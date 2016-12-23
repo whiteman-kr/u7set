@@ -18,6 +18,9 @@ public:
 	explicit ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent = 0);
 	~ChooseUfbDialog();
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 private:
 	void fillTree();
 	void itemSelected(QTreeWidgetItem* item, int column);

@@ -15,22 +15,21 @@ class SelectChangesetDialog : public QDialog
 private:
 	SelectChangesetDialog();
 public:
-	SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, bool onlySelectChanget, QWidget* parent);
+	SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, QWidget* parent);
 	~SelectChangesetDialog();
 
 	int changeset() const;
 
-	static int getFileChangeset(DbController* db, const DbFileInfo& file, bool onlySelectChangeset, QWidget* parent);
-	static int getSignalChangeset(DbController* db, DbChangesetObject signal, bool onlySelectChangeset, QWidget* parent);
+	static int getFileChangeset(DbController* db, const DbFileInfo& file, QWidget* parent);
+	static int getSignalChangeset(DbController* db, DbChangesetObject signal, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent*) override;
 	
 private slots:
 	void on_buttonBox_accepted();
 	void on_changesetList_doubleClicked(const QModelIndex &index);
-
 	void on_changesetList_customContextMenuRequested(const QPoint &pos);
-
-	void changesetDetails(int changeset);
-
 	void on_buttonBox_rejected();
 
 private:
@@ -40,7 +39,5 @@ private:
 	int m_changeset = -1;
 
 	DbChangesetObject m_object;
-
-	bool m_onlySelectChanget = false;
 };
 

@@ -127,6 +127,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
+	drawParam.setInfoMode(theSettings.showItemsLabels());
 
 	// Draw schema
 	//

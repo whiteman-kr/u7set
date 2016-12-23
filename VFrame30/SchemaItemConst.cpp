@@ -114,18 +114,7 @@ namespace VFrame30
 			r.setBottom(r.top() + 0.000001);
 		}
 
-		int dpiX = 96;
-		QPaintDevice* pPaintDevice = p->device();
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->physicalDpiX();
-		}
-
+		int dpiX = drawParam->dpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		if (inputsCount() > 0)

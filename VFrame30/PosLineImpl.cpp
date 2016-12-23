@@ -368,7 +368,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -380,14 +380,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			left = CUtils::ConvertPoint(left, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			left = CUtils::ConvertPoint(left, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 		}
 
 		double delta = value - left;
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		m_startXDocPt = m_startXDocPt + delta;
@@ -404,7 +404,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 				
@@ -416,14 +416,14 @@ namespace VFrame30
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			top = CUtils::ConvertPoint(top, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			top = CUtils::ConvertPoint(top, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 		}
 
 		double delta = value - top;
 
 		if (itemUnit() != SchemaUnit::Display)
 		{
-			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
+			delta = CUtils::ConvertPoint(delta, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		m_startYDocPt = m_startYDocPt + delta;
@@ -440,7 +440,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -459,7 +459,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Horz);
+			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		if (m_endXDocPt >= m_startXDocPt)
@@ -482,7 +482,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 
@@ -501,7 +501,7 @@ namespace VFrame30
 		}
 		else
 		{
-			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, ConvertDirection::Vert);
+			pt = CUtils::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 		}
 
 		if (m_endYDocPt >= m_startYDocPt)

@@ -165,3 +165,15 @@ void ComparePropertyObjectDialog::showDialog(
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->show();
 }
+
+void ComparePropertyObjectDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.30, screen.height() * 0.45);
+
+	move(screen.center() - rect().center());
+
+	return;
+}

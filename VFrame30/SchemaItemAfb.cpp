@@ -45,18 +45,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		int dpiX = 96;
-		QPaintDevice* pPaintDevice = p->device();
-		if (pPaintDevice == nullptr)
-		{
-			assert(pPaintDevice);
-			dpiX = 96;
-		}
-		else
-		{
-			dpiX = pPaintDevice->physicalDpiX();
-		}
-
+		int dpiX = drawParam->dpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		FontParam smallFont = m_font;
@@ -167,9 +156,11 @@ namespace VFrame30
 
 			// Param string LOWERCASED
 			//
-			QString paramStr = QString("%1: %2")
-				.arg(param.caption())
-				.arg(paramValue).toLower();
+			QString paramStr = QString("%1: %2 %3")
+							   .arg(param.caption())
+							   .arg(paramValue)
+							   .arg(param.units())
+									.toLower();
 
 			if (text.isEmpty() == true)
 			{
@@ -346,6 +337,18 @@ namespace VFrame30
 		return QVariant();
 	}
 
+	Afb::AfbParam SchemaItemAfb::afbParam(const QString& name)
+	{
+		for (Afb::AfbParam& p : m_afbElement.params())
+		{
+			if (p.caption() == name)
+			{
+				return p;
+			}
+		}
+
+		return Afb::AfbParam();
+	}
 
 	bool SchemaItemAfb::setAfbElementParams(Afb::AfbElement* afbElement) const
 	{

@@ -1423,6 +1423,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	horizontalHeader->setSectionsMovable(true);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
+	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 	horizontalHeader->setDefaultSectionSize(150);
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);

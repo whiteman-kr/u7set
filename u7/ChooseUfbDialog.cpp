@@ -24,12 +24,27 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 	connect (ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
 	connect (ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
 	connect (ui->ufbElements, &QTreeWidget::doubleClicked, this, &ChooseUfbDialog::itemDoubleClicked);
+
 	fillTree();
+
+	return;
 }
 
 ChooseUfbDialog::~ChooseUfbDialog()
 {
 	delete ui;
+}
+
+void ChooseUfbDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.40);
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 void ChooseUfbDialog::fillTree()

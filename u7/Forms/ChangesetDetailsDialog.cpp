@@ -15,6 +15,8 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
+	// --
+	//
 	if (m_splitterState.isEmpty() == false)
 	{
 		ui->splitter->restoreState(m_splitterState);
@@ -128,6 +130,30 @@ void ChangesetDetailsDialog::showChangesetDetails(DbController* db, int changese
 
 	return;
 }
+
+void ChangesetDetailsDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.45);
+
+	move(screen.center() - rect().center());
+
+	// --
+	//
+	int listWidth = ui->objects->width();
+
+	assert(ui->objects->columnCount() == 5);
+	ui->objects->setColumnWidth(0, listWidth * 0.10);
+	ui->objects->setColumnWidth(1, listWidth * 0.25);
+	ui->objects->setColumnWidth(2, listWidth * 0.40);
+	ui->objects->setColumnWidth(3, listWidth * 0.10);
+	ui->objects->setColumnWidth(4, listWidth * 0.10);
+
+	return;
+}
+
 
 void ChangesetDetailsDialog::on_objects_customContextMenuRequested(const QPoint& /*pos*/)
 {

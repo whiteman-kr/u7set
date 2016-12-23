@@ -65,6 +65,17 @@ bool CheckInDialog::checkIn(std::vector<DbFileInfo>& files, bool treeCheckIn, st
 	return d.result();
 }
 
+void CheckInDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.30, screen.height() * 0.30);
+	move(screen.center() - rect().center());
+
+	return;
+}
+
 void CheckInDialog::on_checkInButton_clicked()
 {
 	QString comment = ui->commentEdit->toPlainText();

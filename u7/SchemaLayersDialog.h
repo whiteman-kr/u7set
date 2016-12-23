@@ -16,11 +16,13 @@ public:
 	explicit SchemaLayersDialog(EditSchemaView* schemaView, QWidget *parent = 0);
 	~SchemaLayersDialog();
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 private slots:
 	void onContextMenu(const QPoint &pos);
 
 	void onActiveClick(bool);
-	void onCompileClick(bool checked);
 	void onShowClick(bool checked);
 	void onPrintClick(bool checked);
 	void on_m_layersList_itemDoubleClicked(QTreeWidgetItem *item, int column);
@@ -34,12 +36,10 @@ private:
 
 	int m_activeIndex = -1;
 	QList<QString> m_name;
-	QList<bool> m_compile;
 	QList<bool> m_show;
 	QList<bool> m_print;
 
 	QAction* m_activeAction = nullptr;
-	QAction* m_compileAction = nullptr;
 	QAction* m_showAction = nullptr;
 	QAction* m_printAction = nullptr;
 

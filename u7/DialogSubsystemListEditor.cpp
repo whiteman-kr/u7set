@@ -129,11 +129,34 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 		item->setData(0, Qt::UserRole, i);
 		ui->m_list->insertTopLevelItem(i, item);
 	}
+
+	return;
 }
 
 DialogSubsystemListEditor::~DialogSubsystemListEditor()
 {
 	delete ui;
+}
+
+void DialogSubsystemListEditor::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.30, screen.height() * 0.60);
+	move(screen.center() - rect().center());
+
+	// --
+	//
+	assert(ui->m_list);
+	assert(ui->m_list->columnCount() == 4);
+
+	ui->m_list->setColumnWidth(0, ui->m_list->width() * 0.15);
+	ui->m_list->setColumnWidth(1, ui->m_list->width() * 0.15);
+	ui->m_list->setColumnWidth(2, ui->m_list->width() * 0.30);
+	ui->m_list->setColumnWidth(3, ui->m_list->width() * 0.30);
+
+	return;
 }
 
 bool DialogSubsystemListEditor::askForSaveChanged()

@@ -163,6 +163,16 @@ DialogChoosePreset::~DialogChoosePreset()
 	delete ui;
 }
 
+void DialogChoosePreset::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.26, screen.height() * 0.45);
+	move(screen.center() - rect().center());
+
+	return;
+}
 
 void DialogChoosePreset::on_DialogChoosePreset_accepted()
 {

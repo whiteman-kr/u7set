@@ -170,6 +170,30 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	return;
 }
 
+void MainWindow::showEvent(QShowEvent*)
+{
+	// Ensure widget is visible
+	//
+	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect intersectRect = screenRect.intersected(frameGeometry());
+
+	if (isMaximized() == false &&
+		(intersectRect.width() < size().width() ||
+		 intersectRect.height() < size().height()))
+	{
+		move(screenRect.topLeft());
+	}
+
+	if (isMaximized() == false &&
+		(frameGeometry().width() > screenRect.width() ||
+		 frameGeometry().height() > screenRect.height()))
+	{
+		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+	}
+
+	return;
+}
+
 void MainWindow::saveWindowState()
 {
 	theSettings.m_mainWindowPos = pos();
@@ -186,6 +210,8 @@ void MainWindow::restoreWindowState()
 	move(theSettings.m_mainWindowPos);
 	restoreGeometry(theSettings.m_mainWindowGeometry);
 	restoreState(theSettings.m_mainWindowState);
+
+	return;
 }
 
 void MainWindow::createActions()

@@ -103,6 +103,18 @@ void FileHistoryDialog::showHistory(DbController* db, QString objectName, const 
 	return;
 }
 
+void FileHistoryDialog::showEvent(QShowEvent* event)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.40, screen.height() * 0.35);
+
+	move(screen.center() - rect().center());
+
+	return;
+}
+
 void FileHistoryDialog::on_changesetList_doubleClicked(const QModelIndex& /*index*/)
 {
 	QTreeWidgetItem* item = ui->changesetList->currentItem();

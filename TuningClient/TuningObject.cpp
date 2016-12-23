@@ -237,6 +237,7 @@ void TuningObject::setDecimalPlaces(int value)
 
 bool TuningObject::valid() const
 {
+    //return true;
     return m_valid;
 }
 

@@ -17,6 +17,9 @@ public:
 	explicit DialogChoosePreset(QWidget *parent, DbController *db, Hardware::DeviceType selectedType);
 	~DialogChoosePreset();
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 public:
 	std::shared_ptr<Hardware::DeviceObject> selectedPreset = nullptr;
 

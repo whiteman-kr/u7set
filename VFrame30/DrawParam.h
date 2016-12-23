@@ -58,6 +58,9 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
+		int dpiX();
+		int dpiY();
+
 		bool isEditMode() const;
 		void setEditMode(bool value);
 
@@ -85,6 +88,9 @@ namespace VFrame30
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
+
+		int m_dpiX = -1;
+		int m_dpiY = -1;
 
 		double m_cosmeticPenWidth = 0.0;
 	};

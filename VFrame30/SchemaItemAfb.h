@@ -38,6 +38,7 @@ namespace VFrame30
 		Q_INVOKABLE bool setAfbParamByOpName(const QString& opName, QVariant value);
 
 		QVariant getAfbParam(const QString& name);
+		Afb::AfbParam afbParam(const QString& name);
 
 		// Set Afb element parameters
 		//

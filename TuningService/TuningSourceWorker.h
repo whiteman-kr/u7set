@@ -183,6 +183,8 @@ namespace Tuning
 		bool processCommandQueue();
 		bool processIdle();
 
+		void onNoReply();
+
 		bool prepareFotipRequest(const TuningCommand& tuningCmd, RupFotipV2& request);
 		void sendFotipRequest(RupFotipV2& request);
 
@@ -220,6 +222,7 @@ namespace Tuning
 		int m_tuningRomFrameCount = 0;
 		int m_tuningRomFrameSizeW = 0;
 		int m_tuningRomSizeW = 0;
+		int m_tuningUsedFramesCount = 0;
 
 		//
 
@@ -230,7 +233,7 @@ namespace Tuning
 
 		bool m_waitReply = false;
 
-		const int MAX_WAIT_REPLY_COUNTER = 3;
+		const int MAX_WAIT_REPLY_COUNTER = 2;
 
 		int m_waitReplyCounter = 0;
 

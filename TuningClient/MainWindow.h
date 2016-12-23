@@ -77,13 +77,6 @@ private:
 
 
 
- private:
-  void loadLanguage(const QString& rLanguage);
-  void switchTranslator(QTranslator& translator, const QString& filename);
-
-
-  QTranslator m_translator; // contains the translations for this application
-  QTranslator m_translatorQt; // contains the translations for qt
 
 };
 

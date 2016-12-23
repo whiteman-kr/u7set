@@ -21,6 +21,8 @@ LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget *parent)
 	{
 		ui->passwordEdit->setFocus();
 	}
+
+	return;
 }
 
 LoginDialog::~LoginDialog()
@@ -28,14 +30,28 @@ LoginDialog::~LoginDialog()
 	delete ui;
 }
 
-const QString& LoginDialog::username() const
+QString LoginDialog::username() const
 {
 	return m_username;
 }
 
-const QString& LoginDialog::password() const
+QString LoginDialog::password() const
 {
 	return m_password;
+}
+
+void LoginDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QSize resizeTo = size();
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resizeTo.setWidth(screen.size().width() * 0.15);
+
+	resize(resizeTo);
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 void LoginDialog::on_buttonBox_accepted()

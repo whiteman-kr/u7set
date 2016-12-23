@@ -17,12 +17,13 @@ public:
 
 	const Settings& settings() const;
 	void setSettings(const Settings& value);
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 	
 private slots:
 	void on_ok_clicked();
-
 	void on_cancel_clicked();
-
 	void on_browseOutputPath_clicked();
 
 private:

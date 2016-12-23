@@ -19,6 +19,9 @@ public:
 	~FileHistoryDialog();
 
 	static void showHistory(DbController* db, QString objectName, const std::vector<DbChangeset>& fileHistory, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 	
 private slots:
 	void on_changesetList_doubleClicked(const QModelIndex &index);

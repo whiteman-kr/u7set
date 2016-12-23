@@ -52,7 +52,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_size, SchemaUnit::Inch, Settings::regionalUnit(), ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(m_size, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
@@ -65,7 +65,7 @@ namespace VFrame30
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, unit, SchemaUnit::Inch, ConvertDirection::Horz);
+			double pt = CUtils::ConvertPoint(value, unit, SchemaUnit::Inch, 0);
 			m_size = pt;
 		}
 	}

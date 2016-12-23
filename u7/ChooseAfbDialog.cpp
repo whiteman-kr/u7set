@@ -13,6 +13,7 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 {
 	ui->setupUi(this);
 
+
 	for (std::shared_ptr<Afb::AfbElement> e : elements)
 	{
         m_elements.push_back(e);
@@ -25,6 +26,20 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 	ui->m_afbTree->setColumnWidth(0, 150);
 
     fillTree();
+
+	return;
+}
+
+void ChooseAfbDialog::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.40);
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 void ChooseAfbDialog::fillTree()

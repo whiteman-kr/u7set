@@ -91,6 +91,18 @@ void CompareDialog::showCompare(DbController* db, const DbChangesetObject& objec
 	return;
 }
 
+void CompareDialog::showEvent(QShowEvent* event)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.25, rect().height());
+
+	move(screen.center() - rect().center());
+
+	return;
+}
+
 void CompareDialog::versionTypeChanged()
 {
 	// Source
@@ -165,7 +177,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{
@@ -180,7 +192,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, true, this);
+		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, this);
 
 		if (changeset != -1)
 		{
@@ -200,7 +212,7 @@ void CompareDialog::on_targetChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{

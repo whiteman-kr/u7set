@@ -489,7 +489,7 @@ void UploadTabPage::clearLog()
 
 void UploadTabPage::settings()
 {
-	DialogSettingsConfigurator dlg;
+	DialogSettingsConfigurator dlg(this);
 	if (dlg.exec() == QDialog::Rejected)
 	{
 		return;

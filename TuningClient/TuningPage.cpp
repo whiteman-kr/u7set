@@ -1219,10 +1219,33 @@ bool TuningTableView::editorActive()
 
 bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEvent * event)
 {
+
     if (trigger == QAbstractItemView::EditKeyPressed)
     {
-        //qDebug()<<"edit "<<(int)trigger;
-        m_editorActive = true;
+        TuningItemModel* m_model = dynamic_cast<TuningItemModel*>(model());
+        if (m_model == nullptr)
+        {
+            assert(m_model);
+            return false;
+        }
+
+        int row = index.row();
+
+        if (row >= 0)
+        {
+            TuningObject* object = m_model->object(row);
+            if (object == nullptr)
+            {
+                assert(object);
+                return false;
+            }
+
+            if (object->analog() == true)
+            {
+                //qDebug()<<"edit "<<(int)trigger;
+                m_editorActive = true;
+            }
+        }
     }
 
     return QTableView::edit(index, trigger, event);
@@ -1231,9 +1254,9 @@ bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEven
 void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEditHint hint)
 {
 
-    m_editorActive = false;
-
     //qDebug()<<"closeEditor";
+
+    m_editorActive = false;
 
     QTableView::closeEditor(editor, hint);
 }
@@ -1708,9 +1731,10 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 		{
             if (m_objectList->editorActive() == false)
             {
-                slot_setValue();
+                m_model->slot_Apply();
                 return true;
             }
+            return true;
 		}
 
 		if(pKeyEvent->key() == Qt::Key_Space)

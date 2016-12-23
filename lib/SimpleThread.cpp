@@ -95,6 +95,17 @@ void SimpleThread::quit()
 {
 	beforeQuit();
 
+	foreach(SimpleThreadWorker* worker, m_workerList)
+	{
+		if (worker == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		worker->requestQuit();
+	}
+
 	m_thread.quit();
 }
 
@@ -107,10 +118,8 @@ bool SimpleThread::wait(unsigned long time)
 
 bool SimpleThread::quitAndWait(unsigned long time)
 {
-	beforeQuit();
-
-	m_thread.quit();
-	return m_thread.wait(time);
+	quit();
+	return wait(time);
 }
 
 

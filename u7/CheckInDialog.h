@@ -17,10 +17,12 @@ private:
 
 public:
 	static bool checkIn(std::vector<DbFileInfo>& files, bool treeCheckIn, std::vector<DbFileInfo>* checkedInFiles, DbController* db, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent* event);
 	
 private slots:
 	void on_checkInButton_clicked();
-
 	void on_cancelButton_clicked();
 
 private:
