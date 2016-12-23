@@ -1,39 +1,34 @@
-#ifndef CIRCULARLOGGER_H
-#define CIRCULARLOGGER_H
+#pragma once
 
 #include <QObject>
 #include <QQueue>
 #include <QMap>
+#include <QTimer>
+
+#include "SimpleThread.h"
 
 class QFile;
 class QTextStream;
 
-const int	MT_USER_ACTION = 0,
-			MT_NET = 1,
-			MT_APPLICATION = 2;
+// ----------------------------------------------------------------------------------
+//
+// CircularLoggerWorker class declaration
+//
+// ----------------------------------------------------------------------------------
 
-const int	MC_ERROR = 0,
-			MC_WARNING = 1,
-			MC_MESSAGE = 2,
-			MC_CONFIG = 3;
-
-
-class CircularLoggerWorker : public QObject
+class CircularLoggerWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 public:
 	CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 	~CircularLoggerWorker();
 
-	void close();
-
 public slots:
 	void writeRecord(const QString record);
-	void flushStream();
 
 private:
-	QTextStream* m_stream = nullptr;
-	QFile* m_file = nullptr;
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
 
 	void detectFiles();
 	void removeOldFiles();
@@ -41,100 +36,86 @@ private:
 	int getFileID(int index);
 	QString fileName(int index);
 	void openFile(int index);
-	void writeFirstRecord();
-	void writeLastRecord();
+	void clearFileStream();
+
+private slots:
+	void flushStream();
+
+private:
+	QTextStream* m_stream = nullptr;
+	QFile* m_file = nullptr;
+	QTimer m_timer;
 
 	QString m_logName;
 	QString m_path;
 	QString m_logFileName;
-	int m_beginFileNumber = -1;
-	int m_endFileNumber = -1;
-	int m_fileCount;
-	int m_fileSizeLimit;	// in megabytes
-	qint64 m_beginFileID = -1;
-	qint64 m_endFileID = -1;
+
+	const int MAX_LOG_FILE_COUNT = 10;
+	const int MAX_LOG_FILE_SIZE = 10;		// in megabytes
+
+	int m_fileCount = 0;
+	int m_fileSizeLimit = 0;				// in megabytes
+
+	int m_firstFileNumber = -1;
+	int m_lastFileNumber = -1;
+	qint64 m_firstFileID = -1;
+	qint64 m_lastFileID = -1;
 };
 
-class CircularLogger : public QObject
+
+// ----------------------------------------------------------------------------------
+//
+// CircularLogger class declaration
+//
+// ----------------------------------------------------------------------------------
+
+class CircularLogger : public SimpleThread
 {
 	Q_OBJECT
+
 public:
-	CircularLogger(QObject *parent = 0);
+	enum class RecordType
+	{
+		Error,
+		Warning,
+		Message,
+		Config
+	};
+
+public:
+	CircularLogger();
 	~CircularLogger();
 
-	void initLog(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
-	void initLog(int fileCount, int fileSizeInMB, QString placementPath = "");
+	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
+
+	bool isInitialized() const { return m_loggerInitialized; }
 
 signals:
 	void writeRecord(const QString record);
 
-public slots:
-
-	QString appErr(const QString& function, const QString& message)
-	{
-		return write(MT_APPLICATION, MC_ERROR, function, message);
-	}
-
-	QString appWrn(const QString& function, const QString& message)
-	{
-		return write(MT_APPLICATION, MC_WARNING, function, message);
-	}
-
-	QString appMsg(const QString& function, const QString& message)
-	{
-		return write(MT_APPLICATION, MC_MESSAGE, function, message);
-	}
-
-	/*QString netErr(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);
-	QString netWrn(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);
-	QString netMsg(char* function, QHostAddress& IP, RequestHeader& header, char* message, ...);*/
-
-	QString userErr(const QString& function, const QString& message)
-	{
-		return write(MT_USER_ACTION, MC_ERROR, function, message);
-	}
-
-	QString userWrn(const QString& function, const QString& message)
-	{
-		return write(MT_USER_ACTION, MC_WARNING, function, message);
-	}
-
-	QString userMsg(const QString& function, const QString& message)
-	{
-		return write(MT_USER_ACTION, MC_MESSAGE, function, message);
-	}
-
-	QString write(int type, int category, QString function, const QString& message/*ip, header*/)
-	{
-		QString record = composeRecord(type, category, function, message);
-		emit writeRecord(record);
-		return record;
-	}
+public:
+	void writeError(const QString& message, const char* function, const char* file, int line);
+	void writeWarning(const QString& message, const char* function, const char* file, int line);
+	void writeMessage(const QString& message, const char* function, const char* file, int line);
+	void writeConfig(const QString& message, const char* function, const char* file, int line);
 
 private:
+	QString getRecordTypeStr(RecordType type);
+	QString getCurrentDateTimeStr();
 
-	CircularLoggerWorker* m_circularLoggerWorker = nullptr;
-	QThread* m_thread = nullptr;
+	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line);
 
-	QString composeRecord(int type, int category, const QString& function, const QString& message/*ip, header*/);
+private:
+	bool m_loggerInitialized = false;
 };
 
-#define MESSAGE_POSITION QString("%1\" \"POS=%2:%3").arg(Q_FUNC_INFO).arg(__FILE__).arg(__LINE__)
 
-#define APP_ERR(log,str) (log).appErr(MESSAGE_POSITION,str);
-#define APP_WRN(log,str) (log).appWrn(MESSAGE_POSITION,str);
-#define APP_MSG(log,str) (log).appMsg(MESSAGE_POSITION,str);
+#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__);
+#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__);
+#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__);
 
-/*#define NET_ERR(log,ip,header,str) (log).netErr(Q_FUNC_INFO,ip,header,str,__VA_ARGS__);
- *#define NET_WRN(log,ip,header,str) (log).netWrn(Q_FUNC_INFO,ip,header,str,__VA_ARGS__);
- *#define NET_MSG(log,ip,header,str) (log).netMsg(Q_FUNC_INFO,ip,header,str,__VA_ARGS__);
- */
+#define INIT_LOGGER(appPath)	 logger.init(10, 10, appPath);
 
-#define USR_ERR(log,str) (log).userErr(MESSAGE_POSITION,str);
-#define USR_WRN(log,str) (log).userWrn(MESSAGE_POSITION,str);
-#define USR_MSG(log,str) (log).userMsg(MESSAGE_POSITION,str);
-
-#endif // CIRCULARLOGGER_H
 
 extern CircularLogger logger;
-

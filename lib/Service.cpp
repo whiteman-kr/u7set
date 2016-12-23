@@ -15,6 +15,8 @@ ServiceStarter::ServiceStarter(int argc, char ** argv, const QString& name, Serv
 	m_serviceWorker(serviceWorker)
 {
 	assert(serviceWorker != nullptr);
+
+	assert(logger.isInitialized() == true);
 }
 
 
@@ -208,8 +210,6 @@ Service::Service(ServiceWorker* serviceWorker):
 	}
 
 	m_type = m_serviceWorker->serviceType();
-
-	initLog();
 }
 
 
@@ -332,17 +332,17 @@ void Service::onBaseRequest(UdpRequest request)
 		}
 
 		case RQID_SERVICE_START:
-			APP_MSG(m_log, QString("Service START request from %1.").arg(request.address().toString()));
+			LOG_MSG(QString("Service START request from %1.").arg(request.address().toString()));
 			startServiceThread();
 			break;
 
 		case RQID_SERVICE_STOP:
-			APP_MSG(m_log, QString("Service STOP request from %1.").arg(request.address().toString()));
+			LOG_MSG(QString("Service STOP request from %1.").arg(request.address().toString()));
 			stopServiceThread();
 			break;
 
 		case RQID_SERVICE_RESTART:
-			APP_MSG(m_log, QString("Service RESTART request from %1.").arg(request.address().toString()));
+			LOG_MSG(QString("Service RESTART request from %1.").arg(request.address().toString()));
 			stopServiceThread();
 			startServiceThread();
 			break;
@@ -405,14 +405,6 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 	{
 		serviceInfo.set_serviceuptime(0);
 	}
-}
-
-
-void Service::initLog()
-{
-	QFileInfo fi(qApp->applicationFilePath());
-
-	m_log.initLog(fi.baseName(), 5, 10);
 }
 
 

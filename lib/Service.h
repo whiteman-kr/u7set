@@ -142,7 +142,6 @@ private:
 	bool m_mainFunctionStopped = false;
 
 	QTimer m_timer500ms;
-	CircularLogger m_log;
 
 	void checkMainFunctionState();
 
@@ -174,8 +173,6 @@ public:
 
 	HostAddressPort cfgServiceAddressPort() const { return m_cfgServiceAddressPort; }
 	HostAddressPort setCfgServiceAddressPort(const HostAddressPort& addressPort) { return m_cfgServiceAddressPort = addressPort; }
-
-	virtual void initLog();
 
 	friend class DaemonServiceStarter;
 };

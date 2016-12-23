@@ -27,6 +27,7 @@
                 <Script>
                     <Changed></Changed>
                 </Script>
+                <Units>ms</Units>
             </AfbElementParam>
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>4</Value>
