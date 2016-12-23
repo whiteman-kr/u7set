@@ -145,6 +145,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0127.sql", "Upgrade to version 127, Update AppLogic and UFB templates, macroses are added"},
 	{":/DatabaseUpgrade/Upgrade0128.sql", "Upgrade to version 128, fix spelling administrator word in dbuser type"},
     {":/DatabaseUpgrade/Upgrade0129.sql", "Upgrade to version 129, added Units to AfbElementParam in damper, int, der, tctc"},
+    {":/DatabaseUpgrade/Upgrade0130.sql", "Upgrade to version 130, integrator and derive afb elements have constant version"},
 };
 
 
