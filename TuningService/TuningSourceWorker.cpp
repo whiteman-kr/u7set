@@ -681,7 +681,7 @@ namespace Tuning
 			return;
 		}
 
-		switch(fotipHeader.operationCode)
+		switch(static_cast<FotipV2::OpCode>(fotipHeader.operationCode))
 		{
 		case FotipV2::OpCode::Read:
 			processReadReply(reply);
