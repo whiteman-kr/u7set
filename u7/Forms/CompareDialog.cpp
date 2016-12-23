@@ -180,7 +180,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{
@@ -195,7 +195,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, true, this);
+		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, this);
 
 		if (changeset != -1)
 		{
@@ -215,7 +215,7 @@ void CompareDialog::on_targetChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{
