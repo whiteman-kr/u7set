@@ -189,15 +189,49 @@ class ServiceWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 
+public:
+	ServiceWorker(ServiceType serviceType, int argc, char** argv);
+	ServiceWorker(ServiceType serviceType, const QStringList& cmdLineArgs);
+
+	virtual ~ServiceWorker();
+
+	virtual void initialize() = 0;
+	virtual void shutdown() = 0;
+
+	virtual void parseCmdLineArgs();
+
+signals:
+	void work();
+	void stopped();
+
+protected:
+	QStringList cmdLineArgs() const { return m_cmdLineArgs; }
+
+	QString getCmdLineKeyValue(const QString& key);
+
+	QString serviceEquipmentID() const { return m_serviceEquipmentID; }
+
+/*	QString cfgServiceIP1() const { return m_cfgServiceIP1; }
+	QString cfgServiceIP2() const { return m_cfgServiceIP2; }
+
+	QString buildPath() const { return m_buildPath; }
+	QString cfgFileName() const { return m_cfgFileName; }*/
+
+	ServiceType serviceType() const { return m_serviceType; }
+
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) { Q_UNUSED(serviceInfo); }
+
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
 
+	QStringList m_cmdLineArgs;
+
 	QString m_serviceEquipmentID;
-	QString m_cfgServiceIP1;
+/*	QString m_cfgServiceIP1;
 	QString m_cfgServiceIP2;
 
 	QString m_buildPath;
-	QString m_cfgFileName;
+	QString m_cfgFileName;*/
 
 	Service* m_service = nullptr;
 
@@ -208,34 +242,6 @@ private:
 
 	void setService(Service* service) { m_service = service; }
 	Service& service() { assert(m_service != nullptr); return *m_service; }
-
-protected:
-	QString serviceEquipmentID() const { return m_serviceEquipmentID; }
-	QString cfgServiceIP1() const { return m_cfgServiceIP1; }
-	QString cfgServiceIP2() const { return m_cfgServiceIP2; }
-
-	QString buildPath() const { return m_buildPath; }
-	QString cfgFileName() const { return m_cfgFileName; }
-
-	ServiceType serviceType() const { return m_serviceType; }
-
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) { Q_UNUSED(serviceInfo); }
-
-public:
-	ServiceWorker(ServiceType serviceType,
-				  const QString& serviceEquipmentID,
-				  const QString& cfgServiceIP1,
-				  const QString& cfgServiceIP2,
-				  const QString& buildPath);
-
-	virtual ~ServiceWorker();
-
-	virtual void initialize() { qDebug() << "Called ServiceWorker::initialize"; }
-	virtual void shutdown() { qDebug() << "Called ServiceWorker::shutdown"; }
-
-signals:
-	void work();
-	void stopped();
 
 	friend class Service;
 };

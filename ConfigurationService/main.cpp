@@ -8,10 +8,6 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	QString buildFolder = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
-	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
-	QString ipStr = ServiceStarter::getCommandLineKeyValue(argc, argv, "ip");
-
 	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker(serviceStrID, buildFolder, ipStr);
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", cfgServiceWorker);

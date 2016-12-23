@@ -414,26 +414,70 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 //
 // -------------------------------------------------------------------------------------
 
-ServiceWorker::ServiceWorker(ServiceType serviceType,
-							 const QString& serviceEquipmentID,
-							 const QString& cfgServiceIP1,
-							 const QString& cfgServiceIP2,
-							 const QString &buildPath) :
-	m_serviceType(serviceType),
-	m_serviceEquipmentID(serviceEquipmentID),
-	m_cfgServiceIP1(cfgServiceIP1),
-	m_cfgServiceIP2(cfgServiceIP2),
-	m_buildPath(buildPath)
+ServiceWorker::ServiceWorker(ServiceType serviceType, int argc, char** argv) :
+	m_serviceType(serviceType)
 {
-	if (m_buildPath.isEmpty() == false)
+	for(int i = 0; i < argc; i++)
 	{
-		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
+		cmdLineArgs().push_back(QString(argv[i]));
 	}
+
+	parseCmdLineArgs();
+}
+
+
+ServiceWorker::ServiceWorker(ServiceType serviceType, const QStringList& cmdLineArgs) :
+	m_serviceType(serviceType)
+{
+	m_cmdLineArgs = cmdLineArgs;
+
+	parseCmdLineArgs();
 }
 
 
 ServiceWorker::~ServiceWorker()
 {
+}
+
+
+void ServiceWorker::parseCmdLineArgs()
+{
+	m_serviceEquipmentID = getCmdLineKeyValue("id");
+
+/*	m_cfgServiceIP1 = getCmdLineKeyValue("cfgip1");
+	m_cfgServiceIP2 = getCmdLineKeyValue("cfgip2");
+	m_buildPath(buildPath)
+
+
+	QString buildFolder = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
+	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
+	QString ipStr = ServiceStarter::getCommandLineKeyValue(argc, argv, "ip");
+
+	if (m_buildPath.isEmpty() == false)
+	{
+		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
+	}*/
+}
+
+
+QString ServiceWorker::getCmdLineKeyValue(const QString& key)
+{
+	QString value;
+
+	QString keyStr = QString("-%1=").arg(key);
+
+	int keyStrLen = keyStr.length();
+
+	for(const QString& cmdLineArg : m_cmdLineArgs)
+	{
+		if (cmdLineArg.mid(0, keyStrLen) == keyStr)
+		{
+			value = cmdLineArg.mid(keyStrLen);
+			break;
+		}
+	}
+
+	return value;
 }
 
 
