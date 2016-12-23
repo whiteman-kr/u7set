@@ -131,28 +131,25 @@ void ChangesetDetailsDialog::showChangesetDetails(DbController* db, int changese
 	return;
 }
 
-void ChangesetDetailsDialog::showEvent(QShowEvent* event)
+void ChangesetDetailsDialog::showEvent(QShowEvent*)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.35, screen.height() * 0.45);
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.45);
 
-		move(screen.center() - rect().center());
+	move(screen.center() - rect().center());
 
-		// --
-		//
-		int listWidth = ui->objects->width();
+	// --
+	//
+	int listWidth = ui->objects->width();
 
-		assert(ui->objects->columnCount() == 5);
-		ui->objects->setColumnWidth(0, listWidth * 0.10);
-		ui->objects->setColumnWidth(1, listWidth * 0.25);
-		ui->objects->setColumnWidth(2, listWidth * 0.40);
-		ui->objects->setColumnWidth(3, listWidth * 0.10);
-		ui->objects->setColumnWidth(4, listWidth * 0.10);
-	}
+	assert(ui->objects->columnCount() == 5);
+	ui->objects->setColumnWidth(0, listWidth * 0.10);
+	ui->objects->setColumnWidth(1, listWidth * 0.25);
+	ui->objects->setColumnWidth(2, listWidth * 0.40);
+	ui->objects->setColumnWidth(3, listWidth * 0.10);
+	ui->objects->setColumnWidth(4, listWidth * 0.10);
 
 	return;
 }

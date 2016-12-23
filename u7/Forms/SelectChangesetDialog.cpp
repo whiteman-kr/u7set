@@ -157,15 +157,12 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	}
 }
 
-void SelectChangesetDialog::showEvent(QShowEvent* e)
+void SelectChangesetDialog::showEvent(QShowEvent*)
 {
-	if (e->spontaneous() == true)
-	{
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.40, screen.height() * 0.35);
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.40, screen.height() * 0.35);
 
-		move(screen.center() - rect().center());
-	}
+	move(screen.center() - rect().center());
 
 	return;
 }

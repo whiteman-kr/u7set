@@ -93,15 +93,12 @@ void CompareDialog::showCompare(DbController* db, const DbChangesetObject& objec
 
 void CompareDialog::showEvent(QShowEvent* event)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.25, rect().height());
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.25, rect().height());
 
-		move(screen.center() - rect().center());
-	}
+	move(screen.center() - rect().center());
 
 	return;
 }

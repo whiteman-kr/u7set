@@ -166,17 +166,14 @@ void ComparePropertyObjectDialog::showDialog(
 	dialog->show();
 }
 
-void ComparePropertyObjectDialog::showEvent(QShowEvent* event)
+void ComparePropertyObjectDialog::showEvent(QShowEvent*)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.30, screen.height() * 0.45);
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.30, screen.height() * 0.45);
 
-		move(screen.center() - rect().center());
-	}
+	move(screen.center() - rect().center());
 
 	return;
 }

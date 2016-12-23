@@ -40,19 +40,16 @@ QString LoginDialog::password() const
 	return m_password;
 }
 
-void LoginDialog::showEvent(QShowEvent* event)
+void LoginDialog::showEvent(QShowEvent*)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QSize resizeTo = size();
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resizeTo.setWidth(screen.size().width() * 0.20);
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QSize resizeTo = size();
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resizeTo.setWidth(screen.size().width() * 0.15);
 
-		resize(resizeTo);
-		move(screen.center() - rect().center());
-	}
+	resize(resizeTo);
+	move(screen.center() - rect().center());
 
 	return;
 }

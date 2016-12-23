@@ -67,25 +67,22 @@ SchemaLayersDialog::~SchemaLayersDialog()
 	delete ui;
 }
 
-void SchemaLayersDialog::showEvent(QShowEvent* event)
+void SchemaLayersDialog::showEvent(QShowEvent*)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.20, screen.height() * 0.15);
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.20, screen.height() * 0.15);
 
-		move(screen.center() - rect().center());
+	move(screen.center() - rect().center());
 
-		// --
-		//
-		assert(ui->m_layersList->columnCount() == 4);
+	// --
+	//
+	assert(ui->m_layersList->columnCount() == 4);
 
-		ui->m_layersList->resizeColumnToContents(1);
-		ui->m_layersList->resizeColumnToContents(2);
-		ui->m_layersList->resizeColumnToContents(3);
-	}
+	ui->m_layersList->resizeColumnToContents(1);
+	ui->m_layersList->resizeColumnToContents(2);
+	ui->m_layersList->resizeColumnToContents(3);
 
 	return;
 }

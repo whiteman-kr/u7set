@@ -30,17 +30,14 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 	return;
 }
 
-void ChooseAfbDialog::showEvent(QShowEvent* event)
+void ChooseAfbDialog::showEvent(QShowEvent*)
 {
-	if (event->spontaneous() == true)
-	{
-		// Resize depends on monitor size, DPI, resolution
-		//
-		QRect screen = QDesktopWidget().availableGeometry(this);
-		resize(screen.width() * 0.35, screen.height() * 0.40);
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.35, screen.height() * 0.40);
 
-		move(screen.center() - rect().center());
-	}
+	move(screen.center() - rect().center());
 
 	return;
 }
