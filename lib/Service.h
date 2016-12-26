@@ -12,18 +12,20 @@
 #include "../lib/UdpSocket.h"
 #include "../lib/CircularLogger.h"
 #include "../lib/SimpleThread.h"
+#include "../lib/CommandLineParser.h"
 #include "../Proto/network.pb.h"
 
 
 class Service;
 class ServiceWorker;
 
+
+
 // -------------------------------------------------------------------------------------
 //
 // ServiceStarter class declaration
 //
 // -------------------------------------------------------------------------------------
-
 
 class ServiceStarter
 {
@@ -42,7 +44,7 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 
 	QStringList m_cmdLineArgs;
-	QCommandLineParser m_cmdLineParser;
+	CommandLineParser m_cmdLineParser;
 };
 
 
@@ -199,36 +201,30 @@ public:
 
 	virtual ~ServiceWorker();
 
-	virtual void initialize() = 0;
-	virtual void shutdown() = 0;
+	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
+	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdoen
 
-	virtual void iniCmdLineParser(QCommandLineParser& cmdLineParser) = 0;
+	virtual void initCmdLineParser() = 0;			// add service-specific options to m_cmdLineParser
 
 signals:
 	void work();
 	void stopped();
 
 protected:
-	QStringList cmdLineArgs() const { return m_cmdLineArgs; }
-
-	QString getCmdLineKeyValue(const QString& key);
+	void baseInitCmdLineParser(CommandLineParser* cmdLineParser);
 
 	QString serviceEquipmentID() const { return m_serviceEquipmentID; }
-
-/*	QString cfgServiceIP1() const { return m_cfgServiceIP1; }
-	QString cfgServiceIP2() const { return m_cfgServiceIP2; }
-
-	QString buildPath() const { return m_buildPath; }
-	QString cfgFileName() const { return m_cfgFileName; }*/
 
 	ServiceType serviceType() const { return m_serviceType; }
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) { Q_UNUSED(serviceInfo); }
 
+
+
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
 
-	QStringList m_cmdLineArgs;
+	CommandLineParser* m_cmdLineParser = nullptr;
 
 	QString m_serviceEquipmentID;
 /*	QString m_cfgServiceIP1;
@@ -248,6 +244,7 @@ private:
 	Service& service() { assert(m_service != nullptr); return *m_service; }
 
 	friend class Service;
+	friend class ServiceStarter;
 };
 
 

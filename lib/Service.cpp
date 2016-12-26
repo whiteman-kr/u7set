@@ -2,6 +2,9 @@
 #include "../lib/Types.h"
 
 
+
+
+
 // -------------------------------------------------------------------------------------
 //
 // ServiceStarter class implementation
@@ -12,7 +15,8 @@ ServiceStarter::ServiceStarter(int argc, char** argv, const QString& name, Servi
 	m_argc(argc),
 	m_argv(argv),
 	m_name(name),
-	m_serviceWorker(serviceWorker)
+	m_serviceWorker(serviceWorker),
+	m_cmdLineParser(argc, argv)
 {
 	assert(logger.isInitialized() == true);
 
@@ -27,35 +31,44 @@ ServiceStarter::ServiceStarter(int argc, char** argv, const QString& name, Servi
 		assert(false);
 		return;
 	}
-
-	for(int i = 0; i < argc; i++)
-	{
-		m_cmdLineArgs.push_back(QString(argv[i]));
-	}
 }
 
 
 void ServiceStarter::initCmdLineParser()
 {
-	m_cmdLineParser.addOption(QCommandLineOption("h", "Print this help"));
-	m_cmdLineParser.addOption(QCommandLineOption("e", "Run service as regular application."));
+	m_cmdLineParser.addSimpleOption("h", "Print this help");
+	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
+	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("s", "Start the service.");
+	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSingleValueOption("id", "Assign equipmentID of service. Use -id=EquipmentID.");
+	m_cmdLineParser.addMultipleValuesOption("idww", "Assign equipmentID of service. Use -id=EquipmentID.");
 
-	m_serviceWorker->iniCmdLineParser(m_cmdLineParser);
+	m_serviceWorker->baseInitCmdLineParser(&m_cmdLineParser);		// ServiceWorker's derived classes cmdLineParser initialization
 
-	m_cmdLineParser.process(m_cmdLineArgs);
+	m_cmdLineParser.parse();
 }
 
 
 int ServiceStarter::exec()
 {
+	if (m_serviceWorker == nullptr)
+	{
+		assert(false);
+		return -1;
+	}
+
 	initCmdLineParser();
+
+	qDebug() << C_STR(m_cmdLineParser.helpText());
 
 	bool consoleMode = false;
 
-	if (m_cmdLineParser.isSet("e") || m_cmdLineParser.isSet("h"))
+	/*if (m_cmdLineParser.isSet("e") || m_cmdLineParser.isSet("h"))
 	{
 		consoleMode = true;
-	}
+	}*/
 
 	int result = 0;
 
@@ -63,7 +76,7 @@ int ServiceStarter::exec()
 	{
 		ConsoleServiceStarter consoleStarter(m_argc, m_argv, m_name, m_serviceWorker);
 
-		result = consoleStarter.exec(m_cmdLineParser);
+		//result = consoleStarter.exec(m_cmdLineParser);
 	}
 	else
 	{
@@ -160,7 +173,7 @@ int ConsoleServiceStarter::exec(QCommandLineParser& cmdLineParser)
 {
 	if (cmdLineParser.isSet("h"))
 	{
-		qDebug() << C_STR(cmdLineParser.helpText());
+		qDebug() << "\n" << C_STR(cmdLineParser.helpText());
 		return 0;
 	}
 
@@ -438,6 +451,20 @@ ServiceWorker::~ServiceWorker()
 {
 }
 
+
+void ServiceWorker::baseInitCmdLineParser(CommandLineParser* cmdLineParser)
+{
+	if (cmdLineParser == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_cmdLineParser = cmdLineParser;
+
+	initCmdLineParser();
+}
+
 /*
 void ServiceWorker::parseCmdLineArgs()
 {
@@ -459,25 +486,6 @@ void ServiceWorker::parseCmdLineArgs()
 }
 */
 
-QString ServiceWorker::getCmdLineKeyValue(const QString& key)
-{
-	QString value;
-
-	QString keyStr = QString("-%1=").arg(key);
-
-	int keyStrLen = keyStr.length();
-
-	for(const QString& cmdLineArg : m_cmdLineArgs)
-	{
-		if (cmdLineArg.mid(0, keyStrLen) == keyStr)
-		{
-			value = cmdLineArg.mid(keyStrLen);
-			break;
-		}
-	}
-
-	return value;
-}
 
 
 void ServiceWorker::onThreadStarted()

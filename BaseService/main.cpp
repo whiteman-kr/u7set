@@ -9,8 +9,9 @@ public:
 	{
 	}
 
-	void iniCmdLineParser(QCommandLineParser& cmdLineParser) override
+	void initCmdLineParser() override
 	{
+		// no service-specific command line options
 	}
 
 /*	ServiceWorker* createInstance() override
