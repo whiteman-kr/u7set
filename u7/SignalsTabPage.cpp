@@ -1093,6 +1093,15 @@ void SignalsModel::addSignal()
 		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
+	int signalCounter = dbController()->nextCounterValue();
+	if (signalCounter >= 0)
+	{
+		QString newId = QString(signal.isAnalog() ? "ANALOG_%1" : "DISCRETE_%1").arg(signalCounter, 3, 10, QLatin1Char('0'));
+		signal.setAppSignalID('#' + newId);
+		signal.setCustomAppSignalID(newId);
+		signal.setCaption(newId);
+	}
+
 	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, false, m_parentWindow);
 
 	if (dlg.exec() == QDialog::Accepted)
