@@ -4,20 +4,19 @@
 class BaseServiceWorker : public ServiceWorker
 {
 public:
-	BaseServiceWorker(int argc, char** argv) :
-		ServiceWorker(ServiceType::BaseService, argc, argv)
+	BaseServiceWorker() :
+		ServiceWorker(ServiceType::BaseService)
 	{
 	}
 
-	BaseServiceWorker(const QStringList& cmdLineArgs) :
-		ServiceWorker(ServiceType::BaseService, cmdLineArgs)
+	void iniCmdLineParser(QCommandLineParser& cmdLineParser) override
 	{
 	}
 
-	ServiceWorker* createInstance() override
+/*	ServiceWorker* createInstance() override
 	{
 		return new BaseServiceWorker(cmdLineArgs());
-	}
+	}*/
 
 	virtual void initialize() override
 	{
@@ -39,7 +38,7 @@ int main(int argc, char *argv[])
 
 	INIT_LOGGER(argv[0]);
 
-	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker(argc, argv);
+	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker();
 
 	ServiceStarter serviceStarter(argc, argv, "RPCT Base Service", baseServiceWorker);
 

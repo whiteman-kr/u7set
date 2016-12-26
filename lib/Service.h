@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <QCommandLineParser>
 #include <iostream>
 #include "../qtservice/src/qtservice.h"
 #include "../lib/UdpSocket.h"
@@ -26,18 +27,22 @@ class ServiceWorker;
 
 class ServiceStarter
 {
+public:
+	ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* m_serviceWorker);
+
+	int exec();
+
+private:
+	void initCmdLineParser();
+
 private:
 	int m_argc = 0;
 	char **m_argv = nullptr;
 	QString m_name;
 	ServiceWorker* m_serviceWorker = nullptr;
 
-public:
-	ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* m_serviceWorker);
-
-	static QString getCommandLineKeyValue(int argc, char ** argv, const QString& key);
-
-	int exec();
+	QStringList m_cmdLineArgs;
+	QCommandLineParser m_cmdLineParser;
 };
 
 
@@ -85,7 +90,7 @@ private:
 public:
 	ConsoleServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker);
 
-	int exec();
+	int exec(QCommandLineParser& cmdLineParser);
 };
 
 
@@ -190,15 +195,14 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType, int argc, char** argv);
-	ServiceWorker(ServiceType serviceType, const QStringList& cmdLineArgs);
+	ServiceWorker(ServiceType serviceType);
 
 	virtual ~ServiceWorker();
 
 	virtual void initialize() = 0;
 	virtual void shutdown() = 0;
 
-	virtual void parseCmdLineArgs();
+	virtual void iniCmdLineParser(QCommandLineParser& cmdLineParser) = 0;
 
 signals:
 	void work();
@@ -238,7 +242,7 @@ private:
 	void onThreadStarted() final;
 	void onThreadFinished() final;
 
-	virtual ServiceWorker* createInstance() = 0;		// must be implemented as { return new DerivedServiceWorker(); }
+//	virtual ServiceWorker* createInstance() = 0;		// must be implemented as { return new DerivedServiceWorker(); }
 
 	void setService(Service* service) { m_service = service; }
 	Service& service() { assert(m_service != nullptr); return *m_service; }

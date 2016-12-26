@@ -8,52 +8,53 @@
 //
 // -------------------------------------------------------------------------------------
 
-ServiceStarter::ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker) :
+ServiceStarter::ServiceStarter(int argc, char** argv, const QString& name, ServiceWorker* serviceWorker) :
 	m_argc(argc),
 	m_argv(argv),
 	m_name(name),
 	m_serviceWorker(serviceWorker)
 {
-	assert(serviceWorker != nullptr);
-
 	assert(logger.isInitialized() == true);
+
+	if (argv == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (serviceWorker == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	for(int i = 0; i < argc; i++)
+	{
+		m_cmdLineArgs.push_back(QString(argv[i]));
+	}
 }
 
 
-QString ServiceStarter::getCommandLineKeyValue(int argc, char **argv, const QString& key)
+void ServiceStarter::initCmdLineParser()
 {
-	QString value;
+	m_cmdLineParser.addOption(QCommandLineOption("h", "Print this help"));
+	m_cmdLineParser.addOption(QCommandLineOption("e", "Run service as regular application."));
 
-	QString keyStr = QString("-%1=").arg(key);
+	m_serviceWorker->iniCmdLineParser(m_cmdLineParser);
 
-	int keyStrLen = keyStr.length();
-
-	for(int i = 0; i <argc; i++)
-	{
-		QString arg = argv[i];
-
-		if (arg.mid(0, keyStrLen) == keyStr)
-		{
-			value = arg.mid(keyStrLen);
-			break;
-		}
-	}
-
-	return value;
+	m_cmdLineParser.process(m_cmdLineArgs);
 }
 
 
 int ServiceStarter::exec()
 {
+	initCmdLineParser();
+
 	bool consoleMode = false;
 
-	for(int i = 0; i < m_argc; i++)
+	if (m_cmdLineParser.isSet("e") || m_cmdLineParser.isSet("h"))
 	{
-		if (QString("-e") == m_argv[i])
-		{
-			consoleMode = true;
-			break;
-		}
+		consoleMode = true;
 	}
 
 	int result = 0;
@@ -62,7 +63,7 @@ int ServiceStarter::exec()
 	{
 		ConsoleServiceStarter consoleStarter(m_argc, m_argv, m_name, m_serviceWorker);
 
-		result = consoleStarter.exec();
+		result = consoleStarter.exec(m_cmdLineParser);
 	}
 	else
 	{
@@ -155,9 +156,15 @@ ConsoleServiceStarter::ConsoleServiceStarter(int argc, char ** argv, const QStri
 }
 
 
-int ConsoleServiceStarter::exec()
+int ConsoleServiceStarter::exec(QCommandLineParser& cmdLineParser)
 {
-	qDebug() << "\n======" << C_STR(m_name) << "sarted ======\n";
+	if (cmdLineParser.isSet("h"))
+	{
+		qDebug() << C_STR(cmdLineParser.helpText());
+		return 0;
+	}
+
+	qDebug() << "\n======" << C_STR(m_name) << "started ======\n";
 	qDebug() << "Press any key and RETURN to finish service\n";
 
 	if (m_serviceWorker == nullptr)
@@ -259,14 +266,21 @@ void Service::startServiceThread()
 
 	m_state = ServiceState::Starts;
 
-	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
+/*	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
 
 	newServiceWorker->setService(this);
 
 	connect(newServiceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
 	connect(newServiceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
 
-	m_serviceThread = new SimpleThread(newServiceWorker);
+	m_serviceThread = new SimpleThread(newServiceWorker); */
+
+	m_serviceWorker->setService(this);
+
+	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
+	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
+
+	m_serviceThread = new SimpleThread(m_serviceWorker);
 
 	m_serviceThread->start();
 }
@@ -414,24 +428,9 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 //
 // -------------------------------------------------------------------------------------
 
-ServiceWorker::ServiceWorker(ServiceType serviceType, int argc, char** argv) :
+ServiceWorker::ServiceWorker(ServiceType serviceType) :
 	m_serviceType(serviceType)
 {
-	for(int i = 0; i < argc; i++)
-	{
-		cmdLineArgs().push_back(QString(argv[i]));
-	}
-
-	parseCmdLineArgs();
-}
-
-
-ServiceWorker::ServiceWorker(ServiceType serviceType, const QStringList& cmdLineArgs) :
-	m_serviceType(serviceType)
-{
-	m_cmdLineArgs = cmdLineArgs;
-
-	parseCmdLineArgs();
 }
 
 
@@ -439,12 +438,12 @@ ServiceWorker::~ServiceWorker()
 {
 }
 
-
+/*
 void ServiceWorker::parseCmdLineArgs()
 {
 	m_serviceEquipmentID = getCmdLineKeyValue("id");
 
-/*	m_cfgServiceIP1 = getCmdLineKeyValue("cfgip1");
+	m_cfgServiceIP1 = getCmdLineKeyValue("cfgip1");
 	m_cfgServiceIP2 = getCmdLineKeyValue("cfgip2");
 	m_buildPath(buildPath)
 
@@ -456,9 +455,9 @@ void ServiceWorker::parseCmdLineArgs()
 	if (m_buildPath.isEmpty() == false)
 	{
 		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
-	}*/
+	}
 }
-
+*/
 
 QString ServiceWorker::getCmdLineKeyValue(const QString& key)
 {
