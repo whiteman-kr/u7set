@@ -16,10 +16,13 @@ class ChangesetDetailsDialog : public QDialog
 
 private:
 	ChangesetDetailsDialog(DbController* db, const DbChangesetDetails& changesetDetails, QWidget* parent);
+
 public:
 	~ChangesetDetailsDialog();
-
 	static void showChangesetDetails(DbController* db, int changeset, QWidget* parent);
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 
 private slots:
 	void on_objects_customContextMenuRequested(const QPoint &pos);

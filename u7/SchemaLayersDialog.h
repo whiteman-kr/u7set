@@ -16,6 +16,9 @@ public:
 	explicit SchemaLayersDialog(EditSchemaView* schemaView, QWidget *parent = 0);
 	~SchemaLayersDialog();
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 private slots:
 	void onContextMenu(const QPoint &pos);
 

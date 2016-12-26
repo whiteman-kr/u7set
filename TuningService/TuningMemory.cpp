@@ -4,6 +4,8 @@
 
 #include "TuningMemory.h"
 
+#include <cstring>
+
 namespace Tuning
 {
 

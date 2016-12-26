@@ -27,6 +27,7 @@ public:
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
+	virtual void showEvent(QShowEvent* event) override;
 
 	// Public methods
 	//
@@ -37,7 +38,6 @@ public:
 protected:
 	void saveWindowState();
 	void restoreWindowState();
-
 
 	// Private methods
 	//

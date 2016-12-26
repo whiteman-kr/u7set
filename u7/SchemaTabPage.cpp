@@ -1759,7 +1759,7 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 
 	// Show chageset dialog
 	//
-	int changesetId = SelectChangesetDialog::getFileChangeset(db(), file, false, this);
+	int changesetId = SelectChangesetDialog::getFileChangeset(db(), file, this);
 
 	if (changesetId == -1)
 	{

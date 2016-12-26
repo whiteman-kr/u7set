@@ -1330,137 +1330,137 @@
         <translation>Приложение запущено.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="54"/>
+        <location filename="../MainWindow.cpp" line="56"/>
         <source>Failed to load user filters: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="60"/>
+        <location filename="../MainWindow.cpp" line="62"/>
         <source>User Presets</source>
         <translation>Пользовательские списки</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="57"/>
-        <location filename="../MainWindow.cpp" line="85"/>
-        <location filename="../MainWindow.cpp" line="91"/>
-        <location filename="../MainWindow.cpp" line="362"/>
+        <location filename="../MainWindow.cpp" line="59"/>
+        <location filename="../MainWindow.cpp" line="87"/>
+        <location filename="../MainWindow.cpp" line="93"/>
+        <location filename="../MainWindow.cpp" line="364"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="38"/>
+        <location filename="../MainWindow.cpp" line="40"/>
         <source>Waiting for configuration...</source>
         <translation>Ожидание загрузки конфигурации...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="94"/>
+        <location filename="../MainWindow.cpp" line="96"/>
         <source>Application finished.</source>
         <translation>Приложение завершено.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="100"/>
+        <location filename="../MainWindow.cpp" line="102"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="101"/>
+        <location filename="../MainWindow.cpp" line="103"/>
         <source>Quit the application</source>
         <translation>Выход из приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="109"/>
+        <location filename="../MainWindow.cpp" line="111"/>
         <source>Preset Editor...</source>
         <translation>Редактор списков...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="110"/>
+        <location filename="../MainWindow.cpp" line="112"/>
         <source>Edit user presets</source>
         <translation>Редактирование списков</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="115"/>
+        <location filename="../MainWindow.cpp" line="117"/>
         <source>Users...</source>
         <translation>Пользователи...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="116"/>
+        <location filename="../MainWindow.cpp" line="118"/>
         <source>Edit users</source>
         <translation>Редактор пользователей</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="121"/>
+        <location filename="../MainWindow.cpp" line="123"/>
         <source>Settings...</source>
         <translation>Настройки...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="122"/>
+        <location filename="../MainWindow.cpp" line="124"/>
         <source>Change application settings</source>
         <translation>Изменить настройки приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="127"/>
+        <location filename="../MainWindow.cpp" line="129"/>
         <source>Tuning sources...</source>
         <translation>Источники тюнинга...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="128"/>
+        <location filename="../MainWindow.cpp" line="130"/>
         <source>View tuning sources</source>
         <translation>Отобразить источникни тюнинга</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="133"/>
+        <location filename="../MainWindow.cpp" line="135"/>
         <source>Log...</source>
         <translation>Журнал...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="134"/>
+        <location filename="../MainWindow.cpp" line="136"/>
         <source>Show application log</source>
         <translation>Вывод журнала приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="138"/>
+        <location filename="../MainWindow.cpp" line="140"/>
         <source>About...</source>
         <translation>О программе...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="139"/>
+        <location filename="../MainWindow.cpp" line="141"/>
         <source>Show application information</source>
         <translation>Вывод информации о программе</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="149"/>
+        <location filename="../MainWindow.cpp" line="151"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="155"/>
+        <location filename="../MainWindow.cpp" line="157"/>
         <source>&amp;Tools</source>
         <translation>&amp;Команды</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="164"/>
+        <location filename="../MainWindow.cpp" line="166"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="207"/>
-        <location filename="../MainWindow.cpp" line="215"/>
+        <location filename="../MainWindow.cpp" line="209"/>
+        <location filename="../MainWindow.cpp" line="217"/>
         <source> ConfigSrv: %1   TuningSrv: %2 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="208"/>
-        <location filename="../MainWindow.cpp" line="209"/>
+        <location filename="../MainWindow.cpp" line="210"/>
+        <location filename="../MainWindow.cpp" line="211"/>
         <source>NoConnection</source>
         <translation>Нет соединения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="231"/>
+        <location filename="../MainWindow.cpp" line="233"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="231"/>
+        <location filename="../MainWindow.cpp" line="233"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфигурация программы изменилась и будет обновлена.</translation>
     </message>
@@ -1532,6 +1532,22 @@
         <location filename="../../lib/OutputLog.h" line="18"/>
         <source>Internal error! File: %1 Line: %2 Function: %3</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="102"/>
+        <location filename="../main.cpp" line="119"/>
+        <source>Error</source>
+        <translation type="unfinished">Ошибка</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="102"/>
+        <source>Failed to create QSharedMemory object!</source>
+        <translation>Ошибка создания объекта QSharedMemory!</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="119"/>
+        <source>Application is already running!</source>
+        <translation>Приложение уже запущено!</translation>
     </message>
 </context>
 <context>
@@ -2212,12 +2228,6 @@
         <translation>Будут применены новые значения:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1164"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="1169"/>
         <source>Are you sure you want to continue?</source>
         <translation>Вы уверены, что хотите продолжить?</translation>
@@ -2247,6 +2257,12 @@ Are you sure you want to continue?</source>
         <location filename="../TuningPage.cpp" line="1161"/>
         <source>Yes</source>
         <translation>Да</translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1164"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1171"/>
@@ -2330,37 +2346,37 @@ Are you sure you want to continue?</source>
 <context>
     <name>TuningPage</name>
     <message>
-        <location filename="../TuningPage.cpp" line="1346"/>
+        <location filename="../TuningPage.cpp" line="1369"/>
         <source>Apply Mask</source>
         <translation>Маска</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1352"/>
+        <location filename="../TuningPage.cpp" line="1375"/>
         <source>Set Value</source>
         <translation>Ввод значения</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1355"/>
+        <location filename="../TuningPage.cpp" line="1378"/>
         <source>Set all to On</source>
         <translation>Включить все</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1358"/>
+        <location filename="../TuningPage.cpp" line="1381"/>
         <source>Set all to Off</source>
         <translation>Выключить все</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1361"/>
+        <location filename="../TuningPage.cpp" line="1384"/>
         <source>Set to Defaults</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1364"/>
+        <location filename="../TuningPage.cpp" line="1387"/>
         <source>Apply</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1367"/>
+        <location filename="../TuningPage.cpp" line="1390"/>
         <source>Undo</source>
         <translation>Отмена</translation>
     </message>

@@ -1,6 +1,5 @@
 #include "SelectChangesetDialog.h"
 #include "ui_SelectChangesetDialog.h"
-#include "ChangesetDetailsDialog.h"
 #include "CompareDialog.h"
 
 SelectChangesetDialog::SelectChangesetDialog()
@@ -8,14 +7,13 @@ SelectChangesetDialog::SelectChangesetDialog()
 	assert(false);
 }
 
-SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, bool onlySelectChanget, QWidget* parent) :
+SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, DbChangesetObject object, const std::vector<DbChangeset>& history, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SelectChangesetDialog),
 	m_db(db),
 	m_history(history),
 	m_changeset(-1),
-	m_object(object),
-	m_onlySelectChanget(onlySelectChanget)
+	m_object(object)
 {
 	assert(m_db);
 
@@ -77,15 +75,6 @@ SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, Db
 		sm->select(mi, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 	}
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.40, screen.height() * 0.35);
-
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -111,7 +100,7 @@ int SelectChangesetDialog::changeset() const
 
 // Modal dialogbox, gets selected changest on Ok
 //
-int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& file, bool onlySelectChangeset, QWidget* parent)
+int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& file, QWidget* parent)
 {
 	if (db == nullptr)
 	{
@@ -126,7 +115,7 @@ int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& 
 
 	DbChangesetObject object(file);
 
-	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, object, fileHistory, onlySelectChangeset, parent);
+	SelectChangesetDialog cd("Select Changeset - " + file.fileName(), db, object, fileHistory, parent);
 
 	int result = cd.exec();
 
@@ -140,7 +129,7 @@ int SelectChangesetDialog::getFileChangeset(DbController* db, const DbFileInfo& 
 	}
 }
 
-int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObject signal, bool onlySelectChangeset, QWidget* parent)
+int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObject signal, QWidget* parent)
 {
 	if (db == nullptr)
 	{
@@ -153,7 +142,7 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	std::vector<DbChangeset> signalHistory;
 	db->getSignalHistory(signal.id(), &signalHistory, parent);
 
-	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signal, signalHistory, onlySelectChangeset, parent);
+	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signal, signalHistory, parent);
 	//cd.setFile(file);
 
 	int result = cd.exec();
@@ -166,6 +155,16 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	{
 		return -1;
 	}
+}
+
+void SelectChangesetDialog::showEvent(QShowEvent*)
+{
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.40, screen.height() * 0.35);
+
+	move(screen.center() - rect().center());
+
+	return;
 }
 
 void SelectChangesetDialog::on_buttonBox_accepted()
@@ -205,16 +204,7 @@ void SelectChangesetDialog::on_changesetList_customContextMenuRequested(const QP
 	QMenu menu(ui->changesetList);
 
 	QTreeWidgetItem* item = ui->changesetList->currentItem();
-
 	if (item == nullptr)
-	{
-		return;
-	}
-
-	bool ok = false;
-	int changeset = item->text(0).toUInt(&ok);
-
-	if (ok == false)
 	{
 		return;
 	}
@@ -222,40 +212,11 @@ void SelectChangesetDialog::on_changesetList_customContextMenuRequested(const QP
 	QAction* selectChangesetAction = new QAction(tr("Select Changeset"), &menu);
 	connect(selectChangesetAction, &QAction::triggered, this, &SelectChangesetDialog::on_buttonBox_accepted);
 
-	QAction* changesetDetailsAction = new QAction(tr("Changeset Details..."), &menu);
-	connect(changesetDetailsAction, &QAction::triggered, this,
-			[this, changeset]()
-			{
-				changesetDetails(changeset);
-			});
-
-	QAction* compareAction = new QAction(tr("Compare..."), &menu);
-	connect(compareAction, &QAction::triggered, this,
-			[this, changeset]()
-			{
-				CompareDialog::showCompare(m_db, m_object, changeset, dynamic_cast<QWidget*>(this->parent()));
-				reject();
-			});
-
 	menu.addAction(selectChangesetAction);
-
-	if (m_onlySelectChanget == false)
-	{
-		menu.addAction(changesetDetailsAction);
-		menu.addAction(compareAction);
-	}
 
 	// Show menu
 	//
 	menu.exec(cursor().pos());
-}
-
-void SelectChangesetDialog::changesetDetails(int changeset)
-{
-	QWidget* parentWidget = dynamic_cast<QWidget*>(this->parent());
-	assert(parentWidget);
-
-	ChangesetDetailsDialog::showChangesetDetails(m_db, changeset, parentWidget);
 }
 
 void SelectChangesetDialog::on_buttonBox_rejected()

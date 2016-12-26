@@ -29,9 +29,11 @@ const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
 			ST_ANY = 0xff;
 
 
-const int	FI_APP_SIGNAL_ID = 0,
-			FI_CUSTOM_APP_SIGNAL_ID = 1,
-			FI_EQUIPMENT_ID = 2;
+const int	FI_ANY = 0,
+			FI_APP_SIGNAL_ID = 1,
+			FI_CUSTOM_APP_SIGNAL_ID = 2,
+			FI_EQUIPMENT_ID = 3,
+			FI_CAPTION = 4;
 
 
 class SignalsDelegate : public QStyledItemDelegate

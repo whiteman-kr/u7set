@@ -59,18 +59,30 @@ SchemaLayersDialog::SchemaLayersDialog(EditSchemaView* schemaView, QWidget *pare
 
 	fillList(m_activeIndex);
 
-	ui->m_layersList->resizeColumnToContents(1);
-	ui->m_layersList->resizeColumnToContents(2);
-	ui->m_layersList->resizeColumnToContents(3);
+	return;
+}
 
+SchemaLayersDialog::~SchemaLayersDialog()
+{
+	delete ui;
+}
+
+void SchemaLayersDialog::showEvent(QShowEvent*)
+{
 	// Resize depends on monitor size, DPI, resolution
 	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
 	QRect screen = QDesktopWidget().availableGeometry(this);
 	resize(screen.width() * 0.20, screen.height() * 0.15);
 
 	move(screen.center() - rect().center());
+
+	// --
+	//
+	assert(ui->m_layersList->columnCount() == 4);
+
+	ui->m_layersList->resizeColumnToContents(1);
+	ui->m_layersList->resizeColumnToContents(2);
+	ui->m_layersList->resizeColumnToContents(3);
 
 	return;
 }
@@ -107,11 +119,6 @@ void SchemaLayersDialog::fillList(int selectedIndex)
 	{
 		ui->m_layersList->setCurrentItem(selectedItem);
 	}
-}
-
-SchemaLayersDialog::~SchemaLayersDialog()
-{
-	delete ui;
 }
 
 void SchemaLayersDialog::onContextMenu(const QPoint &pos)

@@ -18,6 +18,9 @@ public:
 
 	int index();
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 private:
     void fillTree();
 	int getSelectedIndex();

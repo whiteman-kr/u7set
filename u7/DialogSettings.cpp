@@ -14,15 +14,6 @@ DialogSettings::DialogSettings(QWidget *parent) :
 				   ~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.23, height());
-
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -46,6 +37,18 @@ void DialogSettings::setSettings(const Settings& value)
 	ui->editPassword->setText(m_settings.serverPassword());
 	ui->editOutputPath->setText(m_settings.buildOutputPath());
 	ui->checkExpertMode->setChecked(m_settings.isExpertMode());
+
+	return;
+}
+
+void DialogSettings::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.23, height());
+
+	move(screen.center() - rect().center());
 
 	return;
 }

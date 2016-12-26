@@ -68,6 +68,7 @@ namespace Builder
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 		xml.writeStartElement("AppSignals");
+		xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
 
 		// Writing units
 		xml.writeStartElement("Units");

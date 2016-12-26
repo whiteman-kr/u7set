@@ -36,6 +36,9 @@ public:
 			QString target,
 			QWidget* parent);
 
+protected:
+	virtual void showEvent(QShowEvent* event) override;
+
 private:
 	Ui::ComparePropertyObjectDialog* ui;
 };

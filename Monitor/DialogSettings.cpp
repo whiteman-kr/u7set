@@ -17,15 +17,6 @@ DialogSettings::DialogSettings(QWidget *parent) :
 	connect (ui->buttonBox, &QDialogButtonBox::accepted, this, &DialogSettings::ok_clicked);
 	connect (ui->buttonBox, &QDialogButtonBox::rejected, this, &DialogSettings::cancel_clicked);
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.23, height());
-
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -54,6 +45,18 @@ void DialogSettings::setSettings(const Settings& value)
 	ui->checkShowLogo->setChecked(m_settings.showLogo());
 	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels());
 	ui->checkSingleInstance->setChecked(m_settings.singleInstance());
+
+	return;
+}
+
+void DialogSettings::showEvent(QShowEvent*)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.23, height());
+
+	move(screen.center() - rect().center());
 
 	return;
 }

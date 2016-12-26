@@ -96,7 +96,7 @@ void DialogTuningSources::update(bool refreshOnly)
 
             QTreeWidgetItem* item = new QTreeWidgetItem(connectionStrings);
 
-            item->setData(0, Qt::UserRole, ts.m_info.id());
+			item->setData(0, Qt::UserRole, static_cast<quint64>(ts.m_info.id()));
 
             ui->treeWidget->addTopLevelItem(item);
         }

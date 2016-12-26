@@ -67,15 +67,6 @@ CompareDialog::CompareDialog(DbController* db, const DbChangesetObject& object, 
 	connect(ui->sourceTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CompareDialog::versionTypeChanged);
 	connect(ui->targetTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CompareDialog::versionTypeChanged);
 
-	// Resize depends on monitor size, DPI, resolution
-	//
-	setVisible(true);	//	if this widget is not visible yet, QDesktopWidget().availableGeometry returns resilution just to 1st screen
-
-	QRect screen = QDesktopWidget().availableGeometry(this);
-	resize(screen.width() * 0.25, rect().height());
-
-	move(screen.center() - rect().center());
-
 	return;
 }
 
@@ -96,6 +87,18 @@ void CompareDialog::showCompare(DbController* db, const DbChangesetObject& objec
 
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->show();
+
+	return;
+}
+
+void CompareDialog::showEvent(QShowEvent* event)
+{
+	// Resize depends on monitor size, DPI, resolution
+	//
+	QRect screen = QDesktopWidget().availableGeometry(this);
+	resize(screen.width() * 0.25, rect().height());
+
+	move(screen.center() - rect().center());
 
 	return;
 }
@@ -174,7 +177,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{
@@ -189,7 +192,7 @@ void CompareDialog::on_sourceChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, true, this);
+		int changeset = SelectChangesetDialog::getSignalChangeset(m_db, m_object, this);
 
 		if (changeset != -1)
 		{
@@ -209,7 +212,7 @@ void CompareDialog::on_targetChangesetButton_clicked()
 		DbFileInfo file;
 		file.setFileId(m_object.id());
 
-		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, true, this);
+		int changeset = SelectChangesetDialog::getFileChangeset(m_db, file, this);
 
 		if (changeset != -1)
 		{

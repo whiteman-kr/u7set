@@ -15,8 +15,11 @@ public:
 	explicit LoginDialog(const QStringList& loginCompleterList, QWidget* parent);
 	~LoginDialog();
 
-	const QString& username() const;
-	const QString& password() const;
+	QString username() const;
+	QString password() const;
+
+protected:
+	virtual void showEvent(QShowEvent* event) override;
 	
 private slots:
 	void on_buttonBox_accepted();

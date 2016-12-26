@@ -29,11 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	theLogFile.write("--");
 	theLogFile.writeMessage(tr("Application started."));
 
-    loadLanguage(theSettings.language());
-
 	createActions();
 	createMenu();
 	createStatusBar();
+
+    setWindowTitle(QString("TuningClient - ") + theSettings.instanceStrId());
 
     setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
@@ -297,29 +297,6 @@ void MainWindow::slot_tuningConnectionFailed()
 
 }
 
-void MainWindow::loadLanguage(const QString& rLanguage)
-{
-    QLocale locale = QLocale(rLanguage);
-    QLocale::setDefault(locale);
-
-    QString langPath = QApplication::applicationDirPath();
-    langPath.append("/languages");
-
-    switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));
-    switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(rLanguage));
-}
-
-void MainWindow::switchTranslator(QTranslator& translator, const QString& filename)
-{
-    // remove the old translator
-    qApp->removeTranslator(&translator);
-
-    // load the new translator
-    if(translator.load(filename))
-    {
-        qApp->installTranslator(&translator);
-    }
-}
 
 void MainWindow::exit()
 {
