@@ -1377,9 +1377,11 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), ST_DISCRETE);
 
 	m_signalIdFieldCombo = new QComboBox(this);
+	m_signalIdFieldCombo->addItem(tr("Any"), FI_ANY);
 	m_signalIdFieldCombo->addItem(tr("AppSignalID"), FI_APP_SIGNAL_ID);
 	m_signalIdFieldCombo->addItem(tr("CustomAppSignalID"), FI_CUSTOM_APP_SIGNAL_ID);
 	m_signalIdFieldCombo->addItem(tr("EquipmentID"), FI_EQUIPMENT_ID);
+	m_signalIdFieldCombo->addItem(tr("Caption"), FI_CAPTION);
 
 	QToolBar* toolBar = new QToolBar(this);
 
@@ -2753,27 +2755,38 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 	{
 		return true;
 	}
-	QString strId;
-	switch (m_idFilterField)
-	{
-		case FI_APP_SIGNAL_ID:
-			strId = currentSignal.appSignalID().trimmed();
-			break;
-		case FI_CUSTOM_APP_SIGNAL_ID:
-			strId = currentSignal.customAppSignalID().trimmed();
-			break;
-		case FI_EQUIPMENT_ID:
-			strId = currentSignal.equipmentID().trimmed();
-			break;
-		default:
-			assert(false);
-			return false;
-	}
+
 	for (QString idMask : m_strIdMasks)
 	{
 		QRegExp rx(idMask.trimmed());
 		rx.setPatternSyntax(QRegExp::Wildcard);
-		if (rx.exactMatch(strId))
+		bool result = false;
+
+		switch (m_idFilterField)
+		{
+			case FI_ANY:
+				result = rx.exactMatch(currentSignal.appSignalID().trimmed()) ||
+						rx.exactMatch(currentSignal.customAppSignalID().trimmed()) ||
+						rx.exactMatch(currentSignal.equipmentID().trimmed()) ||
+						rx.exactMatch(currentSignal.caption().trimmed());
+				break;
+			case FI_APP_SIGNAL_ID:
+				result = rx.exactMatch(currentSignal.appSignalID().trimmed());
+				break;
+			case FI_CUSTOM_APP_SIGNAL_ID:
+				result = rx.exactMatch(currentSignal.customAppSignalID().trimmed());
+				break;
+			case FI_EQUIPMENT_ID:
+				result = rx.exactMatch(currentSignal.equipmentID().trimmed());
+				break;
+			case FI_CAPTION:
+				result = rx.exactMatch(currentSignal.caption().trimmed());
+				break;
+			default:
+				assert(false);
+				return false;
+		}
+		if (result == true)
 		{
 			return true;
 		}
