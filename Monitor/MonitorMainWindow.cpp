@@ -345,6 +345,31 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
+	// Create logo for toolbar
+	//
+
+	m_logoLabel = new QLabel(this);
+	m_logoImage = QImage(":/Images/Images/logo.png");
+
+	m_logoImage = m_logoImage.scaledToHeight(m_toolBar->height(),Qt::FastTransformation);
+
+	// Show logo if it was enabled in settings
+	//
+
+	if (theSettings.showLogo() == true)
+	{
+		m_logoLabel->setPixmap(QPixmap::fromImage(m_logoImage));
+	}
+
+	// Spacer between actions and logo
+	//
+
+	m_logoSpacer = new QWidget(this);
+	m_logoSpacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+	m_toolBar->addWidget(m_logoSpacer);
+	m_toolBar->addWidget(m_logoLabel);
+
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
 	return;
@@ -405,6 +430,16 @@ void MonitorMainWindow::showSettings()
 
 		// Apply settings here
 		//
+
+		if (theSettings.showLogo())
+		{
+			m_logoLabel->setPixmap(QPixmap::fromImage(m_logoImage));
+		}
+		else
+		{
+			m_logoLabel->clear();
+		}
+
 		return;
 	}
 

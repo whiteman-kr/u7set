@@ -108,6 +108,15 @@ private:
 	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
+	// Logo
+	//
+
+	QLabel* m_logoLabel;
+
+	QWidget* m_logoSpacer;
+
+	QImage m_logoImage;
+
 	// Controls
 	//
 	QToolBar* m_toolBar = nullptr;
