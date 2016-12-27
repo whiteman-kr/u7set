@@ -23,6 +23,7 @@ public:
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
 	virtual void timerEvent(QTimerEvent* event) override;
+	virtual void showEvent(QShowEvent*) override;
 
 	// Public methods
 	//
@@ -33,6 +34,8 @@ public:
 protected:
 	void saveWindowState();
 	void restoreWindowState();
+
+	void showLogo();
 
 	// Private methods
 	//
@@ -110,12 +113,8 @@ private:
 
 	// Logo
 	//
-
-	QLabel* m_logoLabel;
-
-	QWidget* m_logoSpacer;
-
-	QImage m_logoImage;
+	QLabel* m_logoLabel = nullptr;
+	QWidget* m_logoSpacer = nullptr;
 
 	// Controls
 	//
