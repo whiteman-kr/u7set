@@ -44,6 +44,10 @@ public:
 
 	TuningPageSettings *tuningPageSettings(int index);
 
+    QString globalAppDataPath();
+
+    QString localAppDataPath();
+
 public:
 
     int m_requestInterval = 100;
@@ -65,6 +69,11 @@ public:
 	int m_presetPropertiesSplitterState;
 	QPoint m_presetPropertiesWindowPos;
 	QByteArray m_presetPropertiesWindowGeometry;
+
+    // Preset Editor options
+
+    QPoint m_presetEditorPos;
+    QByteArray m_presetEditorGeometry;
 
 
 
@@ -88,6 +97,9 @@ private:
 	bool m_filterBySchema = true;
 
     QString m_language = "en";
+
+    QString m_globalAppDataPath;
+    QString m_localAppDataPath;
 
 	QMutex m;
 

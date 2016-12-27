@@ -237,7 +237,7 @@ void TuningObjectManager::onClientThreadFinished()
 
 void TuningObjectManager::onConnection()
 {
-    theLogFile.writeMessage(tr("TuningObjectManager: connection established."));
+    theLogFile->writeMessage(tr("TuningObjectManager: connection established."));
 
     assert(isClearToSendRequest() == true);
 
@@ -255,7 +255,7 @@ void TuningObjectManager::onConnection()
 
 void TuningObjectManager::onDisconnection()
 {
-    theLogFile.writeMessage(tr("TuningObjectManager: connection failed."));
+    theLogFile->writeMessage(tr("TuningObjectManager: connection failed."));
 
     invalidateSignals();
 
@@ -264,7 +264,7 @@ void TuningObjectManager::onDisconnection()
 
 void TuningObjectManager::onReplyTimeout()
 {
-    theLogFile.writeMessage(tr("TuningObjectManager: reply timeout."));
+    theLogFile->writeMessage(tr("TuningObjectManager: reply timeout."));
 }
 
 void TuningObjectManager::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -297,7 +297,7 @@ void TuningObjectManager::processReply(quint32 requestID, const char* replyData,
 
     default:
         assert(false);
-        theLogFile.writeError(tr("TcpTuningClient::processReply: Wrong requestID."));
+        theLogFile->writeError(tr("TcpTuningClient::processReply: Wrong requestID."));
 
         resetToGetTuningSources();
     }
@@ -508,7 +508,7 @@ void TuningObjectManager::processTuningSourcesInfo(const QByteArray& data)
 
     if (m_tuningDataSourcesInfoReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1")
+        theLogFile->writeError(tr("TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1")
                               .arg(networkErrorStr(static_cast<NetworkError>(m_tuningDataSourcesInfoReply.error()))));
 
         resetToGetTuningSources();
@@ -567,7 +567,7 @@ void TuningObjectManager::processTuningSourcesState(const QByteArray& data)
 
     if (m_tuningDataSourcesStatesReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1")
+        theLogFile->writeError(tr("TcpTuningClient::processTuningSourcesState, error received: %1")
                               .arg(networkErrorStr(static_cast<NetworkError>(m_tuningDataSourcesStatesReply.error()))));
 
         resetToGetTuningSourcesState();
@@ -617,7 +617,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 
     if (m_readTuningSignalsReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, error received: %1")
+        theLogFile->writeError(tr("TcpTuningClient::processReadTuningSignals, error received: %1")
                               .arg(networkErrorStr(static_cast<NetworkError>(m_readTuningSignalsReply.error()))));
 
         resetToGetTuningSourcesState();
@@ -634,7 +634,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 
         if (tss.error() != 0)
         {
-            theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1")
+            theLogFile->writeError(tr("TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1")
                                   .arg(networkErrorStr(static_cast<NetworkError>(tss.error()))));
 
             continue;
@@ -643,7 +643,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
         TuningObject* object = objectPtrByHash(tss.signalhash());
         if (object == nullptr)
         {
-            theLogFile.writeError(tr("TcpTuningClient::processReadTuningSignals, object not found by hash: %1")
+            theLogFile->writeError(tr("TcpTuningClient::processReadTuningSignals, object not found by hash: %1")
                                   .arg(tss.signalhash()));
 
             // no such signal found
@@ -660,7 +660,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 
         if (writingFailed == true)
         {
-            theLogFile.writeError(tr("Error writing wignal %1 (%2), value = %3, expected to write %4 ")
+            theLogFile->writeError(tr("Error writing wignal %1 (%2), value = %3, expected to write %4 ")
                                   .arg(object->appSignalID())
                                   .arg(object->caption())
                                   .arg(object->value())
@@ -709,7 +709,7 @@ void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
 
     if (m_writeTuningSignalsReply.error() != 0)
     {
-        theLogFile.writeError(tr("TcpTuningClient::processWriteTuningSignals, error received: %1")
+        theLogFile->writeError(tr("TcpTuningClient::processWriteTuningSignals, error received: %1")
                               .arg(networkErrorStr(static_cast<NetworkError>(m_writeTuningSignalsReply.error()))));
 
         resetToGetTuningSourcesState();
@@ -724,7 +724,7 @@ void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
 
         if (twr.error() != 0)
         {
-            theLogFile.writeError(tr("TcpTuningClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2")
+            theLogFile->writeError(tr("TcpTuningClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2")
                                   .arg(networkErrorStr(static_cast<NetworkError>(twr.error())))
                                   .arg(twr.signalhash()));
 
@@ -737,7 +737,7 @@ void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
 
 void TuningObjectManager::slot_configurationArrived(ConfigSettings configuration)
 {
-    theLogFile.writeError(tr("TcpTuningClient::slot_configurationArrived"));
+    theLogFile->writeError(tr("TcpTuningClient::slot_configurationArrived"));
 
     HostAddressPort h1 = configuration.tuns1.address();
     HostAddressPort h2 = configuration.tuns1.address();
@@ -749,7 +749,7 @@ void TuningObjectManager::slot_configurationArrived(ConfigSettings configuration
 
 void TuningObjectManager::slot_signalsUpdated()
 {
-    theLogFile.writeError(tr("TcpTuningClient::slot_signalsUpdated"));
+    theLogFile->writeError(tr("TcpTuningClient::slot_signalsUpdated"));
 
     QMutexLocker l(&m_mutex);
 

@@ -9,43 +9,8 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
 
-	// Fill the filter tree
-	//
 
-	std::vector<QTreeWidgetItem*> treeItems;
-
-	fillFilters(treeItems, theFilters);
-
-	fillFilters(treeItems, theUserFilters);
-
-	if (treeItems.empty() == false)
-	{
-		// Create tree control
-		//
-		m_filterTree = new QTreeWidget();
-
-		QStringList headerLabels;
-        headerLabels<<tr("Caption");
-
-		m_filterTree->setColumnCount(headerLabels.size());
-		m_filterTree->setHeaderLabels(headerLabels);
-
-		for (auto item : treeItems)
-		{
-			m_filterTree->addTopLevelItem(item);
-			item->setExpanded(true);
-		}
-
-        m_filterTree->setSortingEnabled(true);
-        m_filterTree->sortItems(0, Qt::AscendingOrder);
-
-        connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
-
-		// Create splitter control
-		//
-		m_hSplitter = new QSplitter();
-		m_hSplitter->addWidget(m_filterTree);
-	}
+    fillFiltersTree();
 
 	// Fill tab pages
 	//
@@ -129,15 +94,78 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 
 TuningWorkspace::~TuningWorkspace()
 {
-	if (m_hSplitter != nullptr)
-	{
-		theSettings.m_mainWindowSplitterState = m_hSplitter->saveState();
-	}
+    if (m_hSplitter != nullptr)
+    {
+        theSettings.m_mainWindowSplitterState = m_hSplitter->saveState();
+    }
 }
 
+void TuningWorkspace::fillFiltersTree()
+{
+    // Fill the filter tree
+    //
 
+    std::vector<QTreeWidgetItem*> treeItems;
 
-void TuningWorkspace::fillFilters(std::vector<QTreeWidgetItem*>& treeItems, TuningFilterStorage& filterStorage)
+    // Project filters
+
+    fillFiltersTreeItems(treeItems, theFilters);
+
+    // User filters
+
+    fillFiltersTreeItems(treeItems, theUserFilters);
+
+    if (treeItems.empty() == false)
+    {
+        // All objects, a nullptr item
+
+        QTreeWidgetItem* allSignalsItem = new QTreeWidgetItem(QStringList()<<tr("All Objects"));
+        treeItems.push_back(allSignalsItem );
+
+        // Create tree control
+        //
+        if (m_filterTree == nullptr)
+        {
+            m_filterTree = new QTreeWidget();
+            m_filterTree->setSortingEnabled(true);
+            connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
+
+            QStringList headerLabels;
+            headerLabels<<tr("Caption");
+
+            m_filterTree->setColumnCount(headerLabels.size());
+            m_filterTree->setHeaderLabels(headerLabels);
+
+            // Create splitter control
+            //
+            m_hSplitter = new QSplitter();
+            m_hSplitter->addWidget(m_filterTree);
+        }
+        else
+        {
+            m_filterTree->clear();
+        }
+
+        // Fill filters control
+        //
+
+        m_filterTree->blockSignals(true);
+
+        for (auto item : treeItems)
+        {
+            m_filterTree->addTopLevelItem(item);
+            item->setExpanded(true);
+        }
+
+        m_filterTree->sortItems(0, Qt::AscendingOrder);
+
+        allSignalsItem->setSelected(true);
+
+        m_filterTree->blockSignals(false);
+    }
+}
+
+void TuningWorkspace::fillFiltersTreeItems(std::vector<QTreeWidgetItem*>& treeItems, TuningFilterStorage& filterStorage)
 {
 	std::shared_ptr<TuningFilter> f = filterStorage.m_root;
 	if (f == nullptr)
@@ -197,7 +225,10 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 void TuningWorkspace::slot_resetTreeFilter()
 {
-	m_filterTree->clearSelection();
+    if (m_filterTree != nullptr)
+    {
+        fillFiltersTree();
+    }
 }
 
 void TuningWorkspace::slot_treeSelectionChanged()

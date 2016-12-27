@@ -40,5 +40,7 @@
 #include <QMenuBar>
 #include <QButtonGroup>
 #include <QUuid>
+#include <QStandardPaths>
+#include <QDir>
 
 #endif // STABLE_H

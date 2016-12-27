@@ -57,7 +57,45 @@ void Settings::RestoreSystem()
 
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+    // Determine the Global settings folder
+
+    QSettings qs(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+
+    QString m_globalAppDataPath = QDir::toNativeSeparators(qs.fileName());
+
+    int ptPos = m_globalAppDataPath.indexOf('.');
+    if (ptPos != -1)
+    {
+        m_globalAppDataPath = m_globalAppDataPath.left(ptPos);
+    }
+
+    qDebug()<<m_globalAppDataPath;
+
+    if (m_admin == true)
+    {
+        QDir dir(m_globalAppDataPath);
+
+        if (dir.exists() == false)
+        {
+            dir.mkpath(m_globalAppDataPath);
+        }
+    }
+
+    // Determine the Local settings folder
+
+    m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+
+    qDebug()<<m_localAppDataPath;
+
+    QDir dir(m_localAppDataPath);
+
+    if (dir.exists() == false)
+    {
+        dir.mkpath(m_localAppDataPath);
+    }
 }
+
 
 void Settings::StoreUser()
 {
@@ -91,6 +129,10 @@ void Settings::StoreUser()
 	s.setValue("PresetProperties/splitterState", m_presetPropertiesSplitterState);
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
+
+
+    s.setValue("PresetEditor/pos", m_presetEditorPos);
+    s.setValue("PresetEditor/geometry", m_presetEditorGeometry);
 
     s.setValue("MainWindow/language", m_language);
 
@@ -134,6 +176,9 @@ void Settings::RestoreUser()
 		m_presetPropertiesSplitterState = 100;
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
+
+    m_presetEditorPos = s.value("PresetEditor/pos", QPoint(-1, -1)).toPoint();
+    m_presetEditorGeometry = s.value("PresetEditor/geometry").toByteArray();
 
     m_language = s.value("MainWindow/language", m_language).toString();
 }
@@ -231,6 +276,16 @@ TuningPageSettings* Settings::tuningPageSettings(int index)
 	}
 
 	return &m_tuningPageSettings[index];
+}
+
+QString Settings::globalAppDataPath()
+{
+    return m_globalAppDataPath;
+}
+
+QString Settings::localAppDataPath()
+{
+    return m_localAppDataPath;
 }
 
 Settings theSettings;

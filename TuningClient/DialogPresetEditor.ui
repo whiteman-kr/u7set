@@ -32,15 +32,15 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QComboBox" name="m_maskTypeCombo"/>
+            <widget class="QComboBox" name="m_filterTypeCombo"/>
            </item>
            <item>
-            <widget class="QLineEdit" name="m_mask"/>
+            <widget class="QLineEdit" name="m_filterText"/>
            </item>
            <item>
-            <widget class="QPushButton" name="m_applyMask">
+            <widget class="QPushButton" name="m_applyFilter">
              <property name="text">
-              <string>Apply Mask</string>
+              <string>Apply Filter</string>
              </property>
             </widget>
            </item>

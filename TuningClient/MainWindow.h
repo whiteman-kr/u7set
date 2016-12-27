@@ -81,7 +81,7 @@ private:
 };
 
 extern MainWindow* theMainWindow;
-extern LogFile theLogFile;
+extern LogFile* theLogFile;
 
 extern TuningObjectManager* theObjectManager;
 

@@ -24,10 +24,12 @@ MainWindow::MainWindow(QWidget *parent) :
 		resize(1024, 768);
 	}
 
-	theLogFile.write("--");
-	theLogFile.write("-----------------------");
-	theLogFile.write("--");
-	theLogFile.writeMessage(tr("Application started."));
+    theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
+
+    theLogFile->write("--");
+    theLogFile->write("-----------------------");
+    theLogFile->write("--");
+    theLogFile->writeMessage(tr("Application started."));
 
 	createActions();
 	createMenu();
@@ -49,11 +51,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(theObjectManager, &TuningObjectManager::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
 
 	QString errorCode;
-	if (theUserFilters.load(QString("UserFilters.xml"), &errorCode) == false)
+
+    QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
+
+    if (theUserFilters.load(userFiltersFile, &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
-		theLogFile.writeError(msg);
+        theLogFile->writeError(msg);
         QMessageBox::critical(this, tr("Error"), msg);
 	}
 
@@ -77,21 +82,9 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
-	QString errorMsg;
+    theLogFile->writeMessage(tr("Application finished."));
 
-	if (theFilters.save("ObjectFilters1.xml", &errorMsg) == false)
-	{
-		theLogFile.writeError(errorMsg);
-		QMessageBox::critical(this, tr("Error"), errorMsg);
-	}
-
-	if (theUserFilters.save("ObjectFiltersUser1.xml", &errorMsg) == false)
-	{
-		theLogFile.writeError(errorMsg);
-		QMessageBox::critical(this, tr("Error"), errorMsg);
-	}
-
-	theLogFile.writeMessage(tr("Application finished."));
+    delete theLogFile;
 }
 
 
@@ -155,9 +148,11 @@ void MainWindow::createMenu()
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	pToolsMenu->addAction(m_pPresetEditorAction);
-	pToolsMenu->addAction(m_pTuningSourcesAction);
-	pToolsMenu->addAction(m_pUsersAction);
-	pToolsMenu->addAction(m_pSettingsAction);
+
+    QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
+    pServiceMenu->addAction(m_pTuningSourcesAction);
+    pServiceMenu->addAction(m_pUsersAction);
+    pServiceMenu->addAction(m_pSettingsAction);
 
 	// Help
 	//
@@ -333,9 +328,11 @@ void MainWindow::runPresetEditor()
 
 		QString errorMsg;
 
-		if (theUserFilters.save("UserFilters.xml", &errorMsg) == false)
+        QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
+
+        if (theUserFilters.save(userFiltersFile, &errorMsg) == false)
 		{
-			theLogFile.writeError(errorMsg);
+            theLogFile->writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
 		}
 		emit userFiltersUpdated();
@@ -357,7 +354,7 @@ void MainWindow::showTuningSources()
 
 
 MainWindow* theMainWindow = nullptr;
-LogFile theLogFile("TuningClient", ".");
+LogFile* theLogFile = nullptr;
 
 TuningObjectManager* theObjectManager = nullptr;
 

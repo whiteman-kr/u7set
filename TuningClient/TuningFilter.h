@@ -19,7 +19,10 @@ class TuningFilterValue
 public:
 	TuningFilterValue();
 
-	QString appSignalId() const;
+    QString customAppSignalId() const;
+    void setCustomAppSignalId(const QString& value);
+
+    QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
 	QString caption() const;
@@ -44,8 +47,13 @@ public:
     void setHighLimit(float value);
 
     Hash hash() const;
+
+    bool load(QXmlStreamReader& reader);
+    bool save(QXmlStreamWriter& writer) const;
+
 private:
 
+    QString m_customAppSignalId;
 	QString m_appSignalId;
 	QString m_caption;
 	bool m_useValue = false;

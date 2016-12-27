@@ -173,7 +173,7 @@ bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* f
 
 	if (result == false)
 	{
-		theLogFile.writeError(tr("ConfigController::getFileBlocked: Can't get file ") + pathFileName);
+		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file ") + pathFileName);
 	}
 
 	return result;
@@ -202,7 +202,7 @@ bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileDat
 
 	if (result == false)
 	{
-		theLogFile.writeError(tr("ConfigController::getFileBlocked: Can't get file with ID ") + id);
+		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file with ID ") + id);
 	}
 
 	return result;
@@ -243,7 +243,7 @@ bool ConfigController::getObjectFilters()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
-		theLogFile.writeError(completeErrorMessage);
+		theLogFile->writeError(completeErrorMessage);
 		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
@@ -252,7 +252,7 @@ bool ConfigController::getObjectFilters()
 		if (theFilters.load(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
-			theLogFile.writeError(completeErrorMessage);
+			theLogFile->writeError(completeErrorMessage);
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
@@ -270,7 +270,7 @@ bool ConfigController::getSchemasDetails()
 	if (getFileBlockedById(CFG_FILE_ID_SCHEMAS_DETAILS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get SchemasDetails.xml file error: %1").arg(errorStr);
-		theLogFile.writeError(completeErrorMessage);
+		theLogFile->writeError(completeErrorMessage);
 		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
@@ -279,7 +279,7 @@ bool ConfigController::getSchemasDetails()
 		if (theFilters.loadSchemasDetails(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
-			theLogFile.writeError(completeErrorMessage);
+			theLogFile->writeError(completeErrorMessage);
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
@@ -294,7 +294,7 @@ bool ConfigController::getTuningSignals()
 	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
 	{
 		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
-		theLogFile.writeError(completeErrorMessage);
+		theLogFile->writeError(completeErrorMessage);
 		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 		return false;
 	}
@@ -303,7 +303,7 @@ bool ConfigController::getTuningSignals()
         if (theObjectManager->loadSignals(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-			theLogFile.writeError(completeErrorMessage);
+			theLogFile->writeError(completeErrorMessage);
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
@@ -385,9 +385,9 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	// Trace received params
 	//
-	theLogFile.writeMessage(tr("New configuration arrived"));
-	theLogFile.writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuns1.equipmentId()).arg(readSettings.tuns1.ip()).arg(readSettings.tuns1.port()));
-	theLogFile.writeMessage(tr("TUNS2 (id, ip, port): %1, %2, %3").arg(readSettings.tuns2.equipmentId()).arg(readSettings.tuns2.ip()).arg(readSettings.tuns2.port()));
+	theLogFile->writeMessage(tr("New configuration arrived"));
+	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuns1.equipmentId()).arg(readSettings.tuns1.ip()).arg(readSettings.tuns1.port()));
+	theLogFile->writeMessage(tr("TUNS2 (id, ip, port): %1, %2, %3").arg(readSettings.tuns2.equipmentId()).arg(readSettings.tuns2.ip()).arg(readSettings.tuns2.port()));
 
 	readSettings.updateFilters = false;
 	readSettings.updateSchemas = false;
