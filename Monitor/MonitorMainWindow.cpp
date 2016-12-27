@@ -175,7 +175,7 @@ void MonitorMainWindow::showLogo()
 {
 	assert(m_logoLabel);
 
-	QImage logo = QImage(":/Images/Images/logo.png");
+	QImage logo = QImage(":/Images/Images/Logo.png");
 
 	if (m_toolBar->frameSize().height() < logo.height())
 	{

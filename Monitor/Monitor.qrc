@@ -11,6 +11,6 @@
         <file>Images/About.svg</file>
         <file>Images/FindSignal.svg</file>
         <file>Images/Camera.svg</file>
-        <file>Images/logo.png</file>
+        <file>Images/Logo.png</file>
     </qresource>
 </RCC>
