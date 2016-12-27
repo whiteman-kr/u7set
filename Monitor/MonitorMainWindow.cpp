@@ -124,6 +124,12 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
+void MonitorMainWindow::showEvent(QShowEvent*)
+{
+	showLogo();
+	return;
+}
+
 void MonitorMainWindow::saveWindowState()
 {
 	theSettings.m_mainWindowPos = pos();
@@ -162,7 +168,33 @@ void MonitorMainWindow::restoreWindowState()
 		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
 	}
 
-	return;}
+	return;
+}
+
+void MonitorMainWindow::showLogo()
+{
+	assert(m_logoLabel);
+
+	QImage logo = QImage(":/Images/Images/Logo.png");
+
+	if (m_toolBar->frameSize().height() < logo.height())
+	{
+		logo = logo.scaledToHeight(m_toolBar->frameSize().height(), Qt::FastTransformation);
+	}
+
+	// Show logo if it was enabled in settings
+	//
+	if (theSettings.showLogo() == true)
+	{
+		m_logoLabel->setPixmap(QPixmap::fromImage(logo));
+	}
+	else
+	{
+		m_logoLabel->clear();
+	}
+
+	return;
+}
 
 void MonitorMainWindow::createActions()
 {
@@ -345,6 +377,18 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
+	// Create logo for toolbar
+	//
+	m_logoLabel = new QLabel(this);
+
+	// Spacer between actions and logo
+	//
+	m_logoSpacer = new QWidget(this);
+	m_logoSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+	m_toolBar->addWidget(m_logoSpacer);
+	m_toolBar->addWidget(m_logoLabel);
+
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
 	return;
@@ -405,6 +449,7 @@ void MonitorMainWindow::showSettings()
 
 		// Apply settings here
 		//
+		showLogo();
 		return;
 	}
 
