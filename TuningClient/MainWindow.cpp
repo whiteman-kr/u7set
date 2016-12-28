@@ -6,7 +6,7 @@
 #include "DialogSettings.h"
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
-#include "DialogPresetEditor.h"
+#include "TuningFilterEditor.h"
 #include "DialogUsers.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -52,9 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	QString errorCode;
 
-    QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
-
-    if (theFilters.load(userFiltersFile, &errorCode, false) == false)
+    if (theFilters.load(theSettings.userFiltersFile(), &errorCode, false) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -275,6 +273,28 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
     theFilters.createAutomaticFilters(objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
+    // Find and possibly remove non-existing signals from the list
+
+    if (settings.updateFilters == true || settings.updateSignals == true)
+    {
+        std::map<Hash, int> &tuningObjectsHashMap = theObjectManager->objectsHashMap();
+
+        bool removedNotFound = false;
+
+        theFilters.checkSignals(tuningObjectsHashMap, removedNotFound, this);
+
+        if (removedNotFound == true)
+        {
+            QString errorMsg;
+
+            if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+            {
+                theLogFile->writeError(errorMsg);
+                QMessageBox::critical(this, tr("Error"), errorMsg);
+            }
+        }
+    }
+
     createWorkspace();
 
     return;
@@ -317,15 +337,24 @@ void MainWindow::showSettings()
 
 void MainWindow::runPresetEditor()
 {
-    DialogPresetEditor d(&theFilters, this);
+    TuningFilterStorage editStorage = theFilters;
+
+    std::vector<TuningObject> objects = theObjectManager->objects();
+
+    bool editAutomatic = false;
+
+    TuningFilterEditor d(&editStorage, &objects, editAutomatic, this);
+
+    connect(this, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+
 
     if (d.exec() == QDialog::Accepted)
 	{
+        theFilters = editStorage;
+
 		QString errorMsg;
 
-        QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
-
-        if (theFilters.save(userFiltersFile, &errorMsg) == false)
+        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
 		{
             theLogFile->writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);

@@ -76,7 +76,6 @@ SOURCES += main.cpp\
     ../Proto/network.pb.cc \
     ../lib/AppSignalState.cpp \
     ../Proto/serialization.pb.cc \
-    DialogPresetEditor.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
@@ -89,7 +88,8 @@ SOURCES += main.cpp\
     DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
-    TuningObjectManager.cpp
+    TuningObjectManager.cpp \
+    TuningFilterEditor.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -111,7 +111,6 @@ HEADERS  += MainWindow.h \
     ../Proto/network.pb.h \
     ../lib/AppSignalState.h \
     ../Proto/serialization.pb.h \
-    DialogPresetEditor.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
@@ -124,12 +123,12 @@ HEADERS  += MainWindow.h \
     DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
-    TuningObjectManager.h
+    TuningObjectManager.h \
+    TuningFilterEditor.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogPresetEditor.ui \
     DialogInputValue.ui \
     DialogUsers.ui \
     DialogTuningSourceInfo.ui

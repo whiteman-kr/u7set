@@ -175,7 +175,7 @@ TuningObject* TuningObjectManager::objectPtr(int index)
     return &m_objects[index];
 }
 
-TuningObject* TuningObjectManager::objectPtrByHash(quint64 hash)
+TuningObject* TuningObjectManager::objectPtrByHash(Hash hash)
 {
     auto it = m_objectsHashMap.find(hash);
 
@@ -193,6 +193,12 @@ std::vector<TuningObject> TuningObjectManager::objects()
 {
     QMutexLocker l(&m_mutex);
     return m_objects;
+}
+
+std::map<Hash, int> TuningObjectManager::objectsHashMap()
+{
+    QMutexLocker l(&m_mutex);
+    return m_objectsHashMap;
 }
 
 QStringList TuningObjectManager::tuningSourcesEquipmentIds()

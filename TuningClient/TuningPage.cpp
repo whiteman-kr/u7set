@@ -482,7 +482,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::Type))
 		{
-            return o.analog() ? tr("Analog") : tr("Discrete");
+            return o.analog() ? tr("A") : tr("D");
 		}
 
 		//

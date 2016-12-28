@@ -7,22 +7,25 @@
 #include "TuningObject.h"
 #include "TuningPage.h"
 
-namespace Ui {
-class DialogPresetEditor;
 
-
-}
-
-
-class DialogPresetEditor : public QDialog
+class TuningFilterEditor : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogPresetEditor(TuningFilterStorage* filterStorage, QWidget *parent = 0);
-	~DialogPresetEditor();
+
+    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const std::vector<TuningObject>* objects, bool showAutomatic, QWidget *parent);
+
+    ~TuningFilterEditor();
+
+
+
+public slots:
+
+    void slot_signalsUpdated();
 
 private slots:
+
 	void on_m_addPreset_clicked();
 
 	void on_m_editPreset_clicked();
@@ -49,9 +52,8 @@ private slots:
 
 	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
 
-	void slot_signalsUpdated();
-
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
+
     void on_m_filterTypeCombo_currentIndexChanged(int index);
 
     void on_m_filterText_returnPressed();
@@ -80,6 +82,8 @@ private:
 		Discrete
 	};
 
+    void initUserInterface();
+
 	bool isFilter(QTreeWidgetItem* item);
 	bool isSignal(QTreeWidgetItem* item);
 
@@ -96,13 +100,44 @@ private:
 
 
 private:
-	Ui::DialogPresetEditor *ui;
 
-	TuningItemModel *m_model = nullptr;
+    // User interface
+    //
+
+    QTableView* m_signalsTable = nullptr;
+    QComboBox* m_signalTypeCombo = nullptr;
+    QComboBox* m_filterTypeCombo = nullptr;
+    QLineEdit* m_filterText = nullptr;
+    QPushButton* m_applyFilter = nullptr;
+
+    QPushButton* m_add = nullptr;
+    QPushButton* m_remove = nullptr;
+
+    QTreeWidget* m_presetsTree = nullptr;
+
+    QPushButton* m_addPreset = nullptr;
+    QPushButton* m_editPreset = nullptr;
+    QPushButton* m_removePreset = nullptr;
+    QPushButton* m_moveUp = nullptr;
+    QPushButton* m_moveDown = nullptr;
+
+    QPushButton* m_setValue = nullptr;
+    QPushButton* m_setCurrent = nullptr;
+
+    QDialogButtonBox* m_okCancelButtonBox = nullptr;
+
+    // Dialog Data
+    //
+
+    TuningItemModel *m_model = nullptr;
 
 	bool m_modified = false;
 
+    bool m_showAutomatic = false;
+
 	TuningFilterStorage* m_filterStorage;
+
+    const std::vector<TuningObject>* m_objects = nullptr;
 
 	int m_sortColumn = 0;
 

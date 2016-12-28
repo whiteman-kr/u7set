@@ -50,9 +50,11 @@ public:
 
     TuningObject* objectPtr(int index); // this function must be used with mutex !!!
 
-    TuningObject* objectPtrByHash(quint64 hash); // this function must be used with mutex !!!
+    TuningObject* objectPtrByHash(Hash hash); // this function must be used with mutex !!!
 
     std::vector<TuningObject> objects();
+
+    std::map<Hash, int> objectsHashMap();
 
     // Tuning sources
 
@@ -125,7 +127,7 @@ private:
     // Signals
     //
 
-    std::map<quint64, int> m_objectsHashMap;
+    std::map<Hash, int> m_objectsHashMap;
 
 	std::vector<TuningObject> m_objects;
 
