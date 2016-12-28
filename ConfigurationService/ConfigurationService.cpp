@@ -10,18 +10,71 @@
 //
 // ------------------------------------------------------------------------------------
 
-ConfigurationServiceWorker::ConfigurationServiceWorker(const QString &serviceStrID, const QString& buildFolder, const QString& ipStr) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceStrID, "", "", buildFolder),
-	m_clientIPStr(ipStr)
+ConfigurationServiceWorker::ConfigurationServiceWorker() :
+	ServiceWorker(ServiceType::ConfigurationService)
 {
+}
+
+
+void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
+{
+	switch(request.ID())
+	{
+	case RQID_GET_CONFIGURATION_SERVICE_INFO:
+		onGetInfo(request);
+		break;
+
+	case RQID_SET_CONFIGURATION_SERVICE_SETTINGS:
+		onSetSettings(request);
+		break;
+
+	case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
+		onGetSettings(request);
+		break;
+
+	default:
+		assert(false);
+	}
+}
+
+
+void ConfigurationServiceWorker::initCmdLineParser()
+{
+	CommandLineParser* clp = cmdLineParser();
+
+	if (clp == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	clp->addSingleValueOption("b", "RPCT project build directory.");
+	clp->addSingleValueOption("ip", "Client request IP.");
+}
+
+
+void ConfigurationServiceWorker::initialize()
+{
+	startCfgServerThread();
+	//startUdpThreads();
+
+	qDebug() << "ConfigurationServiceWorker initialized";
+}
+
+
+void ConfigurationServiceWorker::shutdown()
+{
+	//stopUdpThreads();
+	stopCfgServerThread();
+
+	qDebug() << "ConfigurationServiceWorker stoped";
 }
 
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
 	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST),
-											  new CfgServer(buildPath()));
-
+											  new CfgServer(m_buildPath));
 	m_cfgServerThread->start();
 }
 
@@ -52,46 +105,6 @@ void ConfigurationServiceWorker::stopUdpThreads()
 	m_infoSocketThread->quitAndWait();
 
 	delete m_infoSocketThread;
-}
-
-
-void ConfigurationServiceWorker::initialize()
-{
-	startCfgServerThread();
-	//startUdpThreads();
-
-	qDebug() << "ConfigurationServiceWorker initialized";
-}
-
-
-void ConfigurationServiceWorker::shutdown()
-{
-	//stopUdpThreads();
-	stopCfgServerThread();
-
-	qDebug() << "ConfigurationServiceWorker stoped";
-}
-
-
-void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
-{
-	switch(request.ID())
-	{
-	case RQID_GET_CONFIGURATION_SERVICE_INFO:
-		onGetInfo(request);
-		break;
-
-	case RQID_SET_CONFIGURATION_SERVICE_SETTINGS:
-		onSetSettings(request);
-		break;
-
-	case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
-		onGetSettings(request);
-		break;
-
-	default:
-		assert(false);
-	}
 }
 
 

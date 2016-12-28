@@ -465,6 +465,15 @@ void ServiceWorker::baseInitCmdLineParser(CommandLineParser* cmdLineParser)
 	initCmdLineParser();
 }
 
+
+CommandLineParser* ServiceWorker::cmdLineParser()
+{
+	assert(m_cmdLineParser != nullptr);
+
+	return m_cmdLineParser;
+}
+
+
 /*
 void ServiceWorker::parseCmdLineArgs()
 {

@@ -15,12 +15,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("Radiy");
 	QCoreApplication::setApplicationName(appName);
 
-	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
-	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
-	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
-	QString buildPath = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
-
-	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath);
+	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker();
 
 	ServiceStarter serviceStarter(argc, argv, appName, tuningServiceWorker);
 

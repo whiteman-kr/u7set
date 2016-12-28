@@ -12,11 +12,8 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningServiceWorker::TuningServiceWorker(const QString& serviceEquipmentID,
-											 const QString& cfgServiceIP1,
-											 const QString& cfgServiceIP2,
-											 const QString& buildPath) :
-		ServiceWorker(ServiceType::TuningService, serviceEquipmentID, cfgServiceIP1, cfgServiceIP2, buildPath),
+	TuningServiceWorker::TuningServiceWorker() :
+		ServiceWorker(ServiceType::TuningService),
 		m_timer(this)
 	{
 	}
@@ -28,18 +25,33 @@ namespace Tuning
 	}
 
 
+	void TuningServiceWorker::initCmdLineParser()
+	{
+		CommandLineParser* clp = cmdLineParser();
+
+		if (clp == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+		clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	}
+
+
 	void TuningServiceWorker::clear()
 	{
 		m_tuningSources.clear();
 	}
 
 
-	TuningServiceWorker* TuningServiceWorker::createInstance()
+/*	TuningServiceWorker* TuningServiceWorker::createInstance()
 	{
 		TuningServiceWorker* worker = new TuningServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
 
 		return worker;
-	}
+	}*/
 
 
 	const TuningClientContext* TuningServiceWorker::getClientContext(QString clientID) const
@@ -67,18 +79,18 @@ namespace Tuning
 
 	void TuningServiceWorker::initialize()
 	{
-		if (buildPath().isEmpty() == true)
+		if (m_buildPath.isEmpty() == true)
 		{
 			runCfgLoaderThread();
 		}
 		else
 		{
-			bool result = loadConfigurationFromFile(cfgFileName());
+			/*bool result = loadConfigurationFromFile(cfgFileName());
 
 			if (result == true)
 			{
 				applyNewConfiguration();
-			}
+			}*/
 		}
 
 		connect(&m_timer, &QTimer::timeout, this, &TuningServiceWorker::onTimer);
@@ -100,8 +112,8 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		HostAddressPort ip1(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST);
-		HostAddressPort ip2(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST);
+		HostAddressPort ip1(m_cfgServiceIP1, PORT_CONFIGURATION_SERVICE_REQUEST);
+		HostAddressPort ip2(m_cfgServiceIP2, PORT_CONFIGURATION_SERVICE_REQUEST);
 
 		m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1, ip1, ip2);
 

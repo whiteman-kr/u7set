@@ -11,17 +11,13 @@ class ArchivingServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ArchivingServiceWorker(	const QString& serviceEquipmentID,
-							const QString& cfgServiceIP1,
-							const QString& cfgServiceIP2,
-							const QString& buildPath);
+	ArchivingServiceWorker();
 	~ArchivingServiceWorker();
 
-	ServiceWorker* createInstance() override;
+	virtual void initCmdLineParser() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
-
 
 private:
 	void runCfgLoaderThread();
@@ -42,5 +38,8 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
+	QString m_buildPath;
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
 };
 

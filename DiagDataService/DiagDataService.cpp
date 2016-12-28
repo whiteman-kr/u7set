@@ -10,13 +10,26 @@
 //
 // -------------------------------------------------------------------------------
 
-DiagDataServiceWorker::DiagDataServiceWorker(const QString& serviceStrID,
-									 const QString& cfgServiceIP1,
-									 const QString& cfgServiceIP2,
-									 const QString& buildPath) :
-	ServiceWorker(ServiceType::DiagDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath)
+DiagDataServiceWorker::DiagDataServiceWorker() :
+	ServiceWorker(ServiceType::DiagDataService)
 {
 }
+
+
+void DiagDataServiceWorker::initCmdLineParser()
+{
+	CommandLineParser* clp = cmdLineParser();
+
+	if (clp == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+	clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+}
+
 
 
 void DiagDataServiceWorker::initialize()

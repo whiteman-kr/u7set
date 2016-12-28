@@ -24,6 +24,10 @@ class AppDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 private:
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
+	QString m_buildPath;
+
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_settings;
@@ -84,18 +88,19 @@ private:
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
 
 public:
-	AppDataServiceWorker(	const QString& serviceEquipmentID,
-							const QString& cfgServiceIP1,
-							const QString& cfgServiceIP2,
-							const QString& buildPath);
+	AppDataServiceWorker();
 	~AppDataServiceWorker();
+
+	virtual void initCmdLineParser() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	ServiceWorker* createInstance() override
+
+
+/*	ServiceWorker* createInstance() override
 	{
 		return new AppDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-	}
+	}*/
 };
 

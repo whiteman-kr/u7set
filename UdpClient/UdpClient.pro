@@ -90,7 +90,8 @@ SOURCES += \
     ../lib/DbStruct.cpp \
     ../lib/Types.cpp \
     ../lib/OutputLog.cpp \
-    ../lib/ProtoSerialization.cpp
+    ../lib/ProtoSerialization.cpp \
+    ../lib/CommandLineParser.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -123,7 +124,8 @@ HEADERS  += MainWindow.h \
     ../lib/DbStruct.h \
     ../lib/Types.h \
     ../lib/OutputLog.h \
-    ../lib/ProtoSerialization.h
+    ../lib/ProtoSerialization.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

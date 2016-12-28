@@ -19,14 +19,13 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningServiceWorker(const QString& serviceEquipmentID,
-							const QString& cfgServiceIP1,
-							const QString& cfgServiceIP2,
-							const QString& buildPath);
-
+		TuningServiceWorker();
 		~TuningServiceWorker();
 
-		virtual TuningServiceWorker* createInstance() override;
+		virtual void initCmdLineParser() override;
+
+
+//		virtual TuningServiceWorker* createInstance() override;
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -70,6 +69,10 @@ namespace Tuning
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
+		QString m_cfgServiceIP1;
+		QString m_cfgServiceIP2;
+		QString m_buildPath;
+
 		TuningServiceSettings m_tuningSettings;
 		TuningSources m_tuningSources;
 

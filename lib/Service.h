@@ -198,7 +198,6 @@ class ServiceWorker : public SimpleThreadWorker
 
 public:
 	ServiceWorker(ServiceType serviceType);
-
 	virtual ~ServiceWorker();
 
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
@@ -212,6 +211,8 @@ signals:
 
 protected:
 	void baseInitCmdLineParser(CommandLineParser* cmdLineParser);
+
+	CommandLineParser* cmdLineParser();
 
 	QString serviceEquipmentID() const { return m_serviceEquipmentID; }
 
@@ -227,18 +228,11 @@ private:
 	CommandLineParser* m_cmdLineParser = nullptr;
 
 	QString m_serviceEquipmentID;
-/*	QString m_cfgServiceIP1;
-	QString m_cfgServiceIP2;
-
-	QString m_buildPath;
-	QString m_cfgFileName;*/
 
 	Service* m_service = nullptr;
 
 	void onThreadStarted() final;
 	void onThreadFinished() final;
-
-//	virtual ServiceWorker* createInstance() = 0;		// must be implemented as { return new DerivedServiceWorker(); }
 
 	void setService(Service* service) { m_service = service; }
 	Service& service() { assert(m_service != nullptr); return *m_service; }
