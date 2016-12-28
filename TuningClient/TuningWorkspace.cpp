@@ -105,22 +105,19 @@ void TuningWorkspace::fillFiltersTree()
     // Fill the filter tree
     //
 
-    std::vector<QTreeWidgetItem*> treeItems;
-
-    // Project filters
-
-    fillFiltersTreeItems(treeItems, theFilters);
-
-    // User filters
-
-    fillFiltersTreeItems(treeItems, theUserFilters);
-
-    if (treeItems.empty() == false)
+    std::shared_ptr<TuningFilter> rootFilter = theFilters.m_root;
+    if (rootFilter == nullptr)
     {
-        // All objects, a nullptr item
+        assert(rootFilter);
+        return;
+    }
 
-        QTreeWidgetItem* allSignalsItem = new QTreeWidgetItem(QStringList()<<tr("All Objects"));
-        treeItems.push_back(allSignalsItem );
+    if (rootFilter->childFiltersCount() != 0)
+    {
+        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<rootFilter->caption());
+        item->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
+
+        addChildTreeObjects(rootFilter, item);
 
         // Create tree control
         //
@@ -151,40 +148,16 @@ void TuningWorkspace::fillFiltersTree()
 
         m_filterTree->blockSignals(true);
 
-        for (auto item : treeItems)
-        {
-            m_filterTree->addTopLevelItem(item);
-            item->setExpanded(true);
-        }
+        m_filterTree->addTopLevelItem(item);
+
+        item->setExpanded(true);
+
+        item->setSelected(true);
 
         m_filterTree->sortItems(0, Qt::AscendingOrder);
 
-        allSignalsItem->setSelected(true);
-
         m_filterTree->blockSignals(false);
     }
-}
-
-void TuningWorkspace::fillFiltersTreeItems(std::vector<QTreeWidgetItem*>& treeItems, TuningFilterStorage& filterStorage)
-{
-	std::shared_ptr<TuningFilter> f = filterStorage.m_root;
-	if (f == nullptr)
-	{
-		assert(f);
-		return;
-	}
-
-	if (f->childFiltersCount() == 0)
-	{
-		return;
-	}
-
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<f->caption());
-	item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-	addChildTreeObjects(f, item);
-
-	treeItems.push_back(item);
 }
 
 void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent)

@@ -54,15 +54,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
 
-    if (theUserFilters.load(userFiltersFile, &errorCode) == false)
+    if (theFilters.load(userFiltersFile, &errorCode, false) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
         theLogFile->writeError(msg);
         QMessageBox::critical(this, tr("Error"), msg);
 	}
-
-	theUserFilters.m_root->setCaption(tr("User Presets"));
 
 	//
 
@@ -319,18 +317,15 @@ void MainWindow::showSettings()
 
 void MainWindow::runPresetEditor()
 {
-	TuningFilterStorage editFilters = theUserFilters;
+    DialogPresetEditor d(&theFilters, this);
 
-	DialogPresetEditor d(&editFilters, this);
-	if (d.exec() == QDialog::Accepted)
+    if (d.exec() == QDialog::Accepted)
 	{
-		theUserFilters = editFilters;
-
 		QString errorMsg;
 
         QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
 
-        if (theUserFilters.save(userFiltersFile, &errorMsg) == false)
+        if (theFilters.save(userFiltersFile, &errorMsg) == false)
 		{
             theLogFile->writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -359,6 +354,5 @@ LogFile* theLogFile = nullptr;
 TuningObjectManager* theObjectManager = nullptr;
 
 TuningFilterStorage theFilters;
-TuningFilterStorage theUserFilters;
 
 UserManager theUserManager;

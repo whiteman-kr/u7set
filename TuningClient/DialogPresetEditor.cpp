@@ -52,7 +52,7 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 		ui->m_presetsTree->addTopLevelItem(item);
 	}
 
-	ui->m_presetsTree->expandAll();
+    //ui->m_presetsTree->expandAll();
 
 	for (int i = 0; i < ui->m_presetsTree->columnCount(); i++)
 	{
@@ -98,8 +98,7 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 
 	connect(ui->m_signalsTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogPresetEditor::sortIndicatorChanged);
 
-
-	fillObjectsList();
+    fillObjectsList();
 
 	ui->m_signalsTable->resizeColumnsToContents();
 
@@ -373,7 +372,14 @@ void DialogPresetEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 	}
 
 	QStringList l;
-	l << filter->caption();
+    if (filter->automatic() == true)
+    {
+        l << filter->caption() + tr(" <AUTO>");
+    }
+    else
+    {
+        l << filter->caption();
+    }
 	l.append(tr("Preset"));
 
 	int i = 0;
@@ -394,10 +400,10 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 	QStringList l;
 	l.push_back("-");
     l.push_back(tr("Signal"));
-    l.push_back(value.customAppSignalId());
+    //l.push_back(value.customAppSignalId());
     l.push_back(value.appSignalId());
-    l.push_back(value.caption());
-	if (value.useValue() == true)
+    //l.push_back(value.caption());
+    /*if (value.useValue() == true)
 	{
 		if (value.analog() == false)
 		{
@@ -407,7 +413,7 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		{
 			l.push_back(QString::number(value.value(), 'f', value.decimalPlaces()));
 		}
-	}
+    }*/
 
 	int i = 0;
 	for (auto s : l)
@@ -446,7 +452,7 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 		parentFilter->addChild(newFilter);
 
 		parentItem->addChild(newPresetItem);
-		parentItem->setExpanded(true);
+        //parentItem->setExpanded(true);
 	}
 
 	m_modified = true;
@@ -462,7 +468,9 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 		return;
 	}
 
-	DialogProperties d(editFilter, this);
+    bool readOnly = editFilter->automatic();
+
+    DialogProperties d(editFilter, this, readOnly);
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());
@@ -602,15 +610,6 @@ void DialogPresetEditor::on_m_add_clicked()
 
 		TuningFilterValue ofv;
         ofv.setAppSignalId(o->appSignalID());
-        ofv.setCustomAppSignalId(o->customAppSignalID());
-        ofv.setCaption(o->caption());
-        ofv.setAnalog(o->analog());
-        if (o->analog() == true)
-		{
-            ofv.setLowLimit(o->lowLimit());
-            ofv.setHighLimit(o->highLimit());
-            ofv.setDecimalPlaces(o->decimalPlaces());
-		}
         if (o->valid() == true)
 		{
             ofv.setValue(o->value());
@@ -666,7 +665,7 @@ void DialogPresetEditor::on_m_remove_clicked()
 		}
 
 		TuningFilterValue ofv = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-		filter->removeValue(ofv.hash());
+        filter->removeValue(ofv.appSignalHash());
 
 		QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
 		delete deleteItem;
@@ -716,7 +715,7 @@ void DialogPresetEditor::on_m_presetsTree_itemSelectionChanged()
 
 void DialogPresetEditor::on_m_setValue_clicked()
 {
-	bool first = true;
+    /*bool first = true;
 	TuningFilterValue firstValue;
 
 	bool sameValue = true;
@@ -803,7 +802,7 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		filter->setValue(ov.hash(), ov.value());
 	}
 
-	m_modified = true;
+    m_modified = true;*/
 
 }
 

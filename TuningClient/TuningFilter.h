@@ -19,51 +19,28 @@ class TuningFilterValue
 public:
 	TuningFilterValue();
 
-    QString customAppSignalId() const;
-    void setCustomAppSignalId(const QString& value);
-
     QString appSignalId() const;
 	void setAppSignalId(const QString& value);
-
-	QString caption() const;
-	void setCaption(const QString& value);
 
 	bool useValue() const;
 	void setUseValue(bool value);
 
-	bool analog()  const;
-	void setAnalog(bool value);
-
-	int decimalPlaces() const;
-	void setDecimalPlaces(int value);
-
     float value() const;
     void setValue(float value);
 
-    float lowLimit() const;
-    void setLowLimit(float value);
-
-    float highLimit() const;
-    void setHighLimit(float value);
-
-    Hash hash() const;
+    Hash appSignalHash() const;
 
     bool load(QXmlStreamReader& reader);
     bool save(QXmlStreamWriter& writer) const;
 
 private:
 
-    QString m_customAppSignalId;
 	QString m_appSignalId;
-	QString m_caption;
-	bool m_useValue = false;
-	bool m_analog = false;
-	int m_decimalPlaces = 0;
-    float m_value = 0;
-    float m_lowLimit = 0;
-    float m_highLimit = 0;
+    Hash m_appSignalHash = 0;
 
-	Hash m_hash = 0;
+    bool m_useValue = false;
+    float m_value = 0;
+
 };
 
 class TuningFilter : public PropertyObject
@@ -98,7 +75,7 @@ public:
 
 	TuningFilter& operator= (const TuningFilter& That);
 
-	bool load(QXmlStreamReader& reader);
+    bool load(QXmlStreamReader& reader, bool automatic);
 	bool save(QXmlStreamWriter& writer) const;
 
 	bool match(const TuningObject &object) const;
@@ -112,7 +89,16 @@ public:
 	QString caption() const;
 	void setCaption(const QString& value);
 
-	// Filters
+    bool automatic() const;
+    void setAutomatic(bool value);
+
+    FilterType filterType() const;
+    void setFilterType(FilterType value);
+
+    SignalType signalType() const;
+    void setSignalType(SignalType value);
+
+    // Filters
 	//
 	QString customAppSignalIDMask() const;
 	void setCustomAppSignalIDMask(const QString& value);
@@ -122,6 +108,9 @@ public:
 
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
+
+    // Values
+    //
 
 	std::vector <TuningFilterValue> signalValues() const;
 	void setValues(const std::vector <TuningFilterValue>& values);
@@ -136,18 +125,15 @@ public:
 
 	void removeValue(Hash hash);
 
-	FilterType filterType() const;
-	void setFilterType(FilterType value);
-
-	SignalType signalType() const;
-	void setSignalType(SignalType value);
-
-	TuningFilter* parentFilter() const;
-
-	bool isEmpty() const;
-
 public:
-	bool isRoot() const;
+    // Operations
+    //
+
+    TuningFilter* parentFilter() const;
+
+    bool isEmpty() const;
+
+    bool isRoot() const;
 	bool isTree() const;
 	bool isTab() const;
 	bool isButton() const;
@@ -169,6 +155,8 @@ private:
 
 	QString m_strID;
 	QString m_caption;
+
+    bool m_automatic = false;
 
 	// Filters
 	//
@@ -194,10 +182,10 @@ public:
 	TuningFilterStorage();
 	TuningFilterStorage(const TuningFilterStorage& That);
 
-	bool load(const QByteArray& data, QString *errorCode);
+    bool load(const QByteArray& data, QString *errorCode, bool automatic);
 	bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
 
-	bool load(const QString& fileName, QString *errorCode);
+    bool load(const QString& fileName, QString *errorCode, bool automatic);
 	bool save(const QString& fileName, QString *errorMsg);
 
 	int schemaDetailsCount();

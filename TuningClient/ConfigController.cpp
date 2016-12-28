@@ -249,15 +249,13 @@ bool ConfigController::getObjectFilters()
 	}
 	else
 	{
-		if (theFilters.load(data, &errorStr) == false)
+        if (theFilters.load(data, &errorStr, true) == false)
 		{
 			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
 			theLogFile->writeError(completeErrorMessage);
 			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 			return false;
 		}
-
-		theFilters.m_root->setCaption(tr("All Filters"));
 	}
 
 	return true;

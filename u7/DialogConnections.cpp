@@ -279,11 +279,6 @@ void DialogConnections::fillConnectionsList()
             break;
         }
 
-        if (connection->mode() != Hardware::OptoPort::Mode::Optical)
-        {
-            continue;
-        }
-
         if (m_masks.empty() == false)
         {
             bool result = false;
@@ -378,10 +373,6 @@ bool DialogConnections::continueWithDuplicateCaptions()
     for (int i = 0; i < m_connections->count(); i++)
     {
         Hardware::Connection* c = m_connections->get(i).get();
-        if (c->mode() != Hardware::OptoPort::Mode::Optical)
-        {
-            continue;
-        }
 
         for (int j = 0; j < m_connections->count(); j++)
         {

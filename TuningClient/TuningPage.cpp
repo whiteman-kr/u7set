@@ -1509,13 +1509,17 @@ void TuningPage::fillObjectsList()
 
 		// Tree Filter
 		//
-		if (m_treeFilter != nullptr)
+
+        // If currently selected filter is root - all signals are displayed
+        //
+
+        if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
 		{
 			bool result = true;
 
 			TuningFilter* treeFilter = m_treeFilter.get();
 
-            // If currently selected filter is empty - no signals are displayed
+            // If currently selected filter is empty - no signals are displayed (a "Folder" filter)
 
             if (treeFilter->isEmpty() == true)
             {
@@ -1697,6 +1701,7 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex &index)
 
 void TuningPage::slot_FilterTypeIndexChanged(int index)
 {
+    Q_UNUSED(index);
     fillObjectsList();
 }
 
