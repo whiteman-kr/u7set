@@ -192,7 +192,7 @@ TuningItemModel::~TuningItemModel()
     }
 }
 
-void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int>& objectsIndexes)
+void TuningItemModel::setObjects(std::vector<TuningObject>& objects)
 {
 	if (rowCount() > 0)
 	{
@@ -206,17 +206,13 @@ void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObje
 	}
 
 	//
-	if (objectsIndexes.size() > 0)
+    if (objects.empty() == false)
 	{
+        beginInsertRows(QModelIndex(), 0, (int)objects.size() - 1);
 
-		beginInsertRows(QModelIndex(), 0, (int)objectsIndexes.size() - 1);
+        m_objects.swap(objects);
 
-		for (int index : objectsIndexes)
-		{
-			m_objects.push_back(allObjects[index]);
-		}
-
-		insertRows(0, (int)objectsIndexes.size());
+        insertRows(0, (int)objects.size());
 
 		endInsertRows();
 	}
@@ -1265,10 +1261,11 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, std::vector<TuningObject> *objects, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
-	m_tabFilter(tabFilter)
+    m_tabFilter(tabFilter),
+    m_objects(objects)
 {
 	std::vector<FilterButton*> buttons;
 
@@ -1490,9 +1487,7 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
-	std::vector<int> objectsIndexes;
-
-    std::vector<TuningObject> objects = theObjectManager->objects();
+    std::vector<TuningObject> filteredObjects;
 
     QString filter = m_filterEdit->text();
 
@@ -1503,9 +1498,12 @@ void TuningPage::fillObjectsList()
         filterType = static_cast<FilterType>(data.toInt());
     }
 
-	for (int i = 0; i < objects.size(); i++)
+    for (int i = 0; i < (int)m_objects->size(); i++)
 	{
-        TuningObject& o = objects[i];
+        const TuningObject& o = (*m_objects)[i];
+
+        bool modifyDefaultValue = false;
+        float modifiedDefaultValue = 0;
 
 		// Tree Filter
 		//
@@ -1552,7 +1550,8 @@ void TuningPage::fillObjectsList()
 
             if (hasValue == true)
             {
-                o.setDefaultValue(filterValue.value());
+                modifyDefaultValue = true;
+                modifiedDefaultValue = filterValue.value();
             }
 		}
 
@@ -1630,10 +1629,15 @@ void TuningPage::fillObjectsList()
 
 
 
-		objectsIndexes.push_back(i);
+        filteredObjects.push_back(o);
+
+        if (modifyDefaultValue == true)
+        {
+            filteredObjects[filteredObjects.size() - 1].setDefaultValue(modifiedDefaultValue);
+        }
 	}
 
-	m_model->setObjectsIndexes(objects, objectsIndexes);
+    m_model->setObjects(filteredObjects);
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 

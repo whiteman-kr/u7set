@@ -227,7 +227,7 @@ public:
 
     // Operations
 
-    void createAutomaticFilters(const std::vector<TuningObject> &tuningObjects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+    void createAutomaticFilters(const std::map<Hash, int> &tuningObjectsHashMap, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
 
     void checkSignals(const std::map<Hash, int> &tuningObjectsHashMap, bool &removedNotFound, QWidget* parentWidget);
 

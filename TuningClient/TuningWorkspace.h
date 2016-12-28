@@ -10,6 +10,7 @@ public:
 	TuningWorkspace(QWidget* parent = nullptr);
 	~TuningWorkspace();
 
+    std::vector<TuningObject>* objects();
 
 private:
     void fillFiltersTree();
@@ -18,6 +19,8 @@ private:
 
 private:
 
+    std::vector<TuningObject> m_objects;
+
 	QTreeWidget* m_filterTree = nullptr;
 	QSplitter* m_hSplitter = nullptr;
 	QTabWidget* m_tab = nullptr;
@@ -25,7 +28,7 @@ private:
 	TuningPage* m_tuningPage = nullptr;
 
 public slots:
-	void slot_resetTreeFilter();
+    void slot_runPresetEditor();
 
 private slots:
 	void slot_treeSelectionChanged();

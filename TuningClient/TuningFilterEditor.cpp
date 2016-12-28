@@ -261,7 +261,7 @@ void TuningFilterEditor::fillObjectsList()
 
     QString filterText = m_filterText->text().trimmed();
 
-	std::vector<int> objectsIndexes;
+    std::vector<TuningObject> objects;
 
     for (int i = 0; i < m_objects->size(); i++)
 	{
@@ -334,10 +334,10 @@ void TuningFilterEditor::fillObjectsList()
             }
 		}
 
-		objectsIndexes.push_back(i);
+        objects.push_back(o);
 	}
 
-    m_model->setObjectsIndexes(*m_objects, objectsIndexes);
+    m_model->setObjects(objects);
     m_signalsTable->sortByColumn(m_sortColumn, m_sortOrder);
 }
 

@@ -6,7 +6,6 @@
 #include "DialogSettings.h"
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
-#include "TuningFilterEditor.h"
 #include "DialogUsers.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -99,7 +98,6 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
-	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pUsersAction = new QAction(tr("Users..."), this);
 	m_pUsersAction->setStatusTip(tr("Edit users"));
@@ -232,7 +230,8 @@ void MainWindow::createWorkspace()
 	m_tuningWorkspace = new TuningWorkspace(this);
 	setCentralWidget(m_tuningWorkspace);
 
-	connect(this, &MainWindow::userFiltersUpdated, m_tuningWorkspace, &TuningWorkspace::slot_resetTreeFilter);
+    connect(m_pPresetEditorAction, &QAction::triggered, m_tuningWorkspace, &TuningWorkspace::slot_runPresetEditor);
+
 }
 
 void MainWindow::slot_configurationArrived(ConfigSettings settings)
@@ -269,15 +268,14 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
         emit signalsUpdated();
     }
 
-    std::vector<TuningObject> objects = theObjectManager->objects();
+    std::map<Hash, int> tuningObjectsHashMap = theObjectManager->objectsHashMap();
 
-    theFilters.createAutomaticFilters(objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+    theFilters.createAutomaticFilters(tuningObjectsHashMap, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
     // Find and possibly remove non-existing signals from the list
 
     if (settings.updateFilters == true || settings.updateSignals == true)
     {
-        std::map<Hash, int> &tuningObjectsHashMap = theObjectManager->objectsHashMap();
 
         bool removedNotFound = false;
 
@@ -335,33 +333,6 @@ void MainWindow::showSettings()
     delete d;
 }
 
-void MainWindow::runPresetEditor()
-{
-    TuningFilterStorage editStorage = theFilters;
-
-    std::vector<TuningObject> objects = theObjectManager->objects();
-
-    bool editAutomatic = false;
-
-    TuningFilterEditor d(&editStorage, &objects, editAutomatic, this);
-
-    connect(this, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
-
-
-    if (d.exec() == QDialog::Accepted)
-	{
-        theFilters = editStorage;
-
-		QString errorMsg;
-
-        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
-		{
-            theLogFile->writeError(errorMsg);
-			QMessageBox::critical(this, tr("Error"), errorMsg);
-		}
-		emit userFiltersUpdated();
-	}
-}
 
 void MainWindow::showTuningSources()
 {

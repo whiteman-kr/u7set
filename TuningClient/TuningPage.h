@@ -56,7 +56,7 @@ public:
 
 
 public:
-	void setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int> &objectsIndexes);
+    void setObjects(std::vector<TuningObject>& objects);
 
     TuningObject* object(int index);
 
@@ -175,7 +175,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent = 0);
+    explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, std::vector<TuningObject>* objects, QWidget *parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -200,6 +200,8 @@ public slots:
 
 
 private:
+
+    std::vector<TuningObject>* m_objects = nullptr;
 
     enum class FilterType
     {

@@ -1206,7 +1206,7 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters(const std::vector<TuningObject>& tuningObjects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningFilterStorage::createAutomaticFilters(const std::map<Hash, int> &tuningObjectsHashMap, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
 	if (bySchemas == true)
 	{
@@ -1229,9 +1229,9 @@ void TuningFilterStorage::createAutomaticFilters(const std::vector<TuningObject>
 
                 bool found = false;
 
-                for (const TuningObject& o : tuningObjects)
+                for (auto it : tuningObjectsHashMap)
                 {
-                    if (o.appSignalHash() == hash)
+                    if (it.first == hash)
                     {
                         found = true;
                         break;

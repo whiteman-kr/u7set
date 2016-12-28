@@ -41,7 +41,6 @@ private:
 
 signals:
 	void signalsUpdated();
-	void userFiltersUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
@@ -53,7 +52,6 @@ public slots:
 	void exit();
 	void runUsersEditor();
 	void showSettings();
-	void runPresetEditor();
 	void showTuningSources();
 
 private:
