@@ -10,11 +10,8 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataServiceWorker::AppDataServiceWorker(	const QString& serviceStrID,
-											const QString& cfgServiceIP1,
-											const QString& cfgServiceIP2,
-											const QString& buildPath) :
-	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath),
+AppDataServiceWorker::AppDataServiceWorker() :
+	ServiceWorker(ServiceType::AppDataService),
 	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
@@ -29,6 +26,21 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
+void AppDataServiceWorker::initCmdLineParser()
+{
+	CommandLineParser* clp = cmdLineParser();
+
+	if (clp == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+	clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+}
+
+
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 {
 	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
@@ -39,8 +51,8 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 void AppDataServiceWorker::runCfgLoaderThread()
 {
 	m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1,
-											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
-											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
+											HostAddressPort(m_cfgServiceIP1, PORT_CONFIGURATION_SERVICE_REQUEST),
+											HostAddressPort(m_cfgServiceIP2, PORT_CONFIGURATION_SERVICE_REQUEST));
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 

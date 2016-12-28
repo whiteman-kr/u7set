@@ -11,9 +11,8 @@ namespace TuningIPEN
 	// -------------------------------------------------------------------------------------
 
 
-	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceStrID,
-														const QString& buildPath) :
-		ServiceWorker(ServiceType::TuningService, serviceStrID, "", "", buildPath),
+	TuningIPENServiceWorker::TuningIPENServiceWorker() :
+		ServiceWorker(ServiceType::TuningService),
 		m_timer(this)
 	{
 	}
@@ -25,12 +24,27 @@ namespace TuningIPEN
 	}
 
 
+	void TuningIPENServiceWorker::initCmdLineParser()
+	{
+		CommandLineParser* clp = cmdLineParser();
+
+		if (clp == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+		clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	}
+
+
 	void TuningIPENServiceWorker::clear()
 	{
 	}
 
 
-	TuningIPENServiceWorker* TuningIPENServiceWorker::createInstance()
+/*	TuningIPENServiceWorker* TuningIPENServiceWorker::createInstance()
 	{
 		TuningIPENServiceWorker* worker = new TuningIPENServiceWorker(serviceEquipmentID(), buildPath());
 
@@ -39,7 +53,7 @@ namespace TuningIPEN
 		m_tuningIPENService->setTuningServiceWorker(worker);
 
 		return worker;
-	}
+	}*/
 
 
 	void TuningIPENServiceWorker::requestPreprocessing(SocketRequest& sr)
@@ -169,7 +183,7 @@ namespace TuningIPEN
 
 	void TuningIPENServiceWorker::initialize()
 	{
-		loadConfigurationFromFile(cfgFileName());
+		loadConfigurationFromFile(m_cfgFileName);
 
 		allocateSignalsAndStates();
 

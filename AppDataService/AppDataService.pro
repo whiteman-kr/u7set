@@ -96,7 +96,8 @@ SOURCES += main.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppDataSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/CommandLineParser.cpp
 
 HEADERS += \
 	Stable.h \
@@ -142,7 +143,8 @@ HEADERS += \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     ../lib/AppDataSource.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

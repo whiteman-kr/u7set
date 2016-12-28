@@ -7,12 +7,9 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
-	QString cfgServiceIP1 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip1");
-	QString cfgServiceIP2 = ServiceStarter::getCommandLineKeyValue(argc, argv, "cfgip2");
-	QString buildPath = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
+	INIT_LOGGER(argv[0]);
 
-	ArchivingServiceWorker* archivingServiceWorker = new ArchivingServiceWorker(serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath);
+	ArchivingServiceWorker* archivingServiceWorker = new ArchivingServiceWorker();
 
 	ServiceStarter service(argc, argv, "RPCT Archiving Service", archivingServiceWorker);
 

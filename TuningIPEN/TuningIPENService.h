@@ -32,6 +32,8 @@ namespace TuningIPEN
 
 		QTimer m_timer;
 
+		QString m_cfgFileName;
+
 		bool readTuningDataSources(XmlReadHelper& xml);
 
 		void clear();
@@ -61,14 +63,14 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker(const QString& serviceEquipmentID,
-							const QString& buildPath);
+		TuningIPENServiceWorker();
+		~TuningIPENServiceWorker();
+
+		void initCmdLineParser() override;
 
 		void setTuningService(TuningIPENService* tuningService) { m_tuningIPENService = tuningService; }
 
-		~TuningIPENServiceWorker();
-
-		virtual TuningIPENServiceWorker* createInstance() override;
+//		virtual TuningIPENServiceWorker* createInstance() override;
 
 		bool loadConfigurationFromFile(const QString& fileName);
 		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);

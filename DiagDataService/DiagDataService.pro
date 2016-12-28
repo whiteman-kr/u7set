@@ -89,7 +89,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/CommandLineParser.cpp
 
 HEADERS += \
 	Stable.h \
@@ -126,7 +127,8 @@ HEADERS += \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

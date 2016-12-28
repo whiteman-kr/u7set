@@ -93,7 +93,7 @@ namespace TuningIPEN
 
 		// run Tuning Service
 		//
-		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning Service", buildPath);
+		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker();
 
 		m_service = new TuningIPEN::TuningIPENService(worker);
 

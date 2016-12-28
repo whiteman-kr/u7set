@@ -3401,6 +3401,8 @@ namespace Builder
 			return false;
 		}
 
+		assert(false);			// need reimplement !!!! WhiteMan 28.12.2016
+
         return true;
 
         /*

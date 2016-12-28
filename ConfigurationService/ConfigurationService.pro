@@ -75,7 +75,8 @@ SOURCES += main.cpp \
     ../lib/JsonSerializable.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
-    ../Proto/serialization.pb.cc
+    ../Proto/serialization.pb.cc \
+    ../lib/CommandLineParser.cpp
 
 HEADERS += \
     version.h \
@@ -92,7 +93,8 @@ HEADERS += \
     ../lib/JsonSerializable.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
-    ../Proto/serialization.pb.h
+    ../Proto/serialization.pb.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 
