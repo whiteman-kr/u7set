@@ -12,7 +12,8 @@ public:
 
 
 private:
-	void fillFilters(std::vector<QTreeWidgetItem*>& treeItems, TuningFilterStorage& filterStorage);
+    void fillFiltersTree();
+
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent);
 
 private:

@@ -339,7 +339,7 @@ void TuningItemModel::setImportantFont(const QString& fontName, int fontSize, bo
 
 void TuningItemModel::addColumn(Columns column)
 {
-	m_columnsIndexes.push_back(column);
+    m_columnsIndexes.push_back(static_cast<int>(column));
 }
 
 QModelIndex TuningItemModel::index(int row, int column, const QModelIndex &parent) const
@@ -406,7 +406,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
         int col = index.column();
         int displayIndex = m_columnsIndexes[col];
 
-        if (m_importantFont != nullptr && displayIndex == Value)
+        if (m_importantFont != nullptr && displayIndex == static_cast<int>(Columns::Value))
         {
             return *m_importantFont;
         }
@@ -423,7 +423,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		int col = index.column();
 		int displayIndex = m_columnsIndexes[col];
 
-		if (displayIndex >= Value)
+        if (displayIndex >= static_cast<int>(Columns::Value))
 		{
 			return Qt::AlignCenter;
 		}
@@ -455,32 +455,32 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
 		int displayIndex = m_columnsIndexes[col];
 
-		if (displayIndex == CustomAppSignalID)
+        if (displayIndex == static_cast<int>(Columns::CustomAppSignalID))
 		{
 			return o.customAppSignalID();
 		}
 
-		if (displayIndex == EquipmentID)
+        if (displayIndex == static_cast<int>(Columns::EquipmentID))
 		{
 			return o.equipmentID();
 		}
 
-		if (displayIndex == AppSignalID)
+        if (displayIndex == static_cast<int>(Columns::AppSignalID))
 		{
 			return o.appSignalID();
 		}
 
-		if (displayIndex == Caption)
+        if (displayIndex == static_cast<int>(Columns::Caption))
 		{
 			return o.caption();
 		}
 
-		if (displayIndex == Units)
+        if (displayIndex == static_cast<int>(Columns::Units))
 		{
 			return o.units();
 		}
 
-		if (displayIndex == Type)
+        if (displayIndex == static_cast<int>(Columns::Type))
 		{
             return o.analog() ? tr("Analog") : tr("Discrete");
 		}
@@ -489,7 +489,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		// State
 		//
 
-		if (displayIndex == Value)
+        if (displayIndex == static_cast<int>(Columns::Value))
 		{
 			if (o.valid() == true)
 			{
@@ -536,7 +536,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 		}
 
-        if (displayIndex == LowLimit)
+        if (displayIndex == static_cast<int>(Columns::LowLimit))
         {
             if (o.analog())
             {
@@ -558,7 +558,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
             }
         }
 
-        if (displayIndex == HighLimit)
+        if (displayIndex == static_cast<int>(Columns::HighLimit))
         {
             if (o.analog())
             {
@@ -580,7 +580,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
             }
         }
 
-        if (displayIndex == Default)
+        if (displayIndex == static_cast<int>(Columns::Default))
 		{
 			if (o.analog())
 			{
@@ -592,17 +592,17 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 		}
 
-		if (displayIndex == Valid)
+        if (displayIndex == static_cast<int>(Columns::Valid))
 		{
             return (o.valid() == true) ? tr("") : tr("VALID");
 		}
 
-		if (displayIndex == Underflow)
+        if (displayIndex == static_cast<int>(Columns::Underflow))
 		{
             return (o.underflow() == true) ? tr("UNDRFLW") : tr("");
 		}
 
-		if (displayIndex == Overflow)
+        if (displayIndex == static_cast<int>(Columns::Overflow))
 		{
             return (o.overflow() == true) ? tr("OVRFLW") : tr("");
 		}
@@ -657,19 +657,19 @@ TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
 
 	if (pageSettings->m_columnCount == 0)
 	{
-		addColumn(CustomAppSignalID);
-		addColumn(EquipmentID);
-		addColumn(Caption);
-		addColumn(Units);
-		addColumn(Type);
+        addColumn(Columns::CustomAppSignalID);
+        addColumn(Columns::EquipmentID);
+        addColumn(Columns::Caption);
+        addColumn(Columns::Units);
+        addColumn(Columns::Type);
 
-		addColumn(Value);
-        addColumn(LowLimit);
-        addColumn(HighLimit);
-		addColumn(Default);
-		addColumn(Valid);
-		addColumn(Underflow);
-		addColumn(Overflow);
+        addColumn(Columns::Value);
+        addColumn(Columns::LowLimit);
+        addColumn(Columns::HighLimit);
+        addColumn(Columns::Default);
+        addColumn(Columns::Valid);
+        addColumn(Columns::Underflow);
+        addColumn(Columns::Overflow);
 	}
 	else
 	{
@@ -789,7 +789,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 		return QBrush();
 	}
 
-	if (displayIndex == Value)
+    if (displayIndex == static_cast<int>(Columns::Value))
 	{
 		const TuningObject& o = m_objects[row];
 
@@ -806,7 +806,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 		}
 	}
 
-    if (displayIndex == Valid)
+    if (displayIndex == static_cast<int>(Columns::Valid))
     {
         const TuningObject& o = m_objects[row];
 
@@ -817,7 +817,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == LowLimit || displayIndex == HighLimit)
+    if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
     {
         const TuningObject& o = m_objects[row];
 
@@ -828,7 +828,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Underflow)
+    if (displayIndex == static_cast<int>(Columns::Underflow))
     {
         const TuningObject& o = m_objects[row];
 
@@ -839,7 +839,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Overflow)
+    if (displayIndex == static_cast<int>(Columns::Overflow))
     {
         const TuningObject& o = m_objects[row];
 
@@ -850,7 +850,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Default)
+    if (displayIndex == static_cast<int>(Columns::Default))
 	{
 		QColor color = QColor(Qt::gray);
 		return QBrush(color);
@@ -871,7 +871,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 		return QBrush();
 	}
 
-    if (displayIndex == Valid)
+    if (displayIndex == static_cast<int>(Columns::Valid))
     {
         const TuningObject& o = m_objects[row];
 
@@ -882,7 +882,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Value)
+    if (displayIndex == static_cast<int>(Columns::Value))
 	{
 		const TuningObject& o = m_objects[row];
 
@@ -899,7 +899,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 		}
 	}
 
-    if (displayIndex == LowLimit || displayIndex == HighLimit)
+    if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
     {
         const TuningObject& o = m_objects[row];
 
@@ -910,7 +910,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Underflow)
+    if (displayIndex == static_cast<int>(Columns::Underflow))
     {
         const TuningObject& o = m_objects[row];
 
@@ -921,7 +921,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Overflow)
+    if (displayIndex == static_cast<int>(Columns:: Overflow))
     {
         const TuningObject& o = m_objects[row];
 
@@ -932,7 +932,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
         }
     }
 
-    if (displayIndex == Default)
+    if (displayIndex == static_cast<int>(Columns::Default))
 	{
 		//int displayIndex = m_columnsIndexes[col];
 		QColor color = QColor(Qt::white);
@@ -958,7 +958,7 @@ Qt::ItemFlags TuningItemModelMain::flags(const QModelIndex &index) const
 	}
 
 
-	if (displayIndex == Value)
+    if (displayIndex == static_cast<int>(Columns::Value))
 	{
 		const TuningObject& o = m_objects[row];
 
@@ -994,7 +994,7 @@ QVariant TuningItemModelMain::data(const QModelIndex &index, int role) const
 
 	const TuningObject& o = m_objects[row];
 
-    if (role == Qt::CheckStateRole && displayIndex == Value && o.analog() == false && o.valid() == true)
+    if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && o.analog() == false && o.valid() == true)
 	{
 		return (o.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
@@ -1019,7 +1019,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 		return false;
 	}
 
-	if (role == Qt::EditRole && displayIndex == TuningItemModel::Columns::Value)
+    if (role == Qt::EditRole && displayIndex == static_cast<int>(TuningItemModel::Columns::Value))
 	{
 		TuningObject& o = m_objects[row];
 
@@ -1034,7 +1034,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 		return true;
 	}
 
-	if (role == Qt::CheckStateRole && displayIndex == TuningItemModel::Columns::Value)
+    if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(TuningItemModel::Columns::Value))
 	{
 		TuningObject& o = m_objects[row];
 
@@ -1358,16 +1358,24 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_model->setFont(f.family(), f.pointSize(), false);
     m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-    // Mask controls
+    // Filter controls
 	//
-    //m_maskTypeCombo = new QComboBox();
-    //Vconnect(m_maskTypeCombo, &QLineEdit::selectionChanged, this, &TuningPage::slot_ApplyMask);
+    m_filterTypeCombo = new QComboBox();
+    m_filterTypeCombo->addItem(tr("All Text"), static_cast<int>(FilterType::All));
+    m_filterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(FilterType::AppSignalID));
+    m_filterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterType::CustomAppSignalID));
+    m_filterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterType::EquipmentID));
+    m_filterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterType::Caption));
 
-    m_maskEdit = new QLineEdit();
-    connect(m_maskEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyMask);
+    connect(m_filterTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_FilterTypeIndexChanged(int)));
 
-    m_maskButton = new QPushButton(tr("Apply Mask"));
-    connect(m_maskButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyMask);
+    m_filterTypeCombo->setCurrentIndex(0);
+
+    m_filterEdit = new QLineEdit();
+    connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
+
+    m_filterButton = new QPushButton(tr("Apply Filter"));
+    connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
 
     // Button controls
     //
@@ -1392,9 +1400,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
 	m_bottomLayout = new QHBoxLayout();
 
-    //m_bottomLayout->addWidget(m_maskTypeCombo);
-	m_bottomLayout->addWidget(m_maskEdit);
-	m_bottomLayout->addWidget(m_maskButton);
+    m_bottomLayout->addWidget(m_filterTypeCombo);
+    m_bottomLayout->addWidget(m_filterEdit);
+    m_bottomLayout->addWidget(m_filterButton);
 	m_bottomLayout->addStretch();
 	m_bottomLayout->addWidget(m_setValueButton);
 	m_bottomLayout->addWidget(m_setOnButton);
@@ -1486,40 +1494,54 @@ void TuningPage::fillObjectsList()
 
     std::vector<TuningObject> objects = theObjectManager->objects();
 
-    QString mask = m_maskEdit->text();
+    QString filter = m_filterEdit->text();
+
+    FilterType filterType = FilterType::All;
+    QVariant data = m_filterTypeCombo->currentData();
+    if (data.isValid() == true)
+    {
+        filterType = static_cast<FilterType>(data.toInt());
+    }
 
 	for (int i = 0; i < objects.size(); i++)
 	{
         TuningObject& o = objects[i];
 
-		// Root filter
-		//
-		if (theFilters.m_root->match(o) == false)
-		{
-			continue;
-		}
-
 		// Tree Filter
 		//
-		if (m_treeFilter != nullptr)
+
+        // If currently selected filter is root - all signals are displayed
+        //
+
+        if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
 		{
 			bool result = true;
 
 			TuningFilter* treeFilter = m_treeFilter.get();
-			while (treeFilter != nullptr)
-			{
-				if (treeFilter->match(o) == false)
-				{
-					result = false;
-					break;
-				}
 
-				treeFilter = treeFilter->parentFilter();
-			}
-			if (result == false)
-			{
-				continue;
-			}
+            // If currently selected filter is empty - no signals are displayed (a "Folder" filter)
+
+            if (treeFilter->isEmpty() == true)
+            {
+                continue;
+            }
+
+            // Otherwise, check parent filters
+
+            while (treeFilter != nullptr)
+            {
+                if (treeFilter->match(o) == false)
+                {
+                    result = false;
+                    break;
+                }
+
+                treeFilter = treeFilter->parentFilter();
+            }
+            if (result == false)
+            {
+                continue;
+            }
 
             // Modify the default value from selected filter
             //
@@ -1556,19 +1578,51 @@ void TuningPage::fillObjectsList()
 			}
 		}
 
-        // Mask Filter
+        // Text filter
         //
 
-        if (mask.length() != 0)
+        if (filter.length() != 0)
         {
-            bool maskMatch = false;
+            bool filterMatch = false;
 
-            if (o.appSignalID().contains(mask, Qt::CaseInsensitive) == true || o.customAppSignalID().contains(mask, Qt::CaseInsensitive) == true)
+            switch (filterType)
             {
-                maskMatch = true;
+            case FilterType::All:
+                if (o.appSignalID().contains(filter, Qt::CaseInsensitive) == true
+                        || o.customAppSignalID().contains(filter, Qt::CaseInsensitive) == true
+                        || o.equipmentID().contains(filter, Qt::CaseInsensitive) == true
+                        || o.caption().contains(filter, Qt::CaseInsensitive) == true)
+                {
+                    filterMatch = true;
+                }
+                break;
+            case FilterType::AppSignalID:
+                if (o.appSignalID().contains(filter, Qt::CaseInsensitive) == true)
+                {
+                    filterMatch = true;
+                }
+                break;
+            case FilterType::CustomAppSignalID:
+                if (o.customAppSignalID().contains(filter, Qt::CaseInsensitive) == true)
+                {
+                    filterMatch = true;
+                }
+                break;
+            case FilterType::EquipmentID:
+                if (o.equipmentID().contains(filter, Qt::CaseInsensitive) == true)
+                {
+                    filterMatch = true;
+                }
+                break;
+            case FilterType::Caption:
+                if (o.caption().contains(filter, Qt::CaseInsensitive) == true)
+                {
+                    filterMatch = true;
+                }
+                break;
             }
 
-            if (maskMatch == false)
+            if (filterMatch == false)
             {
                 continue;
             }
@@ -1645,7 +1699,13 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex &index)
 	slot_setValue();
 }
 
-void TuningPage::slot_ApplyMask()
+void TuningPage::slot_FilterTypeIndexChanged(int index)
+{
+    Q_UNUSED(index);
+    fillObjectsList();
+}
+
+void TuningPage::slot_ApplyFilter()
 {
     fillObjectsList();
 }

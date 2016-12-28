@@ -18,14 +18,14 @@
             <AfbElementSignal OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="7" Size="1"/>
         </InputSignals>
         <OutputSignals>
-            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="10" Size="32"/>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="12" Size="32"/>
         </OutputSignals>
         <Params>
             <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
                 <Value>2</Value>
                 <Default>2</Default>
                 <LowLimit>1</LowLimit>
-                <HighLimit>3</HighLimit>
+                <HighLimit>4</HighLimit>
                 <Script>
                     <Changed></Changed>
                 </Script>

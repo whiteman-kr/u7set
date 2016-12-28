@@ -10,7 +10,7 @@ class DialogProperties : public PropertyEditorDialog
 {
     Q_OBJECT
 public:
-	DialogProperties(std::shared_ptr<PropertyObject> object, QWidget *parent);
+    DialogProperties(std::shared_ptr<PropertyObject> object, QWidget *parent, bool readOnly);
 	~DialogProperties();
 
 private:

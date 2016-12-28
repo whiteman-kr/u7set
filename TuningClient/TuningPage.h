@@ -36,7 +36,7 @@ public:
 
 public:
 
-	enum Columns
+    enum class Columns
 	{
 		CustomAppSignalID = 0,
 		EquipmentID,
@@ -53,6 +53,7 @@ public:
 		Underflow,
 		Overflow,
 	};
+
 
 public:
 	void setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int> &objectsIndexes);
@@ -189,14 +190,27 @@ private slots:
 
 	void slot_tableDoubleClicked(const QModelIndex &index);
 
-    void slot_ApplyMask();
+    void slot_ApplyFilter();
+
+    void slot_FilterTypeIndexChanged(int index);
+
 public slots:
-	void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
+
+    void slot_filterTreeChanged(std::shared_ptr<TuningFilter> filter);
 
 
 private:
 
-	void invertValue();
+    enum class FilterType
+    {
+        All = 0,
+        AppSignalID,
+        CustomAppSignalID,
+        EquipmentID,
+        Caption
+    };
+
+    void invertValue();
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -224,11 +238,11 @@ private:
 
 	QPushButton* m_undoButton = nullptr;
 
-	QPushButton* m_maskButton = nullptr;
+    QPushButton* m_filterButton = nullptr;
 
-	QLineEdit* m_maskEdit = nullptr;
+    QLineEdit* m_filterEdit = nullptr;
 
-    //QComboBox* m_maskTypeCombo = nullptr;
+    QComboBox* m_filterTypeCombo = nullptr;
 
 	TuningItemModelMain *m_model = nullptr;
 

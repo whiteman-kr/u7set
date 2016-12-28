@@ -1,7 +1,7 @@
 #include "DialogPresetEditor.h"
 #include "DialogProperties.h"
 #include "ui_DialogPresetEditor.h"
-
+#include "Settings.h"
 #include "MainWindow.h"
 #include "DialogInputValue.h"
 
@@ -23,8 +23,9 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 	QStringList headerLabels;
     headerLabels<<tr("Caption");
     headerLabels<<tr("Type");
+    headerLabels<<tr("CustomAppSignalID");
     headerLabels<<tr("AppSignalID");
-    headerLabels<<tr("AppSignalCaption");
+    headerLabels<<tr("Caption");
     headerLabels<<tr("Value");
 
 	ui->m_presetsTree->setColumnCount(headerLabels.size());
@@ -51,7 +52,7 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 		ui->m_presetsTree->addTopLevelItem(item);
 	}
 
-	ui->m_presetsTree->expandAll();
+    //ui->m_presetsTree->expandAll();
 
 	for (int i = 0; i < ui->m_presetsTree->columnCount(); i++)
 	{
@@ -69,19 +70,21 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 
 	// Objects Masks
 	//
-	ui->m_maskTypeCombo->blockSignals(true);
-    ui->m_maskTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(MaskType::AppSignalID));
-    ui->m_maskTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(MaskType::CustomAppSignalID));
-    ui->m_maskTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(MaskType::EquipmentID));
-	ui->m_maskTypeCombo->setCurrentIndex(0);
-	ui->m_maskTypeCombo->blockSignals(false);
+    ui->m_filterTypeCombo->blockSignals(true);
+    ui->m_filterTypeCombo->addItem(tr("All Text"), static_cast<int>(FilterType::All));
+    ui->m_filterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(FilterType::AppSignalID));
+    ui->m_filterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterType::CustomAppSignalID));
+    ui->m_filterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterType::EquipmentID));
+    ui->m_filterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterType::Caption));
+    ui->m_filterTypeCombo->setCurrentIndex(0);
+    ui->m_filterTypeCombo->blockSignals(false);
 
 	// Objects and model
 	//
 	m_model = new TuningItemModel(this);
 	m_model->addColumn(TuningItemModel::Columns::CustomAppSignalID);
 	m_model->addColumn(TuningItemModel::Columns::AppSignalID);
-	m_model->addColumn(TuningItemModel::Columns::EquipmentID);
+    //m_model->addColumn(TuningItemModel::Columns::EquipmentID);
 	m_model->addColumn(TuningItemModel::Columns::Caption);
 
 	ui->m_signalsTable->setModel(m_model);
@@ -95,17 +98,30 @@ DialogPresetEditor::DialogPresetEditor(TuningFilterStorage *filterStorage, QWidg
 
 	connect(ui->m_signalsTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogPresetEditor::sortIndicatorChanged);
 
-
-	fillObjectsList();
+    fillObjectsList();
 
 	ui->m_signalsTable->resizeColumnsToContents();
 
 	connect(theMainWindow, &MainWindow::signalsUpdated, this, &DialogPresetEditor::slot_signalsUpdated);
 
+    if (theSettings.m_presetEditorPos.x() != -1 && theSettings.m_presetEditorPos.y() != -1)
+    {
+        move(theSettings.m_presetEditorPos);
+        restoreGeometry(theSettings.m_presetEditorGeometry);
+    }
+    else
+    {
+        resize(1024, 768);
+    }
+
 }
 
 DialogPresetEditor::~DialogPresetEditor()
 {
+    theSettings.m_presetEditorPos = pos();
+    theSettings.m_presetEditorGeometry = saveGeometry();
+
+
 	delete ui;
 }
 
@@ -119,16 +135,14 @@ void DialogPresetEditor::fillObjectsList()
 		signalType = static_cast<SignalType>(data.toInt());
 	}
 
-	MaskType maskType = MaskType::AppSignalID;
-	data = ui->m_maskTypeCombo->currentData();
+    FilterType filterType = FilterType::AppSignalID;
+    data = ui->m_filterTypeCombo->currentData();
 	if (data.isNull() == false && data.isValid() == true)
 	{
-		maskType = static_cast<MaskType>(data.toInt());
+        filterType = static_cast<FilterType>(data.toInt());
 	}
 
-	QString mask = ui->m_mask->text().trimmed();
-	QRegExp rx(mask);
-	rx.setPatternSyntax(QRegExp::Wildcard);
+    QString filterText = ui->m_filterText->text().trimmed();
 
     std::vector<TuningObject> objects = theObjectManager->objects();
 
@@ -148,35 +162,61 @@ void DialogPresetEditor::fillObjectsList()
 			continue;
 		}
 
-		if (mask.isEmpty() == false)
+        if (filterText.isEmpty() == false)
 		{
-			switch (maskType)
+            bool filterResult = false;
+
+            switch (filterType)
 			{
-			case MaskType::AppSignalID:
+            case FilterType::All:
+                {
+                if (o.appSignalID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o.customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o.equipmentID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o.caption().contains(filterText, Qt::CaseInsensitive) == true )
+                {
+                    filterResult = true;
+                }
+            }
+                break;
+            case FilterType::AppSignalID:
 				{
-					if (rx.exactMatch(o.appSignalID()) == false)
-					{
-						continue;
+                    if (o.appSignalID().contains(filterText, Qt::CaseInsensitive) == true)
+                    {
+                        filterResult = true;
 					}
 				}
 				break;
-			case MaskType::CustomAppSignalID:
+            case FilterType::CustomAppSignalID:
 				{
-					if (rx.exactMatch(o.customAppSignalID()) == false)
-					{
-						continue;
-					}
+                    if (o.customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true)
+                    {
+                        filterResult = true;
+                    }
 				}
 				break;
-			case MaskType::EquipmentID:
+            case FilterType::EquipmentID:
 				{
-					if (rx.exactMatch(o.equipmentID()) == false)
-					{
-						continue;
-					}
+                    if (o.equipmentID().contains(filterText, Qt::CaseInsensitive) == true)
+                    {
+                        filterResult = true;
+                    }
 				}
 				break;
-			}
+            case FilterType::Caption:
+                {
+                    if (o.caption().contains(filterText, Qt::CaseInsensitive) == true)
+                    {
+                        filterResult = true;
+                    }
+                }
+                break;
+            }
+
+            if (filterResult == false)
+            {
+                continue;
+            }
 		}
 
 		objectsIndexes.push_back(i);
@@ -332,7 +372,14 @@ void DialogPresetEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 	}
 
 	QStringList l;
-	l << filter->caption();
+    if (filter->automatic() == true)
+    {
+        l << filter->caption() + tr(" <AUTO>");
+    }
+    else
+    {
+        l << filter->caption();
+    }
 	l.append(tr("Preset"));
 
 	int i = 0;
@@ -353,9 +400,10 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 	QStringList l;
 	l.push_back("-");
     l.push_back(tr("Signal"));
-	l.push_back(value.appSignalId());
-	l.push_back(value.caption());
-	if (value.useValue() == true)
+    //l.push_back(value.customAppSignalId());
+    l.push_back(value.appSignalId());
+    //l.push_back(value.caption());
+    /*if (value.useValue() == true)
 	{
 		if (value.analog() == false)
 		{
@@ -365,7 +413,7 @@ void DialogPresetEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		{
 			l.push_back(QString::number(value.value(), 'f', value.decimalPlaces()));
 		}
-	}
+    }*/
 
 	int i = 0;
 	for (auto s : l)
@@ -404,7 +452,7 @@ void DialogPresetEditor::on_m_addPreset_clicked()
 		parentFilter->addChild(newFilter);
 
 		parentItem->addChild(newPresetItem);
-		parentItem->setExpanded(true);
+        //parentItem->setExpanded(true);
 	}
 
 	m_modified = true;
@@ -420,7 +468,9 @@ void DialogPresetEditor::on_m_editPreset_clicked()
 		return;
 	}
 
-	DialogProperties d(editFilter, this);
+    bool readOnly = editFilter->automatic();
+
+    DialogProperties d(editFilter, this, readOnly);
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());
@@ -560,14 +610,6 @@ void DialogPresetEditor::on_m_add_clicked()
 
 		TuningFilterValue ofv;
         ofv.setAppSignalId(o->appSignalID());
-        ofv.setCaption(o->caption());
-        ofv.setAnalog(o->analog());
-        if (o->analog() == true)
-		{
-            ofv.setLowLimit(o->lowLimit());
-            ofv.setHighLimit(o->highLimit());
-            ofv.setDecimalPlaces(o->decimalPlaces());
-		}
         if (o->valid() == true)
 		{
             ofv.setValue(o->value());
@@ -623,7 +665,7 @@ void DialogPresetEditor::on_m_remove_clicked()
 		}
 
 		TuningFilterValue ofv = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-		filter->removeValue(ofv.hash());
+        filter->removeValue(ofv.appSignalHash());
 
 		QTreeWidgetItem* deleteItem = parentItem->takeChild(parentItem->indexOfChild(item));
 		delete deleteItem;
@@ -673,7 +715,7 @@ void DialogPresetEditor::on_m_presetsTree_itemSelectionChanged()
 
 void DialogPresetEditor::on_m_setValue_clicked()
 {
-	bool first = true;
+    /*bool first = true;
 	TuningFilterValue firstValue;
 
 	bool sameValue = true;
@@ -760,11 +802,11 @@ void DialogPresetEditor::on_m_setValue_clicked()
 		filter->setValue(ov.hash(), ov.value());
 	}
 
-	m_modified = true;
+    m_modified = true;*/
 
 }
 
-void DialogPresetEditor::on_m_applyMask_clicked()
+void DialogPresetEditor::on_m_applyFilter_clicked()
 {
 	fillObjectsList();
 }
@@ -795,4 +837,15 @@ void DialogPresetEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
 	m_sortOrder = order;
 
 	m_model->sort(column, order);
+}
+
+void DialogPresetEditor::on_m_filterTypeCombo_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+    fillObjectsList();
+}
+
+void DialogPresetEditor::on_m_filterText_returnPressed()
+{
+    fillObjectsList();
 }

@@ -45,13 +45,17 @@ private slots:
 
 	void on_m_setValue_clicked();
 
-	void on_m_applyMask_clicked();
+    void on_m_applyFilter_clicked();
 
 	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
 
 	void slot_signalsUpdated();
 
 	void sortIndicatorChanged(int column, Qt::SortOrder order);
+    void on_m_filterTypeCombo_currentIndexChanged(int index);
+
+    void on_m_filterText_returnPressed();
+
 private:
 
 	enum class TreeItemType
@@ -60,11 +64,13 @@ private:
 		Signal
 	};
 
-	enum class MaskType
+    enum class FilterType
 	{
+        All,
 		AppSignalID,
 		CustomAppSignalID,
-		EquipmentID
+        EquipmentID,
+        Caption
 	};
 
 	enum class SignalType

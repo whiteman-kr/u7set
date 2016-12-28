@@ -81,12 +81,11 @@ private:
 };
 
 extern MainWindow* theMainWindow;
-extern LogFile theLogFile;
+extern LogFile* theLogFile;
 
 extern TuningObjectManager* theObjectManager;
 
 extern TuningFilterStorage theFilters;
-extern TuningFilterStorage theUserFilters;
 
 extern UserManager theUserManager;
 
