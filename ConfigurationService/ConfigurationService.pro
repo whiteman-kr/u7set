@@ -116,3 +116,6 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+DISTFILES += \
+    ../Proto/network.proto

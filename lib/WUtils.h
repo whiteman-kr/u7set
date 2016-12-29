@@ -24,6 +24,12 @@
 										continue; \
 									}
 
+#define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
+									{	\
+										assert(false);	\
+										return; \
+									}
+
 
 #define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
 

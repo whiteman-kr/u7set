@@ -11,11 +11,11 @@ class ConfigurationServiceWorker : public ServiceWorker
 public:
 	ConfigurationServiceWorker();
 
-signals:
-	void ackInformationRequest(UdpRequest request);
-
 public slots:
 	void onInformationRequest(UdpRequest request);
+
+signals:
+	void ackInformationRequest(UdpRequest request);
 
 private:
 	virtual void initCmdLineParser() override;

@@ -4,8 +4,8 @@
 class BaseServiceWorker : public ServiceWorker
 {
 public:
-	BaseServiceWorker() :
-		ServiceWorker(ServiceType::BaseService)
+	BaseServiceWorker(const QString& serviceName, int& argc, char** argv) :
+		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv)
 	{
 	}
 
@@ -39,9 +39,9 @@ int main(int argc, char *argv[])
 
 	INIT_LOGGER(argv[0]);
 
-	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker();
+	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker("RPCT Base Service", argc, argv);
 
-	ServiceStarter serviceStarter(argc, argv, "RPCT Base Service", baseServiceWorker);
+	ServiceStarter serviceStarter(baseServiceWorker);
 
 	return serviceStarter.exec();
 }
