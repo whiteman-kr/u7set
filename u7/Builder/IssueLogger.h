@@ -163,6 +163,7 @@ namespace Builder
 		void errALP4034(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
 		void errALP4035(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
 		void errALP4036(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
+		void errALP4037(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//

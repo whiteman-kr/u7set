@@ -3070,7 +3070,7 @@ namespace Builder
 			{
 				// Something wron in multichannelProcessing for this schema, stop parsing it
 				//
-				continue;
+				return false;
 			}
 
 			result = findBushes(logicSchema, moduleLayer, &bushContainer);
@@ -3120,14 +3120,17 @@ namespace Builder
 										QString equipmentId)
 	{
 		if (schema == nullptr ||
-			layer == nullptr)
+			layer == nullptr ||
+			m_signalSet == nullptr)
 		{
 			assert(schema);
 			assert(layer);
+			assert(m_signalSet);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2.")
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, m_signalSet %3.")
 							  .arg(reinterpret_cast<size_t>(schema.get()))
-							  .arg(reinterpret_cast<size_t>(layer.get())));
+							  .arg(reinterpret_cast<size_t>(layer.get()))
+							  .arg(reinterpret_cast<size_t>(m_signalSet)));
 
 			return false;
 		}
@@ -3184,11 +3187,36 @@ namespace Builder
 
 				signalItem->setAppSignalIds(signalId);
 
+				// Check that all signals belongs to appropriate LM
+				//
+				Signal* appSignal = m_signalSet->getSignal(signalId);
+
+				if (appSignal == nullptr)
+				{
+					result = false;
+					m_log->errALP4034(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm() == nullptr)
+				{
+					result = false;
+					m_log->errALP4035(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm()->equipmentId() != equipmentId)
+				{
+					result = false;
+					m_log->errALP4037(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
+					continue;
+				}
+
 				continue;
 			}
 			else
 			{
-				// it's not singlechannel Signal and not enough or more then channel count
+				// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
 				//
 				result = false;
 				m_log->errALP4031(schema->schemaId(), signalItem->buildName(), signalItem->guid());
