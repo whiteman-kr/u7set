@@ -8,11 +8,8 @@
 //
 // -------------------------------------------------------------------------------
 
-ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceStrID,
-									 const QString& cfgServiceIP1,
-									 const QString& cfgServiceIP2,
-									 const QString& buildPath) :
-	ServiceWorker(ServiceType::AppDataService, serviceStrID, cfgServiceIP1, cfgServiceIP2, buildPath)
+ArchivingServiceWorker::ArchivingServiceWorker() :
+	ServiceWorker(ServiceType::AppDataService)
 {
 }
 
@@ -22,9 +19,18 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 }
 
 
-ServiceWorker* ArchivingServiceWorker::createInstance()
+void ArchivingServiceWorker::initCmdLineParser()
 {
-	return new ArchivingServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
+	CommandLineParser* clp = cmdLineParser();
+
+	if (clp == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+	clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
 }
 
 
@@ -32,18 +38,18 @@ void ArchivingServiceWorker::initialize()
 {
 	// Service Main Function initialization
 	//
-	if (buildPath().isEmpty() == true)
+	if (m_buildPath.isEmpty() == true)
 	{
 		runCfgLoaderThread();
 	}
 	else
 	{
-		bool result = loadConfigurationFromFile(cfgFileName());
+		/*bool result = loadConfigurationFromFile(cfgFileName());
 
 		if (result == true)
 		{
 			applyNewConfiguration();
-		}
+		}*/
 	}
 
 	qDebug() << "ArchivingServiceWorker initialized";
@@ -62,13 +68,11 @@ void ArchivingServiceWorker::shutdown()
 }
 
 
-
-
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
 	m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1,
-											HostAddressPort(cfgServiceIP1(), PORT_CONFIGURATION_SERVICE_REQUEST),
-											HostAddressPort(cfgServiceIP2(), PORT_CONFIGURATION_SERVICE_REQUEST));
+											HostAddressPort(m_cfgServiceIP1, PORT_CONFIGURATION_SERVICE_REQUEST),
+											HostAddressPort(m_cfgServiceIP2, PORT_CONFIGURATION_SERVICE_REQUEST));
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingServiceWorker::onConfigurationReady);
 

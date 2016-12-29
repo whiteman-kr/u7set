@@ -94,6 +94,9 @@ void Settings::RestoreSystem()
     {
         dir.mkpath(m_localAppDataPath);
     }
+
+    m_userFiltersFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
+
 }
 
 
@@ -286,6 +289,11 @@ QString Settings::globalAppDataPath()
 QString Settings::localAppDataPath()
 {
     return m_localAppDataPath;
+}
+
+QString Settings::userFiltersFile()
+{
+    return m_userFiltersFile;
 }
 
 Settings theSettings;

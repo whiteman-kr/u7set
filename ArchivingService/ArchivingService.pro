@@ -89,7 +89,8 @@ SOURCES += main.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
-    ../u7/Builder/ModulesRawData.cpp
+    ../u7/Builder/ModulesRawData.cpp \
+    ../lib/CommandLineParser.cpp
 
 HEADERS += \
     version.h \
@@ -121,7 +122,8 @@ HEADERS += \
     ../lib/OutputLog.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../u7/Builder/ModulesRawData.h
+    ../u7/Builder/ModulesRawData.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -41,7 +41,6 @@ private:
 
 signals:
 	void signalsUpdated();
-	void userFiltersUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
@@ -53,15 +52,15 @@ public slots:
 	void exit();
 	void runUsersEditor();
 	void showSettings();
-	void runPresetEditor();
 	void showTuningSources();
+    void showAbout();
 
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	void removeWorkspace();
-	void createWorkspace();
+    void createWorkspace(const TuningObjectStorage *objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;

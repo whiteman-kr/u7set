@@ -2,59 +2,73 @@
 #include "../lib/Types.h"
 
 
+
+
+
 // -------------------------------------------------------------------------------------
 //
 // ServiceStarter class implementation
 //
 // -------------------------------------------------------------------------------------
 
-ServiceStarter::ServiceStarter(int argc, char ** argv, const QString& name, ServiceWorker* serviceWorker) :
+ServiceStarter::ServiceStarter(int argc, char** argv, const QString& name, ServiceWorker* serviceWorker) :
 	m_argc(argc),
 	m_argv(argv),
 	m_name(name),
-	m_serviceWorker(serviceWorker)
+	m_serviceWorker(serviceWorker),
+	m_cmdLineParser(argc, argv)
 {
-	assert(serviceWorker != nullptr);
-
 	assert(logger.isInitialized() == true);
+
+	if (argv == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (serviceWorker == nullptr)
+	{
+		assert(false);
+		return;
+	}
 }
 
 
-QString ServiceStarter::getCommandLineKeyValue(int argc, char **argv, const QString& key)
+void ServiceStarter::initCmdLineParser()
 {
-	QString value;
+	m_cmdLineParser.addSimpleOption("h", "Print this help");
+	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
+	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("s", "Start the service.");
+	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSingleValueOption("id", "Assign equipmentID of service. Use -id=EquipmentID.");
+	m_cmdLineParser.addMultipleValuesOption("idww", "Assign equipmentID of service. Use -id=EquipmentID.");
 
-	QString keyStr = QString("-%1=").arg(key);
+	m_serviceWorker->baseInitCmdLineParser(&m_cmdLineParser);		// ServiceWorker's derived classes cmdLineParser initialization
 
-	int keyStrLen = keyStr.length();
-
-	for(int i = 0; i <argc; i++)
-	{
-		QString arg = argv[i];
-
-		if (arg.mid(0, keyStrLen) == keyStr)
-		{
-			value = arg.mid(keyStrLen);
-			break;
-		}
-	}
-
-	return value;
+	m_cmdLineParser.parse();
 }
 
 
 int ServiceStarter::exec()
 {
+	if (m_serviceWorker == nullptr)
+	{
+		assert(false);
+		return -1;
+	}
+
+	initCmdLineParser();
+
+	qDebug() << C_STR(m_cmdLineParser.helpText());
+
 	bool consoleMode = false;
 
-	for(int i = 0; i < m_argc; i++)
+	/*if (m_cmdLineParser.isSet("e") || m_cmdLineParser.isSet("h"))
 	{
-		if (QString("-e") == m_argv[i])
-		{
-			consoleMode = true;
-			break;
-		}
-	}
+		consoleMode = true;
+	}*/
 
 	int result = 0;
 
@@ -62,7 +76,7 @@ int ServiceStarter::exec()
 	{
 		ConsoleServiceStarter consoleStarter(m_argc, m_argv, m_name, m_serviceWorker);
 
-		result = consoleStarter.exec();
+		//result = consoleStarter.exec(m_cmdLineParser);
 	}
 	else
 	{
@@ -155,9 +169,15 @@ ConsoleServiceStarter::ConsoleServiceStarter(int argc, char ** argv, const QStri
 }
 
 
-int ConsoleServiceStarter::exec()
+int ConsoleServiceStarter::exec(QCommandLineParser& cmdLineParser)
 {
-	qDebug() << "\n======" << C_STR(m_name) << "sarted ======\n";
+	if (cmdLineParser.isSet("h"))
+	{
+		qDebug() << "\n" << C_STR(cmdLineParser.helpText());
+		return 0;
+	}
+
+	qDebug() << "\n======" << C_STR(m_name) << "started ======\n";
 	qDebug() << "Press any key and RETURN to finish service\n";
 
 	if (m_serviceWorker == nullptr)
@@ -259,14 +279,21 @@ void Service::startServiceThread()
 
 	m_state = ServiceState::Starts;
 
-	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
+/*	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
 
 	newServiceWorker->setService(this);
 
 	connect(newServiceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
 	connect(newServiceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
 
-	m_serviceThread = new SimpleThread(newServiceWorker);
+	m_serviceThread = new SimpleThread(newServiceWorker); */
+
+	m_serviceWorker->setService(this);
+
+	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
+	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
+
+	m_serviceThread = new SimpleThread(m_serviceWorker);
 
 	m_serviceThread->start();
 }
@@ -414,27 +441,60 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 //
 // -------------------------------------------------------------------------------------
 
-ServiceWorker::ServiceWorker(ServiceType serviceType,
-							 const QString& serviceEquipmentID,
-							 const QString& cfgServiceIP1,
-							 const QString& cfgServiceIP2,
-							 const QString &buildPath) :
-	m_serviceType(serviceType),
-	m_serviceEquipmentID(serviceEquipmentID),
-	m_cfgServiceIP1(cfgServiceIP1),
-	m_cfgServiceIP2(cfgServiceIP2),
-	m_buildPath(buildPath)
+ServiceWorker::ServiceWorker(ServiceType serviceType) :
+	m_serviceType(serviceType)
 {
-	if (m_buildPath.isEmpty() == false)
-	{
-		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
-	}
 }
 
 
 ServiceWorker::~ServiceWorker()
 {
 }
+
+
+void ServiceWorker::baseInitCmdLineParser(CommandLineParser* cmdLineParser)
+{
+	if (cmdLineParser == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_cmdLineParser = cmdLineParser;
+
+	initCmdLineParser();
+}
+
+
+CommandLineParser* ServiceWorker::cmdLineParser()
+{
+	assert(m_cmdLineParser != nullptr);
+
+	return m_cmdLineParser;
+}
+
+
+/*
+void ServiceWorker::parseCmdLineArgs()
+{
+	m_serviceEquipmentID = getCmdLineKeyValue("id");
+
+	m_cfgServiceIP1 = getCmdLineKeyValue("cfgip1");
+	m_cfgServiceIP2 = getCmdLineKeyValue("cfgip2");
+	m_buildPath(buildPath)
+
+
+	QString buildFolder = ServiceStarter::getCommandLineKeyValue(argc, argv, "b");
+	QString serviceStrID = ServiceStarter::getCommandLineKeyValue(argc, argv, "id");
+	QString ipStr = ServiceStarter::getCommandLineKeyValue(argc, argv, "ip");
+
+	if (m_buildPath.isEmpty() == false)
+	{
+		m_cfgFileName = m_buildPath + "/" + m_serviceEquipmentID + "/configuration.xml";
+	}
+}
+*/
+
 
 
 void ServiceWorker::onThreadStarted()

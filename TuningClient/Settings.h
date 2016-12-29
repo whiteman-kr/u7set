@@ -48,6 +48,8 @@ public:
 
     QString localAppDataPath();
 
+    QString userFiltersFile();
+
 public:
 
     int m_requestInterval = 100;
@@ -100,6 +102,8 @@ private:
 
     QString m_globalAppDataPath;
     QString m_localAppDataPath;
+
+    QString m_userFiltersFile;
 
 	QMutex m;
 

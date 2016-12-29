@@ -40,19 +40,11 @@ public:
     TuningObjectManager(ConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
     virtual ~TuningObjectManager();
 
-    bool loadSignals(const QByteArray& data, QString *errorCode);
+    bool loadDatabase(const QByteArray& data, QString *errorCode);
 
-    // Object accessing
+    TuningObjectStorage objectStorage();
 
-	TuningObject object(int index);
-
-    int objectCount(); // this function must be used with mutex !!!
-
-    TuningObject* objectPtr(int index); // this function must be used with mutex !!!
-
-    TuningObject* objectPtrByHash(quint64 hash); // this function must be used with mutex !!!
-
-    std::vector<TuningObject> objects();
+    TuningObject* objectPtrByHash(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
 
     // Tuning sources
 
@@ -110,8 +102,6 @@ signals:
 
 private:
 
-    void invalidateSignals();
-
     QString networkErrorStr(NetworkError error);
 
 public:
@@ -121,15 +111,6 @@ public:
 private:
 
     ConfigController* m_cfgController = nullptr;
-
-    // Signals
-    //
-
-    std::map<quint64, int> m_objectsHashMap;
-
-	std::vector<TuningObject> m_objects;
-
-    std::vector<QString> m_signalList;
 
     // Cache protobug messages
     //
@@ -144,6 +125,11 @@ private:
 
     ::Network::TuningSignalsWrite m_writeTuningSignals;
     ::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
+
+    // Objects storage
+    //
+
+    TuningObjectStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
 
     // Tuning sources
     //

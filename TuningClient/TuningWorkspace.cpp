@@ -2,13 +2,24 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "TuningFilterEditor.h"
 
-TuningWorkspace::TuningWorkspace(QWidget *parent)
-	:QWidget(parent)
+TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *parent)
+    :QWidget(parent)
 {
-	QVBoxLayout* pLayout = new QVBoxLayout();
-	setLayout(pLayout);
 
+    if (objects == nullptr)
+    {
+        assert(objects);
+    }
+    else
+    {
+        m_objects = *objects;
+    }
+
+
+    QVBoxLayout* pLayout = new QVBoxLayout();
+	setLayout(pLayout);
 
     fillFiltersTree();
 
@@ -34,8 +45,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(tuningPageIndex++, f);
-
+        TuningPage* tp = new TuningPage(tuningPageIndex++, f, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
@@ -46,7 +56,7 @@ TuningWorkspace::TuningWorkspace(QWidget *parent)
 	{
 		// No tab pages, create only one page
 		//
-		m_tuningPage = new TuningPage(tuningPageIndex, nullptr);
+        m_tuningPage = new TuningPage(tuningPageIndex, nullptr, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
 
@@ -196,10 +206,29 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 	}
 }
 
-void TuningWorkspace::slot_resetTreeFilter()
+
+void TuningWorkspace::slot_runPresetEditor()
 {
-    if (m_filterTree != nullptr)
+    TuningFilterStorage editStorage = theFilters;
+
+    bool editAutomatic = false;
+
+    TuningFilterEditor d(&editStorage, &m_objects, editAutomatic, this);
+
+    connect(theMainWindow, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+
+    if (d.exec() == QDialog::Accepted)
     {
+        theFilters = editStorage;
+
+        QString errorMsg;
+
+        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+        {
+            theLogFile->writeError(errorMsg);
+            QMessageBox::critical(this, tr("Error"), errorMsg);
+        }
+
         fillFiltersTree();
     }
 }

@@ -54,6 +54,39 @@ CONFIG(release, debug|release) {
         UI_DIR = release/ui
 }
 
+# Force prebuild version control info
+#
+# for creating version.h at first build
+win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+unix:system([ -e ./version.h ] || touch ./version.h)
+# for any build
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+		contains(QMAKE_TARGET.arch, x86_64){
+			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+			nmake & \
+			chdir $$PWD & \
+			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/TuningClient.pro
+		}
+		else{
+			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+			nmake & \
+			chdir $$PWD & \
+			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/TuningClient.pro
+		}
+}
+unix {
+	versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+		make; \
+		cd $$PWD; \
+		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/TuningClient.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES += main.cpp\
@@ -76,7 +109,6 @@ SOURCES += main.cpp\
     ../Proto/network.pb.cc \
     ../lib/AppSignalState.cpp \
     ../Proto/serialization.pb.cc \
-    DialogPresetEditor.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
@@ -89,7 +121,8 @@ SOURCES += main.cpp\
     DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
-    TuningObjectManager.cpp
+    TuningObjectManager.cpp \
+    TuningFilterEditor.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -111,7 +144,6 @@ HEADERS  += MainWindow.h \
     ../Proto/network.pb.h \
     ../lib/AppSignalState.h \
     ../Proto/serialization.pb.h \
-    DialogPresetEditor.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
@@ -124,12 +156,12 @@ HEADERS  += MainWindow.h \
     DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
-    TuningObjectManager.h
+    TuningObjectManager.h \
+    TuningFilterEditor.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogPresetEditor.ui \
     DialogInputValue.ui \
     DialogUsers.ui \
     DialogTuningSourceInfo.ui

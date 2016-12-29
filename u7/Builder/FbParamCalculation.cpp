@@ -461,16 +461,26 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
-		requiredParams.append("i_del");
 		requiredParams.append("i_conf");
+
+		if (caption() == "dampc_si" ||
+			caption() == "dampc_fp")
+		{
+			requiredParams.append("i_del");
+		}
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_del = m_paramValuesArray["i_del"];
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
 
-		CHECK_SIGNED_INT32(i_del)
 		CHECK_UNSIGNED_INT(i_conf)
+
+		if (caption() == "dampc_si" ||
+			caption() == "dampc_fp")
+		{
+			AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+			CHECK_SIGNED_INT32(i_del)
+		}
 
 		m_runTime = 0;
 
@@ -1334,6 +1344,7 @@ namespace Builder
 		case 1:			// latch_front_fp, latch_front_si
 		case 2:			// latch_decay_fp, latch_decay_si
 		case 3:			// latch_state_fp, latch_state_si
+		case 4:			// latch_tm1_fp, latch_tm1_si
 			break;
 
 		default:

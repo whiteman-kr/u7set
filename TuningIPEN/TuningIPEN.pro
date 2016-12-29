@@ -50,7 +50,8 @@ SOURCES +=\
     TuningIPENSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     TuningIPENDataStorage.cpp \
-    ../TuningService/TuningDataStorage.cpp
+    ../TuningService/TuningDataStorage.cpp \
+    ../lib/CommandLineParser.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -88,7 +89,8 @@ HEADERS  += TuningMainWindow.h \
     TuningIPENSource.h \
     ../u7/Builder/ModulesRawData.h \
     TuningIPENDataStorage.h \
-    ../TuningService/TuningDataStorage.h
+    ../TuningService/TuningDataStorage.h \
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

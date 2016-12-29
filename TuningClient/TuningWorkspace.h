@@ -7,9 +7,8 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	TuningWorkspace(QWidget* parent = nullptr);
+    TuningWorkspace(const TuningObjectStorage* objects, QWidget* parent);
 	~TuningWorkspace();
-
 
 private:
     void fillFiltersTree();
@@ -18,6 +17,8 @@ private:
 
 private:
 
+    TuningObjectStorage m_objects;
+
 	QTreeWidget* m_filterTree = nullptr;
 	QSplitter* m_hSplitter = nullptr;
 	QTabWidget* m_tab = nullptr;
@@ -25,7 +26,7 @@ private:
 	TuningPage* m_tuningPage = nullptr;
 
 public slots:
-	void slot_resetTreeFilter();
+    void slot_runPresetEditor();
 
 private slots:
 	void slot_treeSelectionChanged();

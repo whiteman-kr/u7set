@@ -192,7 +192,7 @@ TuningItemModel::~TuningItemModel()
     }
 }
 
-void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObjects, const std::vector<int>& objectsIndexes)
+void TuningItemModel::setObjects(std::vector<TuningObject>& objects)
 {
 	if (rowCount() > 0)
 	{
@@ -206,17 +206,13 @@ void TuningItemModel::setObjectsIndexes(const std::vector<TuningObject>& allObje
 	}
 
 	//
-	if (objectsIndexes.size() > 0)
+    if (objects.empty() == false)
 	{
+        beginInsertRows(QModelIndex(), 0, (int)objects.size() - 1);
 
-		beginInsertRows(QModelIndex(), 0, (int)objectsIndexes.size() - 1);
+        m_objects.swap(objects);
 
-		for (int index : objectsIndexes)
-		{
-			m_objects.push_back(allObjects[index]);
-		}
-
-		insertRows(0, (int)objectsIndexes.size());
+        insertRows(0, (int)objects.size());
 
 		endInsertRows();
 	}
@@ -482,7 +478,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::Type))
 		{
-            return o.analog() ? tr("Analog") : tr("Discrete");
+            return o.analog() ? tr("A") : tr("D");
 		}
 
 		//
@@ -495,17 +491,17 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			{
 				if (o.analog() == false)
 				{
-					QString valueString = o.value() == 0 ? tr("No") : tr("Yes");
+                    QString valueString = o.value() == 0 ? tr("0") : tr("1");
 
                     if (o.userModified() == true)
                     {
-                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
                         return tr("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
                     if (o.writing() == true)
                     {
-                        QString editValueString = o.editValue() == 0 ? tr("No") : tr("Yes");
+                        QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
                         return tr("Writing %1").arg(editValueString);
                     }
 
@@ -588,7 +584,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 			else
 			{
-				return ((int)o.defaultValue() == 0 ? tr("No") : tr("Yes"));
+                return ((int)o.defaultValue() == 0 ? tr("0") : tr("1"));
 			}
 		}
 
@@ -1158,7 +1154,7 @@ void TuningItemModelMain::slot_Apply()
 		}
 		else
 		{
-			strValue = o.editValue() == 0 ? tr("No") : tr("Yes");
+            strValue = o.editValue() == 0 ? tr("0") : tr("1");
 		}
 
 		str += tr("%1 (%2) = %3\r\n").arg(o.appSignalID()).arg(o.caption()).arg(strValue);
@@ -1265,10 +1261,11 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage *objects, QWidget *parent) :
 	m_tuningPageIndex(tuningPageIndex),
 	QWidget(parent),
-	m_tabFilter(tabFilter)
+    m_tabFilter(tabFilter),
+    m_objects(objects)
 {
 	std::vector<FilterButton*> buttons;
 
@@ -1490,9 +1487,7 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
-	std::vector<int> objectsIndexes;
-
-    std::vector<TuningObject> objects = theObjectManager->objects();
+    std::vector<TuningObject> filteredObjects;
 
     QString filter = m_filterEdit->text();
 
@@ -1503,9 +1498,17 @@ void TuningPage::fillObjectsList()
         filterType = static_cast<FilterType>(data.toInt());
     }
 
-	for (int i = 0; i < objects.size(); i++)
+    for (int i = 0; i < m_objects->objectCount(); i++)
 	{
-        TuningObject& o = objects[i];
+        const TuningObject* o = m_objects->objectPtr(i);
+        if (o == nullptr)
+        {
+            assert(o);
+            continue;
+        }
+
+        bool modifyDefaultValue = false;
+        float modifiedDefaultValue = 0;
 
 		// Tree Filter
 		//
@@ -1530,7 +1533,7 @@ void TuningPage::fillObjectsList()
 
             while (treeFilter != nullptr)
             {
-                if (treeFilter->match(o) == false)
+                if (treeFilter->match(*o) == false)
                 {
                     result = false;
                     break;
@@ -1548,11 +1551,12 @@ void TuningPage::fillObjectsList()
 
             TuningFilterValue filterValue;
 
-            bool hasValue = m_treeFilter->value(o.appSignalHash(), filterValue);
+            bool hasValue = m_treeFilter->value(o->appSignalHash(), filterValue);
 
             if (hasValue == true)
             {
-                o.setDefaultValue(filterValue.value());
+                modifyDefaultValue = true;
+                modifiedDefaultValue = filterValue.value();
             }
 		}
 
@@ -1561,7 +1565,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_tabFilter != nullptr)
 		{
-			if (m_tabFilter->match(o) == false)
+            if (m_tabFilter->match(*o) == false)
 			{
 				continue;
 			}
@@ -1572,7 +1576,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_buttonFilter != nullptr)
 		{
-			if (m_buttonFilter->match(o) == false)
+            if (m_buttonFilter->match(*o) == false)
 			{
 				continue;
 			}
@@ -1588,34 +1592,34 @@ void TuningPage::fillObjectsList()
             switch (filterType)
             {
             case FilterType::All:
-                if (o.appSignalID().contains(filter, Qt::CaseInsensitive) == true
-                        || o.customAppSignalID().contains(filter, Qt::CaseInsensitive) == true
-                        || o.equipmentID().contains(filter, Qt::CaseInsensitive) == true
-                        || o.caption().contains(filter, Qt::CaseInsensitive) == true)
+                if (o->appSignalID().contains(filter, Qt::CaseInsensitive) == true
+                        || o->customAppSignalID().contains(filter, Qt::CaseInsensitive) == true
+                        || o->equipmentID().contains(filter, Qt::CaseInsensitive) == true
+                        || o->caption().contains(filter, Qt::CaseInsensitive) == true)
                 {
                     filterMatch = true;
                 }
                 break;
             case FilterType::AppSignalID:
-                if (o.appSignalID().contains(filter, Qt::CaseInsensitive) == true)
+                if (o->appSignalID().contains(filter, Qt::CaseInsensitive) == true)
                 {
                     filterMatch = true;
                 }
                 break;
             case FilterType::CustomAppSignalID:
-                if (o.customAppSignalID().contains(filter, Qt::CaseInsensitive) == true)
+                if (o->customAppSignalID().contains(filter, Qt::CaseInsensitive) == true)
                 {
                     filterMatch = true;
                 }
                 break;
             case FilterType::EquipmentID:
-                if (o.equipmentID().contains(filter, Qt::CaseInsensitive) == true)
+                if (o->equipmentID().contains(filter, Qt::CaseInsensitive) == true)
                 {
                     filterMatch = true;
                 }
                 break;
             case FilterType::Caption:
-                if (o.caption().contains(filter, Qt::CaseInsensitive) == true)
+                if (o->caption().contains(filter, Qt::CaseInsensitive) == true)
                 {
                     filterMatch = true;
                 }
@@ -1630,10 +1634,15 @@ void TuningPage::fillObjectsList()
 
 
 
-		objectsIndexes.push_back(i);
+        filteredObjects.push_back(*o);
+
+        if (modifyDefaultValue == true)
+        {
+            filteredObjects[filteredObjects.size() - 1].setDefaultValue(modifiedDefaultValue);
+        }
 	}
 
-	m_model->setObjectsIndexes(objects, objectsIndexes);
+    m_model->setObjects(filteredObjects);
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
