@@ -103,11 +103,11 @@ void FileHistoryDialog::showHistory(DbController* db, QString objectName, const 
 	return;
 }
 
-void FileHistoryDialog::showEvent(QShowEvent* event)
+void FileHistoryDialog::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(this);
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	resize(screen.width() * 0.40, screen.height() * 0.35);
 
 	move(screen.center() - rect().center());

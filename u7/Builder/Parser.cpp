@@ -2972,15 +2972,71 @@ namespace Builder
 		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 		std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		if (logicSchema == nullptr || layer == nullptr)
+		if (logicSchema == nullptr ||
+			layer == nullptr ||
+			m_signalSet == nullptr)
 		{
 			assert(logicSchema);
 			assert(layer);
+			assert(m_signalSet);
 			return false;
 		}
 
 		QStringList equipmentIds = logicSchema->equipmentIdList();
 
+		// Check if all signal elements are from related Logic Module
+		//
+		bool alienLmIds = false;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		{
+			if (item->isType<VFrame30::SchemaItemSignal>() == false)
+			{
+				// Checking only signals
+				//
+				continue;
+			}
+
+			VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
+			assert(signalItem);
+
+			const QStringList& itemSignals = signalItem->appSignalIdList();
+
+			for (const QString& appSignalId : itemSignals)
+			{
+				Signal* appSignal = m_signalSet->getSignal(appSignalId);
+
+				if (appSignal == nullptr)
+				{
+					alienLmIds = true;
+					m_log->errALP4034(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm() == nullptr)
+				{
+					alienLmIds = true;
+					m_log->errALP4035(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+
+				if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
+				{
+					alienLmIds = true;
+					m_log->errALP4036(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+			}
+		}
+
+		if (alienLmIds == true)
+		{
+			// There were an error, the progreamm signaled about it, just leave this func
+			//
+			return false;
+		}
+
+		// Serializae layer, so it can be restored for each equipmentId
+		//
 		QByteArray layerData;
 		layer->Save(layerData);
 

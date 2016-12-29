@@ -592,6 +592,8 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		}
 
 		Hardware::DeviceObject* childDevice = this->deviceObject(childIndex);
+		Q_UNUSED(childDevice);
+
 		assert(childDevice);
 		assert(childDevice == device->child(childRow));
 
