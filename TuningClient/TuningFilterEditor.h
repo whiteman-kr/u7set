@@ -14,7 +14,7 @@ class TuningFilterEditor : public QDialog
 
 public:
 
-    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const std::vector<TuningObject>* objects, bool showAutomatic, QWidget *parent);
+    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningObjectStorage* objects, bool showAutomatic, QWidget *parent);
 
     ~TuningFilterEditor();
 
@@ -135,9 +135,9 @@ private:
 
     bool m_showAutomatic = false;
 
-	TuningFilterStorage* m_filterStorage;
+    TuningFilterStorage* m_filterStorage = nullptr;
 
-    const std::vector<TuningObject>* m_objects = nullptr;
+    const TuningObjectStorage *m_objects = nullptr;
 
 	int m_sortColumn = 0;
 

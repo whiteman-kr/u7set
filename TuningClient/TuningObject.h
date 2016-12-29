@@ -112,4 +112,37 @@ private:
 };
 
 
+class TuningObjectStorage
+{
+
+public:
+
+    TuningObjectStorage();
+
+    bool loadSignals(const QByteArray& data, QString *errorCode);
+
+    void invalidateSignals();
+
+    // Object accessing
+
+
+    int objectCount() const;
+
+    bool objectExists(Hash hash) const;
+
+    TuningObject *objectPtr(int index) const;
+
+    TuningObject *objectPtrByHash(Hash hash) const;
+
+private:
+
+    // Objects
+    //
+
+    std::map<Hash, int> m_objectsMap;
+
+    std::vector<std::shared_ptr<TuningObject>> m_objects;
+
+};
+
 #endif // TUNINGOBJECT_H

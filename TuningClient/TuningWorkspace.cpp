@@ -4,10 +4,19 @@
 #include "MainWindow.h"
 #include "TuningFilterEditor.h"
 
-TuningWorkspace::TuningWorkspace(QWidget *parent)
-	:QWidget(parent)
+TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *parent)
+    :QWidget(parent)
 {
-    m_objects = theObjectManager->objects();
+
+    if (objects == nullptr)
+    {
+        assert(objects);
+    }
+    else
+    {
+        m_objects = *objects;
+    }
+
 
     QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
@@ -99,11 +108,6 @@ TuningWorkspace::~TuningWorkspace()
     {
         theSettings.m_mainWindowSplitterState = m_hSplitter->saveState();
     }
-}
-
-std::vector<TuningObject>* TuningWorkspace::objects()
-{
-    return &m_objects;
 }
 
 void TuningWorkspace::fillFiltersTree()

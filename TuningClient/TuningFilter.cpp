@@ -874,14 +874,20 @@ bool TuningFilter::match(const TuningObject& object) const
 	return true;
 }
 
-void TuningFilter::checkSignals(const std::map<Hash, int> &tuningObjectsHashMap, QStringList& errorLog, int &notFoundCounter)
+void TuningFilter::checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter)
 {
+    if (objects == nullptr)
+    {
+        assert(objects);
+        return;
+    }
+
     for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
     {
         const Hash& hash = it->first;
         const TuningFilterValue& value = it->second;
 
-        if (tuningObjectsHashMap.find(hash) == tuningObjectsHashMap.end())
+        if (objects->objectExists(hash) == false)
         {
             notFoundCounter++;
 
@@ -892,19 +898,25 @@ void TuningFilter::checkSignals(const std::map<Hash, int> &tuningObjectsHashMap,
     int childCount = (int)m_childFilters.size();
     for (int i = 0; i < childCount; i++)
     {
-        m_childFilters[i]->checkSignals(tuningObjectsHashMap, errorLog, notFoundCounter);
+        m_childFilters[i]->checkSignals(objects, errorLog, notFoundCounter);
     }
 }
 
-void TuningFilter::removeNotExistingSignals(const std::map<Hash, int> &tuningObjectsHashMap, int &removedCounter)
+void TuningFilter::removeNotExistingSignals(const TuningObjectStorage *objects, int &removedCounter)
 {
+    if (objects == nullptr)
+    {
+        assert(objects);
+        return;
+    }
+
     std::vector<Hash> valuesToDelete;
 
     for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
     {
         const Hash& hash = it->first;
 
-        if (tuningObjectsHashMap.find(hash) == tuningObjectsHashMap.end())
+        if (objects->objectExists(hash) == false)
         {
             removedCounter++;
             valuesToDelete.push_back(hash);
@@ -938,7 +950,7 @@ void TuningFilter::removeNotExistingSignals(const std::map<Hash, int> &tuningObj
     int childCount = (int)m_childFilters.size();
     for (int i = 0; i < childCount; i++)
     {
-        m_childFilters[i]->removeNotExistingSignals(tuningObjectsHashMap, removedCounter);
+        m_childFilters[i]->removeNotExistingSignals(objects, removedCounter);
     }
 }
 
@@ -1206,9 +1218,15 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters(const std::map<Hash, int> &tuningObjectsHashMap, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
-	if (bySchemas == true)
+    if (objects == nullptr)
+    {
+        assert(objects);
+        return;
+    }
+
+    if (bySchemas == true)
 	{
 
 		// Filter for Schema
@@ -1227,18 +1245,7 @@ void TuningFilterStorage::createAutomaticFilters(const std::map<Hash, int> &tuni
                 //
                 Hash hash = ::calcHash(appSignalID);
 
-                bool found = false;
-
-                for (auto it : tuningObjectsHashMap)
-                {
-                    if (it.first == hash)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found == false)
+                if (objects->objectExists(hash) == false)
                 {
                     continue;
                 }
@@ -1291,8 +1298,13 @@ void TuningFilterStorage::createAutomaticFilters(const std::map<Hash, int> &tuni
 	}
 }
 
-void TuningFilterStorage::checkSignals(const std::map<Hash, int> &tuningObjectsHashMap, bool& removedNotFound, QWidget* parentWidget)
+void TuningFilterStorage::checkSignals(const TuningObjectStorage *objects, bool& removedNotFound, QWidget* parentWidget)
 {
+    if (objects == nullptr)
+    {
+        assert(objects);
+        return;
+    }
 
     QStringList errorLog;
 
@@ -1300,7 +1312,7 @@ void TuningFilterStorage::checkSignals(const std::map<Hash, int> &tuningObjectsH
 
     int notFoundCounter = 0;
 
-    m_root->checkSignals(tuningObjectsHashMap, errorLog, notFoundCounter);
+    m_root->checkSignals(objects, errorLog, notFoundCounter);
 
     if (notFoundCounter == 0)
     {
@@ -1312,7 +1324,7 @@ void TuningFilterStorage::checkSignals(const std::map<Hash, int> &tuningObjectsH
     {
         int removedCounter = 0;
 
-        m_root->removeNotExistingSignals(tuningObjectsHashMap, removedCounter);
+        m_root->removeNotExistingSignals(objects, removedCounter);
 
         removedNotFound = true;
 

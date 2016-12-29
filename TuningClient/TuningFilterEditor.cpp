@@ -7,12 +7,16 @@
 //
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const std::vector<TuningObject> *objects, bool showAutomatic, QWidget *parent) :
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, bool showAutomatic, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
     m_showAutomatic(showAutomatic),
 	m_filterStorage(filterStorage),
     m_objects(objects)
 {
+
+    assert(filterStorage);
+    assert(m_objects);
+
     initUserInterface();
 
     // Objects and model
@@ -263,16 +267,16 @@ void TuningFilterEditor::fillObjectsList()
 
     std::vector<TuningObject> objects;
 
-    for (int i = 0; i < m_objects->size(); i++)
+    for (int i = 0; i < m_objects->objectCount(); i++)
 	{
-        const TuningObject& o = (*m_objects)[i];
+        const TuningObject* o = m_objects->objectPtr(i);
 
-		if (signalType == SignalType::Analog && o.analog() == false)
+        if (signalType == SignalType::Analog && o->analog() == false)
 		{
 			continue;
 		}
 
-		if (signalType == SignalType::Discrete && o.analog() == true)
+        if (signalType == SignalType::Discrete && o->analog() == true)
 		{
 			continue;
 		}
@@ -285,10 +289,10 @@ void TuningFilterEditor::fillObjectsList()
 			{
             case FilterType::All:
                 {
-                if (o.appSignalID().contains(filterText, Qt::CaseInsensitive) == true
-                        ||o.customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true
-                        ||o.equipmentID().contains(filterText, Qt::CaseInsensitive) == true
-                        ||o.caption().contains(filterText, Qt::CaseInsensitive) == true )
+                if (o->appSignalID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o->customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o->equipmentID().contains(filterText, Qt::CaseInsensitive) == true
+                        ||o->caption().contains(filterText, Qt::CaseInsensitive) == true )
                 {
                     filterResult = true;
                 }
@@ -296,7 +300,7 @@ void TuningFilterEditor::fillObjectsList()
                 break;
             case FilterType::AppSignalID:
 				{
-                    if (o.appSignalID().contains(filterText, Qt::CaseInsensitive) == true)
+                    if (o->appSignalID().contains(filterText, Qt::CaseInsensitive) == true)
                     {
                         filterResult = true;
 					}
@@ -304,7 +308,7 @@ void TuningFilterEditor::fillObjectsList()
 				break;
             case FilterType::CustomAppSignalID:
 				{
-                    if (o.customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true)
+                    if (o->customAppSignalID().contains(filterText, Qt::CaseInsensitive) == true)
                     {
                         filterResult = true;
                     }
@@ -312,7 +316,7 @@ void TuningFilterEditor::fillObjectsList()
 				break;
             case FilterType::EquipmentID:
 				{
-                    if (o.equipmentID().contains(filterText, Qt::CaseInsensitive) == true)
+                    if (o->equipmentID().contains(filterText, Qt::CaseInsensitive) == true)
                     {
                         filterResult = true;
                     }
@@ -320,7 +324,7 @@ void TuningFilterEditor::fillObjectsList()
 				break;
             case FilterType::Caption:
                 {
-                    if (o.caption().contains(filterText, Qt::CaseInsensitive) == true)
+                    if (o->caption().contains(filterText, Qt::CaseInsensitive) == true)
                     {
                         filterResult = true;
                     }
@@ -334,7 +338,7 @@ void TuningFilterEditor::fillObjectsList()
             }
 		}
 
-        objects.push_back(o);
+        objects.push_back(*o);
 	}
 
     m_model->setObjects(objects);
@@ -517,23 +521,30 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		return;
 	}
 
+    TuningObject* object = m_objects->objectPtrByHash(value.appSignalHash());
+    if (object == nullptr)
+    {
+        assert(object);
+        return;
+    }
+
 	QStringList l;
 	l.push_back("-");
     l.push_back(tr("Signal"));
-    //l.push_back(value.customAppSignalId());
+    l.push_back(object->customAppSignalID());
     l.push_back(value.appSignalId());
-    //l.push_back(value.caption());
-    /*if (value.useValue() == true)
+    l.push_back(object->caption());
+    if (value.useValue() == true)
 	{
-		if (value.analog() == false)
+        if (object->analog() == false)
 		{
-			l.push_back(value.value() == 0 ? tr("No") : tr("Yes"));
+            l.push_back(value.value() == 0 ? tr("0") : tr("1"));
 		}
 		else
 		{
-			l.push_back(QString::number(value.value(), 'f', value.decimalPlaces()));
+            l.push_back(QString::number(value.value(), 'f', object->decimalPlaces()));
 		}
-    }*/
+    }
 
 	int i = 0;
 	for (auto s : l)
@@ -835,8 +846,12 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 
 void TuningFilterEditor::on_m_setValue_clicked()
 {
-    /*bool first = true;
-	TuningFilterValue firstValue;
+    bool first = true;
+    bool analog = false;
+    float lowLimit = 0;
+    float highLimit = 0;
+    int decimalPlaces = 0;
+    float firstValue = 0;
 
 	bool sameValue = true;
 
@@ -850,36 +865,47 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
 
-		if (first == true)
+        TuningObject* object = m_objects->objectPtrByHash(ov.appSignalHash());
+        if (object == nullptr)
+        {
+            assert(object);
+            return;
+        }
+
+        if (first == true)
 		{
-			firstValue = ov;
+            analog = object->analog();
+            lowLimit = object->lowLimit();
+            highLimit = object->highLimit();
+            decimalPlaces = object->decimalPlaces();
+            firstValue = ov.value();
             first = false;
 		}
 		else
 		{
-			if (ov.analog() != firstValue.analog())
+            if (analog != object->analog())
 			{
                 QMessageBox::warning(this, tr("Preset Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
 			}
 
-            if (ov.analog() == true)
+            if (analog == true)
             {
-                if (ov.lowLimit() != firstValue.lowLimit() || ov.highLimit() != firstValue.highLimit())
+                if (lowLimit != object->lowLimit() || highLimit != object->highLimit())
                 {
                     QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
                     return;
                 }
             }
 
-            if (ov.value() != firstValue.value())
+            if (ov.value() != firstValue)
 			{
 				sameValue = false;
 			}
 		}
 	}
 
-    DialogInputValue d(firstValue.analog(), firstValue.value(), sameValue, firstValue.lowLimit(), firstValue.highLimit(), firstValue.decimalPlaces());
+    DialogInputValue d(analog, firstValue, sameValue, lowLimit, highLimit, decimalPlaces);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -919,10 +945,10 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
 		setSignalItemText(item, ov);
 
-		filter->setValue(ov.hash(), ov.value());
+        filter->setValue(ov.appSignalHash(), ov.value());
 	}
 
-    m_modified = true;*/
+    m_modified = true;
 
 }
 

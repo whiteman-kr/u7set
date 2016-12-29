@@ -53,13 +53,14 @@ public slots:
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
+    void showAbout();
 
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	void removeWorkspace();
-	void createWorkspace();
+    void createWorkspace(const TuningObjectStorage *objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;

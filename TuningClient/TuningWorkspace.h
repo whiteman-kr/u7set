@@ -7,10 +7,8 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	TuningWorkspace(QWidget* parent = nullptr);
+    TuningWorkspace(const TuningObjectStorage* objects, QWidget* parent);
 	~TuningWorkspace();
-
-    std::vector<TuningObject>* objects();
 
 private:
     void fillFiltersTree();
@@ -19,7 +17,7 @@ private:
 
 private:
 
-    std::vector<TuningObject> m_objects;
+    TuningObjectStorage m_objects;
 
 	QTreeWidget* m_filterTree = nullptr;
 	QSplitter* m_hSplitter = nullptr;

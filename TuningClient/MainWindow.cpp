@@ -7,6 +7,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
+#include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -126,7 +127,7 @@ void MainWindow::createActions()
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
-	//connect(m_pAboutAction, &QAction::triggered, this, &MonitorMainWindow::showAbout);
+    connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 void MainWindow::createMenu()
@@ -225,10 +226,11 @@ void MainWindow::removeWorkspace()
 
 }
 
-void MainWindow::createWorkspace()
+void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
-	m_tuningWorkspace = new TuningWorkspace(this);
-	setCentralWidget(m_tuningWorkspace);
+    m_tuningWorkspace = new TuningWorkspace(objects, this);
+
+    setCentralWidget(m_tuningWorkspace);
 
     connect(m_pPresetEditorAction, &QAction::triggered, m_tuningWorkspace, &TuningWorkspace::slot_runPresetEditor);
 
@@ -268,9 +270,9 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
         emit signalsUpdated();
     }
 
-    std::map<Hash, int> tuningObjectsHashMap = theObjectManager->objectsHashMap();
+    TuningObjectStorage objects = theObjectManager->objectStorage();
 
-    theFilters.createAutomaticFilters(tuningObjectsHashMap, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+    theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
     // Find and possibly remove non-existing signals from the list
 
@@ -279,7 +281,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
         bool removedNotFound = false;
 
-        theFilters.checkSignals(tuningObjectsHashMap, removedNotFound, this);
+        theFilters.checkSignals(&objects, removedNotFound, this);
 
         if (removedNotFound == true)
         {
@@ -293,7 +295,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
         }
     }
 
-    createWorkspace();
+    createWorkspace(&objects);
 
     return;
 }
@@ -347,6 +349,56 @@ void MainWindow::showTuningSources()
 	}
 }
 
+void MainWindow::showAbout()
+{
+    QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+    QHBoxLayout* hl = new QHBoxLayout;
+
+    /*QLabel* logo = new QLabel(&aboutDialog);
+    logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+
+    hl->addWidget(logo);*/
+
+    QVBoxLayout* vl = new QVBoxLayout;
+    hl->addLayout(vl);
+
+    QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+    text += "Build: Release";
+#else
+    text += "Build: Debug";
+#endif
+    text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+    QLabel* label = new QLabel(text, &aboutDialog);
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    vl->addWidget(label);
+
+    label = new QLabel(&aboutDialog);
+    label->setText(qApp->applicationName() + " allows user to modify tuning values.");
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    label->setWordWrap(true);
+    vl->addWidget(label);
+
+    QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+    connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+        qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+    });
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+    buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(QDialogButtonBox::Ok);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(hl);
+    mainLayout->addWidget(buttonBox);
+    aboutDialog.setLayout(mainLayout);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
+    aboutDialog.exec();
+}
 
 MainWindow* theMainWindow = nullptr;
 LogFile* theLogFile = nullptr;

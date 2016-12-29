@@ -97,9 +97,9 @@ public:
 
 	bool match(const TuningObject &object) const;
 
-    void checkSignals(const std::map<Hash, int> &tuningObjectsHashMap, QStringList& errorLog, int &notFoundCounter);
+    void checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter);
 
-    void removeNotExistingSignals(const std::map<Hash, int> &tuningObjectsHashMap, int &removedCounter);
+    void removeNotExistingSignals(const TuningObjectStorage *objects, int &removedCounter);
 
 public:
 	// Properties
@@ -227,9 +227,9 @@ public:
 
     // Operations
 
-    void createAutomaticFilters(const std::map<Hash, int> &tuningObjectsHashMap, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+    void createAutomaticFilters(const TuningObjectStorage *objects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
 
-    void checkSignals(const std::map<Hash, int> &tuningObjectsHashMap, bool &removedNotFound, QWidget* parentWidget);
+    void checkSignals(const TuningObjectStorage *objects, bool &removedNotFound, QWidget* parentWidget);
 
 public:
 
