@@ -42,5 +42,8 @@
 #include <QUuid>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDialogButtonBox>
+#include <QTextEdit>
+#include <QClipboard>
 
 #endif // STABLE_H

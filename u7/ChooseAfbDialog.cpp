@@ -34,7 +34,7 @@ void ChooseAfbDialog::showEvent(QShowEvent*)
 {
 	// Resize depends on monitor size, DPI, resolution
 	//
-	QRect screen = QDesktopWidget().availableGeometry(this);
+	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 	resize(screen.width() * 0.35, screen.height() * 0.40);
 
 	move(screen.center() - rect().center());

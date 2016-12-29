@@ -6,8 +6,8 @@
 #include "DialogSettings.h"
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
-#include "DialogPresetEditor.h"
 #include "DialogUsers.h"
+#include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -52,9 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	QString errorCode;
 
-    QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
-
-    if (theFilters.load(userFiltersFile, &errorCode, false) == false)
+    if (theFilters.load(theSettings.userFiltersFile(), &errorCode, false) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -101,7 +99,6 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
-	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pUsersAction = new QAction(tr("Users..."), this);
 	m_pUsersAction->setStatusTip(tr("Edit users"));
@@ -130,7 +127,7 @@ void MainWindow::createActions()
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
-	//connect(m_pAboutAction, &QAction::triggered, this, &MonitorMainWindow::showAbout);
+    connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 void MainWindow::createMenu()
@@ -229,12 +226,14 @@ void MainWindow::removeWorkspace()
 
 }
 
-void MainWindow::createWorkspace()
+void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
-	m_tuningWorkspace = new TuningWorkspace(this);
-	setCentralWidget(m_tuningWorkspace);
+    m_tuningWorkspace = new TuningWorkspace(objects, this);
 
-	connect(this, &MainWindow::userFiltersUpdated, m_tuningWorkspace, &TuningWorkspace::slot_resetTreeFilter);
+    setCentralWidget(m_tuningWorkspace);
+
+    connect(m_pPresetEditorAction, &QAction::triggered, m_tuningWorkspace, &TuningWorkspace::slot_runPresetEditor);
+
 }
 
 void MainWindow::slot_configurationArrived(ConfigSettings settings)
@@ -271,11 +270,32 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
         emit signalsUpdated();
     }
 
-    std::vector<TuningObject> objects = theObjectManager->objects();
+    TuningObjectStorage objects = theObjectManager->objectStorage();
 
-    theFilters.createAutomaticFilters(objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+    theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
 
-    createWorkspace();
+    // Find and possibly remove non-existing signals from the list
+
+    if (settings.updateFilters == true || settings.updateSignals == true)
+    {
+
+        bool removedNotFound = false;
+
+        theFilters.checkSignals(&objects, removedNotFound, this);
+
+        if (removedNotFound == true)
+        {
+            QString errorMsg;
+
+            if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+            {
+                theLogFile->writeError(errorMsg);
+                QMessageBox::critical(this, tr("Error"), errorMsg);
+            }
+        }
+    }
+
+    createWorkspace(&objects);
 
     return;
 }
@@ -315,24 +335,6 @@ void MainWindow::showSettings()
     delete d;
 }
 
-void MainWindow::runPresetEditor()
-{
-    DialogPresetEditor d(&theFilters, this);
-
-    if (d.exec() == QDialog::Accepted)
-	{
-		QString errorMsg;
-
-        QString userFiltersFile = QDir::toNativeSeparators(theSettings.localAppDataPath() + "/UserFilters.xml");
-
-        if (theFilters.save(userFiltersFile, &errorMsg) == false)
-		{
-            theLogFile->writeError(errorMsg);
-			QMessageBox::critical(this, tr("Error"), errorMsg);
-		}
-		emit userFiltersUpdated();
-	}
-}
 
 void MainWindow::showTuningSources()
 {
@@ -347,6 +349,56 @@ void MainWindow::showTuningSources()
 	}
 }
 
+void MainWindow::showAbout()
+{
+    QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+    QHBoxLayout* hl = new QHBoxLayout;
+
+    /*QLabel* logo = new QLabel(&aboutDialog);
+    logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+
+    hl->addWidget(logo);*/
+
+    QVBoxLayout* vl = new QVBoxLayout;
+    hl->addLayout(vl);
+
+    QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+#ifndef Q_DEBUG
+    text += "Build: Release";
+#else
+    text += "Build: Debug";
+#endif
+    text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+    QLabel* label = new QLabel(text, &aboutDialog);
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    vl->addWidget(label);
+
+    label = new QLabel(&aboutDialog);
+    label->setText(qApp->applicationName() + " allows user to modify tuning values.");
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    label->setWordWrap(true);
+    vl->addWidget(label);
+
+    QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+    connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+        qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+    });
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+    buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(QDialogButtonBox::Ok);
+
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(hl);
+    mainLayout->addWidget(buttonBox);
+    aboutDialog.setLayout(mainLayout);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+
+    aboutDialog.exec();
+}
 
 MainWindow* theMainWindow = nullptr;
 LogFile* theLogFile = nullptr;

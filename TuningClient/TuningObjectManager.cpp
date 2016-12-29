@@ -2,6 +2,8 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
+
+
 TuningObjectManager::TuningObjectManager(ConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
     :Tcp::Client(serverAddressPort1, serverAddressPort2),
       m_cfgController(configController)
@@ -16,7 +18,7 @@ TuningObjectManager::~TuningObjectManager()
     qDebug() << "TuningObjectManager::~TuningObjectManager()";
 }
 
-bool TuningObjectManager::loadSignals(const QByteArray& data, QString *errorCode)
+bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCode)
 {
     if (errorCode == nullptr)
     {
@@ -24,194 +26,52 @@ bool TuningObjectManager::loadSignals(const QByteArray& data, QString *errorCode
         return false;
     }
 
+    bool result = true;
+
     QMutexLocker l(&m_mutex);
 
-    m_objects.clear();
-
-    m_objectsHashMap.clear();
-
-    QXmlStreamReader reader(data);
-
-    if (reader.readNextStartElement() == false)
-    {
-        reader.raiseError(QObject::tr("Failed to load root element."));
-        *errorCode = reader.errorString();
-        return !reader.hasError();
-    }
-
-    if (reader.name() != "TuningSignals")
-    {
-        reader.raiseError(QObject::tr("The file is not an TuningSignals file."));
-        *errorCode = reader.errorString();
-        return !reader.hasError();
-    }
-
-    // Read signals
-    //
-    while (!reader.atEnd())
-    {
-        QXmlStreamReader::TokenType t = reader.readNext();
-
-        if (t == QXmlStreamReader::TokenType::Characters)
-        {
-            continue;
-        }
-
-        if (t != QXmlStreamReader::TokenType::StartElement)
-        {
-            continue;
-        }
-
-        if (reader.name() == "TuningSignal")
-        {
-            TuningObject object;
-
-            if (reader.attributes().hasAttribute("AppSignalID"))
-            {
-                object.setAppSignalID(reader.attributes().value("AppSignalID").toString());
-            }
-
-            if (reader.attributes().hasAttribute("CustomAppSignalID"))
-            {
-                object.setCustomAppSignalID(reader.attributes().value("CustomAppSignalID").toString());
-            }
-
-            if (reader.attributes().hasAttribute("EquipmentID"))
-            {
-                object.setEquipmentID(reader.attributes().value("EquipmentID").toString());
-            }
-
-            if (reader.attributes().hasAttribute("Caption"))
-            {
-                object.setCaption(reader.attributes().value("Caption").toString());
-            }
-
-            if (reader.attributes().hasAttribute("Type"))
-            {
-                QString t = reader.attributes().value("Type").toString();
-                object.setAnalog(t == "A");
-            }
-
-            if (reader.attributes().hasAttribute("DecimalPlaces"))
-            {
-                object.setDecimalPlaces(reader.attributes().value("DecimalPlaces").toString().toInt());
-            }
-
-            if (reader.attributes().hasAttribute("DefaultValue"))
-            {
-                QString v = reader.attributes().value("DefaultValue").toString();
-                object.setDefaultValue(v.toFloat());
-            }
-
-            if (reader.attributes().hasAttribute("LowLimit"))
-            {
-                QString v = reader.attributes().value("LowLimit").toString();
-                object.setLowLimit(v.toFloat());
-            }
-
-            if (reader.attributes().hasAttribute("HighLimit"))
-            {
-                QString v = reader.attributes().value("HighLimit").toString();
-                object.setHighLimit(v.toFloat());
-            }
-
-
-            m_objects.push_back(object);
-
-            m_objectsHashMap[object.appSignalHash()] = (int)m_objects.size() - 1;
-
-            continue;
-        }
-
-        reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-        *errorCode = reader.errorString();
-        return !reader.hasError();
-    }
+    result &= m_objects.loadSignals(data, errorCode);
 
     // Create Tuning sources
     //
     m_tuningSourcesList.clear();
 
-    for (auto o : m_objects)
+    int count = m_objects.objectCount();
+    for (int i = 0; i < count; i++)
     {
-        if (m_tuningSourcesList.indexOf(o.equipmentID()) == -1)
+        const TuningObject* o = m_objects.objectPtr(i);
+        if (o == nullptr)
         {
-            m_tuningSourcesList.append(o.equipmentID());
+            assert(o);
+            continue;
+        }
 
+        if (m_tuningSourcesList.indexOf(o->equipmentID()) == -1)
+        {
+            m_tuningSourcesList.append(o->equipmentID());
         }
     }
 
-    return !reader.hasError();
+    return result;
 }
 
-int TuningObjectManager::objectCount()
-{
-    return (int)m_objects.size();
-
-}
-
-TuningObject TuningObjectManager::object(int index)
-{
-    QMutexLocker l(&m_mutex);
-
-    if (index < 0 || index >= m_objects.size())
-    {
-        assert(false);
-        return TuningObject();
-    }
-
-    return m_objects[index];
-
-}
-
-TuningObject* TuningObjectManager::objectPtr(int index)
-{
-    if (index < 0 || index >= m_objects.size())
-    {
-        assert(false);
-        return nullptr;
-    }
-
-    return &m_objects[index];
-}
-
-TuningObject* TuningObjectManager::objectPtrByHash(quint64 hash)
-{
-    auto it = m_objectsHashMap.find(hash);
-
-    if (it == m_objectsHashMap.end())
-    {
-        assert(false);
-        return nullptr;
-    }
-
-    return objectPtr(it->second);
-
-}
-
-std::vector<TuningObject> TuningObjectManager::objects()
+TuningObjectStorage TuningObjectManager::objectStorage()
 {
     QMutexLocker l(&m_mutex);
     return m_objects;
+}
+
+// WARNING!!! Lock the mutex before calling this function!!!
+//
+TuningObject* TuningObjectManager::objectPtrByHash(Hash hash) const
+{
+    return m_objects.objectPtrByHash(hash);
 }
 
 QStringList TuningObjectManager::tuningSourcesEquipmentIds()
 {
     QMutexLocker l(&m_mutex);
     return m_tuningSourcesList;
-}
-
-void TuningObjectManager::invalidateSignals()
-{
-    QMutexLocker l(&m_mutex);
-
-    int count = (int)m_objects.size();
-    for (int i = 0; i < count; i++)
-    {
-        TuningObject& object = m_objects[i];
-        object.setValid(false);
-    }
-
 }
 
 void TuningObjectManager::onClientThreadStarted()
@@ -257,7 +117,9 @@ void TuningObjectManager::onDisconnection()
 {
     theLogFile->writeMessage(tr("TuningObjectManager: connection failed."));
 
-    invalidateSignals();
+    QMutexLocker l(&m_mutex);
+
+    m_objects.invalidateSignals();
 
     emit connectionFailed();
 }
@@ -367,7 +229,7 @@ void TuningObjectManager::requestReadTuningSignals()
 {
     QMutexLocker l(&m_mutex);
 
-    int objectCount = (int)m_objects.size();
+    int objectCount = m_objects.objectCount();
 
     // if no signals in the database, start the new request loop
     //
@@ -411,7 +273,7 @@ void TuningObjectManager::requestReadTuningSignals()
 
     for (int i = 0; i < m_readTuningSignalCount; i++)
     {
-        TuningObject* object = objectPtr(m_readTuningSignalIndex + i);
+        const TuningObject* object = m_objects.objectPtr(m_readTuningSignalIndex + i);
         if (object == nullptr)
         {
             assert(object);
@@ -640,7 +502,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
             continue;
         }
 
-        TuningObject* object = objectPtrByHash(tss.signalhash());
+        TuningObject* object = m_objects.objectPtrByHash(tss.signalhash());
         if (object == nullptr)
         {
             theLogFile->writeError(tr("TcpTuningClient::processReadTuningSignals, object not found by hash: %1")
@@ -670,7 +532,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 
     }
 
-    int objectCount = (int)m_objects.size();
+    int objectCount = m_objects.objectCount();
 
     l.unlock();
 
@@ -836,7 +698,7 @@ void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& 
         // set edit value and writing flags to base object
         //
 
-        TuningObject* baseObject = objectPtrByHash(cmd.m_hash);
+        TuningObject* baseObject = m_objects.objectPtrByHash(cmd.m_hash);
         if (baseObject == nullptr)
         {
             assert(baseObject);

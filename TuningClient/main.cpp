@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "UserManager.h"
 #include <QCommandLineParser>
+#include "version.h"
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
@@ -114,6 +115,8 @@ int main(int argc, char *argv[])
     a.setApplicationName("TuningClient");
     a.setOrganizationName("Radiy");
     a.setOrganizationDomain("radiy.com");
+
+    a.setApplicationVersion(QString("0.1.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
 
     theSettings.RestoreUser();
     theSettings.RestoreSystem();

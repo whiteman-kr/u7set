@@ -298,7 +298,7 @@ bool ConfigController::getTuningSignals()
 	}
 	else
 	{
-        if (theObjectManager->loadSignals(data, &errorStr) == false)
+        if (theObjectManager->loadDatabase(data, &errorStr) == false)
 		{
 			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
 			theLogFile->writeError(completeErrorMessage);

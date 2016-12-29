@@ -43,6 +43,23 @@ private:
 
 };
 
+class DialogCheckFilterSignals : public QDialog
+{
+    Q_OBJECT
+
+public:
+
+    DialogCheckFilterSignals(QStringList& errorLog, QWidget* parent);
+
+private slots:
+
+    void buttonClicked(QAbstractButton* button);
+
+private:
+
+    QDialogButtonBox* m_buttonBox = nullptr;
+};
+
 class TuningFilter : public PropertyObject
 {
 	Q_OBJECT
@@ -69,7 +86,7 @@ public:
 
 public:
 	TuningFilter();
-	TuningFilter(const TuningFilter& That);
+    TuningFilter(const TuningFilter& That);
 	TuningFilter(FilterType filterType);
 	~TuningFilter();
 
@@ -79,6 +96,10 @@ public:
 	bool save(QXmlStreamWriter& writer) const;
 
 	bool match(const TuningObject &object) const;
+
+    void checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter);
+
+    void removeNotExistingSignals(const TuningObjectStorage *objects, int &removedCounter);
 
 public:
 	// Properties
@@ -115,15 +136,15 @@ public:
 	std::vector <TuningFilterValue> signalValues() const;
 	void setValues(const std::vector <TuningFilterValue>& values);
 
-    bool value(Hash hash, TuningFilterValue& value);
+    int valuesCount() const;
+    bool valueExists(Hash hash) const;
+
+    void addValue(const TuningFilterValue& value);
+    void removeValue(Hash hash);
+
     void setValue(Hash hash, float value);
 
-    bool valueExists(Hash hash) const;
-	void addValue(const TuningFilterValue& value);
-
-    int valuesCount() const;
-
-	void removeValue(Hash hash);
+    bool value(Hash hash, TuningFilterValue& value);
 
 public:
     // Operations
@@ -153,22 +174,31 @@ private:
 
 private:
 
+    // Properties
+    //
+
 	QString m_strID;
 	QString m_caption;
 
     bool m_automatic = false;
 
-	// Filters
+    FilterType m_filterType = FilterType::Tree;
+    SignalType m_signalType = SignalType::All;
+
+    // Filters
 	//
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
+    // Values
+    //
+
 	std::vector<Hash> m_signalValuesVec;
 	std::map <Hash, TuningFilterValue> m_signalValuesMap;
 
-	FilterType m_filterType = FilterType::Tree;
-	SignalType m_signalType = SignalType::All;
+    // Parent and child
+    //
 
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
 
@@ -182,18 +212,32 @@ public:
 	TuningFilterStorage();
 	TuningFilterStorage(const TuningFilterStorage& That);
 
+    // Serialization
+
     bool load(const QByteArray& data, QString *errorCode, bool automatic);
-	bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
 
     bool load(const QString& fileName, QString *errorCode, bool automatic);
 	bool save(const QString& fileName, QString *errorMsg);
 
-	int schemaDetailsCount();
+    // Schemas loading
+
+    bool loadSchemasDetails(const QByteArray& data, QString *errorCode);
+    int schemaDetailsCount();
 	SchemaDetails schemaDetails(int index);
 
-    void createAutomaticFilters(const std::vector<TuningObject> &tuningObjects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+    // Operations
+
+    void createAutomaticFilters(const TuningObjectStorage *objects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+
+    void checkSignals(const TuningObjectStorage *objects, bool &removedNotFound, QWidget* parentWidget);
+
+public:
 
 	std::shared_ptr<TuningFilter> m_root = nullptr;
+
+private:
+
+    void checkFilterSignals(TuningFilter* filter, const std::vector<TuningObject> &tuningObjects, QStringList& errorLog, int &notFoundCounter);
 
 private:
 
@@ -201,8 +245,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
+
 Q_DECLARE_METATYPE(TuningFilterValue)
-
-
 
 #endif // OBJECTFILTER_H
