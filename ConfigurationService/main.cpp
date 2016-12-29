@@ -10,13 +10,17 @@ int main(int argc, char *argv[])
 
 	INIT_LOGGER(argv[0]);
 
-	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker();
+	LOG_MSG(QString("Run: %1").arg(argv[0]));
 
-	ServiceStarter serviceStarter(argc, argv, "RPCT Configuration Service", cfgServiceWorker);
+	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker("RPCT Configuration Service", argc, argv);
+
+	ServiceStarter serviceStarter(cfgServiceWorker);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	LOG_MSG(QString("Exit: %1, result = %2").arg(argv[0]).arg(result));
 
 	return result;
 }

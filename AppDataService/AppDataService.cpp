@@ -10,8 +10,8 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataServiceWorker::AppDataServiceWorker() :
-	ServiceWorker(ServiceType::AppDataService),
+AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName, int& argc, char** argv) :
+	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv),
 	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
@@ -26,22 +26,22 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
-void AppDataServiceWorker::initCmdLineParser()
+ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	CommandLineParser* clp = cmdLineParser();
-
-	if (clp == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-	clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv());
+	newInstance->init();
+	return newInstance;
 }
 
 
-void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
+void AppDataServiceWorker::initCmdLineParser()
+{
+	cmdLineParser().addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+	cmdLineParser().addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+}
+
+
+void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
 	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
 	serviceInfo.set_clientrequestport(m_settings.clientRequestIP.port());

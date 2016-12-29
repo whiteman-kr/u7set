@@ -65,16 +65,16 @@ public:
 	void setService(Service* service);
 	Service* service();
 
-	const CommandLineParser& cmdLineParser() const;
+	CommandLineParser& cmdLineParser();
 
-	virtual ServiceWorker* createInstance() = 0;	// Must be implemented in derived class as:
-													//
-													// ServiceWorker* createInstance() override
-													// {
-													//		ServiceWorker* newInstance = new DerivedServiceWorker(argc(), argv());
-													//		newInstance->init();
-													//		return newInstance;
-													// }
+	virtual ServiceWorker* createInstance() const = 0;	// Must be implemented in derived class as:
+														//
+														// ServiceWorker* createInstance() const override
+														// {
+														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(serviceName(), argc(), argv());
+														//		newInstance->init();
+														//		return newInstance;
+														// }
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 

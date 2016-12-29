@@ -1,8 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <QQueue>
-#include <QMap>
 #include <QTimer>
 
 #include "SimpleThread.h"
@@ -86,8 +84,8 @@ public:
 	CircularLogger();
 	~CircularLogger();
 
-	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
-	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
+	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "", bool echoToDebug = false);
+	void init(int fileCount, int fileSizeInMB, QString placementPath = "", bool echoToDebug = false);
 
 	bool isInitialized() const { return m_loggerInitialized; }
 
@@ -108,14 +106,16 @@ private:
 
 private:
 	bool m_loggerInitialized = false;
+	bool m_echoToDebug = false;
 };
 
 
 #define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__);
 #define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__);
 #define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__);
+#define LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__);
 
-#define INIT_LOGGER(appPath)	 logger.init(10, 10, appPath);
+#define INIT_LOGGER(appPath, echoToDebug)	 logger.init(10, 10, appPath, echoToDebug);
 
 
 extern CircularLogger logger;

@@ -74,11 +74,10 @@ Service* ServiceWorker::service()
 }
 
 
-const CommandLineParser& ServiceWorker::cmdLineParser() const
+CommandLineParser &ServiceWorker::cmdLineParser()
 {
 	return m_cmdLineParser;
 }
-
 
 
 void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -352,16 +351,9 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 ServiceStarter::ServiceStarter(ServiceWorker* serviceWorker) :
 	m_serviceWorker(serviceWorker)
 {
+	assert(serviceWorker != nullptr);
 	assert(logger.isInitialized() == true);
-
-	if (serviceWorker == nullptr)
-	{
-		assert(false);
-		return;
-	}
 }
-
-
 
 
 int ServiceStarter::exec()

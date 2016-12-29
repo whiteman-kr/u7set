@@ -1,13 +1,13 @@
-#include "../lib/CircularLogger.h"
 #include <QFile>
 #include <QDir>
 #include <QDateTime>
-#include <QThread>
 #include <QCoreApplication>
 #include <QTimer>
 #include <QDebug>
 #include <assert.h>
 
+#include "../lib/WUtils.h"
+#include "../lib/CircularLogger.h"
 
 CircularLogger logger;		// global logger object
 
@@ -204,6 +204,8 @@ void CircularLoggerWorker::openFile(int index)
 	{
 		*m_stream << m_lastFileID << '\n';
 	}
+
+	*m_stream << '\n';
 }
 
 
@@ -242,13 +244,15 @@ CircularLogger::~CircularLogger()
 }
 
 
-void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
+void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath, bool echoToDebug)
 {
 	if (m_loggerInitialized == true)
 	{
 		assert(false);			// Logger object is allready initialized.
 		return;
 	}
+
+	m_echoToDebug = echoToDebug;
 
 	if (placementPath.isEmpty())
 	{
@@ -290,7 +294,7 @@ void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QStr
 }
 
 
-void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath)
+void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath, bool echoToDebug)
 {
 	if (m_loggerInitialized == true)
 	{
@@ -319,7 +323,7 @@ void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath
 		return;
 	}
 
-	init(fi.baseName(), fileCount, fileSizeInMB, placementPath);
+	init(fi.baseName(), fileCount, fileSizeInMB, placementPath, echoToDebug);
 }
 
 
@@ -390,6 +394,11 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 	{
 		assert(false);		// Logger object isn't initialized. Call CircularLogger::init at first.
 		return;
+	}
+
+	if (m_echoToDebug == true)
+	{
+		qDebug() << C_STR(QString("%1").arg(message));
 	}
 
 	QString record = QString("\"%1\" \"%2\" \"%3\" \"%4\" \"%5:%6\"").

@@ -23,29 +23,18 @@ class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
+public:
+	AppDataServiceWorker(const QString& serviceName, int& argc, char** argv);
+	~AppDataServiceWorker();
+
+	virtual ServiceWorker* createInstance() const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+
 private:
-	QString m_cfgServiceIP1;
-	QString m_cfgServiceIP2;
-	QString m_buildPath;
+	virtual void initCmdLineParser() override;
 
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-
-	AppDataServiceSettings m_settings;
-
-	UnitList m_unitInfo;
-
-	AppSignals m_appSignals;
-
-	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
-
-	AppSignalStates m_signalStates;
-
-	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
-
-	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
-
-	QTimer m_timer;
+	virtual void initialize() override;
+	virtual void shutdown() override;
 
 	//
 
@@ -85,22 +74,28 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
+private:
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
+	QString m_buildPath;
 
-public:
-	AppDataServiceWorker();
-	~AppDataServiceWorker();
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	virtual void initCmdLineParser() override;
+	AppDataServiceSettings m_settings;
 
-	virtual void initialize() override;
-	virtual void shutdown() override;
+	UnitList m_unitInfo;
 
+	AppSignals m_appSignals;
 
+	AppDataSources m_appDataSources;				// all data sources
+	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
 
-/*	ServiceWorker* createInstance() override
-	{
-		return new AppDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-	}*/
+	AppSignalStates m_signalStates;
+
+	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+
+	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
+
+	QTimer m_timer;
 };
 

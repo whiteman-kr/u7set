@@ -10,9 +10,23 @@
 //
 // ------------------------------------------------------------------------------------
 
-ConfigurationServiceWorker::ConfigurationServiceWorker() :
-	ServiceWorker(ServiceType::ConfigurationService)
+ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv) :
+	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv)
 {
+}
+
+
+ServiceWorker* ConfigurationServiceWorker::createInstance() const
+{
+	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv());
+	newInstance->init();
+	return newInstance;
+}
+
+
+void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+{
+	Q_UNUSED(serviceInfo)
 }
 
 
@@ -40,16 +54,8 @@ void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
 
 void ConfigurationServiceWorker::initCmdLineParser()
 {
-	CommandLineParser* clp = cmdLineParser();
-
-	if (clp == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	clp->addSingleValueOption("b", "RPCT project build directory.");
-	clp->addSingleValueOption("ip", "Client request IP.");
+	cmdLineParser().addSingleValueOption("b", "RPCT project build directory.");
+	cmdLineParser().addSingleValueOption("ip", "Client request IP.");
 }
 
 

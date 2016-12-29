@@ -1,4 +1,5 @@
 #include "../lib/Service.h"
+#include "../lib/WUtils.h"
 
 
 class BaseServiceWorker : public ServiceWorker
@@ -9,24 +10,31 @@ public:
 	{
 	}
 
-	void initCmdLineParser() override
+	virtual ServiceWorker* createInstance() const override
 	{
-		// no service-specific command line options
+		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv());
+		newInstance->init();
+		return newInstance;
 	}
 
-/*	ServiceWorker* createInstance() override
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override
 	{
-		return new BaseServiceWorker(cmdLineArgs());
-	}*/
+		Q_UNUSED(serviceInfo);
+	}
+
+	virtual void initCmdLineParser() override
+	{
+		LOG_CALL();
+	}
 
 	virtual void initialize() override
 	{
-		LOG_MSG("BaseServiceWorker is initialized");
+		LOG_CALL();
 	}
 
 	virtual void shutdown() override
 	{
-		LOG_MSG("BaseServiceWorker is finished")
+		LOG_CALL();
 	}
 };
 
@@ -37,11 +45,19 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	INIT_LOGGER(argv[0]);
+	INIT_LOGGER(argv[0], true);
+
+	LOG_MSG(QString("Run: %1").arg(cmdLine(argc, argv)));
 
 	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker("RPCT Base Service", argc, argv);
 
 	ServiceStarter serviceStarter(baseServiceWorker);
 
-	return serviceStarter.exec();
+	int result = serviceStarter.exec();
+
+	LOG_MSG(QString("Exit: %1, result = %2").arg(argv[0]).arg(result));
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	return result;
 }

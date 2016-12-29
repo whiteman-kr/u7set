@@ -74,7 +74,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    ../lib/WUtils.cpp
 
 HEADERS += \
     ../lib/SocketIO.h \
@@ -89,7 +90,8 @@ HEADERS += \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

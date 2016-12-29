@@ -10,9 +10,11 @@ int main(int argc, char *argv[])
 
 	INIT_LOGGER(argv[0]);
 
-	AppDataServiceWorker* dataServiceWorker = new AppDataServiceWorker();
+	LOG_MSG(QString("Run: ").arg(argv[0]));
 
-	ServiceStarter service(argc, argv, "RPCT Application Data Service", dataServiceWorker);
+	AppDataServiceWorker* dataServiceWorker = new AppDataServiceWorker("RPCT Application Data Service", argc, argv);
+
+	ServiceStarter service(dataServiceWorker);
 
 	int result = service.exec();
 

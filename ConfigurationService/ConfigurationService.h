@@ -9,7 +9,10 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker();
+	ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv);
+
+	virtual ServiceWorker* createInstance() const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
 
 public slots:
 	void onInformationRequest(UdpRequest request);
