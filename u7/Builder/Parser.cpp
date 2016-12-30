@@ -2972,15 +2972,71 @@ namespace Builder
 		std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 		std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		if (logicSchema == nullptr || layer == nullptr)
+		if (logicSchema == nullptr ||
+			layer == nullptr ||
+			m_signalSet == nullptr)
 		{
 			assert(logicSchema);
 			assert(layer);
+			assert(m_signalSet);
 			return false;
 		}
 
 		QStringList equipmentIds = logicSchema->equipmentIdList();
 
+		// Check if all signal elements are from related Logic Module
+		//
+		bool alienLmIds = false;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		{
+			if (item->isType<VFrame30::SchemaItemSignal>() == false)
+			{
+				// Checking only signals
+				//
+				continue;
+			}
+
+			VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
+			assert(signalItem);
+
+			const QStringList& itemSignals = signalItem->appSignalIdList();
+
+			for (const QString& appSignalId : itemSignals)
+			{
+				Signal* appSignal = m_signalSet->getSignal(appSignalId);
+
+				if (appSignal == nullptr)
+				{
+					alienLmIds = true;
+					m_log->errALP4034(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm() == nullptr)
+				{
+					alienLmIds = true;
+					m_log->errALP4035(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+
+				if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
+				{
+					alienLmIds = true;
+					m_log->errALP4036(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					continue;
+				}
+			}
+		}
+
+		if (alienLmIds == true)
+		{
+			// There were an error, the progreamm signaled about it, just leave this func
+			//
+			return false;
+		}
+
+		// Serializae layer, so it can be restored for each equipmentId
+		//
 		QByteArray layerData;
 		layer->Save(layerData);
 
@@ -3014,7 +3070,7 @@ namespace Builder
 			{
 				// Something wron in multichannelProcessing for this schema, stop parsing it
 				//
-				continue;
+				return false;
 			}
 
 			result = findBushes(logicSchema, moduleLayer, &bushContainer);
@@ -3064,14 +3120,17 @@ namespace Builder
 										QString equipmentId)
 	{
 		if (schema == nullptr ||
-			layer == nullptr)
+			layer == nullptr ||
+			m_signalSet == nullptr)
 		{
 			assert(schema);
 			assert(layer);
+			assert(m_signalSet);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2.")
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, m_signalSet %3.")
 							  .arg(reinterpret_cast<size_t>(schema.get()))
-							  .arg(reinterpret_cast<size_t>(layer.get())));
+							  .arg(reinterpret_cast<size_t>(layer.get()))
+							  .arg(reinterpret_cast<size_t>(m_signalSet)));
 
 			return false;
 		}
@@ -3128,11 +3187,36 @@ namespace Builder
 
 				signalItem->setAppSignalIds(signalId);
 
+				// Check that all signals belongs to appropriate LM
+				//
+				Signal* appSignal = m_signalSet->getSignal(signalId);
+
+				if (appSignal == nullptr)
+				{
+					result = false;
+					m_log->errALP4034(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm() == nullptr)
+				{
+					result = false;
+					m_log->errALP4035(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					continue;
+				}
+
+				if (appSignal->lm()->equipmentId() != equipmentId)
+				{
+					result = false;
+					m_log->errALP4037(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
+					continue;
+				}
+
 				continue;
 			}
 			else
 			{
-				// it's not singlechannel Signal and not enough or more then channel count
+				// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
 				//
 				result = false;
 				m_log->errALP4031(schema->schemaId(), signalItem->buildName(), signalItem->guid());

@@ -1605,6 +1605,60 @@ namespace Builder
 				  .arg(schemaItem));
 	}
 
+	/// IssueCode: ALP4036
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 LogicSchemaID
+	///		%3 SchemaItem description
+	///
+	/// Description:
+	///		Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').
+	///
+	void IssueLogger::errALP4036(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4036,
+				  tr("Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').")
+				  .arg(appSignalId)
+				  .arg(schema)
+				  .arg(schemaItem));
+	}
+
+	/// IssueCode: ALP4037
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 EquipmentID of LOM
+	///		%3 LogicSchemaID
+	///		%4 SchemaItem description
+	///
+	/// Description:
+	///		Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').
+	///
+	void IssueLogger::errALP4037(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4037,
+				  tr("Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').")
+				  .arg(appSignalId)
+				  .arg(equipmentId)
+				  .arg(schema)
+				  .arg(schemaItem));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//
