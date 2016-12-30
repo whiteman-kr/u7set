@@ -1529,15 +1529,19 @@ void TuningPage::fillObjectsList()
                 continue;
             }
 
-            // Otherwise, check parent filters
+            // Otherwise, check parent filters. Values are checked ONLY for selected filter, not child filters!!!
+
+            bool checkValues = true;
 
             while (treeFilter != nullptr)
             {
-                if (treeFilter->match(*o) == false)
+                if (treeFilter->match(*o, checkValues) == false)
                 {
                     result = false;
                     break;
                 }
+
+                checkValues = false;
 
                 treeFilter = treeFilter->parentFilter();
             }
@@ -1565,7 +1569,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_tabFilter != nullptr)
 		{
-            if (m_tabFilter->match(*o) == false)
+            if (m_tabFilter->match(*o, false) == false)
 			{
 				continue;
 			}
@@ -1576,7 +1580,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_buttonFilter != nullptr)
 		{
-            if (m_buttonFilter->match(*o) == false)
+            if (m_buttonFilter->match(*o, false) == false)
 			{
 				continue;
 			}

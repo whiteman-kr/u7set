@@ -95,7 +95,7 @@ public:
     bool load(QXmlStreamReader& reader, bool automatic);
 	bool save(QXmlStreamWriter& writer) const;
 
-	bool match(const TuningObject &object) const;
+    bool match(const TuningObject &object, bool checkValues) const;
 
     void checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter);
 

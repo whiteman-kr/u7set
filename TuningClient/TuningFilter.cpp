@@ -756,7 +756,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 }
 
 
-bool TuningFilter::match(const TuningObject& object) const
+bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 {
 	if (isEmpty() == true)
 	{
@@ -774,7 +774,7 @@ bool TuningFilter::match(const TuningObject& object) const
 
 	// List of appSignalId
 	//
-	if (m_signalValuesVec.empty() == false)
+    if (checkValues == true && m_signalValuesVec.empty() == false)
 	{
 		if (valueExists(object.appSignalHash()) == false)
 		{
