@@ -4,15 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui qml network
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport concurrent sql printsupport
+QT       += core gui widgets concurrent serialport network sql qml
 
 TARGET = Metrology
 TEMPLATE = app
 
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
-
 
 # DESTDIR
 #
@@ -25,39 +22,43 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-# Force prebuild version control info
-#
-# for creating version.h at first build
-win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-unix:system([ -e ./version.h ] || touch ./version.h)
-# for any build
-versionTarget.target = version.h
-versionTarget.depends = FORCE
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64){
-	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-	    nmake & \
-	    chdir $$PWD & \
-	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Metrology.pro
-	}
-	else{
-	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-	    nmake & \
-	    chdir $$PWD & \
-	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro
-	}
-}
-unix {
-    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-	qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-	make; \
-	cd $$PWD; \
-	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro
-}
-PRE_TARGETDEPS += version.h
-QMAKE_EXTRA_TARGETS += versionTarget
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
+
+## Force prebuild version control info
+##
+## for creating version.h at first build
+#win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+#unix:system([ -e ./version.h ] || touch ./version.h)
+## for any build
+#versionTarget.target = version.h
+#versionTarget.depends = FORCE
+#win32 {
+#	contains(QMAKE_TARGET.arch, x86_64){
+#	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+#	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+#	    nmake & \
+#	    chdir $$PWD & \
+#	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Metrology.pro
+#	}
+#	else{
+#	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+#	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+#	    nmake & \
+#	    chdir $$PWD & \
+#	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro
+#	}
+#}
+#unix {
+#    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+#	qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+#	make; \
+#	cd $$PWD; \
+#	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro
+#}
+#PRE_TARGETDEPS += version.h
+#QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES += \
@@ -83,13 +84,13 @@ SOURCES += \
     ReportView.cpp \
     Conversion.cpp \
     Calculator.cpp \
+    MeasureSignalBase.cpp \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/ModuleConfiguration.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
-    MeasureSignalBase.cpp \
     ../lib/SocketIO.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/HostAddressPort.cpp
@@ -118,6 +119,9 @@ HEADERS  += \
     version.h \
     Conversion.h \
     Calculator.h \
+    Stable.h \
+    ObjectVector.h \
+    MeasureSignalBase.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/Crc.h \
@@ -128,9 +132,6 @@ HEADERS  += \
     ../lib/ProtoSerialization.h \
     ../lib/Types.h \
     ../lib/OrderedHash.h \
-    Stable.h \
-    ObjectVector.h \
-    MeasureSignalBase.h \
     ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
     ../lib/XmlHelper.h \
@@ -144,6 +145,7 @@ RESOURCES += \
 
 TRANSLATIONS = translations/Metrology_ru.ts \
 		translations/Metrology_uk.ts
+
 OTHER_FILES += \
     translations/Metrology_ru.ts \
     translations/Metrology_uk.ts \
@@ -154,12 +156,20 @@ OTHER_FILES += \
     reports/LinearityDetailEl.ncr \
     reports/LinearityDetailPh.ncr
 
+
+#c++11 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++11
+
+
+# Q_DEBUG define
+#
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
+# _DEBUG define, Windows memmory detection leak depends on it
+#
+CONFIG(debug, debug|release): DEFINES += _DEBUG
 
-unix:QMAKE_CXXFLAGS += -std=c++11
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #
@@ -191,6 +201,10 @@ win32{
 	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
 	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto
 
 # NCReport
 #
