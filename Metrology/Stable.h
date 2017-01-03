@@ -89,7 +89,6 @@
 
 #include <QPainter>
 
-
 // Qt Sql
 //
 #include <QSql>
@@ -98,13 +97,6 @@
 #include <QSqlQuery>
 #include <QSqlDriver>
 
-
-// Other stable includes
-//
-#include "../VFrame30/VFrame30Lib_global.h"
-#include "../lib/Factory.h"
-#include "../lib/TypesAndEnums.h"
-#include "../lib/CUtils.h"
 
 // Disable some warnings
 //
