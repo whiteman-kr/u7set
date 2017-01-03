@@ -637,7 +637,7 @@ void UserTests::getUserDataTest()
 	QVERIFY2(query.value("userName").toString() == userName, qPrintable("Error: wrong userName returned"));
 	QVERIFY2(query.value("firstName").toString() == firstName, qPrintable("Error: wrong firstName returned"));
 	QVERIFY2(query.value("lastName").toString() == lastName, qPrintable("Error: wrong lastName returned"));
-	QVERIFY2(query.value("admininstrator").toBool() == false, qPrintable("Error: wrong administrator value returned"));
+	QVERIFY2(query.value("administrator").toBool() == false, qPrintable("Error: wrong administrator value returned"));
 	QVERIFY2(query.value("readOnly").toBool() == false, qPrintable("Error: wrong readOnly value returned"));
 	QVERIFY2(query.value("disabled").toBool() == false, qPrintable("Error: wrong disabled value returned"));
 
@@ -658,93 +658,71 @@ void UserTests::getUserDataTest()
 
 	ok = query.exec(QString("SELECT * FROM user_api.get_user_data('%1', -1)").arg(session_key));
 	QVERIFY2(ok == false, qPrintable("Expected error: invalid user"));
+
+	// Log out as Administrator
+	//
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 }
 
-void UserTests::check_user_passwordIntegerTextTest()
+void UserTests::check_user_passwordTest()
 {
+	QString login = "checkUserPasswordTest";
+	QString password = "TestPassword";
+
 	QSqlQuery query;
-	QString password = "12341234";
+	QString session_key;
+
+	// Log in as Administrator to create new user for test
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	session_key = query.value(0).toString();
 
 	// Create user to test
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM create_user(1, 'Tester', 'Richard', 'Stollman', '%1', false, false, false)").arg(password));
+	ok = query.exec(QString("SELECT user_api.create_user ('%1', '%2', 'Richard', 'Stallman', '%3', false, false);").arg(session_key).arg(login).arg(password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	int userId = query.value("create_user").toInt();
+	// Log out as Administrator
+	//
 
-	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg(password));
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM user_api.check_user_password('%1', '%2');").arg(login).arg(password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value(0) == true, qPrintable("Error: password or username is wrong!"));
 
-	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg("password"));
+	ok = query.exec(QString("SELECT * FROM user_api.check_user_password('%1', '%2');").arg(login).arg("password"));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
 
-	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(9999999).arg(password));
+	ok = query.exec(QString("SELECT * FROM user_api.check_user_password('%1', '%2');").arg("name").arg(password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
 
-	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(userId).arg(""));
+	ok = query.exec(QString("SELECT * FROM user_api.check_user_password('%1', '%2');").arg(login).arg(""));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
 
-	ok = query.exec(QString("SELECT * FROM check_user_password(%1, '%2');").arg(0).arg(password));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
-}
-
-void UserTests::check_user_passwordTextTextTest()
-{
-	QSqlQuery query;
-	QString password = "12341234";
-	QString name = "Linus";
-
-	// Create user to test
-	//
-
-	bool ok = query.exec(QString("SELECT * FROM create_user(1, '%1', 'Richard', 'Stollman', '%2', false, false, false)").arg(name).arg(password));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg(password));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value(0) == true, qPrintable("Error: password or username is wrong!"));
-
-	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg("password"));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
-
-	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg("name").arg(password));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
-
-	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg(name).arg(""));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value(0) == false, qPrintable("Wrong username or password error expected"));
-
-	ok = query.exec(QString("SELECT * FROM check_user_password('%1', '%2');").arg("").arg(password));
+	ok = query.exec(QString("SELECT * FROM user_api.check_user_password('%1', '%2');").arg("").arg(password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
