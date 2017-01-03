@@ -1,3 +1,4 @@
+#include "Main.h"
 #include "MainWindow.h"
 #include <QApplication>
 #include "Settings.h"
@@ -77,6 +78,8 @@ int reportingHook(int, char* userMessage, int*)
 
 QTranslator m_translator; // contains the translations for this application
 
+QSharedMemory* theSharedMemorySingleApp = nullptr;
+
 void switchTranslator(QTranslator& translator, const QString& filename)
 {
     // remove the old translator
@@ -142,17 +145,38 @@ int main(int argc, char *argv[])
 
     // Check to run the application in one instance
     //
-    QSharedMemory* sharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
+    theSharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
 
-    if(sharedMemorySingleApp->attach(QSharedMemory::ReadOnly) == false)
+    if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
     {
-        if(sharedMemorySingleApp->create(1) == false)
+        if(theSharedMemorySingleApp->create(sizeof(TuningClientSharedData)) == false)
         {
-            QMessageBox::critical(nullptr, QObject::tr("Error"), QObject::tr("Failed to create QSharedMemory object!"));
+            qDebug()<<"Failed to create QSharedMemory object!";
             assert(false);
         }
         else
         {
+            bool ok = theSharedMemorySingleApp->lock();
+            if (ok == true)
+            {
+                void* buffer = theSharedMemorySingleApp->data();
+
+                TuningClientSharedData data;
+                memcpy(buffer, &data, sizeof(TuningClientSharedData));
+
+                ok = theSharedMemorySingleApp->unlock();
+                if (ok == false)
+                {
+                    qDebug()<<"Failed to unlock QSharedMemory object!";
+                    assert(false);
+                }
+            }
+            else
+            {
+                qDebug()<<"Failed to lock QSharedMemory object!";
+                assert(false);
+            }
+
             // Run the application
             //
             theMainWindow = new MainWindow();
@@ -168,10 +192,33 @@ int main(int argc, char *argv[])
     else
     {
         QMessageBox::critical(nullptr, QObject::tr("Error"), QObject::tr("Application is already running!"));
-        sharedMemorySingleApp->detach();
+
+        bool ok = theSharedMemorySingleApp->lock();
+        if (ok == true)
+        {
+            TuningClientSharedData* data = (TuningClientSharedData*)theSharedMemorySingleApp->data();
+
+            data->showCommand = true;
+
+            ok = theSharedMemorySingleApp->unlock();
+            if (ok == false)
+            {
+                qDebug()<<"Failed to unlock QSharedMemory object!";
+                assert(false);
+            }
+        }
+        else
+        {
+            qDebug()<<"Failed to lock QSharedMemory object!";
+            assert(false);
+        }
+
+
+        theSharedMemorySingleApp->detach();
     }
 
-    delete sharedMemorySingleApp;
+    delete theSharedMemorySingleApp;
+    theSharedMemorySingleApp = nullptr;
 
     google::protobuf::ShutdownProtobufLibrary();
 

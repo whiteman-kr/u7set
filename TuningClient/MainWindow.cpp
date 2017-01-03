@@ -1,3 +1,4 @@
+#include "main.h"
 #include "MainWindow.h"
 
 #include <QApplication>
@@ -62,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	//
 
-	m_updateStatusBarTimerId = startTimer(100);
+    m_mainWindowTimerId = startTimer(100);
 
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 	m_configController.start();
@@ -184,29 +185,64 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-    if  (event->timerId() == m_updateStatusBarTimerId && theObjectManager != nullptr)
+    if  (event->timerId() == m_mainWindowTimerId)
 	{
-		assert(m_statusBarConnectionState);
-		assert(m_statusBarConnectionStatistics);
+        if (theSharedMemorySingleApp != nullptr)
+        {
+            bool ok = theSharedMemorySingleApp->lock();
+            if (ok == true)
+            {
+                TuningClientSharedData* data = (TuningClientSharedData*)theSharedMemorySingleApp->data();
 
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-        Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
+                if (data->showCommand == true)
+                {
+                    data->showCommand = false;
 
-		// State
-		//
-        QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-                       .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
-                        .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
+                    showMinimized(); // This is to bring up the window if not minimized but beneath some other window
+                    setWindowState(Qt::WindowActive);
+                    showNormal();
+                }
 
-		m_statusBarConnectionState->setText(text);
 
-		// Statistics
-		//
-        text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-			   .arg(QString::number(confiConnState.replyCount))
-			   .arg(QString::number(tuningClientState.replyCount));
+                ok = theSharedMemorySingleApp->unlock();
+                if (ok == false)
+                {
+                    qDebug()<<"Failed to unlock QSharedMemory object!";
+                    assert(false);
+                }
+            }
+            else
+            {
+                qDebug()<<"Failed to lock QSharedMemory object!";
+                assert(false);
+            }
+        }
 
-		m_statusBarConnectionStatistics->setText(text);
+
+        if (theObjectManager != nullptr)
+        {
+            assert(m_statusBarConnectionState);
+            assert(m_statusBarConnectionStatistics);
+
+            Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+            Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
+
+            // State
+            //
+            QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
+                    .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
+                    .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
+
+            m_statusBarConnectionState->setText(text);
+
+            // Statistics
+            //
+            text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
+                    .arg(QString::number(confiConnState.replyCount))
+                    .arg(QString::number(tuningClientState.replyCount));
+
+            m_statusBarConnectionStatistics->setText(text);
+        }
 
 		return;
 	}

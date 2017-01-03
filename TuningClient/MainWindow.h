@@ -37,7 +37,7 @@ private:
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
-	int m_updateStatusBarTimerId = -1;
+    int m_mainWindowTimerId = -1;
 
 signals:
 	void signalsUpdated();
