@@ -1052,6 +1052,8 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, bool 
 				return false;
 			}
 
+            m_root->setCaption(QObject::tr("All Signals"));
+
 			continue;
 		}
 
@@ -1228,7 +1230,6 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 
     if (bySchemas == true)
 	{
-
 		// Filter for Schema
 		//
 		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);

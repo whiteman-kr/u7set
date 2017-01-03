@@ -1371,7 +1371,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_filterEdit = new QLineEdit();
     connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
 
-    m_filterButton = new QPushButton(tr("Apply Filter"));
+    m_filterButton = new QPushButton(tr("Search"));
     connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
 
     // Button controls
