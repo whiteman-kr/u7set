@@ -1264,8 +1264,8 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 
 			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_strId);
 
-            QString s = QString("%1 - %2").arg(schemasDetails.m_strId).arg(schemasDetails.m_caption);
-            ofTs->setCaption(s);
+            //QString s = QString("%1 - %2").arg(schemasDetails.m_strId).arg(schemasDetails.m_caption);
+            ofTs->setCaption(schemasDetails.m_caption);
             ofTs->setAutomatic(true);
 
 			ofSchema->addChild(ofTs);
