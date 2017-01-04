@@ -46,6 +46,11 @@
 #include <QVector>
 #include <QProcess>
 
+// WhiteMan 04.01.2017
+//
+#include "../../lib/CircularLogger.h"
+//
+
 #if defined(QTSERVICE_DEBUG)
 #include <QDebug>
 #include <QFile>
@@ -753,97 +758,369 @@ QtServiceBase::ServiceFlags QtServiceBase::serviceFlags() const
 */
 int QtServiceBase::exec()
 {
-    if (d_ptr->args.size() > 1) {
-        QString a =  d_ptr->args.at(1);
-        if (a == QLatin1String("-i") || a == QLatin1String("-install")) {
-            if (!d_ptr->controller.isInstalled()) {
-                QString account;
-                QString password;
-                if (d_ptr->args.size() > 2)
-                    account = d_ptr->args.at(2);
-                if (d_ptr->args.size() > 3)
-                    password = d_ptr->args.at(3);
-                if (!d_ptr->install(account, password)) {
-                    fprintf(stderr, "The service %s could not be installed\n", serviceName().toLatin1().constData());
-                    return -1;
-                } else {
-                    printf("The service %s has been installed under: %s\n",
-                        serviceName().toLatin1().constData(), d_ptr->filePath().toLatin1().constData());
-                }
-            } else {
-                fprintf(stderr, "The service %s is already installed\n", serviceName().toLatin1().constData());
-            }
-            return 0;
-        } else if (a == QLatin1String("-u") || a == QLatin1String("-uninstall")) {
-            if (d_ptr->controller.isInstalled()) {
-                if (!d_ptr->controller.uninstall()) {
-                    fprintf(stderr, "The service %s could not be uninstalled\n", serviceName().toLatin1().constData());
-                    return -1;
-                } else {
-                    printf("The service %s has been uninstalled.\n",
-                        serviceName().toLatin1().constData());
-                }
-            } else {
-                fprintf(stderr, "The service %s is not installed\n", serviceName().toLatin1().constData());
-            }
-            return 0;
-        } else if (a == QLatin1String("-v") || a == QLatin1String("-version")) {
-            printf("The service\n"
-                "\t%s\n\t%s\n\n", serviceName().toLatin1().constData(), d_ptr->args.at(0).toLatin1().constData());
-            printf("is %s", (d_ptr->controller.isInstalled() ? "installed" : "not installed"));
-            printf(" and %s\n\n", (d_ptr->controller.isRunning() ? "running" : "not running"));
-            return 0;
-        } else if (a == QLatin1String("-e") || a == QLatin1String("-exec")) {
-            d_ptr->args.removeAt(1);
-            int ec = d_ptr->run(false, d_ptr->args);
-            if (ec == -1)
-                qErrnoWarning("The service could not be executed.");
-            return ec;
-        } else if (a == QLatin1String("-t") || a == QLatin1String("-terminate")) {
-            if (!d_ptr->controller.stop())
-                qErrnoWarning("The service could not be stopped.");
-            return 0;
-        } else if (a == QLatin1String("-p") || a == QLatin1String("-pause")) {
-            d_ptr->controller.pause();
-            return 0;
-        } else if (a == QLatin1String("-r") || a == QLatin1String("-resume")) {
-            d_ptr->controller.resume();
-            return 0;
-        } else if (a == QLatin1String("-c") || a == QLatin1String("-command")) {
-            int code = 0;
-            if (d_ptr->args.size() > 2)
-                code = d_ptr->args.at(2).toInt();
-            d_ptr->controller.sendCommand(code);
-            return 0;
-        } else  if (a == QLatin1String("-h") || a == QLatin1String("-help")) {
-            printf("\n%s -[i|u|e|s|v|h]\n"
-                   "\t-i(nstall) [account] [password]\t: Install the service, optionally using given account and password\n"
-                   "\t-u(ninstall)\t: Uninstall the service.\n"
-                   "\t-e(xec)\t\t: Run as a regular application. Useful for debugging.\n"
-                   "\t-t(erminate)\t: Stop the service.\n"
-                   "\t-c(ommand) num\t: Send command code num to the service.\n"
-                   "\t-v(ersion)\t: Print version and status information.\n"
-                   "\t-h(elp)   \t: Show this help\n"
-                   "\tNo arguments\t: Start the service.\n",
-                   d_ptr->args.at(0).toLatin1().constData());
-            return 0;
-        }
-    }
-#if defined(Q_OS_UNIX)
-    if (::getenv("QTSERVICE_RUN")) {
-        // Means we're the detached, real service process.
-        int ec = d_ptr->run(true, d_ptr->args);
-        if (ec == -1)
-            qErrnoWarning("The service failed to run.");
-        return ec;
-    }
-#endif
-    if (!d_ptr->start()) {
-        fprintf(stderr, "The service %s could not start\n", serviceName().toLatin1().constData());
-        return -4;
-    }
-    return 0;
+	if (d_ptr->args.size() > 1)
+	{
+		QString a =  d_ptr->args.at(1);
+
+		if (a == QLatin1String("-i") || a == QLatin1String("-install"))
+		{
+			return installService();
+		}
+
+		if (a == QLatin1String("-u") || a == QLatin1String("-uninstall"))
+		{
+			return uninstallService();
+		}
+
+		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
+		{
+			return printVersion();
+		}
+
+		if (a == QLatin1String("-e") || a == QLatin1String("-exec"))
+		{
+			return startAsRegularApplication();
+		}
+
+		if (a == QLatin1String("-t") || a == QLatin1String("-terminate"))
+		{
+			return terminateService();
+		}
+
+		if (a == QLatin1String("-p") || a == QLatin1String("-pause"))
+		{
+			return pauseService();
+		}
+
+		if (a == QLatin1String("-r") || a == QLatin1String("-resume"))
+		{
+			return resumeService();
+		}
+
+		if (a == QLatin1String("-c") || a == QLatin1String("-command"))
+		{
+			return executeCommand();
+		}
+
+		if (a == QLatin1String("-h") || a == QLatin1String("-help"))
+		{
+			return printHelp();
+		}
+	}
+
+	return startService();
 }
+
+
+/* ------------------------- original QtServiceBase::exec() ---------------------------
+ *
+int QtServiceBase::exec()
+{
+	if (d_ptr->args.size() > 1) {
+		QString a =  d_ptr->args.at(1);
+		if (a == QLatin1String("-i") || a == QLatin1String("-install")) {
+			if (!d_ptr->controller.isInstalled()) {
+				QString account;
+				QString password;
+				if (d_ptr->args.size() > 2)
+					account = d_ptr->args.at(2);
+				if (d_ptr->args.size() > 3)
+					password = d_ptr->args.at(3);
+				if (!d_ptr->install(account, password)) {
+					fprintf(stderr, "The service %s could not be installed\n", serviceName().toLatin1().constData());
+					return -1;
+				} else {
+					printf("The service %s has been installed under: %s\n",
+						serviceName().toLatin1().constData(), d_ptr->filePath().toLatin1().constData());
+				}
+			} else {
+				fprintf(stderr, "The service %s is already installed\n", serviceName().toLatin1().constData());
+			}
+			return 0;
+		} else if (a == QLatin1String("-u") || a == QLatin1String("-uninstall")) {
+			if (d_ptr->controller.isInstalled()) {
+				if (!d_ptr->controller.uninstall()) {
+					fprintf(stderr, "The service %s could not be uninstalled\n", serviceName().toLatin1().constData());
+					return -1;
+				} else {
+					printf("The service %s has been uninstalled.\n",
+						serviceName().toLatin1().constData());
+				}
+			} else {
+				fprintf(stderr, "The service %s is not installed\n", serviceName().toLatin1().constData());
+			}
+			return 0;
+		} else if (a == QLatin1String("-v") || a == QLatin1String("-version")) {
+			printf("The service\n"
+				"\t%s\n\t%s\n\n", serviceName().toLatin1().constData(), d_ptr->args.at(0).toLatin1().constData());
+			printf("is %s", (d_ptr->controller.isInstalled() ? "installed" : "not installed"));
+			printf(" and %s\n\n", (d_ptr->controller.isRunning() ? "running" : "not running"));
+			return 0;
+		} else if (a == QLatin1String("-e") || a == QLatin1String("-exec")) {
+			d_ptr->args.removeAt(1);
+			int ec = d_ptr->run(false, d_ptr->args);
+			if (ec == -1)
+				qErrnoWarning("The service could not be executed.");
+			return ec;
+		} else if (a == QLatin1String("-t") || a == QLatin1String("-terminate")) {
+			if (!d_ptr->controller.stop())
+				qErrnoWarning("The service could not be stopped.");
+			return 0;
+		} else if (a == QLatin1String("-p") || a == QLatin1String("-pause")) {
+			d_ptr->controller.pause();
+			return 0;
+		} else if (a == QLatin1String("-r") || a == QLatin1String("-resume")) {
+			d_ptr->controller.resume();
+			return 0;
+		} else if (a == QLatin1String("-c") || a == QLatin1String("-command")) {
+			int code = 0;
+			if (d_ptr->args.size() > 2)
+				code = d_ptr->args.at(2).toInt();
+			d_ptr->controller.sendCommand(code);
+			return 0;
+		} else  if (a == QLatin1String("-h") || a == QLatin1String("-help")) {
+			printf("\n%s -[i|u|e|s|v|h]\n"
+				   "\t-i(nstall) [account] [password]\t: Install the service, optionally using given account and password\n"
+				   "\t-u(ninstall)\t: Uninstall the service.\n"
+				   "\t-e(xec)\t\t: Run as a regular application. Useful for debugging.\n"
+				   "\t-t(erminate)\t: Stop the service.\n"
+				   "\t-c(ommand) num\t: Send command code num to the service.\n"
+				   "\t-v(ersion)\t: Print version and status information.\n"
+				   "\t-h(elp)   \t: Show this help\n"
+				   "\tNo arguments\t: Start the service.\n",
+				   d_ptr->args.at(0).toLatin1().constData());
+			return 0;
+		}
+	}
+
+#if defined(Q_OS_UNIX)
+
+	if (::getenv("QTSERVICE_RUN")) {
+		// Means we're the detached, real service process.
+		int ec = d_ptr->run(true, d_ptr->args);
+		if (ec == -1)
+			qErrnoWarning("The service failed to run.");
+		return ec;
+	}
+
+#endif
+
+	if (!d_ptr->start()) {
+		fprintf(stderr, "\nThe service '%s' could not start\n", serviceName().toLatin1().constData());
+		return -4;
+	}
+
+	return 0;
+}
+
+ ----------------- End of original QtServiceBase::exec() ---------------------------------*/
+
+
+
+int QtServiceBase::installService()
+{
+	if (!d_ptr->controller.isInstalled())
+	{
+		QString account;
+		QString password;
+
+		if (d_ptr->args.size() > 2)
+		{
+			account = d_ptr->args.at(2);
+		}
+
+		if (d_ptr->args.size() > 3)
+		{
+			password = d_ptr->args.at(3);
+		}
+
+		if (!d_ptr->install(account, password))
+		{
+			fprintf(stderr, "\nThe service '%s'' could not be installed\n", serviceName().toLatin1().constData());
+			return -1;
+		}
+		else
+		{
+			printf("\nThe service '%s' has been installed under: %s\n",
+				serviceName().toLatin1().constData(), d_ptr->filePath().toLatin1().constData());
+		}
+	}
+	else
+	{
+		fprintf(stderr, "\nThe service '%s' is already installed\n", serviceName().toLatin1().constData());
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::uninstallService()
+{
+	if (d_ptr->controller.isInstalled())
+	{
+		if (!d_ptr->controller.uninstall())
+		{
+			fprintf(stderr, "\nThe service '%s' could not be uninstalled\n", serviceName().toLatin1().constData());
+			return -1;
+		}
+		else
+		{
+			printf("\nThe service '%s' has been uninstalled.\n", serviceName().toLatin1().constData());
+		}
+	}
+	else
+	{
+		fprintf(stderr, "The service '%s' is not installed\n", serviceName().toLatin1().constData());
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::printVersion()
+{
+	printf("The service\n"
+		"\t%s\n\t%s\n\n", serviceName().toLatin1().constData(), d_ptr->args.at(0).toLatin1().constData());
+	printf("is %s", (d_ptr->controller.isInstalled() ? "installed" : "not installed"));
+	printf(" and %s\n\n", (d_ptr->controller.isRunning() ? "running" : "not running"));
+
+	return 0;
+}
+
+
+int QtServiceBase::startAsRegularApplication()
+{
+	d_ptr->args.removeAt(1);
+
+	int ec = d_ptr->run(false, d_ptr->args);
+
+	if (ec == -1)
+	{
+		qErrnoWarning("\nThe service could not be executed.\n");
+	}
+
+	return ec;
+}
+
+
+int QtServiceBase::terminateService()
+{
+	if (d_ptr->controller.stop() == false)
+	{
+		qErrnoWarning("\nThe service could not be stopped.\n");
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::pauseService()
+{
+	if (d_ptr->controller.pause() == false)
+	{
+		qErrnoWarning("\nThe service could not be paused.\n");
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::resumeService()
+{
+	if (d_ptr->controller.resume() == false)
+	{
+		qErrnoWarning("\nThe service could not be resumed.\n");
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::executeCommand()
+{
+	int code = 0;
+
+	if (d_ptr->args.size() > 2)
+	{
+		code = d_ptr->args.at(2).toInt();
+
+		if (d_ptr->controller.sendCommand(code) == true)
+		{
+			printf("\nCommand has been send to service.\n");
+		}
+		else
+		{
+			qErrnoWarning("\nCommand isn't send to service.\n");
+		}
+	}
+	else
+	{
+		qErrnoWarning("\nSpecify the command nuber like: -c N.\n");
+	}
+
+	return 0;
+}
+
+
+int QtServiceBase::printHelp()
+{
+	printf("\n%s -[i|u|e|s|v|h]\n"
+		   "\t-i(nstall) [account] [password]\t: Install the service, optionally using given account and password\n"
+		   "\t-u(ninstall)\t: Uninstall the service.\n"
+		   "\t-e(xec)\t\t: Run as a regular application. Useful for debugging.\n"
+		   "\t-t(erminate)\t: Stop the service.\n"
+		   "\t-c(ommand) num\t: Send command code num to the service.\n"
+		   "\t-v(ersion)\t: Print version and status information.\n"
+		   "\t-h(elp)   \t: Show this help\n"
+		   "\tNo arguments\t: Start the service.\n",
+		   d_ptr->args.at(0).toLatin1().constData());
+
+	return 0;
+}
+
+
+int QtServiceBase::startService()
+{
+#if defined(Q_OS_UNIX)
+
+	if (::getenv("QTSERVICE_RUN"))
+	{
+		// Means we're the detached, real service process.
+		//
+		int ec = d_ptr->run(true, d_ptr->args);
+
+		if (ec == -1)
+		{
+			qErrnoWarning("The service failed to run.");
+		}
+
+		return ec;
+	}
+
+#endif
+
+	if (d_ptr->controller.isInstalled() == false)
+	{
+		DEBUG_LOG_WRN(QString(tr("The service '%1' is not installed. Run the service with -i key first.")).arg(serviceName()));
+		return 0;
+	}
+
+	if (d_ptr->controller.isRunning() == true)
+	{
+		printf("\nThe service '%s' is already running.\n", serviceName().toLatin1().constData());
+		return 0;
+	}
+
+	if (d_ptr->start() == false)
+	{
+		fprintf(stderr, "\nThe service '%s' could not start\n", serviceName().toLatin1().constData());
+		return -4;
+	}
+
+	return 0;
+}
+
+
 
 /*!
     \fn void QtServiceBase::logMessage(const QString &message, MessageType type,

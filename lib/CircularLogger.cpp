@@ -240,19 +240,16 @@ CircularLogger::CircularLogger()
 
 CircularLogger::~CircularLogger()
 {
-	quitAndWait();
 }
 
 
-void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath, bool echoToDebug)
+void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
 {
 	if (m_loggerInitialized == true)
 	{
 		assert(false);			// Logger object is allready initialized.
 		return;
 	}
-
-	m_echoToDebug = echoToDebug;
 
 	if (placementPath.isEmpty())
 	{
@@ -284,9 +281,7 @@ void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QStr
 
 	addWorker(worker);
 
-	connect(this, &CircularLogger::writeRecord,
-			worker, &CircularLoggerWorker::writeRecord,
-			Qt::QueuedConnection);
+	connect(this, &CircularLogger::writeRecord, worker, &CircularLoggerWorker::writeRecord);
 
 	start();
 
@@ -294,7 +289,7 @@ void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QStr
 }
 
 
-void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath, bool echoToDebug)
+void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath)
 {
 	if (m_loggerInitialized == true)
 	{
@@ -323,31 +318,37 @@ void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath
 		return;
 	}
 
-	init(fi.baseName(), fileCount, fileSizeInMB, placementPath, echoToDebug);
+	init(fi.baseName(), fileCount, fileSizeInMB, placementPath);
 }
 
 
-void CircularLogger::writeError(const QString& message, const char* function, const char* file, int line)
+void CircularLogger::shutdown()
 {
-	composeAndWriteRecord(RecordType::Error, message, function, file, line);
+	quitAndWait();
 }
 
 
-void CircularLogger::writeWarning(const QString& message, const char* function, const char* file, int line)
+void CircularLogger::writeError(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
-	composeAndWriteRecord(RecordType::Warning, message, function, file, line);
+	composeAndWriteRecord(RecordType::Error, message, function, file, line, debugEcho);
 }
 
 
-void CircularLogger::writeMessage(const QString& message, const char* function, const char* file, int line)
+void CircularLogger::writeWarning(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
-	composeAndWriteRecord(RecordType::Message, message, function, file, line);
+	composeAndWriteRecord(RecordType::Warning, message, function, file, line, debugEcho);
 }
 
 
-void CircularLogger::writeConfig(const QString& message, const char* function, const char* file, int line)
+void CircularLogger::writeMessage(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
-	composeAndWriteRecord(RecordType::Config, message, function, file, line);
+	composeAndWriteRecord(RecordType::Message, message, function, file, line, debugEcho);
+}
+
+
+void CircularLogger::writeConfig(const QString& message, const char* function, const char* file, int line, bool debugEcho)
+{
+	composeAndWriteRecord(RecordType::Config, message, function, file, line, debugEcho);
 }
 
 
@@ -388,7 +389,7 @@ QString CircularLogger::getCurrentDateTimeStr()
 }
 
 
-void CircularLogger::composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line)
+void CircularLogger::composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	if (m_loggerInitialized == false)
 	{
@@ -396,9 +397,9 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
-	if (m_echoToDebug == true)
+	if (debugEcho == true)
 	{
-		qDebug() << C_STR(QString("%1").arg(message));
+		qDebug() << C_STR(message);
 	}
 
 	QString record = QString("\"%1\" \"%2\" \"%3\" \"%4\" \"%5:%6\"").

@@ -1,7 +1,5 @@
 #include "../lib/Service.h"
-#include "../lib/Types.h"
 #include "../lib/WUtils.h"
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -13,7 +11,10 @@ ServiceWorker::ServiceWorker(ServiceType serviceType, const QString& serviceName
 	m_serviceType(serviceType),
 	m_serviceName(serviceName),
 	m_argc(argc),
-	m_argv(argv)
+	m_argv(argv),
+	m_cmdLineParser(argc, argv),
+	m_settings("Radiy", serviceName)
+
 {
 	TEST_PTR_RETURN(argv);
 }
@@ -86,6 +87,29 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 }
 
 
+void ServiceWorker::processCmdLineSettings()
+{
+	CommandLineParser& cp = cmdLineParser();
+
+	if (cp.optionIsSet("id") == true)
+	{
+		m_settings.setValue("id", cp.optionValue("id"));
+	}
+}
+
+
+void ServiceWorker::loadSettings()
+{
+	m_serviceEquipmentID = m_settings.value("id").toString();
+}
+
+
+void ServiceWorker::clearSettings()
+{
+	m_settings.clear();
+}
+
+
 void ServiceWorker::baseInitCmdLineParser()
 {
 	m_cmdLineParser.addSimpleOption("h", "Print this help");
@@ -94,7 +118,8 @@ void ServiceWorker::baseInitCmdLineParser()
 	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
 	m_cmdLineParser.addSimpleOption("s", "Start the service.");
 	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSingleValueOption("id", "Assign equipmentID of service. Use -id=EquipmentID.");
+	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
+	m_cmdLineParser.addSingleValueOption("id", "Assign EquipmentID of service.", "EQUIPMENT_ID");
 
 	initCmdLineParser();
 
@@ -104,7 +129,10 @@ void ServiceWorker::baseInitCmdLineParser()
 
 void ServiceWorker::onThreadStarted()
 {
+	loadSettings();
+
 	initialize();
+
 	emit work();
 }
 
@@ -137,25 +165,25 @@ Service::Service(ServiceWorker* serviceWorker):
 
 Service::~Service()
 {
-	delete m_serviceWorker;
+	delete m_serviceWorker;		// delete ServiceWorker object passed to cinstructor
 }
 
 
 void Service::start()
 {
 	startBaseRequestSocketThread();
-	startServiceThread();
+	startServiceWorkerThread();
 }
 
 
 void Service::stop()
 {
-	stopServiceThread();
+	stopServiceWorkerThread();
 	stopBaseRequestSocketThread();
 }
 
 
-void Service::startServiceThread()
+void Service::startServiceWorkerThread()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -181,27 +209,19 @@ void Service::startServiceThread()
 
 	m_state = ServiceState::Starts;
 
-/*	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
+	ServiceWorker* newServiceWorker = m_serviceWorker->createInstance();
 
 	newServiceWorker->setService(this);
 
 	connect(newServiceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
 	connect(newServiceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
 
-	m_serviceThread = new SimpleThread(newServiceWorker); */
-
-	m_serviceWorker->setService(this);
-
-	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
-	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
-
-	m_serviceWorkerThread = new SimpleThread(m_serviceWorker);
-
+	m_serviceWorkerThread = new SimpleThread(newServiceWorker);
 	m_serviceWorkerThread->start();
 }
 
 
-void Service::stopServiceThread()
+void Service::stopServiceWorkerThread()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -262,18 +282,18 @@ void Service::onBaseRequest(UdpRequest request)
 
 		case RQID_SERVICE_START:
 			LOG_MSG(QString("Service START request from %1.").arg(request.address().toString()));
-			startServiceThread();
+			startServiceWorkerThread();
 			break;
 
 		case RQID_SERVICE_STOP:
 			LOG_MSG(QString("Service STOP request from %1.").arg(request.address().toString()));
-			stopServiceThread();
+			stopServiceWorkerThread();
 			break;
 
 		case RQID_SERVICE_RESTART:
 			LOG_MSG(QString("Service RESTART request from %1.").arg(request.address().toString()));
-			stopServiceThread();
-			startServiceThread();
+			stopServiceWorkerThread();
+			startServiceWorkerThread();
 			break;
 
 		default:
@@ -366,12 +386,18 @@ int ServiceStarter::exec()
 
 	m_serviceWorker->init();
 
+	const CommandLineParser& cmdLineParser = m_serviceWorker->cmdLineParser();
+
 	bool consoleMode = false;
 
-	/*if (m_cmdLineParser.isSet("e") || m_cmdLineParser.isSet("h"))
+	// print help if no args or -h option specified
+	//
+	if (cmdLineParser.optionIsSet("h") == true ||
+		cmdLineParser.optionIsSet("e") == true ||
+		cmdLineParser.optionIsSet("clr") == true)
 	{
 		consoleMode = true;
-	}*/
+	}
 
 	int result = 0;
 
@@ -379,7 +405,7 @@ int ServiceStarter::exec()
 	{
 		ConsoleServiceStarter consoleStarter(m_serviceWorker);
 
-		//result = consoleStarter.exec(m_cmdLineParser);
+		result = consoleStarter.exec();
 	}
 	else
 	{
@@ -423,6 +449,15 @@ DaemonServiceStarter::~DaemonServiceStarter()
 		m_serviceWorkerDeleted = true;
 	}
 }
+
+
+int DaemonServiceStarter::exec()
+{
+	QCoreApplication app(m_serviceWorker->argc(), m_serviceWorker->argv());
+
+	return QtService<QCoreApplication>::exec();
+}
+
 
 
 void DaemonServiceStarter::start()
@@ -470,22 +505,22 @@ ConsoleServiceStarter::ConsoleServiceStarter(ServiceWorker* serviceWorker) :
 }
 
 
-int ConsoleServiceStarter::exec(QCommandLineParser& cmdLineParser)
+int ConsoleServiceStarter::exec()
 {
-	if (cmdLineParser.isSet("h"))
-	{
-		qDebug() << "\n" << C_STR(cmdLineParser.helpText());
-		return 0;
-	}
-
-	qDebug() << "\n======" << C_STR(m_name) << "started ======\n";
-	qDebug() << "Press any key and RETURN to finish service\n";
-
 	if (m_serviceWorker == nullptr)
 	{
 		assert(false);
 		return 0;
 	}
+
+	bool exit = processCmdLineArguments();
+
+	if (exit == true)
+	{
+		return 0;
+	}
+
+	m_serviceWorker->processCmdLineSettings();
 
 	ConsoleServiceKeyReaderThread* keyReaderThread = new ConsoleServiceKeyReaderThread();
 
@@ -508,9 +543,46 @@ int ConsoleServiceStarter::exec(QCommandLineParser& cmdLineParser)
 	keyReaderThread->wait();
 	delete keyReaderThread;
 
-	qDebug() << "\n======" << C_STR(m_name) << "finished ======\n";
+	return 0;
+}
 
-	return 1;
+
+// returns 'true' for application exit
+//
+bool ConsoleServiceStarter::processCmdLineArguments()
+{
+	const CommandLineParser& cmdLineParser = m_serviceWorker->cmdLineParser();
+
+	// print Help and exit if "-h" is set
+	//
+	if (cmdLineParser.optionIsSet("h") == true)
+	{
+		QString helpText = cmdLineParser.helpText();
+
+		std::cout << C_STR(helpText);
+
+		return true;
+	}
+
+	// clear settings and exit if "-clr" is set
+	//
+	if (cmdLineParser.optionIsSet("clr") == true)
+	{
+		m_serviceWorker->clearSettings();
+
+		std::cout << C_STR(QString(tr("\nService settings has been cleared.\n")));
+
+		return true;
+	}
+
+	// run service as a regular application if "-e" is set
+	//
+	if (cmdLineParser.optionIsSet("e") == true)
+	{
+		return false;			// not exit!
+	}
+
+	return false;
 }
 
 

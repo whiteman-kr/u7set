@@ -84,8 +84,10 @@ public:
 	CircularLogger();
 	~CircularLogger();
 
-	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "", bool echoToDebug = false);
-	void init(int fileCount, int fileSizeInMB, QString placementPath = "", bool echoToDebug = false);
+	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
+
+	void shutdown();
 
 	bool isInitialized() const { return m_loggerInitialized; }
 
@@ -93,29 +95,36 @@ signals:
 	void writeRecord(const QString record);
 
 public:
-	void writeError(const QString& message, const char* function, const char* file, int line);
-	void writeWarning(const QString& message, const char* function, const char* file, int line);
-	void writeMessage(const QString& message, const char* function, const char* file, int line);
-	void writeConfig(const QString& message, const char* function, const char* file, int line);
+	void writeError(const QString& message, const char* function, const char* file, int line, bool debugEcho);
+	void writeWarning(const QString& message, const char* function, const char* file, int line, bool debugEcho);
+	void writeMessage(const QString& message, const char* function, const char* file, int line, bool debugEcho);
+	void writeConfig(const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 private:
 	QString getRecordTypeStr(RecordType type);
 	QString getCurrentDateTimeStr();
 
-	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line);
+	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 private:
 	bool m_loggerInitialized = false;
-	bool m_echoToDebug = false;
 };
 
 
-#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__);
-#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__);
-#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__);
-#define LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__);
+#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, false);
 
-#define INIT_LOGGER(appPath, echoToDebug)	 logger.init(10, 10, appPath, echoToDebug);
+
+#define DEBUG_LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
+
+
+#define INIT_LOGGER(appPath)		logger.init(10, 10, appPath);
+#define SHUTDOWN_LOGGER				logger.shutdown();
 
 
 extern CircularLogger logger;

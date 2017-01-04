@@ -24,7 +24,6 @@ public:
 
 	virtual void initCmdLineParser() override
 	{
-		LOG_CALL();
 	}
 
 	virtual void initialize() override
@@ -44,8 +43,9 @@ int main(int argc, char *argv[])
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
+	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER(argv[0], true);
+	INIT_LOGGER(argv[0])
 
 	LOG_MSG(QString("Run: %1").arg(cmdLine(argc, argv)));
 
@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
 	LOG_MSG(QString("Exit: %1, result = %2").arg(argv[0]).arg(result));
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	SHUTDOWN_LOGGER
 
 	return result;
 }

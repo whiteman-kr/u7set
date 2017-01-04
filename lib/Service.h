@@ -7,7 +7,9 @@
 #include <QFileInfo>
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QSettings>
 #include <iostream>
+
 #include "../qtservice/src/qtservice.h"
 #include "../lib/UdpSocket.h"
 #include "../lib/CircularLogger.h"
@@ -78,6 +80,11 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
+	virtual void processCmdLineSettings();				// override to process service-specific cmd line settings
+	virtual void loadSettings();						// override to load service-specific settings
+
+	void clearSettings();								// clear all service settings
+
 signals:
 	void work();
 	void stopped();
@@ -93,6 +100,9 @@ private:
 
 	void onThreadStarted() final;
 	void onThreadFinished() final;
+
+protected:
+	QSettings m_settings;
 
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
@@ -142,8 +152,8 @@ private slots:
 private:
 	void checkMainFunctionState();
 
-	void startServiceThread();
-	void stopServiceThread();
+	void startServiceWorkerThread();
+	void stopServiceWorkerThread();
 
 	void startBaseRequestSocketThread();
 	void stopBaseRequestSocketThread();
@@ -182,20 +192,22 @@ private:
 
 class DaemonServiceStarter : private QtService<QCoreApplication>
 {
+public:
+	DaemonServiceStarter(ServiceWorker* serviceWorker);
+	virtual ~DaemonServiceStarter();
+
+	int exec();
+
+private:
+	void start() final;				// override QtService::start
+	void stop() final;				// override QtService::stop
+
 private:
 	ServiceWorker* m_serviceWorker = nullptr;
 	Service* m_service = nullptr;
 
 	bool m_serviceWorkerDeleted = false;
 
-	void start() final;				// override QtService::start
-	void stop() final;				// override QtService::stop
-
-public:
-	DaemonServiceStarter(ServiceWorker* serviceWorker);
-	virtual ~DaemonServiceStarter();
-
-	int exec() { return QtService<QCoreApplication>::exec(); }
 };
 
 
@@ -207,16 +219,17 @@ public:
 
 class ConsoleServiceStarter : private QCoreApplication
 {
-private:
-	QString m_name;
-
-	ServiceWorker* m_serviceWorker = nullptr;
-	Service* m_service = nullptr;
-
 public:
 	ConsoleServiceStarter(ServiceWorker* serviceWorker);
 
-	int exec(QCommandLineParser& cmdLineParser);
+	int exec();
+
+private:
+	bool processCmdLineArguments();			// returns 'true' for application exit
+
+private:
+	ServiceWorker* m_serviceWorker = nullptr;
+	Service* m_service = nullptr;
 };
 
 

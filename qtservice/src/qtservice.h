@@ -99,7 +99,7 @@ private:
 
 class QtServiceBasePrivate;
 
-class QT_QTSERVICE_EXPORT QtServiceBase
+class QT_QTSERVICE_EXPORT QtServiceBase : public QObject
 {
     Q_DECLARE_PRIVATE(QtServiceBase)
 public:
@@ -153,6 +153,21 @@ protected:
     virtual int executeApplication() = 0;
 
 private:
+
+	// the functions added to refactoring original QtServiceBase::exec() (WhiteMan 04.01.2017)
+	//
+	int installService();
+	int uninstallService();
+	int printVersion();
+	int startAsRegularApplication();
+	int terminateService();
+	int pauseService();
+	int resumeService();
+	int executeCommand();
+	int printHelp();
+	int startService();
+
+	//
 
     friend class QtServiceSysPrivate;
     QtServiceBasePrivate *d_ptr;
