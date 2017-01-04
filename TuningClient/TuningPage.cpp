@@ -1371,7 +1371,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_filterEdit = new QLineEdit();
     connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
 
-    m_filterButton = new QPushButton(tr("Apply Filter"));
+    m_filterButton = new QPushButton(tr("Search"));
     connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
 
     // Button controls
@@ -1529,15 +1529,19 @@ void TuningPage::fillObjectsList()
                 continue;
             }
 
-            // Otherwise, check parent filters
+            // Otherwise, check parent filters. Values are checked ONLY for selected filter, not child filters!!!
+
+            bool checkValues = true;
 
             while (treeFilter != nullptr)
             {
-                if (treeFilter->match(*o) == false)
+                if (treeFilter->match(*o, checkValues) == false)
                 {
                     result = false;
                     break;
                 }
+
+                checkValues = false;
 
                 treeFilter = treeFilter->parentFilter();
             }
@@ -1565,7 +1569,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_tabFilter != nullptr)
 		{
-            if (m_tabFilter->match(*o) == false)
+            if (m_tabFilter->match(*o, false) == false)
 			{
 				continue;
 			}
@@ -1576,7 +1580,7 @@ void TuningPage::fillObjectsList()
 
 		if (m_buttonFilter != nullptr)
 		{
-            if (m_buttonFilter->match(*o) == false)
+            if (m_buttonFilter->match(*o, false) == false)
 			{
 				continue;
 			}
@@ -1644,6 +1648,17 @@ void TuningPage::fillObjectsList()
 
     m_model->setObjects(filteredObjects);
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
+}
+
+QColor TuningPage::tabColor()
+{
+    if (m_tabFilter != nullptr)
+    {
+        return m_tabFilter->tabColor();
+    }
+
+    return QColor();
+
 }
 
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)

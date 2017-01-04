@@ -37,7 +37,7 @@ private:
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
-	int m_updateStatusBarTimerId = -1;
+    int m_mainWindowTimerId = -1;
 
 signals:
 	void signalsUpdated();
@@ -50,6 +50,7 @@ private slots:
 public slots:
 
 	void exit();
+    void runPresetEditor();
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
@@ -59,7 +60,6 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void removeWorkspace();
     void createWorkspace(const TuningObjectStorage *objects);
 
 	QAction* m_pExitAction = nullptr;

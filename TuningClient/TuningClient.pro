@@ -157,7 +157,8 @@ HEADERS  += MainWindow.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
     TuningObjectManager.h \
-    TuningFilterEditor.h
+    TuningFilterEditor.h \
+    main.h
 
 FORMS    += \
     DialogSettings.ui \

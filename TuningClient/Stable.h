@@ -45,5 +45,6 @@
 #include <QDialogButtonBox>
 #include <QTextEdit>
 #include <QClipboard>
+#include <QSharedMemory>
 
 #endif // STABLE_H

@@ -1,3 +1,4 @@
+#include "main.h"
 #include "MainWindow.h"
 
 #include <QApplication>
@@ -7,6 +8,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
+#include "TuningFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -62,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	//
 
-	m_updateStatusBarTimerId = startTimer(100);
+    m_mainWindowTimerId = startTimer(100);
 
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 	m_configController.start();
@@ -99,6 +101,7 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
+    connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pUsersAction = new QAction(tr("Users..."), this);
 	m_pUsersAction->setStatusTip(tr("Edit users"));
@@ -184,29 +187,64 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-    if  (event->timerId() == m_updateStatusBarTimerId && theObjectManager != nullptr)
+    if  (event->timerId() == m_mainWindowTimerId)
 	{
-		assert(m_statusBarConnectionState);
-		assert(m_statusBarConnectionStatistics);
+        if (theSharedMemorySingleApp != nullptr)
+        {
+            bool ok = theSharedMemorySingleApp->lock();
+            if (ok == true)
+            {
+                TuningClientSharedData* data = (TuningClientSharedData*)theSharedMemorySingleApp->data();
 
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-        Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
+                if (data->showCommand == true)
+                {
+                    data->showCommand = false;
 
-		// State
-		//
-        QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-                       .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
-                        .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
+                    showMinimized(); // This is to bring up the window if not minimized but beneath some other window
+                    setWindowState(Qt::WindowActive);
+                    showNormal();
+                }
 
-		m_statusBarConnectionState->setText(text);
 
-		// Statistics
-		//
-        text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-			   .arg(QString::number(confiConnState.replyCount))
-			   .arg(QString::number(tuningClientState.replyCount));
+                ok = theSharedMemorySingleApp->unlock();
+                if (ok == false)
+                {
+                    qDebug()<<"Failed to unlock QSharedMemory object!";
+                    assert(false);
+                }
+            }
+            else
+            {
+                qDebug()<<"Failed to lock QSharedMemory object!";
+                assert(false);
+            }
+        }
 
-		m_statusBarConnectionStatistics->setText(text);
+
+        if (theObjectManager != nullptr)
+        {
+            assert(m_statusBarConnectionState);
+            assert(m_statusBarConnectionStatistics);
+
+            Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+            Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
+
+            // State
+            //
+            QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
+                    .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
+                    .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
+
+            m_statusBarConnectionState->setText(text);
+
+            // Statistics
+            //
+            text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
+                    .arg(QString::number(confiConnState.replyCount))
+                    .arg(QString::number(tuningClientState.replyCount));
+
+            m_statusBarConnectionStatistics->setText(text);
+        }
 
 		return;
 	}
@@ -214,25 +252,17 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::removeWorkspace()
-{
-	if (m_tuningWorkspace != nullptr)
-	{
-        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
-
-		delete m_tuningWorkspace;
-		m_tuningWorkspace = nullptr;
-	}
-
-}
-
 void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
+    if (m_tuningWorkspace != nullptr)
+    {
+        delete m_tuningWorkspace;
+        m_tuningWorkspace = nullptr;
+    }
+
     m_tuningWorkspace = new TuningWorkspace(objects, this);
 
     setCentralWidget(m_tuningWorkspace);
-
-    connect(m_pPresetEditorAction, &QAction::triggered, m_tuningWorkspace, &TuningWorkspace::slot_runPresetEditor);
 
 }
 
@@ -243,15 +273,15 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		return;
 	}
 
-	removeWorkspace();
-
 	if (settings.updateFilters == true)
 	{
-		if (m_configController.getObjectFilters() == false)
-		{
+        theFilters.removeAutomaticFilters();
 
-		}
-	}
+        if (m_configController.getObjectFilters() == false)
+        {
+
+        }
+    }
 
 	if (settings.updateSchemas == true)
 	{
@@ -278,7 +308,6 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
     if (settings.updateFilters == true || settings.updateSignals == true)
     {
-
         bool removedNotFound = false;
 
         theFilters.checkSignals(&objects, removedNotFound, this);
@@ -293,6 +322,11 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
                 QMessageBox::critical(this, tr("Error"), errorMsg);
             }
         }
+    }
+
+    if (m_tuningWorkspace != nullptr)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
     }
 
     createWorkspace(&objects);
@@ -314,6 +348,34 @@ void MainWindow::slot_tuningConnectionFailed()
 void MainWindow::exit()
 {
 	close();
+}
+
+void MainWindow::runPresetEditor()
+{
+    TuningFilterStorage editStorage = theFilters;
+
+    bool editAutomatic = false;
+
+    TuningObjectStorage objects = theObjectManager->objectStorage();
+
+    TuningFilterEditor d(&editStorage, &objects, editAutomatic, this);
+
+    connect(theMainWindow, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+
+    if (d.exec() == QDialog::Accepted)
+    {
+        theFilters = editStorage;
+
+        QString errorMsg;
+
+        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+        {
+            theLogFile->writeError(errorMsg);
+            QMessageBox::critical(this, tr("Error"), errorMsg);
+        }
+
+        createWorkspace(&objects);
+    }
 }
 
 void MainWindow::runUsersEditor()

@@ -115,7 +115,7 @@
     </message>
     <message>
         <location filename="../../u7/Builder/IssueLogger.cpp" line="589"/>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1630"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1684"/>
         <source>Signal &apos;%1&apos; is not found in Application Signals.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -312,382 +312,392 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1649"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1628"/>
+        <source>Signal &apos;%1&apos; is not bound to any schema&apos;s EquipmentIds(LMs), (LogicSchema &apos;%2&apos;, SchemaItem &apos;%3&apos;).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1655"/>
+        <source>Signal &apos;%1&apos; is expected to be bound to EquipmentId(LM) %2 (LogicSchema &apos;%3&apos;, SchemaItem &apos;%4&apos;).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1703"/>
         <source>Application logic for module &apos;%1&apos; is not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1672"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1726"/>
         <source>Value of signal &apos;%1&apos; is undefined (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1696"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1750"/>
         <source>Analog output &apos;%1.%2&apos; is connected to discrete signal &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1719"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1773"/>
         <source>Output &apos;%1.%2&apos; is connected to signal &apos;%3&apos; with uncompatible data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1742"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1796"/>
         <source>Output &apos;%1.%2&apos; is connected to signal &apos;%3&apos; with uncompatible data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1765"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1819"/>
         <source>Discrete output &apos;%1.%2&apos; is connected to analog signal &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1789"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1843"/>
         <source>Discrete signal &apos;%1&apos; is connected to analog input &apos;%2.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1812"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1866"/>
         <source>Signal &apos;%1&apos; is connected to input &apos;%2.%3&apos; with uncompatible data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1836"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1890"/>
         <source>Signal &apos;%1&apos; is connected to input &apos;%2.%3&apos; with uncompatible data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1859"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1913"/>
         <source>Analog signal &apos;%1&apos; is connected to discrete input &apos;%2.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1881"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1935"/>
         <source>Application item &apos;%1&apos; has unknown type. Contact to the RPCT developers.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1900"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1954"/>
         <source>Application signal &apos;%1&apos; is not bound to any device object.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1920"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1974"/>
         <source>Application signal &apos;%1&apos; is bound to unknown device object &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1940"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1994"/>
         <source>Discrete signal &apos;%1&apos; must have DataSize equal to 1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1960"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2014"/>
         <source>Analog signal &apos;%1&apos; must have DataSize equal to 32.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1980"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2034"/>
         <source>Application signal identifier &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2000"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2054"/>
         <source>Custom application signal identifier &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2023"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2077"/>
         <source>Opto ports &apos;%1&apos; and &apos;%2&apos; are not compatible (connection &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2045"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2099"/>
         <source>Opto port &apos;%1&apos; of connection &apos;%2&apos; is already used in connection &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2066"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2120"/>
         <source>LM&apos;s opto port &apos;%1&apos; can&apos;t work in RS232/485 mode (connection &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2087"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2141"/>
         <source>Undefined opto port &apos;%1&apos; in the connection &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2107"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2161"/>
         <source>Opto ports of the same chassis is linked via connection &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2127"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2181"/>
         <source>Opto connection ID &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2150"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2204"/>
         <source>Transmitter is linked to unknown opto connection &apos;%1&apos; (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2173"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2227"/>
         <source>Receiver is linked to unknown opto connection &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2201"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2255"/>
         <source>Transmitter input can be linked to one signal only.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2222"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2276"/>
         <source>All transmitter inputs must be directly linked to a signals.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2246"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2300"/>
         <source>Floating point constant is connected to discrete signal &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2271"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2325"/>
         <source>The signal &apos;%1&apos; is repeatedly connected to the transmitter &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2295"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2349"/>
         <source>The signal &apos;%1&apos; is not associated with LM &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2315"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2369"/>
         <source>The signal &apos;%1&apos; can be bind only to Logic Module or Equipment Signal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2339"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2393"/>
         <source>TxData size (%1 words) of opto port &apos;%2&apos; exceed value of OptoPortAppDataSize property of module &apos;%3&apos; (%4 words).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2361"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2415"/>
         <source>Can&apos;t find logic module associated with signal &apos;%1&apos; (no LM in chassis &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2385"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2439"/>
         <source>Non-signal element is connected to transmitter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2408"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2462"/>
         <source>RxData size (%1 words) of opto port &apos;%2&apos; exceed value of OptoPortAppDataSize property of module &apos;%3&apos; (%4 words).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2434"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2488"/>
         <source>Analog signal &apos;%1&apos; is connected to discrete signal &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2461"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2515"/>
         <source>Discrete signal &apos;%1&apos; is connected to analog signal &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2487"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2541"/>
         <source>Signals &apos;%1&apos; and &apos;%2&apos; have different data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2513"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2567"/>
         <source>Signals &apos;%1&apos; and &apos;%2&apos; have different data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2533"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2587"/>
         <source>Connection with ID &apos;%1&apos; is not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2555"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2609"/>
         <source>Signal &apos;%1&apos; exists in LM &apos;%2&apos;. No receivers needed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2578"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2632"/>
         <source>Signal &apos;%1&apos; is not exists in connection &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2602"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2656"/>
         <source>Value of parameter &apos;%1.%2&apos; must be greater or equal to 0.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2626"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2680"/>
         <source>Parameter&apos;s calculation for AFB &apos;%1&apos; (opcode %2) is not implemented.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2650"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2704"/>
         <source>Required parameter &apos;%1&apos; of AFB &apos;%2&apos; is missing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2674"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2728"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2698"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2752"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 16-bit Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2722"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2776"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2746"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2800"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Signed Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2770"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2824"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Float.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2795"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2849"/>
         <source>Value %1 of parameter &apos;%2&apos; of AFB &apos;%3&apos; is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2820"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2874"/>
         <source>Value of parameter &apos;%1.%2&apos; must be greate then the value of &apos;%1.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2843"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2897"/>
         <source>Automatic sorting of XY points of FB &apos;%1&apos; has been performed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2867"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2921"/>
         <source>Parameters &apos;%1&apos; and &apos;%2&apos; of AFB &apos;%3&apos; can&apos;t be equal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2887"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2941"/>
         <source>Optical connection &apos;%1&apos; is configured manually.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2907"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2961"/>
         <source>SubsystemID &apos;%1&apos; assigned in LM &apos;%2&apos; is not found in subsystem list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2932"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2986"/>
         <source>Uncompatible data format of analog AFB signal &apos;%1.%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2956"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3010"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; can&apos;t be 0.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2980"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3034"/>
         <source>Ports of connection &apos;%1&apos; are not accessible in LM &apos;%2&apos; (Logic schema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3002"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3056"/>
         <source>Float constant is connected to discrete input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3023"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3077"/>
         <source>Float constant is connected to 16-bit input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3044"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3098"/>
         <source>Float constant is connected to SignedInt input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3065"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3119"/>
         <source>Integer constant is connected to Float input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3084"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3138"/>
         <source>Read address %1 of application memory is out of range 0..65535.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3103"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3157"/>
         <source>Write address %1 of application memory is out of range 0..65535.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3124"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3178"/>
         <source>Command &apos;MOVEMEM %1, %2, %3&apos; can&apos;t write to bit-addressed memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3146"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3200"/>
         <source>Command &apos;MOVBC %1, %2, #%3&apos; can&apos;t write out of application bit- or word-addressed memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3168"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3222"/>
         <source>LowEngeneeringUnits property of tuningable signal &apos;%1&apos; must be greate than HighEngeneeringUnits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3190"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3244"/>
         <source>TuningDefaultValue property of tuningable signal &apos;%1&apos; must be in range from LowEngeneeringUnits to HighEngeneeringUnits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3211"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3265"/>
         <source>Signal &apos;%1&apos; has Little Endian byte order.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3234"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3288"/>
         <source>Can&apos;t assign value to tuningable signal &apos;%1&apos; (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3261"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3315"/>
         <source>Property Place is less then 0 (Equipment object &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3286"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3340"/>
         <source>Two or more equipment objects have the same EquipmentID &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3313"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3367"/>
         <source>Two or more equipment objects have the same Uuid &apos;%1&apos; (Object1 &apos;%2&apos;, Object2 &apos;%3&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3343"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3397"/>
         <source>Ethernet adapters of LMs &apos;%1&apos; and &apos;%2&apos; has duplicate IP address %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3369"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3423"/>
         <source>Unknown software type (Software object StrID &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
@@ -746,10 +756,6 @@
         <location filename="../ConfigController.cpp" line="254"/>
         <source>ObjectFilters.xml file loading error: %1</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All Filters</source>
-        <translation type="obsolete">Все фильтры</translation>
     </message>
     <message>
         <location filename="../ConfigController.cpp" line="270"/>
@@ -906,133 +912,6 @@
         <location filename="../DialogInputValue.cpp" line="83"/>
         <source>Please select the value.</source>
         <translation>Выберите значение параметра.</translation>
-    </message>
-</context>
-<context>
-    <name>DialogPresetEditor</name>
-    <message>
-        <source>Preset Editor</source>
-        <translation type="vanished">Редактор списков</translation>
-    </message>
-    <message>
-        <source>Apply Mask</source>
-        <translation type="vanished">Маска</translation>
-    </message>
-    <message>
-        <source>Apply Filter</source>
-        <translation type="vanished">Фильтр</translation>
-    </message>
-    <message>
-        <source>Set Current</source>
-        <translation type="vanished">Текущее</translation>
-    </message>
-    <message>
-        <source>Move Up</source>
-        <translation type="vanished">Вверх</translation>
-    </message>
-    <message>
-        <source>Set Value...</source>
-        <translation type="vanished">Задать...</translation>
-    </message>
-    <message>
-        <source>Remove Preset</source>
-        <translation type="vanished">Удалить список</translation>
-    </message>
-    <message>
-        <source>Edit Preset...</source>
-        <translation type="vanished">Изменить список...</translation>
-    </message>
-    <message>
-        <source>Move Down</source>
-        <translation type="vanished">Вниз</translation>
-    </message>
-    <message>
-        <source>Add Preset...</source>
-        <translation type="vanished">Добавить список...</translation>
-    </message>
-    <message>
-        <source>Caption</source>
-        <translation type="vanished">Наименование</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <translation type="vanished">Тип</translation>
-    </message>
-    <message>
-        <source>AppSignalID</source>
-        <translation type="vanished">Внутр. ИД</translation>
-    </message>
-    <message>
-        <source>AppSignalCaption</source>
-        <translation type="vanished">Наименование</translation>
-    </message>
-    <message>
-        <source>Value</source>
-        <translation type="vanished">Значение</translation>
-    </message>
-    <message>
-        <source>All signals</source>
-        <translation type="vanished">Все сигналы</translation>
-    </message>
-    <message>
-        <source>Analog signals</source>
-        <translation type="vanished">Аналоговые</translation>
-    </message>
-    <message>
-        <source>Discrete signals</source>
-        <translation type="vanished">Дискретные</translation>
-    </message>
-    <message>
-        <source>CustomAppSignalID</source>
-        <translation type="vanished">ИД</translation>
-    </message>
-    <message>
-        <source>All Text</source>
-        <translation type="vanished">Все</translation>
-    </message>
-    <message>
-        <source>EquipmentID</source>
-        <translation type="vanished">ИД оборудования</translation>
-    </message>
-    <message>
-        <source>Preset</source>
-        <translation type="vanished">Список</translation>
-    </message>
-    <message>
-        <source>Signal</source>
-        <translation type="vanished">Сигнал</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation type="vanished">Нет</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation type="vanished">Да</translation>
-    </message>
-    <message>
-        <source>New Filter</source>
-        <translation type="vanished">Новый фильтр</translation>
-    </message>
-    <message>
-        <source>Are you sure you want to remove selected presets?</source>
-        <translation type="vanished">Вы уверены, что хотите удалить выбранные списки?</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation type="vanished">Ошибка</translation>
-    </message>
-    <message>
-        <source>Select one preset to add signals!</source>
-        <translation type="vanished">Выберите один список!</translation>
-    </message>
-    <message>
-        <source>Please select signals of same type (analog or discrete).</source>
-        <translation type="vanished">Выберите сигналы одного типа (аналоговые или дискретные).</translation>
-    </message>
-    <message>
-        <source>Selected signals have different input range.</source>
-        <translation type="vanished">Выбранные сигналы имеют разный диапазон.</translation>
     </message>
 </context>
 <context>
@@ -1312,144 +1191,141 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="32"/>
+        <location filename="../MainWindow.cpp" line="34"/>
         <source>Application started.</source>
         <translation>Приложение запущено.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="57"/>
+        <location filename="../MainWindow.cpp" line="59"/>
         <source>Failed to load user filters: %1</source>
         <translation>Ошибка загрузки файла списков: %1</translation>
     </message>
     <message>
-        <source>User Presets</source>
-        <translation type="vanished">Пользовательские списки</translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="60"/>
-        <location filename="../MainWindow.cpp" line="293"/>
+        <location filename="../MainWindow.cpp" line="62"/>
+        <location filename="../MainWindow.cpp" line="320"/>
+        <location filename="../MainWindow.cpp" line="372"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="40"/>
+        <location filename="../MainWindow.cpp" line="42"/>
         <source>Waiting for configuration...</source>
         <translation>Ожидание загрузки конфигурации...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="81"/>
+        <location filename="../MainWindow.cpp" line="83"/>
         <source>Application finished.</source>
         <translation>Приложение завершено.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="89"/>
+        <location filename="../MainWindow.cpp" line="91"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="90"/>
+        <location filename="../MainWindow.cpp" line="92"/>
         <source>Quit the application</source>
         <translation>Выход из приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="98"/>
+        <location filename="../MainWindow.cpp" line="100"/>
         <source>Preset Editor...</source>
         <translation>Редактор списков...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="99"/>
+        <location filename="../MainWindow.cpp" line="101"/>
         <source>Edit user presets</source>
         <translation>Редактирование списков</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="103"/>
+        <location filename="../MainWindow.cpp" line="106"/>
         <source>Users...</source>
         <translation>Пользователи...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="104"/>
+        <location filename="../MainWindow.cpp" line="107"/>
         <source>Edit users</source>
         <translation>Редактор пользователей</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="109"/>
+        <location filename="../MainWindow.cpp" line="112"/>
         <source>Settings...</source>
         <translation>Настройки...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="110"/>
+        <location filename="../MainWindow.cpp" line="113"/>
         <source>Change application settings</source>
         <translation>Изменить настройки приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="115"/>
+        <location filename="../MainWindow.cpp" line="118"/>
         <source>Tuning sources...</source>
         <translation>Источники тюнинга...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="116"/>
+        <location filename="../MainWindow.cpp" line="119"/>
         <source>View tuning sources</source>
         <translation>Отобразить источникни тюнинга</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="121"/>
+        <location filename="../MainWindow.cpp" line="124"/>
         <source>Log...</source>
         <translation>Журнал...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="122"/>
+        <location filename="../MainWindow.cpp" line="125"/>
         <source>Show application log</source>
         <translation>Вывод журнала приложения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="126"/>
+        <location filename="../MainWindow.cpp" line="129"/>
         <source>About...</source>
         <translation>О программе...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="127"/>
+        <location filename="../MainWindow.cpp" line="130"/>
         <source>Show application information</source>
         <translation>Вывод информации о программе</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="137"/>
+        <location filename="../MainWindow.cpp" line="140"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="143"/>
+        <location filename="../MainWindow.cpp" line="146"/>
         <source>&amp;Tools</source>
         <translation>&amp;Инструменты</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="147"/>
+        <location filename="../MainWindow.cpp" line="150"/>
         <source>&amp;Service</source>
         <translation>&amp;Сервис</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="154"/>
+        <location filename="../MainWindow.cpp" line="157"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="197"/>
-        <location filename="../MainWindow.cpp" line="205"/>
+        <location filename="../MainWindow.cpp" line="234"/>
+        <location filename="../MainWindow.cpp" line="242"/>
         <source> ConfigSrv: %1   TuningSrv: %2 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="198"/>
-        <location filename="../MainWindow.cpp" line="199"/>
+        <location filename="../MainWindow.cpp" line="235"/>
+        <location filename="../MainWindow.cpp" line="236"/>
         <source>NoConnection</source>
         <translation>Нет соединения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="221"/>
+        <location filename="../MainWindow.cpp" line="327"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="221"/>
+        <location filename="../MainWindow.cpp" line="327"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфигурация программы изменилась и будет обновлена.</translation>
     </message>
@@ -1457,68 +1333,60 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../TuningFilter.cpp" line="1058"/>
-        <location filename="../TuningFilter.cpp" line="1212"/>
+        <location filename="../TuningFilter.cpp" line="1064"/>
+        <location filename="../TuningFilter.cpp" line="1218"/>
         <location filename="../TuningObject.cpp" line="435"/>
         <source>Unknown tag: </source>
         <translation>Неизвестный тег:</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="965"/>
+        <location filename="../TuningFilter.cpp" line="969"/>
         <source>All Signals</source>
         <translation>Все сигналы</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="993"/>
+        <location filename="../TuningFilter.cpp" line="997"/>
         <source>Error opening file:
 
 %1</source>
-        <translation>Ошибка открытия файла: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1015"/>
-        <location filename="../TuningFilter.cpp" line="1131"/>
+        <location filename="../TuningFilter.cpp" line="1019"/>
+        <location filename="../TuningFilter.cpp" line="1137"/>
         <location filename="../TuningObject.cpp" line="346"/>
         <source>Failed to load root element.</source>
         <translation>Ошибка чтения корневого элемента.</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1022"/>
+        <location filename="../TuningFilter.cpp" line="1026"/>
         <source>The file is not an ObjectFilterStorage file.</source>
         <translation>Файл не является хранилищем ObjectFilterStorage.</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1090"/>
+        <location filename="../TuningFilter.cpp" line="1096"/>
         <source>TuningFilterStorage::save: failed to save presets in file %1.</source>
         <translation>TuningFilterStorage::save: ошибка сохранения списков в файл %1.</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1138"/>
+        <location filename="../TuningFilter.cpp" line="1144"/>
         <source>The file is not an SchemasDetails file.</source>
         <translation>Файл не является хранилищем SchemasDetails.</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1236"/>
+        <location filename="../TuningFilter.cpp" line="1241"/>
         <source>Schemas</source>
         <translation>Алгоритмы</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1283"/>
+        <location filename="../TuningFilter.cpp" line="1288"/>
         <source>Equipment</source>
         <translation>Оборудование</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="1331"/>
+        <location filename="../TuningFilter.cpp" line="1336"/>
         <source>%1 signals have been removed.</source>
         <translation>Удалено %1 сигналов.</translation>
-    </message>
-    <message>
-        <source>Automatic Filters</source>
-        <translation type="vanished">Автоматические фильтры</translation>
-    </message>
-    <message>
-        <source>Automatic presets</source>
-        <translation type="vanished">Автоматические списки</translation>
     </message>
     <message>
         <location filename="../TuningObject.cpp" line="353"/>
@@ -1536,18 +1404,12 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="151"/>
-        <location filename="../main.cpp" line="170"/>
+        <location filename="../main.cpp" line="194"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="151"/>
-        <source>Failed to create QSharedMemory object!</source>
-        <translation>Ошибка создания объекта QSharedMemory!</translation>
-    </message>
-    <message>
-        <location filename="../main.cpp" line="170"/>
+        <location filename="../main.cpp" line="194"/>
         <source>Application is already running!</source>
         <translation>Приложение уже запущено!</translation>
     </message>
@@ -2069,7 +1931,7 @@
         <translation>Неизвестный тег:</translation>
     </message>
     <message>
-        <location filename="../TuningFilter.cpp" line="894"/>
+        <location filename="../TuningFilter.cpp" line="898"/>
         <source>Signal with AppSignalID &lt;font color=&quot;red&quot;&gt;&apos;%1&apos;&lt;/font&gt; was not found in the preset &apos;%2&apos;.</source>
         <translation>Сигнал с идентификатором AppSignalID &lt;font color=&quot;red&quot;&gt;&apos;%1&apos;&lt;/font&gt; не найден в списке &apos;%2&apos;.</translation>
     </message>
@@ -2244,17 +2106,6 @@
     </message>
 </context>
 <context>
-    <name>TuningFilterStorage</name>
-    <message>
-        <source>Schemas</source>
-        <translation type="vanished">Алгоритмы</translation>
-    </message>
-    <message>
-        <source>Equipment</source>
-        <translation type="vanished">Оборудование</translation>
-    </message>
-</context>
-<context>
     <name>TuningItemModel</name>
     <message>
         <location filename="../TuningPage.cpp" line="164"/>
@@ -2348,22 +2199,6 @@
         <translation></translation>
     </message>
     <message>
-        <source>Analog</source>
-        <translation type="vanished">Аналоговый</translation>
-    </message>
-    <message>
-        <source>Discrete</source>
-        <translation type="vanished">Дискретный</translation>
-    </message>
-    <message>
-        <source>No</source>
-        <translation type="vanished">Нет</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation type="vanished">Да</translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="499"/>
         <source>%1 =&gt; %2</source>
         <translation></translation>
@@ -2430,26 +2265,9 @@
         <translation>1</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1160"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="1165"/>
         <source>Are you sure you want to continue?</source>
         <translation>Вы уверены, что хотите продолжить?</translation>
-    </message>
-    <message>
-        <source>New values will be applied: 
-
-</source>
-        <translation type="obsolete">Будут применены новые значения:\r\n\r\n</translation>
-    </message>
-    <message>
-        <source>
-Are you sure you want to continue?</source>
-        <translation type="obsolete">Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1147"/>
@@ -2457,12 +2275,10 @@ Are you sure you want to continue?</source>
         <translation>и еще %1 значений.</translation>
     </message>
     <message>
-        <source>No</source>
-        <translation type="vanished">Нет</translation>
-    </message>
-    <message>
-        <source>Yes</source>
-        <translation type="vanished">Да</translation>
+        <location filename="../TuningPage.cpp" line="1160"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1167"/>
@@ -2546,10 +2362,6 @@ Are you sure you want to continue?</source>
 <context>
     <name>TuningPage</name>
     <message>
-        <source>Apply Mask</source>
-        <translation type="vanished">Маска</translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="1361"/>
         <source>All Text</source>
         <translation>Все</translation>
@@ -2576,8 +2388,8 @@ Are you sure you want to continue?</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1374"/>
-        <source>Apply Filter</source>
-        <translation>Фильтр</translation>
+        <source>Search</source>
+        <translation>Поиск</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1380"/>
@@ -2613,18 +2425,14 @@ Are you sure you want to continue?</source>
 <context>
     <name>TuningWorkspace</name>
     <message>
-        <source>All Objects</source>
-        <translation type="vanished">&lt;Все объекты&gt;</translation>
-    </message>
-    <message>
-        <location filename="../TuningWorkspace.cpp" line="141"/>
+        <location filename="../TuningWorkspace.cpp" line="152"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningWorkspace.cpp" line="229"/>
-        <source>Error</source>
-        <translation>Ошибка</translation>
+        <location filename="../TuningWorkspace.cpp" line="160"/>
+        <source>Search</source>
+        <translation>Поиск</translation>
     </message>
 </context>
 </TS>
