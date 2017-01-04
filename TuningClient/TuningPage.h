@@ -180,6 +180,7 @@ public:
 
 	void fillObjectsList();
 
+    QColor tabColor();
 
 private slots:
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);

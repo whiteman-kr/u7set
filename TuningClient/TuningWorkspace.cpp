@@ -77,6 +77,9 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 		//
 		m_tab = new QTabWidget();
 
+        connect(m_tab, &QTabWidget::currentChanged, this, &TuningWorkspace::slot_currentTabChanged);
+
+
 		if (m_hSplitter != nullptr)
 		{
 			m_hSplitter->addWidget(m_tab);
@@ -91,9 +94,9 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 			TuningPage* tp = t.first;
 			QString tabName = t.second;
 
-			m_tab->addTab(tp, tabName);
-		}
-	}
+            m_tab->addTab(tp, tabName);
+        }
+    }
 
 	// Restore splitter size
 	//
@@ -272,4 +275,62 @@ void TuningWorkspace::slot_maskReturnPressed()
 void TuningWorkspace::slot_maskApply()
 {
     fillFiltersTree();
+}
+
+
+void TuningWorkspace::slot_currentTabChanged(int index)
+{
+    if (m_tab == nullptr)
+    {
+        assert(m_tab);
+        return;
+    }
+
+    TuningPage* page = dynamic_cast<TuningPage*>(m_tab->widget(index));
+    if (page == nullptr)
+    {
+        assert(page);
+        return;
+    }
+
+    // Set the tab back color
+    //
+
+    QColor tabColor = page->tabColor();
+
+    if (tabColor.isValid())
+    {
+        // See http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
+        //
+
+        QString s = QString("\
+            QTabWidget::pane \
+            {\
+                background: solid %1;\
+                border-top: 2px solid %1;\
+            }\
+            QTabWidget::tab-bar\
+            {\
+              alignment: left;\
+            }\
+            QTabBar::tab\
+            {\
+                border: 2px solid #C4C4C3;\
+                border-bottom-color: #C2C7CB;\
+                border-top-left-radius: 4px;\
+                border-top-right-radius: 4px;\
+                min-width: 8px;\
+                padding: 4px;\
+            }\
+            QTabBar::tab:selected\
+            {\
+                background: solid %1;\
+                border-color: #C2C7CB;\
+                border-bottom-color: #C2C7CB;\
+            }\
+        ").arg(tabColor.name());
+
+        m_tab->setStyleSheet(s);
+    }
+
 }

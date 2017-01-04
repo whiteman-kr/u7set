@@ -275,11 +275,13 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
 	if (settings.updateFilters == true)
 	{
-		if (m_configController.getObjectFilters() == false)
-		{
+        theFilters.removeAutomaticFilters();
 
-		}
-	}
+        if (m_configController.getObjectFilters() == false)
+        {
+
+        }
+    }
 
 	if (settings.updateSchemas == true)
 	{

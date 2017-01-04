@@ -1650,6 +1650,17 @@ void TuningPage::fillObjectsList()
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
+QColor TuningPage::tabColor()
+{
+    if (m_tabFilter != nullptr)
+    {
+        return m_tabFilter->tabColor();
+    }
+
+    return QColor();
+
+}
+
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 {
 	if (filter == nullptr)

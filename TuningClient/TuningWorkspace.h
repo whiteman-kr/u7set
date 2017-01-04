@@ -37,6 +37,8 @@ private slots:
     void slot_maskReturnPressed();
     void slot_maskApply();
 
+    void slot_currentTabChanged(int index);
+
 signals:
 	void filterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
