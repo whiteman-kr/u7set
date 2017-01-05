@@ -169,6 +169,8 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
+    auto propTabColor = ADD_PROPERTY_GETTER_SETTER(QColor, "Color", true, TuningFilter::tabColor, TuningFilter::setTabColor);
+    propTabColor->setCategory("Tab");
 }
 
 TuningFilter::TuningFilter(const TuningFilter& That)
@@ -219,7 +221,6 @@ void TuningFilter::copy(const TuningFilter& That)
 
 TuningFilter::~TuningFilter()
 {
-	//qDebug()<<"Deleting filter: "<<caption();
 
 }
 
@@ -235,6 +236,11 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
         if (reader.attributes().hasAttribute("Caption"))
         {
             setCaption(reader.attributes().value("Caption").toString());
+        }
+
+        if (reader.attributes().hasAttribute("TabColor"))
+        {
+            setTabColor(QColor(reader.attributes().value("TabColor").toString()));
         }
 
         if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
@@ -399,7 +405,9 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("StrID", strID());
 	writer.writeAttribute("Caption", caption());
 
-	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
+    writer.writeAttribute("TabColor", tabColor().name());
+
+    writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
 
@@ -658,6 +666,16 @@ void TuningFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
+QColor TuningFilter::tabColor() const
+{
+    return m_tabColor;
+}
+
+void TuningFilter::setTabColor(const QColor& value)
+{
+    m_tabColor = value;
+}
+
 TuningFilter* TuningFilter::parentFilter() const
 {
 	return m_parentFilter;
@@ -732,10 +750,46 @@ void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 	}
 }
 
+bool TuningFilter::removeChild(const QString& strID)
+{
+    bool found = false;
+
+    for (auto it = m_childFilters.begin(); it != m_childFilters.end(); it++)
+    {
+        if (it->get()->strID() == strID)
+        {
+            m_childFilters.erase(it);
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+}
+
 void TuningFilter::removeAllChildren()
 {
 	m_childFilters.clear();
 
+}
+
+void TuningFilter::removeAutomaticChildren()
+{
+    std::vector<std::shared_ptr<TuningFilter>> childFiltersCopy;
+
+    childFiltersCopy = m_childFilters;
+
+    m_childFilters.clear();
+
+    for (auto it = childFiltersCopy.begin(); it != childFiltersCopy.end(); it++)
+    {
+        std::shared_ptr<TuningFilter>& filter = *it;
+
+        if (filter->automatic() == false)
+        {
+            m_childFilters.push_back(filter);
+        }
+    }
 }
 
 int TuningFilter::childFiltersCount() const
@@ -1052,6 +1106,8 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, bool 
 				return false;
 			}
 
+            m_root->setCaption(QObject::tr("All Signals"));
+
 			continue;
 		}
 
@@ -1228,6 +1284,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 
     if (bySchemas == true)
 	{
+        m_root->removeChild("%AUTOFILTER%_SCHEMA");
 
 		// Filter for Schema
 		//
@@ -1276,6 +1333,8 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 
 	if (byEquipment == true)
 	{
+        m_root->removeChild("%AUTOFILTER%_EQUIPMENT");
+
 		// Filter for EquipmentId
 		//
 		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
@@ -1296,6 +1355,12 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 
 		m_root->addTopChild(ofEquipment);
 	}
+}
+
+void TuningFilterStorage::removeAutomaticFilters()
+{
+    m_root->removeAutomaticChildren();
+
 }
 
 void TuningFilterStorage::checkSignals(const TuningObjectStorage *objects, bool& removedNotFound, QWidget* parentWidget)

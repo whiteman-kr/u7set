@@ -1371,7 +1371,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_filterEdit = new QLineEdit();
     connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
 
-    m_filterButton = new QPushButton(tr("Apply Filter"));
+    m_filterButton = new QPushButton(tr("Search"));
     connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
 
     // Button controls
@@ -1648,6 +1648,17 @@ void TuningPage::fillObjectsList()
 
     m_model->setObjects(filteredObjects);
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
+}
+
+QColor TuningPage::tabColor()
+{
+    if (m_tabFilter != nullptr)
+    {
+        return m_tabFilter->tabColor();
+    }
+
+    return QColor();
+
 }
 
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)

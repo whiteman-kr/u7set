@@ -119,6 +119,9 @@ public:
     SignalType signalType() const;
     void setSignalType(SignalType value);
 
+    QColor tabColor() const;
+    void setTabColor(const QColor& value);
+
     // Filters
 	//
 	QString customAppSignalIDMask() const;
@@ -163,8 +166,10 @@ public:
 	void addChild(const std::shared_ptr<TuningFilter>& child);
 
 	void removeChild(const std::shared_ptr<TuningFilter>& child);
+    bool removeChild(const QString& strID);
 
 	void removeAllChildren();
+    void removeAutomaticChildren();
 
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
@@ -184,6 +189,8 @@ private:
 
     FilterType m_filterType = FilterType::Tree;
     SignalType m_signalType = SignalType::All;
+
+    QColor m_tabColor;
 
     // Filters
 	//
@@ -228,6 +235,8 @@ public:
     // Operations
 
     void createAutomaticFilters(const TuningObjectStorage *objects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+
+    void removeAutomaticFilters();
 
     void checkSignals(const TuningObjectStorage *objects, bool &removedNotFound, QWidget* parentWidget);
 

@@ -8,6 +8,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
+#include "TuningFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -100,6 +101,7 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
+    connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pUsersAction = new QAction(tr("Users..."), this);
 	m_pUsersAction->setStatusTip(tr("Edit users"));
@@ -250,25 +252,17 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::removeWorkspace()
-{
-	if (m_tuningWorkspace != nullptr)
-	{
-        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
-
-		delete m_tuningWorkspace;
-		m_tuningWorkspace = nullptr;
-	}
-
-}
-
 void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
+    if (m_tuningWorkspace != nullptr)
+    {
+        delete m_tuningWorkspace;
+        m_tuningWorkspace = nullptr;
+    }
+
     m_tuningWorkspace = new TuningWorkspace(objects, this);
 
     setCentralWidget(m_tuningWorkspace);
-
-    connect(m_pPresetEditorAction, &QAction::triggered, m_tuningWorkspace, &TuningWorkspace::slot_runPresetEditor);
 
 }
 
@@ -279,15 +273,15 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 		return;
 	}
 
-	removeWorkspace();
-
 	if (settings.updateFilters == true)
 	{
-		if (m_configController.getObjectFilters() == false)
-		{
+        theFilters.removeAutomaticFilters();
 
-		}
-	}
+        if (m_configController.getObjectFilters() == false)
+        {
+
+        }
+    }
 
 	if (settings.updateSchemas == true)
 	{
@@ -314,7 +308,6 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
     if (settings.updateFilters == true || settings.updateSignals == true)
     {
-
         bool removedNotFound = false;
 
         theFilters.checkSignals(&objects, removedNotFound, this);
@@ -329,6 +322,11 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
                 QMessageBox::critical(this, tr("Error"), errorMsg);
             }
         }
+    }
+
+    if (m_tuningWorkspace != nullptr)
+    {
+        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
     }
 
     createWorkspace(&objects);
@@ -350,6 +348,34 @@ void MainWindow::slot_tuningConnectionFailed()
 void MainWindow::exit()
 {
 	close();
+}
+
+void MainWindow::runPresetEditor()
+{
+    TuningFilterStorage editStorage = theFilters;
+
+    bool editAutomatic = false;
+
+    TuningObjectStorage objects = theObjectManager->objectStorage();
+
+    TuningFilterEditor d(&editStorage, &objects, editAutomatic, this);
+
+    connect(theMainWindow, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+
+    if (d.exec() == QDialog::Accepted)
+    {
+        theFilters = editStorage;
+
+        QString errorMsg;
+
+        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+        {
+            theLogFile->writeError(errorMsg);
+            QMessageBox::critical(this, tr("Error"), errorMsg);
+        }
+
+        createWorkspace(&objects);
+    }
 }
 
 void MainWindow::runUsersEditor()
