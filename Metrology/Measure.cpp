@@ -7,6 +7,22 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+void DevicePosition::setFromID(const QString& equipmentID)
+{
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(equipmentID.isEmpty() != true);
+        return;
+    }
+
+    m_equipmentID = equipmentID;
+
+    // parse position from equipmentID
+    //
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QString DevicePosition::caseString() const
 {
     QString caseNo = m_caseNo == -1 ? "" : QString::number(m_caseNo + 1);
@@ -57,7 +73,7 @@ QString DevicePosition::entryString() const
 
 DevicePosition& DevicePosition::operator=(const DevicePosition& from)
 {
-    m_deviceStrID = from.m_deviceStrID;
+    m_equipmentID = from.m_equipmentID;
 
     m_caseNo = from.m_caseNo;
     m_caseType = from.m_caseType;
@@ -170,9 +186,9 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("#IDMPS");
+    setCustomAppSignalID("IDMPS");
+    setCaption("This is signal of the block MPS");
 
     position().setCaseNo(0);
     position().setCaseType("CASE-1");
@@ -366,9 +382,9 @@ void LinearetyMeasureItem::updateAdditionalValue(MeasureItem* pMeasure)
 
 LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem& from)
 {
-    m_strID = from.m_strID;
-    m_extStrID = from.m_extStrID;
-    m_name = from.m_name;
+    m_appSignalID = from.m_appSignalID;
+    m_customAppSignalID = from.m_customAppSignalID;
+    m_caption = from.m_caption;
 
     m_position = from.m_position;
 

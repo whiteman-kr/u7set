@@ -17,7 +17,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Case"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "ID"), 150, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Name"), 200, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Caption"), 200, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Case No"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Subblock"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Block"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),

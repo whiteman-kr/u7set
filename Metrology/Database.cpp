@@ -47,11 +47,11 @@ int SqlFieldBase::init(int objectType, int)
 
             append("Filter",						QVariant::Bool);
 
-            append("StrID",                         QVariant::String, 64);
-            append("ExtStrID",						QVariant::String, 64);
-            append("Name",                          QVariant::String, 256);
+            append("AppSignalID",                   QVariant::String, 64);
+            append("CustomAppSignalID",     		QVariant::String, 64);
+            append("Caption",                       QVariant::String, 256);
 
-            append("DevStrID",						QVariant::String, 256);
+            append("EquipmentID",					QVariant::String, 256);
             append("CaseNo",                        QVariant::Int);
             append("CaseType",						QVariant::String, 64);
             append("Channel",						QVariant::Int);
@@ -728,11 +728,11 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->setFilter(query.value(field++).toBool());
 
-                    measure->setStrID(query.value(field++).toString());
-                    measure->setExtStrID(query.value(field++).toString());
-                    measure->setName(query.value(field++).toString());
+                    measure->setAppSignalID(query.value(field++).toString());
+                    measure->setCustomAppSignalID(query.value(field++).toString());
+                    measure->setCaption(query.value(field++).toString());
 
-                    measure->position().setDeviceStrID(query.value(field++).toString());
+                    measure->position().setEquipmentID(query.value(field++).toString());
                     measure->position().setCaseNo(query.value(field++).toInt());
                     measure->position().setCaseType(query.value(field++).toString());
                     measure->position().setChannel(query.value(field++).toInt());
@@ -1062,7 +1062,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->extStrID());
                     query.bindValue(field++, measure->name());
 
-                    query.bindValue(field++, measure->position().deviceStrID());
+                    query.bindValue(field++, measure->position().equipmentID());
                     query.bindValue(field++, measure->position().caseNo());
                     query.bindValue(field++, measure->position().caseType());
                     query.bindValue(field++, measure->position().channel());

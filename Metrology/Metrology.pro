@@ -93,7 +93,14 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/SocketIO.cpp \
     ../lib/XmlHelper.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/SimpleThread.cpp \
+    SignalSocket.cpp \
+    ../lib/Tcp.cpp \
+    SignalBase.cpp \
+    ../Proto/network.pb.cc \
+    ../Proto/serialization.pb.cc \
+    ../lib/AppSignalState.cpp
 
 
 HEADERS  += \
@@ -135,7 +142,14 @@ HEADERS  += \
     ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
     ../lib/XmlHelper.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/SimpleThread.h \
+    SignalSocket.h \
+    ../lib/Tcp.h \
+    SignalBase.h \
+    ../Proto/network.pb.h \
+    ../Proto/serialization.pb.h \
+    ../lib/AppSignalState.h
 
 
 FORMS    +=

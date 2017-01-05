@@ -11,9 +11,12 @@
 #include <QProgressBar>
 
 #include "MeasureView.h"
+#include "SignalSocket.h"
 #include "MeasureThread.h"
 #include "FindMeasure.h"
 #include "Calculator.h"
+
+#include "../lib/SimpleThread.h"
 
 // ==============================================================================================
 
@@ -72,6 +75,9 @@ public:
     QLabel*             m_statusConnectToServer = nullptr;
 
 public:
+
+    SignalSocket*       m_pSignalSocket = nullptr;
+    SimpleThread*       m_pSignalSocketThread = nullptr;
 
     MeasureThread       m_measureThread;
 
@@ -204,6 +210,12 @@ private slots:
     // Slots of calibrator base
     //
     void calibratorConnectedChanged(int);
+
+    // Slots of socket for signals
+    //
+    void signalSocketConnected();
+    void signalSocketDisconnected();
+    void signalSocketSignalsLoaded();
 
     // Slots of measure thread
     //

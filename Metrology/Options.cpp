@@ -40,7 +40,7 @@ void TcpIpOption::load()
     QSettings s;
 
     m_serverIP = s.value( QString("%1ServerIP").arg(TCPIP_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort = s.value( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), 2000).toInt();
+    m_serverPort = s.value( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
