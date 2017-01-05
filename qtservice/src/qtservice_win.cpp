@@ -783,12 +783,16 @@ bool myEventFilter(void* message, long* result)
 bool QtServiceBasePrivate::start()
 {
     sysInit();
+
     if (!winServiceInit())
+	{
         return false;
+	}
 
     // Since StartServiceCtrlDispatcher() blocks waiting for service
     // control events, we need to call it in another thread, so that
     // the main thread can run the QApplication event loop.
+	//
     HandlerThread* ht = new HandlerThread();
     ht->start();
 

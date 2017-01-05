@@ -398,14 +398,18 @@ void QtServiceBasePrivate::sysCleanup()
 
 bool QtServiceBasePrivate::start()
 {
-    if (sendCmd(controller.serviceName(), "alive")) {
+	if (sendCmd(controller.serviceName(), "alive"))
+	{
         // Already running
         return false;
     }
+
     // Could just call controller.start() here, but that would fail if
     // we're not installed. We do not want to strictly require installation.
+	//
     ::setenv("QTSERVICE_RUN", "1", 1);  // Tell the detached process it's it
-    return QProcess::startDetached(filePath(), args.mid(1), "/");
+
+	return QProcess::startDetached(filePath(), args.mid(1), "/");
 }
 
 bool QtServiceBasePrivate::install(const QString &account, const QString &password)

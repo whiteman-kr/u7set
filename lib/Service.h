@@ -52,7 +52,7 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv);
+	ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, int majorVersion, int minorVersion);
 	virtual ~ServiceWorker();
 
 	int& argc() const;
@@ -60,7 +60,12 @@ public:
 
 	ServiceType serviceType() const;
 	QString serviceName() const;
-	QString serviceEquipmentID() const;
+
+	int majorVersion() const;
+	int minorVersion() const;
+	int commitNo() const;
+	QString buildBranch() const;
+	QString commitSHA() const;
 
 	void init();
 
@@ -80,8 +85,8 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
-	virtual void processCmdLineSettings();				// override to process service-specific cmd line settings
-	virtual void loadSettings();						// override to load service-specific settings
+	virtual void processCmdLineSettings() = 0;			// override to process service-specific cmd line settings
+	virtual void loadSettings() = 0;					// override to load service-specific settings
 
 	void clearSettings();								// clear all service settings
 
@@ -110,9 +115,10 @@ private:
 	int& m_argc;
 	char** m_argv = nullptr;
 
-	CommandLineParser m_cmdLineParser;
+	int m_majorVersion = 0;
+	int m_minorVersion = 0;
 
-	QString m_serviceEquipmentID;
+	CommandLineParser m_cmdLineParser;
 
 	Service* m_service = nullptr;
 };
@@ -135,23 +141,16 @@ public:
 	void start();
 	void stop();
 
-//	HostAddressPort cfgServiceAddressPort() const { return m_cfgServiceAddressPort; }
-//	HostAddressPort setCfgServiceAddressPort(const HostAddressPort& addressPort) { return m_cfgServiceAddressPort = addressPort; }
-
 signals:
 	void ackBaseRequest(UdpRequest request);
 
 private slots:
-	void onTimer500ms();
-
 	void onServiceWork();
 	void onServiceStopped();
 
 	void onBaseRequest(UdpRequest request);
 
 private:
-	void checkMainFunctionState();
-
 	void startServiceWorkerThread();
 	void stopServiceWorkerThread();
 
@@ -163,9 +162,6 @@ private:
 private:
 	QMutex m_mutex;
 
-	quint32 m_majorVersion = 0;
-	quint32 m_minorVersion = 0;
-	quint32 m_buildNo = 0;
 	quint32 m_crc = 0;
 
 	qint64 m_serviceStartTime = 0;
@@ -190,10 +186,10 @@ private:
 //
 // -------------------------------------------------------------------------------------
 
-class DaemonServiceStarter : private QtService<QCoreApplication>
+class DaemonServiceStarter : private QtService
 {
 public:
-	DaemonServiceStarter(ServiceWorker* serviceWorker);
+	DaemonServiceStarter(QCoreApplication* app, ServiceWorker* serviceWorker);
 	virtual ~DaemonServiceStarter();
 
 	int exec();
@@ -202,54 +198,11 @@ private:
 	void start() final;				// override QtService::start
 	void stop() final;				// override QtService::stop
 
-private:
-	ServiceWorker* m_serviceWorker = nullptr;
-	Service* m_service = nullptr;
-
-	bool m_serviceWorkerDeleted = false;
-
-};
-
-
-// -------------------------------------------------------------------------------------
-//
-// ConsoleService Starter class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class ConsoleServiceStarter : private QCoreApplication
-{
-public:
-	ConsoleServiceStarter(ServiceWorker* serviceWorker);
-
-	int exec();
-
-private:
-	bool processCmdLineArguments();			// returns 'true' for application exit
+	void stopAndDeleteService();
 
 private:
 	ServiceWorker* m_serviceWorker = nullptr;
 	Service* m_service = nullptr;
-};
-
-
-// -------------------------------------------------------------------------------------
-//
-// ConsoleServiceKeyReaderThread Starter class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class ConsoleServiceKeyReaderThread : public QThread
-{
-	Q_OBJECT
-
-public:
-	virtual void run()
-	{
-		char c = 0;
-		std::cin >> c;
-		QCoreApplication::exit(0);
-	}
 };
 
 
@@ -259,20 +212,28 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
-class ServiceStarter
+class ServiceStarter : public QObject
 {
+	Q_OBJECT
+
 public:
-	ServiceStarter(ServiceWorker* m_serviceWorker);
+	ServiceStarter(QCoreApplication& app, ServiceWorker* m_serviceWorker);
 
 	int exec();
 
 private:
+	void processCmdLineArguments(bool& pauseAndExit, bool& startAsRegularApp);
 
+	int startAsRegularApplication();
+
+private:
+	QCoreApplication& m_app;
 	ServiceWorker* m_serviceWorker = nullptr;
+
+private:
+	class KeyReaderThread : public QThread
+	{
+	public:
+		virtual void run() override;
+	};
 };
-
-
-
-
-
-

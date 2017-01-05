@@ -402,7 +402,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		qDebug() << C_STR(message);
 	}
 
-	QString record = QString("\"%1\" \"%2\" \"%3\" \"%4\" \"%5:%6\"").
+	QString record = QString("%1 %2  %3  ###%4###%5:%6###").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
 							arg(message).

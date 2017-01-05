@@ -59,6 +59,8 @@
 #  define QT_QTSERVICE_EXPORT
 #endif
 
+const int QT_SERVICE_PAUSE_AND_EXIT = -555;
+
 class QStringList;
 class QtServiceControllerPrivate;
 
@@ -173,7 +175,45 @@ private:
     QtServiceBasePrivate *d_ptr;
 };
 
-template <typename Application>
+
+class QtService : public QtServiceBase
+{
+public:
+	QtService(int argc, char** argv, QCoreApplication* app, const QString &name)
+		: QtServiceBase(argc, argv, name),
+		  m_app(app)
+	{
+	}
+
+	~QtService()
+	{
+	}
+
+protected:
+	QCoreApplication* application() const
+	{
+		return m_app;
+	}
+
+	virtual void createApplication(int &argc, char **argv)
+	{
+		Q_UNUSED(argc);
+		Q_UNUSED(argv);
+		/*app = new Application(argc, argv);
+		QCoreApplication *a = app;
+		Q_UNUSED(a);*/
+	}
+
+	virtual int executeApplication()
+	{
+		return m_app->exec();
+	}
+
+private:
+	QCoreApplication* m_app;
+};
+
+/*template <typename Application>
 class QtService : public QtServiceBase
 {
 public:
@@ -200,7 +240,7 @@ protected:
 
 private:
     Application *app;
-};
+};*/
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QtServiceBase::ServiceFlags)
 

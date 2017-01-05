@@ -637,13 +637,17 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
     QtServiceBasePrivate::instance = this;
 
     QString nm(name);
-    if (nm.length() > 255) {
-	qWarning("QtService: 'name' is longer than 255 characters.");
-	nm.truncate(255);
+
+	if (nm.length() > 255)
+	{
+		qWarning("QtService: 'name' is longer than 255 characters.");
+		nm.truncate(255);
     }
-    if (nm.contains('\\')) {
-	qWarning("QtService: 'name' contains backslashes '\\'.");
-	nm.replace((QChar)'\\', (QChar)'\0');
+
+	if (nm.contains('\\'))
+	{
+		qWarning("QtService: 'name' contains backslashes '\\'.");
+		nm.replace((QChar)'\\', (QChar)'\0');
     }
 
     d_ptr = new QtServiceBasePrivate(nm);
@@ -651,8 +655,11 @@ QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
 
     d_ptr->serviceFlags = 0;
     d_ptr->sysd = 0;
+
     for (int i = 0; i < argc; ++i)
+	{
         d_ptr->args.append(QString::fromLocal8Bit(argv[i]));
+	}
 }
 
 /*!
@@ -762,17 +769,17 @@ int QtServiceBase::exec()
 	{
 		QString a =  d_ptr->args.at(1);
 
-		if (a == QLatin1String("-i") || a == QLatin1String("-install"))
+		if (a == QLatin1String("-i"))
 		{
 			return installService();
 		}
 
-		if (a == QLatin1String("-u") || a == QLatin1String("-uninstall"))
+		if (a == QLatin1String("-u"))
 		{
 			return uninstallService();
 		}
 
-		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
+/*		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
 		{
 			return printVersion();
 		}
@@ -780,14 +787,14 @@ int QtServiceBase::exec()
 		if (a == QLatin1String("-e") || a == QLatin1String("-exec"))
 		{
 			return startAsRegularApplication();
-		}
+		}*/
 
-		if (a == QLatin1String("-t") || a == QLatin1String("-terminate"))
+		if (a == QLatin1String("-t"))
 		{
 			return terminateService();
 		}
 
-		if (a == QLatin1String("-p") || a == QLatin1String("-pause"))
+/*		if (a == QLatin1String("-p") || a == QLatin1String("-pause"))
 		{
 			return pauseService();
 		}
@@ -805,7 +812,11 @@ int QtServiceBase::exec()
 		if (a == QLatin1String("-h") || a == QLatin1String("-help"))
 		{
 			return printHelp();
-		}
+		}*/
+
+		DEBUG_LOG_WRN(QString(tr("Unknown command line arguments.")));
+
+		return QT_SERVICE_PAUSE_AND_EXIT;
 	}
 
 	return startService();
@@ -919,7 +930,7 @@ int QtServiceBase::exec()
 
 int QtServiceBase::installService()
 {
-	if (!d_ptr->controller.isInstalled())
+	if (d_ptr->controller.isInstalled() == false)
 	{
 		QString account;
 		QString password;
@@ -934,23 +945,22 @@ int QtServiceBase::installService()
 			password = d_ptr->args.at(3);
 		}
 
-		if (!d_ptr->install(account, password))
+		if (d_ptr->install(account, password) == false)
 		{
-			fprintf(stderr, "\nThe service '%s'' could not be installed\n", serviceName().toLatin1().constData());
-			return -1;
+			DEBUG_LOG_WRN(QString(tr("The service '%1' could not be installed.")).arg(serviceName()));
 		}
 		else
 		{
-			printf("\nThe service '%s' has been installed under: %s\n",
-				serviceName().toLatin1().constData(), d_ptr->filePath().toLatin1().constData());
+			DEBUG_LOG_MSG(QString(tr("The service '%1' has been installed under: %2")).
+						  arg(serviceName()).arg(d_ptr->filePath()));
 		}
 	}
 	else
 	{
-		fprintf(stderr, "\nThe service '%s' is already installed\n", serviceName().toLatin1().constData());
+		DEBUG_LOG_MSG(QString(tr("The service '%1' is already installed\n")).arg(serviceName()));
 	}
 
-	return 0;
+	return QT_SERVICE_PAUSE_AND_EXIT;
 }
 
 
@@ -1007,10 +1017,14 @@ int QtServiceBase::terminateService()
 {
 	if (d_ptr->controller.stop() == false)
 	{
-		qErrnoWarning("\nThe service could not be stopped.\n");
+		DEBUG_LOG_WRN(QString(tr("The service '%1' could not be stopped.")).arg(serviceName()));
+	}
+	else
+	{
+		DEBUG_LOG_WRN(QString(tr("The service '%1' is stopped.")).arg(serviceName()));
 	}
 
-	return 0;
+	return QT_SERVICE_PAUSE_AND_EXIT;
 }
 
 
@@ -1099,25 +1113,15 @@ int QtServiceBase::startService()
 
 #endif
 
-	if (d_ptr->controller.isInstalled() == false)
-	{
-		DEBUG_LOG_WRN(QString(tr("The service '%1' is not installed. Run the service with -i key first.")).arg(serviceName()));
-		return 0;
-	}
-
-	if (d_ptr->controller.isRunning() == true)
-	{
-		printf("\nThe service '%s' is already running.\n", serviceName().toLatin1().constData());
-		return 0;
-	}
-
 	if (d_ptr->start() == false)
 	{
-		fprintf(stderr, "\nThe service '%s' could not start\n", serviceName().toLatin1().constData());
-		return -4;
+		DEBUG_LOG_WRN(QString(tr("The service '%1' could not start.")).arg(serviceName()));
+		return QT_SERVICE_PAUSE_AND_EXIT;
 	}
 
-	return 0;
+	DEBUG_LOG_MSG(QString(tr("The service '%1' has been started.")).arg(serviceName()));
+
+	return QT_SERVICE_PAUSE_AND_EXIT;
 }
 
 
