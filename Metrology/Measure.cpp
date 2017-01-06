@@ -7,6 +7,134 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+void DevicePosition::setFromID(const QString& equipmentID)
+{
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(equipmentID.isEmpty() != true);
+        return;
+    }
+
+    m_equipmentID = equipmentID;
+
+    // parse position from equipmentID
+    //
+
+    QString value;
+    int begPos, endPos;
+
+    // CaseIndex
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_");
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 1);
+
+    value.remove(1, value.count());
+
+    m_caseNo = value.toInt() - 1;
+
+    // CaseType
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_");
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 2);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_caseType = value;
+
+    // Shassis
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_subblock = value.toInt() - 1;
+
+    // Module
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_block = value.toInt() - 1;
+
+    // Input
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    value.remove(2, value.count());
+
+    m_entry = value.toInt() - 1;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QString DevicePosition::caseString() const
 {
     QString caseNo = m_caseNo == -1 ? "" : QString::number(m_caseNo + 1);
@@ -57,7 +185,7 @@ QString DevicePosition::entryString() const
 
 DevicePosition& DevicePosition::operator=(const DevicePosition& from)
 {
-    m_deviceStrID = from.m_deviceStrID;
+    m_equipmentID = from.m_equipmentID;
 
     m_caseNo = from.m_caseNo;
     m_caseType = from.m_caseType;
@@ -170,9 +298,9 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("#IDMPS");
+    setCustomAppSignalID("IDMPS");
+    setCaption("This is signal of the block MPS");
 
     position().setCaseNo(0);
     position().setCaseType("CASE-1");
@@ -366,9 +494,9 @@ void LinearetyMeasureItem::updateAdditionalValue(MeasureItem* pMeasure)
 
 LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem& from)
 {
-    m_strID = from.m_strID;
-    m_extStrID = from.m_extStrID;
-    m_name = from.m_name;
+    m_appSignalID = from.m_appSignalID;
+    m_customAppSignalID = from.m_customAppSignalID;
+    m_caption = from.m_caption;
 
     m_position = from.m_position;
 

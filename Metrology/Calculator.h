@@ -55,9 +55,6 @@ private:
     void            conversionTc();
     void            conversionLin();
 
-//signals:
-
-
 private slots:
 
     void            onTrSensorChanged(int)  { conversionTr(); }

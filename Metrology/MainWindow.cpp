@@ -18,8 +18,10 @@
 #include "OptionsDialog.h"
 #include "CalibratorBase.h"
 #include "Database.h"
+#include "SignalBase.h"
 #include "ReportView.h"
 #include "ExportMeasure.h"
+#include "SignalList.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +36,18 @@ MainWindow::MainWindow(QWidget *parent) :
     // init interface
     //
     createInterface();
+
+    // init signal socket thread
+    //
+    HostAddressPort hostAddress(theOptions.connectTcpIp().m_serverIP, theOptions.connectTcpIp().m_serverPort);
+    m_pSignalSocket = new SignalSocket(hostAddress);
+    m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+    m_pSignalSocketThread->start();
+
+    connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::unitsLoaded, this, &MainWindow::signalSocketUnitsLoaded, Qt::QueuedConnection);
 
     // init measure thread
     //
@@ -184,11 +198,6 @@ void  MainWindow::createActions()
     m_pShowComparatorsListAction->setToolTip("");
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-    m_pShowCorrecrtionsListAction = new QAction(tr("Co&rrections ..."), this);
-    m_pShowCorrecrtionsListAction->setIcon(QIcon(":/icons/Signals.png"));
-    m_pShowCorrecrtionsListAction->setToolTip("");
-    connect(m_pShowCorrecrtionsListAction, &QAction::triggered, this, &MainWindow::showCorrecrtionsList);
-
     m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
     m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
     m_pShowStatisticAction->setToolTip("");
@@ -304,7 +313,6 @@ void MainWindow::createMenu()
 
     m_pInfoMenu->addAction(m_pShowSignalListAction);
     m_pInfoMenu->addAction(m_pShowComparatorsListAction);
-    m_pInfoMenu->addAction(m_pShowCorrecrtionsListAction);
     m_pInfoMenu->addSeparator();
     m_pInfoMenu->addAction(m_pShowStatisticAction);
     m_pInfoMenu->addSeparator();
@@ -992,6 +1000,14 @@ void MainWindow::options()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showSignalList()
+{
+    SignalListDialog dialog;
+    dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::setMeasureKind(int index)
 {
     int kind = index;
@@ -1048,6 +1064,35 @@ void MainWindow::calibratorConnectedChanged(int count)
 
     m_statusCalibratorCount->setText( tr(" Connected calibrators: %1 ").arg(count) );
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalSocketConnected()
+{
+    m_statusConnectToServer->setText( tr("Connect to server: on  ") );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalSocketDisconnected()
+{
+    m_statusConnectToServer->setText( tr("Connect to server: off ") );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalSocketSignalsLoaded()
+{
+    qDebug() << "MainWindow::signalSocketSignalsLoaded()";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalSocketUnitsLoaded()
+{
+    theSignalBase.updateSignalUnit();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1165,6 +1210,12 @@ void MainWindow::closeEvent(QCloseEvent* e)
         QMessageBox::critical(this, windowTitle(), m_statusMeasureThreadState->text());
         e->ignore();
         return;
+    }
+
+    if (m_pSignalSocketThread != nullptr)
+    {
+        m_pSignalSocketThread->quitAndWait(10000);
+        delete m_pSignalSocketThread;
     }
 
     theCalibratorBase.clear();

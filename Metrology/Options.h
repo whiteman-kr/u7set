@@ -15,6 +15,8 @@
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
 
+#include "../lib/SocketIO.h"
+
 // ==============================================================================================
 
 #define                 WINDOW_GEOMETRY_OPTIONS_KEY		"Options/Window/"
@@ -48,7 +50,7 @@ public:
                         ~TcpIpOption();
 
     QString             m_serverIP = "127.0.0.1";
-    int                 m_serverPort = 2000;
+    int                 m_serverPort = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
 
     void                load();
     void                save();

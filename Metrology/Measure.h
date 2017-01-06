@@ -213,7 +213,7 @@ class DevicePosition
 {
 private:
 
-    QString m_deviceStrID;
+    QString m_equipmentID;
 
     int m_caseNo = -1;
     QString	m_caseType;
@@ -225,8 +225,10 @@ private:
 
 public:
 
-    QString deviceStrID() const { return m_deviceStrID; }
-    void setDeviceStrID(const QString& deviceStrID) { m_deviceStrID = deviceStrID; }
+    void setFromID(const QString& equipmentID);
+
+    QString equipmentID() const { return m_equipmentID; }
+    void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
     int caseNo() const { return m_caseNo; }
     void setCaseNo(int caseNo) { m_caseNo = caseNo; }
@@ -316,9 +318,9 @@ public:
 
 private:
 
-    QString m_strID;
-    QString m_extStrID;
-    QString m_name;
+    QString m_appSignalID;
+    QString m_customAppSignalID;
+    QString m_caption;
 
     DevicePosition m_position;
 
@@ -351,14 +353,14 @@ private:
 
 public:
 
-    QString strID() const { return m_strID; }
-    void setStrID(const QString& strID) { m_strID = strID; }
+    QString strID() const { return m_appSignalID; }
+    void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
-    QString extStrID() const { return m_extStrID; }
-    void setExtStrID(const QString& extStrID) { m_extStrID = extStrID; }
+    QString extStrID() const { return m_customAppSignalID; }
+    void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
-    QString name() const { return m_name; }
-    void setName(const QString& name) { m_name = name; }
+    QString name() const { return m_caption; }
+    void setCaption(const QString& caption) { m_caption = caption; }
 
     DevicePosition& position() { return m_position; }
 
