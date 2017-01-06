@@ -509,7 +509,7 @@ void ReportOption::load()
     m_path = s.value( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
     m_type = s.value( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
 
-    m_headerBase.reportsIsExist();
+    //m_headerBase.reportsIsExist();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

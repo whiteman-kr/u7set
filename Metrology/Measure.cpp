@@ -19,6 +19,118 @@ void DevicePosition::setFromID(const QString& equipmentID)
 
     // parse position from equipmentID
     //
+
+    QString value;
+    int begPos, endPos;
+
+    // CaseIndex
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_");
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 1);
+
+    value.remove(1, value.count());
+
+    m_caseNo = value.toInt() - 1;
+
+    // CaseType
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_");
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 2);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_caseType = value;
+
+    // Shassis
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_subblock = value.toInt() - 1;
+
+    // Module
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    endPos = value.indexOf("_", 0);
+    if (endPos == -1)
+    {
+        return;
+    }
+
+    value.remove(endPos, value.count());
+
+    m_block = value.toInt() - 1;
+
+    // Input
+    //
+
+    value = equipmentID;
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    begPos = value.indexOf("_", begPos + 1);
+    if (begPos == -1)
+    {
+        return;
+    }
+
+    value.remove(0, begPos + 3);
+
+    value.remove(2, value.count());
+
+    m_entry = value.toInt() - 1;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include "Measure.h"
 #include "ObjectVector.h"
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -78,30 +79,6 @@ public:
 
 // ==============================================================================================
 
-class MeasureSignal
-{
-public:
-
-    explicit    MeasureSignal();
-                ~MeasureSignal();
-
-private:
-
-    MeasureSignalParam m_param;
-    MeasureSignalState m_state;
-
-public:
-
-    MeasureSignalParam param() const { return m_param; }
-    void setParam(MeasureSignalParam param) { m_param = param; }
-
-    MeasureSignalState state() const { return m_state; }
-    void setState(MeasureSignalState state) { m_state = state; }
-
-};
-
-// ==============================================================================================
-
 const int       COMPLEX_MEASURE_SIGNAL_0            = 0,
                 COMPLEX_MEASURE_SIGNAL_1            = 1,
                 COMPLEX_MEASURE_SIGNAL_2            = 2,
@@ -109,7 +86,7 @@ const int       COMPLEX_MEASURE_SIGNAL_0            = 0,
                 COMPLEX_MEASURE_SIGNAL_4            = 4,
                 COMPLEX_MEASURE_SIGNAL_5            = 5;
 
-const int       COMPLEX_MEASURE_SIGNAL_COUNT        = 5;
+const int       COMPLEX_MEASURE_SIGNAL_COUNT        = 6;
 
 // ==============================================================================================
 

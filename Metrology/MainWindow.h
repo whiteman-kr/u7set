@@ -141,7 +141,6 @@ private:
     //
     QAction* m_pShowSignalListAction = nullptr;
     QAction* m_pShowComparatorsListAction = nullptr;
-    QAction* m_pShowCorrecrtionsListAction = nullptr;
     QAction* m_pShowStatisticAction = nullptr;
     QAction* m_pAboutConnectionAction = nullptr;
     QAction* m_pAboutAppAction = nullptr;
@@ -185,9 +184,8 @@ private slots:
 
     // menu - ?
     //
-    void showSignalList() {};
+    void showSignalList();
     void showComparatorsList() {};
-    void showCorrecrtionsList() {};
     void showStatistic() {};
     void aboutConnection() {};
     void aboutApp() {};
@@ -216,6 +214,7 @@ private slots:
     void signalSocketConnected();
     void signalSocketDisconnected();
     void signalSocketSignalsLoaded();
+    void signalSocketUnitsLoaded();
 
     // Slots of measure thread
     //

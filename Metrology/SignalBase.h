@@ -12,37 +12,51 @@
 
 // ==============================================================================================
 
-struct MEASURE_SIGNAL
+class MeasureSignal
 {
-    MEASURE_SIGNAL()
-    {
+public:
 
-    }
+    explicit    MeasureSignal();
+                MeasureSignal(Signal param);
+                ~MeasureSignal();
 
-    MEASURE_SIGNAL(Signal param)
-    {
-        m_param = param;
-
-        if (param.equipmentID().isEmpty() == false && param.hash() != 0)
-        {
-            m_position.setFromID(param.equipmentID());
-        }
-    }
-
-    MEASURE_SIGNAL(Signal param, AppSignalState state)
-    {
-        m_param = param;
-        m_state = state;
-
-        if (param.equipmentID().isEmpty() == false && param.hash() != 0)
-        {
-            m_position.setFromID(param.equipmentID());
-        }
-    }
+private:
 
     Signal m_param;
     AppSignalState m_state;
     DevicePosition m_position;
+
+    QString m_inputPhysicalUnit;
+    QString m_inputElectricUnit;
+    QString m_outputPhysicalUnit;
+
+public:
+
+    Signal param() const { return m_param; }
+    void setParam(Signal param) { m_param = param; }
+
+    AppSignalState state() const { return m_state; }
+    void setState(AppSignalState state) { m_state = state; }
+
+    DevicePosition position() const { return m_position; }
+    void setState(DevicePosition position) { m_position = position; }
+
+    QString inputPhysicalUnit() const { return m_inputPhysicalUnit; }
+    void setInputPhysicalUnit(QString unit) { m_inputPhysicalUnit = unit; }
+
+    QString inputElectricUnit() const { return m_inputElectricUnit; }
+    void setInputElectricUnit(QString unit) { m_inputElectricUnit = unit; }
+
+    QString outputPhysicalUnit() const { return m_outputPhysicalUnit; }
+    void setOutputPhysicalUnit(QString unit) { m_outputPhysicalUnit = unit; }
+
+    MeasureSignal& operator=(const MeasureSignal& from);
+
+    QString adcRangeString();
+    QString inputPhysicalRangeString();
+    QString inputElectricRangeString();
+    QString outputPhysicalRangeString();
+    QString outputElectricRangeString();
 };
 
 // ==============================================================================================
@@ -62,6 +76,8 @@ public:
     // Signals
     //
 
+    MeasureSignal           operator [] (int index);
+
     int                     appendSignal(const Signal &param);
 
     bool                    signalParam(const int& index, Signal& param);
@@ -76,12 +92,10 @@ public:
     // Units
     //
 
-    void                    appendUnit(const int& id, const QString& unit);
+    void                    appendUnit(const int& unitID, const QString& unit);
+    QString                 unit(const int& unitID);
+    void                    updateSignalUnit();
 
-    QString                 signalUnit(const Hash& hash);
-    QString                 signalUnit(const int& index);
-
-    QString                 unit(const int& id);
 
     // hashs for update signal state
     //
@@ -93,10 +107,10 @@ private:
 
     mutable QMutex          m_paramMutex;
     QMap<Hash, int>         m_hashMap;
-    QVector<MEASURE_SIGNAL> m_signalList;
+    QVector<MeasureSignal>  m_signalList;
 
     mutable QMutex          m_unitMutex;
-    UnitList                m_unitList;
+    QMap<int, QString>      m_unitList;
 
     mutable QMutex          m_stateMutex;
     QVector<Hash>           m_requestStateList;

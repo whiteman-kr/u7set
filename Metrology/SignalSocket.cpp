@@ -352,6 +352,8 @@ void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
     }
 
     qDebug() << "SignalSocket::replyUnits - Units were loaded: " << m_getUnitsReply.units_size();
+
+    emit unitsLoaded();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

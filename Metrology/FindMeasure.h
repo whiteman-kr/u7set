@@ -67,9 +67,9 @@ Q_DECLARE_METATYPE(FindItem)   // for type QVariant
 
 const char* const       FmColumn[] =
 {
-                        QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Text"),
-                        QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Index"),
-                        QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Column"),
+                        QT_TRANSLATE_NOOP("FindMeasure.h", "Text"),
+                        QT_TRANSLATE_NOOP("FindMeasure.h", "Index"),
+                        QT_TRANSLATE_NOOP("FindMeasure.h", "Column"),
 };
 
 const int               FM_COLUMN_COUNT    = sizeof(FmColumn)/sizeof(char*);

@@ -21,6 +21,7 @@
 #include "SignalBase.h"
 #include "ReportView.h"
 #include "ExportMeasure.h"
+#include "SignalList.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::unitsLoaded, this, &MainWindow::signalSocketUnitsLoaded, Qt::QueuedConnection);
 
     // init measure thread
     //
@@ -196,11 +198,6 @@ void  MainWindow::createActions()
     m_pShowComparatorsListAction->setToolTip("");
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-    m_pShowCorrecrtionsListAction = new QAction(tr("Co&rrections ..."), this);
-    m_pShowCorrecrtionsListAction->setIcon(QIcon(":/icons/Signals.png"));
-    m_pShowCorrecrtionsListAction->setToolTip("");
-    connect(m_pShowCorrecrtionsListAction, &QAction::triggered, this, &MainWindow::showCorrecrtionsList);
-
     m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
     m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
     m_pShowStatisticAction->setToolTip("");
@@ -316,7 +313,6 @@ void MainWindow::createMenu()
 
     m_pInfoMenu->addAction(m_pShowSignalListAction);
     m_pInfoMenu->addAction(m_pShowComparatorsListAction);
-    m_pInfoMenu->addAction(m_pShowCorrecrtionsListAction);
     m_pInfoMenu->addSeparator();
     m_pInfoMenu->addAction(m_pShowStatisticAction);
     m_pInfoMenu->addSeparator();
@@ -1004,6 +1000,14 @@ void MainWindow::options()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showSignalList()
+{
+    SignalListDialog dialog;
+    dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::setMeasureKind(int index)
 {
     int kind = index;
@@ -1081,6 +1085,14 @@ void MainWindow::signalSocketSignalsLoaded()
 {
     qDebug() << "MainWindow::signalSocketSignalsLoaded()";
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalSocketUnitsLoaded()
+{
+    theSignalBase.updateSignalUnit();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
