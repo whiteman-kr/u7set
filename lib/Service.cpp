@@ -1,26 +1,26 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 
-#include "version.h"
-
 // -------------------------------------------------------------------------------------
 //
 // ServiceWorker class implementation
 //
 // -------------------------------------------------------------------------------------
 
-ServiceWorker::ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv,
-							 int majorVersion, int minorVersion) :
+int ServiceWorker::m_instanceNo = 0;
+
+ServiceWorker::ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
 	m_serviceType(serviceType),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
-	m_majorVersion(majorVersion),
-	m_minorVersion(minorVersion),
+	m_versionInfo(versionInfo),
 	m_cmdLineParser(argc, argv),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this)
 {
 	TEST_PTR_RETURN(argv);
+
+	m_instanceNo++;
 }
 
 
@@ -92,41 +92,55 @@ QString ServiceWorker::serviceName() const
 }
 
 
-int ServiceWorker::majorVersion() const
+const VersionInfo& ServiceWorker::versionInfo() const
 {
-	return m_majorVersion;
-}
-
-
-int ServiceWorker::minorVersion() const
-{
-	return m_minorVersion;
-}
-
-
-int ServiceWorker::commitNo() const
-{
-	return USED_SERVER_COMMIT_NUMBER;
-}
-
-
-QString ServiceWorker::buildBranch() const
-{
-	return QString(BUILD_BRANCH);
-}
-
-
-QString ServiceWorker::commitSHA() const
-{
-	return QString(USED_SERVER_COMMIT_SHA);
+	return m_versionInfo;
 }
 
 
 void ServiceWorker::init()
 {
-	baseInitCmdLineParser();
-}
+	if (m_instanceNo > 1)
+	{
+		assert(false);			// call init() for first ServiceWorker instance only!
+		return;
+	}
 
+	m_cmdLineParser.addSimpleOption("h", "Print this help.");
+	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
+	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
+	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
+
+	initCmdLineParser();
+
+	m_cmdLineParser.parse();
+
+	processCmdLineSettings();
+
+	m_settings.sync();			// save settings to permanent storage
+
+	QSettings::Status s = m_settings.status();
+
+	switch(s)
+	{
+	case QSettings::AccessError:
+		DEBUG_LOG_ERR(QString(tr("Access error to settings permanent storage. Program should run with adminstrator's rights.")));
+		break;
+
+	case QSettings::FormatError:
+		DEBUG_LOG_ERR(QString(tr("Settings format error.")));
+		break;
+
+	case QSettings::NoError:
+		break;
+
+	default:
+		assert(false);
+	}
+}
 
 
 void ServiceWorker::setService(Service* service)
@@ -157,22 +171,6 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 void ServiceWorker::clearSettings()
 {
 	m_settings.clear();
-}
-
-
-void ServiceWorker::baseInitCmdLineParser()
-{
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
-	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
-	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
-	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
-
-	initCmdLineParser();
-
-	m_cmdLineParser.parse();
 }
 
 
@@ -229,16 +227,12 @@ void Service::stop()
 void Service::onServiceWork()
 {
 	m_state = ServiceState::Work;
-
-	DEBUG_LOG_MSG(QString(tr("Service is working")));
 }
 
 
 void Service::onServiceStopped()
 {
 	m_state = ServiceState::Stopped;
-
-	DEBUG_LOG_MSG(QString(tr("Service has been stoped")));
 }
 
 
@@ -342,7 +336,7 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, serviceInfo[TO_INT(m_serviceWorker.serviceType())].port);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorker.serviceType())].port);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
@@ -365,10 +359,16 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
 	QMutexLocker locker(&m_mutex);
 
+	const VersionInfo& vi = m_serviceWorker.versionInfo();
+
 	serviceInfo.set_type(TO_INT(m_serviceWorker.serviceType()));
-	serviceInfo.set_majorversion(m_serviceWorker.majorVersion());
-	serviceInfo.set_minorversion(m_serviceWorker.minorVersion());
-	serviceInfo.set_buildno(m_serviceWorker.commitNo());
+
+	serviceInfo.set_majorversion(vi.majorVersion);
+	serviceInfo.set_minorversion(vi.minorVersion);
+	serviceInfo.set_commitno(vi.commitNo);
+	serviceInfo.set_buildbranch(C_STR(vi.buildBranch));
+	serviceInfo.set_commitsha(C_STR(vi.commitSHA));
+
 	serviceInfo.set_crc(m_crc);
 	serviceInfo.set_uptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
 
@@ -416,9 +416,9 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
-	m_serviceWorker.init();
-
-	m_serviceWorker.processCmdLineSettings();			// update and store service settings
+	m_serviceWorker.init();			// 1. init CommanLineParser
+									// 2. process cmd line args
+									// 3. update and store service settings
 
 	bool pauseAndExit = false;
 	bool startAsRegularApp = false;
@@ -476,14 +476,16 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	//
 	if (cmdLineParser.optionIsSet("v") == true)
 	{
+		const VersionInfo& vi = m_serviceWorker.versionInfo();
+
 		QString versionInfo =
 			QString("\nApplication:\t%1\nVersion:\t%2.%3.%4 (%5)\nCommit SHA:\t%6\n").
 				arg(m_serviceWorker.serviceName()).
-				arg(m_serviceWorker.majorVersion()).
-				arg(m_serviceWorker.minorVersion()).
-				arg(m_serviceWorker.commitNo()).
-				arg(m_serviceWorker.buildBranch()).
-				arg(m_serviceWorker.commitSHA());
+				arg(vi.majorVersion).
+				arg(vi.minorVersion).
+				arg(vi.commitNo).
+				arg(vi.buildBranch).
+				arg(vi.commitSHA);
 
 		std::cout << C_STR(versionInfo);
 
@@ -519,32 +521,24 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 int ServiceStarter::runAsRegularApplication()
 {
-	m_keyReaderThread = new KeyReaderThread();
+	KeyReaderThread* keyReaderThread = new KeyReaderThread();
 
-	m_keyReaderThread->start();
+	keyReaderThread->start();
 
 	// run service
 	//
-	m_service = new Service(m_serviceWorker);
+	Service* service = new Service(m_serviceWorker);
 
-	m_service->start();
+	service->start();
 
 	int result = m_app.exec();
 
-	if (m_service != nullptr)
-	{
-		// stop service
-		//
-		m_service->stop();
-		delete m_service;
-	}
+	service->stop();
+	delete service;
 
-	if (m_keyReaderThread != nullptr)
-	{
-		m_keyReaderThread->quit();
-		m_keyReaderThread->wait();
-		delete m_keyReaderThread;
-	}
+	keyReaderThread->quit();
+	keyReaderThread->wait();
+	delete keyReaderThread;
 
 	return result;
 }

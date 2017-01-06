@@ -10,16 +10,17 @@
 //
 // ------------------------------------------------------------------------------------
 
-ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv) :
-	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv)
+ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName,
+													   int& argc, char** argv,
+													   const VersionInfo& versionInfo) :
+	ServiceWorker(ServiceType::ConfigurationService, serviceName, argc, argv, versionInfo)
 {
 }
 
 
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
-	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv());
-	newInstance->init();
+	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv(), versionInfo());
 	return newInstance;
 }
 
@@ -54,33 +55,69 @@ void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
 
 void ConfigurationServiceWorker::initCmdLineParser()
 {
-	cmdLineParser().addSingleValueOption("b", "RPCT project build directory.");
-	cmdLineParser().addSingleValueOption("ip", "Client request IP.");
+	CommandLineParser& cp = cmdLineParser();
+
+	cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("b", "Path to RPCT project build.", "PathToBuild");
+	cp.addSingleValueOption("ip", "Client request IP.", "IPv4");
+}
+
+
+void ConfigurationServiceWorker::processCmdLineSettings()
+{
+	CommandLineParser& cp = cmdLineParser();
+
+	if (cp.optionIsSet("id") == true)
+	{
+		m_settings.setValue("EquipmentID", cp.optionValue("id"));
+	}
+
+	if (cp.optionIsSet("b") == true)
+	{
+		m_settings.setValue("BuildPath", cp.optionValue("b"));
+	}
+
+	if (cp.optionIsSet("ip") == true)
+	{
+		m_settings.setValue("ClientRequestIP", cp.optionValue("ip"));
+	}
+}
+
+
+void ConfigurationServiceWorker::loadSettings()
+{
+	m_equipmentID = m_settings.value("EquipmentID").toString();
+	m_buildPath = m_settings.value("BuildPath").toString();
+	m_clientIPStr = m_settings.value("ClientRequestIP").toString();
+
+	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	DEBUG_LOG_MSG(QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("ClientRequestIP").arg(m_clientIPStr).arg(m_clientIP.addressPortStr()));
 }
 
 
 void ConfigurationServiceWorker::initialize()
 {
 	startCfgServerThread();
-	//startUdpThreads();
 
-	qDebug() << "ConfigurationServiceWorker initialized";
+	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker initialized")));
 }
 
 
 void ConfigurationServiceWorker::shutdown()
 {
-	//stopUdpThreads();
 	stopCfgServerThread();
 
-	qDebug() << "ConfigurationServiceWorker stoped";
+	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker shutdown")));
 }
 
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
-	m_cfgServerThread = new Tcp::ServerThread(HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST),
-											  new CfgServer(m_buildPath));
+	m_cfgServerThread = new Tcp::ServerThread(m_clientIP, new CfgServer(m_buildPath));
 	m_cfgServerThread->start();
 }
 

@@ -1,5 +1,5 @@
-#include <QCoreApplication>
 #include "AppDataService.h"
+#include "version.h"
 
 
 int main(int argc, char *argv[])
@@ -8,17 +8,23 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	INIT_LOGGER(argv[0]);
+	QCoreApplication app(argc, argv);
 
-	LOG_MSG(QString("Run: ").arg(argv[0]));
+	INIT_LOGGER(argv[0]);			// init global CircularLogger object
 
-	AppDataServiceWorker* dataServiceWorker = new AppDataServiceWorker("RPCT Application Data Service", argc, argv);
+	logger.setLogCodeInfo(false);
 
-	ServiceStarter service(dataServiceWorker);
+	VersionInfo vi = VERSION_INFO(1, 0);
 
-	int result = service.exec();
+	AppDataServiceWorker appDataServiceWorker("RPCT Application Data Service", argc, argv, vi);
+
+	ServiceStarter serviceStarter(app, appDataServiceWorker);
+
+	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	SHUTDOWN_LOGGER
 
 	return result;
 }

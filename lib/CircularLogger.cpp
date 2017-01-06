@@ -305,9 +305,21 @@ void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath
 }
 
 
+bool CircularLogger::isInitialized() const
+{
+	return m_loggerInitialized;
+}
+
+
 void CircularLogger::shutdown()
 {
-	quitAndWait(1000);
+	quitAndWait(500);
+}
+
+
+void CircularLogger::setLogCodeInfo(bool logCodeInfo)
+{
+	m_logCodeInfo = logCodeInfo;
 }
 
 
@@ -381,13 +393,26 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 
 	QString msg = message;
 
-	QString record = QString("%1 %2  %3  ###%4###%5:%6###").
+	QString record;
+
+	if (m_logCodeInfo == true)
+	{
+		record = QString("%1 %2  %3  ###%4###%5:%6###").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
 							arg(msg.simplified()).
 							arg(function).
 							arg(file).
 							arg(line);
+	}
+	else
+	{
+		record = QString("%1 %2  %3").
+							arg(getCurrentDateTimeStr()).
+							arg(getRecordTypeStr(type)).
+							arg(msg.simplified());
+	}
+
 
 	emit writeRecord(record);
 }

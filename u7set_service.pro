@@ -4,7 +4,10 @@ CONFIG += ordered
 
 win32:	SUBDIRS +=  Protobuf \
 		    qtservice \
-		    BaseService
+                    BaseService \
+                    ConfigurationService \
+                    AppDataService \
+                    TuningService
 
 
 

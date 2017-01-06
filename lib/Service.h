@@ -18,6 +18,23 @@
 #include "../Proto/network.pb.h"
 
 
+struct VersionInfo
+{
+	int majorVersion;
+	int minorVersion;
+	int commitNo;
+	QString buildBranch;
+	QString commitSHA;
+};
+
+
+#define VERSION_INFO(majorVersion, minorVersion) {	majorVersion, \
+													minorVersion, \
+													USED_SERVER_COMMIT_NUMBER, \
+													BUILD_BRANCH, \
+													USED_SERVER_COMMIT_SHA }
+
+
 struct ServiceInfo
 {
 	ServiceType serviceType;
@@ -52,7 +69,7 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, int majorVersion, int minorVersion);
+	ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
 	virtual ~ServiceWorker();
 
 	int& argc() const;
@@ -64,11 +81,7 @@ public:
 	ServiceType serviceType() const;
 	QString serviceName() const;
 
-	int majorVersion() const;
-	int minorVersion() const;
-	int commitNo() const;
-	QString buildBranch() const;
-	QString commitSHA() const;
+	const VersionInfo& versionInfo() const;
 
 	void init();
 
@@ -88,9 +101,6 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
-	virtual void processCmdLineSettings() = 0;			// override to process service-specific cmd line settings
-	virtual void loadSettings() = 0;					// override to load service-specific settings
-
 	void clearSettings();								// clear all service settings
 
 signals:
@@ -98,14 +108,14 @@ signals:
 	void stopped();
 
 protected:
-	virtual void initCmdLineParser() = 0;			// add service-specific options to m_cmdLineParser
+	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
+	virtual void processCmdLineSettings() = 0;		// override to process service-specific cmd line settings
+	virtual void loadSettings() = 0;				// override to load service-specific settings
 
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
 private:
-	void baseInitCmdLineParser();
-
 	void onThreadStarted() final;
 	void onThreadFinished() final;
 
@@ -118,12 +128,13 @@ private:
 	int& m_argc;
 	char** m_argv = nullptr;
 
-	int m_majorVersion = 0;
-	int m_minorVersion = 0;
+	VersionInfo m_versionInfo;
 
 	CommandLineParser m_cmdLineParser;
 
 	Service* m_service = nullptr;
+
+	static int m_instanceNo;
 };
 
 
@@ -246,8 +257,4 @@ private:
 private:
 	QCoreApplication& m_app;
 	ServiceWorker& m_serviceWorker;
-
-	Service* m_service = nullptr;
-	KeyReaderThread* m_keyReaderThread = nullptr;
-
 };

@@ -1,5 +1,5 @@
-#include <QCoreApplication>
 #include "TuningService.h"
+#include "version.h"
 
 
 int main(int argc, char *argv[])
@@ -8,20 +8,23 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	INIT_LOGGER(argv[0]);
+	QCoreApplication app(argc, argv);
 
-	const char* appName = "RPCT Tuning Service";
+	INIT_LOGGER(argv[0]);			// init global CircularLogger object
 
-	QCoreApplication::setOrganizationName("Radiy");
-	QCoreApplication::setApplicationName(appName);
+	logger.setLogCodeInfo(false);
 
-	Tuning::TuningServiceWorker* tuningServiceWorker = new Tuning::TuningServiceWorker();
+	VersionInfo vi = VERSION_INFO(1, 0);
 
-	ServiceStarter serviceStarter(argc, argv, appName, tuningServiceWorker);
+	Tuning::TuningServiceWorker tuningServiceWorker("RPCT Tuning Service", argc, argv, vi);
+
+	ServiceStarter serviceStarter(app, tuningServiceWorker);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	SHUTDOWN_LOGGER
 
 	return result;
 }

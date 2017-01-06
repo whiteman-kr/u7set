@@ -86,9 +86,11 @@ public:
 	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
 
+	bool isInitialized() const;
+
 	void shutdown();
 
-	bool isInitialized() const { return m_loggerInitialized; }
+	void setLogCodeInfo(bool logCodeInfo);
 
 signals:
 	void writeRecord(const QString record);
@@ -106,6 +108,7 @@ private:
 
 private:
 	bool m_loggerInitialized = false;
+	bool m_logCodeInfo = true;
 };
 
 

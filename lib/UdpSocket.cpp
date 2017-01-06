@@ -1,4 +1,5 @@
 #include "../lib/UdpSocket.h"
+#include "../lib/CircularLogger.h"
 #include "../lib/WUtils.h"
 #include <QByteArray>
 
@@ -635,6 +636,9 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onThreadStarted()
 {
+	DEBUG_LOG_MSG(QString(tr("UdpServerSocket thread started (listen %1)").
+						  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
+
 	m_timer.start(1000);
 
 	connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
@@ -646,34 +650,39 @@ void UdpServerSocket::onThreadStarted()
 }
 
 
-void UdpServerSocket::onSocketThreadStarted()
-{
-	qDebug() << "Called UdpServerSocket::onSocketThreadStarted";
-}
-
-
 void UdpServerSocket::onThreadFinished()
 {
 	onSocketThreadFinished();
+
+	DEBUG_LOG_MSG(QString(tr("UdpServerSocket thread finished (listen %1)")).
+				  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr()));
 }
+
+
+void UdpServerSocket::onSocketThreadStarted()
+{
+}
+
 
 
 void UdpServerSocket::onSocketThreadFinished()
 {
-	qDebug() << "Called UdpServerSocket::onSocketThreadFinished";
 }
 
 
 void UdpServerSocket::bind()
 {
-	if (m_socket.state() != QAbstractSocket::BoundState)
+	if (m_socket.state() == QAbstractSocket::BoundState)
 	{
-		bool res = m_socket.bind(m_bindToAddress, m_port);
+		return;
+	}
 
-		if (res)
-		{
-			qDebug() << "Socket bound on port " << m_port;
-		}
+	bool result = m_socket.bind(m_bindToAddress, m_port);
+
+	if (result == true)
+	{
+		DEBUG_LOG_MSG(QString(tr("UdpServerSocket bound on  %1").
+							  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
 	}
 }
 

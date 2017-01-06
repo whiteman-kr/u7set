@@ -1,18 +1,20 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 
+#include "version.h"
+
 
 class BaseServiceWorker : public ServiceWorker
 {
 public:
-	BaseServiceWorker(const QString& serviceName, int& argc, char** argv, int majVersion, int minVersion) :
-		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, majVersion, minVersion)
+	BaseServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
+		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, versionInfo)
 	{
 	}
 
 	virtual ServiceWorker* createInstance() const override
 	{
-		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), majorVersion(), minorVersion());
+		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), versionInfo());
 		newInstance->init();
 		return newInstance;
 	}
@@ -64,11 +66,16 @@ int main(int argc, char *argv[])
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
+
 	QCoreApplication app(argc, argv);
 
 	INIT_LOGGER(argv[0]);			// init global CircularLogger object
 
-	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, 1, 0);
+	logger.setLogCodeInfo(false);
+
+	VersionInfo vi = VERSION_INFO(1, 0);
+
+	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, vi);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker);
 
