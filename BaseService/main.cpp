@@ -45,6 +45,8 @@ public:
 	void loadSettings() override
 	{
 		m_serviceEquipmentID = m_settings.value("id").toString();
+
+		LOG_MSG(QString("%1 = %2").arg("id").arg(m_serviceEquipmentID));
 	}
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override
@@ -62,20 +64,15 @@ int main(int argc, char *argv[])
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
-
 	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER(argv[0])
+	INIT_LOGGER(argv[0]);			// init global CircularLogger object
 
-	LOG_MSG(QString("Run: %1").arg(cmdLine(argc, argv)));
-
-	BaseServiceWorker* baseServiceWorker = new BaseServiceWorker("RPCT Base Service", argc, argv, 1, 0);
+	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, 1, 0);
 
 	ServiceStarter serviceStarter(app, baseServiceWorker);
 
 	int result = serviceStarter.exec();
-
-	LOG_MSG(QString("Exit: %1, result = %2").arg(argv[0]).arg(result));
 
 	google::protobuf::ShutdownProtobufLibrary();
 

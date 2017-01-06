@@ -59,8 +59,6 @@
 #  define QT_QTSERVICE_EXPORT
 #endif
 
-const int QT_SERVICE_PAUSE_AND_EXIT = -555;
-
 class QStringList;
 class QtServiceControllerPrivate;
 

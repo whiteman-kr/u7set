@@ -134,9 +134,13 @@ static bool winServiceInit()
 bool QtServiceController::isInstalled() const
 {
     Q_D(const QtServiceController);
+
     bool result = false;
+
     if (!winServiceInit())
+	{
         return result;
+	}
 
     // Open the Service Control Manager
     SC_HANDLE hSCM = pOpenSCManager(0, 0, 0);

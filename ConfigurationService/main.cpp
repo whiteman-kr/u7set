@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
 	LOG_MSG(QString("Run: %1").arg(argv[0]));
 
-	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker("RPCT Configuration Service", argc, argv);
+	ConfigurationServiceWorker* cfgServiceWorker = new ConfigurationServiceWorker("RPCT Configuration Service", argc, argv, 1, 0);
 
 	ServiceStarter serviceStarter(cfgServiceWorker);
 

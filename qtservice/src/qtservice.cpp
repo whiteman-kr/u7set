@@ -816,7 +816,7 @@ int QtServiceBase::exec()
 
 		DEBUG_LOG_WRN(QString(tr("Unknown command line arguments.")));
 
-		return QT_SERVICE_PAUSE_AND_EXIT;
+		return 1;
 	}
 
 	return startService();
@@ -947,20 +947,20 @@ int QtServiceBase::installService()
 
 		if (d_ptr->install(account, password) == false)
 		{
-			DEBUG_LOG_WRN(QString(tr("The service '%1' could not be installed.")).arg(serviceName()));
+			DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be installed.\n")).arg(serviceName()));
 		}
 		else
 		{
-			DEBUG_LOG_MSG(QString(tr("The service '%1' has been installed under: %2")).
+			DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been installed under: %2\n")).
 						  arg(serviceName()).arg(d_ptr->filePath()));
 		}
 	}
 	else
 	{
-		DEBUG_LOG_MSG(QString(tr("The service '%1' is already installed\n")).arg(serviceName()));
+		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' is already installed\n")).arg(serviceName()));
 	}
 
-	return QT_SERVICE_PAUSE_AND_EXIT;
+	return 1;
 }
 
 
@@ -970,20 +970,20 @@ int QtServiceBase::uninstallService()
 	{
 		if (!d_ptr->controller.uninstall())
 		{
-			fprintf(stderr, "\nThe service '%s' could not be uninstalled\n", serviceName().toLatin1().constData());
-			return -1;
+			DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be uninstalled.\n")).arg(serviceName()));
+			return 1;
 		}
 		else
 		{
-			printf("\nThe service '%s' has been uninstalled.\n", serviceName().toLatin1().constData());
+			DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been uninstalled.\n")).arg(serviceName()));
 		}
 	}
 	else
 	{
-		fprintf(stderr, "The service '%s' is not installed\n", serviceName().toLatin1().constData());
+		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' is not installed\n")).arg(serviceName()));
 	}
 
-	return 0;
+	return 1;
 }
 
 
@@ -1017,14 +1017,14 @@ int QtServiceBase::terminateService()
 {
 	if (d_ptr->controller.stop() == false)
 	{
-		DEBUG_LOG_WRN(QString(tr("The service '%1' could not be stopped.")).arg(serviceName()));
+		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be stopped.\n")).arg(serviceName()));
 	}
 	else
 	{
-		DEBUG_LOG_WRN(QString(tr("The service '%1' is stopped.")).arg(serviceName()));
+		DEBUG_LOG_MSG(QString(tr("\nThe service '%1' is stopped.\n")).arg(serviceName()));
 	}
 
-	return QT_SERVICE_PAUSE_AND_EXIT;
+	return 1;
 }
 
 
@@ -1115,13 +1115,13 @@ int QtServiceBase::startService()
 
 	if (d_ptr->start() == false)
 	{
-		DEBUG_LOG_WRN(QString(tr("The service '%1' could not start.")).arg(serviceName()));
-		return QT_SERVICE_PAUSE_AND_EXIT;
+		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not start.\n")).arg(serviceName()));
+		return 1;
 	}
 
-	DEBUG_LOG_MSG(QString(tr("The service '%1' has been started.")).arg(serviceName()));
+	DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been started.\n")).arg(serviceName()));
 
-	return QT_SERVICE_PAUSE_AND_EXIT;
+	return 1;
 }
 
 

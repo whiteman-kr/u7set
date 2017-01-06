@@ -58,6 +58,9 @@ public:
 	int& argc() const;
 	char** argv() const;
 
+	QString appPath() const;
+	QString cmdLine() const;
+
 	ServiceType serviceType() const;
 	QString serviceName() const;
 
@@ -135,7 +138,7 @@ class Service : public QObject
 	Q_OBJECT
 
 public:
-	Service(ServiceWorker *serviceWorker);
+	Service(ServiceWorker& serviceWorker);
 	virtual ~Service();
 
 	void start();
@@ -169,7 +172,8 @@ private:
 
 	ServiceState m_state = ServiceState::Stopped;
 
-	ServiceWorker* m_serviceWorker = nullptr;
+	ServiceWorker& m_serviceWorker;
+
 	SimpleThread* m_serviceWorkerThread = nullptr;
 	UdpSocketThread* m_baseRequestSocketThread = nullptr;
 
@@ -189,7 +193,7 @@ private:
 class DaemonServiceStarter : private QtService
 {
 public:
-	DaemonServiceStarter(QCoreApplication* app, ServiceWorker* serviceWorker);
+	DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker);
 	virtual ~DaemonServiceStarter();
 
 	int exec();
@@ -201,7 +205,9 @@ private:
 	void stopAndDeleteService();
 
 private:
-	ServiceWorker* m_serviceWorker = nullptr;
+	QCoreApplication& m_app;
+	ServiceWorker& m_serviceWorker;
+
 	Service* m_service = nullptr;
 };
 
@@ -217,18 +223,18 @@ class ServiceStarter : public QObject
 	Q_OBJECT
 
 public:
-	ServiceStarter(QCoreApplication& app, ServiceWorker* m_serviceWorker);
+	ServiceStarter(QCoreApplication& app, ServiceWorker& m_serviceWorker);
 
 	int exec();
 
 private:
+	int privateRun();
+
 	void processCmdLineArguments(bool& pauseAndExit, bool& startAsRegularApp);
 
-	int startAsRegularApplication();
+	int runAsRegularApplication();
 
-private:
-	QCoreApplication& m_app;
-	ServiceWorker* m_serviceWorker = nullptr;
+	void exitThread();
 
 private:
 	class KeyReaderThread : public QThread
@@ -236,4 +242,12 @@ private:
 	public:
 		virtual void run() override;
 	};
+
+private:
+	QCoreApplication& m_app;
+	ServiceWorker& m_serviceWorker;
+
+	Service* m_service = nullptr;
+	KeyReaderThread* m_keyReaderThread = nullptr;
+
 };

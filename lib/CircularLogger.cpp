@@ -1,15 +1,14 @@
-#include <QFile>
 #include <QDir>
 #include <QDateTime>
 #include <QCoreApplication>
-#include <QTimer>
 #include <QDebug>
-#include <assert.h>
+#include <cassert>
 
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
 
-CircularLogger logger;		// global logger object
+
+CircularLogger logger;
 
 // ----------------------------------------------------------------------------------
 //
@@ -21,8 +20,7 @@ CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int f
 	m_logName(logName),
 	m_path(placementPath.isEmpty() ? qApp->applicationDirPath() + "/Log" : placementPath),
 	m_fileCount(fileCount),
-	m_fileSizeLimit(fileSizeInMB),
-	m_timer(this)
+	m_fileSizeLimit(fileSizeInMB)
 {
 	if (m_fileCount < 1)
 	{
@@ -54,31 +52,21 @@ CircularLoggerWorker::~CircularLoggerWorker()
 
 void CircularLoggerWorker::writeRecord(const QString record)
 {
-	if (m_stream != nullptr)
-	{
-		*m_stream << record << '\n';
-	}
+	m_stream << record << '\n';
+
+	m_stream.flush();
 }
 
 
 void CircularLoggerWorker::onThreadStarted()
 {
 	detectFiles();
-
-	connect(&m_timer, &QTimer::timeout, this, &CircularLoggerWorker::flushStream);
-	m_timer.start(1000);
 }
 
 
 void CircularLoggerWorker::onThreadFinished()
 {
 	clearFileStream();
-}
-
-
-void CircularLoggerWorker::flushStream()
-{
-	m_stream->flush();
 }
 
 
@@ -148,7 +136,7 @@ void CircularLoggerWorker::removeOldFiles()
 
 void CircularLoggerWorker::checkFileSize()
 {
-	if (m_file->size() >= m_fileSizeLimit * 1024 * 1024)
+	if (m_file.size() >= m_fileSizeLimit * 1024 * 1024)
 	{
 		clearFileStream();
 
@@ -196,34 +184,29 @@ void CircularLoggerWorker::openFile(int index)
 {
 	clearFileStream();
 
-	m_file = new QFile(fileName(index));
-	m_file->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-	m_stream = new QTextStream(m_file);
+	m_fileName = fileName(index);
 
-	if (m_file->size() == 0)
+	m_file.setFileName(m_fileName);
+
+	m_file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+	m_stream.setDevice(&m_file);
+
+	if (m_file.size() == 0)
 	{
-		*m_stream << m_lastFileID << '\n';
+		writeRecord(QString("%1\n").arg(m_lastFileID));
 	}
-
-	*m_stream << '\n';
+	else
+	{
+		writeRecord(QString(""));
+	}
 }
 
 
 void CircularLoggerWorker::clearFileStream()
 {
-	if (m_stream != nullptr)
-	{
-		m_stream->flush();
-		delete m_stream;
-		m_stream = nullptr;
-	}
-
-	if (m_file != nullptr)
-	{
-		m_file->close();
-		delete m_file;
-		m_file = nullptr;
-	}
+	m_stream.flush();
+	m_file.close();
 }
 
 
@@ -324,7 +307,7 @@ void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath
 
 void CircularLogger::shutdown()
 {
-	quitAndWait();
+	quitAndWait(1000);
 }
 
 
@@ -343,12 +326,6 @@ void CircularLogger::writeWarning(const QString& message, const char* function, 
 void CircularLogger::writeMessage(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	composeAndWriteRecord(RecordType::Message, message, function, file, line, debugEcho);
-}
-
-
-void CircularLogger::writeConfig(const QString& message, const char* function, const char* file, int line, bool debugEcho)
-{
-	composeAndWriteRecord(RecordType::Config, message, function, file, line, debugEcho);
 }
 
 
@@ -402,10 +379,12 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		qDebug() << C_STR(message);
 	}
 
+	QString msg = message;
+
 	QString record = QString("%1 %2  %3  ###%4###%5:%6###").
 							arg(getCurrentDateTimeStr()).
 							arg(getRecordTypeStr(type)).
-							arg(message).
+							arg(msg.simplified()).
 							arg(function).
 							arg(file).
 							arg(line);

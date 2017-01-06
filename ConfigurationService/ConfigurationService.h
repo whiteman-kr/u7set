@@ -13,6 +13,9 @@ public:
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
+	virtual void processCmdLineSettings() override;
+	virtual void loadSettings() override;
+
 
 public slots:
 	void onInformationRequest(UdpRequest request);

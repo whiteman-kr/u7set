@@ -59,4 +59,4 @@ inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
 
-QString cmdLine(int argc, char** argv);
+const char* const RADIY_ORG = "Radiy";
