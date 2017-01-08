@@ -216,7 +216,8 @@ private:
     QString m_equipmentID;
 
     int m_caseNo = -1;
-    QString	m_caseType;
+    QString	m_caseCaption;
+    int m_caseType = -1;
 
     int m_channel = -1;
     int m_subblock = -1;
@@ -233,8 +234,11 @@ public:
     int caseNo() const { return m_caseNo; }
     void setCaseNo(int caseNo) { m_caseNo = caseNo; }
 
-    QString caseType() const { return m_caseType; }
-    void setCaseType(const QString& caseType) { m_caseType = caseType; }
+    QString caseCaption() const { return m_caseCaption; }
+    void setCaseCaption(const QString& caption) { m_caseCaption = caption; }
+
+    int caseType() const { return m_caseType; }
+    void setCaseType(int type) { m_caseType = type; }
 
     QString caseString() const;
 

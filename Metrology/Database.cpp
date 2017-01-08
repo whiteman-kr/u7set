@@ -734,7 +734,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->position().setEquipmentID(query.value(field++).toString());
                     measure->position().setCaseNo(query.value(field++).toInt());
-                    measure->position().setCaseType(query.value(field++).toString());
+                    measure->position().setCaseCaption(query.value(field++).toString());
                     measure->position().setChannel(query.value(field++).toInt());
                     measure->position().setSubblock(query.value(field++).toInt());
                     measure->position().setBlock(query.value(field++).toInt());
@@ -1064,7 +1064,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     query.bindValue(field++, measure->position().equipmentID());
                     query.bindValue(field++, measure->position().caseNo());
-                    query.bindValue(field++, measure->position().caseType());
+                    query.bindValue(field++, measure->position().caseCaption());
                     query.bindValue(field++, measure->position().channel());
                     query.bindValue(field++, measure->position().subblock());
                     query.bindValue(field++, measure->position().block());

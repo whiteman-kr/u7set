@@ -40,6 +40,11 @@ void DevicePosition::setFromID(const QString& equipmentID)
 
     m_caseNo = value.toInt() - 1;
 
+//    if (m_caseNo == 3)
+//    {
+//        m_caseNo = 5;
+//    }
+
     // CaseType
     //
 
@@ -61,7 +66,7 @@ void DevicePosition::setFromID(const QString& equipmentID)
 
     value.remove(endPos, value.count());
 
-    m_caseType = value;
+    m_caseCaption = value;
 
     // Shassis
     //
@@ -141,13 +146,14 @@ QString DevicePosition::caseString() const
 
     QString result;
 
-    if (caseNo.isEmpty() == false && m_caseType.isEmpty() == false)
+    if (caseNo.isEmpty() == false && m_caseCaption.isEmpty() == false)
     {
-        result = caseNo + " - " + m_caseType;
+        result = caseNo + " - " + m_caseCaption;
+        // result = caseNo + " - " + m_caseCaption + " (" + QString::number(m_caseType)+ ")";
     }
     else
     {
-        result = caseNo + m_caseType;
+        result = caseNo + m_caseCaption;
     }
 
     return result;
@@ -188,6 +194,7 @@ DevicePosition& DevicePosition::operator=(const DevicePosition& from)
     m_equipmentID = from.m_equipmentID;
 
     m_caseNo = from.m_caseNo;
+    m_caseCaption = from.m_caseCaption;
     m_caseType = from.m_caseType;
 
     m_channel = from.m_channel;
@@ -303,7 +310,7 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
     setCaption("This is signal of the block MPS");
 
     position().setCaseNo(0);
-    position().setCaseType("CASE-1");
+    position().setCaseCaption("CASE-1");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);
@@ -569,7 +576,7 @@ ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
     setName("This is signal of the block MPS");
 
     position().setCaseNo(0);
-    position().setCaseType("CASE-1");
+    position().setCaseCaption("CASE-1");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);
@@ -614,7 +621,7 @@ ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCali
     setName("This is signal of the block MPS");
 
     position().setCaseNo(0);
-    position().setCaseType("CASE-1");
+    position().setCaseCaption("CASE-1");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);

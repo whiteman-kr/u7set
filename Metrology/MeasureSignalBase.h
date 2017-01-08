@@ -79,45 +79,7 @@ public:
 
 // ==============================================================================================
 
-const int       COMPLEX_MEASURE_SIGNAL_0            = 0,
-                COMPLEX_MEASURE_SIGNAL_1            = 1,
-                COMPLEX_MEASURE_SIGNAL_2            = 2,
-                COMPLEX_MEASURE_SIGNAL_3            = 3,
-                COMPLEX_MEASURE_SIGNAL_4            = 4,
-                COMPLEX_MEASURE_SIGNAL_5            = 5;
-
-const int       COMPLEX_MEASURE_SIGNAL_COUNT        = 6;
-
-// ==============================================================================================
-
-class ComplexMeasureSignal
-{
-public:
-
-    explicit    ComplexMeasureSignal();
-    explicit    ComplexMeasureSignal(const ComplexMeasureSignal& from) { *this = from; }
-                ~ComplexMeasureSignal();
-
-private:
-
-    QMutex m_mutex;
-
-    MeasureSignal* m_signal[COMPLEX_MEASURE_SIGNAL_COUNT];
-
-public:
-
-    void clear();
-
-    MeasureSignal* signal(int index) const;
-    void setSignal(int index, MeasureSignal *s);
-
-    ComplexMeasureSignal& operator=(const ComplexMeasureSignal& from);
-    bool operator==(const ComplexMeasureSignal& from);
-};
-
-// ==============================================================================================
-
-class MeasureSignalBase : public PtrObjectVector<ComplexMeasureSignal>
+class MeasureSignalBase : public PtrObjectVector<MeasureMultiSignal>
 {
 public:
 
@@ -128,12 +90,12 @@ private:
 
     QMutex m_baseMutex;
 
-    ComplexMeasureSignal* m_pActiveSignal = nullptr;
+    MeasureMultiSignal* m_pActiveSignal = nullptr;
 
 public:
 
-    ComplexMeasureSignal* activeSignal() const { return m_pActiveSignal; }
-    void setActiveSignal(ComplexMeasureSignal* s) { m_baseMutex.lock(); m_pActiveSignal = s; m_baseMutex.unlock(); }
+    MeasureMultiSignal* activeSignal() const { return m_pActiveSignal; }
+    void setActiveSignal(MeasureMultiSignal* s) { m_baseMutex.lock(); m_pActiveSignal = s; m_baseMutex.unlock(); }
 };
 
 // ==============================================================================================

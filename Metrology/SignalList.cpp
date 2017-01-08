@@ -128,10 +128,10 @@ QString SignalListTable::text(int row, int column) const
         case SIGNAL_LIST_COLUMN_MODULE:         result = s.position().blockString();    break;
         case SIGNAL_LIST_COLUMN_INPUT:          result = s.position().entryString();    break;
         case SIGNAL_LIST_COLUMN_ADC:            result = s.adcRangeString();            break;
-        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = s.inputPhysicalRangeString();  break;
-        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = s.inputElectricRangeString();  break;
-        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = s.outputPhysicalRangeString(); break;
-        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = s.outputElectricRangeString(); break;
+        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = s.inputPhysicalRange();  break;
+        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = s.inputElectricRange();  break;
+        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = s.outputPhysicalRange(); break;
+        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = s.outputElectricRange(); break;
         default:                                assert(0);                              break;
     }
 
@@ -293,22 +293,22 @@ void SignalListDialog::updateList()
 
     QList<MeasureSignal> signalList;
 
-    int count = theSignalBase.size();
+    int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        Signal param;
+        Signal* param = theSignalBase.signalParam(i);
 
-        if (theSignalBase.signalParam(i, param) == false)
+        if (param == nullptr)
         {
             continue;
         }
 
-        if (param.signalType() != m_typeAD)
+        if (param->signalType() != m_typeAD)
         {
             continue;
         }
 
-        if (param.inOutType() != m_typeIO)
+        if (param->inOutType() != m_typeIO)
         {
             continue;
         }
