@@ -83,7 +83,6 @@ SOURCES += \
     ReportView.cpp \
     Conversion.cpp \
     Calculator.cpp \
-    MeasureSignalBase.cpp \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -129,7 +128,6 @@ HEADERS  += \
     Calculator.h \
     Stable.h \
     ObjectVector.h \
-    MeasureSignalBase.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/Crc.h \
