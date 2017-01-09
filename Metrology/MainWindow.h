@@ -13,7 +13,8 @@
 #include "MeasureView.h"
 #include "SignalSocket.h"
 #include "MeasureThread.h"
-#include "FindMeasure.h"
+#include "FindMeasurePanel.h"
+#include "SignalInfoPanel.h"
 #include "Calculator.h"
 
 #include "../lib/SimpleThread.h"
@@ -64,9 +65,8 @@ public:
 
     // Elements of interface - Panels
     //
-    FindMeasure*        m_pFindMeasurePanel = nullptr;
-    QDockWidget*        m_pSignalInfoPanel = nullptr;
-    QTableView*         m_pSignalInfoView = nullptr;
+    FindMeasurePanel*   m_pFindMeasurePanel = nullptr;
+    SignalInfoPanel*    m_pSignalInfoPanel = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
     QTableView*         m_pComparatorInfoView = nullptr;
     QDockWidget*        m_pComplexComparatorInfoPanel = nullptr;
@@ -159,6 +159,8 @@ private:
 signals:
 
     void                appendMeasure(MeasureItem*);
+
+    void                setActiveSignal();
 
 private slots:
 

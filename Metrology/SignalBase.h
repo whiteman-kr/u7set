@@ -31,48 +31,55 @@ class MeasureSignal
 {
 public:
 
-    explicit    MeasureSignal();
-                MeasureSignal(Signal param);
-                ~MeasureSignal();
+    explicit            MeasureSignal();
+    explicit            MeasureSignal(Signal param);
+                        ~MeasureSignal();
 
 private:
 
-    Signal m_param;
-    AppSignalState m_state;
-    DevicePosition m_position;
+    Signal              m_param;
+    AppSignalState      m_state;
+    DevicePosition      m_position;
 
 public:
 
-    Signal param() const { return m_param; }
-    void setParam(Signal param) { m_param = param; }
+    Signal              param() const { return m_param; }
+    void                setParam(Signal param) { m_param = param; }
 
-    AppSignalState state() const { return m_state; }
-    void setState(AppSignalState state) { m_state = state; }
+    AppSignalState      state() const { return m_state; }
+    void                setState(AppSignalState state) { m_state = state; }
 
-    DevicePosition position() const { return m_position; }
-    void setPosition(DevicePosition position) { m_position = position; }
+    DevicePosition      position() const { return m_position; }
+    void                setPosition(DevicePosition position) { m_position = position; }
 
-    void setCaseType(const int& type) { m_position.setCaseType(type); }
+    void                setCaseType(const int& type) { m_position.setCaseType(type); }
 
-    MeasureSignal& operator=(const MeasureSignal& from);
+    MeasureSignal&      operator=(const MeasureSignal& from);
 
-    QString adcRangeString();
-    QString inputPhysicalRange();
-    QString inputElectricRange();
-    QString outputPhysicalRange();
-    QString outputElectricRange();
+    QString             stateString();
+    QString             adcRange(const bool& showInHex);
+    QString             inputPhysicalRange();
+    QString             inputElectricRange();
+    QString             outputPhysicalRange();
+    QString             outputElectricRange();
+    QString             adjustmentString();
 };
 
 // ==============================================================================================
 
-const int   MEASURE_MULTI_SIGNAL_0            = 0,
-            MEASURE_MULTI_SIGNAL_1            = 1,
-            MEASURE_MULTI_SIGNAL_2            = 2,
-            MEASURE_MULTI_SIGNAL_3            = 3,
-            MEASURE_MULTI_SIGNAL_4            = 4,
-            MEASURE_MULTI_SIGNAL_5            = 5;
+                        Q_DECLARE_METATYPE(MeasureSignal)
+                        Q_DECLARE_METATYPE(MeasureSignal*)
 
-const int   MEASURE_MULTI_SIGNAL_COUNT        = 6;
+// ==============================================================================================
+
+const int               MEASURE_MULTI_SIGNAL_0            = 0,
+                        MEASURE_MULTI_SIGNAL_1            = 1,
+                        MEASURE_MULTI_SIGNAL_2            = 2,
+                        MEASURE_MULTI_SIGNAL_3            = 3,
+                        MEASURE_MULTI_SIGNAL_4            = 4,
+                        MEASURE_MULTI_SIGNAL_5            = 5;
+
+const int               MEASURE_MULTI_SIGNAL_COUNT        = 6;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -80,43 +87,48 @@ class MeasureMultiSignal
 {
 public:
 
-    explicit    MeasureMultiSignal();
-    explicit    MeasureMultiSignal(const MeasureMultiSignal& from) { *this = from; }
-                ~MeasureMultiSignal();
+    explicit            MeasureMultiSignal();
+    explicit            MeasureMultiSignal(const MeasureMultiSignal& from) { *this = from; }
+                        ~MeasureMultiSignal();
 
 private:
 
-    QMutex m_mutex;
+    mutable QMutex      m_mutex;
 
-    MeasureSignal* m_signal[MEASURE_MULTI_SIGNAL_COUNT];
+    MeasureSignal*      m_signal[MEASURE_MULTI_SIGNAL_COUNT];
 
-    int m_caseNo = -1;
-    int m_subblock = -1;
-    int m_block = -1;
-    int m_entry = -1;
+    int                 m_caseNo = -1;
+    int                 m_subblock = -1;
+    int                 m_block = -1;
+    int                 m_entry = -1;
 
 public:
 
-    void clear();
-    bool isEmpty();
+    void                clear();
+    bool                isEmpty() const;
 
-    MeasureSignal* signal(const int& index) const;
-    void setSignal(const int& index, MeasureSignal* pSignal);
+    MeasureSignal*      signal(const int& index) const;
+    void                setSignal(const int& index, MeasureSignal* pSignal);
 
-    int caseNo() const { return m_caseNo; }
-    void setCaseNo(int caseNo) { m_caseNo = caseNo; }
+    int                 caseNo() const { return m_caseNo; }
+    void                setCaseNo(int caseNo) { m_caseNo = caseNo; }
 
-    int subblock() const { return m_subblock; }
-    void setSubblock(int subblock) { m_subblock = subblock; }
+    int                 subblock() const { return m_subblock; }
+    void                setSubblock(int subblock) { m_subblock = subblock; }
 
-    int block() const { return m_block; }
-    void setBlock(int block) { m_block = block; }
+    int                 block() const { return m_block; }
+    void                setBlock(int block) { m_block = block; }
 
-    int entry() const { return m_entry; }
-    void setEntry(int entry) { m_entry = entry; }
+    int                 entry() const { return m_entry; }
+    void                setEntry(int entry) { m_entry = entry; }
 
     MeasureMultiSignal& operator=(const MeasureMultiSignal& from);
 };
+
+// ==============================================================================================
+
+                        Q_DECLARE_METATYPE(MeasureMultiSignal)
+                        Q_DECLARE_METATYPE(MeasureMultiSignal*)
 
 // ==============================================================================================
 
@@ -174,7 +186,7 @@ public:
 
     // Main signal for measure
     //
-    // MeasureMultiSignal      activeSignal();
+    MeasureMultiSignal&     activeSignal() { return m_activeSignal; }
     void                    setActiveSignal(const MeasureMultiSignal& multiSignal);
 
 private:

@@ -433,6 +433,8 @@ void SignalSocket::startSignalStateTimer()
         connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalSocket::updateSignalState);
     }
 
+    // according to GOST MI-2002 in each point we need do twenty measurements per one second
+    //
     m_updateSignalStateTimer->start(50); //   50 ms
 }
 

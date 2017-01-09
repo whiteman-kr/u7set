@@ -147,14 +147,14 @@ void OptionsPointsDialog::setHeaderList()
             continue;
         }
 
-        m_pAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
-        if (m_pAction[sensor] != nullptr)
+        m_pColumnAction[sensor] = m_headerContextMenu->addAction(LinearityPointSensor[sensor]);
+        if (m_pColumnAction[sensor] != nullptr)
         {
-            m_pAction[sensor]->setCheckable(true);
-            m_pAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
+            m_pColumnAction[sensor]->setCheckable(true);
+            m_pColumnAction[sensor]->setChecked(sensor > POINT_SENSOR_I_4_20_MA ? false : true);
 
 
-            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onAction);
+            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &OptionsPointsDialog::onColumnAction);
         }
     }
 
@@ -562,7 +562,7 @@ void OptionsPointsDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::onAction(QAction* action)
+void OptionsPointsDialog::onColumnAction(QAction* action)
 {
     if (action == nullptr)
     {
@@ -571,7 +571,7 @@ void OptionsPointsDialog::onAction(QAction* action)
 
     for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
     {
-        if (m_pAction[sensor] == action)
+        if (m_pColumnAction[sensor] == action)
         {
             hideColumn(sensor,  !action->isChecked());
 

@@ -93,20 +93,16 @@ const int   OUTPUT_SIGNAL_KIND_UNKNOWN			= -1,
 const char* const OutputSignalType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Don't used"),
+            QT_TRANSLATE_NOOP("Measure.h", "In → Out "),
             QT_TRANSLATE_NOOP("Measure.h", "Correction"),
-            QT_TRANSLATE_NOOP("Measure.h", "Signal MPS"),
-            QT_TRANSLATE_NOOP("Measure.h", "P → T"),
-            QT_TRANSLATE_NOOP("Measure.h", "T → P"),
 };
 
 const int   OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(char*);
 
 const int   OUTPUT_SIGNAL_TYPE_UNKNOWN			= -1,
             OUTPUT_SIGNAL_TYPE_DONT_USED		= 0,
-            OUTPUT_SIGNAL_TYPE_CORRECTION		= 1,
-            OUTPUT_SIGNAL_TYPE_MPS				= 2,
-            OUTPUT_SIGNAL_TYPE_PT				= 3,
-            OUTPUT_SIGNAL_TYPE_TP				= 4;
+            OUTPUT_SIGNAL_TYPE_IN_OUT           = 1,
+            OUTPUT_SIGNAL_TYPE_CORRECTION		= 2;
 
 // ----------------------------------------------------------------------------------------------
 

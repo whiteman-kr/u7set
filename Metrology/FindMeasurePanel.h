@@ -67,9 +67,9 @@ Q_DECLARE_METATYPE(FindItem)   // for type QVariant
 
 const char* const       FmColumn[] =
 {
-                        QT_TRANSLATE_NOOP("FindMeasure.h", "Text"),
-                        QT_TRANSLATE_NOOP("FindMeasure.h", "Index"),
-                        QT_TRANSLATE_NOOP("FindMeasure.h", "Column"),
+                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Text"),
+                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Index"),
+                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Column"),
 };
 
 const int               FM_COLUMN_COUNT    = sizeof(FmColumn)/sizeof(char*);
@@ -113,13 +113,13 @@ private:
 
 // ==============================================================================================
 
-class FindMeasure : public QDockWidget
+class FindMeasurePanel : public QDockWidget
 {
     Q_OBJECT
 
 public:
 
-    explicit            FindMeasure(QWidget* parent = 0);
+    explicit            FindMeasurePanel(QWidget* parent = 0);
 
     FindMeasureTable&   table() { return m_table; }
 
@@ -133,7 +133,7 @@ private:
 
     QString             m_findText;
 
-    QMainWindow*        m_pFindWindow;
+    QMainWindow*        m_pFindWindow = nullptr;
     QLineEdit*          m_findTextEdit  = nullptr;
     QTableView*         m_pView = nullptr;
     QLabel*             m_statusLabel = nullptr;
@@ -146,9 +146,6 @@ private:
     void                createInterface();
     void                createContextMenu();
 
-    void                copy();
-    void                selectAll();
-
     void                loadSettings();
     void                saveSettings();
 
@@ -157,7 +154,7 @@ protected:
     bool                event(QEvent* e);
     bool                eventFilter(QObject* object, QEvent* e);
 
-public slots:
+private slots:
 
     void                find();
 
@@ -165,6 +162,9 @@ public slots:
 
     void                onContextMenu(QPoint);
     void                onColumnResized(int index, int, int width);
+
+    void                copy();
+    void                selectAll();
 };
 
 // ==============================================================================================

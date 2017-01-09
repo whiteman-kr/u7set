@@ -20,7 +20,6 @@ MeasureSignal::MeasureSignal(Signal param)
 
     // temporary solution
     //
-
     if (param.equipmentID().isEmpty() == false && param.hash() != 0)
     {
         if (param.isAnalog() == true && param.isInput() == true)
@@ -29,10 +28,13 @@ MeasureSignal::MeasureSignal(Signal param)
         }
     }
 
-    m_param.setInputLowLimit(4);
-    m_param.setInputHighLimit(20);
-    m_param.setInputUnitID(15);
+    m_param.setInputLowLimit(0);
+    m_param.setInputHighLimit(5);
+    m_param.setInputUnitID(12);
     //m_param.setInputSensorID(1);
+    //
+    // temporary solution
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,11 +56,48 @@ MeasureSignal& MeasureSignal::operator=(const MeasureSignal& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureSignal::adcRangeString()
+QString MeasureSignal::stateString()
+{
+    QString state, formatStr;
+
+    formatStr.sprintf( ("%%.%df"), m_param.decimalPlaces() );
+
+    state.sprintf( formatStr.toAscii() + " ", m_state.value );
+
+    state.append( theSignalBase.unit( m_param.unitID() ) );
+
+    if (m_state.flags.underflow != 0)
+    {
+        state = "Underflow";
+    }
+
+    if (m_state.flags.overflow != 0)
+    {
+        state = "Overflow";
+    }
+
+    if (m_state.flags.valid == 0)
+    {
+        state = "No valid";
+    }
+
+    return state;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureSignal::adcRange(const bool& showInHex)
 {
     QString range;
 
-    range.sprintf("%04X .. %04X", m_param.lowADC(), m_param.highADC());
+    if (showInHex == true)
+    {
+        range.sprintf("%04X .. %04X", m_param.lowADC(), m_param.highADC());
+    }
+    else
+    {
+        range.sprintf("%d .. %d", m_param.lowADC(), m_param.highADC());
+    }
 
     return range;
 }
@@ -119,7 +158,6 @@ QString MeasureSignal::outputPhysicalRange()
 
 QString MeasureSignal::outputElectricRange()
 {
-
     int mode = m_param.outputMode();
 
     if (mode < 0 || mode >= OUTPUT_MODE_COUNT)
@@ -129,6 +167,19 @@ QString MeasureSignal::outputElectricRange()
     }
 
     return OutputModeStr[ m_param.outputMode() ];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureSignal::adjustmentString()
+{
+    QString adjustment, formatStr;
+
+    formatStr.sprintf( ("%%.%df"), m_param.decimalPlaces() );
+
+    adjustment.sprintf( formatStr.toAscii(), 0);
+
+    return adjustment;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -167,7 +218,7 @@ void MeasureMultiSignal::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureMultiSignal::isEmpty()
+bool MeasureMultiSignal::isEmpty() const
 {
     bool empty = true;
 

@@ -595,7 +595,7 @@ void MainWindow::createPanels()
 {
     // Search measurements panel
     //
-    m_pFindMeasurePanel = new FindMeasure(this);
+    m_pFindMeasurePanel = new FindMeasurePanel(this);
     if (m_pFindMeasurePanel != nullptr)
     {
         m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
@@ -633,18 +633,11 @@ void MainWindow::createPanels()
 
     // Panel signal information
     //
-    m_pSignalInfoPanel = new QDockWidget(tr("Panel signal information"), this);
-    m_pSignalInfoPanel->setObjectName("Panel signal information");
+    m_pSignalInfoPanel = new SignalInfoPanel(this);
     if (m_pSignalInfoPanel != nullptr)
     {
         m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-        m_pSignalInfoView = new QTableView;
-
-        if (m_pSignalInfoPanel != nullptr)
-        {
-            m_pSignalInfoPanel->setWidget(m_pSignalInfoView);
-        }
         addDockWidget(Qt::BottomDockWidgetArea, m_pSignalInfoPanel);
 
         if (m_pViewPanelMenu != nullptr)
@@ -1267,6 +1260,8 @@ void MainWindow::setMeasureSignal(int index)
     m_asSubblockCombo->setCurrentText( QString::number( multiSignal.subblock() + 1) );
     m_asBlockCombo->setCurrentText( QString::number( multiSignal.block() + 1) );
     m_asEntryCombo->setCurrentText( QString::number( multiSignal.entry() + 1) );
+
+    emit setActiveSignal();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
