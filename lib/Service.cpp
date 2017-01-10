@@ -119,27 +119,6 @@ void ServiceWorker::init()
 	m_cmdLineParser.parse();
 
 	processCmdLineSettings();
-
-	m_settings.sync();			// save settings to permanent storage
-
-	QSettings::Status s = m_settings.status();
-
-	switch(s)
-	{
-	case QSettings::AccessError:
-		DEBUG_LOG_ERR(QString(tr("Access error to settings permanent storage. Program should run with adminstrator's rights.")));
-		break;
-
-	case QSettings::FormatError:
-		DEBUG_LOG_ERR(QString(tr("Settings format error.")));
-		break;
-
-	case QSettings::NoError:
-		break;
-
-	default:
-		assert(false);
-	}
 }
 
 
@@ -171,6 +150,50 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 void ServiceWorker::clearSettings()
 {
 	m_settings.clear();
+}
+
+
+void ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
+{
+	m_settings.setValue(settingName, QVariant(value));
+
+	m_settings.sync();
+
+	checkSettingWriteStatus(settingName);
+}
+
+
+QString ServiceWorker::getStrSetting(const QString& settingName)
+{
+	return m_settings.value(settingName).toString();
+}
+
+
+bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
+{
+	QSettings::Status s = m_settings.status();
+
+	bool result = false;
+
+	switch(s)
+	{
+	case QSettings::Status::AccessError:
+		DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+		break;
+
+	case QSettings::Status::FormatError:
+		DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+		break;
+
+	case QSettings::Status::NoError:
+		result = true;
+		break;
+
+	default:
+		assert(false);
+	}
+
+	return result;
 }
 
 
@@ -397,6 +420,8 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 	m_app(app),
 	m_serviceWorker(serviceWorker)
 {
+	app.setOrganizationName(RADIY_ORG);
+	app.setApplicationName(serviceWorker.serviceName());
 }
 
 

@@ -64,7 +64,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/HostAddressPort.cpp \
     ArchivingService.cpp \
     ../lib/Queue.cpp \
@@ -90,7 +90,8 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    ArchServiceMain.cpp
 
 HEADERS += \
     version.h \

@@ -52,37 +52,37 @@ namespace Tuning
 
 		if (cp.optionIsSet("id") == true)
 		{
-			m_settings.setValue("EquipmentID", cp.optionValue("id"));
+			setStrSetting("EquipmentID", cp.optionValue("id"));
 		}
 
 		if (cp.optionIsSet("b") == true)
 		{
-			m_settings.setValue("BuildPath", cp.optionValue("b"));
+			setStrSetting("BuildPath", cp.optionValue("b"));
 		}
 
 		if (cp.optionIsSet("cfgip1") == true)
 		{
-			m_settings.setValue("CfgServiceIP1", cp.optionValue("cfgip1"));
+			setStrSetting("CfgServiceIP1", cp.optionValue("cfgip1"));
 		}
 
 		if (cp.optionIsSet("cfgip2") == true)
 		{
-			m_settings.setValue("CfgServiceIP2", cp.optionValue("cfgip2"));
+			setStrSetting("CfgServiceIP2", cp.optionValue("cfgip2"));
 		}
 	}
 
 
 	void TuningServiceWorker::loadSettings()
 	{
-		m_equipmentID = m_settings.value("EquipmentID").toString();
+		m_equipmentID = getStrSetting("EquipmentID");
 
-		m_buildPath = m_settings.value("BuildPath").toString();
+		m_buildPath = getStrSetting("BuildPath");
 
-		m_cfgServiceIP1Str = m_settings.value("CfgServiceIP1").toString();
+		m_cfgServiceIP1Str = getStrSetting("CfgServiceIP1");
 
 		m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-		m_cfgServiceIP2Str = m_settings.value("CfgServiceIP2").toString();
+		m_cfgServiceIP2Str = getStrSetting("CfgServiceIP2");
 
 		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 

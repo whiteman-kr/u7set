@@ -61,7 +61,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/CfgServerLoader.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
@@ -76,7 +76,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    CfgServiceMain.cpp
 
 HEADERS += \
     version.h \

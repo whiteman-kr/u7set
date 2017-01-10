@@ -57,7 +57,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -69,7 +69,8 @@ SOURCES += main.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
-    ../lib/WUtils.cpp
+    ../lib/WUtils.cpp \
+    BaseServiceMain.cpp
 
 HEADERS += \
     ../lib/SocketIO.h \

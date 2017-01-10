@@ -69,26 +69,26 @@ void ConfigurationServiceWorker::processCmdLineSettings()
 
 	if (cp.optionIsSet("id") == true)
 	{
-		m_settings.setValue("EquipmentID", cp.optionValue("id"));
+		setStrSetting("EquipmentID", cp.optionValue("id"));
 	}
 
 	if (cp.optionIsSet("b") == true)
 	{
-		m_settings.setValue("BuildPath", cp.optionValue("b"));
+		setStrSetting("BuildPath", cp.optionValue("b"));
 	}
 
 	if (cp.optionIsSet("ip") == true)
 	{
-		m_settings.setValue("ClientRequestIP", cp.optionValue("ip"));
+		setStrSetting("ClientRequestIP", cp.optionValue("ip"));
 	}
 }
 
 
 void ConfigurationServiceWorker::loadSettings()
 {
-	m_equipmentID = m_settings.value("EquipmentID").toString();
-	m_buildPath = m_settings.value("BuildPath").toString();
-	m_clientIPStr = m_settings.value("ClientRequestIP").toString();
+	m_equipmentID = getStrSetting("EquipmentID");
+	m_buildPath = getStrSetting("BuildPath");
+	m_clientIPStr = getStrSetting("ClientRequestIP");
 
 	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
 

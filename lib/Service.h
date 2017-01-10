@@ -115,20 +115,23 @@ protected:
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
+	void setStrSetting(const QString& settingName, const QString& value);
+	QString getStrSetting(const QString& settingName);
+
 private:
+	bool checkSettingWriteStatus(const QString& settingName);
+
 	void onThreadStarted() final;
 	void onThreadFinished() final;
-
-protected:
-	QSettings m_settings;
 
 private:
 	ServiceType m_serviceType = ServiceType::BaseService;
 	QString m_serviceName;
 	int& m_argc;
 	char** m_argv = nullptr;
-
 	VersionInfo m_versionInfo;
+
+	QSettings m_settings;
 
 	CommandLineParser m_cmdLineParser;
 

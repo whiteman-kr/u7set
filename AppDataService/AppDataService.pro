@@ -58,7 +58,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -97,7 +97,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppDataSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    AppDataServiceMain.cpp
 
 HEADERS += \
 	Stable.h \

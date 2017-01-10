@@ -7,7 +7,8 @@ win32:	SUBDIRS +=  Protobuf \
                     BaseService \
                     ConfigurationService \
                     AppDataService \
-                    TuningService
+                    TuningService \
+                    ArchivingService
 
 
 

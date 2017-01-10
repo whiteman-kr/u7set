@@ -83,7 +83,6 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../AppDataService/AppSignalStateEx.cpp \
     ../lib/Crc.cpp \
-    TuningMain.cpp \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
@@ -98,7 +97,8 @@ SOURCES += \
     TuningSourceWorker.cpp \
     TuningMemory.cpp \
     TuningClientContext.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    TuningServiceMain.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \

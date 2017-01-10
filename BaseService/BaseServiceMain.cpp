@@ -40,13 +40,13 @@ public:
 
 		if (cp.optionIsSet("id") == true)
 		{
-			m_settings.setValue("id", cp.optionValue("id"));
+			setStrSetting("id", cp.optionValue("id"));
 		}
 	}
 
 	void loadSettings() override
 	{
-		m_serviceEquipmentID = m_settings.value("id").toString();
+		m_serviceEquipmentID = getStrSetting("id");
 
 		LOG_MSG(QString("%1 = %2").arg("id").arg(m_serviceEquipmentID));
 	}
