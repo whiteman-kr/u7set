@@ -97,7 +97,6 @@ signals:
     void            socketDisconnected();
 
     void            signalsLoaded();
-    void            unitsLoaded();
 };
 
 #endif // SIGNALSOCKET_H

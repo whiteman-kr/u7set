@@ -67,33 +67,52 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    int indexRow = index.row();
-    if (indexRow < 0 || indexRow >= m_signalList.count())
+    int row = index.row();
+    if (row < 0 || row >= m_signalList.count())
     {
         return QVariant();
     }
 
-    int indexColumn = index.column();
-    if (indexColumn < 0 || indexColumn > SIGNAL_LIST_COLUMN_COUNT)
+    int column = index.column();
+    if (column < 0 || column > SIGNAL_LIST_COLUMN_COUNT)
     {
         return QVariant();
     }
 
     if (role == Qt::TextAlignmentRole)
     {
-        return Qt::AlignLeft;
+        int result = Qt::AlignLeft;
+
+        switch (column)
+        {
+            case SIGNAL_LIST_COLUMN_ID:             result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_CAPTION:        result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_CASE:           result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_BLOCK:          result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_ENTRY:          result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_ADC:            result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = Qt::AlignCenter;   break;
+            default:                                assert(0);
+        }
+
+        return result;
     }
 
     if (role == Qt::UserRole )
     {
         QVariant var;
-        var.setValue(m_signalList.at(indexRow));
+        var.setValue(m_signalList.at(row));
         return var;
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        return text(indexRow, indexColumn);
+        return text(row, column);
     }
 
     return QVariant();
@@ -119,20 +138,19 @@ QString SignalListTable::text(int row, int column) const
 
     switch (column)
     {
-        case SIGNAL_LIST_COLUMN_ID:             result = s.param().appSignalID();       break;
-        case SIGNAL_LIST_COLUMN_CUSTOM_ID:      result = s.param().customAppSignalID(); break;
-        case SIGNAL_LIST_COLUMN_CAPTION:        result = s.param().caption();           break;
+        case SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? s.param().customAppSignalID() : s.param().appSignalID(); break;
         case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = s.param().equipmentID();       break;
+        case SIGNAL_LIST_COLUMN_CAPTION:        result = s.param().caption();           break;
         case SIGNAL_LIST_COLUMN_CASE:           result = s.position().caseString();     break;
-        case SIGNAL_LIST_COLUMN_CHASSIS:        result = s.position().subblockString(); break;
-        case SIGNAL_LIST_COLUMN_MODULE:         result = s.position().blockString();    break;
-        case SIGNAL_LIST_COLUMN_INPUT:          result = s.position().entryString();    break;
-        case SIGNAL_LIST_COLUMN_ADC:            result = s.adcRangeString();            break;
-        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = s.inputPhysicalRangeString();  break;
-        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = s.inputElectricRangeString();  break;
-        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = s.outputPhysicalRangeString(); break;
-        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = s.outputElectricRangeString(); break;
-        default:                                assert(0);                              break;
+        case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = s.position().subblockString(); break;
+        case SIGNAL_LIST_COLUMN_BLOCK:          result = s.position().blockString();    break;
+        case SIGNAL_LIST_COLUMN_ENTRY:          result = s.position().entryString();    break;
+        case SIGNAL_LIST_COLUMN_ADC:            result = s.adcRange(m_showADCInHex);    break;
+        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = s.inputPhysicalRange();        break;
+        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = s.inputElectricRange();        break;
+        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = s.outputPhysicalRange();       break;
+        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = s.outputElectricRange();       break;
+        default:                                assert(0);
     }
 
     return result;
@@ -189,6 +207,24 @@ void SignalListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
+{
+    250,    // LIST_COLUMN_ID
+    250,    // LIST_COLUMN_EQUIPMENT_ID
+    150,    // LIST_COLUMN_CAPTION
+    100,    // LIST_COLUMN_CASE
+     60,    // LIST_COLUMN_SUBBLOCK
+     60,    // LIST_COLUMN_BLOCK
+     60,    // LIST_COLUMN_ENTRY
+    100,    // LIST_COLUMN_ADC
+    150,    // LIST_COLUMN_IN_PH_RANGE
+    150,    // LIST_COLUMN_IN_EL_RANGE
+    150,    // LIST_COLUMN_OUT_PH_RANGE
+    150,    // LIST_COLUMN_OUT_EL_RANGE
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+
 SignalListDialog::SignalListDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -233,21 +269,42 @@ void SignalListDialog::createInterface()
     m_pTypeInternalAction->setCheckable(true);
     m_pTypeInternalAction->setChecked(false);
 
+    m_pViewShowMenu = new QMenu(tr("Show"), this);
+    m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
+    m_pShowCustomIDAction->setCheckable(true);
+    m_pShowCustomIDAction->setChecked(false);
+    m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC In Hex"));
+    m_pShowADCInHexAction->setCheckable(true);
+    m_pShowADCInHexAction->setChecked(true);
+
     m_pViewMenu->addMenu(m_pViewTypeADMenu);
     m_pViewMenu->addMenu(m_pViewTypeIOMenu);
+    m_pViewMenu->addSeparator();
+    m_pViewMenu->addMenu(m_pViewShowMenu);
+
 
     m_pMenuBar->addMenu(m_pViewMenu);
 
-    connect(m_pTypeAnalogAction, &QAction::triggered, this, &SignalListDialog::onTypeAnalog);
-    connect(m_pTypeDiscreteAction, &QAction::triggered, this, &SignalListDialog::onTypeDiscrete);
-    connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::onTypeInput);
-    connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::onTypeOutput);
-    connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::onTypeInternal);
+    connect(m_pTypeAnalogAction, &QAction::triggered, this, &SignalListDialog::showTypeAnalog);
+    connect(m_pTypeDiscreteAction, &QAction::triggered, this, &SignalListDialog::showTypeDiscrete);
+    connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
+    connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
+    connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
+    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalListDialog::showCustomID);
+    connect(m_pShowADCInHexAction, &QAction::triggered, this, &SignalListDialog::showADCInHex);
+
 
     m_pView = new QTableView(this);
     m_pView->setModel(&m_table);
     QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
+
+    for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
+    {
+        m_pView->setColumnWidth(column, m_columnWidth[column]);
+    }
+
+    m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMenuBar(m_pMenuBar);
@@ -270,15 +327,15 @@ void SignalListDialog::createHeaderContexMenu()
 
     m_headerContextMenu = new QMenu(m_pView);
 
-    for(int c = 0; c < SIGNAL_LIST_COLUMN_COUNT; c++)
+    for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
     {
-        m_pAction[c] = m_headerContextMenu->addAction(SignalListColumn[c]);
-        if (m_pAction[c] != nullptr)
+        m_pColumnAction[column] = m_headerContextMenu->addAction(SignalListColumn[column]);
+        if (m_pColumnAction[column] != nullptr)
         {
-            m_pAction[c]->setCheckable(true);
-            m_pAction[c]->setChecked(true);
+            m_pColumnAction[column]->setCheckable(true);
+            m_pColumnAction[column]->setChecked(true);
 
-            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onAction);
+            connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalListDialog::onColumnAction);
         }
     }
 }
@@ -293,22 +350,22 @@ void SignalListDialog::updateList()
 
     QList<MeasureSignal> signalList;
 
-    int count = theSignalBase.size();
+    int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        Signal param;
+        Signal* param = theSignalBase.signalParam(i);
 
-        if (theSignalBase.signalParam(i, param) == false)
+        if (param == nullptr)
         {
             continue;
         }
 
-        if (param.signalType() != m_typeAD)
+        if (param->signalType() != m_typeAD)
         {
             continue;
         }
 
-        if (param.inOutType() != m_typeIO)
+        if (param->inOutType() != m_typeIO)
         {
             continue;
         }
@@ -333,7 +390,7 @@ void SignalListDialog::updateVisibleColunm()
         hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
         hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
 
-        m_pAction[SIGNAL_LIST_COLUMN_OUT_PH_RANGE]->setChecked(false);
+        m_pColumnAction[SIGNAL_LIST_COLUMN_OUT_PH_RANGE]->setChecked(false);
     }
 
     if (m_typeAD == E::SignalType::Discrete)
@@ -358,18 +415,18 @@ void SignalListDialog::hideColumn(int column, bool hide)
     if (hide == true)
     {
         m_pView->hideColumn(column);
-        m_pAction[column]->setChecked(false);
+        m_pColumnAction[column]->setChecked(false);
     }
     else
     {
         m_pView->showColumn(column);
-        m_pAction[column]->setChecked(true);
+        m_pColumnAction[column]->setChecked(true);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onTypeAnalog()
+void SignalListDialog::showTypeAnalog()
 {
     m_typeAD = E::SignalType::Analog;
 
@@ -381,7 +438,7 @@ void SignalListDialog::onTypeAnalog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onTypeDiscrete()
+void SignalListDialog::showTypeDiscrete()
 {
     m_typeAD = E::SignalType::Discrete;
 
@@ -393,7 +450,7 @@ void SignalListDialog::onTypeDiscrete()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onTypeInput()
+void SignalListDialog::showTypeInput()
 {
     m_typeIO = E::SignalInOutType::Input;
 
@@ -406,7 +463,7 @@ void SignalListDialog::onTypeInput()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onTypeOutput()
+void SignalListDialog::showTypeOutput()
 {
     m_typeIO = E::SignalInOutType::Output;
 
@@ -419,13 +476,31 @@ void SignalListDialog::onTypeOutput()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onTypeInternal()
+void SignalListDialog::showTypeInternal()
 {
     m_typeIO = E::SignalInOutType::Internal;
 
     m_pTypeInputAction->setChecked(false);
     m_pTypeOutputAction->setChecked(false);
     m_pTypeInternalAction->setChecked(true);
+
+    updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::showCustomID()
+{
+    m_table.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+
+    updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::showADCInHex()
+{
+    m_table.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
 
     updateList();
 }
@@ -444,18 +519,18 @@ void SignalListDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::onAction(QAction* action)
+void SignalListDialog::onColumnAction(QAction* action)
 {
     if (action == nullptr)
     {
         return;
     }
 
-    for(int c = 0; c < SIGNAL_LIST_COLUMN_COUNT; c++)
+    for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
     {
-        if (m_pAction[c] == action)
+        if (m_pColumnAction[column] == action)
         {
-            hideColumn(c,  !action->isChecked());
+            hideColumn(column,  !action->isChecked());
 
             break;
         }

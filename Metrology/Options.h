@@ -72,10 +72,23 @@ public:
     explicit            ToolBarOption(QObject *parent = 0);
     explicit            ToolBarOption(const ToolBarOption& from, QObject *parent = 0);
                         ~ToolBarOption();
+//private:
 
     int                 m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
     int                 m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
     int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_DONT_USED;  // selected type of output signal
+
+//public:
+
+//    int measureTimeout() const { return m_measureTimeout; }
+//    void setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
+
+//    int measureKind() const { return m_measureKind; }
+//    void setMeasureKind(int kind) { m_measureKind = kind; }
+
+//    int outputSignalType() const { return m_outputSignalType; }
+//    void setOutputSignalType(int type) { m_outputSignalType = type; }
+
 
     void                load();
     void                save();

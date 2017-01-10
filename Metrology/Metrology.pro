@@ -78,13 +78,11 @@ SOURCES += \
     MeasureBase.cpp \
     ExportMeasure.cpp \
     Delegate.cpp \
-    FindMeasure.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
     ReportView.cpp \
     Conversion.cpp \
     Calculator.cpp \
-    MeasureSignalBase.cpp \
     ../lib/Crc.cpp \
     ../lib/DbStruct.cpp \
     ../lib/DeviceObject.cpp \
@@ -101,7 +99,9 @@ SOURCES += \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     ../lib/AppSignalState.cpp \
-    SignalList.cpp
+    SignalList.cpp \
+    FindMeasurePanel.cpp \
+    SignalInfoPanel.cpp
 
 
 HEADERS  += \
@@ -120,7 +120,6 @@ HEADERS  += \
     MeasureBase.h \
     ExportMeasure.h \
     Delegate.h \
-    FindMeasure.h \
     FolderPropertyManager.h \
     Database.h \
     ReportView.h \
@@ -129,7 +128,6 @@ HEADERS  += \
     Calculator.h \
     Stable.h \
     ObjectVector.h \
-    MeasureSignalBase.h \
     ../lib/Signal.h \
     ../lib/CUtils.h \
     ../lib/Crc.h \
@@ -151,7 +149,9 @@ HEADERS  += \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../lib/AppSignalState.h \
-    SignalList.h
+    SignalList.h \
+    FindMeasurePanel.h \
+    SignalInfoPanel.h
 
 
 FORMS    +=

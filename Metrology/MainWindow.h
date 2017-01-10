@@ -13,7 +13,8 @@
 #include "MeasureView.h"
 #include "SignalSocket.h"
 #include "MeasureThread.h"
-#include "FindMeasure.h"
+#include "FindMeasurePanel.h"
+#include "SignalInfoPanel.h"
 #include "Calculator.h"
 
 #include "../lib/SimpleThread.h"
@@ -48,6 +49,15 @@ public:
     QToolBar*           m_pAnalogSignalToolBar = nullptr;
     QToolBar*           m_pComplexComporatorToolBar = nullptr;
 
+    // Elements of interface - Items of ToolBars
+    //
+    QComboBox*          m_asCaseTypeCombo;
+    QComboBox*          m_asMeasureSignalCombo;
+    QComboBox*          m_asCaseNoCombo;
+    QComboBox*          m_asSubblockCombo;
+    QComboBox*          m_asBlockCombo;
+    QComboBox*          m_asEntryCombo;
+
     // Elements of interface - Pages of Tab
     //
     QTabWidget*         m_pMainTab = nullptr;
@@ -55,9 +65,8 @@ public:
 
     // Elements of interface - Panels
     //
-    FindMeasure*        m_pFindMeasurePanel = nullptr;
-    QDockWidget*        m_pSignalInfoPanel = nullptr;
-    QTableView*         m_pSignalInfoView = nullptr;
+    FindMeasurePanel*   m_pFindMeasurePanel = nullptr;
+    SignalInfoPanel*    m_pSignalInfoPanel = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
     QTableView*         m_pComparatorInfoView = nullptr;
     QDockWidget*        m_pComplexComparatorInfoPanel = nullptr;
@@ -92,17 +101,17 @@ protected:
 
 public:
 
-    bool createInterface();
+    bool                createInterface();
 
-    void createActions();
-    void updateActions();
-    void createMenu();
-    bool createToolBars();
-    void createMeasurePages();
-    void createPanels();
-    void createStatusBar();
-    void createContextMenu();
-
+    void                createActions();
+    void                updateActions();
+    void                createMenu();
+    bool                createToolBars();
+    void                createMeasurePages();
+    void                createPanels();
+    void                createStatusBar();
+    void                createContextMenu();
+    void                updateAnalogSignalToolBar();
 
 private:
 
@@ -113,43 +122,45 @@ private:
 
     // menu - Measure
     //
-    QAction* m_pStartMeasureAction = nullptr;
-    QAction* m_pStopMeasureAction = nullptr;
-    QAction* m_pPrintMeasureAction = nullptr;
-    QAction* m_pExportMeasureAction = nullptr;
+    QAction*            m_pStartMeasureAction = nullptr;
+    QAction*            m_pStopMeasureAction = nullptr;
+    QAction*            m_pPrintMeasureAction = nullptr;
+    QAction*            m_pExportMeasureAction = nullptr;
 
     // menu - Edit
     //
-    QAction* m_pCopyMeasureAction = nullptr;
-    QAction* m_pRemoveMeasureAction = nullptr;
-    QAction* m_pSelectAllMeasureAction = nullptr;
+    QAction*            m_pCopyMeasureAction = nullptr;
+    QAction*            m_pRemoveMeasureAction = nullptr;
+    QAction*            m_pSelectAllMeasureAction = nullptr;
 
     // menu - View
     //
-    QAction* m_pShowReportsAction = nullptr;
-    QAction* m_pShowCalculatorAction = nullptr;
+    QAction*            m_pShowReportsAction = nullptr;
+    QAction*            m_pShowCalculatorAction = nullptr;
 
     // menu - Tools
     //
-    QAction* m_pCalibratorsAction = nullptr;
-    QAction* m_pShowOutputSignalListAction = nullptr;
-    QAction* m_pShowOutputRangeListAction = nullptr;
-    QAction* m_pShowComlexComparatorListAction = nullptr;
-    QAction* m_pOptionsAction;
+    QAction*            m_pCalibratorsAction = nullptr;
+    QAction*            m_pShowOutputSignalListAction = nullptr;
+    QAction*            m_pShowOutputRangeListAction = nullptr;
+    QAction*            m_pShowComlexComparatorListAction = nullptr;
+    QAction*            m_pOptionsAction;
 
     // menu - ?
     //
-    QAction* m_pShowSignalListAction = nullptr;
-    QAction* m_pShowComparatorsListAction = nullptr;
-    QAction* m_pShowStatisticAction = nullptr;
-    QAction* m_pAboutConnectionAction = nullptr;
-    QAction* m_pAboutAppAction = nullptr;
+    QAction*            m_pShowSignalListAction = nullptr;
+    QAction*            m_pShowComparatorsListAction = nullptr;
+    QAction*            m_pShowStatisticAction = nullptr;
+    QAction*            m_pAboutConnectionAction = nullptr;
+    QAction*            m_pAboutAppAction = nullptr;
 
-    QMenu* m_pContextMenu = nullptr;
+    QMenu*              m_pContextMenu = nullptr;
 
 signals:
 
-    void appendMeasure(MeasureItem*);
+    void                appendMeasure(MeasureItem*);
+
+    void                setActiveSignal();
 
 private slots:
 
@@ -158,71 +169,80 @@ private slots:
 
     // menu - Measure
     //
-    void startMeasure();
-    void stopMeasure();
-    void printMeasure();
-    void exportMeasure();
+    void                startMeasure();
+    void                stopMeasure();
+    void                printMeasure();
+    void                exportMeasure();
 
     // menu - Edit
     //
-    void copyMeasure();
-    void removeMeasure();
-    void selectAllMeasure();
+    void                copyMeasure();
+    void                removeMeasure();
+    void                selectAllMeasure();
 
     // menu - View
     //
-    void showReports() {};
-    void showCalculator();
+    void                showReports() {};
+    void                showCalculator();
 
     // menu - Tools
     //
-    void calibrators();
-    void showOutputSignalList() {};
-    void showOutputRangeList() {};
-    void showComlexComparatorList() {};
-    void options();
+    void                calibrators();
+    void                showOutputSignalList() {};
+    void                showOutputRangeList() {};
+    void                showComlexComparatorList() {};
+    void                options();
 
     // menu - ?
     //
-    void showSignalList();
-    void showComparatorsList() {};
-    void showStatistic() {};
-    void aboutConnection() {};
-    void aboutApp() {};
+    void                showSignalList();
+    void                showComparatorsList() {};
+    void                showStatistic() {};
+    void                aboutConnection() {};
+    void                aboutApp() {};
 
     // Slots of tab -- page measure type
     //
-    void setMeasureType(int type);
-    void measureCountChanged(int count);
+    void                setMeasureType(int type);
+    void                measureCountChanged(int count);
 
     // Slots of control panels
     //
-    void setMeasureKind(int index);
-    void setMeasureTimeout(QString value);
-    void setOutputSignalType(int index);
+    void                setMeasureKind(int index);
+    void                setMeasureTimeout(QString value);
+    void                setOutputSignalType(int index);
+
+    // Slots of analog signal toolbar
+    //
+    void                setCaseType(int index);
+    void                setMeasureSignal(int index);
+    void                setCaseNo(int index);
+    void                setSubblock(int index);
+    void                setBlock(int index);
+    void                setEntry(int index);
+    void                setMeasureSignalByPosition(int index);
 
     // Slots of contex menu
     //
-    void onContextMenu(QPoint);
+    void                onContextMenu(QPoint);
 
     // Slots of calibrator base
     //
-    void calibratorConnectedChanged(int);
+    void                calibratorConnectedChanged(int);
 
     // Slots of socket for signals
     //
-    void signalSocketConnected();
-    void signalSocketDisconnected();
-    void signalSocketSignalsLoaded();
-    void signalSocketUnitsLoaded();
+    void                signalSocketConnected();
+    void                signalSocketDisconnected();
+    void                signalSocketSignalsLoaded();
 
     // Slots of measure thread
     //
-    void measureThreadStarted();
-    void measureThreadStoped();
-    void setMeasureThreadInfo(QString msg);
-    void setMeasureThreadInfo(int timeout);
-    void measureComplite(MeasureItem* pMeasure);
+    void                measureThreadStarted();
+    void                measureThreadStoped();
+    void                setMeasureThreadInfo(QString msg);
+    void                setMeasureThreadInfo(int timeout);
+    void                measureComplite(MeasureItem* pMeasure);
 };
 
 // ==============================================================================================

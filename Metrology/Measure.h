@@ -93,20 +93,16 @@ const int   OUTPUT_SIGNAL_KIND_UNKNOWN			= -1,
 const char* const OutputSignalType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Don't used"),
+            QT_TRANSLATE_NOOP("Measure.h", "In → Out "),
             QT_TRANSLATE_NOOP("Measure.h", "Correction"),
-            QT_TRANSLATE_NOOP("Measure.h", "Signal MPS"),
-            QT_TRANSLATE_NOOP("Measure.h", "P → T"),
-            QT_TRANSLATE_NOOP("Measure.h", "T → P"),
 };
 
 const int   OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(char*);
 
 const int   OUTPUT_SIGNAL_TYPE_UNKNOWN			= -1,
             OUTPUT_SIGNAL_TYPE_DONT_USED		= 0,
-            OUTPUT_SIGNAL_TYPE_CORRECTION		= 1,
-            OUTPUT_SIGNAL_TYPE_MPS				= 2,
-            OUTPUT_SIGNAL_TYPE_PT				= 3,
-            OUTPUT_SIGNAL_TYPE_TP				= 4;
+            OUTPUT_SIGNAL_TYPE_IN_OUT           = 1,
+            OUTPUT_SIGNAL_TYPE_CORRECTION		= 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -216,7 +212,8 @@ private:
     QString m_equipmentID;
 
     int m_caseNo = -1;
-    QString	m_caseType;
+    QString	m_caseCaption;
+    int m_caseType = -1;
 
     int m_channel = -1;
     int m_subblock = -1;
@@ -233,8 +230,11 @@ public:
     int caseNo() const { return m_caseNo; }
     void setCaseNo(int caseNo) { m_caseNo = caseNo; }
 
-    QString caseType() const { return m_caseType; }
-    void setCaseType(const QString& caseType) { m_caseType = caseType; }
+    QString caseCaption() const { return m_caseCaption; }
+    void setCaseCaption(const QString& caption) { m_caseCaption = caption; }
+
+    int caseType() const { return m_caseType; }
+    void setCaseType(int type) { m_caseType = type; }
 
     QString caseString() const;
 
