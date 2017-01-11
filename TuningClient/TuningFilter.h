@@ -194,9 +194,9 @@ private:
 
     // Filters
 	//
-	QStringList m_customAppSignalIDMasks;
-	QStringList m_equipmentIDMasks;
-	QStringList m_appSignalIDMasks;
+    QStringList m_customAppSignalIDMasks;
+    QStringList m_equipmentIDMasks;
+    QStringList m_appSignalIDMasks;
 
     // Values
     //
@@ -225,6 +225,9 @@ public:
 
     bool load(const QString& fileName, QString *errorCode, bool automatic);
 	bool save(const QString& fileName, QString *errorMsg);
+
+    bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
+    std::shared_ptr<TuningFilter> pasteFromClipboard();
 
     // Schemas loading
 

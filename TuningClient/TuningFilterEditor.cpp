@@ -191,39 +191,58 @@ void TuningFilterEditor::initUserInterface()
 
     QGridLayout* rightGridLayout = new QGridLayout();
 
+    int col = 0;
+
     m_addPreset = new QPushButton(tr("Add Preset"));
     connect(m_addPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_addPreset_clicked);
-    rightGridLayout->addWidget(m_addPreset, 0, 0);
+    rightGridLayout->addWidget(m_addPreset, 0, col);
 
     m_editPreset = new QPushButton(tr("Edit Preset"));
     m_editPreset->setEnabled(false);
     connect(m_editPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_editPreset_clicked);
-    rightGridLayout->addWidget(m_editPreset, 1, 0);
+    rightGridLayout->addWidget(m_editPreset, 1, col);
 
     m_removePreset = new QPushButton(tr("Remove Preset"));
     m_removePreset->setEnabled(false);
     connect(m_removePreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_removePreset_clicked);
-    rightGridLayout->addWidget(m_removePreset, 2, 0);
+    rightGridLayout->addWidget(m_removePreset, 2, col);
+
+    col++;
+
+    m_copyPreset = new QPushButton(tr("Copy"));
+    m_copyPreset->setEnabled(false);
+    connect(m_copyPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_copyPreset_clicked);
+    rightGridLayout->addWidget(m_copyPreset, 0, col);
+
+    m_pastePreset = new QPushButton(tr("Paste"));
+    connect(m_pastePreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_pastePreset_clicked);
+    rightGridLayout->addWidget(m_pastePreset, 1, col);
+
+    col++;
 
     m_moveUp = new QPushButton(tr("Move Up"));
     connect(m_moveUp, &QPushButton::clicked, this, &TuningFilterEditor::on_m_moveUp_clicked);
-    rightGridLayout->addWidget(m_moveUp, 0, 1);
+    rightGridLayout->addWidget(m_moveUp, 0, col);
 
     m_moveDown = new QPushButton(tr("Move Down"));
     connect(m_moveDown, &QPushButton::clicked, this, &TuningFilterEditor::on_m_moveDown_clicked);
-    rightGridLayout->addWidget(m_moveDown, 1, 1);
+    rightGridLayout->addWidget(m_moveDown, 1, col);
 
-    rightGridLayout->setColumnStretch(2, 1);
+    col++;
+
+    rightGridLayout->setColumnStretch(col, 1);
+
+    col++;
 
     m_setValue = new QPushButton(tr("Set Value"));
     m_setValue->setEnabled(false);
     connect(m_setValue, &QPushButton::clicked, this, &TuningFilterEditor::on_m_setValue_clicked);
-    rightGridLayout->addWidget(m_setValue, 0, 3);
+    rightGridLayout->addWidget(m_setValue, 0, col);
 
     m_setCurrent = new QPushButton(tr("Set Current"));
     m_setCurrent->setEnabled(false);
     //connect(m_setCurrent, &QPushButton::clicked, this, &TuningFilterEditor::on_m_s);
-    rightGridLayout->addWidget(m_setCurrent, 1, 3);
+    rightGridLayout->addWidget(m_setCurrent, 1, col);
 
     rightLayout->addLayout(rightGridLayout);
 
@@ -681,6 +700,114 @@ void TuningFilterEditor::on_m_removePreset_clicked()
 
 }
 
+void TuningFilterEditor::on_m_copyPreset_clicked()
+{
+    std::vector<std::shared_ptr<TuningFilter>> filters;
+
+    // Create the list of selected Presets
+    //
+    QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
+    for (auto p : selectedItems)
+    {
+        if (isFilter(p) == true)
+        {
+            std::shared_ptr<TuningFilter> filter = p->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+            if (filter == nullptr)
+            {
+                assert(filter);
+                return;
+            }
+
+            filters.push_back(filter);
+        }
+    }
+
+    if (filters.empty() == true)
+    {
+        return;
+    }
+
+    m_filterStorage->copyToClipboard(filters);
+
+}
+
+void TuningFilterEditor::on_m_pastePreset_clicked()
+{
+    QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
+
+    QTreeWidgetItem* parentItem = nullptr;
+
+    std::shared_ptr<TuningFilter> parentFilter = nullptr;
+
+    for (auto p : selectedItems)
+    {
+        if (isFilter(p) == true)
+        {
+            std::shared_ptr<TuningFilter> filter = p->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+            if (filter == nullptr)
+            {
+                assert(filter);
+                return;
+            }
+
+            parentFilter = filter;
+
+            parentItem = p;
+
+            break;
+        }
+    }
+
+    std::shared_ptr<TuningFilter> pastedRoot = m_filterStorage->pasteFromClipboard();
+
+    if (pastedRoot == nullptr)
+    {
+        return;
+    }
+
+    int count = pastedRoot->childFiltersCount();
+    if (count == 0)
+    {
+        return;
+    }
+
+    for (int i = 0; i < count; i++)
+    {
+
+        std::shared_ptr<TuningFilter> newFilter = pastedRoot->childFilter(i);
+
+        QUuid uid = QUuid::createUuid();
+        newFilter->setStrID(uid.toString());
+
+        QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
+        setFilterItemText(newPresetItem, newFilter.get());
+        newPresetItem->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+        newPresetItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
+
+        addChildTreeObjects(newFilter, newPresetItem);
+
+        if (parentItem == nullptr || parentFilter == nullptr)
+        {
+            // no item was selected, add top level item
+            //
+            m_filterStorage->m_root->addChild(newFilter);
+            m_presetsTree->addTopLevelItem(newPresetItem);
+        }
+        else
+        {
+            // an item was selected, add child item
+            //
+            parentFilter->addChild(newFilter);
+
+            parentItem->addChild(newPresetItem);
+        }
+
+    }
+
+    m_modified = true;
+}
+
+
 void TuningFilterEditor::on_m_moveUp_clicked()
 {
 
@@ -837,6 +964,8 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 
     m_editPreset->setEnabled(presetsCount == 1 && signalsCount == 0);
     m_removePreset->setEnabled(presetsCount > 0 && signalsCount == 0);
+
+    m_copyPreset->setEnabled(presetsCount > 0 && signalsCount == 0);
 
     m_add->setEnabled(presetsCount == 1 && signalsCount == 0);
     m_remove->setEnabled(presetsCount == 0 && signalsCount > 0);

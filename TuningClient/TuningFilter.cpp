@@ -432,7 +432,6 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	return true;
 }
 
-
 QString TuningFilter::strID() const
 {
 	return m_strID;
@@ -483,9 +482,9 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 		m_customAppSignalIDMasks.clear();
 	}
 	else
-	{
-		m_customAppSignalIDMasks = value.split(';');
-	}
+    {
+        m_customAppSignalIDMasks = value.split(';');
+    }
 
 }
 
@@ -508,9 +507,9 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 		m_equipmentIDMasks.clear();
 	}
 	else
-	{
-		m_equipmentIDMasks = value.split(';');
-	}
+    {
+        m_equipmentIDMasks = value.split(';');
+    }
 }
 
 QString TuningFilter::appSignalIDMask() const
@@ -533,7 +532,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';');
+        m_appSignalIDMasks = value.split(';');
 	}
 }
 
@@ -835,11 +834,10 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 			return false;
 		}
 	}
-
-	// Mask for equipmentID
+    // Mask for equipmentID
 	//
 
-	if (m_equipmentIDMasks.isEmpty() == false)
+    if (m_equipmentIDMasks.isEmpty() == false)
 	{
 
 		QString s = object.equipmentID();
@@ -869,7 +867,7 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 	// Mask for appSignalId
 	//
 
-	if (m_appSignalIDMasks.isEmpty() == false)
+    if (m_appSignalIDMasks.isEmpty() == false)
 	{
 
 		QString s = object.appSignalID();
@@ -899,7 +897,7 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 	// Mask for customAppSignalID
 	//
 
-	if (m_customAppSignalIDMasks.isEmpty() == false)
+    if (m_customAppSignalIDMasks.isEmpty() == false)
 	{
 		QString s = object.customAppSignalID();
 
@@ -1123,34 +1121,96 @@ bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
 {
 	// save data to XML
 	//
-	QByteArray data;
-	QXmlStreamWriter writer(&data);
+    QByteArray data;
+    QXmlStreamWriter writer(&data);
 
-	writer.setAutoFormatting(true);
-	writer.writeStartDocument();
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
 
-	writer.writeStartElement("ObjectFilterStorage");
+    writer.writeStartElement("ObjectFilterStorage");
 
-	m_root->save(writer);
+    m_root->save(writer);
 
-	writer.writeEndElement();
+    writer.writeEndElement();
 
-	writer.writeEndElement();	// ObjectFilterStorage
+    writer.writeEndElement();	// ObjectFilterStorage
 
-	writer.writeEndDocument();
+    writer.writeEndDocument();
 
-	QFile f(fileName);
+    QFile f(fileName);
 
-	if (f.open(QFile::WriteOnly) == false)
-	{
+    if (f.open(QFile::WriteOnly) == false)
+    {
         *errorMsg = QObject::tr("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName);
-		return false;
-	}
+        return false;
+    }
 
-	f.write(data);
+    f.write(data);
 
-	return true;
+    return true;
 
+}
+
+bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters)
+{
+    // save data to clipboard
+    //
+    QByteArray data;
+    QXmlStreamWriter writer(&data);
+
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+
+    writer.writeStartElement("ObjectFilterStorage");
+
+    TuningFilter root(TuningFilter::FilterType::Root);
+
+    for (auto filter : filters)
+    {
+        std::shared_ptr<TuningFilter> filterCopy = std::make_shared<TuningFilter>();
+
+        *filterCopy = *filter;
+
+        root.addChild(filterCopy);
+    }
+
+    root.save(writer);
+
+    writer.writeEndElement();
+
+    writer.writeEndElement();	// ObjectFilterStorage
+
+    writer.writeEndDocument();
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(data.toStdString().c_str());
+
+    return true;
+}
+
+std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QString clipboardText = clipboard->text();
+
+    if (clipboardText.isEmpty() == true)
+    {
+        return nullptr;
+    }
+
+    TuningFilterStorage clipboardStorage;
+
+    QByteArray data = clipboardText.toUtf8();
+
+    QString errorMsg;
+
+    bool ok = clipboardStorage.load(data, &errorMsg, false);
+    if (ok == false)
+    {
+        return nullptr;
+    }
+
+    return clipboardStorage.m_root;
 }
 
 

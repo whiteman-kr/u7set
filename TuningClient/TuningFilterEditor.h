@@ -32,7 +32,11 @@ private slots:
 
 	void on_m_removePreset_clicked();
 
-	void on_m_moveUp_clicked();
+    void on_m_copyPreset_clicked();
+
+    void on_m_pastePreset_clicked();
+
+    void on_m_moveUp_clicked();
 
 	void on_m_moveDown_clicked();
 
@@ -118,6 +122,10 @@ private:
     QPushButton* m_addPreset = nullptr;
     QPushButton* m_editPreset = nullptr;
     QPushButton* m_removePreset = nullptr;
+
+    QPushButton* m_copyPreset = nullptr;
+    QPushButton* m_pastePreset = nullptr;
+
     QPushButton* m_moveUp = nullptr;
     QPushButton* m_moveDown = nullptr;
 
