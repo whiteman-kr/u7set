@@ -141,9 +141,9 @@ namespace Builder
 		//
 		std::shared_ptr<AppLogicModule> deepCopy(QUuid groupId, const QString& label) const;
 
-		bool debugCheckItemsRelationsConsistency(IssueLogger* log) const;
+		bool checkItemsRelationsConsistency(IssueLogger* log) const;
 
-		static bool debugCheckItemsRelationsConsistency(QString equipmentId,
+		static bool checkItemsRelationsConsistency(QString equipmentId,
 														const std::list<AppLogicItem>& items,
 														IssueLogger* log);
 
