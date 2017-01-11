@@ -215,7 +215,7 @@ void  MainWindow::createActions()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::updateActions()
+void MainWindow::updateStartStopActions()
 {
     bool startMeasure = true;
     bool stopMeasure = true;
@@ -256,7 +256,6 @@ void MainWindow::updateActions()
 
             break;
     }
-
 
     m_pStartMeasureAction->setEnabled(startMeasure);
     m_pStopMeasureAction->setEnabled(stopMeasure);
@@ -463,7 +462,6 @@ bool MainWindow::createToolBars()
 
         m_asCaseTypeCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asCaseTypeCombo);
-        m_asCaseTypeCombo->addItem("");
         m_asCaseTypeCombo->setEnabled(false);
         m_asCaseTypeCombo->setFixedWidth(100);
         connect(m_asCaseTypeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setCaseType);
@@ -475,7 +473,6 @@ bool MainWindow::createToolBars()
 
         m_asMeasureSignalCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asMeasureSignalCombo);
-        m_asMeasureSignalCombo->addItem("");
         m_asMeasureSignalCombo->setEnabled(false);
         m_asMeasureSignalCombo->setFixedWidth(250);
         connect(m_asMeasureSignalCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureSignal);
@@ -489,7 +486,6 @@ bool MainWindow::createToolBars()
 
         m_asCaseNoCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asCaseNoCombo);
-        m_asCaseNoCombo->addItem("");
         m_asCaseNoCombo->setEnabled(false);
         m_asCaseNoCombo->setFixedWidth(60);
         connect(m_asCaseNoCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setCaseNo);
@@ -501,7 +497,6 @@ bool MainWindow::createToolBars()
 
         m_asSubblockCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asSubblockCombo);
-        m_asSubblockCombo->addItem("");
         m_asSubblockCombo->setEnabled(false);
         m_asSubblockCombo->setFixedWidth(60);
         connect(m_asSubblockCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setSubblock);
@@ -513,7 +508,6 @@ bool MainWindow::createToolBars()
 
         m_asBlockCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asBlockCombo);
-        m_asBlockCombo->addItem("");
         m_asBlockCombo->setEnabled(false);
         m_asBlockCombo->setFixedWidth(60);
         connect(m_asBlockCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setBlock);
@@ -525,7 +519,6 @@ bool MainWindow::createToolBars()
 
         m_asEntryCombo = new QComboBox(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(m_asEntryCombo);
-        m_asEntryCombo->addItem("");
         m_asEntryCombo->setEnabled(false);
         m_asEntryCombo->setFixedWidth(60);
         connect(m_asEntryCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setEntry);
@@ -852,19 +845,19 @@ void MainWindow::updateAnalogSignalToolBar()
         {
             case MEASURE_KIND_ONE:
                 {
-                    MeasureSignal* pSignal = multiSignal.signal(MEASURE_MULTI_SIGNAL_0);
-
-                    if (pSignal == nullptr)
+                    Hash hash = multiSignal.hash(MEASURE_MULTI_SIGNAL_0);
+                    if (hash == 0)
                     {
                         continue;
                     }
 
-                    if (pSignal->param().appSignalID().isEmpty() == true || pSignal->param().hash() == 0)
+                    MeasureSignal signal = theSignalBase.signal(hash);
+                    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
                     {
                         continue;
                     }
 
-                    id = pSignal->param().equipmentID();
+                    id = signal.param().customAppSignalID();
                 }
                 break;
 
@@ -988,7 +981,7 @@ void MainWindow::setMeasureType(int type)
 
     m_measureType = type;
 
-    updateActions();
+    updateStartStopActions();
 
     if (m_pFindMeasurePanel != nullptr)
     {
@@ -1007,6 +1000,18 @@ void MainWindow::measureCountChanged(int count)
 
 void MainWindow::startMeasure()
 {
+    if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
+    {
+        return;
+    }
+
+    if (m_pSignalSocket->isConnected() == false)
+    {
+        QMessageBox::critical(this, tr("Metrology"), tr("No connect to server!"));
+
+        return;
+    }
+
     if (m_measureThread.isRunning() == true)
     {
         return;
@@ -1475,7 +1480,7 @@ void MainWindow::onContextMenu(QPoint)
 
 void MainWindow::calibratorConnectedChanged(int count)
 {
-    updateActions();
+    updateStartStopActions();
 
     m_statusCalibratorCount->setText( tr(" Connected calibrators: %1 ").arg(count) );
 }
@@ -1484,6 +1489,8 @@ void MainWindow::calibratorConnectedChanged(int count)
 
 void MainWindow::signalSocketConnected()
 {
+    updateStartStopActions();
+
     m_statusConnectToServer->setText( tr("Connect to server: on  ") );
     // m_statusConnectToServer->setStyleSheet("background-color: rgb(127, 255, 127);");
 }
@@ -1492,7 +1499,7 @@ void MainWindow::signalSocketConnected()
 
 void MainWindow::signalSocketDisconnected()
 {
-    theSignalBase.clear();
+    updateStartStopActions();
 
     m_asCaseTypeCombo->clear();
     m_asCaseTypeCombo->setEnabled(false);
@@ -1512,8 +1519,12 @@ void MainWindow::signalSocketDisconnected()
     m_asEntryCombo->clear();
     m_asEntryCombo->setEnabled(false);
 
+    theSignalBase.clear();
+
     m_statusConnectToServer->setText( tr("Connect to server: off ") );
     // m_statusConnectToServer->setStyleSheet("background-color: rgb(255, 127, 127);");
+
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1547,7 +1558,7 @@ void MainWindow::signalSocketSignalsLoaded()
 
 void MainWindow::measureThreadStarted()
 {
-    updateActions();
+    updateStartStopActions();
 
     m_pMeasureKind->setDisabled(true);
     m_pOutputSignalToolBar->setDisabled(true);
@@ -1574,7 +1585,7 @@ void MainWindow::measureThreadStarted()
 
 void MainWindow::measureThreadStoped()
 {
-    updateActions();
+    updateStartStopActions();
 
     m_pMeasureKind->setEnabled(true);
     m_pOutputSignalToolBar->setEnabled(true);

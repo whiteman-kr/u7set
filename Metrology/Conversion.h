@@ -3,6 +3,8 @@
 
 #include <QtGlobal>
 
+#include "../lib/Signal.h"
+
 // ==============================================================================================
 
 const char* const InputUnitStr[] =
@@ -16,13 +18,14 @@ const int	INPUT_UNIT_COUNT	=	sizeof(InputUnitStr)/sizeof(const char* const);
 
 const int	INPUT_UNIT_OHM	= 0,
             INPUT_UNIT_MV	= 1,
-            INPUT_UNIT_MA	= 2;
+            INPUT_UNIT_MA	= 2,
+            INPUT_UNIT_V	= 3;
 
 // ==============================================================================================
 
 const char* const InputSensorStr[] =
 {
-            QT_TRANSLATE_NOOP("Conversion.h", "Don't used"),
+            QT_TRANSLATE_NOOP("Conversion.h", "Not used"),
 
             QT_TRANSLATE_NOOP("Conversion.h", "Pt50 W=1.391"),
             QT_TRANSLATE_NOOP("Conversion.h", "Pt100 W=1.391"),
@@ -110,9 +113,15 @@ const int	CT_COUNT                = 2;
 
 // ==============================================================================================
 
-//double      conversion(double val, int type, Signal* s);
+double conversion(double val, int type, const Signal& param);
 double conversion(double val, int type, int unit, int sensor);
 
 // ==============================================================================================
+
+extern double K_STUDENT[];
+extern const int K_STUDENT_COUNT;
+
+// ==============================================================================================
+
 
 #endif // CONVERSION_H

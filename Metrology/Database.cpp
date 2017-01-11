@@ -90,13 +90,17 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ErrorInputAbsolute",			QVariant::Double);
             append("ErrorInputReduce",              QVariant::Double);
+            append("ErrorInputRelative",            QVariant::Double);
             append("ErrorOutputAbsolute",			QVariant::Double);
             append("ErrorOutputReduce",             QVariant::Double);
+            append("ErrorOutputRelative",           QVariant::Double);
             append("ErrorLimitAbsolute",			QVariant::Double);
             append("ErrorLimitReduce",              QVariant::Double);
+            append("ErrorLimitRelative",            QVariant::Double);
 
             append("ErrorPrecisionAbsolute",        QVariant::Int);
             append("ErrorPrecisionReduce",          QVariant::Int);
+            append("ErrorPrecisionRelative",        QVariant::Int);
 
             append("MeasureTime",					QVariant::String, 64);
 
@@ -771,13 +775,17 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->setErrorInput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorInput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorInput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
                     measure->setErrorOutput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorOutput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorOutput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
                     measure->setErrorLimit(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorLimit(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorLimit(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
                     measure->setErrorPrecision(ERROR_TYPE_ABSOLUTE, query.value(field++).toInt());
                     measure->setErrorPrecision(ERROR_TYPE_REDUCE, query.value(field++).toInt());
+                    measure->setErrorPrecision(ERROR_TYPE_RELATIVE, query.value(field++).toInt());
 
                     measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
@@ -837,12 +845,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->setAdditionalValueCount(query.value(field++).toInt());
 
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_MSE, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, query.value(field++).toDouble());
+                    measure->setAdditionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER, query.value(field++).toDouble());
                 }
                 break;
 
@@ -1101,15 +1107,19 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     query.bindValue(field++, measure->errorInput(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorInput(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorInput(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorOutput(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorOutput(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorOutput(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorLimit(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorLimit(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_RELATIVE));
 
                     measure->setMeasureTime(QDateTime::currentDateTime());
 
@@ -1172,12 +1182,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     query.bindValue(field++, measure->additionalValueCount());
 
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MEASURE_MIN));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MEASURE_MAX));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MSE));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_BORDER));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER));
+                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER));
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);

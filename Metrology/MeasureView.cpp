@@ -239,12 +239,9 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_ID:                      result = theOptions.measureView().m_showExternalID ? m->extStrID() : m->strID(); break;
         case MVC_CMN_L_NAME:					result = m->name(); break;
 
-        case MVC_CMN_L_CASE_NO:					result = m->position().channelString(); break;
         case MVC_CMN_L_SUBBLOCK:				result = m->position().subblockString(); break;
         case MVC_CMN_L_BLOCK:					result = m->position().blockString(); break;
         case MVC_CMN_L_ENTRY:					result = m->position().entryString(); break;
-
-        case MVC_CMN_L_ADJUSTMENT:				result = QString::number(m->adjustment(), 10, m->valuePrecision(VALUE_TYPE_PHYSICAL)); break;
 
         case MVC_CMN_L_EL_NOMINAL:				result = m->nominalString(VALUE_TYPE_ELECTRIC); break;
         case MVC_CMN_L_PH_NOMINAL:				result = m->nominalString(VALUE_TYPE_PHYSICAL); break;
@@ -284,8 +281,8 @@ QString MeasureTable::textLinearity(int row, int column) const
 
         case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR), 10, 2); break;
         case MVC_CMN_L_MSE:                     result = QString::number(m->additionalValue(ADDITIONAL_VALUE_MSE), 10, 2); break;
-        case MVC_CMN_L_LOW_BORDER:				result = QString::number(m->additionalValue(ADDITIONAL_VALUE_LOW_BORDER), 10, 2); break;
-        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER), 10, 2); break;
+        case MVC_CMN_L_LOW_BORDER:				result = QString::number(-m->additionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER), 10, 2); break;
+        case MVC_CMN_L_HIGH_BORDER:             result = QString::number(m->additionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER), 10, 2); break;
 
         case MVC_CMN_L_ERROR:                   result = QString::number(m->errorInput(errorType), 10, m->errorPrecision(errorType)); break;
         case MVC_CMN_L_OUT_ERROR:               result = QString::number(m->errorOutput(errorType), 10, m->errorPrecision(errorType)); break;

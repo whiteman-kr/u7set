@@ -133,12 +133,16 @@ QString SignalListTable::text(int row, int column) const
     }
 
     MeasureSignal s = m_signalList.at(row);
+    if (s.param().appSignalID().isEmpty() == true || s.param().hash() == 0)
+    {
+        return "";
+    }
 
     QString result;
 
     switch (column)
     {
-        case SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? s.param().customAppSignalID() : s.param().appSignalID(); break;
+        case SIGNAL_LIST_COLUMN_ID:             result = m_showAppSignalID == true ? s.param().appSignalID() : s.param().customAppSignalID(); break;
         case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = s.param().equipmentID();       break;
         case SIGNAL_LIST_COLUMN_CAPTION:        result = s.param().caption();           break;
         case SIGNAL_LIST_COLUMN_CASE:           result = s.position().caseString();     break;
@@ -270,10 +274,10 @@ void SignalListDialog::createInterface()
     m_pTypeInternalAction->setChecked(false);
 
     m_pViewShowMenu = new QMenu(tr("Show"), this);
-    m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
-    m_pShowCustomIDAction->setCheckable(true);
-    m_pShowCustomIDAction->setChecked(false);
-    m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC In Hex"));
+    m_pShowAppSignalIDAction = m_pViewShowMenu->addAction(tr("internal ID"));
+    m_pShowAppSignalIDAction->setCheckable(true);
+    m_pShowAppSignalIDAction->setChecked(false);
+    m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
     m_pShowADCInHexAction->setCheckable(true);
     m_pShowADCInHexAction->setChecked(true);
 
@@ -290,7 +294,7 @@ void SignalListDialog::createInterface()
     connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
     connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
     connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
-    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalListDialog::showCustomID);
+    connect(m_pShowAppSignalIDAction, &QAction::triggered, this, &SignalListDialog::showAppSignalID);
     connect(m_pShowADCInHexAction, &QAction::triggered, this, &SignalListDialog::showADCInHex);
 
 
@@ -353,24 +357,23 @@ void SignalListDialog::updateList()
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        Signal* param = theSignalBase.signalParam(i);
-
-        if (param == nullptr)
+        Signal param = theSignalBase.signalParam(i);
+        if (param.appSignalID().isEmpty() == true || param.hash() == 0)
         {
             continue;
         }
 
-        if (param->signalType() != m_typeAD)
+        if (param.signalType() != m_typeAD)
         {
             continue;
         }
 
-        if (param->inOutType() != m_typeIO)
+        if (param.inOutType() != m_typeIO)
         {
             continue;
         }
 
-        signalList.append( theSignalBase[i] );
+        signalList.append( theSignalBase.signal(i) );
     }
 
     m_table.set(signalList);
@@ -489,9 +492,9 @@ void SignalListDialog::showTypeInternal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::showCustomID()
+void SignalListDialog::showAppSignalID()
 {
-    m_table.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+    m_table.setShowAppSignalID( m_pShowAppSignalIDAction->isChecked() );
 
     updateList();
 }
