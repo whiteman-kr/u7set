@@ -412,6 +412,68 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 // -------------------------------------------------------------------------------------
 //
+// DaemonServiceStarter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker) :
+	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName()),
+	m_app(app),
+	m_serviceWorker(serviceWorker)
+{
+}
+
+
+DaemonServiceStarter::~DaemonServiceStarter()
+{
+	stopAndDeleteService();
+}
+
+
+int DaemonServiceStarter::exec()
+{
+	setServiceFlags(QtServiceBase::ServiceFlag::NeedsStopOnShutdown);
+
+	int result = QtService::exec();
+
+	return result;
+}
+
+
+void DaemonServiceStarter::start()
+{
+	LOG_CALL();
+
+	m_service = new Service(m_serviceWorker);
+
+	m_service->start();
+}
+
+
+void DaemonServiceStarter::stop()
+{
+	stopAndDeleteService();
+
+	LOG_CALL();
+}
+
+
+void DaemonServiceStarter::stopAndDeleteService()
+{
+	if (m_service == nullptr)
+	{
+		return;
+	}
+
+	m_service->stop();
+
+	delete m_service;
+	m_service = nullptr;
+}
+
+
+// -------------------------------------------------------------------------------------
+//
 // ServiceStarter class implementation
 //
 // -------------------------------------------------------------------------------------
@@ -575,68 +637,5 @@ void ServiceStarter::KeyReaderThread::run()
 	std::cin >> c;
 	QCoreApplication::exit(0);
 }
-
-
-// -------------------------------------------------------------------------------------
-//
-// DaemonServiceStarter class implementation
-//
-// -------------------------------------------------------------------------------------
-
-DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker) :
-	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName()),
-	m_app(app),
-	m_serviceWorker(serviceWorker)
-{
-}
-
-
-DaemonServiceStarter::~DaemonServiceStarter()
-{
-	stopAndDeleteService();
-}
-
-
-int DaemonServiceStarter::exec()
-{
-	setServiceFlags(QtServiceBase::ServiceFlag::NeedsStopOnShutdown);
-
-	int result = QtService::exec();
-
-	return result;
-}
-
-
-void DaemonServiceStarter::start()
-{
-	LOG_CALL();
-
-	m_service = new Service(m_serviceWorker);
-
-	m_service->start();
-}
-
-
-void DaemonServiceStarter::stop()
-{
-	stopAndDeleteService();
-
-	LOG_CALL();
-}
-
-
-void DaemonServiceStarter::stopAndDeleteService()
-{
-	if (m_service == nullptr)
-	{
-		return;
-	}
-
-	m_service->stop();
-
-	delete m_service;
-	m_service = nullptr;
-}
-
 
 

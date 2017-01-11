@@ -71,7 +71,7 @@ namespace TuningIPEN
 		void automaticModeChanged(bool newValue);
 
 	public:
-		explicit TuningMainWindow(QString buildPath, QWidget *parent = 0);
+		explicit TuningMainWindow(int& argc, char** argv, QWidget *parent = 0);
 		~TuningMainWindow();
 
 		void onTuningServiceReady();

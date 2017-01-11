@@ -85,7 +85,8 @@ SOURCES += MainWindow.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/AppDataSource.cpp
+    ../lib/AppDataSource.cpp \
+    ../lib/CircularLogger.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -116,7 +117,8 @@ HEADERS  += MainWindow.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
-    ../lib/AppDataSource.h
+    ../lib/AppDataSource.h \
+    ../lib/CircularLogger.h
 
 FORMS    +=
 

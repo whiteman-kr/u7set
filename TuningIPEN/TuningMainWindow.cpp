@@ -52,7 +52,7 @@ namespace TuningIPEN
 	}
 
 
-	TuningMainWindow::TuningMainWindow(QString buildPath, QWidget *parent) :
+	TuningMainWindow::TuningMainWindow(int& argc, char** argv, QWidget* parent) :
 		QMainWindow(parent),
 		m_updateTimer(new QTimer(this))
 	{
@@ -65,10 +65,12 @@ namespace TuningIPEN
 		desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
 		desktopRect.moveCenter(center);
 		QRect windowRect = settings.value("TuningMainWindow/geometry", desktopRect).toRect();
+
 		if (windowRect.height() > desktopRect.height())
 		{
 			windowRect.setHeight(desktopRect.height());
 		}
+
 		if (windowRect.width() > desktopRect.width())
 		{
 			windowRect.setWidth(desktopRect.width());
@@ -81,19 +83,17 @@ namespace TuningIPEN
 
 		statusBar();
 
-		if (buildPath == "")
-		{
-			m_cfgPath = settings.value("ConfigurationPath").toString();
-		}
-		else
-		{
-			m_cfgPath = buildPath;
-			settings.setValue("ConfigurationPath", m_cfgPath);
-		}
-
 		// run Tuning Service
 		//
-		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker();
+		VersionInfo v;
+
+		v.majorVersion = 1;
+		v.minorVersion = 0;
+		v.commitNo = 0;
+
+		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning IPEN Service", argc, argv, v);
+
+		worker->init();
 
 		m_service = new TuningIPEN::TuningIPENService(worker);
 

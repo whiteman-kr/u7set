@@ -11,8 +11,8 @@ namespace TuningIPEN
 	// -------------------------------------------------------------------------------------
 
 
-	TuningIPENServiceWorker::TuningIPENServiceWorker() :
-		ServiceWorker(ServiceType::TuningService),
+	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
+		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo),
 		m_timer(this)
 	{
 	}
@@ -24,18 +24,17 @@ namespace TuningIPEN
 	}
 
 
-	void TuningIPENServiceWorker::initCmdLineParser()
+	ServiceWorker* TuningIPENServiceWorker::createInstance() const
 	{
-		CommandLineParser* clp = cmdLineParser();
+		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(serviceName(), argc(), argv(), versionInfo());
 
-		if (clp == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		return tuningIPENServiceWorker;
+	}
 
-		clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-		clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+
+	void TuningIPENServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+	{
+		Q_UNUSED(serviceInfo)
 	}
 
 
@@ -86,6 +85,31 @@ namespace TuningIPEN
 
 			ptr++;
 		}
+	}
+
+
+	void TuningIPENServiceWorker::initCmdLineParser()
+	{
+		CommandLineParser& cp = cmdLineParser();
+
+		cp.addSingleValueOption("b", "Path to RPCT project build.");
+	}
+
+
+	void TuningIPENServiceWorker::processCmdLineSettings()
+	{
+		CommandLineParser& cp = cmdLineParser();
+
+		if (cp.optionIsSet("b") == true)
+		{
+			setStrSetting("BuildPath", cp.optionValue("b"));
+		}
+	}
+
+
+	void TuningIPENServiceWorker::loadSettings()
+	{
+		m_buildPath = getStrSetting("BuildPath");
 	}
 
 
@@ -530,7 +554,7 @@ namespace TuningIPEN
 	// -------------------------------------------------------------------------------------
 
 	TuningIPENService::TuningIPENService(TuningIPENServiceWorker* worker) :
-		Service(worker)
+		Service(*worker)
 	{
 		worker->setTuningService(this);
 	}
