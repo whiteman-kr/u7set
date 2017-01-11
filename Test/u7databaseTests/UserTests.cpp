@@ -732,16 +732,37 @@ void UserTests::check_user_passwordTest()
 void UserTests::update_userTest()
 {
 	QSqlQuery query;
+	QSqlQuery tempQuery;
 	QString oldDataForTest = "updateUserTest";
 	QString newDataForTest = "updateUserTestUpdated";
 	QString simplePassword = "1234";
 
-	bool ok = query.exec(QString("SELECT * FROM create_user(1, '%1', '%1', '%1', '%1', false, false, false)").arg(oldDataForTest));
+	// Log in as Administrator to create new user for test
+	//
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString session_key = query.value(0).toString();
+
+	ok = query.exec(QString("SELECT * FROM user_api.create_user('%1', '%2', '%2', '%2', '%2', false, false)").arg(session_key).arg(oldDataForTest));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%2', '%2', '%1', '%2', true, true, true)").arg(oldDataForTest).arg(newDataForTest));
+	// Try update user with wrong session_key
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('wrong', '%1', '%2', '%2', '%1', '%2', true, true)").arg(oldDataForTest).arg(newDataForTest));
+
+	QVERIFY2(ok == false, qPrintable("Wrong session key error expected!"));
+
+	// Update user with valid data
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', '%2', '%3', '%3', '%2', '%3', true, true)").arg(session_key).arg(oldDataForTest).arg(newDataForTest));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -753,59 +774,70 @@ void UserTests::update_userTest()
 
 	QVERIFY2(query.value("firstName").toString() == newDataForTest, qPrintable("Error: firstName is not correct, or wrong userId has been returned!"));
 	QVERIFY2(query.value("lastName").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("password").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("administrator").toBool() == true, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("readonly").toBool() == true, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("disabled").toBool() == true, qPrintable("Error: lastName is not correct!"));
+	QVERIFY2(query.value("administrator").toBool() == false, qPrintable("Error: administrator value is not correct!"));
+	QVERIFY2(query.value("readonly").toBool() == true, qPrintable("Error: readonly value is not correct!"));
+	QVERIFY2(query.value("disabled").toBool() == true, qPrintable("Error: disabled value is not correct!"));
 
+	ok = tempQuery.exec(QString("SELECT * FROM user_api.password_hash('%1', '%2')").arg(query.value("salt").toString(), newDataForTest));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("passwordhash").toString() == tempQuery.value(0).toString(), qPrintable("Error: wrong password hash after user update"));
 
 	// Call too simple password error
 	//
 
-	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%1', '%1', '%2', '%3', false, false, false)").arg(oldDataForTest).arg(newDataForTest).arg(simplePassword));
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', '%2', '%2', '%2', '%3', '%4', false, false)").arg(session_key).arg(oldDataForTest).arg(newDataForTest).arg(simplePassword));
 	QVERIFY2(ok == false, qPrintable("Too small password error expected!"));
 
 	// Call wrong user error
 	//
 
-	ok = query.exec("SElECT * FROM create_user(1, 'UpdateUserWrongUserErrorTest', 'TEST', 'TEST', 'testPass', false, false, false)");
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	int userForErrorTest = query.value(0).toInt();
-
-	ok = query.exec(QString("SELECT * FROM update_user(%2, '%1', 'TEST', 'TEST', 'testPass', '%1', false, false, false)").arg(oldDataForTest).arg(userForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Wrong user error expected!"));
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', 'WrongUser', 'TEST', 'TEST', 'testPass', '%1', false, false)").arg(session_key));
+	QVERIFY2(ok == false, qPrintable("Error expected: user not exist error!"));
 
 	// Try to change one user by another
 	//
 
-	ok = query.exec("SElECT * FROM create_user(1, 'UpdateUserWrongUserChangePassErrorTest', 'firstName', 'lastName', 'testPassword', false, false, false)");
+	QString passSecondUserForTest = "testPass";
+	QString userNameSecondUserForTest = "testUser";
+	int secondUserId = -1;
+
+	ok = query.exec(QString("SELECT * FROM user_api.create_user('%1', '%2', 'TEST', 'TEST', '%3', false, false)").arg(session_key).arg(userNameSecondUserForTest).arg(passSecondUserForTest));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM update_user(%2, 'UpdateUserWrongUserChangePassErrorTest', 'firstName', 'lastName', 'testPassword', 'newPassword', false, false, false)").arg(userForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Error: user must not be able to change another user's password"));
+	secondUserId = query.value(0).toInt();
 
-	// Try to change user flags by user
+	// Log out as Administrator and log in as new user
 	//
-	ok = query.exec("SElECT * FROM create_user(1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'testPassword', false, false, false)");
 
+	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	int setAdminUpdateUserTest = query.value(0).toInt();
-
-	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'testPassword', 'newPassword', true, true, true)").arg(setAdminUpdateUserTest));
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')").arg(userNameSecondUserForTest).arg(passSecondUserForTest));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value(0).toInt() == setAdminUpdateUserTest, qPrintable ("Error: function returned wrong id"));
+	session_key = query.value(0).toString();
 
-	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(setAdminUpdateUserTest));
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', '%2', 'TEST', 'TEST', '%3', 'TESTTEST', false, false)").arg(session_key).arg(oldDataForTest).arg(newDataForTest));
+	QVERIFY2(ok == false, qPrintable("Error expected: user must has not rights to update another user!"));
+
+	//	Try to change user flags by user
+	//
+
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', '%2', 'TEST', 'TEST', '%3', '%3', true, true)").arg(session_key).arg(userNameSecondUserForTest).arg(passSecondUserForTest));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == secondUserId, qPrintable ("Error: function returned wrong id"));
+
+	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(secondUserId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
@@ -817,90 +849,10 @@ void UserTests::update_userTest()
 	// Call wrong password error
 	//
 
-	ok = query.exec("SElECT * FROM create_user(1, 'UpdateUserWrongPasswordAdministrator', 'TEST', 'TEST', 'TESTPASS', true, false, false)");
+	ok = query.exec(QString("SELECT * FROM user_api.update_user('%1', '%2', 'TEST', 'TEST', 'TESTTEST', 'TESTTEST', true, true)").arg(session_key).arg(userNameSecondUserForTest));
 
+	QVERIFY2(ok == false, qPrintable("Error expected: wrong password error!"));
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	int AdministratorForErrorTest = query.value(0).toInt();
-
-	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserWrongPasswordAdministrator', 'TEST', 'TEST', 'errorPassword', 'newPassword', false, false, false)").arg(AdministratorForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Wrong password error expected!"));
-
-	// Call user is not exist error
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(1, 'errorNameForUpdateUserTest', '%1', '%1', '%2', '%1', false, false, false)").arg(oldDataForTest).arg(newDataForTest));
-	QVERIFY2(ok == false, qPrintable("Wrong userName error expected!"));
-
-	/////////////////////////////////////////////////////////////////////
-	// Another function without is_Admin testing
-	//
-	/////////////////////////////////////////////////////////////////////
-
-	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%2', '%2', '%1', '%2', true, true)").arg(oldDataForTest).arg(newDataForTest));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(query.value(0).toInt()));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	QVERIFY2(query.value("firstName").toString() == newDataForTest, qPrintable("Error: firstName is not correct, or wrong userId has been returned!"));
-	QVERIFY2(query.value("lastName").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("password").toString() == newDataForTest, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("readonly").toBool() == true, qPrintable("Error: lastName is not correct!"));
-	QVERIFY2(query.value("disabled").toBool() == true, qPrintable("Error: lastName is not correct!"));
-
-
-	// Call too simple password error
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(1, '%1', '%1', '%1', '%2', '%3', false, false)").arg(oldDataForTest).arg(newDataForTest).arg(simplePassword));
-	QVERIFY2(ok == false, qPrintable("Too small password error expected!"));
-
-	// Call wrong user error
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(%2, '%1', 'TEST', 'TEST', 'testPass', '%1', false, false)").arg(oldDataForTest).arg(userForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Wrong user error expected!"));
-
-	// Try to change one user by another
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(%2, 'UpdateUserWrongUserChangePassErrorTest', 'firstName', 'lastName', 'testPassword', 'newPassword', false, false)").arg(userForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Error: user must not be able to change another user's password"));
-
-	// Try to change user flags by user
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserHackAdminTest', 'firstName', 'lastName', 'newPassword', 'testPassword', true, true)").arg(setAdminUpdateUserTest));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
-
-	QVERIFY2(query.value(0).toInt() == setAdminUpdateUserTest, qPrintable ("Error: function returned wrong id"));
-
-	ok = query.exec(QString("SELECT * FROM users WHERE userId = %1").arg(setAdminUpdateUserTest));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
-
-	QVERIFY2(query.value("readOnly").toBool() == true, qPrintable ("Error: function do not changed value readOnly"));
-	QVERIFY2(query.value("disabled").toBool() == false, qPrintable ("Error: function changed value disabled y user"));
-
-	// Call wrong password error
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(%1, 'UpdateUserWrongPasswordAdministrator', 'TEST', 'TEST', 'errorPassword', 'newPassword', false, false)").arg(AdministratorForErrorTest));
-	QVERIFY2(ok == false, qPrintable("Wrong password error expected!"));
-
-	// Call user is not exist error
-	//
-
-	ok = query.exec(QString("SELECT * FROM update_user(1, 'errorNameForUpdateUserTest', '%1', '%1', '%2', '%1', false, false)").arg(oldDataForTest).arg(newDataForTest));
-	QVERIFY2(ok == false, qPrintable("Wrong userName error expected!"));
-
 }
