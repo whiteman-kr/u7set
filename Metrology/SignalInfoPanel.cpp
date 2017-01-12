@@ -103,10 +103,9 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
             case SIGNAL_INFO_COLUMN_BLOCK:          result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_ENTRY:          result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_CAPTION:        result = Qt::AlignLeft;     break;
-            case SIGNAL_INFO_COLUMN_ADJUSTMENT:     result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_IN_PH_RANGE:    result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_IN_EL_RANGE:    result = Qt::AlignCenter;   break;
-            case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = Qt::AlignLeft;     break;
+            case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_OUT_PH_RANGE:   result = Qt::AlignCenter;   break;
             case SIGNAL_INFO_COLUMN_OUT_EL_RANGE:   result = Qt::AlignCenter;   break;
             default:                                assert(0);
@@ -118,7 +117,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
     if (role == Qt::UserRole )
     {
         QVariant var;
-        var.setValue(m_activeSignal.signal(row));
+        var.setValue(m_activeSignal.hash(row));
         return var;
     }
 
@@ -126,12 +125,16 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
     {
         if (column == SIGNAL_INFO_COLUMN_STATE)
         {
-            MeasureSignal* pSignal = m_activeSignal.signal(row);
-            if (pSignal != nullptr)
+            Hash signaHash = m_activeSignal.hash(row);
+            if (signaHash != 0)
             {
-                if (pSignal->state().flags.valid == 0)
+                MeasureSignal signal = theSignalBase.signal(signaHash);
+                if (signal.param().appSignalID().isEmpty() == false || signal.param().hash() != 0)
                 {
-                    return QColor(0xFF, 0x00, 0x00);
+                    if (signal.state().flags.valid == 0)
+                    {
+                        return QColor(0xFF, 0xA0, 0xA0);
+                    }
                 }
             }
         }
@@ -149,7 +152,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::text(int row, int column) const
+QString SignalInfoTable::text(const int &row, const int &column) const
 {
     if (row < 0 || row >= MEASURE_MULTI_SIGNAL_COUNT)
     {
@@ -161,29 +164,35 @@ QString SignalInfoTable::text(int row, int column) const
         return "";
     }
 
-    MeasureSignal* pSignal = m_activeSignal.signal(row);
-    if (pSignal == nullptr)
+    Hash signaHash = m_activeSignal.hash(row);
+    if (signaHash == 0)
+    {
+        return "";
+    }
+
+    MeasureSignal signal = theSignalBase.signal(signaHash);
+    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
     {
         return "";
     }
 
     QString result;
 
+
     switch (column)
     {
-        case SIGNAL_INFO_COLUMN_CASE:           result = pSignal->position().caseString();      break;
-        case SIGNAL_INFO_COLUMN_ID:             result = pSignal->param().appSignalID();        break;
-        case SIGNAL_INFO_COLUMN_STATE:          result = pSignal->stateString();                break;
-        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = pSignal->position().subblockString();  break;
-        case SIGNAL_INFO_COLUMN_BLOCK:          result = pSignal->position().blockString();     break;
-        case SIGNAL_INFO_COLUMN_ENTRY:          result = pSignal->position().entryString();     break;
-        case SIGNAL_INFO_COLUMN_CAPTION:        result = pSignal->param().caption();            break;
-        case SIGNAL_INFO_COLUMN_ADJUSTMENT:     result = pSignal->adjustmentString();           break;
-        case SIGNAL_INFO_COLUMN_IN_PH_RANGE:    result = pSignal->inputPhysicalRange();         break;
-        case SIGNAL_INFO_COLUMN_IN_EL_RANGE:    result = pSignal->inputElectricRange();         break;
-        case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = "";                                    break;
-        case SIGNAL_INFO_COLUMN_OUT_PH_RANGE:   result = pSignal->outputPhysicalRange();        break;
-        case SIGNAL_INFO_COLUMN_OUT_EL_RANGE:   result = pSignal->outputElectricRange();        break;
+        case SIGNAL_INFO_COLUMN_CASE:           result = signal.position().caseString();      break;
+        case SIGNAL_INFO_COLUMN_ID:             result = m_showAppSignalID == true ? signal.param().appSignalID() : signal.param().customAppSignalID();        break;
+        case SIGNAL_INFO_COLUMN_STATE:          result = signal.stateString();                break;
+        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = signal.position().subblockString();  break;
+        case SIGNAL_INFO_COLUMN_BLOCK:          result = signal.position().blockString();     break;
+        case SIGNAL_INFO_COLUMN_ENTRY:          result = signal.position().entryString();     break;
+        case SIGNAL_INFO_COLUMN_CAPTION:        result = signal.param().caption();            break;
+        case SIGNAL_INFO_COLUMN_IN_PH_RANGE:    result = signal.inputPhysicalRange();         break;
+        case SIGNAL_INFO_COLUMN_IN_EL_RANGE:    result = signal.inputElectricRange();         break;
+        case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = signal.calibratorIndexString(row);   break;
+        case SIGNAL_INFO_COLUMN_OUT_PH_RANGE:   result = signal.outputPhysicalRange();        break;
+        case SIGNAL_INFO_COLUMN_OUT_EL_RANGE:   result = signal.outputElectricRange();        break;
         default:                                assert(0);
     }
 
@@ -192,11 +201,16 @@ QString SignalInfoTable::text(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateState()
+void SignalInfoTable::updateColumn(const int& column)
 {
+    if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
+    {
+        return;
+    }
+
     for (int row = 0; row < MEASURE_MULTI_SIGNAL_COUNT; row ++)
     {
-        QModelIndex cellIndex = index(row, SIGNAL_INFO_COLUMN_STATE);
+        QModelIndex cellIndex = index(row, column);
 
         emit dataChanged( cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
     }
@@ -204,28 +218,18 @@ void SignalInfoTable::updateState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureSignal* SignalInfoTable::at(int index)
+void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
 {
-    if (index < 0 || index >= MEASURE_MULTI_SIGNAL_COUNT)
-    {
-        return nullptr;
-    }
-
-    return m_activeSignal.signal(index);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoTable::set(MeasureMultiSignal& signal)
-{
-    if (signal.isEmpty() == true)
+    if (multiSignal.isEmpty() == true)
     {
         return;
     }
 
+    clear();
+
     beginInsertRows(QModelIndex(), 0, MEASURE_MULTI_SIGNAL_COUNT - 1);
 
-        m_activeSignal = signal;
+        m_activeSignal = multiSignal;
 
     endInsertRows();
 }
@@ -254,10 +258,9 @@ int SignalInfoPanel::m_columnWidth[SIGNAL_INFO_COLUMN_COUNT] =
      60,    // SIGNAL_INFO_COLUMN_BLOCK
      60,    // SIGNAL_INFO_COLUMN_ENTRY
     150,    // SIGNAL_INFO_COLUMN_CAPTION
-    100,    // SIGNAL_INFO_COLUMN_ADJUSTMENT
     150,    // SIGNAL_INFO_COLUMN_IN_PH_RANGE
     150,    // SIGNAL_INFO_COLUMN_IN_EL_RANGE
-    100,    // SIGNAL_INFO_COLUMN_CALIBRATOR
+    150,    // SIGNAL_INFO_COLUMN_CALIBRATOR
     150,    // SIGNAL_INFO_COLUMN_OUT_PH_RANGE
     150,    // SIGNAL_INFO_COLUMN_OUT_EL_RANGE
 };
@@ -285,8 +288,6 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
     hideColumn(SIGNAL_INFO_COLUMN_SUBBLOCK, true);
     hideColumn(SIGNAL_INFO_COLUMN_BLOCK, true);
     hideColumn(SIGNAL_INFO_COLUMN_ENTRY, true);
-    hideColumn(SIGNAL_INFO_COLUMN_ADJUSTMENT, true);
-    hideColumn(SIGNAL_INFO_COLUMN_CALIBRATOR, true);
     hideColumn(SIGNAL_INFO_COLUMN_OUT_PH_RANGE, true);
     hideColumn(SIGNAL_INFO_COLUMN_OUT_EL_RANGE, true);
 
@@ -356,9 +357,9 @@ void SignalInfoPanel::createContextMenu()
     m_pContextMenu = new QMenu(tr("&Measurements"), m_pSignalInfoWindow);
 
 
-    m_pShowCustomIDAction = m_pContextMenu->addAction(tr("Show Custom ID"));
-    m_pShowCustomIDAction->setCheckable(true);
-    m_pShowCustomIDAction->setChecked(false);
+    m_pShowAppSignalIDAction = m_pContextMenu->addAction(tr("Show internal ID"));
+    m_pShowAppSignalIDAction->setCheckable(true);
+    m_pShowAppSignalIDAction->setChecked(false);
 
     m_pChangeRangeAction = m_pContextMenu->addAction(tr("Change signal range"));
 
@@ -367,7 +368,7 @@ void SignalInfoPanel::createContextMenu()
     m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
     m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
-    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalInfoPanel::showCustomID);
+    connect(m_pShowAppSignalIDAction, &QAction::triggered, this, &SignalInfoPanel::showAppSignalID);
     connect(m_pChangeRangeAction, &QAction::triggered, this, &SignalInfoPanel::changeRange);
     connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 
@@ -432,7 +433,6 @@ void SignalInfoPanel::onContextMenu(QPoint)
 
 void SignalInfoPanel::onSetActiveSignal()
 {
-    m_table.clear();
     m_table.set( theSignalBase.activeSignal() );
 }
 
@@ -440,14 +440,15 @@ void SignalInfoPanel::onSetActiveSignal()
 
 void SignalInfoPanel::updateStateActiveSignal()
 {
-    m_table.updateState();
+    m_table.updateColumn(SIGNAL_INFO_COLUMN_STATE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showCustomID()
+void SignalInfoPanel::showAppSignalID()
 {
-
+    m_table.setShowAppSignalID( m_pShowAppSignalIDAction->isChecked() );
+    m_table.updateColumn(SIGNAL_INFO_COLUMN_ID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -478,7 +479,7 @@ void SignalInfoPanel::copy()
                 textRow.append(m_table.text(r, c));
             }
 
-            if (c != FM_COLUMN_COUNT - 1)
+            if (c != SIGNAL_INFO_COLUMN_COUNT - 1)
             {
                 textRow.append("\t");
             }

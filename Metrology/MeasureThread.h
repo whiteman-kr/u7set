@@ -3,8 +3,10 @@
 
 #include <QThread>
 #include <QMessageBox>
+
 #include "Measure.h"
 #include "CalibratorBase.h"
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -23,6 +25,7 @@ public:
     void                    init(QWidget* parent = 0);
 
     void                    setMeasureType(int type)    { m_measureType = type; }
+
     void                    stop()                      { m_cmdStopMeasure = true; }
 
 private:
@@ -32,11 +35,13 @@ private:
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
     bool                    m_cmdStopMeasure = true;
 
-    CalibratorManagerVector m_calibratorManagerVector;
+    MeasureMultiSignal      m_activeSignal;
 
     void                    waitMeasureTimeout();
 
-    bool                    prepareCalibrator(CalibratorManager* manager, int mode, int unit);
+    bool                    calibratorIsValid(CalibratorManager* pManager);
+
+    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const int& signalInputUnit, const double& highInputLimit);
 
     void                    measureLinearity();
     void                    measureComprators();

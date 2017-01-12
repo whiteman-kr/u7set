@@ -2,7 +2,9 @@
 
 #include <assert.h>
 #include <QDateTime>
+
 #include "Calibrator.h"
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -92,7 +94,7 @@ const int   OUTPUT_SIGNAL_KIND_UNKNOWN			= -1,
 
 const char* const OutputSignalType[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "Don't used"),
+            QT_TRANSLATE_NOOP("Measure.h", "Not used"),
             QT_TRANSLATE_NOOP("Measure.h", "In → Out "),
             QT_TRANSLATE_NOOP("Measure.h", "Correction"),
 };
@@ -159,13 +161,15 @@ const char* const ErrorType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Absolute"),
             QT_TRANSLATE_NOOP("Measure.h", "Reduce"),
+            QT_TRANSLATE_NOOP("Measure.h", "Relative"),
 };
 
 const int	ERROR_TYPE_COUNT		= sizeof(ErrorType)/sizeof(char*);
 
 const int   ERROR_TYPE_UNKNOWN		= -1,
             ERROR_TYPE_ABSOLUTE		= 0,
-            ERROR_TYPE_REDUCE		= 1;
+            ERROR_TYPE_REDUCE		= 1,
+            ERROR_TYPE_RELATIVE		= 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -177,23 +181,22 @@ const int   ERROR_TYPE_UNKNOWN		= -1,
 
 const char* const AdditionalValue[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "Measure value min"),
             QT_TRANSLATE_NOOP("Measure.h", "Measure value max"),
             QT_TRANSLATE_NOOP("Measure.h", "System error"),
             QT_TRANSLATE_NOOP("Measure.h", "MSE"),
-            QT_TRANSLATE_NOOP("Measure.h", "Low border"),
-            QT_TRANSLATE_NOOP("Measure.h", "High border"),
+            QT_TRANSLATE_NOOP("Measure.h", "Low High border"),
 };
 
-const int	ADDITIONAL_VALUE_COUNT          = sizeof(AdditionalValue)/sizeof(char*);
+const int	ADDITIONAL_VALUE_COUNT              = sizeof(AdditionalValue)/sizeof(char*);
 
-const int   ADDITIONAL_VALUE_UNKNOWN        = -1,
-            ADDITIONAL_VALUE_MEASURE_MIN    = 0,
-            ADDITIONAL_VALUE_MEASURE_MAX    = 1,
-            ADDITIONAL_VALUE_SYSTEM_ERROR   = 2,
-            ADDITIONAL_VALUE_MSE            = 3,
-            ADDITIONAL_VALUE_LOW_BORDER     = 4,
-            ADDITIONAL_VALUE_HIGH_BORDER    = 5;
+const int   ADDITIONAL_VALUE_UNKNOWN            = -1,
+            ADDITIONAL_VALUE_MEASURE_MAX        = 0,
+            ADDITIONAL_VALUE_SYSTEM_ERROR       = 1,
+            ADDITIONAL_VALUE_MSE                = 2,
+            ADDITIONAL_VALUE_LOW_HIGH_BORDER    = 3;
+
+            // maximum 16 items ( 0 .. 15)
+            // now used 4 ( 0 .. 3 )
 
 // ==============================================================================================
 
@@ -202,64 +205,6 @@ const int   MEASUREMENT_IN_POINT    = 20;
 // ==============================================================================================
 
 const int   INVALID_VALUE           = 0xFFFF;
-
-// ==============================================================================================
-
-class DevicePosition
-{
-private:
-
-    QString m_equipmentID;
-
-    int m_caseNo = -1;
-    QString	m_caseCaption;
-    int m_caseType = -1;
-
-    int m_channel = -1;
-    int m_subblock = -1;
-    int m_block = -1;
-    int m_entry = -1;
-
-public:
-
-    void setFromID(const QString& equipmentID);
-
-    QString equipmentID() const { return m_equipmentID; }
-    void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
-    int caseNo() const { return m_caseNo; }
-    void setCaseNo(int caseNo) { m_caseNo = caseNo; }
-
-    QString caseCaption() const { return m_caseCaption; }
-    void setCaseCaption(const QString& caption) { m_caseCaption = caption; }
-
-    int caseType() const { return m_caseType; }
-    void setCaseType(int type) { m_caseType = type; }
-
-    QString caseString() const;
-
-    int channel() const { return m_channel; }
-    void setChannel(int channel) { m_channel = channel; }
-
-    QString channelString() const;
-
-    int subblock() const { return m_subblock; }
-    void setSubblock(int subblock) { m_subblock = subblock; }
-
-    QString subblockString() const;
-
-    int block() const { return m_block; }
-    void setBlock(int block) { m_block = block; }
-
-    QString blockString() const;
-
-    int entry() const { return m_entry; }
-    void setEntry(int entry) { m_entry = entry; }
-
-    QString entryString() const;
-
-    DevicePosition& operator=(const DevicePosition& from);
-};
 
 // ==============================================================================================
 
@@ -314,7 +259,7 @@ class LinearetyMeasureItem : public MeasureItem
 public:
 
     explicit LinearetyMeasureItem();
-    explicit LinearetyMeasureItem(Calibrator* pCalibrator);
+    explicit LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& signalHash);
 
 private:
 
@@ -363,6 +308,7 @@ public:
     void setCaption(const QString& caption) { m_caption = caption; }
 
     DevicePosition& position() { return m_position; }
+    void setPosition(const DevicePosition& pos) { m_position = pos; }
 
     double nominal(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_nominal[type]; }
     void setNominal(int type, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_nominal[type] = value; }

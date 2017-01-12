@@ -64,8 +64,8 @@ public:
 
     QString             text(int row, int column) const;
 
-    bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(bool show) { m_showCustomID = show; }
+    bool                showAppSignalID() const { return m_showAppSignalID; }
+    void                setShowAppSignalID(bool show) { m_showAppSignalID = show; }
 
     bool                showADCInHex() const { return m_showADCInHex; }
     void                setShowADCInHex(bool show) { m_showADCInHex = show; }
@@ -74,7 +74,7 @@ private:
 
     QList<MeasureSignal> m_signalList;
 
-    bool                m_showCustomID = false;
+    bool                m_showAppSignalID = false;
     bool                m_showADCInHex = true;
 
     int                 columnCount(const QModelIndex &parent) const;
@@ -109,7 +109,7 @@ private:
     QAction*            m_pTypeInputAction = nullptr;
     QAction*            m_pTypeOutputAction = nullptr;
     QAction*            m_pTypeInternalAction = nullptr;
-    QAction*            m_pShowCustomIDAction = nullptr;
+    QAction*            m_pShowAppSignalIDAction = nullptr;
     QAction*            m_pShowADCInHexAction = nullptr;
 
     QTableView*         m_pView = nullptr;
@@ -140,7 +140,7 @@ private slots:
     void                showTypeInput();
     void                showTypeOutput();
     void                showTypeInternal();
-    void                showCustomID();
+    void                showAppSignalID();
     void                showADCInHex();
 
     // slots for list header, to hide or show columns
