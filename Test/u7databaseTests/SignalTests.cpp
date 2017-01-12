@@ -11,22 +11,46 @@ void SignalTests::initTestCase()
 {
 	QSqlQuery query;
 
+	// Alter Administrator user. Set administrator password "123412341234"
+	//
+
+	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString passwordHashQuery = QString("user_api.password_hash('%1', '%2')").arg(query.value(0).toString()).arg(m_adminPassword);
+
+	ok = query.exec(QString("UPDATE users SET passwordhash = %1 WHERE username = 'Administrator'").arg(passwordHashQuery));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString session_key = query.value(0).toString();
+
 	// Testers
 	//
 
-	bool ok = query.exec("SElECT create_user(1, 'signalTestUser1', 'FIRSTTEST', 'FIRSTTEST', '12341234', false, false, false);");
+	ok = query.exec(QString("SELECT user_api.create_user('%1', 'signalTestUser1', 'FIRSTTEST', 'FIRSTTEST', '12341234', false, false);").arg(session_key));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	SignalTests::m_firstUserForTest = query.value("create_user").toInt();
 
-	ok = query.exec("SElECT create_user(1, 'signalTestUser2', 'SECONDTEST', 'SECONDTEST', '12341234', false, false, false);");
+	ok = query.exec(QString("SELECT user_api.create_user('%1', 'signalTestUser2', 'SECONDTEST', 'SECONDTEST', '12341234', false, false);").arg(session_key));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	SignalTests::m_secondUserForTest = query.value("create_user").toInt();
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 }
 
 void SignalTests::add_signalTest()
