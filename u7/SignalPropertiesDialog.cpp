@@ -357,9 +357,14 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
-		int id = signalProperites->signal().ID();
+		Signal& signal = signalProperites->signal();
+		int id = signal.ID();
+		if (signal.checkedOut() || m_editedSignalsId.contains(id))
+		{
+			continue;
+		}
 		QString message;
-		if (checkoutSignal(signalProperites->signal(), message) && !message.isEmpty())
+		if (checkoutSignal(signal, message) && !message.isEmpty())
 		{
 			showError(message);
 			setWindowTitle("Signal properties (read only)");
