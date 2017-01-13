@@ -19,11 +19,68 @@
 
 #include <QObject>
 
-#include "Measure.h"
-
 #include "../lib/Hash.h"
 #include "../lib/Signal.h"
 #include "../lib/AppSignalState.h"
+
+// ==============================================================================================
+
+class DevicePosition
+{
+private:
+
+    QString                 m_equipmentID;
+
+    int                     m_caseNo = -1;
+
+    int                     m_caseType = -1;        // depend from m_caseCaption
+    QString                 m_caseCaption;
+
+    int                     m_channel = -1;
+    int                     m_subblock = -1;
+    int                     m_block = -1;
+    int                     m_entry = -1;
+
+public:
+
+    void                    setFromID(const QString& equipmentID);
+
+    QString                 equipmentID() const { return m_equipmentID; }
+    void                    setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+
+    int                     caseNo() const { return m_caseNo; }
+    void                    setCaseNo(int caseNo) { m_caseNo = caseNo; }
+
+    int                     caseType() const { return m_caseType; }
+    void                    setCaseType(int type) { m_caseType = type; }
+
+    QString                 caseCaption() const { return m_caseCaption; }
+    void                    setCaseCaption(const QString& caption) { m_caseCaption = caption; }
+
+    QString                 caseString() const;
+
+    int                     channel() const { return m_channel; }
+    void                    setChannel(int channel) { m_channel = channel; }
+
+    QString                 channelString() const;
+
+    int                     subblock() const { return m_subblock; }
+    void                    setSubblock(int subblock) { m_subblock = subblock; }
+
+    QString                 subblockString() const;
+
+    int                     block() const { return m_block; }
+    void                    setBlock(int block) { m_block = block; }
+
+    QString                 blockString() const;
+
+    int                     entry() const { return m_entry; }
+    void                    setEntry(int entry) { m_entry = entry; }
+
+    QString                 entryString() const;
+
+    DevicePosition&         operator=(const DevicePosition& from);
+};
 
 // ==============================================================================================
 
@@ -62,7 +119,7 @@ public:
     QString             inputElectricRange();
     QString             outputPhysicalRange();
     QString             outputElectricRange();
-    QString             adjustmentString();
+    QString             calibratorIndexString(const int& index);
 };
 
 // ==============================================================================================
@@ -95,7 +152,7 @@ private:
 
     mutable QMutex      m_mutex;
 
-    MeasureSignal*      m_signal[MEASURE_MULTI_SIGNAL_COUNT];
+    Hash                m_signalHash[MEASURE_MULTI_SIGNAL_COUNT];
 
     int                 m_caseNo = -1;
     int                 m_subblock = -1;
@@ -107,8 +164,8 @@ public:
     void                clear();
     bool                isEmpty() const;
 
-    MeasureSignal*      signal(const int& index) const;
-    void                setSignal(const int& index, MeasureSignal* pSignal);
+    Hash                hash(const int& index) const;
+    void                setSignal(const int& index, const MeasureSignal& signal);
 
     int                 caseNo() const { return m_caseNo; }
     void                setCaseNo(int caseNo) { m_caseNo = caseNo; }
@@ -146,15 +203,20 @@ public:
 
     // Signals
     //
-    MeasureSignal           operator [] (int index);
+    //MeasureSignal           operator [] (int index);
+
+
 
     int                     appendSignal(const Signal &param);
 
-    Signal*                 signalParam(const Hash& hash);
-    Signal*                 signalParam(const int& index);
+    MeasureSignal           signal(const Hash& hash);
+    MeasureSignal           signal(const int& index);
 
-    AppSignalState*         signalState(const Hash& hash);
-    AppSignalState*         signalState(const int& index);
+    Signal                  signalParam(const Hash& hash);
+    Signal                  signalParam(const int& index);
+
+    AppSignalState          signalState(const Hash& hash);
+    AppSignalState          signalState(const int& index);
 
     bool                    setSignalState(const Hash& hash, const AppSignalState& state);
     bool                    setSignalState(const int& index, const AppSignalState& state);
@@ -162,6 +224,7 @@ public:
     // Units
     //
     void                    appendUnit(const int& unitID, const QString& unit);
+    int                     unitCount() const;
     QString                 unit(const int& unitID);
 
     // hashs for update signal state
@@ -173,16 +236,20 @@ public:
     // Signals and Cases for measure
     //
     int                     createCaseTypeList();
+
+                            // cases
+                            //
     int                     caseTypeCount() const;
     QString                 caseTypeCaption(const int& type);
 
     int                     caseNoCount() const;
     int                     caseNoByCaseIndex(const int& caseIndex);
-    //int                     caseIndexByCaseNo(const int& caseNo);
 
+                            // signals
+                            //
     int                     createSignalListForMeasure(const int& caseType, const int &measureKind);
     int                     signalForMeasureCount() const;
-    bool                    signalForMeasure(const int& index, MeasureMultiSignal& signal);
+    bool                    signalForMeasure(const int& index, MeasureMultiSignal& multiSignal);
 
     // Main signal for measure
     //

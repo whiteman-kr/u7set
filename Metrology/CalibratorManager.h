@@ -112,7 +112,7 @@ private slots:
 
 // ==============================================================================================
 
-typedef PtrObjectVector<CalibratorManager> CalibratorManagerVector;
+typedef PtrObjectVector<CalibratorManager> CalibratorManagerList;
 
 // ==============================================================================================
 

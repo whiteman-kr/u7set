@@ -62,9 +62,12 @@ public:
     void                    init(QWidget* parent = 0);
     void                    show();
 
-    int                     count() { return m_calibratorManagerVector.count(); }
+    int                     count() { return m_calibratorManagerList.count(); }
 
     CalibratorManager*      at(int index);
+    CalibratorManager*      firstConnectedCalibrator();
+
+    CalibratorManager*      сalibratorForMeasure(int index);
 
     int                     connectedCalibratorsCount() { return m_connectedCalibratorsCount; }
 
@@ -75,7 +78,7 @@ private:
     QTimer                  m_timer;
     int                     m_timeout = 0;
 
-    CalibratorManagerVector m_calibratorManagerVector;
+    CalibratorManagerList   m_calibratorManagerList;
 
     void                    createCalibrators();
     void                    removeCalibrators();

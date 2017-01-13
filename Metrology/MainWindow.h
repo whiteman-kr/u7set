@@ -104,13 +104,14 @@ public:
     bool                createInterface();
 
     void                createActions();
-    void                updateActions();
+    void                updateStartStopActions();
     void                createMenu();
     bool                createToolBars();
     void                createMeasurePages();
     void                createPanels();
     void                createStatusBar();
     void                createContextMenu();
+
     void                updateAnalogSignalToolBar();
 
 private:
