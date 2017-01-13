@@ -1332,7 +1332,7 @@ namespace Hardware
 
 						port->setAbsTxStartAddress(absTxStartAddress);
 
-						if (port->manualTxStartAddressW() + port->txDataSizeW() > module->optoPortAppDataSize())
+						if (port->manualTxStartAddressW() + port->manualTxSizeW() > module->optoPortAppDataSize())
 						{
 							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 							//
