@@ -480,12 +480,12 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputUnitID", signal.inputUnitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorType());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputLowLimit", signal.outputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputHighLimit", signal.outputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputUnitID", signal.outputUnitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
+    settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
+    settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorType());
 	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
 	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
 	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());

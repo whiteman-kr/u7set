@@ -3927,12 +3927,12 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setUnbalanceLimit(q.value(25).toDouble());
 	s.setInputLowLimit(q.value(26).toDouble());
 	s.setInputHighLimit(q.value(27).toDouble());
-	s.setInputUnitID(q.value(28).toInt());
-	s.setInputSensorID(q.value(29).toInt());
+    s.setInputUnitID(static_cast<E::InputUnit>(q.value(28).toInt()));
+    s.setInputSensorType(static_cast<E::SensorType>(q.value(29).toInt()));
 	s.setOutputLowLimit(q.value(30).toDouble());
 	s.setOutputHighLimit(q.value(31).toDouble());
 	s.setOutputUnitID(q.value(32).toInt());
-	s.setOutputSensorID(q.value(33).toInt());
+    s.setOutputSensorType(static_cast<E::SensorType>(q.value(33).toInt()));
 	s.setAcquire(q.value(34).toBool());
 	s.setCalculated(q.value(35).toBool());
 	s.setNormalState(q.value(36).toInt());
@@ -3940,9 +3940,9 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setAperture(q.value(38).toDouble());
 	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
 	s.setEquipmentID(q.value(40).toString());
-	s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));		// since version 35 of database
+    s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));               // since version 35 of database
 	s.setFilteringTime(q.value(42).toDouble());										//
-	s.setSpreadTolerance(q.value(43).toDouble());										//
+    s.setSpreadTolerance(q.value(43).toDouble());									//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
 	s.setTuningDefaultValue(q.value(46).toDouble());								// since version 58 of database
@@ -3986,11 +3986,11 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.inputLowLimit())
 	.arg(s.inputHighLimit())
 	.arg(s.inputUnitID())
-	.arg(s.inputSensorID())
+	.arg(s.inputSensorType())
 	.arg(s.outputLowLimit())
 	.arg(s.outputHighLimit())
 	.arg(s.outputUnitID())
-	.arg(s.outputSensorID())
+	.arg(s.outputSensorType())
 	.arg(toSqlBoolean(s.acquire()))
 	.arg(toSqlBoolean(s.calculated()))
 	.arg(s.normalState())
