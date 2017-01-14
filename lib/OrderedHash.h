@@ -538,8 +538,8 @@ public:
 	VALUE& operator[](const KEY& key);
 	const VALUE& operator[](const KEY& key) const;
 
-	const VALUE value(const KEY& key);
-	const VALUE value(const KEY& key, const VALUE& defaultValue);
+	const VALUE value(const KEY& key) const;
+	const VALUE value(const KEY& key, const VALUE& defaultValue) const;
 
 	int indexOf(const KEY& key)
 	{
@@ -607,7 +607,7 @@ const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 
 
 template <typename KEY, typename VALUE>
-const VALUE HashedVector<KEY, VALUE>::value(const KEY& key)
+const VALUE HashedVector<KEY, VALUE>::value(const KEY& key) const
 {
 	int index = m_map.value(key, -1);
 
@@ -617,7 +617,7 @@ const VALUE HashedVector<KEY, VALUE>::value(const KEY& key)
 
 
 template <typename KEY, typename VALUE>
-const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue)
+const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const
 {
 	int index = m_map.value(key, -1);
 

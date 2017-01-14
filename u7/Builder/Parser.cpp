@@ -804,12 +804,12 @@ namespace Builder
 		return copy;
 	}
 
-	bool AppLogicModule::debugCheckItemsRelationsConsistency(IssueLogger* log) const
+	bool AppLogicModule::checkItemsRelationsConsistency(IssueLogger* log) const
 	{
-		return AppLogicModule::debugCheckItemsRelationsConsistency(m_equipmentId, m_items, log);
+		return AppLogicModule::checkItemsRelationsConsistency(m_equipmentId, m_items, log);
 	}
 
-	bool AppLogicModule::debugCheckItemsRelationsConsistency(QString equipmentId,
+	bool AppLogicModule::checkItemsRelationsConsistency(QString equipmentId,
 															 const std::list<AppLogicItem>& items,
 															 IssueLogger* log)
 	{
@@ -1730,7 +1730,7 @@ namespace Builder
 				return false;
 			}
 
-			bool checkResult = module->debugCheckItemsRelationsConsistency(log);
+			bool checkResult = module->checkItemsRelationsConsistency(log);
 			if (checkResult == false)
 			{
 				return false;
@@ -1773,7 +1773,7 @@ namespace Builder
 					continue;
 				}
 
-				// Make a copy of ufb, so all the guid will be unique in
+				// Make a copy of ufb, so all the guids will be unique in
 				//
 				std::shared_ptr<AppLogicModule> ufbCopy = parsedUfb->deepCopy(ufbItem->guid(), ufbItem->label());
 				if (ufbCopy == nullptr)
@@ -1784,11 +1784,13 @@ namespace Builder
 
 				std::list<AppLogicItem> ufbItemsCopy = ufbCopy->items();		// Prefer to work with a list copy
 
-				// Intermidiate check, to make sure all the new guids were set right and relations were kept in consistency
+				// Intermidiate check, to make sure all the new guids were set right and relations are kept in consistency
 				//
-				checkResult = ufbCopy->debugCheckItemsRelationsConsistency(log);
+				checkResult = ufbCopy->checkItemsRelationsConsistency(log);
 				if (checkResult == false)
 				{
+					// The error is signaled in checkItemsRelationsConsistency
+					//
 					return false;
 				}
 
@@ -1832,7 +1834,7 @@ namespace Builder
 					}
 				}
 
-				// Bind LogicSchema outputû to UFB items inputs
+				// Bind LogicSchema outputs to UFB items inputs
 				//
 				for (const VFrame30::AfbPin& ufbItemPin : ufbItem->inputs())
 				{
@@ -2103,15 +2105,19 @@ namespace Builder
 				// Inject ufb schema items
 				//
 				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
-			}
 
-			// Remove all VFrame30::SchemaItemUfb, as they have already beeen expanded
-			//
-			module->items().remove_if(
-						[](const AppLogicItem& ali)
-						{
-							return ali.m_fblItem->isType<VFrame30::SchemaItemUfb>();
-						});
+				// Remove expanded VFrame30::SchemaItemUfb, and set new value to the iterator
+				//
+				if (ufbItemsCopy.empty() == false)
+				{
+					itemIt = module->items().erase(itemIt);		// itemIt is the first injected item
+				}
+				else
+				{
+					module->items().erase(itemIt);
+					itemIt = module->items().begin();			// Dumb way, but it works :) should be set to prev but is prev exist?
+				}
+			}
 
 			// Remove Fake Items
 			//
@@ -2122,7 +2128,7 @@ namespace Builder
 
 			// --
 			//
-			checkResult = module->debugCheckItemsRelationsConsistency(log);
+			checkResult = module->checkItemsRelationsConsistency(log);
 			if (checkResult == false)
 			{
 				return false;
@@ -2369,12 +2375,12 @@ namespace Builder
 		bool checkResult = true;
 		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
 		{
-			checkResult &= module->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= module->checkItemsRelationsConsistency(m_log);
 		}
 
 		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : m_applicationData->ufbs())
 		{
-			checkResult &= ufb.second->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= ufb.second->checkItemsRelationsConsistency(m_log);
 		}
 
 		if (checkResult == false)

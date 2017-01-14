@@ -23,42 +23,42 @@ unix {
 }
 
 
-## Force prebuild version control info
-##
-## for creating version.h at first build
-#win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-#unix:system([ -e ./version.h ] || touch ./version.h)
-## for any build
-#versionTarget.target = version.h
-#versionTarget.depends = FORCE
-#win32 {
-#        contains(QMAKE_TARGET.arch, x86_64){
-#            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-#            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-#            nmake & \
-#            chdir $$PWD & \
-#            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/DataAquisitionService.pro
-#        }
-#        else{
-#            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-#            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-#            nmake & \
-#            chdir $$PWD & \
-#            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/DataAquisitionService.pro
-#        }
-#}
-#unix {
-#    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-#        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-#        make; \
-#        cd $$PWD; \
-#        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/DataAquisitionService.pro
-#}
-#PRE_TARGETDEPS += version.h
-#QMAKE_EXTRA_TARGETS += versionTarget
+# Force prebuild version control info
+#
+# for creating version.h at first build
+win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
+unix:system([ -e ./version.h ] || touch ./version.h)
+# for any build
+versionTarget.target = version.h
+versionTarget.depends = FORCE
+win32 {
+        contains(QMAKE_TARGET.arch, x86_64){
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/AppDataService.pro
+        }
+        else{
+            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake & \
+            chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/AppDataService.pro
+        }
+}
+unix {
+    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make; \
+        cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/AppDataService.pro
+}
+PRE_TARGETDEPS += version.h
+QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -97,7 +97,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppDataSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    AppDataServiceMain.cpp
 
 HEADERS += \
 	Stable.h \

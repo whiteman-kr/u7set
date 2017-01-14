@@ -4657,10 +4657,11 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 
 	// In cycle we are processing current point with previous point
 	//
+
 	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
 	{
-		VFrame30::SchemaPoint curPoint = result.at(currentPointIndex);
-		VFrame30::SchemaPoint prevPoint = result.at(currentPointIndex - 1);
+		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
+		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
 
 		if (std::abs(curPoint.X - prevPoint.X) < 0.0000001)
 		{
@@ -4744,14 +4745,14 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 
 	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
 	{
-		VFrame30::SchemaPoint curPoint = result.at(currentPointIndex);
-		VFrame30::SchemaPoint prevPoint = result.at(currentPointIndex - 1);
+		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
+		const VFrame30::SchemaPoint& prevPoint = result.at(currentPointIndex - 1);
 
 		// Points must be connected by X or Y axis. In other way - exception must be rised
 		//
 
-		assert((curPoint.X == prevPoint.X) ||
-			   (curPoint.Y == prevPoint.Y));
+		assert((std::abs(curPoint.X - prevPoint.X) < 0.0000001) ||
+				(std::abs(curPoint.Y - prevPoint.Y) < 0.0000001));
 	}
 
 	return result;

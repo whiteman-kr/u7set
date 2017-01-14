@@ -561,10 +561,29 @@ namespace Builder
 	{
 		for(BuildFile* file : m_buildFiles)
 		{
+			if (file == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
 			delete file;
 		}
 
 		m_buildFiles.clear();
+
+		for(MultichannelFile* multichannelFile : m_multichannelFiles)
+		{
+			if (multichannelFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			delete multichannelFile;
+		}
+
+		m_multichannelFiles.clear();
 	}
 
 
@@ -946,11 +965,7 @@ namespace Builder
 				//assert(false);
 				result = false;
 			}
-
-			delete multichannelFile;		// is no longer needed
 		}
-
-		m_multichannelFiles.clear();
 
 		return result;
 	}

@@ -4,16 +4,14 @@
 
 namespace Tuning
 {
-
-
 	// -------------------------------------------------------------------------------------
 	//
 	// TuningServiceWorker class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningServiceWorker::TuningServiceWorker() :
-		ServiceWorker(ServiceType::TuningService),
+	TuningServiceWorker::TuningServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
+		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo),
 		m_timer(this)
 	{
 	}
@@ -24,19 +22,75 @@ namespace Tuning
 		clear();
 	}
 
+	ServiceWorker* TuningServiceWorker::createInstance() const
+	{
+		ServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo());
+		return newInstance;
+	}
+
+
+	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+	{
+		Q_UNUSED(serviceInfo);
+	}
+
 
 	void TuningServiceWorker::initCmdLineParser()
 	{
-		CommandLineParser* clp = cmdLineParser();
+		CommandLineParser& cp = cmdLineParser();
 
-		if (clp == nullptr)
+		cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
+		cp.addSingleValueOption("b", "Path to RPCT project build.");
+		cp.addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
+		cp.addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	}
+
+
+	void TuningServiceWorker::processCmdLineSettings()
+	{
+		CommandLineParser& cp = cmdLineParser();
+
+		if (cp.optionIsSet("id") == true)
 		{
-			assert(false);
-			return;
+			setStrSetting("EquipmentID", cp.optionValue("id"));
 		}
 
-		clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-		clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+		if (cp.optionIsSet("b") == true)
+		{
+			setStrSetting("BuildPath", cp.optionValue("b"));
+		}
+
+		if (cp.optionIsSet("cfgip1") == true)
+		{
+			setStrSetting("CfgServiceIP1", cp.optionValue("cfgip1"));
+		}
+
+		if (cp.optionIsSet("cfgip2") == true)
+		{
+			setStrSetting("CfgServiceIP2", cp.optionValue("cfgip2"));
+		}
+	}
+
+
+	void TuningServiceWorker::loadSettings()
+	{
+		m_equipmentID = getStrSetting("EquipmentID");
+
+		m_buildPath = getStrSetting("BuildPath");
+
+		m_cfgServiceIP1Str = getStrSetting("CfgServiceIP1");
+
+		m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+		m_cfgServiceIP2Str = getStrSetting("CfgServiceIP2");
+
+		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+		DEBUG_LOG_MSG(QString(tr("Load settings:")));
+		DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+		DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
+		DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+		DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 	}
 
 
@@ -44,14 +98,6 @@ namespace Tuning
 	{
 		m_tuningSources.clear();
 	}
-
-
-/*	TuningServiceWorker* TuningServiceWorker::createInstance()
-	{
-		TuningServiceWorker* worker = new TuningServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-
-		return worker;
-	}*/
 
 
 	const TuningClientContext* TuningServiceWorker::getClientContext(QString clientID) const
@@ -112,20 +158,12 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		HostAddressPort ip1(m_cfgServiceIP1, PORT_CONFIGURATION_SERVICE_REQUEST);
-		HostAddressPort ip2(m_cfgServiceIP2, PORT_CONFIGURATION_SERVICE_REQUEST);
-
-		m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1, ip1, ip2);
+		m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2);
 
 		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
 
 		m_cfgLoaderThread->start();
 		m_cfgLoaderThread->enableDownloadConfiguration();
-
-		QString str = QString("ConfigurationService communication thread is running, IP1 = %1, IP2 = %2").
-				arg(ip1.addressPortStr()).arg(ip2.addressPortStr());
-
-		qDebug() << C_STR(str);
 	}
 
 
@@ -160,7 +198,7 @@ namespace Tuning
 
 	void TuningServiceWorker::buildServiceMaps()
 	{
-		m_clientContextMap.init(m_tuningSettings, m_tuningSources);
+		m_clientContextMap.init(m_cfgSettings, m_tuningSources);
 	}
 
 
@@ -174,7 +212,7 @@ namespace Tuning
 	{
 		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this);
 
-		m_tcpTuningServerThread = new TcpTuningServerThread(m_tuningSettings.clientRequestIP,
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_cfgSettings.clientRequestIP,
 															tcpTuningSever);
 		m_tcpTuningServerThread->start();
 	}
@@ -201,7 +239,7 @@ namespace Tuning
 
 		bool result = true;
 
-		result &= m_tuningSettings.readFromXml(xml);
+		result &= m_cfgSettings.readFromXml(xml);
 		result &= readTuningDataSources(xml);
 
 		if  (result == true)
@@ -367,7 +405,7 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_tuningSettings, *tuningSource);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource);
 
 			if (sourceWorkerThread == nullptr)
 			{
@@ -386,7 +424,7 @@ namespace Tuning
 		//
 		assert(m_socketListenerThread == nullptr);
 
-		m_socketListenerThread = new TuningSocketListenerThread(m_tuningSettings.tuningDataIP, m_sourceWorkerThreadMap);
+		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceWorkerThreadMap);
 		m_socketListenerThread->start();
 
 		// run TuningSourceWorkerThreads

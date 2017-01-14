@@ -24,8 +24,17 @@
 										continue; \
 									}
 
+#define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
+									{	\
+										assert(false);	\
+										return; \
+									}
+
 
 #define AUTO_LOCK(mutex) QMutexLocker m(&mutex);
+
+
+#define C_STR(qstring) qstring.toStdString().c_str()
 
 
 void swapBytes(const char* src, char* dest, int size);
@@ -49,3 +58,5 @@ inline quint64 reverseUint64(quint64 val) { return reverseBytes<quint64>(val); }
 inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
+
+const char* const RADIY_ORG = "Radiy";

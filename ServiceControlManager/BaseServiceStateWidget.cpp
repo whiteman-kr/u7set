@@ -87,7 +87,7 @@ void BaseServiceStateWidget::updateServiceState()
 	m_whoIsLabel->setText(serviceType + QString(" v%1.%2.%3(0x%4)")
 						  .arg(serviceState.majorversion())
 						  .arg(serviceState.minorversion())
-						  .arg(serviceState.buildno())
+						  .arg(serviceState.commitno())
 						  .arg(serviceState.crc(), 0, 16, QChar('0')));
 
 	ServiceState srvState = static_cast<ServiceState>(serviceState.servicestate());

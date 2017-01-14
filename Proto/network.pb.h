@@ -1957,12 +1957,12 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 minorversion() const;
   inline void set_minorversion(::google::protobuf::int32 value);
 
-  // optional int32 buildNo = 4 [default = 0];
-  inline bool has_buildno() const;
-  inline void clear_buildno();
-  static const int kBuildNoFieldNumber = 4;
-  inline ::google::protobuf::int32 buildno() const;
-  inline void set_buildno(::google::protobuf::int32 value);
+  // optional int32 commitNo = 4 [default = 0];
+  inline bool has_commitno() const;
+  inline void clear_commitno();
+  static const int kCommitNoFieldNumber = 4;
+  inline ::google::protobuf::int32 commitno() const;
+  inline void set_commitno(::google::protobuf::int32 value);
 
   // optional uint32 crc = 5 [default = 0];
   inline bool has_crc() const;
@@ -2006,6 +2006,30 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 clientrequestport() const;
   inline void set_clientrequestport(::google::protobuf::int32 value);
 
+  // optional string buildBranch = 11;
+  inline bool has_buildbranch() const;
+  inline void clear_buildbranch();
+  static const int kBuildBranchFieldNumber = 11;
+  inline const ::std::string& buildbranch() const;
+  inline void set_buildbranch(const ::std::string& value);
+  inline void set_buildbranch(const char* value);
+  inline void set_buildbranch(const char* value, size_t size);
+  inline ::std::string* mutable_buildbranch();
+  inline ::std::string* release_buildbranch();
+  inline void set_allocated_buildbranch(::std::string* buildbranch);
+
+  // optional string commitSHA = 12;
+  inline bool has_commitsha() const;
+  inline void clear_commitsha();
+  static const int kCommitSHAFieldNumber = 12;
+  inline const ::std::string& commitsha() const;
+  inline void set_commitsha(const ::std::string& value);
+  inline void set_commitsha(const char* value);
+  inline void set_commitsha(const char* value, size_t size);
+  inline ::std::string* mutable_commitsha();
+  inline ::std::string* release_commitsha();
+  inline void set_allocated_commitsha(::std::string* commitsha);
+
   // @@protoc_insertion_point(class_scope:Network.ServiceInfo)
  private:
   inline void set_has_type();
@@ -2014,8 +2038,8 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline void clear_has_majorversion();
   inline void set_has_minorversion();
   inline void clear_has_minorversion();
-  inline void set_has_buildno();
-  inline void clear_has_buildno();
+  inline void set_has_commitno();
+  inline void clear_has_commitno();
   inline void set_has_crc();
   inline void clear_has_crc();
   inline void set_has_uptime();
@@ -2028,22 +2052,28 @@ class ServiceInfo : public ::google::protobuf::Message {
   inline void clear_has_clientrequestip();
   inline void set_has_clientrequestport();
   inline void clear_has_clientrequestport();
+  inline void set_has_buildbranch();
+  inline void clear_has_buildbranch();
+  inline void set_has_commitsha();
+  inline void clear_has_commitsha();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 majorversion_;
   ::google::protobuf::int32 minorversion_;
-  ::google::protobuf::int32 buildno_;
+  ::google::protobuf::int32 commitno_;
   ::google::protobuf::int64 uptime_;
   ::google::protobuf::uint32 crc_;
   ::google::protobuf::int32 servicestate_;
   ::google::protobuf::int64 serviceuptime_;
   ::google::protobuf::uint32 clientrequestip_;
   ::google::protobuf::int32 clientrequestport_;
+  ::std::string* buildbranch_;
+  ::std::string* commitsha_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -5505,26 +5535,26 @@ inline void ServiceInfo::set_minorversion(::google::protobuf::int32 value) {
   minorversion_ = value;
 }
 
-// optional int32 buildNo = 4 [default = 0];
-inline bool ServiceInfo::has_buildno() const {
+// optional int32 commitNo = 4 [default = 0];
+inline bool ServiceInfo::has_commitno() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void ServiceInfo::set_has_buildno() {
+inline void ServiceInfo::set_has_commitno() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void ServiceInfo::clear_has_buildno() {
+inline void ServiceInfo::clear_has_commitno() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void ServiceInfo::clear_buildno() {
-  buildno_ = 0;
-  clear_has_buildno();
+inline void ServiceInfo::clear_commitno() {
+  commitno_ = 0;
+  clear_has_commitno();
 }
-inline ::google::protobuf::int32 ServiceInfo::buildno() const {
-  return buildno_;
+inline ::google::protobuf::int32 ServiceInfo::commitno() const {
+  return commitno_;
 }
-inline void ServiceInfo::set_buildno(::google::protobuf::int32 value) {
-  set_has_buildno();
-  buildno_ = value;
+inline void ServiceInfo::set_commitno(::google::protobuf::int32 value) {
+  set_has_commitno();
+  commitno_ = value;
 }
 
 // optional uint32 crc = 5 [default = 0];
@@ -5657,6 +5687,146 @@ inline ::google::protobuf::int32 ServiceInfo::clientrequestport() const {
 inline void ServiceInfo::set_clientrequestport(::google::protobuf::int32 value) {
   set_has_clientrequestport();
   clientrequestport_ = value;
+}
+
+// optional string buildBranch = 11;
+inline bool ServiceInfo::has_buildbranch() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void ServiceInfo::set_has_buildbranch() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void ServiceInfo::clear_has_buildbranch() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void ServiceInfo::clear_buildbranch() {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    buildbranch_->clear();
+  }
+  clear_has_buildbranch();
+}
+inline const ::std::string& ServiceInfo::buildbranch() const {
+  return *buildbranch_;
+}
+inline void ServiceInfo::set_buildbranch(const ::std::string& value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void ServiceInfo::set_buildbranch(const char* value) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(value);
+}
+inline void ServiceInfo::set_buildbranch(const char* value, size_t size) {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  buildbranch_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceInfo::mutable_buildbranch() {
+  set_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    buildbranch_ = new ::std::string;
+  }
+  return buildbranch_;
+}
+inline ::std::string* ServiceInfo::release_buildbranch() {
+  clear_has_buildbranch();
+  if (buildbranch_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = buildbranch_;
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceInfo::set_allocated_buildbranch(::std::string* buildbranch) {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    delete buildbranch_;
+  }
+  if (buildbranch) {
+    set_has_buildbranch();
+    buildbranch_ = buildbranch;
+  } else {
+    clear_has_buildbranch();
+    buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string commitSHA = 12;
+inline bool ServiceInfo::has_commitsha() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void ServiceInfo::set_has_commitsha() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void ServiceInfo::clear_has_commitsha() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void ServiceInfo::clear_commitsha() {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    commitsha_->clear();
+  }
+  clear_has_commitsha();
+}
+inline const ::std::string& ServiceInfo::commitsha() const {
+  return *commitsha_;
+}
+inline void ServiceInfo::set_commitsha(const ::std::string& value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void ServiceInfo::set_commitsha(const char* value) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(value);
+}
+inline void ServiceInfo::set_commitsha(const char* value, size_t size) {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  commitsha_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceInfo::mutable_commitsha() {
+  set_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    commitsha_ = new ::std::string;
+  }
+  return commitsha_;
+}
+inline ::std::string* ServiceInfo::release_commitsha() {
+  clear_has_commitsha();
+  if (commitsha_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = commitsha_;
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceInfo::set_allocated_commitsha(::std::string* commitsha) {
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    delete commitsha_;
+  }
+  if (commitsha) {
+    set_has_commitsha();
+    commitsha_ = commitsha;
+  } else {
+    clear_has_commitsha();
+    commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

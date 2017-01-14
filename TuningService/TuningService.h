@@ -19,13 +19,11 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningServiceWorker();
+		TuningServiceWorker(const QString &serviceName, int &argc, char **argv, const VersionInfo &versionInfo);
 		~TuningServiceWorker();
 
-		virtual void initCmdLineParser() override;
-
-
-//		virtual TuningServiceWorker* createInstance() override;
+		virtual ServiceWorker* createInstance() const override;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -37,6 +35,10 @@ namespace Tuning
 	public slots:
 
 	private:
+		virtual void initCmdLineParser() override;
+		virtual void processCmdLineSettings() override;
+		virtual void loadSettings() override;
+
 		void clear();
 
 		virtual void initialize() override;
@@ -69,11 +71,16 @@ namespace Tuning
 		void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	private:
-		QString m_cfgServiceIP1;
-		QString m_cfgServiceIP2;
+		QString m_equipmentID;
 		QString m_buildPath;
+		QString m_cfgServiceIP1Str;
+		QString m_cfgServiceIP2Str;
 
-		TuningServiceSettings m_tuningSettings;
+		HostAddressPort m_cfgServiceIP1;
+		HostAddressPort m_cfgServiceIP2;
+
+		TuningServiceSettings m_cfgSettings;
+
 		TuningSources m_tuningSources;
 
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;

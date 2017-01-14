@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2014-08-19T13:17:21
-#
-#-------------------------------------------------
-
 QT      += core
 QT      -= gui
 QT      += network
@@ -63,7 +57,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp \
+SOURCES += \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -74,7 +68,9 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    ../lib/WUtils.cpp \
+    BaseServiceMain.cpp
 
 HEADERS += \
     ../lib/SocketIO.h \
@@ -89,7 +85,8 @@ HEADERS += \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

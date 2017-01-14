@@ -1365,7 +1365,7 @@ namespace Hardware
 			{
 				// calculate tx addresses for ports of OCM module
 				//
-				int absTxStartAddress = module->optoInterfaceDataOffset();
+				int autoAbsTxStartAddress = module->optoInterfaceDataOffset();
 
 				int txDataSizeW = 0;
 
@@ -1380,11 +1380,15 @@ namespace Hardware
 
 					if (port->manualSettings() == true)
 					{
-						absTxStartAddress += port->manualTxStartAddressW();
+						port->setAbsTxStartAddress(module->optoInterfaceDataOffset() + port->manualTxStartAddressW());
 
-						port->setAbsTxStartAddress(absTxStartAddress);
+						// calculate TxStartAddr for next port with auto settings (if exists)
+						//
+						autoAbsTxStartAddress = module->optoInterfaceDataOffset() +
+												port->manualTxStartAddressW() +
+												port->manualTxSizeW();
 
-						if (port->manualTxStartAddressW() + port->txDataSizeW() > module->optoPortAppDataSize())
+						if (port->manualTxStartAddressW() + port->manualTxSizeW() > module->optoPortAppDataSize())
 						{
 							// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
 							//
@@ -1398,9 +1402,9 @@ namespace Hardware
 					{
 						// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 						//
-						port->setAbsTxStartAddress(absTxStartAddress);
+						port->setAbsTxStartAddress(autoAbsTxStartAddress);
 
-						absTxStartAddress += port->txDataSizeW();
+						autoAbsTxStartAddress += port->txDataSizeW();
 
 						txDataSizeW += port->txDataSizeW();
 

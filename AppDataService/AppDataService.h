@@ -23,29 +23,20 @@ class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
+public:
+	AppDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	~AppDataServiceWorker();
+
+	virtual ServiceWorker* createInstance() const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+
 private:
-	QString m_cfgServiceIP1;
-	QString m_cfgServiceIP2;
-	QString m_buildPath;
+	virtual void initCmdLineParser() override;
+	virtual void processCmdLineSettings() override;
+	virtual void loadSettings() override;
 
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-
-	AppDataServiceSettings m_settings;
-
-	UnitList m_unitInfo;
-
-	AppSignals m_appSignals;
-
-	AppDataSources m_appDataSources;				// all data sources
-	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
-
-	AppSignalStates m_signalStates;
-
-	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
-
-	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
-
-	QTimer m_timer;
+	virtual void initialize() override;
+	virtual void shutdown() override;
 
 	//
 
@@ -85,22 +76,31 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) override;
+private:
+	QString m_equipmentID;
+	QString m_cfgServiceIP1Str;
+	QString m_cfgServiceIP2Str;
 
-public:
-	AppDataServiceWorker();
-	~AppDataServiceWorker();
+	HostAddressPort m_cfgServiceIP1;
+	HostAddressPort m_cfgServiceIP2;
 
-	virtual void initCmdLineParser() override;
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	virtual void initialize() override;
-	virtual void shutdown() override;
+	AppDataServiceSettings m_cfgSettings;
 
+	UnitList m_unitInfo;
 
+	AppSignals m_appSignals;
 
-/*	ServiceWorker* createInstance() override
-	{
-		return new AppDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-	}*/
+	AppDataSources m_appDataSources;				// all data sources
+	AppDataSourcesIP m_enabledAppDataSources;		// only enabled data sources
+
+	AppSignalStates m_signalStates;
+
+	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
+
+	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
+
+	QTimer m_timer;
 };
 

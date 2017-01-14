@@ -28,10 +28,12 @@ private slots:
 	void is_signal_with_equipmentid_existsTest();
 	void get_latest_signals_by_appsignalIds();
 
-public:
+private:
 	int m_firstUserForTest = -1;
 	int m_secondUserForTest = -1;
 	static const int maxValueId = 9999999;
+
+	QString m_adminPassword = "123412341234";
 
 	struct SignalData
 	{

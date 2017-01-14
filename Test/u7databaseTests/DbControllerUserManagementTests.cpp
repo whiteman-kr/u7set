@@ -99,7 +99,6 @@ void DbControllerUserTests::createUserTest()
 	QVERIFY2 (query.value("username").toString() == userName, qPrintable("Wrong userName after createUser() function of dbController"));
 	QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable("Wrong firstName after createUser() function of dbController"));
 	QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable("Wrong lastName after createUser() function of dbController"));
-	QVERIFY2 (query.value("password").toString() == password, qPrintable("Wrong password after createUser() function of dbController"));
 	QVERIFY2 (query.value("administrator").toBool() == false, qPrintable("Wrong administrator flag after createUser() function of dbController"));
 	QVERIFY2 (query.value("readonly").toBool() == false, qPrintable("Wrong readOnly flag after createUser() function of dbController"));
 	QVERIFY2 (query.value("disabled").toBool() == false, qPrintable("Wrong disabled flag after createUser() function of dbController"));
@@ -134,7 +133,6 @@ void DbControllerUserTests::createUserTest()
 			QVERIFY2 (query.value("username").toString() == userName, qPrintable("Wrong userName after createUser() function of dbController"));
 			QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable("Wrong firstName after createUser() function of dbController"));
 			QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable("Wrong lastName after createUser() function of dbController"));
-			QVERIFY2 (query.value("password").toString() == password, qPrintable("Wrong password after createUser() function of dbController"));
 			QVERIFY2 (query.value("administrator").toBool() == false, qPrintable("Wrong administrator flag after createUser() function of dbController"));
 			QVERIFY2 (query.value("readonly").toBool() == false, qPrintable("Wrong readOnly flag after createUser() function of dbController"));
 			QVERIFY2 (query.value("disabled").toBool() == false, qPrintable("Wrong disabled flag after createUser() function of dbController"));
@@ -210,7 +208,6 @@ void DbControllerUserTests::updateUserTest()
 	QVERIFY2 (query.value("username").toString() == userName, qPrintable("Wrong userName after createUser() function of dbController"));
 	QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable("Wrong firstName after createUser() function of dbController"));
 	QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable("Wrong lastName after createUser() function of dbController"));
-	QVERIFY2 (query.value("password").toString() == password, qPrintable("Wrong password after createUser() function of dbController"));
 	QVERIFY2 (query.value("administrator").toBool() == false, qPrintable("Wrong administrator flag after createUser() function of dbController"));
 	QVERIFY2 (query.value("readonly").toBool() == true, qPrintable("Wrong readOnly flag after createUser() function of dbController"));
 	QVERIFY2 (query.value("disabled").toBool() == true, qPrintable("Wrong disabled flag after createUser() function of dbController"));
@@ -260,7 +257,6 @@ void DbControllerUserTests::updateUserTest()
 			QVERIFY2 (query.value("username").toString() == userName, qPrintable(QString("Wrong userName after updateUser() function of dbController Actual: %1\nExpected: %2").arg(query.value("username").toString()).arg(userName)));
 			QVERIFY2 (query.value("firstname").toString() == firstName, qPrintable(QString("Wrong firstName after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("firstname").toString()).arg(firstName)));
 			QVERIFY2 (query.value("lastname").toString() == lastName, qPrintable(QString("Wrong lastName after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("lastname").toString()).arg(lastName)));
-			QVERIFY2 (query.value("password").toString() == password, qPrintable(QString("Wrong password after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("password").toString()).arg(password)));
 			QVERIFY2 (query.value("administrator").toBool() == false, qPrintable(QString("Wrong administrator flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("administrator").toBool()).arg("true")));
 			QVERIFY2 (query.value("readonly").toBool() == true, qPrintable(QString("Wrong readOnly flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("readonly").toBool()).arg("true")));
 			QVERIFY2 (query.value("disabled").toBool() == true, qPrintable(QString("Wrong disabled flag after updateUser() function of dbController \nActual: %1\nExpected: %2").arg(query.value("disabled").toBool()).arg("true")));
@@ -308,7 +304,6 @@ void DbControllerUserTests::getUserListTest()
 		buff.setUsername(query.value("username").toString());
 		buff.setFirstName(query.value("firstName").toString());
 		buff.setLastName(query.value("lastName").toString());
-		buff.setPassword(query.value("password").toString());
 		buff.setAdministrator(query.value("administrator").toBool());
 		buff.setDisabled(query.value("disabled").toBool());
 		buff.setReadonly(query.value("readonly").toBool());
@@ -329,7 +324,6 @@ void DbControllerUserTests::getUserListTest()
 			{
 				QVERIFY2 (buff.firstName() == buffQuery.firstName(), qPrintable("Error: function getUserList returned wrong output (wrong firstName)"));
 				QVERIFY2 (buff.lastName() == buffQuery.lastName(), qPrintable("Error: function getUserList returned wrong output (wrong lastName)"));
-				QVERIFY2 (buff.password() == buffQuery.password(), qPrintable("Error: function getUserList returned wrong output (wrong password)"));
 				QVERIFY2 (buff.date().toString() == buffQuery.date().toString(), qPrintable("Error: function getUserList returned wrong output (wrong date)"));
 				QVERIFY2 (buff.isAdminstrator() == buffQuery.isAdminstrator(), qPrintable("Error: function getUserList returned wrong output (wrong administrator flag)"));
 				QVERIFY2 (buff.isDisabled() == buffQuery.isDisabled(), qPrintable("Error: function getUserList returned wrong output (wrong disabled flag)"));
