@@ -203,9 +203,6 @@ public:
 
     // Signals
     //
-    //MeasureSignal           operator [] (int index);
-
-
 
     int                     appendSignal(const Signal &param);
 

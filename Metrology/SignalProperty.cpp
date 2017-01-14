@@ -207,10 +207,9 @@ void SignalPropertyDialog::createPropertyList()
 
             item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
             QStringList inputUnitList;
-            int inputUnitCount = theSignalBase.unitCount();
-            for(int u = 0; u < inputUnitCount; u++)
+            for(int u = 0; u < INPUT_UNIT_COUNT; u++)
             {
-                inputUnitList.append( theSignalBase.unit( u ) );
+                inputUnitList.append( InputUnitStr[ u ] );
             }
             item->setAttribute(QLatin1String("enumNames"), inputUnitList);
             item->setValue( m_signal.param().inputUnitID() );
@@ -224,7 +223,7 @@ void SignalPropertyDialog::createPropertyList()
                 sensorList.append( SensorTypeStr[ s ] );
             }
             item->setAttribute(QLatin1String("enumNames"), sensorList);
-            item->setValue( m_signal.param().inputSensorID() );
+            item->setValue( m_signal.param().inputSensorType() );
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR);
             inputElectricRangeGroup->addSubProperty(item);
 
@@ -300,7 +299,7 @@ void SignalPropertyDialog::createPropertyList()
                 outputSensorList.append( SensorTypeStr[ s ] );
             }
             item->setAttribute(QLatin1String("enumNames"), outputSensorList);
-            item->setValue( m_signal.param().outputSensorID() );
+            item->setValue( m_signal.param().outputSensorType() );
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR);
             outputElectricRangeGroup->addSubProperty(item);
 
@@ -392,28 +391,28 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 
     switch(index)
     {
-        case SIGNAL_PROPERTY_ITEM_CUSTOM_ID:                param.setCustomAppSignalID(value.toString());       groupIndex = SIGNAL_PROPERTY_GROUP_ID;              break;
-        case SIGNAL_PROPERTY_ITEM_CAPTION:                  param.setCaption(value.toString());                 groupIndex = SIGNAL_PROPERTY_GROUP_ID;              break;
+        case SIGNAL_PROPERTY_ITEM_CUSTOM_ID:                param.setCustomAppSignalID(value.toString());                           groupIndex = SIGNAL_PROPERTY_GROUP_ID;              break;
+        case SIGNAL_PROPERTY_ITEM_CAPTION:                  param.setCaption(value.toString());                                     groupIndex = SIGNAL_PROPERTY_GROUP_ID;              break;
 
-        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW:          param.setLowEngeneeringUnits(value.toDouble());     groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH:         param.setHighEngeneeringUnits(value.toDouble());    groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT:         param.setUnitID(value.toInt());                     groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION:    param.setDecimalPlaces( value.toInt());             groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW:          param.setLowEngeneeringUnits(value.toDouble());                         groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH:         param.setHighEngeneeringUnits(value.toDouble());                        groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT:         param.setUnitID(value.toInt());                                         groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION:    param.setDecimalPlaces( value.toInt());                                 groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
 
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW:          param.setInputLowLimit(value.toDouble());           groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH:         param.setInputHighLimit(value.toDouble());          groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT:         param.setInputUnitID(value.toInt());                groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR:       param.setInputSensorID(value.toInt());              groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION:                                                        groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW:          param.setInputLowLimit(value.toDouble());                               groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH:         param.setInputHighLimit(value.toDouble());                              groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT:         param.setInputUnitID(static_cast<E::InputUnit>(value.toInt()));         groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR:       param.setInputSensorType(static_cast<E::SensorType>(value.toInt()));    groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION:                                                                            groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
 
-        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW:         param.setOutputLowLimit(value.toDouble());          groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH:        param.setOutputHighLimit(value.toDouble());         groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT:        param.setOutputUnitID(value.toInt());               groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION:                                                       groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW:         param.setOutputLowLimit(value.toDouble());                              groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH:        param.setOutputHighLimit(value.toDouble());                             groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT:        param.setOutputUnitID(value.toInt());                                   groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION:                                                                           groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
 
-        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_MODE:                                                            groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR:      param.setOutputSensorID(value.toInt());             groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION:                                                       groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_MODE:        param.setOutputMode(static_cast<E::OutputMode>(value.toInt()));         groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR:      param.setOutputSensorType(static_cast<E::SensorType>(value.toInt()));   groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION:                                                                           groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
     }
 
     m_signal.setParam(param);

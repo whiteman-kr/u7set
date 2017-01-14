@@ -41,7 +41,7 @@ private:
 
     bool                    calibratorIsValid(CalibratorManager* pManager);
 
-    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const int& signalInputUnit, const double& highInputLimit);
+    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit);
 
     void                    measureLinearity();
     void                    measureComprators();

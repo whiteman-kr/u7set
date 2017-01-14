@@ -183,7 +183,11 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& 
     //
     setLowLimit(VALUE_TYPE_ELECTRIC, signal.param().inputLowLimit());
     setHighLimit(VALUE_TYPE_ELECTRIC, signal.param().inputHighLimit());
-    setUnit(VALUE_TYPE_ELECTRIC, theSignalBase.unit( signal.param().inputUnitID() ) );
+
+    if ( signal.param().inputUnitID() >= 0 && signal.param().inputUnitID() < INPUT_UNIT_COUNT)
+    {
+        setUnit(VALUE_TYPE_ELECTRIC, InputUnitStr[ signal.param().inputUnitID() ] );
+    }
 
     setLowLimit(VALUE_TYPE_PHYSICAL, signal.param().lowEngeneeringUnits());
     setHighLimit(VALUE_TYPE_PHYSICAL, signal.param().highADC());

@@ -136,7 +136,7 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pManager)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const int& signalInputUnit, const double& highInputLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit)
 {
     if (calibratorIsValid(pManager) == false)
     {
@@ -148,7 +148,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
         return false;
     }
 
-    if (signalInputUnit < 0 || signalInputUnit >= theSignalBase.unitCount())
+    if (signalInputUnit < 0 || signalInputUnit >= INPUT_UNIT_COUNT)
     {
         return false;
     }
@@ -157,11 +157,10 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
 
     switch(signalInputUnit)
     {
-        case  11:   calibratorUnit = CALIBRATOR_UNIT_MV;    break;
-        case  15:   calibratorUnit = CALIBRATOR_UNIT_MA;    break;
-        case  12:   calibratorUnit = CALIBRATOR_UNIT_V;     break;
-        case  8:    calibratorUnit = CALIBRATOR_UNIT_KHZ;   break;      //        (case  7: - Hz)
-        case  20:                                                       //        (case  21: - KOhm)
+        case E::InputUnit::mA:  calibratorUnit = CALIBRATOR_UNIT_MA;    break;
+        case E::InputUnit::mV:  calibratorUnit = CALIBRATOR_UNIT_MV;    break;
+        case E::InputUnit::V:   calibratorUnit = CALIBRATOR_UNIT_V;     break;
+        case E::InputUnit::Ohm:
             {
                 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
                 //
@@ -176,6 +175,9 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
             }
 
             break;
+
+
+        default: assert(0);
     }
 
     if (calibratorUnit < 0 || calibratorUnit >= CALIBRATOR_UNIT_COUNT)

@@ -247,7 +247,7 @@ MeasureSignal::MeasureSignal(Signal param)
 
     m_param.setInputLowLimit(4);
     m_param.setInputHighLimit(20);
-    m_param.setInputUnitID(15);
+    m_param.setInputUnitID( E::InputUnit::mA );
     //
     // temporary solution
 
@@ -341,14 +341,15 @@ QString MeasureSignal::inputElectricRange()
 
     range.sprintf("%.3f .. %.3f ", m_param.inputLowLimit(), m_param.inputHighLimit());
 
-    range.append( theSignalBase.unit( m_param.inputUnitID() ) );
+    if ( m_param.inputUnitID() >= 0 && m_param.inputUnitID() < INPUT_UNIT_COUNT)
+    {
+        range.append( InputUnitStr[ m_param.inputUnitID() ] );
+    }
 
-    int inputSensorID = m_param.inputSensorID();
-
-    if (inputSensorID >= 1 && inputSensorID < SENSOR_TYPE_COUNT)
+    if (m_param.inputSensorType() >= 1 && m_param.inputSensorType() < SENSOR_TYPE_COUNT)
     {
         range.append( " (" );
-        range.append( SensorTypeStr[ inputSensorID ]  );
+        range.append( SensorTypeStr[ m_param.inputSensorType() ]  );
         range.append( ")" );
     }
 
