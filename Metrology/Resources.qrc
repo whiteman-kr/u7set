@@ -30,5 +30,6 @@
         <file>icons/Preview.png</file>
         <file>icons/clbCalys75.png</file>
         <file>icons/clbTRXII.png</file>
+        <file>icons/Property.png</file>
     </qresource>
 </RCC>

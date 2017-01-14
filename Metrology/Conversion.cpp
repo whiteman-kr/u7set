@@ -6763,6 +6763,35 @@ double conversion(double val, int type, const Signal& param)
         return 0;
     }
 
+    int sensor = -1;
+
+    switch(param.inputSensorID())
+    {
+        case 0: sensor = OHM_PT_50_W_1391;      break;          // "Not used",
+
+        case 1: sensor = OHM_PT_50_W_1391;      break;          // "TSP-50P-1.391",
+        case 2: sensor = OHM_PT_100_W_1391;     break;          // "TSP-100P-1.391",
+        case 3: sensor = OHM_PT_50_W_1385;      break;          // "TSP-50P-1.385",
+        case 4: sensor = OHM_PT_100_W_1385;     break;          // "TSP-100P-1.385",
+        case 5: sensor = OHM_CU_50_W_1428;      break;          // "TSM-50M-1.428",
+        case 6: sensor = OHM_CU_100_W_1428;     break;          // "TSM-100M-1.428",
+        case 7: sensor = OHM_CU_50_W_1426;      break;          // "TSM-50M-1.426",
+        case 8: sensor = OHM_CU_100_W_1426;     break;          // "TSM-100M-1.426",
+
+        case 9: sensor = OHM_PT_21;             break;          // "TSP-21",
+        case 10: sensor = OHM_CU_23;            break;          // "TSM-23",
+
+        case 12: sensor = MV_K_TXA;             break;          // "TXA(K)",
+        case 13: sensor = MV_L_TXK;             break;          // "TXK(L) 84",
+        case 14: sensor = MV_L_TXK;             break;          // "TXK(L) 94",
+        case 15: sensor = MV_N_THH;             break;          // "TNN(N)",
+    }
+
+    if (sensor == -1)
+    {
+        return 0;
+    }
+
     double	retVal = 0;
 
     switch(type)
@@ -6773,7 +6802,7 @@ double conversion(double val, int type, const Signal& param)
             {
                 case INPUT_UNIT_OHM:
 
-                    switch(param.inputSensorID())
+                    switch(sensor)
                     {
                         case NO_CONVERTER:      retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
 
@@ -6797,7 +6826,7 @@ double conversion(double val, int type, const Signal& param)
 
                 case INPUT_UNIT_MV:
 
-                    switch(param.inputSensorID())
+                    switch(sensor)
                     {
                         case NO_CONVERTER:      retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
 
@@ -6830,7 +6859,7 @@ double conversion(double val, int type, const Signal& param)
             {
                 case INPUT_UNIT_OHM:
 
-                    switch(param.inputSensorID())
+                    switch(sensor)
                     {
 
                         case NO_CONVERTER:      retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
@@ -6855,7 +6884,7 @@ double conversion(double val, int type, const Signal& param)
 
                 case INPUT_UNIT_MV:
 
-                    switch(param.inputSensorID())
+                    switch(sensor)
                     {
                         case NO_CONVERTER:      retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
 

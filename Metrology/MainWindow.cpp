@@ -1177,7 +1177,7 @@ void MainWindow::options()
 
 void MainWindow::showSignalList()
 {
-    SignalListDialog dialog;
+    SignalListDialog dialog(this);
     dialog.exec();
 }
 

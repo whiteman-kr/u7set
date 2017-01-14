@@ -308,7 +308,7 @@ QString MeasureSignal::adcRange(const bool& showInHex)
 
     if (showInHex == true)
     {
-        range.sprintf("%04X .. %04X", m_param.lowADC(), m_param.highADC());
+        range.sprintf("0x%04X .. 0x%04X", m_param.lowADC(), m_param.highADC());
     }
     else
     {
@@ -742,6 +742,45 @@ Signal SignalBase::signalParam(const int& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::setSignalParam(const Hash& hash, const Signal& param)
+{
+    if (hashIsValid(hash) == false)
+    {
+        assert(false);
+        return;
+    }
+
+    int index = -1;
+
+    m_signalMutex.lock();
+
+        index = m_signalHashMap[hash];
+
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setParam(param);
+        }
+
+    m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::setSignalParam(const int& index, const Signal& param)
+{
+    m_signalMutex.lock();
+
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setParam(param);
+        }
+
+    m_signalMutex.unlock();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 AppSignalState SignalBase::signalState(const Hash& hash)
 {
     if (hashIsValid(hash) == false)
@@ -786,12 +825,11 @@ AppSignalState SignalBase::signalState(const int& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
+void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 {
     if (hashIsValid(hash) == false)
     {
         assert(false);
-        return false;
     }
 
     int index = -1;
@@ -800,14 +838,17 @@ bool SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 
         index = m_signalHashMap[hash];
 
-    m_signalMutex.unlock();
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setState(state);
+        }
 
-    return setSignalState(index, state);
+    m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::setSignalState(const int& index, const AppSignalState &state)
+void SignalBase::setSignalState(const int& index, const AppSignalState &state)
 {
     m_signalMutex.lock();
 
@@ -817,8 +858,6 @@ bool SignalBase::setSignalState(const int& index, const AppSignalState &state)
         }
 
     m_signalMutex.unlock();
-
-    return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

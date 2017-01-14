@@ -300,7 +300,7 @@ void FindMeasurePanel::createInterface()
     m_pView->setItemDelegateForColumn(FM_COLUMN_TEXT, textDelegate);
 
     m_pView->verticalHeader()->hide();
-    m_pView->setShowGrid(false);
+    //m_pView->setShowGrid(false);
     m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     connect(m_pView->horizontalHeader(), &QHeaderView::sectionResized, this, &FindMeasurePanel::onColumnResized);

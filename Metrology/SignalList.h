@@ -64,8 +64,8 @@ public:
 
     QString             text(int row, int column) const;
 
-    bool                showAppSignalID() const { return m_showAppSignalID; }
-    void                setShowAppSignalID(bool show) { m_showAppSignalID = show; }
+    bool                showCustomID() const { return m_showCustomID; }
+    void                setShowCustomID(bool show) { m_showCustomID = show; }
 
     bool                showADCInHex() const { return m_showADCInHex; }
     void                setShowADCInHex(bool show) { m_showADCInHex = show; }
@@ -74,8 +74,8 @@ private:
 
     QList<MeasureSignal> m_signalList;
 
-    bool                m_showAppSignalID = false;
-    bool                m_showADCInHex = true;
+    static bool         m_showCustomID;
+    static bool         m_showADCInHex;
 
     int                 columnCount(const QModelIndex &parent) const;
     int                 rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -99,17 +99,22 @@ private:
     static int          m_columnWidth[SIGNAL_LIST_COLUMN_COUNT];
 
     QMenuBar*           m_pMenuBar = nullptr;
+    QMenu*              m_pEditMenu = nullptr;
     QMenu*              m_pViewMenu = nullptr;
     QMenu*              m_pViewTypeADMenu = nullptr;
     QMenu*              m_pViewTypeIOMenu = nullptr;
     QMenu*              m_pViewShowMenu = nullptr;
+
+    QAction*            m_pCopyAction = nullptr;
+    QAction*            m_pFindAction = nullptr;
+    QAction*            m_pSignalPropertyAction = nullptr;
 
     QAction*            m_pTypeAnalogAction = nullptr;
     QAction*            m_pTypeDiscreteAction = nullptr;
     QAction*            m_pTypeInputAction = nullptr;
     QAction*            m_pTypeOutputAction = nullptr;
     QAction*            m_pTypeInternalAction = nullptr;
-    QAction*            m_pShowAppSignalIDAction = nullptr;
+    QAction*            m_pShowCustomIDAction = nullptr;
     QAction*            m_pShowADCInHexAction = nullptr;
 
     QTableView*         m_pView = nullptr;
@@ -118,35 +123,57 @@ private:
     QAction*            m_pColumnAction[SIGNAL_LIST_COLUMN_COUNT];
     QMenu*              m_headerContextMenu = nullptr;
 
-    E::SignalType       m_typeAD = E::SignalType::Analog;
-    E::SignalInOutType  m_typeIO = E::SignalInOutType::Input;
+    static E::SignalType       m_typeAD;
+    static E::SignalInOutType  m_typeIO;
 
     void                createInterface();
     void                createHeaderContexMenu();
 
-    void                updateList();
     void                updateVisibleColunm();
 
     void                hideColumn(int column, bool hide);
+
+protected:
+
+    bool                eventFilter(QObject *object, QEvent *event);
 
 signals:
 
 private slots:
 
+    // slots for updating
+    //
+    void                updateList();
+
     // slots of menu
     //
+                        // Edit
+                        //
+    void                copy();
+    void                find();
+    void                signalProperty();
+
+
+                        // View
+                        //
     void                showTypeAnalog();
     void                showTypeDiscrete();
     void                showTypeInput();
     void                showTypeOutput();
     void                showTypeInternal();
-    void                showAppSignalID();
+    void                showCustomID();
     void                showADCInHex();
+
+    void                onContextMenu(QPoint);
 
     // slots for list header, to hide or show columns
     //
     void                onHeaderContextMenu(QPoint);
     void                onColumnAction(QAction* action);
+
+    // slots for list
+    //
+    void                onListDoubleClicked(const QModelIndex&) { signalProperty(); }
 };
 
 // ==============================================================================================

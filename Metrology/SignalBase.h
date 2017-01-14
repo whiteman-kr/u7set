@@ -215,11 +215,14 @@ public:
     Signal                  signalParam(const Hash& hash);
     Signal                  signalParam(const int& index);
 
+    void                    setSignalParam(const Hash& hash, const Signal& param);
+    void                    setSignalParam(const int& index, const Signal& param);
+
     AppSignalState          signalState(const Hash& hash);
     AppSignalState          signalState(const int& index);
 
-    bool                    setSignalState(const Hash& hash, const AppSignalState& state);
-    bool                    setSignalState(const int& index, const AppSignalState& state);
+    void                    setSignalState(const Hash& hash, const AppSignalState& state);
+    void                    setSignalState(const int& index, const AppSignalState& state);
 
     // Units
     //
