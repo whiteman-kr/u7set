@@ -19,13 +19,12 @@ class FindItem
 public:
 
     explicit            FindItem();
-    explicit            FindItem(int row, int column, QString columnTitle, int beginPos, int endPos, QString text);
+    explicit            FindItem(const int& row, const int& column, const int& beginPos, const int& endPos, const QString& text);
 
 private:
 
     int                 m_row = -1;
     int                 m_column = -1;
-    QString             m_columnTitle;
 
     int                 m_beginPos = -1;
     int                 m_endPos = -1;
@@ -39,9 +38,6 @@ public:
 
     int                 column() const { return m_column; }
     void                setColumn(int column) { m_column = column; }
-
-    QString             columnTitle() const { return m_columnTitle; }
-    void                setColumnTitle(QString title) { m_columnTitle = title; }
 
     void                setCoordinates(int row, int column) { m_row = row; m_column = column; }
 
@@ -69,14 +65,14 @@ const char* const       FindMeasureColumn[] =
 {
                         QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Row"),
                         QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Text"),
-                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Column"),
 };
 
 const int               FIND_MEASURE_COLUMN_COUNT       = sizeof(FindMeasureColumn)/sizeof(char*);
 
 const int               FIND_MEASURE_COLUMN_ROW         = 0,
-                        FIND_MEASURE_COLUMN_TEXT        = 1,
-                        FIND_MEASURE_COLUMN_COLUMN      = 2;
+                        FIND_MEASURE_COLUMN_TEXT        = 1;
+
+const int               FIND_MEASURE_COLUMN_ROW_WIDTH   = 50;
 
 // ==============================================================================================
 
@@ -129,13 +125,11 @@ private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    static int          m_columnWidth[FIND_MEASURE_COLUMN_COUNT];
-
     QString             m_findText;
 
     QMainWindow*        m_pFindWindow = nullptr;
     QLineEdit*          m_findTextEdit  = nullptr;
-    QTableView*         m_pView = nullptr;
+    QTableView*         m_pFindItemView = nullptr;
     QLabel*             m_statusLabel = nullptr;
     FindMeasureTable    m_table;
 
@@ -158,10 +152,9 @@ private slots:
 
     void                find();
 
-    void                selectMeasureCell(QModelIndex);
+    void                selectItemInMeasureView(QModelIndex);
 
     void                onContextMenu(QPoint);
-    void                onColumnResized(int index, int, int width);
 
     void                copy();
     void                selectAll();

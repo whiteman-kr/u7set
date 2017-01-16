@@ -62,7 +62,7 @@ class MeasureView : public QTableView
     Q_OBJECT
 
 public:
-    explicit            MeasureView(int type, QWidget *parent = 0);
+    explicit            MeasureView(const int& measureType, QWidget *parent = 0);
                         ~MeasureView();
 
     int                 measureType()   { return m_measureType; }

@@ -543,11 +543,11 @@ bool MeasureTable::remove(const QList<int> removeIndexList)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureView::MeasureView(int type, QWidget *parent) :
+MeasureView::MeasureView(const int& measureType, QWidget *parent) :
     QTableView(parent),
-    m_measureType(type)
+    m_measureType(measureType)
 {
-    m_table.setMeasureType(type);
+    m_table.setMeasureType(measureType);
     setModel(&m_table);
 
     //setSelectionBehavior(QAbstractItemView::SelectRows);
