@@ -31,5 +31,9 @@
         <file>icons/clbCalys75.png</file>
         <file>icons/clbTRXII.png</file>
         <file>icons/Property.png</file>
+        <file>icons/CheckGreen.png</file>
+        <file>icons/CheckGrey.png</file>
+        <file>icons/CheckRed.png</file>
+        <file>icons/QuestionGrey.png</file>
     </qresource>
 </RCC>

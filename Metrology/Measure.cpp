@@ -7,33 +7,34 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureItem::MeasureItem(int type)
+Measurement::Measurement(int type)
 {
     m_measureType = type;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureItem* MeasureItem::at(int index)
+Measurement* Measurement::at(int index)
 {
-    MeasureItem* pMeasure = nullptr;
+    Measurement* pMeasurement = nullptr;
 
     switch(m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:            pMeasure = static_cast<LinearetyMeasureItem*> (this) + index;           break;
-        case MEASURE_TYPE_COMPARATOR:           pMeasure = static_cast<ComparatorMeasureItem*> (this) + index;          break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasure = static_cast<ComplexComparatorMeasureItem*> (this) + index;   break;
-        default:                                assert(0);                                                              break;
+        case MEASURE_TYPE_LINEARITY:            pMeasurement = static_cast<LinearityMeasurement*> (this) + index;           break;
+        case MEASURE_TYPE_COMPARATOR:           pMeasurement = static_cast<ComparatorMeasurement*> (this) + index;          break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasurement = static_cast<ComplexComparatorMeasurement*> (this) + index;   break;
+        default:                                assert(0);
     }
 
-    return pMeasure;
+    return pMeasurement;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureItem& MeasureItem::operator=(MeasureItem& from)
+Measurement& Measurement::operator=(Measurement& from)
 {
     m_measureType = from.m_measureType;
+    m_signalHash = from.m_signalHash;
 
     m_measureID = from.m_measureID;
     m_filter = from.m_filter;
@@ -43,10 +44,10 @@ MeasureItem& MeasureItem::operator=(MeasureItem& from)
 
     switch(m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:            *static_cast<LinearetyMeasureItem*> (this) = *static_cast <LinearetyMeasureItem*> (&from);                  break;
-        case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasureItem*> (this) = *static_cast <ComparatorMeasureItem*> (&from);                break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasureItem*> (this) = *static_cast <ComplexComparatorMeasureItem*> (&from);  break;
-        default:                                assert(0);                                                                                                  break;
+        case MEASURE_TYPE_LINEARITY:            *static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);                  break;
+        case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasurement*> (this) = *static_cast <ComparatorMeasurement*> (&from);                break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasurement*> (this) = *static_cast <ComplexComparatorMeasurement*> (&from);  break;
+        default:                                assert(0);
     }
 
     return *this;
@@ -56,8 +57,8 @@ MeasureItem& MeasureItem::operator=(MeasureItem& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem::LinearetyMeasureItem() :
-    MeasureItem(MEASURE_TYPE_LINEARITY)
+LinearityMeasurement::LinearityMeasurement() :
+    Measurement(MEASURE_TYPE_LINEARITY)
 {
     for(int v = 0; v < VALUE_TYPE_COUNT; v++)
     {
@@ -92,7 +93,7 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& signalHash)
+LinearityMeasurement::LinearityMeasurement(Calibrator* pCalibrator, const Hash& signalHash)
 {
     if (pCalibrator == nullptr)
     {
@@ -113,8 +114,9 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& 
         return;
     }
 
-
     setMeasureType(MEASURE_TYPE_LINEARITY);
+
+    setSignalHash(signalHash);
 
     // features
     //
@@ -288,7 +290,7 @@ LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::limitString(int type) const
+QString LinearityMeasurement::limitString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -304,7 +306,7 @@ QString LinearetyMeasureItem::limitString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::nominalString(int type) const
+QString LinearityMeasurement::nominalString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -317,7 +319,7 @@ QString LinearetyMeasureItem::nominalString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::measureString(int type) const
+QString LinearityMeasurement::measureString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -330,7 +332,7 @@ QString LinearetyMeasureItem::measureString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::measureItemString(int type, int index) const
+QString LinearityMeasurement::measureItemString(int type, int index) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -349,55 +351,55 @@ QString LinearetyMeasureItem::measureItemString(int type, int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearetyMeasureItem::updateMeasureArray(int valueType, MeasureItem* pMeasure)
+void LinearityMeasurement::updateMeasureArray(int valueType, Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
 
-    int measureType = pMeasure->measureType();
+    int measureType = pMeasurement->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+    LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
-    m_measureArrayCount = pLinearetyMeasureItem->measureArrayCount();
+    m_measureArrayCount = pLinearityMeasureItem->measureArrayCount();
 
     for(int m = 0; m < MEASUREMENT_IN_POINT; m++)
     {
-        m_measureArray[valueType][m] = pLinearetyMeasureItem->measureItemArray(valueType, m);
+        m_measureArray[valueType][m] = pLinearityMeasureItem->measureItemArray(valueType, m);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearetyMeasureItem::updateAdditionalValue(MeasureItem* pMeasure)
+void LinearityMeasurement::updateAdditionalValue(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
 
-    int measureType = pMeasure->measureType();
+    int measureType = pMeasurement->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+    LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
     for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
     {
-        m_additionalValue[a] = pLinearetyMeasureItem->additionalValue(a);
+        m_additionalValue[a] = pLinearityMeasureItem->additionalValue(a);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem& from)
+LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement& from)
 {
     m_appSignalID = from.m_appSignalID;
     m_customAppSignalID = from.m_customAppSignalID;
@@ -451,14 +453,14 @@ LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasureItem::ComparatorMeasureItem() :
-    MeasureItem(MEASURE_TYPE_COMPARATOR)
+ComparatorMeasurement::ComparatorMeasurement() :
+    Measurement(MEASURE_TYPE_COMPARATOR)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
+ComparatorMeasurement::ComparatorMeasurement(Calibrator* pCalibrator)
 {
     if (pCalibrator == nullptr)
     {
@@ -483,9 +485,9 @@ ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+void ComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
@@ -496,14 +498,14 @@ void ComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
 // -------------------------------------------------------------------------------------------------------------------
 
 
-ComplexComparatorMeasureItem::ComplexComparatorMeasureItem() :
-    MeasureItem(MEASURE_TYPE_COMPLEX_COMPARATOR)
+ComplexComparatorMeasurement::ComplexComparatorMeasurement() :
+    Measurement(MEASURE_TYPE_COMPLEX_COMPARATOR)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
+ComplexComparatorMeasurement::ComplexComparatorMeasurement(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
 {
     if (pMainCalibrator == nullptr || pSubCalibrator == nullptr)
     {
@@ -528,9 +530,9 @@ ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCali
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComplexComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+void ComplexComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }

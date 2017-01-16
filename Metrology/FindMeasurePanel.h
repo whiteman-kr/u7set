@@ -65,18 +65,18 @@ Q_DECLARE_METATYPE(FindItem)   // for type QVariant
 
 // ==============================================================================================
 
-const char* const       FmColumn[] =
+const char* const       FindMeasureColumn[] =
 {
+                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Row"),
                         QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Text"),
-                        QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Index"),
                         QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Column"),
 };
 
-const int               FM_COLUMN_COUNT    = sizeof(FmColumn)/sizeof(char*);
+const int               FIND_MEASURE_COLUMN_COUNT       = sizeof(FindMeasureColumn)/sizeof(char*);
 
-const int               FM_COLUMN_TEXT     = 0,
-                        FM_COLUMN_INDEX    = 1,
-                        FM_COLUMN_COLUMN   = 2;
+const int               FIND_MEASURE_COLUMN_ROW         = 0,
+                        FIND_MEASURE_COLUMN_TEXT        = 1,
+                        FIND_MEASURE_COLUMN_COLUMN      = 2;
 
 // ==============================================================================================
 
@@ -129,7 +129,7 @@ private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
-    static int          m_columnWidth[FM_COLUMN_COUNT];
+    static int          m_columnWidth[FIND_MEASURE_COLUMN_COUNT];
 
     QString             m_findText;
 

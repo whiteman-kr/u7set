@@ -102,7 +102,8 @@ SOURCES += \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
-    SignalProperty.cpp
+    SignalProperty.cpp \
+    Statistic.cpp
 
 
 HEADERS  += \
@@ -153,7 +154,8 @@ HEADERS  += \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
-    SignalProperty.h
+    SignalProperty.h \
+    Statistic.h
 
 
 FORMS    +=

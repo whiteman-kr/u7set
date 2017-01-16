@@ -6,6 +6,8 @@
 #include "Calibrator.h"
 #include "SignalBase.h"
 
+#include "../lib/Hash.h"
+
 // ==============================================================================================
 
 const char* const MeasureType[] =
@@ -212,16 +214,17 @@ const int   INVALID_VALUE           = 0xFFFF;
 
 // ==============================================================================================
 
-class MeasureItem
+class Measurement
 {
 
 public:
 
-    explicit MeasureItem(int type = MEASURE_TYPE_UNKNOWN);
+    explicit Measurement(int type = MEASURE_TYPE_UNKNOWN);
 
 private:
 
     int m_measureType = MEASURE_TYPE_UNKNOWN;           // measure tyupe
+    Hash m_signalHash = 0;                              // hash calced from AppSignalID by function calcHash()
 
     int m_measureID = -1;                               // primary key of record in SQL table
     bool m_filter = false;                              // filter for record, if "true" - hide record
@@ -233,6 +236,10 @@ public:
 
     int measureType() const { return m_measureType; }
     void setMeasureType(int type) { m_measureType = type; }
+
+    Hash signalHash() const { return m_signalHash; }
+    void setSignalHash(Hash hash) { m_signalHash = hash; }
+    void setSignalHash(QString id) { m_signalHash = calcHash(id); }
 
     int measureID() const { return m_measureID; }
     void setMeasureID(int id) { m_measureID = id; }
@@ -246,20 +253,20 @@ public:
     int reportType() const { return m_reportType; }
     void setReportType(int type) { m_reportType = type; }
 
-    MeasureItem* at(int index);
+    Measurement* at(int index);
 
-    MeasureItem& operator=(MeasureItem& from);
+    Measurement& operator=(Measurement& from);
 };
 
 // ==============================================================================================
 
-class LinearetyMeasureItem : public MeasureItem
+class LinearityMeasurement : public Measurement
 {
 
 public:
 
-    explicit LinearetyMeasureItem();
-    explicit LinearetyMeasureItem(Calibrator* pCalibrator, const Hash& signalHash);
+    explicit LinearityMeasurement();
+    explicit LinearityMeasurement(Calibrator* pCalibrator, const Hash& signalHash);
 
 private:
 
@@ -298,10 +305,10 @@ private:
 
 public:
 
-    QString strID() const { return m_appSignalID; }
-    void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
+    QString appSignalID() const { return m_appSignalID; }
+    void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID;  setSignalHash(m_appSignalID); }
 
-    QString extStrID() const { return m_customAppSignalID; }
+    QString customAppSignalID() const { return m_customAppSignalID; }
     void setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
     QString name() const { return m_caption; }
@@ -369,21 +376,21 @@ public:
     double additionalValue(int type) const { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return 0; } return m_additionalValue[type]; }
     void setAdditionalValue(int type, double value) { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return; } m_additionalValue[type] = value; }
 
-    void updateMeasureArray(int type, MeasureItem* pMeasure);
-    void updateAdditionalValue(MeasureItem* pMeasure);
+    void updateMeasureArray(int type, Measurement* pMeasurement);
+    void updateAdditionalValue(Measurement* pMeasurement);
 
-    LinearetyMeasureItem& operator=(const LinearetyMeasureItem& from);
+    LinearityMeasurement& operator=(const LinearityMeasurement& from);
 };
 
 // ==============================================================================================
 
-class ComparatorMeasureItem : public MeasureItem
+class ComparatorMeasurement : public Measurement
 {
 
 public:
 
-    explicit ComparatorMeasureItem();
-    explicit ComparatorMeasureItem(Calibrator* pCalibrator);
+    explicit ComparatorMeasurement();
+    explicit ComparatorMeasurement(Calibrator* pCalibrator);
 
 private:
 
@@ -406,7 +413,7 @@ public:
 
     DevicePosition& position() { return m_position; }
 
-    void updateHysteresis(MeasureItem* pMeasure);
+    void updateHysteresis(Measurement* pMeasurement);
 };
 
 // ==============================================================================================
@@ -415,13 +422,13 @@ const int COMPLEX_COMPARATOR_SIGNAL_COUNT = 2;
 
 // ==============================================================================================
 
-class ComplexComparatorMeasureItem : public MeasureItem
+class ComplexComparatorMeasurement : public Measurement
 {
 
 public:
 
-    explicit ComplexComparatorMeasureItem();
-    explicit ComplexComparatorMeasureItem(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator);
+    explicit ComplexComparatorMeasurement();
+    explicit ComplexComparatorMeasurement(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator);
 
 private:
 
@@ -444,7 +451,7 @@ public:
 
     DevicePosition& position() { return m_position; }
 
-    void updateHysteresis(MeasureItem* pMeasure);
+    void updateHysteresis(Measurement* pMeasurement);
 };
 
 // ==============================================================================================

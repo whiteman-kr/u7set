@@ -22,6 +22,7 @@
 #include "ReportView.h"
 #include "ExportMeasure.h"
 #include "SignalList.h"
+#include "Statistic.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -1091,7 +1092,7 @@ void MainWindow::copyMeasure()
         return;
     }
 
-    pView->copyMeasure();
+    pView->copy();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1178,6 +1179,14 @@ void MainWindow::options()
 void MainWindow::showSignalList()
 {
     SignalListDialog dialog(this);
+    dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showStatistic()
+{
+    StatisticDialog dialog(this);
     dialog.exec();
 }
 
@@ -1492,6 +1501,7 @@ void MainWindow::signalSocketConnected()
     updateStartStopActions();
 
     m_statusConnectToServer->setText( tr("Connect to server: on  ") );
+
     // m_statusConnectToServer->setStyleSheet("background-color: rgb(127, 255, 127);");
 }
 
@@ -1522,9 +1532,8 @@ void MainWindow::signalSocketDisconnected()
     theSignalBase.clear();
 
     m_statusConnectToServer->setText( tr("Connect to server: off ") );
+
     // m_statusConnectToServer->setStyleSheet("background-color: rgb(255, 127, 127);");
-
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1617,20 +1626,20 @@ void MainWindow::setMeasureThreadInfo(int timeout)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::measureComplite(MeasureItem* pMeasure)
+void MainWindow::measureComplite(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
 
-    int type = pMeasure->measureType();
+    int type = pMeasurement->measureType();
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    emit appendMeasure(pMeasure);
+    emit appendMeasure(pMeasurement);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1677,6 +1686,10 @@ void MainWindow::closeEvent(QCloseEvent* e)
         m_pSignalSocketThread->quitAndWait(10000);
         delete m_pSignalSocketThread;
     }
+
+    theSignalBase.clear();
+
+    theMeasurementBase.clear();
 
     theCalibratorBase.clear();
 

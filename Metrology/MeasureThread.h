@@ -33,9 +33,9 @@ private:
     QWidget*                m_parentWidget = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    bool                    m_cmdStopMeasure = true;
-
     MeasureMultiSignal      m_activeSignal;
+
+    bool                    m_cmdStopMeasure = true;
 
     void                    waitMeasureTimeout();
 
@@ -55,11 +55,10 @@ signals:
 
     void                    showMsgBox(QString);
 
-    // measure thread signals
-    //
     void                    measureInfo(QString);
     void                    measureInfo(int);
-    void                    measureComplite(MeasureItem*);
+
+    void                    measureComplite(Measurement*);
 
 private slots:
 

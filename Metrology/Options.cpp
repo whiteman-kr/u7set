@@ -367,10 +367,10 @@ void REPORT_HEADER::init(int type)
 
     switch(m_type)
     {
-        case REPORT_TYPE_LINEARITY:                 objectID = SqlObjectID[SQL_TABLE_LINEARETY];            break;
-        case REPORT_TYPE_LINEARITY_CERTIFICATION:   objectID = SqlObjectID[SQL_TABLE_LINEARETY_ADD_VAL];    break;
-        case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_EL];      break;
-        case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_PH];      break;
+        case REPORT_TYPE_LINEARITY:                 objectID = SqlObjectID[SQL_TABLE_LINEARITY];            break;
+        case REPORT_TYPE_LINEARITY_CERTIFICATION:   objectID = SqlObjectID[SQL_TABLE_LINEARITY_ADD_VAL];    break;
+        case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_EL];      break;
+        case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_PH];      break;
         case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
         case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
         default:                                    assert(0);                                              break;
@@ -702,7 +702,7 @@ void LinearityOption::load()
 {
     QSettings s;
 
-    m_pointBase.loadData(SQL_TABLE_LINEARETY_POINT);
+    m_pointBase.loadData(SQL_TABLE_LINEARITY_POINT);
 
     m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
@@ -741,7 +741,7 @@ void LinearityOption::save()
     s.setValue( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
     s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
 
-    m_pointBase.saveData(SQL_TABLE_LINEARETY_POINT);
+    m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

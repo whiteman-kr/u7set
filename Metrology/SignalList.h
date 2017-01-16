@@ -57,9 +57,9 @@ public:
     explicit            SignalListTable(QObject* parent = 0);
                         ~SignalListTable();
 
-    int                 count() { return m_signalList.count(); }
-    MeasureSignal       at(int index);
-    void                set(const QList<MeasureSignal> list_add);
+    int                 count() { return m_signaHashList.count(); }
+    Hash                at(int index);
+    void                set(const QList<Hash> list_add);
     void                clear();
 
     QString             text(int row, int column) const;
@@ -72,7 +72,7 @@ public:
 
 private:
 
-    QList<MeasureSignal> m_signalList;
+    QList<Hash>         m_signaHashList;
 
     static bool         m_showCustomID;
     static bool         m_showADCInHex;

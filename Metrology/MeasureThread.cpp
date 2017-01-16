@@ -5,7 +5,6 @@
 #include <QTime>
 
 #include "Options.h"
-#include "MeasureBase.h"
 #include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -404,13 +403,13 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            LinearetyMeasureItem* pMeasure = new LinearetyMeasureItem(pManager->calibrator(), signalHash);
-            if (pMeasure == nullptr )
+            LinearityMeasurement* pMeasurement = new LinearityMeasurement(pManager->calibrator(), signalHash);
+            if (pMeasurement == nullptr )
             {
                 continue;
             }
 
-            emit measureComplite( pMeasure );
+            emit measureComplite( pMeasurement );
         }
     }
 }

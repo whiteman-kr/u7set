@@ -70,7 +70,7 @@ FindMeasureTable::~FindMeasureTable()
 
 int FindMeasureTable::columnCount(const QModelIndex&) const
 {
-    return FM_COLUMN_COUNT;
+    return FIND_MEASURE_COLUMN_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ QVariant FindMeasureTable::headerData(int section, Qt::Orientation orientation, 
 
     if(orientation == Qt::Horizontal )
     {
-        if (section >= 0 && section < FM_COLUMN_COUNT)
+        if (section >= 0 && section < FIND_MEASURE_COLUMN_COUNT)
         {
-            result = FmColumn[section];
+            result = FindMeasureColumn[section];
         }
     }
 
@@ -123,24 +123,27 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
     }
 
     int column = index.column();
-    if (column < 0 || column > FM_COLUMN_COUNT)
+    if (column < 0 || column > FIND_MEASURE_COLUMN_COUNT)
     {
         return QVariant();
     }
 
     if (role == Qt::TextAlignmentRole)
     {
-        int result = Qt::AlignCenter;
+        return Qt::AlignLeft;
+    }
+
+    if (role == Qt::TextColorRole)
+    {
+        QColor result;
 
         switch (column)
         {
-            case FM_COLUMN_TEXT:    result = Qt::AlignLeft;     break;
-            case FM_COLUMN_INDEX:   result = Qt::AlignCenter;   break;
-            case FM_COLUMN_COLUMN:  result = Qt::AlignLeft;     break;
-            default:                assert(0);
+            case FIND_MEASURE_COLUMN_ROW:
+            case FIND_MEASURE_COLUMN_COLUMN:    return QColor(0xA0, 0xA0, 0xA0); break;
         }
 
-        return result;
+        return QVariant();
     }
 
     if (role == Qt::UserRole )
@@ -167,7 +170,7 @@ QString FindMeasureTable::text(int row, int column) const
         return "";
     }
 
-    if (column < 0 || column > FM_COLUMN_COUNT)
+    if (column < 0 || column > FIND_MEASURE_COLUMN_COUNT)
     {
         return "";
     }
@@ -178,10 +181,10 @@ QString FindMeasureTable::text(int row, int column) const
 
     switch (column)
     {
-        case FM_COLUMN_TEXT:    result = item.text();                       break;
-        case FM_COLUMN_INDEX:   result = QString::number(item.row() + 1);   break;
-        case FM_COLUMN_COLUMN:  result = item.columnTitle();                break;
-        default:                assert(0);                                  break;
+        case FIND_MEASURE_COLUMN_ROW:       result = QString::number(item.row() + 1);   break;
+        case FIND_MEASURE_COLUMN_TEXT:      result = item.text();                       break;
+        case FIND_MEASURE_COLUMN_COLUMN:    result = item.columnTitle();                break;
+        default:                            assert(0);
     }
 
     return result;
@@ -238,7 +241,7 @@ void FindMeasureTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int FindMeasurePanel::m_columnWidth[FM_COLUMN_COUNT] = { 200, 50, 100, };
+int FindMeasurePanel::m_columnWidth[FIND_MEASURE_COLUMN_COUNT] = { 50, 200, 100, };
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -288,7 +291,7 @@ void FindMeasurePanel::createInterface()
 
     m_pFindWindow->setCentralWidget(m_pView);
 
-    for(int c = 0; c < FM_COLUMN_COUNT; c++)
+    for(int c = 0; c < FIND_MEASURE_COLUMN_COUNT; c++)
     {
         m_pView->setColumnWidth(c, m_columnWidth[c]);
     }
@@ -297,10 +300,10 @@ void FindMeasurePanel::createInterface()
     m_pView->installEventFilter(this);
 
     FindTextDelegate* textDelegate = new FindTextDelegate(this);
-    m_pView->setItemDelegateForColumn(FM_COLUMN_TEXT, textDelegate);
+    m_pView->setItemDelegateForColumn(FIND_MEASURE_COLUMN_TEXT, textDelegate);
 
     m_pView->verticalHeader()->hide();
-    //m_pView->setShowGrid(false);
+    m_pView->setShowGrid(false);
     m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     connect(m_pView->horizontalHeader(), &QHeaderView::sectionResized, this, &FindMeasurePanel::onColumnResized);
@@ -441,7 +444,7 @@ void FindMeasurePanel::find()
 
     m_table.set(findItemList);
 
-    m_pView->setCurrentIndex(m_pView->model()->index(0, FM_COLUMN_TEXT));
+    m_pView->setCurrentIndex(m_pView->model()->index(0, FIND_MEASURE_COLUMN_TEXT));
     m_pView->setFocus();
 
     selectMeasureCell(QModelIndex());
@@ -503,7 +506,7 @@ void FindMeasurePanel::onContextMenu(QPoint)
 
 void FindMeasurePanel::onColumnResized(int index, int, int width)
 {
-    if (index < 0 || index >= FM_COLUMN_COUNT)
+    if (index < 0 || index >= FIND_MEASURE_COLUMN_COUNT)
     {
         return;
     }
@@ -525,7 +528,7 @@ void FindMeasurePanel::copy()
         appendRow = false;
         textRow = "";
 
-        for(int c = 0; c < FM_COLUMN_COUNT; c++)
+        for(int c = 0; c < FIND_MEASURE_COLUMN_COUNT; c++)
         {
             if (m_pView->selectionModel()->isSelected( m_pView->model()->index(r,c) ) == true)
             {
@@ -533,7 +536,7 @@ void FindMeasurePanel::copy()
                 textRow.append(m_table.text(r, c));
             }
 
-            if (c != FM_COLUMN_COUNT - 1)
+            if (c != FIND_MEASURE_COLUMN_COUNT - 1)
             {
                 textRow.append("\t");
             }
@@ -565,9 +568,9 @@ void FindMeasurePanel::loadSettings()
 
     m_findText = s.value( QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), "").toString();
 
-    for(int c = 0; c < FM_COLUMN_COUNT; c++)
+    for(int c = 0; c < FIND_MEASURE_COLUMN_COUNT; c++)
     {
-        m_columnWidth[c] = s.value(QString("%1/Header/%2/Width").arg(FIND_MEASURE_OPTIONS_KEY).arg(FmColumn[c]), m_columnWidth[c]).toInt();
+        m_columnWidth[c] = s.value(QString("%1/Header/%2/Width").arg(FIND_MEASURE_OPTIONS_KEY).arg(FindMeasureColumn[c]), m_columnWidth[c]).toInt();
     }
 }
 
@@ -579,9 +582,9 @@ void FindMeasurePanel::saveSettings()
 
     s.setValue( QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), m_findText);
 
-    for(int c = 0; c < FM_COLUMN_COUNT; c++)
+    for(int c = 0; c < FIND_MEASURE_COLUMN_COUNT; c++)
     {
-        s.setValue(QString("%1/Header/%2/Width").arg(FIND_MEASURE_OPTIONS_KEY).arg(FmColumn[c]), m_columnWidth[c]);
+        s.setValue(QString("%1/Header/%2/Width").arg(FIND_MEASURE_OPTIONS_KEY).arg(FindMeasureColumn[c]), m_columnWidth[c]);
     }
 }
 
