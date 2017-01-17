@@ -129,6 +129,39 @@ public:
 	};
 	Q_ENUM(OutputMode)
 
+    enum InputUnit
+    {
+        NoInputUnit = 0,
+        mA = 1,
+        mV = 2,
+        Ohm = 3,
+        V = 4,
+    };
+    Q_ENUM(InputUnit)
+
+    enum SensorType
+    {
+        NoSensorType = 0,
+
+        Ohm_Pt50_W1391 = 1,
+        Ohm_Pt100_W1391 = 2,
+        Ohm_Pt50_W1385 = 3,
+        Ohm_Pt100_W1385 = 4,
+
+        Ohm_Cu_50_W1428 = 5,
+        Ohm_Cu_100_W1428 = 6,
+        Ohm_Cu_50_W1426 = 7,
+        Ohm_Cu_100_W1426 = 8,
+
+        Ohm_Pt21 = 9,
+        Ohm_Cu23 = 10,
+
+        mV_K_TXA = 11,
+        mV_L_TXK = 12,
+        mV_N_THH = 13,
+    };
+    Q_ENUM(SensorType)
+
 	enum class SignalInOutType
 	{
 		Input = 0,

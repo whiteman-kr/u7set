@@ -26,53 +26,94 @@ const char* const InOutTypeStr[] =
 const int IN_OUT_TYPE_COUNT = sizeof(InOutTypeStr) / sizeof(InOutTypeStr[0]);
 
 
-const char* const SensorTypeStr[] =
-{
-	"Not used",
-
-	"TSP-50P-1.391",
-	"TSP-100P-1.391",
-	"TSP-50P-1.385",
-	"TSP-100P-1.385",
-	"TSM-50M-1.428",
-	"TSM-100M-1.428",
-	"TSM-50M-1.426",
-	"TSM-100M-1.426",
-	"TSP-21",
-	"TSM-23",
-	"Rheochord",
-
-	"TXA(K)",
-	"TXK(L) 84",
-	"TXK(L) 94",
-	"TNN(N)",
-
-	"BPS",
-};
-
-const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
-
-
 const char* const OutputModeStr[] =
 {
-	"0..5 V",
-	"4..20 mA",
-	"-10..10 V",
-	"0..5 mA",
+    "0 .. 5 V",
+    "4 .. 20 mA",
+    "-10 .. 10 V",
+    "0 .. 5 mA",
 };
 
 const int OUTPUT_MODE_COUNT = sizeof(OutputModeStr) / sizeof(OutputModeStr[0]);
 
 
-const int NO_UNIT_ID = 1;
-
+const int   NO_UNIT_ID = 1;
 
 struct Unit
 {
-	int ID;
-	QString nameEn;
-	QString nameRu;
+    int ID;
+    QString nameEn;
+    QString nameRu;
 };
+
+const char* const InputUnitStr[] =
+{
+    "Not used",
+    "mA",
+    "mV",
+    "Ohm",
+    "V",
+};
+
+const int INPUT_UNIT_COUNT = sizeof(InputUnitStr) / sizeof(InputUnitStr[0]);
+
+
+const char* const SensorTypeStr[] =
+{
+    "Not used",
+
+    "Pt50 W=1.391",
+    "Pt100 W=1.391",
+    "Pt50 W=1.385",
+    "Pt100 W=1.385",
+
+    "Cu50 W=1.428",
+    "Cu100 W=1.428",
+    "Cu50 W=1.426",
+    "Cu100 W=1.426",
+
+    "Pt21",
+    "Cu23",
+
+    "K (TXA)",
+    "L (TXK)",
+    "N (THH)",
+};
+
+const int   SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
+
+
+struct UnitSensorTypePair
+{
+    int unitID;
+    int sensorType;
+};
+
+const UnitSensorTypePair SensorTypeByUnit[] =
+{
+    // types of thermistors
+    //
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385 },
+
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1428 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1428 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1426 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1426 },
+
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
+    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
+
+    // types of thermocouple
+    //
+    { E::InputUnit::mV, 	E::SensorType::mV_K_TXA },
+    { E::InputUnit::mV, 	E::SensorType::mV_L_TXK },
+    { E::InputUnit::mV, 	E::SensorType::mV_N_THH },
+};
+
+const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);
 
 
 struct DataFormatPair
@@ -130,21 +171,21 @@ private:
 	int m_dataSize = 32;
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
-	double m_lowEngeneeringUnits = 0;
-	double m_highEngeneeringUnits = 100;
-	int m_unitID = NO_UNIT_ID;
+    double m_lowEngeneeringUnits = 0;                               // low physical value for input range
+    double m_highEngeneeringUnits = 100;                            // high physical value for input range
+    int m_unitID = NO_UNIT_ID;                                      // physical unit for input range (kg, mm, Pa ...)
 	double m_lowValidRange = 0;
 	double m_highValidRange = 100;
 	double m_unbalanceLimit = 0;
-	double m_inputLowLimit = 0;
-	double m_inputHighLimit = 0;
-	int m_inputUnitID = NO_UNIT_ID;
-	int m_inputSensorID = 0;
-	double m_outputLowLimit = 0;
-	double m_outputHighLimit = 0;
-	int m_outputUnitID = NO_UNIT_ID;
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;
-	int m_outputSensorID = 0;
+    double m_inputLowLimit = 0;                                     // low electric value for input range
+    double m_inputHighLimit = 0;                                    // high electric value for input range
+    E::InputUnit m_inputUnitID = E::InputUnit::NoInputUnit;         // electric unit for input range (mA, mV, Ohm, V ....)
+    E::SensorType m_inputSensorType = E::SensorType::NoSensorType;  // electric sensor type for input range (was created for m_inputUnitID)
+    double m_outputLowLimit = 0;                                    // low physical value for output range
+    double m_outputHighLimit = 0;                                   // high physical value for output range
+    int m_outputUnitID = NO_UNIT_ID;                                // physical unit for output range (kg, mm, Pa ...)
+    E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;      // output electric range (or mode ref. OutputModeStr[])
+    E::SensorType m_outputSensorType = E::SensorType::NoSensorType; // electric sensor type for output range (was created for m_outputMode)
 	bool m_acquire = true;
 	bool m_calculated = false;
 	int m_normalState = 0;
@@ -256,6 +297,8 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
+    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::InputUnit));
+    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
@@ -316,11 +359,15 @@ public:
 	Q_INVOKABLE double inputHighLimit() const { return m_inputHighLimit; }
 	void setInputHighLimit(double inputHighLimit) { m_inputHighLimit = inputHighLimit; }
 
-	Q_INVOKABLE int inputUnitID() const { return m_inputUnitID; }
-	void setInputUnitID(int inputUnitID) { m_inputUnitID = inputUnitID; }
+    int inputUnitIDInt() const { return TO_INT(m_inputUnitID); }
+    E::InputUnit inputUnitID() const { return m_inputUnitID; }
+    Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(inputUnitID());}
+    void setInputUnitID(E::InputUnit inputUnitID) { m_inputUnitID = inputUnitID; }
 
-	Q_INVOKABLE int inputSensorID() const { return m_inputSensorID; }
-	void setInputSensorID(int inputSensorID) { m_inputSensorID = inputSensorID; }
+    int inputSensorTypeInt() const { return TO_INT(m_inputSensorType); }
+    E::SensorType inputSensorType() const { return m_inputSensorType; }
+    Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(inputSensorType());}
+    void setInputSensorType(E::SensorType inputSensorType) { m_inputSensorType = inputSensorType; }
 
 	Q_INVOKABLE double outputLowLimit() const { return m_outputLowLimit; }
 	void setOutputLowLimit(double outputLowLimit) { m_outputLowLimit = outputLowLimit; }
@@ -336,8 +383,10 @@ public:
 	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(outputMode());}
 	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
 
-	Q_INVOKABLE int outputSensorID() const { return m_outputSensorID; }
-	void setOutputSensorID(int outputSensorID) { m_outputSensorID = outputSensorID; }
+    int outputSensorTypeInt() const { return TO_INT(m_outputSensorType); }
+    E::SensorType outputSensorType() const { return m_outputSensorType; }
+    Q_INVOKABLE int jsOutputSensorType() const { return static_cast<int>(outputSensorType());}
+    void setOutputSensorType(E::SensorType outputSensorType) { m_outputSensorType = outputSensorType; }
 
 	Q_INVOKABLE bool acquire() const { return m_acquire; }
 	void setAcquire(bool acquire) { m_acquire = acquire; }

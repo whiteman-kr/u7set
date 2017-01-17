@@ -159,7 +159,7 @@ private:
 
 signals:
 
-    void                appendMeasure(MeasureItem*);
+    void                appendMeasure(Measurement*);
 
     void                setActiveSignal();
 
@@ -198,7 +198,7 @@ private slots:
     //
     void                showSignalList();
     void                showComparatorsList() {};
-    void                showStatistic() {};
+    void                showStatistic();
     void                aboutConnection() {};
     void                aboutApp() {};
 
@@ -243,7 +243,7 @@ private slots:
     void                measureThreadStoped();
     void                setMeasureThreadInfo(QString msg);
     void                setMeasureThreadInfo(int timeout);
-    void                measureComplite(MeasureItem* pMeasure);
+    void                measureComplite(Measurement* pMeasurement);
 };
 
 // ==============================================================================================

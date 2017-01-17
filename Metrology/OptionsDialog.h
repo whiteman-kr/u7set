@@ -37,8 +37,8 @@ const int                       OPTION_PAGE_COUNT				= sizeof(OptionPage)/sizeof
 
 const int                       OPTION_PAGE_UNKNOWN				= -1,
                                 OPTION_PAGE_TCP_IP              = 0,
-                                OPTION_PAGE_LINEARETY_MEASURE	= 1,
-                                OPTION_PAGE_LINEARETY_POINT		= 2,
+                                OPTION_PAGE_LINEARITY_MEASURE	= 1,
+                                OPTION_PAGE_LINEARITY_POINT		= 2,
                                 OPTION_PAGE_COMPARATOR_MEASURE	= 3,
                                 OPTION_PAGE_MEASURE_VIEW_TEXT	= 4,
                                 OPTION_PAGE_MEASURE_VIEW_COLUMN	= 5,
@@ -80,7 +80,7 @@ const int                       OPTION_GROUP_COUNT              = sizeof(OptionG
 
 const int                       OPTION_GROUP_UNKNOWN        = -1,
                                 OPTION_GROUP_TCP_IP         = 0,
-                                OPTION_GROUP_LINEARETY      = 1,
+                                OPTION_GROUP_LINEARITY      = 1,
                                 OPTION_GROUP_SETTING        = 2,
                                 OPTION_GROUP_MEASURE_VIEW   = 3,
                                 OPTION_GROUP_SIGNAL_INFO    = 4,
@@ -94,8 +94,8 @@ const int                       OPTION_GROUP_UNKNOWN        = -1,
 const int                       OptionGroupPage[OPTION_PAGE_COUNT] =
 {
                                 OPTION_GROUP_TCP_IP,        //("Linearity -- Measurements"),
-                                OPTION_GROUP_LINEARETY,		//("Linearity -- Measurements"),
-                                OPTION_GROUP_LINEARETY,		//("Linearity -- Points"),
+                                OPTION_GROUP_LINEARITY,		//("Linearity -- Measurements"),
+                                OPTION_GROUP_LINEARITY,		//("Linearity -- Points"),
                                 OPTION_GROUP_SETTING,		//("Comparators -- Measurements"),
                                 OPTION_GROUP_MEASURE_VIEW,	//("List of measurements -- Display"),
                                 OPTION_GROUP_MEASURE_VIEW,	//("List of measurements -- Columns"),

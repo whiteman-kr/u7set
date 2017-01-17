@@ -94,8 +94,8 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -104,7 +104,7 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 //	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);

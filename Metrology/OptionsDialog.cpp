@@ -92,7 +92,7 @@ PropertyPage::~PropertyPage()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int OptionsDialog::m_activePage = OPTION_PAGE_LINEARETY_MEASURE;
+int OptionsDialog::m_activePage = OPTION_PAGE_LINEARITY_MEASURE;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -253,14 +253,14 @@ PropertyPage* OptionsDialog::createPage(int page)
     switch (page)
     {
         case OPTION_PAGE_TCP_IP:
-        case OPTION_PAGE_LINEARETY_MEASURE:
+        case OPTION_PAGE_LINEARITY_MEASURE:
         case OPTION_PAGE_COMPARATOR_MEASURE:
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
         case OPTION_PAGE_SIGNAL_INFO:
         case OPTION_PAGE_REPORT:
         case OPTION_PAGE_DATABASE:
         case OPTION_PAGE_BACKUP:                pPropertyPage = createPropertyList(page);     break;
-        case OPTION_PAGE_LINEARETY_POINT:
+        case OPTION_PAGE_LINEARITY_POINT:
         case OPTION_PAGE_MEASURE_VIEW_COLUMN:   pPropertyPage = createPropertyDialog(page);   break;
         default:                                assert(nullptr);                              break;
     }
@@ -313,7 +313,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
             }
             break;
 
-        case OPTION_PAGE_LINEARETY_MEASURE:
+        case OPTION_PAGE_LINEARITY_MEASURE:
             {
                 QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
@@ -787,7 +787,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
     switch (page)
     {
-        case OPTION_PAGE_LINEARETY_POINT:
+        case OPTION_PAGE_LINEARITY_POINT:
             {
                 OptionsPointsDialog* dialog = new OptionsPointsDialog(m_options.linearity());
                 connect(dialog, &OptionsPointsDialog::updateLinearityPage, this, &OptionsDialog::updateLinearityPage);
@@ -1036,7 +1036,7 @@ void OptionsDialog::applyProperty()
             }
             break;
 
-        case OPTION_PAGE_LINEARETY_MEASURE:
+        case OPTION_PAGE_LINEARITY_MEASURE:
             {
                 switch(param)
                 {
@@ -1059,7 +1059,7 @@ void OptionsDialog::applyProperty()
                     case LO_PARAM_HIGH_RANGE:       m_options.linearity().m_highLimitRange = value.toDouble();
                                                     m_options.linearity().recalcPoints();
                                                     updateLinearityPage(false);                                             break;
-                    case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARETY_POINT);                             break;
+                    case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARITY_POINT);                             break;
                     case LO_PARAM_LIST_TYPE:        m_options.linearity().m_viewType = value.toInt();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
@@ -1188,7 +1188,7 @@ void OptionsDialog::applyProperty()
 
 void OptionsDialog::updateLinearityPage(bool isDialog)
 {
-    PropertyPage* page = m_pageList[OPTION_PAGE_LINEARETY_POINT];
+    PropertyPage* page = m_pageList[OPTION_PAGE_LINEARITY_POINT];
     if (page == nullptr)
     {
         return;
@@ -1215,13 +1215,13 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
     QtVariantProperty *property = nullptr;
 
-    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_RANGE_TYPE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_RANGE_TYPE );
     if (property != nullptr)
     {
         property->setValue( m_options.linearity().m_rangeType );
     }
 
-    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
     if (property != nullptr)
     {
         property->setValue( m_options.linearity().m_pointBase.count() );
@@ -1234,7 +1234,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
         }
     }
 
-    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_LOW_RANGE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_LOW_RANGE );
     if (property != nullptr)
     {
         property->setValue( m_options.linearity().m_lowLimitRange );
@@ -1247,7 +1247,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
         }
     }
 
-    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_HIGH_RANGE );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_HIGH_RANGE );
     if (property != nullptr)
     {
         property->setValue( m_options.linearity().m_highLimitRange );
@@ -1261,7 +1261,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
     }
 
-    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARETY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
+    property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
     if (property != nullptr)
     {
         property->setValue( m_options.linearity().m_pointBase.text() );
@@ -1430,7 +1430,7 @@ void OptionsDialog::loadSettings()
     QByteArray geometry = s.value(QString("%1OptionsDialog/geometry").arg(WINDOW_GEOMETRY_OPTIONS_KEY)).toByteArray();
     restoreGeometry( geometry );
 
-    m_activePage = s.value( QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), OPTION_PAGE_LINEARETY_MEASURE).toInt();
+    m_activePage = s.value( QString("%1OptionsDialog/activePage").arg(WINDOW_GEOMETRY_OPTIONS_KEY), OPTION_PAGE_LINEARITY_MEASURE).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

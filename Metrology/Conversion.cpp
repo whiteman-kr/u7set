@@ -6741,77 +6741,62 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int type, const Signal& param)
+double conversion(double val, const int& type, const Signal& param)
 {
     if (type < 0 || type > CT_COUNT)
     {
         return 0;
     }
 
-    int unit = -1;
-
-    switch(param.inputUnitID())
-    {
-        case  20:   unit = INPUT_UNIT_OHM;  break;    //        (case  21: - KOhm)
-        case  11:   unit = INPUT_UNIT_MV;   break;
-        case  15:   unit = INPUT_UNIT_MA;   break;
-        case  12:   unit = INPUT_UNIT_V;    break;
-    }
-
-    if (unit == -1)
-    {
-        return 0;
-    }
-
-    double	retVal = 0;
+    double retVal = 0;
 
     switch(type)
     {
         case CT_PHYSICAL_TO_ELECTRIC:
 
-            switch(unit)
+            switch(param.inputUnitID())
             {
-                case INPUT_UNIT_OHM:
+                case E::InputUnit::Ohm:
 
-                    switch(param.inputSensorID())
+                    switch(param.inputSensorType())
                     {
-                        case NO_CONVERTER:      retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
 
-                        case OHM_PT_50_W_1391:	retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);	break;
-                        case OHM_PT_100_W_1391: retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, true);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt50_W1391:     retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt100_W1391:    retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt50_W1385:     retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt100_W1385:    retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	break;
 
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, true);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, true);	break;
-                        case OHM_CU_100_W_1426:	retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_50_W1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_100_W1428:   retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_50_W1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_100_W1426:	retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	break;
 
-                        case OHM_PT_21:         retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
-                        case OHM_CU_23:         retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
+                        case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
+                        case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
 
-                        default:				assert(0);                                                                          break;
+                        default:				assert(0);
                     }
 
                     break;
 
-                case INPUT_UNIT_MV:
+                case E::InputUnit::mV:
 
-                    switch(param.inputSensorID())
+                    switch(param.inputSensorType())
                     {
-                        case NO_CONVERTER:      retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
 
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
+                        case E::SensorType::mV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
+                        case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
+                        case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
 
-                        default:				assert(0);                                                                          break;
+                        default:				assert(0);
                     }
 
                     break;
 
-                case INPUT_UNIT_MA:
-                case INPUT_UNIT_V:
+                case E::InputUnit::mA:
+                case E::InputUnit::V:
 
                     retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit();
 
@@ -6819,57 +6804,56 @@ double conversion(double val, int type, const Signal& param)
 
                 default:
                     assert(0);
-                    break;
             }
 
             break;
 
         case CT_ELECTRIC_TO_PHYSICAL:
 
-            switch(unit)
+            switch(param.inputUnitID())
             {
-                case INPUT_UNIT_OHM:
+                case E::InputUnit::Ohm:
 
-                    switch(param.inputSensorID())
+                    switch(param.inputSensorType())
                     {
 
-                        case NO_CONVERTER:      retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
 
-                        case OHM_PT_50_W_1391:  retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
-                        case OHM_PT_100_W_1391:	retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, false);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt50_W1391:     retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt100_W1391:	retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt50_W1385:     retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt100_W1385:    retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
 
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, false);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, false);	break;
-                        case OHM_CU_100_W_1426: retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_50_W1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_100_W1428:   retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_50_W1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_100_W1426:   retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
 
-                        case OHM_PT_21:		retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                     break;
-                        case OHM_CU_23:		retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                     break;
+                        case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                 break;
+                        case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                 break;
 
-                        default:				assert(0);                                                                          break;
+                        default:				assert(0);
                     }
 
                     break;
 
-                case INPUT_UNIT_MV:
+                case E::InputUnit::mV:
 
-                    switch(param.inputSensorID())
+                    switch(param.inputSensorType())
                     {
-                        case NO_CONVERTER:      retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
 
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
+                        case E::SensorType::mV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
+                        case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
+                        case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
 
-                        default:				assert(0);                                                                          break;
+                        default:				assert(0);
                     }
 
                     break;
 
-                case INPUT_UNIT_MA:
-                case INPUT_UNIT_V:
+                case E::InputUnit::mA:
+                case E::InputUnit::V:
 
                     retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits();
 
@@ -6877,14 +6861,12 @@ double conversion(double val, int type, const Signal& param)
 
                 default:
                     assert(0);
-                    break;
             }
 
             break;
 
         default:
             assert(0);
-            break;
     }
 
     return retVal;
@@ -6892,148 +6874,21 @@ double conversion(double val, int type, const Signal& param)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int type, int unit, int sensor)
+double conversion(double val, const int& type, const E::InputUnit& unitID, const E::SensorType& sensorType)
 {
     if (type < 0 || type > CT_COUNT)
     {
         return 0;
     }
 
-//    if (s == nullptr)
-//    {
-//        return 0;
-//    }
+    Signal param;
 
-	double	retVal = 0;
-	
-    switch(type)
-	{
-        case CT_PHYSICAL_TO_ELECTRIC:
+    param.setInputUnitID(unitID);
+    param.setInputSensorType(sensorType);
 
-            //switch(s->inputUnitID())
-            switch(unit)
-			{
-				case INPUT_UNIT_OHM: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-                    {
-                        //case NO_CONVERTER:      retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit; break;
-
-                        case OHM_PT_50_W_1391:	retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);	break;
-                        case OHM_PT_100_W_1391: retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, true);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	break;
-
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, true);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, true);	break;
-                        case OHM_CU_100_W_1426:	retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	break;
-
-                        case OHM_PT_21:         retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
-                        case OHM_CU_23:         retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
-
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-				case INPUT_UNIT_MV: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-                    {
-                        //case NO_CONVERTER:      retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit; break;
-
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
-
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-                case INPUT_UNIT_MA:
-
-                    //retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit;
-
-                    break;
-
-				default:				
-                    assert(0);
-					break;
-			}
-
-			break;
-
-        case CT_ELECTRIC_TO_PHYSICAL:
-
-            //switch(s->inputUnitID())
-            switch(unit)
-            {
-				case INPUT_UNIT_OHM: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-					{
-
-                        //case NO_CONVERTER:      retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit(); break;
-
-                        case OHM_PT_50_W_1391:  retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
-                        case OHM_PT_100_W_1391:	retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, false);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
-
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, false);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, false);	break;
-                        case OHM_CU_100_W_1426: retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
-								
-                        case OHM_PT_21:		retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                     break;
-                        case OHM_CU_23:		retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                     break;
-
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-				case INPUT_UNIT_MV: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-                    {
-                        //case NO_CONVERTER:      retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit(); break;
-
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
-
-                        default:				assert(0);                                                                          break;
-					}
-							
-					break;
-
-                case INPUT_UNIT_MA:
-
-                    //retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit();
-
-                    break;
-			
-				default:				
-                    assert(0);
-					break;
-			}
-
-			break;
-
-		default:
-            assert(0);
-			break;
-	}
-
-	return retVal;
+    return conversion(val, type, param);
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
+
 

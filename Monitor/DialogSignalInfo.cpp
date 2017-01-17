@@ -234,13 +234,13 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputUnitID")<<QString::number(m_signal.inputUnitID())));
 
 
-		if (m_signal.inputSensorID() >= 0 && m_signal.inputSensorID() < SENSOR_TYPE_COUNT)
+		if (m_signal.inputSensorType() >= 0 && m_signal.inputSensorType() < SENSOR_TYPE_COUNT)
 		{
-			str = QString("%1 - %2").arg(m_signal.inputSensorID()).arg(SensorTypeStr[m_signal.inputSensorID()]);
+			str = QString("%1 - %2").arg(m_signal.inputSensorType()).arg(SensorTypeStr[m_signal.inputSensorType()]);
 		}
 		else
 		{
-			str = QString("%1 - ???").arg(m_signal.inputSensorID());
+			str = QString("%1 - ???").arg(m_signal.inputSensorType());
 		}
 
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputSensorID")<<str));
@@ -257,13 +257,13 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputHighLimit")<<QString::number(m_signal.outputHighLimit(), 'f', m_signal.decimalPlaces())));
 		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputUnitID")<<QString::number(m_signal.outputUnitID())));
 
-		if (m_signal.outputSensorID() >= 0 && m_signal.outputSensorID() < SENSOR_TYPE_COUNT)
+		if (m_signal.outputSensorType() >= 0 && m_signal.outputSensorType() < SENSOR_TYPE_COUNT)
 		{
-			str = QString("%1 - %2").arg(m_signal.outputSensorID()).arg(SensorTypeStr[m_signal.outputSensorID()]);
+			str = QString("%1 - %2").arg(m_signal.outputSensorType()).arg(SensorTypeStr[m_signal.outputSensorType()]);
 		}
 		else
 		{
-			str = QString("%1 - ???").arg(m_signal.outputSensorID());
+			str = QString("%1 - ???").arg(m_signal.outputSensorType());
 		}
 		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputSensorID")<<str));
 		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputMode")<<E::valueToString<E::OutputMode>(m_signal.outputModeInt())));

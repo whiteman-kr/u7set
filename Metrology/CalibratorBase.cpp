@@ -655,7 +655,6 @@ bool CalibratorBase::eventFilter(QObject *object, QEvent *event)
     return QObject::eventFilter(object, event);
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorBase::clear()
