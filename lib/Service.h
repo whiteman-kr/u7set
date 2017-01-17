@@ -101,7 +101,7 @@ public:
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
 
-	void clearSettings();								// clear all service settings
+	bool clearSettings();								// clear all service settings
 
 signals:
 	void work();
@@ -115,7 +115,7 @@ protected:
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
-	void setStrSetting(const QString& settingName, const QString& value);
+	bool setStrSetting(const QString& settingName, const QString& value);
 	QString getStrSetting(const QString& settingName);
 
 private:
