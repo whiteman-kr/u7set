@@ -7,14 +7,14 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement::Measurement(int type)
+Measurement::Measurement(const int& measureType)
 {
-    m_measureType = type;
+    m_measureType = measureType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement* Measurement::at(int index)
+Measurement* Measurement::at(const int& index)
 {
     Measurement* pMeasurement = nullptr;
 
@@ -193,7 +193,7 @@ LinearityMeasurement::LinearityMeasurement(Calibrator* pCalibrator, const Hash& 
 
     setLowLimit(VALUE_TYPE_PHYSICAL, signal.param().lowEngeneeringUnits());
     setHighLimit(VALUE_TYPE_PHYSICAL, signal.param().highADC());
-    setUnit(VALUE_TYPE_PHYSICAL, theSignalBase.unit( signal.param().unitID() ) );
+    setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit( signal.param().unitID() ) );
 
     if (signal.param().isOutput() == true)
     {
@@ -273,13 +273,9 @@ LinearityMeasurement::LinearityMeasurement(Calibrator* pCalibrator, const Hash& 
     double estimateSCO = sco / sqrt( (double) measureCount );
 
         // Student's rate according to GOST 27.202 on P = 0.95
+        // or GOST 8.207-76 application 2 (last page)
         //
-    double k_student = 0;
-
-    if ( measureCount >= 0 && measureCount < K_STUDENT_COUNT )
-    {
-        k_student = K_STUDENT[measureCount];
-    }
+    double k_student = studentK(measureCount, CT_PROPABILITY_95);
 
         // according to GOST 8.207-76 paragraph 3.2
         //
@@ -471,12 +467,12 @@ ComparatorMeasurement::ComparatorMeasurement(Calibrator* pCalibrator)
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("");
+    setCustomAppSignalID("");
+    setCaption("");
 
     position().setCaseNo(0);
-    position().setCaseCaption("CASE-1");
+    position().setCaseCaption("");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);
@@ -516,12 +512,12 @@ ComplexComparatorMeasurement::ComplexComparatorMeasurement(Calibrator* pMainCali
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("");
+    setCustomAppSignalID("");
+    setCaption("");
 
     position().setCaseNo(0);
-    position().setCaseCaption("CASE-1");
+    position().setCaseCaption("");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);

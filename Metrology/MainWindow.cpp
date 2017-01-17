@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init signal socket thread
     //
-    HostAddressPort hostAddress(theOptions.connectTcpIp().m_serverIP, theOptions.connectTcpIp().m_serverPort);
+    HostAddressPort hostAddress(theOptions.connectTcpIp().serverIP(), theOptions.connectTcpIp().serverPort());
     m_pSignalSocket = new SignalSocket(hostAddress);
     m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
     m_pSignalSocketThread->start();
@@ -376,7 +376,7 @@ bool MainWindow::createToolBars()
             measureTimeoutList->addItem(QString::number(MeasureTimeout[t], 10, 1));
         }
 
-        measureTimeoutList->setCurrentText(QString::number(double(theOptions.toolBar().m_measureTimeout) / 1000, 10, 1));
+        measureTimeoutList->setCurrentText(QString::number(double(theOptions.toolBar().measureTimeout()) / 1000, 10, 1));
 
         measureTimeoutUnitLabel->setText(tr(" sec."));
         measureTimeoutUnitLabel->setEnabled(false);
@@ -410,7 +410,7 @@ bool MainWindow::createToolBars()
             measureKindList->addItem(MeasureKind[k]);
         }
 
-        measureKindList->setCurrentIndex(theOptions.toolBar().m_measureKind);
+        measureKindList->setCurrentIndex(theOptions.toolBar().measureKind());
 
         connect(measureKindList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureKind);
     }
@@ -440,7 +440,7 @@ bool MainWindow::createToolBars()
         {
             outputSignalList->addItem(OutputSignalType[s]);
         }
-        outputSignalList->setCurrentIndex(theOptions.toolBar().m_outputSignalType);
+        outputSignalList->setCurrentIndex(theOptions.toolBar().outputSignalType());
 
         connect(outputSignalList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType);
     }
@@ -768,7 +768,7 @@ void MainWindow::updateAnalogSignalToolBar()
         return;
     }
 
-    int measureKind = theOptions.toolBar().m_measureKind;
+    int measureKind = theOptions.toolBar().measureKind();
     if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
     {
         assert(false);
@@ -846,7 +846,7 @@ void MainWindow::updateAnalogSignalToolBar()
         {
             case MEASURE_KIND_ONE:
                 {
-                    Hash hash = multiSignal.hash(MEASURE_MULTI_SIGNAL_0);
+                    Hash hash = multiSignal.hash(CHANNEL_0);
                     if (hash == 0)
                     {
                         continue;
@@ -1147,7 +1147,7 @@ void MainWindow::showCalculator()
 
 void MainWindow::calibrators()
 {
-    theCalibratorBase.show();
+    theCalibratorBase.showInitDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1200,7 +1200,7 @@ void MainWindow::setMeasureKind(int index)
         return;
     }
 
-    theOptions.toolBar().m_measureKind = kind;
+    theOptions.toolBar().setMeasureKind(kind);
     theOptions.toolBar().save();
 
     updateAnalogSignalToolBar();
@@ -1210,10 +1210,10 @@ void MainWindow::setMeasureKind(int index)
 
 void MainWindow::setMeasureTimeout(QString value)
 {
-    theOptions.toolBar().m_measureTimeout = value.toDouble() * 1000;
+    theOptions.toolBar().setMeasureTimeout(value.toDouble() * 1000);
     theOptions.toolBar().save();
 
-    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().measureTimeout());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1226,7 +1226,7 @@ void MainWindow::setOutputSignalType(int index)
         return;
     }
 
-    theOptions.toolBar().m_outputSignalType = type;
+    theOptions.toolBar().setOutputSignalType(type);
     theOptions.toolBar().save();
 }
 
@@ -1266,7 +1266,7 @@ void MainWindow::setMeasureSignal(int index)
 
     theSignalBase.setActiveSignal( multiSignal );
 
-    if (theOptions.toolBar().m_measureKind == MEASURE_KIND_ONE)
+    if (theOptions.toolBar().measureKind() == MEASURE_KIND_ONE)
     {
         m_asCaseNoCombo->setCurrentText( QString::number( multiSignal.caseNo() + 1) );
     }
@@ -1576,10 +1576,10 @@ void MainWindow::measureThreadStarted()
 
     m_statusMeasureThreadInfo->setText("");
 
-    if (theOptions.toolBar().m_measureTimeout != 0)
+    if (theOptions.toolBar().measureTimeout() != 0)
     {
         m_statusMeasureTimeout->show();
-        m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
+        m_statusMeasureTimeout->setRange(0, theOptions.toolBar().measureTimeout());
         m_statusMeasureTimeout->setValue(0);
     }
     else
@@ -1604,7 +1604,7 @@ void MainWindow::measureThreadStoped()
     m_statusMeasureThreadInfo->setText("");
 
     m_statusMeasureTimeout->hide();
-    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().m_measureTimeout);
+    m_statusMeasureTimeout->setRange(0, theOptions.toolBar().measureTimeout());
     m_statusMeasureTimeout->setValue(0);
 
     m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));

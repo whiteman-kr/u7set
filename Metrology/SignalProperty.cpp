@@ -162,10 +162,10 @@ void SignalPropertyDialog::createPropertyList()
 
             item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
             QStringList unitList;
-            int unitCount = theSignalBase.unitCount();
+            int unitCount = theUnitBase.unitCount();
             for(int u = 0; u < unitCount; u++)
             {
-                unitList.append( theSignalBase.unit( u ) );
+                unitList.append( theUnitBase.unit( u ) );
             }
             item->setAttribute(QLatin1String("enumNames"), unitList);
             item->setValue( m_signal.param().unitID() );
@@ -257,10 +257,10 @@ void SignalPropertyDialog::createPropertyList()
 
             item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
             QStringList outputUnitList;
-            int outputUnitCount = theSignalBase.unitCount();
+            int outputUnitCount = theUnitBase.unitCount();
             for(int u = 0; u < outputUnitCount; u++)
             {
-                outputUnitList.append( theSignalBase.unit( u ) );
+                outputUnitList.append( theUnitBase.unit( u ) );
             }
             item->setAttribute(QLatin1String("enumNames"), outputUnitList);
             item->setValue( m_signal.param().outputUnitID() );

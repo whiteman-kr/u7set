@@ -6672,7 +6672,8 @@ double CU_23[][2] =
 const int CU_23_COUNT = sizeof(CU_23) / (sizeof(double)*2);
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
-
+// GOST 8.207-76 application 2 (last page) by P = 0,95
+//
 double K_STUDENT[] =
 {
     0.0,		//	0
@@ -6891,4 +6892,20 @@ double conversion(double val, const int& type, const E::InputUnit& unitID, const
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
+double studentK(const int& measureCount, const int& p)
+{
+    if (measureCount < 0 || measureCount >= K_STUDENT_COUNT)
+    {
+        return 0;
+    }
 
+    if (p < 0 || p >= CT_PROPABILITY_COUNT)
+    {
+        return 0;
+    }
+
+    return K_STUDENT[measureCount];
+    //return K_STUDENT[measureCount][P];
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------

@@ -18,7 +18,7 @@ MeasureThread::MeasureThread(QObject *parent) :
 
 void MeasureThread::init(QWidget* parent)
 {
-    m_parentWidget = parent;
+    m_parent = parent;
 
     connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
     connect(this, &MeasureThread::finished, this, &MeasureThread::finish);
@@ -101,7 +101,7 @@ void MeasureThread::waitMeasureTimeout()
 {
     // Timeout for Measure
     //
-    for(int t = 0; t < theOptions.toolBar().m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
+    for(int t = 0; t < theOptions.toolBar().measureTimeout(); t += MEASURE_THREAD_TIMEOUT_STEP )
     {
         if (m_cmdStopMeasure == true)
         {
@@ -224,7 +224,7 @@ void MeasureThread::run()
             // if m_measureKind == MEASURE_KIND_ONE (i.e measure in the one channel) then take first connected calibrator
             // if m_measureKind == MEASURE_KIND_MULTI (i.e measure all channels) then attempt to take all calibrators
             //
-            for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+            for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
             {
                 Hash signalHash = m_activeSignal.hash(i);
                 if (signalHash == 0)
@@ -328,7 +328,7 @@ void MeasureThread::measureLinearity()
         // set electric value on calibrators
         //
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             Hash signalHash = m_activeSignal.hash(i);
             if (signalHash == 0)
@@ -359,7 +359,7 @@ void MeasureThread::measureLinearity()
         // wait until all calibrators will has fixed electric value
         //
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
 
@@ -389,7 +389,7 @@ void MeasureThread::measureLinearity()
 
         emit measureInfo(tr("Save measurements "));
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             Hash signalHash = m_activeSignal.hash(i);
             if (signalHash == 0)

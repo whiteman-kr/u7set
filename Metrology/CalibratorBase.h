@@ -17,23 +17,11 @@
 
 // ==============================================================================================
 
-
-const int                   CALIBRATOR_0            = 0,
-                            CALIBRATOR_1            = 1,
-                            CALIBRATOR_2            = 2,
-                            CALIBRATOR_3            = 3,
-                            CALIBRATOR_4            = 4,
-                            CALIBRATOR_5            = 5;
-
-const int                   MAX_CALIBRATOR_COUNT    = 6;         // max amount calibrators in calibrator base
-
-// ==============================================================================================
-
 const int                   CALIBRATOR_COUNT_FOR_CC = 2;      // amount calibrators for measure complex cpmporator
 
 // ==============================================================================================
 
-const char* const CalibratorsColumn[] =
+const char* const CalibratorColumn[] =
 {
                             QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial port"),
                             QT_TRANSLATE_NOOP("CalibratorBase.h", "Type"),
@@ -41,12 +29,12 @@ const char* const CalibratorsColumn[] =
                             QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial number"),
 };
 
-const int                   CalibratorsColumnCount  = sizeof(CalibratorsColumn)/sizeof(char*);
+const int                   CALIBRATOR_COLUMN_COUNT     = sizeof(CalibratorColumn)/sizeof(char*);
 
-const int                   CalibratorColumnPort    = 0,
-                            CalibratorColumnType    = 1,
-                            CalibratorColumnConnect = 2,
-                            CalibratorColumnSN      = 3;
+const int                   CALIBRATOR_COLUMN_PORT      = 0,
+                            CALIBRATOR_COLUMN_TYPE      = 1,
+                            CALIBRATOR_COLUMN_CONNECT   = 2,
+                            CALIBRATOR_COLUMN_SN        = 3;
 
 // ==============================================================================================
 
@@ -60,14 +48,13 @@ public:
                             ~CalibratorBase();
 
     void                    init(QWidget* parent = 0);
-    void                    show();
+    void                    showInitDialog();
 
     int                     count() { return m_calibratorManagerList.count(); }
 
-    CalibratorManager*      at(int index);
+    CalibratorManager*      at(const int&  index);
     CalibratorManager*      firstConnectedCalibrator();
-
-    CalibratorManager*      сalibratorForMeasure(int index);
+    CalibratorManager*      сalibratorForMeasure(const int& index);
 
     int                     connectedCalibratorsCount() { return m_connectedCalibratorsCount; }
 
@@ -80,7 +67,7 @@ private:
 
     CalibratorManagerList   m_calibratorManagerList;
 
-    void                    createCalibrators();
+    void                    createCalibrators(QWidget* parent);
     void                    removeCalibrators();
 
     int                     m_connectedCalibratorsCount = 0;
@@ -91,8 +78,7 @@ private:
 
     // Elements of interface
     //
-    QWidget*                m_parentWidget = nullptr;
-    QDialog*                m_pDialog = nullptr;
+    QDialog*                m_pInitDialog = nullptr;
 
     QMenuBar*               m_pMenuBar = nullptr;
     QMenu*                  m_pCalibratorMenu = nullptr;
@@ -104,7 +90,7 @@ private:
     QTableWidget*           m_pCalibratorView = nullptr;
     QProgressBar*           m_pCalibratorProgress = nullptr;
 
-    void                    createDialog();
+    void                    createInitDialog(QWidget* parent);
 
     void                    setHeaderList();
     void                    updateList();
@@ -122,17 +108,17 @@ signals:
 
 public slots:
 
-    void                    timeoutInitialization();            // Slot of timer
+    void                    timeoutInitialization();                    // Slot of timer
 
-    void                    onInitialization();                 // Slot of calibrator menu - Initialization
-    void                    onManage();                         // Slot of calibrator menu - Manage
-    void                    onSettings();                       // Slot of calibrator menu - Edit setting
-    void                    onSettings(int row,int);            // Slot for edit serial port and type of calibrator
-    void                    onCopy();                           // Slot of calibrator menu - Copy serail number
-    void                    onContextMenu(QPoint);              // Slot of context menu
+    void                    onInitialization();                         // Slot of calibrator menu - Initialization
+    void                    onManage();                                 // Slot of calibrator menu - Manage
+    void                    onSettings();                               // Slot of calibrator menu - Edit setting
+    void                    onSettings(const int& row, const int& );    // Slot for edit serial port and type of calibrator
+    void                    onCopy();                                   // Slot of calibrator menu - Copy serail number
+    void                    onContextMenu(QPoint);                      // Slot of context menu
 
-    void                    onCalibratorConnected();            // Slots events from calibrator
-    void                    onCalibratorDisconnected();         // Slots events from calibrator
+    void                    onCalibratorConnected();                    // Slots events from calibrator
+    void                    onCalibratorDisconnected();                 // Slots events from calibrator
 };
 
 // ==============================================================================================
