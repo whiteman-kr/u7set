@@ -87,8 +87,8 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -97,7 +97,7 @@ void DbControllerSignalTests::addSignalTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
@@ -137,11 +137,11 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("inputLowLimit").toDouble() == newSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == newSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
 	QVERIFY2(query.value("inputUnitId").toInt() == newSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-	QVERIFY2(query.value("inputSensorId").toInt() == newSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
+//	QVERIFY2(query.value("inputSensorId").toInt() == newSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
 	QVERIFY2(query.value("outputLowLimit").toDouble() == newSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
 	QVERIFY2(query.value("outputHighLimit").toDouble() == newSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
 	QVERIFY2(query.value("outputUnitId").toInt() == newSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-	QVERIFY2(query.value("outputSensorId").toInt() == newSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+//	QVERIFY2(query.value("outputSensorId").toInt() == newSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == newSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
 	QVERIFY2(query.value("calculated").toBool() == newSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
 	QVERIFY2(query.value("normalState").toInt() == newSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
@@ -288,8 +288,8 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -298,7 +298,7 @@ void DbControllerSignalTests::getSignalIdsTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
@@ -377,8 +377,8 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -387,7 +387,7 @@ void DbControllerSignalTests::checkInCheckOutSignalsTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+	//newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
@@ -533,8 +533,8 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -543,7 +543,7 @@ void DbControllerSignalTests::getLatestSignalTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
@@ -603,11 +603,11 @@ void DbControllerSignalTests::getLatestSignalTest()
 	QVERIFY2(query.value("inputLowLimit").toDouble() == resultSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == resultSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
 	QVERIFY2(query.value("inputUnitId").toInt() == resultSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
+//	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
 	QVERIFY2(query.value("outputLowLimit").toDouble() == resultSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
 	QVERIFY2(query.value("outputHighLimit").toDouble() == resultSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
 	QVERIFY2(query.value("outputUnitId").toInt() == resultSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+//	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == resultSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
 	QVERIFY2(query.value("calculated").toBool() == resultSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
 	QVERIFY2(query.value("normalState").toInt() == resultSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
@@ -662,8 +662,8 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -672,7 +672,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+	//newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
@@ -724,8 +724,8 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setInOutType(E::SignalInOutType::Output);
 	resultSignal.setInputHighLimit(1928.3);
 	resultSignal.setInputLowLimit(12.8);
-	resultSignal.setInputSensorID(3452);
-	resultSignal.setInputUnitID(1);
+//	resultSignal.setInputSensorID(3452);
+	resultSignal.setInputUnitID(E::InputUnit::V);
 	resultSignal.setLowADC(4321);
 	resultSignal.setLowEngeneeringUnits(123.4);
 	resultSignal.setLowValidRange(125.3);
@@ -733,7 +733,7 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	resultSignal.setOutputHighLimit(5263.1);
 	resultSignal.setOutputLowLimit(754.7);
 	resultSignal.setOutputMode(E::OutputMode::Minus10_Plus10_V);
-	resultSignal.setOutputSensorID(34847);
+	//resultSignal.setOutputSensorID(34847);
 	resultSignal.setOutputUnitID(1);
 	resultSignal.setSpreadTolerance(2346.8);
 	resultSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
@@ -761,11 +761,11 @@ void DbControllerSignalTests::setSignalWorkCopyTest()
 	QVERIFY2(query.value("inputLowLimit").toDouble() == resultSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
 	QVERIFY2(query.value("inputHighLimit").toDouble() == resultSignal.inputHighLimit(), qPrintable(QString("Error: inputHighLimit is wrong")));
 	QVERIFY2(query.value("inputUnitId").toInt() == resultSignal.inputUnitID(), qPrintable(QString("Error: inputUnitId is wrong")));
-	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
+//	QVERIFY2(query.value("inputSensorId").toInt() == resultSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
 	QVERIFY2(query.value("outputLowLimit").toDouble() == resultSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
 	QVERIFY2(query.value("outputHighLimit").toDouble() == resultSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
 	QVERIFY2(query.value("outputUnitId").toInt() == resultSignal.outputUnitID(), qPrintable(QString("Error: outputUnitId is wrong")));
-	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
+//	QVERIFY2(query.value("outputSensorId").toInt() == resultSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
 	QVERIFY2(query.value("acquire").toBool() == resultSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
 	QVERIFY2(query.value("calculated").toBool() == resultSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
 	QVERIFY2(query.value("normalState").toInt() == resultSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
@@ -820,8 +820,8 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -830,7 +830,7 @@ void DbControllerSignalTests::undoSignalChangesTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);// setType(E::SignalType::Discrete);
@@ -914,8 +914,8 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setInOutType(E::SignalInOutType::Input);
 	newSignal.setInputHighLimit(2345.3);
 	newSignal.setInputLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setInputUnitID(1);
+//	newSignal.setInputSensorID(5345);
+	newSignal.setInputUnitID(E::InputUnit::V);
 	newSignal.setLowADC(1234);
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
@@ -924,7 +924,7 @@ void DbControllerSignalTests::deleteSignalTest()
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
+//	newSignal.setOutputSensorID(13443);
 	newSignal.setOutputUnitID(1);
 	//	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
@@ -1018,7 +1018,7 @@ void DbControllerSignalTests::autoAddSignalsTest()
 
 	QVERIFY2(addedSignals.size() == 2, qPrintable("Error: wrong amount of added signals"));
 
-	for (int currentSignal = 0; currentSignal < addedSignals.size(); currentSignal++)
+	for (uint currentSignal = 0; currentSignal < addedSignals.size(); currentSignal++)
 	{
 		QString addedSignalCaption = Signal(addedSignals.at(currentSignal)).caption();
 		QString newSignalCaption = "Signal #" + Hardware::DeviceSignal(*newSignals.at(currentSignal)).caption();

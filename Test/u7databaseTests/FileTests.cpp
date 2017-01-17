@@ -328,6 +328,7 @@ void FileTests::delete_fileTest()
 void FileTests::check_inTest()
 {
 	QSqlQuery query;
+	QString comment = "TEST";
 
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
@@ -357,10 +358,8 @@ void FileTests::check_inTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString fifthFile = query.value("id").toString();
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(fifthFile).arg(comment));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
-	QString comment = "TEST";
 
 
 	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(QString(firstFile + ", " + secondFile + ", " + thirdFile)).arg(comment));
@@ -368,22 +367,22 @@ void FileTests::check_inTest()
 
 	while (query.next())
 	{
+		QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("Error code %1").arg(query.value("errCode").toInt())));
 		int id = query.value("id").toInt();
 
-		QVERIFY2(query.value("errCode").toInt() == 0, qPrintable(QString("Error code %1 at fileId %2").arg(query.value("errCode").toInt()).arg(id)));
 		QSqlQuery tempQuery;
 
 		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileId = %1").arg(id));
 
 		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
-		QVERIFY2(tempQuery.value(0) == 0, qPrintable(QString("FILEID %1 hasn't been deleted from checkout!").arg(id)));
+		QVERIFY2(tempQuery.value(0) == 0, qPrintable(QString("FILEID %1 hasn't been checked in!").arg(id)));
 
 		ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(id));
 
 		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
-		QVERIFY2(tempQuery.value("checkedOutInstanceId") == "", qPrintable(QString("File %1 has not been checked in").arg(id)));
+		QVERIFY2(tempQuery.value("checkedOutInstanceId") == "", qPrintable(QString("File %1: checkedOutInstanceId is not empty after checkIn").arg(id)));
 
 		QString Uuid = tempQuery.value("checkedInInstanceId").toString();
 
@@ -418,6 +417,94 @@ void FileTests::check_inTest()
 
 	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(fourthFile).arg("TEST"));
 	QVERIFY2(ok == false, qPrintable("Can not checkin checkinned file error expected"));
+
+	// Let's check in unchanged file
+	//
+
+	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fifthFileLastChangeset = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	// Check In withoutChanges
+	//
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(fifthFileLastChangeset == query.value(0).toInt(), qPrintable("Error: checked in file without changes"));
+
+	ok = query.exec(QString("SELECT comment FROM changeset WHERE changesetId = %1").arg(fifthFileLastChangeset));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(comment == query.value(0).toString(), qPrintable("Error: comment from unchecked In file has been written to changeset table"));
+
+	ok = query.exec(QString("SELECT * FROM is_file_checkedout(%1)").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: file was not checked in"));
+
+	// change Action row, do not change Data row
+	//
+
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(fifthFileLastChangeset == query.value(0).toInt(), qPrintable("Error: file was checked in without data row changed"));
+
+	ok = query.exec(QString("SELECT * FROM is_file_checkedout(%1)").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: file was not checked in"));
+
+	// change Action and Data row
+	//
+
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(fifthFileLastChangeset != query.value(0).toInt(), qPrintable("Error: file was not checked in (file was fully updated)"));
+
+	ok = query.exec(QString("SELECT * FROM is_file_checkedout(%1)").arg(fifthFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: file was not checked in"));
 }
 
 void FileTests::check_outTest()
@@ -2670,7 +2757,10 @@ void FileTests::check_in_treeTest()
 	QSqlQuery query;
 	QSqlQuery tempQuery;
 
-	int fileIds[7] = {0, 0, 0, 0, 0, 0, 0};
+	int fileIds[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	int changesetIdUnchangedFile = -1; // File was checked in, checked out, and check_in_tree without changes
+	int changesetIdChangedFile = -1; // File was checked in, checked out, and check_in_tree with changes
 
 	bool ok = query.exec("SElECT * FROM add_file(1, 'checkInTreeTest', 0, 'FreeBSD', '{}');");
 
@@ -2739,12 +2829,52 @@ void FileTests::check_in_treeTest()
 
 	fileIds[6] = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in (1, '{%1, %2}', 'TEST');").arg(fileIds[6]).arg(fileIds[5]));
+	// Create file. Check it in, check out, and do checkInTree without changes
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestUnchangedFile', %1, 'GNU/Hurd', '{}');").arg(fileIds[0]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[7] = query.value("id").toInt();
+
+	// Create file. Check it in, check it out, make some changes, checkInTree.
+	//
+
+	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestChangedFile', %1, 'GNU/Linux', '{}');").arg(fileIds[0]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	fileIds[8] = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_in (1, '{%1, %2, %3, %4}', 'TEST');").arg(fileIds[6]).arg(fileIds[5]).arg(fileIds[7]).arg(fileIds[8]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}');").arg(fileIds[5]));
+	ok = query.exec(QString("SELECT MAX(changesetId) FROM fileInstance WHERE fileId = %1").arg(fileIds[7]));
 
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	changesetIdUnchangedFile = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT MAX(changesetId) FROM fileInstance WHERE fileId = %1").arg(fileIds[8]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	changesetIdChangedFile = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1, %2, %3}');").arg(fileIds[5]).arg(fileIds[7]).arg(fileIds[8]));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM delete_file (1, %1);").arg(fileIds[5]));
@@ -2756,22 +2886,42 @@ void FileTests::check_in_treeTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	int fileNumber = 0;
+
 	while (query.next())
 	{
-		QVERIFY2(query.value("id").toInt() != fileIds[6], qPrintable("Error: checked in file has been checked_in twice"));
-		QVERIFY2(query.value("id").toInt() == fileIds[fileNumber], qPrintable(QString("Error: wrong fileId\nActual: %1\nExpected: %2").arg(query.value("id").toInt()).arg(fileIds[fileNumber])));
+		// 6th file in array - file, which already checked in. Function must not return 6th file id, and
+		// need to skip it
+		//
 
-		if (query.value("id").toInt() == fileIds[5])
+		QVERIFY2(query.value("id").toInt() != fileIds[6], qPrintable("Error: checked in file has been checked_in twice"));
+
+		if (fileNumber == 6)
+		{
+			fileNumber++;
+		}
+
+		int currentFileId = query.value("id").toInt();
+
+		if (currentFileId == fileIds[5])
 		{
 			// Check deleted file
 			//
 
-			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(fileIds[5]));
+			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(currentFileId));
 
 			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
 			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
 
 			QVERIFY2 (tempQuery.value(0).toBool() == true, qPrintable ("File has not been deleted"));
+		}
+		else if (currentFileId == fileIds[7])
+		{
+			ok = tempQuery.exec(QString("SELECT max(changesetId) FROM fileInstance WHERE fileId = %1").arg(currentFileId));
+
+			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+			QVERIFY2 (tempQuery.value(0).toInt() == changesetIdUnchangedFile, qPrintable("Error: file without changes has been checked in"));
 		}
 		else
 		{
@@ -2795,6 +2945,16 @@ void FileTests::check_in_treeTest()
 			QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
 
 			QVERIFY2 (tempQuery.value("fileId").toInt() == fileIds[fileNumber], qPrintable ("Wrong fileId in table fileInstance"));
+
+			if (currentFileId == fileIds[8])
+			{
+				ok = tempQuery.exec(QString("SELECT max(changesetId) FROM fileInstance WHERE fileId = %1").arg(currentFileId));
+
+				QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
+				QVERIFY2 (tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+				QVERIFY2 (tempQuery.value(0).toInt() != changesetIdUnchangedFile, qPrintable("Error: file with changes was not checkedIn"));
+			}
 		}
 
 		fileNumber++;
@@ -2803,7 +2963,7 @@ void FileTests::check_in_treeTest()
 	// Check amount of results
 	//
 
-	QVERIFY2 (fileNumber == 6, qPrintable ("Error: wrong file amount"));
+	QVERIFY2 (fileNumber == 9, qPrintable ("Error: wrong file amount"));
 
 	// Try call bug, when child file dublates in result
 	//
@@ -2827,6 +2987,7 @@ void FileTests::check_in_treeTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	fileNumber = 0;
+
 	while (query.next())
 	{
 		QVERIFY2 (fileNumber < 2, qPrintable ("Error: child file dublicates in result"));
