@@ -344,6 +344,13 @@ void MainWindow::slot_tuningConnectionFailed()
 
 }
 
+void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
+{
+    theSettings.m_presetEditorSignalsTableColumnWidth = signalsTableColumnWidth;
+    theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
+    theSettings.m_presetEditorPos = pos;
+    theSettings.m_presetEditorGeometry = geometry;
+}
 
 void MainWindow::exit()
 {
@@ -358,9 +365,15 @@ void MainWindow::runPresetEditor()
 
     TuningObjectStorage objects = theObjectManager->objectStorage();
 
-    TuningFilterEditor d(&editStorage, &objects, editAutomatic, this);
+    TuningFilterEditor d(&editStorage, &objects, editAutomatic,
+                         theSettings.m_presetEditorSignalsTableColumnWidth,
+                         theSettings.m_presetEditorPresetsTreeColumnWidth,
+                         theSettings.m_presetEditorPos,
+                         theSettings.m_presetEditorGeometry,
+                         this);
 
-    connect(theMainWindow, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+    connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
+    connect(this, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
 
     if (d.exec() == QDialog::Accepted)
     {
