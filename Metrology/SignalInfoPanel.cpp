@@ -40,7 +40,7 @@ int SignalInfoTable::columnCount(const QModelIndex&) const
 
 int SignalInfoTable::rowCount(const QModelIndex&) const
 {
-    return MEASURE_MULTI_SIGNAL_COUNT;
+    return MAX_CHANNEL_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
     }
 
     int row = index.row();
-    if (row < 0 || row >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
         return QVariant();
     }
@@ -155,7 +155,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 QString SignalInfoTable::text(const int &row, const int &column) const
 {
-    if (row < 0 || row >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
         return "";
     }
@@ -208,7 +208,7 @@ void SignalInfoTable::updateColumn(const int& column)
         return;
     }
 
-    for (int row = 0; row < MEASURE_MULTI_SIGNAL_COUNT; row ++)
+    for (int row = 0; row < MAX_CHANNEL_COUNT; row ++)
     {
         QModelIndex cellIndex = index(row, column);
 
@@ -239,7 +239,7 @@ void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
 
     clear();
 
-    beginInsertRows(QModelIndex(), 0, MEASURE_MULTI_SIGNAL_COUNT - 1);
+    beginInsertRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1);
 
         m_activeSignal = multiSignal;
 
@@ -250,7 +250,7 @@ void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
 
 void SignalInfoTable::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, MEASURE_MULTI_SIGNAL_COUNT - 1 );
+    beginRemoveRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1 );
 
         m_activeSignal.clear();
 

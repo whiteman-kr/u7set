@@ -32,6 +32,8 @@ void Calculator::createDialog()
     //
     m_pDialog = new QDialog(m_parentWidget);
 
+    QFont* font = new QFont("Arial", 16, 2);
+
     // Thermistor
     //
     QGroupBox* trGroup = new QGroupBox(tr("Thermistor"));
@@ -43,6 +45,7 @@ void Calculator::createDialog()
 
     m_pTrDegreeRadio = new QRadioButton(m_pDialog);
     m_pTrDegreeEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pTrDegreeEdit->setFont(*font);
 
     tr_C_Layout->addWidget(m_pTrDegreeRadio);
     tr_C_Layout->addWidget(m_pTrDegreeEdit);
@@ -53,6 +56,7 @@ void Calculator::createDialog()
 
     m_pTrElectricRadio = new QRadioButton(m_pDialog);
     m_pTrElectricEdit = new QLineEdit(m_pDialog);
+    m_pTrElectricEdit->setFont(*font);
 
     tr_Ohm_Layout->addWidget(m_pTrElectricRadio);
     tr_Ohm_Layout->addWidget(m_pTrElectricEdit);
@@ -76,6 +80,7 @@ void Calculator::createDialog()
 
     m_pTcDegreeRadio = new QRadioButton(m_pDialog);
     m_pTcDegreeEdit = new QLineEdit(tr("400"), m_pDialog);
+    m_pTcDegreeEdit->setFont(*font);
 
     tc_C_Layout->addWidget(m_pTcDegreeRadio);
     tc_C_Layout->addWidget(m_pTcDegreeEdit);
@@ -86,6 +91,7 @@ void Calculator::createDialog()
 
     m_pTcElectricRadio = new QRadioButton(m_pDialog);
     m_pTcElectricEdit = new QLineEdit(m_pDialog);
+    m_pTcElectricEdit->setFont(*font);
 
     tc_mV_Layout->addWidget(m_pTcElectricRadio);
     tc_mV_Layout->addWidget(m_pTcElectricEdit);
@@ -107,6 +113,7 @@ void Calculator::createDialog()
 
     m_pLinInRadio = new QRadioButton(m_pDialog);
     m_pLinInValEdit = new QLineEdit(tr("2.5"), m_pDialog);
+    m_pLinInValEdit->setFont(*font);
 
     lin_inval_Layout->addWidget(m_pLinInRadio);
     lin_inval_Layout->addWidget(m_pLinInValEdit);
@@ -117,6 +124,7 @@ void Calculator::createDialog()
 
     m_pLinOutRadio = new QRadioButton(m_pDialog);
     m_pLinOutValEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pLinOutValEdit->setFont(*font);
 
     lin_outval_Layout->addWidget(m_pLinOutRadio);
     lin_outval_Layout->addWidget(m_pLinOutValEdit);

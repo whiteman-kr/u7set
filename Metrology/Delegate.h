@@ -16,7 +16,7 @@ public:
 
     IntDelegate(QObject *parent);
 
-    QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+    QWidget*    createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
 };
 
 // ==============================================================================================
@@ -29,7 +29,7 @@ public:
 
     DoubleDelegate(QObject *parent);
 
-    QWidget * createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+    QWidget*    createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
 };
 
 // ==============================================================================================

@@ -295,7 +295,7 @@ public slots:
 
     bool        open();                                                                 // initialization of the calibrator
 
-    bool		setUnit(int mode, int unit);                                            // select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or soource - 1 (CALIBRATOR_MODE_SOURCE)
+    bool		setUnit(int mode, int unit);                                            // select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
                                                                                         // select unit: mA, mV and etc.
     bool		setValue(double value);                                                 // set value
     bool		stepDown();                                                             // decrease the value on the calibrator

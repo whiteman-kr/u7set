@@ -295,12 +295,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
 
                     item = manager->addProperty(QVariant::String, TcpIpParamName[TCPIP_PARAM_SERVER_IP]);
-                    item->setValue( m_options.connectTcpIp().m_serverIP );
+                    item->setValue( m_options.connectTcpIp().serverIP() );
                     appendProperty(item, page, TCPIP_PARAM_SERVER_IP);
                     serverGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Int, TcpIpParamName[TCPIP_PARAM_SERVER_PORT]);
-                    item->setValue( m_options.connectTcpIp().m_serverPort );
+                    item->setValue( m_options.connectTcpIp().serverPort() );
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 65535);
                     item->setAttribute(QLatin1String("singleStep"), 1);
@@ -341,12 +341,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                     item->setValue(m_options.linearity().m_errorType);
                     appendProperty(item, page, LO_PARAM_ERROR_TYPE);
                     errorGroup->addSubProperty(item);
-
-                    item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_ERROR_BY_SCO]);
-                    item->setValue( m_options.linearity().m_errorCalcBySCO );
-                    appendProperty(item, page, LO_PARAM_ERROR_BY_SCO);
-                    errorGroup->addSubProperty(item);
-
 
                 QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
 
@@ -492,12 +486,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                     appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
                     errorGroup->addSubProperty(item);
 
-                    item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_NO]);
-                    item->setValue(m_options.comparator().m_startComparatorNo);
+                    item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
+                    item->setValue(m_options.comparator().m_startComparatorIndex);
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 16);
                     item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, CO_PARAM_COMPARATOR_NO);
+                    appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
                     errorGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ADDITIONAL_CHECK]);
@@ -571,7 +565,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 QtProperty *locationGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reports"));
 
                     item = manager->addProperty(VariantManager::folerPathTypeId(), ReportParam[RO_PARAM_PATH]);
-                    item->setValue( m_options.report().m_path );
+                    item->setValue( m_options.report().path() );
                     appendProperty(item, page, RO_PARAM_PATH);
                     locationGroup->addSubProperty(item);
 
@@ -584,7 +578,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                         valueTypeList.append(ReportType[t]);
                     }
                     item->setAttribute(QLatin1String("enumNames"), valueTypeList);
-                    item->setValue(m_options.report().m_type);
+                    item->setValue(m_options.report().type());
                     appendProperty(item, page, DBO_PARAM_TYPE);
                     reportGroup->addSubProperty(item);
 
@@ -711,7 +705,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 QtProperty *databaseGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of Database"));
 
                     item = manager->addProperty(VariantManager::folerPathTypeId(), DatabaseParam[DBO_PARAM_PATH]);
-                    item->setValue( m_options.database().m_path );
+                    item->setValue( m_options.database().path() );
                     appendProperty(item, page, DBO_PARAM_PATH);
                     databaseGroup->addSubProperty(item);
 
@@ -722,7 +716,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                         valueTypeList.append(DatabaseType[t]);
                     }
                     item->setAttribute(QLatin1String("enumNames"), valueTypeList);
-                    item->setValue(m_options.database().m_type);
+                    item->setValue(m_options.database().type());
                     appendProperty(item, page, DBO_PARAM_TYPE);
                     databaseGroup->addSubProperty(item);
 
@@ -737,19 +731,19 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                 QtProperty *eventGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Events"));
 
                     item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_START]);
-                    item->setValue( m_options.backup().m_onStart );
+                    item->setValue( m_options.backup().onStart() );
                     appendProperty(item, page, BUO_PARAM_ON_START);
                     eventGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Bool, BackupParam[BUO_PARAM_ON_EXIT]);
-                    item->setValue( m_options.backup().m_onExit );
+                    item->setValue( m_options.backup().onExit() );
                     appendProperty(item, page, BUO_PARAM_ON_EXIT);
                     eventGroup->addSubProperty(item);
 
                 QtProperty *pathGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Location of reserve copy"));
 
                     item = manager->addProperty(VariantManager::folerPathTypeId(), BackupParam[BUO_PARAM_PATH]);
-                    item->setValue( m_options.backup().m_path );
+                    item->setValue( m_options.backup().path() );
                     appendProperty(item, page, BUO_PARAM_PATH);
                     pathGroup->addSubProperty(item);
 
@@ -1030,8 +1024,9 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case TCPIP_PARAM_SERVER_IP:     m_options.connectTcpIp().m_serverIP = value.toString();                 break;
-                    case TCPIP_PARAM_SERVER_PORT:   m_options.connectTcpIp().m_serverPort = value.toInt();                  break;
+                    case TCPIP_PARAM_SERVER_IP:     m_options.connectTcpIp().setServerIP(value.toString());                 break;
+                    case TCPIP_PARAM_SERVER_PORT:   m_options.connectTcpIp().setServerPort(value.toInt());                  break;
+                    default:                        assert(0);
                 }
             }
             break;
@@ -1045,7 +1040,6 @@ void OptionsDialog::applyProperty()
                     case LO_PARAM_ERROR_TYPE:       m_options.linearity().m_errorType = value.toInt();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
-                    case LO_PARAM_ERROR_BY_SCO:     m_options.linearity().m_errorCalcBySCO = value.toBool();                break;
                     case LO_PARAM_MEASURE_TIME:     m_options.linearity().m_measureTimeInPoint = value.toInt();             break;
                     case LO_PARAM_MEASURE_IN_POINT: m_options.linearity().m_measureCountInPoint = value.toInt();            break;
                     case LO_PARAM_RANGE_TYPE:       m_options.linearity().m_rangeType = value.toInt();
@@ -1066,7 +1060,7 @@ void OptionsDialog::applyProperty()
                     case LO_PARAM_OUTPUT_RANGE:     m_options.linearity().m_showOutputRangeColumn = value.toBool();
                                                     m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
                                                     break;
-                    default:                        assert(0);                                                              break;
+                    default:                        assert(0);
                 }
             }
             break;
@@ -1080,9 +1074,9 @@ void OptionsDialog::applyProperty()
                     case CO_PARAM_START_VALUE:          m_options.comparator().m_startValue = value.toDouble();             break;
                     case CO_PARAM_ERROR_TYPE:           m_options.comparator().m_errorType = value.toInt();                 break;
                     case CO_PARAM_ENABLE_HYSTERESIS:    m_options.comparator().m_enableMeasureHysteresis = value.toBool();  break;
-                    case CO_PARAM_COMPARATOR_NO:        m_options.comparator().m_startComparatorNo = value.toInt();         break;
+                    case CO_PARAM_COMPARATOR_INDEX:     m_options.comparator().m_startComparatorIndex = value.toInt();      break;
                     case CO_PARAM_ADDITIONAL_CHECK:     m_options.comparator().m_additionalCheck = value.toBool();          break;
-                    default:                            assert(0);                                                          break;
+                    default:                            assert(0);
                 }
             }
             break;
@@ -1096,7 +1090,7 @@ void OptionsDialog::applyProperty()
                     case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();              break;
                     case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString());    break;
                     case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());      break;
-                    default:                            assert(0);                                                                      break;
+                    default:                            assert(0);
                 }
 
                 for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
@@ -1116,7 +1110,7 @@ void OptionsDialog::applyProperty()
 
         case OPTION_PAGE_REPORT:
             {
-                int type = m_options.report().m_type;
+                int type = m_options.report().type();
                 if (type < 0 || type >= m_options.report().m_headerBase.count())
                 {
                     break;
@@ -1126,8 +1120,8 @@ void OptionsDialog::applyProperty()
 
                 switch(param)
                 {
-                    case RO_PARAM_PATH:                 m_options.report().m_path = value.toString();           break;
-                    case RO_PARAM_TYPE:                 m_options.report().m_type = value.toInt();
+                    case RO_PARAM_PATH:                 m_options.report().setPath(value.toString());           break;
+                    case RO_PARAM_TYPE:                 m_options.report().setType(value.toInt());
                                                         updateReportHeaderPage();                               break;
                     case RO_PARAM_DOCUMENT_TITLE:       header.m_documentTitle = value.toString();              break;
                     case RO_PARAM_REPORT_TITLE:         header.m_reportTitle = value.toString();                break;
@@ -1139,14 +1133,14 @@ void OptionsDialog::applyProperty()
                     case RO_PARAM_H:                    header.m_H = value.toDouble();                          break;
                     case RO_PARAM_V:                    header.m_V = value.toDouble();                          break;
                     case RO_PARAM_F:                    header.m_F = value.toDouble();                          break;
-                    case RO_PARAM_CALIBRATOR_0:         header.m_calibrator[CALIBRATOR_0] = value.toString();   break;
-                    case RO_PARAM_CALIBRATOR_1:         header.m_calibrator[CALIBRATOR_1] = value.toString();   break;
-                    case RO_PARAM_CALIBRATOR_2:         header.m_calibrator[CALIBRATOR_2] = value.toString();   break;
-                    case RO_PARAM_CALIBRATOR_3:         header.m_calibrator[CALIBRATOR_3] = value.toString();   break;
-                    case RO_PARAM_CALIBRATOR_4:         header.m_calibrator[CALIBRATOR_4] = value.toString();   break;
-                    case RO_PARAM_CALIBRATOR_5:         header.m_calibrator[CALIBRATOR_5] = value.toString();   break;
+                    case RO_PARAM_CALIBRATOR_0:         header.m_calibrator[CHANNEL_0] = value.toString();      break;
+                    case RO_PARAM_CALIBRATOR_1:         header.m_calibrator[CHANNEL_1] = value.toString();      break;
+                    case RO_PARAM_CALIBRATOR_2:         header.m_calibrator[CHANNEL_2] = value.toString();      break;
+                    case RO_PARAM_CALIBRATOR_3:         header.m_calibrator[CHANNEL_3] = value.toString();      break;
+                    case RO_PARAM_CALIBRATOR_4:         header.m_calibrator[CHANNEL_4] = value.toString();      break;
+                    case RO_PARAM_CALIBRATOR_5:         header.m_calibrator[CHANNEL_5] = value.toString();      break;
                     case RO_PARAM_REPORT_FILE:          break;
-                    default:                            assert(0);                                              break;
+                    default:                            assert(0);
                 }
 
                 m_options.report().m_headerBase.set(type, header);
@@ -1157,9 +1151,9 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case DBO_PARAM_PATH:                m_options.database().m_path = value.toString(); break;
-                    case DBO_PARAM_TYPE:                m_options.database().m_type = value.toBool();   break;
-                    default:                            assert(0);                                      break;
+                    case DBO_PARAM_PATH:                m_options.database().setPath(value.toString());         break;
+                    case DBO_PARAM_TYPE:                m_options.database().setType(value.toBool());           break;
+                    default:                            assert(0);
                 }
             }
             break;
@@ -1168,10 +1162,10 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case BUO_PARAM_ON_START:            m_options.backup().m_onStart = value.toBool();      break;
-                    case BUO_PARAM_ON_EXIT:             m_options.backup().m_onExit = value.toBool();       break;
-                    case BUO_PARAM_PATH:                m_options.backup().m_path = value.toString();       break;
-                    default:                            assert(0);                                          break;
+                    case BUO_PARAM_ON_START:            m_options.backup().setOnStart(value.toBool());          break;
+                    case BUO_PARAM_ON_EXIT:             m_options.backup().setOnExit(value.toBool());           break;
+                    case BUO_PARAM_PATH:                m_options.backup().setPath(value.toString());           break;
+                    default:                            assert(0);
                 }
             }
             break;
@@ -1310,7 +1304,7 @@ void OptionsDialog::updateReportHeaderPage()
 {
     REPORT_HEADER header;
 
-    int type = m_options.report().m_type;
+    int type = m_options.report().type();
     if (type >= 0 && type < m_options.report().m_headerBase.count())
     {
         header = m_options.report().m_headerBase.at(type);
@@ -1381,37 +1375,37 @@ void OptionsDialog::updateReportHeaderPage()
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_0 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_0] );
+        property->setValue( header.m_calibrator[CHANNEL_0] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_1 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_1] );
+        property->setValue( header.m_calibrator[CHANNEL_1] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_2 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_2] );
+        property->setValue( header.m_calibrator[CHANNEL_2] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_3 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_3] );
+        property->setValue( header.m_calibrator[CHANNEL_3] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_4 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_4] );
+        property->setValue( header.m_calibrator[CHANNEL_4] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_5 );
     if (property != nullptr)
     {
-        property->setValue( header.m_calibrator[CALIBRATOR_5] );
+        property->setValue( header.m_calibrator[CHANNEL_5] );
     }
 
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_REPORT << 8) | RO_PARAM_REPORT_FILE );

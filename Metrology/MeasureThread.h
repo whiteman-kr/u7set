@@ -30,7 +30,7 @@ public:
 
 private:
 
-    QWidget*                m_parentWidget = nullptr;
+    QWidget*                m_parent = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
     MeasureMultiSignal      m_activeSignal;
@@ -62,7 +62,7 @@ signals:
 
 private slots:
 
-    void                    msgBox(QString text)        { QMessageBox::information(m_parentWidget, tr("Measurement process"), text); }
+    void                    msgBox(QString text)        { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
     void                    calibratorDisconnected();
 

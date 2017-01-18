@@ -348,7 +348,7 @@ void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
 
     for (int i = 0; i < m_getUnitsReply.units_size(); i++)
     {
-        theSignalBase.appendUnit(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
+        theUnitBase.appendUnit(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
     }
 
     qDebug() << "SignalSocket::replyUnits - Units were loaded:              " << m_getUnitsReply.units_size();
