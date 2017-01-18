@@ -105,7 +105,7 @@ namespace VFrame30
 		//
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), QLatin1String("T"), r, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("T"), r, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}

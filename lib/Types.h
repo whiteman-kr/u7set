@@ -33,6 +33,21 @@ public:
 	};
 	Q_ENUM(VertAlign)
 
+	// UserTextPos
+	//
+	enum class UserTextPos
+	{
+		LeftTop,
+		Top,
+		RightTop,
+		Right,
+		RightBottom,
+		Bottom,
+		LeftBottom,
+		Left
+	};
+	Q_ENUM(UserTextPos)
+
 	// Format analog
 	//
 	enum class AnalogFormat
@@ -65,6 +80,8 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	// SignalFunction
+	//
 	enum class SignalFunction
 	{
 		Input,					// physical input, application logic signal
@@ -74,6 +91,8 @@ public:
 	};
 	Q_ENUM(SignalFunction)
 
+	// ByteOrder
+	//
 	enum ByteOrder
 	{
 		LittleEndian,
@@ -92,6 +111,8 @@ public:
 	};
 	Q_ENUM(DataFormat)
 
+	// AnalogAppSignalFormat
+	//
 	enum class AnalogAppSignalFormat
 	{
 		SignedInt32 = static_cast<int>(E::DataFormat::SignedInt),
@@ -99,6 +120,8 @@ public:
 	};
 	Q_ENUM(AnalogAppSignalFormat)
 
+	// MemoryArea
+	//
 	enum class MemoryArea
 	{
 		ApplicationData,
@@ -120,6 +143,8 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
+	// OutputMode
+	//
 	enum OutputMode
 	{
 		Plus0_Plus5_V = 0,
@@ -129,6 +154,8 @@ public:
 	};
 	Q_ENUM(OutputMode)
 
+	// InputUnit
+	//
     enum InputUnit
     {
         NoInputUnit = 0,
@@ -139,6 +166,8 @@ public:
     };
     Q_ENUM(InputUnit)
 
+	// SensorType
+	//
     enum SensorType
     {
         NoSensorType = 0,
@@ -162,6 +191,8 @@ public:
     };
     Q_ENUM(SensorType)
 
+	// SignalInOutType
+	//
 	enum class SignalInOutType
 	{
 		Input = 0,
@@ -170,6 +201,8 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
+	// Channel
+	//
 	enum class Channel
 	{
 		A = 0,
@@ -179,6 +212,8 @@ public:
 	};
 	Q_ENUM(Channel)
 
+	// DataSourceState
+	//
 	enum class DataSourceState
 	{
 		NoData = 0,

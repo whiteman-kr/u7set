@@ -138,6 +138,12 @@ namespace VFrame30
 		QString label() const;
 		void setLabel(const QString& value);
 
+		QString userText() const;
+		void setUserText(const QString& value);
+
+		E::UserTextPos userTextPos() const;
+		void setUserTextPos(E::UserTextPos value);
+
 	protected:
 		// m_gridSize and m_pingGridStep are cached values from Schema, they set in CalcPointPos.
 		// We need these variables in case we call functions and do not have schema pointer.
@@ -146,13 +152,16 @@ namespace VFrame30
 		mutable double m_cachedGridSize = -1;			// -1 means it is not iniotialized
 		mutable int m_cachedPinGridStep = 0;
 
-		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
+		double m_weight;								// Line weight, is kept in pixels or inches depends on UnitDocPt
 		QRgb m_lineColor;
 		QRgb m_fillColor;
 		QRgb m_textColor;
 		FontParam m_font;
 
 		QString m_label;
+
+		QString m_userText;
+		E::UserTextPos m_userTextPos = E::UserTextPos::Top;
 	};
 }
 
