@@ -296,9 +296,10 @@ void TuningWorkspace::slot_currentTabChanged(int index)
     // Set the tab back color
     //
 
-    QColor tabColor = page->tabColor();
+    QColor backColor = page->backColor();
+    QColor textColor = page->textColor();
 
-    if (tabColor.isValid())
+    if (backColor.isValid() && textColor.isValid() && backColor != textColor)
     {
         // See http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
         //
@@ -308,6 +309,7 @@ void TuningWorkspace::slot_currentTabChanged(int index)
             {\
                 background: solid %1;\
                 border-top: 2px solid %1;\
+                color: %2;\
             }\
             QTabWidget::tab-bar\
             {\
@@ -327,8 +329,9 @@ void TuningWorkspace::slot_currentTabChanged(int index)
                 background: solid %1;\
                 border-color: #C2C7CB;\
                 border-bottom-color: #C2C7CB;\
+                color: %2;\
             }\
-        ").arg(tabColor.name());
+        ").arg(backColor.name()).arg(textColor.name());
 
         m_tab->setStyleSheet(s);
     }

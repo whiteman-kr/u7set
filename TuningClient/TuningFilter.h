@@ -119,8 +119,12 @@ public:
     SignalType signalType() const;
     void setSignalType(SignalType value);
 
-    QColor tabColor() const;
-    void setTabColor(const QColor& value);
+    QColor backColor() const;
+    void setBackColor(const QColor& value);
+
+    QColor textColor() const;
+    void setTextColor(const QColor& value);
+
 
     // Filters
 	//
@@ -190,7 +194,9 @@ private:
     FilterType m_filterType = FilterType::Tree;
     SignalType m_signalType = SignalType::All;
 
-    QColor m_tabColor;
+    QColor m_backColor = Qt::GlobalColor::lightGray;
+    QColor m_textColor = Qt::GlobalColor::lightGray;
+
 
     // Filters
 	//

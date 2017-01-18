@@ -169,8 +169,12 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-    auto propTabColor = ADD_PROPERTY_GETTER_SETTER(QColor, "Color", true, TuningFilter::tabColor, TuningFilter::setTabColor);
-    propTabColor->setCategory("Tab");
+    auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
+    propBackColor->setCategory("Color");
+
+    auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
+    propTextColor->setCategory("Color");
+
 }
 
 TuningFilter::TuningFilter(const TuningFilter& That)
@@ -238,9 +242,14 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
             setCaption(reader.attributes().value("Caption").toString());
         }
 
-        if (reader.attributes().hasAttribute("TabColor"))
+        if (reader.attributes().hasAttribute("BackColor"))
         {
-            setTabColor(QColor(reader.attributes().value("TabColor").toString()));
+            setBackColor(QColor(reader.attributes().value("BackColor").toString()));
+        }
+
+        if (reader.attributes().hasAttribute("TextColor"))
+        {
+            setTextColor(QColor(reader.attributes().value("TextColor").toString()));
         }
 
         if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
@@ -405,7 +414,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("StrID", strID());
 	writer.writeAttribute("Caption", caption());
 
-    writer.writeAttribute("TabColor", tabColor().name());
+    writer.writeAttribute("BackColor", backColor().name());
+    writer.writeAttribute("TextColor", textColor().name());
 
     writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
@@ -665,14 +675,24 @@ void TuningFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
-QColor TuningFilter::tabColor() const
+QColor TuningFilter::backColor() const
 {
-    return m_tabColor;
+    return m_backColor;
 }
 
-void TuningFilter::setTabColor(const QColor& value)
+void TuningFilter::setBackColor(const QColor& value)
 {
-    m_tabColor = value;
+    m_backColor = value;
+}
+
+QColor TuningFilter::textColor() const
+{
+    return m_textColor;
+}
+
+void TuningFilter::setTextColor(const QColor& value)
+{
+    m_textColor = value;
 }
 
 TuningFilter* TuningFilter::parentFilter() const
