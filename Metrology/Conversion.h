@@ -15,13 +15,16 @@ const int	CT_COUNT                = 2;
 
 // ==============================================================================================
 
-double conversion(double val, const int& type, const Signal& param);
-double conversion(double val, const int& type, const E::InputUnit& unitID, const E::SensorType& sensorType);
+double      conversion(double val, const int& type, const Signal& param);
+double      conversion(double val, const int& type, const E::InputUnit& unitID, const E::SensorType& sensorType);
 
 // ==============================================================================================
 
-extern double K_STUDENT[];
-extern const int K_STUDENT_COUNT;
+const int	CT_PROPABILITY_95    = 0;
+
+const int	CT_PROPABILITY_COUNT = 1;
+
+double      studentK(const int& measureCount, const int& p);
 
 // ==============================================================================================
 

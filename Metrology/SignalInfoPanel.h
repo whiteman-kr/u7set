@@ -53,7 +53,7 @@ public:
     explicit            SignalInfoTable(QObject* parent = 0);
                         ~SignalInfoTable();
 
-    int                 count() { return MEASURE_MULTI_SIGNAL_COUNT; }
+    int                 count() { return MAX_CHANNEL_COUNT; }
     Hash                at(int index);
     void                set(const MeasureMultiSignal& multiSignal);
     void                clear();

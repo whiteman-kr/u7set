@@ -915,12 +915,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     header->m_V = query.value(field++).toDouble();
                     header->m_F = query.value(field++).toDouble();
 
-                    header->m_calibrator[CALIBRATOR_0] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_1] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_2] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_3] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_4] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_5] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_0] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_1] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_2] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_3] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_4] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_5] = query.value(field++).toString();
 
                     header->m_linkObjectID = query.value(field++).toInt();
                     header->m_reportFile = query.value(field++).toString();
@@ -1264,12 +1264,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, header->m_V);
                     query.bindValue(field++, header->m_F);
 
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_0]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_1]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_2]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_3]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_4]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_5]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_0]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_1]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_2]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_3]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_4]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_5]);
 
                     query.bindValue(field++, header->m_linkObjectID);
                     query.bindValue(field++, header->m_reportFile);
@@ -1395,14 +1395,14 @@ Database::~Database()
 
 bool Database::open()
 {
-    QString path = theOptions.database().m_path;
+    QString path = theOptions.database().path();
     if (path.isEmpty() == true)
     {
         QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path!"));
         return false;
     }
 
-    switch(theOptions.database().m_type)
+    switch(theOptions.database().type())
     {
         case DATABASE_TYPE_SQLITE:
 
