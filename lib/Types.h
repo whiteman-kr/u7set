@@ -131,11 +131,11 @@ public:
 
     enum InputUnit
     {
-        NoInputUnit = 0,
-        mA = 1,
-        mV = 2,
-        Ohm = 3,
-        V = 4,
+        NoInputUnit = 1,
+        mA = 15,
+        mV = 11,
+        Ohm = 20,
+        V = 12,
     };
     Q_ENUM(InputUnit)
 
