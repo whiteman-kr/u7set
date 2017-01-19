@@ -46,8 +46,6 @@ struct Unit
     QString nameRu;
 };
 
-const int   INPUT_UNIT_COUNT = 5;
-
 const char* const SensorTypeStr[] =
 {
     "Not used",
