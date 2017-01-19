@@ -186,9 +186,9 @@ LinearityMeasurement::LinearityMeasurement(Calibrator* pCalibrator, const Hash& 
     setLowLimit(VALUE_TYPE_ELECTRIC, signal.param().inputLowLimit());
     setHighLimit(VALUE_TYPE_ELECTRIC, signal.param().inputHighLimit());
 
-    if ( signal.param().inputUnitID() >= 0 && signal.param().inputUnitID() < INPUT_UNIT_COUNT)
+    if ( signal.param().inputUnitID() >= 0 && signal.param().inputUnitID() < theUnitBase.unitCount())
     {
-        setUnit(VALUE_TYPE_ELECTRIC, InputUnitStr[ signal.param().inputUnitID() ] );
+        setUnit(VALUE_TYPE_ELECTRIC, theUnitBase.unit( signal.param().inputUnitID() ) );
     }
 
     setLowLimit(VALUE_TYPE_PHYSICAL, signal.param().lowEngeneeringUnits());
