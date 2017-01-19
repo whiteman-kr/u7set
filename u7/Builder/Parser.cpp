@@ -2,6 +2,7 @@
 
 #include <typeindex>
 #include <functional>
+#include <set>
 #include <QtConcurrent/QtConcurrent>
 
 #include "IssueLogger.h"
@@ -2241,6 +2242,8 @@ namespace Builder
 
 	bool Parser::parse()
 	{
+		bool result = true;
+
 		// Get User Functional Blocks
 		//
 		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
@@ -2249,6 +2252,14 @@ namespace Builder
 		if (ok == false)
 		{
 			return ok;
+		}
+
+		// Check for the same lables in ufbs
+		//
+		ok = checkSameLabelsAndGuids(ufbs);
+		if (ok == false)
+		{
+			result = false;
 		}
 
 		// Check Ufbs SchemaItemAfb.afbElement versions
@@ -2286,8 +2297,6 @@ namespace Builder
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
-		bool result = true;
-
 		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
 
 		ok = m_applicationData->orderUfbItems(m_log);
@@ -2312,6 +2321,14 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
+		}
+
+		// Check for the same lables in schemas
+		//
+		ok = checkSameLabelsAndGuids(schemas);
+		if (ok == false)
+		{
+			result = false;
 		}
 
 		// Check schemas EquipmentIDs
@@ -2573,6 +2590,60 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	template<typename SchemaType>
+	bool Parser::checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType>>& schemas) const
+	{
+		std::multiset<QUuid> uuids;
+		std::multiset<QString> labels;
+
+		for (const std::shared_ptr<SchemaType>& schema : schemas)
+		{
+			uuids.insert(schema->guid());			// Schema guid is also included in check
+
+			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+			{
+				uuids.insert(layer->guid());		// Layer guid is also included in check
+
+				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				{
+					uuids.insert(item->guid());
+
+					if (item->isFblItemRect() == true)
+					{
+						QString label = item->toFblItemRect()->label();
+						labels.insert(label);
+					}
+				}
+			}
+		}
+
+		bool result = true;
+
+		// Check for the same guids
+		//
+		for (const QUuid& uuid : uuids)
+		{
+			if (uuids.count(uuid) != 1)
+			{
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate guids %1").arg(uuid.toString()));
+				result = false;
+			}
+		}
+
+		// Check for the same labels
+		//
+		for (const QString& label : labels)
+		{
+			if (labels.count(label) != 1)
+			{
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(label));
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool Parser::checkEquipmentIds(VFrame30::LogicSchema* logicSchema)
