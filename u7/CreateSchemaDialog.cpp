@@ -3,10 +3,12 @@
 #include "../lib/DbController.h"
 #include "../VFrame30/Settings.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/FblItemRect.h"
 
 CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateSchemaDialog),
+	m_db(db),
 	m_schema(schema)
 {
 	assert(m_schema.get() != nullptr);
@@ -247,6 +249,27 @@ void CreateSchemaDialog::accept()
 
 		m_templateSchema->Save(&data);
 		m_schema->Load(data);
+
+		// Set new uuids and labels to the schema
+		//
+		m_schema->setGuid(QUuid::createUuid());
+
+		for (auto layer : m_schema->Layers)
+		{
+			layer->setGuid(QUuid::createUuid());
+
+			for (auto item : layer->Items)
+			{
+				item->setGuid(QUuid::createUuid());
+
+				if (item->isFblItemRect() == true)
+				{
+					int counterValue = m_db->nextCounterValue();
+					item->toFblItemRect()->setLabel(strID + "_" + QString::number(counterValue));
+				}
+			}
+		}
+
 	}
 
 	m_schema->setSchemaId(strID);
