@@ -46,18 +46,6 @@ struct Unit
     QString nameRu;
 };
 
-const char* const InputUnitStr[] =
-{
-    "Not used",
-    "mA",
-    "mV",
-    "Ohm",
-    "V",
-};
-
-const int INPUT_UNIT_COUNT = sizeof(InputUnitStr) / sizeof(InputUnitStr[0]);
-
-
 const char* const SensorTypeStr[] =
 {
     "Not used",
@@ -297,7 +285,7 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
-    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::InputUnit));
+    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(E::InputUnit));
     void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));

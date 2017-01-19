@@ -336,9 +336,9 @@ QString MeasureSignal::inputElectricRange()
 
     range.sprintf("%.3f .. %.3f ", m_param.inputLowLimit(), m_param.inputHighLimit());
 
-    if ( m_param.inputUnitID() >= 0 && m_param.inputUnitID() < INPUT_UNIT_COUNT)
+    if ( m_param.inputUnitID() >= 0 && m_param.inputUnitID() < theUnitBase.unitCount())
     {
-        range.append( InputUnitStr[ m_param.inputUnitID() ] );
+        range.append( theUnitBase.unit( m_param.inputUnitID() ) );
     }
 
     if (m_param.inputSensorType() >= 1 && m_param.inputSensorType() < SENSOR_TYPE_COUNT)

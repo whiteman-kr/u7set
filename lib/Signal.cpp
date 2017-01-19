@@ -258,7 +258,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::InputUnit))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(E::InputUnit))
 {
     const QStringRef& strValue = attr.value(fieldName);
     if (strValue.isEmpty())
@@ -266,9 +266,9 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
         assert(false);
         return;
     }
-    for (int i = 0; i < INPUT_UNIT_COUNT; i++)
+    for (int i = 0; i < unitInfo.count(); i++)
     {
-        if (strValue == InputUnitStr[i])
+        if (strValue == unitInfo[i])
         {
             (this->*setter)(static_cast<E::InputUnit>(i));
             return;
@@ -426,15 +426,12 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
 	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
 	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
-    //serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
-    serializeField(attr, "InputUnitID", &Signal::setInputUnitID);
-    //serializeSensorField(attr, "InputSensorID", &Signal::setInputSensorType);
+    serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
     serializeField(attr, "InputSensorID", &Signal::setInputSensorType);
 	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
 	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
 	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
 	serializeField(attr, "OutputMode", &Signal::setOutputMode);
-    //serializeSensorField(attr, "OutputSensorID", &Signal::setOutputSensorType);
     serializeField(attr, "OutputSensorID", &Signal::setOutputSensorType);
 	serializeField(attr, "Acquire", &Signal::setAcquire);
 	serializeField(attr, "Calculated", &Signal::setCalculated);

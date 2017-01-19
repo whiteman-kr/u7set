@@ -207,9 +207,11 @@ void SignalPropertyDialog::createPropertyList()
 
             item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
             QStringList inputUnitList;
-            for(int u = 0; u < INPUT_UNIT_COUNT; u++)
+            QMetaEnum me = QMetaEnum::fromType<E::InputUnit>();
+            int inputUnitCount = me.keyCount();
+            for(int u = 0; u < inputUnitCount; u++)
             {
-                inputUnitList.append( InputUnitStr[ u ] );
+                inputUnitList.append( theUnitBase.unit( me.value(u) ) );
             }
             item->setAttribute(QLatin1String("enumNames"), inputUnitList);
             item->setValue( m_signal.param().inputUnitID() );
