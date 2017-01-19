@@ -207,9 +207,10 @@ void SignalPropertyDialog::createPropertyList()
 
             item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
             QStringList inputUnitList;
+            //int unitCount =
             for(int u = 0; u < INPUT_UNIT_COUNT; u++)
             {
-                inputUnitList.append( InputUnitStr[ u ] );
+                inputUnitList.append( theUnitBase.unit( u ) );
             }
             item->setAttribute(QLatin1String("enumNames"), inputUnitList);
             item->setValue( m_signal.param().inputUnitID() );
