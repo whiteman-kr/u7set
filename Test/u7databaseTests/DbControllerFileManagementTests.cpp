@@ -492,6 +492,15 @@ void DbControllerFileTests::checkInTest()
 	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}')").arg(firstFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
+	ok = query.exec(QString("SELECT max(changesetId) FROM fileInstance WHERE fileId = %1").arg(firstFileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int changesetIdFirstFile = query.value(0).toInt();
+
+	ok = query.exec(QString("UPDATE fileInstance SET Data='1235234523636' WHERE fileId = %1 AND changesetId = %2").arg(firstFileId).arg(changesetIdFirstFile));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
 	DbFileInfo file2;
 	QString fileTwo = "SecondFileCheckIn";
 
@@ -588,6 +597,71 @@ void DbControllerFileTests::checkInTest()
 	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
 
 	QVERIFY2 (instanceQuery.value(0).toInt() == 1, qPrintable("Error: function check_in has not checked in one file (wrong record in fileInstance)"));
+
+	// Check_in files, that has not been changed
+	//
+
+	DbFileInfo fileWithoutChanges;
+
+	QString fileWithoutChangesName = "FileWithoutChangesCheckInTest";
+
+	comment = "File without changes must be checked in once";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', 1, 'LOL', '{}')").arg(fileWithoutChangesName));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fileWithoutChangesId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileWithoutChangesId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	fileWithoutChanges.setFileName(fileWithoutChangesName);
+	fileWithoutChanges.setSize(instanceQuery.value("Size").toInt());
+	fileWithoutChanges.setUserId(1);
+	fileWithoutChanges.setParentId(1);
+	fileWithoutChanges.setDetails(instanceQuery.value("details").toString());
+	fileWithoutChanges.setFileId(query.value("fileId").toInt());
+
+	ok = m_dbController->checkIn(fileWithoutChanges, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT MAX(changesetId) from FileInstance WHERE FileId = %1").arg(fileWithoutChangesId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int lastChangesetForFileWithoutChanges = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}')").arg(fileWithoutChangesId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	QString wrongComment = "This comment must not exist!";
+
+	ok = m_dbController->checkIn(fileWithoutChanges, wrongComment, 0);
+	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT MAX(changesetId) from FileInstance WHERE FileId = %1").arg(fileWithoutChangesId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == lastChangesetForFileWithoutChanges, qPrintable("Error: file has been checked in without any changes! (FileInstance table record)"));
+
+	ok = query.exec(QString("SELECT * FROM is_file_checkedout(%1)").arg(fileWithoutChangesId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: file was not checked in"));
+
+	ok = query.exec(QString("SELECT COUNT(*) FROM changeset WHERE comment = '%1'").arg(wrongComment));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value(0).toInt() == 0, qPrintable("Error: file has been checked in without any changes! (Changeset table record)"));
 
 	db.close();
 }
@@ -1667,7 +1741,7 @@ void DbControllerFileTests::checkInTreeTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
-	DbFileInfo firstParentFile, firstChildFile, secondParentFile, secondChildFile;
+	DbFileInfo firstParentFile, firstChildFile, secondParentFile, secondChildFile, fileWithoutChanges;
 	QSqlQuery query, instanceQuery;
 
 	QString fileName = "FirstParentForCheckInTreeTestOfDbController\\'\"";
@@ -1761,6 +1835,42 @@ void DbControllerFileTests::checkInTreeTest()
 	secondChildFile.setDetails(instanceQuery.value("details").toString());
 	secondChildFile.setFileId(query.value("fileId").toInt());
 
+	fileName = "ThirdChildFileWithoutChanges";
+
+	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(fileName).arg(secondParentFile.fileId()));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	fileId = query.value("id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM file WHERE fileId=%1").arg(fileId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = instanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileInstanceid = '%1'").arg(query.value("checkedOutInstanceId").toString()));
+	QVERIFY2(ok == true, qPrintable(instanceQuery.lastError().databaseText()));
+	QVERIFY2(instanceQuery.first() == true, qPrintable(instanceQuery.lastError().databaseText()));
+
+	fileWithoutChanges.setFileName(fileName);
+	fileWithoutChanges.setSize(instanceQuery.value("Size").toInt());
+	fileWithoutChanges.setUserId(1);
+	fileWithoutChanges.setParentId(1);
+	fileWithoutChanges.setDetails(instanceQuery.value("details").toString());
+	fileWithoutChanges.setFileId(query.value("fileId").toInt());
+
+	ok = m_dbController->checkIn(fileWithoutChanges, "Only one comment for chack_in_tree test", 0);
+	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+
+	ok = query.exec(QString("SELECT MAX(changesetId) FROM FileInstance WHERE FileId = %1").arg(fileId));
+
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	int fileWithoutChangesChangesetId = query.value(0).toInt();
+	int fileWithoutChangesFileId = fileId;
+
+	ok = query.exec(QString("SELECT * FROM check_out(1, '{%1}')").arg(fileId));
+	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
 	std::vector<DbFileInfo> files;
 
 	files.push_back(firstParentFile);
@@ -1773,6 +1883,9 @@ void DbControllerFileTests::checkInTreeTest()
 	ok = m_dbController->checkInTree(files, &out, comment, 0);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
 
+	const int baseFileAmount = 5; // Amount of files in test
+	int currentFileNumber = 0;
+
 	for (DbFileInfo buff : out)
 	{
 		ok = query.exec(QString("SELECT * FROM get_file_state(%1)").arg(buff.fileId()));
@@ -1780,7 +1893,21 @@ void DbControllerFileTests::checkInTreeTest()
 		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
 		QVERIFY2 (query.value("checkedout").toBool() == false, qPrintable ("Error: file was not checked in"));
+
+		if (buff.fileId() == fileWithoutChangesFileId)
+		{
+			ok = query.exec(QString("SELECT MAX(changesetId) FROM FileInstance WHERE FileId = %1").arg(fileId));
+
+			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+
+			QVERIFY2 (query.value(0).toInt() == fileWithoutChangesChangesetId, qPrintable("Error: file without changes has been checked in (fileInstance record)"));
+		}
+
+		currentFileNumber++;
 	}
+
+	QVERIFY2 (currentFileNumber == baseFileAmount, qPrintable("Error: wrong file amount has been processed!"));
 }
 
 void DbControllerFileTests::undoChangestest()

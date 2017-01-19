@@ -351,7 +351,7 @@ namespace VFrame30
 			}
 		}
 
-		DrawHelper::DrawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
+		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
 	}
 
 	void SchemaItemSignal::drawMultichannelValues(CDrawParam* drawParam, QPen& linePen) const
@@ -449,7 +449,7 @@ namespace VFrame30
 
 				QRectF boundingRect = rect.intersected(textRect);
 
-				DrawHelper::DrawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+				DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
 
 				// --
 				//
@@ -577,7 +577,7 @@ namespace VFrame30
 
 			painter->setPen(textColor());
 
-			DrawHelper::DrawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+			DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
 
 			// --
 			//

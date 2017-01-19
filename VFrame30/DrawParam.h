@@ -98,7 +98,7 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT DrawHelper
 	{
 	public:
-		static void DrawText(QPainter* p,
+		static void drawText(QPainter* p,
 							 const FontParam& font,
 							 SchemaUnit unit,
 							 const QString& str,

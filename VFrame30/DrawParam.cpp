@@ -170,7 +170,7 @@ namespace VFrame30
 		return m_session;
 	}
 
-	void DrawHelper::DrawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
+	void DrawHelper::drawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
 		if (painter == nullptr)
 		{
