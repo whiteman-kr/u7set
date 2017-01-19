@@ -21,8 +21,11 @@ class CircularLoggerWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 public:
-	CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
+	CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB);
 	~CircularLoggerWorker();
+
+	static bool writeFileCheck(const QString& logPath, const QString& logName);
+
 
 public slots:
 	void writeRecord(const QString record);
@@ -83,8 +86,7 @@ public:
 	CircularLogger();
 	~CircularLogger();
 
-	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
-	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
+	bool init(int fileCount, int fileSizeInMB);
 
 	bool isInitialized() const;
 
@@ -122,7 +124,7 @@ private:
 #define DEBUG_LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
 #define DEBUG_LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
 
-#define INIT_LOGGER(appPath)		logger.init(10, 10, appPath);
+#define INIT_LOGGER(appPath)		logger.init(10, 10);
 #define SHUTDOWN_LOGGER				logger.shutdown();
 
 

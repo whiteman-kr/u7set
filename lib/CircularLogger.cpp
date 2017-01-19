@@ -2,6 +2,7 @@
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QStandardPaths>
 #include <cassert>
 
 #include "../lib/WUtils.h"
@@ -16,9 +17,9 @@ CircularLogger logger;
 //
 // ----------------------------------------------------------------------------------
 
-CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int fileSizeInMB, QString placementPath) :
+CircularLoggerWorker::CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB) :
+	m_path(logPath),
 	m_logName(logName),
-	m_path(placementPath.isEmpty() ? qApp->applicationDirPath() + "/Log" : placementPath),
 	m_fileCount(fileCount),
 	m_fileSizeLimit(fileSizeInMB)
 {
@@ -41,12 +42,40 @@ CircularLoggerWorker::CircularLoggerWorker(QString logName, int fileCount, int f
 	{
 		m_fileSizeLimit = MAX_LOG_FILE_SIZE;
 	}
+
+	assert(m_path.isEmpty() == false);
+	assert(m_logName.isEmpty() == false);
 }
 
 
 CircularLoggerWorker::~CircularLoggerWorker()
 {
 	clearFileStream();
+}
+
+
+bool CircularLoggerWorker::writeFileCheck(const QString& logPath, const QString& logName)
+{
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	QString testFileName = logPath + '/' + logName + '_' + QString::number(now) + ".tmp";
+
+	QFile testFile(testFileName);
+
+	bool res = testFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	testFile.close();
+
+	QDir dr;
+
+	dr.remove(testFileName);
+
+	return true;
 }
 
 
@@ -81,7 +110,9 @@ void CircularLoggerWorker::detectFiles()
 
 	for (int i = 0; i < 1000; i++)
 	{
-		if (QFile::exists(fileName(i)) == false)
+		QString fName = fileName(i);
+
+		if (QFile::exists(fName) == false)
 		{
 			continue;
 		}
@@ -188,7 +219,12 @@ void CircularLoggerWorker::openFile(int index)
 
 	m_file.setFileName(m_fileName);
 
-	m_file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+	bool res = m_file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+	if (res == false)
+	{
+		qDebug() << "Error open file: " << C_STR(m_fileName);
+	}
 
 	m_stream.setDevice(&m_file);
 
@@ -226,41 +262,38 @@ CircularLogger::~CircularLogger()
 }
 
 
-void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QString placementPath)
+bool CircularLogger::init(int fileCount, int fileSizeInMB)
 {
 	if (m_loggerInitialized == true)
 	{
-		assert(false);			// Logger object is allready initialized.
-		return;
+		assert(false);				// Logger object is allready initialized.
+		return false;
 	}
 
-	if (placementPath.isEmpty())
+	if (qApp == nullptr)
 	{
-		placementPath = qApp->applicationDirPath();
+		assert(false);				// create QCoreApplication or QApplication instance first!
+		return false;
 	}
 
-	assert(placementPath.isEmpty() == false);
+	QString appFileName = qApp->applicationFilePath();
 
-	QFileInfo fi(placementPath);
-	QString logPath;
+	QFileInfo fi(appFileName);
 
-	if (fi.isRelative())
+	QString logName = fi.baseName();
+
+	QString logPath = fi.absolutePath();
+
+	fi.setFile(logPath);
+
+	if (CircularLoggerWorker::writeFileCheck(logPath, logName) == false)
 	{
-		logPath = qApp->applicationDirPath() + "/" + placementPath;
-	}
-	else
-	{
-		if (fi.isDir())
-		{
-			logPath = fi.absoluteFilePath();
-		}
-		else
-		{
-			logPath = fi.absolutePath();
-		}
+		logPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+		qDebug() << "Application folder isn't writeble. Log created at: " << C_STR(logPath);
 	}
 
-	CircularLoggerWorker* worker = new CircularLoggerWorker(logName, fileCount, fileSizeInMB, logPath);
+	CircularLoggerWorker* worker = new CircularLoggerWorker(logPath, logName, fileCount, fileSizeInMB);
 
 	addWorker(worker);
 
@@ -269,39 +302,8 @@ void CircularLogger::init(QString logName, int fileCount, int fileSizeInMB, QStr
 	start();
 
 	m_loggerInitialized = true;
-}
 
-
-void CircularLogger::init(int fileCount, int fileSizeInMB, QString placementPath)
-{
-	if (m_loggerInitialized == true)
-	{
-		assert(false);			// Logger object is allready initialized.
-		return;
-	}
-
-	QString filePath;
-
-	if (qApp != nullptr && !qApp->applicationFilePath().isEmpty())
-	{
-		filePath = qApp->applicationFilePath();
-	}
-
-	if (filePath.isEmpty() == true)
-	{
-		assert(!placementPath.isEmpty());
-		filePath = placementPath;
-	}
-
-	QFileInfo fi(filePath);
-
-	if (!fi.isFile())
-	{
-		assert(fi.isFile());
-		return;
-	}
-
-	init(fi.baseName(), fileCount, fileSizeInMB, placementPath);
+	return true;
 }
 
 
