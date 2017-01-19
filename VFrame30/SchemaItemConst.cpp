@@ -136,7 +136,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
+		DrawHelper::drawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
 
 		return;
 	}

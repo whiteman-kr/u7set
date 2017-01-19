@@ -153,7 +153,6 @@ namespace VFrame30
 		const VFrame30::AfbPin& output(const QUuid& guid) const;
 		VFrame30::AfbPin& output(const QUuid& guid);
 
-
 		// Public methods
 		//
 	public:
@@ -164,8 +163,6 @@ namespace VFrame30
 	private:
 		std::vector<VFrame30::AfbPin> m_inputPoints;
 		std::vector<VFrame30::AfbPin> m_outputPoints;
-
-
 	};
 }
 

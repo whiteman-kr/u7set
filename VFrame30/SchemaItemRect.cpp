@@ -215,7 +215,7 @@ namespace VFrame30
 		if (m_text.isEmpty() == false)
 		{
 			p->setPen(textColor());
-			DrawHelper::DrawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
+			DrawHelper::drawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
 		}
 
 		return;

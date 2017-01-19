@@ -31,6 +31,9 @@ const QString PropertyNames::text("Text");
 const QString PropertyNames::label("Label");
 const QString PropertyNames::caption("Caption");
 
+const QString PropertyNames::userText("UserText");
+const QString PropertyNames::userTextPos("UserTextPos");
+
 const QString PropertyNames::ufbSchemaId("UFBSchemaID");
 const QString PropertyNames::ufbSchemaVersion("UFBSchemaVersion");
 

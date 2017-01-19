@@ -104,7 +104,7 @@ namespace VFrame30
 		QString text = m_ufbCaption;
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+		DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
 		// Draw Label
 		//
@@ -115,7 +115,7 @@ namespace VFrame30
 			labelRect.moveBottomLeft(labelRect.topRight());
 
 			p->setPen(Qt::darkGray);
-			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
+			DrawHelper::drawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
 		}
 
 		return;
