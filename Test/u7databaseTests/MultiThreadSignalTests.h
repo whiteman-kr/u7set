@@ -24,7 +24,7 @@ public:
 	QString m_databaseUserPassword;
 	QString m_projectName;
 
-	int m_currentSignalId = 0;
+	uint m_currentSignalId = 0;
 
 	QMutex mutex;
 };
@@ -46,8 +46,6 @@ public:
 
 	std::vector<int> m_signalIds;
 
-	MultiThreadGetSignalTest *m_getSignalThread = nullptr;
-
 	QMutex mutex;
 
 	QString m_databaseHost;
@@ -56,6 +54,8 @@ public:
 	QString m_projectName;
 
 	int m_userIdSignalCreator = 0;
+
+	MultiThreadGetSignalTest *m_getSignalThread = nullptr;
 };
 
 class MultiThreadSignalTest : public QThread
@@ -85,12 +85,13 @@ public:
 	virtual void run();
 
 	int m_threadNumber = 0;
-	int m_amountOfSignalIds = 0;
 
 	QString m_databaseHost;
 	QString m_databaseUser;
 	QString m_databaseUserPassword;
 	QString m_projectName;
+
+	int m_amountOfSignalIds = 0;
 
 	struct signalData
 	{

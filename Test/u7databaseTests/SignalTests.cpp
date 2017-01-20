@@ -2654,3 +2654,81 @@ void SignalTests::get_latest_signals_by_appsignalIds()
 	ok = query.exec(QString("SELECT * FROM checkout_signals(1, '{%1}')").arg(signalId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 }
+
+void SignalTests::get_signal_historyTest()
+{
+	QSqlQuery query, signalInstanceQuery, changesetQuery, usersQuery;
+
+	int recordsAmount = 0;
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("Id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'First checkIn')").arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}')").arg(m_firstUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'Second checkIn')").arg(m_firstUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}')").arg(m_secondUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'Third checkIn')").arg(m_secondUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM get_signal_history(1, %1)").arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = signalInstanceQuery.exec(QString("SELECT * FROM signalInstance WHERE SignalId = %1 ORDER BY changesetId DESC").arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(signalInstanceQuery.lastError().databaseText()));
+
+	while (query.next() == true)
+	{
+		QVERIFY2(signalInstanceQuery.next() == true, qPrintable(signalInstanceQuery.lastError().databaseText()));
+
+		int changesetFromQuery = query.value("changesetId").toInt();
+		int changesetFromCheck = signalInstanceQuery.value("changesetId").toInt();
+
+		QVERIFY2(changesetFromQuery == changesetFromCheck, qPrintable("Error: get_signal_history returned wrong changesetId"));
+		QVERIFY2(query.value("action").toInt() == signalInstanceQuery.value("action").toInt(), qPrintable("Error: wrong action has been returned"));
+
+		ok = changesetQuery.exec(QString("SELECT * FROM changeset WHERE changesetId = %1").arg(changesetFromQuery));
+
+		QVERIFY2(ok == true, qPrintable(changesetQuery.lastError().databaseText()));
+		QVERIFY2(changesetQuery.next() == true, qPrintable(changesetQuery.lastError().databaseText()));
+
+		QVERIFY2(query.value("comment").toString() == changesetQuery.value("comment").toString(), qPrintable("Error: wrong comment has been set"));
+		QVERIFY2(query.value("userId").toString() == changesetQuery.value("userId").toString(), qPrintable("Error: wrong userId has been set"));
+		QVERIFY2(query.value("checkInTime").toString() == changesetQuery.value("time").toString(), qPrintable("Error: wrong checkInTime has been set"));
+
+		ok = usersQuery.exec(QString("SELECT username FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
+
+		QVERIFY2(ok == true, qPrintable(usersQuery.lastError().databaseText()));
+		QVERIFY2(usersQuery.next() == true, qPrintable(usersQuery.lastError().databaseText()));
+
+		QVERIFY2(usersQuery.value(0).toString() == query.value("username").toString(), qPrintable("Error: wrong username"));
+
+		recordsAmount++;
+	}
+
+	QVERIFY2(recordsAmount == 3, qPrintable("Error: get_signal_history returned wrong amount of changesets"));
+}

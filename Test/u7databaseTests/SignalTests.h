@@ -27,6 +27,7 @@ private slots:
 	void delete_signal_by_equipmentidTest();
 	void is_signal_with_equipmentid_existsTest();
 	void get_latest_signals_by_appsignalIds();
+	void get_signal_historyTest();
 
 private:
 	int m_firstUserForTest = -1;
