@@ -147,6 +147,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0129.sql", "Upgrade to version 129, added Units to AfbElementParam in damper, int, der, tctc"},
     {":/DatabaseUpgrade/Upgrade0130.sql", "Upgrade to version 130, integrator and derive afb elements have constant version"},
     {":/DatabaseUpgrade/Upgrade0131.sql", "Upgrade to version 131, afb elements damp and latch were changed"},
+	{":/DatabaseUpgrade/Upgrade0132.sql", "Upgrade to version 132, force users to use latest software version"},
 };
 
 
