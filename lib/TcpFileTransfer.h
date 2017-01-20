@@ -149,6 +149,10 @@ namespace Tcp
 
 		virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 
+		QString rootFolder() const;
+
+		virtual void onFileSent(const QString& fileName);
+
 	private:
 		void init();
 

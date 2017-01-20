@@ -12,7 +12,7 @@ namespace Tcp
 		else
 		{
 			qDebug() << "\nTcp::ConnectionState - is connected";
-			qDebug() << qPrintable(QString("Host: %1").arg(host.addressPortStr()));
+			qDebug() << qPrintable(QString("Peer: %1").arg(peerAddr.addressPortStr()));
 			qDebug() << qPrintable(QString("Start time: %1").arg(QDateTime::fromMSecsSinceEpoch(startTime).toString()));
 			qDebug() << qPrintable(QString("Sent bytes: %1").arg(sentBytes));
 			qDebug() << qPrintable(QString("Received bytes: %1").arg(receivedBytes));
@@ -95,8 +95,6 @@ namespace Tcp
 		setStateDisconnected();
 
 		onDisconnection();
-
-		qDebug() << "Socket disconnected";
 
 		emit disconnected(this);
 	}
@@ -383,6 +381,27 @@ namespace Tcp
 	}
 
 
+	void SocketWorker::onConnection()
+	{
+		if (m_tcpSocket == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		qDebug() << C_STR(QString(tr("Socket connected with %1 (descriptor = %2)")).
+						  arg(peerAddr().addressStr()).
+						  arg(m_tcpSocket->socketDescriptor()));
+	}
+
+
+	void SocketWorker::onDisconnection()
+	{
+		qDebug() << C_STR(QString(tr("Socket disconnected (descriptor = %1)")).
+						  arg(m_tcpSocket->socketDescriptor()));
+	}
+
+
 	ConnectionState SocketWorker::getConnectionState()
 	{
 		m_stateMutex.lock();
@@ -395,12 +414,18 @@ namespace Tcp
 	}
 
 
-	void SocketWorker::setStateConnected(const HostAddressPort& hostPort)
+	HostAddressPort SocketWorker::peerAddr() const
+	{
+		return m_state.peerAddr;
+	}
+
+
+	void SocketWorker::setStateConnected(const HostAddressPort& peerAddr)
 	{
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.isConnected = true;
-		m_state.host = hostPort;
+		m_state.peerAddr = peerAddr;
 		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
@@ -414,7 +439,7 @@ namespace Tcp
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.isConnected = false;
-		m_state.host.clear();
+		m_state.peerAddr.clear();
 		m_state.startTime = 0;
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
@@ -511,6 +536,10 @@ namespace Tcp
 		SocketWorker::createSocket();
 
 		m_tcpSocket->setSocketDescriptor(m_connectedSocketDescriptor);
+
+		// added 20_01_2017 by WhiteMan
+		//
+		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
 	}
 
 
@@ -523,25 +552,9 @@ namespace Tcp
 	}
 
 
-	void Server::onConnection()
-	{
-	}
-
-
-	void Server::onDisconnection()
-	{
-	}
-
-
 	void Server::setConnectedSocketDescriptor(qintptr connectedSocketDescriptor)
 	{
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
-
-		QTcpSocket tcpSocket;
-
-		tcpSocket.setSocketDescriptor(connectedSocketDescriptor);
-
-		m_peerAddr = HostAddressPort(tcpSocket.peerAddress(), tcpSocket.peerPort());
 	}
 
 
@@ -721,12 +734,6 @@ namespace Tcp
 	}
 
 
-	HostAddressPort Server::peerAddr() const
-	{
-		return m_peerAddr;
-	}
-
-
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::TcpServer class implementation
@@ -770,6 +777,13 @@ namespace Tcp
 		m_runningServers.clear();
 
 		delete m_serverInstance;
+	}
+
+
+	void Listener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
+	{
+		Q_UNUSED(peerAddr)
+		Q_UNUSED(connectionNo)
 	}
 
 
@@ -858,20 +872,17 @@ namespace Tcp
 
 	void Listener::onServerDisconnected(const SocketWorker* server)
 	{
-		qDebug() << "onServerDisconnected";
+		SimpleThread* thread = m_runningServers.value(server, nullptr);
 
-		if (!m_runningServers.contains(server))
+		if (thread == nullptr)
 		{
 			assert(false);
 			return;
 		}
 
-		SimpleThread* thread = m_runningServers[server];
-
 		m_runningServers.remove(server);
 
 		thread->quit();
-
 		delete thread;
 	}
 

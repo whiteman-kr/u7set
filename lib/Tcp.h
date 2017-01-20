@@ -28,7 +28,7 @@ namespace Tcp
 
 		// nex data is valid if isConnected == true
 		//
-		HostAddressPort host;
+		HostAddressPort peerAddr;
 		qint64 startTime = 0;					// milliseconds since epoch
 
 		qint64 sentBytes = 0;
@@ -129,7 +129,7 @@ namespace Tcp
 		void addRequest();
 		void addReply();
 
-		void setStateConnected(const HostAddressPort& hostPort);
+		void setStateConnected(const HostAddressPort& peerAddr);
 		void setStateDisconnected();
 
 	private:
@@ -159,8 +159,8 @@ namespace Tcp
 
 		void closeConnection();
 
-		virtual void onConnection() {}
-		virtual void onDisconnection() {}
+		virtual void onConnection();
+		virtual void onDisconnection();
 
 		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
 		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
@@ -169,6 +169,8 @@ namespace Tcp
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState();
+
+		HostAddressPort peerAddr() const;
 	};
 
 
@@ -197,8 +199,6 @@ namespace Tcp
 		qintptr m_connectedSocketDescriptor = 0;
 
 		ServerState m_serverState = ServerState::WainigForRequest;
-
-		HostAddressPort m_peerAddr;
 
 		double m_requestProcessingPorgress = 0;
 
@@ -234,9 +234,6 @@ namespace Tcp
 		virtual void onServerThreadStarted() {}
 		virtual void onServerThreadFinished() {}
 
-		virtual void onConnection() override;
-		virtual void onDisconnection() override;
-
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
 		void setAutoAck(bool autoAck) { m_autoAck = autoAck; }
@@ -246,8 +243,6 @@ namespace Tcp
 		bool sendReply(const QByteArray& replyData);
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
-
-		HostAddressPort peerAddr() const;
 	};
 
 
@@ -287,8 +282,8 @@ namespace Tcp
 
 		virtual void onListenerThreadStarted() {}
 		virtual void onListenerThreadFinished() {}
-		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo) {}
 
+		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo);
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
 	private:

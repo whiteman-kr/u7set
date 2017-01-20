@@ -116,7 +116,9 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
-	CfgServerListener* listener = new CfgServerListener(m_clientIP, new CfgServer(m_buildPath));
+	CfgServerWithLog* cfgServer = new CfgServerWithLog(m_buildPath);
+
+	ListenerWithLog* listener = new ListenerWithLog(m_clientIP, cfgServer);
 
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 
@@ -184,23 +186,17 @@ void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
 
 // ------------------------------------------------------------------------------------
 //
-// CfgServerListener class implementation
+// ListenerWithLog class implementation
 //
 // ------------------------------------------------------------------------------------
 
-CfgServerListener::CfgServerListener(const HostAddressPort& listenAddressPort, Tcp::Server* server) :
+ListenerWithLog::ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server) :
 	Tcp::Listener(listenAddressPort, server)
 {
 }
 
 
-void CfgServerListener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
-{
-	DEBUG_LOG_MSG(QString(tr("CfgServer accept new connection #%1 from %2")).arg(connectionNo).arg(peerAddr.addressStr()));
-}
-
-
-void CfgServerListener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+void ListenerWithLog::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
 {
 	if (startOk)
 	{
@@ -213,5 +209,39 @@ void CfgServerListener::onStartListening(const HostAddressPort& addr, bool start
 }
 
 
+// ------------------------------------------------------------------------------------
+//
+// CfgServerWithLog class implementation
+//
+// ------------------------------------------------------------------------------------
+
+CfgServerWithLog::CfgServerWithLog(const QString& buildFolder) :
+	CfgServer(buildFolder)
+{
+}
+
+
+CfgServer* CfgServerWithLog::getNewInstance()
+{
+	return new CfgServerWithLog(rootFolder());
+}
+
+
+void CfgServerWithLog::onConnection()
+{
+	DEBUG_LOG_MSG(QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
+}
+
+
+void CfgServerWithLog::onDisconnection()
+{
+	DEBUG_LOG_MSG(QString(tr("CfgServer connection #%1 closed")).arg(id()));
+}
+
+
+void CfgServerWithLog::onFileSent(const QString& fileName)
+{
+	DEBUG_LOG_MSG(QString(tr("File has been sent: %1")).arg(fileName));
+}
 
 

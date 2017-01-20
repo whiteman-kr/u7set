@@ -406,6 +406,18 @@ namespace Tcp
 	}
 
 
+	QString FileServer::rootFolder() const
+	{
+		return m_rootFolder;
+	}
+
+
+	void FileServer::onFileSent(const QString& fileName)
+	{
+		qDebug() << C_STR(QString(tr("File has been sent: %1")).arg(fileName));
+	}
+
+
 	void FileServer::init()
 	{
 		m_fileName = "";
@@ -512,7 +524,9 @@ namespace Tcp
 		{
 			// all parts of file are sent
 			//
-			qDebug() << "File " << m_file.fileName() << " has been sent";
+
+			onFileSent(m_file.fileName());
+
 
 			init();
 		}

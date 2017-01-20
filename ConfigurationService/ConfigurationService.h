@@ -59,16 +59,36 @@ private:
 
 // ------------------------------------------------------------------------------------
 //
-// CfgServerListener class declaration
+// ListenerWithLog class declaration
 //
 // ------------------------------------------------------------------------------------
 
-class CfgServerListener : public Tcp::Listener
+class ListenerWithLog : public Tcp::Listener
 {
 public:
-	CfgServerListener(const HostAddressPort& listenAddressPort, Tcp::Server* server);
+	ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server);
 
-	virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo) override;
 	virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr) override;
 };
+
+
+// ------------------------------------------------------------------------------------
+//
+// CfgServerWithLog class declaration
+//
+// ------------------------------------------------------------------------------------
+
+class CfgServerWithLog : public CfgServer
+{
+public:
+	CfgServerWithLog(const QString& buildFolder);
+
+	virtual CfgServer* getNewInstance() override;
+
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
+
+	virtual void onFileSent(const QString& fileName) override;
+};
+
 
