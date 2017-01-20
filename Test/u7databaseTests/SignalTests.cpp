@@ -2717,7 +2717,7 @@ void SignalTests::get_signal_historyTest()
 		QVERIFY2(changesetQuery.next() == true, qPrintable(changesetQuery.lastError().databaseText()));
 
 		QVERIFY2(query.value("comment").toString() == changesetQuery.value("comment").toString(), qPrintable("Error: wrong comment has been set"));
-		QVERIFY2(query.value("userId").toString() == changesetQuery.value("userId").toString(), qPrintable("Error: wrong userId has been set"));
+		QVERIFY2(query.value("userId").toInt() == changesetQuery.value("userId").toInt(), qPrintable("Error: wrong userId has been set"));
 		QVERIFY2(query.value("checkInTime").toString() == changesetQuery.value("time").toString(), qPrintable("Error: wrong checkInTime has been set"));
 
 		ok = usersQuery.exec(QString("SELECT username FROM users WHERE userId = %1").arg(query.value("userId").toInt()));
