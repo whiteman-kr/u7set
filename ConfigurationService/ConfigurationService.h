@@ -3,6 +3,11 @@
 #include "../lib/Service.h"
 #include "../lib/CfgServerLoader.h"
 
+// ------------------------------------------------------------------------------------
+//
+// ConfigurationServiceWorker class declaration
+//
+// ------------------------------------------------------------------------------------
 
 class ConfigurationServiceWorker : public ServiceWorker
 {
@@ -49,5 +54,21 @@ private:
 	QString m_clientIPStr;
 
 	HostAddressPort m_clientIP;
+};
+
+
+// ------------------------------------------------------------------------------------
+//
+// CfgServerListener class declaration
+//
+// ------------------------------------------------------------------------------------
+
+class CfgServerListener : public Tcp::Listener
+{
+public:
+	CfgServerListener(const HostAddressPort& listenAddressPort, Tcp::Server* server);
+
+	virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo) override;
+	virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr) override;
 };
 

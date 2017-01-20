@@ -395,6 +395,17 @@ namespace Tcp
 	}
 
 
+	Server* FileServer::getNewInstance()
+	{
+		return new FileServer(m_rootFolder);
+	}
+
+
+	void FileServer::processSuccessorRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
+	{
+	}
+
+
 	void FileServer::init()
 	{
 		m_fileName = "";
@@ -508,8 +519,5 @@ namespace Tcp
 	}
 
 
-	void FileServer::processSuccessorRequest(quint32 /*requestID*/, const char* /*requestData*/, quint32 /*requestDataSize*/)
-	{
-	}
 
 }

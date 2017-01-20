@@ -1,4 +1,6 @@
 #include "../lib/CfgServerLoader.h"
+#include "../lib/CircularLogger.h"
+
 #include <QXmlStreamReader>
 #include <QStandardPaths>
 
@@ -34,11 +36,20 @@ CfgServer::CfgServer(const QString& buildFolder) :
 }
 
 
+CfgServer* CfgServer::getNewInstance()
+{
+	return new CfgServer(m_rootFolder);
+}
+
+
 void CfgServer::onServerThreadStarted()
 {
-	Tcp::FileServer::onServerThreadStarted();
-
 	onRootFolderChange();
+}
+
+
+void CfgServer::onServerThreadFinished()
+{
 }
 
 

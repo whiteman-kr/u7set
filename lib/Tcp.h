@@ -198,6 +198,8 @@ namespace Tcp
 
 		ServerState m_serverState = ServerState::WainigForRequest;
 
+		HostAddressPort m_peerAddr;
+
 		double m_requestProcessingPorgress = 0;
 
 		bool m_autoAck = true;
@@ -205,8 +207,6 @@ namespace Tcp
 		QTimer m_autoAckTimer;
 
 		char* m_protobufBuffer = nullptr;
-
-		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
@@ -217,18 +217,17 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
-		friend class Listener;
-
 	private slots:
 		void onAutoAckTimer();
 
-	protected:
-
-		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
-												// { return new ServerDerivedClass(); }
 	public:
 		Server();
 		virtual ~Server();
+
+		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
+												// { return new ServerDerivedClass(); }
+
+		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		int id() const { return m_id; }
 
@@ -247,6 +246,8 @@ namespace Tcp
 		bool sendReply(const QByteArray& replyData);
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
+
+		HostAddressPort peerAddr() const;
 	};
 
 
@@ -280,6 +281,27 @@ namespace Tcp
 	{
 		Q_OBJECT
 
+	public:
+		Listener(const HostAddressPort& listenAddressPort, Server* server);
+		~Listener();
+
+		virtual void onListenerThreadStarted() {}
+		virtual void onListenerThreadFinished() {}
+		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo) {}
+
+		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
+
+	private:
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		void startListening();
+		void onNewConnection(qintptr socketDescriptor);
+
+	private slots:
+		void onPeriodicTimer();
+		void onServerDisconnected(const SocketWorker *server);
+
 	private:
 		HostAddressPort m_listenAddressPort;
 		TcpServer* m_tcpServer = nullptr;
@@ -290,22 +312,6 @@ namespace Tcp
 		QHash<const SocketWorker*, SimpleThread*> m_runningServers;
 
 		friend class TcpServer;
-
-	private:
-		void startListening();
-		void onNewConnection(qintptr socketDescriptor);
-
-	private slots:
-		void onAcceptError();
-		void onPeriodicTimer();
-		void onServerDisconnected(const SocketWorker *server);
-
-	public:
-		Listener(const HostAddressPort& listenAddressPort, Server* server);
-		~Listener();
-
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
 	};
 
 
@@ -321,6 +327,8 @@ namespace Tcp
 
 	public:
 		ServerThread(const HostAddressPort& listenAddressPort, Server* server);
+		ServerThread(Listener* listener);
+
 		~ServerThread();
 	};
 

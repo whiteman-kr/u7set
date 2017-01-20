@@ -3,7 +3,6 @@
 
 #include "ConfigurationService.h"
 
-
 // ------------------------------------------------------------------------------------
 //
 // ConfigurationServiceWorker class implementation
@@ -103,7 +102,7 @@ void ConfigurationServiceWorker::initialize()
 {
 	startCfgServerThread();
 
-	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker initialized")));
+	DEBUG_LOG_MSG(QString(tr("ServiceWorker is initialized")));
 }
 
 
@@ -111,13 +110,16 @@ void ConfigurationServiceWorker::shutdown()
 {
 	stopCfgServerThread();
 
-	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker shutdown")));
+	DEBUG_LOG_MSG(QString(tr("ServiceWorker is shutting down")));
 }
 
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
-	m_cfgServerThread = new Tcp::ServerThread(m_clientIP, new CfgServer(m_buildPath));
+	CfgServerListener* listener = new CfgServerListener(m_clientIP, new CfgServer(m_buildPath));
+
+	m_cfgServerThread = new Tcp::ServerThread(listener);
+
 	m_cfgServerThread->start();
 }
 
@@ -125,7 +127,6 @@ void ConfigurationServiceWorker::startCfgServerThread()
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
 	m_cfgServerThread->quit();
-
 	delete m_cfgServerThread;
 }
 
@@ -180,6 +181,36 @@ void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
 	ackInformationRequest(ack);
 }
 
+
+// ------------------------------------------------------------------------------------
+//
+// CfgServerListener class implementation
+//
+// ------------------------------------------------------------------------------------
+
+CfgServerListener::CfgServerListener(const HostAddressPort& listenAddressPort, Tcp::Server* server) :
+	Tcp::Listener(listenAddressPort, server)
+{
+}
+
+
+void CfgServerListener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
+{
+	DEBUG_LOG_MSG(QString(tr("CfgServer accept new connection #%1 from %2")).arg(connectionNo).arg(peerAddr.addressStr()));
+}
+
+
+void CfgServerListener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+{
+	if (startOk)
+	{
+		DEBUG_LOG_MSG(QString("CfgServer start listening %1 OK").arg(addr.addressPortStr()));
+	}
+	else
+	{
+		DEBUG_LOG_ERR(QString("CfgServer error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+	}
+}
 
 
 

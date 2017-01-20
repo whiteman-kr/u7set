@@ -522,6 +522,7 @@ namespace Tcp
 		m_readDataSize = 0;
 	}
 
+
 	void Server::onConnection()
 	{
 	}
@@ -535,6 +536,12 @@ namespace Tcp
 	void Server::setConnectedSocketDescriptor(qintptr connectedSocketDescriptor)
 	{
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
+
+		QTcpSocket tcpSocket;
+
+		tcpSocket.setSocketDescriptor(connectedSocketDescriptor);
+
+		m_peerAddr = HostAddressPort(tcpSocket.peerAddress(), tcpSocket.peerPort());
 	}
 
 
@@ -714,6 +721,12 @@ namespace Tcp
 	}
 
 
+	HostAddressPort Server::peerAddr() const
+	{
+		return m_peerAddr;
+	}
+
+
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::TcpServer class implementation
@@ -760,6 +773,14 @@ namespace Tcp
 	}
 
 
+	void Listener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+	{
+		Q_UNUSED(startOk)
+		Q_UNUSED(addr)
+		Q_UNUSED(errStr)
+	}
+
+
 	void Listener::onThreadStarted()
 	{
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
@@ -769,11 +790,15 @@ namespace Tcp
 		m_periodicTimer.start();
 
 		startListening();
+
+		onListenerThreadStarted();
 	}
 
 
 	void Listener::onThreadFinished()
 	{
+		onListenerThreadFinished();
+
 		if (m_tcpServer != nullptr)
 		{
 			m_tcpServer->close();
@@ -793,22 +818,11 @@ namespace Tcp
 
 		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()))
 		{
-			qDebug() << qPrintable(QString("Start listening %1 OK").arg(m_listenAddressPort.addressPortStr()));
+			onStartListening(m_listenAddressPort, true, "");
 		}
 		else
 		{
-			qDebug() << qPrintable(QString("Error on start listening %1: %2").
-									arg(m_listenAddressPort.addressPortStr()).
-									arg(m_tcpServer->errorString()));
-		}
-	}
-
-
-	void Listener::onPeriodicTimer()
-	{
-		if (!m_tcpServer->isListening())
-		{
-			startListening();
+			onStartListening(m_listenAddressPort, false, m_tcpServer->errorString());
 		}
 	}
 
@@ -823,18 +837,22 @@ namespace Tcp
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
 
+		onNewConnectionAccepted(newServerInstance->peerAddr(), newServerInstance->id());
+
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
 		m_runningServers.insert(newServerInstance, newThread);
 
 		newThread->start();
-
-		qDebug() << "Accept new connection #" << newServerInstance->id();
 	}
 
 
-	void Listener::onAcceptError()
+	void Listener::onPeriodicTimer()
 	{
+		if (!m_tcpServer->isListening())
+		{
+			startListening();
+		}
 	}
 
 
@@ -866,6 +884,12 @@ namespace Tcp
 
 	ServerThread::ServerThread(const HostAddressPort &listenAddressPort, Server* server) :
 		SimpleThread(new Listener(listenAddressPort, server))
+	{
+	}
+
+
+	ServerThread::ServerThread(Listener* listener) :
+		SimpleThread(listener)
 	{
 	}
 
