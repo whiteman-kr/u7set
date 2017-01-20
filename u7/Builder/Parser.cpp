@@ -2595,25 +2595,82 @@ namespace Builder
 	template<typename SchemaType>
 	bool Parser::checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType>>& schemas) const
 	{
-		std::multiset<QUuid> uuids;
-		std::multiset<QString> labels;
+		LOG_MESSAGE(log(), tr("Checking guids, labels..."));
+
+		std::multimap<QUuid, QString> uuids;			// value is schema
+		std::multimap<QString, QString> labels;
 
 		for (const std::shared_ptr<SchemaType>& schema : schemas)
 		{
-			uuids.insert(schema->guid());			// Schema guid is also included in check
+			if (schema->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			uuids.insert(std::make_pair(schema->guid(), schema->schemaId()));			// Schema guid is also included in check
+
+//			if (schema->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//			{
+//				//assert(false);
+//			}
 
 			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
 			{
-				uuids.insert(layer->guid());		// Layer guid is also included in check
+				if (layer->compile() == false)
+				{
+					continue;
+				}
+
+				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
+
+//				if (layer->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//				{
+//					assert(false);
+//				}
 
 				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 				{
-					uuids.insert(item->guid());
+					if (item->isFblItem() == false)
+					{
+						continue;
+					}
+
+					uuids.insert(std::make_pair(item->guid(), schema->schemaId()));
+
+//					if (item->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//					{
+//						assert(false);
+//					}
 
 					if (item->isFblItemRect() == true)
 					{
-						QString label = item->toFblItemRect()->label();
-						labels.insert(label);
+						VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
+						assert(fblItemRect);
+
+						QString label = fblItemRect->label();
+						labels.insert(std::make_pair(label, schema->schemaId()));
+
+						// Check pins guids
+						//
+						for (auto& pin : fblItemRect->inputs())
+						{
+							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
+
+//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
+//							{
+//								assert(false);
+//							}
+						}
+
+						for (auto& pin : fblItemRect->outputs())
+						{
+							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
+
+//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
+//							{
+//								assert(false);
+//							}
+						}
 					}
 				}
 			}
@@ -2623,22 +2680,22 @@ namespace Builder
 
 		// Check for the same guids
 		//
-		for (const QUuid& uuid : uuids)
+		for (const std::pair<QUuid, QString>& uuidPair : uuids)
 		{
-			if (uuids.count(uuid) != 1)
+			if (uuids.count(uuidPair.first) != 1)
 			{
-				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate guids %1").arg(uuid.toString()));
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate guids %1").arg(uuidPair.first.toString()), uuidPair.second);
 				result = false;
 			}
 		}
 
 		// Check for the same labels
 		//
-		for (const QString& label : labels)
+		for (const std::pair<QString, QString>& labelPair : labels)
 		{
-			if (labels.count(label) != 1)
+			if (labels.count(labelPair.first) != 1)
 			{
-				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(label));
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(labelPair.first), labelPair.second);
 				result = false;
 			}
 		}

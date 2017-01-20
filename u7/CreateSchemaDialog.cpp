@@ -258,9 +258,9 @@ void CreateSchemaDialog::accept()
 		{
 			layer->setGuid(QUuid::createUuid());
 
-			for (auto item : layer->Items)
+			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 			{
-				item->setGuid(QUuid::createUuid());
+				item->setNewGuid();
 
 				if (item->isFblItemRect() == true)
 				{
@@ -269,7 +269,6 @@ void CreateSchemaDialog::accept()
 				}
 			}
 		}
-
 	}
 
 	m_schema->setSchemaId(strID);
