@@ -232,8 +232,8 @@ void MainWindow::timerEvent(QTimerEvent* event)
             // State
             //
             QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-                    .arg(confiConnState.isConnected ? confiConnState.host.addressStr() :tr("NoConnection"))
-                    .arg(tuningClientState.isConnected ? tuningClientState.host.addressStr() : tr("NoConnection"));
+					.arg(confiConnState.isConnected ? confiConnState.peerAddr.addressStr() :tr("NoConnection"))
+					.arg(tuningClientState.isConnected ? tuningClientState.peerAddr.addressStr() : tr("NoConnection"));
 
             m_statusBarConnectionState->setText(text);
 

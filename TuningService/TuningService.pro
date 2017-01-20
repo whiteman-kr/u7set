@@ -98,7 +98,8 @@ SOURCES += \
     TuningMemory.cpp \
     TuningClientContext.cpp \
     ../lib/CommandLineParser.cpp \
-    TuningServiceMain.cpp
+    TuningServiceMain.cpp \
+    ../lib/CfgLoaderWithLog.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -141,7 +142,8 @@ HEADERS += \
     ../lib/DataProtocols.h \
     TuningMemory.h \
     TuningClientContext.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/CfgLoaderWithLog.h
 
 include(../qtservice/src/qtservice.pri)
 

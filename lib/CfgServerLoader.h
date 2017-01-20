@@ -115,7 +115,7 @@ private:
 		}
 	};
 
-	QString m_appStrID;
+	QString m_appEquipmentID;
 	int m_appInstance;
 
 	QString m_appDataPath;
@@ -183,7 +183,7 @@ private slots:
 	void slot_getFile(QString fileName, QByteArray *fileData);
 
 public:
-	CfgLoader(	const QString& appStrID,
+	CfgLoader(const QString& appEquipmentID,
 				int appInstance,
 				const HostAddressPort& serverAddressPort1,
 				const HostAddressPort& serverAddressPort2,
@@ -191,7 +191,7 @@ public:
 
 	virtual void onClientThreadStarted() override;
 
-	void changeApp(const QString& appStrID, int appInstance);
+	void changeApp(const QString& appEquipmentID, int appInstance);
 
 	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
 	bool getFile(QString pathFileName, QByteArray* fileData);
@@ -203,6 +203,9 @@ public:
 	QString getLastErrorStr();
 
 	bool isFileReady();
+
+	virtual void onStartDownload(const QString& fileName);
+	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
 	friend class CfgLoaderThread;
 };
@@ -231,6 +234,8 @@ public:
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg = false);
+
+	CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader);
 
 	void enableDownloadConfiguration();
 

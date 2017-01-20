@@ -158,7 +158,9 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2);
+		CfgLoaderWithLog* cfgLoader = new CfgLoaderWithLog(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false);
+
+		m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
 		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
 
@@ -182,6 +184,8 @@ namespace Tuning
 
 	void TuningServiceWorker::clearConfiguration()
 	{
+		DEBUG_LOG_MSG(QString("Clear current configuration"));
+
 		stopTcpTuningServerThread();
 		stopTuningSourceWorkers();
 		clearServiceMaps();
@@ -190,6 +194,8 @@ namespace Tuning
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
+		DEBUG_LOG_MSG(QString("Apply new configuration"));
+
 		buildServiceMaps();
 		runTuningSourceWorkers();
 		runTcpTuningServerThread();
@@ -492,7 +498,7 @@ namespace Tuning
 			return;
 		}
 
-		clearConfiguration();
+		DEBUG_LOG_MSG(QString("Configuration is ready"));
 
 		bool result = true;
 
@@ -500,8 +506,13 @@ namespace Tuning
 
 		if (result == false)
 		{
+			DEBUG_LOG_ERR(QString("Configuration reading error"));
 			return;
 		}
+
+		DEBUG_LOG_MSG(QString("Configuration reading success"));
+
+		clearConfiguration();
 
 		applyNewConfiguration();
 	}

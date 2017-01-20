@@ -92,9 +92,9 @@ namespace Tcp
 
 	void SocketWorker::onSocketDisconnected()
 	{
-		setStateDisconnected();
-
 		onDisconnection();
+
+		setStateDisconnected();
 
 		emit disconnected(this);
 	}
@@ -1026,6 +1026,12 @@ namespace Tcp
 	}
 
 
+	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
+	{
+		qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+	}
+
+
 	void Client::onAck(quint32 requestID, const char* replyData, quint32 replyDataSize)
 	{
 		Q_UNUSED(requestID);
@@ -1131,7 +1137,7 @@ namespace Tcp
 			return;
 		}
 
-		qDebug() << qPrintable(QString("Try connect to server %1").arg(m_selectedServer.addressPortStr()));
+		onTryConnectToServer(m_selectedServer);
 
 		m_tcpSocket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
 	}

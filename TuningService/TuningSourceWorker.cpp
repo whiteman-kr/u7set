@@ -1,7 +1,8 @@
 #include "../lib/WUtils.h"
 #include "../lib/Crc.h"
-#include "TuningSourceWorker.h"
+#include "../lib/CircularLogger.h"
 
+#include "TuningSourceWorker.h"
 
 namespace Tuning
 {
@@ -302,11 +303,14 @@ namespace Tuning
 		m_timerInterval = 5;
 
 		restartTimer();
+
+		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is started")).arg(m_sourceIP.addressStr()));
 	}
 
 
 	void TuningSourceWorker::onThreadFinished()
 	{
+		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is finished")).arg(m_sourceIP.addressStr()));
 	}
 
 
