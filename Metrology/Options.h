@@ -45,12 +45,23 @@ class TcpIpOption : public QObject
     Q_OBJECT
 
 public:
+
     explicit            TcpIpOption(QObject *parent = 0);
     explicit            TcpIpOption(const TcpIpOption& from, QObject *parent = 0);
                         ~TcpIpOption();
+private:
 
     QString             m_serverIP = "127.0.0.1";
     int                 m_serverPort = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
+
+public:
+
+    QString             serverIP() const { return m_serverIP; }
+    void                setServerIP(QString ip) { m_serverIP = ip; }
+
+    int                 serverPort() const { return m_serverPort; }
+    void                setServerPort(int port) { m_serverPort = port; }
+
 
     void                load();
     void                save();
@@ -72,22 +83,22 @@ public:
     explicit            ToolBarOption(QObject *parent = 0);
     explicit            ToolBarOption(const ToolBarOption& from, QObject *parent = 0);
                         ~ToolBarOption();
-//private:
+private:
 
     int                 m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
     int                 m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
     int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_DONT_USED;  // selected type of output signal
 
-//public:
+public:
 
-//    int measureTimeout() const { return m_measureTimeout; }
-//    void setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
+    int                 measureTimeout() const { return m_measureTimeout; }
+    void                setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
 
-//    int measureKind() const { return m_measureKind; }
-//    void setMeasureKind(int kind) { m_measureKind = kind; }
+    int                 measureKind() const { return m_measureKind; }
+    void                setMeasureKind(int kind) { m_measureKind = kind; }
 
-//    int outputSignalType() const { return m_outputSignalType; }
-//    void setOutputSignalType(int type) { m_outputSignalType = type; }
+    int                 outputSignalType() const { return m_outputSignalType; }
+    void                setOutputSignalType(int type) { m_outputSignalType = type; }
 
 
     void                load();
@@ -150,6 +161,9 @@ public:
     explicit            MeasureViewOption(const MeasureViewOption& from, QObject *parent = 0);
                         ~MeasureViewOption();
 
+//private:
+public:
+
     MeasureViewColumn   m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
     int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
@@ -162,6 +176,8 @@ public:
 
     QColor              m_colorLimitError = COLOR_LIMIT_ERROR;
     QColor              m_colorControlError = COLOR_CONTROL_ERROR;
+
+public:
 
     void                init();
 
@@ -210,9 +226,19 @@ public:
     explicit            DatabaseOption(QObject *parent = 0);
     explicit            DatabaseOption(const DatabaseOption& from, QObject *parent = 0);
                         ~DatabaseOption();
+private:
 
     QString             m_path;
     int					m_type;
+
+public:
+
+    QString             path() const { return m_path; }
+    void                setPath(QString path) { m_path = path; }
+
+    int                 type() const { return m_type; }
+    void                setType(int type) { m_type = type; }
+
 
     bool                create();
     void                remove();
@@ -325,7 +351,7 @@ struct REPORT_HEADER
     double              m_V = 0;
     double              m_F = 0;
 
-    QString             m_calibrator[MAX_CALIBRATOR_COUNT];
+    QString             m_calibrator[MAX_CHANNEL_COUNT];
 
     int                 m_linkObjectID;
     QString             m_reportFile;
@@ -361,8 +387,18 @@ public:
     explicit            ReportOption(const ReportOption& from, QObject *parent = 0);
                         ~ReportOption();
 
+private:
+
     QString             m_path;
     int					m_type = REPORT_TYPE_LINEARITY;
+
+public:
+
+    QString             path() const { return m_path; }
+    void                setPath(QString path) { m_path = path; }
+
+    int                 type() const { return m_type; }
+    void                setType(int type) { m_type = type; }
 
     ReportHeaderBase    m_headerBase;
 
@@ -455,7 +491,6 @@ const char* const       LinearityParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Limit error"),
                         QT_TRANSLATE_NOOP("Options.h", "Control error"),
                         QT_TRANSLATE_NOOP("Options.h", "Error type"),
-                        QT_TRANSLATE_NOOP("Options.h", "Calculate error by standard deviation"),
                         QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
                         QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
                         QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
@@ -472,16 +507,15 @@ const int               LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(ch
 const int               LO_PARAM_ERROR				= 0,
                         LO_PARAM_ERROR_CTRL			= 1,
                         LO_PARAM_ERROR_TYPE			= 2,
-                        LO_PARAM_ERROR_BY_SCO		= 3,
-                        LO_PARAM_MEASURE_TIME		= 4,
-                        LO_PARAM_MEASURE_IN_POINT	= 5,
-                        LO_PARAM_RANGE_TYPE			= 6,
-                        LO_PARAM_POINT_COUNT		= 7,
-                        LO_PARAM_LOW_RANGE			= 8,
-                        LO_PARAM_HIGH_RANGE			= 9,
-                        LO_PARAM_VALUE_POINTS       = 10,
-                        LO_PARAM_LIST_TYPE          = 11,
-                        LO_PARAM_OUTPUT_RANGE		= 12;
+                        LO_PARAM_MEASURE_TIME		= 3,
+                        LO_PARAM_MEASURE_IN_POINT	= 4,
+                        LO_PARAM_RANGE_TYPE			= 5,
+                        LO_PARAM_POINT_COUNT		= 6,
+                        LO_PARAM_LOW_RANGE			= 7,
+                        LO_PARAM_HIGH_RANGE			= 8,
+                        LO_PARAM_VALUE_POINTS       = 9,
+                        LO_PARAM_LIST_TYPE          = 10,
+                        LO_PARAM_OUTPUT_RANGE		= 11;
 
 
 // ----------------------------------------------------------------------------------------------
@@ -526,12 +560,14 @@ public:
     explicit            LinearityOption(const LinearityOption& from, QObject *parent = 0);
                         ~LinearityOption();
 
+//private:
+public:
+
     LinearityPointBase  m_pointBase;                                    // list of measurement points
 
     double              m_errorValue = 0.2;                             // permissible error is given by specified documents
     double              m_errorCtrl = 0.1;                              // control error is given by metrologists
     int                 m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
-    bool                m_errorCalcBySCO = false;                       // сalculate error by standard deviation
 
     int                 m_measureTimeInPoint = 1;                       // time, in seconds, during which will be made ​​N measurements at each point
     int                 m_measureCountInPoint = 20;                     // количество измерений в точке, согласно госту МИ 2002-89 приложение 7
@@ -542,6 +578,8 @@ public:
 
     int                 m_viewType = LO_VIEW_TYPE_SIMPLE;               // type of measurements list extended or simple
     bool                m_showOutputRangeColumn = false;                // show column output values
+
+public:
 
     void                recalcPoints(int count = -1);
 
@@ -575,7 +613,7 @@ const int				CO_PARAM_ERROR				= 0,
                         CO_PARAM_START_VALUE		= 2,
                         CO_PARAM_ERROR_TYPE			= 3,
                         CO_PARAM_ENABLE_HYSTERESIS	= 4,
-                        CO_PARAM_COMPARATOR_NO      = 5,
+                        CO_PARAM_COMPARATOR_INDEX   = 5,
                         CO_PARAM_ADDITIONAL_CHECK   = 6;
 
 // ----------------------------------------------------------------------------------------------
@@ -589,14 +627,19 @@ public:
     explicit            ComparatorOption(const ComparatorOption& from, QObject *parent = 0);
                         ~ComparatorOption();
 
+//private:
+public:
+
     double				m_errorValue = 0.2;                             // permissible error is given by specified documents
     double				m_errorCtrl = 0.1;                              // control error is given by metrologists
     double				m_startValue = 0.1;                             // start value is given by metrologists
     int					m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
 
     bool				m_enableMeasureHysteresis = false;              // enable flag to measure hysteresis of сomparator
-    int					m_startComparatorNo = 0;                        // start the measurement with the сomparators under the number ...
+    int					m_startComparatorIndex = 0;                     // start the measurement with the сomparators under the number ...
     bool				m_additionalCheck = true;                       // additional check on the stitch сomparator
+
+public:
 
     void				load();
     void				save();
@@ -634,9 +677,24 @@ public:
     explicit            BackupOption(const BackupOption& from, QObject *parent = 0);
                         ~BackupOption();
 
+private:
+
     bool				m_onStart = false;
     bool                m_onExit = true;
     QString				m_path;
+
+
+public:
+
+    bool                onStart () const { return m_onStart; }
+    void                setOnStart(bool onStart) { m_onStart = onStart; }
+
+    bool                onExit() const { return m_onExit; }
+    void                setOnExit(bool onExit) { m_onExit = onExit; }
+
+    QString             path() const { return m_path; }
+    void                setPath(QString path) { m_path = path; }
+
 
     bool				createBackup();
     void				createBackupOnStart();

@@ -30,6 +30,9 @@ namespace VFrame30
 		auto labelProp = ADD_PROPERTY_GETTER(QString, PropertyNames::label, true, SchemaItemAfb::label);
 		labelProp->setCategory(PropertyNames::functionalCategory);
 
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::userText, PropertyNames::textCategory, true, FblItemRect::userText, FblItemRect::setUserText);
+		ADD_PROPERTY_GET_SET_CAT(E::UserTextPos, PropertyNames::userTextPos, PropertyNames::textCategory, true, FblItemRect::userTextPos, FblItemRect::setUserTextPos);
+
 		// --
 		//
 		setItemUnit(unit);
@@ -90,6 +93,8 @@ namespace VFrame30
 		m_font.SaveData(itemMessage->mutable_font());
 
 		itemMessage->set_label(m_label.toStdString());
+		itemMessage->set_usertext(m_userText.toStdString());
+		itemMessage->set_usertextpos(static_cast<::google::protobuf::int32>(m_userTextPos));
 
 		return true;
 	}
@@ -132,6 +137,9 @@ namespace VFrame30
 		m_font.LoadData(itemMessage.font());
 
 		m_label = QString::fromStdString(itemMessage.label());
+
+		m_userText = QString::fromStdString(itemMessage.usertext());
+		m_userTextPos = static_cast<E::UserTextPos>(itemMessage.usertextpos());
 
 		return true;
 	}
@@ -316,6 +324,7 @@ namespace VFrame30
 		}
 
 		QRectF labelRect(r);	// save rect for future use
+		QRectF userTextRect(r);	// save rect for future use
 
 		// Draw main rect
 		//
@@ -385,7 +394,7 @@ namespace VFrame30
 			FontParam font = m_font;
 			font.setDrawSize(m_font.drawSize() * 0.75);
 
-			DrawHelper::DrawText(p,
+			DrawHelper::drawText(p,
 								 font,
 								 itemUnit(),
 								 input.caption(),
@@ -440,12 +449,60 @@ namespace VFrame30
 			FontParam font = m_font;
 			font.setDrawSize(m_font.drawSize() * 0.75);
 
-			DrawHelper::DrawText(p,
+			DrawHelper::drawText(p,
 								 font,
 								 itemUnit(),
 								 output.caption(),
 								 pinTextRect,
 								 Qt::TextDontClip | Qt::AlignVCenter | Qt::AlignLeft);
+		}
+
+		// Draw UserText
+		//
+		if (userTextRect.isEmpty() == false)
+		{
+			int alignFlags = Qt::AlignmentFlag::AlignCenter;
+			switch (userTextPos())
+			{
+			case E::UserTextPos::LeftTop:
+				userTextRect.moveBottomRight(userTextRect.topLeft());
+				alignFlags = Qt::AlignRight | Qt::AlignBottom;
+				break;
+			case E::UserTextPos::Top:
+				userTextRect.moveBottom(userTextRect.top());
+				alignFlags = Qt::AlignHCenter | Qt::AlignBottom;
+				break;
+			case E::UserTextPos::RightTop:
+				userTextRect.moveBottomLeft(userTextRect.topRight());
+				alignFlags = Qt::AlignLeft | Qt::AlignBottom;
+				break;
+			case E::UserTextPos::Right:
+				userTextRect.moveLeft(userTextRect.right());
+				alignFlags = Qt::AlignLeft | Qt::AlignVCenter;
+				break;
+			case E::UserTextPos::RightBottom:
+				userTextRect.moveTopLeft(userTextRect.bottomRight());
+				alignFlags = Qt::AlignLeft | Qt::AlignTop;
+				break;
+			case E::UserTextPos::Bottom:
+				userTextRect.moveTop(userTextRect.bottom());
+				alignFlags = Qt::AlignHCenter | Qt::AlignTop;
+				break;
+			case E::UserTextPos::LeftBottom:
+				userTextRect.moveTopRight(userTextRect.bottomLeft());
+				alignFlags = Qt::AlignRight | Qt::AlignTop;
+				break;
+			case E::UserTextPos::Left:
+				userTextRect.moveRight(userTextRect.left());
+				alignFlags = Qt::AlignRight | Qt::AlignVCenter;
+				break;
+
+			default:
+				assert(false);
+			}
+
+			p->setPen(Qt::black);
+			DrawHelper::drawText(p, smallFont, itemUnit(), userText(), userTextRect, Qt::TextDontClip | alignFlags);
 		}
 
 		// Draw Label
@@ -457,7 +514,7 @@ namespace VFrame30
 			labelRect.moveBottomLeft(labelRect.topRight());
 
 			p->setPen(Qt::darkGray);
-			DrawHelper::DrawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
+			DrawHelper::drawText(p, smallFont, itemUnit(), labelText, labelRect, Qt::TextDontClip | Qt::AlignLeft | Qt::AlignBottom);
 		}
 
 		return;
@@ -477,7 +534,7 @@ namespace VFrame30
 
 		QString str = QString("roi %1").arg(runOrderIndex);
 
-		DrawHelper::DrawText(p,
+		DrawHelper::drawText(p,
 							 font,
 							 itemUnit(),
 							 str,
@@ -620,7 +677,9 @@ namespace VFrame30
 
 	bool FblItemRect::searchText(const QString& text) const
 	{
-		return m_label.contains(text, Qt::CaseInsensitive);
+		return	SchemaItem::searchText(text) ||
+				m_label.contains(text, Qt::CaseInsensitive) ||
+				m_userText.contains(text, Qt::CaseInsensitive);
 	}
 
 	// Properties and Data
@@ -866,5 +925,26 @@ namespace VFrame30
 	{
 		m_label = value;
 	}
+
+	QString FblItemRect::userText() const
+	{
+		return m_userText;
+	}
+
+	void FblItemRect::setUserText(const QString& value)
+	{
+		m_userText = value;
+	}
+
+	E::UserTextPos FblItemRect::userTextPos() const
+	{
+		return m_userTextPos;
+	}
+
+	void FblItemRect::setUserTextPos(E::UserTextPos value)
+	{
+		m_userTextPos = value;
+	}
+
 }
 

@@ -18,7 +18,6 @@ class MeasureTable : public QAbstractTableModel
 public:
 
     explicit            MeasureTable(QObject* parent = 0);
-    explicit            MeasureTable(int type, QObject* parent = 0);
                         ~MeasureTable();
 
     int                 measureType() { return m_measureType; }
@@ -26,21 +25,23 @@ public:
 
     MeasureViewHeader&  header() { return m_header; }
 
-    int                 count() { return m_measureBase.count(); }
+    int                 count() { return m_measureBase.measurementCount(); }
 
     bool                columnIsVisible(int column);
 
-    bool                append(MeasureItem* pMeasure);
+    bool                append(Measurement* pMeasurement);
     bool                remove(const QList<int> removeIndexList);
 
+    QColor              backgroundColor(int row, int column) const;
     QString             text(int row, int column) const;
+
+    MeasurementBase     m_measureBase;
 
 private:
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 
     MeasureViewHeader   m_header;
-    MeasureBase         m_measureBase;
 
     int                 columnCount(const QModelIndex &parent) const;
     int                 rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -61,7 +62,7 @@ class MeasureView : public QTableView
     Q_OBJECT
 
 public:
-    explicit            MeasureView(int type, QWidget *parent = 0);
+    explicit            MeasureView(const int& measureType, QWidget *parent = 0);
                         ~MeasureView();
 
     int                 measureType()   { return m_measureType; }
@@ -90,10 +91,10 @@ public slots:
 
     void                onColumnResized(int index, int, int width);
 
-    void                appendMeasure(MeasureItem* pMeasure);
+    void                appendMeasure(Measurement* pMeasurement);
     void                removeMeasure();
 
-    void                copyMeasure();
+    void                copy();
 };
 
 // ==============================================================================================

@@ -262,6 +262,8 @@ namespace Builder
 		template<typename SchemaType>
 		bool loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString filter);
 
+		template<typename SchemaType>
+		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType> >& schemas) const;
 
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
 

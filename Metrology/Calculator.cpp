@@ -6,6 +6,8 @@
 
 #include "Conversion.h"
 
+#include "../lib/Types.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 Calculator::Calculator(QWidget* parent) :
@@ -30,6 +32,8 @@ void Calculator::createDialog()
     //
     m_pDialog = new QDialog(m_parentWidget);
 
+    QFont* font = new QFont("Arial", 16, 2);
+
     // Thermistor
     //
     QGroupBox* trGroup = new QGroupBox(tr("Thermistor"));
@@ -41,6 +45,7 @@ void Calculator::createDialog()
 
     m_pTrDegreeRadio = new QRadioButton(m_pDialog);
     m_pTrDegreeEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pTrDegreeEdit->setFont(*font);
 
     tr_C_Layout->addWidget(m_pTrDegreeRadio);
     tr_C_Layout->addWidget(m_pTrDegreeEdit);
@@ -51,6 +56,7 @@ void Calculator::createDialog()
 
     m_pTrElectricRadio = new QRadioButton(m_pDialog);
     m_pTrElectricEdit = new QLineEdit(m_pDialog);
+    m_pTrElectricEdit->setFont(*font);
 
     tr_Ohm_Layout->addWidget(m_pTrElectricRadio);
     tr_Ohm_Layout->addWidget(m_pTrElectricEdit);
@@ -74,6 +80,7 @@ void Calculator::createDialog()
 
     m_pTcDegreeRadio = new QRadioButton(m_pDialog);
     m_pTcDegreeEdit = new QLineEdit(tr("400"), m_pDialog);
+    m_pTcDegreeEdit->setFont(*font);
 
     tc_C_Layout->addWidget(m_pTcDegreeRadio);
     tc_C_Layout->addWidget(m_pTcDegreeEdit);
@@ -84,6 +91,7 @@ void Calculator::createDialog()
 
     m_pTcElectricRadio = new QRadioButton(m_pDialog);
     m_pTcElectricEdit = new QLineEdit(m_pDialog);
+    m_pTcElectricEdit->setFont(*font);
 
     tc_mV_Layout->addWidget(m_pTcElectricRadio);
     tc_mV_Layout->addWidget(m_pTcElectricEdit);
@@ -105,6 +113,7 @@ void Calculator::createDialog()
 
     m_pLinInRadio = new QRadioButton(m_pDialog);
     m_pLinInValEdit = new QLineEdit(tr("2.5"), m_pDialog);
+    m_pLinInValEdit->setFont(*font);
 
     lin_inval_Layout->addWidget(m_pLinInRadio);
     lin_inval_Layout->addWidget(m_pLinInValEdit);
@@ -115,6 +124,7 @@ void Calculator::createDialog()
 
     m_pLinOutRadio = new QRadioButton(m_pDialog);
     m_pLinOutValEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pLinOutValEdit->setFont(*font);
 
     lin_outval_Layout->addWidget(m_pLinOutRadio);
     lin_outval_Layout->addWidget(m_pLinOutValEdit);
@@ -176,24 +186,24 @@ void Calculator::initDialog()
     //
     m_pTrDegreeRadio->setChecked(true);
 
-    for (int s = 0; s < INPUT_UNIT_SENSOR_COUNT; s++)
+    for (int s = 0; s < SENSOR_TYPE_BY_UNIT_COUNT; s++)
     {
-        INPUT_UNIT_SENSOR ius = InputUnitSensorStr[s];
-        if (ius.unit != INPUT_UNIT_OHM)
+        UnitSensorTypePair pair = SensorTypeByUnit[s];
+        if (pair.unitID != E::InputUnit::Ohm)
         {
             continue;
         }
 
-        if (ius.sensor < 0 || ius.sensor >= INPUT_SENSOR_COUNT)
+        if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
         {
             continue;
         }
 
-        m_pTrList->addItem(InputSensorStr[ ius.sensor ], ius.sensor);
+        m_pTrList->addItem(SensorTypeStr[ pair.sensorType ], pair.sensorType);
     }
     m_pTrList->setCurrentIndex(0);
 
-    connect(m_pTrList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTrSensorChanged);
+    connect(m_pTrList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTrSensorTypeChanged);
     connect(m_pTrDegreeRadio, &QRadioButton::clicked, this, &Calculator::onTrRadio);
     connect(m_pTrDegreeEdit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
     connect(m_pTrElectricRadio, &QRadioButton::clicked, this, &Calculator::onTrRadio);
@@ -208,25 +218,25 @@ void Calculator::initDialog()
     //
     m_pTcDegreeRadio->setChecked(true);
 
-    for (int s = 0; s < INPUT_UNIT_SENSOR_COUNT; s++)
+    for (int s = 0; s < SENSOR_TYPE_BY_UNIT_COUNT; s++)
     {
-        INPUT_UNIT_SENSOR ius = InputUnitSensorStr[s];
-        if (ius.unit != INPUT_UNIT_MV)
+        UnitSensorTypePair pair = SensorTypeByUnit[s];
+        if (pair.unitID != E::InputUnit::mV)
         {
             continue;
         }
 
-        if (ius.sensor < 0 || ius.sensor >= INPUT_SENSOR_COUNT)
+        if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
         {
             continue;
         }
 
-        m_pTcList->addItem(InputSensorStr[ ius.sensor ], ius.sensor);
+        m_pTcList->addItem(SensorTypeStr[ pair.sensorType ], pair.sensorType);
     }
     m_pTcList->setCurrentIndex(0);
 
 
-    connect(m_pTcList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTcSensorChanged);
+    connect(m_pTcList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &Calculator::onTcSensorTypeChanged);
     connect(m_pTcDegreeRadio, &QRadioButton::clicked, this, &Calculator::onTcRadio);
     connect(m_pTcDegreeEdit, &QLineEdit::textChanged, this, &Calculator::onTcValue);
     connect(m_pTcElectricRadio, &QRadioButton::clicked, this, &Calculator::onTcRadio);
@@ -275,15 +285,15 @@ void Calculator::conversionTr()
         return;
     }
 
-    int sensor = m_pTrList->itemData(index).toInt();
-    if (sensor < 0 || sensor >= INPUT_SENSOR_COUNT)
+    E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
+    if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
     {
         return;
     }
 
     if (m_pTrDegreeRadio->isChecked() == true)
     {
-        double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, INPUT_UNIT_OHM, sensor);
+        double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::InputUnit::Ohm, sensorType);
 
         m_pTrDegreeEdit->setFocus();
         m_pTrDegreeEdit->setReadOnly(false);
@@ -293,7 +303,7 @@ void Calculator::conversionTr()
 
     if (m_pTrElectricRadio->isChecked() == true)
     {
-        double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, INPUT_UNIT_OHM, sensor);
+        double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::InputUnit::Ohm, sensorType);
 
         m_pTrElectricEdit->setFocus();
         m_pTrElectricEdit->setReadOnly(false);
@@ -312,15 +322,15 @@ void Calculator::conversionTc()
         return;
     }
 
-    int sensor = m_pTcList->itemData(index).toInt();
-    if (sensor < 0 || sensor >= INPUT_SENSOR_COUNT)
+    E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
+    if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
     {
         return;
     }
 
     if (m_pTcDegreeRadio->isChecked() == true)
     {
-        double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, INPUT_UNIT_MV, sensor);
+        double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::InputUnit::mV, sensorType);
 
         m_pTcDegreeEdit->setFocus();
         m_pTcDegreeEdit->setReadOnly(false);
@@ -330,7 +340,7 @@ void Calculator::conversionTc()
 
     if (m_pTcElectricRadio->isChecked() == true)
     {
-        double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, INPUT_UNIT_MV, sensor);
+        double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::InputUnit::mV, sensorType);
 
         m_pTcElectricEdit->setFocus();
         m_pTcElectricEdit->setReadOnly(false);

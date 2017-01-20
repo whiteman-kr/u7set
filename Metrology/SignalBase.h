@@ -129,16 +129,16 @@ public:
 
 // ==============================================================================================
 
-const int               MEASURE_MULTI_SIGNAL_0            = 0,
-                        MEASURE_MULTI_SIGNAL_1            = 1,
-                        MEASURE_MULTI_SIGNAL_2            = 2,
-                        MEASURE_MULTI_SIGNAL_3            = 3,
-                        MEASURE_MULTI_SIGNAL_4            = 4,
-                        MEASURE_MULTI_SIGNAL_5            = 5;
+const int               CHANNEL_0           = 0,
+                        CHANNEL_1           = 1,
+                        CHANNEL_2           = 2,
+                        CHANNEL_3           = 3,
+                        CHANNEL_4           = 4,
+                        CHANNEL_5           = 5;
 
-const int               MEASURE_MULTI_SIGNAL_COUNT        = 6;
+const int               MAX_CHANNEL_COUNT   = 6;
 
-// ----------------------------------------------------------------------------------------------
+// ==============================================================================================
 
 class MeasureMultiSignal
 {
@@ -152,7 +152,7 @@ private:
 
     mutable QMutex      m_mutex;
 
-    Hash                m_signalHash[MEASURE_MULTI_SIGNAL_COUNT];
+    Hash                m_signalHash[MAX_CHANNEL_COUNT];
 
     int                 m_caseNo = -1;
     int                 m_subblock = -1;
@@ -203,9 +203,6 @@ public:
 
     // Signals
     //
-    //MeasureSignal           operator [] (int index);
-
-
 
     int                     appendSignal(const Signal &param);
 
@@ -215,17 +212,14 @@ public:
     Signal                  signalParam(const Hash& hash);
     Signal                  signalParam(const int& index);
 
+    void                    setSignalParam(const Hash& hash, const Signal& param);
+    void                    setSignalParam(const int& index, const Signal& param);
+
     AppSignalState          signalState(const Hash& hash);
     AppSignalState          signalState(const int& index);
 
-    bool                    setSignalState(const Hash& hash, const AppSignalState& state);
-    bool                    setSignalState(const int& index, const AppSignalState& state);
-
-    // Units
-    //
-    void                    appendUnit(const int& unitID, const QString& unit);
-    int                     unitCount() const;
-    QString                 unit(const int& unitID);
+    void                    setSignalState(const Hash& hash, const AppSignalState& state);
+    void                    setSignalState(const int& index, const AppSignalState& state);
 
     // hashs for update signal state
     //
@@ -264,11 +258,6 @@ private:
     QMap<Hash, int>         m_signalHashMap;
     QVector<MeasureSignal>  m_signalList;
 
-    // all units that received form AppDataSrv
-    //
-    mutable QMutex          m_unitMutex;
-    QMap<int, QString>      m_unitMap;
-
     // list of hashes to receive signal state form AppDataSrv
     //
     mutable QMutex          m_stateMutex;
@@ -299,6 +288,41 @@ public slots:
 // ==============================================================================================
 
 extern SignalBase theSignalBase;
+
+// ==============================================================================================
+
+class UnitBase : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit                UnitBase(QObject *parent = 0);
+                            ~UnitBase();
+
+    void                    clear();
+
+    int                     unitCount() const;
+
+    void                    appendUnit(const int& unitID, const QString& unit);
+
+    QString                 unit(const int& unitID);
+
+private:
+
+    // all units that received form AppDataSrv
+    //
+    mutable QMutex          m_unitMutex;
+    QMap<int, QString>      m_unitMap;
+
+signals:
+
+public slots:
+
+};
+
+// ==============================================================================================
+
+extern UnitBase theUnitBase;
 
 // ==============================================================================================
 

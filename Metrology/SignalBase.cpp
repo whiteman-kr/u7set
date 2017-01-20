@@ -2,16 +2,11 @@
 
 #include "Measure.h"
 #include "CalibratorBase.h"
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalBase theSignalBase;
+#include "MeasureBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-
-#include "ctype.h"
 
 void DevicePosition::setFromID(const QString& equipmentID)
 {
@@ -247,7 +242,7 @@ MeasureSignal::MeasureSignal(Signal param)
 
     m_param.setInputLowLimit(4);
     m_param.setInputHighLimit(20);
-    m_param.setInputUnitID(15);
+    m_param.setInputUnitID( E::InputUnit::mA );
     //
     // temporary solution
 
@@ -280,7 +275,7 @@ QString MeasureSignal::stateString()
 
     state.sprintf( formatStr.toAscii() + " ", m_state.value );
 
-    state.append( theSignalBase.unit( m_param.unitID() ) );
+    state.append( theUnitBase.unit( m_param.unitID() ) );
 
     if (m_state.flags.underflow != 0)
     {
@@ -308,7 +303,7 @@ QString MeasureSignal::adcRange(const bool& showInHex)
 
     if (showInHex == true)
     {
-        range.sprintf("%04X .. %04X", m_param.lowADC(), m_param.highADC());
+        range.sprintf("0x%04X .. 0x%04X", m_param.lowADC(), m_param.highADC());
     }
     else
     {
@@ -328,7 +323,7 @@ QString MeasureSignal::inputPhysicalRange()
 
     range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_param.lowEngeneeringUnits(), m_param.highEngeneeringUnits());
 
-    range.append( theSignalBase.unit( m_param.unitID() ) );
+    range.append( theUnitBase.unit( m_param.unitID() ) );
 
     return range;
 }
@@ -341,14 +336,15 @@ QString MeasureSignal::inputElectricRange()
 
     range.sprintf("%.3f .. %.3f ", m_param.inputLowLimit(), m_param.inputHighLimit());
 
-    range.append( theSignalBase.unit( m_param.inputUnitID() ) );
+    if ( m_param.inputUnitID() >= 0 && m_param.inputUnitID() < theUnitBase.unitCount())
+    {
+        range.append( theUnitBase.unit( m_param.inputUnitID() ) );
+    }
 
-    int inputSensorID = m_param.inputSensorID();
-
-    if (inputSensorID >= 1 && inputSensorID < SENSOR_TYPE_COUNT)
+    if (m_param.inputSensorType() >= 1 && m_param.inputSensorType() < SENSOR_TYPE_COUNT)
     {
         range.append( " (" );
-        range.append( SensorTypeStr[ inputSensorID ]  );
+        range.append( SensorTypeStr[ m_param.inputSensorType() ]  );
         range.append( ")" );
     }
 
@@ -365,7 +361,7 @@ QString MeasureSignal::outputPhysicalRange()
 
     range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_param.outputLowLimit(), m_param.outputHighLimit());
 
-    range.append( theSignalBase.unit( m_param.outputUnitID() ) );
+    range.append( theUnitBase.unit( m_param.outputUnitID() ) );
 
     return range;
 }
@@ -424,7 +420,7 @@ void MeasureMultiSignal::clear()
 {
     m_mutex.lock();
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
         {
             m_signalHash[i] = 0;
         }
@@ -445,7 +441,7 @@ bool MeasureMultiSignal::isEmpty() const
 
     m_mutex.lock();
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
         {
             if (m_signalHash[i] != 0)
             {
@@ -464,7 +460,7 @@ bool MeasureMultiSignal::isEmpty() const
 
 Hash MeasureMultiSignal::hash(const int& index) const
 {
-    if (index < 0 || index >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (index < 0 || index >= MAX_CHANNEL_COUNT)
     {
         assert(false);
         return 0;
@@ -485,7 +481,7 @@ Hash MeasureMultiSignal::hash(const int& index) const
 
 void MeasureMultiSignal::setSignal(const int& index, const MeasureSignal& signal)
 {
-    if (index < 0 || index >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (index < 0 || index >= MAX_CHANNEL_COUNT)
     {
         return;
     }
@@ -516,7 +512,7 @@ MeasureMultiSignal& MeasureMultiSignal::operator=(const MeasureMultiSignal& from
 {
     m_mutex.lock();
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
         {
             m_signalHash[i] = from.m_signalHash[i];
         }
@@ -533,6 +529,10 @@ MeasureMultiSignal& MeasureMultiSignal::operator=(const MeasureMultiSignal& from
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalBase theSignalBase;
+
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalBase::SignalBase(QObject *parent) :
@@ -570,12 +570,6 @@ void SignalBase::clear()
 
     m_stateMutex.unlock();
 
-    m_unitMutex.lock();
-
-        m_unitMap.clear();
-
-    m_unitMutex.unlock();
-
     m_signalMutex.lock();
 
         m_signalHashMap.clear();
@@ -583,6 +577,8 @@ void SignalBase::clear()
         m_signalList.clear();
 
     m_signalMutex.unlock();
+
+    theUnitBase.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -742,6 +738,45 @@ Signal SignalBase::signalParam(const int& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::setSignalParam(const Hash& hash, const Signal& param)
+{
+    if (hashIsValid(hash) == false)
+    {
+        assert(false);
+        return;
+    }
+
+    int index = -1;
+
+    m_signalMutex.lock();
+
+        index = m_signalHashMap[hash];
+
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setParam(param);
+        }
+
+    m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::setSignalParam(const int& index, const Signal& param)
+{
+    m_signalMutex.lock();
+
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setParam(param);
+        }
+
+    m_signalMutex.unlock();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 AppSignalState SignalBase::signalState(const Hash& hash)
 {
     if (hashIsValid(hash) == false)
@@ -786,12 +821,11 @@ AppSignalState SignalBase::signalState(const int& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
+void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 {
     if (hashIsValid(hash) == false)
     {
         assert(false);
-        return false;
     }
 
     int index = -1;
@@ -800,14 +834,17 @@ bool SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 
         index = m_signalHashMap[hash];
 
-    m_signalMutex.unlock();
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setState(state);
+        }
 
-    return setSignalState(index, state);
+    m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::setSignalState(const int& index, const AppSignalState &state)
+void SignalBase::setSignalState(const int& index, const AppSignalState &state)
 {
     m_signalMutex.lock();
 
@@ -817,56 +854,6 @@ bool SignalBase::setSignalState(const int& index, const AppSignalState &state)
         }
 
     m_signalMutex.unlock();
-
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalBase::appendUnit(const int& unitID, const QString& unit)
-{
-    m_unitMutex.lock();
-
-        if (m_unitMap.contains(unitID) == false)
-        {
-            m_unitMap.insert(unitID, unit);
-        }
-
-    m_unitMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalBase::unitCount() const
-{
-    int count = 0;
-
-    m_unitMutex.lock();
-
-        count = m_unitMap.size();
-
-    m_unitMutex.unlock();
-
-    return count;
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString SignalBase::unit(const int& unitID)
-{
-    QString strUnit;
-
-    m_unitMutex.lock();
-
-        if (m_unitMap.contains(unitID) == true)
-        {
-            strUnit = m_unitMap[unitID];
-        }
-
-    m_unitMutex.unlock();
-
-    return strUnit;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1132,7 +1119,7 @@ int SignalBase::createSignalListForMeasure(const int& caseType, const int& measu
 
                 case MEASURE_KIND_ONE:
                     {
-                        multiSignal.setSignal(MEASURE_MULTI_SIGNAL_0, signal);
+                        multiSignal.setSignal(CHANNEL_0, signal);
                     }
                     break;
 
@@ -1160,7 +1147,7 @@ int SignalBase::createSignalListForMeasure(const int& caseType, const int& measu
                                 {
                                     int caseIndex = caseNoMap[signal.position().caseNo()];
 
-                                    if ( caseIndex >= 0 && caseIndex < MEASURE_MULTI_SIGNAL_COUNT )
+                                    if ( caseIndex >= 0 && caseIndex < MAX_CHANNEL_COUNT )
                                     {
                                         ms.setSignal( caseIndex, signal );
                                     }
@@ -1176,7 +1163,7 @@ int SignalBase::createSignalListForMeasure(const int& caseType, const int& measu
                         {
                             int caseIndex = caseNoMap[signal.position().caseNo()];
 
-                            if ( caseIndex >= 0 && caseIndex < MEASURE_MULTI_SIGNAL_COUNT )
+                            if ( caseIndex >= 0 && caseIndex < MAX_CHANNEL_COUNT )
                             {
                                 multiSignal.setSignal( caseIndex, signal );
                             }
@@ -1252,7 +1239,7 @@ void SignalBase::setActiveSignal(const MeasureMultiSignal& multiSignal)
 
             m_requestStateList.clear();
 
-            for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i++)
+            for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
             {
                 Hash hash = m_activeSignal.hash(i);
                 if (hash != 0)
@@ -1267,3 +1254,84 @@ void SignalBase::setActiveSignal(const MeasureMultiSignal& multiSignal)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+UnitBase theUnitBase;
+
+// -------------------------------------------------------------------------------------------------------------------
+
+UnitBase::UnitBase(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ UnitBase::~UnitBase()
+ {
+ }
+
+ // -------------------------------------------------------------------------------------------------------------------
+
+void UnitBase::clear()
+{
+    m_unitMutex.lock();
+
+        m_unitMap.clear();
+
+    m_unitMutex.unlock();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int UnitBase::unitCount() const
+{
+    int count = 0;
+
+    m_unitMutex.lock();
+
+        count = m_unitMap.size();
+
+    m_unitMutex.unlock();
+
+    return count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void UnitBase::appendUnit(const int& unitID, const QString& unit)
+{
+    m_unitMutex.lock();
+
+        if (m_unitMap.contains(unitID) == false)
+        {
+            m_unitMap.insert(unitID, unit);
+        }
+
+    m_unitMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString UnitBase::unit(const int& unitID)
+{
+    QString strUnit;
+
+    m_unitMutex.lock();
+
+        if (m_unitMap.contains(unitID) == true)
+        {
+            strUnit = m_unitMap[unitID];
+        }
+
+    m_unitMutex.unlock();
+
+    return strUnit;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+

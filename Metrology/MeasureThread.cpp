@@ -5,7 +5,6 @@
 #include <QTime>
 
 #include "Options.h"
-#include "MeasureBase.h"
 #include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -19,7 +18,7 @@ MeasureThread::MeasureThread(QObject *parent) :
 
 void MeasureThread::init(QWidget* parent)
 {
-    m_parentWidget = parent;
+    m_parent = parent;
 
     connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
     connect(this, &MeasureThread::finished, this, &MeasureThread::finish);
@@ -102,7 +101,7 @@ void MeasureThread::waitMeasureTimeout()
 {
     // Timeout for Measure
     //
-    for(int t = 0; t < theOptions.toolBar().m_measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
+    for(int t = 0; t < theOptions.toolBar().measureTimeout(); t += MEASURE_THREAD_TIMEOUT_STEP )
     {
         if (m_cmdStopMeasure == true)
         {
@@ -136,7 +135,7 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pManager)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const int& signalInputUnit, const double& highInputLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit)
 {
     if (calibratorIsValid(pManager) == false)
     {
@@ -148,20 +147,14 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
         return false;
     }
 
-    if (signalInputUnit < 0 || signalInputUnit >= theSignalBase.unitCount())
-    {
-        return false;
-    }
-
     int calibratorUnit = CALIBRATOR_UNIT_UNKNOWN;
 
     switch(signalInputUnit)
     {
-        case  11:   calibratorUnit = CALIBRATOR_UNIT_MV;    break;
-        case  15:   calibratorUnit = CALIBRATOR_UNIT_MA;    break;
-        case  12:   calibratorUnit = CALIBRATOR_UNIT_V;     break;
-        case  8:    calibratorUnit = CALIBRATOR_UNIT_KHZ;   break;      //        (case  7: - Hz)
-        case  20:                                                       //        (case  21: - KOhm)
+        case E::InputUnit::mA:  calibratorUnit = CALIBRATOR_UNIT_MA;    break;
+        case E::InputUnit::mV:  calibratorUnit = CALIBRATOR_UNIT_MV;    break;
+        case E::InputUnit::V:   calibratorUnit = CALIBRATOR_UNIT_V;     break;
+        case E::InputUnit::Ohm:
             {
                 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
                 //
@@ -176,6 +169,9 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
             }
 
             break;
+
+
+        default: assert(0);
     }
 
     if (calibratorUnit < 0 || calibratorUnit >= CALIBRATOR_UNIT_COUNT)
@@ -223,7 +219,7 @@ void MeasureThread::run()
             // if m_measureKind == MEASURE_KIND_ONE (i.e measure in the one channel) then take first connected calibrator
             // if m_measureKind == MEASURE_KIND_MULTI (i.e measure all channels) then attempt to take all calibrators
             //
-            for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+            for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
             {
                 Hash signalHash = m_activeSignal.hash(i);
                 if (signalHash == 0)
@@ -327,7 +323,7 @@ void MeasureThread::measureLinearity()
         // set electric value on calibrators
         //
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             Hash signalHash = m_activeSignal.hash(i);
             if (signalHash == 0)
@@ -358,7 +354,7 @@ void MeasureThread::measureLinearity()
         // wait until all calibrators will has fixed electric value
         //
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
 
@@ -388,7 +384,7 @@ void MeasureThread::measureLinearity()
 
         emit measureInfo(tr("Save measurements "));
 
-        for(int i = 0; i < MEASURE_MULTI_SIGNAL_COUNT; i ++)
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
             Hash signalHash = m_activeSignal.hash(i);
             if (signalHash == 0)
@@ -402,13 +398,13 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            LinearetyMeasureItem* pMeasure = new LinearetyMeasureItem(pManager->calibrator(), signalHash);
-            if (pMeasure == nullptr )
+            LinearityMeasurement* pMeasurement = new LinearityMeasurement(pManager->calibrator(), signalHash);
+            if (pMeasurement == nullptr )
             {
                 continue;
             }
 
-            emit measureComplite( pMeasure );
+            emit measureComplite( pMeasurement );
         }
     }
 }

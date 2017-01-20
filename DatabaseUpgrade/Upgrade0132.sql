@@ -1,0 +1,1 @@
+select 1;	-- empty update FORCE USERS TO USE NEW VERSION OF SOFTWARE

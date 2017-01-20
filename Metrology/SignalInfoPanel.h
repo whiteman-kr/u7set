@@ -4,10 +4,6 @@
 #include <QDockWidget>
 #include <QMenu>
 #include <QAction>
-#include <QKeyEvent>
-#include <QList>
-#include <QLabel>
-#include <QLineEdit>
 #include <QTableView>
 
 #include "Measure.h"
@@ -57,14 +53,15 @@ public:
     explicit            SignalInfoTable(QObject* parent = 0);
                         ~SignalInfoTable();
 
-    int                 count() { return MEASURE_MULTI_SIGNAL_COUNT; }
+    int                 count() { return MAX_CHANNEL_COUNT; }
+    Hash                at(int index);
     void                set(const MeasureMultiSignal& multiSignal);
     void                clear();
 
     QString             text(const int& row, const int& column) const;
 
-    bool                showAppSignalID() const { return m_showAppSignalID; }
-    void                setShowAppSignalID(bool show) { m_showAppSignalID = show; }
+    bool                showCustomID() const { return m_showCustomID; }
+    void                setShowCustomID(bool show) { m_showCustomID = show; }
 
     void                updateColumn(const int& column);
 
@@ -72,7 +69,7 @@ private:
 
     MeasureMultiSignal  m_activeSignal;
 
-    bool                m_showAppSignalID = false;
+    static bool         m_showCustomID;
 
     int                 columnCount(const QModelIndex &parent) const;
     int                 rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -111,9 +108,9 @@ private:
     SignalInfoTable     m_table;
 
     QMenu*              m_pContextMenu = nullptr;
-    QAction*            m_pShowAppSignalIDAction = nullptr;
-    QAction*            m_pChangeRangeAction = nullptr;
     QAction*            m_pCopyAction = nullptr;
+    QAction*            m_pShowCustomIDAction = nullptr;
+    QAction*            m_pSignalPropertyAction = nullptr;
 
     QAction*            m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
     QMenu*              m_headerContextMenu = nullptr;
@@ -127,6 +124,10 @@ private:
     QTimer*             m_updateSignalStateTimer = nullptr;
     void                startSignalStateTimer();
     void                stopSignalStateTimer();
+
+protected:
+
+    bool                eventFilter(QObject *object, QEvent *event);
 
 public slots:
 
@@ -142,9 +143,9 @@ private slots:
 
     // slots of menu
     //
-    void                showAppSignalID();
-    void                changeRange();
     void                copy();
+    void                showCustomID();
+    void                signalProperty();
 
     void                onContextMenu(QPoint);
 
@@ -152,6 +153,9 @@ private slots:
     //
     void                onHeaderContextMenu(QPoint);
     void                onColumnAction(QAction* action);
+    // slots for list
+    //
+    void                onListDoubleClicked(const QModelIndex&) { signalProperty(); }
 };
 
 // ==============================================================================================

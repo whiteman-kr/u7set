@@ -1,20 +1,21 @@
 #include "SignalInfoPanel.h"
 
 #include <QApplication>
-#include <QSettings>
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QStatusBar>
 #include <QClipboard>
 
 #include "MainWindow.h"
-#include "MeasureView.h"
 #include "Options.h"
-#include "Delegate.h"
+#include "SignalProperty.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalInfoTable::m_showCustomID = true;
+
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalInfoTable::SignalInfoTable(QObject*)
@@ -39,7 +40,7 @@ int SignalInfoTable::columnCount(const QModelIndex&) const
 
 int SignalInfoTable::rowCount(const QModelIndex&) const
 {
-    return MEASURE_MULTI_SIGNAL_COUNT;
+    return MAX_CHANNEL_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -79,7 +80,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
     }
 
     int row = index.row();
-    if (row < 0 || row >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
         return QVariant();
     }
@@ -154,7 +155,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 QString SignalInfoTable::text(const int &row, const int &column) const
 {
-    if (row < 0 || row >= MEASURE_MULTI_SIGNAL_COUNT)
+    if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
         return "";
     }
@@ -178,11 +179,10 @@ QString SignalInfoTable::text(const int &row, const int &column) const
 
     QString result;
 
-
     switch (column)
     {
         case SIGNAL_INFO_COLUMN_CASE:           result = signal.position().caseString();      break;
-        case SIGNAL_INFO_COLUMN_ID:             result = m_showAppSignalID == true ? signal.param().appSignalID() : signal.param().customAppSignalID();        break;
+        case SIGNAL_INFO_COLUMN_ID:             result = m_showCustomID == true ? signal.param().customAppSignalID() : signal.param().appSignalID();  break;
         case SIGNAL_INFO_COLUMN_STATE:          result = signal.stateString();                break;
         case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = signal.position().subblockString();  break;
         case SIGNAL_INFO_COLUMN_BLOCK:          result = signal.position().blockString();     break;
@@ -208,12 +208,24 @@ void SignalInfoTable::updateColumn(const int& column)
         return;
     }
 
-    for (int row = 0; row < MEASURE_MULTI_SIGNAL_COUNT; row ++)
+    for (int row = 0; row < MAX_CHANNEL_COUNT; row ++)
     {
         QModelIndex cellIndex = index(row, column);
 
         emit dataChanged( cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
     }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Hash SignalInfoTable::at(int index)
+{
+    if (index < 0 || index >= count())
+    {
+        return 0;
+    }
+
+    return m_activeSignal.hash(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -227,7 +239,7 @@ void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
 
     clear();
 
-    beginInsertRows(QModelIndex(), 0, MEASURE_MULTI_SIGNAL_COUNT - 1);
+    beginInsertRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1);
 
         m_activeSignal = multiSignal;
 
@@ -238,7 +250,7 @@ void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
 
 void SignalInfoTable::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, MEASURE_MULTI_SIGNAL_COUNT - 1 );
+    beginRemoveRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1 );
 
         m_activeSignal.clear();
 
@@ -307,6 +319,8 @@ void SignalInfoPanel::createInterface()
 {
     m_pSignalInfoWindow = new QMainWindow;
 
+    m_pSignalInfoWindow->installEventFilter(this);
+
     m_pView = new QTableView(m_pSignalInfoWindow);
     m_pView->setModel(&m_table);
     QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
@@ -319,7 +333,7 @@ void SignalInfoPanel::createInterface()
         m_pView->setColumnWidth(column, m_columnWidth[column]);
     }
 
-    m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    connect(m_pView, &QTableView::doubleClicked , this, &SignalInfoPanel::onListDoubleClicked);
 
     setWidget(m_pSignalInfoWindow);
 }
@@ -356,20 +370,20 @@ void SignalInfoPanel::createContextMenu()
     //
     m_pContextMenu = new QMenu(tr("&Measurements"), m_pSignalInfoWindow);
 
-
-    m_pShowAppSignalIDAction = m_pContextMenu->addAction(tr("Show internal ID"));
-    m_pShowAppSignalIDAction->setCheckable(true);
-    m_pShowAppSignalIDAction->setChecked(false);
-
-    m_pChangeRangeAction = m_pContextMenu->addAction(tr("Change signal range"));
-
-    m_pContextMenu->addSeparator();
-
     m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
     m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
-    connect(m_pShowAppSignalIDAction, &QAction::triggered, this, &SignalInfoPanel::showAppSignalID);
-    connect(m_pChangeRangeAction, &QAction::triggered, this, &SignalInfoPanel::changeRange);
+    m_pShowCustomIDAction = m_pContextMenu->addAction(tr("Show Custom ID"));
+    m_pShowCustomIDAction->setCheckable(true);
+    m_pShowCustomIDAction->setChecked(true);
+
+    m_pContextMenu->addSeparator();
+
+    m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties"));
+    m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
+
+    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalInfoPanel::showCustomID);
+    connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
     connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 
     // init context menu
@@ -426,7 +440,26 @@ void SignalInfoPanel::stopSignalStateTimer()
 
 void SignalInfoPanel::onContextMenu(QPoint)
 {
+    m_pShowCustomIDAction->setChecked(m_table.showCustomID());
+
     m_pContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+
+        if (keyEvent->key() == Qt::Key_Return)
+        {
+            signalProperty();
+        }
+    }
+
+    return QObject::eventFilter(object, event);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -445,16 +478,10 @@ void SignalInfoPanel::updateStateActiveSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showAppSignalID()
+void SignalInfoPanel::showCustomID()
 {
-    m_table.setShowAppSignalID( m_pShowAppSignalIDAction->isChecked() );
+    m_table.setShowCustomID( m_pShowCustomIDAction->isChecked() );
     m_table.updateColumn(SIGNAL_INFO_COLUMN_ID);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoPanel::changeRange()
-{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -477,11 +504,11 @@ void SignalInfoPanel::copy()
             {
                 appendRow = true;
                 textRow.append(m_table.text(r, c));
-            }
 
-            if (c != SIGNAL_INFO_COLUMN_COUNT - 1)
-            {
-                textRow.append("\t");
+                if (c != SIGNAL_INFO_COLUMN_COUNT - 1)
+                {
+                    textRow.append("\t");
+                }
             }
         }
 
@@ -494,6 +521,32 @@ void SignalInfoPanel::copy()
 
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::signalProperty()
+{
+    int index = m_pView->currentIndex().row();
+    if (index < 0 || index >= m_table.count())
+    {
+        return;
+    }
+
+    Hash hash = m_table.at(index);
+    if (hash == 0)
+    {
+        return;
+    }
+
+    MeasureSignal signal = theSignalBase.signal(hash);
+    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+    {
+        return;
+    }
+
+    SignalPropertyDialog dialog( signal.param().hash() );
+    dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

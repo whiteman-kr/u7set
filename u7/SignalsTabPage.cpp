@@ -1060,12 +1060,8 @@ void SignalsModel::addSignal()
 
 	signal.setInputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/inputLowLimit").toDouble());
 	signal.setInputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/inputHighLimit").toDouble());
-	unit = settings.value("SignalsTabPage/LastEditedSignal/inputUnitID").toInt();
-	if (unit != -1)
-	{
-		signal.setInputUnitID(m_unitInfo.keyAt(unit));
-	}
-	signal.setInputSensorID(settings.value("SignalsTabPage/LastEditedSignal/inputSensorID").toInt());
+    signal.setInputUnitID(static_cast<E::InputUnit>(settings.value("SignalsTabPage/LastEditedSignal/inputUnitID").toInt()));
+    signal.setInputSensorType(static_cast<E::SensorType>(settings.value("SignalsTabPage/LastEditedSignal/inputSensorID").toInt()));
 
 	signal.setOutputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/outputLowLimit").toDouble());
 	signal.setOutputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/outputHighLimit").toDouble());
@@ -1074,9 +1070,9 @@ void SignalsModel::addSignal()
 	{
 		signal.setOutputUnitID(m_unitInfo.keyAt(unit));
 	}
-	signal.setOutputSensorID(settings.value("SignalsTabPage/LastEditedSignal/outputSensorID").toInt());
 
 	signal.setOutputMode(static_cast<E::OutputMode>(settings.value("SignalsTabPage/LastEditedSignal/outputMode").toInt()));
+    signal.setOutputSensorType(static_cast<E::SensorType>(settings.value("SignalsTabPage/LastEditedSignal/outputSensorID").toInt()));
 
 	signal.setAcquire(settings.value("SignalsTabPage/LastEditedSignal/acquire").toBool());
 	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());

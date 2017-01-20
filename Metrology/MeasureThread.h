@@ -30,18 +30,18 @@ public:
 
 private:
 
-    QWidget*                m_parentWidget = nullptr;
+    QWidget*                m_parent = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    bool                    m_cmdStopMeasure = true;
-
     MeasureMultiSignal      m_activeSignal;
+
+    bool                    m_cmdStopMeasure = true;
 
     void                    waitMeasureTimeout();
 
     bool                    calibratorIsValid(CalibratorManager* pManager);
 
-    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const int& signalInputUnit, const double& highInputLimit);
+    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit);
 
     void                    measureLinearity();
     void                    measureComprators();
@@ -55,15 +55,14 @@ signals:
 
     void                    showMsgBox(QString);
 
-    // measure thread signals
-    //
     void                    measureInfo(QString);
     void                    measureInfo(int);
-    void                    measureComplite(MeasureItem*);
+
+    void                    measureComplite(Measurement*);
 
 private slots:
 
-    void                    msgBox(QString text)        { QMessageBox::information(m_parentWidget, tr("Measurement process"), text); }
+    void                    msgBox(QString text)        { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
     void                    calibratorDisconnected();
 

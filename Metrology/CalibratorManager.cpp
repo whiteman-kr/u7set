@@ -12,18 +12,8 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager::CalibratorManager(Calibrator* pCalibrator, QWidget* parent) :
-    QObject(parent),
-    m_pCalibrator( pCalibrator ),
-    m_parentWidget(parent)
+CalibratorManager::CalibratorManager()
 {
-    if (m_pCalibrator == nullptr)
-    {
-        return;
-    }
-
-    createDialog();
-    initDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -35,33 +25,32 @@ CalibratorManager::~CalibratorManager()
         delete m_pErrorDialog;
     }
 
-    if (m_pDialog != nullptr)
+    if (m_pManageDialog != nullptr)
     {
-        delete m_pDialog;
+        delete m_pManageDialog;
     }
 
-    m_pCalibrator = nullptr;
     m_index = -1;
-
+    m_pCalibrator = nullptr;
     m_ready = false;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::createDialog()
+void CalibratorManager::createDialog(QWidget* parent)
 {
     // create elements of interface
     //
-    m_pDialog = new QDialog(m_parentWidget);
+    m_pManageDialog = new QDialog(parent);
 
     QGroupBox* valueGroup = new QGroupBox(tr("Display"));
     QVBoxLayout *valueLayout = new QVBoxLayout;
 
-    m_pMeasureLabel = new QLabel(tr("Measure"), m_pDialog);
-    m_pMeasureEdit = new QLineEdit(m_pDialog);
+    m_pMeasureLabel = new QLabel(tr("Measure"), m_pManageDialog);
+    m_pMeasureEdit = new QLineEdit(m_pManageDialog);
 
-    m_pSourceLabel = new QLabel(tr("Source"), m_pDialog);
-    m_pSourceEdit = new QLineEdit(m_pDialog);
+    m_pSourceLabel = new QLabel(tr("Source"), m_pManageDialog);
+    m_pSourceEdit = new QLineEdit(m_pManageDialog);
 
     valueLayout->addWidget(m_pMeasureLabel);
     valueLayout->addWidget(m_pMeasureEdit);
@@ -70,17 +59,17 @@ void CalibratorManager::createDialog()
 
     valueGroup->setLayout(valueLayout);
 
-    m_pValueEdit = new QLineEdit(m_pDialog);
+    m_pValueEdit = new QLineEdit(m_pManageDialog);
 
     QGroupBox* buttonGroup = new QGroupBox(tr("Control"));
     QVBoxLayout *buttonLayout = new QVBoxLayout;
 
-    m_pSetValueButton = new QPushButton(tr("set value"), m_pDialog);
+    m_pSetValueButton = new QPushButton(tr("set value"), m_pManageDialog);
 
     QHBoxLayout *stepButtonLayout = new QHBoxLayout;
 
-    m_pStepDownButton = new QPushButton(tr("Step down"), m_pDialog);
-    m_pStepUpButton = new QPushButton(tr("Step up"), m_pDialog);
+    m_pStepDownButton = new QPushButton(tr("Step down"), m_pManageDialog);
+    m_pStepUpButton = new QPushButton(tr("Step up"), m_pManageDialog);
 
     stepButtonLayout->addWidget(m_pStepDownButton);
     stepButtonLayout->addWidget(m_pStepUpButton);
@@ -92,15 +81,15 @@ void CalibratorManager::createDialog()
 
     QHBoxLayout *unitLayout = new QHBoxLayout;
 
-    m_pModeList = new QComboBox(m_pDialog);
-    m_pUnitList = new QComboBox(m_pDialog);
+    m_pModeList = new QComboBox(m_pManageDialog);
+    m_pUnitList = new QComboBox(m_pManageDialog);
 
     unitLayout->addWidget(m_pModeList);
     unitLayout->addWidget(m_pUnitList);
 
-    m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), m_pDialog);
+    m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), m_pManageDialog);
 
-    m_pErrorsButton = new QPushButton(tr("List errors"), m_pDialog);
+    m_pErrorsButton = new QPushButton(tr("List errors"), m_pManageDialog);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -112,27 +101,35 @@ void CalibratorManager::createDialog()
     mainLayout->addWidget(m_pRemoteControlCheck);
     mainLayout->addStretch();
 
-    m_pErrorDialog = new QDialog(m_pDialog);
+    m_pErrorDialog = new QDialog(m_pManageDialog);
 
     QVBoxLayout *errorLayout = new QVBoxLayout;
 
-    m_pErrorList = new QTextEdit(m_pDialog);
+    m_pErrorList = new QTextEdit(m_pManageDialog);
     errorLayout->addWidget(m_pErrorList);
 
     m_pErrorDialog->setLayout(errorLayout);
 
-    m_pDialog->setLayout(mainLayout);
+    m_pManageDialog->setLayout(mainLayout);
+
+    initDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorManager::initDialog()
 {
+    if (m_pCalibrator == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
     // init elements of interface
     //
-    m_pDialog->setWindowFlags(Qt::Drawer);
-    m_pDialog->setFixedWidth(190);
-    m_pDialog->setWindowIcon(QIcon(":/icons/Manage.png"));
+    m_pManageDialog->setWindowFlags(Qt::Drawer);
+    m_pManageDialog->setFixedWidth(190);
+    m_pManageDialog->setWindowIcon(QIcon(":/icons/Manage.png"));
 
     QFont* font = new QFont("Arial", 16, 2);
 
@@ -149,7 +146,7 @@ void CalibratorManager::initDialog()
 
 
     QRegExp rx( "^[-]{0,1}[0-9]*[.]{1}[0-9]*$" );
-    QValidator *validator = new QRegExpValidator(rx, m_pDialog);
+    QValidator *validator = new QRegExpValidator(rx, m_pManageDialog);
 
     m_pValueEdit->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_pValueEdit->setFont(*font);
@@ -214,15 +211,14 @@ void CalibratorManager::initDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::show()
+void CalibratorManager::showManageDialog()
 {
-    if (m_pDialog == nullptr)
+    if (m_pManageDialog == nullptr)
     {
         return;
     }
 
-    m_pDialog->show();
-    m_pDialog->move(m_parentWidget->geometry().center() - m_pDialog->rect().center());
+    m_pManageDialog->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -278,12 +274,12 @@ void  CalibratorManager::onCalibratorError(QString text)
     m_pErrorList->append(error);
     m_pErrorsButton->setText( QString("List errors (%1)").arg(m_pErrorList->document()->lineCount() ) );
 
-    if(m_pDialog->isVisible() == false)
+    if(m_pManageDialog->isVisible() == false)
     {
         return;
     }
 
-    QMessageBox::critical(m_pDialog, m_pDialog->windowTitle(), text);
+    QMessageBox::critical(m_pManageDialog, m_pManageDialog->windowTitle(), text);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -296,7 +292,7 @@ void CalibratorManager::onCalibratorConnect()
     }
 
     QString title = QString("c:%1 ").arg(m_index + 1) + m_pCalibrator->name() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
-    m_pDialog->setWindowTitle( title );
+    m_pManageDialog->setWindowTitle( title );
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
     enableInterface(true);
@@ -314,7 +310,7 @@ void CalibratorManager::onCalibratorDisconnect()
     }
 
     QString title = QString("c:%1 (%2) - Disconnected").arg(m_index + 1).arg(m_pCalibrator->portName()) ;
-    m_pDialog->setWindowTitle(title);
+    m_pManageDialog->setWindowTitle(title);
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
     enableInterface(false);
@@ -345,6 +341,59 @@ void CalibratorManager::onUnitChanged()
 
     updateValue();
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool CalibratorManager::setUnit(int mode, int unit)
+{
+    if (calibratorIsConnected() == false)
+    {
+        return false;
+    }
+
+    if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+    {
+        return false;
+    }
+
+    if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+    {
+        return false;
+    }
+
+    m_ready = true;
+
+    emit calibratorSetUnit(mode, unit);
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::onModeUnitList(int)
+{
+    m_pSetValueButton->setEnabled(false);
+    m_pStepDownButton->setEnabled(false);
+    m_pStepUpButton->setEnabled(false);
+
+    int mode = m_pModeList->currentIndex();
+    int unit = m_pUnitList->currentIndex();
+
+    if (setUnit(mode, unit) == false)
+    {
+        return;
+    }
+
+    if (mode == CALIBRATOR_MODE_SOURCE)
+    {
+        m_pSetValueButton->setEnabled(true);
+        m_pStepDownButton->setEnabled(true);
+        m_pStepUpButton->setEnabled(true);
+    }
+
+    emit calibratorGetValue();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -404,7 +453,7 @@ void CalibratorManager::updateValue()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::getValue()
+void CalibratorManager::value()
 {
     if (calibratorIsConnected() == false)
     {
@@ -487,61 +536,9 @@ void CalibratorManager::onStepUp()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::setUnit(int mode, int unit)
-{
-    if (calibratorIsConnected() == false)
-    {
-        return false;
-    }
-
-    if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
-    {
-        return false;
-    }
-
-    if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
-    {
-        return false;
-    }
-
-    m_ready = true;
-
-    emit calibratorSetUnit(mode, unit);
-
-    return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void CalibratorManager::onModeUnitList(int)
-{
-    m_pSetValueButton->setEnabled(false);
-    m_pStepDownButton->setEnabled(false);
-    m_pStepUpButton->setEnabled(false);
-
-    int mode = m_pModeList->currentIndex();
-    int unit = m_pUnitList->currentIndex();
-
-    if (setUnit(mode, unit) == false)
-    {
-        return;
-    }
-
-    if (mode == CALIBRATOR_MODE_SOURCE)
-    {
-        m_pSetValueButton->setEnabled(true);
-        m_pStepDownButton->setEnabled(true);
-        m_pStepUpButton->setEnabled(true);
-    }
-
-    emit calibratorGetValue();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void CalibratorManager::onErrorList()
 {
-    if (m_pDialog == nullptr)
+    if (m_pManageDialog == nullptr)
     {
         return;
     }
@@ -552,7 +549,7 @@ void CalibratorManager::onErrorList()
     }
 
     m_pErrorDialog->show();
-    m_pErrorDialog->move(m_pDialog->geometry().center() - m_pErrorDialog->rect().center());
+    m_pErrorDialog->move(m_pManageDialog->geometry().center() - m_pErrorDialog->rect().center());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -607,5 +604,3 @@ void CalibratorManager::saveSettings()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-

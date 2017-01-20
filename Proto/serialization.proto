@@ -515,6 +515,8 @@ message FblItemRect
 	required uint32 textColor = 4;
 	required FontParam font = 5;
 	optional string label = 6;
+	optional string userText = 7;
+	optional int32 userTextPos = 8 [default = 1];			// enum E::UserTextPos, 1 - Top
 }
 
 

@@ -1,9 +1,18 @@
 #include "SignalList.h"
 
+#include <QClipboard>
+
+#include "MainWindow.h"
 #include "Options.h"
+#include "SignalProperty.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalListTable::m_showCustomID = true;
+bool SignalListTable::m_showADCInHex = true;
+
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalListTable::SignalListTable(QObject*)
@@ -14,7 +23,7 @@ SignalListTable::SignalListTable(QObject*)
 
 SignalListTable::~SignalListTable()
 {
-    m_signalList.clear();
+    m_signaHashList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -28,7 +37,7 @@ int SignalListTable::columnCount(const QModelIndex&) const
 
 int SignalListTable::rowCount(const QModelIndex&) const
 {
-    return m_signalList.count();
+    return m_signaHashList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -68,7 +77,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
     }
 
     int row = index.row();
-    if (row < 0 || row >= m_signalList.count())
+    if (row < 0 || row >= m_signaHashList.count())
     {
         return QVariant();
     }
@@ -106,7 +115,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
     if (role == Qt::UserRole )
     {
         QVariant var;
-        var.setValue(m_signalList.at(row));
+        var.setValue(m_signaHashList.at(row));
         return var;
     }
 
@@ -122,7 +131,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 QString SignalListTable::text(int row, int column) const
 {
-    if (row < 0 || row >= m_signalList.count())
+    if (row < 0 || row >= m_signaHashList.count())
     {
         return "";
     }
@@ -132,7 +141,13 @@ QString SignalListTable::text(int row, int column) const
         return "";
     }
 
-    MeasureSignal s = m_signalList.at(row);
+    Hash signalHash = m_signaHashList.at(row);
+    if (signalHash == 0)
+    {
+        return "";
+    }
+
+    MeasureSignal s = theSignalBase.signal(signalHash);
     if (s.param().appSignalID().isEmpty() == true || s.param().hash() == 0)
     {
         return "";
@@ -142,7 +157,7 @@ QString SignalListTable::text(int row, int column) const
 
     switch (column)
     {
-        case SIGNAL_LIST_COLUMN_ID:             result = m_showAppSignalID == true ? s.param().appSignalID() : s.param().customAppSignalID(); break;
+        case SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? s.param().customAppSignalID() : s.param().appSignalID(); break;
         case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = s.param().equipmentID();       break;
         case SIGNAL_LIST_COLUMN_CAPTION:        result = s.param().caption();           break;
         case SIGNAL_LIST_COLUMN_CASE:           result = s.position().caseString();     break;
@@ -162,20 +177,19 @@ QString SignalListTable::text(int row, int column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-
-MeasureSignal SignalListTable::at(int index)
+Hash SignalListTable::at(int index)
 {
     if (index < 0 || index >= count())
     {
-        return MeasureSignal();
+        return 0;
     }
 
-    return m_signalList.at(index);
+    return m_signaHashList.at(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<MeasureSignal> list_add)
+void SignalListTable::set(const QList<Hash> list_add)
 {
     int count = list_add.count();
     if (count == 0)
@@ -185,7 +199,7 @@ void SignalListTable::set(const QList<MeasureSignal> list_add)
 
     beginInsertRows(QModelIndex(), 0, count - 1);
 
-        m_signalList = list_add;
+        m_signaHashList = list_add;
 
     endInsertRows();
 }
@@ -194,7 +208,7 @@ void SignalListTable::set(const QList<MeasureSignal> list_add)
 
 void SignalListTable::clear()
 {
-    int count = m_signalList.count();
+    int count = m_signaHashList.count();
     if (count == 0)
     {
         return;
@@ -202,7 +216,7 @@ void SignalListTable::clear()
 
     beginRemoveRows(QModelIndex(), 0, count - 1 );
 
-        m_signalList.clear();
+        m_signaHashList.clear();
 
     endRemoveRows();
 }
@@ -229,11 +243,22 @@ int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
+E::SignalType       SignalListDialog::m_typeAD = E::SignalType::Analog;
+E::SignalInOutType  SignalListDialog::m_typeIO = E::SignalInOutType::Input;
+
+// -------------------------------------------------------------------------------------------------------------------
+
 SignalListDialog::SignalListDialog(QWidget *parent) :
     QDialog(parent)
 {
-    createInterface();
+    MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
+    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+    {
+        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
+        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &SignalListDialog::updateList, Qt::QueuedConnection);
+    }
 
+    createInterface();
     updateList();
 }
 
@@ -247,39 +272,58 @@ SignalListDialog::~SignalListDialog()
 
 void SignalListDialog::createInterface()
 {
-    setWindowFlags(Qt::Window);
+    setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     setWindowIcon(QIcon(":/icons/Signals.png"));
     setWindowTitle(tr("Signals"));
+    resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
+    move(QApplication::desktop()->availableGeometry().center() - rect().center());
+    installEventFilter(this);
 
     m_pMenuBar = new QMenuBar(this);
+    m_pEditMenu = new QMenu(tr("&Edit"), this);
     m_pViewMenu = new QMenu(tr("&View"), this);
+
+
+    m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
+    m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+    m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+
+    m_pFindAction = m_pEditMenu->addAction(tr("&Find"));
+    m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
+    m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
+
+    m_pEditMenu->addSeparator();
+
+    m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties"));
+    m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
+
 
     m_pViewTypeADMenu = new QMenu(tr("Type A/D"), this);
     m_pTypeAnalogAction = m_pViewTypeADMenu->addAction(tr("Analog"));
     m_pTypeAnalogAction->setCheckable(true);
-    m_pTypeAnalogAction->setChecked(true);
+    m_pTypeAnalogAction->setChecked(m_typeAD == E::SignalType::Analog);
     m_pTypeDiscreteAction = m_pViewTypeADMenu->addAction(tr("Discrete"));
     m_pTypeDiscreteAction->setCheckable(true);
-    m_pTypeDiscreteAction->setChecked(false);
+    m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
 
     m_pViewTypeIOMenu = new QMenu(tr("Type I/O"), this);
     m_pTypeInputAction = m_pViewTypeIOMenu->addAction(tr("Input"));
     m_pTypeInputAction->setCheckable(true);
-    m_pTypeInputAction->setChecked(true);
+    m_pTypeInputAction->setChecked(m_typeIO == E::SignalInOutType::Input);
     m_pTypeOutputAction = m_pViewTypeIOMenu->addAction(tr("Output"));
     m_pTypeOutputAction->setCheckable(true);
-    m_pTypeOutputAction->setChecked(false);
+    m_pTypeOutputAction->setChecked(m_typeIO == E::SignalInOutType::Output);
     m_pTypeInternalAction = m_pViewTypeIOMenu->addAction(tr("Internal"));
     m_pTypeInternalAction->setCheckable(true);
-    m_pTypeInternalAction->setChecked(false);
+    m_pTypeInternalAction->setChecked(m_typeIO == E::SignalInOutType::Internal);
 
     m_pViewShowMenu = new QMenu(tr("Show"), this);
-    m_pShowAppSignalIDAction = m_pViewShowMenu->addAction(tr("internal ID"));
-    m_pShowAppSignalIDAction->setCheckable(true);
-    m_pShowAppSignalIDAction->setChecked(false);
+    m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
+    m_pShowCustomIDAction->setCheckable(true);
+    m_pShowCustomIDAction->setChecked(m_table.showCustomID());
     m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
     m_pShowADCInHexAction->setCheckable(true);
-    m_pShowADCInHexAction->setChecked(true);
+    m_pShowADCInHexAction->setChecked(m_table.showADCInHex());
 
     m_pViewMenu->addMenu(m_pViewTypeADMenu);
     m_pViewMenu->addMenu(m_pViewTypeIOMenu);
@@ -287,14 +331,19 @@ void SignalListDialog::createInterface()
     m_pViewMenu->addMenu(m_pViewShowMenu);
 
 
+    m_pMenuBar->addMenu(m_pEditMenu);
     m_pMenuBar->addMenu(m_pViewMenu);
+
+    connect(m_pCopyAction, &QAction::triggered, this, &SignalListDialog::copy);
+    connect(m_pFindAction, &QAction::triggered, this, &SignalListDialog::find);
+    connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalListDialog::signalProperty);
 
     connect(m_pTypeAnalogAction, &QAction::triggered, this, &SignalListDialog::showTypeAnalog);
     connect(m_pTypeDiscreteAction, &QAction::triggered, this, &SignalListDialog::showTypeDiscrete);
     connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
     connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
     connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
-    connect(m_pShowAppSignalIDAction, &QAction::triggered, this, &SignalListDialog::showAppSignalID);
+    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalListDialog::showCustomID);
     connect(m_pShowADCInHexAction, &QAction::triggered, this, &SignalListDialog::showADCInHex);
 
 
@@ -310,12 +359,17 @@ void SignalListDialog::createInterface()
 
     m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
+    connect(m_pView, &QTableView::doubleClicked , this, &SignalListDialog::onListDoubleClicked);
+
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMenuBar(m_pMenuBar);
 
     mainLayout->addWidget(m_pView);
 
     setLayout(mainLayout);
+
+    m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_pView, &QTableWidget::customContextMenuRequested, this, &SignalListDialog::onContextMenu);
 
     createHeaderContexMenu();
 }
@@ -352,7 +406,7 @@ void SignalListDialog::updateList()
 
     m_table.clear();
 
-    QList<MeasureSignal> signalList;
+    QList<Hash> signalHashList;
 
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
@@ -363,20 +417,15 @@ void SignalListDialog::updateList()
             continue;
         }
 
-        if (param.signalType() != m_typeAD)
+        if (param.signalType() != m_typeAD || param.inOutType() != m_typeIO)
         {
             continue;
         }
 
-        if (param.inOutType() != m_typeIO)
-        {
-            continue;
-        }
-
-        signalList.append( theSignalBase.signal(i) );
+        signalHashList.append( param.hash() );
     }
 
-    m_table.set(signalList);
+    m_table.set(signalHashList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -392,8 +441,6 @@ void SignalListDialog::updateVisibleColunm()
     {
         hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
         hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
-
-        m_pColumnAction[SIGNAL_LIST_COLUMN_OUT_PH_RANGE]->setChecked(false);
     }
 
     if (m_typeAD == E::SignalType::Discrete)
@@ -426,6 +473,101 @@ void SignalListDialog::hideColumn(int column, bool hide)
         m_pColumnAction[column]->setChecked(true);
     }
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+
+        if (keyEvent->key() == Qt::Key_Return)
+        {
+            signalProperty();
+        }
+    }
+
+    return QObject::eventFilter(object, event);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::copy()
+{
+    bool appendRow;
+    QString textRow;
+    QString textClipboard;
+
+    int count = m_table.count();
+    for(int r = 0; r < count; r++)
+    {
+        appendRow = false;
+        textRow = "";
+
+        for(int c = 0; c < SIGNAL_LIST_COLUMN_COUNT; c++)
+        {
+            if (m_pView->selectionModel()->isSelected( m_pView->model()->index(r,c) ) == true)
+            {
+                appendRow = true;
+                textRow.append(m_table.text(r, c));
+            }
+
+            if (c != SIGNAL_LIST_COLUMN_COUNT - 1)
+            {
+                textRow.append("\t");
+            }
+        }
+
+        if (appendRow == true)
+        {
+            textClipboard.append(textRow);
+            textClipboard.append("\n");
+        }
+    }
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::find()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::signalProperty()
+{
+    QModelIndex visibleIndex = m_pView->currentIndex();
+
+    int index = visibleIndex .row();
+    if (index < 0 || index >= m_table.count())
+    {
+        return;
+    }
+
+    Hash signalHash = m_table.at(index);
+    if (signalHash == 0)
+    {
+        return;
+    }
+
+    MeasureSignal signal = theSignalBase.signal(signalHash);
+    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+    {
+        return;
+    }
+
+    SignalPropertyDialog dialog( signal.param().hash() );
+    dialog.exec();
+
+    updateList();
+
+    m_pView->setCurrentIndex(visibleIndex);
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -492,9 +634,9 @@ void SignalListDialog::showTypeInternal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::showAppSignalID()
+void SignalListDialog::showCustomID()
 {
-    m_table.setShowAppSignalID( m_pShowAppSignalIDAction->isChecked() );
+    m_table.setShowCustomID( m_pShowCustomIDAction->isChecked() );
 
     updateList();
 }
@@ -506,6 +648,13 @@ void SignalListDialog::showADCInHex()
     m_table.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
 
     updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::onContextMenu(QPoint)
+{
+    m_pViewMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -541,7 +690,3 @@ void SignalListDialog::onColumnAction(QAction* action)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-
-
-
