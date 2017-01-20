@@ -275,6 +275,7 @@ namespace Tuning
 		TuningCommand cmd;
 
 		cmd.opCode = FotipV2::OpCode::Write;
+		cmd.autoCommand = false;
 
 		cmd.write.signalIndex = signalIndex;
 		cmd.write.value = value;
@@ -455,6 +456,7 @@ namespace Tuning
 
 		tuningCmd.opCode = FotipV2::OpCode::Read;
 		tuningCmd.read.frame = m_nextFrameToAutoRead;
+		tuningCmd.autoCommand = true;
 
 		m_tuningCommandQueue.push(&tuningCmd);
 

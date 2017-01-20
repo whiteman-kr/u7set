@@ -87,6 +87,7 @@ namespace Tuning
 		struct TuningCommand
 		{
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
+			bool autoCommand = false;
 
 			struct
 			{
