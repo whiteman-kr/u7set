@@ -147,11 +147,6 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
         return false;
     }
 
-    if (signalInputUnit < 0 || signalInputUnit >= INPUT_UNIT_COUNT)
-    {
-        return false;
-    }
-
     int calibratorUnit = CALIBRATOR_UNIT_UNKNOWN;
 
     switch(signalInputUnit)
