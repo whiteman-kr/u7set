@@ -8,7 +8,7 @@
 #include "TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
-#include "TuningFilterEditor.h"
+#include "TuningClientFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -365,7 +365,7 @@ void MainWindow::runPresetEditor()
 
     TuningObjectStorage objects = theObjectManager->objectStorage();
 
-    TuningFilterEditor d(&editStorage, &objects, editAutomatic,
+    TuningClientFilterEditor d(&editStorage, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,
                          theSettings.m_presetEditorPresetsTreeColumnWidth,
                          theSettings.m_presetEditorPos,

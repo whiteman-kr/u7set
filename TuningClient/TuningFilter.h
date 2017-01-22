@@ -149,7 +149,7 @@ public:
     void addValue(const TuningFilterValue& value);
     void removeValue(Hash hash);
 
-    void setValue(Hash hash, float value);
+    void setValue(const TuningFilterValue &value);
 
     bool value(Hash hash, TuningFilterValue& value);
 

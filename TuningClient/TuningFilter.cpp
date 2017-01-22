@@ -583,9 +583,9 @@ bool TuningFilter::value(Hash hash, TuningFilterValue& value)
 
 }
 
-void TuningFilter::setValue(Hash hash, float value)
+void TuningFilter::setValue(const TuningFilterValue& value)
 {
-	auto it = m_signalValuesMap.find(hash);
+    auto it = m_signalValuesMap.find(value.appSignalHash());
 
 	if (it == m_signalValuesMap.end())
 	{
@@ -594,8 +594,8 @@ void TuningFilter::setValue(Hash hash, float value)
 	}
 
 	TuningFilterValue& ofv = it->second;
-	ofv.setUseValue(true);
-	ofv.setValue(value);
+    ofv.setUseValue(value.useValue());
+    ofv.setValue(value.value());
 }
 
 bool TuningFilter::valueExists(Hash hash) const

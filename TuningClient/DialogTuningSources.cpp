@@ -111,8 +111,6 @@ void DialogTuningSources::update(bool refreshOnly)
 
     for (int i = 0; i < count; i++)
 	{
-		TuningSource& ts = tsi[i];
-
         QTreeWidgetItem* item = ui->treeWidget->topLevelItem(i);
 
         if (item == nullptr)
@@ -121,14 +119,20 @@ void DialogTuningSources::update(bool refreshOnly)
             continue;
         }
 
-        int col = dynamicColumn;
+        quint64 id = item->data(0, Qt::UserRole).value<quint64>();
 
-        item->setText(col++, ts.m_state.isreply() ? tr("Yes") : tr("No"));
-        item->setText(col++, QString::number(ts.m_state.requestcount()));
-        item->setText(col++, QString::number(ts.m_state.replycount()));
-        item->setText(col++, QString::number(ts.m_state.commandqueuesize()));
+        TuningSource ts;
+
+        if (theObjectManager->tuningSourceInfo(id, ts) == true)
+        {
+            int col = dynamicColumn;
+
+            item->setText(col++, ts.m_state.isreply() ? tr("Yes") : tr("No"));
+            item->setText(col++, QString::number(ts.m_state.requestcount()));
+            item->setText(col++, QString::number(ts.m_state.replycount()));
+            item->setText(col++, QString::number(ts.m_state.commandqueuesize()));
+        }
     }
-
 }
 
 DialogTuningSources* theDialogTuningSources = nullptr;

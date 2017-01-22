@@ -122,7 +122,8 @@ SOURCES += main.cpp\
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     TuningObjectManager.cpp \
-    TuningFilterEditor.cpp
+    TuningFilterEditor.cpp \
+    TuningClientFilterEditor.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -158,7 +159,8 @@ HEADERS  += MainWindow.h \
     DialogTuningSourceInfo.h \
     TuningObjectManager.h \
     TuningFilterEditor.h \
-    main.h
+    main.h \
+    TuningClientFilterEditor.h
 
 FORMS    += \
     DialogSettings.ui \

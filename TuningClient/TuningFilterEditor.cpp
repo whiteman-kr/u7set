@@ -344,12 +344,20 @@ void TuningFilterEditor::initUserInterface()
     m_presetsTreeContextMenu->addAction(m_setCurrentAction);
     //
 
-    m_okCancelButtonBox = new QDialogButtonBox(QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel);
-    connect(m_okCancelButtonBox, &QDialogButtonBox::accepted, this, &TuningFilterEditor::accept);
-    connect(m_okCancelButtonBox, &QDialogButtonBox::rejected, this, &TuningFilterEditor::reject);
+    m_saveButton = new QPushButton(tr("Save"));
+    connect(m_saveButton, &QPushButton::clicked, this, &TuningFilterEditor::accept);
+
+    m_cancelButton = new QPushButton(tr("Cancel"));
+    connect(m_cancelButton, &QPushButton::clicked, this, &TuningFilterEditor::reject);
+
+    QHBoxLayout* okCancelButtonsLayout = new QHBoxLayout();
+    okCancelButtonsLayout->addStretch();
+    okCancelButtonsLayout->addWidget(m_saveButton);
+    okCancelButtonsLayout->addWidget(m_cancelButton);
+
 
     mainLayout->addLayout(mainHorzLayout);
-    mainLayout->addWidget(m_okCancelButtonBox);
+    mainLayout->addLayout(okCancelButtonsLayout);
 
     setLayout(mainLayout);
 }
@@ -657,6 +665,10 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		{
             l.push_back(QString::number(value.value(), 'f', object->decimalPlaces()));
 		}
+    }
+    else
+    {
+        l.push_back("");
     }
 
 	int i = 0;
@@ -1177,7 +1189,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
 		setSignalItemText(item, ov);
 
-        filter->setValue(ov.appSignalHash(), ov.value());
+        filter->setValue(ov);
 	}
 
     m_modified = true;
@@ -1185,70 +1197,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
 }
 void TuningFilterEditor::on_m_setCurrent_clicked()
 {
-    /*bool first = true;
-    bool analog = false;
-    float lowLimit = 0;
-    float highLimit = 0;
-    int decimalPlaces = 0;
-    float firstValue = 0;
-
-    bool sameValue = true;
-
     QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
-    for (auto item : selectedItems)
-    {
-        if (isSignal(item) == false)
-        {
-            continue;
-        }
-
-        TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-
-        TuningObject* object = m_objects->objectPtrByHash(ov.appSignalHash());
-        if (object == nullptr)
-        {
-            assert(object);
-            return;
-        }
-
-        if (first == true)
-        {
-            analog = object->analog();
-            lowLimit = object->lowLimit();
-            highLimit = object->highLimit();
-            decimalPlaces = object->decimalPlaces();
-            firstValue = ov.value();
-            first = false;
-        }
-        else
-        {
-            if (analog != object->analog())
-            {
-                QMessageBox::warning(this, tr("Preset Editor"), tr("Please select signals of same type (analog or discrete)."));
-                return;
-            }
-
-            if (analog == true)
-            {
-                if (lowLimit != object->lowLimit() || highLimit != object->highLimit())
-                {
-                    QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
-                    return;
-                }
-            }
-
-            if (ov.value() != firstValue)
-            {
-                sameValue = false;
-            }
-        }
-    }
-
-    DialogInputValue d(analog, firstValue, sameValue, lowLimit, highLimit, decimalPlaces);
-    if (d.exec() != QDialog::Accepted)
-    {
-        return;
-    }
 
     for (auto item : selectedItems)
     {
@@ -1278,16 +1227,28 @@ void TuningFilterEditor::on_m_setCurrent_clicked()
         }
 
         TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-        ov.setUseValue(true);
-        ov.setValue(d.value());
+
+        bool ok = false;
+
+        double newValue = getCurrentSignalValue(ov.appSignalHash(), ok);
+
+        if (ok == true)
+        {
+            ov.setUseValue(true);
+            ov.setValue(newValue);
+        }
+        else
+        {
+            ov.setUseValue(false);
+        }
 
         item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
         setSignalItemText(item, ov);
 
-        filter->setValue(ov.appSignalHash(), ov.value());
+        filter->setValue(ov);
     }
 
-    m_modified = true;*/
+    m_modified = true;
 
 }
 
@@ -1314,6 +1275,14 @@ void TuningFilterEditor::on_m_signalsTable_doubleClicked(const QModelIndex &inde
 void TuningFilterEditor::slot_signalsUpdated()
 {
 	fillObjectsList();
+}
+
+double TuningFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
+{
+    Q_UNUSED(appSignalHash);
+    ok = false;
+
+    return 0;
 }
 
 void TuningFilterEditor::sortIndicatorChanged(int column, Qt::SortOrder order)

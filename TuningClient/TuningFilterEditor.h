@@ -30,6 +30,10 @@ public slots:
 
     void slot_signalsUpdated();
 
+protected:
+
+    virtual double getCurrentSignalValue(Hash appSignalHash, bool &ok);
+
 private slots:
 
 	void on_m_addPreset_clicked();
@@ -162,7 +166,9 @@ private:
     QMenu* m_presetsTreeContextMenu = nullptr;
 
 
-    QDialogButtonBox* m_okCancelButtonBox = nullptr;
+    //QDialogButtonBox* m_okCancelButtonBox = nullptr;
+    QPushButton* m_saveButton = nullptr;
+    QPushButton* m_cancelButton = nullptr;
 
     // Dialog Data
     //
