@@ -212,5 +212,44 @@ bool ConfigurationServiceInfo::fromJson(const QJsonObject &/*jsonObject*/, int /
 }
 
 
+QString getNetworkErrorStr(NetworkError err)
+{
+	switch(err)
+	{
+	case NetworkError::Success:
+		return QString("NetworkError::Success");
+
+	case NetworkError::WrongPartNo:
+		return QString("NetworkError::WrongPartNo");
+
+	case NetworkError::RequestParamExceed:
+		return QString("NetworkError::RequestParamExceed");
+
+	case NetworkError::RequestStateExceed:
+		return QString("NetworkError::RequestStateExceed");
+
+	case NetworkError::ParseRequestError:
+		return QString("NetworkError::ParseRequestError");
+
+	case NetworkError::RequestDataSourcesStatesExceed:
+		return QString("NetworkError::RequestDataSourcesStatesExceed");
+
+	case NetworkError::UnitsExceed:
+		return QString("NetworkError::UnitsExceed");
+
+	case NetworkError::UnknownTuningClientID:
+		return QString("NetworkError::UnknownTuningClientID");
+
+	case NetworkError::UnknownSignalHash:
+		return QString("NetworkError::UnknownSignalHash");
+
+	case NetworkError::InternalError:
+		return QString("NetworkError::InternalError");
+
+	default:
+		assert(false);			// unknown err value
+	}
+}
+
 
 

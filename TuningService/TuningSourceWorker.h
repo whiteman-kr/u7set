@@ -122,6 +122,8 @@ namespace Tuning
 			void setReadLowBound(float readLowBound);
 			void setReadHighBound(float readHighBound);
 
+			QString appSignalID() const;
+
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);
 

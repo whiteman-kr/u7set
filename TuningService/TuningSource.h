@@ -34,8 +34,6 @@ namespace Tuning
 
 		void clear();
 
-//		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);
-
 		void buildIP2DataSourceMap();
 
 		const TuningSource* getSourceByIP(quint32 ip) const;

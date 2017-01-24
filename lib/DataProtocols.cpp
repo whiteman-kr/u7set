@@ -54,4 +54,53 @@ namespace FotipV2
 		dataType = reverseUint16(dataType);
 		offsetInFrameW = reverseUint32(offsetInFrameW);
 	}
+
+
+	QString Frame::valueStr(bool reverseValue)
+	{
+		assert(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
+
+		switch(header.dataType)
+		{
+		case FotipV2::DataType::AnalogFloat:
+			{
+				float floatValue = write.analogFloatValue;
+
+				if (reverseValue == true)
+				{
+					floatValue = reverseFloat(floatValue);
+				}
+
+				return QString("%1").arg(static_cast<double>(floatValue));
+			}
+
+		case FotipV2::DataType::AnalogSignedInt:
+			{
+				qint32 signedIntValue = write.analogSignedIntValue;
+
+				if (reverseValue == true)
+				{
+					signedIntValue = reverseInt32(signedIntValue);
+				}
+
+				return QString("%1").arg(signedIntValue);
+			}
+
+		case FotipV2::DataType::Discrete:
+			{
+				quint32 unsignedIntValue = write.discreteValue;
+
+				if (reverseValue == true)
+				{
+					unsignedIntValue = reverseUint32(unsignedIntValue);
+				}
+
+				return QString("%1").arg(unsignedIntValue);
+			}
+
+		default:
+			assert(false);
+			return QString("Unknown FotipV2::DataType");
+		}
+	}
 }
