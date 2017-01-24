@@ -677,7 +677,8 @@ namespace VFrame30
 
 	bool FblItemRect::searchText(const QString& text) const
 	{
-		return	m_label.contains(text, Qt::CaseInsensitive) ||
+		return	SchemaItem::searchText(text) ||
+				m_label.contains(text, Qt::CaseInsensitive) ||
 				m_userText.contains(text, Qt::CaseInsensitive);
 	}
 

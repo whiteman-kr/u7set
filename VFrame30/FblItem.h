@@ -147,6 +147,10 @@ namespace VFrame30
 		bool hasInput(const QUuid& guid) const;
 		bool hasOutput(const QUuid& guid) const;
 
+		void setNewGuid();					// FblItem is not derived from SchemaIte, so this func cannot be virtual
+
+		bool searchText(const QString& text) const;
+
 		const VFrame30::AfbPin& input(const QUuid& guid) const;
 		VFrame30::AfbPin& input(const QUuid& guid);
 

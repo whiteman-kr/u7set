@@ -2732,3 +2732,137 @@ void SignalTests::get_signal_historyTest()
 
 	QVERIFY2(recordsAmount == 3, qPrintable("Error: get_signal_history returned wrong amount of changesets"));
 }
+
+void SignalTests::get_specific_signalTest()
+{
+	QSqlQuery query, tempQuery;
+	QString keyComment = "keyComment";
+
+	bool ok = query.exec("SELECT * FROM add_signal(1, 0, 0)");
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int signalId = query.value("Id").toInt();
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(1, '{%1}', 'First checkIn')").arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}')").arg(m_firstUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', '%3')").arg(m_firstUserForTest).arg(signalId).arg(keyComment));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkout_signals(%1, '{%2}')").arg(m_secondUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM checkin_signals(%1, '{%2}', 'Third checkIn')").arg(m_secondUserForTest).arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT changesetId FROM changeset WHERE comment = '%1'").arg(keyComment));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	int changesetId = query.value(0).toInt();
+
+	ok = query.exec(QString("SELECT * FROM get_specific_signal(1, %1, %2)").arg(signalId).arg(changesetId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QVERIFY2(query.value("changesetId").toInt() == changesetId, qPrintable("Error: wrongChangesetId returned"));
+
+	ok = tempQuery.exec(QString("SELECT * FROM signalInstance WHERE changesetId = %1").arg(changesetId));
+
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalId").toInt() == tempQuery.value("signalId").toInt(), qPrintable(QString("Error: value signalId is not match (Actual: %1, Expected: %2)").arg(query.value("signalId").toInt()).arg(tempQuery.value("signalId").toInt())));
+	QVERIFY2(query.value("appSignalID").toString() == tempQuery.value("appSignalID").toString(), qPrintable(QString("Error: value appSignalID is not match (Actual: %1, Expected: %2)").arg(query.value("appSignalID").toString()).arg(tempQuery.value("appSignalID").toString())));
+	QVERIFY2(query.value("customAppSignalID").toString() == tempQuery.value("customAppSignalID").toString(), qPrintable(QString("Error: value customAppSignalID is not match (Actual: %1, Expected: %2)").arg(query.value("customAppSignalID").toString()).arg(tempQuery.value("customAppSignalID").toString())));
+	QVERIFY2(query.value("caption").toString() == tempQuery.value("caption").toString(), qPrintable(QString("Error: value name is not match (Actual: %1, Expected: %2)").arg(query.value("caption").toString()).arg(tempQuery.value("caption").toString())));
+	QVERIFY2(query.value("dataFormatId").toInt() == tempQuery.value("dataFormatId").toInt(), qPrintable(QString("Error: value dataFormatId is not match (Actual: %1, Expected: %2)").arg(query.value("dataFormatId").toInt()).arg(tempQuery.value("dataFormatId").toInt())));
+	QVERIFY2(query.value("dataSize").toInt() == tempQuery.value("dataSize").toInt(), qPrintable(QString("Error: value dataSize is not match (Actual: %1, Expected: %2)").arg(query.value("dataSize").toInt()).arg(tempQuery.value("dataSize").toInt())));
+	QVERIFY2(query.value("lowAdc").toInt() == tempQuery.value("lowAdc").toInt(), qPrintable(QString("Error: value lowAdc is not match (Actual: %1, Expected: %2)").arg(query.value("lowAdc").toInt()).arg(tempQuery.value("lowAdc").toInt())));
+	QVERIFY2(query.value("highAdc").toInt() == tempQuery.value("highAdc").toInt(), qPrintable(QString("Error: value highAdc is not match (Actual: %1, Expected: %2)").arg(query.value("highAdc").toInt()).arg(tempQuery.value("highAdc").toInt())));
+	QVERIFY2(query.value("lowengeneeringunits").toInt() == tempQuery.value("lowengeneeringunits").toInt(), qPrintable(QString("Error: value lowengeneeringunits is not match (Actual: %1, Expected: %2)").arg(query.value("lowengeneeringunits").toInt()).arg(tempQuery.value("lowengeneeringunits").toInt())));
+	QVERIFY2(query.value("highengeneeringunits").toInt() == tempQuery.value("highengeneeringunits").toInt(), qPrintable(QString("Error: value highengeneeringunits is not match (Actual: %1, Expected: %2)").arg(query.value("highengeneeringunits").toInt()).arg(tempQuery.value("highengeneeringunits").toInt())));
+	QVERIFY2(query.value("unitId").toInt() == tempQuery.value("unitId").toInt(), qPrintable(QString("Error: value unitId is not match (Actual: %1, Expected: %2)").arg(query.value("unitId").toInt()).arg(tempQuery.value("unitId").toInt())));
+	QVERIFY2(query.value("adjustment").toInt() == tempQuery.value("adjustment").toInt(), qPrintable(QString("Error: value adjustment is not match (Actual: %1, Expected: %2)").arg(query.value("adjustment").toInt()).arg(tempQuery.value("adjustment").toInt())));
+	QVERIFY2(query.value("lowvalidrange").toInt() == tempQuery.value("lowvalidrange").toInt(), qPrintable(QString("Error: value lowvalidrange is not match (Actual: %1, Expected: %2)").arg(query.value("lowvalidrange").toInt()).arg(tempQuery.value("lowvalidrange").toInt())));
+	QVERIFY2(query.value("highvalidrange").toInt() == tempQuery.value("highvalidrange").toInt(), qPrintable(QString("Error: value highvalidrange is not match (Actual: %1, Expected: %2)").arg(query.value("highvalidrange").toInt()).arg(tempQuery.value("highvalidrange").toInt())));
+	QVERIFY2(query.value("unbalanceLimit").toInt() == tempQuery.value("unbalanceLimit").toInt(), qPrintable(QString("Error: value unbalanceLimit is not match (Actual: %1, Expected: %2)").arg(query.value("unbalanceLimit").toInt()).arg(tempQuery.value("unbalanceLimit").toInt())));
+	QVERIFY2(query.value("inputLowLimit").toInt() == tempQuery.value("inputLowLimit").toInt(), qPrintable(QString("Error: value inputLowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputLowLimit").toInt()).arg(tempQuery.value("inputLowLimit").toInt())));
+	QVERIFY2(query.value("inputHighLimit").toInt() == tempQuery.value("inputHighLimit").toInt(), qPrintable(QString("Error: value inputHighLimit is not match (Actual: %1, Expected: %2)").arg(query.value("inputHighLimit").toInt()).arg(tempQuery.value("inputHighLimit").toInt())));
+	QVERIFY2(query.value("inputUnitId").toInt() == tempQuery.value("inputUnitId").toInt(), qPrintable(QString("Error: value inputUnitId is not match (Actual: %1, Expected: %2)").arg(query.value("inputUnitId").toInt()).arg(tempQuery.value("inputUnitId").toInt())));
+	QVERIFY2(query.value("inputSensorId").toInt() == tempQuery.value("inputSensorId").toInt(), qPrintable(QString("Error: value inputSensorId is not match (Actual: %1, Expected: %2)").arg(query.value("inputSensorId").toInt()).arg(tempQuery.value("inputSensorId").toInt())));
+	QVERIFY2(query.value("outputLowLimit").toInt() == tempQuery.value("outputLowLimit").toInt(), qPrintable(QString("Error: value outputLowLimit is not match (Actual: %1, Expected: %2)").arg(query.value("outputLowLimit").toInt()).arg(tempQuery.value("outputLowLimit").toInt())));
+	QVERIFY2(query.value("outputHighLimit").toInt() == tempQuery.value("outputHighLimit").toInt(), qPrintable(QString("Error: value outputHighLimit is not match (Actual: %1, Expected: %2)").arg(query.value("outputHighLimit").toInt()).arg(tempQuery.value("outputHighLimit").toInt())));
+	QVERIFY2(query.value("outputUnitId").toInt() == tempQuery.value("outputUnitId").toInt(), qPrintable(QString("Error: value outputUnitId is not match (Actual: %1, Expected: %2)").arg(query.value("outputUnitId").toInt()).arg(tempQuery.value("outputUnitId").toInt())));
+	QVERIFY2(query.value("outputSensorId").toInt() == tempQuery.value("outputSensorId").toInt(), qPrintable(QString("Error: value outputSensorId is not match (Actual: %1, Expected: %2)").arg(query.value("outputSensorId").toInt()).arg(tempQuery.value("outputSensorId").toInt())));
+	QVERIFY2(query.value("acquire").toString() == tempQuery.value("acquire").toString(), qPrintable(QString("Error: value acquire is not match (Actual: %1, Expected: %2)").arg(query.value("acquire").toString()).arg(tempQuery.value("acquire").toString())));
+	QVERIFY2(query.value("calculated").toString() == tempQuery.value("calculated").toString(), qPrintable(QString("Error: value calculated is not match (Actual: %1, Expected: %2)").arg(query.value("calculated").toString()).arg(tempQuery.value("calculated").toString())));
+	QVERIFY2(query.value("normalState").toInt() == tempQuery.value("normalState").toInt(), qPrintable(QString("Error: value normalState is not match (Actual: %1, Expected: %2)").arg(query.value("normalState").toInt()).arg(tempQuery.value("normalState").toInt())));
+	QVERIFY2(query.value("decimalPlaces").toInt() == tempQuery.value("decimalPlaces").toInt(), qPrintable(QString("Error: value decimalPlaces is not match (Actual: %1, Expected: %2)").arg(query.value("decimalPlaces").toInt()).arg(tempQuery.value("decimalPlaces").toInt())));
+	QVERIFY2(query.value("aperture").toInt() == tempQuery.value("aperture").toInt(), qPrintable(QString("Error: value aperture is not match (Actual: %1, Expected: %2)").arg(query.value("aperture").toInt()).arg(tempQuery.value("aperture").toInt())));
+	QVERIFY2(query.value("inOutType").toInt() == tempQuery.value("inOutType").toInt(), qPrintable(QString("Error: value inOutType is not match (Actual: %1, Expected: %2)").arg(query.value("inOutType").toInt()).arg(tempQuery.value("inOutType").toInt())));
+	QVERIFY2(query.value("equipmentID").toString() == tempQuery.value("equipmentID").toString(), qPrintable(QString("Error: value equipmentID is not match (Actual: %1, Expected: %2)").arg(query.value("equipmentID").toString()).arg(tempQuery.value("equipmentID").toString())));
+	QVERIFY2(query.value("outputRangeMode").toInt() == tempQuery.value("outputRangeMode").toInt(), qPrintable(QString("Error: value outputRangeMode is not match (Actual: %1, Expected: %2)").arg(query.value("outputRangeMode").toInt()).arg(tempQuery.value("outputRangeMode").toInt())));
+	QVERIFY2(query.value("filteringTime").toInt() == tempQuery.value("filteringTime").toInt(), qPrintable(QString("Error: value filteringTime is not match (Actual: %1, Expected: %2)").arg(query.value("filteringTime").toInt()).arg(tempQuery.value("filteringTime").toInt())));
+	QVERIFY2(query.value("spreadtolerance").toInt() == tempQuery.value("spreadtolerance").toInt(), qPrintable(QString("Error: value spreadtolerance is not match (Actual: %1, Expected: %2)").arg(query.value("spreadtolerance").toInt()).arg(tempQuery.value("spreadtolerance").toInt())));
+	QVERIFY2(query.value("byteOrder").toInt() == tempQuery.value("byteOrder").toInt(), qPrintable(QString("Error: value byteOrder is not match (Actual: %1, Expected: %2)").arg(query.value("byteOrder").toInt()).arg(tempQuery.value("byteOrder").toInt())));
+	QVERIFY2(query.value("enableTuning").toString() == tempQuery.value("enableTuning").toString(), qPrintable(QString("Error: value enableTuning is not match (Actual: %1, Expected: %2)").arg(query.value("enableTuning").toString()).arg(tempQuery.value("enableTuning").toString())));
+	QVERIFY2(query.value("tuningDefaultValue").toDouble() == tempQuery.value("tuningDefaultValue").toDouble(), qPrintable(QString("Error: value tuningDefaultValue is not match (Actual: %1, Expected: %2)").arg(query.value("tuningDefaultValue").toDouble()).arg(tempQuery.value("tuningDefaultValue").toDouble())));
+
+	ok = tempQuery.exec(QString("SELECT * FROM signal WHERE signalId = %1").arg(signalId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("signalGroupId").toInt() == tempQuery.value("signalGroupId").toInt(), qPrintable("Error: wrong signalGroupId returned"));
+	QVERIFY2(query.value("channel").toInt() == tempQuery.value("channel").toInt(), qPrintable("Error: wrong channel returned"));
+	QVERIFY2(query.value("type").toInt() == tempQuery.value("type").toInt(), qPrintable("Error: wrong type returned"));
+	QVERIFY2(query.value("created").toString() == tempQuery.value("created").toString(), qPrintable("Error: wrong creation date returned"));
+	QVERIFY2(query.value("deleted").toBool() == tempQuery.value("deleted").toBool(), qPrintable("Error: wrong deleted value returned"));
+
+	ok = tempQuery.exec(QString("SELECT * FROM changeset WHERE changesetId = %1").arg(changesetId));
+	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
+	QVERIFY2(tempQuery.next() == true, qPrintable(tempQuery.lastError().databaseText()));
+
+	QVERIFY2(query.value("userId").toInt() == tempQuery.value("userId").toInt(), qPrintable(QString("Error: wrong userId value returned (Actual: %1, Expected: %2").arg(query.value("userId").toInt()).arg(tempQuery.value("userId").toInt())));
+
+	// Check empty user
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_specific_signal(0, %1, %2)").arg(signalId).arg(changesetId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Expected error: empty userId"));
+
+	// Check empty signalId
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_specific_signal(1, 0, %1)").arg(changesetId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Expected error: empty signalId"));
+
+	// Check wrong changeset
+	//
+
+	ok = query.exec(QString("SELECT * FROM get_specific_signal(1, %1, 0)").arg(signalId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == false, qPrintable("Expected error: empty changeset"));
+}
