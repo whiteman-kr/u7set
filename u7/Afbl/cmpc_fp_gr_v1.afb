@@ -3,7 +3,7 @@
     <AfbElement StrId="#cmpc_fp_gr_v1">
         <Properties>
             <Caption>cmpc_fp_gr</Caption>
-            <Version>1.0002</Version>
+            <Version>1.0003</Version>
             <Implementation Version="108" OpIndex="12"/>
             <Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
             <Category>Compare</Category>
@@ -105,7 +105,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}	
 	
-	createOutput(videoItemFblElement, afbElement, "OutNan", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
 
