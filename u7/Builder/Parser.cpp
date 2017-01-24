@@ -2,6 +2,7 @@
 
 #include <typeindex>
 #include <functional>
+#include <set>
 #include <QtConcurrent/QtConcurrent>
 
 #include "IssueLogger.h"
@@ -804,12 +805,12 @@ namespace Builder
 		return copy;
 	}
 
-	bool AppLogicModule::debugCheckItemsRelationsConsistency(IssueLogger* log) const
+	bool AppLogicModule::checkItemsRelationsConsistency(IssueLogger* log) const
 	{
-		return AppLogicModule::debugCheckItemsRelationsConsistency(m_equipmentId, m_items, log);
+		return AppLogicModule::checkItemsRelationsConsistency(m_equipmentId, m_items, log);
 	}
 
-	bool AppLogicModule::debugCheckItemsRelationsConsistency(QString equipmentId,
+	bool AppLogicModule::checkItemsRelationsConsistency(QString equipmentId,
 															 const std::list<AppLogicItem>& items,
 															 IssueLogger* log)
 	{
@@ -1730,7 +1731,7 @@ namespace Builder
 				return false;
 			}
 
-			bool checkResult = module->debugCheckItemsRelationsConsistency(log);
+			bool checkResult = module->checkItemsRelationsConsistency(log);
 			if (checkResult == false)
 			{
 				return false;
@@ -1773,7 +1774,7 @@ namespace Builder
 					continue;
 				}
 
-				// Make a copy of ufb, so all the guid will be unique in
+				// Make a copy of ufb, so all the guids will be unique in
 				//
 				std::shared_ptr<AppLogicModule> ufbCopy = parsedUfb->deepCopy(ufbItem->guid(), ufbItem->label());
 				if (ufbCopy == nullptr)
@@ -1784,11 +1785,13 @@ namespace Builder
 
 				std::list<AppLogicItem> ufbItemsCopy = ufbCopy->items();		// Prefer to work with a list copy
 
-				// Intermidiate check, to make sure all the new guids were set right and relations were kept in consistency
+				// Intermidiate check, to make sure all the new guids were set right and relations are kept in consistency
 				//
-				checkResult = ufbCopy->debugCheckItemsRelationsConsistency(log);
+				checkResult = ufbCopy->checkItemsRelationsConsistency(log);
 				if (checkResult == false)
 				{
+					// The error is signaled in checkItemsRelationsConsistency
+					//
 					return false;
 				}
 
@@ -1832,7 +1835,7 @@ namespace Builder
 					}
 				}
 
-				// Bind LogicSchema outputû to UFB items inputs
+				// Bind LogicSchema outputs to UFB items inputs
 				//
 				for (const VFrame30::AfbPin& ufbItemPin : ufbItem->inputs())
 				{
@@ -2103,15 +2106,19 @@ namespace Builder
 				// Inject ufb schema items
 				//
 				module->items().insert(itemIt, ufbItemsCopy.begin(), ufbItemsCopy.end());
-			}
 
-			// Remove all VFrame30::SchemaItemUfb, as they have already beeen expanded
-			//
-			module->items().remove_if(
-						[](const AppLogicItem& ali)
-						{
-							return ali.m_fblItem->isType<VFrame30::SchemaItemUfb>();
-						});
+				// Remove expanded VFrame30::SchemaItemUfb, and set new value to the iterator
+				//
+				if (ufbItemsCopy.empty() == false)
+				{
+					itemIt = module->items().erase(itemIt);		// itemIt is the first injected item
+				}
+				else
+				{
+					module->items().erase(itemIt);
+					itemIt = module->items().begin();			// Dumb way, but it works :) should be set to prev but is prev exist?
+				}
+			}
 
 			// Remove Fake Items
 			//
@@ -2122,7 +2129,7 @@ namespace Builder
 
 			// --
 			//
-			checkResult = module->debugCheckItemsRelationsConsistency(log);
+			checkResult = module->checkItemsRelationsConsistency(log);
 			if (checkResult == false)
 			{
 				return false;
@@ -2235,6 +2242,8 @@ namespace Builder
 
 	bool Parser::parse()
 	{
+		bool result = true;
+
 		// Get User Functional Blocks
 		//
 		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
@@ -2243,6 +2252,14 @@ namespace Builder
 		if (ok == false)
 		{
 			return ok;
+		}
+
+		// Check for the same lables in ufbs
+		//
+		ok = checkSameLabelsAndGuids(ufbs);
+		if (ok == false)
+		{
+			result = false;
 		}
 
 		// Check Ufbs SchemaItemAfb.afbElement versions
@@ -2280,8 +2297,6 @@ namespace Builder
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order itmes in all modules
 		//
-		bool result = true;
-
 		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
 
 		ok = m_applicationData->orderUfbItems(m_log);
@@ -2306,6 +2321,14 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
+		}
+
+		// Check for the same lables in schemas
+		//
+		ok = checkSameLabelsAndGuids(schemas);
+		if (ok == false)
+		{
+			result = false;
 		}
 
 		// Check schemas EquipmentIDs
@@ -2369,12 +2392,12 @@ namespace Builder
 		bool checkResult = true;
 		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
 		{
-			checkResult &= module->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= module->checkItemsRelationsConsistency(m_log);
 		}
 
 		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : m_applicationData->ufbs())
 		{
-			checkResult &= ufb.second->debugCheckItemsRelationsConsistency(m_log);
+			checkResult &= ufb.second->checkItemsRelationsConsistency(m_log);
 		}
 
 		if (checkResult == false)
@@ -2567,6 +2590,117 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	template<typename SchemaType>
+	bool Parser::checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType>>& schemas) const
+	{
+		LOG_MESSAGE(log(), tr("Checking guids, labels..."));
+
+		std::multimap<QUuid, QString> uuids;			// value is schema
+		std::multimap<QString, QString> labels;
+
+		for (const std::shared_ptr<SchemaType>& schema : schemas)
+		{
+			if (schema->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			uuids.insert(std::make_pair(schema->guid(), schema->schemaId()));			// Schema guid is also included in check
+
+//			if (schema->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//			{
+//				//assert(false);
+//			}
+
+			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+			{
+				if (layer->compile() == false)
+				{
+					continue;
+				}
+
+				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
+
+//				if (layer->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//				{
+//					assert(false);
+//				}
+
+				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				{
+					if (item->isFblItem() == false)
+					{
+						continue;
+					}
+
+					uuids.insert(std::make_pair(item->guid(), schema->schemaId()));
+
+//					if (item->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
+//					{
+//						assert(false);
+//					}
+
+					if (item->isFblItemRect() == true)
+					{
+						VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
+						assert(fblItemRect);
+
+						QString label = fblItemRect->label();
+						labels.insert(std::make_pair(label, schema->schemaId()));
+
+						// Check pins guids
+						//
+						for (auto& pin : fblItemRect->inputs())
+						{
+							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
+
+//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
+//							{
+//								assert(false);
+//							}
+						}
+
+						for (auto& pin : fblItemRect->outputs())
+						{
+							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
+
+//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
+//							{
+//								assert(false);
+//							}
+						}
+					}
+				}
+			}
+		}
+
+		bool result = true;
+
+		// Check for the same guids
+		//
+		for (const std::pair<QUuid, QString>& uuidPair : uuids)
+		{
+			if (uuids.count(uuidPair.first) != 1)
+			{
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate guids %1").arg(uuidPair.first.toString()), uuidPair.second);
+				result = false;
+			}
+		}
+
+		// Check for the same labels
+		//
+		for (const std::pair<QString, QString>& labelPair : labels)
+		{
+			if (labels.count(labelPair.first) != 1)
+			{
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(labelPair.first), labelPair.second);
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool Parser::checkEquipmentIds(VFrame30::LogicSchema* logicSchema)

@@ -125,12 +125,12 @@ Signal& Signal::operator =(const Signal& signal)
 	m_inputLowLimit = signal.m_inputLowLimit;
 	m_inputHighLimit = signal.m_inputHighLimit;
 	m_inputUnitID = signal.m_inputUnitID;
-	m_inputSensorID = signal.m_inputSensorID;
+	m_inputSensorType = signal.m_inputSensorType;
 	m_outputLowLimit = signal.m_outputLowLimit;
 	m_outputHighLimit = signal.m_outputHighLimit;
 	m_outputUnitID = signal.m_outputUnitID;
 	m_outputMode = signal.m_outputMode;
-	m_outputSensorID = signal.m_outputSensorID;
+	m_outputSensorType = signal.m_outputSensorType;
 	m_acquire = signal.m_acquire;
 	m_calculated = signal.m_calculated;
 	m_normalState = signal.m_normalState;
@@ -256,6 +256,44 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		}
 	}
 	assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(E::InputUnit))
+{
+    const QStringRef& strValue = attr.value(fieldName);
+    if (strValue.isEmpty())
+    {
+        assert(false);
+        return;
+    }
+    for (int i = 0; i < unitInfo.count(); i++)
+    {
+        if (strValue == unitInfo[i])
+        {
+            (this->*setter)(static_cast<E::InputUnit>(i));
+            return;
+        }
+    }
+    assert(false);
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType))
+{
+    const QStringRef& strValue = attr.value(fieldName);
+    if (strValue.isEmpty())
+    {
+        assert(false);
+        return;
+    }
+    for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
+    {
+        if (strValue == SensorTypeStr[i])
+        {
+            (this->*setter)(static_cast<E::SensorType>(i));
+            return;
+        }
+    }
+    assert(false);
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType))
@@ -388,13 +426,13 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
 	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
 	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
-	serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
-	serializeSensorField(attr, "InputSensorID", &Signal::setInputSensorID);
+    serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
+    serializeField(attr, "InputSensorID", &Signal::setInputSensorType);
 	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
 	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
 	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
 	serializeField(attr, "OutputMode", &Signal::setOutputMode);
-	serializeSensorField(attr, "OutputSensorID", &Signal::setOutputSensorID);
+    serializeField(attr, "OutputSensorID", &Signal::setOutputSensorType);
 	serializeField(attr, "Acquire", &Signal::setAcquire);
 	serializeField(attr, "Calculated", &Signal::setCalculated);
 	serializeField(attr, "NormalState", &Signal::setNormalState);
@@ -620,12 +658,12 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
 	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
 	xml.writeIntAttribute("InputUnitID", inputUnitID());
-	xml.writeIntAttribute("InputSensorID", inputSensorID());
+	xml.writeIntAttribute("InputSensorID", inputSensorType());
 	xml.writeDoubleAttribute("OutputLowLimit", outputLowLimit());
 	xml.writeDoubleAttribute("OutputHighLimit", outputHighLimit());
 	xml.writeIntAttribute("OutputUnitID", outputUnitID());
 	xml.writeIntAttribute("OutputMode", outputModeInt());
-	xml.writeIntAttribute("OutputSensorID", outputSensorID());
+	xml.writeIntAttribute("OutputSensorID", outputSensorType());
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", calculated());
 	xml.writeIntAttribute("NormalState", normalState());
@@ -694,8 +732,13 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
 	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
 	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
-	result &= xml.readIntAttribute("InputUnitID", &m_inputUnitID);
-	result &= xml.readIntAttribute("InputSensorID", &m_inputSensorID);
+
+    result &= xml.readIntAttribute("InputUnitID", &intValue);
+    m_inputUnitID = static_cast<E::InputUnit>(intValue);
+
+    result &= xml.readIntAttribute("InputSensorID", &intValue);
+    m_inputSensorType = static_cast<E::SensorType>(intValue);
+
 	result &= xml.readDoubleAttribute("OutputLowLimit", &m_outputLowLimit);
 	result &= xml.readDoubleAttribute("OutputHighLimit", &m_outputHighLimit);
 	result &= xml.readIntAttribute("OutputUnitID", &m_outputUnitID);
@@ -703,7 +746,9 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("OutputMode", &intValue);
 	m_outputMode = static_cast<E::OutputMode>(intValue);
 
-	result &= xml.readIntAttribute("OutputSensorID", &m_outputSensorID);
+    result &= xml.readIntAttribute("OutputSensorID", &intValue);
+    m_outputSensorType = static_cast<E::SensorType>(intValue);
+
 	result &= xml.readBoolAttribute("Acquire", &m_acquire);
 	result &= xml.readBoolAttribute("Calculated", &m_calculated);
 	result &= xml.readIntAttribute("NormalState", &m_normalState);
@@ -791,12 +836,12 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_inputlowlimit(m_inputLowLimit);
 	s->set_inputhighlimit(m_inputHighLimit);
 	s->set_inputunitid(m_inputUnitID);
-	s->set_inputsensorid(m_inputSensorID);
+	s->set_inputsensorid(m_inputSensorType);
 	s->set_outputlowlimit(m_outputLowLimit);
 	s->set_outputhighlimit(m_outputHighLimit);
 	s->set_outputunitid(m_outputUnitID);
 	s->set_outputmode(m_outputMode);
-	s->set_outputsensorid(m_outputSensorID);
+	s->set_outputsensorid(m_outputSensorType);
 	s->set_acquire(m_acquire);
 	s->set_calculated(m_calculated);
 	s->set_normalstate(m_normalState);
@@ -971,12 +1016,12 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_inputunitid())
 	{
-		m_inputUnitID = s->inputunitid();
+        m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
 	}
 
 	if (s->has_inputsensorid())
 	{
-		m_inputSensorID = s->inputsensorid();
+        m_inputSensorType = static_cast<E::SensorType>(s->inputsensorid());
 	}
 
 	if (s->has_outputlowlimit())
@@ -1001,7 +1046,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_outputsensorid())
 	{
-		m_outputSensorID = s->outputsensorid();
+        m_outputSensorType = static_cast<E::SensorType>(s->outputsensorid());
 	}
 
 	if (s->has_acquire())

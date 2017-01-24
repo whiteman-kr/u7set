@@ -9,24 +9,11 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	QString buildPath;
-
-	for(int i = 0; i < argc; i++)
-	{
-		QString arg(argv[i]);
-
-		if (arg.startsWith("-b="))
-		{
-			buildPath = arg.mid(3);
-			continue;
-		}
-	}
-
 	qRegisterMetaType<TuningIPEN::TuningSourceState>("TuningDataSourceState");
 	qRegisterMetaType<TuningIPEN::FotipFrame>("FotipFrame");
 
 	QApplication a(argc, argv);
-	TuningIPEN::TuningMainWindow w(buildPath);
+	TuningIPEN::TuningMainWindow w(argc, argv);
 	w.show();
 
 	int result =  a.exec();

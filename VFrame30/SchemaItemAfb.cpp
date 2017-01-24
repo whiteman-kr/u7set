@@ -87,7 +87,7 @@ namespace VFrame30
 		QString text = m_afbElement.caption();
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
+		DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
 
 		// Draw params
 		//
@@ -173,7 +173,7 @@ namespace VFrame30
 		}
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
+		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
 
 		return;
 	}

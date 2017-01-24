@@ -426,7 +426,7 @@ public:
     explicit            PtrObjectVector(const PtrObjectVector& from);
                         ~PtrObjectVector();
 
-private:
+protected:
 
     mutable QMutex      m_vectorMutex;
 

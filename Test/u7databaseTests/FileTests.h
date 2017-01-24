@@ -57,4 +57,6 @@ public:
 
 private:
 	static void getObjectState(QSqlQuery& q, ObjectState& os);
+
+	QString m_adminPassword = "123412341234";
 };

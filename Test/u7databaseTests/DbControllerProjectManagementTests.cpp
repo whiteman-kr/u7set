@@ -104,8 +104,18 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 
 	QVERIFY2 (db.open() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec ("SELECT * FROM create_user(1, 'Tester', 'Tester', 'Tester', 'TesterTester', false, false, true)");
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	QString session_key = query.value(0).toString();
+
+	ok = query.exec (QString("SELECT * FROM user_api.create_user('%1', 'Tester', 'Tester', 'Tester', 'TesterTester', false, true)").arg(session_key));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = m_dbController->openProject(m_databaseName, "Tester", "TesterTester", 0);
 	QVERIFY2 (ok == false, qPrintable("Error: Disabled user"));

@@ -45,6 +45,30 @@ namespace VFrame30
 	//
 	bool Schema::SaveData(Proto::Envelope* message) const
 	{
+//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
+//		// Set new uuids and labels to the schema
+//		//
+//		Schema* sss = const_cast<Schema*>(this);
+//		sss->setGuid(QUuid::createUuid());
+
+//		for (auto layer : sss->Layers)
+//		{
+//			layer->setGuid(QUuid::createUuid());
+
+//			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+//			{
+//				item->setNewGuid();
+
+//				if (item->isFblItemRect() == true)
+//				{
+//static int counterValue = 18000;
+//					//int counterValue = //m_db->nextCounterValue();
+//					item->toFblItemRect()->setLabel(schemaId() + "_" + QString::number(counterValue++));
+//				}
+//			}
+//		}
+//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 

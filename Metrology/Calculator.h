@@ -55,16 +55,13 @@ private:
     void            conversionTc();
     void            conversionLin();
 
-//signals:
-
-
 private slots:
 
-    void            onTrSensorChanged(int)  { conversionTr(); }
+    void            onTrSensorTypeChanged(int)  { conversionTr(); }
     void            onTrRadio()             { conversionTr(); }
     void            onTrValue(QString)      { conversionTr(); }
 
-    void            onTcSensorChanged(int)  { conversionTc(); }
+    void            onTcSensorTypeChanged(int)  { conversionTc(); }
     void            onTcRadio()             { conversionTc(); }
     void            onTcValue(QString)      { conversionTc(); }
 

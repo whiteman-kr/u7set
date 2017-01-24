@@ -277,6 +277,39 @@ namespace Builder
 				  .arg(debugMessage));
 	}
 
+	void IssueLogger::errINT1001(QString debugMessage, QString schema)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+
+		LOG_ERROR(IssueType::Internal,
+				  1001,
+				  tr("Internal exception, schema %1: %2.")
+					.arg(schema)
+					.arg(debugMessage));
+	}
+
+	void IssueLogger::errINT1001(QString debugMessage, QString schema, QUuid itemsUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuid, schema);
+
+		LOG_ERROR(IssueType::Internal,
+				  1001,
+				  tr("Internal exception, schema %1: %2.")
+					.arg(schema)
+					.arg(debugMessage));
+	}
+
+	void IssueLogger::errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
+
+		LOG_ERROR(IssueType::Internal,
+				  1001,
+				  tr("Internal exception, schema %1: %2.")
+					.arg(schema)
+					.arg(debugMessage));
+	}
+
 	// PDB			Project database issues					2000-2999
 	//
 

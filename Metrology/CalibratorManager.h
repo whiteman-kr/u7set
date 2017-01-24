@@ -20,42 +20,32 @@ class CalibratorManager : public QObject
     Q_OBJECT
 
 public:
-    explicit        CalibratorManager(Calibrator* pCalibrator, QWidget* parent);
+    explicit        CalibratorManager();
                     ~CalibratorManager();
 
-    void            show();
+private:
+
+    int             m_index = -1;                    // index calibrator in a common base calibrators CalibratorBase
+    Calibrator*     m_pCalibrator = nullptr;
+    bool            m_ready = false;
+
+public:
 
     int             index()                         { return m_index;   }
     void            setIndex(int index)             { m_index = index;  }
 
+    void            setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator;  }
+
     Calibrator*     calibrator()                    { return m_pCalibrator; }
     QString         portName()                      { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->portName(); }
 
-    bool            calibratorIsConnected();
-
-    bool            setUnit(int mode, int unit);
-    void            setValue(double value);
-    void            stepDown();
-    void            stepUp();
-
-    void            getValue();
-
     bool            isReady()                       { return m_ready; }
 
-    void            loadSettings();
-    void            saveSettings();
+public:
 
-private:
-
-    Calibrator*     m_pCalibrator = nullptr;
-    int             m_index = -1;                   // index calibrator in a common base calibrators CalibratorBase
-
-    bool            m_ready = false;
-
-    // Elements of interface - Menu
+    // elements of interface - Menu
     //
-    QWidget*        m_parentWidget = nullptr;
-    QDialog*        m_pDialog = nullptr;
+    QDialog*        m_pManageDialog = nullptr;
 
     QFont*          m_pFont;
     QLabel*         m_pMeasureLabel = nullptr;
@@ -74,10 +64,34 @@ private:
     QDialog*        m_pErrorDialog = nullptr;
     QTextEdit*      m_pErrorList = nullptr;
 
-    void            createDialog();
+    void            createDialog(QWidget* parent);
     void            initDialog();
     void            enableInterface(bool enable);
+
+
+public:
+
+    void            showManageDialog();
+
+    bool            calibratorIsConnected();
+
+    // function for manage
+    //
+
+    bool            setUnit(int mode, int unit);
+
     void            updateValue();
+    void            value();
+    void            setValue(double value);
+
+    void            stepDown();
+    void            stepUp();
+
+    // options
+    //
+
+    void            loadSettings();
+    void            saveSettings();
 
 signals:
 
@@ -96,14 +110,14 @@ private slots:
     void            onCalibratorDisconnect();
 
     void            onUnitChanged();
+    void            onModeUnitList(int);
+
     void            onValueChanging();
     void            onValueChanged();
 
     void            onSetValue();
     void            onStepDown();
     void            onStepUp();
-
-    void            onModeUnitList(int);
 
     void            onErrorList();
 
@@ -112,7 +126,7 @@ private slots:
 
 // ==============================================================================================
 
-typedef PtrObjectVector<CalibratorManager> CalibratorManagerVector;
+typedef PtrObjectVector<CalibratorManager> CalibratorManagerList;
 
 // ==============================================================================================
 

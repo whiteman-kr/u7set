@@ -21,10 +21,10 @@
         <htmlBodyStyle>{DEFAULT}</htmlBodyStyle>
     </options>
     <datasources>
-        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="ConnID" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE" connOpt="db">SELECT * FROM LinearetyMeasure</datasource>
+        <datasource id="DataSource1" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="ConnID" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE" connOpt="db">SELECT * FROM LinearityMeasure</datasource>
         <datasource id="DataSource2" allowEmpty="true" type="sql" openRole="begin" source="static" connection="external" parentID="" connID="" host="" database="D:\Git\u7set\Metrology\Metrology.db" user="" password="" port="" driver="QSQLITE">SELECT * FROM ReportOption 
-INNER JOIN LinearetyMeasure 
-ON ReportOption.LinkObjectID = LinearetyMeasure.ObjectID 
+INNER JOIN LinearityMeasure
+ON ReportOption.LinkObjectID = LinearityMeasure.ObjectID
 GROUP BY ReportID</datasource>
     </datasources>
     <variables/>

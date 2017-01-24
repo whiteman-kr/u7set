@@ -33,6 +33,21 @@ public:
 	};
 	Q_ENUM(VertAlign)
 
+	// UserTextPos
+	//
+	enum class UserTextPos
+	{
+		LeftTop,
+		Top,
+		RightTop,
+		Right,
+		RightBottom,
+		Bottom,
+		LeftBottom,
+		Left
+	};
+	Q_ENUM(UserTextPos)
+
 	// Format analog
 	//
 	enum class AnalogFormat
@@ -65,6 +80,8 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	// SignalFunction
+	//
 	enum class SignalFunction
 	{
 		Input,					// physical input, application logic signal
@@ -74,6 +91,8 @@ public:
 	};
 	Q_ENUM(SignalFunction)
 
+	// ByteOrder
+	//
 	enum ByteOrder
 	{
 		LittleEndian,
@@ -92,6 +111,8 @@ public:
 	};
 	Q_ENUM(DataFormat)
 
+	// AnalogAppSignalFormat
+	//
 	enum class AnalogAppSignalFormat
 	{
 		SignedInt32 = static_cast<int>(E::DataFormat::SignedInt),
@@ -99,6 +120,8 @@ public:
 	};
 	Q_ENUM(AnalogAppSignalFormat)
 
+	// MemoryArea
+	//
 	enum class MemoryArea
 	{
 		ApplicationData,
@@ -120,6 +143,8 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
+	// OutputMode
+	//
 	enum OutputMode
 	{
 		Plus0_Plus5_V = 0,
@@ -129,6 +154,45 @@ public:
 	};
 	Q_ENUM(OutputMode)
 
+	// InputUnit
+	//
+    enum InputUnit
+    {
+        NoInputUnit = 1,
+        mA = 15,
+        mV = 11,
+        Ohm = 20,
+        V = 12,
+    };
+    Q_ENUM(InputUnit)
+
+	// SensorType
+	//
+    enum SensorType
+    {
+        NoSensorType = 0,
+
+        Ohm_Pt50_W1391 = 1,
+        Ohm_Pt100_W1391 = 2,
+        Ohm_Pt50_W1385 = 3,
+        Ohm_Pt100_W1385 = 4,
+
+        Ohm_Cu_50_W1428 = 5,
+        Ohm_Cu_100_W1428 = 6,
+        Ohm_Cu_50_W1426 = 7,
+        Ohm_Cu_100_W1426 = 8,
+
+        Ohm_Pt21 = 9,
+        Ohm_Cu23 = 10,
+
+        mV_K_TXA = 11,
+        mV_L_TXK = 12,
+        mV_N_THH = 13,
+    };
+    Q_ENUM(SensorType)
+
+	// SignalInOutType
+	//
 	enum class SignalInOutType
 	{
 		Input = 0,
@@ -137,6 +201,8 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
+	// Channel
+	//
 	enum class Channel
 	{
 		A = 0,
@@ -146,6 +212,8 @@ public:
 	};
 	Q_ENUM(Channel)
 
+	// DataSourceState
+	//
 	enum class DataSourceState
 	{
 		NoData = 0,
@@ -235,8 +303,6 @@ enum class UartID
 
 #define TO_INT(enumValue) (static_cast<int>(enumValue))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
-
-#define C_STR(qstring) qstring.toStdString().c_str()
 
 template <typename EnumType>
 EnumType IntToEnum(int value)

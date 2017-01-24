@@ -33,6 +33,7 @@ namespace TuningIPEN
 		QTimer m_timer;
 
 		QString m_cfgFileName;
+		QString m_buildPath;
 
 		bool readTuningDataSources(XmlReadHelper& xml);
 
@@ -54,6 +55,10 @@ namespace TuningIPEN
 		virtual void requestPreprocessing(SocketRequest& sr);
 		virtual void replyPreprocessing(SocketReply& sr);
 
+		virtual void initCmdLineParser();
+		virtual void processCmdLineSettings();
+		virtual void loadSettings();
+
 	private slots:
 		void onTimer();
 		void onReplyReady();
@@ -63,14 +68,13 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker();
-		~TuningIPENServiceWorker();
+		TuningIPENServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+		virtual ~TuningIPENServiceWorker();
 
-		void initCmdLineParser() override;
+		virtual ServiceWorker* createInstance() const override;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
 
 		void setTuningService(TuningIPENService* tuningService) { m_tuningIPENService = tuningService; }
-
-//		virtual TuningIPENServiceWorker* createInstance() override;
 
 		bool loadConfigurationFromFile(const QString& fileName);
 		void getTuningDataSourcesInfo(QVector<TuningSourceInfo>& info);

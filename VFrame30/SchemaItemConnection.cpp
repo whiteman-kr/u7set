@@ -204,7 +204,7 @@ namespace VFrame30
 		arrowRect.setLeft(r.right() - pinWidth);
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		// Draw ConnectionID
 		//
@@ -213,7 +213,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}
@@ -413,7 +413,7 @@ namespace VFrame30
 		arrowRect.setRight(r.left() + pinWidth);
 
 		p->setPen(textColor());
-		DrawHelper::DrawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		// Draw ConnectionID
 		//
@@ -422,7 +422,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
+		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
 
 		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
 		//
@@ -444,7 +444,7 @@ namespace VFrame30
 
 		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);
 
-		DrawHelper::DrawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
+		DrawHelper::drawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
 
 		return;
 	}

@@ -135,10 +135,10 @@ void SignalSocket::replySignalListStart(const char* replyData, quint32 replyData
         return;
     }
 
-    qDebug() << "SignalSocket::replyAppSignalListStart";
-    qDebug() << "TotalItemCount:    "   << m_getSignalListStartReply.totalitemcount();
-    qDebug() << "PartCount:         "   << m_getSignalListStartReply.partcount();
-    qDebug() << "ItemsPerPart:      "   << m_getSignalListStartReply.itemsperpart();
+    qDebug() << "SignalSocket::replyAppSignalListStart - Signals for load:  " << m_getSignalListStartReply.totalitemcount();
+    // qDebug() << "TotalItemCount:    "   << m_getSignalListStartReply.totalitemcount();
+    // qDebug() << "PartCount:         "   << m_getSignalListStartReply.partcount();
+    // qDebug() << "ItemsPerPart:      "   << m_getSignalListStartReply.itemsperpart();
 
     if (m_getSignalListStartReply.totalitemcount() == 0 || m_getSignalListStartReply.partcount() == 0)
     {
@@ -219,9 +219,9 @@ void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataS
         return;
     }
 
-    qDebug() << "SignalSocket::replySignalListNext";
-    qDebug() << "PartIndex:         "   << m_getSignalListNextReply.part();
-    qDebug() << "Items in the Part: "   << m_getSignalListNextReply.appsignalids_size();
+    // qDebug() << "SignalSocket::replySignalListNext";
+    // qDebug() << "PartIndex:         "   << m_getSignalListNextReply.part();
+    // qDebug() << "Items in the Part: "   << m_getSignalListNextReply.appsignalids_size();
 
     int stringCount = m_getSignalListNextReply.appsignalids_size();
 
@@ -251,7 +251,7 @@ void SignalSocket::requestSignalParam(int startIndex)
 
     if (startIndex >= m_signalHashList.size())
     {
-        qDebug() << "SignalSocket::requestSignalParam - Signals were loaded: " << theSignalBase.size();
+        qDebug() << "SignalSocket::requestSignalParam - Signals were loaded:    " << theSignalBase.signalCount();
 
         requestUnits();
 
@@ -348,10 +348,10 @@ void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
 
     for (int i = 0; i < m_getUnitsReply.units_size(); i++)
     {
-        theSignalBase.appendUnit(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
+        theUnitBase.appendUnit(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
     }
 
-    qDebug() << "SignalSocket::replyUnits - Units were loaded: " << m_getUnitsReply.units_size();
+    qDebug() << "SignalSocket::replyUnits - Units were loaded:              " << m_getUnitsReply.units_size();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -433,6 +433,8 @@ void SignalSocket::startSignalStateTimer()
         connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalSocket::updateSignalState);
     }
 
+    // according to GOST MI-2002 in each point we need do twenty measurements per one second
+    //
     m_updateSignalStateTimer->start(50); //   50 ms
 }
 

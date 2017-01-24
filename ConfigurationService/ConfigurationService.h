@@ -9,16 +9,21 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker();
+	ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
 
-signals:
-	void ackInformationRequest(UdpRequest request);
+	virtual ServiceWorker* createInstance() const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
 
 public slots:
 	void onInformationRequest(UdpRequest request);
 
+signals:
+	void ackInformationRequest(UdpRequest request);
+
 private:
 	virtual void initCmdLineParser() override;
+	virtual void processCmdLineSettings() override;
+	virtual void loadSettings() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
@@ -37,7 +42,12 @@ private:
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
-	QString m_clientIPStr;
+	// settings
+	//
+	QString m_equipmentID;
 	QString m_buildPath;
+	QString m_clientIPStr;
+
+	HostAddressPort m_clientIP;
 };
 

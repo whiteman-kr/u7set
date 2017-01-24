@@ -21,19 +21,21 @@ public:
 
 	void setCmdLineArgs(int argc, char** argv);
 
-	bool addSimpleOption(const QString& name, const QString& description);				// specify name without "-"
-	bool addSingleValueOption(const QString& name, const QString& description);			// specify name without "-"
-	bool addMultipleValuesOption(const QString& name, const QString& description);		// specify name without "-"
+	int argCount() const;
 
-	bool addHelpOption();
+	// specify name without "-"
+	//
+	bool addSimpleOption(const QString& name, const QString& description);
+	bool addSingleValueOption(const QString& name, const QString& description, const QString& paramExample = QString(""));
+	bool addMultipleValuesOption(const QString& name, const QString& description, const QString& paramsExample = QString(""));
 
 	void parse();
 
-	bool isOptionSet(const QString& name);					// use with all option types
-	QString optionValue(const QString& name);				// use only with OptionType::SingleValue
-	QStringList optionValues(const QString& name);			// use only with OptionType::MultipleValues
+	bool optionIsSet(const QString& name) const;					// use with all option types
+	QString optionValue(const QString& name) const;					// use only with OptionType::SingleValue
+	QStringList optionValues(const QString& name) const;			// use only with OptionType::MultipleValues
 
-	QString helpText();
+	QString helpText() const;
 
 private:
 	struct Option
@@ -41,12 +43,13 @@ private:
 		OptionType type = OptionType::Simple;
 		QString name;
 		QString description;
+		QString paramsExample;
 
 		bool isSet = false;
 		QStringList values;
 	};
 
-	bool addOption(OptionType type, const QString& name, const QString& description);
+	bool addOption(OptionType type, const QString& name, const QString& description, const QString& paramsExample);
 
 private:
 	QString m_appPath;
@@ -55,6 +58,7 @@ private:
 	HashedVector<QString, Option> m_options;
 
 	bool m_parsed = false;
+	bool m_cmdLineArgsIsSet = false;
 
 	const int MIN_OPTION_LEN = 2;
 	int m_maxOptionLen = 0;

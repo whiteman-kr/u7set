@@ -3,8 +3,10 @@
 
 #include <QThread>
 #include <QMessageBox>
+
 #include "Measure.h"
 #include "CalibratorBase.h"
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -23,20 +25,23 @@ public:
     void                    init(QWidget* parent = 0);
 
     void                    setMeasureType(int type)    { m_measureType = type; }
+
     void                    stop()                      { m_cmdStopMeasure = true; }
 
 private:
 
-    QWidget*                m_parentWidget = nullptr;
+    QWidget*                m_parent = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    bool                    m_cmdStopMeasure = true;
+    MeasureMultiSignal      m_activeSignal;
 
-    CalibratorManagerVector m_calibratorManagerVector;
+    bool                    m_cmdStopMeasure = true;
 
     void                    waitMeasureTimeout();
 
-    bool                    prepareCalibrator(CalibratorManager* manager, int mode, int unit);
+    bool                    calibratorIsValid(CalibratorManager* pManager);
+
+    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit);
 
     void                    measureLinearity();
     void                    measureComprators();
@@ -50,15 +55,14 @@ signals:
 
     void                    showMsgBox(QString);
 
-    // measure thread signals
-    //
     void                    measureInfo(QString);
     void                    measureInfo(int);
-    void                    measureComplite(MeasureItem*);
+
+    void                    measureComplite(Measurement*);
 
 private slots:
 
-    void                    msgBox(QString text)        { QMessageBox::information(m_parentWidget, tr("Measurement process"), text); }
+    void                    msgBox(QString text)        { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
     void                    calibratorDisconnected();
 

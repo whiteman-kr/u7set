@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QObject>
-#include <QQueue>
-#include <QMap>
 #include <QTimer>
+#include <QFile>
+#include <QTextStream>
+#include <QSystemSemaphore>
 
 #include "SimpleThread.h"
 
@@ -38,17 +39,13 @@ private:
 	void openFile(int index);
 	void clearFileStream();
 
-private slots:
-	void flushStream();
-
 private:
-	QTextStream* m_stream = nullptr;
-	QFile* m_file = nullptr;
-	QTimer m_timer;
+	QString m_fileName;
+	QFile m_file;
+	QTextStream m_stream;
 
 	QString m_logName;
 	QString m_path;
-	QString m_logFileName;
 
 	const int MAX_LOG_FILE_COUNT = 10;
 	const int MAX_LOG_FILE_SIZE = 10;		// in megabytes
@@ -89,33 +86,44 @@ public:
 	void init(QString logName, int fileCount, int fileSizeInMB, QString placementPath = "");
 	void init(int fileCount, int fileSizeInMB, QString placementPath = "");
 
-	bool isInitialized() const { return m_loggerInitialized; }
+	bool isInitialized() const;
+
+	void shutdown();
+
+	void setLogCodeInfo(bool logCodeInfo);
 
 signals:
 	void writeRecord(const QString record);
 
 public:
-	void writeError(const QString& message, const char* function, const char* file, int line);
-	void writeWarning(const QString& message, const char* function, const char* file, int line);
-	void writeMessage(const QString& message, const char* function, const char* file, int line);
-	void writeConfig(const QString& message, const char* function, const char* file, int line);
+	void writeError(const QString& message, const char* function, const char* file, int line, bool debugEcho);
+	void writeWarning(const QString& message, const char* function, const char* file, int line, bool debugEcho);
+	void writeMessage(const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 private:
 	QString getRecordTypeStr(RecordType type);
 	QString getCurrentDateTimeStr();
 
-	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line);
+	void composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 private:
 	bool m_loggerInitialized = false;
+	bool m_logCodeInfo = true;
 };
 
 
-#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__);
-#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__);
-#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__);
+#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, false);
 
-#define INIT_LOGGER(appPath)	 logger.init(10, 10, appPath);
+#define DEBUG_LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
+
+#define INIT_LOGGER(appPath)		logger.init(10, 10, appPath);
+#define SHUTDOWN_LOGGER				logger.shutdown();
 
 
 extern CircularLogger logger;

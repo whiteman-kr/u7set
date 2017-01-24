@@ -1,4 +1,6 @@
 #include "../lib/WUtils.h"
+#include <QString>
+#include <cassert>
 
 
 void swapBytes(const char* src, char* dest, int size)
@@ -10,4 +12,6 @@ void swapBytes(const char* src, char* dest, int size)
 		*dest-- = *src++;
 	}
 }
+
+
 

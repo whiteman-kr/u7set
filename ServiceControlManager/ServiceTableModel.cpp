@@ -170,7 +170,7 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceFound)
 			{
 				str += QString(" v%1.%2.%3(0x%4)\n").arg(si.majorversion()).arg(si.minorversion()).
-													arg(si.buildno()).arg(si.crc(), 0, 16, QChar('0'));
+													arg(si.commitno()).arg(si.crc(), 0, 16, QChar('0'));
 			}
 
 			if (serviceState != ServiceState::Undefined &&

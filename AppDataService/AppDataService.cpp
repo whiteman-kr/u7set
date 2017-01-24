@@ -10,8 +10,8 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataServiceWorker::AppDataServiceWorker() :
-	ServiceWorker(ServiceType::AppDataService),
+AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo &versionInfo) :
+	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo),
 	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
@@ -26,33 +26,73 @@ AppDataServiceWorker::~AppDataServiceWorker()
 }
 
 
-void AppDataServiceWorker::initCmdLineParser()
+ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	CommandLineParser* clp = cmdLineParser();
-
-	if (clp == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	clp->addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-	clp->addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo());
+	return newInstance;
 }
 
 
-void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
+void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_settings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_settings.clientRequestIP.port());
+	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+}
+
+
+void AppDataServiceWorker::initCmdLineParser()
+{
+	CommandLineParser& cp = cmdLineParser();
+
+	cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.", "IPv4");
+	cp.addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.", "IPv4");
+}
+
+
+void AppDataServiceWorker::processCmdLineSettings()
+{
+	CommandLineParser& cp = cmdLineParser();
+
+	if (cp.optionIsSet("id") == true)
+	{
+		setStrSetting("EquipmentID", cp.optionValue("id"));
+	}
+
+	if (cp.optionIsSet("cfgip1") == true)
+	{
+		setStrSetting("CfgServiceIP1", cp.optionValue("cfgip1"));
+	}
+
+	if (cp.optionIsSet("cfgip2") == true)
+	{
+		setStrSetting("CfgServiceIP2", cp.optionValue("cfgip2"));
+	}
+}
+
+
+void AppDataServiceWorker::loadSettings()
+{
+	m_equipmentID = getStrSetting("EquipmentID");
+
+	m_cfgServiceIP1Str = getStrSetting("CfgServiceIP1");
+
+	m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	m_cfgServiceIP2Str = getStrSetting("CfgServiceIP2");
+
+	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	DEBUG_LOG_MSG(QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 }
 
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(serviceEquipmentID(), 1,
-											HostAddressPort(m_cfgServiceIP1, PORT_CONFIGURATION_SERVICE_REQUEST),
-											HostAddressPort(m_cfgServiceIP2, PORT_CONFIGURATION_SERVICE_REQUEST));
+	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 
@@ -81,7 +121,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer();
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_settings.clientRequestIP,
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,
 															m_enabledAppDataSources,
 															m_appSignals,
@@ -216,7 +256,7 @@ bool AppDataServiceWorker::readConfiguration(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 
-	bool result = m_settings.readFromXml(xml);
+	bool result = m_cfgSettings.readFromXml(xml);
 
 	if (result == true)
 	{
@@ -448,7 +488,7 @@ void AppDataServiceWorker::initDataChannelThreads()
 		// create AppDataChannelThread
 		//
 		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
-						m_settings.appDataServiceChannel[channel].appDataReceivingIP);
+						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP);
 
 		// add AppDataSources to channel
 		//

@@ -367,10 +367,10 @@ void REPORT_HEADER::init(int type)
 
     switch(m_type)
     {
-        case REPORT_TYPE_LINEARITY:                 objectID = SqlObjectID[SQL_TABLE_LINEARETY];            break;
-        case REPORT_TYPE_LINEARITY_CERTIFICATION:   objectID = SqlObjectID[SQL_TABLE_LINEARETY_ADD_VAL];    break;
-        case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_EL];      break;
-        case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARETY_20_PH];      break;
+        case REPORT_TYPE_LINEARITY:                 objectID = SqlObjectID[SQL_TABLE_LINEARITY];            break;
+        case REPORT_TYPE_LINEARITY_CERTIFICATION:   objectID = SqlObjectID[SQL_TABLE_LINEARITY_ADD_VAL];    break;
+        case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_EL];      break;
+        case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_PH];      break;
         case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
         case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
         default:                                    assert(0);                                              break;
@@ -407,7 +407,7 @@ bool ReportHeaderBase::reportsIsExist()
     {
         REPORT_HEADER header = at(r);
 
-        QString path = theOptions.report().m_path + QDir::separator() + header.m_reportFile;
+        QString path = theOptions.report().path() + QDir::separator() + header.m_reportFile;
         if (QFile::exists(path) == false)
         {
             dontExistReports.append("- " + header.m_reportFile + "\n");
@@ -509,7 +509,7 @@ void ReportOption::load()
     m_path = s.value( QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
     m_type = s.value( QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
 
-    m_headerBase.reportsIsExist();
+    //m_headerBase.reportsIsExist();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -702,12 +702,11 @@ void LinearityOption::load()
 {
     QSettings s;
 
-    m_pointBase.loadData(SQL_TABLE_LINEARETY_POINT);
+    m_pointBase.loadData(SQL_TABLE_LINEARITY_POINT);
 
     m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
     m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
-    m_errorCalcBySCO  = s.value( QString("%1ErrorCalcByMSE ").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 
     m_measureTimeInPoint = s.value( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
     m_measureCountInPoint = s.value( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -729,7 +728,6 @@ void LinearityOption::save()
     s.setValue( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
     s.setValue( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
     s.setValue( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
-    s.setValue( QString("%1ErrorCalcByMSE").arg(LINEARITY_OPTIONS_KEY), m_errorCalcBySCO);
 
     s.setValue( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
     s.setValue( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
@@ -741,7 +739,7 @@ void LinearityOption::save()
     s.setValue( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
     s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
 
-    m_pointBase.saveData(SQL_TABLE_LINEARETY_POINT);
+    m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -753,7 +751,6 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
     m_errorValue = from.m_errorValue;
     m_errorCtrl = from.m_errorCtrl;
     m_errorType = from.m_errorType;
-    m_errorCalcBySCO = from.m_errorCalcBySCO;
 
     m_measureTimeInPoint = from.m_measureTimeInPoint;
     m_measureCountInPoint = from.m_measureCountInPoint;
@@ -804,7 +801,7 @@ void ComparatorOption::load()
     m_errorType = s.value( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
 
     m_enableMeasureHysteresis = s.value( QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
-    m_startComparatorNo = s.value( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+    m_startComparatorIndex = s.value( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
     m_additionalCheck = s.value( QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
 
@@ -820,7 +817,7 @@ void ComparatorOption::save()
     s.setValue( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 
     s.setValue( QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
-    s.setValue( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorNo);
+    s.setValue( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
     s.setValue( QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_additionalCheck);
 }
 
@@ -834,7 +831,7 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
     m_errorType = from.m_errorType;
 
     m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
-    m_startComparatorNo = from.m_startComparatorNo;
+    m_startComparatorIndex = from.m_startComparatorIndex;
     m_additionalCheck = from.m_additionalCheck;
 
     return *this;
@@ -867,7 +864,7 @@ BackupOption::~BackupOption()
 
 bool BackupOption::createBackup()
 {
-    QString sourcePath = theOptions.database().m_path + QDir::separator() + DATABASE_NAME;
+    QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
     QString destPath = m_path + QDir::separator() + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + DATABASE_NAME;
 
     if (QFile::copy(sourcePath, destPath) == false)
@@ -963,11 +960,11 @@ int Options::channelCount()
 {
     int count = 0;
 
-    switch(m_toolBar.m_measureKind)
+    switch(m_toolBar.measureKind())
     {
-        case MEASURE_KIND_ONE:      count = 1;                      break;
-        case MEASURE_KIND_MULTI:    count = MAX_CALIBRATOR_COUNT;   break;
-        default:                    assert(0);                      break;
+        case MEASURE_KIND_ONE:      count = 1;                          break;
+        case MEASURE_KIND_MULTI:    count = MAX_CHANNEL_COUNT; break;
+        default:                    assert(0);
     }
 
     return count;

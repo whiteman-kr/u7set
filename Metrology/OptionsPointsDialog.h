@@ -28,7 +28,7 @@ public:
 
 private:
 
-    QAction*            m_pAction[POINT_SENSOR_COUNT];
+    QAction*            m_pColumnAction[POINT_SENSOR_COUNT];
     QMenu*              m_headerContextMenu = nullptr;
 
     // elements of interface
@@ -84,7 +84,7 @@ private slots:
     void                currentCellChanged(int,int,int,int);
 
     void                onHeaderContextMenu(QPoint);
-    void                onAction(QAction* action);
+    void                onColumnAction(QAction* action);
 };
 
 // ==============================================================================================

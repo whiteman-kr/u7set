@@ -1,4 +1,5 @@
 #include "../Builder/LmMemoryMap.h"
+#include "../lib/WUtils.h"
 
 namespace Builder
 {

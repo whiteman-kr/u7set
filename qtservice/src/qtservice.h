@@ -99,7 +99,7 @@ private:
 
 class QtServiceBasePrivate;
 
-class QT_QTSERVICE_EXPORT QtServiceBase
+class QT_QTSERVICE_EXPORT QtServiceBase : public QObject
 {
     Q_DECLARE_PRIVATE(QtServiceBase)
 public:
@@ -154,11 +154,64 @@ protected:
 
 private:
 
+	// the functions added to refactoring original QtServiceBase::exec() (WhiteMan 04.01.2017)
+	//
+	int installService();
+	int uninstallService();
+	int printVersion();
+	int startAsRegularApplication();
+	int terminateService();
+	int pauseService();
+	int resumeService();
+	int executeCommand();
+	int printHelp();
+	int startService();
+
+	//
+
     friend class QtServiceSysPrivate;
     QtServiceBasePrivate *d_ptr;
 };
 
-template <typename Application>
+
+class QtService : public QtServiceBase
+{
+public:
+	QtService(int argc, char** argv, QCoreApplication* app, const QString &name)
+		: QtServiceBase(argc, argv, name),
+		  m_app(app)
+	{
+	}
+
+	~QtService()
+	{
+	}
+
+protected:
+	QCoreApplication* application() const
+	{
+		return m_app;
+	}
+
+	virtual void createApplication(int &argc, char **argv)
+	{
+		Q_UNUSED(argc);
+		Q_UNUSED(argv);
+		/*app = new Application(argc, argv);
+		QCoreApplication *a = app;
+		Q_UNUSED(a);*/
+	}
+
+	virtual int executeApplication()
+	{
+		return m_app->exec();
+	}
+
+private:
+	QCoreApplication* m_app;
+};
+
+/*template <typename Application>
 class QtService : public QtServiceBase
 {
 public:
@@ -185,7 +238,7 @@ protected:
 
 private:
     Application *app;
-};
+};*/
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QtServiceBase::ServiceFlags)
 

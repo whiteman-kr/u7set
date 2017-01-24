@@ -7,116 +7,34 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void DevicePosition::setFromID(const QString& equipmentID)
+Measurement::Measurement(const int& measureType)
 {
-    if (equipmentID.isEmpty() == true)
-    {
-        assert(equipmentID.isEmpty() != true);
-        return;
-    }
-
-    m_equipmentID = equipmentID;
-
-    // parse position from equipmentID
-    //
+    m_measureType = measureType;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString DevicePosition::caseString() const
+Measurement* Measurement::at(const int& index)
 {
-    QString caseNo = m_caseNo == -1 ? "" : QString::number(m_caseNo + 1);
-
-    QString result;
-
-    if (caseNo.isEmpty() == false && m_caseType.isEmpty() == false)
-    {
-        result = caseNo + " - " + m_caseType;
-    }
-    else
-    {
-        result = caseNo + m_caseType;
-    }
-
-    return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString DevicePosition::channelString() const
-{
-    return m_channel == -1 ? QT_TRANSLATE_NOOP("Measure", "No") : QString::number(m_channel + 1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString DevicePosition::subblockString() const
-{
-    return m_subblock == -1 ? QT_TRANSLATE_NOOP("Measure", "No") : QString::number(m_subblock + 1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString DevicePosition::blockString() const
-{
-    return m_block == -1 ? QT_TRANSLATE_NOOP("Measure", "No") : QString::number(m_block + 1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString DevicePosition::entryString() const
-{
-    return m_entry == -1 ? QT_TRANSLATE_NOOP("Measure", "No") : QString::number(m_entry + 1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-DevicePosition& DevicePosition::operator=(const DevicePosition& from)
-{
-    m_equipmentID = from.m_equipmentID;
-
-    m_caseNo = from.m_caseNo;
-    m_caseType = from.m_caseType;
-
-    m_channel = from.m_channel;
-    m_subblock = from.m_subblock;
-    m_block = from.m_block;
-    m_entry = from.m_entry;
-
-    return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureItem::MeasureItem(int type)
-{
-    m_measureType = type;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MeasureItem* MeasureItem::at(int index)
-{
-    MeasureItem* pMeasure = nullptr;
+    Measurement* pMeasurement = nullptr;
 
     switch(m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:            pMeasure = static_cast<LinearetyMeasureItem*> (this) + index;           break;
-        case MEASURE_TYPE_COMPARATOR:           pMeasure = static_cast<ComparatorMeasureItem*> (this) + index;          break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasure = static_cast<ComplexComparatorMeasureItem*> (this) + index;   break;
-        default:                                assert(0);                                                              break;
+        case MEASURE_TYPE_LINEARITY:            pMeasurement = static_cast<LinearityMeasurement*> (this) + index;           break;
+        case MEASURE_TYPE_COMPARATOR:           pMeasurement = static_cast<ComparatorMeasurement*> (this) + index;          break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasurement = static_cast<ComplexComparatorMeasurement*> (this) + index;   break;
+        default:                                assert(0);
     }
 
-    return pMeasure;
+    return pMeasurement;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureItem& MeasureItem::operator=(MeasureItem& from)
+Measurement& Measurement::operator=(Measurement& from)
 {
     m_measureType = from.m_measureType;
+    m_signalHash = from.m_signalHash;
 
     m_measureID = from.m_measureID;
     m_filter = from.m_filter;
@@ -126,10 +44,10 @@ MeasureItem& MeasureItem::operator=(MeasureItem& from)
 
     switch(m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:            *static_cast<LinearetyMeasureItem*> (this) = *static_cast <LinearetyMeasureItem*> (&from);                  break;
-        case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasureItem*> (this) = *static_cast <ComparatorMeasureItem*> (&from);                break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasureItem*> (this) = *static_cast <ComplexComparatorMeasureItem*> (&from);  break;
-        default:                                assert(0);                                                                                                  break;
+        case MEASURE_TYPE_LINEARITY:            *static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);                  break;
+        case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasurement*> (this) = *static_cast <ComparatorMeasurement*> (&from);                break;
+        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasurement*> (this) = *static_cast <ComplexComparatorMeasurement*> (&from);  break;
+        default:                                assert(0);
     }
 
     return *this;
@@ -139,8 +57,8 @@ MeasureItem& MeasureItem::operator=(MeasureItem& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem::LinearetyMeasureItem() :
-    MeasureItem(MEASURE_TYPE_LINEARITY)
+LinearityMeasurement::LinearityMeasurement() :
+    Measurement(MEASURE_TYPE_LINEARITY)
 {
     for(int v = 0; v < VALUE_TYPE_COUNT; v++)
     {
@@ -175,103 +93,200 @@ LinearetyMeasureItem::LinearetyMeasureItem() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem::LinearetyMeasureItem(Calibrator* pCalibrator)
+LinearityMeasurement::LinearityMeasurement(Calibrator* pCalibrator, const Hash& signalHash)
 {
     if (pCalibrator == nullptr)
     {
+        assert(false);
+        return;
+    }
+
+    if (signalHash == 0)
+    {
+        assert(false);
+        return;
+    }
+
+    MeasureSignal signal = theSignalBase.signal(signalHash);
+    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+    {
+        assert(false);
         return;
     }
 
     setMeasureType(MEASURE_TYPE_LINEARITY);
 
+    setSignalHash(signalHash);
+
     // features
     //
-    setAppSignalID("#IDMPS");
-    setCustomAppSignalID("IDMPS");
-    setCaption("This is signal of the block MPS");
 
-    position().setCaseNo(0);
-    position().setCaseType("CASE-1");
-    position().setChannel(0);
-    position().setBlock(0);
-    position().setSubblock(0);
-    position().setEntry(0);
+    setAppSignalID( signal.param().appSignalID() );
+    setCustomAppSignalID( signal.param().customAppSignalID() );
+    setCaption( signal.param().caption() );
+
+    setPosition( signal.position() );
 
     setValuePrecision(VALUE_TYPE_ELECTRIC, 3);
-    setValuePrecision(VALUE_TYPE_PHYSICAL, 2);
+    setValuePrecision(VALUE_TYPE_PHYSICAL, signal.param().decimalPlaces());
     setValuePrecision(VALUE_TYPE_OUTPUT, 3);
 
     // nominal
     //
 
     double electric = pCalibrator->sourceValue();
-    double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, INPUT_UNIT_OHM, OHM_PT_50_W_1391);
+    double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, signal.param());
 
     setNominal(VALUE_TYPE_ELECTRIC, electric);
     setNominal(VALUE_TYPE_PHYSICAL, physical);
-    setNominal(VALUE_TYPE_OUTPUT, 0);
 
-    setPercent(0);
+    if (signal.param().isOutput() == true)
+    {
+        setNominal(VALUE_TYPE_OUTPUT, 0);
+    }
+
+    setPercent( (( physical - signal.param().lowEngeneeringUnits()) * 100)/(signal.param().highEngeneeringUnits() - signal.param().lowEngeneeringUnits() ));
 
     // measure
     //
+
     int measureCount = theOptions.linearity().m_measureCountInPoint > MEASUREMENT_IN_POINT ? MEASUREMENT_IN_POINT : theOptions.linearity().m_measureCountInPoint;
 
     setMeasureArrayCount(measureCount);
 
+    double averageElVal = 0;
+    double averagePhVal = 0;
+
     for(int index = 0; index < measureCount; index++)
     {
-        setMeasureItemArray(VALUE_TYPE_ELECTRIC, index, 0);
-        setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, 0);
-        setMeasureItemArray(VALUE_TYPE_OUTPUT, index, pCalibrator->measureValue());
+        AppSignalState signalState = theSignalBase.signalState(signalHash);
+
+        double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, signal.param());
+        double phVal = signalState.value;
+
+        setMeasureItemArray(VALUE_TYPE_ELECTRIC, index, elVal);
+        setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, phVal);
+        setMeasureItemArray(VALUE_TYPE_OUTPUT, index, 0);
+
+        averageElVal += elVal;
+        averagePhVal += phVal;
+
+        QThread::msleep((theOptions.linearity().m_measureTimeInPoint*1000)/measureCount);
     }
 
-    setMeasure(VALUE_TYPE_ELECTRIC, 0);
-    setMeasure(VALUE_TYPE_PHYSICAL, 0);
+    averageElVal /= measureCount;
+    averagePhVal /= measureCount;
+
+    setMeasure(VALUE_TYPE_ELECTRIC, averageElVal);
+    setMeasure(VALUE_TYPE_PHYSICAL, averagePhVal);
     setMeasure(VALUE_TYPE_OUTPUT, pCalibrator->measureValue());
 
     // limits
     //
-    setLowLimit(VALUE_TYPE_ELECTRIC, 50);
-    setHighLimit(VALUE_TYPE_ELECTRIC, 100);
-    setUnit(VALUE_TYPE_ELECTRIC, CalibratorUnit[pCalibrator->sourceUnit()]);
+    setLowLimit(VALUE_TYPE_ELECTRIC, signal.param().inputLowLimit());
+    setHighLimit(VALUE_TYPE_ELECTRIC, signal.param().inputHighLimit());
 
-    setLowLimit(VALUE_TYPE_PHYSICAL, 0);
-    setHighLimit(VALUE_TYPE_PHYSICAL, 100);
-    setUnit(VALUE_TYPE_PHYSICAL, "°С");
+    if ( signal.param().inputUnitID() >= 0 && signal.param().inputUnitID() < theUnitBase.unitCount())
+    {
+        setUnit(VALUE_TYPE_ELECTRIC, theUnitBase.unit( signal.param().inputUnitID() ) );
+    }
 
-    setLowLimit(VALUE_TYPE_OUTPUT, 4);
-    setHighLimit(VALUE_TYPE_OUTPUT, 20);
-    setUnit(VALUE_TYPE_OUTPUT, CalibratorUnit[pCalibrator->measureUnit()]);
+    setLowLimit(VALUE_TYPE_PHYSICAL, signal.param().lowEngeneeringUnits());
+    setHighLimit(VALUE_TYPE_PHYSICAL, signal.param().highADC());
+    setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit( signal.param().unitID() ) );
 
-    setHasOutput(true);
+    if (signal.param().isOutput() == true)
+    {
+        switch(signal.param().outputMode())
+        {
+            case E::OutputMode::Plus0_Plus5_V:     setLowLimit(VALUE_TYPE_OUTPUT, 0);      setHighLimit(VALUE_TYPE_OUTPUT, 5);     setUnit(VALUE_TYPE_OUTPUT, "V");     break;
+            case E::OutputMode::Plus4_Plus20_mA:   setLowLimit(VALUE_TYPE_OUTPUT, 4);      setHighLimit(VALUE_TYPE_OUTPUT, 20);    setUnit(VALUE_TYPE_OUTPUT, "mA");    break;
+            case E::OutputMode::Minus10_Plus10_V:  setLowLimit(VALUE_TYPE_OUTPUT, -10);    setHighLimit(VALUE_TYPE_OUTPUT, 10);    setUnit(VALUE_TYPE_OUTPUT, "V");     break;
+            case E::OutputMode::Plus0_Plus5_mA:    setLowLimit(VALUE_TYPE_OUTPUT, 0);      setHighLimit(VALUE_TYPE_OUTPUT, 5);     setUnit(VALUE_TYPE_OUTPUT, "mA");    break;
+        }
+    }
+
+    setHasOutput(false);
     setAdjustment(0);
 
     // calc errors
     //
-    setErrorInput(ERROR_TYPE_ABSOLUTE, 0);
-    setErrorInput(ERROR_TYPE_REDUCE, 0);
 
-    setErrorOutput(ERROR_TYPE_ABSOLUTE, 0);
-    setErrorOutput(ERROR_TYPE_REDUCE, 0);
+    setErrorInput(ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL)) );
+    setErrorInput(ERROR_TYPE_REDUCE, abs( ((averagePhVal - nominal(VALUE_TYPE_PHYSICAL)) / (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL))) * 100.0) );
+    setErrorInput(ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL) ) / nominal(VALUE_TYPE_PHYSICAL)) * 100.0) );
 
-    setErrorLimit(ERROR_TYPE_ABSOLUTE, 0);
-    setErrorLimit(ERROR_TYPE_REDUCE, 0);
+    setErrorLimit(ERROR_TYPE_ABSOLUTE, abs( (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL)) * theOptions.linearity().m_errorValue / 100.0 ));
+    setErrorLimit(ERROR_TYPE_REDUCE, theOptions.linearity().m_errorValue);
+    setErrorLimit(ERROR_TYPE_RELATIVE, theOptions.linearity().m_errorValue);
 
-    setErrorPrecision(ERROR_TYPE_ABSOLUTE, 0);
+    if (signal.param().isOutput() == true)
+    {
+        setErrorOutput(ERROR_TYPE_ABSOLUTE, 0);
+        setErrorOutput(ERROR_TYPE_REDUCE, 0);
+        setErrorOutput(ERROR_TYPE_RELATIVE, 0);
+    }
+
+    setErrorPrecision(ERROR_TYPE_ABSOLUTE, signal.param().decimalPlaces());
     setErrorPrecision(ERROR_TYPE_REDUCE, 2);
+    setErrorPrecision(ERROR_TYPE_RELATIVE, 2);
 
-    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, 0);
-    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, 0);
-    setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, 0);
-    setAdditionalValue(ADDITIONAL_VALUE_MSE, 0);
-    setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, 0);
-    setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, 0);
+    // calc additional parameters
+    //
+
+    double maxDeviation = 0;
+    int maxDeviationIndex = 0;
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        if ( maxDeviation < abs(averagePhVal - measureItemArray(VALUE_TYPE_PHYSICAL, index)))
+        {
+            maxDeviation = abs(averagePhVal - measureItemArray(VALUE_TYPE_PHYSICAL, index));
+            maxDeviationIndex = index;
+        }
+    }
+
+    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX,  measureItemArray(VALUE_TYPE_PHYSICAL, maxDeviationIndex));
+
+        // according to GOST 8.508-84 paragraph 3.4.1 formula 42
+        //
+    double systemError = abs (averagePhVal - nominal(VALUE_TYPE_PHYSICAL));
+
+    setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, systemError);
+
+        // according to GOST 8.736-2011 paragraph 5.3 formula 3
+        //
+    double sumDeviation = 0;
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        sumDeviation += pow( averagePhVal -  measureItemArray(VALUE_TYPE_PHYSICAL, index), 2 );	// 1. sum of deviations
+    }
+
+    sumDeviation /= (double) measureCount - 1;                                                  // 2. divide on (count of measure - 1)
+    double sco = sqrt(sumDeviation);                                                            // 3. sqrt
+
+    setAdditionalValue(ADDITIONAL_VALUE_MSE, sco);
+
+        // according to GOST 8.207-76 paragraph 2.4
+        //
+    double estimateSCO = sco / sqrt( (double) measureCount );
+
+        // Student's rate according to GOST 27.202 on P = 0.95
+        // or GOST 8.207-76 application 2 (last page)
+        //
+    double k_student = studentK(measureCount, CT_PROPABILITY_95);
+
+        // according to GOST 8.207-76 paragraph 3.2
+        //
+    double border = k_student * estimateSCO;
+
+    setAdditionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER, border);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::limitString(int type) const
+QString LinearityMeasurement::limitString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -287,7 +302,7 @@ QString LinearetyMeasureItem::limitString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::nominalString(int type) const
+QString LinearityMeasurement::nominalString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -300,7 +315,7 @@ QString LinearetyMeasureItem::nominalString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::measureString(int type) const
+QString LinearityMeasurement::measureString(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -313,7 +328,7 @@ QString LinearetyMeasureItem::measureString(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearetyMeasureItem::measureItemString(int type, int index) const
+QString LinearityMeasurement::measureItemString(int type, int index) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -332,55 +347,55 @@ QString LinearetyMeasureItem::measureItemString(int type, int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearetyMeasureItem::updateMeasureArray(int valueType, MeasureItem* pMeasure)
+void LinearityMeasurement::updateMeasureArray(int valueType, Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
 
-    int measureType = pMeasure->measureType();
+    int measureType = pMeasurement->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+    LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
-    m_measureArrayCount = pLinearetyMeasureItem->measureArrayCount();
+    m_measureArrayCount = pLinearityMeasureItem->measureArrayCount();
 
     for(int m = 0; m < MEASUREMENT_IN_POINT; m++)
     {
-        m_measureArray[valueType][m] = pLinearetyMeasureItem->measureItemArray(valueType, m);
+        m_measureArray[valueType][m] = pLinearityMeasureItem->measureItemArray(valueType, m);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearetyMeasureItem::updateAdditionalValue(MeasureItem* pMeasure)
+void LinearityMeasurement::updateAdditionalValue(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
 
-    int measureType = pMeasure->measureType();
+    int measureType = pMeasurement->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    LinearetyMeasureItem* pLinearetyMeasureItem = static_cast <LinearetyMeasureItem*> (pMeasure);
+    LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
     for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
     {
-        m_additionalValue[a] = pLinearetyMeasureItem->additionalValue(a);
+        m_additionalValue[a] = pLinearityMeasureItem->additionalValue(a);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem& from)
+LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement& from)
 {
     m_appSignalID = from.m_appSignalID;
     m_customAppSignalID = from.m_customAppSignalID;
@@ -434,14 +449,14 @@ LinearetyMeasureItem& LinearetyMeasureItem::operator=(const LinearetyMeasureItem
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasureItem::ComparatorMeasureItem() :
-    MeasureItem(MEASURE_TYPE_COMPARATOR)
+ComparatorMeasurement::ComparatorMeasurement() :
+    Measurement(MEASURE_TYPE_COMPARATOR)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
+ComparatorMeasurement::ComparatorMeasurement(Calibrator* pCalibrator)
 {
     if (pCalibrator == nullptr)
     {
@@ -452,12 +467,12 @@ ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("");
+    setCustomAppSignalID("");
+    setCaption("");
 
     position().setCaseNo(0);
-    position().setCaseType("CASE-1");
+    position().setCaseCaption("");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);
@@ -466,9 +481,9 @@ ComparatorMeasureItem::ComparatorMeasureItem(Calibrator* pCalibrator)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+void ComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }
@@ -479,14 +494,14 @@ void ComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
 // -------------------------------------------------------------------------------------------------------------------
 
 
-ComplexComparatorMeasureItem::ComplexComparatorMeasureItem() :
-    MeasureItem(MEASURE_TYPE_COMPLEX_COMPARATOR)
+ComplexComparatorMeasurement::ComplexComparatorMeasurement() :
+    Measurement(MEASURE_TYPE_COMPLEX_COMPARATOR)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
+ComplexComparatorMeasurement::ComplexComparatorMeasurement(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
 {
     if (pMainCalibrator == nullptr || pSubCalibrator == nullptr)
     {
@@ -497,12 +512,12 @@ ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCali
 
     // features
     //
-    setStrID("#IDMPS");
-    setExtStrID("IDMPS");
-    setName("This is signal of the block MPS");
+    setAppSignalID("");
+    setCustomAppSignalID("");
+    setCaption("");
 
     position().setCaseNo(0);
-    position().setCaseType("CASE-1");
+    position().setCaseCaption("");
     position().setChannel(0);
     position().setBlock(0);
     position().setSubblock(0);
@@ -511,9 +526,9 @@ ComplexComparatorMeasureItem::ComplexComparatorMeasureItem(Calibrator* pMainCali
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComplexComparatorMeasureItem::updateHysteresis(MeasureItem* pMeasure)
+void ComplexComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return;
     }

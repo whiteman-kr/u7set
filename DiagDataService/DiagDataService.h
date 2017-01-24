@@ -7,28 +7,32 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/DataChannel.h"
 
-namespace Hardware
-{
-	class DeviceRoot;
-}
 
 class DiagDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
 
-private:
-
 public:
-	DiagDataServiceWorker();
+	DiagDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	virtual ~DiagDataServiceWorker();
 
+	virtual ServiceWorker* createInstance() const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+
+private:
 	void initCmdLineParser() override;
+	virtual void processCmdLineSettings() override;
+	virtual void loadSettings() override;
 
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-/*	ServiceWorker* createInstance() override
-	{
-		return new DiagDataServiceWorker(serviceEquipmentID(), cfgServiceIP1(), cfgServiceIP2(), buildPath());
-	}*/
+private:
+	QString m_equipmentID;
+	QString m_cfgServiceIP1Str;
+	QString m_cfgServiceIP2Str;
+
+	HostAddressPort m_cfgServiceIP1;
+	HostAddressPort m_cfgServiceIP2;
 };
 

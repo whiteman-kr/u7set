@@ -155,7 +155,7 @@ message ServiceInfo
     optional int32 type = 1 [default = 0];	    // ServiceType::BaseService
     optional int32 majorVersion = 2 [default = 0];
     optional int32 minorVersion = 3 [default = 0];
-    optional int32 buildNo = 4 [default = 0];
+    optional int32 commitNo = 4 [default = 0];
     optional uint32 crc = 5 [default = 0];
     optional int64 uptime = 6 [default = 0];
     optional int32 serviceState = 7 [default = 0];    // ServiceState::Undefined;
@@ -163,6 +163,9 @@ message ServiceInfo
 
     optional uint32 clientRequestIP = 9 [default = 0];
     optional int32 clientRequestPort = 10 [default = 0];
+
+    optional string buildBranch = 11;
+    optional string commitSHA = 12;
 }
 
 message GetServiceInfoReply

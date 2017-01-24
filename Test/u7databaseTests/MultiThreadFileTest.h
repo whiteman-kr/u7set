@@ -20,10 +20,11 @@ public:
 	virtual void run();
 
 	int m_threadNumber = 0;
-	int m_amountOfFileIds = 0;
 
 	QString m_databaseHost;
 	QString m_databaseUser;
 	QString m_databaseUserPassword;
 	QString m_projectName;
+
+	int m_amountOfFileIds = 0;
 };

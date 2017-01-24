@@ -357,9 +357,14 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
-		int id = signalProperites->signal().ID();
+		Signal& signal = signalProperites->signal();
+		int id = signal.ID();
+		if (signal.checkedOut() || m_editedSignalsId.contains(id))
+		{
+			continue;
+		}
 		QString message;
-		if (checkoutSignal(signalProperites->signal(), message) && !message.isEmpty())
+		if (checkoutSignal(signal, message) && !message.isEmpty())
 		{
 			showError(message);
 			setWindowTitle("Signal properties (read only)");
@@ -475,12 +480,12 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputUnitID", signal.inputUnitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorID());
+	settings.setValue("SignalsTabPage/LastEditedSignal/inputSensorID", signal.inputSensorType());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputLowLimit", signal.outputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputHighLimit", signal.outputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/outputUnitID", signal.outputUnitID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorID());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
+    settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
+    settings.setValue("SignalsTabPage/LastEditedSignal/outputSensorID", signal.outputSensorType());
 	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
 	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
 	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());

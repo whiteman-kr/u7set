@@ -14,6 +14,8 @@ CommandLineParser::CommandLineParser(int argc, char** argv)
 
 void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 {
+	m_cmdLineArgsIsSet = false;
+
 	if (argc < 1)
 	{
 		assert(false);		// argc must be >= 1
@@ -50,41 +52,44 @@ void CommandLineParser::setCmdLineArgs(int argc, char** argv)
 		op.values.clear();
 	}
 
+	m_cmdLineArgsIsSet = true;
 	m_parsed = false;
+}
+
+
+int CommandLineParser::argCount() const
+{
+	return m_cmdLineArgs.count() + 1;	// 1 == application path arg
 }
 
 
 bool CommandLineParser::addSimpleOption(const QString& name, const QString& description)
 {
-	return addOption(OptionType::Simple, name, description);
+	return addOption(OptionType::Simple, name, description, QString(""));
 }
 
 
-bool CommandLineParser::addSingleValueOption(const QString& name, const QString& description)
+bool CommandLineParser::addSingleValueOption(const QString& name, const QString& description, const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, name, description);
+	return addOption(OptionType::SingleValue, name, description, paramExample);
 }
 
 
-bool CommandLineParser::addMultipleValuesOption(const QString& name, const QString& description)
+bool CommandLineParser::addMultipleValuesOption(const QString& name, const QString& description, const QString& paramsExample)
 {
-	return addOption(OptionType::MultipleValues, name, description);
-}
-
-
-bool CommandLineParser::addHelpOption()
-{
-	return addSimpleOption("h", "Print this help.");
+	return addOption(OptionType::MultipleValues, name, description, paramsExample);
 }
 
 
 void CommandLineParser::parse()
 {
+	assert(m_cmdLineArgsIsSet == true);
+
 	QVector<QString> cmdLineArgs = m_cmdLineArgs;	// make copy
 
 	for(int len = m_maxOptionLen; len >= MIN_OPTION_LEN; len--)
 	{
-		for(Option op : m_options)
+		for(Option& op : m_options)
 		{
 			if (op.name.length() != len)
 			{
@@ -148,7 +153,7 @@ void CommandLineParser::parse()
 }
 
 
-bool CommandLineParser::isOptionSet(const QString& name)
+bool CommandLineParser::optionIsSet(const QString& name) const
 {
 	assert(m_parsed == true);
 
@@ -162,7 +167,7 @@ bool CommandLineParser::isOptionSet(const QString& name)
 }
 
 
-QString CommandLineParser::optionValue(const QString& name)
+QString CommandLineParser::optionValue(const QString& name) const
 {
 	assert(m_parsed == true);
 
@@ -172,11 +177,15 @@ QString CommandLineParser::optionValue(const QString& name)
 		return QString("");
 	}
 
-	return m_options.value(name).values.first();
+	Option op = m_options.value(name);
+
+	assert(op.type == OptionType::SingleValue);
+
+	return op.values.first();
 }
 
 
-QStringList CommandLineParser::optionValues(const QString& name)
+QStringList CommandLineParser::optionValues(const QString& name) const
 {
 	assert(m_parsed == true);
 
@@ -186,46 +195,88 @@ QStringList CommandLineParser::optionValues(const QString& name)
 		return QStringList();
 	}
 
-	return m_options.value(name).values;
+	Option op = m_options.value(name);
+
+	assert(op.type == OptionType::MultipleValues);
+
+	return op.values;
 }
 
 
-QString CommandLineParser::helpText()
+QString CommandLineParser::helpText() const
 {
-	QString ht;
+	QStringList opStrs;
 
-	ht = QString("Use: %1 [options]\n\nOptions:\n").arg(m_appPath);
+	int opMaxLen = 0;
 
 	for(const Option& op : m_options)
 	{
-		QString opStr;
-
 		switch(op.type)
 		{
 		case OptionType::Simple:
-			opStr = QString("%1\t\t\t").arg(op.name);
+			opStrs << op.name;
 			break;
 
 		case OptionType::SingleValue:
-			opStr = QString("%1=value\t\t").arg(op.name);
+			if (op.paramsExample.isEmpty() == true)
+			{
+				opStrs << (op.name + "=value");
+			}
+			else
+			{
+				opStrs << (op.name + "=" + op.paramsExample);
+			}
 			break;
 
 		case OptionType::MultipleValues:
-			opStr = QString("%1=value1,valueN\t").arg(op.name);
+			if (op.paramsExample.isEmpty() == true)
+			{
+				opStrs << (op.name + "=value1,...,valueN");
+			}
+			else
+			{
+				opStrs << (op.name + "=" + op.paramsExample);
+			}
 			break;
 
 		default:
 			assert(false);
 		}
 
-		ht += QString("\t%1%2\n").arg(opStr).arg(op.description);
+		int len = opStrs.last().length();
+
+		if (len > opMaxLen)
+		{
+			opMaxLen = len;
+		}
 	}
 
-	return ht;
+	opMaxLen += 4;			// indent between option and description
+
+	QString helpText;
+
+	helpText = QString("\nUse: %1 [options]\n\nOptions:\n").arg(m_appPath);
+
+	int index = 0;
+
+	for(QString opStr : opStrs)
+	{
+		opStr = QString("    ") + opStr.leftJustified(opMaxLen, ' ');
+
+		opStr += m_options[index].description;
+
+		helpText += opStr + "\n";
+
+		index++;
+	}
+
+	helpText += "\n";
+
+	return helpText;
 }
 
 
-bool CommandLineParser::addOption(OptionType type, const QString& name, const QString& description)
+bool CommandLineParser::addOption(OptionType type, const QString& name, const QString& description, const QString& paramsExample)
 {
 	if (name.isEmpty() == true)
 	{
@@ -244,6 +295,7 @@ bool CommandLineParser::addOption(OptionType type, const QString& name, const QS
 	op.type = type;
 	op.name = QString("-") + name;
 	op.description = description;
+	op.paramsExample = paramsExample;
 
 	m_options.insert(name, op);
 

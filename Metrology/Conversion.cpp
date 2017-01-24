@@ -17,16 +17,16 @@ double K_TXA[][2]=
 	{-120,-4.138}, {-121,-4.166}, {-122,-4.194}, {-123,-4.221}, {-124,-4.249}, {-125,-4.276}, {-126,-4.303}, {-127,-4.330}, {-128,-4.357}, {-129,-4.384},
 	{-110,-3.852}, {-111,-3.882}, {-112,-3.911}, {-113,-3.939}, {-114,-3.968}, {-115,-3.997}, {-116,-4.025}, {-117,-4.054}, {-118,-4.082}, {-119,-4.110},
 	{-100,-3.554}, {-101,-3.584}, {-102,-3.614}, {-103,-3.645}, {-104,-3.675}, {-105,-3.705}, {-106,-3.734}, {-107,-3.764}, {-108,-3.794}, {-109,-3.823},
-	{-90,-3.243}, {-91,-3.274}, {-92,-3.306}, {-93,-3.337}, {-94,-3.368}, {-95,-3.400}, {-96,-3.431}, {-97,-3.462}, {-98,-3.492}, {-99,-3.523},
-	{-80,-2.920}, {-81,-2.953}, {-82,-2.986}, {-83,-3.018}, {-84,-3.050}, {-85,-3.083}, {-86,-3.115}, {-87,-3.147}, {-88,-3.179}, {-89,-3.211},
-	{-70,-2.587}, {-71,-2.620}, {-72,-2.654}, {-73,-2.688}, {-74,-2.721}, {-75,-2.755}, {-76,-2.788}, {-77,-2.821}, {-78,-2.854}, {-79,-2.887},
-	{-60,-2.243}, {-61,-2.278}, {-62,-2.312}, {-63,-2.347}, {-64,-2.382}, {-65,-2.416}, {-66,-2.450}, {-67,-2.485}, {-68,-2.519}, {-69,-2.553},
-	{-50,-1.889}, {-51,-1.925}, {-52,-1.961}, {-53,-1.996}, {-54,-2.032}, {-55,-2.067}, {-56,-2.103}, {-57,-2.138}, {-58,-2.173}, {-59,-2.208},
-	{-40,-1.527}, {-41,-1.564}, {-42,-1.600}, {-43,-1.637}, {-44,-1.673}, {-45,-1.709}, {-46,-1.745}, {-47,-1.782}, {-48,-1.818}, {-49,-1.854},
-	{-30,-1.156}, {-31,-1.194}, {-32,-1.231}, {-33,-1.268}, {-34,-1.305}, {-35,-1.343}, {-36,-1.380}, {-37,-1.417}, {-38,-1.453}, {-39,-1.490},
-	{-20,-0.778}, {-21,-0.816}, {-22,-0.854}, {-23,-0.892}, {-24,-0.930}, {-25,-0.968}, {-26,-1.006}, {-27,-1.043}, {-28,-1.081}, {-29,-1.119},
-	{-10,-0.392}, {-11,-0.431}, {-12,-0.470}, {-13,-0.508}, {-14,-0.547}, {-15,-0.586}, {-16,-0.624}, {-17,-0.663}, {-18,-0.701}, {-19,-0.739},
-	{-0,0.000}, {-1,-0.039}, {-2,-0.079}, {-3,-0.118}, {-4,-0.157}, {-5,-0.197}, {-6,-0.236}, {-7,-0.275}, {-8,-0.314}, {-9,-0.353},
+     {-90,-3.243}, { -91,-3.274}, { -92,-3.306}, { -93,-3.337}, { -94,-3.368}, { -95,-3.400}, { -96,-3.431}, { -97,-3.462}, { -98,-3.492}, { -99,-3.523},
+    { -80,-2.920}, { -81,-2.953}, { -82,-2.986}, { -83,-3.018}, { -84,-3.050}, { -85,-3.083}, { -86,-3.115}, { -87,-3.147}, { -88,-3.179}, { -89,-3.211},
+    { -70,-2.587}, { -71,-2.620}, { -72,-2.654}, { -73,-2.688}, { -74,-2.721}, { -75,-2.755}, { -76,-2.788}, { -77,-2.821}, { -78,-2.854}, { -79,-2.887},
+    { -60,-2.243}, { -61,-2.278}, { -62,-2.312}, { -63,-2.347}, { -64,-2.382}, { -65,-2.416}, { -66,-2.450}, { -67,-2.485}, { -68,-2.519}, { -69,-2.553},
+    { -50,-1.889}, { -51,-1.925}, { -52,-1.961}, { -53,-1.996}, { -54,-2.032}, { -55,-2.067}, { -56,-2.103}, { -57,-2.138}, { -58,-2.173}, { -59,-2.208},
+    { -40,-1.527}, { -41,-1.564}, { -42,-1.600}, { -43,-1.637}, { -44,-1.673}, { -45,-1.709}, { -46,-1.745}, { -47,-1.782}, { -48,-1.818}, { -49,-1.854},
+    { -30,-1.156}, { -31,-1.194}, { -32,-1.231}, { -33,-1.268}, { -34,-1.305}, { -35,-1.343}, { -36,-1.380}, { -37,-1.417}, { -38,-1.453}, { -39,-1.490},
+    { -20,-0.778}, { -21,-0.816}, { -22,-0.854}, { -23,-0.892}, { -24,-0.930}, { -25,-0.968}, { -26,-1.006}, { -27,-1.043}, { -28,-1.081}, { -29,-1.119},
+    { -10,-0.392}, { -11,-0.431}, { -12,-0.470}, { -13,-0.508}, { -14,-0.547}, { -15,-0.586}, { -16,-0.624}, { -17,-0.663}, { -18,-0.701}, { -19,-0.739},
+    {  -0, 0.000}, {  -1,-0.039}, {  -2,-0.079}, {  -3,-0.118}, {  -4,-0.157}, {  -5,-0.197}, {  -6,-0.236}, {  -7,-0.275}, {  -8,-0.314}, {  -9,-0.353},
 	{0,0.000}, {1,0.039}, {2,0.079}, {3,0.119}, {4,0.158}, {5,0.198}, {6,0.238}, {7,0.277}, {8,0.317}, {9,0.357},
 	{10,0.397}, {11,0.437}, {12,0.477}, {13,0.517}, {14,0.557}, {15,0.597}, {16,0.637}, {17,0.677}, {18,0.718}, {19,0.758},
 	{20,0.798}, {21,0.838}, {22,0.879}, {23,0.919}, {24,0.960}, {25,1.000}, {26,1.041}, {27,1.081}, {28,1.122}, {29,1.163},
@@ -6672,6 +6672,37 @@ double CU_23[][2] =
 const int CU_23_COUNT = sizeof(CU_23) / (sizeof(double)*2);
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
+// GOST 8.207-76 application 2 (last page) by P = 0,95
+//
+double K_STUDENT[] =
+{
+    0.0,		//	0
+    0.0,		//	1
+    12.706,		//	2
+    4.303,		//	3
+    3.182,		//	4
+    2.776,		//	5
+    2.571,		//	6
+    2.447,		//	7
+    2.365,		//	8
+    2.306,		//	9
+    2.262,		//	10
+    2.228,		//	11
+    2.201,		//	12
+    2.179,		//	13
+    2.160,		//	14
+    2.145,		//	15
+    2.131,		//	16
+    2.120,		//	17
+    2.110,		//	18
+    2.101,		//	19
+    2.093,		//	20
+    2.086,		//	21
+};
+
+const int K_STUDENT_COUNT = sizeof(K_STUDENT) / (sizeof(double));
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------
 
 double findConversionVal(double val, double* pArray, int size, bool isDegree)
 {
@@ -6711,149 +6742,170 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-//double conversion(double val, int type, Signal* s)
-double conversion(double val, int type, int unit, int sensor)
+double conversion(double val, const int& type, const Signal& param)
 {
     if (type < 0 || type > CT_COUNT)
     {
         return 0;
     }
 
-//    if (s == nullptr)
-//    {
-//        return 0;
-//    }
+    double retVal = 0;
 
-	double	retVal = 0;
-	
     switch(type)
-	{
+    {
         case CT_PHYSICAL_TO_ELECTRIC:
 
-            //switch(s->inputUnitID())
-            switch(unit)
-			{
-				case INPUT_UNIT_OHM: 
+            switch(param.inputUnitID())
+            {
+                case E::InputUnit::Ohm:
 
-                    //switch(s->inputSensorID())
-                    switch(sensor)
+                    switch(param.inputSensorType())
                     {
-                        //case NO_CONVERTER:      retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit; break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
 
-                        case OHM_PT_50_W_1391:	retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);	break;
-                        case OHM_PT_100_W_1391: retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, true);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt50_W1391:     retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt100_W1391:    retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt50_W1385:     retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, true);	break;
+                        case E::SensorType::Ohm_Pt100_W1385:    retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	break;
 
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, true);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, true);	break;
-                        case OHM_CU_100_W_1426:	retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_50_W1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_100_W1428:   retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_50_W1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, true);	break;
+                        case E::SensorType::Ohm_Cu_100_W1426:	retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	break;
 
-                        case OHM_PT_21:         retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
-                        case OHM_CU_23:         retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
+                        case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
+                        case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
 
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-				case INPUT_UNIT_MV: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-                    {
-                        //case NO_CONVERTER:      retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit; break;
-
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
-
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-                case INPUT_UNIT_MA:
-
-                    //retVal = (val - s->lowLimit())*(s->inputHighLimit() - s->inputLowLimit())/(s->highLimit() - s->lowLimit()) + s->inputLowLimit;
+                        default:				assert(0);
+                    }
 
                     break;
 
-				default:				
-                    assert(0);
-					break;
-			}
+                case E::InputUnit::mV:
 
-			break;
+                    switch(param.inputSensorType())
+                    {
+                        case E::SensorType::NoSensorType:       retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit(); break;
+
+                        case E::SensorType::mV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
+                        case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
+                        case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
+
+                        default:				assert(0);
+                    }
+
+                    break;
+
+                case E::InputUnit::mA:
+                case E::InputUnit::V:
+
+                    retVal = (val - param.lowEngeneeringUnits())*(param.inputHighLimit() - param.inputLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.inputLowLimit();
+
+                    break;
+
+                default:
+                    assert(0);
+            }
+
+            break;
 
         case CT_ELECTRIC_TO_PHYSICAL:
 
-            //switch(s->inputUnitID())
-            switch(unit)
+            switch(param.inputUnitID())
             {
-				case INPUT_UNIT_OHM: 
+                case E::InputUnit::Ohm:
 
-                    //switch(s->inputSensorID())
-                    switch(sensor)
-					{
-
-                        //case NO_CONVERTER:      retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit(); break;
-
-                        case OHM_PT_50_W_1391:  retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
-                        case OHM_PT_100_W_1391:	retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
-                        case OHM_PT_50_W_1385:	retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, false);	break;
-                        case OHM_PT_100_W_1385: retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
-
-                        case OHM_CU_50_W_1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, false);	break;
-                        case OHM_CU_100_W_1428: retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
-                        case OHM_CU_50_W_1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, false);	break;
-                        case OHM_CU_100_W_1426: retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
-								
-                        case OHM_PT_21:		retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                     break;
-                        case OHM_CU_23:		retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                     break;
-
-                        default:				assert(0);                                                                          break;
-					}
-
-					break;
-
-				case INPUT_UNIT_MV: 
-
-                    //switch(s->inputSensorID())
-                    switch(sensor)
+                    switch(param.inputSensorType())
                     {
-                        //case NO_CONVERTER:      retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit(); break;
 
-                        case MV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-                        case MV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-                        case MV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
+                        case E::SensorType::NoSensorType:       retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
 
-                        default:				assert(0);                                                                          break;
-					}
-							
-					break;
+                        case E::SensorType::Ohm_Pt50_W1391:     retVal = findConversionVal( val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt100_W1391:	retVal = findConversionVal( val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt50_W1385:     retVal = findConversionVal( val, &PT_50_W_1385[0][0], PT_50_W_1385_COUNT, false);	break;
+                        case E::SensorType::Ohm_Pt100_W1385:    retVal = findConversionVal( val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
 
-                case INPUT_UNIT_MA:
+                        case E::SensorType::Ohm_Cu_50_W1428:	retVal = findConversionVal( val, &CU_50_W_1428[0][0], CU_50_W_1428_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_100_W1428:   retVal = findConversionVal( val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_50_W1426:	retVal = findConversionVal( val, &CU_50_W_1426[0][0], CU_50_W_1426_COUNT, false);	break;
+                        case E::SensorType::Ohm_Cu_100_W1426:   retVal = findConversionVal( val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
 
-                    //retVal = (val - s->inputLowLimit)*(s->highLimit() - s->lowLimit())/(s->inputHighLimit() - s->inputLowLimit) + s->lowLimit();
+                        case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                 break;
+                        case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                 break;
+
+                        default:				assert(0);
+                    }
 
                     break;
-			
-				default:				
+
+                case E::InputUnit::mV:
+
+                    switch(param.inputSensorType())
+                    {
+                        case E::SensorType::NoSensorType:       retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits(); break;
+
+                        case E::SensorType::mV_K_TXA: 			retVal = findConversionVal( val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
+                        case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
+                        case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
+
+                        default:				assert(0);
+                    }
+
+                    break;
+
+                case E::InputUnit::mA:
+                case E::InputUnit::V:
+
+                    retVal = (val - param.inputLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.inputHighLimit() - param.inputLowLimit()) + param.lowEngeneeringUnits();
+
+                    break;
+
+                default:
                     assert(0);
-					break;
-			}
+            }
 
-			break;
+            break;
 
-		default:
+        default:
             assert(0);
-			break;
-	}
+    }
 
-	return retVal;
+    return retVal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
+double conversion(double val, const int& type, const E::InputUnit& unitID, const E::SensorType& sensorType)
+{
+    if (type < 0 || type > CT_COUNT)
+    {
+        return 0;
+    }
+
+    Signal param;
+
+    param.setInputUnitID(unitID);
+    param.setInputSensorType(sensorType);
+
+    return conversion(val, type, param);
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------
+
+double studentK(const int& measureCount, const int& p)
+{
+    if (measureCount < 0 || measureCount >= K_STUDENT_COUNT)
+    {
+        return 0;
+    }
+
+    if (p < 0 || p >= CT_PROPABILITY_COUNT)
+    {
+        return 0;
+    }
+
+    return K_STUDENT[measureCount];
+    //return K_STUDENT[measureCount][P];
+}
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------

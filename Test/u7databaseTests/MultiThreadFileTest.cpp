@@ -51,19 +51,73 @@ void MultiThreadFileTest::run()
 	// Create new user for each thread
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM create_user(1, '%1', '%2', '%3', '%4', false, false, false)")
+	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	if (query.next() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	QString passwordHashQuery = QString("user_api.password_hash('%1', '%2')").arg(query.value(0).toString()).arg(m_databaseUserPassword);
+
+	ok = query.exec(QString("UPDATE users SET passwordhash = %1 WHERE username = 'Administrator'").arg(passwordHashQuery));
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_databaseUserPassword));
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	if (query.next() == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	QString session_key = query.value(0).toString();
+
+	ok = query.exec(QString("SELECT * FROM user_api.create_user('%1', '%2', '%3', '%4', '%5', false, false)")
+	                     .arg(session_key)
 						 .arg("fileThread_" + QString::number(m_threadNumber))
 						 .arg("fileThread_" + QString::number(m_threadNumber))
 						 .arg("fileThread_" + QString::number(m_threadNumber))
 						 .arg("fileThread_" + QString::number(m_threadNumber)));
+
+	ok = query.exec("SELECT * FROM user_api.log_out()");
+
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
+		this->terminate();
 	}
-	ok = query.next();
+
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
+		this->terminate();
+	}
+
+	ok = query.next();
+
+	if (ok == false)
+	{
+		qDebug() << query.lastError().databaseText();
+		this->terminate();
 	}
 
 	// Remember id of created user

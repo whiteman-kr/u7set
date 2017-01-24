@@ -421,17 +421,19 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetServiceInfoRequest));
   ServiceInfo_descriptor_ = file->message_type(17);
-  static const int ServiceInfo_offsets_[10] = {
+  static const int ServiceInfo_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, majorversion_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, minorversion_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, buildno_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, commitno_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, crc_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, uptime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, servicestate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, serviceuptime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, clientrequestip_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, clientrequestport_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, buildbranch_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ServiceInfo, commitsha_),
   };
   ServiceInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -923,74 +925,75 @@ void protobuf_AddDesc_network_2eproto() {
     "tUnitsRequest\" \n\004Unit\022\n\n\002id\030\001 \001(\005\022\014\n\004uni"
     "t\030\002 \001(\t\"\?\n\rGetUnitsReply\022\020\n\005error\030\001 \001(\005:"
     "\0010\022\034\n\005units\030\002 \003(\0132\r.Network.Unit\"\027\n\025GetS"
-    "erviceInfoRequest\"\364\001\n\013ServiceInfo\022\017\n\004typ"
+    "erviceInfoRequest\"\235\002\n\013ServiceInfo\022\017\n\004typ"
     "e\030\001 \001(\005:\0010\022\027\n\014majorVersion\030\002 \001(\005:\0010\022\027\n\014m"
-    "inorVersion\030\003 \001(\005:\0010\022\022\n\007buildNo\030\004 \001(\005:\0010"
-    "\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006uptime\030\006 \001(\003:\0010\022\027\n\014s"
-    "erviceState\030\007 \001(\005:\0010\022\030\n\rserviceUptime\030\010 "
-    "\001(\003:\0010\022\032\n\017clientRequestIP\030\t \001(\r:\0010\022\034\n\021cl"
-    "ientRequestPort\030\n \001(\005:\0010\"R\n\023GetServiceIn"
-    "foReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInfo"
-    "\030\002 \002(\0132\024.Network.ServiceInfo\"1\n\024GetTunin"
-    "gSourcesInfo\022\031\n\021clientEquipmentID\030\001 \001(\t\""
-    "`\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001 "
-    "\001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netwo"
-    "rk.DataSourceInfo\"3\n\026GetTuningSourcesSta"
-    "tes\022\031\n\021clientEquipmentID\030\001 \001(\t\"\345\t\n\021Tunin"
-    "gSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007isR"
-    "eply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003:"
-    "\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQueu"
-    "eSize\030\005 \001(\005:\0010\022\034\n\021errUntimelyReplay\030\006 \001("
-    "\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016errPartialSe"
-    "nt\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n\n"
-    "errNoReply\030\n \001(\003:\0010\022 \n\025errRupProtocolVer"
-    "sion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:\001"
-    "0\022\036\n\023errRupNonTuningData\030\r \001(\003:\0010\022\033\n\020err"
-    "RupModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQu"
-    "antity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 \001"
-    "(\003:\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:\001"
-    "0\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFot"
-    "ipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsystem"
-    "Code\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030\025"
-    " \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032\n"
-    "\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRom"
-    "FrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsChe"
-    "ckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSucc"
-    "ess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 \001"
-    "(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n\025"
-    "fotipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotipF"
-    "lagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomFr"
-    "ameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSiz"
-    "eErr\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersio"
-    "nErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyEr"
-    "r\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003:"
-    "\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fot"
-    "ipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFlag"
-    "SetSOR\030& \001(\003:\0010\022!\n\026errAnalogLowBoundChec"
-    "k\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030( "
-    "\001(\003:\0010\"g\n\033GetTuningSourcesStatesReply\022\020\n"
-    "\005error\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 "
-    "\003(\0132\032.Network.TuningSourceState\"B\n\021Tunin"
-    "gSignalsRead\022\031\n\021clientEquipmentID\030\001 \001(\t\022"
-    "\022\n\nsignalHash\030\002 \003(\004\"\227\001\n\021TuningSignalStat"
-    "e\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005:"
-    "\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005value\030\004 \001(\002:"
-    "\0010\022\027\n\014readLowBound\030\005 \001(\002:\0010\022\030\n\rreadHighB"
-    "ound\030\006 \001(\002:\0010\"a\n\026TuningSignalsReadReply\022"
-    "\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002"
-    " \003(\0132\032.Network.TuningSignalState\"<\n\021Tuni"
-    "ngSignalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005"
-    "value\030\002 \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031\n"
-    "\021clientEquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002 "
-    "\001(\010:\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032."
-    "Network.TuningSignalWrite\"B\n\027TuningSigna"
-    "lWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005e"
-    "rror\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132"
-    " .Network.TuningSignalWriteResult\"/\n\022Tun"
-    "ingSignalsApply\022\031\n\021clientEquipmentID\030\001 \001"
-    "(\t\"+\n\027TuningSignalsApplyReply\022\020\n\005error\030\001"
-    " \001(\005:\0010", 4327);
+    "inorVersion\030\003 \001(\005:\0010\022\023\n\010commitNo\030\004 \001(\005:\001"
+    "0\022\016\n\003crc\030\005 \001(\r:\0010\022\021\n\006uptime\030\006 \001(\003:\0010\022\027\n\014"
+    "serviceState\030\007 \001(\005:\0010\022\030\n\rserviceUptime\030\010"
+    " \001(\003:\0010\022\032\n\017clientRequestIP\030\t \001(\r:\0010\022\034\n\021c"
+    "lientRequestPort\030\n \001(\005:\0010\022\023\n\013buildBranch"
+    "\030\013 \001(\t\022\021\n\tcommitSHA\030\014 \001(\t\"R\n\023GetServiceI"
+    "nfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serviceInf"
+    "o\030\002 \002(\0132\024.Network.ServiceInfo\"1\n\024GetTuni"
+    "ngSourcesInfo\022\031\n\021clientEquipmentID\030\001 \001(\t"
+    "\"`\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001"
+    " \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netw"
+    "ork.DataSourceInfo\"3\n\026GetTuningSourcesSt"
+    "ates\022\031\n\021clientEquipmentID\030\001 \001(\t\"\345\t\n\021Tuni"
+    "ngSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\007is"
+    "Reply\030\002 \001(\010:\005false\022\027\n\014requestCount\030\003 \001(\003"
+    ":\0010\022\025\n\nreplyCount\030\004 \001(\003:\0010\022\033\n\020commandQue"
+    "ueSize\030\005 \001(\005:\0010\022\034\n\021errUntimelyReplay\030\006 \001"
+    "(\003:\0010\022\022\n\007errSent\030\007 \001(\003:\0010\022\031\n\016errPartialS"
+    "ent\030\010 \001(\003:\0010\022\027\n\014errReplySize\030\t \001(\003:\0010\022\025\n"
+    "\nerrNoReply\030\n \001(\003:\0010\022 \n\025errRupProtocolVe"
+    "rsion\030\013 \001(\003:\0010\022\032\n\017errRupFrameSize\030\014 \001(\003:"
+    "\0010\022\036\n\023errRupNonTuningData\030\r \001(\003:\0010\022\033\n\020er"
+    "rRupModuleType\030\016 \001(\003:\0010\022\037\n\024errRupFramesQ"
+    "uantity\030\017 \001(\003:\0010\022\034\n\021errRupFrameNumber\030\020 "
+    "\001(\003:\0010\022\"\n\027errFotipProtocolVersion\030\021 \001(\003:"
+    "\0010\022\033\n\020errFotipUniqueID\030\022 \001(\003:\0010\022\033\n\020errFo"
+    "tipLmNumber\030\023 \001(\003:\0010\022 \n\025errFotipSubsyste"
+    "mCode\030\024 \001(\003:\0010\022 \n\025errFotipOperationCode\030"
+    "\025 \001(\003:\0010\022\034\n\021errFotipFrameSize\030\026 \001(\003:\0010\022\032"
+    "\n\017errFotipRomSize\030\027 \001(\003:\0010\022\037\n\024errFotipRo"
+    "mFrameSize\030\030 \001(\003:\0010\022&\n\033fotipFlagBoundsCh"
+    "eckSuccess\030\031 \001(\003:\0010\022 \n\025fotipFlagWriteSuc"
+    "cess\030\032 \001(\003:\0010\022\037\n\024fotipFlagDataTypeErr\030\033 "
+    "\001(\003:\0010\022\035\n\022fotipFlagOpCodeErr\030\034 \001(\003:\0010\022 \n"
+    "\025fotipFlagStartAddrErr\030\035 \001(\003:\0010\022\036\n\023fotip"
+    "FlagRomSizeErr\030\036 \001(\003:\0010\022#\n\030fotipFlagRomF"
+    "rameSizeErr\030\037 \001(\003:\0010\022 \n\025fotipFlagFrameSi"
+    "zeErr\030  \001(\003:\0010\022&\n\033fotipFlagProtocolVersi"
+    "onErr\030! \001(\003:\0010\022#\n\030fotipFlagSubsystemKeyE"
+    "rr\030\" \001(\003:\0010\022\036\n\023fotipFlagUniueIDErr\030# \001(\003"
+    ":\0010\022\035\n\022fotipFlagOffsetErr\030$ \001(\003:\0010\022 \n\025fo"
+    "tipFlagApplySuccess\030% \001(\003:\0010\022\032\n\017fotipFla"
+    "gSetSOR\030& \001(\003:\0010\022!\n\026errAnalogLowBoundChe"
+    "ck\030\' \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030("
+    " \001(\003:\0010\"g\n\033GetTuningSourcesStatesReply\022\020"
+    "\n\005error\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002"
+    " \003(\0132\032.Network.TuningSourceState\"B\n\021Tuni"
+    "ngSignalsRead\022\031\n\021clientEquipmentID\030\001 \001(\t"
+    "\022\022\n\nsignalHash\030\002 \003(\004\"\227\001\n\021TuningSignalSta"
+    "te\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error\030\002 \001(\005"
+    ":\0010\022\024\n\005valid\030\003 \001(\010:\005false\022\020\n\005value\030\004 \001(\002"
+    ":\0010\022\027\n\014readLowBound\030\005 \001(\002:\0010\022\030\n\rreadHigh"
+    "Bound\030\006 \001(\002:\0010\"a\n\026TuningSignalsReadReply"
+    "\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030"
+    "\002 \003(\0132\032.Network.TuningSignalState\"<\n\021Tun"
+    "ingSignalWrite\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n"
+    "\005value\030\002 \001(\002:\0010\"\200\001\n\022TuningSignalsWrite\022\031"
+    "\n\021clientEquipmentID\030\001 \001(\t\022\030\n\tautoApply\030\002"
+    " \001(\010:\005false\0225\n\021tuningSignalWrite\030\003 \003(\0132\032"
+    ".Network.TuningSignalWrite\"B\n\027TuningSign"
+    "alWriteResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005"
+    "error\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteRepl"
+    "y\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\013"
+    "2 .Network.TuningSignalWriteResult\"/\n\022Tu"
+    "ningSignalsApply\022\031\n\021clientEquipmentID\030\001 "
+    "\001(\t\"+\n\027TuningSignalsApplyReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010", 4368);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -6127,13 +6130,15 @@ void GetServiceInfoRequest::Swap(GetServiceInfoRequest* other) {
 const int ServiceInfo::kTypeFieldNumber;
 const int ServiceInfo::kMajorVersionFieldNumber;
 const int ServiceInfo::kMinorVersionFieldNumber;
-const int ServiceInfo::kBuildNoFieldNumber;
+const int ServiceInfo::kCommitNoFieldNumber;
 const int ServiceInfo::kCrcFieldNumber;
 const int ServiceInfo::kUptimeFieldNumber;
 const int ServiceInfo::kServiceStateFieldNumber;
 const int ServiceInfo::kServiceUptimeFieldNumber;
 const int ServiceInfo::kClientRequestIPFieldNumber;
 const int ServiceInfo::kClientRequestPortFieldNumber;
+const int ServiceInfo::kBuildBranchFieldNumber;
+const int ServiceInfo::kCommitSHAFieldNumber;
 #endif  // !_MSC_VER
 
 ServiceInfo::ServiceInfo()
@@ -6155,13 +6160,15 @@ void ServiceInfo::SharedCtor() {
   type_ = 0;
   majorversion_ = 0;
   minorversion_ = 0;
-  buildno_ = 0;
+  commitno_ = 0;
   crc_ = 0u;
   uptime_ = GOOGLE_LONGLONG(0);
   servicestate_ = 0;
   serviceuptime_ = GOOGLE_LONGLONG(0);
   clientrequestip_ = 0u;
   clientrequestport_ = 0;
+  buildbranch_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  commitsha_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -6170,6 +6177,12 @@ ServiceInfo::~ServiceInfo() {
 }
 
 void ServiceInfo::SharedDtor() {
+  if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+    delete buildbranch_;
+  }
+  if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+    delete commitsha_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -6200,7 +6213,7 @@ void ServiceInfo::Clear() {
     type_ = 0;
     majorversion_ = 0;
     minorversion_ = 0;
-    buildno_ = 0;
+    commitno_ = 0;
     crc_ = 0u;
     uptime_ = GOOGLE_LONGLONG(0);
     servicestate_ = 0;
@@ -6209,6 +6222,16 @@ void ServiceInfo::Clear() {
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     clientrequestip_ = 0u;
     clientrequestport_ = 0;
+    if (has_buildbranch()) {
+      if (buildbranch_ != &::google::protobuf::internal::kEmptyString) {
+        buildbranch_->clear();
+      }
+    }
+    if (has_commitsha()) {
+      if (commitsha_ != &::google::protobuf::internal::kEmptyString) {
+        commitsha_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -6263,19 +6286,19 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_buildNo;
+        if (input->ExpectTag(32)) goto parse_commitNo;
         break;
       }
 
-      // optional int32 buildNo = 4 [default = 0];
+      // optional int32 commitNo = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_buildNo:
+         parse_commitNo:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &buildno_)));
-          set_has_buildno();
+                 input, &commitno_)));
+          set_has_commitno();
         } else {
           goto handle_uninterpreted;
         }
@@ -6375,6 +6398,40 @@ bool ServiceInfo::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(90)) goto parse_buildBranch;
+        break;
+      }
+
+      // optional string buildBranch = 11;
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_buildBranch:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_buildbranch()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->buildbranch().data(), this->buildbranch().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(98)) goto parse_commitSHA;
+        break;
+      }
+
+      // optional string commitSHA = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_commitSHA:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_commitsha()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->commitsha().data(), this->commitsha().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -6412,9 +6469,9 @@ void ServiceInfo::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->minorversion(), output);
   }
 
-  // optional int32 buildNo = 4 [default = 0];
-  if (has_buildno()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->buildno(), output);
+  // optional int32 commitNo = 4 [default = 0];
+  if (has_commitno()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->commitno(), output);
   }
 
   // optional uint32 crc = 5 [default = 0];
@@ -6447,6 +6504,24 @@ void ServiceInfo::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->clientrequestport(), output);
   }
 
+  // optional string buildBranch = 11;
+  if (has_buildbranch()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->buildbranch().data(), this->buildbranch().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      11, this->buildbranch(), output);
+  }
+
+  // optional string commitSHA = 12;
+  if (has_commitsha()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->commitsha().data(), this->commitsha().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      12, this->commitsha(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -6470,9 +6545,9 @@ void ServiceInfo::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->minorversion(), target);
   }
 
-  // optional int32 buildNo = 4 [default = 0];
-  if (has_buildno()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->buildno(), target);
+  // optional int32 commitNo = 4 [default = 0];
+  if (has_commitno()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->commitno(), target);
   }
 
   // optional uint32 crc = 5 [default = 0];
@@ -6503,6 +6578,26 @@ void ServiceInfo::SerializeWithCachedSizes(
   // optional int32 clientRequestPort = 10 [default = 0];
   if (has_clientrequestport()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->clientrequestport(), target);
+  }
+
+  // optional string buildBranch = 11;
+  if (has_buildbranch()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->buildbranch().data(), this->buildbranch().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        11, this->buildbranch(), target);
+  }
+
+  // optional string commitSHA = 12;
+  if (has_commitsha()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->commitsha().data(), this->commitsha().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        12, this->commitsha(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -6537,11 +6632,11 @@ int ServiceInfo::ByteSize() const {
           this->minorversion());
     }
 
-    // optional int32 buildNo = 4 [default = 0];
-    if (has_buildno()) {
+    // optional int32 commitNo = 4 [default = 0];
+    if (has_commitno()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->buildno());
+          this->commitno());
     }
 
     // optional uint32 crc = 5 [default = 0];
@@ -6588,6 +6683,20 @@ int ServiceInfo::ByteSize() const {
           this->clientrequestport());
     }
 
+    // optional string buildBranch = 11;
+    if (has_buildbranch()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->buildbranch());
+    }
+
+    // optional string commitSHA = 12;
+    if (has_commitsha()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->commitsha());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -6624,8 +6733,8 @@ void ServiceInfo::MergeFrom(const ServiceInfo& from) {
     if (from.has_minorversion()) {
       set_minorversion(from.minorversion());
     }
-    if (from.has_buildno()) {
-      set_buildno(from.buildno());
+    if (from.has_commitno()) {
+      set_commitno(from.commitno());
     }
     if (from.has_crc()) {
       set_crc(from.crc());
@@ -6646,6 +6755,12 @@ void ServiceInfo::MergeFrom(const ServiceInfo& from) {
     }
     if (from.has_clientrequestport()) {
       set_clientrequestport(from.clientrequestport());
+    }
+    if (from.has_buildbranch()) {
+      set_buildbranch(from.buildbranch());
+    }
+    if (from.has_commitsha()) {
+      set_commitsha(from.commitsha());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -6673,13 +6788,15 @@ void ServiceInfo::Swap(ServiceInfo* other) {
     std::swap(type_, other->type_);
     std::swap(majorversion_, other->majorversion_);
     std::swap(minorversion_, other->minorversion_);
-    std::swap(buildno_, other->buildno_);
+    std::swap(commitno_, other->commitno_);
     std::swap(crc_, other->crc_);
     std::swap(uptime_, other->uptime_);
     std::swap(servicestate_, other->servicestate_);
     std::swap(serviceuptime_, other->serviceuptime_);
     std::swap(clientrequestip_, other->clientrequestip_);
     std::swap(clientrequestport_, other->clientrequestport_);
+    std::swap(buildbranch_, other->buildbranch_);
+    std::swap(commitsha_, other->commitsha_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

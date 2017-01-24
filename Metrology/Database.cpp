@@ -40,7 +40,7 @@ int SqlFieldBase::init(int objectType, int)
 
             break;
 
-        case SQL_TABLE_LINEARETY:
+        case SQL_TABLE_LINEARITY:
 
             append("ObjectID",						QVariant::Int);
             append("MeasureID",						QVariant::Int);
@@ -90,20 +90,24 @@ int SqlFieldBase::init(int objectType, int)
 
             append("ErrorInputAbsolute",			QVariant::Double);
             append("ErrorInputReduce",              QVariant::Double);
+            append("ErrorInputRelative",            QVariant::Double);
             append("ErrorOutputAbsolute",			QVariant::Double);
             append("ErrorOutputReduce",             QVariant::Double);
+            append("ErrorOutputRelative",           QVariant::Double);
             append("ErrorLimitAbsolute",			QVariant::Double);
             append("ErrorLimitReduce",              QVariant::Double);
+            append("ErrorLimitRelative",            QVariant::Double);
 
             append("ErrorPrecisionAbsolute",        QVariant::Int);
             append("ErrorPrecisionReduce",          QVariant::Int);
+            append("ErrorPrecisionRelative",        QVariant::Int);
 
             append("MeasureTime",					QVariant::String, 64);
 
             break;
 
-        case SQL_TABLE_LINEARETY_20_EL:
-        case SQL_TABLE_LINEARETY_20_PH:
+        case SQL_TABLE_LINEARITY_20_EL:
+        case SQL_TABLE_LINEARITY_20_PH:
 
             append("ObjectID",						QVariant::Int);
             append("MeasureID",						QVariant::Int);
@@ -133,7 +137,7 @@ int SqlFieldBase::init(int objectType, int)
 
             break;
 
-        case SQL_TABLE_LINEARETY_ADD_VAL:
+        case SQL_TABLE_LINEARITY_ADD_VAL:
 
             append("ObjectID",						QVariant::Int);
             append("MeasureID",						QVariant::Int);
@@ -159,7 +163,7 @@ int SqlFieldBase::init(int objectType, int)
 
             break;
 
-        case SQL_TABLE_LINEARETY_POINT:
+        case SQL_TABLE_LINEARITY_POINT:
 
             append("ObjectID",						QVariant::Int);
             append("PointID",                       QVariant::Int);
@@ -570,10 +574,10 @@ bool SqlTable::create()
 
             switch(m_info.objectType())
             {
-                case SQL_TABLE_LINEARETY_20_EL:
-                case SQL_TABLE_LINEARETY_20_PH:
-                case SQL_TABLE_LINEARETY_ADD_VAL:
-                    request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARETY]));
+                case SQL_TABLE_LINEARITY_20_EL:
+                case SQL_TABLE_LINEARITY_20_PH:
+                case SQL_TABLE_LINEARITY_ADD_VAL:
+                    request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARITY]));
                     break;
             }
         }
@@ -720,9 +724,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY:
+            case SQL_TABLE_LINEARITY:
                 {
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
 
                     measure->setMeasureID(query.value(field++).toInt());
 
@@ -734,7 +738,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->position().setEquipmentID(query.value(field++).toString());
                     measure->position().setCaseNo(query.value(field++).toInt());
-                    measure->position().setCaseType(query.value(field++).toString());
+                    measure->position().setCaseCaption(query.value(field++).toString());
                     measure->position().setChannel(query.value(field++).toInt());
                     measure->position().setSubblock(query.value(field++).toInt());
                     measure->position().setBlock(query.value(field++).toInt());
@@ -771,27 +775,31 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     measure->setErrorInput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorInput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorInput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
                     measure->setErrorOutput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorOutput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorOutput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
                     measure->setErrorLimit(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
                     measure->setErrorLimit(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorLimit(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
                     measure->setErrorPrecision(ERROR_TYPE_ABSOLUTE, query.value(field++).toInt());
                     measure->setErrorPrecision(ERROR_TYPE_REDUCE, query.value(field++).toInt());
+                    measure->setErrorPrecision(ERROR_TYPE_RELATIVE, query.value(field++).toInt());
 
                     measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_20_EL:
-            case SQL_TABLE_LINEARETY_20_PH:
+            case SQL_TABLE_LINEARITY_20_EL:
+            case SQL_TABLE_LINEARITY_20_PH:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
                     switch(m_info.objectType())
                     {
-                        case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
-                        case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
+                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
+                        case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -800,7 +808,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                         break;
                     }
 
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
 
                     measure->setMeasureID(query.value(field++).toInt());
 
@@ -829,24 +837,22 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_ADD_VAL:
+            case SQL_TABLE_LINEARITY_ADD_VAL:
                 {
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + readedCount;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
 
                     measure->setMeasureID(query.value(field++).toInt());
 
                     measure->setAdditionalValueCount(query.value(field++).toInt());
 
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MIN, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, query.value(field++).toDouble());
                     measure->setAdditionalValue(ADDITIONAL_VALUE_MSE, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_LOW_BORDER, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_HIGH_BORDER, query.value(field++).toDouble());
+                    measure->setAdditionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER, query.value(field++).toDouble());
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_POINT:
+            case SQL_TABLE_LINEARITY_POINT:
                 {
                     LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + readedCount;
 
@@ -909,12 +915,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     header->m_V = query.value(field++).toDouble();
                     header->m_F = query.value(field++).toDouble();
 
-                    header->m_calibrator[CALIBRATOR_0] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_1] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_2] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_3] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_4] = query.value(field++).toString();
-                    header->m_calibrator[CALIBRATOR_5] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_0] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_1] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_2] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_3] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_4] = query.value(field++).toString();
+                    header->m_calibrator[CHANNEL_5] = query.value(field++).toString();
 
                     header->m_linkObjectID = query.value(field++).toInt();
                     header->m_reportFile = query.value(field++).toString();
@@ -1048,9 +1054,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY:
+            case SQL_TABLE_LINEARITY:
                 {
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
 
                     measure->setMeasureID( lastKey() + 1);
 
@@ -1058,13 +1064,13 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     query.bindValue(field++, measure->filter());
 
-                    query.bindValue(field++, measure->strID());
-                    query.bindValue(field++, measure->extStrID());
+                    query.bindValue(field++, measure->appSignalID());
+                    query.bindValue(field++, measure->customAppSignalID());
                     query.bindValue(field++, measure->name());
 
                     query.bindValue(field++, measure->position().equipmentID());
                     query.bindValue(field++, measure->position().caseNo());
-                    query.bindValue(field++, measure->position().caseType());
+                    query.bindValue(field++, measure->position().caseCaption());
                     query.bindValue(field++, measure->position().channel());
                     query.bindValue(field++, measure->position().subblock());
                     query.bindValue(field++, measure->position().block());
@@ -1101,15 +1107,19 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
                     query.bindValue(field++, measure->errorInput(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorInput(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorInput(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorOutput(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorOutput(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorOutput(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorLimit(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorLimit(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(ERROR_TYPE_RELATIVE));
 
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_ABSOLUTE));
                     query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_RELATIVE));
 
                     measure->setMeasureTime(QDateTime::currentDateTime());
 
@@ -1118,15 +1128,15 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_20_EL:
-            case SQL_TABLE_LINEARETY_20_PH:
+            case SQL_TABLE_LINEARITY_20_EL:
+            case SQL_TABLE_LINEARITY_20_PH:
                 {
                     int valueType = VALUE_TYPE_UNKNOWN;
 
                     switch(m_info.objectType())
                     {
-                        case SQL_TABLE_LINEARETY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
-                        case SQL_TABLE_LINEARETY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
+                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
+                        case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
 
@@ -1135,7 +1145,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
                         break;
                     }
 
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
 
                     query.bindValue(field++, measure->measureID());
 
@@ -1164,20 +1174,20 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_ADD_VAL:
+            case SQL_TABLE_LINEARITY_ADD_VAL:
                 {
-                    LinearetyMeasureItem* measure = static_cast<LinearetyMeasureItem*> (pRecord) + r;
+                    LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
 
                     query.bindValue(field++, measure->measureID());
 
                     query.bindValue(field++, measure->additionalValueCount());
 
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MEASURE_MIN));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MEASURE_MAX));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR));
                     query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MSE));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_BORDER));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_HIGH_BORDER));
+                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER));
+                    query.bindValue(field++, 0);
+                    query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
@@ -1191,7 +1201,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
                 }
                 break;
 
-            case SQL_TABLE_LINEARETY_POINT:
+            case SQL_TABLE_LINEARITY_POINT:
                 {
                     LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + r;
 
@@ -1254,12 +1264,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, header->m_V);
                     query.bindValue(field++, header->m_F);
 
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_0]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_1]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_2]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_3]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_4]);
-                    query.bindValue(field++, header->m_calibrator[CALIBRATOR_5]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_0]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_1]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_2]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_3]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_4]);
+                    query.bindValue(field++, header->m_calibrator[CHANNEL_5]);
 
                     query.bindValue(field++, header->m_linkObjectID);
                     query.bindValue(field++, header->m_reportFile);
@@ -1385,14 +1395,14 @@ Database::~Database()
 
 bool Database::open()
 {
-    QString path = theOptions.database().m_path;
+    QString path = theOptions.database().path();
     if (path.isEmpty() == true)
     {
         QMessageBox::critical(nullptr, tr("Database"), tr("Invalid path!"));
         return false;
     }
 
-    switch(theOptions.database().m_type)
+    switch(theOptions.database().type())
     {
         case DATABASE_TYPE_SQLITE:
 
@@ -1553,14 +1563,14 @@ void Database::createTables()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::appendMeasure(MeasureItem* pMeasure)
+bool Database::appendMeasure(Measurement* pMeasurement)
 {
-    if (pMeasure == nullptr)
+    if (pMeasurement == nullptr)
     {
         return false;
     }
 
-    int measureType = pMeasure->measureType();
+    int measureType = pMeasurement->measureType();
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return false;
@@ -1579,7 +1589,7 @@ bool Database::appendMeasure(MeasureItem* pMeasure)
 
         if (table.open() == true)
         {
-            if (table.write(pMeasure) == 1)
+            if (table.write(pMeasurement) == 1)
             {
                 result = true;
             }
