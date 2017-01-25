@@ -161,7 +161,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 2;
+		m_runTime = 3;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -183,27 +183,24 @@ namespace Builder
 
 	bool AppFb::calculate_NOT_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3;
 		return true;
 	}
 
 
 	bool AppFb::calculate_TCT_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 4;
 
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
-		//requiredParams.append("i_counter");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		//AppFbParamValue& i_counter = m_paramValuesArray["i_counter"];
 
 		CHECK_UNSIGNED_INT(i_conf);
-		//CHECK_UNSIGNED_INT(i_counter);
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -237,7 +234,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 2;
+		m_runTime = 3;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -272,7 +269,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 2;
+		m_runTime = 3;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -293,35 +290,51 @@ namespace Builder
 
 	bool AppFb::calculate_MAJ_paramValues()
 	{
-		m_runTime = 2;
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf_y");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf_y = m_paramValuesArray["i_conf_y"];
+
+		CHECK_UNSIGNED_INT(i_conf_y)
+
+		m_runTime = 3;
+
+		if (i_conf_y.unsignedIntValue() > 3)
+		{
+			m_runTime += i_conf_y.unsignedIntValue() + 1;
+		}
+
 		return true;
 	}
 
 
 	bool AppFb::calculate_SRSST_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BCOD_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BDEC_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BCOMP_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3;
 
 		QStringList requiredParams;
 
@@ -487,11 +500,11 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 3;		// for signed int input
+			m_runTime = 6;		// for signed int input
 			break;
 
 		case 2:
-			m_runTime = 19;		// for float input
+			m_runTime = 24;		// for float input
 			break;
 
 		default:

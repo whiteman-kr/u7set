@@ -374,6 +374,8 @@ namespace Builder
     {
 		m_result = true;
 
+		assert(sizeW > 0);
+
 		m_code.setOpCode(LmCommandCode::MOVMEM);
         m_code.setWord2(addrTo);
         m_code.setWord3(addrFrom);
@@ -541,6 +543,8 @@ namespace Builder
 	void Command::setMem(quint16 addr, quint16 constValue, quint16 sizeW)
     {
 		m_result = true;
+
+		assert(sizeW > 0);
 
 		m_code.setOpCode(LmCommandCode::SETMEM);
         m_code.setWord2(addr);
@@ -1137,35 +1141,37 @@ namespace Builder
         switch(lmCommand->runTime)
         {
         case RUNTIME_START:
-            *runTime = 5 + m_fbRunTime;
+			*runTime = 6 + m_fbRunTime;
             break;
 
         case RUNTIME_MOVE:
-            *runTime = addressInBitMemory(m_code.getWord2()) == true ? 54 : 8;
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
             break;
 
         case RUNTIME_MOVEMEM:
-            *runTime = 2 + m_code.getWord4() * 6 + 3;
+			assert(m_code.getWord4() > 0);
+			*runTime = 7 + (m_code.getWord4() - 1) * 6 + 1;
             break;
 
         case RUNTIME_MOVC:
-            *runTime = addressInBitMemory(m_code.getWord2()) == true ? 52 : 5;
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
             break;
 
         case RUNTIME_MOVBC:
-            *runTime = addressInBitMemory(m_code.getWord2()) == true ? 6 : 11;
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
             break;
 
         case RUNTIME_RDFBB:
-            *runTime = addressInBitMemory(m_code.getWord3()) == true ? 8 : 9;
+			*runTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
             break;
 
         case RUNTIME_SETMEM:
-            *runTime = 2 + m_code.getWord4() * 3;
+			assert(m_code.getWord4() > 0);
+			*runTime = 4 + (m_code.getWord4() - 1) * 3 + 1;
             break;
 
         case RUNTIME_MOVB:
-            *runTime = addressInBitMemory(m_code.getWord2()) == true ? 7 : 11;
+			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
             break;
 
         case RUNTIME_NSTART:
