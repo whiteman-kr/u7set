@@ -359,6 +359,11 @@ void MainWindow::exit()
 
 void MainWindow::runPresetEditor()
 {
+    if (theUserManager.requestPassword(this, false) == false)
+    {
+        return;
+    }
+
     TuningFilterStorage editStorage = theFilters;
 
     bool editAutomatic = false;
@@ -393,6 +398,11 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::runUsersEditor()
 {
+    if (theUserManager.requestPassword(this, true) == false)
+    {
+        return;
+    }
+
 	DialogUsers d(theUserManager, this);
 	if (d.exec() == QDialog::Accepted && theSettings.admin() == true)
 	{
@@ -403,6 +413,11 @@ void MainWindow::runUsersEditor()
 
 void MainWindow::showSettings()
 {
+    if (theUserManager.requestPassword(this, true) == false)
+    {
+        return;
+    }
+
     DialogSettings* d = new DialogSettings(this);
 
     d->exec();

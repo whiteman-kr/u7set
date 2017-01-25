@@ -180,7 +180,16 @@ public:
 		m_expert = value;
 	}
 
-	int precision() const
+    bool password() const
+    {
+        return m_password;
+    }
+    void setPassword(bool value)
+    {
+        m_password = value;
+    }
+
+    int precision() const
 	{
 		return m_precision;
 	}
@@ -247,6 +256,7 @@ private:
 			bool m_specific : 1;				// Specific property, used in DeviceObject
 			bool m_visible : 1;
 			bool m_expert : 1;
+            bool m_password : 1;
 		};
 		uint32_t m_flags;
 	};

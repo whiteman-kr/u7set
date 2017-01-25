@@ -36,7 +36,7 @@ class UserManager
 public:
 	UserManager();
 
-	bool requestPassword();
+    bool requestPassword(QWidget *parent, bool adminNeeded);
 
 	void Restore();
 	void Store();

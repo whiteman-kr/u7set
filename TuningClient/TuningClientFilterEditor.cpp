@@ -17,6 +17,12 @@ double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool 
 
     QMutexLocker l(&theObjectManager->m_mutex);
 
+    if (theObjectManager->objectExists(appSignalHash) == false)
+    {
+        ok = false;
+        return 0;
+    }
+
     TuningObject* baseObject = theObjectManager->objectPtrByHash(appSignalHash);
 
     if (baseObject == nullptr)

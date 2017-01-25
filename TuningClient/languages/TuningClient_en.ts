@@ -49,655 +49,662 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="300"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="286"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="297"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="308"/>
+        <source>Internal exception, schema %1: %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="333"/>
         <source>The workcopies of the checked out files will be compiled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="321"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="354"/>
         <source>Error of getting file list from the database, parent file ID %1, filter &apos;%2&apos;, database message &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="345"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="378"/>
         <source>Getting file instance error, file ID %1, file name &apos;%2&apos;, database message &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="366"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="399"/>
         <source>Load signals from the project database error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="384"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="417"/>
         <source>Load units from the project database error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="402"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="435"/>
         <source>Load UFB schemas from the project database error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="426"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="459"/>
         <source>Property &apos;%1&apos; does not exist in object &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="449"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="482"/>
         <source>Subsystem &apos;%1&apos; is not found in subsystem set (Logic Moudle &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="474"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="507"/>
         <source>Property &apos;%1&apos;&apos; has wrong value (%2), valid range is %3..%4 (module &apos;%5&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="499"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="532"/>
         <source>Property System\LMNumber (%1) is not unique in Logic Module &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="522"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="555"/>
         <source>Controller &apos;%1&apos; is not found in module &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="545"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="578"/>
         <source>Signal &apos;%1&apos; is not found in controller &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="567"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="600"/>
         <source>Signal with place %1 is not found in controller &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="589"/>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1684"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="622"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1717"/>
         <source>Signal &apos;%1&apos; is not found in Application Signals.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="610"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="643"/>
         <source>Software &apos;%1&apos; is not found (Logic Module &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="634"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="667"/>
         <source>Analog inputs SpreadTolerance mismatch, signals %1 and %2 in module &apos;%3&apos;. SpreadTolerance, ADC limits, Engineering Units limits, Valid Range limits must be same for both signals.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="665"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="698"/>
         <source>Property &apos;%1&apos;&apos; has wrong value (%2), valid range is %3..%4 (signal &apos;%6&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="698"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="731"/>
         <source>IP address in property &apos;%1&apos; has undefined value (%2) in controller &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="722"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="755"/>
         <source>Port in property &apos;%1&apos; has undefined value (%2) in controller &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="763"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="796"/>
         <source>Property &apos;%1&apos; (%2) is %3 property &apos;%4&apos; (%5) in signal &apos;%6&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="789"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="822"/>
         <source>Can&apos;t find child object wuith suffix &apos;%1&apos; in object &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="812"/>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="946"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="845"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="979"/>
         <source>Property &apos;%1.%2&apos; is linked to undefined software ID &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="835"/>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="969"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="868"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1002"/>
         <source>Property &apos;%1.%2&apos; is empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="858"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="891"/>
         <source>Property &apos;%1.%2&apos; is linked to not compatible software &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="881"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="914"/>
         <source>Default &apos;%1&apos; IP address %2:%3 is used in controller %4.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="905"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="938"/>
         <source>Property &apos;%1.%2&apos; write error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="925"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="958"/>
         <source>Property &apos;%1.%2&apos;is not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="996"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1029"/>
         <source>Branch has multiple outputs (Logic Schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1019"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1052"/>
         <source>Property EquipmentIDs for Logic Schema is not set (LogicSchema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1042"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1075"/>
         <source>EquipmentID &apos;%1&apos; is not found in the project equipment (LogicSchema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1066"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1099"/>
         <source>EquipmentID &apos;%1&apos; must be LM family module type (LogicSchema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1090"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1123"/>
         <source>Schema is excluded from build (Schem &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1112"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1145"/>
         <source>Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1144"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1177"/>
         <source>Schema item &apos;%1&apos; has unlinked pin(s) &apos;%2&apos; (Logic Schema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1170"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1203"/>
         <source>AFB description &apos;%1&apos; is not found for schema item &apos;%2&apos; (Logic Schema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1196"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1229"/>
         <source>SchemaItem &apos;%1&apos; has outdated AFB description version, item&apos;s AFB.version %2, the latest is %3 (LogicSchema &apos;%4&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1223"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1256"/>
         <source>UFB schema &apos;%1&apos; is not found for schema item &apos;%2&apos; (Logic Schema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1249"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1282"/>
         <source>SchemaItem &apos;%1&apos; has outdated UFB version, item&apos;s UFB.version %2, the latest is %3 (LogicSchema &apos;%4&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1275"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1308"/>
         <source>User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1299"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1332"/>
         <source>Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1326"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1359"/>
         <source>Empty loop with UFB detected. UFB contains in to out direct link, on Logic Schema these pins also have direct connection, SchemaItem %1, in %2, out %3 (LogicSchema %4).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1353"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1386"/>
         <source>User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1378"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1411"/>
         <source>UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1399"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1432"/>
         <source>There is no any input element in applictaion logic for Logic Module &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1425"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1458"/>
         <source>Duplicate output signal %1, item &apos;%2&apos; on schema &apos;%3&apos;, item &apos;%4&apos; on schema &apos;%5&apos; (Logic Module &apos;%6&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1452"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1485"/>
         <source>Schema does not have logic layer (Schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1476"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1509"/>
         <source>Singlechannel Logic Schema &apos;%1&apos; cannot contain multichannel signal block (&apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1502"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1535"/>
         <source>Multichannel signal block must have the same number of AppSignalIDs as schema&apos;s channel number (number of schema&apos;s EquipmentIDs), Logic Schema %1, item %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1527"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1560"/>
         <source>Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1551"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1584"/>
         <source>Single channel branch contains signals (%1) from different channels (LogicSchema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1576"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1609"/>
         <source>Signal &apos;%1&apos; is not found (LogicSchema &apos;%2&apos;, SchemaItem &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1602"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1635"/>
         <source>Signal &apos;%1&apos; does not have valid LM (LogicSchema &apos;%2&apos;, SchemaItem &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1628"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1661"/>
         <source>Signal &apos;%1&apos; is not bound to any schema&apos;s EquipmentIds(LMs), (LogicSchema &apos;%2&apos;, SchemaItem &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1655"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1688"/>
         <source>Signal &apos;%1&apos; is expected to be bound to EquipmentId(LM) %2 (LogicSchema &apos;%3&apos;, SchemaItem &apos;%4&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1703"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1736"/>
         <source>Application logic for module &apos;%1&apos; is not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1726"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1759"/>
         <source>Value of signal &apos;%1&apos; is undefined (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1750"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1783"/>
         <source>Analog output &apos;%1.%2&apos; is connected to discrete signal &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1773"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1806"/>
         <source>Output &apos;%1.%2&apos; is connected to signal &apos;%3&apos; with uncompatible data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1796"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1829"/>
         <source>Output &apos;%1.%2&apos; is connected to signal &apos;%3&apos; with uncompatible data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1819"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1852"/>
         <source>Discrete output &apos;%1.%2&apos; is connected to analog signal &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1843"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1876"/>
         <source>Discrete signal &apos;%1&apos; is connected to analog input &apos;%2.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1866"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1899"/>
         <source>Signal &apos;%1&apos; is connected to input &apos;%2.%3&apos; with uncompatible data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1890"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1923"/>
         <source>Signal &apos;%1&apos; is connected to input &apos;%2.%3&apos; with uncompatible data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1913"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1946"/>
         <source>Analog signal &apos;%1&apos; is connected to discrete input &apos;%2.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1935"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1968"/>
         <source>Application item &apos;%1&apos; has unknown type. Contact to the RPCT developers.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1954"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="1987"/>
         <source>Application signal &apos;%1&apos; is not bound to any device object.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1974"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2007"/>
         <source>Application signal &apos;%1&apos; is bound to unknown device object &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="1994"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2027"/>
         <source>Discrete signal &apos;%1&apos; must have DataSize equal to 1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2014"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2047"/>
         <source>Analog signal &apos;%1&apos; must have DataSize equal to 32.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2034"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2067"/>
         <source>Application signal identifier &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2054"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2087"/>
         <source>Custom application signal identifier &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2077"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2110"/>
         <source>Opto ports &apos;%1&apos; and &apos;%2&apos; are not compatible (connection &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2099"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2132"/>
         <source>Opto port &apos;%1&apos; of connection &apos;%2&apos; is already used in connection &apos;%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2120"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2153"/>
         <source>LM&apos;s opto port &apos;%1&apos; can&apos;t work in RS232/485 mode (connection &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2141"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2174"/>
         <source>Undefined opto port &apos;%1&apos; in the connection &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2161"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2194"/>
         <source>Opto ports of the same chassis is linked via connection &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2181"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2214"/>
         <source>Opto connection ID &apos;%1&apos; is not unique.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2204"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2237"/>
         <source>Transmitter is linked to unknown opto connection &apos;%1&apos; (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2227"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2260"/>
         <source>Receiver is linked to unknown opto connection &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2255"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2288"/>
         <source>Transmitter input can be linked to one signal only.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2276"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2309"/>
         <source>All transmitter inputs must be directly linked to a signals.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2300"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2333"/>
         <source>Floating point constant is connected to discrete signal &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2325"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2358"/>
         <source>The signal &apos;%1&apos; is repeatedly connected to the transmitter &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2349"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2382"/>
         <source>The signal &apos;%1&apos; is not associated with LM &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2369"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2402"/>
         <source>The signal &apos;%1&apos; can be bind only to Logic Module or Equipment Signal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2393"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2426"/>
         <source>TxData size (%1 words) of opto port &apos;%2&apos; exceed value of OptoPortAppDataSize property of module &apos;%3&apos; (%4 words).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2415"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2448"/>
         <source>Can&apos;t find logic module associated with signal &apos;%1&apos; (no LM in chassis &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2439"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2472"/>
         <source>Non-signal element is connected to transmitter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2462"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2495"/>
         <source>RxData size (%1 words) of opto port &apos;%2&apos; exceed value of OptoPortAppDataSize property of module &apos;%3&apos; (%4 words).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2488"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2521"/>
         <source>Analog signal &apos;%1&apos; is connected to discrete signal &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2515"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2548"/>
         <source>Discrete signal &apos;%1&apos; is connected to analog signal &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2541"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2574"/>
         <source>Signals &apos;%1&apos; and &apos;%2&apos; have different data format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2567"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2600"/>
         <source>Signals &apos;%1&apos; and &apos;%2&apos; have different data size.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2587"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2620"/>
         <source>Connection with ID &apos;%1&apos; is not found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2609"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2642"/>
         <source>Signal &apos;%1&apos; exists in LM &apos;%2&apos;. No receivers needed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2632"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2665"/>
         <source>Signal &apos;%1&apos; is not exists in connection &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2656"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2689"/>
         <source>Value of parameter &apos;%1.%2&apos; must be greater or equal to 0.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2680"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2713"/>
         <source>Parameter&apos;s calculation for AFB &apos;%1&apos; (opcode %2) is not implemented.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2704"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2737"/>
         <source>Required parameter &apos;%1&apos; of AFB &apos;%2&apos; is missing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2728"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2761"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2752"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2785"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 16-bit Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2776"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2809"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Unsigned Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2800"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2833"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Signed Int.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2824"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2857"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; must have type 32-bit Float.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2849"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2882"/>
         <source>Value %1 of parameter &apos;%2&apos; of AFB &apos;%3&apos; is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2874"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2907"/>
         <source>Value of parameter &apos;%1.%2&apos; must be greate then the value of &apos;%1.%3&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2897"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2930"/>
         <source>Automatic sorting of XY points of FB &apos;%1&apos; has been performed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2921"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2954"/>
         <source>Parameters &apos;%1&apos; and &apos;%2&apos; of AFB &apos;%3&apos; can&apos;t be equal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2941"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2974"/>
         <source>Optical connection &apos;%1&apos; is configured manually.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2961"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="2994"/>
         <source>SubsystemID &apos;%1&apos; assigned in LM &apos;%2&apos; is not found in subsystem list.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="2986"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3019"/>
         <source>Uncompatible data format of analog AFB signal &apos;%1.%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3010"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3043"/>
         <source>Parameter &apos;%1&apos; of AFB &apos;%2&apos; can&apos;t be 0.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3034"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3067"/>
         <source>Ports of connection &apos;%1&apos; are not accessible in LM &apos;%2&apos; (Logic schema &apos;%3&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3056"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3089"/>
         <source>Float constant is connected to discrete input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3077"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3110"/>
         <source>Float constant is connected to 16-bit input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3098"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3131"/>
         <source>Float constant is connected to SignedInt input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3119"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3152"/>
         <source>Integer constant is connected to Float input (Logic schema &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3138"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3171"/>
         <source>Read address %1 of application memory is out of range 0..65535.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3157"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3190"/>
         <source>Write address %1 of application memory is out of range 0..65535.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3178"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3211"/>
         <source>Command &apos;MOVEMEM %1, %2, %3&apos; can&apos;t write to bit-addressed memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3200"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3233"/>
         <source>Command &apos;MOVBC %1, %2, #%3&apos; can&apos;t write out of application bit- or word-addressed memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3222"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3255"/>
         <source>LowEngeneeringUnits property of tuningable signal &apos;%1&apos; must be greate than HighEngeneeringUnits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3244"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3277"/>
         <source>TuningDefaultValue property of tuningable signal &apos;%1&apos; must be in range from LowEngeneeringUnits to HighEngeneeringUnits.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3265"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3298"/>
         <source>Signal &apos;%1&apos; has Little Endian byte order.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3288"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3321"/>
         <source>Can&apos;t assign value to tuningable signal &apos;%1&apos; (Logic schema &apos;%2&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3315"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3348"/>
         <source>Property Place is less then 0 (Equipment object &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3340"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3373"/>
         <source>Two or more equipment objects have the same EquipmentID &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3367"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3400"/>
         <source>Two or more equipment objects have the same Uuid &apos;%1&apos; (Object1 &apos;%2&apos;, Object2 &apos;%3&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3397"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3430"/>
         <source>Ethernet adapters of LMs &apos;%1&apos; and &apos;%2&apos; has duplicate IP address %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../u7/Builder/IssueLogger.cpp" line="3423"/>
+        <location filename="../../u7/Builder/IssueLogger.cpp" line="3456"/>
         <source>Unknown software type (Software object StrID &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
@@ -915,6 +922,44 @@
     </message>
 </context>
 <context>
+    <name>DialogPassword</name>
+    <message>
+        <location filename="../DialogPassword.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.ui" line="22"/>
+        <source>Choose User:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.ui" line="45"/>
+        <source>Enter Password:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.cpp" line="15"/>
+        <source>Enter Administrator Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.cpp" line="15"/>
+        <source>Enter Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.cpp" line="70"/>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DialogPassword.cpp" line="70"/>
+        <source>Wrong password!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DialogProperties</name>
     <message>
         <location filename="../DialogProperties.cpp" line="13"/>
@@ -1122,12 +1167,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="126"/>
+        <location filename="../DialogTuningSources.cpp" line="130"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogTuningSources.cpp" line="126"/>
+        <location filename="../DialogTuningSources.cpp" line="130"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1155,27 +1200,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="20"/>
+        <location filename="../DialogUsers.cpp" line="18"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="21"/>
+        <location filename="../DialogUsers.cpp" line="19"/>
         <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="22"/>
+        <location filename="../DialogUsers.cpp" line="20"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="75"/>
-        <source>&lt;Enter password&gt;</source>
+        <location filename="../DialogUsers.cpp" line="73"/>
+        <source>&lt;Password&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="156"/>
+        <location filename="../DialogUsers.cpp" line="154"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1203,7 +1248,7 @@
     <message>
         <location filename="../MainWindow.cpp" line="62"/>
         <location filename="../MainWindow.cpp" line="322"/>
-        <location filename="../MainWindow.cpp" line="387"/>
+        <location filename="../MainWindow.cpp" line="392"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2023,7 +2068,7 @@
     <message>
         <location filename="../TuningFilterEditor.cpp" line="259"/>
         <location filename="../TuningFilterEditor.cpp" line="311"/>
-        <location filename="../TuningFilterEditor.cpp" line="736"/>
+        <location filename="../TuningFilterEditor.cpp" line="766"/>
         <source>Remove Preset</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2084,53 +2129,54 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="654"/>
+        <location filename="../TuningFilterEditor.cpp" line="649"/>
+        <location filename="../TuningFilterEditor.cpp" line="680"/>
         <source>Signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="662"/>
+        <location filename="../TuningFilterEditor.cpp" line="688"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="662"/>
+        <location filename="../TuningFilterEditor.cpp" line="688"/>
         <source>1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="683"/>
+        <location filename="../TuningFilterEditor.cpp" line="713"/>
         <source>New Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="737"/>
+        <location filename="../TuningFilterEditor.cpp" line="767"/>
         <source>Are you sure you want to remove selected presets?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="936"/>
+        <location filename="../TuningFilterEditor.cpp" line="966"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="936"/>
+        <location filename="../TuningFilterEditor.cpp" line="966"/>
         <source>Select one preset to add signals!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="1128"/>
-        <location filename="../TuningFilterEditor.cpp" line="1136"/>
+        <location filename="../TuningFilterEditor.cpp" line="1163"/>
+        <location filename="../TuningFilterEditor.cpp" line="1171"/>
         <source>Preset Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="1128"/>
+        <location filename="../TuningFilterEditor.cpp" line="1163"/>
         <source>Please select signals of same type (analog or discrete).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningFilterEditor.cpp" line="1136"/>
+        <location filename="../TuningFilterEditor.cpp" line="1171"/>
         <source>Selected signals have different input range.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2295,6 +2341,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../TuningPage.cpp" line="1160"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../TuningPage.cpp" line="1165"/>
         <source>Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
@@ -2302,12 +2354,6 @@
     <message>
         <location filename="../TuningPage.cpp" line="1147"/>
         <source>and %1 more values.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="1160"/>
-        <source>%1 (%2) = %3
-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2319,72 +2365,72 @@
 <context>
     <name>TuningObjectManager</name>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="100"/>
+        <location filename="../TuningObjectManager.cpp" line="107"/>
         <source>TuningObjectManager: connection established.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="118"/>
+        <location filename="../TuningObjectManager.cpp" line="125"/>
         <source>TuningObjectManager: connection failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="129"/>
+        <location filename="../TuningObjectManager.cpp" line="136"/>
         <source>TuningObjectManager: reply timeout.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="162"/>
+        <location filename="../TuningObjectManager.cpp" line="169"/>
         <source>TcpTuningClient::processReply: Wrong requestID.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="373"/>
+        <location filename="../TuningObjectManager.cpp" line="380"/>
         <source>TcpTuningClient::m_tuningDataSourcesInfoReply, error received: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="432"/>
+        <location filename="../TuningObjectManager.cpp" line="439"/>
         <source>TcpTuningClient::processTuningSourcesState, error received: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="482"/>
+        <location filename="../TuningObjectManager.cpp" line="489"/>
         <source>TcpTuningClient::processReadTuningSignals, error received: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="499"/>
+        <location filename="../TuningObjectManager.cpp" line="506"/>
         <source>TcpTuningClient::processReadTuningSignals, TuningSignalState error received: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="508"/>
+        <location filename="../TuningObjectManager.cpp" line="515"/>
         <source>TcpTuningClient::processReadTuningSignals, object not found by hash: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="525"/>
+        <location filename="../TuningObjectManager.cpp" line="532"/>
         <source>Error writing wignal %1 (%2), value = %3, expected to write %4 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="574"/>
+        <location filename="../TuningObjectManager.cpp" line="581"/>
         <source>TcpTuningClient::processWriteTuningSignals, error received: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="589"/>
+        <location filename="../TuningObjectManager.cpp" line="596"/>
         <source>TcpTuningClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="602"/>
+        <location filename="../TuningObjectManager.cpp" line="609"/>
         <source>TcpTuningClient::slot_configurationArrived</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningObjectManager.cpp" line="614"/>
+        <location filename="../TuningObjectManager.cpp" line="621"/>
         <source>TcpTuningClient::slot_signalsUpdated</source>
         <translation type="unfinished"></translation>
     </message>

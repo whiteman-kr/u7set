@@ -3,8 +3,6 @@
 #include "Stable.h"
 #include "Settings.h"
 
-#include <QCryptographicHash>
-
 //
 // DialogUsers
 //
@@ -70,10 +68,10 @@ void DialogUsers::on_m_edit_clicked()
 
 	User user = item->data(0, Qt::UserRole).value<User>();
 
-	QString oldPassword = user.password();
+    QString oldPassword = user.password();
 
-	QString passwordPrompt = tr("<Enter password>");
-	user.setPassword(passwordPrompt);
+    QString passwordPrompt = tr("<Password>");
+    user.setPassword(passwordPrompt);
 
 	std::shared_ptr<User> userPtr = std::make_shared<User>();
 	*userPtr = user;

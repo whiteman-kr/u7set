@@ -642,6 +642,32 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		return;
 	}
 
+    if (m_objects->objectExists(value.appSignalHash()) == false)
+    {
+        QStringList l;
+        l.push_back("-");
+        l.push_back(tr("Signal"));
+        l.push_back("?");
+        l.push_back(value.appSignalId());
+        l.push_back("?");
+        if (value.useValue() == true)
+        {
+            l.push_back("?");
+        }
+        else
+        {
+            l.push_back("");
+        }
+
+        int i = 0;
+        for (auto s : l)
+        {
+            item->setText(i++, s);
+        }
+
+        return;
+    }
+
     TuningObject* object = m_objects->objectPtrByHash(value.appSignalHash());
     if (object == nullptr)
     {
@@ -649,7 +675,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
         return;
     }
 
-	QStringList l;
+    QStringList l;
 	l.push_back("-");
     l.push_back(tr("Signal"));
     l.push_back(object->customAppSignalID());
@@ -1108,6 +1134,11 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		}
 
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
+
+        if (m_objects->objectExists(ov.appSignalHash()) == false)
+        {
+            continue;
+        }
 
         TuningObject* object = m_objects->objectPtrByHash(ov.appSignalHash());
         if (object == nullptr)

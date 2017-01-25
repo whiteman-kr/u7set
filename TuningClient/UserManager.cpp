@@ -1,5 +1,6 @@
 #include "UserManager.h"
 #include <QSettings>
+#include "DialogPassword.h"
 
 //
 // User
@@ -9,7 +10,10 @@ User::User()
 {
 	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, User::name, User::setName);
 	ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, User::description, User::setDescription);
-	ADD_PROPERTY_GETTER_SETTER(QString, "Password", true, User::password, User::setPassword);
+
+    auto propPassword = ADD_PROPERTY_GETTER_SETTER(QString, "Password", true, User::password, User::setPassword);
+    propPassword->setPassword(true);
+
 	ADD_PROPERTY_GETTER_SETTER(bool, "Administrator", true, User::admin, User::setAdmin);
 }
 
@@ -81,8 +85,35 @@ UserManager::UserManager()
 {
 }
 
-bool UserManager::requestPassword()
+bool UserManager::requestPassword(QWidget* parent, bool adminNeeded)
 {
+    bool noPasswordsExist = true;
+
+    QCryptographicHash md5Generator(QCryptographicHash::Md5);
+    md5Generator.addData(QString("").toUtf8());
+    QString emptyMd5 = md5Generator.result().toHex();
+
+    for (const User& users : m_users)
+    {
+        if (users.password() != emptyMd5)
+        {
+            noPasswordsExist = false;
+            break;
+        }
+    }
+
+    if (noPasswordsExist == true)
+    {
+        return true;
+    }
+
+    DialogPassword d(this, adminNeeded, parent);
+
+    if (d.exec() != QDialog::Accepted)
+    {
+        return false;
+    }
+
 	return true;
 }
 

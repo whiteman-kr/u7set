@@ -1106,7 +1106,7 @@ void TuningItemModelMain::slot_undo()
 
 void TuningItemModelMain::slot_Apply()
 {
-	if (theUserManager.requestPassword() == false)
+    if (theUserManager.requestPassword(m_parent, false) == false)
 	{
 		return;
 	}

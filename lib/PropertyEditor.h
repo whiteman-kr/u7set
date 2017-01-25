@@ -174,7 +174,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-        explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption, const QString &validator);
+        explicit QtMultiTextEdit(QWidget* parent, int userType, const QString& caption, const QString &validator, bool password);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
