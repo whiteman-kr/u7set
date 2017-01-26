@@ -1078,7 +1078,7 @@ namespace Builder
         int readTime = 0;
         int runTime = 0;
 
-        getReadAndRunTimes(&readTime, &runTime);
+		getReadAndRunTimes(readTime, runTime);
 
         QString str;
 
@@ -1114,14 +1114,8 @@ namespace Builder
     }
 
 
-    bool Command::getReadAndRunTimes(int* readTime, int* runTime)
+	bool Command::getReadAndRunTimes(int& readTime, int& runTime, quint16& prevFbType, int& prevFbRuntime)
     {
-        if (readTime == nullptr || runTime == nullptr)
-        {
-            assert(false);
-            return false;
-        }
-
         if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
         {
             assert(false);			// unknown command code!
@@ -1136,52 +1130,116 @@ namespace Builder
             return false;
         }
 
-        *readTime = lmCommand->readTime;
+		readTime = lmCommand->readTime;
 
-        switch(lmCommand->runTime)
+		int cmdRuntime = 0;
+
+		switch(m_code.getOpCode())
         {
+		case LmCommandCode::NoCommand:
+			assert(false);
+			break;
+
+		case LmCommandCode::NOP:
+		case LmCommandCode::STOP:
+		case LmCommandCode::WRFB:
+		case LmCommandCode::RDFB:
+		case LmCommandCode::WRFBC:
+		case LmCommandCode::WRFBB:
+		case LmCommandCode::RDFBTS:
+		case LmCommandCode::APPSTART:
+		case LmCommandCode::MOV32:
+		case LmCommandCode::MOVC32:
+		case LmCommandCode::WRFB32:
+		case LmCommandCode::RDFB32:
+		case LmCommandCode::WRFBC32:
+		case LmCommandCode::RDFBTS32:
+		case LmCommandCode::START:
+		case LmCommandCode::NSTART:
+			cmdRuntime = lmCommand->runTime;
+			break;
+
+
+		{	LmCommandCode::START,		2,	"START",	true,	8,	RUNTIME_START		},
+		{	LmCommandCode::MOV,			3,	"MOV",		false,	11,	RUNTIME_MOVE		},
+		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	false,	14,	RUNTIME_MOVEMEM		},
+		{	LmCommandCode::MOVC,		3,	"MOVC",		false,	11, RUNTIME_MOVC		},
+		{	LmCommandCode::MOVBC,		4,	"MOVBC",	false,	14, RUNTIME_MOVBC		},
+		{	LmCommandCode::RDFBB,		4,	"RDFBB",	true,	14,	RUNTIME_RDFBB		},
+
+		{	LmCommandCode::SETMEM,		4,	"SETMEM",	false,	14, RUNTIME_SETMEM		},
+		{	LmCommandCode::MOVB,		4,	"MOVB",		false,	14,	RUNTIME_MOVB		},
+		{	LmCommandCode::NSTART,		3,	"NSTART",	true,	11,	RUNTIME_NSTART		},
+
+
+
+
+
+
+
+
+
         case RUNTIME_START:
-			*runTime = 6 + m_fbRunTime;
+			assert(prevFbRuntime == 0);				// no START command, after START or NSTART command
+
+			runTime = 6;
+			prevFbRuntime =  m_fbRunTime;				// set FB runtime to accommodate in next WaitFbExec command
             break;
 
         case RUNTIME_MOVE:
-			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
+			runTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
             break;
 
         case RUNTIME_MOVEMEM:
-			assert(m_code.getWord4() > 0);
-			*runTime = 7 + (m_code.getWord4() - 1) * 6 + 1;
+			{
+				quint16 n = m_code.getWord4();
+
+				assert(n > 0);
+
+				runTime = 7 + (n - 1) * 6 + 1;
+			}
             break;
 
         case RUNTIME_MOVC:
-			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
+			runTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
             break;
 
         case RUNTIME_MOVBC:
-			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
+			runTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
             break;
 
-        case RUNTIME_RDFBB:
-			*runTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
-            break;
+		case RUNTIME_RDFBB:
+			runTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
+			break;
 
         case RUNTIME_SETMEM:
-			assert(m_code.getWord4() > 0);
-			*runTime = 4 + (m_code.getWord4() - 1) * 3 + 1;
+			{
+				quint16 n = m_code.getWord4();
+
+				assert(n > 0);
+
+				runTime = 4 + (n - 1) * 3 + 1;
+			}
             break;
 
         case RUNTIME_MOVB:
-			*runTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
+			runTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
             break;
 
         case RUNTIME_NSTART:
-            *runTime = 3 + m_code.getWord3() * (2 + m_fbRunTime);
+			{
+				assert(prevFbRuntime == 0);				// no NSTART command, after START or NSTART command
+
+				quint16 n = m_code.getWord3();
+				runTime = 3 + n * 2;
+				prevFbRuntime = n * m_fbRunTime;
+			}
             break;
 
         default:
             assert(lmCommand->runTime < RUNTIME_START);
 
-            *runTime = lmCommand->runTime;
+			runTime = lmCommand->runTime;
         }
 
         return true;
@@ -1738,7 +1796,6 @@ namespace Builder
 	}
 
 
-
     bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount)
     {
         if (idrPhaseClockCount == nullptr || alpPhaseClockCount == nullptr)
@@ -1802,6 +1859,9 @@ namespace Builder
 
 		int count = 0;
 
+		quint16 prevFbType = 0;
+		int prevFbRuntime = 0;
+
         for(CodeItem* codeItem : m_codeItems)
         {
 			count++;
@@ -1830,6 +1890,7 @@ namespace Builder
                 *idrPhaseClockCount += prevRunTime;
 
                 prevRunTime = 0;
+				prevFbRuntime = 0;
 
                 idrPhaseCode = false;
             }
@@ -1837,11 +1898,11 @@ namespace Builder
             int readTime = 0;
             int runTime = 0;
 
-            command->getReadAndRunTimes(&readTime, &runTime);
+			command->getReadAndRunTimes(readTime, runTime, prevFbType, prevFbRuntime);
 
             if (idrPhaseCode == true)
             {
-                // alpPhaseCode
+				// data reading phase code
                 //
                 if (prevRunTime >= readTime)
                 {
@@ -1856,7 +1917,7 @@ namespace Builder
             }
             else
             {
-                // alpPhaseCode
+				// app logic processing phase code
                 //
                 if (prevRunTime >= readTime)
                 {

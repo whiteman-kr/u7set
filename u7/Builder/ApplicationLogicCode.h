@@ -41,7 +41,9 @@ namespace Builder
         int sizeW;
         const char* str;
 
-        int readTime;
+		bool waitFbExecution;
+
+		int readTime;
         int runTime;
 
         static bool isValidCode(int commandCode);
@@ -50,43 +52,34 @@ namespace Builder
     };
 
 
-    const int	RUNTIME_START	= 10000,
-                RUNTIME_MOVE	= 10100,
-                RUNTIME_MOVEMEM	= 10200,
-                RUNTIME_MOVC	= 10300,
-                RUNTIME_MOVBC	= 10400,
-                RUNTIME_RDFBB	= 10500,
-                RUNTIME_SETMEM	= 10600,
-                RUNTIME_MOVB	= 10700,
-                RUNTIME_NSTART	= 10800;
-
+	const int CALC_RUNTIME = 999;
 
     const LmCommand LmCommands[] =
     {
-        {	LmCommandCode::NoCommand,	0,	"NO_CMD",	0,	0				},
-		{	LmCommandCode::NOP,			1,	"NOP",		5,	2				},
-		{	LmCommandCode::START,		2,	"START",	8,	RUNTIME_START	},
-		{	LmCommandCode::STOP,		1,	"STOP",		5,	2				},
-		{	LmCommandCode::MOV,			3,	"MOV",		11,	RUNTIME_MOVE	},
-		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	14,	RUNTIME_MOVEMEM	},
-		{	LmCommandCode::MOVC,		3,	"MOVC",		11, RUNTIME_MOVC 	},
-		{	LmCommandCode::MOVBC,		4,	"MOVBC",	14, RUNTIME_MOVBC	},
-		{	LmCommandCode::WRFB,		3,	"WRFB",		11,	9				},
-		{	LmCommandCode::RDFB,		3,	"RDFB",		11,	7				},
-		{	LmCommandCode::WRFBC,		3,	"WRFBC",	11,	6				},
-		{	LmCommandCode::WRFBB,		4,	"WRFBB",	14,	8				},
-		{	LmCommandCode::RDFBB,		4,	"RDFBB",	14,	RUNTIME_RDFBB	},
-		{	LmCommandCode::RDFBTS,		3,	"RDFBTS",	11,	4				},
-		{	LmCommandCode::SETMEM,		4,	"SETMEM",	14, RUNTIME_SETMEM	},
-		{	LmCommandCode::MOVB,		4,	"MOVB",		14,	RUNTIME_MOVB	},
-		{	LmCommandCode::NSTART,		3,	"NSTART",	11,	RUNTIME_NSTART	},
-		{	LmCommandCode::APPSTART,	2,	"APPSTART",	8,	2				},
-		{	LmCommandCode::MOV32,		3,	"MOV32",	11,	14				},
-		{	LmCommandCode::MOVC32,		4,	"MOVC32",	14, 8				},
-		{	LmCommandCode::WRFB32,		3,	"WRFB32",	11,	14				},
-		{	LmCommandCode::RDFB32,		3,	"RDFB32",	11,	14				},
-		{	LmCommandCode::WRFBC32,		4,	"WRFBC32",	14,	10				},
-		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32",	14,	6				},
+		{	LmCommandCode::NoCommand,	0,	"NO_CMD",	false,	0,	0					},
+		{	LmCommandCode::NOP,			1,	"NOP",		false,	5,	2					},
+		{	LmCommandCode::START,		2,	"START",	true,	8,	6					},
+		{	LmCommandCode::STOP,		1,	"STOP",		false,	5,	2					},
+		{	LmCommandCode::MOV,			3,	"MOV",		false,	11,	CALC_RUNTIME		},
+		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	false,	14,	CALC_RUNTIME		},
+		{	LmCommandCode::MOVC,		3,	"MOVC",		false,	11, CALC_RUNTIME		},
+		{	LmCommandCode::MOVBC,		4,	"MOVBC",	false,	14, CALC_RUNTIME		},
+		{	LmCommandCode::WRFB,		3,	"WRFB",		false,	11,	9					},
+		{	LmCommandCode::RDFB,		3,	"RDFB",		true,	11,	7					},
+		{	LmCommandCode::WRFBC,		3,	"WRFBC",	false,	11,	6					},
+		{	LmCommandCode::WRFBB,		4,	"WRFBB",	false,	14,	8					},
+		{	LmCommandCode::RDFBB,		4,	"RDFBB",	true,	14,	CALC_RUNTIME		},
+		{	LmCommandCode::RDFBTS,		3,	"RDFBTS",	true,	11,	4					},
+		{	LmCommandCode::SETMEM,		4,	"SETMEM",	false,	14, CALC_RUNTIME		},
+		{	LmCommandCode::MOVB,		4,	"MOVB",		false,	14,	CALC_RUNTIME		},
+		{	LmCommandCode::NSTART,		3,	"NSTART",	true,	11,	CALC_RUNTIME		},
+		{	LmCommandCode::APPSTART,	2,	"APPSTART",	false,	8,	2					},
+		{	LmCommandCode::MOV32,		3,	"MOV32",	false,	11,	14					},
+		{	LmCommandCode::MOVC32,		4,	"MOVC32",	false,	14, 8					},
+		{	LmCommandCode::WRFB32,		3,	"WRFB32",	false,	11,	14					},
+		{	LmCommandCode::RDFB32,		3,	"RDFB32",	true,	11,	14					},
+		{	LmCommandCode::WRFBC32,		4,	"WRFBC32",	false,	14,	10					},
+		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32",	true,	14,	6					},
     };
 
     const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
@@ -278,6 +271,8 @@ namespace Builder
 
         int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
 
+		int m_cmdRuntime = 0;			// calculated command runtime
+
 		bool m_result = true;
 
         CommandCode m_code;
@@ -351,7 +346,7 @@ namespace Builder
 
         int address() const { return m_address; }
 
-        bool getReadAndRunTimes(int* readTime, int* runTime);
+		bool getReadAndRunTimes(int& readTime, int& runTime, quint16& prevFbType, int& prevFbRuntime);
 
 		static void setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log);
 		static void resetMemoryMap();
