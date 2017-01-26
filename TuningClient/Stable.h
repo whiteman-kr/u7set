@@ -46,5 +46,6 @@
 #include <QTextEdit>
 #include <QClipboard>
 #include <QSharedMemory>
+#include <QCryptographicHash>
 
 #endif // STABLE_H

@@ -28,6 +28,7 @@ private slots:
 	void is_signal_with_equipmentid_existsTest();
 	void get_latest_signals_by_appsignalIds();
 	void get_signal_historyTest();
+	void get_specific_signalTest();
 
 private:
 	int m_firstUserForTest = -1;

@@ -119,8 +119,12 @@ public:
     SignalType signalType() const;
     void setSignalType(SignalType value);
 
-    QColor tabColor() const;
-    void setTabColor(const QColor& value);
+    QColor backColor() const;
+    void setBackColor(const QColor& value);
+
+    QColor textColor() const;
+    void setTextColor(const QColor& value);
+
 
     // Filters
 	//
@@ -145,7 +149,7 @@ public:
     void addValue(const TuningFilterValue& value);
     void removeValue(Hash hash);
 
-    void setValue(Hash hash, float value);
+    void setValue(const TuningFilterValue &value);
 
     bool value(Hash hash, TuningFilterValue& value);
 
@@ -190,13 +194,15 @@ private:
     FilterType m_filterType = FilterType::Tree;
     SignalType m_signalType = SignalType::All;
 
-    QColor m_tabColor;
+    QColor m_backColor = Qt::GlobalColor::lightGray;
+    QColor m_textColor = Qt::GlobalColor::lightGray;
+
 
     // Filters
 	//
-	QStringList m_customAppSignalIDMasks;
-	QStringList m_equipmentIDMasks;
-	QStringList m_appSignalIDMasks;
+    QStringList m_customAppSignalIDMasks;
+    QStringList m_equipmentIDMasks;
+    QStringList m_appSignalIDMasks;
 
     // Values
     //
@@ -225,6 +231,9 @@ public:
 
     bool load(const QString& fileName, QString *errorCode, bool automatic);
 	bool save(const QString& fileName, QString *errorMsg);
+
+    bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
+    std::shared_ptr<TuningFilter> pasteFromClipboard();
 
     // Schemas loading
 

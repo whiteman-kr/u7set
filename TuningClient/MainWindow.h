@@ -46,6 +46,7 @@ private slots:
 	void slot_configurationArrived(ConfigSettings settings);
 	void slot_tuningSourcesArrived();
 	void slot_tuningConnectionFailed();
+    void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
 public slots:
 

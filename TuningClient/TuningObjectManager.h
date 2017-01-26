@@ -44,6 +44,8 @@ public:
 
     TuningObjectStorage objectStorage();
 
+    bool objectExists(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
+
     TuningObject* objectPtrByHash(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
 
     // Tuning sources

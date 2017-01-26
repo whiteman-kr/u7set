@@ -63,6 +63,13 @@ TuningObjectStorage TuningObjectManager::objectStorage()
 
 // WARNING!!! Lock the mutex before calling this function!!!
 //
+bool TuningObjectManager::objectExists(Hash hash) const
+{
+    return m_objects.objectExists(hash);
+}
+
+// WARNING!!! Lock the mutex before calling this function!!!
+//
 TuningObject* TuningObjectManager::objectPtrByHash(Hash hash) const
 {
     return m_objects.objectPtrByHash(hash);

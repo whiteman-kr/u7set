@@ -122,7 +122,9 @@ SOURCES += main.cpp\
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     TuningObjectManager.cpp \
-    TuningFilterEditor.cpp
+    TuningFilterEditor.cpp \
+    TuningClientFilterEditor.cpp \
+    DialogPassword.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -158,14 +160,17 @@ HEADERS  += MainWindow.h \
     DialogTuningSourceInfo.h \
     TuningObjectManager.h \
     TuningFilterEditor.h \
-    main.h
+    main.h \
+    TuningClientFilterEditor.h \
+    DialogPassword.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
     DialogInputValue.ui \
     DialogUsers.ui \
-    DialogTuningSourceInfo.ui
+    DialogTuningSourceInfo.ui \
+    DialogPassword.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
