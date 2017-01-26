@@ -1220,11 +1220,21 @@
         <translation></translation>
     </message>
     <message>
+        <location filename="../DialogUsers.cpp" line="114"/>
+        <source>Error</source>
+        <translation>Ошибка</translation>
+    </message>
+    <message>
+        <location filename="../DialogUsers.cpp" line="114"/>
+        <source>Can&apos;t delete the built-in Administrator account!</source>
+        <translation>Нельзя удалить встроенную учетную запись администратора!</translation>
+    </message>
+    <message>
         <source>&lt;Enter password&gt;</source>
         <translation type="vanished">&lt;Введите пароль&gt;</translation>
     </message>
     <message>
-        <location filename="../DialogUsers.cpp" line="154"/>
+        <location filename="../DialogUsers.cpp" line="162"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
@@ -2345,12 +2355,6 @@
         <translation>1</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1160"/>
-        <source>%1 (%2) = %3
-</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../TuningPage.cpp" line="1165"/>
         <source>Are you sure you want to continue?</source>
         <translation>Вы уверены, что хотите продолжить?</translation>
@@ -2359,6 +2363,12 @@
         <location filename="../TuningPage.cpp" line="1147"/>
         <source>and %1 more values.</source>
         <translation>и еще %1 значений.</translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="1160"/>
+        <source>%1 (%2) = %3
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1167"/>

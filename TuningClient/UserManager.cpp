@@ -83,19 +83,18 @@ void User::setAdmin(bool value)
 
 UserManager::UserManager()
 {
+    QCryptographicHash md5Generator(QCryptographicHash::Md5);
+    md5Generator.addData(QString("").toUtf8());
+    m_emptyMd5 = md5Generator.result().toHex();
 }
 
 bool UserManager::requestPassword(QWidget* parent, bool adminNeeded)
 {
     bool noPasswordsExist = true;
 
-    QCryptographicHash md5Generator(QCryptographicHash::Md5);
-    md5Generator.addData(QString("").toUtf8());
-    QString emptyMd5 = md5Generator.result().toHex();
-
     for (const User& users : m_users)
     {
-        if (users.password() != emptyMd5)
+        if (users.password() != m_emptyMd5)
         {
             noPasswordsExist = false;
             break;
@@ -137,7 +136,7 @@ void UserManager::Restore()
 
 	if (m_users.empty() == true)
 	{
-		m_users.push_back(User("Administrator", "Built-in administrator", "", true));
+        m_users.push_back(User("Administrator", "Built-in administrator", m_emptyMd5, true));
 	}
 }
 

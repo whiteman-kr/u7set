@@ -107,6 +107,14 @@ void DialogUsers::on_m_remove_clicked()
 		return;
 	}
 
+    User user = item->data(0, Qt::UserRole).value<User>();
+
+    if (user.name() == "Administrator")
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Can't delete the built-in Administrator account!"));
+        return;
+    }
+
 	QTreeWidgetItem* deleteItem = ui->m_tree->takeTopLevelItem(ui->m_tree->indexOfTopLevelItem(item));
 	if (deleteItem == nullptr)
 	{

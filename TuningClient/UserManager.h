@@ -42,6 +42,9 @@ public:
 	void Store();
 
 	std::vector<User> m_users;
+
+private:
+    QString m_emptyMd5;
 };
 
 Q_DECLARE_METATYPE(User)
