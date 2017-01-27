@@ -387,7 +387,7 @@ namespace Builder
 		void getAsmMetadataFields(QStringList& metadataFields);
 		void getAsmMetadata(std::vector<QVariantList>& metadata);
 
-        bool getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount);
+		bool getRunTimes(int& idrPhaseClockCount, int& alpPhaseClockCount);
 
         void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 

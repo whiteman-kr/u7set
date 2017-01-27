@@ -1159,17 +1159,15 @@ namespace Builder
 			cmdRuntime = lmCommand->runTime;
 			break;
 
-
-		{	LmCommandCode::START,		2,	"START",	true,	8,	RUNTIME_START		},
-		{	LmCommandCode::MOV,			3,	"MOV",		false,	11,	RUNTIME_MOVE		},
-		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	false,	14,	RUNTIME_MOVEMEM		},
-		{	LmCommandCode::MOVC,		3,	"MOVC",		false,	11, RUNTIME_MOVC		},
-		{	LmCommandCode::MOVBC,		4,	"MOVBC",	false,	14, RUNTIME_MOVBC		},
-		{	LmCommandCode::RDFBB,		4,	"RDFBB",	true,	14,	RUNTIME_RDFBB		},
-
-		{	LmCommandCode::SETMEM,		4,	"SETMEM",	false,	14, RUNTIME_SETMEM		},
-		{	LmCommandCode::MOVB,		4,	"MOVB",		false,	14,	RUNTIME_MOVB		},
-		{	LmCommandCode::NSTART,		3,	"NSTART",	true,	11,	RUNTIME_NSTART		},
+		case LmCommandCode::START:
+		case LmCommandCode::MOV:
+		case LmCommandCode::MOVMEM:
+		case LmCommandCode::MOVC:
+		case LmCommandCode::MOVBC:
+		case LmCommandCode::RDFBB:
+		case LmCommandCode::SETMEM:
+		case LmCommandCode::MOVB:
+		case LmCommandCode::NSTART:
 
 
 
@@ -1796,16 +1794,10 @@ namespace Builder
 	}
 
 
-    bool ApplicationLogicCode::getRunTimes(int* idrPhaseClockCount, int* alpPhaseClockCount)
+	bool ApplicationLogicCode::getRunTimes(int& idrPhaseClockCount, int& alpPhaseClockCount)
     {
-        if (idrPhaseClockCount == nullptr || alpPhaseClockCount == nullptr)
-        {
-            assert(false);
-            return false;
-        }
-
-        *idrPhaseClockCount = 0;
-        *alpPhaseClockCount = 0;
+		idrPhaseClockCount = 0;
+		alpPhaseClockCount = 0;
 
         if (m_codeItems.isEmpty())
         {
@@ -1857,15 +1849,11 @@ namespace Builder
 
         int prevRunTime = 0;
 
-		int count = 0;
-
 		quint16 prevFbType = 0;
 		int prevFbRuntime = 0;
 
         for(CodeItem* codeItem : m_codeItems)
         {
-			count++;
-
             if (codeItem == nullptr)
             {
                 assert(false);
