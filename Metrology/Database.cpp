@@ -18,7 +18,13 @@ SqlFieldBase::SqlFieldBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlFieldBase::init(int objectType, int)
+SqlFieldBase::~SqlFieldBase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SqlFieldBase::init(const int objectType, const int )
 {
     switch(objectType)
     {
@@ -220,6 +226,13 @@ int SqlFieldBase::init(int objectType, int)
             append("ObjectID",						QVariant::Int);
             append("SignalID",						QVariant::Int);
 
+            append("OutputSignalType",              QVariant::Int);
+            append("SumType",						QVariant::Int);
+
+            append("InputAppSignalID",              QVariant::String, 64);
+            append("OutputAppSignalID",             QVariant::String, 64);
+            append("SumAppSignalID",                QVariant::String, 64);
+
             break;
 
         case SQL_TABLE_REPORT_HEADER:
@@ -304,7 +317,7 @@ void SqlFieldBase::append(QString name, QVariant::Type type, int length)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SqlFieldBase::extFieldName(int index)
+QString SqlFieldBase::extFieldName(const int index)
 {
     if (index < 0 || index >= count())
     {
@@ -321,7 +334,7 @@ QString SqlFieldBase::extFieldName(int index)
         case QVariant::Int:     result = QString("%1 INTEGER").arg( f.name() );                             break;
         case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg( f.name() ).arg(f.precision());    break;
         case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg( f.name()).arg(f.length());          break;
-        default:                result = "";                                                                break;
+        default:                result = QString();
     }
 
     return result;
@@ -338,7 +351,13 @@ SqlObjectInfo::SqlObjectInfo()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SqlObjectInfo::init(int objectType)
+SqlObjectInfo::~SqlObjectInfo()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SqlObjectInfo::init(const int objectType)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -385,7 +404,13 @@ SqlHistoryDatabase::SqlHistoryDatabase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, QString event,  QString time)
+SqlHistoryDatabase::~SqlHistoryDatabase()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SqlHistoryDatabase::SqlHistoryDatabase(const int objectID, const int version, const QString& event,  const QString& time)
 {
     m_objectID = objectID;
     m_version = version;
@@ -415,7 +440,13 @@ SqlTable::SqlTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::recordCount()
+SqlTable::~SqlTable()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SqlTable::recordCount() const
 {
     if (isOpen() == false)
     {
@@ -439,7 +470,7 @@ int SqlTable::recordCount()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::lastKey()
+int SqlTable::lastKey() const
 {
     if (isOpen() == false)
     {
@@ -463,7 +494,7 @@ int SqlTable::lastKey()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SqlTable::init(int objectType, QSqlDatabase* pDatabase)
+bool SqlTable::init(const int objectType, QSqlDatabase* pDatabase)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -487,7 +518,7 @@ bool SqlTable::init(int objectType, QSqlDatabase* pDatabase)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SqlTable::isExist()
+bool SqlTable::isExist() const
 {
     if (m_pDatabase == nullptr)
     {
@@ -641,7 +672,7 @@ bool SqlTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::read(void* pRecord, int* key, int keyCount)
+int SqlTable::read(void* pRecord, const int* key, const int keyCount)
 {
     if (isOpen() == false)
     {
@@ -894,6 +925,16 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
             case SQL_TABLE_OUTPUT_SIGNAL:
                 {
+                    OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + readedCount;
+
+                    signal->setSignalID(query.value(field++).toInt());
+
+                    signal->setType(query.value(field++).toInt());
+                    query.value(field++).toInt();                           // reserve for Sum
+
+                    signal->setAppSignalID( OUTPUT_SIGNAL_KIND_INPUT, query.value(field++).toString() );
+                    signal->setAppSignalID( OUTPUT_SIGNAL_KIND_OUTPUT, query.value(field++).toString() );
+                    query.value(field++).toString();                        // reserve for Sum
                 }
                 break;
 
@@ -942,7 +983,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::write(void* pRecord, int count, int* key)
+int SqlTable::write(void* pRecord, const int count, const int* key)
 {
     if (isOpen() == false)
     {
@@ -1243,6 +1284,18 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
             case SQL_TABLE_OUTPUT_SIGNAL:
                 {
+                    OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + r;
+
+                    signal->setSignalID(lastKey() + 1);
+
+                    query.bindValue(field++, signal->signalID());
+
+                    query.bindValue(field++, signal->type());
+                    query.bindValue(field++, OUTPUT_SIGNAL_SUM_TYPE_NO_USED);                   // reserve to Sum
+
+                    query.bindValue(field++, signal->appSignalID(OUTPUT_SIGNAL_KIND_INPUT) );
+                    query.bindValue(field++, signal->appSignalID(OUTPUT_SIGNAL_KIND_OUTPUT) );
+                    query.bindValue(field++, QString() );                                       // reserve to Sum
                 }
                 break;
 
@@ -1301,7 +1354,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::remove(int* key, int keyCount)
+int SqlTable::remove(const int* key, const int keyCount) const
 {
     if (isOpen() == false)
     {
@@ -1468,7 +1521,7 @@ void Database::close()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlTable* Database::openTable(int objectType)
+SqlTable* Database::openTable(const int objectType)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -1603,7 +1656,7 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::removeMeasure(int measuteType, QVector<int> keyList)
+bool Database::removeMeasure(const int measuteType, const QVector<int> keyList)
 {
     bool result = false;
 

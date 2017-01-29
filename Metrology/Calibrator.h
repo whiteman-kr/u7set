@@ -23,7 +23,7 @@ const char* const CalibratorType[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "CALYS-75"),
 };
 
-const int		CALIBRATOR_TYPE_COUNT           = sizeof(CalibratorType)/sizeof(char*);
+const int		CALIBRATOR_TYPE_COUNT           = sizeof(CalibratorType)/sizeof(CalibratorType[0]);
 
 const int		CALIBRATOR_TYPE_UNKNOWN         = -1,
                 CALIBRATOR_TYPE_TRXII           = 0,
@@ -37,7 +37,7 @@ const char* const CalibratorMode[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "Source"),
 };
 
-const int		CALIBRATOR_MODE_COUNT           = sizeof(CalibratorMode)/sizeof(char*);
+const int		CALIBRATOR_MODE_COUNT           = sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
 
 const int		CALIBRATOR_MODE_UNKNOWN         = -1,
                 CALIBRATOR_MODE_MEASURE         = 0,
@@ -55,7 +55,7 @@ const char* const CalibratorUnit[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (High)"),
 };
 
-const int		CALIBRATOR_UNIT_COUNT          = sizeof(CalibratorUnit)/sizeof(char*);
+const int		CALIBRATOR_UNIT_COUNT          = sizeof(CalibratorUnit)/sizeof(CalibratorUnit[0]);
 
 const int		CALIBRATOR_UNIT_UNKNOWN         = -1,
                 CALIBRATOR_UNIT_MV              = 0,
@@ -73,7 +73,7 @@ const char* const CalibratorStep[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "Step up"),
 };
 
-const int		CALIBRATOR_STEP_COUNT           = sizeof(CalibratorStep)/sizeof(char*);
+const int		CALIBRATOR_STEP_COUNT           = sizeof(CalibratorStep)/sizeof(CalibratorStep[0]);
 
 const int		CALIBRATOR_STEP_UNKNOWN        = -1,
                 CALIBRATOR_STEP_DOWN            = 0,
@@ -87,7 +87,7 @@ const char* const CalibratorReset[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "Soft reset"),
 };
 
-const int		CALIBRATOR_RESET_COUNT          = sizeof(CalibratorStep)/sizeof(char*);
+const int		CALIBRATOR_RESET_COUNT          = sizeof(CalibratorStep)/sizeof(CalibratorReset[0]);
 
 const int		CALIBRATOR_RESET_UNKNOWN        = -1,
                 CALIBRATOR_RESET_HARD           = 0,
@@ -101,7 +101,7 @@ const char* const CalibratorConvert[] =
                 QT_TRANSLATE_NOOP("Calibrator.h", "kHz to Hz"),
 };
 
-const int		CALIBRATOR_CONVERT_COUNT        = sizeof(CalibratorConvert)/sizeof(char*);
+const int		CALIBRATOR_CONVERT_COUNT        = sizeof(CalibratorConvert)/sizeof(CalibratorConvert[0]);
 
 const int		CALIBRATOR_CONVERT_HZ_TO_KHZ    = 0,
                 CALIBRATOR_CONVERT_KHZ_TO_HZ    = 1;
@@ -124,6 +124,10 @@ const char* const CalibratorTerminator[CALIBRATOR_TYPE_COUNT] =
                 "\n\r",
                 "\r\n",
 };
+
+// ==============================================================================================
+
+const int		INVALID_CALIBRATOR_INDEX = -1;
 
 // ==============================================================================================
 // common commands
@@ -204,18 +208,20 @@ class Calibrator : public QObject
 
 public:
 
-    explicit    Calibrator(QObject *parent = 0);
+    explicit    Calibrator(const int index = INVALID_CALIBRATOR_INDEX, QObject *parent = 0);
                ~Calibrator();
 
 private:
 
     bool        m_connected = false;
 
+    int         m_index = INVALID_CALIBRATOR_INDEX;                                     // index calibrator in a common base calibrators CalibratorBase
+
     QSerialPort m_port;                                                                 // object serial port for management of the calibrator
 
     QString		m_portName;													            // string containing the name of the serial port
     int			m_type = CALIBRATOR_TYPE_UNKNOWN;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
-    QString		m_name;													                // name of calibrator
+    QString		m_caption;													            // name of calibrator
     QString		m_serialNo;												                // serial number of calibrator
 
     int			m_timeout = 0;												            // time counter waits for a response from the calibrator
@@ -236,7 +242,7 @@ private:
 
     void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
 
-    void        setConnected(bool connect);                                             // function changes status calibrator: connected or disconnected
+    void        setConnected(const bool connect);                                       // function changes status calibrator: connected or disconnected
 
     bool        openPort();                                                             // open the serial port to manage the calibrator
     bool        getIDN();                                                               // identify the calibrator, get: SerialNo, Type and etc.
@@ -245,38 +251,41 @@ private:
     bool		recv();                                                                 // receiving a response from the calibrator
 
     void        parseResponse();                                                        // extracts from the string of the last response from the calibrator current electrical values
-    void		convert(double& val, int mode, int order);                              // translation from Kilo to Mega, from Hz to kHz, etc.
+    void		convert(double& val, const int mode, const int order);                  // translation from Kilo to Mega, from Hz to kHz, etc.
 
 public:
 
-    bool        isConnected()                   { return m_connected; }
+    bool        isConnected() const { return m_connected; }
 
-    bool        isOpenPort()                    { return m_port.isOpen(); }
+    int         index() const{ return m_index; }
 
-    QString		portName()                      { return m_portName; }
-    void		setPortName(QString portName)   { m_portName = portName; }
+    bool        isOpenPort() const { return m_port.isOpen(); }
 
-    int			type()                          { return m_type; }
-    void		setType(int type)               { m_type = type; }
-    QString		typeString()                    { if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT) return ""; return CalibratorType[ m_type ]; }
+    QString		portName() const { return m_portName; }
+    void		setPortName(const QString& portName) { m_portName = portName; }
 
-    QString		name()                          { return m_name; }
-    QString		serialNo()                      { return m_serialNo; }
-    int			timeout()                       { return m_timeout;    }
+    int			type() const { return m_type; }
+    QString		typeStr() const;
+    void		setType(const int type) { m_type = type; }
 
-    int			mode()                          { return m_mode; }
-    int			measureUnit()                   { return m_measureUnit; }
-    int			sourceUnit()                    { return m_sourceUnit; }
+    QString     caption() const { return m_caption; }
+    QString		serialNo() const { return m_serialNo; }
 
-    double		measureValue()                  { return m_measureValue; }
-    double		sourceValue()                   { return m_sourceValue; }
+    int			timeout() const { return m_timeout;    }
 
-    QString     lastError()                     { return m_lastError; }
+    int			mode() const { return m_mode; }
+    int			measureUnit() const { return m_measureUnit; }
+    int			sourceUnit() const { return m_sourceUnit; }
 
-    void        setWaitResponse(bool enable)    { m_enableWaitResponse = enable; }
+    double		measureValue() const { return m_measureValue; }
+    double		sourceValue() const { return m_sourceValue; }
 
-    void        setBusy(bool busy);
-    bool        isBusy()                        { return m_busy; }
+    QString     lastError() const { return m_lastError; }
+
+    void        setWaitResponse(const bool enable) { m_enableWaitResponse = enable; }
+
+    bool        isBusy() const { return m_busy; }
+    void        setBusy(const bool busy);
 
 signals:
 

@@ -16,7 +16,8 @@ class FolderEdit : public QWidget
 
 public:
 
-    FolderEdit(QWidget *parent = 0);
+    explicit            FolderEdit(QWidget *parent = 0);
+                        ~FolderEdit();
 
     QString             folderPath() const { return m_edit->text(); }
     void                setFolderPath(const QString &path) { if (m_edit->text() != path) m_edit->setText(path); }

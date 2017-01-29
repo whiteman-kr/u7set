@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QVector>
 
+
 #include "Database.h"
 
 // ==============================================================================================
@@ -15,8 +16,9 @@ class ObjectVector
 {
 public:
 
-    explicit        ObjectVector();
-    explicit        ObjectVector(const ObjectVector& from);
+                    ObjectVector();
+                    ObjectVector(const ObjectVector& from);
+    virtual         ~ObjectVector();
 
 private:
 
@@ -65,6 +67,13 @@ template <class TYPE>
 ObjectVector<TYPE>::ObjectVector(const ObjectVector& from)
 {
     *this = from;
+}
+
+// ----------------------------------------------------------------------------------------------
+
+template <class TYPE>
+ObjectVector<TYPE>::~ObjectVector()
+{
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -422,9 +431,9 @@ template <class TYPE>
 class PtrObjectVector
 {
 public:
-    explicit            PtrObjectVector();
-    explicit            PtrObjectVector(const PtrObjectVector& from);
-                        ~PtrObjectVector();
+                        PtrObjectVector();
+                        PtrObjectVector(const PtrObjectVector& from);
+    virtual             ~PtrObjectVector();
 
 protected:
 

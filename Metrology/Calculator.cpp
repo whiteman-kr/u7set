@@ -11,10 +11,9 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 Calculator::Calculator(QWidget* parent) :
-    QObject(parent),
-    m_parentWidget(parent)
+    QDialog(parent)
 {
-    createDialog();
+    createInterface();
     initDialog();
 }
 
@@ -26,11 +25,10 @@ Calculator::~Calculator()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calculator::createDialog()
+void Calculator::createInterface()
 {
     // create elements of interface
     //
-    m_pDialog = new QDialog(m_parentWidget);
 
     QFont* font = new QFont("Arial", 16, 2);
 
@@ -39,28 +37,28 @@ void Calculator::createDialog()
     QGroupBox* trGroup = new QGroupBox(tr("Thermistor"));
     QVBoxLayout *trLayout = new QVBoxLayout;
 
-    m_pTrList = new QComboBox(m_pDialog);
+    m_pTrList = new QComboBox(this);
 
     QHBoxLayout *tr_C_Layout = new QHBoxLayout;
 
-    m_pTrDegreeRadio = new QRadioButton(m_pDialog);
-    m_pTrDegreeEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pTrDegreeRadio = new QRadioButton(this);
+    m_pTrDegreeEdit = new QLineEdit(tr("0"), this);
     m_pTrDegreeEdit->setFont(*font);
 
     tr_C_Layout->addWidget(m_pTrDegreeRadio);
     tr_C_Layout->addWidget(m_pTrDegreeEdit);
-    tr_C_Layout->addWidget(new QLabel(tr("°C"), m_pDialog));
+    tr_C_Layout->addWidget(new QLabel(tr("°C"), this));
     tr_C_Layout->addStretch();
 
     QHBoxLayout *tr_Ohm_Layout = new QHBoxLayout;
 
-    m_pTrElectricRadio = new QRadioButton(m_pDialog);
-    m_pTrElectricEdit = new QLineEdit(m_pDialog);
+    m_pTrElectricRadio = new QRadioButton(this);
+    m_pTrElectricEdit = new QLineEdit(this);
     m_pTrElectricEdit->setFont(*font);
 
     tr_Ohm_Layout->addWidget(m_pTrElectricRadio);
     tr_Ohm_Layout->addWidget(m_pTrElectricEdit);
-    tr_Ohm_Layout->addWidget(new QLabel(tr("Ohm"), m_pDialog));
+    tr_Ohm_Layout->addWidget(new QLabel(tr("Ohm"), this));
     tr_Ohm_Layout->addStretch();
 
     trLayout->addWidget(m_pTrList);
@@ -74,28 +72,28 @@ void Calculator::createDialog()
     QGroupBox* tcGroup = new QGroupBox(tr("Thermocouple"));
     QVBoxLayout *tcLayout = new QVBoxLayout;
 
-    m_pTcList = new QComboBox(m_pDialog);
+    m_pTcList = new QComboBox(this);
 
     QHBoxLayout *tc_C_Layout = new QHBoxLayout;
 
-    m_pTcDegreeRadio = new QRadioButton(m_pDialog);
-    m_pTcDegreeEdit = new QLineEdit(tr("400"), m_pDialog);
+    m_pTcDegreeRadio = new QRadioButton(this);
+    m_pTcDegreeEdit = new QLineEdit(tr("400"), this);
     m_pTcDegreeEdit->setFont(*font);
 
     tc_C_Layout->addWidget(m_pTcDegreeRadio);
     tc_C_Layout->addWidget(m_pTcDegreeEdit);
-    tc_C_Layout->addWidget(new QLabel(tr("°C"), m_pDialog));
+    tc_C_Layout->addWidget(new QLabel(tr("°C"), this));
     tc_C_Layout->addStretch();
 
     QHBoxLayout *tc_mV_Layout = new QHBoxLayout;
 
-    m_pTcElectricRadio = new QRadioButton(m_pDialog);
-    m_pTcElectricEdit = new QLineEdit(m_pDialog);
+    m_pTcElectricRadio = new QRadioButton(this);
+    m_pTcElectricEdit = new QLineEdit(this);
     m_pTcElectricEdit->setFont(*font);
 
     tc_mV_Layout->addWidget(m_pTcElectricRadio);
     tc_mV_Layout->addWidget(m_pTcElectricEdit);
-    tc_mV_Layout->addWidget(new QLabel(tr("mV"), m_pDialog));
+    tc_mV_Layout->addWidget(new QLabel(tr("mV"), this));
     tc_mV_Layout->addStretch();
 
     tcLayout->addWidget(m_pTcList);
@@ -111,42 +109,42 @@ void Calculator::createDialog()
 
     QHBoxLayout *lin_inval_Layout = new QHBoxLayout;
 
-    m_pLinInRadio = new QRadioButton(m_pDialog);
-    m_pLinInValEdit = new QLineEdit(tr("2.5"), m_pDialog);
+    m_pLinInRadio = new QRadioButton(this);
+    m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
     m_pLinInValEdit->setFont(*font);
 
     lin_inval_Layout->addWidget(m_pLinInRadio);
     lin_inval_Layout->addWidget(m_pLinInValEdit);
-    lin_inval_Layout->addWidget(new QLabel(tr("in"), m_pDialog));
+    lin_inval_Layout->addWidget(new QLabel(tr("in"), this));
     lin_inval_Layout->addStretch();
 
     QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
 
-    m_pLinOutRadio = new QRadioButton(m_pDialog);
-    m_pLinOutValEdit = new QLineEdit(tr("0"), m_pDialog);
+    m_pLinOutRadio = new QRadioButton(this);
+    m_pLinOutValEdit = new QLineEdit(tr("0"), this);
     m_pLinOutValEdit->setFont(*font);
 
     lin_outval_Layout->addWidget(m_pLinOutRadio);
     lin_outval_Layout->addWidget(m_pLinOutValEdit);
-    lin_outval_Layout->addWidget(new QLabel(tr("out"), m_pDialog));
+    lin_outval_Layout->addWidget(new QLabel(tr("out"), this));
     lin_outval_Layout->addStretch();
 
     QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
 
-    m_pLinInLowEdit = new QLineEdit(tr("0"), m_pDialog);
-    m_pLinInHighEdit = new QLineEdit(tr("5"), m_pDialog);
+    m_pLinInLowEdit = new QLineEdit(tr("0"), this);
+    m_pLinInHighEdit = new QLineEdit(tr("5"), this);
 
     lin_inrange_Layout->addWidget(m_pLinInLowEdit);
-    lin_inrange_Layout->addWidget(new QLabel(tr(".."), m_pDialog));
+    lin_inrange_Layout->addWidget(new QLabel(tr(".."), this));
     lin_inrange_Layout->addWidget(m_pLinInHighEdit);
 
     QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
 
-    m_pLinOutLowEdit = new QLineEdit(tr("0"), m_pDialog);
-    m_pLinOutHighEdit = new QLineEdit(tr("100"), m_pDialog);
+    m_pLinOutLowEdit = new QLineEdit(tr("0"), this);
+    m_pLinOutHighEdit = new QLineEdit(tr("100"), this);
 
     lin_outrange_Layout->addWidget(m_pLinOutLowEdit);
-    lin_outrange_Layout->addWidget(new QLabel(tr(".."), m_pDialog));
+    lin_outrange_Layout->addWidget(new QLabel(tr(".."), this));
     lin_outrange_Layout->addWidget(m_pLinOutHighEdit);
 
     linLayout->addLayout(lin_inval_Layout);
@@ -165,7 +163,7 @@ void Calculator::createDialog()
     mainLayout->addWidget(linGroup);
     mainLayout->addStretch();
 
-    m_pDialog->setLayout(mainLayout);
+    setLayout(mainLayout);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -173,14 +171,14 @@ void Calculator::createDialog()
 void Calculator::initDialog()
 {
     QRegExp rx( "^[-]{0,1}[0-9]*[.]{1}[0-9]*$" );
-    QValidator *validator = new QRegExpValidator(rx, m_pDialog);
+    QValidator *validator = new QRegExpValidator(rx, this);
 
     // init elements of interface
     //
-    m_pDialog->setWindowFlags(Qt::Drawer);
-    m_pDialog->setFixedWidth(230);
-    m_pDialog->setWindowIcon(QIcon(":/icons/Calculator.png"));
-    m_pDialog->setWindowTitle(tr("Metrological calculator"));
+    setWindowFlags(Qt::Drawer);
+    setFixedWidth(230);
+    setWindowIcon(QIcon(":/icons/Calculator.png"));
+    setWindowTitle(tr("Metrological calculator"));
 
     // Thermistor
     //
@@ -272,7 +270,6 @@ void Calculator::initDialog()
     // Select first dialog item
     //
     m_pTrList->setFocus();
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -297,7 +294,7 @@ void Calculator::conversionTr()
 
         m_pTrDegreeEdit->setFocus();
         m_pTrDegreeEdit->setReadOnly(false);
-        m_pTrElectricEdit->setText( QString::number(val, 3, 4) );
+        m_pTrElectricEdit->setText( QString::number(val, 10, 4) );
         m_pTrElectricEdit->setReadOnly(true);
     }
 
@@ -307,7 +304,7 @@ void Calculator::conversionTr()
 
         m_pTrElectricEdit->setFocus();
         m_pTrElectricEdit->setReadOnly(false);
-        m_pTrDegreeEdit->setText( QString::number(val, 3, 3) );
+        m_pTrDegreeEdit->setText( QString::number(val, 10, 4) );
         m_pTrDegreeEdit->setReadOnly(true);
     }
 }
@@ -334,7 +331,7 @@ void Calculator::conversionTc()
 
         m_pTcDegreeEdit->setFocus();
         m_pTcDegreeEdit->setReadOnly(false);
-        m_pTcElectricEdit->setText( QString::number(val, 3, 4) );
+        m_pTcElectricEdit->setText( QString::number(val, 10, 4) );
         m_pTcElectricEdit->setReadOnly(true);
     }
 
@@ -344,7 +341,7 @@ void Calculator::conversionTc()
 
         m_pTcElectricEdit->setFocus();
         m_pTcElectricEdit->setReadOnly(false);
-        m_pTcDegreeEdit->setText( QString::number(val, 3, 3) );
+        m_pTcDegreeEdit->setText( QString::number(val, 10, 4) );
         m_pTcDegreeEdit->setReadOnly(true);
     }
 }

@@ -10,7 +10,7 @@
 
 // ==============================================================================================
 
-class Calculator : public QObject
+class Calculator : public QDialog
 {
     Q_OBJECT
 
@@ -19,14 +19,9 @@ public:
     explicit        Calculator(QWidget* parent = 0);
                     ~Calculator();
 
-    void            show()                  { if (m_pDialog != nullptr) m_pDialog->show(); }
-
 private:
 
-    QWidget*        m_parentWidget = nullptr;
-    QDialog*        m_pDialog = nullptr;
-
-    void            createDialog();
+    void            createInterface();
     void            initDialog();
 
     QComboBox*      m_pTrList = nullptr;
@@ -57,16 +52,16 @@ private:
 
 private slots:
 
-    void            onTrSensorTypeChanged(int)  { conversionTr(); }
-    void            onTrRadio()             { conversionTr(); }
-    void            onTrValue(QString)      { conversionTr(); }
+    void            onTrSensorTypeChanged(int) { conversionTr(); }
+    void            onTrRadio() { conversionTr(); }
+    void            onTrValue(QString) { conversionTr(); }
 
-    void            onTcSensorTypeChanged(int)  { conversionTc(); }
-    void            onTcRadio()             { conversionTc(); }
-    void            onTcValue(QString)      { conversionTc(); }
+    void            onTcSensorTypeChanged(int) { conversionTc(); }
+    void            onTcRadio() { conversionTc(); }
+    void            onTcValue(QString) { conversionTc(); }
 
-    void            onLinRadio()            { conversionLin(); }
-    void            onLinValue(QString)     { conversionLin(); }
+    void            onLinRadio() { conversionLin(); }
+    void            onLinValue(QString) { conversionLin(); }
 
 };
 

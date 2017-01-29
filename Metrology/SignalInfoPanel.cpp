@@ -9,24 +9,28 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "SignalProperty.h"
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
 bool SignalInfoTable::m_showCustomID = true;
+bool SignalInfoTable::m_showElectricValue = false;
+bool SignalInfoTable::m_showAdcValue = false;
+bool SignalInfoTable::m_showAdcHexValue = false;
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalInfoTable::SignalInfoTable(QObject*)
 {
+    connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &SignalInfoTable::updateSignalParam, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalInfoTable::~SignalInfoTable()
 {
-    m_activeSignal.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -91,6 +95,14 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
+    MeasureSignalParam param = signalParam(row);
+    if (param.isValid() == false)
+    {
+        return QVariant();
+    }
+
+    AppSignalState state = theSignalBase.signalState(param.hash());
+
     if (role == Qt::TextAlignmentRole)
     {
         int result = Qt::AlignLeft;
@@ -115,28 +127,13 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
         return result;
     }
 
-    if (role == Qt::UserRole )
-    {
-        QVariant var;
-        var.setValue(m_activeSignal.hash(row));
-        return var;
-    }
-
     if (role == Qt::BackgroundColorRole)
     {
         if (column == SIGNAL_INFO_COLUMN_STATE)
         {
-            Hash signaHash = m_activeSignal.hash(row);
-            if (signaHash != 0)
+            if (state.flags.underflow == true || state.flags.overflow == true || state.flags.valid == false)
             {
-                MeasureSignal signal = theSignalBase.signal(signaHash);
-                if (signal.param().appSignalID().isEmpty() == false || signal.param().hash() != 0)
-                {
-                    if (signal.state().flags.valid == 0)
-                    {
-                        return QColor(0xFF, 0xA0, 0xA0);
-                    }
-                }
+                return QColor(0xFF, 0xA0, 0xA0);
             }
         }
 
@@ -145,7 +142,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        return text(row, column);
+        return text(row, column, param, state);
     }
 
     return QVariant();
@@ -153,46 +150,39 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::text(const int &row, const int &column) const
+QString SignalInfoTable::text(const int row, const int column, const MeasureSignalParam& param, const AppSignalState& state) const
 {
     if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
-        return "";
+        return QString();
     }
 
     if (column < 0 || column > SIGNAL_INFO_COLUMN_COUNT)
     {
-        return "";
+        return QString();
     }
 
-    Hash signaHash = m_activeSignal.hash(row);
-    if (signaHash == 0)
+    if (param.isValid() == false)
     {
-        return "";
-    }
-
-    MeasureSignal signal = theSignalBase.signal(signaHash);
-    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
-    {
-        return "";
+        return QString();
     }
 
     QString result;
 
     switch (column)
     {
-        case SIGNAL_INFO_COLUMN_CASE:           result = signal.position().caseString();      break;
-        case SIGNAL_INFO_COLUMN_ID:             result = m_showCustomID == true ? signal.param().customAppSignalID() : signal.param().appSignalID();  break;
-        case SIGNAL_INFO_COLUMN_STATE:          result = signal.stateString();                break;
-        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = signal.position().subblockString();  break;
-        case SIGNAL_INFO_COLUMN_BLOCK:          result = signal.position().blockString();     break;
-        case SIGNAL_INFO_COLUMN_ENTRY:          result = signal.position().entryString();     break;
-        case SIGNAL_INFO_COLUMN_CAPTION:        result = signal.param().caption();            break;
-        case SIGNAL_INFO_COLUMN_IN_PH_RANGE:    result = signal.inputPhysicalRange();         break;
-        case SIGNAL_INFO_COLUMN_IN_EL_RANGE:    result = signal.inputElectricRange();         break;
-        case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = signal.calibratorIndexString(row);   break;
-        case SIGNAL_INFO_COLUMN_OUT_PH_RANGE:   result = signal.outputPhysicalRange();        break;
-        case SIGNAL_INFO_COLUMN_OUT_EL_RANGE:   result = signal.outputElectricRange();        break;
+        case SIGNAL_INFO_COLUMN_CASE:           result = param.position().caseStr();        break;
+        case SIGNAL_INFO_COLUMN_ID:             result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();          break;
+        case SIGNAL_INFO_COLUMN_STATE:          result = signalStateStr(param, state);      break;
+        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = param.position().subblockStr();    break;
+        case SIGNAL_INFO_COLUMN_BLOCK:          result = param.position().blockStr();       break;
+        case SIGNAL_INFO_COLUMN_ENTRY:          result = param.position().entryStr();       break;
+        case SIGNAL_INFO_COLUMN_CAPTION:        result = param.caption();                   break;
+        case SIGNAL_INFO_COLUMN_IN_PH_RANGE:    result = param.inputPhysicalRangeStr();     break;
+        case SIGNAL_INFO_COLUMN_IN_EL_RANGE:    result = param.inputElectricRangeStr();     break;
+        case SIGNAL_INFO_COLUMN_CALIBRATOR:     result = param.calibratorIndexStr(row);     break;
+        case SIGNAL_INFO_COLUMN_OUT_PH_RANGE:   result = param.outputPhysicalRangeStr();    break;
+        case SIGNAL_INFO_COLUMN_OUT_EL_RANGE:   result = param.outputElectricRangeStr();    break;
         default:                                assert(0);
     }
 
@@ -201,7 +191,78 @@ QString SignalInfoTable::text(const int &row, const int &column) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateColumn(const int& column)
+QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const AppSignalState& state) const
+{
+    if (param.isValid() == false)
+    {
+        return QString();
+    }
+
+    QString stateStr, formatStr;
+
+    formatStr.sprintf( ("%%.%df"), param.inputPhysicalPrecise() );
+
+    stateStr.sprintf( formatStr.toAscii(), state.value );
+
+    int physicalUnit = param.inputPhysicalUnitID();
+    if ( physicalUnit >= 0 && physicalUnit < theUnitBase.unitCount())
+    {
+        stateStr.append( " " + theUnitBase.unit( physicalUnit ) );
+    }
+
+    // append electrical equivalent
+    //
+    if (m_showElectricValue == true)
+    {
+        double electric = conversion( state.value, CT_PHYSICAL_TO_ELECTRIC, param);
+        stateStr.append( " = " + QString::number( electric, 10, param.inputElectricPrecise() ) );
+
+        int electricUnit = param.inputElectricUnitID();
+        if ( electricUnit >= 0 && electricUnit < theUnitBase.unitCount())
+        {
+            stateStr.append( " " + theUnitBase.unit( electricUnit ) );
+        }
+    }
+
+    // append adc equivalent in Dec
+    //
+    if (m_showAdcValue == true)
+    {
+        int adc = (state.value - param.inputPhysicalLowLimit())*(param.adcHighLimit() - param.adcLowLimit())/( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
+        stateStr.append( " = " + QString::number( adc, 10 ) );
+    }
+
+    // append adc equivalent in Hex
+    //
+    if (m_showAdcHexValue == true)
+    {
+        int adc = (state.value - param.inputPhysicalLowLimit())* (param.adcHighLimit() - param.adcLowLimit())/ ( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
+        stateStr.append( " = " + QString::number( adc, 16 ) + " h");
+    }
+
+    // check flags
+    //
+    if (state.flags.underflow != 0)
+    {
+        stateStr.append(" - Underflow");
+    }
+
+    if (state.flags.overflow != 0)
+    {
+        stateStr.append(" - Overflow");
+    }
+
+    if (state.flags.valid == 0)
+    {
+        stateStr = "No valid";
+    }
+
+    return stateStr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoTable::updateColumn(const int column)
 {
     if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
     {
@@ -218,30 +279,49 @@ void SignalInfoTable::updateColumn(const int& column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Hash SignalInfoTable::at(int index)
+MeasureSignalParam SignalInfoTable::signalParam(const int index) const
 {
-    if (index < 0 || index >= count())
-    {
-        return 0;
-    }
+    MeasureSignalParam param;
 
-    return m_activeSignal.hash(index);
+    m_signalMutex.lock();
+
+        if (index >= 0 || index < MAX_CHANNEL_COUNT)
+        {
+            param = m_activeSignalParam[index];
+        }
+
+    m_signalMutex.unlock();
+
+    return param;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::set(const MeasureMultiSignal& multiSignal)
+void SignalInfoTable::set(const MeasureMultiSignal& activeSignal)
 {
-    if (multiSignal.isEmpty() == true)
+    clear();
+
+    if (activeSignal.isEmpty() == true)
     {
         return;
     }
 
-    clear();
-
     beginInsertRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1);
 
-        m_activeSignal = multiSignal;
+        m_signalMutex.lock();
+
+            for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+            {
+                Hash signalHash = activeSignal.hash(i);
+                if (signalHash == 0)
+                {
+                    continue;
+                }
+
+                m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
+            }
+
+        m_signalMutex.unlock();
 
     endInsertRows();
 }
@@ -252,9 +332,41 @@ void SignalInfoTable::clear()
 {
     beginRemoveRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1 );
 
-        m_activeSignal.clear();
+        m_signalMutex.lock();
+
+            for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+            {
+                m_activeSignalParam[i].setAppSignalID(QString());
+            }
+
+        m_signalMutex.unlock();
 
     endRemoveRows();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoTable::updateSignalParam(const Hash& signalHash)
+{
+    if (signalHash == 0)
+    {
+        assert(signalHash != 0);
+        return;
+    }
+
+    m_signalMutex.lock();
+
+        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+        {
+            if (m_activeSignalParam[i].hash() == signalHash)
+            {
+                m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
+
+                break;
+            }
+        }
+
+    m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -265,7 +377,7 @@ int SignalInfoPanel::m_columnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 {
     100,    // SIGNAL_INFO_COLUMN_CASE
     270,    // SIGNAL_INFO_COLUMN_ID
-    100,    // SIGNAL_INFO_COLUMN_STATE
+    150,    // SIGNAL_INFO_COLUMN_STATE
      60,    // SIGNAL_INFO_COLUMN_SUBBLOCK
      60,    // SIGNAL_INFO_COLUMN_BLOCK
      60,    // SIGNAL_INFO_COLUMN_ENTRY
@@ -282,13 +394,17 @@ int SignalInfoPanel::m_columnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
     QDockWidget(parent)
 {
-    m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
-    if (m_pMainWindow == nullptr)
-    {
-        return;
-    }
 
-    connect((const MainWindow*) m_pMainWindow, &MainWindow::setActiveSignal, this, &SignalInfoPanel::onSetActiveSignal, Qt::QueuedConnection);
+    MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
+    if (pMainWindow != nullptr)
+    {
+        connect(pMainWindow, &MainWindow::setActiveSignal, this, &SignalInfoPanel::onSetActiveSignal, Qt::QueuedConnection);
+
+        if (pMainWindow->m_pSignalSocket != nullptr)
+        {
+            connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &SignalInfoPanel::onSetActiveSignal, Qt::QueuedConnection);
+        }
+    }
 
     setWindowTitle("Panel signal information");
     setObjectName(windowTitle());
@@ -322,7 +438,7 @@ void SignalInfoPanel::createInterface()
     m_pSignalInfoWindow->installEventFilter(this);
 
     m_pView = new QTableView(m_pSignalInfoWindow);
-    m_pView->setModel(&m_table);
+    m_pView->setModel(&m_signalParamTable);
     QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
@@ -368,23 +484,46 @@ void SignalInfoPanel::createContextMenu()
 {
     // create context menu
     //
-    m_pContextMenu = new QMenu(tr("&Measurements"), m_pSignalInfoWindow);
+    m_pContextMenu = new QMenu(tr(""), m_pSignalInfoWindow);
 
     m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
     m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
-    m_pShowCustomIDAction = m_pContextMenu->addAction(tr("Show Custom ID"));
+    m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
+
+    m_pShowCustomIDAction = m_pShowMenu->addAction(tr("Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
     m_pShowCustomIDAction->setChecked(true);
+
+    m_pShowMenu->addSeparator();
+
+    m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical"));
+    m_pShowElectricValueAction->setCheckable(true);
+    m_pShowElectricValueAction->setChecked(false);
+
+
+    m_pShowAdcValueAction = m_pShowMenu->addAction(tr("ADC"));
+    m_pShowAdcValueAction->setCheckable(true);
+    m_pShowAdcValueAction->setChecked(false);
+
+    m_pShowAdcHexValueAction = m_pShowMenu->addAction(tr("ADC (hex)"));
+    m_pShowAdcHexValueAction->setCheckable(true);
+    m_pShowAdcHexValueAction->setChecked(false);
+
+    m_pContextMenu->addMenu(m_pShowMenu);
 
     m_pContextMenu->addSeparator();
 
     m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties"));
     m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalInfoPanel::showCustomID);
-    connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
     connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
+    connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalInfoPanel::showCustomID);
+    connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
+    connect(m_pShowAdcValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcValue);
+    connect(m_pShowAdcHexValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcHexValue);
+    connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
+
 
     // init context menu
     //
@@ -394,7 +533,7 @@ void SignalInfoPanel::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::hideColumn(int column, bool hide)
+void SignalInfoPanel::hideColumn(const int column, const bool hide)
 {
     if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
     {
@@ -420,7 +559,7 @@ void SignalInfoPanel::startSignalStateTimer()
     if (m_updateSignalStateTimer == nullptr)
     {
         m_updateSignalStateTimer = new QTimer(this);
-        connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateStateActiveSignal);
+        connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateSignalState);
     }
 
     m_updateSignalStateTimer->start(100); //   100 ms
@@ -440,8 +579,6 @@ void SignalInfoPanel::stopSignalStateTimer()
 
 void SignalInfoPanel::onContextMenu(QPoint)
 {
-    m_pShowCustomIDAction->setChecked(m_table.showCustomID());
-
     m_pContextMenu->exec(QCursor::pos());
 }
 
@@ -466,57 +603,68 @@ bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
 
 void SignalInfoPanel::onSetActiveSignal()
 {
-    m_table.set( theSignalBase.activeSignal() );
+    m_signalParamTable.set( theSignalBase.activeSignal() );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::updateStateActiveSignal()
+void SignalInfoPanel::updateSignalState()
 {
-    m_table.updateColumn(SIGNAL_INFO_COLUMN_STATE);
+    m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_STATE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::showCustomID()
 {
-    m_table.setShowCustomID( m_pShowCustomIDAction->isChecked() );
-    m_table.updateColumn(SIGNAL_INFO_COLUMN_ID);
+    m_signalParamTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+    m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_ID);
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showElectricValue()
+{
+    m_signalParamTable.setShowElectricValue( m_pShowElectricValueAction->isChecked() );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showAdcValue()
+{
+    m_signalParamTable.setShowAdcValue( m_pShowAdcValueAction->isChecked() );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::showAdcHexValue()
+{
+    m_signalParamTable.setShowAdcHexValue( m_pShowAdcHexValueAction->isChecked() );
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::copy()
 {
-    bool appendRow;
-    QString textRow;
     QString textClipboard;
 
-    int count = m_table.count();
-    for(int r = 0; r < count; r++)
+    int rowCount = m_pView->model()->rowCount();
+    int columnCount = m_pView->model()->columnCount();
+
+    for(int row = 0; row < rowCount; row++)
     {
-        appendRow = false;
-        textRow = "";
-
-        for(int c = 0; c < SIGNAL_INFO_COLUMN_COUNT; c++)
+        for(int column = 0; column < columnCount; column++)
         {
-            if (m_pView->selectionModel()->isSelected( m_pView->model()->index(r,c) ) == true)
+            if (m_pView->selectionModel()->isSelected( m_pView->model()->index(row, column) ) == false)
             {
-                appendRow = true;
-                textRow.append(m_table.text(r, c));
-
-                if (c != SIGNAL_INFO_COLUMN_COUNT - 1)
-                {
-                    textRow.append("\t");
-                }
+                continue;
             }
+
+            textClipboard.append(m_pView->model()->data( m_pView->model()->index(row, column)).toString() + "\t");
         }
 
-        if (appendRow == true)
-        {
-            textClipboard.append(textRow);
-            textClipboard.append("\n");
-        }
+        textClipboard.replace(textClipboard.length() - 1, 1, "\n");
     }
 
     QClipboard *clipboard = QApplication::clipboard();
@@ -528,25 +676,20 @@ void SignalInfoPanel::copy()
 void SignalInfoPanel::signalProperty()
 {
     int index = m_pView->currentIndex().row();
-    if (index < 0 || index >= m_table.count())
+    if (index < 0 || index >= m_signalParamTable.signalCount())
     {
         return;
     }
 
-    Hash hash = m_table.at(index);
-    if (hash == 0)
+    MeasureSignalParam param = m_signalParamTable.signalParam(index);
+    if (param.isValid() == false)
     {
         return;
     }
 
-    MeasureSignal signal = theSignalBase.signal(hash);
-    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
-    {
-        return;
-    }
-
-    SignalPropertyDialog dialog( signal.param().hash() );
+    SignalPropertyDialog dialog( param );
     dialog.exec();
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------

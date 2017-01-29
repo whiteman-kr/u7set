@@ -21,6 +21,7 @@
 #include "SignalBase.h"
 #include "ReportView.h"
 #include "ExportMeasure.h"
+#include "OutputSignal.h"
 #include "SignalList.h"
 #include "Statistic.h"
 
@@ -33,6 +34,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     theCalibratorBase.init(this);
     connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
+
+    // load output signals base
+    //
+    theOutputSignalBase.load();
 
     // init interface
     //
@@ -164,7 +169,17 @@ void  MainWindow::createActions()
     m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
     connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
 
-    m_pShowOutputSignalListAction = new QAction(tr("Signals input/output ..."), this);
+    m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
+    m_pShowSignalListAction->setIcon(QIcon(":/icons/Signals.png"));
+    m_pShowSignalListAction->setToolTip("");
+    connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
+
+    m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
+    m_pShowComparatorsListAction->setIcon(QIcon(":/icons/Complex.png"));
+    m_pShowComparatorsListAction->setToolTip("");
+    connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
+
+    m_pShowOutputSignalListAction = new QAction(tr("Output signals ..."), this);
     m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
     m_pShowOutputSignalListAction->setToolTip("");
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
@@ -185,19 +200,8 @@ void  MainWindow::createActions()
     m_pOptionsAction->setToolTip(tr("Editing application settings"));
     connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::options);
 
-
     // ?
     //
-    m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
-    m_pShowSignalListAction->setIcon(QIcon(":/icons/Signals.png"));
-    m_pShowSignalListAction->setToolTip("");
-    connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
-
-    m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
-    m_pShowComparatorsListAction->setIcon(QIcon(":/icons/Signals.png"));
-    m_pShowComparatorsListAction->setToolTip("");
-    connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
-
     m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
     m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
     m_pShowStatisticAction->setToolTip("");
@@ -301,6 +305,8 @@ void MainWindow::createMenu()
 
     m_pSettingMenu->addAction(m_pCalibratorsAction);
     m_pSettingMenu->addSeparator();
+    m_pSettingMenu->addAction(m_pShowSignalListAction);
+    m_pSettingMenu->addAction(m_pShowComparatorsListAction);
     m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
     m_pSettingMenu->addAction(m_pShowOutputRangeListAction);
     m_pSettingMenu->addAction(m_pShowComlexComparatorListAction);
@@ -310,9 +316,6 @@ void MainWindow::createMenu()
 
     m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
 
-    m_pInfoMenu->addAction(m_pShowSignalListAction);
-    m_pInfoMenu->addAction(m_pShowComparatorsListAction);
-    m_pInfoMenu->addSeparator();
     m_pInfoMenu->addAction(m_pShowStatisticAction);
     m_pInfoMenu->addSeparator();
     m_pInfoMenu->addAction(m_pAboutConnectionAction);
@@ -428,21 +431,23 @@ bool MainWindow::createToolBars()
         addToolBar(m_pOutputSignalToolBar);
 
         QLabel* outputSignalLabel = new QLabel(m_pOutputSignalToolBar);
-        QComboBox* outputSignalList = new QComboBox(m_pOutputSignalToolBar);
+        m_outputSignalTypeList = new QComboBox(m_pOutputSignalToolBar);
 
         m_pOutputSignalToolBar->addWidget(outputSignalLabel);
         outputSignalLabel->setText(tr(" Output signals "));
         outputSignalLabel->setEnabled(false);
 
-        m_pOutputSignalToolBar->addWidget(outputSignalList);
+        m_pOutputSignalToolBar->addWidget(m_outputSignalTypeList);
+
+        m_outputSignalTypeList->addItem(tr("Not used"), OUTPUT_SIGNAL_TYPE_NO_USED);
 
         for(int s = 0; s < OUTPUT_SIGNAL_TYPE_COUNT; s++)
         {
-            outputSignalList->addItem(OutputSignalType[s]);
+            m_outputSignalTypeList->addItem(OutputSignalType[s], s);
         }
-        outputSignalList->setCurrentIndex(theOptions.toolBar().outputSignalType());
+        m_outputSignalTypeList->setCurrentIndex(theOptions.toolBar().outputSignalType());
 
-        connect(outputSignalList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType);
+        connect(m_outputSignalTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType);
     }
 
     // Control panel selecting analog signal
@@ -545,7 +550,6 @@ bool MainWindow::createToolBars()
 
         QComboBox* ccTypeCombo = new QComboBox(m_pComplexComporatorToolBar);
         m_pComplexComporatorToolBar->addWidget(ccTypeCombo);
-        ccTypeCombo->addItem("");
         ccTypeCombo->setEnabled(false);
         ccTypeCombo->setFixedWidth(60);
     }
@@ -560,19 +564,19 @@ void MainWindow::createMeasurePages()
     m_pMainTab = new QTabWidget();
     m_pMainTab->setTabPosition(QTabWidget::South);
 
-    for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
+    for(int measureType = 0; measureType < MEASURE_TYPE_COUNT; measureType++)
     {
-        MeasureView* pView = new MeasureView(type, this);
+        MeasureView* pView = new MeasureView(measureType, this);
         if (pView == nullptr)
         {
             continue;
         }
 
-        m_pMainTab->addTab(pView, tr(MeasureType[type]));
+        m_pMainTab->addTab(pView, tr(MeasureType[measureType]));
 
         pView->setFrameStyle(QFrame::NoFrame);
 
-        m_measureView[type] = pView;
+        appendMeasureView(measureType, pView);
 
         connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
         connect(pView, &MeasureView::measureCountChanged, this, &MainWindow::measureCountChanged, Qt::QueuedConnection);
@@ -581,6 +585,50 @@ void MainWindow::createMeasurePages()
     setCentralWidget(m_pMainTab);
 
     connect(m_pMainTab, &QTabWidget::currentChanged, this, &MainWindow::setMeasureType);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureView* MainWindow::measureView(const int measureType)
+{
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        assert(false);
+        return nullptr;
+    }
+
+    if (m_measureViewMap.contains(measureType) == false)
+    {
+        assert(false);
+        return nullptr;
+    }
+
+    return m_measureViewMap[measureType];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void  MainWindow::appendMeasureView(const int measureType, MeasureView* pView)
+{
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
+    {
+        assert(false);
+        return;
+    }
+
+    if (pView == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    if (m_measureViewMap.contains(measureType) == true)
+    {
+        assert(false);
+        return;
+    }
+
+    m_measureViewMap[measureType] = pView;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -688,7 +736,6 @@ void MainWindow::createPanels()
 
         m_pComplexComparatorInfoPanel->hide();
     }
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -705,7 +752,6 @@ void MainWindow::createStatusBar()
     m_statusMeasureThreadInfo = new QLabel(pStatusBar);
     m_statusMeasureTimeout = new QProgressBar(pStatusBar);
     m_statusMeasureThreadState = new QLabel(pStatusBar);
-    m_statusMeasureCount = new QLabel(pStatusBar);
     m_statusCalibratorCount = new QLabel(pStatusBar);
     m_statusConnectToServer = new QLabel(pStatusBar);
 
@@ -717,7 +763,6 @@ void MainWindow::createStatusBar()
 
     pStatusBar->addWidget(m_statusConnectToServer);
     pStatusBar->addWidget(m_statusCalibratorCount);
-    pStatusBar->addWidget(m_statusMeasureCount);
     pStatusBar->addWidget(m_statusMeasureThreadState);
     pStatusBar->addWidget(m_statusMeasureTimeout);
     pStatusBar->addWidget(m_statusMeasureThreadInfo);
@@ -725,9 +770,10 @@ void MainWindow::createStatusBar()
 
     pStatusBar->setLayoutDirection(Qt::RightToLeft);
 
-    m_statusEmpty->setText("");
-    m_statusMeasureCount->setText(tr("Measurement 0/0 "));
-    m_statusConnectToServer->setText(tr("Connect to server: offline "));
+    m_statusEmpty->setText(QString());
+    m_statusConnectToServer->setText(tr(" Connect to server: offline "));
+    m_statusConnectToServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+    m_statusConnectToServer->setToolTip(tr("Please, connect to Server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -746,7 +792,7 @@ void MainWindow::createContextMenu()
     //
     for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
     {
-        MeasureView* pView = m_measureView[type];
+        MeasureView* pView = measureView(type);
         if (pView == nullptr)
         {
             continue;
@@ -833,9 +879,8 @@ void MainWindow::updateAnalogSignalToolBar()
 
     for(int s = 0; s < signalCount; s++)
     {
-        MeasureMultiSignal multiSignal;
-
-        if (theSignalBase.signalForMeasure(s, multiSignal) == false)
+        MeasureMultiSignal multiSignal = theSignalBase.signalForMeasure(s);
+        if (multiSignal.isEmpty() == true)
         {
             continue;
         }
@@ -852,13 +897,13 @@ void MainWindow::updateAnalogSignalToolBar()
                         continue;
                     }
 
-                    MeasureSignal signal = theSignalBase.signal(hash);
-                    if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+                    MeasureSignalParam param = theSignalBase.signalParam(hash);
+                    if (param.isValid() == false)
                     {
                         continue;
                     }
 
-                    id = signal.param().customAppSignalID();
+                    id = param.customAppSignalID();
                 }
                 break;
 
@@ -931,14 +976,14 @@ void MainWindow::updateAnalogSignalToolBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setMeasureType(int type)
+void MainWindow::setMeasureType(const int measureType)
 {
-    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    MeasureView* pView = m_measureView[type];
+    MeasureView* pView = measureView(measureType);
     if (pView == nullptr)
     {
         return;
@@ -946,7 +991,7 @@ void MainWindow::setMeasureType(int type)
 
     measureCountChanged(pView->table().count());
 
-    switch(type)
+    switch(measureType)
     {
         case MEASURE_TYPE_LINEARITY:
         case MEASURE_TYPE_COMPARATOR:
@@ -980,21 +1025,17 @@ void MainWindow::setMeasureType(int type)
             break;
     }
 
-    m_measureType = type;
+    m_measureType = measureType;
 
     updateStartStopActions();
 
-    if (m_pFindMeasurePanel != nullptr)
-    {
-        m_pFindMeasurePanel->table().clear();
-    }
+    m_pFindMeasurePanel->clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::measureCountChanged(int count)
+void MainWindow::measureCountChanged(int)
 {
-    m_statusMeasureCount->setText(tr("Measurement 0 / %1 ").arg(count));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1008,7 +1049,7 @@ void MainWindow::startMeasure()
 
     if (m_pSignalSocket->isConnected() == false)
     {
-        QMessageBox::critical(this, tr("Metrology"), tr("No connect to server!"));
+        QMessageBox::critical(this, windowTitle(), tr("No connect to server!"));
 
         return;
     }
@@ -1043,12 +1084,7 @@ void MainWindow::stopMeasure()
 
 void MainWindow::printMeasure()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    MeasureView* pMeasureView = m_measureView[m_measureType];
+    MeasureView* pMeasureView = activeMeasureView();
     if (pMeasureView == nullptr)
     {
         return;
@@ -1062,12 +1098,7 @@ void MainWindow::printMeasure()
 
 void MainWindow::exportMeasure()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    MeasureView* pMeasureView = m_measureView[m_measureType];
+    MeasureView* pMeasureView = activeMeasureView();
     if (pMeasureView == nullptr)
     {
         return;
@@ -1081,12 +1112,7 @@ void MainWindow::exportMeasure()
 
 void MainWindow::copyMeasure()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    MeasureView* pView = m_measureView[m_measureType];
+    MeasureView* pView = activeMeasureView();
     if (pView == nullptr)
     {
         return;
@@ -1099,12 +1125,7 @@ void MainWindow::copyMeasure()
 
 void MainWindow::removeMeasure()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    MeasureView* pView = m_measureView[m_measureType];
+    MeasureView* pView = activeMeasureView();
     if (pView == nullptr)
     {
         return;
@@ -1117,12 +1138,7 @@ void MainWindow::removeMeasure()
 
 void MainWindow::selectAllMeasure()
 {
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    MeasureView* pView = m_measureView[m_measureType];
+    MeasureView* pView = activeMeasureView();
     if (pView == nullptr)
     {
         return;
@@ -1152,6 +1168,31 @@ void MainWindow::calibrators()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showSignalList()
+{
+    SignalListDialog dialog(false, this);
+    dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showOutputSignalList()
+{
+    OutputSignalDialog dialog(this);
+    if (dialog.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    if (theOutputSignalBase.save() == false)
+    {
+        QMessageBox::information(this, windowTitle(), tr("Attempt to save output signals was unsuccessfully!"));
+        return;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::options()
 {
     OptionsDialog dialog;
@@ -1164,7 +1205,7 @@ void MainWindow::options()
             continue;
         }
 
-        MeasureView* pView = m_measureView[type];
+        MeasureView* pView = measureView(type);
         if (pView == nullptr)
         {
             continue;
@@ -1172,14 +1213,6 @@ void MainWindow::options()
 
         pView->updateColumn();
     }
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::showSignalList()
-{
-    SignalListDialog dialog(this);
-    dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1220,7 +1253,12 @@ void MainWindow::setMeasureTimeout(QString value)
 
 void MainWindow::setOutputSignalType(int index)
 {
-    int type = index;
+    if (index == -1)
+    {
+        return;
+    }
+
+    int type = m_outputSignalTypeList->currentData().toInt() ;
     if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
     {
         return;
@@ -1252,13 +1290,7 @@ void MainWindow::setMeasureSignal(int index)
         return;
     }
 
-    MeasureMultiSignal multiSignal;
-
-    if (theSignalBase.signalForMeasure(index, multiSignal) == false)
-    {
-        return;
-    }
-
+    MeasureMultiSignal multiSignal = theSignalBase.signalForMeasure(index);
     if (multiSignal.isEmpty() == true)
     {
         return;
@@ -1492,6 +1524,17 @@ void MainWindow::calibratorConnectedChanged(int count)
     updateStartStopActions();
 
     m_statusCalibratorCount->setText( tr(" Connected calibrators: %1 ").arg(count) );
+
+    if (count == 0)
+    {
+        m_statusCalibratorCount->setStyleSheet("background-color: rgb(255, 160, 160);");
+        m_statusCalibratorCount->setToolTip(tr("Please, connect Calibrators\nclick menu \"Tool\" - \"Calibrators...\""));
+    }
+    else
+    {
+        m_statusCalibratorCount->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+        m_statusCalibratorCount->setToolTip(QString());
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1500,9 +1543,10 @@ void MainWindow::signalSocketConnected()
 {
     updateStartStopActions();
 
-    m_statusConnectToServer->setText( tr("Connect to server: on  ") );
-
-    // m_statusConnectToServer->setStyleSheet("background-color: rgb(127, 255, 127);");
+    m_statusConnectToServer->setText( tr(" Connect to server: on  ") );
+    m_statusConnectToServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+    m_statusConnectToServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(theOptions.connectTcpIp().serverIP()).arg(theOptions.connectTcpIp().serverPort()) );
+    m_statusConnectToServer->setToolTip(QString());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1531,15 +1575,19 @@ void MainWindow::signalSocketDisconnected()
 
     theSignalBase.clear();
 
-    m_statusConnectToServer->setText( tr("Connect to server: off ") );
-
-    // m_statusConnectToServer->setStyleSheet("background-color: rgb(255, 127, 127);");
+    m_statusConnectToServer->setText( tr(" Connect to server: off ") );
+    m_statusConnectToServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+    m_statusConnectToServer->setToolTip(tr("Please, connect to Server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::signalSocketSignalsLoaded()
 {
+    m_statusConnectToServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: %3").arg(theOptions.connectTcpIp().serverIP()).arg(theOptions.connectTcpIp().serverPort()).arg(theSignalBase.signalCount()) );
+
+    theSignalBase.sortByPosition();
+
     m_asCaseTypeCombo->clear();
 
     theSignalBase.createCaseTypeList();
@@ -1574,7 +1622,8 @@ void MainWindow::measureThreadStarted()
     m_pAnalogSignalToolBar->setDisabled(true);
     m_pComplexComporatorToolBar->setDisabled(true);
 
-    m_statusMeasureThreadInfo->setText("");
+    m_statusMeasureThreadInfo->setText(QString());
+    m_statusMeasureThreadInfo->show();
 
     if (theOptions.toolBar().measureTimeout() != 0)
     {
@@ -1587,7 +1636,8 @@ void MainWindow::measureThreadStarted()
          m_statusMeasureTimeout->hide();
     }
 
-    m_statusMeasureThreadState->setText(tr("The measurement process is started "));
+    m_statusMeasureThreadState->setText(tr(" Measure process is running "));
+    m_statusMeasureThreadState->setStyleSheet("background-color: rgb(160, 255, 160);");
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1601,13 +1651,16 @@ void MainWindow::measureThreadStoped()
     m_pAnalogSignalToolBar->setEnabled(true);
     m_pComplexComporatorToolBar->setEnabled(true);
 
-    m_statusMeasureThreadInfo->setText("");
+    m_statusMeasureThreadInfo->setText(QString());
+    m_statusMeasureThreadInfo->hide();
 
     m_statusMeasureTimeout->hide();
     m_statusMeasureTimeout->setRange(0, theOptions.toolBar().measureTimeout());
     m_statusMeasureTimeout->setValue(0);
 
-    m_statusMeasureThreadState->setText(tr("The measurement process is stopped "));
+    m_statusMeasureThreadState->setText(tr(" Measure process is stopped "));
+    m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------

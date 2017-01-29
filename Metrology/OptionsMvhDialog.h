@@ -24,7 +24,7 @@ const char* const       MvhColumn[] =
                         QT_TRANSLATE_NOOP("OptionsMvhDialog.h", "Bold font"),
 };
 
-const int               MVH_COLUMN_COUNT    = sizeof(MvhColumn)/sizeof(char*);
+const int               MVH_COLUMN_COUNT    = sizeof(MvhColumn)/sizeof(MvhColumn[0]);
 
 const int               MVH_COLUMN_TITLE    = 0,
                         MVH_COLUMN_VISIBLE  = 1,
@@ -53,10 +53,11 @@ public:
     explicit            OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent = 0);
                         ~OptionsMeasureViewHeaderDialog();
 
-    int                 m_measureType = MEASURE_TYPE_LINEARITY;
     MeasureViewOption   m_header;
 
 private:
+
+    int                 m_measureType = MEASURE_TYPE_LINEARITY;
 
     // elements of interface
     //
@@ -71,7 +72,10 @@ private:
     void                updateList();
     void                clearList();
 
-    void                onMeasureType(int type);
+public:
+
+    int                 measureType() const { return m_measureType; }
+    void                setMeasureType(const int measureType);
 
 protected:
 

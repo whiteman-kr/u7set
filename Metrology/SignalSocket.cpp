@@ -376,7 +376,7 @@ void SignalSocket::requestSignalState()
 
         if (hash == 0)
         {
-            assert(false);
+            assert(hash != 0);
             continue;
         }
 
@@ -418,6 +418,9 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 
         AppSignalState state;
         state.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+
+//        state.flags.valid = true;
+//        state.value = 50;
 
         theSignalBase.setSignalState(hash, state);
     }

@@ -7,7 +7,7 @@
 
 #include "Measure.h"
 #include "MeasureViewHeader.h"
-#include "MeasureBase.h"
+#include "MeasurementBase.h"
 
 // ==============================================================================================
 
@@ -20,20 +20,20 @@ public:
     explicit            MeasureTable(QObject* parent = 0);
                         ~MeasureTable();
 
-    int                 measureType() { return m_measureType; }
-    void                setMeasureType(int type);
+    int                 measureType() const { return m_measureType; }
+    void                setMeasureType(const int measureType);
 
     MeasureViewHeader&  header() { return m_header; }
 
-    int                 count() { return m_measureBase.measurementCount(); }
+    int                 count() const { return m_measureBase.measurementCount(); }
 
-    bool                columnIsVisible(int column);
+    bool                columnIsVisible(const int column);
 
     bool                append(Measurement* pMeasurement);
     bool                remove(const QList<int> removeIndexList);
 
-    QColor              backgroundColor(int row, int column) const;
-    QString             text(int row, int column) const;
+    QColor              backgroundColor(const int row, const int column) const;
+    QString             text(const int row, const int column) const;
 
     MeasurementBase     m_measureBase;
 
@@ -62,11 +62,11 @@ class MeasureView : public QTableView
     Q_OBJECT
 
 public:
-    explicit            MeasureView(const int& measureType, QWidget *parent = 0);
+    explicit            MeasureView(const int measureType, QWidget *parent = 0);
                         ~MeasureView();
 
-    int                 measureType()   { return m_measureType; }
-    MeasureTable&       table()         { return m_table; }
+    int                 measureType() const { return m_measureType; }
+    MeasureTable&       table() { return m_table; }
 
     void                updateColumn();
 

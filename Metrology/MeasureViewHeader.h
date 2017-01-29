@@ -24,15 +24,16 @@ class MeasureViewColumn
 {
 public:
 
-    explicit            MeasureViewColumn();
+                        MeasureViewColumn();
                         MeasureViewColumn(const MeasureViewColumn& from);
-                        MeasureViewColumn(QString title, int width, bool visible, int alignment, bool bold, QColor color, bool duplicate);
+                        MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate);
+                        ~MeasureViewColumn();
 
 private:
 
     int                 m_index = -1;
 
-    QString             m_title = "";
+    QString             m_title;
     int                 m_width = 100;
     bool                m_enableVisible = MVC_CMN_SHOW;
 
@@ -44,27 +45,27 @@ private:
 
 public:
 
-    int                 index()                     { return m_index; }
-    void                setIndex(int index)         { m_index = index; }
+    int                 index() const { return m_index; }
+    void                setIndex(const int index) { m_index = index; }
 
-    QString             title()                     { return m_title; }
+    QString             title() const { return m_title; }
 
-    int                 width()                     { return m_width; }
-    void                setWidth(int width)         { m_width = width; }
+    int                 width() const { return m_width; }
+    void                setWidth(const int width) { m_width = width; }
 
 
-    bool                enableVisible()             { return m_enableVisible; }
-    void                setVisible(bool enable)     { m_enableVisible = enable; }
+    bool                enableVisible() const { return m_enableVisible; }
+    void                setVisible(const bool enable) { m_enableVisible = enable; }
 
-    int                 alignment()                 { return m_alignment; }
+    int                 alignment() const { return m_alignment; }
 
-    bool                boldFont()                  { return m_boldFont; }
-    void                setBoldFont(bool bold)      { m_boldFont = bold; }
+    bool                boldFont() const { return m_boldFont; }
+    void                setBoldFont(const bool bold) { m_boldFont = bold; }
 
-    QColor              color()                     { return m_color; }
-    void                setColor(QColor color)      { m_color = color; }
+    QColor              color() const { return m_color; }
+    void                setColor(const QColor& color) { m_color = color; }
 
-    bool                isEnableDuplicate()         { return m_enableDuplicate; }
+    bool                isEnableDuplicate() const { return m_enableDuplicate; }
 
     MeasureViewColumn&  operator=(const MeasureViewColumn& from);
 };
@@ -90,20 +91,20 @@ public:
     explicit            MeasureViewHeader(QObject *parent = 0);
                         ~MeasureViewHeader();
 
-    void                setMeasureType(int type);
+    void                setMeasureType(const int measureType);
 
-    void                init(int type);
+    void                init(const int type);
 
     int                 count() const;
-    MeasureViewColumn*  column(int index) const;
+    MeasureViewColumn*  column(const int index) const;
 
     void                updateColumnState();
 
-    void                setColumnVisible(int column, bool visible);
+    void                setColumnVisible(const int column, const bool visible);
 
 private:
 
-    static MeasureViewColumn    m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
+    static MeasureViewColumn m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
     int                 m_measureType = MEASURE_TYPE_UNKNOWN;
 

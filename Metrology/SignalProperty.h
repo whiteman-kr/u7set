@@ -33,7 +33,7 @@ const char* const               SignalPropertyGroup[] =
                                 QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Output electric range: "),
 };
 
-const int                       SIGNAL_PROPERTY_GROUP_COUNT         = sizeof(SignalPropertyGroup)/sizeof(char*);
+const int                       SIGNAL_PROPERTY_GROUP_COUNT         = sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
 
 const int                       SIGNAL_PROPERTY_GROUP_ID            = 0,
                                 SIGNAL_PROPERTY_GROUP_POSITION      = 1,
@@ -59,11 +59,13 @@ const int                       SIGNAL_PROPERTY_ITEM_CUSTOM_ID              = 0,
                                 SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH      = 12,
                                 SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT      = 13,
                                 SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION = 14,
-                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_MODE      = 15,
-                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR    = 16,
-                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION = 17;
+                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_LOW       = 15,
+                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_HIGH      = 16,
+                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT      = 17,
+                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR    = 18,
+                                SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION = 19;
 
-const int                       SIGNAL_PROPERTY_ITEM_COUNT                  = 18;
+const int                       SIGNAL_PROPERTY_ITEM_COUNT                  = 20;
 
 
 // ==============================================================================================
@@ -73,15 +75,14 @@ class SignalPropertyDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit                    SignalPropertyDialog(const Hash& signalHash, QWidget *parent = 0);
+    explicit                    SignalPropertyDialog(const MeasureSignalParam& param, QWidget *parent = 0);
                                 ~SignalPropertyDialog();
 
-    MeasureSignal               signal() { return m_signal; }
+    MeasureSignalParam          param() const { return m_param; }
 
 private:
 
-    Hash                        m_signalHash;
-    MeasureSignal               m_signal;
+    MeasureSignalParam          m_param;
 
     // Property list
     //
@@ -91,7 +92,7 @@ private:
 
     // buttons
     //
-    QDialogButtonBox*           m_buttonBox;
+    QDialogButtonBox*           m_buttonBox = nullptr;
 
     static bool                 m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT];
     QtBrowserItem*              m_browserItemList[SIGNAL_PROPERTY_GROUP_COUNT];
@@ -102,7 +103,7 @@ private:
 
     void                        createPropertyList();
 
-    void                        updateGroupHeader(const int& index);
+    void                        updateGroupHeader(const int index);
 
 signals:
 

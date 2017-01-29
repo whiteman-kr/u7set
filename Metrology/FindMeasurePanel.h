@@ -18,39 +18,40 @@ class FindItem
 {
 public:
 
-    explicit            FindItem();
-    explicit            FindItem(const int& row, const int& column, const int& beginPos, const int& endPos, const QString& text);
+                        FindItem();
+                        FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos);
+                        ~FindItem();
 
 private:
 
     int                 m_row = -1;
     int                 m_column = -1;
 
+    QString             m_text;
+
     int                 m_beginPos = -1;
     int                 m_endPos = -1;
-
-    QString             m_text;
 
 public:
 
     int                 row() const { return m_row; }
-    void                setRow(int row) { m_row = row; }
+    void                setRow(const int row) { m_row = row; }
 
     int                 column() const { return m_column; }
-    void                setColumn(int column) { m_column = column; }
+    void                setColumn(const int column) { m_column = column; }
 
-    void                setCoordinates(int row, int column) { m_row = row; m_column = column; }
-
-    int                 beginPos() const { return m_beginPos; }
-    void                setBeginPos(int pos) { m_beginPos = pos; }
-
-    int                 endPos() const { return m_endPos; }
-    void                setEndPos(int pos) { m_endPos = pos; }
-
-    void                setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
+    void                setCoordinates(const int row, const int column) { m_row = row; m_column = column; }
 
     QString             text() const { return m_text; }
-    void                setText(QString text) { m_text = text; }
+    void                setText(const QString& text) { m_text = text; }
+
+    int                 beginPos() const { return m_beginPos; }
+    void                setBeginPos(const int pos) { m_beginPos = pos; }
+
+    int                 endPos() const { return m_endPos; }
+    void                setEndPos(const int pos) { m_endPos = pos; }
+
+    void                setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
 
     FindItem&           operator=(const FindItem& from);
 };
@@ -67,7 +68,7 @@ const char* const       FindMeasureColumn[] =
                         QT_TRANSLATE_NOOP("FindMeasurePanel.h", "Text"),
 };
 
-const int               FIND_MEASURE_COLUMN_COUNT       = sizeof(FindMeasureColumn)/sizeof(char*);
+const int               FIND_MEASURE_COLUMN_COUNT       = sizeof(FindMeasureColumn)/sizeof(FindMeasureColumn[0]);
 
 const int               FIND_MEASURE_COLUMN_ROW         = 0,
                         FIND_MEASURE_COLUMN_TEXT        = 1;
@@ -85,12 +86,12 @@ public:
     explicit            FindMeasureTable(QObject* parent = 0);
                         ~FindMeasureTable();
 
-    int                 count() { return m_findItemList.count(); }
-    FindItem            at(int index);
+    int                 count() const { return m_findItemList.count(); }
+    FindItem            at(const int index) const;
     void                set(const QList<FindItem> list_add);
     void                clear();
 
-    QString             text(int row, int column) const;
+    QString             text(const int row, const int column) const;
 
 private:
 
@@ -116,8 +117,9 @@ class FindMeasurePanel : public QDockWidget
 public:
 
     explicit            FindMeasurePanel(QWidget* parent = 0);
+                        ~FindMeasurePanel();
 
-    FindMeasureTable&   table() { return m_table; }
+    void                clear() { m_table.clear(); m_statusLabel->setText(QString()); }
 
 private:
 
@@ -129,7 +131,7 @@ private:
 
     QMainWindow*        m_pFindWindow = nullptr;
     QLineEdit*          m_findTextEdit  = nullptr;
-    QTableView*         m_pFindItemView = nullptr;
+    QTableView*         m_pView = nullptr;
     QLabel*             m_statusLabel = nullptr;
     FindMeasureTable    m_table;
 
@@ -152,12 +154,12 @@ private slots:
 
     void                find();
 
-    void                selectItemInMeasureView(QModelIndex);
+    void                selectItemInMeasureView();
 
     void                onContextMenu(QPoint);
 
     void                copy();
-    void                selectAll();
+    void                selectAll() { m_pView->selectAll(); }
 };
 
 // ==============================================================================================

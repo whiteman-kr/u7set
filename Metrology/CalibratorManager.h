@@ -15,38 +15,33 @@
 
 // ==============================================================================================
 
-class CalibratorManager : public QObject
+class CalibratorManager : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit        CalibratorManager();
+    explicit        CalibratorManager(Calibrator* pCalibrator, QWidget* parent = 0);
                     ~CalibratorManager();
 
 private:
 
-    int             m_index = -1;                    // index calibrator in a common base calibrators CalibratorBase
     Calibrator*     m_pCalibrator = nullptr;
     bool            m_ready = false;
 
 public:
 
-    int             index()                         { return m_index;   }
-    void            setIndex(int index)             { m_index = index;  }
-
+    Calibrator*     calibrator() const { return m_pCalibrator; }
     void            setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator;  }
 
-    Calibrator*     calibrator()                    { return m_pCalibrator; }
-    QString         portName()                      { if (m_pCalibrator == nullptr) return ""; return m_pCalibrator->portName(); }
+    int             index() const;
+    QString         portName() const;
 
-    bool            isReady()                       { return m_ready; }
+    bool            isReady() const { return m_ready; }
 
 public:
 
     // elements of interface - Menu
     //
-    QDialog*        m_pManageDialog = nullptr;
-
     QFont*          m_pFont;
     QLabel*         m_pMeasureLabel = nullptr;
     QLineEdit*      m_pMeasureEdit = nullptr;
@@ -64,25 +59,22 @@ public:
     QDialog*        m_pErrorDialog = nullptr;
     QTextEdit*      m_pErrorList = nullptr;
 
-    void            createDialog(QWidget* parent);
+    void            createManageDialog();
     void            initDialog();
     void            enableInterface(bool enable);
 
-
 public:
-
-    void            showManageDialog();
 
     bool            calibratorIsConnected();
 
     // function for manage
     //
 
-    bool            setUnit(int mode, int unit);
+    bool            setUnit(const int mode, const int unit);
 
     void            updateValue();
     void            value();
-    void            setValue(double value);
+    void            setValue(const double value);
 
     void            stepDown();
     void            stepUp();
@@ -90,8 +82,8 @@ public:
     // options
     //
 
-    void            loadSettings();
-    void            saveSettings();
+    void            loadCalibratorSettings(Calibrator* pCalibrator);
+    void            saveCalibratorSettings(Calibrator* pCalibrator);
 
 signals:
 

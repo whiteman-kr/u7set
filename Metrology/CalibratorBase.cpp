@@ -51,22 +51,17 @@ void CalibratorBase::createCalibrators(QWidget* parent)
 {
     for(int index = 0; index < MAX_CHANNEL_COUNT; index++ )
     {
-        Calibrator* calibrator = new Calibrator;
+        Calibrator* calibrator = new Calibrator(index);
         if (calibrator == nullptr)
         {
             continue;
         }
 
-        CalibratorManager* manager = new CalibratorManager;
+        CalibratorManager* manager = new CalibratorManager(calibrator, parent);
         if (manager == nullptr)
         {
             continue;
         }
-
-        manager->setIndex(index);
-        manager->setCalibrator(calibrator);
-        manager->createDialog(parent);
-        manager->loadSettings();
 
         if (m_calibratorManagerList.append(manager) == -1)
         {
@@ -176,8 +171,6 @@ void CalibratorBase::createInitDialog(QWidget* parent)
     m_pInitDialog->setLayout(mainLayout);
 }
 
-
-
 // -------------------------------------------------------------------------------------------------------------------
 
 void CalibratorBase::setHeaderList()
@@ -214,7 +207,7 @@ void CalibratorBase::setHeaderList()
     {
         for(int row = 0; row < MAX_CHANNEL_COUNT; row++ )
         {
-            QTableWidgetItem* item = new QTableWidgetItem("");
+            QTableWidgetItem* item = new QTableWidgetItem(QString());
             item->setTextAlignment(Qt::AlignHCenter);
             m_pCalibratorView->setItem(row, column, item);
         }
@@ -255,11 +248,11 @@ void CalibratorBase::updateList()
         }
 
         m_pCalibratorView->item(index, CALIBRATOR_COLUMN_PORT)->setText(pCalibrator->portName());
-        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_TYPE)->setText(pCalibrator->typeString());
+        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_TYPE)->setText(pCalibrator->typeStr());
         m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
         m_pCalibratorView->item(index, CALIBRATOR_COLUMN_SN)->setText(pCalibrator->serialNo());
 
-        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackgroundColor(pCalibrator->isConnected() ? Qt::green : Qt::white);
+        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackgroundColor(pCalibrator->isConnected() ? QColor(0xA0, 0xFF, 0xA0) : Qt::white);
     }
 }
 
@@ -299,7 +292,7 @@ void CalibratorBase::showInitDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::at(const int& index)
+CalibratorManager* CalibratorBase::at(const int index) const
 {
     if (index < 0 || index >= m_calibratorManagerList.count())
     {
@@ -311,7 +304,7 @@ CalibratorManager* CalibratorBase::at(const int& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::firstConnectedCalibrator()
+CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 {
     CalibratorManager* pFirstConnected = nullptr;
 
@@ -337,7 +330,7 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::сalibratorForMeasure(const int& index)
+CalibratorManager* CalibratorBase::сalibratorForMeasure(const int index) const
 {
     CalibratorManager* pManager = nullptr;
 
@@ -428,7 +421,8 @@ void CalibratorBase::onManage()
         return;
     }
 
-    manager->showManageDialog();
+    manager->show();
+    manager->activateWindow();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -447,7 +441,7 @@ void CalibratorBase::onSettings()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorBase::onSettings(const int&  row, const int& )
+void CalibratorBase::onSettings(int row, int)
 {
     int index = row;
     if (index < 0 || index >= count())
@@ -545,7 +539,7 @@ void CalibratorBase::onSettings(const int&  row, const int& )
     calibrator->setPortName(portCombo->currentText());
     calibrator->setType(typeCombo->currentIndex());
 
-    manager->saveSettings();
+    manager->saveCalibratorSettings(calibrator);
 
     updateList();
 }
@@ -574,7 +568,7 @@ void CalibratorBase::onCopy()
     }
 
     QClipboard *clipboard = QApplication::clipboard();
-    clipboard->setText(calibrator->typeString() + " " + calibrator->serialNo());
+    clipboard->setText(calibrator->typeStr() + " " + calibrator->serialNo());
 }
 
 

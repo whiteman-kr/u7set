@@ -23,15 +23,21 @@ FindItem::FindItem()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindItem::FindItem(const int& row, const int& column, const int& beginPos, const int& endPos, const QString& text)
+FindItem::~FindItem()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+FindItem::FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos)
 {
     m_row = row;
     m_column = column;
 
+    m_text = text;
+
     m_beginPos = beginPos;
     m_endPos = endPos;
-
-    m_text = text;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -41,10 +47,10 @@ FindItem& FindItem::operator=(const FindItem& from)
     m_row = from.m_row;
     m_column = from.m_column;
 
+    m_text = from.m_text;
+
     m_beginPos = from.m_beginPos;
     m_endPos = from.m_endPos;
-
-    m_text = from.m_text;
 
     return *this;
 }
@@ -158,16 +164,16 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString FindMeasureTable::text(int row, int column) const
+QString FindMeasureTable::text(const int row, const int column) const
 {
     if (row < 0 || row >= m_findItemList.count())
     {
-        return "";
+        return QString();
     }
 
     if (column < 0 || column > FIND_MEASURE_COLUMN_COUNT)
     {
-        return "";
+        return QString();
     }
 
     FindItem item = m_findItemList.at(row);
@@ -187,7 +193,7 @@ QString FindMeasureTable::text(int row, int column) const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-FindItem FindMeasureTable::at(int index)
+FindItem FindMeasureTable::at(const int index) const
 {
     if (index < 0 || index >= count())
     {
@@ -254,6 +260,12 @@ FindMeasurePanel::FindMeasurePanel(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
+FindMeasurePanel::~FindMeasurePanel()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void FindMeasurePanel::createInterface()
 {
     m_pFindWindow = new QMainWindow;
@@ -273,25 +285,25 @@ void FindMeasurePanel::createInterface()
     m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
     m_pFindWindow->addToolBar(toolBar);
 
-    m_pFindItemView = new QTableView(m_pFindWindow);
-    m_pFindItemView->setModel(&m_table);
+    m_pView = new QTableView(m_pFindWindow);
+    m_pView->setModel(&m_table);
     QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
-    m_pFindItemView->verticalHeader()->setDefaultSectionSize(cellSize.height());
+    m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
-    m_pFindWindow->setCentralWidget(m_pFindItemView);
+    m_pFindWindow->setCentralWidget(m_pView);
 
-    m_pFindItemView->setColumnWidth(FIND_MEASURE_COLUMN_ROW, FIND_MEASURE_COLUMN_ROW_WIDTH);
+    m_pView->setColumnWidth(FIND_MEASURE_COLUMN_ROW, FIND_MEASURE_COLUMN_ROW_WIDTH);
 
-    connect(m_pFindItemView, &QTableView::clicked, this, &FindMeasurePanel::selectItemInMeasureView);
-    m_pFindItemView->installEventFilter(this);
+    connect(m_pView, &QTableView::clicked, this, &FindMeasurePanel::selectItemInMeasureView);
+    m_pView->installEventFilter(this);
 
     FindTextDelegate* textDelegate = new FindTextDelegate(this);
-    m_pFindItemView->setItemDelegateForColumn(FIND_MEASURE_COLUMN_TEXT, textDelegate);
+    m_pView->setItemDelegateForColumn(FIND_MEASURE_COLUMN_TEXT, textDelegate);
 
-    m_pFindItemView->horizontalHeader()->hide();
-    m_pFindItemView->verticalHeader()->hide();
-    m_pFindItemView->setShowGrid(false);
-    m_pFindItemView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_pView->horizontalHeader()->hide();
+    m_pView->verticalHeader()->hide();
+    m_pView->setShowGrid(false);
+    m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     QStatusBar* statusBar = m_pFindWindow->statusBar();
     m_statusLabel = new QLabel(tr("Found: 0"), statusBar);
@@ -311,17 +323,21 @@ void FindMeasurePanel::createContextMenu()
 
     m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
     m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+    m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+
     m_pContextMenu->addSeparator();
+
     m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
     m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+    m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
     connect(m_pCopyAction, &QAction::triggered, this, &FindMeasurePanel::copy);
     connect(m_pSelectAllAction, &QAction::triggered, this, &FindMeasurePanel::selectAll);
 
     // init context menu
     //
-    m_pFindItemView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_pFindItemView, &QTableWidget::customContextMenuRequested, this, &FindMeasurePanel::onContextMenu);
+    m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_pView, &QTableWidget::customContextMenuRequested, this, &FindMeasurePanel::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -347,7 +363,7 @@ bool FindMeasurePanel::event(QEvent* e)
     {
         QResizeEvent* resizeEvent = static_cast<QResizeEvent*>( e );
 
-        m_pFindItemView->setColumnWidth(FIND_MEASURE_COLUMN_TEXT, resizeEvent->size().width() - FIND_MEASURE_COLUMN_ROW_WIDTH - 20 );
+        m_pView->setColumnWidth(FIND_MEASURE_COLUMN_TEXT, resizeEvent->size().width() - FIND_MEASURE_COLUMN_ROW_WIDTH - 20 );
 
     }
 
@@ -364,7 +380,7 @@ bool FindMeasurePanel::eventFilter(QObject* object, QEvent* e)
 
         if(ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down || ke->key() == Qt::Key_PageUp || ke->key() == Qt::Key_PageDown)
         {
-            selectItemInMeasureView(QModelIndex());
+            selectItemInMeasureView();
         }
     }
 
@@ -395,7 +411,7 @@ void FindMeasurePanel::find()
 
     m_measureType = measureType;
 
-    MeasureView* pMeasureView = pMainWindow->m_measureView[measureType];
+    MeasureView* pMeasureView = pMainWindow->measureView(measureType);
     if (pMeasureView == nullptr)
     {
         return;
@@ -425,7 +441,7 @@ void FindMeasurePanel::find()
                 continue;
             }
 
-            findItemList.append( FindItem(row, column, pos, pos + m_findText.count(), text ) );
+            findItemList.append( FindItem(row, column, text, pos, pos + m_findText.count() ) );
         }
     }
 
@@ -439,15 +455,15 @@ void FindMeasurePanel::find()
 
     m_table.set(findItemList);
 
-    m_pFindItemView->setCurrentIndex(m_pFindItemView->model()->index(0, FIND_MEASURE_COLUMN_ROW));
-    m_pFindItemView->setFocus();
+    m_pView->setCurrentIndex(m_pView->model()->index(0, FIND_MEASURE_COLUMN_ROW));
+    m_pView->setFocus();
 
-    selectItemInMeasureView(QModelIndex());
+    selectItemInMeasureView();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::selectItemInMeasureView(QModelIndex)
+void FindMeasurePanel::selectItemInMeasureView()
 {
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
     if (pMainWindow == nullptr)
@@ -460,13 +476,13 @@ void FindMeasurePanel::selectItemInMeasureView(QModelIndex)
         return;
     }
 
-    MeasureView* pMeasureView = pMainWindow->m_measureView[m_measureType];
+    MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
     if (pMeasureView == nullptr)
     {
         return;
     }
 
-    int indexFindItem = m_pFindItemView->currentIndex().row();
+    int indexFindItem = m_pView->currentIndex().row();
     if (indexFindItem < 0 || indexFindItem >= m_table.count())
     {
         return;
@@ -501,35 +517,29 @@ void FindMeasurePanel::onContextMenu(QPoint)
 
 void FindMeasurePanel::copy()
 {
-    bool appendRow;
-    QString textRow;
     QString textClipboard;
 
-    int count = m_table.count();
-    for(int r = 0; r < count; r++)
+    int rowCount = m_pView->model()->rowCount();
+    int columnCount = m_pView->model()->columnCount();
+
+    for(int row = 0; row < rowCount; row++)
     {
-        appendRow = false;
-        textRow = "";
-
-        for(int c = 0; c < FIND_MEASURE_COLUMN_COUNT; c++)
+        if (m_pView->selectionModel()->isRowSelected(row, QModelIndex() ) == false)
         {
-            if (m_pFindItemView->selectionModel()->isSelected( m_pFindItemView->model()->index(r,c) ) == true)
-            {
-                appendRow = true;
-                textRow.append(m_table.text(r, c));
-            }
-
-            if (c != FIND_MEASURE_COLUMN_COUNT - 1)
-            {
-                textRow.append("\t");
-            }
+            continue;
         }
 
-        if (appendRow == true)
+        for(int column = 0; column < columnCount; column++)
         {
-            textClipboard.append(textRow);
-            textClipboard.append("\n");
+            if (m_pView->isColumnHidden(column) == true)
+            {
+                continue;
+            }
+
+            textClipboard.append(m_pView->model()->data( m_pView->model()->index(row, column)).toString() + "\t");
         }
+
+        textClipboard.replace(textClipboard.length() - 1, 1, "\n");
     }
 
     QClipboard *clipboard = QApplication::clipboard();
@@ -538,18 +548,11 @@ void FindMeasurePanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasurePanel::selectAll()
-{
-    m_pFindItemView->selectAll();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void FindMeasurePanel::loadSettings()
 {
     QSettings s;
 
-    m_findText = s.value( QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), "").toString();
+    m_findText = s.value( QString("%1/FindText").arg(FIND_MEASURE_OPTIONS_KEY), QString()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

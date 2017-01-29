@@ -5,7 +5,8 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Calibrator::Calibrator(QObject *parent) :
+Calibrator::Calibrator(const int index, QObject *parent) :
+    m_index (index),
     QObject(parent),
     m_port(this)
 {
@@ -30,8 +31,8 @@ void Calibrator::empty()
 
     m_connected = false;
 
-    m_name = "";
-    m_serialNo = "";
+    m_caption = QString();
+    m_serialNo = QString();
 
     m_timeout = 0;
 
@@ -42,13 +43,13 @@ void Calibrator::empty()
     m_measureValue = 0;
     m_sourceValue = 0;
 
-    m_lastResponse = "";
-    m_lastError = "";
+    m_lastResponse = QString();
+    m_lastError = QString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::setConnected(bool connect)
+void Calibrator::setConnected(const bool connect)
 {
     m_connected = connect;
 
@@ -129,10 +130,10 @@ bool Calibrator::getIDN()
 
     // Calibrator name
     //
-    m_name = m_lastResponse.left(endPos);
-    m_name = m_name.right(endPos - begPos - 1);
+    m_caption = m_lastResponse.left(endPos);
+    m_caption = m_caption.right(endPos - begPos - 1);
 
-    if (m_name.isEmpty() == true)
+    if (m_caption.isEmpty() == true)
     {
         m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration name").arg(__FUNCTION__).arg(m_portName);
         qDebug("%s", qPrintable(m_lastError));
@@ -272,7 +273,7 @@ bool Calibrator::recv()
         return false;
     }
 
-    m_lastResponse = "";
+    m_lastResponse = QString();
 
     QByteArray requestData;
 
@@ -323,6 +324,18 @@ bool Calibrator::recv()
     emit responseIsReceived(m_lastResponse);
 
     return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString Calibrator::typeStr() const
+{
+    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+    {
+        return QString ();
+    }
+
+    return CalibratorType[ m_type ];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -749,7 +762,7 @@ double Calibrator::getValue()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::setBusy(bool busy)
+void Calibrator::setBusy(const bool busy)
 {
     m_busy = busy;
 
@@ -973,7 +986,7 @@ void Calibrator::parseResponse()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::convert(double& val, int mode, int order)
+void Calibrator::convert(double& val, const int mode, const int order)
 {
     bool enableCorrect = false;
 

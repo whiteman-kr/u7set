@@ -121,7 +121,7 @@ void ExportMeasure::exec()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ExportMeasure::startExportThread(ExportMeasure* pThis, QString fileName)
+void ExportMeasure::startExportThread(ExportMeasure* pThis, const QString& fileName)
 {
     if (pThis == nullptr)
     {

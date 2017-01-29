@@ -36,7 +36,7 @@ private:
 
     bool            m_exportCancel = true;
 
-    static void     startExportThread(ExportMeasure* pThis, QString fileName);
+    static void     startExportThread(ExportMeasure* pThis, const QString& fileName);
     bool            saveFile(QString fileName);
 
 signals:

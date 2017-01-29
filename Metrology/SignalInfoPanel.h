@@ -27,7 +27,7 @@ const char* const       SignalInfoColumn[] =
                         QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Out. El. range"),
 };
 
-const int               SIGNAL_INFO_COLUMN_COUNT    = sizeof(SignalInfoColumn)/sizeof(char*);
+const int               SIGNAL_INFO_COLUMN_COUNT    = sizeof(SignalInfoColumn)/sizeof(SignalInfoColumn[0]);
 
 const int               SIGNAL_INFO_COLUMN_CASE         = 0,
                         SIGNAL_INFO_COLUMN_ID           = 1,
@@ -53,29 +53,47 @@ public:
     explicit            SignalInfoTable(QObject* parent = 0);
                         ~SignalInfoTable();
 
-    int                 count() { return MAX_CHANNEL_COUNT; }
-    Hash                at(int index);
-    void                set(const MeasureMultiSignal& multiSignal);
+    int                 signalCount() const { return MAX_CHANNEL_COUNT; }
+    MeasureSignalParam  signalParam(const int index) const;
+    void                set(const MeasureMultiSignal& activeSignal);
     void                clear();
 
-    QString             text(const int& row, const int& column) const;
+    QString             text(const int row, const int column, const MeasureSignalParam& param, const AppSignalState& state) const;
+    QString             signalStateStr(const MeasureSignalParam& param, const AppSignalState& state) const;
 
     bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(bool show) { m_showCustomID = show; }
+    void                setShowCustomID(const bool show) { m_showCustomID = show; }
 
-    void                updateColumn(const int& column);
+    bool                showElectricValue() const { return m_showElectricValue; }
+    void                setShowElectricValue(const bool show) { m_showElectricValue = show; }
+
+    bool                showAdcValue() const { return m_showAdcValue; }
+    void                setShowAdcValue(const bool show) { m_showAdcValue = show; }
+
+    bool                showAdcHexValue() const { return m_showAdcHexValue; }
+    void                setShowAdcHexValue(const bool show) { m_showAdcHexValue = show; }
+
+    void                updateColumn(const int column);
 
 private:
 
-    MeasureMultiSignal  m_activeSignal;
+    mutable QMutex      m_signalMutex;
+    MeasureSignalParam  m_activeSignalParam[MAX_CHANNEL_COUNT];
 
     static bool         m_showCustomID;
+    static bool         m_showElectricValue;
+    static bool         m_showAdcValue;
+    static bool         m_showAdcHexValue;
 
     int                 columnCount(const QModelIndex &parent) const;
     int                 rowCount(const QModelIndex &parent=QModelIndex()) const;
 
     QVariant            headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
     QVariant            data(const QModelIndex &index, int role) const;
+
+private slots:
+
+    void                updateSignalParam(const Hash& signalHash);
 };
 
 // ==============================================================================================
@@ -93,11 +111,9 @@ public:
     explicit            SignalInfoPanel(QWidget* parent = 0);
                         ~SignalInfoPanel();
 
-    void                clear()  { m_table.clear(); }
+    void                clear()  { m_signalParamTable.clear(); }
 
 private:
-
-    QMainWindow*        m_pMainWindow;
 
     static int          m_columnWidth[SIGNAL_INFO_COLUMN_COUNT];
 
@@ -105,11 +121,15 @@ private:
     //
     QMainWindow*        m_pSignalInfoWindow = nullptr;
     QTableView*         m_pView = nullptr;
-    SignalInfoTable     m_table;
+    SignalInfoTable     m_signalParamTable;
 
+    QMenu*              m_pShowMenu = nullptr;
     QMenu*              m_pContextMenu = nullptr;
     QAction*            m_pCopyAction = nullptr;
     QAction*            m_pShowCustomIDAction = nullptr;
+    QAction*            m_pShowElectricValueAction = nullptr;
+    QAction*            m_pShowAdcValueAction = nullptr;
+    QAction*            m_pShowAdcHexValueAction = nullptr;
     QAction*            m_pSignalPropertyAction = nullptr;
 
     QAction*            m_pColumnAction[SIGNAL_INFO_COLUMN_COUNT];
@@ -119,7 +139,7 @@ private:
     void                createHeaderContexMenu();
     void                createContextMenu();
 
-    void                hideColumn(int column, bool hide);
+    void                hideColumn(const int column, const bool hide);
 
     QTimer*             m_updateSignalStateTimer = nullptr;
     void                startSignalStateTimer();
@@ -137,7 +157,7 @@ public slots:
 
     // slot informs that signal for measure has updated his state
     //
-    void                updateStateActiveSignal();
+    void                updateSignalState();
 
 private slots:
 
@@ -145,6 +165,9 @@ private slots:
     //
     void                copy();
     void                showCustomID();
+    void                showElectricValue();
+    void                showAdcValue();
+    void                showAdcHexValue();
     void                signalProperty();
 
     void                onContextMenu(QPoint);
