@@ -4,6 +4,7 @@
 
 #include "MainWindow.h"
 #include "Options.h"
+#include "ExportData.h"
 #include "SignalList.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -898,7 +899,8 @@ void OutputSignalDialog::importSignal()
 
 void OutputSignalDialog::exportSignal()
 {
-
+    ExportData* dialog = new ExportData(m_pView, tr("OutputSignal"));
+    dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

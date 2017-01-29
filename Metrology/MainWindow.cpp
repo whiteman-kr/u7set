@@ -20,7 +20,7 @@
 #include "Database.h"
 #include "SignalBase.h"
 #include "ReportView.h"
-#include "ExportMeasure.h"
+#include "ExportData.h"
 #include "OutputSignal.h"
 #include "SignalList.h"
 #include "Statistic.h"
@@ -1104,7 +1104,12 @@ void MainWindow::exportMeasure()
         return;
     }
 
-    ExportMeasure* dialog = new ExportMeasure(pMeasureView);
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    ExportData* dialog = new ExportData(pMeasureView, MeasureFileName[m_measureType]);
     dialog->exec();
 }
 

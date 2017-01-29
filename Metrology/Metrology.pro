@@ -75,7 +75,6 @@ SOURCES += \
     MeasureViewHeader.cpp \
     MeasureView.cpp \
     OptionsMvhDialog.cpp \
-    ExportMeasure.cpp \
     Delegate.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
@@ -104,7 +103,8 @@ SOURCES += \
     SignalProperty.cpp \
     Statistic.cpp \
     MeasurementBase.cpp \
-    OutputSignal.cpp
+    OutputSignal.cpp \
+    ExportData.cpp
 
 
 HEADERS  += \
@@ -120,7 +120,6 @@ HEADERS  += \
     MeasureViewHeader.h \
     MeasureView.h \
     OptionsMvhDialog.h \
-    ExportMeasure.h \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
@@ -157,7 +156,8 @@ HEADERS  += \
     SignalProperty.h \
     Statistic.h \
     MeasurementBase.h \
-    OutputSignal.h
+    OutputSignal.h \
+    ExportData.h
 
 
 FORMS    +=

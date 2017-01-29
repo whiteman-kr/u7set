@@ -108,12 +108,16 @@ private:
     static int          m_columnWidth[SIGNAL_LIST_COLUMN_COUNT];
 
     QMenuBar*           m_pMenuBar = nullptr;
+    QMenu*              m_pSignalMenu = nullptr;
     QMenu*              m_pEditMenu = nullptr;
     QMenu*              m_pViewMenu = nullptr;
     QMenu*              m_pViewTypeADMenu = nullptr;
     QMenu*              m_pViewTypeIOMenu = nullptr;
     QMenu*              m_pViewShowMenu = nullptr;
     QMenu*              m_pContextMenu = nullptr;
+
+    QAction*            m_pPrintAction = nullptr;
+    QAction*            m_pExportAction = nullptr;
 
     QAction*            m_pFindAction = nullptr;
     QAction*            m_pCopyAction = nullptr;
@@ -163,6 +167,11 @@ private slots:
 
     // slots of menu
     //
+                        // Signal
+                        //
+    void                printSignal();
+    void                exportSignal();
+
                         // Edit
                         //
     void                find();
