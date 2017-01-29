@@ -1,4 +1,3 @@
-#include "Settings.h"
 #include "TuningFilterEditor.h"
 #include "DialogProperties.h"
 #include "DialogInputValue.h"
@@ -7,11 +6,17 @@
 //
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, bool showAutomatic, QWidget *parent) :
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, bool showAutomatic,
+                                       std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth,
+                                       QPoint pos,
+                                       QByteArray geometry,
+                                       QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
     m_showAutomatic(showAutomatic),
 	m_filterStorage(filterStorage),
-    m_objects(objects)
+    m_objects(objects),
+    m_signalsTableColumnWidth(signalsTableColumnWidth),
+    m_presetsTreeColumnWidth(presetsTreeColumnWidth)
 {
 
     assert(filterStorage);
@@ -31,7 +36,25 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
 
     fillObjectsList();
 
-    m_signalsTable->resizeColumnsToContents();
+    // Set column width
+
+    if (m_signalsTableColumnWidth.empty() == true)
+    {
+        m_signalsTable->resizeColumnsToContents();
+    }
+    else
+    {
+        int w = 0;
+        for (int c = 0; c < m_model->columnCount(); c++)
+        {
+            m_signalsTable->setColumnWidth(c, m_signalsTableColumnWidth[w++]);
+
+            if (w >= m_signalsTableColumnWidth.size())
+            {
+                break;
+            }
+        }
+    }
 
     // Add presets to tree
 	//
@@ -60,17 +83,35 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
         m_presetsTree->addTopLevelItem(item);
 	}
 
-    for (int i = 0; i < m_presetsTree->columnCount(); i++)
-	{
-        m_presetsTree->resizeColumnToContents(i);
-	}
+    // Set column width
+
+    if (m_presetsTreeColumnWidth.empty() == true)
+    {
+        for (int i = 0; i < m_presetsTree->columnCount(); i++)
+        {
+            m_presetsTree->resizeColumnToContents(i);
+        }
+    }
+    else
+    {
+        int w = 0;
+        for (int c = 0; c < m_presetsTree->columnCount(); c++)
+        {
+            m_presetsTree->setColumnWidth(c, m_presetsTreeColumnWidth[w++]);
+
+            if (w >= m_presetsTreeColumnWidth.size())
+            {
+                break;
+            }
+        }
+    }
 
     //
 
-    if (theSettings.m_presetEditorPos.x() != -1 && theSettings.m_presetEditorPos.y() != -1)
+    if (pos.x() != -1 && pos.y() != -1)
     {
-        move(theSettings.m_presetEditorPos);
-        restoreGeometry(theSettings.m_presetEditorGeometry);
+        move(pos);
+        restoreGeometry(geometry);
     }
     else
     {
@@ -81,9 +122,19 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
 
 TuningFilterEditor::~TuningFilterEditor()
 {
-    theSettings.m_presetEditorPos = pos();
-    theSettings.m_presetEditorGeometry = saveGeometry();
+    m_signalsTableColumnWidth.clear();
+    for (int i = 0; i < m_model->columnCount(); i++)
+    {
+        m_signalsTableColumnWidth.push_back(m_signalsTable->columnWidth(i));
+    }
 
+    m_presetsTreeColumnWidth.clear();
+    for (int i = 0; i < m_presetsTree->columnCount(); i++)
+    {
+        m_presetsTreeColumnWidth.push_back(m_presetsTree->columnWidth(i));
+    }
+
+    emit editorClosing(m_signalsTableColumnWidth, m_presetsTreeColumnWidth, pos(), saveGeometry());
 }
 
 void TuningFilterEditor::initUserInterface()
@@ -187,56 +238,126 @@ void TuningFilterEditor::initUserInterface()
     connect(m_presetsTree, &QTreeWidget::itemSelectionChanged, this, &TuningFilterEditor::on_m_presetsTree_itemSelectionChanged);
     connect(m_presetsTree, &QTreeWidget::doubleClicked, this, &TuningFilterEditor::on_m_presetsTree_doubleClicked);
 
+    m_presetsTree->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_presetsTree, &QTreeWidget::customContextMenuRequested, this, &TuningFilterEditor::on_m_presetsTree_contextMenu);
+
     rightLayout->addWidget(m_presetsTree);
 
     QGridLayout* rightGridLayout = new QGridLayout();
 
+    int col = 0;
+
     m_addPreset = new QPushButton(tr("Add Preset"));
     connect(m_addPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_addPreset_clicked);
-    rightGridLayout->addWidget(m_addPreset, 0, 0);
+    rightGridLayout->addWidget(m_addPreset, 0, col);
 
     m_editPreset = new QPushButton(tr("Edit Preset"));
     m_editPreset->setEnabled(false);
     connect(m_editPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_editPreset_clicked);
-    rightGridLayout->addWidget(m_editPreset, 1, 0);
+    rightGridLayout->addWidget(m_editPreset, 1, col);
 
     m_removePreset = new QPushButton(tr("Remove Preset"));
     m_removePreset->setEnabled(false);
     connect(m_removePreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_removePreset_clicked);
-    rightGridLayout->addWidget(m_removePreset, 2, 0);
+    rightGridLayout->addWidget(m_removePreset, 2, col);
+
+    col++;
+
+    m_copyPreset = new QPushButton(tr("Copy"));
+    m_copyPreset->setEnabled(false);
+    connect(m_copyPreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_copyPreset_clicked);
+    rightGridLayout->addWidget(m_copyPreset, 0, col);
+
+    m_pastePreset = new QPushButton(tr("Paste"));
+    connect(m_pastePreset, &QPushButton::clicked, this, &TuningFilterEditor::on_m_pastePreset_clicked);
+    rightGridLayout->addWidget(m_pastePreset, 1, col);
+
+    col++;
 
     m_moveUp = new QPushButton(tr("Move Up"));
     connect(m_moveUp, &QPushButton::clicked, this, &TuningFilterEditor::on_m_moveUp_clicked);
-    rightGridLayout->addWidget(m_moveUp, 0, 1);
+    rightGridLayout->addWidget(m_moveUp, 0, col);
 
     m_moveDown = new QPushButton(tr("Move Down"));
     connect(m_moveDown, &QPushButton::clicked, this, &TuningFilterEditor::on_m_moveDown_clicked);
-    rightGridLayout->addWidget(m_moveDown, 1, 1);
+    rightGridLayout->addWidget(m_moveDown, 1, col);
 
-    rightGridLayout->setColumnStretch(2, 1);
+    col++;
+
+    rightGridLayout->setColumnStretch(col, 1);
+
+    col++;
 
     m_setValue = new QPushButton(tr("Set Value"));
     m_setValue->setEnabled(false);
     connect(m_setValue, &QPushButton::clicked, this, &TuningFilterEditor::on_m_setValue_clicked);
-    rightGridLayout->addWidget(m_setValue, 0, 3);
+    rightGridLayout->addWidget(m_setValue, 0, col);
 
     m_setCurrent = new QPushButton(tr("Set Current"));
     m_setCurrent->setEnabled(false);
-    //connect(m_setCurrent, &QPushButton::clicked, this, &TuningFilterEditor::on_m_s);
-    rightGridLayout->addWidget(m_setCurrent, 1, 3);
+    connect(m_setCurrent, &QPushButton::clicked, this, &TuningFilterEditor::on_m_setCurrent_clicked);
+    rightGridLayout->addWidget(m_setCurrent, 1, col);
 
     rightLayout->addLayout(rightGridLayout);
 
     mainHorzLayout->addLayout(rightLayout);
 
+    m_addPresetAction = new QAction(tr("Add Preset"), this);
+    connect(m_addPresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_addPreset_clicked);
+
+    m_editPresetAction = new QAction(tr("Edit Preset"), this);
+    connect(m_editPresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_editPreset_clicked);
+
+    m_removePresetAction = new QAction(tr("Remove Preset"), this);
+    connect(m_removePresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_removePreset_clicked);
+
+    m_copyPresetAction = new QAction(tr("Copy"), this);
+    connect(m_copyPresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_copyPreset_clicked);
+
+    m_pastePresetAction = new QAction(tr("Paste"), this);
+    connect(m_pastePresetAction, &QAction::triggered, this, &TuningFilterEditor::on_m_pastePreset_clicked);
+
+    m_moveUpAction = new QAction(tr("Move Up"), this);
+    connect(m_moveUpAction, &QAction::triggered, this, &TuningFilterEditor::on_m_moveUp_clicked);
+
+    m_moveDownAction = new QAction(tr("Move Down"), this);
+    connect(m_moveDownAction, &QAction::triggered, this, &TuningFilterEditor::on_m_moveDown_clicked);
+
+    m_setValueAction = new QAction(tr("Set Value"), this);
+    connect(m_setValueAction, &QAction::triggered, this, &TuningFilterEditor::on_m_setValue_clicked);
+
+    m_setCurrentAction = new QAction(tr("Set Current"), this);
+    connect(m_setCurrentAction, &QAction::triggered, this, &TuningFilterEditor::on_m_setCurrent_clicked);
+
+    m_presetsTreeContextMenu = new QMenu(this);
+    m_presetsTreeContextMenu->addAction(m_addPresetAction);
+    m_presetsTreeContextMenu->addAction(m_editPresetAction);
+    m_presetsTreeContextMenu->addAction(m_removePresetAction);
+    m_presetsTreeContextMenu->addSeparator();
+    m_presetsTreeContextMenu->addAction(m_copyPresetAction);
+    m_presetsTreeContextMenu->addAction(m_pastePresetAction);
+    m_presetsTreeContextMenu->addSeparator();
+    m_presetsTreeContextMenu->addAction(m_moveUpAction);
+    m_presetsTreeContextMenu->addAction(m_moveDownAction);
+    m_presetsTreeContextMenu->addSeparator();
+    m_presetsTreeContextMenu->addAction(m_setValueAction);
+    m_presetsTreeContextMenu->addAction(m_setCurrentAction);
     //
 
-    m_okCancelButtonBox = new QDialogButtonBox(QDialogButtonBox::StandardButton::Ok | QDialogButtonBox::StandardButton::Cancel);
-    connect(m_okCancelButtonBox, &QDialogButtonBox::accepted, this, &TuningFilterEditor::accept);
-    connect(m_okCancelButtonBox, &QDialogButtonBox::rejected, this, &TuningFilterEditor::reject);
+    m_saveButton = new QPushButton(tr("Save"));
+    connect(m_saveButton, &QPushButton::clicked, this, &TuningFilterEditor::accept);
+
+    m_cancelButton = new QPushButton(tr("Cancel"));
+    connect(m_cancelButton, &QPushButton::clicked, this, &TuningFilterEditor::reject);
+
+    QHBoxLayout* okCancelButtonsLayout = new QHBoxLayout();
+    okCancelButtonsLayout->addStretch();
+    okCancelButtonsLayout->addWidget(m_saveButton);
+    okCancelButtonsLayout->addWidget(m_cancelButton);
+
 
     mainLayout->addLayout(mainHorzLayout);
-    mainLayout->addWidget(m_okCancelButtonBox);
+    mainLayout->addLayout(okCancelButtonsLayout);
 
     setLayout(mainLayout);
 }
@@ -521,6 +642,32 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		return;
 	}
 
+    if (m_objects->objectExists(value.appSignalHash()) == false)
+    {
+        QStringList l;
+        l.push_back("-");
+        l.push_back(tr("Signal"));
+        l.push_back("?");
+        l.push_back(value.appSignalId());
+        l.push_back("?");
+        if (value.useValue() == true)
+        {
+            l.push_back("?");
+        }
+        else
+        {
+            l.push_back("");
+        }
+
+        int i = 0;
+        for (auto s : l)
+        {
+            item->setText(i++, s);
+        }
+
+        return;
+    }
+
     TuningObject* object = m_objects->objectPtrByHash(value.appSignalHash());
     if (object == nullptr)
     {
@@ -528,7 +675,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
         return;
     }
 
-	QStringList l;
+    QStringList l;
 	l.push_back("-");
     l.push_back(tr("Signal"));
     l.push_back(object->customAppSignalID());
@@ -544,6 +691,10 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		{
             l.push_back(QString::number(value.value(), 'f', object->decimalPlaces()));
 		}
+    }
+    else
+    {
+        l.push_back("");
     }
 
 	int i = 0;
@@ -680,6 +831,114 @@ void TuningFilterEditor::on_m_removePreset_clicked()
 	}
 
 }
+
+void TuningFilterEditor::on_m_copyPreset_clicked()
+{
+    std::vector<std::shared_ptr<TuningFilter>> filters;
+
+    // Create the list of selected Presets
+    //
+    QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
+    for (auto p : selectedItems)
+    {
+        if (isFilter(p) == true)
+        {
+            std::shared_ptr<TuningFilter> filter = p->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+            if (filter == nullptr)
+            {
+                assert(filter);
+                return;
+            }
+
+            filters.push_back(filter);
+        }
+    }
+
+    if (filters.empty() == true)
+    {
+        return;
+    }
+
+    m_filterStorage->copyToClipboard(filters);
+
+}
+
+void TuningFilterEditor::on_m_pastePreset_clicked()
+{
+    QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
+
+    QTreeWidgetItem* parentItem = nullptr;
+
+    std::shared_ptr<TuningFilter> parentFilter = nullptr;
+
+    for (auto p : selectedItems)
+    {
+        if (isFilter(p) == true)
+        {
+            std::shared_ptr<TuningFilter> filter = p->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+            if (filter == nullptr)
+            {
+                assert(filter);
+                return;
+            }
+
+            parentFilter = filter;
+
+            parentItem = p;
+
+            break;
+        }
+    }
+
+    std::shared_ptr<TuningFilter> pastedRoot = m_filterStorage->pasteFromClipboard();
+
+    if (pastedRoot == nullptr)
+    {
+        return;
+    }
+
+    int count = pastedRoot->childFiltersCount();
+    if (count == 0)
+    {
+        return;
+    }
+
+    for (int i = 0; i < count; i++)
+    {
+
+        std::shared_ptr<TuningFilter> newFilter = pastedRoot->childFilter(i);
+
+        QUuid uid = QUuid::createUuid();
+        newFilter->setStrID(uid.toString());
+
+        QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
+        setFilterItemText(newPresetItem, newFilter.get());
+        newPresetItem->setData(0, Qt::UserRole, QVariant::fromValue(newFilter));
+        newPresetItem->setData(1, Qt::UserRole, static_cast<int>(TreeItemType::Filter));
+
+        addChildTreeObjects(newFilter, newPresetItem);
+
+        if (parentItem == nullptr || parentFilter == nullptr)
+        {
+            // no item was selected, add top level item
+            //
+            m_filterStorage->m_root->addChild(newFilter);
+            m_presetsTree->addTopLevelItem(newPresetItem);
+        }
+        else
+        {
+            // an item was selected, add child item
+            //
+            parentFilter->addChild(newFilter);
+
+            parentItem->addChild(newPresetItem);
+        }
+
+    }
+
+    m_modified = true;
+}
+
 
 void TuningFilterEditor::on_m_moveUp_clicked()
 {
@@ -836,12 +1095,23 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 	getSelectedCount(presetsCount, signalsCount);
 
     m_editPreset->setEnabled(presetsCount == 1 && signalsCount == 0);
+    m_editPresetAction->setEnabled(m_editPreset->isEnabled());
+
     m_removePreset->setEnabled(presetsCount > 0 && signalsCount == 0);
+    m_removePresetAction->setEnabled(m_removePreset->isEnabled());
+
+    m_copyPreset->setEnabled(presetsCount > 0 && signalsCount == 0);
+    m_copyPresetAction->setEnabled(m_copyPreset->isEnabled());
 
     m_add->setEnabled(presetsCount == 1 && signalsCount == 0);
     m_remove->setEnabled(presetsCount == 0 && signalsCount > 0);
 
     m_setValue->setEnabled(presetsCount == 0 && signalsCount > 0);
+    m_setValueAction->setEnabled(m_setValue->isEnabled());
+
+    m_setCurrent->setEnabled(presetsCount == 0 && signalsCount > 0);
+    m_setCurrentAction->setEnabled(m_setCurrent->isEnabled());
+
 }
 
 void TuningFilterEditor::on_m_setValue_clicked()
@@ -864,6 +1134,11 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		}
 
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
+
+        if (m_objects->objectExists(ov.appSignalHash()) == false)
+        {
+            continue;
+        }
 
         TuningObject* object = m_objects->objectPtrByHash(ov.appSignalHash());
         if (object == nullptr)
@@ -945,8 +1220,64 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
 		setSignalItemText(item, ov);
 
-        filter->setValue(ov.appSignalHash(), ov.value());
+        filter->setValue(ov);
 	}
+
+    m_modified = true;
+
+}
+void TuningFilterEditor::on_m_setCurrent_clicked()
+{
+    QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
+
+    for (auto item : selectedItems)
+    {
+        if (isSignal(item) == false)
+        {
+            continue;
+        }
+
+        QTreeWidgetItem* parentItem = item->parent();
+        if (parentItem == nullptr)
+        {
+            assert(parentItem);
+            return;
+        }
+
+        if (isFilter(parentItem) == false)
+        {
+            assert(false);
+            return;
+        }
+
+        std::shared_ptr<TuningFilter> filter = parentItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+        if (filter == nullptr)
+        {
+            assert(filter);
+            return;
+        }
+
+        TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
+
+        bool ok = false;
+
+        double newValue = getCurrentSignalValue(ov.appSignalHash(), ok);
+
+        if (ok == true)
+        {
+            ov.setUseValue(true);
+            ov.setValue(newValue);
+        }
+        else
+        {
+            ov.setUseValue(false);
+        }
+
+        item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
+        setSignalItemText(item, ov);
+
+        filter->setValue(ov);
+    }
 
     m_modified = true;
 
@@ -977,6 +1308,14 @@ void TuningFilterEditor::slot_signalsUpdated()
 	fillObjectsList();
 }
 
+double TuningFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
+{
+    Q_UNUSED(appSignalHash);
+    ok = false;
+
+    return 0;
+}
+
 void TuningFilterEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
 	m_sortColumn = column;
@@ -994,4 +1333,11 @@ void TuningFilterEditor::on_m_filterTypeCombo_currentIndexChanged(int index)
 void TuningFilterEditor::on_m_filterText_returnPressed()
 {
     fillObjectsList();
+}
+
+void TuningFilterEditor::on_m_presetsTree_contextMenu(const QPoint &pos)
+{
+    Q_UNUSED(pos);
+
+    m_presetsTreeContextMenu->exec(this->cursor().pos());
 }

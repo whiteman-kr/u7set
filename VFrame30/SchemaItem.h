@@ -17,6 +17,7 @@ namespace VFrame30
 	class SchemaItemSignal;
 
 	class FblItemRect;
+	class FblItem;
 }
 
 
@@ -180,6 +181,8 @@ namespace VFrame30
 		const FblItemRect* toFblItemRect() const;
 
 		bool isFblItem() const;
+		FblItem* toFblItem();
+		const FblItem* toFblItem() const;
 
 		bool isSchemaItemAfb() const;
 		SchemaItemAfb* toSchemaItemAfb();

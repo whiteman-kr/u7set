@@ -1106,7 +1106,7 @@ void TuningItemModelMain::slot_undo()
 
 void TuningItemModelMain::slot_Apply()
 {
-	if (theUserManager.requestPassword() == false)
+    if (theUserManager.requestPassword(m_parent, false) == false)
 	{
 		return;
 	}
@@ -1650,16 +1650,28 @@ void TuningPage::fillObjectsList()
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
-QColor TuningPage::tabColor()
+QColor TuningPage::backColor()
 {
     if (m_tabFilter != nullptr)
     {
-        return m_tabFilter->tabColor();
+        return m_tabFilter->backColor();
     }
 
     return QColor();
 
 }
+
+QColor TuningPage::textColor()
+{
+    if (m_tabFilter != nullptr)
+    {
+        return m_tabFilter->textColor();
+    }
+
+    return QColor();
+
+}
+
 
 void TuningPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
 {

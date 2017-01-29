@@ -77,6 +77,9 @@ public:
     QPoint m_presetEditorPos;
     QByteArray m_presetEditorGeometry;
 
+    std::vector<int> m_presetEditorSignalsTableColumnWidth;
+    std::vector<int> m_presetEditorPresetsTreeColumnWidth;
+
 
 
 private:

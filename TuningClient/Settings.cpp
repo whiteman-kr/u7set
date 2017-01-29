@@ -133,9 +133,24 @@ void Settings::StoreUser()
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
 
+    // Preset editor
 
     s.setValue("PresetEditor/pos", m_presetEditorPos);
     s.setValue("PresetEditor/geometry", m_presetEditorGeometry);
+
+    s.setValue("PresetEditor/signalsColumnCount", static_cast<uint>(m_presetEditorSignalsTableColumnWidth.size()));
+    for (int i = 0; i < m_presetEditorSignalsTableColumnWidth.size(); i++)
+    {
+        s.setValue(QString("PresetEditor/signalsColumnWidth/column%1").arg(i), m_presetEditorSignalsTableColumnWidth[i]);
+    }
+
+    s.setValue("PresetEditor/presetsColumnCount", static_cast<uint>(m_presetEditorPresetsTreeColumnWidth.size()));
+    for (int i = 0; i < m_presetEditorPresetsTreeColumnWidth.size(); i++)
+    {
+        s.setValue(QString("PresetEditor/presetsColumnWidth/column%1").arg(i), m_presetEditorPresetsTreeColumnWidth[i]);
+    }
+
+    //
 
     s.setValue("MainWindow/language", m_language);
 
@@ -180,8 +195,24 @@ void Settings::RestoreUser()
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 
+    // Preset Editor
+
     m_presetEditorPos = s.value("PresetEditor/pos", QPoint(-1, -1)).toPoint();
     m_presetEditorGeometry = s.value("PresetEditor/geometry").toByteArray();
+
+    int count = s.value("PresetEditor/signalsColumnCount", 0).toInt();
+    for (int i = 0; i < count; i++)
+    {
+        m_presetEditorSignalsTableColumnWidth.push_back(s.value(QString("PresetEditor/signalsColumnWidth/column%1").arg(i)).toInt());
+    }
+
+    count = s.value("PresetEditor/presetsColumnCount", 0).toInt();
+    for (int i = 0; i < count; i++)
+    {
+        m_presetEditorPresetsTreeColumnWidth.push_back(s.value(QString("PresetEditor/presetsColumnWidth/column%1").arg(i)).toInt());
+    }
+
+    //
 
     m_language = s.value("MainWindow/language", m_language).toString();
 }

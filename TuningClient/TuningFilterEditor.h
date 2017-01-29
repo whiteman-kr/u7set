@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "TuningObjectManager.h"
 #include "TuningObject.h"
 #include "TuningPage.h"
 
@@ -14,15 +13,26 @@ class TuningFilterEditor : public QDialog
 
 public:
 
-    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningObjectStorage* objects, bool showAutomatic, QWidget *parent);
+    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningObjectStorage* objects, bool showAutomatic,
+                                std::vector<int> &signalsTableColumnWidth, std::vector<int> &presetsTreeColumnWidth,
+                                QPoint pos,
+                                QByteArray geometry,
+                                QWidget *parent);
 
     ~TuningFilterEditor();
 
 
+signals:
+
+    void editorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
 public slots:
 
     void slot_signalsUpdated();
+
+protected:
+
+    virtual double getCurrentSignalValue(Hash appSignalHash, bool &ok);
 
 private slots:
 
@@ -32,7 +42,11 @@ private slots:
 
 	void on_m_removePreset_clicked();
 
-	void on_m_moveUp_clicked();
+    void on_m_copyPreset_clicked();
+
+    void on_m_pastePreset_clicked();
+
+    void on_m_moveUp_clicked();
 
 	void on_m_moveDown_clicked();
 
@@ -48,6 +62,8 @@ private slots:
 
 	void on_m_setValue_clicked();
 
+    void on_m_setCurrent_clicked();
+
     void on_m_applyFilter_clicked();
 
 	void on_m_signalsTable_doubleClicked(const QModelIndex &index);
@@ -57,6 +73,8 @@ private slots:
     void on_m_filterTypeCombo_currentIndexChanged(int index);
 
     void on_m_filterText_returnPressed();
+
+    void on_m_presetsTree_contextMenu(const QPoint &pos);
 
 private:
 
@@ -110,21 +128,47 @@ private:
     QLineEdit* m_filterText = nullptr;
     QPushButton* m_applyFilter = nullptr;
 
+    //
+
     QPushButton* m_add = nullptr;
     QPushButton* m_remove = nullptr;
 
     QTreeWidget* m_presetsTree = nullptr;
 
+    //
+
     QPushButton* m_addPreset = nullptr;
     QPushButton* m_editPreset = nullptr;
     QPushButton* m_removePreset = nullptr;
+
+    QPushButton* m_copyPreset = nullptr;
+    QPushButton* m_pastePreset = nullptr;
+
     QPushButton* m_moveUp = nullptr;
     QPushButton* m_moveDown = nullptr;
 
     QPushButton* m_setValue = nullptr;
     QPushButton* m_setCurrent = nullptr;
 
-    QDialogButtonBox* m_okCancelButtonBox = nullptr;
+    QAction* m_addPresetAction = nullptr;
+    QAction* m_editPresetAction = nullptr;
+    QAction* m_removePresetAction = nullptr;
+
+    QAction* m_copyPresetAction = nullptr;
+    QAction* m_pastePresetAction = nullptr;
+
+    QAction* m_moveUpAction = nullptr;
+    QAction* m_moveDownAction = nullptr;
+
+    QAction* m_setValueAction = nullptr;
+    QAction* m_setCurrentAction = nullptr;
+
+    QMenu* m_presetsTreeContextMenu = nullptr;
+
+
+    //QDialogButtonBox* m_okCancelButtonBox = nullptr;
+    QPushButton* m_saveButton = nullptr;
+    QPushButton* m_cancelButton = nullptr;
 
     // Dialog Data
     //
@@ -142,6 +186,9 @@ private:
 	int m_sortColumn = 0;
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+
+    std::vector <int> m_signalsTableColumnWidth;
+    std::vector <int> m_presetsTreeColumnWidth;
 };
 
 #endif // DIALOGPRESETEDITOR_H

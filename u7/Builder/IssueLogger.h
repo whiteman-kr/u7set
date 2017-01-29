@@ -81,7 +81,11 @@ namespace Builder
 		// INT			Internal issues							1000-1999
 		//
 		void errINT1000(QString debugMessage);
+
 		void errINT1001(QString debugMessage);
+		void errINT1001(QString debugMessage, QString schema);
+		void errINT1001(QString debugMessage, QString schema, QUuid itemsUuids);
+		void errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids);
 
 		// PDB			Project database issues					2000-2999
 		//
