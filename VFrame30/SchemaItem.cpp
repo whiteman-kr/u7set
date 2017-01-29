@@ -171,8 +171,27 @@ namespace VFrame30
 		qDebug() << "\tguid:" << guid();
 	}
 
-	bool SchemaItem::searchText(const QString& /*text*/) const
+	bool SchemaItem::searchText(const QString& text) const
 	{
+		QUuid uuid(text);
+		if (uuid.isNull() == false)
+		{
+			if (uuid == guid())
+			{
+				return true;
+			}
+		}
+
+		// FblItem is not derived from SchemaItem, so serach for the text manualy, cant call virtual function
+		//
+		if (isFblItem() == true)
+		{
+			if (toFblItem()->searchText(text) == true)
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -374,6 +393,16 @@ namespace VFrame30
 		return dynamic_cast<const FblItem*>(this) != nullptr;
 	}
 
+	FblItem* SchemaItem::toFblItem()
+	{
+		return dynamic_cast<FblItem*>(this);
+	}
+
+	const FblItem* SchemaItem::toFblItem() const
+	{
+		return dynamic_cast<const FblItem*>(this);
+	}
+
 	bool SchemaItem::isSchemaItemAfb() const
 	{
 		return dynamic_cast<const SchemaItemAfb*>(this) != nullptr;
@@ -430,6 +459,13 @@ namespace VFrame30
 	{
 		QUuid uuid = QUuid::createUuid();
 		setGuid(uuid);
+
+		// FblItem is not derived from SchemaItem, setNewGuid must be called manualy
+		//
+		if (this->isType<FblItem>() == true)
+		{
+			toType<FblItem>()->setNewGuid();
+		}
 
 		return;
 	}

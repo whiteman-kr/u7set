@@ -34,6 +34,8 @@ private:
 private:
 	Ui::CreateSchemaDialog *ui;
 
+	DbController* m_db = nullptr;
+
 	std::shared_ptr<VFrame30::Schema> m_schema;
 	std::shared_ptr<VFrame30::Schema> m_templateSchema;
 

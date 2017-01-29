@@ -169,8 +169,12 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-    auto propTabColor = ADD_PROPERTY_GETTER_SETTER(QColor, "Color", true, TuningFilter::tabColor, TuningFilter::setTabColor);
-    propTabColor->setCategory("Tab");
+    auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
+    propBackColor->setCategory("Color");
+
+    auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
+    propTextColor->setCategory("Color");
+
 }
 
 TuningFilter::TuningFilter(const TuningFilter& That)
@@ -238,9 +242,14 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
             setCaption(reader.attributes().value("Caption").toString());
         }
 
-        if (reader.attributes().hasAttribute("TabColor"))
+        if (reader.attributes().hasAttribute("BackColor"))
         {
-            setTabColor(QColor(reader.attributes().value("TabColor").toString()));
+            setBackColor(QColor(reader.attributes().value("BackColor").toString()));
+        }
+
+        if (reader.attributes().hasAttribute("TextColor"))
+        {
+            setTextColor(QColor(reader.attributes().value("TextColor").toString()));
         }
 
         if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
@@ -405,7 +414,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("StrID", strID());
 	writer.writeAttribute("Caption", caption());
 
-    writer.writeAttribute("TabColor", tabColor().name());
+    writer.writeAttribute("BackColor", backColor().name());
+    writer.writeAttribute("TextColor", textColor().name());
 
     writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
@@ -431,7 +441,6 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeEndElement();
 	return true;
 }
-
 
 QString TuningFilter::strID() const
 {
@@ -483,9 +492,9 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 		m_customAppSignalIDMasks.clear();
 	}
 	else
-	{
-		m_customAppSignalIDMasks = value.split(';');
-	}
+    {
+        m_customAppSignalIDMasks = value.split(';');
+    }
 
 }
 
@@ -508,9 +517,9 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 		m_equipmentIDMasks.clear();
 	}
 	else
-	{
-		m_equipmentIDMasks = value.split(';');
-	}
+    {
+        m_equipmentIDMasks = value.split(';');
+    }
 }
 
 QString TuningFilter::appSignalIDMask() const
@@ -533,7 +542,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';');
+        m_appSignalIDMasks = value.split(';');
 	}
 }
 
@@ -574,9 +583,9 @@ bool TuningFilter::value(Hash hash, TuningFilterValue& value)
 
 }
 
-void TuningFilter::setValue(Hash hash, float value)
+void TuningFilter::setValue(const TuningFilterValue& value)
 {
-	auto it = m_signalValuesMap.find(hash);
+    auto it = m_signalValuesMap.find(value.appSignalHash());
 
 	if (it == m_signalValuesMap.end())
 	{
@@ -585,8 +594,8 @@ void TuningFilter::setValue(Hash hash, float value)
 	}
 
 	TuningFilterValue& ofv = it->second;
-	ofv.setUseValue(true);
-	ofv.setValue(value);
+    ofv.setUseValue(value.useValue());
+    ofv.setValue(value.value());
 }
 
 bool TuningFilter::valueExists(Hash hash) const
@@ -666,14 +675,24 @@ void TuningFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
-QColor TuningFilter::tabColor() const
+QColor TuningFilter::backColor() const
 {
-    return m_tabColor;
+    return m_backColor;
 }
 
-void TuningFilter::setTabColor(const QColor& value)
+void TuningFilter::setBackColor(const QColor& value)
 {
-    m_tabColor = value;
+    m_backColor = value;
+}
+
+QColor TuningFilter::textColor() const
+{
+    return m_textColor;
+}
+
+void TuningFilter::setTextColor(const QColor& value)
+{
+    m_textColor = value;
 }
 
 TuningFilter* TuningFilter::parentFilter() const
@@ -835,11 +854,10 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 			return false;
 		}
 	}
-
-	// Mask for equipmentID
+    // Mask for equipmentID
 	//
 
-	if (m_equipmentIDMasks.isEmpty() == false)
+    if (m_equipmentIDMasks.isEmpty() == false)
 	{
 
 		QString s = object.equipmentID();
@@ -869,7 +887,7 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 	// Mask for appSignalId
 	//
 
-	if (m_appSignalIDMasks.isEmpty() == false)
+    if (m_appSignalIDMasks.isEmpty() == false)
 	{
 
 		QString s = object.appSignalID();
@@ -899,7 +917,7 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 	// Mask for customAppSignalID
 	//
 
-	if (m_customAppSignalIDMasks.isEmpty() == false)
+    if (m_customAppSignalIDMasks.isEmpty() == false)
 	{
 		QString s = object.customAppSignalID();
 
@@ -1123,34 +1141,96 @@ bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
 {
 	// save data to XML
 	//
-	QByteArray data;
-	QXmlStreamWriter writer(&data);
+    QByteArray data;
+    QXmlStreamWriter writer(&data);
 
-	writer.setAutoFormatting(true);
-	writer.writeStartDocument();
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
 
-	writer.writeStartElement("ObjectFilterStorage");
+    writer.writeStartElement("ObjectFilterStorage");
 
-	m_root->save(writer);
+    m_root->save(writer);
 
-	writer.writeEndElement();
+    writer.writeEndElement();
 
-	writer.writeEndElement();	// ObjectFilterStorage
+    writer.writeEndElement();	// ObjectFilterStorage
 
-	writer.writeEndDocument();
+    writer.writeEndDocument();
 
-	QFile f(fileName);
+    QFile f(fileName);
 
-	if (f.open(QFile::WriteOnly) == false)
-	{
+    if (f.open(QFile::WriteOnly) == false)
+    {
         *errorMsg = QObject::tr("TuningFilterStorage::save: failed to save presets in file %1.").arg(fileName);
-		return false;
-	}
+        return false;
+    }
 
-	f.write(data);
+    f.write(data);
 
-	return true;
+    return true;
 
+}
+
+bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters)
+{
+    // save data to clipboard
+    //
+    QByteArray data;
+    QXmlStreamWriter writer(&data);
+
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+
+    writer.writeStartElement("ObjectFilterStorage");
+
+    TuningFilter root(TuningFilter::FilterType::Root);
+
+    for (auto filter : filters)
+    {
+        std::shared_ptr<TuningFilter> filterCopy = std::make_shared<TuningFilter>();
+
+        *filterCopy = *filter;
+
+        root.addChild(filterCopy);
+    }
+
+    root.save(writer);
+
+    writer.writeEndElement();
+
+    writer.writeEndElement();	// ObjectFilterStorage
+
+    writer.writeEndDocument();
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(data.toStdString().c_str());
+
+    return true;
+}
+
+std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QString clipboardText = clipboard->text();
+
+    if (clipboardText.isEmpty() == true)
+    {
+        return nullptr;
+    }
+
+    TuningFilterStorage clipboardStorage;
+
+    QByteArray data = clipboardText.toUtf8();
+
+    QString errorMsg;
+
+    bool ok = clipboardStorage.load(data, &errorMsg, false);
+    if (ok == false)
+    {
+        return nullptr;
+    }
+
+    return clipboardStorage.m_root;
 }
 
 

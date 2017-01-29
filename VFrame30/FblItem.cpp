@@ -512,6 +512,48 @@ namespace VFrame30
 		return foundIt != m_outputPoints.end();
 	}
 
+	void FblItem::setNewGuid()
+	{
+		for (VFrame30::AfbPin& pin : m_inputPoints)
+		{
+			pin.setGuid(QUuid::createUuid());
+		}
+
+		for (VFrame30::AfbPin& pin : m_outputPoints)
+		{
+			pin.setGuid(QUuid::createUuid());
+		}
+
+		return;
+	}
+
+	bool FblItem::searchText(const QString& text) const
+	{
+		QUuid uuid(text);
+		if (uuid.isNull() == true)
+		{
+			return false;
+		}
+
+		for (const VFrame30::AfbPin& pin : m_inputPoints)
+		{
+			if (pin.guid() == uuid)
+			{
+				return true;
+			}
+		}
+
+		for (const VFrame30::AfbPin& pin : m_outputPoints)
+		{
+			if (pin.guid() == uuid)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	const VFrame30::AfbPin& FblItem::input(const QUuid& guid) const
 	{
 		for (const VFrame30::AfbPin& pin : m_inputPoints)
