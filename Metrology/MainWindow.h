@@ -47,7 +47,6 @@ public:
     QToolBar*           m_pMeasureKind = nullptr;
     QToolBar*           m_pOutputSignalToolBar = nullptr;
     QToolBar*           m_pAnalogSignalToolBar = nullptr;
-    QToolBar*           m_pComplexComporatorToolBar = nullptr;
 
     // Elements of interface - Items of ToolBars
     //
@@ -70,9 +69,6 @@ public:
     SignalInfoPanel*    m_pSignalInfoPanel = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
     QTableView*         m_pComparatorInfoView = nullptr;
-    QDockWidget*        m_pComplexComparatorInfoPanel = nullptr;
-    QTableView*         m_pComplexComparatorInfoView = nullptr;
-
 
     // Elements of interface - StatusBar
     //
@@ -151,8 +147,6 @@ private:
     QAction*            m_pShowSignalListAction = nullptr;
     QAction*            m_pShowComparatorsListAction = nullptr;
     QAction*            m_pShowOutputSignalListAction = nullptr;
-    QAction*            m_pShowOutputRangeListAction = nullptr;
-    QAction*            m_pShowComlexComparatorListAction = nullptr;
     QAction*            m_pOptionsAction;
 
     // menu - ?

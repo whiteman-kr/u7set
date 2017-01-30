@@ -173,7 +173,6 @@ OTHER_FILES += \
     translations/Metrology_uk.ts \
     reports/Linearity.ncr \
     reports/Comparators.ncr \
-    reports/ComplexComparators.ncr \
     reports/LinearityCertification.ncr \
     reports/LinearityDetailEl.ncr \
     reports/LinearityDetailPh.ncr

@@ -28,7 +28,6 @@ Measurement* Measurement::at(const int index)
     {
         case MEASURE_TYPE_LINEARITY:            pMeasurement = static_cast<LinearityMeasurement*> (this) + index;           break;
         case MEASURE_TYPE_COMPARATOR:           pMeasurement = static_cast<ComparatorMeasurement*> (this) + index;          break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasurement = static_cast<ComplexComparatorMeasurement*> (this) + index;   break;
         default:                                assert(0);
     }
 
@@ -52,7 +51,6 @@ Measurement& Measurement::operator=(Measurement& from)
     {
         case MEASURE_TYPE_LINEARITY:            *static_cast<LinearityMeasurement*> (this) = *static_cast <LinearityMeasurement*> (&from);                  break;
         case MEASURE_TYPE_COMPARATOR:           *static_cast<ComparatorMeasurement*> (this) = *static_cast <ComparatorMeasurement*> (&from);                break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   *static_cast<ComplexComparatorMeasurement*> (this) = *static_cast <ComplexComparatorMeasurement*> (&from);  break;
         default:                                assert(0);
     }
 
@@ -502,55 +500,3 @@ void ComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-
-ComplexComparatorMeasurement::ComplexComparatorMeasurement() :
-    Measurement(MEASURE_TYPE_COMPLEX_COMPARATOR)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ComplexComparatorMeasurement::ComplexComparatorMeasurement(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator)
-{
-    if (pMainCalibrator == nullptr || pSubCalibrator == nullptr)
-    {
-        return;
-    }
-
-    setMeasureType(MEASURE_TYPE_COMPLEX_COMPARATOR);
-
-    // features
-    //
-    setAppSignalID(QString());
-    setCustomAppSignalID(QString());
-    setCaption(QString());
-
-    position().setCaseNo(0);
-    position().setCaseCaption(QString());
-    position().setChannel(0);
-    position().setBlock(0);
-    position().setSubblock(0);
-    position().setEntry(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-ComplexComparatorMeasurement::~ComplexComparatorMeasurement()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComplexComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
-{
-    if (pMeasurement == nullptr)
-    {
-        return;
-    }
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-

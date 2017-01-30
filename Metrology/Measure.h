@@ -14,7 +14,6 @@ const char* const MeasureType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Measurements of linearity"),
             QT_TRANSLATE_NOOP("Measure.h", "Measurements of comparators"),
-            QT_TRANSLATE_NOOP("Measure.h", "Measurements of complex comparators"),
 };
 
 
@@ -22,8 +21,8 @@ const int   MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
 
 const int   MEASURE_TYPE_UNKNOWN            = -1,
             MEASURE_TYPE_LINEARITY          = 0,
-            MEASURE_TYPE_COMPARATOR         = 1,
-            MEASURE_TYPE_COMPLEX_COMPARATOR	= 2;
+            MEASURE_TYPE_COMPARATOR         = 1;
+
 
 // ----------------------------------------------------------------------------------------------
 
@@ -37,7 +36,6 @@ const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Linearity"),
             QT_TRANSLATE_NOOP("Measure.h", "Comparators"),
-            QT_TRANSLATE_NOOP("Measure.h", "ComplexComparators"),
 };
 
 // ==============================================================================================
@@ -329,45 +327,6 @@ public:
                     ComparatorMeasurement();
     explicit        ComparatorMeasurement(Calibrator* pCalibrator);
                     ~ComparatorMeasurement();
-
-private:
-
-    QString         m_appSignalID;
-    QString         m_customAppSignalID;
-    QString         m_caption;
-
-    DevicePosition  m_position;
-
-public:
-
-    QString         appSignalID() const { return m_appSignalID; }
-    void            setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
-
-    QString         customAppSignalID() const { return m_customAppSignalID; }
-    void            setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-
-    QString         caption() const { return m_caption; }
-    void            setCaption(const QString& name) { m_caption = name; }
-
-    DevicePosition& position() { return m_position; }
-
-    void updateHysteresis(Measurement* pMeasurement);
-};
-
-// ==============================================================================================
-
-const int COMPLEX_COMPARATOR_SIGNAL_COUNT = 2;
-
-// ==============================================================================================
-
-class ComplexComparatorMeasurement : public Measurement
-{
-
-public:
-
-                    ComplexComparatorMeasurement();
-    explicit        ComplexComparatorMeasurement(Calibrator* pMainCalibrator, Calibrator* pSubCalibrator);
-                    ~ComplexComparatorMeasurement();
 
 private:
 

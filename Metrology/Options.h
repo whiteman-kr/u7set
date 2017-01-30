@@ -310,7 +310,6 @@ const char* const       ReportType[] =
                         QT_TRANSLATE_NOOP("Options.h", "Linearity detail electric"),
                         QT_TRANSLATE_NOOP("Options.h", "Linearity detail physical"),
                         QT_TRANSLATE_NOOP("Options.h", "Comparators"),
-                        QT_TRANSLATE_NOOP("Options.h", "Complex comparators"),
 };
 
 const int               REPORT_TYPE_COUNT                       = sizeof(ReportType)/sizeof(ReportType[0]);
@@ -320,8 +319,7 @@ const int               REPORT_TYPE_UNKNOWN                     = -1,
                         REPORT_TYPE_LINEARITY_CERTIFICATION     = 1,
                         REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC   = 2,
                         REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL   = 3,
-                        REPORT_TYPE_COMPARATOR                  = 4,
-                        REPORT_TYPE_COMPLEX_COMPARATOR          = 5;
+                        REPORT_TYPE_COMPARATOR                  = 4;
 
 const char* const       ReportFileName[REPORT_TYPE_COUNT] =
 {
@@ -330,7 +328,6 @@ const char* const       ReportFileName[REPORT_TYPE_COUNT] =
                         QT_TRANSLATE_NOOP("Options.h", "LinearityDetailEl.ncr"),
                         QT_TRANSLATE_NOOP("Options.h", "LinearityDetailPh.ncr"),
                         QT_TRANSLATE_NOOP("Options.h", "Comparators.ncr"),
-                        QT_TRANSLATE_NOOP("Options.h", "ComplexComparators.ncr"),
 };
 
 // ==============================================================================================

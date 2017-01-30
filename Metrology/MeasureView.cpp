@@ -211,10 +211,6 @@ QColor MeasureTable::backgroundColor(const int row, const int column) const
 
             break;
 
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            break;
-
         default:
             assert(0);
     }
@@ -247,7 +243,6 @@ QString MeasureTable::text(const int row, const int column) const
     {
         case MEASURE_TYPE_LINEARITY:            result = textLinearity(row, column);         break;
         case MEASURE_TYPE_COMPARATOR:           result = textComparator(row, column);        break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   result = textComplexComparator(row, column); break;
         default:                                result = QString();
     }
 
@@ -369,42 +364,6 @@ QString MeasureTable::textLinearity(int row, int column) const
 // -------------------------------------------------------------------------------------------------------------------
 
 QString MeasureTable::textComparator(int row, int column) const
-{
-    if (row < 0 || row >= m_measureBase.measurementCount())
-    {
-        return QString();
-    }
-
-    if (column < 0 || column > m_header.count())
-    {
-        return QString();
-    }
-
-    Measurement* m = m_measureBase.measurement(row);
-    if (m == nullptr)
-    {
-        return QString();
-    }
-
-    QString result;
-
-    switch(column)
-    {
-        case 0:
-
-            break;
-
-        default:
-            result = QString();
-            break;
-    }
-
-    return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString MeasureTable::textComplexComparator(int row, int column) const
 {
     if (row < 0 || row >= m_measureBase.measurementCount())
     {

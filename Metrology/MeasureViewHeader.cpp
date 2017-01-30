@@ -148,75 +148,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
         MeasureViewColumn(),
         MeasureViewColumn(),
     },
-
-    // Measurements of complex comparators
-
-    {
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-    },
 };
 
 
@@ -238,17 +169,17 @@ MeasureViewColumn::MeasureViewColumn(const MeasureViewColumn& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn::MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate)
+MeasureViewColumn::MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate) :
+    m_title(title) ,
+    m_width(width) ,
+    m_enableVisible(visible) ,
+
+    m_alignment(alignment) ,
+    m_boldFont(bold) ,
+    m_color(color) ,
+
+    m_enableDuplicate(duplicate)
 {
-    m_title = title;
-    m_width = width;
-    m_enableVisible = visible;
-
-    m_alignment = alignment;
-    m_boldFont = bold;
-    m_color = color;
-
-    m_enableDuplicate = duplicate;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -467,9 +398,6 @@ void MeasureViewHeader::updateColumnState()
             break;
 
         case MEASURE_TYPE_COMPARATOR:
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
             break;
 
         default:

@@ -145,7 +145,6 @@ int MeasurementBase::load(const int measureType)
                 {
                     case MEASURE_TYPE_LINEARITY:            data.pMeasurement = new LinearityMeasurement[data.count];           break;
                     case MEASURE_TYPE_COMPARATOR:           data.pMeasurement = new ComparatorMeasurement[data.count];          break;
-                    case MEASURE_TYPE_COMPLEX_COMPARATOR:   data.pMeasurement = new ComplexComparatorMeasurement[data.count];   break;
                     default:                                assert(0);
                 }
 
@@ -208,7 +207,6 @@ int MeasurementBase::load(const int measureType)
                         case SQL_TABLE_LINEARITY_20_PH:                 static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_PHYSICAL, pSubMeasure); break;
                         case SQL_TABLE_LINEARITY_ADD_VAL:               static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalValue(pSubMeasure);                   break;
                         case SQL_TABLE_COMPARATOR_HYSTERESIS:           static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);                       break;
-                        case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:   static_cast<ComplexComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);                break;
                     }
 
                     break;
@@ -233,7 +231,6 @@ int MeasurementBase::load(const int measureType)
         {
             case MEASURE_TYPE_LINEARITY:            pMeasureAppend  = new LinearityMeasurement;         break;
             case MEASURE_TYPE_COMPARATOR:           pMeasureAppend  = new ComparatorMeasurement;        break;
-            case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasureAppend  = new ComplexComparatorMeasurement; break;
             default:                                assert(0);                                          break;
         }
 
@@ -315,7 +312,6 @@ int MeasurementBase::load(const int measureType)
         {
             case MEASURE_TYPE_LINEARITY:            delete [] static_cast<LinearityMeasurement*> (table.pMeasurement);          break;
             case MEASURE_TYPE_COMPARATOR:           delete [] static_cast<ComparatorMeasurement*> (table.pMeasurement);         break;
-            case MEASURE_TYPE_COMPLEX_COMPARATOR:   delete [] static_cast<ComplexComparatorMeasurement*> (table.pMeasurement);  break;
             default:                                assert(0);
         }
     }
@@ -461,10 +457,6 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
 
                 case MEASURE_TYPE_COMPARATOR:
                     static_cast<ComparatorMeasurement*> (pMeasurement);
-                    break;
-
-                case MEASURE_TYPE_COMPLEX_COMPARATOR:
-                    static_cast<ComplexComparatorMeasurement*> (pMeasurement);
                     break;
 
                 default:

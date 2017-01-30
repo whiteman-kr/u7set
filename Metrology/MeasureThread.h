@@ -46,7 +46,6 @@ private:
 
     void                    measureLinearity();
     void                    measureComprators();
-    void                    measureComplexComprators();
 
 protected:
 

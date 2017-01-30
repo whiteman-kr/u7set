@@ -175,7 +175,7 @@ void  MainWindow::createActions()
     connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
 
     m_pShowComparatorsListAction = new QAction(tr("&Comparators ..."), this);
-    m_pShowComparatorsListAction->setIcon(QIcon(":/icons/Complex.png"));
+    m_pShowComparatorsListAction->setIcon(QIcon(":/icons/Comparator.png"));
     m_pShowComparatorsListAction->setToolTip("");
     connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
@@ -183,16 +183,6 @@ void  MainWindow::createActions()
     m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
     m_pShowOutputSignalListAction->setToolTip("");
     connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
-
-    m_pShowOutputRangeListAction = new QAction(tr("Signals with output ranges ..."), this);
-    m_pShowOutputRangeListAction->setIcon(QIcon(":/icons/OutRange.png"));
-    m_pShowOutputRangeListAction->setToolTip("");
-    connect(m_pShowOutputRangeListAction, &QAction::triggered, this, &MainWindow::showOutputRangeList);
-
-    m_pShowComlexComparatorListAction = new QAction(tr("&Signals of complex comparator ..."), this);
-    m_pShowComlexComparatorListAction->setIcon(QIcon(":/icons/Complex.png"));
-    m_pShowComlexComparatorListAction->setToolTip("");
-    connect(m_pShowComlexComparatorListAction, &QAction::triggered, this, &MainWindow::showComlexComparatorList);
 
     m_pOptionsAction = new QAction(tr("&Options ..."), this);
     m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -242,15 +232,6 @@ void MainWindow::updateStartStopActions()
             if (theCalibratorBase.connectedCalibratorsCount() == 0)
             {
                startMeasure = false;
-            }
-
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            if (theCalibratorBase.connectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
-            {
-                startMeasure = false;
             }
 
             break;
@@ -308,8 +289,6 @@ void MainWindow::createMenu()
     m_pSettingMenu->addAction(m_pShowSignalListAction);
     m_pSettingMenu->addAction(m_pShowComparatorsListAction);
     m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
-    m_pSettingMenu->addAction(m_pShowOutputRangeListAction);
-    m_pSettingMenu->addAction(m_pShowComlexComparatorListAction);
     m_pSettingMenu->addSeparator();
     m_pSettingMenu->addAction(m_pOptionsAction);
 
@@ -530,30 +509,6 @@ bool MainWindow::createToolBars()
         connect(m_asEntryCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setEntry);
     }
 
-
-    // Control panel selecting signal of complex comparator
-    //
-    m_pComplexComporatorToolBar = new QToolBar(this);
-    if (m_pComplexComporatorToolBar != nullptr)
-    {
-        m_pComplexComporatorToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-        m_pComplexComporatorToolBar->setWindowTitle(tr("Control panel selecting signal of complex comparator"));
-        m_pComplexComporatorToolBar->setObjectName(m_pComplexComporatorToolBar->windowTitle());
-        addToolBarBreak(Qt::TopToolBarArea);
-        addToolBar(m_pComplexComporatorToolBar);
-
-        QLabel* ccTypeLabel = new QLabel(m_pComplexComporatorToolBar);
-        m_pComplexComporatorToolBar->addWidget(ccTypeLabel);
-        ccTypeLabel->setText(tr(" Type "));
-        ccTypeLabel->setEnabled(false);
-
-
-        QComboBox* ccTypeCombo = new QComboBox(m_pComplexComporatorToolBar);
-        m_pComplexComporatorToolBar->addWidget(ccTypeCombo);
-        ccTypeCombo->setEnabled(false);
-        ccTypeCombo->setFixedWidth(60);
-    }
-
     return true;
 }
 
@@ -711,30 +666,6 @@ void MainWindow::createPanels()
         }
 
         m_pComparatorInfoPanel->hide();
-    }
-
-
-    // Panel complex comparator information
-    //
-    m_pComplexComparatorInfoPanel = new QDockWidget(tr("Panel complex comparator information"), this);
-    m_pComplexComparatorInfoPanel->setObjectName("Panel complex comparator information");
-    if (m_pComplexComparatorInfoPanel != nullptr)
-    {
-        m_pComplexComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
-
-        m_pComplexComparatorInfoView = new QTableView;
-        if (m_pComplexComparatorInfoView != nullptr)
-        {
-            m_pComplexComparatorInfoPanel->setWidget(m_pComplexComparatorInfoView);
-        }
-        addDockWidget(Qt::BottomDockWidgetArea, m_pComplexComparatorInfoPanel);
-
-        if (m_pViewPanelMenu != nullptr)
-        {
-            m_pViewPanelMenu->addAction(m_pComplexComparatorInfoPanel->toggleViewAction());
-        }
-
-        m_pComplexComparatorInfoPanel->hide();
     }
 }
 
@@ -999,24 +930,9 @@ void MainWindow::setMeasureType(const int measureType)
             m_pMeasureKind->show();
             m_pOutputSignalToolBar->show();
             m_pAnalogSignalToolBar->show();
-            m_pComplexComporatorToolBar->hide();
 
             m_pSignalInfoPanel->show();
             m_pComparatorInfoPanel->show();
-            m_pComplexComparatorInfoPanel->hide();
-
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            m_pMeasureKind->hide();
-            m_pOutputSignalToolBar->hide();
-            m_pAnalogSignalToolBar->hide();
-            m_pComplexComporatorToolBar->show();
-
-            m_pSignalInfoPanel->hide();
-            m_pComparatorInfoPanel->hide();
-            m_pComplexComparatorInfoPanel->show();
 
             break;
 
@@ -1625,7 +1541,6 @@ void MainWindow::measureThreadStarted()
     m_pMeasureKind->setDisabled(true);
     m_pOutputSignalToolBar->setDisabled(true);
     m_pAnalogSignalToolBar->setDisabled(true);
-    m_pComplexComporatorToolBar->setDisabled(true);
 
     m_statusMeasureThreadInfo->setText(QString());
     m_statusMeasureThreadInfo->show();
@@ -1654,7 +1569,6 @@ void MainWindow::measureThreadStoped()
     m_pMeasureKind->setEnabled(true);
     m_pOutputSignalToolBar->setEnabled(true);
     m_pAnalogSignalToolBar->setEnabled(true);
-    m_pComplexComporatorToolBar->setEnabled(true);
 
     m_statusMeasureThreadInfo->setText(QString());
     m_statusMeasureThreadInfo->hide();

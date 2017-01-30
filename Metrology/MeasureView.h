@@ -51,8 +51,6 @@ private:
 
     QString             textLinearity(int row, int column) const;
     QString             textComparator(int row, int column) const;
-    QString             textComplexComparator(int row, int column) const;
-
 };
 
 // ==============================================================================================

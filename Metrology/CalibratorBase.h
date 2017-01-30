@@ -17,10 +17,6 @@
 
 // ==============================================================================================
 
-const int                   CALIBRATOR_COUNT_FOR_CC = 2;      // amount calibrators for measure complex cpmporator
-
-// ==============================================================================================
-
 const char* const           CalibratorColumn[] =
 {
                             QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial port"),

@@ -170,8 +170,8 @@ const int               SqlTableByMeasureType[SQL_TABLE_COUNT] =
                         MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR                          // SQL_TABLE_MEASURE_MAIN
                         MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR_HYSTERESIS               // SQL_TABLE_MEASURE_SUB
 
-                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR                  // SQL_TABLE_MEASURE_MAIN
-                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS       // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR                  // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS       // SQL_TABLE_MEASURE_SUB
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_POINT            // SQL_TABLE_CONFIG
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL           // SQL_TABLE_CONFIG
 

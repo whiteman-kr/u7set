@@ -188,18 +188,6 @@ void MeasureThread::run()
 
             break;
 
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            // for verification the complex comparators need two calibrator
-            //
-            if (theCalibratorBase.connectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
-            {
-                emit showMsgBox(QString("For measure accuracy complex comparator the need for at least %1 calibrators").arg(CALIBRATOR_COUNT_FOR_CC));
-                break;
-            }
-
-            break;
-
         default:
             assert(false);
     }
@@ -214,10 +202,6 @@ void MeasureThread::run()
 
         case MEASURE_TYPE_COMPARATOR:
             measureComprators();
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-            measureComplexComprators();
             break;
 
         default:
@@ -356,23 +340,6 @@ void MeasureThread::measureComprators()
     }
 
     emit measureInfo(tr("Comprators "));
-
-    waitMeasureTimeout();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MeasureThread::measureComplexComprators()
-{
-    int calibratorCount = theCalibratorBase.connectedCalibratorsCount();
-    if (calibratorCount < CALIBRATOR_COUNT_FOR_CC)
-    {
-        emit showMsgBox("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators");
-        m_cmdStopMeasure = true;
-        return;
-    }
-
-    emit measureInfo(tr("Complex Comprators "));
 
     waitMeasureTimeout();
 }

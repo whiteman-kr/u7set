@@ -372,7 +372,6 @@ void REPORT_HEADER::init(const int type)
         case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_EL];      break;
         case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_PH];      break;
         case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
-        case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
         default:                                    assert(0);                                              break;
     }
 
@@ -491,7 +490,6 @@ int ReportOption::reportTypeByMeasureType(const int measureType)
             break;
 
         case MEASURE_TYPE_COMPARATOR:           reportType = REPORT_TYPE_COMPARATOR;                        break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   reportType = REPORT_TYPE_COMPLEX_COMPARATOR;                break;
         default:                                reportType = REPORT_TYPE_UNKNOWN;                           break;
     }
 
