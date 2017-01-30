@@ -52,7 +52,7 @@ namespace Builder
     };
 
 
-	const int CALC_RUNTIME = 999;
+	const int CALC_RUNTIME = 99999;
 
     const LmCommand LmCommands[] =
     {
@@ -261,6 +261,7 @@ namespace Builder
     {
     private:
         static QHash<int, const LmCommand*> m_lmCommands;
+		static QHash<quint16, int> m_executedFb;
 
 		// initialized by ApplicationLogicCode::setMemoryMap()
         //
@@ -271,7 +272,8 @@ namespace Builder
 
         int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
 
-		int m_cmdRuntime = 0;			// calculated command runtime
+		int m_cmdReadTime = 0;			// command read time, equal to LmCommand::readTime
+		int m_cmdRunTime = 0;			// equal to LmCommand::runTime or calculated value
 
 		bool m_result = true;
 
