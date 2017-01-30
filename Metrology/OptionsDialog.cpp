@@ -241,7 +241,7 @@ QHBoxLayout* OptionsDialog::createButtons()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPage(int page)
+PropertyPage* OptionsDialog::createPage(const int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -270,7 +270,7 @@ PropertyPage* OptionsDialog::createPage(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyList(int page)
+PropertyPage* OptionsDialog::createPropertyList(const int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -356,7 +356,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
                     item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_IN_POINT]);
                     item->setValue(m_options.linearity().m_measureCountInPoint);
                     item->setAttribute(QLatin1String("minimum"), 1);
-                    item->setAttribute(QLatin1String("maximum"), MEASUREMENT_IN_POINT);
+                    item->setAttribute(QLatin1String("maximum"), MAX_MEASUREMENT_IN_POINT);
                     item->setAttribute(QLatin1String("singleStep"), 1);
                     appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
                     measureGroup->addSubProperty(item);
@@ -770,7 +770,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyDialog(int page)
+PropertyPage* OptionsDialog::createPropertyDialog(const int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -814,7 +814,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
+void OptionsDialog::appendProperty(QtProperty* property, const int page, const int param)
 {
     if (property == nullptr)
     {
@@ -832,7 +832,7 @@ void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded)
+void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, const int page, const int param, const bool expanded)
 {
     if (pEditor == nullptr)
     {
@@ -881,7 +881,7 @@ void OptionsDialog::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OptionsDialog::setActivePage(int page)
+bool OptionsDialog::setActivePage(const int page)
 {
     if (page < 0 || page >= m_pageList.count())
     {
@@ -1180,7 +1180,7 @@ void OptionsDialog::applyProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateLinearityPage(bool isDialog)
+void OptionsDialog::updateLinearityPage(const bool isDialog)
 {
     PropertyPage* page = m_pageList[OPTION_PAGE_LINEARITY_POINT];
     if (page == nullptr)
@@ -1264,7 +1264,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateMeasureViewPage(bool isDialog)
+void OptionsDialog::updateMeasureViewPage(const bool isDialog)
 {
     PropertyPage* page = m_pageList[OPTION_PAGE_MEASURE_VIEW_COLUMN];
     if (page == nullptr)
@@ -1284,7 +1284,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
         //
         m_options.setMeasureView( dialog->m_header );
 
-        int measureType = dialog->m_measureType;
+        int measureType = dialog->measureType();
         if (measureType >= 0 || measureType < MEASURE_TYPE_COUNT)
         {
             m_options.m_updateColumnView[measureType] = true;
@@ -1470,7 +1470,7 @@ bool OptionsDialog::event(QEvent * e)
             PropertyPage* pActivePage = m_pageList.at(m_activePage);
             if (pActivePage != nullptr )
             {
-                if (pActivePage->getType() == PROPERTY_PAGE_TYPE_LIST)
+                if (pActivePage->type() == PROPERTY_PAGE_TYPE_LIST)
                 {
                     QKeyEvent* keyEvent =  static_cast<QKeyEvent *>( e );
 

@@ -11,32 +11,33 @@
 
 // ==============================================================================================
 
-#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportMeasure.h", "Export measurements")
+#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportMeasure.h", "Export data")
 
 // ==============================================================================================
 
-class ExportMeasure : public QObject
+class ExportData : public QObject
 {
     Q_OBJECT
 
 public:
 
-    explicit        ExportMeasure(MeasureView* pMeasureView = nullptr);
-                    ~ExportMeasure();
+                    ExportData(QTableView* pView, const QString& fileName);
+                    ~ExportData();
 
     void            exec();
 
 private:
 
-    MeasureView*    m_pMeasureView = nullptr;
+    QTableView*     m_pView = nullptr;
+    QString         m_fileName;
 
-    QDialog*        m_pDialog = nullptr;
+    QDialog*        m_pProgressDialog = nullptr;
     QProgressBar*   m_progress = nullptr;
     QPushButton*    m_cancelButton = nullptr;
 
     bool            m_exportCancel = true;
 
-    static void     startExportThread(ExportMeasure* pThis, QString fileName);
+    static void     startExportThread(ExportData* pThis, const QString& fileName);
     bool            saveFile(QString fileName);
 
 signals:
@@ -49,7 +50,7 @@ signals:
 public slots:
 
     void            exportCancel() { m_exportCancel = true; }
-    void            exportComplited() { QMessageBox::information(m_pDialog, EXPORT_WINDOW_TITLE, tr("Export is complited!")); }
+    void            exportComplited() { QMessageBox::information(m_pProgressDialog, EXPORT_WINDOW_TITLE, tr("Export is complited!")); }
 };
 
 // ==============================================================================================

@@ -21,19 +21,20 @@ class MeasureThread : public QThread
 public:
 
     explicit                MeasureThread(QObject *parent = 0);
+                            ~MeasureThread();
 
     void                    init(QWidget* parent = 0);
 
-    void                    setMeasureType(int type)    { m_measureType = type; }
+    void                    setMeasureType(const int measureType) { m_measureType = measureType; }
 
-    void                    stop()                      { m_cmdStopMeasure = true; }
+    void                    stop() { m_cmdStopMeasure = true; }
 
 private:
 
     QWidget*                m_parent = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    MeasureMultiSignal      m_activeSignal;
+    MeasureSignalParam      m_activeSignalParam[MAX_CHANNEL_COUNT];
 
     bool                    m_cmdStopMeasure = true;
 
@@ -41,11 +42,10 @@ private:
 
     bool                    calibratorIsValid(CalibratorManager* pManager);
 
-    bool                    prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit);
+    bool                    prepareCalibrator(CalibratorManager* pManager, const int calibratorMode, const E::InputUnit signalInputUnit, const double inputElectricHighLimit);
 
     void                    measureLinearity();
     void                    measureComprators();
-    void                    measureComplexComprators();
 
 protected:
 
@@ -62,11 +62,11 @@ signals:
 
 private slots:
 
-    void                    msgBox(QString text)        { QMessageBox::information(m_parent, tr("Measurement process"), text); }
+    void                    msgBox(QString text) const { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
-    void                    calibratorDisconnected();
+    void                    updateSignalParam(const Hash& signalHash);
 
-    void                    finish();
+    void                    stopMeasure();
 };
 
 // ==============================================================================================

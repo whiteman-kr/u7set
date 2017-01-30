@@ -439,7 +439,7 @@ namespace ExtWidgets
 	// ---------QtMultiTextEdit----------
 	//
 
-    QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption, const QString& validator):
+    QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption, const QString& validator, bool password):
 		QWidget(parent),
 		m_userType(userType),
         m_caption(caption),
@@ -449,7 +449,7 @@ namespace ExtWidgets
 		m_lineEdit = new QLineEdit(parent);
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 
-        if (userType == QVariant::String && m_validator.isEmpty() == true)
+        if (userType == QVariant::String && m_validator.isEmpty() == true && password == false)
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -475,6 +475,11 @@ namespace ExtWidgets
             QRegExp regexp(m_validator);
             QRegExpValidator *v = new QRegExpValidator(regexp, this);
             m_lineEdit->setValidator(v);
+        }
+
+        if (password == true)
+        {
+            m_lineEdit->setEchoMode(QLineEdit::Password);
         }
 
 
@@ -905,7 +910,7 @@ namespace ExtWidgets
 					case QVariant::UInt:
 					case QVariant::Double:
 						{
-                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption(), p->validator());
+                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption(), p->validator(), p->password());
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
@@ -927,7 +932,7 @@ namespace ExtWidgets
 
 					case QVariant::Uuid:
 						{
-                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption(), p->validator());
+                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption(), p->validator(), p->password());
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
@@ -1265,6 +1270,11 @@ namespace ExtWidgets
         {
             assert(false);
             return QString();
+        }
+
+        if (p->password() == true)
+        {
+            return "";
         }
 
         QVariant value = p->value();

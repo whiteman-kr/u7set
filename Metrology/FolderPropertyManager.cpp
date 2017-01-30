@@ -44,6 +44,10 @@ void FolderEdit::buttonClicked()
     emit folderPathChanged(path);
 }
 
+FolderEdit::~FolderEdit()
+{
+}
+
 void FolderEdit::focusInEvent(QFocusEvent *e)
 {
     m_edit->event(e);

@@ -12,8 +12,13 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager::CalibratorManager()
+CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
+    : m_pCalibrator (pCalibrator)
+    , QDialog(parent)
 {
+    loadCalibratorSettings(pCalibrator);
+
+    createManageDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -25,32 +30,49 @@ CalibratorManager::~CalibratorManager()
         delete m_pErrorDialog;
     }
 
-    if (m_pManageDialog != nullptr)
-    {
-        delete m_pManageDialog;
-    }
-
-    m_index = -1;
     m_pCalibrator = nullptr;
     m_ready = false;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::createDialog(QWidget* parent)
+int CalibratorManager::index() const
+{
+    if (m_pCalibrator == nullptr)
+    {
+        return INVALID_CALIBRATOR_INDEX;
+    }
+
+    return m_pCalibrator->index();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString CalibratorManager::portName() const
+{
+    if (m_pCalibrator == nullptr)
+    {
+        return QString();
+    }
+
+    return m_pCalibrator->portName();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void CalibratorManager::createManageDialog()
 {
     // create elements of interface
     //
-    m_pManageDialog = new QDialog(parent);
 
     QGroupBox* valueGroup = new QGroupBox(tr("Display"));
     QVBoxLayout *valueLayout = new QVBoxLayout;
 
-    m_pMeasureLabel = new QLabel(tr("Measure"), m_pManageDialog);
-    m_pMeasureEdit = new QLineEdit(m_pManageDialog);
+    m_pMeasureLabel = new QLabel(tr("Measure"), this);
+    m_pMeasureEdit = new QLineEdit(this);
 
-    m_pSourceLabel = new QLabel(tr("Source"), m_pManageDialog);
-    m_pSourceEdit = new QLineEdit(m_pManageDialog);
+    m_pSourceLabel = new QLabel(tr("Source"), this);
+    m_pSourceEdit = new QLineEdit(this);
 
     valueLayout->addWidget(m_pMeasureLabel);
     valueLayout->addWidget(m_pMeasureEdit);
@@ -59,17 +81,17 @@ void CalibratorManager::createDialog(QWidget* parent)
 
     valueGroup->setLayout(valueLayout);
 
-    m_pValueEdit = new QLineEdit(m_pManageDialog);
+    m_pValueEdit = new QLineEdit(this);
 
     QGroupBox* buttonGroup = new QGroupBox(tr("Control"));
     QVBoxLayout *buttonLayout = new QVBoxLayout;
 
-    m_pSetValueButton = new QPushButton(tr("set value"), m_pManageDialog);
+    m_pSetValueButton = new QPushButton(tr("set value"), this);
 
     QHBoxLayout *stepButtonLayout = new QHBoxLayout;
 
-    m_pStepDownButton = new QPushButton(tr("Step down"), m_pManageDialog);
-    m_pStepUpButton = new QPushButton(tr("Step up"), m_pManageDialog);
+    m_pStepDownButton = new QPushButton(tr("Step down"), this);
+    m_pStepUpButton = new QPushButton(tr("Step up"), this);
 
     stepButtonLayout->addWidget(m_pStepDownButton);
     stepButtonLayout->addWidget(m_pStepUpButton);
@@ -81,15 +103,15 @@ void CalibratorManager::createDialog(QWidget* parent)
 
     QHBoxLayout *unitLayout = new QHBoxLayout;
 
-    m_pModeList = new QComboBox(m_pManageDialog);
-    m_pUnitList = new QComboBox(m_pManageDialog);
+    m_pModeList = new QComboBox(this);
+    m_pUnitList = new QComboBox(this);
 
     unitLayout->addWidget(m_pModeList);
     unitLayout->addWidget(m_pUnitList);
 
-    m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), m_pManageDialog);
+    m_pRemoteControlCheck = new QCheckBox(tr("Remote control"), this);
 
-    m_pErrorsButton = new QPushButton(tr("List errors"), m_pManageDialog);
+    m_pErrorsButton = new QPushButton(tr("List errors"), this);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -101,16 +123,16 @@ void CalibratorManager::createDialog(QWidget* parent)
     mainLayout->addWidget(m_pRemoteControlCheck);
     mainLayout->addStretch();
 
-    m_pErrorDialog = new QDialog(m_pManageDialog);
+    m_pErrorDialog = new QDialog(this);
 
     QVBoxLayout *errorLayout = new QVBoxLayout;
 
-    m_pErrorList = new QTextEdit(m_pManageDialog);
+    m_pErrorList = new QTextEdit(this);
     errorLayout->addWidget(m_pErrorList);
 
     m_pErrorDialog->setLayout(errorLayout);
 
-    m_pManageDialog->setLayout(mainLayout);
+    setLayout(mainLayout);
 
     initDialog();
 }
@@ -127,9 +149,9 @@ void CalibratorManager::initDialog()
 
     // init elements of interface
     //
-    m_pManageDialog->setWindowFlags(Qt::Drawer);
-    m_pManageDialog->setFixedWidth(190);
-    m_pManageDialog->setWindowIcon(QIcon(":/icons/Manage.png"));
+    setWindowFlags(Qt::Drawer);
+    setFixedWidth(190);
+    setWindowIcon(QIcon(":/icons/Manage.png"));
 
     QFont* font = new QFont("Arial", 16, 2);
 
@@ -146,7 +168,7 @@ void CalibratorManager::initDialog()
 
 
     QRegExp rx( "^[-]{0,1}[0-9]*[.]{1}[0-9]*$" );
-    QValidator *validator = new QRegExpValidator(rx, m_pManageDialog);
+    QValidator *validator = new QRegExpValidator(rx, this);
 
     m_pValueEdit->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_pValueEdit->setFont(*font);
@@ -211,18 +233,6 @@ void CalibratorManager::initDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::showManageDialog()
-{
-    if (m_pManageDialog == nullptr)
-    {
-        return;
-    }
-
-    m_pManageDialog->show();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void CalibratorManager::enableInterface(bool enable)
 {
     if (m_pCalibrator == nullptr)
@@ -252,14 +262,7 @@ void CalibratorManager::enableInterface(bool enable)
         m_pStepUpButton->setEnabled(false);
     }
 
-    if (m_pCalibrator->type() == CALIBRATOR_TYPE_CALYS75)
-    {
-        m_pRemoteControlCheck->setVisible(true);
-    }
-    else
-    {
-        m_pRemoteControlCheck->setVisible(false);
-    }
+    m_pRemoteControlCheck->setVisible(m_pCalibrator->type() == CALIBRATOR_TYPE_CALYS75);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -274,12 +277,12 @@ void  CalibratorManager::onCalibratorError(QString text)
     m_pErrorList->append(error);
     m_pErrorsButton->setText( QString("List errors (%1)").arg(m_pErrorList->document()->lineCount() ) );
 
-    if(m_pManageDialog->isVisible() == false)
+    if(isVisible() == false)
     {
         return;
     }
 
-    QMessageBox::critical(m_pManageDialog, m_pManageDialog->windowTitle(), text);
+    QMessageBox::critical(this, windowTitle(), text);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -291,8 +294,14 @@ void CalibratorManager::onCalibratorConnect()
         return;
     }
 
-    QString title = QString("c:%1 ").arg(m_index + 1) + m_pCalibrator->name() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
-    m_pManageDialog->setWindowTitle( title );
+    int index = m_pCalibrator->index();
+    if (index == INVALID_CALIBRATOR_INDEX)
+    {
+        return;
+    }
+
+    QString title = QString("c:%1 ").arg(index + 1) + m_pCalibrator->caption() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
+    setWindowTitle( title );
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
     enableInterface(true);
@@ -309,8 +318,15 @@ void CalibratorManager::onCalibratorDisconnect()
         return;
     }
 
-    QString title = QString("c:%1 (%2) - Disconnected").arg(m_index + 1).arg(m_pCalibrator->portName()) ;
-    m_pManageDialog->setWindowTitle(title);
+    int index = m_pCalibrator->index();
+    if (index == INVALID_CALIBRATOR_INDEX)
+    {
+        return;
+    }
+
+    QString title = QString("c:%1 (%2) - Disconnected").arg(index + 1).arg(m_pCalibrator->portName()) ;
+    setWindowTitle(title);
+
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
     enableInterface(false);
@@ -344,7 +360,7 @@ void CalibratorManager::onUnitChanged()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::setUnit(int mode, int unit)
+bool CalibratorManager::setUnit(const int mode, const int unit)
 {
     if (calibratorIsConnected() == false)
     {
@@ -465,7 +481,7 @@ void CalibratorManager::value()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::setValue(double value)
+void CalibratorManager::setValue(const double value)
 {
     if (calibratorIsConnected() == false)
     {
@@ -538,18 +554,13 @@ void CalibratorManager::onStepUp()
 
 void CalibratorManager::onErrorList()
 {
-    if (m_pManageDialog == nullptr)
-    {
-        return;
-    }
-
     if (m_pErrorDialog == nullptr)
     {
         return;
     }
 
     m_pErrorDialog->show();
-    m_pErrorDialog->move(m_pManageDialog->geometry().center() - m_pErrorDialog->rect().center());
+    m_pErrorDialog->move(geometry().center() - m_pErrorDialog->rect().center());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -561,46 +572,48 @@ void CalibratorManager::onRemoveControl()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::loadSettings()
+void CalibratorManager::loadCalibratorSettings(Calibrator* pCalibrator)
 {
-    if (m_pCalibrator == nullptr)
+    if (pCalibrator == nullptr)
     {
         return;
     }
 
-    if (m_index == -1)
+    int index = pCalibrator->index();
+    if (index == INVALID_CALIBRATOR_INDEX)
     {
         return;
     }
 
     QSettings s;
 
-    QString portName = s.value( QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), QString("COM%1").arg( m_index + 1)).toString();
-    int type = s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), CALIBRATOR_TYPE_TRXII).toInt();
+    QString portName    = s.value(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), QString("COM%1").arg( index + 1)).toString();
+    int     type        = s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), CALIBRATOR_TYPE_TRXII).toInt();
 
-    m_pCalibrator->setPortName(portName);
-    m_pCalibrator->setType(type);
+    pCalibrator->setPortName(portName);
+    pCalibrator->setType(type);
 
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::saveSettings()
+void CalibratorManager::saveCalibratorSettings(Calibrator* pCalibrator)
 {
-    if (m_pCalibrator == nullptr)
+    if (pCalibrator == nullptr)
     {
         return;
     }
 
-    if (m_index == -1)
+    int index = pCalibrator->index();
+    if (index == INVALID_CALIBRATOR_INDEX)
     {
         return;
     }
 
     QSettings s;
 
-    s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_pCalibrator->portName());
-    s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(m_index + 1), m_pCalibrator->type());
+    s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), pCalibrator->portName());
+    s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), pCalibrator->type());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

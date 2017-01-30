@@ -16,83 +16,20 @@ MeasureThread::MeasureThread(QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::init(QWidget* parent)
+MeasureThread::~MeasureThread()
 {
-    m_parent = parent;
-
-    connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
-    connect(this, &MeasureThread::finished, this, &MeasureThread::finish);
-
-    // set events on disconnect of calibrators
-    // in case if in process of measuring, our calibrator will disconnect we will be known about it
-    //
-    int calibratorCount = theCalibratorBase.count();
-    for(int c = 0; c < calibratorCount; c ++)
-    {
-        CalibratorManager* pManager = theCalibratorBase.at(c);
-        if (pManager == nullptr)
-        {
-            continue;
-        }
-
-        Calibrator* pCalibrator = pManager->calibrator();
-        if (pCalibrator == nullptr)
-        {
-            continue;
-        }
-
-        connect(pCalibrator, &Calibrator::disconnected, this, &MeasureThread::calibratorDisconnected);
-    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::calibratorDisconnected()
+void MeasureThread::init(QWidget* parent)
 {
-    if (m_cmdStopMeasure == true)
-    {
-        return;
-    }
+    m_parent = parent;
 
-    // calibrator has been disconnected
-    // if no connected calibrators then stop measuring
-    //
+    connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
-    int calibratorDisconnectedCount = theCalibratorBase.connectedCalibratorsCount();
-
-    switch (m_measureType)
-    {
-        case MEASURE_TYPE_LINEARITY:
-        case MEASURE_TYPE_COMPARATOR:
-
-            if ( calibratorDisconnectedCount == 0)
-            {
-                m_cmdStopMeasure = true;
-            }
-
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            if ( calibratorDisconnectedCount < CALIBRATOR_COUNT_FOR_CC )
-            {
-                m_cmdStopMeasure = true;
-            }
-
-            break;
-
-        default:
-            assert(0);
-            break;
-    }
-
-    // tell about problem
-    //
-    Calibrator* pDisconnectedCalibrator = dynamic_cast<Calibrator*> (sender());
-    if (pDisconnectedCalibrator != nullptr)
-    {
-        emit showMsgBox(tr("Calibrator: %1 - disconnected.").arg(pDisconnectedCalibrator->portName()));
-    }
+    connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
+    connect(this, &MeasureThread::finished, this, &MeasureThread::stopMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -135,7 +72,7 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pManager)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& calibratorMode, const E::InputUnit& signalInputUnit, const double& highInputLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int calibratorMode, const E::InputUnit signalInputUnit, const double inputElectricHighLimit)
 {
     if (calibratorIsValid(pManager) == false)
     {
@@ -158,7 +95,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int& ca
             {
                 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
                 //
-                if (highInputLimit <= 400)
+                if (inputElectricHighLimit <= 400)
                 {
                     calibratorUnit = CALIBRATOR_UNIT_LOW_OHM;
                 }
@@ -200,13 +137,22 @@ void MeasureThread::run()
         return;
     }
 
-    m_activeSignal = theSignalBase.activeSignal();
-    if (m_activeSignal.isEmpty() == true)
-    {
-        return;
-    }
-
+    // set command for exit (stop measure) in state = FALSE
+    //
     m_cmdStopMeasure = false;
+
+    // create param list
+    //
+    for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+    {
+        Hash signalHash = theSignalBase.activeSignal().hash(i);
+        if (signalHash == 0)
+        {
+            continue;
+        }
+
+        m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
+    }
 
     // select calibrator mode and calibrator unit
     // depend from analog signal
@@ -221,14 +167,8 @@ void MeasureThread::run()
             //
             for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
             {
-                Hash signalHash = m_activeSignal.hash(i);
-                if (signalHash == 0)
-                {
-                    continue;
-                }
-
-                Signal param = theSignalBase.signalParam(signalHash);
-                if (param.appSignalID().isEmpty() == true || param.hash() == 0)
+                MeasureSignalParam param = m_activeSignalParam[i];
+                if (param.isValid() == false)
                 {
                     continue;
                 }
@@ -239,23 +179,11 @@ void MeasureThread::run()
                     continue;
                 }
 
-                if (prepareCalibrator(pManager, CALIBRATOR_MODE_SOURCE, param.inputUnitID(), param.inputHighLimit() ) == false)
+                if (prepareCalibrator(pManager, CALIBRATOR_MODE_SOURCE, param.inputElectricUnitID(), param.inputElectricHighLimit() ) == false)
                 {
                     emit showMsgBox(QString("Calibrator: %1 - can not set source mode.").arg(pManager->portName()));
                     continue;
                 }
-            }
-
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-
-            // for verification the complex comparators need two calibrator
-            //
-            if (theCalibratorBase.connectedCalibratorsCount() < CALIBRATOR_COUNT_FOR_CC)
-            {
-                emit showMsgBox(QString("For measure accuracy complex comparator the need for at least %1 calibrators").arg(CALIBRATOR_COUNT_FOR_CC));
-                break;
             }
 
             break;
@@ -274,10 +202,6 @@ void MeasureThread::run()
 
         case MEASURE_TYPE_COMPARATOR:
             measureComprators();
-            break;
-
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-            measureComplexComprators();
             break;
 
         default:
@@ -325,14 +249,8 @@ void MeasureThread::measureLinearity()
 
         for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
-            Hash signalHash = m_activeSignal.hash(i);
-            if (signalHash == 0)
-            {
-                continue;
-            }
-
-            Signal param = theSignalBase.signalParam(signalHash);
-            if (param.appSignalID().isEmpty() == true || param.hash() == 0)
+            MeasureSignalParam param = m_activeSignalParam[i];
+            if (param.isValid() == false)
             {
                 continue;
             }
@@ -344,7 +262,7 @@ void MeasureThread::measureLinearity()
             }
 
 
-            double physicalVal = (point.percent() * (param.highEngeneeringUnits() - param.lowEngeneeringUnits()) / 100) + param.lowEngeneeringUnits();
+            double physicalVal = (point.percent() * (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) / 100) + param.inputPhysicalLowLimit();
             double electricVal = conversion(physicalVal, CT_PHYSICAL_TO_ELECTRIC, param);
 
             pManager->setValue( electricVal );
@@ -386,8 +304,8 @@ void MeasureThread::measureLinearity()
 
         for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
         {
-            Hash signalHash = m_activeSignal.hash(i);
-            if (signalHash == 0)
+            MeasureSignalParam param = m_activeSignalParam[i];
+            if (param.isValid() == false)
             {
                 continue;
             }
@@ -398,7 +316,7 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            LinearityMeasurement* pMeasurement = new LinearityMeasurement(pManager->calibrator(), signalHash);
+            LinearityMeasurement* pMeasurement = new LinearityMeasurement(pManager->calibrator(), param);
             if (pMeasurement == nullptr )
             {
                 continue;
@@ -428,24 +346,26 @@ void MeasureThread::measureComprators()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::measureComplexComprators()
+void MeasureThread::updateSignalParam(const Hash& signalHash)
 {
-    int calibratorCount = theCalibratorBase.connectedCalibratorsCount();
-    if (calibratorCount < CALIBRATOR_COUNT_FOR_CC)
+    if (signalHash == 0)
     {
-        emit showMsgBox("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators");
-        m_cmdStopMeasure = true;
+        assert(signalHash != 0);
         return;
     }
 
-    emit measureInfo(tr("Complex Comprators "));
-
-    waitMeasureTimeout();
+    for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+    {
+        if (m_activeSignalParam[i].hash() == signalHash)
+        {
+            m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::finish()
+void MeasureThread::stopMeasure()
 {
     setMeasureType(MEASURE_TYPE_UNKNOWN);
     m_cmdStopMeasure = true;

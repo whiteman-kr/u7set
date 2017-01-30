@@ -75,8 +75,6 @@ SOURCES += \
     MeasureViewHeader.cpp \
     MeasureView.cpp \
     OptionsMvhDialog.cpp \
-    MeasureBase.cpp \
-    ExportMeasure.cpp \
     Delegate.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
@@ -103,7 +101,10 @@ SOURCES += \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
     SignalProperty.cpp \
-    Statistic.cpp
+    Statistic.cpp \
+    MeasurementBase.cpp \
+    OutputSignal.cpp \
+    ExportData.cpp
 
 
 HEADERS  += \
@@ -119,8 +120,6 @@ HEADERS  += \
     MeasureViewHeader.h \
     MeasureView.h \
     OptionsMvhDialog.h \
-    MeasureBase.h \
-    ExportMeasure.h \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
@@ -155,7 +154,10 @@ HEADERS  += \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
     SignalProperty.h \
-    Statistic.h
+    Statistic.h \
+    MeasurementBase.h \
+    OutputSignal.h \
+    ExportData.h
 
 
 FORMS    +=
@@ -171,7 +173,6 @@ OTHER_FILES += \
     translations/Metrology_uk.ts \
     reports/Linearity.ncr \
     reports/Comparators.ncr \
-    reports/ComplexComparators.ncr \
     reports/LinearityCertification.ncr \
     reports/LinearityDetailEl.ncr \
     reports/LinearityDetailPh.ncr

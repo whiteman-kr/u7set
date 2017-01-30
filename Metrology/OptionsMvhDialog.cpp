@@ -39,7 +39,7 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
     setLayout(mainLayout);
 
-    connect(m_measureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OptionsMeasureViewHeaderDialog::onMeasureType);
+    connect(m_measureTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OptionsMeasureViewHeaderDialog::setMeasureType);
 
     setHeaderList();
 }
@@ -206,14 +206,14 @@ void OptionsMeasureViewHeaderDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::onMeasureType(int type)
+void OptionsMeasureViewHeaderDialog::setMeasureType(const int measureType)
 {
-    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    m_measureType = type;
+    m_measureType = measureType;
 
     updateList();
 }

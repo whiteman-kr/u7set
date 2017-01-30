@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtSql>
 #include <QMutex>
+
 #include "Measure.h"
 
 // ==============================================================================================
@@ -19,14 +20,15 @@ class SqlFieldBase : public QSqlRecord
 {
 public:
 
-    explicit            SqlFieldBase();
+                        SqlFieldBase();
+                        ~SqlFieldBase();
 
-    int                 init(int objectType, int version);
+    int                 init(const int objectType, const int version);
 
     void                append(const QSqlField& field);
     void                append(QString name, QVariant::Type type = QVariant::Invalid, int length = 0);
 
-    QString             extFieldName(int index);
+    QString             extFieldName(const int index);
 };
 
 // ==============================================================================================
@@ -55,7 +57,7 @@ const char* const		SqlTabletName[] =
                         QT_TRANSLATE_NOOP("Database.h", "ReportOption"),
 };
 
-const int               SQL_TABLE_COUNT                    = sizeof(SqlTabletName)/sizeof(char*);
+const int               SQL_TABLE_COUNT                    = sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);
 
 const int               SQL_TABLE_UNKNONW                       = -1,
                         SQL_TABLE_DATABASE_INFO                 = 0,
@@ -148,9 +150,9 @@ const int               SqlObjectID[SQL_TABLE_COUNT] =
 
 // ==============================================================================================
 
-const int               SQL_TABLE_MEASURE_MAIN  = 0,
-                        SQL_TABLE_MEASURE_SUB   = 1,
-                        SQL_TABLE_CONFIG        = 2;
+const int               SQL_TABLE_IS_MAIN   = 0,
+                        SQL_TABLE_IS_SUB    = 1,
+                        SQL_TABLE_IS_CONFIG = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -168,8 +170,8 @@ const int               SqlTableByMeasureType[SQL_TABLE_COUNT] =
                         MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR                          // SQL_TABLE_MEASURE_MAIN
                         MEASURE_TYPE_COMPARATOR,            //    SQL_TABLE_COMPARATOR_HYSTERESIS               // SQL_TABLE_MEASURE_SUB
 
-                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR                  // SQL_TABLE_MEASURE_MAIN
-                        MEASURE_TYPE_COMPLEX_COMPARATOR,    //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS       // SQL_TABLE_MEASURE_SUB
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR                  // SQL_TABLE_MEASURE_MAIN
+                        MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS       // SQL_TABLE_MEASURE_SUB
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_POINT            // SQL_TABLE_CONFIG
                         MEASURE_TYPE_UNKNOWN,               //    SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL           // SQL_TABLE_CONFIG
 
@@ -180,8 +182,8 @@ const int               SqlTableByMeasureType[SQL_TABLE_COUNT] =
 
 // ==============================================================================================
 
-const int				SQL_FIELD_OBJECT_ID = 0;	// zero column is unique identifier of the table (or other object) in the database
-const int				SQL_FIELD_KEY       = 1;	// first column is key in the table, for example:: RecordID, PointID, SignalID, ReportID и т.д.
+const int				SQL_FIELD_OBJECT_ID = 0;            // zero column is unique identifier of the table (or other object) in the database
+const int				SQL_FIELD_KEY       = 1;            // first column is key in the table, for example:: RecordID, PointID, SignalID, ReportID и т.д.
 
 // ==============================================================================================
 
@@ -197,31 +199,32 @@ class SqlObjectInfo
 {
 public:
 
-    explicit            SqlObjectInfo();
+                        SqlObjectInfo();
+                        ~SqlObjectInfo();
 
 private:
 
-    int                 m_objectType = SQL_TABLE_UNKNONW;           // тип таблицы
-    int                 m_objectID = SQL_OBJECT_ID_UNKNONW;			// уникалильный идентификатор таблицы в БД
+    int                 m_objectType = SQL_TABLE_UNKNONW;           // type of table
+    int                 m_objectID = SQL_OBJECT_ID_UNKNONW;			// unique identifier of table in the database
     QString             m_name;                                     // наименование таблицы
-    int                 m_version = SQL_TABLE_VER_UNKNONW;          // версия таблицы, считывается при инициализации БД
+    int                 m_version = SQL_TABLE_VER_UNKNONW;          // table version, is read when the database initialization
 
 public:
 
-    bool                init(int objectType);
+    bool                init(const int objectType);
     void                clear();
 
-    int                 objectType() { return m_objectType; }
-    void                setObjectType(int type) { m_objectType = type; }
+    int                 objectType() const { return m_objectType; }
+    void                setObjectType(const int type) { m_objectType = type; }
 
-    int                 objectID() { return m_objectID; }
-    void                setObjectID(int objectID) { m_objectID = objectID; }
+    int                 objectID() const { return m_objectID; }
+    void                setObjectID(const int objectID) { m_objectID = objectID; }
 
-    QString             name() { return m_name; }
-    void                setName(QString name) { m_name = name; }
+    QString             name() const { return m_name; }
+    void                setName(const QString& name) { m_name = name; }
 
-    int                 version() { return m_version; }
-    void                setVersion(int verison) { m_version = verison; }
+    int                 version() const { return m_version; }
+    void                setVersion(const int verison) { m_version = verison; }
 
     SqlObjectInfo&      operator=(SqlObjectInfo& from);
 };
@@ -233,8 +236,9 @@ class SqlHistoryDatabase
 
 public:
 
-    explicit            SqlHistoryDatabase();
-    explicit            SqlHistoryDatabase(int objectID, int version, QString event,  QString time);
+                        SqlHistoryDatabase();
+                        SqlHistoryDatabase(const int objectID, const int version, const QString& event, const QString& time);
+                        ~SqlHistoryDatabase();
 
 private:
 
@@ -245,17 +249,17 @@ private:
 
 public:
 
-    int                 objectID() { return m_objectID; }
-    void                setObjectID(int objectID) { m_objectID = objectID; }
+    int                 objectID() const { return m_objectID; }
+    void                setObjectID(const int objectID) { m_objectID = objectID; }
 
-    int                 version() { return m_version; }
-    void                setVersion(int verison) { m_version = verison; }
+    int                 version() const { return m_version; }
+    void                setVersion(const int verison) { m_version = verison; }
 
-    QString             event() { return m_event; }
-    void                setEvent(QString event) { m_event = event; }
+    QString             event() const { return m_event; }
+    void                setEvent(const QString& event) { m_event = event; }
 
-    QString             time() { return m_time; }
-    void                setTime(QString time) { m_time = time; }
+    QString             time() const { return m_time; }
+    void                setTime(const QString& time) { m_time = time; }
 
     SqlHistoryDatabase& operator=(SqlHistoryDatabase& from);
 };
@@ -266,7 +270,8 @@ class SqlTable
 {
 public:
 
-    explicit            SqlTable();
+                        SqlTable();
+                        ~SqlTable();
 
 private:
 
@@ -280,13 +285,13 @@ public:
     void                setInfo(SqlObjectInfo info) { m_info = info; }
 
     bool                isEmpty() { return recordCount() == 0; }
-    int                 recordCount();
-    int                 lastKey();
+    int                 recordCount() const;
+    int                 lastKey() const;
 
-    bool                init(int objectType, QSqlDatabase* pDatabase);
+    bool                init(const int objectType, QSqlDatabase* pDatabase);
 
-    bool                isExist();
-    bool                isOpen() { return m_fieldBase.count() != 0; }
+    bool                isExist() const;
+    bool                isOpen() const { return m_fieldBase.count() != 0; }
     bool                open();
     void                close();
 
@@ -294,15 +299,15 @@ public:
     bool                drop();
     bool                clear();
 
-    int                 read(void* pRecord, int key) { return read(pRecord, &key, 1); }
-    int                 read(void* pRecord, int* key = nullptr, int keyCount = 0);                        // read record form table, if key == nullptr in the array pRecord will be record all records of table
+    int                 read(void* pRecord, const int key) { return read(pRecord, &key, 1); }
+    int                 read(void* pRecord, const int* key = nullptr, const int keyCount = 0);             // read record form table, if key == nullptr in the array pRecord will be record all records of table
 
     int                 write(void* pRecord) { return write(pRecord, 1); }
-    int                 write(void* pRecord, int count, int key) { return write(pRecord, count, &key); }
-    int                 write(void* pRecord, int recordCount, int* key = nullptr);                              // insert or update records in a table, pRecord - array of record, count - amount records
+    int                 write(void* pRecord, const int count, const int key) { return write(pRecord, count, &key); }
+    int                 write(void* pRecord, const int recordCount, const int* key = nullptr);             // insert or update records (depend from key) in a table, pRecord - array of record, count - amount records
 
-    int                 remove(int key) { return remove(&key, 1); }                                       // remove records by key
-    int                 remove(int* key, int keyCount);
+    int                 remove(const int key) { return remove(&key, 1); }                                  // remove records by key
+    int                 remove(const int* key, const int keyCount) const;
 
     SqlTable&           operator=(SqlTable& from);
 };
@@ -318,14 +323,14 @@ public:
     explicit            Database(QObject* parent = 0);
                         ~Database();
 
-    bool                isOpen() { return m_database.isOpen(); }
+    bool                isOpen() const { return m_database.isOpen(); }
     bool                open();
     void                close();
 
-    SqlTable*           openTable(int objectType);
+    SqlTable*           openTable(const int objectType);
 
     bool                appendMeasure(Measurement* pMeasurement);
-    bool                removeMeasure(int measuteType, QVector<int> keyList);
+    bool                removeMeasure(const int measuteType, const QVector<int> keyList);
 
 private:
 

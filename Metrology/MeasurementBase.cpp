@@ -1,4 +1,4 @@
-#include "MeasureBase.h"
+#include "MeasurementBase.h"
 
 #include "Database.h"
 #include "Options.h"
@@ -41,7 +41,7 @@ int MeasurementBase::measurementCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasurementBase::measurementCount(const int& measureType) const
+int MeasurementBase::measurementCount(const int measureType) const
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -96,7 +96,7 @@ void MeasurementBase::clear(const bool removeData)
 // firstly read data from the main table, and additional sub tables in memory
 // later update the data in the main table from sub tables
 //
-int MeasurementBase::load(int measureType)
+int MeasurementBase::load(const int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -113,16 +113,16 @@ int MeasurementBase::load(int measureType)
 
     m_measureType = measureType;
 
-    struct tableData
+    struct rawTableData
     {
         int             objectType;
         Measurement*    pMeasurement;
         int             count;
     };
 
-    QVector<tableData> tableList;
+    QVector<rawTableData> loadedTablesInMemory;
 
-    // read all table of current MEASURE_TYPE in memory
+    // read all tables for current measureType in memory
     //
     for(int objectType = 0; objectType < SQL_TABLE_COUNT; objectType++)
     {
@@ -131,25 +131,30 @@ int MeasurementBase::load(int measureType)
             SqlTable* table = thePtrDB->openTable(objectType);
             if (table != nullptr)
             {
-                tableData data;
+                rawTableData data;
+
+                // determine size data to allocate memory
 
                 data.objectType = objectType;
                 data.pMeasurement = nullptr;
                 data.count = table->recordCount();
 
+                // allocate memory
+
                 switch(measureType)
                 {
                     case MEASURE_TYPE_LINEARITY:            data.pMeasurement = new LinearityMeasurement[data.count];           break;
                     case MEASURE_TYPE_COMPARATOR:           data.pMeasurement = new ComparatorMeasurement[data.count];          break;
-                    case MEASURE_TYPE_COMPLEX_COMPARATOR:   data.pMeasurement = new ComplexComparatorMeasurement[data.count];   break;
                     default:                                assert(0);
                 }
+
+                // load data to memory
 
                 if (data.pMeasurement != nullptr)
                 {
                     if (table->read(data.pMeasurement) == data.count)
                     {
-                        tableList.append( data );
+                        loadedTablesInMemory.append( data );
                     }
                 }
 
@@ -158,19 +163,19 @@ int MeasurementBase::load(int measureType)
         }
     }
 
-    // if tables of current MEASURE_TYPE is not exist, then exit
+    // if tables for current measureType is not exist, then exit
     //
-    int tableCount = tableList.count();
-    if (tableCount == 0)
+    int tableInMemoryCount = loadedTablesInMemory.count();
+    if (tableInMemoryCount == 0)
     {
         return 0;
     }
 
     // get main table, afterwards from sub tables update data in main table
-    // append data-measurement in MeasureBase
+    // append data-measurement in MeasurementBase
     //
 
-    tableData mainTable = tableList[SQL_TABLE_MEASURE_MAIN];
+    rawTableData mainTable = loadedTablesInMemory[SQL_TABLE_IS_MAIN];
 
     for(int mainIndex = 0; mainIndex < mainTable.count; mainIndex++)
     {
@@ -180,9 +185,9 @@ int MeasurementBase::load(int measureType)
             continue;
         }
 
-        for(int sub_table = 1; sub_table < tableCount; sub_table++)
+        for(int tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
         {
-            tableData subTable = tableList[sub_table];
+            rawTableData subTable = loadedTablesInMemory[tableInMemory];
 
             for(int subIndex = 0; subIndex < subTable.count; subIndex++)
             {
@@ -202,7 +207,6 @@ int MeasurementBase::load(int measureType)
                         case SQL_TABLE_LINEARITY_20_PH:                 static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_PHYSICAL, pSubMeasure); break;
                         case SQL_TABLE_LINEARITY_ADD_VAL:               static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalValue(pSubMeasure);                   break;
                         case SQL_TABLE_COMPARATOR_HYSTERESIS:           static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);                       break;
-                        case SQL_TABLE_COMPLEX_COMPARATOR_HYSTERESIS:   static_cast<ComplexComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);                break;
                     }
 
                     break;
@@ -227,7 +231,6 @@ int MeasurementBase::load(int measureType)
         {
             case MEASURE_TYPE_LINEARITY:            pMeasureAppend  = new LinearityMeasurement;         break;
             case MEASURE_TYPE_COMPARATOR:           pMeasureAppend  = new ComparatorMeasurement;        break;
-            case MEASURE_TYPE_COMPLEX_COMPARATOR:   pMeasureAppend  = new ComplexComparatorMeasurement; break;
             default:                                assert(0);                                          break;
         }
 
@@ -245,9 +248,9 @@ int MeasurementBase::load(int measureType)
     // need remove this measurement in sub table
     // remove nonexistent indexes-measurements-ID in sub tables
     //
-    for(int sub_table = 1; sub_table < tableCount; sub_table++)
+    for(int tableInMemory = SQL_TABLE_IS_SUB; tableInMemory < tableInMemoryCount; tableInMemory++)
     {
-        tableData subTable = tableList[sub_table];
+        rawTableData subTable = loadedTablesInMemory[tableInMemory];
 
         QVector<int> removeKeyList;
 
@@ -294,11 +297,11 @@ int MeasurementBase::load(int measureType)
         }
     }
 
-    // remove table data from memory
+    // remove raw table data from memory
     //
-    for(int t = 0; t < tableCount; t++)
+    for(int tableInMemory = 0; tableInMemory < tableInMemoryCount; tableInMemory++)
     {
-        tableData table = tableList[t];
+        rawTableData table = loadedTablesInMemory[tableInMemory];
 
         if (table.pMeasurement == nullptr)
         {
@@ -309,7 +312,6 @@ int MeasurementBase::load(int measureType)
         {
             case MEASURE_TYPE_LINEARITY:            delete [] static_cast<LinearityMeasurement*> (table.pMeasurement);          break;
             case MEASURE_TYPE_COMPARATOR:           delete [] static_cast<ComparatorMeasurement*> (table.pMeasurement);         break;
-            case MEASURE_TYPE_COMPLEX_COMPARATOR:   delete [] static_cast<ComplexComparatorMeasurement*> (table.pMeasurement);  break;
             default:                                assert(0);
         }
     }
@@ -348,7 +350,7 @@ int MeasurementBase::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasurementBase::remove(const int index, bool removeData)
+bool MeasurementBase::remove(const int index, const bool removeData)
 {
     if (index < 0 || index >= measurementCount())
     {
@@ -402,11 +404,11 @@ Measurement* MeasurementBase::measurement(const int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem MeasurementBase::statisticItem(Hash signalHash)
+StatisticItem MeasurementBase::statistic(const Hash& signalHash)
 {
     if (signalHash == 0)
     {
-        assert(0);
+        assert(signalHash != 0);
         return StatisticItem();
     }
 
@@ -446,7 +448,7 @@ StatisticItem MeasurementBase::statisticItem(Hash signalHash)
 
                         si.incrementMeasureCount();
 
-                        if ( pLinearityMeasurement->errorInput(errorType) >= pLinearityMeasurement->errorLimit(errorType) )
+                        if ( pLinearityMeasurement->errorInput(errorType) > pLinearityMeasurement->errorLimit(errorType) )
                         {
                             si.setState(STATISTIC_STATE_INVALID);
                         }
@@ -455,10 +457,6 @@ StatisticItem MeasurementBase::statisticItem(Hash signalHash)
 
                 case MEASURE_TYPE_COMPARATOR:
                     static_cast<ComparatorMeasurement*> (pMeasurement);
-                    break;
-
-                case MEASURE_TYPE_COMPLEX_COMPARATOR:
-                    static_cast<ComplexComparatorMeasurement*> (pMeasurement);
                     break;
 
                 default:

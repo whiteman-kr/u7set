@@ -33,7 +33,7 @@ const char* const               OptionPage[] =
 
 };
 
-const int                       OPTION_PAGE_COUNT				= sizeof(OptionPage)/sizeof(char*);
+const int                       OPTION_PAGE_COUNT				= sizeof(OptionPage)/sizeof(OptionPage[0]);
 
 const int                       OPTION_PAGE_UNKNOWN				= -1,
                                 OPTION_PAGE_TCP_IP              = 0,
@@ -76,7 +76,7 @@ const char* const               OptionGroup[] =
 
 };
 
-const int                       OPTION_GROUP_COUNT              = sizeof(OptionGroup)/sizeof(char*);
+const int                       OPTION_GROUP_COUNT              = sizeof(OptionGroup)/sizeof(OptionGroup[0]);
 
 const int                       OPTION_GROUP_UNKNOWN        = -1,
                                 OPTION_GROUP_TCP_IP         = 0,
@@ -122,12 +122,12 @@ class PropertyPage : public QObject
 
 public:
 
-    explicit                    PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
+                                PropertyPage(QtVariantPropertyManager* manager, QtVariantEditorFactory* factory, QtTreePropertyBrowser* editor);
     explicit                    PropertyPage(QDialog* dialog);
                                 ~PropertyPage();
 
     QWidget*                    getWidget() { return m_pWidget; }
-    int                         getType()   { return m_type; }
+    int                         type() const { return m_type; }
 
     int                         m_page = OPTION_PAGE_UNKNOWN;
     QTreeWidgetItem*            m_pTreeWidgetItem = nullptr;
@@ -165,7 +165,7 @@ private:
     Options                     m_options;
 
     static int                  m_activePage;
-    bool                        setActivePage(int page);
+    bool                        setActivePage(const int page);
 
     void                        createInterface();
 
@@ -180,16 +180,16 @@ private:
 
     QList<PropertyPage*>        m_pageList;
 
-    PropertyPage*               createPage(int page);
-    PropertyPage*               createPropertyList(int page);
-    PropertyPage*               createPropertyDialog(int page);
+    PropertyPage*               createPage(const int page);
+    PropertyPage*               createPropertyList(const int page);
+    PropertyPage*               createPropertyDialog(const int page);
 
 
     QMap<QtProperty*,int>       m_propertyItemList;
     QMap<QtProperty*,QVariant>  m_propertyValueList;
 
-    void                        appendProperty(QtProperty* property, int page, int param);
-    void                        expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded);
+    void                        appendProperty(QtProperty* property, const int page, const int param);
+    void                        expandProperty(QtTreePropertyBrowser* pEditor, const int page, const int param, const bool expanded);
     void                        clearProperty();
 
     QtProperty*                 m_currentPropertyItem = nullptr;
@@ -212,8 +212,8 @@ private slots:
 
     void                        onBrowserItem(QtBrowserItem*);
 
-    void                        updateLinearityPage(bool isDialog);
-    void                        updateMeasureViewPage(bool isDialog);
+    void                        updateLinearityPage(const bool isDialog);
+    void                        updateMeasureViewPage(const bool isDialog);
     void                        updateReportHeaderPage();
 
     void                        onOk();

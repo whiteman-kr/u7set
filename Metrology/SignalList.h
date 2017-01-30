@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QVBoxLayout>
 #include <QTableView>
+#include <QDialogButtonBox>
 
 #include "SignalBase.h"
 
@@ -31,7 +32,7 @@ const char* const       SignalListColumn[] =
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "Output El.range"),
 };
 
-const int               SIGNAL_LIST_COLUMN_COUNT        = sizeof(SignalListColumn)/sizeof(char*);
+const int               SIGNAL_LIST_COLUMN_COUNT        = sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
 const int               SIGNAL_LIST_COLUMN_ID           = 0,
                         SIGNAL_LIST_COLUMN_EQUIPMENT_ID = 1,
@@ -57,22 +58,23 @@ public:
     explicit            SignalListTable(QObject* parent = 0);
                         ~SignalListTable();
 
-    int                 count() { return m_signaHashList.count(); }
-    Hash                at(int index);
-    void                set(const QList<Hash> list_add);
+    int                 signalCount() const;
+    MeasureSignalParam  signalParam(const int index) const;
+    void                set(const QList<MeasureSignalParam> list_add);
     void                clear();
 
-    QString             text(int row, int column) const;
+    QString             text(const int row, const int column, const MeasureSignalParam& param) const;
 
     bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(bool show) { m_showCustomID = show; }
+    void                setShowCustomID(const bool show) { m_showCustomID = show; }
 
     bool                showADCInHex() const { return m_showADCInHex; }
-    void                setShowADCInHex(bool show) { m_showADCInHex = show; }
+    void                setShowADCInHex(const bool show) { m_showADCInHex = show; }
 
 private:
 
-    QList<Hash>         m_signaHashList;
+    mutable QMutex     m_signalMutex;
+    QList<MeasureSignalParam> m_signalParamList;
 
     static bool         m_showCustomID;
     static bool         m_showADCInHex;
@@ -82,6 +84,11 @@ private:
 
     QVariant            headerData(int section,Qt::Orientation orientation, int role=Qt::DisplayRole) const;
     QVariant            data(const QModelIndex &index, int role) const;
+
+private slots:
+
+    void                updateSignalParam(const Hash& signalHash);
+
 };
 
 // ==============================================================================================
@@ -91,47 +98,60 @@ class SignalListDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit            SignalListDialog(QWidget *parent = 0);
+    explicit            SignalListDialog(const bool hasButtons, QWidget *parent = 0);
                         ~SignalListDialog();
+
+    Hash                selectedSignalHash() const { return m_selectedSignalHash; }
 
 private:
 
     static int          m_columnWidth[SIGNAL_LIST_COLUMN_COUNT];
 
     QMenuBar*           m_pMenuBar = nullptr;
+    QMenu*              m_pSignalMenu = nullptr;
     QMenu*              m_pEditMenu = nullptr;
     QMenu*              m_pViewMenu = nullptr;
     QMenu*              m_pViewTypeADMenu = nullptr;
     QMenu*              m_pViewTypeIOMenu = nullptr;
     QMenu*              m_pViewShowMenu = nullptr;
+    QMenu*              m_pContextMenu = nullptr;
 
-    QAction*            m_pCopyAction = nullptr;
+    QAction*            m_pPrintAction = nullptr;
+    QAction*            m_pExportAction = nullptr;
+
     QAction*            m_pFindAction = nullptr;
+    QAction*            m_pCopyAction = nullptr;
+    QAction*            m_pSelectAllAction = nullptr;
     QAction*            m_pSignalPropertyAction = nullptr;
 
     QAction*            m_pTypeAnalogAction = nullptr;
     QAction*            m_pTypeDiscreteAction = nullptr;
     QAction*            m_pTypeInputAction = nullptr;
-    QAction*            m_pTypeOutputAction = nullptr;
     QAction*            m_pTypeInternalAction = nullptr;
+    QAction*            m_pTypeOutputAction = nullptr;
     QAction*            m_pShowCustomIDAction = nullptr;
     QAction*            m_pShowADCInHexAction = nullptr;
 
     QTableView*         m_pView = nullptr;
-    SignalListTable     m_table;
+    SignalListTable     m_signalParamTable;
+
+    QDialogButtonBox*   m_buttonBox = nullptr;
 
     QAction*            m_pColumnAction[SIGNAL_LIST_COLUMN_COUNT];
     QMenu*              m_headerContextMenu = nullptr;
 
     static E::SignalType       m_typeAD;
     static E::SignalInOutType  m_typeIO;
+    static int          m_currenIndex;
 
-    void                createInterface();
+    Hash                m_selectedSignalHash = 0;
+
+    void                createInterface(const bool hasButtons);
     void                createHeaderContexMenu();
+    void                createContextMenu();
 
     void                updateVisibleColunm();
-
-    void                hideColumn(int column, bool hide);
+    void                hideColumn(const int column, const bool hide);
 
 protected:
 
@@ -147,10 +167,16 @@ private slots:
 
     // slots of menu
     //
+                        // Signal
+                        //
+    void                printSignal();
+    void                exportSignal();
+
                         // Edit
                         //
-    void                copy();
     void                find();
+    void                copy();
+    void                selectAll() { m_pView->selectAll(); }
     void                signalProperty();
 
 
@@ -158,9 +184,11 @@ private slots:
                         //
     void                showTypeAnalog();
     void                showTypeDiscrete();
+
     void                showTypeInput();
-    void                showTypeOutput();
     void                showTypeInternal();
+    void                showTypeOutput();
+
     void                showCustomID();
     void                showADCInHex();
 
@@ -173,7 +201,11 @@ private slots:
 
     // slots for list
     //
-    void                onListDoubleClicked(const QModelIndex&) { signalProperty(); }
+    void                onListDoubleClicked(const QModelIndex&);
+
+    // slots of buttons
+    //
+    void                onOk();
 };
 
 // ==============================================================================================

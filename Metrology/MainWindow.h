@@ -26,10 +26,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit            MainWindow(QWidget *parent = 0);
+                        ~MainWindow();
 
-    int                 measureType() { return m_measureType; }
+    int                 measureType() const { return m_measureType; }
 
     // Elements of interface - Menu
     //
@@ -47,10 +47,11 @@ public:
     QToolBar*           m_pMeasureKind = nullptr;
     QToolBar*           m_pOutputSignalToolBar = nullptr;
     QToolBar*           m_pAnalogSignalToolBar = nullptr;
-    QToolBar*           m_pComplexComporatorToolBar = nullptr;
 
     // Elements of interface - Items of ToolBars
     //
+    QComboBox*          m_outputSignalTypeList;
+
     QComboBox*          m_asCaseTypeCombo;
     QComboBox*          m_asMeasureSignalCombo;
     QComboBox*          m_asCaseNoCombo;
@@ -61,7 +62,6 @@ public:
     // Elements of interface - Pages of Tab
     //
     QTabWidget*         m_pMainTab = nullptr;
-    MeasureView*        m_measureView[MEASURE_TYPE_COUNT];
 
     // Elements of interface - Panels
     //
@@ -69,9 +69,6 @@ public:
     SignalInfoPanel*    m_pSignalInfoPanel = nullptr;
     QDockWidget*        m_pComparatorInfoPanel = nullptr;
     QTableView*         m_pComparatorInfoView = nullptr;
-    QDockWidget*        m_pComplexComparatorInfoPanel = nullptr;
-    QTableView*         m_pComplexComparatorInfoView = nullptr;
-
 
     // Elements of interface - StatusBar
     //
@@ -79,7 +76,6 @@ public:
     QLabel*             m_statusMeasureThreadInfo = nullptr;
     QProgressBar*       m_statusMeasureTimeout = nullptr;
     QLabel*             m_statusMeasureThreadState = nullptr;
-    QLabel*             m_statusMeasureCount = nullptr;
     QLabel*             m_statusCalibratorCount = nullptr;
     QLabel*             m_statusConnectToServer = nullptr;
 
@@ -114,9 +110,15 @@ public:
 
     void                updateAnalogSignalToolBar();
 
+    MeasureView*        activeMeasureView() { return measureView(m_measureType); }
+    MeasureView*        measureView(const int measureType);
+    void                appendMeasureView(const int measureType, MeasureView* pView);
+
 private:
 
-    int m_measureType = MEASURE_TYPE_UNKNOWN;
+    int                 m_measureType = MEASURE_TYPE_UNKNOWN;
+
+    QMap<int, MeasureView*> m_measureViewMap;
 
     // Actions of main menu
     //
@@ -142,15 +144,13 @@ private:
     // menu - Tools
     //
     QAction*            m_pCalibratorsAction = nullptr;
+    QAction*            m_pShowSignalListAction = nullptr;
+    QAction*            m_pShowComparatorsListAction = nullptr;
     QAction*            m_pShowOutputSignalListAction = nullptr;
-    QAction*            m_pShowOutputRangeListAction = nullptr;
-    QAction*            m_pShowComlexComparatorListAction = nullptr;
     QAction*            m_pOptionsAction;
 
     // menu - ?
     //
-    QAction*            m_pShowSignalListAction = nullptr;
-    QAction*            m_pShowComparatorsListAction = nullptr;
     QAction*            m_pShowStatisticAction = nullptr;
     QAction*            m_pAboutConnectionAction = nullptr;
     QAction*            m_pAboutAppAction = nullptr;
@@ -189,23 +189,23 @@ private slots:
     // menu - Tools
     //
     void                calibrators();
-    void                showOutputSignalList() {};
+    void                showSignalList();
+    void                showComparatorsList() {};
+    void                showOutputSignalList();
     void                showOutputRangeList() {};
     void                showComlexComparatorList() {};
     void                options();
 
     // menu - ?
     //
-    void                showSignalList();
-    void                showComparatorsList() {};
     void                showStatistic();
     void                aboutConnection() {};
     void                aboutApp() {};
 
     // Slots of tab -- page measure type
     //
-    void                setMeasureType(int type);
-    void                measureCountChanged(int count);
+    void                setMeasureType(const int measureType);
+    void                measureCountChanged(int);
 
     // Slots of control panels
     //

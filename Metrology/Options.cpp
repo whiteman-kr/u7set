@@ -95,7 +95,7 @@ void ToolBarOption::load()
 
     m_measureTimeout = s.value( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
     m_measureKind = s.value( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
-    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_DONT_USED).toInt();
+    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_NO_USED).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -342,7 +342,7 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void REPORT_HEADER::init(int type)
+void REPORT_HEADER::init(const int type)
 {
     if ( type < 0 || type >=  REPORT_TYPE_COUNT)
     {
@@ -372,7 +372,6 @@ void REPORT_HEADER::init(int type)
         case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_EL];      break;
         case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: objectID = SqlObjectID[SQL_TABLE_LINEARITY_20_PH];      break;
         case REPORT_TYPE_COMPARATOR:                objectID = SqlObjectID[SQL_TABLE_COMPARATOR];           break;
-        case REPORT_TYPE_COMPLEX_COMPARATOR:        objectID = SqlObjectID[SQL_TABLE_COMPLEX_COMPARATOR];   break;
         default:                                    assert(0);                                              break;
     }
 
@@ -466,7 +465,7 @@ ReportOption::~ReportOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int ReportOption::reportTypeByMeasureType(int measureType)
+int ReportOption::reportTypeByMeasureType(const int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -491,7 +490,6 @@ int ReportOption::reportTypeByMeasureType(int measureType)
             break;
 
         case MEASURE_TYPE_COMPARATOR:           reportType = REPORT_TYPE_COMPARATOR;                        break;
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:   reportType = REPORT_TYPE_COMPLEX_COMPARATOR;                break;
         default:                                reportType = REPORT_TYPE_UNKNOWN;                           break;
     }
 
@@ -540,7 +538,7 @@ ReportOption& ReportOption::operator=(const ReportOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityPoint::setPercent(double value)
+void LinearityPoint::setPercent(const double value)
 {
     m_percentValue = value;
 
@@ -563,7 +561,7 @@ void LinearityPoint::setPercent(double value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double LinearityPoint::sensorValue(int sensor)
+double LinearityPoint::sensorValue(const int sensor)
 {
     if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
     {

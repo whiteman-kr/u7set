@@ -30,9 +30,9 @@ class SignalSocket : public Tcp::Client
      Q_OBJECT
 
 public:
-    SignalSocket(const HostAddressPort& serverAddressPort);
-    SignalSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
-    virtual ~SignalSocket();
+                    SignalSocket(const HostAddressPort& serverAddressPort);
+                    SignalSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+    virtual         ~SignalSocket();
 
     virtual void    onClientThreadStarted() override;
     virtual void    onClientThreadFinished() override;

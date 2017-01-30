@@ -15,17 +15,17 @@ public:
                             ~MeasurementBase();
 
     int                     measurementCount() const;
-    int                     measurementCount(const int& measureType) const;
+    int                     measurementCount(const int measureType) const;
 
     void                    clear(const bool removeData = true);
 
-    int                     load(int measureType);
+    int                     load(const int measureType);
 
     int                     append(Measurement* pMeasurement);
-    bool                    remove(const int index, bool removeData = true);
+    bool                    remove(const int index, const bool removeData = true);
     Measurement*            measurement(const int index) const;
 
-    StatisticItem           statisticItem(Hash signalHash);
+    StatisticItem           statistic(const Hash& signalHash);
 
 private:
 

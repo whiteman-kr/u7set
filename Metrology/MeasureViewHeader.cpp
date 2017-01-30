@@ -148,75 +148,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
         MeasureViewColumn(),
         MeasureViewColumn(),
     },
-
-    // Measurements of complex comparators
-
-    {
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-        MeasureViewColumn(),
-    },
 };
 
 
@@ -233,22 +164,28 @@ MeasureViewColumn::MeasureViewColumn()
 MeasureViewColumn::MeasureViewColumn(const MeasureViewColumn& from)
 {
     *this = from;
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn::MeasureViewColumn(QString title, int width, bool visible, int alignment, bool bold, QColor color, bool duplicate)
+MeasureViewColumn::MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate) :
+    m_title(title) ,
+    m_width(width) ,
+    m_enableVisible(visible) ,
+
+    m_alignment(alignment) ,
+    m_boldFont(bold) ,
+    m_color(color) ,
+
+    m_enableDuplicate(duplicate)
 {
-    m_title = title;
-    m_width = width;
-    m_enableVisible = visible;
+}
 
-    m_alignment = alignment;
-    m_boldFont = bold;
-    m_color = color;
+// -------------------------------------------------------------------------------------------------------------------
 
-    m_enableDuplicate = duplicate;
-
+MeasureViewColumn::~MeasureViewColumn()
+{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -302,20 +239,20 @@ MeasureViewHeader::~MeasureViewHeader()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setMeasureType(int type)
+void MeasureViewHeader::setMeasureType(const int measureType)
 {
-    if (type < 0 || type >= MEASURE_TYPE_COUNT)
+    if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
         return;
     }
 
-    m_measureType = type;
+    m_measureType = measureType;
 
     for(int column = 0; column < MEASURE_VIEW_COLUMN_COUNT; column++)
     {
-        if (m_column[type][column].title().isEmpty() == true)
+        if (m_column[measureType][column].title().isEmpty() == true)
         {
-            m_columnCount[type] = column;
+            m_columnCount[measureType] = column;
             break;
         }
     }
@@ -323,7 +260,7 @@ void MeasureViewHeader::setMeasureType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(int type)
+void MeasureViewHeader::init(const int type)
 {
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
@@ -356,7 +293,7 @@ int MeasureViewHeader::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn* MeasureViewHeader::column(int index) const
+MeasureViewColumn* MeasureViewHeader::column(const int index) const
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {
@@ -379,9 +316,6 @@ void MeasureViewHeader::updateColumnState()
     {
         return;
     }
-
-
-
 
     switch (m_measureType)
     {
@@ -406,7 +340,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
                         setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 
-                        for (int m = 0; m < MEASUREMENT_IN_POINT; m ++)
+                        for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
                             setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
                         }
@@ -425,7 +359,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_LOW_BORDER, true);
                         setColumnVisible(MVC_CMN_L_HIGH_BORDER, true);
 
-                        for (int m = 0; m < MEASUREMENT_IN_POINT; m ++)
+                        for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
                             setColumnVisible(m + MVC_CMN_L_VALUE_0, false);
                         }
@@ -445,7 +379,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
                         setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
 
-                        for (int m = 0; m < MEASUREMENT_IN_POINT; m ++)
+                        for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
                             setColumnVisible(m + MVC_CMN_L_VALUE_0, true);
                         }
@@ -466,9 +400,6 @@ void MeasureViewHeader::updateColumnState()
         case MEASURE_TYPE_COMPARATOR:
             break;
 
-        case MEASURE_TYPE_COMPLEX_COMPARATOR:
-            break;
-
         default:
             assert(0);
             break;
@@ -477,7 +408,7 @@ void MeasureViewHeader::updateColumnState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setColumnVisible(int column, bool visible)
+void MeasureViewHeader::setColumnVisible(const int column, const bool visible)
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {

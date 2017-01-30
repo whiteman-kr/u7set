@@ -33,7 +33,7 @@ const char* const       TcpIpParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
 };
 
-const int               TCPIP_PARAM_COUNT       = sizeof(TcpIpParamName)/sizeof(char*);
+const int               TCPIP_PARAM_COUNT       = sizeof(TcpIpParamName)/sizeof(TcpIpParamName[0]);
 
 const int               TCPIP_PARAM_SERVER_IP   = 0,
                         TCPIP_PARAM_SERVER_PORT = 1;
@@ -57,10 +57,10 @@ private:
 public:
 
     QString             serverIP() const { return m_serverIP; }
-    void                setServerIP(QString ip) { m_serverIP = ip; }
+    void                setServerIP(const QString& ip) { m_serverIP = ip; }
 
     int                 serverPort() const { return m_serverPort; }
-    void                setServerPort(int port) { m_serverPort = port; }
+    void                setServerPort(const int port) { m_serverPort = port; }
 
 
     void                load();
@@ -87,18 +87,18 @@ private:
 
     int                 m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
     int                 m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
-    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_DONT_USED;  // selected type of output signal
+    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_NO_USED;  // selected type of output signal
 
 public:
 
     int                 measureTimeout() const { return m_measureTimeout; }
-    void                setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
+    void                setMeasureTimeout(const int timeout) { m_measureTimeout = timeout; }
 
     int                 measureKind() const { return m_measureKind; }
-    void                setMeasureKind(int kind) { m_measureKind = kind; }
+    void                setMeasureKind(const int kind) { m_measureKind = kind; }
 
     int                 outputSignalType() const { return m_outputSignalType; }
-    void                setOutputSignalType(int type) { m_outputSignalType = type; }
+    void                setOutputSignalType(const int type) { m_outputSignalType = type; }
 
 
     void                load();
@@ -122,7 +122,7 @@ const char* const		MeasureViewParam[] =
                         QT_TRANSLATE_NOOP("Options.h", "Measurement over control error"),
 };
 
-const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(char*);
+const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
 const int				MWO_PARAM_FONT					= 0,
                         MWO_PARAM_ID					= 1,
@@ -144,7 +144,7 @@ const char* const       DisplayingValueType[] =
                         QT_TRANSLATE_NOOP("Options.h", "Displayed as a percentage (%) of the range"),
 };
 
-const int				DISPLAYING_VALUE_TYPE_COUNT     = sizeof(DisplayingValueType)/sizeof(char*);
+const int				DISPLAYING_VALUE_TYPE_COUNT     = sizeof(DisplayingValueType)/sizeof(DisplayingValueType[0]);
 
 const int				DISPLAYING_VALUE_TYPE_PHYSICAL  = 0,
                         DISPLAYING_VALUE_TYPE_ELECTRIC  = 1,
@@ -199,7 +199,7 @@ const char* const		DatabaseParam[] =
                         QT_TRANSLATE_NOOP("Options.h", "Type"),
 };
 
-const int				DBO_PARAM_COUNT = sizeof(DatabaseParam)/sizeof(char*);
+const int				DBO_PARAM_COUNT = sizeof(DatabaseParam)/sizeof(DatabaseParam[0]);
 
 const int				DBO_PARAM_PATH  = 0,
                         DBO_PARAM_TYPE  = 1;
@@ -211,7 +211,7 @@ const char* const       DatabaseType[] =
                         QT_TRANSLATE_NOOP("Options.h", "SQLite"),
 };
 
-const int				DATABASE_TYPE_COUNT     = sizeof(DatabaseType)/sizeof(char*);
+const int				DATABASE_TYPE_COUNT     = sizeof(DatabaseType)/sizeof(DatabaseType[0]);
 
 const int				DATABASE_TYPE_SQLITE    = 0;
 
@@ -234,10 +234,10 @@ private:
 public:
 
     QString             path() const { return m_path; }
-    void                setPath(QString path) { m_path = path; }
+    void                setPath(const QString& path) { m_path = path; }
 
     int                 type() const { return m_type; }
-    void                setType(int type) { m_type = type; }
+    void                setType(const int type) { m_type = type; }
 
 
     bool                create();
@@ -278,7 +278,7 @@ const char* const		ReportParam[] =
                         QT_TRANSLATE_NOOP("Options.h", "File name"),
 };
 
-const int				RO_PARAM_COUNT          = sizeof(ReportParam)/sizeof(char*);
+const int				RO_PARAM_COUNT          = sizeof(ReportParam)/sizeof(ReportParam[0]);
 
 const int				RO_PARAM_PATH           = 0,
                         RO_PARAM_TYPE           = 1,
@@ -310,18 +310,16 @@ const char* const       ReportType[] =
                         QT_TRANSLATE_NOOP("Options.h", "Linearity detail electric"),
                         QT_TRANSLATE_NOOP("Options.h", "Linearity detail physical"),
                         QT_TRANSLATE_NOOP("Options.h", "Comparators"),
-                        QT_TRANSLATE_NOOP("Options.h", "Complex comparators"),
 };
 
-const int               REPORT_TYPE_COUNT                       = sizeof(ReportType)/sizeof(char*);
+const int               REPORT_TYPE_COUNT                       = sizeof(ReportType)/sizeof(ReportType[0]);
 
 const int               REPORT_TYPE_UNKNOWN                     = -1,
                         REPORT_TYPE_LINEARITY                   = 0,
                         REPORT_TYPE_LINEARITY_CERTIFICATION     = 1,
                         REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC   = 2,
                         REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL   = 3,
-                        REPORT_TYPE_COMPARATOR                  = 4,
-                        REPORT_TYPE_COMPLEX_COMPARATOR          = 5;
+                        REPORT_TYPE_COMPARATOR                  = 4;
 
 const char* const       ReportFileName[REPORT_TYPE_COUNT] =
 {
@@ -330,7 +328,6 @@ const char* const       ReportFileName[REPORT_TYPE_COUNT] =
                         QT_TRANSLATE_NOOP("Options.h", "LinearityDetailEl.ncr"),
                         QT_TRANSLATE_NOOP("Options.h", "LinearityDetailPh.ncr"),
                         QT_TRANSLATE_NOOP("Options.h", "Comparators.ncr"),
-                        QT_TRANSLATE_NOOP("Options.h", "ComplexComparators.ncr"),
 };
 
 // ==============================================================================================
@@ -358,7 +355,7 @@ struct REPORT_HEADER
 
     int                 m_param = 0;
 
-    void                init(int type);
+    void                init(const int type);
 };
 
 
@@ -368,7 +365,7 @@ class ReportHeaderBase : public ObjectVector<REPORT_HEADER>
 {
 public:
 
-    explicit            ReportHeaderBase();
+                        ReportHeaderBase();
                         ~ReportHeaderBase();
 
     bool                reportsIsExist();
@@ -395,14 +392,14 @@ private:
 public:
 
     QString             path() const { return m_path; }
-    void                setPath(QString path) { m_path = path; }
+    void                setPath(const QString& path) { m_path = path; }
 
     int                 type() const { return m_type; }
-    void                setType(int type) { m_type = type; }
+    void                setType(const int type) { m_type = type; }
 
     ReportHeaderBase    m_headerBase;
 
-    int                 reportTypeByMeasureType(int measureType);
+    int                 reportTypeByMeasureType(const int measureType);
 
     void                load();
     void                save();
@@ -425,7 +422,7 @@ const char* const       LinearityPointSensor[] =
                         QT_TRANSLATE_NOOP("Options.h", "0 - 400 °C"),
 };
 
-const int               POINT_SENSOR_COUNT          = sizeof(LinearityPointSensor)/sizeof(char*);
+const int               POINT_SENSOR_COUNT          = sizeof(LinearityPointSensor)/sizeof(LinearityPointSensor[0]);
 
 const int               POINT_SENSOR_UNKNOWN        = -1,
                         POINT_SENSOR_PERCENT        = 0,
@@ -444,7 +441,7 @@ class LinearityPoint
 {
 public:
 
-    explicit            LinearityPoint() { setPercent(0); }
+                        LinearityPoint() { setPercent(0); }
     explicit            LinearityPoint(double percent) { setPercent(percent); }
 
 private:
@@ -457,12 +454,12 @@ private:
 public:
 
     int                 pointID() const { return m_pointID; }
-    void                setPointID(int id) { m_pointID = id; }
+    void                setPointID(const int id) { m_pointID = id; }
 
     double              percent() const {return m_percentValue; }
-    void                setPercent(double value);
+    void                setPercent(const double value);
 
-    double              sensorValue(int sensor);
+    double              sensorValue(const int sensor);
 };
 
 // ==============================================================================================
@@ -472,7 +469,7 @@ class LinearityPointBase : public ObjectVector<LinearityPoint>
 
 public:
 
-    explicit            LinearityPointBase();
+                        LinearityPointBase();
                         ~LinearityPointBase();
 
     QString             text();
@@ -502,7 +499,7 @@ const char* const       LinearityParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Show column of output values"),
 };
 
-const int               LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(char*);
+const int               LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
 
 const int               LO_PARAM_ERROR				= 0,
                         LO_PARAM_ERROR_CTRL			= 1,
@@ -526,7 +523,7 @@ const char* const       LinearityRangeTypeStr[] =
                         QT_TRANSLATE_NOOP("Options.h", "Automatic division of the measure range"),
 };
 
-const int               LO_RANGE_TYPE_COUNT			= sizeof(LinearityRangeTypeStr)/sizeof(char*);
+const int               LO_RANGE_TYPE_COUNT			= sizeof(LinearityRangeTypeStr)/sizeof(LinearityRangeTypeStr[0]);
 
 const int               LO_RANGE_TYPE_MANUAL		= 0,
                         LO_RANGE_TYPE_AUTOMATIC		= 1;
@@ -541,7 +538,7 @@ const char* const       LinearityViewTypeStr[] =
                         QT_TRANSLATE_NOOP("Options.h", "Detail physical (show all measurements at one point)"),
 };
 
-const int               LO_VIEW_TYPE_COUNT              = sizeof(LinearityViewTypeStr)/sizeof(char*);
+const int               LO_VIEW_TYPE_COUNT              = sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
 
 const int               LO_VIEW_TYPE_UNKNOWN            = -1,
                         LO_VIEW_TYPE_SIMPLE             = 0,
@@ -606,7 +603,7 @@ const char* const		ComparatorParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Additional check on the switch сomparator"),
 };
 
-const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(char*);
+const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
 
 const int				CO_PARAM_ERROR				= 0,
                         CO_PARAM_ERROR_CTRL			= 1,
@@ -660,7 +657,7 @@ const char* const		BackupParam[] =
                         QT_TRANSLATE_NOOP("Options.h", "Path"),
 };
 
-const int				BUO_PARAM_COUNT         = sizeof(BackupParam)/sizeof(char*);
+const int				BUO_PARAM_COUNT         = sizeof(BackupParam)/sizeof(BackupParam[0]);
 
 const int				BUO_PARAM_ON_START      = 0,
                         BUO_PARAM_ON_EXIT       = 1,
@@ -687,13 +684,13 @@ private:
 public:
 
     bool                onStart () const { return m_onStart; }
-    void                setOnStart(bool onStart) { m_onStart = onStart; }
+    void                setOnStart(const bool onStart) { m_onStart = onStart; }
 
     bool                onExit() const { return m_onExit; }
-    void                setOnExit(bool onExit) { m_onExit = onExit; }
+    void                setOnExit(const bool onExit) { m_onExit = onExit; }
 
     QString             path() const { return m_path; }
-    void                setPath(QString path) { m_path = path; }
+    void                setPath(const QString& path) { m_path = path; }
 
 
     bool				createBackup();

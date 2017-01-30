@@ -5,7 +5,6 @@
         <file>icons/About connection.png</file>
         <file>icons/Calculator.png</file>
         <file>icons/Calibrators.png</file>
-        <file>icons/Copy.png</file>
         <file>icons/Cut.png</file>
         <file>icons/Find.png</file>
         <file>icons/Import.png</file>
@@ -19,7 +18,6 @@
         <file>icons/Stop.png</file>
         <file>icons/OutRange.png</file>
         <file>icons/InOut.png</file>
-        <file>icons/Complex.png</file>
         <file>icons/Signals.png</file>
         <file>icons/Metrology.ico</file>
         <file>icons/Settings.png</file>
@@ -35,5 +33,9 @@
         <file>icons/CheckGrey.png</file>
         <file>icons/CheckRed.png</file>
         <file>icons/QuestionGrey.png</file>
+        <file>icons/Edit.png</file>
+        <file>icons/Add.png</file>
+        <file>icons/Copy.png</file>
+        <file>icons/Comparator.png</file>
     </qresource>
 </RCC>

@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QVector>
 
+
 #include "Database.h"
 
 // ==============================================================================================
@@ -15,8 +16,9 @@ class ObjectVector
 {
 public:
 
-    explicit        ObjectVector();
-    explicit        ObjectVector(const ObjectVector& from);
+                    ObjectVector();
+                    ObjectVector(const ObjectVector& from);
+    virtual         ~ObjectVector();
 
 private:
 
@@ -31,14 +33,13 @@ public:
 
     // TYPE         operator[](const int index);       don't append this method
     TYPE            at(const int index) const;
-    QVector<TYPE>   toVector() const;
 
-    int             set(const int index, const TYPE item);
+    int             set(const int index, const TYPE& item);
     void            set(const QVector<TYPE>& fromVector);
     ObjectVector&   operator=(const ObjectVector& from);
 
-    int				append(const TYPE item);
-    int             insert(const int index, const TYPE item);
+    int				append(const TYPE& item);
+    int             insert(const int index, const TYPE& item);
     bool			remove(const int index);
     void            clear();
 
@@ -65,6 +66,13 @@ template <class TYPE>
 ObjectVector<TYPE>::ObjectVector(const ObjectVector& from)
 {
     *this = from;
+}
+
+// ----------------------------------------------------------------------------------------------
+
+template <class TYPE>
+ObjectVector<TYPE>::~ObjectVector()
+{
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -123,15 +131,7 @@ TYPE ObjectVector<TYPE>::at(const int index) const
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-QVector<TYPE> ObjectVector<TYPE>::toVector() const
-{
-    return m_vector;
-}
-
-// ----------------------------------------------------------------------------------------------
-
-template <class TYPE>
-int ObjectVector<TYPE>::set(const int index, const TYPE item)
+int ObjectVector<TYPE>::set(const int index, const TYPE& item)
 {
     if (index < 0 || index >= count())
     {
@@ -153,8 +153,6 @@ int ObjectVector<TYPE>::set(const int index, const TYPE item)
 template <class TYPE>
 void ObjectVector<TYPE>::set(const QVector<TYPE>& fromVector)
 {
-    clear();
-
     m_vectorMutex.lock();
 
         m_vector = fromVector;
@@ -167,11 +165,9 @@ void ObjectVector<TYPE>::set(const QVector<TYPE>& fromVector)
 template <class TYPE>
 ObjectVector<TYPE>& ObjectVector<TYPE>::operator=(const ObjectVector& from)
 {
-    clear();
-
     m_vectorMutex.lock();
 
-        m_vector = from.toVector();
+        m_vector = from.m_vector;
 
     m_vectorMutex.unlock();
 
@@ -181,7 +177,7 @@ ObjectVector<TYPE>& ObjectVector<TYPE>::operator=(const ObjectVector& from)
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int ObjectVector<TYPE>::append(const TYPE item)
+int ObjectVector<TYPE>::append(const TYPE& item)
 {
     int index = -1;
 
@@ -198,7 +194,7 @@ int ObjectVector<TYPE>::append(const TYPE item)
 // -------------------------------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int ObjectVector<TYPE>::insert(const int index, const TYPE item)
+int ObjectVector<TYPE>::insert(const int index, const TYPE& item)
 {
     if (index < 0 || index > count())
     {
@@ -313,7 +309,7 @@ int ObjectVector<TYPE>::find(const TYPE& item) const
 template <class TYPE>
 void ObjectVector<TYPE>::initEmptyData(QVector<TYPE>& data)
 {
-    data.empty();
+    data.clear();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -404,7 +400,7 @@ bool ObjectVector<TYPE>::saveData(int table)
 
         if (pTable->clear() == true)
         {
-            pTable->write(toVector().data(), toVector().count());
+            pTable->write(m_vector.data(), m_vector.count());
         }
 
     m_vectorMutex.unlock();
@@ -422,9 +418,9 @@ template <class TYPE>
 class PtrObjectVector
 {
 public:
-    explicit            PtrObjectVector();
-    explicit            PtrObjectVector(const PtrObjectVector& from);
-                        ~PtrObjectVector();
+                        PtrObjectVector();
+                        PtrObjectVector(const PtrObjectVector& from);
+    virtual             ~PtrObjectVector();
 
 protected:
 

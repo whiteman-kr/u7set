@@ -297,7 +297,7 @@ void OptionsPointsDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::hideColumn(int column, bool hide)
+void OptionsPointsDialog::hideColumn(const int column, const bool hide)
 {
     if (column < 0 || column >= m_pointList->columnCount())
     {
