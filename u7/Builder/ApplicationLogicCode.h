@@ -163,6 +163,8 @@ namespace Builder
             setNoCommand();
         }
 
+		CommandCode& operator = (const CommandCode& cCode);
+
         void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
 
 		bool isNoCommand() const { return opCode.code == TO_INT(LmCommandCode::NoCommand); }
@@ -297,6 +299,7 @@ namespace Builder
 
     public:
         Command();
+		Command(const Command& cmd);
 
         void nop();
         void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime);
