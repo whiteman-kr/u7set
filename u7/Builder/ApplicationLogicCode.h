@@ -158,10 +158,8 @@ namespace Builder
 		E::DataFormat m_constDataFormat = E::DataFormat::Float;
 
     public:
-        CommandCode()
-        {
-            setNoCommand();
-        }
+		CommandCode();
+		CommandCode(const CommandCode& cCode);
 
 		CommandCode& operator = (const CommandCode& cCode);
 
@@ -284,7 +282,9 @@ namespace Builder
 
         CommandCode m_code;
 
-        QString getCodeWordStr(int wordNo);
+		void initStaticMembers();
+
+		QString getCodeWordStr(int wordNo);
 
         bool addressInBitMemory(int address);
         bool addressInWordMemory(int address);

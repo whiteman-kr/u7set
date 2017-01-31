@@ -44,6 +44,17 @@ namespace Builder
     //
     // ---------------------------------------------------------------------------------------
 
+	CommandCode::CommandCode()
+	{
+		setNoCommand();
+	}
+
+
+	CommandCode::CommandCode(const CommandCode& cCode)
+	{
+		*this = cCode;
+	}
+
 
 	CommandCode& CommandCode::operator = (const CommandCode& cCode)
 	{
@@ -52,10 +63,12 @@ namespace Builder
 		word3 = cCode.word3;
 		word4 = cCode.word4;
 
-
 		m_fbCaption = cCode.m_fbCaption;
+
 		m_const = cCode.m_const;
 		m_constDataFormat = cCode.m_constDataFormat;
+
+		return *this;
 	}
 
 	void CommandCode::setOpCode(LmCommandCode code)
@@ -293,24 +306,22 @@ namespace Builder
 
     Command::Command()
     {
-		if (m_memoryMap == nullptr)
-        {
-			assert(false);			// call ApplicationLogicCode::initMemoryMap() first
-            return;
-        }
-
-        if (m_lmCommands.isEmpty())
-        {
-            for(const LmCommand& lmCommand : LmCommands)
-            {
-                m_lmCommands.insert(static_cast<int>(lmCommand.code), &lmCommand);
-            }
-        }
-
+		initStaticMembers();
     }
 
 
 	Command::Command(const Command& cmd)
+	{
+		initStaticMembers();
+
+		m_address = cmd.m_address;
+		m_fbRunTime = cmd.m_fbRunTime;
+		m_result = cmd.m_result;
+		m_code = cmd.m_code;
+	}
+
+
+	void Command::initStaticMembers()
 	{
 		if (m_memoryMap == nullptr)
 		{
@@ -325,21 +336,7 @@ namespace Builder
 				m_lmCommands.insert(static_cast<int>(lmCommand.code), &lmCommand);
 			}
 		}
-
-
-		m_address = cmd.m_address;
-
-		m_fbRunTime = cmd.m_fbRunTime;
-		// != 0 for commands START and NSTART only
-
-
-		m_result = cmd.m_result;
-
-
-		m_code = cmd.m_code;
-
 	}
-
 
 
 	void Command::setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log)
