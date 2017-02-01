@@ -61,29 +61,12 @@ public:
     QString             text(const int row, const int column, const MeasureSignalParam& param, const AppSignalState& state) const;
     QString             signalStateStr(const MeasureSignalParam& param, const AppSignalState& state) const;
 
-    bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(const bool show) { m_showCustomID = show; }
-
-    bool                showElectricValue() const { return m_showElectricValue; }
-    void                setShowElectricValue(const bool show) { m_showElectricValue = show; }
-
-    bool                showAdcValue() const { return m_showAdcValue; }
-    void                setShowAdcValue(const bool show) { m_showAdcValue = show; }
-
-    bool                showAdcHexValue() const { return m_showAdcHexValue; }
-    void                setShowAdcHexValue(const bool show) { m_showAdcHexValue = show; }
-
     void                updateColumn(const int column);
 
 private:
 
     mutable QMutex      m_signalMutex;
     MeasureSignalParam  m_activeSignalParam[MAX_CHANNEL_COUNT];
-
-    static bool         m_showCustomID;
-    static bool         m_showElectricValue;
-    static bool         m_showAdcValue;
-    static bool         m_showAdcHexValue;
 
     int                 columnCount(const QModelIndex &parent) const;
     int                 rowCount(const QModelIndex &parent=QModelIndex()) const;

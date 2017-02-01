@@ -252,7 +252,7 @@ void CalibratorBase::updateList()
         m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setText(pCalibrator->isConnected() ? tr("Yes") : tr("No"));
         m_pCalibratorView->item(index, CALIBRATOR_COLUMN_SN)->setText(pCalibrator->serialNo());
 
-        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackgroundColor(pCalibrator->isConnected() ? QColor(0xA0, 0xFF, 0xA0) : Qt::white);
+        m_pCalibratorView->item(index, CALIBRATOR_COLUMN_CONNECT)->setBackgroundColor(pCalibrator->isConnected() == true ? COLOR_CALIBRATOR_CONNECTED : COLOR_CALIBRATOR_NOT_CONNECTED);
     }
 }
 

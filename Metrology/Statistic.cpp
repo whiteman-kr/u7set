@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
+#include "FindData.h"
 #include "SignalProperty.h"
 
 
@@ -129,11 +130,16 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
         return result;
     }
 
+    if (role == Qt::FontRole)
+    {
+        return theOptions.measureView().font();
+    }
+
     if (role == Qt::TextColorRole)
     {
         if (column == STATISTIC_COLUMN_STATE && param.statistic().measureCount() == 0)
         {
-            return QColor(0xA0, 0xA0, 0xA0);
+            return QColor( Qt::lightGray );
         }
 
         return QVariant();
@@ -145,11 +151,11 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
         {
             if (param.statistic().state() == STATISTIC_STATE_INVALID)
             {
-                return QColor(0xFF, 0xA0, 0xA0);
+                return theOptions.measureView().colorLimitError();
             }
             if (param.statistic().state() == STATISTIC_STATE_SUCCESS)
             {
-                return QColor(0xA0, 0xFF, 0xA0);
+                return theOptions.measureView().colorNotError();
             }
 
         }
@@ -380,15 +386,15 @@ void StatisticDialog::createInterface()
     m_pEditMenu = new QMenu(tr("&Edit"), this);
     m_pViewMenu = new QMenu(tr("&View"), this);
 
-    m_pPrintAction = m_pSignalMenu->addAction(tr("&Print"));
+    m_pPrintAction = m_pSignalMenu->addAction(tr("&Print ..."));
     m_pPrintAction->setIcon(QIcon(":/icons/Print.png"));
     m_pPrintAction->setShortcut(Qt::CTRL + Qt::Key_P);
 
-    m_pExportAction = m_pSignalMenu->addAction(tr("&Export"));
+    m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
     m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
     m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_pFindAction = m_pEditMenu->addAction(tr("&Find"));
+    m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
     m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
     m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
 
@@ -408,6 +414,7 @@ void StatisticDialog::createInterface()
     m_pTypeLinearityAction = m_pViewMeasureTypeMenu->addAction(tr("Linearity"));
     m_pTypeLinearityAction->setCheckable(true);
     m_pTypeLinearityAction->setChecked(m_measureType == MEASURE_TYPE_LINEARITY);
+
     m_pTypeComparatorsAction = m_pViewMeasureTypeMenu->addAction(tr("Comparators"));
     m_pTypeComparatorsAction->setCheckable(true);
     m_pTypeComparatorsAction->setChecked(m_measureType == MEASURE_TYPE_COMPARATOR);
@@ -416,19 +423,25 @@ void StatisticDialog::createInterface()
     m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
     m_pShowCustomIDAction->setChecked(m_signalParamTable.showCustomID());
-    m_pShowCustomIDAction->setShortcut(Qt::Key_Tab);
+    m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
+
     m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
     m_pShowADCInHexAction->setCheckable(true);
     m_pShowADCInHexAction->setChecked(m_signalParamTable.showADCInHex());
 
+    m_pViewGotoMenu = new QMenu(tr("Go to next"), this);
+    m_pGotoNextNoMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
+    m_pGotoNextInvalidAction = m_pViewGotoMenu->addAction(tr("Invalid"));
+
     m_pViewMenu->addMenu(m_pViewMeasureTypeMenu);
     m_pViewMenu->addSeparator();
     m_pViewMenu->addMenu(m_pViewShowMenu);
+    m_pViewMenu->addSeparator();
+    m_pViewMenu->addMenu(m_pViewGotoMenu);
 
     m_pMenuBar->addMenu(m_pSignalMenu);
     m_pMenuBar->addMenu(m_pEditMenu);
     m_pMenuBar->addMenu(m_pViewMenu);
-
 
     createStatusBar();
 
@@ -443,11 +456,13 @@ void StatisticDialog::createInterface()
     connect(m_pTypeComparatorsAction, &QAction::triggered, this, &StatisticDialog::showTypeComparators);
     connect(m_pShowCustomIDAction, &QAction::triggered, this, &StatisticDialog::showCustomID);
     connect(m_pShowADCInHexAction, &QAction::triggered, this, &StatisticDialog::showADCInHex);
+    connect(m_pGotoNextNoMeasuredAction, &QAction::triggered, this, &StatisticDialog::gotoNextNoMeasured);
+    connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticDialog::gotoNextInvalid);
 
 
     m_pView = new QTableView(this);
     m_pView->setModel(&m_signalParamTable);
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     for(int column = 0; column < STATISTIC_COLUMN_COUNT; column++)
@@ -505,14 +520,17 @@ void StatisticDialog::createContextMenu()
     //
     m_pContextMenu = new QMenu(tr(""), this);
 
-
     m_pContextMenu->addAction(m_pCopyAction);
-
+    m_pContextMenu->addSeparator();
+    m_pSelectSignalForMeasure = m_pContextMenu->addAction(tr("&Select signal for measuring"));
+    m_pSelectSignalForMeasure->setIcon(QIcon(":/icons/Start.png"));
 
     // init context menu
     //
     m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_pView, &QTableWidget::customContextMenuRequested, this, &StatisticDialog::onContextMenu);
+
+    connect(m_pSelectSignalForMeasure, &QAction::triggered, this, &StatisticDialog::selectSignalForMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -709,9 +727,17 @@ void StatisticDialog::exportSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticDialog::find()
+void StatisticDialog::selectSignalForMeasure()
 {
 
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticDialog::find()
+{
+    FindData* dialog = new FindData(m_pView);
+    dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -787,6 +813,90 @@ void StatisticDialog::showADCInHex()
     m_signalParamTable.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
 
     updateList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticDialog::gotoNextNoMeasured()
+{
+    int signaCount = m_signalParamTable.signalCount();
+    if (signaCount == 0)
+    {
+        return;
+    }
+
+    int startIndex = m_pView->currentIndex().row() ;
+    if (startIndex == 0)
+    {
+        startIndex = -1;
+    }
+
+    int foundIndex = -1;
+
+    for(int i = startIndex + 1; i < signaCount; i++)
+    {
+        MeasureSignalParam param = m_signalParamTable.signalParam(i);
+        if (param.isValid() == false)
+        {
+            continue;
+        }
+
+        if (param.statistic().measureCount() == 0)
+        {
+            foundIndex = i;
+
+            break;
+        }
+    }
+
+    if (foundIndex == -1)
+    {
+        return;
+    }
+
+    m_pView->setCurrentIndex( m_pView->model()->index(foundIndex, 0) );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticDialog::gotoNextInvalid()
+{
+    int signaCount = m_signalParamTable.signalCount();
+    if (signaCount == 0)
+    {
+        return;
+    }
+
+    int startIndex = m_pView->currentIndex().row() ;
+    if (startIndex == 0)
+    {
+        startIndex = -1;
+    }
+
+    int foundIndex = -1;
+
+    for(int i = startIndex + 1; i < signaCount; i++)
+    {
+        MeasureSignalParam param = m_signalParamTable.signalParam(i);
+        if (param.isValid() == false)
+        {
+            continue;
+        }
+
+        if (param.statistic().state() == STATISTIC_STATE_INVALID)
+        {
+            foundIndex = i;
+
+            break;
+        }
+    }
+
+    if (foundIndex == -1)
+    {
+        return;
+    }
+
+    m_pView->setCurrentIndex( m_pView->model()->index(foundIndex, 0) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -116,39 +116,25 @@ public:
 const char* const		MeasureViewParam[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
-                        QT_TRANSLATE_NOOP("Options.h", "Show external ID"),
-                        QT_TRANSLATE_NOOP("Options.h", "Displaying value"),
-                        QT_TRANSLATE_NOOP("Options.h", "Measurement over limit error"),
-                        QT_TRANSLATE_NOOP("Options.h", "Measurement over control error"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show Custom ID"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color measurement that has not error"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
 };
 
 const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
 const int				MWO_PARAM_FONT					= 0,
                         MWO_PARAM_ID					= 1,
-                        MWO_PARAM_DISPLAYING_VALUE      = 2,
+                        MWO_PARAM_COLOR_NOT_ERROR       = 2,
                         MWO_PARAM_COLOR_LIMIT_ERROR     = 3,
                         MWO_PARAM_COLOR_CONTROL_ERROR   = 4;
 
 // ----------------------------------------------------------------------------------------------
 
-#define                 COLOR_LIMIT_ERROR               QColor(0xFF, 0xD0, 0xD0)
-#define					COLOR_CONTROL_ERROR             QColor(0xFF, 0xFF, 0x99)
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const       DisplayingValueType[] =
-{
-                        QT_TRANSLATE_NOOP("Options.h", "Show in physical units"),
-                        QT_TRANSLATE_NOOP("Options.h", "Show in electrical units"),
-                        QT_TRANSLATE_NOOP("Options.h", "Displayed as a percentage (%) of the range"),
-};
-
-const int				DISPLAYING_VALUE_TYPE_COUNT     = sizeof(DisplayingValueType)/sizeof(DisplayingValueType[0]);
-
-const int				DISPLAYING_VALUE_TYPE_PHYSICAL  = 0,
-                        DISPLAYING_VALUE_TYPE_ELECTRIC  = 1,
-                        DISPLAYING_VALUE_TYPE_PERCENT   = 2;
+#define                 COLOR_NOT_ERROR                 QColor(0xA0, 0xFF, 0xA0)
+#define                 COLOR_OVER_LIMIT_ERROR          QColor(0xFF, 0xA0, 0xA0)
+#define					COLOR_OVER_CONTROL_ERROR        QColor(0xFF, 0xA0, 0x00)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -166,18 +152,42 @@ public:
 
     MeasureViewColumn   m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
+private:
+
     int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
 
     QFont				m_font;
     QFont				m_fontBold;
 
-    bool				m_showExternalID = true;
-    int					m_showDisplayingValueType = DISPLAYING_VALUE_TYPE_PHYSICAL;
+    bool				m_showCustomID = true;
 
-    QColor              m_colorLimitError = COLOR_LIMIT_ERROR;
-    QColor              m_colorControlError = COLOR_CONTROL_ERROR;
+    QColor              m_colorNotError = COLOR_NOT_ERROR;
+    QColor              m_colorLimitError = COLOR_OVER_LIMIT_ERROR;
+    QColor              m_colorControlError = COLOR_OVER_CONTROL_ERROR;
+
 
 public:
+
+    int                 measureType() const { return m_measureType; }
+    void                setMeasureType(const int measureType) { m_measureType = measureType; }
+
+    QFont&              font() { return m_font; }
+    void                setFont(QFont font) { m_font = font; }
+
+    QFont               fontBold() const { return m_fontBold; }
+    void                setFontBold(QFont font) { m_fontBold = font; }
+
+    bool                showCustomID() const { return m_showCustomID; }
+    void                setShowCustomID(const bool show) { m_showCustomID = show; }
+
+    QColor              colorNotError() const { return m_colorNotError; }
+    void                setColorNotError(QColor color) { m_colorNotError = color; }
+
+    QColor              colorLimitError() const { return m_colorLimitError; }
+    void                setColorLimitError(QColor color) { m_colorLimitError = color; }
+
+    QColor              colorControlError() const { return m_colorControlError; }
+    void                setColorControlError(QColor color) { m_colorControlError = color; }
 
     void                init();
 
@@ -186,6 +196,99 @@ public:
 
     MeasureViewOption&  operator=(const MeasureViewOption& from);
 };
+
+// ==============================================================================================
+
+#define                 SIGNAL_INFO_OPTIONS_KEY        "Options/SignalInfo/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		SignalInfoParam[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show Custom ID"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show Electric state"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show ADC state"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show ADC (hex) state"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color flag overflow"),
+                        QT_TRANSLATE_NOOP("Options.h", "Color flag underflow"),
+};
+
+const int				SIO_PARAM_COUNT					= sizeof(SignalInfoParam)/sizeof(SignalInfoParam[0]);
+
+const int				SIO_PARAM_FONT					= 0,
+                        SIO_PARAM_ID					= 1,
+                        SIO_PARAM_ELECTRIC_STATE        = 2,
+                        SIO_PARAM_ADC_STATE             = 3,
+                        SIO_PARAM_ADC_HEX_STATE         = 4,
+                        SIO_PARAM_COLOR_FLAG_VALID      = 5,
+                        SIO_PARAM_COLOR_FLAG_OVERFLOW   = 6,
+                        SIO_PARAM_COLOR_FLAG_UNDERFLOW  = 7;
+
+// ----------------------------------------------------------------------------------------------
+
+#define                 COLOR_FLAG_VALID                QColor(0xFF, 0xA0, 0xA0)
+#define					COLOR_FLAG_OVERFLOW             QColor(0xFF, 0xA0, 0x00)
+#define					COLOR_FLAG_OVERBREAK            QColor(0xFF, 0xA0, 0x00)
+
+// ----------------------------------------------------------------------------------------------
+
+class SignalInfoOption : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit            SignalInfoOption(QObject *parent = 0);
+    explicit            SignalInfoOption(const SignalInfoOption& from, QObject *parent = 0);
+                        ~SignalInfoOption();
+
+private:
+
+    QFont				m_font;
+
+    bool				m_showCustomID = true;
+    bool				m_showElectricState = false;
+    bool				m_showAdcState = false;
+    bool				m_showAdcHexState = false;
+
+    QColor              m_colorFlagValid = COLOR_FLAG_VALID;
+    QColor              m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
+    QColor              m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
+
+
+public:
+
+    QFont&              font() { return m_font; }
+    void                setFont(QFont font) { m_font = font; }
+
+    bool                showCustomID() const { return m_showCustomID; }
+    void                setShowCustomID(const bool show) { m_showCustomID = show; }
+
+    bool                showElectricState() const { return m_showElectricState; }
+    void                setShowElectricState(const bool show) { m_showElectricState = show; }
+
+    bool                showAdcState() const { return m_showAdcState; }
+    void                setShowAdcState(const bool show) { m_showAdcState = show; }
+
+    bool                showAdcHexState() const { return m_showAdcHexState; }
+    void                setShowAdcHexState(const bool show) { m_showAdcHexState = show; }
+
+    QColor              colorFlagValid() const { return m_colorFlagValid; }
+    void                setColorFlagValid(QColor color) { m_colorFlagValid = color; }
+
+    QColor              colorFlagOverflow() const { return m_colorFlagOverflow; }
+    void                setColorFlagOverflow(QColor color) { m_colorFlagOverflow = color; }
+
+    QColor              colorFlagUnderflow() const { return m_colorFlagUnderflow; }
+    void                setColorFlagUnderflow(QColor color) { m_colorFlagUnderflow = color; }
+
+    void                load();
+    void                save();
+
+    SignalInfoOption&  operator=(const SignalInfoOption& from);
+};
+
 
 // ==============================================================================================
 
@@ -726,6 +829,7 @@ private:
     ToolBarOption       m_toolBar;
     TcpIpOption         m_connectTcpIp;
     MeasureViewOption   m_measureView;
+    SignalInfoOption    m_signalInfo;
     DatabaseOption      m_database;
     ReportOption        m_report;
     LinearityOption     m_linearity;
@@ -742,6 +846,9 @@ public:
 
     MeasureViewOption&  measureView() { return m_measureView; }
     void                setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
+
+    SignalInfoOption&   signalInfo() { return m_signalInfo; }
+    void                setSignalInfo(const SignalInfoOption& signalInfo) { m_signalInfo = signalInfo; }
 
     DatabaseOption&     database() { return m_database; }
     void                setDatabase(const DatabaseOption& database) { m_database = database; }

@@ -30,6 +30,7 @@ const char* const       OutputSignalColumn[] =
                         QT_TRANSLATE_NOOP("OutputSignalDialog.h", "Case"),
                         QT_TRANSLATE_NOOP("OutputSignalDialog.h", "Signal ID (output)"),
                         QT_TRANSLATE_NOOP("OutputSignalDialog.h", "Caption"),
+                        QT_TRANSLATE_NOOP("OutputSignalDialog.h", ""),
 
 };
 
@@ -43,7 +44,8 @@ const int               OUTPUT_SIGNAL_COLUMN_TYPE           = 0,
                         OUTPUT_SIGNAL_COLUMN_SEPARATOR2     = 5,
                         OUTPUT_SIGNAL_COLUMN_OUT_CASE       = 6,
                         OUTPUT_SIGNAL_COLUMN_OUT_ID         = 7,
-                        OUTPUT_SIGNAL_COLUMN_OUT_CAPTION    = 8;
+                        OUTPUT_SIGNAL_COLUMN_OUT_CAPTION    = 8,
+                        OUTPUT_SIGNAL_COLUMN_SEPARATOR3     = 9;
 
 // ==============================================================================================
 
@@ -170,10 +172,6 @@ private:
 
     void                createInterface();
     void                createContextMenu();
-
-protected:
-
-    bool                eventFilter(QObject *object, QEvent *event);
 
 signals:
 

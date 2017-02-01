@@ -966,8 +966,54 @@ void MainWindow::startMeasure()
     if (m_pSignalSocket->isConnected() == false)
     {
         QMessageBox::critical(this, windowTitle(), tr("No connect to server!"));
-
         return;
+    }
+
+
+    if (theSignalBase.activeSignal().isEmpty() == true)
+    {
+        QMessageBox::critical(this, windowTitle(), tr("Signal for measure is not selected!"));
+        return;
+    }
+
+    // temporary solution
+    // param.setStatistic( theMeasureBase.statisticItem( param.hash() ) );
+    //
+    //
+    MeasureView* pMeasureView = activeMeasureView();
+    if (pMeasureView == nullptr)
+    {
+        return;
+    }
+
+    QString measuredSignalID;
+
+    for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+    {
+        Hash hash = theSignalBase.activeSignal().hash( i );
+        if (hash == 0)
+        {
+            continue;
+        }
+
+        MeasureSignalParam param = theSignalBase.signalParam(hash);
+        param.setStatistic( pMeasureView->table().m_measureBase.statistic( hash ) );
+
+        if ( param.statistic().measureCount() != 0 )
+        {
+            measuredSignalID.append( param.customAppSignalID() + "\n");
+        }
+    }
+    //
+    //
+    // temporary solution
+
+    if (measuredSignalID.isEmpty() == false)
+    {
+        if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignalID)) == QMessageBox::No)
+        {
+            return;
+        }
     }
 
     if (m_measureThread.isRunning() == true)

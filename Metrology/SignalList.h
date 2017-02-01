@@ -18,10 +18,10 @@
 
 const char* const       SignalListColumn[] =
 {
+                        QT_TRANSLATE_NOOP("SignalListDialog.h", "Case"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "ID"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "Caption"),
-                        QT_TRANSLATE_NOOP("SignalListDialog.h", "Case"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "Subblock"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "Block"),
                         QT_TRANSLATE_NOOP("SignalListDialog.h", "Entry"),
@@ -34,10 +34,10 @@ const char* const       SignalListColumn[] =
 
 const int               SIGNAL_LIST_COLUMN_COUNT        = sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
-const int               SIGNAL_LIST_COLUMN_ID           = 0,
-                        SIGNAL_LIST_COLUMN_EQUIPMENT_ID = 1,
-                        SIGNAL_LIST_COLUMN_CAPTION      = 2,
-                        SIGNAL_LIST_COLUMN_CASE         = 3,
+const int               SIGNAL_LIST_COLUMN_CASE         = 0,
+                        SIGNAL_LIST_COLUMN_ID           = 1,
+                        SIGNAL_LIST_COLUMN_EQUIPMENT_ID = 2,
+                        SIGNAL_LIST_COLUMN_CAPTION      = 3,
                         SIGNAL_LIST_COLUMN_SUBBLOCK     = 4,
                         SIGNAL_LIST_COLUMN_BLOCK        = 5,
                         SIGNAL_LIST_COLUMN_ENTRY        = 6,

@@ -511,37 +511,31 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                 QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
                     item = manager->addProperty(QVariant::Font, MeasureViewParam[MWO_PARAM_FONT]);
-                    item->setValue( m_options.measureView().m_font );
+                    item->setValue( m_options.measureView().font() );
                     appendProperty(item, page, MWO_PARAM_FONT);
                     fontGroup->addSubProperty(item);
 
                 QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying measurements"));
 
                     item = manager->addProperty(QVariant::Bool, MeasureViewParam[MWO_PARAM_ID]);
-                    item->setValue( m_options.measureView().m_showExternalID );
+                    item->setValue( m_options.measureView().showCustomID() );
                     appendProperty(item, page, MWO_PARAM_ID);
-                    measureGroup->addSubProperty(item);
-
-                    item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), MeasureViewParam[MWO_PARAM_DISPLAYING_VALUE]);
-                    QStringList valueTypeList;
-                    for(int t = 0; t < DISPLAYING_VALUE_TYPE_COUNT; t++)
-                    {
-                        valueTypeList.append(DisplayingValueType[t]);
-                    }
-                    item->setAttribute(QLatin1String("enumNames"), valueTypeList);
-                    item->setValue(m_options.measureView().m_showDisplayingValueType);
-                    appendProperty(item, page, MWO_PARAM_DISPLAYING_VALUE);
                     measureGroup->addSubProperty(item);
 
                 QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
+                    item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]);
+                    item->setValue( m_options.measureView().colorNotError() );
+                    appendProperty(item, page, MWO_PARAM_COLOR_NOT_ERROR);
+                    colorGroup->addSubProperty(item);
+
                     item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]);
-                    item->setValue( m_options.measureView().m_colorLimitError );
+                    item->setValue( m_options.measureView().colorLimitError() );
                     appendProperty(item, page, MWO_PARAM_COLOR_LIMIT_ERROR);
                     colorGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]);
-                    item->setValue( m_options.measureView().m_colorControlError );
+                    item->setValue( m_options.measureView().colorControlError() );
                     appendProperty(item, page, MWO_PARAM_COLOR_CONTROL_ERROR);
                     colorGroup->addSubProperty(item);
 
@@ -552,12 +546,72 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                 editor->addProperty(colorGroup);
 
                 expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_FONT, false);
-                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_CONTROL_ERROR, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_NOT_ERROR, false);
                 expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_LIMIT_ERROR, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_CONTROL_ERROR, false);
             }
             break;
 
         case OPTION_PAGE_SIGNAL_INFO:
+            {
+                QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
+
+                    item = manager->addProperty(QVariant::Font, SignalInfoParam[SIO_PARAM_FONT]);
+                    item->setValue( m_options.signalInfo().font() );
+                    appendProperty(item, page, SIO_PARAM_FONT);
+                    fontGroup->addSubProperty(item);
+
+                QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying signal state"));
+
+                    item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ID]);
+                    item->setValue( m_options.signalInfo().showCustomID() );
+                    appendProperty(item, page, SIO_PARAM_ID);
+                    measureGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]);
+                    item->setValue( m_options.signalInfo().showElectricState() );
+                    appendProperty(item, page, SIO_PARAM_ELECTRIC_STATE);
+                    measureGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ADC_STATE]);
+                    item->setValue( m_options.signalInfo().showAdcState() );
+                    appendProperty(item, page, SIO_PARAM_ADC_STATE);
+                    measureGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ADC_HEX_STATE]);
+                    item->setValue( m_options.signalInfo().showAdcHexState() );
+                    appendProperty(item, page, SIO_PARAM_ADC_HEX_STATE);
+                    measureGroup->addSubProperty(item);
+
+                QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
+
+                    item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_VALID]);
+                    item->setValue( m_options.signalInfo().colorFlagValid() );
+                    appendProperty(item, page, SIO_PARAM_COLOR_FLAG_VALID);
+                    colorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_OVERFLOW]);
+                    item->setValue( m_options.signalInfo().colorFlagOverflow() );
+                    appendProperty(item, page, SIO_PARAM_COLOR_FLAG_OVERFLOW);
+                    colorGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Color, SignalInfoParam[SIO_PARAM_COLOR_FLAG_UNDERFLOW]);
+                    item->setValue( m_options.signalInfo().colorFlagUnderflow() );
+                    appendProperty(item, page, SIO_PARAM_COLOR_FLAG_UNDERFLOW);
+                    colorGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(fontGroup);
+                editor->addProperty(measureGroup);
+                editor->addProperty(colorGroup);
+
+                expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_FONT, false);
+                expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_VALID, false);
+                expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_OVERFLOW, false);
+                expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_UNDERFLOW, false);
+            }
+
             break;
 
         case OPTION_PAGE_REPORT:
@@ -1085,11 +1139,11 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case MWO_PARAM_FONT:                m_options.measureView().m_font.fromString(value.toString());                    break;
-                    case MWO_PARAM_ID:                  m_options.measureView().m_showExternalID = value.toBool();                      break;
-                    case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();              break;
-                    case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString());    break;
-                    case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());      break;
+                    case MWO_PARAM_FONT:                m_options.measureView().font().fromString(value.toString());                break;
+                    case MWO_PARAM_ID:                  m_options.measureView().setShowCustomID( value.toBool() );                  break;
+                    case MWO_PARAM_COLOR_NOT_ERROR:     m_options.measureView().setColorNotError( QColor( value.toString() ) );     break;
+                    case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().setColorLimitError( QColor( value.toString() ) );   break;
+                    case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().setColorControlError( QColor( value.toString() ) ); break;
                     default:                            assert(0);
                 }
 
@@ -1105,6 +1159,19 @@ void OptionsDialog::applyProperty()
             break;
 
         case OPTION_PAGE_SIGNAL_INFO:
+
+            switch(param)
+            {
+                case SIO_PARAM_FONT:                    m_options.signalInfo().font().fromString(value.toString());                 break;
+                case SIO_PARAM_ID:                      m_options.signalInfo().setShowCustomID(value.toBool() );                    break;
+                case SIO_PARAM_ELECTRIC_STATE:          m_options.signalInfo().setShowElectricState(value.toBool() );               break;
+                case SIO_PARAM_ADC_STATE:               m_options.signalInfo().setShowAdcState(value.toBool() );                    break;
+                case SIO_PARAM_ADC_HEX_STATE:           m_options.signalInfo().setShowAdcHexState(value.toBool() );                 break;
+                case SIO_PARAM_COLOR_FLAG_VALID:        m_options.signalInfo().setColorFlagValid( QColor( value.toString() ) );     break;
+                case SIO_PARAM_COLOR_FLAG_OVERFLOW:     m_options.signalInfo().setColorFlagOverflow( QColor( value.toString() ) );  break;
+                case SIO_PARAM_COLOR_FLAG_UNDERFLOW:    m_options.signalInfo().setColorFlagUnderflow( QColor( value.toString() ) ); break;
+                default:                                assert(0);
+            }
 
             break;
 
