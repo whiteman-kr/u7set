@@ -15,13 +15,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalInfoTable::m_showCustomID = true;
-bool SignalInfoTable::m_showElectricValue = false;
-bool SignalInfoTable::m_showAdcValue = false;
-bool SignalInfoTable::m_showAdcHexValue = false;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 SignalInfoTable::SignalInfoTable(QObject*)
 {
     connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &SignalInfoTable::updateSignalParam, Qt::QueuedConnection);
@@ -127,13 +120,28 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
         return result;
     }
 
+    if (role == Qt::FontRole)
+    {
+        return theOptions.signalInfo().font();
+    }
+
     if (role == Qt::BackgroundColorRole)
     {
         if (column == SIGNAL_INFO_COLUMN_STATE)
         {
-            if (state.flags.underflow == true || state.flags.overflow == true || state.flags.valid == false)
+            if (state.flags.valid == false)
             {
-                return QColor(0xFF, 0xA0, 0xA0);
+                return theOptions.signalInfo().colorFlagValid();
+            }
+
+            if (state.flags.overflow == true)
+            {
+                return theOptions.signalInfo().colorFlagOverflow();
+            }
+
+            if (state.flags.underflow == true)
+            {
+                return theOptions.signalInfo().colorFlagUnderflow();
             }
         }
 
@@ -172,7 +180,7 @@ QString SignalInfoTable::text(const int row, const int column, const MeasureSign
     switch (column)
     {
         case SIGNAL_INFO_COLUMN_CASE:           result = param.position().caseStr();        break;
-        case SIGNAL_INFO_COLUMN_ID:             result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();          break;
+        case SIGNAL_INFO_COLUMN_ID:             result = theOptions.signalInfo().showCustomID() == true ? param.customAppSignalID() : param.appSignalID();  break;
         case SIGNAL_INFO_COLUMN_STATE:          result = signalStateStr(param, state);      break;
         case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = param.position().subblockStr();    break;
         case SIGNAL_INFO_COLUMN_BLOCK:          result = param.position().blockStr();       break;
@@ -212,7 +220,7 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
 
     // append electrical equivalent
     //
-    if (m_showElectricValue == true)
+    if (theOptions.signalInfo().showElectricState() == true)
     {
         double electric = conversion( state.value, CT_PHYSICAL_TO_ELECTRIC, param);
         stateStr.append( " = " + QString::number( electric, 10, param.inputElectricPrecise() ) );
@@ -226,7 +234,7 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
 
     // append adc equivalent in Dec
     //
-    if (m_showAdcValue == true)
+    if (theOptions.signalInfo().showAdcState() == true)
     {
         int adc = (state.value - param.inputPhysicalLowLimit())*(param.adcHighLimit() - param.adcLowLimit())/( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
         stateStr.append( " = " + QString::number( adc, 10 ) );
@@ -234,7 +242,7 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
 
     // append adc equivalent in Hex
     //
-    if (m_showAdcHexValue == true)
+    if (theOptions.signalInfo().showAdcHexState() == true)
     {
         int adc = (state.value - param.inputPhysicalLowLimit())* (param.adcHighLimit() - param.adcLowLimit())/ ( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
         stateStr.append( " = " + QString::number( adc, 16 ) + " h");
@@ -439,7 +447,7 @@ void SignalInfoPanel::createInterface()
 
     m_pView = new QTableView(m_pSignalInfoWindow);
     m_pView->setModel(&m_signalParamTable);
-    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.signalInfo().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     m_pSignalInfoWindow->setCentralWidget(m_pView);
@@ -495,22 +503,22 @@ void SignalInfoPanel::createContextMenu()
 
     m_pShowCustomIDAction = m_pShowMenu->addAction(tr("Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
-    m_pShowCustomIDAction->setChecked(true);
+    m_pShowCustomIDAction->setChecked(theOptions.signalInfo().showCustomID());
 
     m_pShowMenu->addSeparator();
 
     m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical"));
     m_pShowElectricValueAction->setCheckable(true);
-    m_pShowElectricValueAction->setChecked(false);
+    m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
 
 
     m_pShowAdcValueAction = m_pShowMenu->addAction(tr("ADC"));
     m_pShowAdcValueAction->setCheckable(true);
-    m_pShowAdcValueAction->setChecked(false);
+    m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
 
     m_pShowAdcHexValueAction = m_pShowMenu->addAction(tr("ADC (hex)"));
     m_pShowAdcHexValueAction->setCheckable(true);
-    m_pShowAdcHexValueAction->setChecked(false);
+    m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
 
     m_pContextMenu->addMenu(m_pShowMenu);
 
@@ -581,6 +589,11 @@ void SignalInfoPanel::stopSignalStateTimer()
 
 void SignalInfoPanel::onContextMenu(QPoint)
 {
+    m_pShowCustomIDAction->setChecked(theOptions.signalInfo().showCustomID());
+    m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
+    m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
+    m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
+
     m_pContextMenu->exec(QCursor::pos());
 }
 
@@ -619,7 +632,7 @@ void SignalInfoPanel::updateSignalState()
 
 void SignalInfoPanel::showCustomID()
 {
-    m_signalParamTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+    theOptions.signalInfo().setShowCustomID( m_pShowCustomIDAction->isChecked() );
     m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_ID);
 }
 
@@ -627,21 +640,21 @@ void SignalInfoPanel::showCustomID()
 
 void SignalInfoPanel::showElectricValue()
 {
-    m_signalParamTable.setShowElectricValue( m_pShowElectricValueAction->isChecked() );
+    theOptions.signalInfo().setShowElectricState( m_pShowElectricValueAction->isChecked() );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::showAdcValue()
 {
-    m_signalParamTable.setShowAdcValue( m_pShowAdcValueAction->isChecked() );
+    theOptions.signalInfo().setShowAdcState( m_pShowAdcValueAction->isChecked() );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalInfoPanel::showAdcHexValue()
 {
-    m_signalParamTable.setShowAdcHexValue( m_pShowAdcHexValueAction->isChecked() );
+    theOptions.signalInfo().setShowAdcHexState( m_pShowAdcHexValueAction->isChecked() );
 }
 
 

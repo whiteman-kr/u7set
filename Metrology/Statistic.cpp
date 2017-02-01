@@ -139,7 +139,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
     {
         if (column == STATISTIC_COLUMN_STATE && param.statistic().measureCount() == 0)
         {
-            return QColor(0xA0, 0xA0, 0xA0);
+            return QColor( Qt::lightGray );
         }
 
         return QVariant();

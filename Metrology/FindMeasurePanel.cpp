@@ -140,7 +140,7 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
     {
         if (column == FIND_MEASURE_COLUMN_ROW)
         {
-            return QColor(0xA0, 0xA0, 0xA0);
+            return QColor( Qt::lightGray );
         }
 
         return QVariant();

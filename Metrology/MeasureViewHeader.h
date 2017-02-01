@@ -65,7 +65,7 @@ public:
     QColor              color() const { return m_color; }
     void                setColor(const QColor& color) { m_color = color; }
 
-    bool                isEnableDuplicate() const { return m_enableDuplicate; }
+    bool                enableDuplicate() const { return m_enableDuplicate; }
 
     MeasureViewColumn&  operator=(const MeasureViewColumn& from);
 };

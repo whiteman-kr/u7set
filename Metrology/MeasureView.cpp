@@ -268,6 +268,12 @@ QString MeasureTable::textLinearity(int row, int column) const
         return QString();
     }
 
+    MeasureViewColumn* pColumn = m_header.column(column);
+    if (pColumn == nullptr)
+    {
+        return QString();
+    }
+
     LinearityMeasurement* m = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
     if (m == nullptr)
     {
@@ -354,7 +360,7 @@ QString MeasureTable::textLinearity(int row, int column) const
         {
             if ( prev_m->signalHash() == m->signalHash() )
             {
-                if (column <= MVC_CMN_L_ENTRY)
+                if (pColumn->enableDuplicate() == false)
                 {
                     result = QString();
                 }

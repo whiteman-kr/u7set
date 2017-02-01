@@ -192,11 +192,11 @@ void MeasureViewOption::load()
     m_fontBold = m_font;
     m_fontBold.setBold(true);
 
-    m_showCustomID = s.value( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
-    m_showDisplayingValueType = s.value( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), DISPLAYING_VALUE_TYPE_PHYSICAL).toInt();
+    m_showCustomID = s.value( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
 
-    m_colorLimitError = s.value( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_LIMIT_ERROR.rgb()).toInt();
-    m_colorControlError = s.value( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_CONTROL_ERROR.rgb()).toInt();
+    m_colorNotError = s.value( QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toInt();
+    m_colorLimitError = s.value( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toInt();
+    m_colorControlError = s.value( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -222,9 +222,9 @@ void MeasureViewOption::save()
 
     s.setValue( QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
 
-    s.setValue( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showCustomID);
-    s.setValue( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), m_showDisplayingValueType);
+    s.setValue( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showCustomID);
 
+    s.setValue( QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorNotError.rgb() );
     s.setValue( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorLimitError.rgb() );
     s.setValue( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorControlError.rgb() );
 }
@@ -246,10 +246,90 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
     m_fontBold.setBold(true);
 
     m_showCustomID = from.m_showCustomID;
-    m_showDisplayingValueType = from.m_showDisplayingValueType;
 
-    m_colorControlError = from.m_colorControlError;
+    m_colorNotError = from.m_colorNotError;
     m_colorLimitError = from.m_colorLimitError;
+    m_colorControlError = from.m_colorControlError;
+
+    return *this;
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption::SignalInfoOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption::SignalInfoOption(const SignalInfoOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+SignalInfoOption::~SignalInfoOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::load()
+{
+    QSettings s;
+
+    m_font.fromString( s.value( QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), "Segoe UI, 10").toString() );
+
+    m_showCustomID = s.value( QString("%1ShowExternalID").arg(SIGNAL_INFO_OPTIONS_KEY), true).toBool();
+    m_showElectricState = s.value( QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
+    m_showAdcState = s.value( QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
+    m_showAdcHexState = s.value( QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
+
+    m_colorFlagValid = s.value( QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toInt();
+    m_colorFlagOverflow = s.value( QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toInt();
+    m_colorFlagUnderflow = s.value( QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), m_font.toString());
+
+    s.setValue( QString("%1ShowExternalID").arg(SIGNAL_INFO_OPTIONS_KEY), m_showCustomID);
+    s.setValue( QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
+    s.setValue( QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcState);
+    s.setValue( QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcHexState);
+
+
+    s.setValue( QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb() );
+    s.setValue( QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb() );
+    s.setValue( QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb() );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
+{
+    m_font.fromString( from.m_font.toString() );
+
+    m_showCustomID = from.m_showCustomID;
+    m_showElectricState = from.m_showElectricState;
+    m_showAdcState = from.m_showAdcState;
+    m_showAdcHexState = from.m_showAdcHexState;
+
+    m_colorFlagValid = from.m_colorFlagValid;
+    m_colorFlagOverflow = from.m_colorFlagOverflow;
+    m_colorFlagUnderflow = from.m_colorFlagUnderflow;
 
     return *this;
 }
@@ -979,6 +1059,8 @@ void Options::load()
     m_measureView.init();
     m_measureView.load();
 
+    m_signalInfo.load();
+
     m_database.load();
     m_database.create();
 
@@ -999,6 +1081,7 @@ void Options::save()
     m_toolBar.save();
     m_connectTcpIp.save();
     m_measureView.save();
+    m_signalInfo.save();
     m_database.save();
     m_report.save();
     m_linearity.save();
@@ -1029,6 +1112,7 @@ Options& Options::operator=(const Options& from)
         m_toolBar = from.m_toolBar;
         m_connectTcpIp = from.m_connectTcpIp;
         m_measureView = from.m_measureView;
+        m_signalInfo = from.m_signalInfo;
         m_database = from.m_database;
         m_report = from.m_report;
         m_linearity = from.m_linearity;

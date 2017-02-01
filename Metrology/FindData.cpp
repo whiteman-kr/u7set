@@ -35,7 +35,7 @@ void FindData::createFindDialog(QTableView *pView)
 
     m_pFindDialog = new QDialog(pView->parentWidget());
 
-    m_pFindDialog->setWindowFlags(Qt::Drawer);
+    m_pFindDialog->setWindowFlags(Qt::Dialog );
     m_pFindDialog->setWindowTitle(tr("Find"));
     m_pFindDialog->setWindowIcon(QIcon(":/icons/Find.png"));
 

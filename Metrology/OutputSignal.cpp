@@ -113,12 +113,12 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
     {
         if ((column == OUTPUT_SIGNAL_COLUMN_IN_CASE || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION) && signal.param(OUTPUT_SIGNAL_KIND_INPUT).isValid() == false)
         {
-            return QColor(0xFF, 0x00, 0x00);
+            return QColor( Qt::red );
         }
 
         if ((column == OUTPUT_SIGNAL_COLUMN_OUT_CASE || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION) && signal.param(OUTPUT_SIGNAL_KIND_OUTPUT).isValid() == false)
         {
-            return QColor(0xFF, 0x00, 0x00);
+            return QColor( Qt::red );
         }
 
         return QVariant();
@@ -127,9 +127,9 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::BackgroundColorRole)
     {
-        if (column == OUTPUT_SIGNAL_COLUMN_SEPARATOR1 || column == OUTPUT_SIGNAL_COLUMN_SEPARATOR2)
+        if (column == OUTPUT_SIGNAL_COLUMN_SEPARATOR1 || column == OUTPUT_SIGNAL_COLUMN_SEPARATOR2 || column == OUTPUT_SIGNAL_COLUMN_SEPARATOR3)
         {
-            return QColor(0xF0, 0xF0, 0xF0);
+            return QColor( Qt::lightGray );
         }
 
         return QVariant();
@@ -178,6 +178,7 @@ QString OutputSignalTable::text(const int row, const int column, const OutputSig
         case OUTPUT_SIGNAL_COLUMN_OUT_CASE:     outParam.isValid() == false ?   result = QString("???")     : result = outParam.position().caseStr();   break;
         case OUTPUT_SIGNAL_COLUMN_OUT_ID:       outParam.isValid() == false ?   result = signal.appSignalID(OUTPUT_SIGNAL_KIND_OUTPUT) : result =  m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID();  break;
         case OUTPUT_SIGNAL_COLUMN_OUT_CAPTION:  outParam.isValid() == false ?   result = QString("???")     : result = outParam.caption();              break;
+        case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:   result = QString();                                                                                     break;
         default:                                assert(0);
     }
 
@@ -586,14 +587,15 @@ void OutputSignalItemDialog::onOk()
 int OutputSignalDialog::m_columnWidth[OUTPUT_SIGNAL_COLUMN_COUNT] =
 {
     100,    // OUTPUT_SIGNAL_COLUMN_TYPE
-     10,    // OUTPUT_SIGNAL_COLUMN_SEPARATOR1
+      3,    // OUTPUT_SIGNAL_COLUMN_SEPARATOR1
     100,    // OUTPUT_SIGNAL_COLUMN_IN_CASE
     250,    // OUTPUT_SIGNAL_COLUMN_IN_ID
     150,    // OUTPUT_SIGNAL_COLUMN_IN_CAPTION
-     10,    // OUTPUT_SIGNAL_COLUMN_SEPARATOR2
+      3,    // OUTPUT_SIGNAL_COLUMN_SEPARATOR2
     100,    // OUTPUT_SIGNAL_COLUMN_OUT_CASE
     250,    // OUTPUT_SIGNAL_COLUMN_OUT_ID
     150,    // OUTPUT_SIGNAL_COLUMN_OUT_CAPTION
+      3,    // OUTPUT_SIGNAL_COLUMN_SEPARATOR3
 };
 
 // -------------------------------------------------------------------------------------------------------------------

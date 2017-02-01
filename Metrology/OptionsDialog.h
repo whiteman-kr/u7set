@@ -69,7 +69,7 @@ const char* const               OptionGroup[] =
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Information of signal"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel signal information"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),

@@ -17,6 +17,12 @@
 
 // ==============================================================================================
 
+
+#define                     COLOR_CALIBRATOR_CONNECTED          QColor(0xA0, 0xFF, 0xA0)
+#define                     COLOR_CALIBRATOR_NOT_CONNECTED      QColor(0x00, 0x00, 0x00)
+
+// ==============================================================================================
+
 const char* const           CalibratorColumn[] =
 {
                             QT_TRANSLATE_NOOP("CalibratorBase.h", "Serial port"),
