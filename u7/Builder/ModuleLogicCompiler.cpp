@@ -4681,7 +4681,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
-		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
+		bool result = m_code.getRunTimes(m_idrPhaseClockCount, m_alpPhaseClockCount);
 
 		if (result == false)
 		{

@@ -151,10 +151,10 @@ namespace Builder
 		E::DataFormat m_constDataFormat = E::DataFormat::Float;
 
     public:
-        CommandCode()
-        {
-            setNoCommand();
-        }
+		CommandCode();
+		CommandCode(const CommandCode& cCode);
+
+		CommandCode& operator = (const CommandCode& cCode);
 
         void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
 
@@ -261,7 +261,7 @@ namespace Builder
     {
     private:
         static QHash<int, const LmCommand*> m_lmCommands;
-		static QHash<quint16, int> m_executedFb;
+		static QHash<quint16, int> m_executedFb;				// fbType => remaining exec time
 
 		// initialized by ApplicationLogicCode::setMemoryMap()
         //
@@ -270,16 +270,21 @@ namespace Builder
 
         int m_address = -1;
 
-        int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
+		int m_waitTime = 0;				// command wait-to-execution time
+		int m_execTime = 0;				// command execution time
 
-		int m_cmdReadTime = 0;			// command read time, equal to LmCommand::readTime
-		int m_cmdRunTime = 0;			// equal to LmCommand::runTime or calculated value
+		int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
 
 		bool m_result = true;
 
         CommandCode m_code;
 
-        QString getCodeWordStr(int wordNo);
+		static int startFbExec(quint16 fbType, int fbRuntime);
+		static void decFbExecTime(int time);
+
+		void initStaticMembers();
+
+		QString getCodeWordStr(int wordNo);
 
         bool addressInBitMemory(int address);
         bool addressInWordMemory(int address);
@@ -294,6 +299,7 @@ namespace Builder
 
     public:
         Command();
+		Command(const Command& cmd);
 
         void nop();
         void start(quint16 fbType, quint16 fbInstance, const QString& fbCaption, int fbRunTime);
@@ -348,7 +354,11 @@ namespace Builder
 
         int address() const { return m_address; }
 
-		bool getReadAndRunTimes(int& readTime, int& runTime, quint16& prevFbType, int& prevFbRuntime);
+		bool getTimes(int prevCmdRunTime);
+
+		int execTime() const { return m_execTime; }
+		int waitTime() const { return m_waitTime; }
+		int waitAndExecTime() const { return m_waitTime + m_execTime; }
 
 		static void setMemoryMap(LmMemoryMap* memoryMap, IssueLogger* log);
 		static void resetMemoryMap();

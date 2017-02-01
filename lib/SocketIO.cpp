@@ -249,6 +249,8 @@ QString getNetworkErrorStr(NetworkError err)
 	default:
 		assert(false);			// unknown err value
 	}
+
+	return QString("Unknown NetworkError ???");
 }
 
 

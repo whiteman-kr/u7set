@@ -277,7 +277,59 @@ namespace Builder
 	LmMemoryMap* Command::m_memoryMap = nullptr;
 	IssueLogger* Command::m_log = nullptr;
 
-	Command::Command()
+    Command::Command()
+    {
+		initStaticMembers();
+    }
+
+
+	Command::Command(const Command& cmd)
+	{
+		initStaticMembers();
+
+		m_address = cmd.m_address;
+		m_fbRunTime = cmd.m_fbRunTime;
+		m_result = cmd.m_result;
+		m_code = cmd.m_code;
+	}
+
+
+	int Command::startFbExec(quint16 fbType, int fbRuntime)
+	{
+		int waitTime = 0;
+
+		int fbRemainingExecTime = m_executedFb.value(fbType, -1);
+
+		if (fbRemainingExecTime != -1)
+		{
+			// FB of fbType is executed now!
+			//
+			waitTime = fbRemainingExecTime;
+		}
+		else
+		{
+			// FB of fbType is NOT executed now!
+			//
+			waitTime = 0;
+		}
+
+		// add FB to exec map
+		//
+		m_executedFb.insert(fbType, fbRuntime);
+
+		return waitTime;
+	}
+
+	void Command::decFbExecTime(int time)
+	{
+		for(quint16 fbType : m_executedFb)
+		{
+
+		}
+	}
+
+
+	void Command::initStaticMembers()
 	{
 		if (m_memoryMap == nullptr)
 		{
@@ -292,7 +344,6 @@ namespace Builder
 				m_lmCommands.insert(static_cast<int>(lmCommand.code), &lmCommand);
 			}
 		}
-
 	}
 
 
@@ -1075,14 +1126,11 @@ namespace Builder
 			cmdStr += "\t";
 		}
 
-		int readTime = 0;
-		int runTime = 0;
-
-		getReadAndRunTimes(readTime, runTime);
+		assert(m_execTime != 0);			// check that times already calculated
 
 		QString str;
 
-		str.sprintf("[%02d:%02d]", readTime, runTime);
+		str.sprintf("[%02d:%02d]", m_waitTime, m_execTime);
 		str = str.leftJustified(12, ' ');
 
 		cmdStr += str;
@@ -1114,7 +1162,7 @@ namespace Builder
 	}
 
 
-	bool Command::getReadAndRunTimes(int& readTime, int& runTime, quint16& prevFbType, int& prevFbRuntime)
+	bool Command::getTimes(int prevCmdRunTime)
 	{
 		if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
 		{
@@ -1130,11 +1178,29 @@ namespace Builder
 			return false;
 		}
 
-		readTime = lmCommand->readTime;
+		int cmdReadTime = lmCommand->readTime;
 
-		m_cmdReadTime = readTime;
+		if (prevCmdRunTime > cmdReadTime)
+		{
+			m_waitTime = prevCmdRunTime - cmdReadTime;
 
-		int cmdRuntime = 0;
+			decFbExecTime(prevCmdRunTime);
+		}
+		else
+		{
+			m_waitTime = 0;
+
+			decFbExecTime(cmdReadTime);
+		}
+
+
+
+		if (lmCommand->waitFbExecution == true)
+		{
+
+		}
+
+		int cmdExecTime = 0;
 
 		switch(m_code.getOpCode())
 		{
@@ -1159,7 +1225,7 @@ namespace Builder
 		case LmCommandCode::WRFBC32:
 		case LmCommandCode::RDFBTS32:
 			assert(lmCommand->runTime != CALC_RUNTIME);
-			cmdRuntime = lmCommand->runTime;
+			cmdExecTime = lmCommand->runTime;
 			break;
 
 			// specific commands START, NSTART
@@ -1168,9 +1234,9 @@ namespace Builder
 			{
 				assert(lmCommand->runTime != CALC_RUNTIME);
 
-				cmdRuntime = lmCommand->runTime;
+				cmdExecTime = lmCommand->runTime;
 
-				prevFbRuntime =  m_fbRunTime;				// set FB runtime to accommodate in next WaitFbExec command
+				//prevFbRuntime =  m_fbRunTime;				// set FB runtime to accommodate in next WaitFbExec command
 			}
 			break;
 
@@ -1180,10 +1246,10 @@ namespace Builder
 
 				quint16 n = m_code.getWord3();
 
-				cmdRuntime = 3 + n * 2;
+				cmdExecTime = 3 + n * 2;
 
-				prevFbRuntime = m_fbRunTime * n;
-				prevFbType = m_code.getFbType();
+				//prevFbRuntime = m_fbRunTime * n;
+				//prevFbType = m_code.getFbType();
 			}
 			break;
 
@@ -1191,7 +1257,7 @@ namespace Builder
 			//
 		case LmCommandCode::MOV:
 			assert(lmCommand->runTime == CALC_RUNTIME);
-			runTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
+			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 53 : 8;
 			break;
 
 		case LmCommandCode::MOVMEM:
@@ -1202,23 +1268,23 @@ namespace Builder
 
 				assert(n > 0);
 
-				runTime = 7 + (n - 1) * 6 + 1;
+				cmdExecTime = 7 + (n - 1) * 6 + 1;
 			}
 			break;
 
 		case LmCommandCode::MOVC:
 			assert(lmCommand->runTime == CALC_RUNTIME);
-			runTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
+			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 50 : 5;
 			break;
 
 		case LmCommandCode::MOVBC:
 			assert(lmCommand->runTime == CALC_RUNTIME);
-			runTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
+			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 5 : 10;
 			break;
 
 		case LmCommandCode::RDFBB:
 			assert(lmCommand->runTime == CALC_RUNTIME);
-			runTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
+			cmdExecTime = addressInBitMemory(m_code.getWord3()) == true ? 7 : 9;
 			break;
 
 		case LmCommandCode::SETMEM:
@@ -1229,29 +1295,20 @@ namespace Builder
 
 				assert(n > 0);
 
-				runTime = 4 + (n - 1) * 3 + 1;
+				cmdExecTime = 4 + (n - 1) * 3 + 1;
 			}
 			break;
 
 		case LmCommandCode::MOVB:
 			assert(lmCommand->runTime == CALC_RUNTIME);
-			runTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
-
-		case LmCommandCode::NSTART:
-			{
-				assert(lmCommand->runTime == CALC_RUNTIME);
-
-				quint16 n = m_code.getWord3();
-				runTime = 3 + n * 2;
-				prevFbRuntime = n * m_fbRunTime;
-			}
+			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
 			break;
 
 		default:
 			assert(false);								// unknown command code
 		}
 
-		m_cmdRunTime = runTime;
+		m_execTime = cmdExecTime;
 
 		return true;
 	}
@@ -1860,10 +1917,7 @@ namespace Builder
 		//
 		bool idrPhaseCode = true;
 
-		int prevRunTime = 0;
-
-		quint16 prevFbType = 0;
-		int prevFbRuntime = 0;
+		int prevCmdExecTime = 0;
 
 		for(CodeItem* codeItem : m_codeItems)
 		{
@@ -1888,10 +1942,9 @@ namespace Builder
 
 			if (command->address() == appLogicProcessingCodeStartAddress)
 			{
-				idrPhaseClockCount += prevRunTime;
+				idrPhaseClockCount += prevCmdExecTime;
 
-				prevRunTime = 0;
-				prevFbRuntime = 0;
+				prevCmdExecTime = 0;
 
 				idrPhaseCode = false;
 			}
@@ -1899,41 +1952,21 @@ namespace Builder
 			int readTime = 0;
 			int runTime = 0;
 
-			command->getReadAndRunTimes(readTime, runTime, prevFbType, prevFbRuntime);
+			command->getTimes(prevCmdExecTime);
 
 			if (idrPhaseCode == true)
 			{
-				// data reading phase code
-				//
-				if (prevRunTime >= readTime)
-				{
-					idrPhaseClockCount += prevRunTime;
-				}
-				else
-				{
-					idrPhaseClockCount += readTime;
-				}
-
-				prevRunTime = runTime;
+				idrPhaseClockCount += prevCmdExecTime;
 			}
 			else
 			{
-				// app logic processing phase code
-				//
-				if (prevRunTime >= readTime)
-				{
-					alpPhaseClockCount += prevRunTime;
-				}
-				else
-				{
-					alpPhaseClockCount += readTime;
-				}
-
-				prevRunTime = runTime;
+				alpPhaseClockCount += prevCmdExecTime;
 			}
+
+			prevCmdExecTime = command->execTime();
 		}
 
-		alpPhaseClockCount += prevRunTime;
+		alpPhaseClockCount += prevCmdExecTime;
 
 		return true;
 	}
