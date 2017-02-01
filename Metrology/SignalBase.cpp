@@ -304,7 +304,7 @@ QString StatisticItem::stateStr() const
 {
     if (m_measureCount == 0)
     {
-        return QString("no measured");
+        return QString("Not measured");
     }
 
     if (m_state < 0 || m_state >= STATISTIC_STATE_COUNT)
@@ -523,7 +523,7 @@ QString MeasureSignalParam::calibratorIndexStr(const int index) const
     CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(index);
     if (pManager == nullptr || pManager->calibratorIsConnected() == false)
     {
-        return QString("not connected");
+        return QString("Not connected");
     }
 
     return QString("Calibrator %1 (%2)").arg( pManager->index() + 1).arg(pManager->portName());

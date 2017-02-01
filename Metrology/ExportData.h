@@ -1,17 +1,14 @@
-#ifndef MEASURESAVEDIALOG_H
-#define MEASURESAVEDIALOG_H
+#ifndef EXPORTDATADIALOG_H
+#define EXPORTDATADIALOG_H
 
-#include <QMessageBox>
 #include <QDialog>
 #include <QProgressBar>
 #include <QPushButton>
-
-#include "MeasureView.h"
-#include "ReportView.h"
+#include <QMessageBox>
 
 // ==============================================================================================
 
-#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportMeasure.h", "Export data")
+#define EXPORT_WINDOW_TITLE QT_TRANSLATE_NOOP("ExportData.h", "Export data")
 
 // ==============================================================================================
 
@@ -37,6 +34,7 @@ private:
 
     bool            m_exportCancel = true;
 
+    void            createProgressDialog(QTableView *pView);
     static void     startExportThread(ExportData* pThis, const QString& fileName);
     bool            saveFile(QString fileName);
 
@@ -55,4 +53,4 @@ public slots:
 
 // ==============================================================================================
 
-#endif // MEASURESAVEDIALOG_H
+#endif // EXPORTDATADIALOG_H

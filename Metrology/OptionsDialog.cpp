@@ -511,14 +511,14 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                 QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
 
                     item = manager->addProperty(QVariant::Font, MeasureViewParam[MWO_PARAM_FONT]);
-                    item->setValue( m_options.measureView().m_font );
+                    item->setValue( m_options.measureView().font() );
                     appendProperty(item, page, MWO_PARAM_FONT);
                     fontGroup->addSubProperty(item);
 
                 QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying measurements"));
 
                     item = manager->addProperty(QVariant::Bool, MeasureViewParam[MWO_PARAM_ID]);
-                    item->setValue( m_options.measureView().m_showExternalID );
+                    item->setValue( m_options.measureView().showCustomID() );
                     appendProperty(item, page, MWO_PARAM_ID);
                     measureGroup->addSubProperty(item);
 
@@ -529,19 +529,24 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                         valueTypeList.append(DisplayingValueType[t]);
                     }
                     item->setAttribute(QLatin1String("enumNames"), valueTypeList);
-                    item->setValue(m_options.measureView().m_showDisplayingValueType);
+                    item->setValue(m_options.measureView().showDisplayingValueType());
                     appendProperty(item, page, MWO_PARAM_DISPLAYING_VALUE);
                     measureGroup->addSubProperty(item);
 
                 QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
+                    item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]);
+                    item->setValue( m_options.measureView().colorNotError() );
+                    appendProperty(item, page, MWO_PARAM_COLOR_NOT_ERROR);
+                    colorGroup->addSubProperty(item);
+
                     item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_LIMIT_ERROR]);
-                    item->setValue( m_options.measureView().m_colorLimitError );
+                    item->setValue( m_options.measureView().colorLimitError() );
                     appendProperty(item, page, MWO_PARAM_COLOR_LIMIT_ERROR);
                     colorGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_CONTROL_ERROR]);
-                    item->setValue( m_options.measureView().m_colorControlError );
+                    item->setValue( m_options.measureView().colorControlError() );
                     appendProperty(item, page, MWO_PARAM_COLOR_CONTROL_ERROR);
                     colorGroup->addSubProperty(item);
 
@@ -552,8 +557,9 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                 editor->addProperty(colorGroup);
 
                 expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_FONT, false);
-                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_CONTROL_ERROR, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_NOT_ERROR, false);
                 expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_LIMIT_ERROR, false);
+                expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_COLOR_CONTROL_ERROR, false);
             }
             break;
 
@@ -1085,11 +1091,12 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case MWO_PARAM_FONT:                m_options.measureView().m_font.fromString(value.toString());                    break;
-                    case MWO_PARAM_ID:                  m_options.measureView().m_showExternalID = value.toBool();                      break;
-                    case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().m_showDisplayingValueType = value.toInt();              break;
-                    case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().m_colorControlError.setNamedColor(value.toString());    break;
-                    case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().m_colorLimitError.setNamedColor(value.toString());      break;
+                    case MWO_PARAM_FONT:                m_options.measureView().font().fromString(value.toString());                break;
+                    case MWO_PARAM_ID:                  m_options.measureView().setShowCustomID( value.toBool() );                  break;
+                    case MWO_PARAM_DISPLAYING_VALUE:    m_options.measureView().setShowDisplayingValueType( value.toInt() );        break;
+                    case MWO_PARAM_COLOR_NOT_ERROR:     m_options.measureView().setColorNotError( QColor( value.toString() ) );     break;
+                    case MWO_PARAM_COLOR_LIMIT_ERROR:   m_options.measureView().setColorLimitError( QColor( value.toString() ) );   break;
+                    case MWO_PARAM_COLOR_CONTROL_ERROR: m_options.measureView().setColorControlError( QColor( value.toString() ) ); break;
                     default:                            assert(0);
                 }
 

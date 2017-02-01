@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
+#include "FindData.h"
 #include "SignalList.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -101,6 +102,11 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
     if (role == Qt::TextAlignmentRole)
     {
         return Qt::AlignLeft;
+    }
+
+    if (role == Qt::FontRole)
+    {
+        return theOptions.measureView().font();
     }
 
     if (role == Qt::TextColorRole)
@@ -406,7 +412,6 @@ void OutputSignalItemDialog::createInterface()
 
     m_pTypeList->setCurrentIndex( type );
 
-
     QVBoxLayout *mainLayout = new QVBoxLayout;
 
     mainLayout->addLayout(typeLayout);
@@ -624,18 +629,17 @@ void OutputSignalDialog::createInterface()
     setWindowTitle(tr("Output signals"));
     resize(QApplication::desktop()->availableGeometry().width() - 700, 500);
     move(QApplication::desktop()->availableGeometry().center() - rect().center());
-    installEventFilter(this);
 
     m_pMenuBar = new QMenuBar(this);
     m_pSignalMenu = new QMenu(tr("&Signal"), this);
     m_pEditMenu = new QMenu(tr("&Edit"), this);
     m_pViewMenu = new QMenu(tr("&View"), this);
 
-    m_pAddAction = m_pSignalMenu->addAction(tr("&Add"));
+    m_pAddAction = m_pSignalMenu->addAction(tr("&Add ..."));
     m_pAddAction->setIcon(QIcon(":/icons/Add.png"));
     m_pAddAction->setShortcut(Qt::Key_Insert);
 
-    m_pEditAction = m_pSignalMenu->addAction(tr("&Edit"));
+    m_pEditAction = m_pSignalMenu->addAction(tr("&Edit ..."));
     m_pEditAction->setIcon(QIcon(":/icons/Edit.png"));
 
     m_pRemoveAction = m_pSignalMenu->addAction(tr("&Remove"));
@@ -644,15 +648,15 @@ void OutputSignalDialog::createInterface()
 
     m_pSignalMenu->addSeparator();
 
-    m_pImportAction = m_pSignalMenu->addAction(tr("&Import"));
+    m_pImportAction = m_pSignalMenu->addAction(tr("&Import ..."));
     m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
     m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
-    m_pExportAction = m_pSignalMenu->addAction(tr("&Export"));
+    m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
     m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
     m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_pFindAction = m_pEditMenu->addAction(tr("&Find"));
+    m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
     m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
     m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
 
@@ -669,7 +673,7 @@ void OutputSignalDialog::createInterface()
     m_pShowCustomIDAction = m_pViewMenu->addAction(tr("Show Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
     m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
-    m_pShowCustomIDAction->setShortcut(Qt::Key_Tab);
+    m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 
     m_pMenuBar->addMenu(m_pSignalMenu);
     m_pMenuBar->addMenu(m_pEditMenu);
@@ -690,7 +694,7 @@ void OutputSignalDialog::createInterface()
 
     m_pView = new QTableView(this);
     m_pView->setModel(&m_signalTable);
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     for(int column = 0; column < OUTPUT_SIGNAL_COLUMN_COUNT; column++)
@@ -764,34 +768,6 @@ void OutputSignalDialog::updateList()
 
     m_signalTable.set(signalList);
 }
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool OutputSignalDialog::eventFilter(QObject *object, QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
-
-        if (keyEvent->key() == Qt::Key_Return)
-        {
-            QModelIndex visibleIndex = m_pView->currentIndex();
-
-            int index = visibleIndex .row();
-            if (index < 0 || index >= m_signalTable.signalCount())
-            {
-                addSignal();
-            }
-            else
-            {
-                editSignal();
-            }
-        }
-    }
-
-    return QObject::eventFilter(object, event);
-}
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -907,7 +883,8 @@ void OutputSignalDialog::exportSignal()
 
 void OutputSignalDialog::find()
 {
-
+    FindData* dialog = new FindData(m_pView);
+    dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -104,7 +104,8 @@ SOURCES += \
     Statistic.cpp \
     MeasurementBase.cpp \
     OutputSignal.cpp \
-    ExportData.cpp
+    ExportData.cpp \
+    FindData.cpp
 
 
 HEADERS  += \
@@ -157,7 +158,8 @@ HEADERS  += \
     Statistic.h \
     MeasurementBase.h \
     OutputSignal.h \
-    ExportData.h
+    ExportData.h \
+    FindData.h
 
 
 FORMS    +=

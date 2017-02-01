@@ -1,11 +1,10 @@
 #include "ExportData.h"
 
-#include <QFileDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QHeaderView>
-#include <QtConcurrent>
+#include <QFileDialog>
 #include <QFile>
+#include <QtConcurrent>
 
 #include "Options.h"
 
@@ -16,6 +15,24 @@ ExportData::ExportData(QTableView *pView, const QString& fileName) :
     m_pView(pView),
     m_fileName(fileName)
 {
+    createProgressDialog(pView);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ExportData::~ExportData()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ExportData::createProgressDialog(QTableView *pView)
+{
+    if (pView == nullptr)
+    {
+        return;
+    }
+
     m_pProgressDialog = new QDialog(pView->parentWidget());
 
     m_pProgressDialog->setWindowFlags(Qt::Drawer);
@@ -51,12 +68,6 @@ ExportData::ExportData(QTableView *pView, const QString& fileName) :
     connect(this, &ExportData::exportThreadFinish, this, &ExportData::exportComplited);
     connect(m_cancelButton, &QPushButton::clicked, m_pProgressDialog, &QDialog::reject);
     connect(m_pProgressDialog, &QDialog::rejected, this, &ExportData::exportCancel);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ExportData::~ExportData()
-{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -104,21 +115,9 @@ void ExportData::exec()
         m_pProgressDialog->show();
         QtConcurrent::run(ExportData::startExportThread, this, fileName);
 
-        //QFuture<void> result = QtConcurrent::run(ExportMeasure::startExportThread, this, fileName);
+        //QFuture<void> result = QtConcurrent::run(ExportData::startExportThread, this, fileName);
         //result.waitForFinished();
     }
-
-//    if (fileExt == "pdf")
-//    {
-//        int reportType = theOptions.report().reportTypeByMeasureType(measureType);
-//        if (reportType != REPORT_TYPE_UNKNOWN)
-//        {
-//            if (ReportView::exportToPDF(reportType, fileName) == true)
-//            {
-//                exportComplited();
-//            }
-//        }
-//    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------

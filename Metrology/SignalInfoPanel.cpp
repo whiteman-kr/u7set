@@ -439,7 +439,7 @@ void SignalInfoPanel::createInterface()
 
     m_pView = new QTableView(m_pSignalInfoWindow);
     m_pView->setModel(&m_signalParamTable);
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     m_pSignalInfoWindow->setCentralWidget(m_pView);
@@ -489,6 +489,8 @@ void SignalInfoPanel::createContextMenu()
     m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
     m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 
+    m_pContextMenu->addSeparator();
+
     m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
 
     m_pShowCustomIDAction = m_pShowMenu->addAction(tr("Custom ID"));
@@ -514,7 +516,7 @@ void SignalInfoPanel::createContextMenu()
 
     m_pContextMenu->addSeparator();
 
-    m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties"));
+    m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
     m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
     connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);

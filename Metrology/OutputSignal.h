@@ -171,10 +171,6 @@ private:
     void                createInterface();
     void                createContextMenu();
 
-protected:
-
-    bool                eventFilter(QObject *object, QEvent *event);
-
 signals:
 
 private slots:

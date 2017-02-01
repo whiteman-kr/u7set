@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "ExportData.h"
+#include "FindData.h"
 #include "SignalProperty.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -106,10 +107,10 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
         switch (column)
         {
+            case SIGNAL_LIST_COLUMN_CASE:           result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_ID:             result = Qt::AlignLeft;     break;
             case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = Qt::AlignLeft;     break;
             case SIGNAL_LIST_COLUMN_CAPTION:        result = Qt::AlignLeft;     break;
-            case SIGNAL_LIST_COLUMN_CASE:           result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_BLOCK:          result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_ENTRY:          result = Qt::AlignCenter;   break;
@@ -124,7 +125,10 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
         return result;
     }
 
-
+    if (role == Qt::FontRole)
+    {
+        return theOptions.measureView().font();
+    }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
@@ -157,10 +161,10 @@ QString SignalListTable::text(const int  row, const int column, const MeasureSig
 
     switch (column)
     {
+        case SIGNAL_LIST_COLUMN_CASE:           result = param.position().caseStr();        break;
         case SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
         case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = param.position().equipmentID();    break;
         case SIGNAL_LIST_COLUMN_CAPTION:        result = param.caption();                   break;
-        case SIGNAL_LIST_COLUMN_CASE:           result = param.position().caseStr();        break;
         case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = param.position().subblockStr();    break;
         case SIGNAL_LIST_COLUMN_BLOCK:          result = param.position().blockStr();       break;
         case SIGNAL_LIST_COLUMN_ENTRY:          result = param.position().entryStr();       break;
@@ -283,10 +287,10 @@ void SignalListTable::updateSignalParam(const Hash& signalHash)
 
 int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
+    100,    // LIST_COLUMN_CASE
     250,    // LIST_COLUMN_ID
     250,    // LIST_COLUMN_EQUIPMENT_ID
     150,    // LIST_COLUMN_CAPTION
-    100,    // LIST_COLUMN_CASE
      60,    // LIST_COLUMN_SUBBLOCK
      60,    // LIST_COLUMN_BLOCK
      60,    // LIST_COLUMN_ENTRY
@@ -341,15 +345,15 @@ void SignalListDialog::createInterface(const bool hasButtons)
     m_pEditMenu = new QMenu(tr("&Edit"), this);
     m_pViewMenu = new QMenu(tr("&View"), this);
 
-    m_pPrintAction = m_pSignalMenu->addAction(tr("&Print"));
+    m_pPrintAction = m_pSignalMenu->addAction(tr("&Print ..."));
     m_pPrintAction->setIcon(QIcon(":/icons/Print.png"));
     m_pPrintAction->setShortcut(Qt::CTRL + Qt::Key_P);
 
-    m_pExportAction = m_pSignalMenu->addAction(tr("&Export"));
+    m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
     m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
     m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
 
-    m_pFindAction = m_pEditMenu->addAction(tr("&Find"));
+    m_pFindAction = m_pEditMenu->addAction(tr("&Find ..."));
     m_pFindAction->setIcon(QIcon(":/icons/Find.png"));
     m_pFindAction->setShortcut(Qt::CTRL + Qt::Key_F);
 
@@ -365,7 +369,7 @@ void SignalListDialog::createInterface(const bool hasButtons)
 
     m_pEditMenu->addSeparator();
 
-    m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties"));
+    m_pSignalPropertyAction = m_pEditMenu->addAction(tr("Properties ..."));
     m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
     m_pViewTypeADMenu = new QMenu(tr("Type A/D"), this);
@@ -391,7 +395,7 @@ void SignalListDialog::createInterface(const bool hasButtons)
     m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
     m_pShowCustomIDAction->setChecked(m_signalParamTable.showCustomID());
-    m_pShowCustomIDAction->setShortcut(Qt::Key_Tab);
+    m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
     m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
     m_pShowADCInHexAction->setCheckable(true);
     m_pShowADCInHexAction->setChecked(m_signalParamTable.showADCInHex());
@@ -424,7 +428,7 @@ void SignalListDialog::createInterface(const bool hasButtons)
 
     m_pView = new QTableView(this);
     m_pView->setModel(&m_signalParamTable);
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
@@ -630,6 +634,8 @@ void SignalListDialog::exportSignal()
 
 void SignalListDialog::find()
 {
+    FindData* dialog = new FindData(m_pView);
+    dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

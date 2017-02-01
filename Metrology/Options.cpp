@@ -192,7 +192,7 @@ void MeasureViewOption::load()
     m_fontBold = m_font;
     m_fontBold.setBold(true);
 
-    m_showExternalID = s.value( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
+    m_showCustomID = s.value( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
     m_showDisplayingValueType = s.value( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), DISPLAYING_VALUE_TYPE_PHYSICAL).toInt();
 
     m_colorLimitError = s.value( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_LIMIT_ERROR.rgb()).toInt();
@@ -222,7 +222,7 @@ void MeasureViewOption::save()
 
     s.setValue( QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
 
-    s.setValue( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showExternalID);
+    s.setValue( QString("%1ShowExternalID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showCustomID);
     s.setValue( QString("%1ShowDisplayingValueType").arg(MEASURE_VIEW_OPTIONS_KEY), m_showDisplayingValueType);
 
     s.setValue( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorLimitError.rgb() );
@@ -245,7 +245,7 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
     m_fontBold = m_font;
     m_fontBold.setBold(true);
 
-    m_showExternalID = from.m_showExternalID;
+    m_showCustomID = from.m_showCustomID;
     m_showDisplayingValueType = from.m_showDisplayingValueType;
 
     m_colorControlError = from.m_colorControlError;

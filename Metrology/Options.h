@@ -116,8 +116,9 @@ public:
 const char* const		MeasureViewParam[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
-                        QT_TRANSLATE_NOOP("Options.h", "Show external ID"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show Custom ID"),
                         QT_TRANSLATE_NOOP("Options.h", "Displaying value"),
+                        QT_TRANSLATE_NOOP("Options.h", "Measurement have not error"),
                         QT_TRANSLATE_NOOP("Options.h", "Measurement over limit error"),
                         QT_TRANSLATE_NOOP("Options.h", "Measurement over control error"),
 };
@@ -127,13 +128,15 @@ const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewPa
 const int				MWO_PARAM_FONT					= 0,
                         MWO_PARAM_ID					= 1,
                         MWO_PARAM_DISPLAYING_VALUE      = 2,
-                        MWO_PARAM_COLOR_LIMIT_ERROR     = 3,
-                        MWO_PARAM_COLOR_CONTROL_ERROR   = 4;
+                        MWO_PARAM_COLOR_NOT_ERROR       = 3,
+                        MWO_PARAM_COLOR_LIMIT_ERROR     = 4,
+                        MWO_PARAM_COLOR_CONTROL_ERROR   = 5;
 
 // ----------------------------------------------------------------------------------------------
 
-#define                 COLOR_LIMIT_ERROR               QColor(0xFF, 0xD0, 0xD0)
-#define					COLOR_CONTROL_ERROR             QColor(0xFF, 0xFF, 0x99)
+#define                 COLOR_NOT_ERROR                 QColor(0xA0, 0xFF, 0xA0)
+#define                 COLOR_LIMIT_ERROR               QColor(0xFF, 0xA0, 0xA0)
+#define					COLOR_CONTROL_ERROR             QColor(0xFF, 0xFF, 0xA0)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -166,18 +169,46 @@ public:
 
     MeasureViewColumn   m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_COLUMN_COUNT];
 
+private:
+
     int					m_measureType = MEASURE_TYPE_UNKNOWN;						// current, active ViewID
 
     QFont				m_font;
     QFont				m_fontBold;
 
-    bool				m_showExternalID = true;
+    bool				m_showCustomID = true;
     int					m_showDisplayingValueType = DISPLAYING_VALUE_TYPE_PHYSICAL;
 
+    QColor              m_colorNotError = COLOR_NOT_ERROR;
     QColor              m_colorLimitError = COLOR_LIMIT_ERROR;
     QColor              m_colorControlError = COLOR_CONTROL_ERROR;
 
+
 public:
+
+    int                 measureType() const { return m_measureType; }
+    void                setMeasureType(const int measureType) { m_measureType = measureType; }
+
+    QFont&              font() { return m_font; }
+    void                setFont(QFont font) { m_font = font; }
+
+    QFont               fontBold() const { return m_fontBold; }
+    void                setFontBold(QFont font) { m_fontBold = font; }
+
+    bool                showCustomID() const { return m_showCustomID; }
+    void                setShowCustomID(const bool show) { m_showCustomID = show; }
+
+    int                 showDisplayingValueType() const { return m_showDisplayingValueType; }
+    void                setShowDisplayingValueType(const int type) { m_showDisplayingValueType = type; }
+
+    QColor              colorNotError() const { return m_colorNotError; }
+    void                setColorNotError(QColor color) { m_colorNotError = color; }
+
+    QColor              colorLimitError() const { return m_colorLimitError; }
+    void                setColorLimitError(QColor color) { m_colorLimitError = color; }
+
+    QColor              colorControlError() const { return m_colorControlError; }
+    void                setColorControlError(QColor color) { m_colorControlError = color; }
 
     void                init();
 

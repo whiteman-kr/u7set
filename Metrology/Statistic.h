@@ -120,10 +120,12 @@ private:
     QMenu*              m_pViewMenu = nullptr;
     QMenu*              m_pViewMeasureTypeMenu = nullptr;
     QMenu*              m_pViewShowMenu = nullptr;
+    QMenu*              m_pViewGotoMenu = nullptr;
     QMenu*              m_pContextMenu = nullptr;
 
     QAction*            m_pPrintAction = nullptr;
     QAction*            m_pExportAction = nullptr;
+    QAction*            m_pSelectSignalForMeasure = nullptr;
 
     QAction*            m_pFindAction = nullptr;
     QAction*            m_pCopyAction = nullptr;
@@ -133,6 +135,8 @@ private:
     QAction*            m_pTypeComparatorsAction = nullptr;
     QAction*            m_pShowCustomIDAction = nullptr;
     QAction*            m_pShowADCInHexAction = nullptr;
+    QAction*            m_pGotoNextNoMeasuredAction = nullptr;
+    QAction*            m_pGotoNextInvalidAction = nullptr;
 
     QStatusBar*         m_pStatusBar;
     QLabel*             m_statusEmpty = nullptr;
@@ -178,6 +182,7 @@ private slots:
                         //
     void                printSignal();
     void                exportSignal();
+    void                selectSignalForMeasure();
 
                         // Edit
                         //
@@ -191,6 +196,9 @@ private slots:
     void                showTypeComparators();
     void                showCustomID();
     void                showADCInHex();
+    void                gotoNextNoMeasured();
+    void                gotoNextInvalid();
+
 
     void                onContextMenu(QPoint);
 

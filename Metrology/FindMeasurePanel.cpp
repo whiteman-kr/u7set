@@ -29,15 +29,14 @@ FindItem::~FindItem()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindItem::FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos)
+FindItem::FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos) :
+    m_row ( row) ,
+    m_column (column) ,
+    m_text (text) ,
+    m_beginPos (beginPos) ,
+    m_endPos (endPos)
 {
-    m_row = row;
-    m_column = column;
 
-    m_text = text;
-
-    m_beginPos = beginPos;
-    m_endPos = endPos;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -287,7 +286,7 @@ void FindMeasurePanel::createInterface()
 
     m_pView = new QTableView(m_pFindWindow);
     m_pView->setModel(&m_table);
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
     m_pFindWindow->setCentralWidget(m_pView);
@@ -455,7 +454,7 @@ void FindMeasurePanel::find()
 
     m_table.set(findItemList);
 
-    m_pView->setCurrentIndex(m_pView->model()->index(0, FIND_MEASURE_COLUMN_ROW));
+    m_pView->setCurrentIndex(m_pView->model()->index(0, 0));
     m_pView->setFocus();
 
     selectItemInMeasureView();

@@ -141,7 +141,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::FontRole)
     {
-        return pColumn->boldFont() ? theOptions.measureView().m_fontBold : theOptions.measureView().m_font;
+        return pColumn->boldFont() ? theOptions.measureView().fontBold() : theOptions.measureView().font();
     }
 
     if (role == Qt::BackgroundColorRole)
@@ -187,7 +187,6 @@ QColor MeasureTable::backgroundColor(const int row, const int column) const
     {
         case MEASURE_TYPE_LINEARITY:
             {
-
                 LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
                 if (pLinearityMeasurement == nullptr)
                 {
@@ -200,9 +199,14 @@ QColor MeasureTable::backgroundColor(const int row, const int column) const
                     break;
                 }
 
+                if ( pLinearityMeasurement->errorInput(ERROR_TYPE_REDUCE) > theOptions.linearity().m_errorCtrl )
+                {
+                    result = theOptions.measureView().colorControlError();
+                }
+
                 if ( pLinearityMeasurement->errorInput(errorType) > pLinearityMeasurement->errorLimit(errorType) )
                 {
-                    result = QColor(0xFF, 0xA0, 0xA0);
+                    result = theOptions.measureView().colorLimitError();
                 }
             }
             break;
@@ -286,7 +290,7 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
         case MVC_CMN_L_CASE:					result = m->position().caseStr(); break;
-        case MVC_CMN_L_ID:                      result = theOptions.measureView().m_showExternalID ? m->customAppSignalID() : m->appSignalID(); break;
+        case MVC_CMN_L_ID:                      result = theOptions.measureView().showCustomID() == true ? m->customAppSignalID() : m->appSignalID(); break;
         case MVC_CMN_L_NAME:					result = m->name(); break;
 
         case MVC_CMN_L_SUBBLOCK:				result = m->position().subblockStr(); break;
@@ -569,7 +573,7 @@ void MeasureView::updateColumn()
         }
     }
 
-    QSize cellSize = QFontMetrics( theOptions.measureView().m_font ).size(Qt::TextSingleLine,"A");
+    QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     verticalHeader()->setDefaultSectionSize(cellSize.height());
 }
 
