@@ -316,7 +316,7 @@ namespace Builder
 
 		int address() const { return m_address; }
 
-		bool getTimes(int prevCmdRunTime);
+		bool getTimes(int prevCmdExecTime);
 
 		int execTime() const { return m_execTime; }
 		int waitTime() const { return m_waitTime; }
@@ -328,6 +328,7 @@ namespace Builder
 	private:
 		static int startFbExec(quint16 fbType, int fbRuntime);
 		static void decFbExecTime(int time);
+		static int getFbRemainingExecTime(quint16 fbType);
 
 		void initStaticMembers();
 
@@ -352,12 +353,12 @@ namespace Builder
 		int m_waitTime = 0;				// command wait-to-execution time
 		int m_execTime = 0;				// command execution time
 
-		int m_fbRunTime = 0;			// != 0 for commands START and NSTART only
+		int m_fbExecTime = 0;			// != 0 for commands START and NSTART only
 
 		bool m_result = true;
 
 		static QHash<int, const LmCommand*> m_lmCommands;
-		static QHash<quint16, int> m_executedFb;				// fbType => remaining exec time
+		static QHash<quint16, int> m_executedFb;				// fbType => remaining FB exec time
 
 		// initialized by ApplicationLogicCode::setMemoryMap()
         //

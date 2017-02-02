@@ -44,6 +44,33 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
+	CommandCode::CommandCode()
+	{
+		setNoCommand();
+	}
+
+
+	CommandCode::CommandCode(const CommandCode& cCode)
+	{
+		*this = cCode;
+	}
+
+
+	CommandCode& CommandCode::operator = (const CommandCode& cCode)
+	{
+		word1 = cCode.word1;
+		word2 = cCode.word2;
+		word3 = cCode.word3;
+		word4 = cCode.word4;
+
+		m_fbCaption = cCode.m_fbCaption;
+
+		m_const = cCode.m_const;
+		m_constDataFormat = cCode.m_constDataFormat;
+
+		return *this;
+	}
+
 	void CommandCode::setOpCode(LmCommandCode code)
 	{
 		if (!LmCommand::isValidCode(static_cast<int>(code)))
@@ -273,6 +300,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------------
 
 	QHash<int, const LmCommand*> Command::m_lmCommands;
+	 QHash<quint16, int> Command::m_executedFb;
 
 	LmMemoryMap* Command::m_memoryMap = nullptr;
 	IssueLogger* Command::m_log = nullptr;
@@ -288,7 +316,9 @@ namespace Builder
 		initStaticMembers();
 
 		m_address = cmd.m_address;
-		m_fbRunTime = cmd.m_fbRunTime;
+		m_fbExecTime = cmd.m_fbExecTime;
+		m_waitTime = cmd.m_waitTime;
+		m_execTime = cmd.m_execTime;
 		m_result = cmd.m_result;
 		m_code = cmd.m_code;
 	}
@@ -347,6 +377,12 @@ namespace Builder
 	}
 
 
+	int Command::getFbRemainingExecTime(quint16 fbType)
+	{
+		return m_executedFb.value(fbType, 0);
+	}
+
+
 	void Command::initStaticMembers()
 	{
 		if (m_memoryMap == nullptr)
@@ -398,7 +434,7 @@ namespace Builder
 	{
 		m_result = true;
 
-		m_fbRunTime = fbRunTime;
+		m_fbExecTime = fbRunTime;
 
 		m_code.setOpCode(LmCommandCode::START);
 		m_code.setFbType(fbType);
@@ -653,7 +689,7 @@ namespace Builder
 	{
 		m_result = true;
 
-		m_fbRunTime = fbRunTime;
+		m_fbExecTime = fbRunTime;
 
 		m_code.setOpCode(LmCommandCode::NSTART);
 		m_code.setFbType(fbType);
@@ -1180,7 +1216,7 @@ namespace Builder
 	}
 
 
-	bool Command::getTimes(int prevCmdRunTime)
+	bool Command::getTimes(int prevCmdExecTime)
 	{
 		if (m_lmCommands.contains(m_code.getOpCodeInt()) == false)
 		{
@@ -1198,11 +1234,11 @@ namespace Builder
 
 		int cmdReadTime = lmCommand->readTime;
 
-		if (prevCmdRunTime > cmdReadTime)
+		if (prevCmdExecTime > cmdReadTime)
 		{
-			m_waitTime = prevCmdRunTime - cmdReadTime;
+			m_waitTime = prevCmdExecTime - cmdReadTime;
 
-			decFbExecTime(prevCmdRunTime);
+			decFbExecTime(prevCmdExecTime);
 		}
 		else
 		{
@@ -1211,11 +1247,11 @@ namespace Builder
 			decFbExecTime(cmdReadTime);
 		}
 
-
-
 		if (lmCommand->waitFbExecution == true)
 		{
+			int fbType = m_code.getFbType();
 
+			m_waitTime += getFbRemainingExecTime(fbType);
 		}
 
 		int cmdExecTime = 0;
@@ -1254,7 +1290,7 @@ namespace Builder
 
 				cmdExecTime = lmCommand->runTime;
 
-				//prevFbRuntime =  m_fbRunTime;				// set FB runtime to accommodate in next WaitFbExec command
+				startFbExec(m_code.getFbType(), m_fbExecTime);
 			}
 			break;
 
@@ -1266,8 +1302,7 @@ namespace Builder
 
 				cmdExecTime = 3 + n * 2;
 
-				//prevFbRuntime = m_fbRunTime * n;
-				//prevFbType = m_code.getFbType();
+				startFbExec(m_code.getFbType(), m_fbExecTime * n);
 			}
 			break;
 
