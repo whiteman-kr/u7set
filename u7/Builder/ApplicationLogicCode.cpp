@@ -320,11 +320,29 @@ namespace Builder
 		return waitTime;
 	}
 
+
 	void Command::decFbExecTime(int time)
 	{
-		for(quint16 fbType : m_executedFb)
-		{
+		QHash<quint16, int>::iterator i = m_executedFb.begin();
 
+		while(i != m_executedFb.end())
+		{
+			int remainingFbExecTime = i.value() - time;
+
+			if (remainingFbExecTime > 0)
+			{
+				// update FB remaining exec time
+				//
+				m_executedFb.insert(i.key(), remainingFbExecTime);
+
+				i++;		// move to next elem
+			}
+			else
+			{
+				// remove FB from map
+				//
+				i = m_executedFb.erase(i);
+			}
 		}
 	}
 
