@@ -528,6 +528,7 @@ void MainWindow::showAbout()
 	text += "Build: Debug";
 #endif
 	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+	text += "<br>Supported project database version: " + QString::number(DbController::databaseVersion());
 
 	QLabel* label = new QLabel(text, &aboutDialog);
 	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
