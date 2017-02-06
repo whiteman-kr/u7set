@@ -161,7 +161,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3;
+		m_runTime = 3 + 4;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -183,14 +183,14 @@ namespace Builder
 
 	bool AppFb::calculate_NOT_paramValues()
 	{
-		m_runTime = 3;
+		m_runTime = 3 + 4;
 		return true;
 	}
 
 
 	bool AppFb::calculate_TCT_paramValues()
 	{
-		m_runTime = 4;
+		m_runTime = 4 + 34;
 
 		QStringList requiredParams;
 
@@ -234,7 +234,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3;
+		m_runTime = 3 + 24;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -269,7 +269,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 3;
+		m_runTime = 3 + 34;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -313,28 +313,28 @@ namespace Builder
 
 	bool AppFb::calculate_SRSST_paramValues()
 	{
-		m_runTime = 3;
+		m_runTime = 3 + 4;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BCOD_paramValues()
 	{
-		m_runTime = 3;
+		m_runTime = 3 + 4;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BDEC_paramValues()
 	{
-		m_runTime = 3;
+		m_runTime = 3 + 4;
 		return true;
 	}
 
 
 	bool AppFb::calculate_BCOMP_paramValues()
 	{
-		m_runTime = 3;
+		m_runTime = 3 + 14;
 
 		QStringList requiredParams;
 
@@ -500,11 +500,11 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 6;		// for signed int input
+			m_runTime = 6 + 34;		// for signed int input
 			break;
 
 		case 2:
-			m_runTime = 24;		// for float input
+			m_runTime = 24 + 34;	// for float input
 			break;
 
 		default:
@@ -521,26 +521,47 @@ namespace Builder
 
 	bool AppFb::calculate_MEM_paramValues()
 	{
+		m_runTime = 0;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
+		requiredParams.append("i_count");
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_count = m_paramValuesArray["i_count"];
 
 		CHECK_UNSIGNED_INT(i_conf)
+		CHECK_UNSIGNED_INT(i_count)
 
-		m_runTime = 0;
+		if (i_count.unsignedIntValue() < 3 || i_count.unsignedIntValue() > 8)
+		{
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_count.unsignedIntValue(), i_count.caption(), caption(), guid());
+			return false;
+		}
+
+		int index = i_count.unsignedIntValue() - 3;
 
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 9;		// for signed int input
+			{
+				int siTiming[] = { 4, 17, 23, 30, 38, 47 };		// exec time for signed int inputs
+
+				m_runTime = siTiming[index] + 4;
+			}
 			break;
 
 		case 2:
-			m_runTime = 16;		// for float input
+			{
+				int fpTiming[] = { 21, 36, 44, 49, 57, 66 };	// exec time for float inputs
+
+				m_runTime = fpTiming[index] + 4;
+			}
 			break;
 
 		default:
@@ -574,17 +595,14 @@ namespace Builder
 		case 2:			// sub_si
 		case 3:			// mul_si
 		case 4:			// div_si
-			m_runTime = 2;
+			m_runTime = 3 + 4;
 			break;
 
 		case 5:			// add_fp
 		case 6:			// sub_fp
-		case 8:			// div_fb
-			m_runTime = 8;
-			break;
-
 		case 7:			// mul_fp
-			m_runTime = 6;
+		case 8:			// div_fb
+			m_runTime = 9 + 4;
 			break;
 
 		default:
@@ -632,18 +650,18 @@ namespace Builder
 		case 2:
 		case 3:
 		case 4:
-			m_runTime = 2;
+			m_runTime = 4 + 4;
 			break;
 
 		case 5:
 		case 7:
 		case 8:
 		case 9:
-			m_runTime = 18;
+			m_runTime = 21 + 4;
 			break;
 
 		case 6:
-			m_runTime = 11;
+			m_runTime = 14 + 4;
 			break;
 
 		default:
@@ -908,7 +926,7 @@ namespace Builder
 		{
 			// signed int scale
 			//
-			m_runTime = 2;
+			m_runTime = 4 + 4;
 
 			// get parameters that defined by user
 			//
@@ -1020,7 +1038,7 @@ namespace Builder
 		{
 			// float scale
 			//
-			m_runTime = 18;
+			m_runTime = 20 + 4;
 
 			// get parameters that defined by user
 			//
@@ -1151,32 +1169,35 @@ namespace Builder
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:
-			m_runTime = 17;		// sqrt
+			m_runTime = 20 + 4;		// sqrt
 			break;
 
-		case 2:					// abs fp
-		case 8:					// abs si
-			m_runTime = 2;
+		case 2:
+			m_runTime = 4 + 4;		// abs fp
 			break;
 
 		case 3:
-			m_runTime = 37;		// sin
+			m_runTime = 40 + 4;		// sin
 			break;
 
 		case 4:
-			m_runTime = 36;		// cos
+			m_runTime = 40 + 4;		// cos
 			break;
 
 		case 5:
-			m_runTime = 22;		// log
+			m_runTime = 25 + 4;		// log
 			break;
 
 		case 6:
-			m_runTime = 18;		// exp
+			m_runTime = 21 + 4;		// exp
 			break;
 
 		case 7:
-			m_runTime = 21;		// inv
+			m_runTime = 25 + 4;		// inv
+			break;
+
+		case 8:
+			m_runTime = 4 + 4;		// abs si
 			break;
 
 		default:
@@ -1243,7 +1264,7 @@ namespace Builder
 			return false;
 		}
 
-		m_runTime = 24;
+		m_runTime = 27 + 24;
 
 		return true;
 	}
@@ -1251,8 +1272,6 @@ namespace Builder
 
 	bool AppFb::calculate_DPCOMP_paramValues()
 	{
-		m_runTime = 2;
-
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
@@ -1276,11 +1295,15 @@ namespace Builder
 					CMP_32FP_LESS = 7,
 					CMP_32FP_NOT_EQU = 8;
 
+		m_runTime = 0;
+
 		if (iConf == CMP_32SI_EQU ||
 			iConf == CMP_32SI_GREAT ||
 			iConf == CMP_32SI_LESS ||
 			iConf == CMP_32SI_NOT_EQU)
 		{
+			m_runTime = 5 + 14;
+
 			// comparison of signed int values
 			//
 			CHECK_SIGNED_INT32(hysteresisParam)
@@ -1304,6 +1327,8 @@ namespace Builder
 			iConf == CMP_32FP_LESS ||
 			iConf == CMP_32FP_NOT_EQU)
 		{
+			m_runTime = 16 + 14;
+
 			// comparison of floating point values
 			//
 			CHECK_FLOAT32(hysteresisParam)
@@ -1332,7 +1357,7 @@ namespace Builder
 
 	bool AppFb::calculate_MUX_paramValues()
 	{
-		m_runTime = 2;
+		m_runTime = 3 + 4;
 
 		return true;
 	}
@@ -1350,7 +1375,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf)
 
-		m_runTime = 2;
+		m_runTime = 3 + 34;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1387,11 +1412,13 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf);
 
-		m_runTime = 2;
+		m_runTime = 0;
 
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:								// signed int limiter
+			m_runTime = 3 + 4;
+
 			CHECK_SIGNED_INT32(i_lim_max);
 			CHECK_SIGNED_INT32(i_lim_min);
 
@@ -1407,6 +1434,8 @@ namespace Builder
 			break;
 
 		case 2:								// float limiter
+			m_runTime = 4 + 4;
+
 			CHECK_FLOAT32(i_lim_max);
 			CHECK_FLOAT32(i_lim_min);
 
@@ -1447,7 +1476,7 @@ namespace Builder
 
 		CHECK_UNSIGNED_INT(i_conf);
 
-		m_runTime = 3;
+		m_runTime = 5 + 4;
 
 		switch(i_conf.unsignedIntValue())
 		{
@@ -1495,7 +1524,7 @@ namespace Builder
 
 	bool AppFb::calculate_POL_paramValues()
 	{
-		m_runTime = 22;
+		m_runTime = 24 + 4;
 
 		LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
 				  QString(tr("Unknown runtime of FB POLY")));
@@ -1506,6 +1535,8 @@ namespace Builder
 
 	bool AppFb::calculate_DER_paramValues()
 	{
+		m_runTime = 35 + 44;
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_max");
@@ -1557,8 +1588,6 @@ namespace Builder
 			return false;
 		}
 
-		m_runTime = 32;
-
 		return true;
 	}
 
@@ -1601,12 +1630,14 @@ namespace Builder
 			mismatchWithRange = true;
 		}
 
+		m_runTime = 0;
+
 		// i_conf must have value 1 (SI) or 2 (FP)
 		//
 		switch(i_conf.unsignedIntValue())
 		{
 		case 1:				// SI
-			m_runTime = 5;
+			m_runTime = 5 + 4;
 
 			CHECK_SIGNED_INT32(i_ust);
 
@@ -1649,7 +1680,7 @@ namespace Builder
 			break;
 
 		case 2:				// FP
-			m_runTime = 20;
+			m_runTime = 14 + 4;
 
 			CHECK_FLOAT32(i_ust);
 

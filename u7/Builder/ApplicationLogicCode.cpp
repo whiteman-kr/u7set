@@ -878,6 +878,36 @@ namespace Builder
 	}
 
 
+	void Command::movConstIfFlag(quint16 addrTo, quint16 constVal)
+	{
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::MOVCF);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(constVal);
+	}
+
+
+	void Command::prevMov(quint16 addrTo, quint16 addrFrom)
+	{
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::PMOV);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+
+	void Command::prevMov32(quint16 addrTo, quint16 addrFrom)
+	{
+		m_result = true;
+
+		m_code.setOpCode(LmCommandCode::PMOV32);
+		m_code.setWord2(addrTo);
+		m_code.setWord3(addrFrom);
+	}
+
+
 	void Command::generateBinCode(E::ByteOrder byteOrder)
 	{
 		m_binCode.clear();
@@ -952,7 +982,9 @@ namespace Builder
 			break;
 
 		case LmCommandCode::MOV:
+		case LmCommandCode::PMOV:
 		case LmCommandCode::MOV32:
+		case LmCommandCode::PMOV32:
 			params = QString("%1, %2").
 						arg(m_code.getWord2()).
 						arg(m_code.getWord3());
@@ -966,6 +998,7 @@ namespace Builder
 			break;
 
 		case LmCommandCode::MOVC:
+		case LmCommandCode::MOVCF:
 			params = QString("%1, #%2").
 						arg(m_code.getWord2()).
 						arg(m_code.getWord3());
@@ -1058,96 +1091,25 @@ namespace Builder
 			break;
 
 		case LmCommandCode::MOVC32:
-			switch(m_code.constDataFormat())
-			{
-			case E::DataFormat::Float:
-				params = QString("%1, #%2").
-							arg(m_code.getWord2()).
-							arg(m_code.getConstFloat());
-				break;
-
-			case E::DataFormat::SignedInt:
-				params = QString("%1, #%2").
-							arg(m_code.getWord2()).
-							arg(m_code.getConstInt32());
-				break;
-
-			case E::DataFormat::UnsignedInt:
-				params = QString("%1, #%2").
-							arg(m_code.getWord2()).
-							arg(m_code.getConstUInt32());
-				break;
-
-			default:
-				assert(false);
-			}
-
+			params = QString("%1, #%2").
+						arg(m_code.getWord2()).
+						arg(getConstValueString());
 			break;
 
 		case LmCommandCode::WRFBC32:
-			switch(m_code.constDataFormat())
-			{
-			case E::DataFormat::Float:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstFloat());
-				break;
-
-			case E::DataFormat::SignedInt:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstInt32());
-				break;
-
-			case E::DataFormat::UnsignedInt:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstUInt32());
-				break;
-
-			default:
-				assert(false);
-			}
-
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(getConstValueString());
 			break;
 
 		case LmCommandCode::RDFBTS32:
-			switch(m_code.constDataFormat())
-			{
-			case E::DataFormat::Float:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstFloat());
-				break;
-
-			case E::DataFormat::SignedInt:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstInt32());
-				break;
-
-			case E::DataFormat::UnsignedInt:
-				params = QString("%1.%2[%3], #%4").
-							arg(m_code.getFbCaption()).
-							arg(m_code.getFbInstanceInt()).
-							arg(m_code.getFbParamNoInt()).
-							arg(m_code.getConstUInt32());
-				break;
-
-			default:
-				assert(false);
-			}
-
+			params = QString("%1.%2[%3], #%4").
+						arg(m_code.getFbCaption()).
+						arg(m_code.getFbInstanceInt()).
+						arg(m_code.getFbParamNoInt()).
+						arg(getConstValueString());
 			break;
 
 		default:
@@ -1155,6 +1117,27 @@ namespace Builder
 		}
 
 		return mnemoCode + params;
+	}
+
+
+	QString Command::getConstValueString()
+	{
+		switch(m_code.constDataFormat())
+		{
+		case E::DataFormat::Float:
+			return QString("%1").arg(m_code.getConstFloat());
+
+		case E::DataFormat::SignedInt:
+			return QString("%1").arg(m_code.getConstInt32());
+
+		case E::DataFormat::UnsignedInt:
+			return QString("%1").arg(m_code.getConstUInt32());
+
+		default:
+			assert(false);
+		}
+
+		return QString();
 	}
 
 
@@ -1242,10 +1225,12 @@ namespace Builder
 		}
 		else
 		{
-			m_waitTime = 0;
+			m_waitTime = cmdReadTime - prevCmdExecTime;
 
 			decFbExecTime(cmdReadTime);
 		}
+
+		assert(m_waitTime >= 0);
 
 		if (lmCommand->waitFbExecution == true)
 		{
@@ -1278,6 +1263,8 @@ namespace Builder
 		case LmCommandCode::RDFB32:
 		case LmCommandCode::WRFBC32:
 		case LmCommandCode::RDFBTS32:
+		case LmCommandCode::MOVCF:
+		case LmCommandCode::PMOV32:
 			assert(lmCommand->runTime != CALC_RUNTIME);
 			cmdExecTime = lmCommand->runTime;
 			break;
@@ -1355,6 +1342,11 @@ namespace Builder
 		case LmCommandCode::MOVB:
 			assert(lmCommand->runTime == CALC_RUNTIME);
 			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 9 : 13;
+			break;
+
+		case LmCommandCode::PMOV:
+			assert(lmCommand->runTime == CALC_RUNTIME);
+			cmdExecTime = addressInBitMemory(m_code.getWord2()) == true ? 8 : 53;
 			break;
 
 		default:
@@ -2002,18 +1994,15 @@ namespace Builder
 				idrPhaseCode = false;
 			}
 
-			int readTime = 0;
-			int runTime = 0;
-
 			command->getTimes(prevCmdExecTime);
 
 			if (idrPhaseCode == true)
 			{
-				idrPhaseClockCount += prevCmdExecTime;
+				idrPhaseClockCount += command->waitAndExecTime();
 			}
 			else
 			{
-				alpPhaseClockCount += prevCmdExecTime;
+				alpPhaseClockCount += command->waitAndExecTime();
 			}
 
 			prevCmdExecTime = command->execTime();

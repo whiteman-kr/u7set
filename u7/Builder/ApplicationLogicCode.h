@@ -32,6 +32,9 @@ namespace Builder
         RDFB32 = 21,
         WRFBC32 = 22,
         RDFBTS32 = 23,
+		MOVCF = 24,
+		PMOV = 25,
+		PMOV32 = 26,
     };
 
 
@@ -64,10 +67,10 @@ namespace Builder
 		{	LmCommandCode::MOVMEM,		4,	"MOVMEM",	false,	14,	CALC_RUNTIME		},
 		{	LmCommandCode::MOVC,		3,	"MOVC",		false,	11, CALC_RUNTIME		},
 		{	LmCommandCode::MOVBC,		4,	"MOVBC",	false,	14, CALC_RUNTIME		},
-		{	LmCommandCode::WRFB,		3,	"WRFB",		false,	11,	9					},
+		{	LmCommandCode::WRFB,		3,	"WRFB",		false,	11,	12					},
 		{	LmCommandCode::RDFB,		3,	"RDFB",		true,	11,	7					},
-		{	LmCommandCode::WRFBC,		3,	"WRFBC",	false,	11,	6					},
-		{	LmCommandCode::WRFBB,		4,	"WRFBB",	false,	14,	8					},
+		{	LmCommandCode::WRFBC,		3,	"WRFBC",	false,	11,	9					},
+		{	LmCommandCode::WRFBB,		4,	"WRFBB",	false,	14,	11					},
 		{	LmCommandCode::RDFBB,		4,	"RDFBB",	true,	14,	CALC_RUNTIME		},
 		{	LmCommandCode::RDFBTS,		3,	"RDFBTS",	true,	11,	4					},
 		{	LmCommandCode::SETMEM,		4,	"SETMEM",	false,	14, CALC_RUNTIME		},
@@ -76,10 +79,13 @@ namespace Builder
 		{	LmCommandCode::APPSTART,	2,	"APPSTART",	false,	8,	2					},
 		{	LmCommandCode::MOV32,		3,	"MOV32",	false,	11,	14					},
 		{	LmCommandCode::MOVC32,		4,	"MOVC32",	false,	14, 8					},
-		{	LmCommandCode::WRFB32,		3,	"WRFB32",	false,	11,	14					},
+		{	LmCommandCode::WRFB32,		3,	"WRFB32",	false,	11,	20					},
 		{	LmCommandCode::RDFB32,		3,	"RDFB32",	true,	11,	14					},
-		{	LmCommandCode::WRFBC32,		4,	"WRFBC32",	false,	14,	10					},
+		{	LmCommandCode::WRFBC32,		4,	"WRFBC32",	false,	14,	16					},
 		{	LmCommandCode::RDFBTS32,	4,	"RDFBTS32",	true,	14,	6					},
+		{	LmCommandCode::MOVCF,		3,	"MOVCF",	false,	11,	6					},
+		{	LmCommandCode::PMOV,		3,	"PMOV",		false,	11,	CALC_RUNTIME		},
+		{	LmCommandCode::PMOV32,		3,	"PMOV32",	false,	11,	14					},
     };
 
     const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
@@ -292,6 +298,10 @@ namespace Builder
 		void readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption);
 		void readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption);
 
+		void movConstIfFlag(quint16 addrTo, quint16 constVal);
+		void prevMov(quint16 addrTo, quint16 addrFrom);
+		void prevMov32(quint16 addrTo, quint16 addrFrom);
+
 		void setAddress(int address) { m_address = address; }
 
 		QString toString() override;
@@ -313,6 +323,7 @@ namespace Builder
 		void generateBinCode(E::ByteOrder byteOrder) override;
 
 		QString getMnemoCode();
+		QString getConstValueString();
 
 		int address() const { return m_address; }
 
