@@ -46,11 +46,12 @@ private:
 	QString m_fileName;
 	QFile m_file;
 	QTextStream m_stream;
+	int m_fileGrowing = 0;
 
 	QString m_logName;
 	QString m_path;
 
-	const int MAX_LOG_FILE_COUNT = 10;
+	const int MAX_LOG_FILE_COUNT = 3;
 	const int MAX_LOG_FILE_SIZE = 10;		// in megabytes
 
 	int m_fileCount = 0;

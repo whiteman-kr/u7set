@@ -84,6 +84,15 @@ void CircularLoggerWorker::writeRecord(const QString record)
 	m_stream << record << '\n';
 
 	m_stream.flush();
+
+	m_fileGrowing += record.length();
+
+	if (m_fileGrowing >= 10 * 1024)		// check each written 10k
+	{
+		checkFileSize();
+
+		m_fileGrowing = 0;
+	}
 }
 
 
@@ -167,7 +176,9 @@ void CircularLoggerWorker::removeOldFiles()
 
 void CircularLoggerWorker::checkFileSize()
 {
-	if (m_file.size() >= m_fileSizeLimit * 1024 * 1024)
+	int fileSize = m_file.size();
+
+	if (fileSize >= m_fileSizeLimit * 1024 * 1024)
 	{
 		clearFileStream();
 
