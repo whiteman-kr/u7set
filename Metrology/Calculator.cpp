@@ -111,22 +111,26 @@ void Calculator::createInterface()
 
     m_pLinInRadio = new QRadioButton(this);
     m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
+    QLabel* pLinInValLable = new QLabel(tr("In"), this);
+    pLinInValLable->setFixedWidth(30);
     m_pLinInValEdit->setFont(*font);
 
     lin_inval_Layout->addWidget(m_pLinInRadio);
     lin_inval_Layout->addWidget(m_pLinInValEdit);
-    lin_inval_Layout->addWidget(new QLabel(tr("in"), this));
+    lin_inval_Layout->addWidget(pLinInValLable);
     lin_inval_Layout->addStretch();
 
     QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
 
     m_pLinOutRadio = new QRadioButton(this);
     m_pLinOutValEdit = new QLineEdit(tr("0"), this);
+    QLabel* pLinOutValLable = new QLabel(tr("Out"), this);
+    pLinOutValLable->setFixedWidth(30);
     m_pLinOutValEdit->setFont(*font);
 
     lin_outval_Layout->addWidget(m_pLinOutRadio);
     lin_outval_Layout->addWidget(m_pLinOutValEdit);
-    lin_outval_Layout->addWidget(new QLabel(tr("out"), this));
+    lin_outval_Layout->addWidget(pLinOutValLable);
     lin_outval_Layout->addStretch();
 
     QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
@@ -134,8 +138,9 @@ void Calculator::createInterface()
     m_pLinInLowEdit = new QLineEdit(tr("0"), this);
     m_pLinInHighEdit = new QLineEdit(tr("5"), this);
 
+    lin_inrange_Layout->addWidget(new QLabel(tr("min"), this));
     lin_inrange_Layout->addWidget(m_pLinInLowEdit);
-    lin_inrange_Layout->addWidget(new QLabel(tr(".."), this));
+    lin_inrange_Layout->addWidget(new QLabel(tr("max"), this));
     lin_inrange_Layout->addWidget(m_pLinInHighEdit);
 
     QHBoxLayout *lin_outrange_Layout = new QHBoxLayout;
@@ -143,8 +148,9 @@ void Calculator::createInterface()
     m_pLinOutLowEdit = new QLineEdit(tr("0"), this);
     m_pLinOutHighEdit = new QLineEdit(tr("100"), this);
 
+    lin_outrange_Layout->addWidget(new QLabel(tr("min"), this));
     lin_outrange_Layout->addWidget(m_pLinOutLowEdit);
-    lin_outrange_Layout->addWidget(new QLabel(tr(".."), this));
+    lin_outrange_Layout->addWidget(new QLabel(tr("max"), this));
     lin_outrange_Layout->addWidget(m_pLinOutHighEdit);
 
     linLayout->addLayout(lin_inval_Layout);
