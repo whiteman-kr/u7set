@@ -13,14 +13,14 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TcpIpOption::TcpIpOption(QObject *parent) :
+ConfigSocketOption::ConfigSocketOption(QObject *parent) :
     QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TcpIpOption::TcpIpOption(const TcpIpOption& from, QObject *parent) :
+ConfigSocketOption::ConfigSocketOption(const ConfigSocketOption& from, QObject *parent) :
     QObject(parent)
 {
     *this = from;
@@ -29,36 +29,150 @@ TcpIpOption::TcpIpOption(const TcpIpOption& from, QObject *parent) :
 // -------------------------------------------------------------------------------------------------------------------
 
 
-TcpIpOption::~TcpIpOption()
+ConfigSocketOption::~ConfigSocketOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TcpIpOption::load()
-{
-    QSettings s;
-
-    m_serverIP = s.value( QString("%1ServerIP").arg(TCPIP_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort = s.value( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TcpIpOption::save()
+void ConfigSocketOption::load()
 {
     QSettings s;
 
-    s.setValue( QString("%1ServerIP").arg(TCPIP_OPTIONS_KEY), m_serverIP);
-    s.setValue( QString("%1ServerPort").arg(TCPIP_OPTIONS_KEY), m_serverPort);
+    m_serverIP = s.value( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort = s.value( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TcpIpOption& TcpIpOption::operator=(const TcpIpOption& from)
+void ConfigSocketOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP);
+    s.setValue( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ConfigSocketOption& ConfigSocketOption::operator=(const ConfigSocketOption& from)
 {
     m_serverIP = from.m_serverIP;
     m_serverPort = from.m_serverPort;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalSocketOption::SignalSocketOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalSocketOption::SignalSocketOption(const SignalSocketOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+SignalSocketOption::~SignalSocketOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalSocketOption::load()
+{
+    QSettings s;
+
+    m_serverIP = s.value( QString("%1ServerIP").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort = s.value( QString("%1ServerPort").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalSocketOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1ServerIP").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP);
+    s.setValue( QString("%1ServerPort").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalSocketOption& SignalSocketOption::operator=(const SignalSocketOption& from)
+{
+    m_serverIP = from.m_serverIP;
+    m_serverPort = from.m_serverPort;
+
+    return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+TuningSocketOption::TuningSocketOption(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TuningSocketOption::TuningSocketOption(const TuningSocketOption& from, QObject *parent) :
+    QObject(parent)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+TuningSocketOption::~TuningSocketOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSocketOption::load()
+{
+    QSettings s;
+
+    m_serverIP = s.value( QString("%1ServerIP").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort = s.value( QString("%1ServerPort").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
+
+    m_equipmentID = s.value( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_TUN").toString();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSocketOption::save()
+{
+    QSettings s;
+
+    s.setValue( QString("%1ServerIP").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP);
+    s.setValue( QString("%1ServerPort").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort);
+
+    s.setValue( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), m_equipmentID);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TuningSocketOption& TuningSocketOption::operator=(const TuningSocketOption& from)
+{
+    m_serverIP = from.m_serverIP;
+    m_serverPort = from.m_serverPort;
+
+    m_equipmentID = from.m_equipmentID;
 
     return *this;
 }
@@ -95,7 +209,7 @@ void ToolBarOption::load()
 
     m_measureTimeout = s.value( QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
     m_measureKind = s.value( QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
-    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_NO_USED).toInt();
+    m_outputSignalType = s.value( QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNUSED).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -422,7 +536,7 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void REPORT_HEADER::init(const int type)
+void REPORT_HEADER::init(int type)
 {
     if ( type < 0 || type >=  REPORT_TYPE_COUNT)
     {
@@ -545,7 +659,7 @@ ReportOption::~ReportOption()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int ReportOption::reportTypeByMeasureType(const int measureType)
+int ReportOption::reportTypeByMeasureType(int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -618,7 +732,7 @@ ReportOption& ReportOption::operator=(const ReportOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityPoint::setPercent(const double value)
+void LinearityPoint::setPercent(double value)
 {
     m_percentValue = value;
 
@@ -641,7 +755,7 @@ void LinearityPoint::setPercent(const double value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-double LinearityPoint::sensorValue(const int sensor)
+double LinearityPoint::sensorValue(int sensor)
 {
     if (sensor < 0 || sensor >= POINT_SENSOR_COUNT)
     {
@@ -732,10 +846,43 @@ LinearityOption::LinearityOption(const LinearityOption& from, QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-
 LinearityOption::~LinearityOption()
 {
     m_pointBase.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int LinearityOption::measureCountInPoint()
+{
+    if (m_measureCountInPoint == 0)
+    {
+        m_measureCountInPoint = 1;
+    }
+
+    if (m_measureCountInPoint > MAX_MEASUREMENT_IN_POINT)
+    {
+        m_measureCountInPoint = MAX_MEASUREMENT_IN_POINT;
+    }
+
+    return m_measureCountInPoint;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityOption::setMeasureCountInPoint(int measureCount)
+{
+    if (measureCount <= 0)
+    {
+        measureCount = 1;
+    }
+
+    if (measureCount > MAX_MEASUREMENT_IN_POINT)
+    {
+        measureCount = MAX_MEASUREMENT_IN_POINT;
+    }
+
+    m_measureCountInPoint = measureCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -784,7 +931,7 @@ void LinearityOption::load()
 
     m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
+    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 
     m_measureTimeInPoint = s.value( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
     m_measureCountInPoint = s.value( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -876,7 +1023,7 @@ void ComparatorOption::load()
     m_errorValue = s.value( QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
     m_startValue = s.value( QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
-    m_errorType = s.value( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), ERROR_TYPE_REDUCE).toInt();
+    m_errorType = s.value( QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 
     m_enableMeasureHysteresis = s.value( QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
     m_startComparatorIndex = s.value( QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
@@ -1054,7 +1201,10 @@ void Options::load()
 {
     m_toolBar.load();
 
-    m_connectTcpIp.load();
+    m_configSocket.load();
+    m_signalSocket.load();
+    m_tuningSocket.load();
+
 
     m_measureView.init();
     m_measureView.load();
@@ -1079,7 +1229,9 @@ void Options::load()
 void Options::save()
 {
     m_toolBar.save();
-    m_connectTcpIp.save();
+    m_configSocket.save();
+    m_signalSocket.save();
+    m_tuningSocket.save();
     m_measureView.save();
     m_signalInfo.save();
     m_database.save();
@@ -1110,7 +1262,9 @@ Options& Options::operator=(const Options& from)
         }
 
         m_toolBar = from.m_toolBar;
-        m_connectTcpIp = from.m_connectTcpIp;
+        m_configSocket = from.m_configSocket;
+        m_signalSocket = from.m_signalSocket;
+        m_tuningSocket = from.m_tuningSocket;
         m_measureView = from.m_measureView;
         m_signalInfo = from.m_signalInfo;
         m_database = from.m_database;

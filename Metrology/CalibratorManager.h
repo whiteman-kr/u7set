@@ -11,7 +11,6 @@
 #include <QMutex>
 
 #include "Calibrator.h"
-#include "ObjectVector.h"
 
 // ==============================================================================================
 
@@ -26,7 +25,7 @@ public:
 private:
 
     Calibrator*     m_pCalibrator = nullptr;
-    bool            m_ready = false;
+    bool            m_readyForManage = false;
 
 public:
 
@@ -36,7 +35,7 @@ public:
     int             index() const;
     QString         portName() const;
 
-    bool            isReady() const { return m_ready; }
+    bool            isReadyForManage() const { return m_readyForManage; }
 
 public:
 
@@ -70,11 +69,11 @@ public:
     // function for manage
     //
 
-    bool            setUnit(const int mode, const int unit);
+    bool            setUnit(int mode, int unit);
 
     void            updateValue();
     void            value();
-    void            setValue(const double value);
+    void            setValue(double value);
 
     void            stepDown();
     void            stepUp();
@@ -115,10 +114,6 @@ private slots:
 
     void            onRemoveControl();
 };
-
-// ==============================================================================================
-
-typedef PtrObjectVector<CalibratorManager> CalibratorManagerList;
 
 // ==============================================================================================
 

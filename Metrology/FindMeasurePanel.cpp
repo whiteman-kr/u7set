@@ -29,7 +29,7 @@ FindItem::~FindItem()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindItem::FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos) :
+FindItem::FindItem(int row, int column, const QString& text, int beginPos, int endPos) :
     m_row ( row) ,
     m_column (column) ,
     m_text (text) ,
@@ -163,7 +163,7 @@ QVariant FindMeasureTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString FindMeasureTable::text(const int row, const int column) const
+QString FindMeasureTable::text(int row, int column) const
 {
     if (row < 0 || row >= m_findItemList.count())
     {
@@ -192,7 +192,7 @@ QString FindMeasureTable::text(const int row, const int column) const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-FindItem FindMeasureTable::at(const int index) const
+FindItem FindMeasureTable::at(int index) const
 {
     if (index < 0 || index >= count())
     {

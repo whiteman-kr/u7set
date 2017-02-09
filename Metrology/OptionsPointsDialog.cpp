@@ -200,7 +200,7 @@ void OptionsPointsDialog::updateRangeType()
             m_upButton->hide();
             m_downButton->hide();
 
-            m_pointCountEdit->setText( QString::number( m_linearity.m_pointBase.count() ) );
+            m_pointCountEdit->setText( QString::number( m_linearity.points().count() ) );
             m_lowRangeEdit->setText( QString::number(m_linearity.m_lowLimitRange, 10, 2) );
             m_highRangeEdit->setText( QString::number(m_linearity.m_highLimitRange, 10, 2) );
 
@@ -218,7 +218,7 @@ void OptionsPointsDialog::updateList()
 {
     clearList();
 
-    int rowCount = m_linearity.m_pointBase.count();
+    int rowCount = m_linearity.points().count();
 
     m_pointList->setRowCount(rowCount);
 
@@ -231,7 +231,7 @@ void OptionsPointsDialog::updateList()
     //
     for(int index = 0; index < rowCount; index++ )
     {
-        LinearityPoint point = m_linearity.m_pointBase.at(index);
+        LinearityPoint point = m_linearity.points().at(index);
 
         point.setPointID(index);
 
@@ -250,7 +250,7 @@ void OptionsPointsDialog::updateList()
             }
         }
 
-        m_linearity.m_pointBase.set(index, point);
+        m_linearity.points().set(index, point);
     }
 
     m_pointList->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -297,7 +297,7 @@ void OptionsPointsDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsPointsDialog::hideColumn(const int column, const bool hide)
+void OptionsPointsDialog::hideColumn(int column, bool hide)
 {
     if (column < 0 || column >= m_pointList->columnCount())
     {
@@ -321,10 +321,10 @@ void OptionsPointsDialog::onAddPoint()
     int index = m_pointList->currentRow();
     if (index == -1)
     {
-        index = m_linearity.m_pointBase.count() - 1;
+        index = m_linearity.points().count() - 1;
     }
 
-    m_linearity.m_pointBase.insert(index + 1, LinearityPoint() );
+    m_linearity.points().insert(index + 1, LinearityPoint() );
 
     updateList();
 
@@ -335,8 +335,6 @@ void OptionsPointsDialog::onAddPoint()
     }
 
     m_pointList->editItem(item);
-
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -354,7 +352,7 @@ void OptionsPointsDialog::cellChanged(int row, int column)
     }
 
     int index = row;
-    if (index < 0 || index >= m_linearity.m_pointBase.count())
+    if (index < 0 || index >= m_linearity.points().count())
     {
         QMessageBox::information(this, windowTitle(), tr("Please, select point"));
         return;
@@ -362,9 +360,9 @@ void OptionsPointsDialog::cellChanged(int row, int column)
 
     QString value = m_pointList->item(row, column)->text();
 
-    LinearityPoint point = m_linearity.m_pointBase.at(index);
+    LinearityPoint point = m_linearity.points().at(index);
     point.setPercent( value.toDouble() );
-    m_linearity.m_pointBase.set(index, point);
+    m_linearity.points().set(index, point);
 
     updateList();
 
@@ -411,12 +409,12 @@ void OptionsPointsDialog::onEditPoint()
 void OptionsPointsDialog::onRemovePoint()
 {
     int index = m_pointList->currentRow();
-    if (index < 0 || index >= m_linearity.m_pointBase.count())
+    if (index < 0 || index >= m_linearity.points().count())
     {
         return;
     }
 
-    m_linearity.m_pointBase.remove(index);
+    m_linearity.points().remove(index);
 
     updateList();
 
@@ -428,7 +426,7 @@ void OptionsPointsDialog::onRemovePoint()
 void OptionsPointsDialog::onUpPoint()
 {
     int index = m_pointList->currentRow();
-    if (index < 0 || index >= m_linearity.m_pointBase.count())
+    if (index < 0 || index >= m_linearity.points().count())
     {
         return;
     }
@@ -440,7 +438,7 @@ void OptionsPointsDialog::onUpPoint()
         return;
     }
 
-    m_linearity.m_pointBase.swap(index, index - 1);
+    m_linearity.points().swap(index, index - 1);
     m_pointList->selectRow(index - 1);
 
     updateList();
@@ -453,19 +451,19 @@ void OptionsPointsDialog::onUpPoint()
 void OptionsPointsDialog::onDownPoint()
 {
     int index = m_pointList->currentRow();
-    if (index < 0 || index >= m_linearity.m_pointBase.count())
+    if (index < 0 || index >= m_linearity.points().count())
     {
         return;
     }
 
     m_pointList->setFocus();
 
-    if (index + 1 >= m_linearity.m_pointBase.count())
+    if (index + 1 >= m_linearity.points().count())
     {
         return;
     }
 
-    m_linearity.m_pointBase.swap(index, index + 1);
+    m_linearity.points().swap(index, index + 1);
     m_pointList->selectRow(index + 1);
 
     updateList();

@@ -17,7 +17,6 @@
         <file>icons/Statistics.png</file>
         <file>icons/Stop.png</file>
         <file>icons/OutRange.png</file>
-        <file>icons/InOut.png</file>
         <file>icons/Signals.png</file>
         <file>icons/Metrology.ico</file>
         <file>icons/Settings.png</file>
@@ -37,5 +36,6 @@
         <file>icons/Add.png</file>
         <file>icons/Copy.png</file>
         <file>icons/Comparator.png</file>
+        <file>icons/InOut.png</file>
     </qresource>
 </RCC>

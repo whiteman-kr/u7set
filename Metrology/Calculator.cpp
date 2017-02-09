@@ -175,7 +175,7 @@ void Calculator::initDialog()
 
     // init elements of interface
     //
-    setWindowFlags(Qt::Drawer);
+    setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
     setFixedWidth(230);
     setWindowIcon(QIcon(":/icons/Calculator.png"));
     setWindowTitle(tr("Metrological calculator"));

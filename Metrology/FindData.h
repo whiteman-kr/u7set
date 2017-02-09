@@ -30,8 +30,8 @@ private:
 
     void            createFindDialog(QTableView *pView);
 
-    int             find(const int start);
-    void            enableFindNextButton(const int start);
+    int             find(int start);
+    void            enableFindNextButton(int start);
 
 signals:
 

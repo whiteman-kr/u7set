@@ -208,7 +208,7 @@ class Calibrator : public QObject
 
 public:
 
-    explicit    Calibrator(const int index = INVALID_CALIBRATOR_INDEX, QObject *parent = 0);
+    explicit    Calibrator(int index = INVALID_CALIBRATOR_INDEX, QObject *parent = 0);
                ~Calibrator();
 
 private:
@@ -242,7 +242,7 @@ private:
 
     void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
 
-    void        setConnected(const bool connect);                                       // function changes status calibrator: connected or disconnected
+    void        setConnected(bool connect);                                             // function changes status calibrator: connected or disconnected
 
     bool        openPort();                                                             // open the serial port to manage the calibrator
     bool        getIDN();                                                               // identify the calibrator, get: SerialNo, Type and etc.
@@ -251,7 +251,7 @@ private:
     bool		recv();                                                                 // receiving a response from the calibrator
 
     void        parseResponse();                                                        // extracts from the string of the last response from the calibrator current electrical values
-    void		convert(double& val, const int mode, const int order);                  // translation from Kilo to Mega, from Hz to kHz, etc.
+    void		convert(double& val, int mode, int order);                              // translation from Kilo to Mega, from Hz to kHz, etc.
 
 public:
 
@@ -266,7 +266,7 @@ public:
 
     int			type() const { return m_type; }
     QString		typeStr() const;
-    void		setType(const int type) { m_type = type; }
+    void		setType(int type) { m_type = type; }
 
     QString     caption() const { return m_caption; }
     QString		serialNo() const { return m_serialNo; }
@@ -282,10 +282,10 @@ public:
 
     QString     lastError() const { return m_lastError; }
 
-    void        setWaitResponse(const bool enable) { m_enableWaitResponse = enable; }
+    void        setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
 
     bool        isBusy() const { return m_busy; }
-    void        setBusy(const bool busy);
+    void        setBusy(bool busy);
 
 signals:
 

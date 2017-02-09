@@ -18,9 +18,37 @@
 
 // ==============================================================================================
 
-const char* const               OptionPage[] =
+const char* const               OptionGroupTitle[] =
 {
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to server TCP/IP"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connect to server"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel signal information"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
+};
+
+const int                       OPTION_GROUP_COUNT          = sizeof(OptionGroupTitle)/sizeof(OptionGroupTitle[0]);
+
+const int                       OPTION_GROUP_UNKNOWN        = -1,
+                                OPTION_GROUP_SERVER         = 0,
+                                OPTION_GROUP_LINEARITY      = 1,
+                                OPTION_GROUP_SETTING        = 2,
+                                OPTION_GROUP_MEASURE_VIEW   = 3,
+                                OPTION_GROUP_SIGNAL_INFO    = 4,
+                                OPTION_GROUP_REPORT_HEADER  = 5,
+                                OPTION_GROUP_DATABASE       = 6,
+                                OPTION_GROUP_BACKUP         = 7;
+
+// ==============================================================================================
+
+const char* const               OptionPageTitle[] =
+{
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Config Server - TCP/IP"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Application Data Server - TCP/IP"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Tuning Server - TCP/IP"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements of linearity"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Point of linearity"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Measure comparators"),
@@ -33,23 +61,29 @@ const char* const               OptionPage[] =
 
 };
 
-const int                       OPTION_PAGE_COUNT				= sizeof(OptionPage)/sizeof(OptionPage[0]);
+const int                       OPTION_PAGE_COUNT				= sizeof(OptionPageTitle)/sizeof(OptionPageTitle[0]);
 
 const int                       OPTION_PAGE_UNKNOWN				= -1,
-                                OPTION_PAGE_TCP_IP              = 0,
-                                OPTION_PAGE_LINEARITY_MEASURE	= 1,
-                                OPTION_PAGE_LINEARITY_POINT		= 2,
-                                OPTION_PAGE_COMPARATOR_MEASURE	= 3,
-                                OPTION_PAGE_MEASURE_VIEW_TEXT	= 4,
-                                OPTION_PAGE_MEASURE_VIEW_COLUMN	= 5,
-                                OPTION_PAGE_SIGNAL_INFO			= 6,
-                                OPTION_PAGE_REPORT              = 7,
-                                OPTION_PAGE_DATABASE			= 8,
-                                OPTION_PAGE_BACKUP				= 9;
+                                OPTION_PAGE_CONFIG_SOCKET       = 0,
+                                OPTION_PAGE_SIGNAL_SOCKET       = 1,
+                                OPTION_PAGE_TUNING_SOCKET       = 2,
+                                OPTION_PAGE_LINEARITY_MEASURE	= 3,
+                                OPTION_PAGE_LINEARITY_POINT		= 4,
+                                OPTION_PAGE_COMPARATOR_MEASURE	= 5,
+                                OPTION_PAGE_MEASURE_VIEW_TEXT	= 6,
+                                OPTION_PAGE_MEASURE_VIEW_COLUMN	= 7,
+                                OPTION_PAGE_SIGNAL_INFO			= 8,
+                                OPTION_PAGE_REPORT              = 9,
+                                OPTION_PAGE_DATABASE			= 10,
+                                OPTION_PAGE_BACKUP				= 11;
 
-const char* const               OptionPageShort[OPTION_PAGE_COUNT] =
+// ----------------------------------------------------------------------------------------------
+
+const char* const               OptionPageShortTitle[OPTION_PAGE_COUNT] =
 {
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "TCP/IP"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "ConfigService"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "AppDataService"),
+                                QT_TRANSLATE_NOOP("OptionsDialog.h", "TuningService"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Points"),
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
@@ -61,48 +95,22 @@ const char* const               OptionPageShort[OPTION_PAGE_COUNT] =
                                 QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 };
 
-// ==============================================================================================
-
-const char* const               OptionGroup[] =
-{
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Connect to server"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel signal information"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
-                                QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
-
-};
-
-const int                       OPTION_GROUP_COUNT              = sizeof(OptionGroup)/sizeof(OptionGroup[0]);
-
-const int                       OPTION_GROUP_UNKNOWN        = -1,
-                                OPTION_GROUP_TCP_IP         = 0,
-                                OPTION_GROUP_LINEARITY      = 1,
-                                OPTION_GROUP_SETTING        = 2,
-                                OPTION_GROUP_MEASURE_VIEW   = 3,
-                                OPTION_GROUP_SIGNAL_INFO    = 4,
-                                OPTION_GROUP_REPORT_HEADER  = 5,
-                                OPTION_GROUP_DATABASE       = 6,
-                                OPTION_GROUP_BACKUP         = 7;
-
-
 // ----------------------------------------------------------------------------------------------
 
 const int                       OptionGroupPage[OPTION_PAGE_COUNT] =
 {
-                                OPTION_GROUP_TCP_IP,        //("Linearity -- Measurements"),
-                                OPTION_GROUP_LINEARITY,		//("Linearity -- Measurements"),
-                                OPTION_GROUP_LINEARITY,		//("Linearity -- Points"),
-                                OPTION_GROUP_SETTING,		//("Comparators -- Measurements"),
-                                OPTION_GROUP_MEASURE_VIEW,	//("List of measurements -- Display"),
-                                OPTION_GROUP_MEASURE_VIEW,	//("List of measurements -- Columns"),
-                                OPTION_GROUP_SIGNAL_INFO,	//("Information of signal -- Displaying"),
-                                OPTION_GROUP_REPORT_HEADER,	//("Reports"),
-                                OPTION_GROUP_DATABASE,		//("Database"),
-                                OPTION_GROUP_BACKUP,		//("Backup measurements"),
+                                OPTION_GROUP_SERVER,        // Group: Connect to server --      Page : ConfigService"),
+                                OPTION_GROUP_SERVER,        // Group: Connect to server --      Page : AppDataService"),
+                                OPTION_GROUP_SERVER,        // Group: Connect to server --      Page : TuningService"),
+                                OPTION_GROUP_LINEARITY,		// Group: Linearity --              Page : Measurements"),
+                                OPTION_GROUP_LINEARITY,		// Group: Linearity --              Page : Points"),
+                                OPTION_GROUP_SETTING,		// Group: Comparators --            Page : Measurements"),
+                                OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --   Page : Display"),
+                                OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --   Page : Columns"),
+                                OPTION_GROUP_SIGNAL_INFO,	// Group: Information of signal --  Page : Displaying"),
+                                OPTION_GROUP_REPORT_HEADER,	// Group: Reports --                Page : Settings"),
+                                OPTION_GROUP_DATABASE,		// Group: Database --               Page : Settings"),
+                                OPTION_GROUP_BACKUP,		// Group: Backup measurements --    Page : Settings"),
 };
 
 // ==============================================================================================
@@ -165,7 +173,7 @@ private:
     Options                     m_options;
 
     static int                  m_activePage;
-    bool                        setActivePage(const int page);
+    bool                        setActivePage(int page);
 
     void                        createInterface();
 
@@ -180,16 +188,16 @@ private:
 
     QList<PropertyPage*>        m_pageList;
 
-    PropertyPage*               createPage(const int page);
-    PropertyPage*               createPropertyList(const int page);
-    PropertyPage*               createPropertyDialog(const int page);
+    PropertyPage*               createPage(int page);
+    PropertyPage*               createPropertyList(int page);
+    PropertyPage*               createPropertyDialog(int page);
 
 
     QMap<QtProperty*,int>       m_propertyItemList;
     QMap<QtProperty*,QVariant>  m_propertyValueList;
 
-    void                        appendProperty(QtProperty* property, const int page, const int param);
-    void                        expandProperty(QtTreePropertyBrowser* pEditor, const int page, const int param, const bool expanded);
+    void                        appendProperty(QtProperty* property, int page, int param);
+    void                        expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded);
     void                        clearProperty();
 
     QtProperty*                 m_currentPropertyItem = nullptr;
@@ -212,8 +220,8 @@ private slots:
 
     void                        onBrowserItem(QtBrowserItem*);
 
-    void                        updateLinearityPage(const bool isDialog);
-    void                        updateMeasureViewPage(const bool isDialog);
+    void                        updateLinearityPage(bool isDialog);
+    void                        updateMeasureViewPage(bool isDialog);
     void                        updateReportHeaderPage();
 
     void                        onOk();

@@ -7,9 +7,10 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement::Measurement(const int measureType)
+Measurement::Measurement(int measureType) :
+    m_measureType (measureType)
 {
-    m_measureType = measureType;
+    clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -20,7 +21,7 @@ Measurement::~Measurement()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Measurement* Measurement::at(const int index)
+Measurement* Measurement::at(int index)
 {
     Measurement* pMeasurement = nullptr;
 
@@ -64,191 +65,573 @@ Measurement& Measurement::operator=(Measurement& from)
 LinearityMeasurement::LinearityMeasurement() :
     Measurement(MEASURE_TYPE_LINEARITY)
 {
-    for(int v = 0; v < VALUE_TYPE_COUNT; v++)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+LinearityMeasurement::LinearityMeasurement(const MeasureParam &measureParam)
+{
+    clear();
+
+    if (measureParam.isValid() == false)
     {
-        m_nominal[v] = 0;
-        m_measure[v] = 0;
-
-        for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
-        {
-            m_measureArray[v][m] = 0;
-        }
-
-        m_lowLimit[v] = 0;
-        m_highLimit[v] = 0;
-
-        m_valuePrecision[v] = 0;
+        return;
     }
 
-    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+    int outputSignalType = measureParam.outputSignalType();
+    if (outputSignalType < 0  || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
     {
-        m_errorInput[e] = 0;
-        m_errorOutput[e] = 0;
-        m_errorLimit[e] = 0;
-
-        m_errorPrecision[e] = 0;
+        assert(0);
+        return;
     }
 
-    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
+    if (measureParam.calibratorManager() == nullptr)
     {
-        m_additionalValue[a] = 0;
+        assert(0);
+        return;
+    }
+
+    switch ( outputSignalType )
+    {
+        case OUTPUT_SIGNAL_TYPE_UNUSED:         set1(measureParam); break;
+        case OUTPUT_SIGNAL_TYPE_FROM_INPUT:     set2(measureParam); break;
+        case OUTPUT_SIGNAL_TYPE_FROM_TUNING:    set3(measureParam); break;
+        default:                                assert(0);
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::LinearityMeasurement(const Calibrator* pCalibrator, const MeasureSignalParam& param)
+LinearityMeasurement::~LinearityMeasurement()
 {
-    if (pCalibrator == nullptr)
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::clear()
+{
+    setMeasureType(MEASURE_TYPE_LINEARITY);
+
+    m_appSignalID = QString();
+    m_customAppSignalID = QString();
+    m_caption = QString();
+
+    m_position.clear();
+
+    for(int t = 0; t < VALUE_TYPE_COUNT; t++)
     {
-        assert(false);
-        return;
+        m_nominal[t] = 0;
+        m_measure[t] = 0;
+
+        for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
+        {
+            m_measureArray[t][m] = 0;
+        }
+
+        m_lowLimit[t] = 0;
+        m_highLimit[t] = 0;
+        m_unit[t] = QString();
+
+        m_valuePrecision[t] = 0;
+
+        m_hasRange[t] = true;
     }
 
+    m_percent = 0;
+    m_measureCount = 0;
+    m_adjustment = 0;
+
+    for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
+    {
+        m_errorInput[e] = 0;
+        m_errorOutput[e] = 0;
+        m_errorLimit[e] = 0;
+    }
+
+    m_additionalParamCount = 0;
+
+    for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
+    {
+        m_additionalParam[a] = 0;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::set1(const MeasureParam &measureParam)
+{
+    SignalParam param = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
     if (param.isValid() == false)
     {
         assert(false);
         return;
     }
 
+    if (measureParam.calibratorManager() == nullptr)
+    {
+        assert(0);
+        return;
+    }
+
+    Calibrator* pCalibrator = measureParam.calibratorManager()->calibrator();
+    if (pCalibrator == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    //
+    //
     setMeasureType(MEASURE_TYPE_LINEARITY);
     setSignalHash(param.hash());
 
+    // set ranges
+    //
+    setHasRange(VALUE_TYPE_PHYSICAL, true);
+    setHasRange(VALUE_TYPE_IN_ELECTRIC, true);
+    setHasRange(VALUE_TYPE_OUT_ELECTRIC, false);
+
     // features
     //
-
     setAppSignalID( param.appSignalID() );
     setCustomAppSignalID( param.customAppSignalID() );
     setCaption( param.caption() );
 
     setPosition( param.position() );
 
-    setValuePrecision(VALUE_TYPE_ELECTRIC, param.inputElectricPrecise());
-    setValuePrecision(VALUE_TYPE_PHYSICAL, param.inputPhysicalPrecise());
-    setValuePrecision(VALUE_TYPE_OUTPUT, param.outputElectricPrecise());
-
     // nominal
     //
+    double electric = pCalibrator->sourceValue();
+    double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, param);
 
-    double electric =   pCalibrator->sourceValue();
-    double physical =   conversion(electric, CT_ELECTRIC_TO_PHYSICAL, param);
-
-    setNominal(VALUE_TYPE_ELECTRIC, electric);
     setNominal(VALUE_TYPE_PHYSICAL, physical);
-
-    if (param.hasOutput() == true)
-    {
-        double outputEl =   (physical - param.inputPhysicalLowLimit()) * (param.outputElectricHighLimit() - param.outputElectricLowLimit())/
-                            (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit())+ param.outputElectricLowLimit();
-
-        setNominal(VALUE_TYPE_OUTPUT, outputEl);
-    }
+    setNominal(VALUE_TYPE_IN_ELECTRIC, electric);
+    setNominal(VALUE_TYPE_OUT_ELECTRIC, 0);
 
     setPercent( (( physical - param.inputPhysicalLowLimit()) * 100)/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit() ));
 
     // measure
     //
 
-    int measureCount = theOptions.linearity().m_measureCountInPoint;
-
-    if (measureCount > MAX_MEASUREMENT_IN_POINT)
-    {
-        measureCount = MAX_MEASUREMENT_IN_POINT;
-    }
-
-    setMeasureArrayCount(measureCount);
-
-    double averageElVal = 0;
     double averagePhVal = 0;
+    double averageInElVal = 0;
+    double averageOutElVal = 0;
+
+    int measureCount = theOptions.linearity().measureCountInPoint();
+
+    setMeasureCount(measureCount);
 
     for(int index = 0; index < measureCount; index++)
     {
         AppSignalState signalState = theSignalBase.signalState(param.hash());
 
-        double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, param);
         double phVal = signalState.value;
+        double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, param);
 
-        setMeasureItemArray(VALUE_TYPE_ELECTRIC, index, elVal);
         setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, phVal);
-        setMeasureItemArray(VALUE_TYPE_OUTPUT, index, 0);
+        setMeasureItemArray(VALUE_TYPE_IN_ELECTRIC, index, elVal);
+        setMeasureItemArray(VALUE_TYPE_OUT_ELECTRIC, index, 0);
 
-        averageElVal += elVal;
         averagePhVal += phVal;
+        averageInElVal += elVal;
 
-        QThread::msleep((theOptions.linearity().m_measureTimeInPoint*1000)/measureCount);
+        QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
     }
 
-    averageElVal /= measureCount;
     averagePhVal /= measureCount;
+    averageInElVal /= measureCount;
 
-    setMeasure(VALUE_TYPE_ELECTRIC, averageElVal);
     setMeasure(VALUE_TYPE_PHYSICAL, averagePhVal);
-    setMeasure(VALUE_TYPE_OUTPUT, pCalibrator->measureValue());
+    setMeasure(VALUE_TYPE_IN_ELECTRIC, averageInElVal);
+    setMeasure(VALUE_TYPE_OUT_ELECTRIC, averageOutElVal);
 
     // limits
     //
-    setLowLimit(VALUE_TYPE_ELECTRIC, param.inputElectricLowLimit());
-    setHighLimit(VALUE_TYPE_ELECTRIC, param.inputElectricHighLimit());
-    setUnit(VALUE_TYPE_ELECTRIC, theUnitBase.unit( param.inputElectricUnitID() ) );
-
     setLowLimit(VALUE_TYPE_PHYSICAL, param.inputPhysicalLowLimit());
     setHighLimit(VALUE_TYPE_PHYSICAL, param.inputPhysicalHighLimit());
     setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit( param.inputPhysicalUnitID() ) );
 
-    if (param.hasOutput() == true)
+    setLowLimit(VALUE_TYPE_IN_ELECTRIC, param.inputElectricLowLimit());
+    setHighLimit(VALUE_TYPE_IN_ELECTRIC, param.inputElectricHighLimit());
+    setUnit(VALUE_TYPE_IN_ELECTRIC, theUnitBase.unit( param.inputElectricUnitID() ) );
+
+    setLowLimit(VALUE_TYPE_OUT_ELECTRIC, 0);
+    setHighLimit(VALUE_TYPE_OUT_ELECTRIC, 0);
+    setUnit(VALUE_TYPE_OUT_ELECTRIC, QString() );
+
+    // precision
+    //
+    setValuePrecision(VALUE_TYPE_PHYSICAL, param.inputPhysicalPrecision());
+    setValuePrecision(VALUE_TYPE_IN_ELECTRIC, param.inputElectricPrecision());
+    setValuePrecision(VALUE_TYPE_OUT_ELECTRIC, 0 );
+
+    // calc errors
+    //
+    setErrorInput(MEASURE_ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL)) );
+    setErrorInput(MEASURE_ERROR_TYPE_REDUCE, abs( ((averagePhVal - nominal(VALUE_TYPE_PHYSICAL)) / (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL))) * 100.0) );
+    setErrorInput(MEASURE_ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL) ) / nominal(VALUE_TYPE_PHYSICAL)) * 100.0) );
+
+    setErrorLimit(MEASURE_ERROR_TYPE_ABSOLUTE, abs( (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL)) * theOptions.linearity().m_errorValue / 100.0 ));
+    setErrorLimit(MEASURE_ERROR_TYPE_REDUCE, theOptions.linearity().m_errorValue);
+    setErrorLimit(MEASURE_ERROR_TYPE_RELATIVE, theOptions.linearity().m_errorValue);
+
+    setErrorOutput(MEASURE_ERROR_TYPE_ABSOLUTE, 0 );
+    setErrorOutput(MEASURE_ERROR_TYPE_REDUCE, 0 );
+    setErrorOutput(MEASURE_ERROR_TYPE_RELATIVE, 0 );
+
+    // calc additional parameters
+    //
+    calcAdditionalParam(averagePhVal, measureCount, VALUE_TYPE_PHYSICAL);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::set2(const MeasureParam &measureParam)
+{
+    if (measureParam.isValid() == false)
     {
-        setLowLimit(VALUE_TYPE_OUTPUT, param.outputElectricLowLimit());
-        setHighLimit(VALUE_TYPE_OUTPUT, param.outputElectricHighLimit());
-        setUnit(VALUE_TYPE_OUTPUT, theUnitBase.unit( param.outputElectricUnitID() ) );
+        assert(false);
+        return;
     }
 
-    setHasOutput( param.hasOutput() );
-    setAdjustment( param.adjustment() );
+    int outputSignalType = measureParam.outputSignalType();
+    if (outputSignalType < 0  || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+    {
+        assert(0);
+        return;
+    }
+
+    if (measureParam.calibratorManager() == nullptr)
+    {
+        assert(0);
+        return;
+    }
+
+    Calibrator* pCalibrator = measureParam.calibratorManager()->calibrator();
+    if (pCalibrator == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+    SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+    //
+    //
+    setMeasureType(MEASURE_TYPE_LINEARITY);
+    setSignalHash(outParam.hash());
+
+    // set ranges
+    //
+    setHasRange(VALUE_TYPE_PHYSICAL, true);
+    setHasRange(VALUE_TYPE_IN_ELECTRIC, true);
+    setHasRange(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput());
+
+    // features
+    //
+    setAppSignalID( outParam.appSignalID() );
+    setCustomAppSignalID( outParam.customAppSignalID() );
+    setCaption( outParam.caption() );
+
+    setPosition( outParam.position() );
+
+    // nominal
+    //
+    double electric = pCalibrator->sourceValue();
+    double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, inParam);
+
+    setNominal(VALUE_TYPE_PHYSICAL, physical);
+    setNominal(VALUE_TYPE_IN_ELECTRIC, electric);
+    setNominal(VALUE_TYPE_OUT_ELECTRIC, 0);
+
+    if (outParam.isOutput() == true)
+    {
+        double outElectric =    (physical - outParam.inputPhysicalLowLimit()) * (outParam.outputElectricHighLimit() - outParam.outputElectricLowLimit())/
+                                (outParam.inputPhysicalHighLimit() - outParam.inputPhysicalLowLimit()) + outParam.outputElectricLowLimit();
+
+        setNominal(VALUE_TYPE_OUT_ELECTRIC, outElectric);
+    }
+
+    setPercent( (( physical - inParam.inputPhysicalLowLimit()) * 100)/(inParam.inputPhysicalHighLimit() - inParam.inputPhysicalLowLimit() ));
+
+    // measure
+    //
+
+    double averagePhVal = 0;
+    double averageInElVal = 0;
+    double averageOutElVal = 0;
+
+    int measureCount = theOptions.linearity().measureCountInPoint();
+
+    setMeasureCount(measureCount);
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        AppSignalState signalState = theSignalBase.signalState(inParam.hash());
+
+        double phVal = signalState.value;
+        double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, inParam);
+        double OutElVal = 0;
+
+        if (outParam.isOutput() == true)
+        {
+            OutElVal = pCalibrator->measureValue();
+        }
+
+        setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, phVal);
+        setMeasureItemArray(VALUE_TYPE_IN_ELECTRIC, index, elVal);
+        setMeasureItemArray(VALUE_TYPE_OUT_ELECTRIC, index, OutElVal);
+
+        averagePhVal += phVal;
+        averageInElVal += elVal;
+        averageOutElVal += OutElVal;
+
+        QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
+    }
+
+    averagePhVal /= measureCount;
+    averageInElVal /= measureCount;
+    averageOutElVal /= measureCount;
+
+    setMeasure(VALUE_TYPE_PHYSICAL, averagePhVal);
+    setMeasure(VALUE_TYPE_IN_ELECTRIC, averageInElVal);
+    setMeasure(VALUE_TYPE_OUT_ELECTRIC, averageOutElVal);
+
+    // limits
+    //
+    setLowLimit(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalLowLimit());
+    setHighLimit(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalHighLimit());
+    setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit( inParam.inputPhysicalUnitID() ) );
+
+    setLowLimit(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricLowLimit());
+    setHighLimit(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricHighLimit());
+    setUnit(VALUE_TYPE_IN_ELECTRIC, theUnitBase.unit( inParam.inputElectricUnitID() ) );
+
+    setLowLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricLowLimit() : 0);
+    setHighLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricHighLimit() : 0);
+    setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? theUnitBase.unit( outParam.outputElectricUnitID() ) : QString());
+
+    // precision
+    //
+    setValuePrecision(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalPrecision());
+    setValuePrecision(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricPrecision());
+    setValuePrecision(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricPrecision() : 0);
 
     // calc errors
     //
 
-    setErrorInput(ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL)) );
-    setErrorInput(ERROR_TYPE_REDUCE, abs( ((averagePhVal - nominal(VALUE_TYPE_PHYSICAL)) / (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL))) * 100.0) );
-    setErrorInput(ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL) ) / nominal(VALUE_TYPE_PHYSICAL)) * 100.0) );
+    setErrorInput(MEASURE_ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL)) );
+    setErrorInput(MEASURE_ERROR_TYPE_REDUCE, abs( ((averagePhVal - nominal(VALUE_TYPE_PHYSICAL)) / (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL))) * 100.0) );
+    setErrorInput(MEASURE_ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_PHYSICAL)- measure(VALUE_TYPE_PHYSICAL) ) / nominal(VALUE_TYPE_PHYSICAL)) * 100.0) );
 
-    setErrorLimit(ERROR_TYPE_ABSOLUTE, abs( (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL)) * theOptions.linearity().m_errorValue / 100.0 ));
-    setErrorLimit(ERROR_TYPE_REDUCE, theOptions.linearity().m_errorValue);
-    setErrorLimit(ERROR_TYPE_RELATIVE, theOptions.linearity().m_errorValue);
+    setErrorLimit(MEASURE_ERROR_TYPE_ABSOLUTE, abs( (highLimit(VALUE_TYPE_PHYSICAL) - lowLimit(VALUE_TYPE_PHYSICAL)) * theOptions.linearity().m_errorValue / 100.0 ));
+    setErrorLimit(MEASURE_ERROR_TYPE_REDUCE, theOptions.linearity().m_errorValue);
+    setErrorLimit(MEASURE_ERROR_TYPE_RELATIVE, theOptions.linearity().m_errorValue);
 
-    if (param.hasOutput() == true)
+    if (outParam.isOutput() == true)
     {
-        setErrorOutput(ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_OUTPUT)- measure(VALUE_TYPE_OUTPUT)) );
-        setErrorOutput(ERROR_TYPE_REDUCE, abs( ((averagePhVal - nominal(VALUE_TYPE_OUTPUT)) / (highLimit(VALUE_TYPE_OUTPUT) - lowLimit(VALUE_TYPE_OUTPUT))) * 100.0) );
-        setErrorOutput(ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_OUTPUT)- measure(VALUE_TYPE_OUTPUT) ) / nominal(VALUE_TYPE_OUTPUT)) * 100.0) );
+        setErrorOutput(MEASURE_ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_OUT_ELECTRIC)- measure(VALUE_TYPE_OUT_ELECTRIC)) );
+        setErrorOutput(MEASURE_ERROR_TYPE_REDUCE, abs( ((averageOutElVal - nominal(VALUE_TYPE_OUT_ELECTRIC)) / (highLimit(VALUE_TYPE_OUT_ELECTRIC) - lowLimit(VALUE_TYPE_OUT_ELECTRIC))) * 100.0) );
+        setErrorOutput(MEASURE_ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_OUT_ELECTRIC)- measure(VALUE_TYPE_OUT_ELECTRIC) ) / nominal(VALUE_TYPE_OUT_ELECTRIC)) * 100.0) );
     }
-
-    setErrorPrecision(ERROR_TYPE_ABSOLUTE, param.inputPhysicalPrecise() );
-    setErrorPrecision(ERROR_TYPE_REDUCE, 2);
-    setErrorPrecision(ERROR_TYPE_RELATIVE, 2);
 
     // calc additional parameters
     //
+    calcAdditionalParam(averagePhVal, measureCount, VALUE_TYPE_PHYSICAL);
+}
 
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::set3(const MeasureParam &measureParam)
+{
+    if (measureParam.isValid() == false)
+    {
+        assert(false);
+        return;
+    }
+
+    int outputSignalType = measureParam.outputSignalType();
+    if (outputSignalType < 0  || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+    {
+        assert(0);
+        return;
+    }
+
+    if (measureParam.calibratorManager() == nullptr)
+    {
+        assert(0);
+        return;
+    }
+
+    Calibrator* pCalibrator = measureParam.calibratorManager()->calibrator();
+    if (pCalibrator == nullptr)
+    {
+        assert(false);
+        return;
+    }
+
+    SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+    SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+    //
+    //
+    setMeasureType(MEASURE_TYPE_LINEARITY);
+    setSignalHash(outParam.hash());
+
+    // set ranges
+    //
+    setHasRange(VALUE_TYPE_PHYSICAL, true);
+    setHasRange(VALUE_TYPE_IN_ELECTRIC, false);
+    setHasRange(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput());
+
+    // features
+    //
+    setAppSignalID( outParam.appSignalID() );
+    setCustomAppSignalID( outParam.customAppSignalID() );
+    setCaption( outParam.caption() );
+
+    setPosition( outParam.position() );
+
+    // nominal
+    //
+    double physical = theSignalBase.signalState(outParam.hash()).value;
+
+    setNominal(VALUE_TYPE_PHYSICAL, physical);
+    setNominal(VALUE_TYPE_IN_ELECTRIC, 0);
+    setNominal(VALUE_TYPE_OUT_ELECTRIC, 0);
+
+    if (outParam.isOutput() == true)
+    {
+        double outElectric =    (physical - outParam.inputPhysicalLowLimit()) * (outParam.outputElectricHighLimit() - outParam.outputElectricLowLimit())/
+                                (outParam.inputPhysicalHighLimit() - outParam.inputPhysicalLowLimit()) + outParam.outputElectricLowLimit();
+
+        setNominal(VALUE_TYPE_OUT_ELECTRIC, outElectric);
+    }
+
+    setPercent( (( physical - outParam.inputPhysicalLowLimit()) * 100)/(outParam.inputPhysicalHighLimit() - outParam.inputPhysicalLowLimit() ));
+
+    // measure
+    //
+
+    if (outParam.isOutput() == true)
+    {
+        measureParam.calibratorManager()->value();
+        while(measureParam.calibratorManager()->isReadyForManage() != true);
+    }
+
+    double averagePhVal = 0;
+    double averageOutElVal = 0;
+
+    int measureCount = theOptions.linearity().measureCountInPoint();
+
+    setMeasureCount(measureCount);
+
+    for(int index = 0; index < measureCount; index++)
+    {
+        double phVal = theSignalBase.signalState(outParam.hash()).value;
+        double OutElVal = 0;
+
+        if (outParam.isOutput() == true)
+        {
+            OutElVal = pCalibrator->measureValue();
+        }
+
+        setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, phVal);
+        setMeasureItemArray(VALUE_TYPE_IN_ELECTRIC, index, 0);
+        setMeasureItemArray(VALUE_TYPE_OUT_ELECTRIC, index, OutElVal);
+
+        averagePhVal += phVal;
+        averageOutElVal += OutElVal;
+
+        QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
+    }
+
+    averagePhVal /= measureCount;
+    averageOutElVal /= measureCount;
+
+    setMeasure(VALUE_TYPE_PHYSICAL, averagePhVal);
+    setMeasure(VALUE_TYPE_IN_ELECTRIC, 0);
+    setMeasure(VALUE_TYPE_OUT_ELECTRIC, averageOutElVal);
+
+    // limits
+    //
+    setLowLimit(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalLowLimit());
+    setHighLimit(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalHighLimit());
+    setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit( outParam.inputPhysicalUnitID() ) );
+
+    setLowLimit(VALUE_TYPE_IN_ELECTRIC, 0);
+    setHighLimit(VALUE_TYPE_IN_ELECTRIC, 0);
+    setUnit(VALUE_TYPE_IN_ELECTRIC, QString() );
+
+    setLowLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricLowLimit() : 0);
+    setHighLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricHighLimit() : 0);
+    setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? theUnitBase.unit( outParam.outputElectricUnitID() ) : QString());
+
+    // precision
+    //
+    setValuePrecision(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalPrecision());
+    setValuePrecision(VALUE_TYPE_IN_ELECTRIC, 0);
+    setValuePrecision(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricPrecision() : 0);
+
+    // calc errors
+    //
+    setErrorInput(MEASURE_ERROR_TYPE_ABSOLUTE, 0 );
+    setErrorInput(MEASURE_ERROR_TYPE_REDUCE, 0 );
+    setErrorInput(MEASURE_ERROR_TYPE_RELATIVE, 0 );
+
+    setErrorLimit(MEASURE_ERROR_TYPE_ABSOLUTE, abs( (highLimit(VALUE_TYPE_OUT_ELECTRIC) - lowLimit(VALUE_TYPE_OUT_ELECTRIC)) * theOptions.linearity().m_errorValue / 100.0 ));
+    setErrorLimit(MEASURE_ERROR_TYPE_REDUCE, theOptions.linearity().m_errorValue);
+    setErrorLimit(MEASURE_ERROR_TYPE_RELATIVE, theOptions.linearity().m_errorValue);
+
+    if (outParam.isOutput() == true)
+    {
+        setErrorOutput(MEASURE_ERROR_TYPE_ABSOLUTE, abs( nominal(VALUE_TYPE_OUT_ELECTRIC)- measure(VALUE_TYPE_OUT_ELECTRIC)) );
+        setErrorOutput(MEASURE_ERROR_TYPE_REDUCE, abs( ((averageOutElVal - nominal(VALUE_TYPE_OUT_ELECTRIC)) / (highLimit(VALUE_TYPE_OUT_ELECTRIC) - lowLimit(VALUE_TYPE_OUT_ELECTRIC))) * 100.0) );
+        setErrorOutput(MEASURE_ERROR_TYPE_RELATIVE, abs( ((nominal(VALUE_TYPE_OUT_ELECTRIC)- measure(VALUE_TYPE_OUT_ELECTRIC) ) / nominal(VALUE_TYPE_OUT_ELECTRIC)) * 100.0) );
+    }
+
+    // calc additional parameters
+    //
+    calcAdditionalParam(averageOutElVal, measureCount, VALUE_TYPE_OUT_ELECTRIC);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void LinearityMeasurement::calcAdditionalParam(double averageVal, int measureCount, int type)
+{
+    if (measureCount < 1 || measureCount >= MAX_MEASUREMENT_IN_POINT)
+    {
+        return;
+    }
+
+    if (type < 0 || type >= VALUE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    // calc additional parameters
+    //
     double maxDeviation = 0;
     int maxDeviationIndex = 0;
 
     for(int index = 0; index < measureCount; index++)
     {
-        if ( maxDeviation < abs(averagePhVal - measureItemArray(VALUE_TYPE_PHYSICAL, index)))
+        if ( maxDeviation < abs(averageVal - measureItemArray(type, index)))
         {
-            maxDeviation = abs(averagePhVal - measureItemArray(VALUE_TYPE_PHYSICAL, index));
+            maxDeviation = abs(averageVal - measureItemArray(type, index));
             maxDeviationIndex = index;
         }
     }
 
-    setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX,  measureItemArray(VALUE_TYPE_PHYSICAL, maxDeviationIndex));
+    setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MAX_VALUE,  measureItemArray(type, maxDeviationIndex));
 
         // according to GOST 8.508-84 paragraph 3.4.1 formula 42
         //
-    double systemError = abs (averagePhVal - nominal(VALUE_TYPE_PHYSICAL));
+    double systemError = abs (averageVal - nominal(type));
 
-    setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, systemError);
+    setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, systemError);
 
         // according to GOST 8.736-2011 paragraph 5.3 formula 3
         //
@@ -256,13 +639,13 @@ LinearityMeasurement::LinearityMeasurement(const Calibrator* pCalibrator, const 
 
     for(int index = 0; index < measureCount; index++)
     {
-        sumDeviation += pow( averagePhVal -  measureItemArray(VALUE_TYPE_PHYSICAL, index), 2 );	// 1. sum of deviations
+        sumDeviation += pow( averageVal -  measureItemArray(type, index), 2 );	// 1. sum of deviations
     }
 
     sumDeviation /= (double) measureCount - 1;                                                  // 2. divide on (count of measure - 1)
     double sco = sqrt(sumDeviation);                                                            // 3. sqrt
 
-    setAdditionalValue(ADDITIONAL_VALUE_MSE, sco);
+    setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MSE, sco);
 
         // according to GOST 8.207-76 paragraph 2.4
         //
@@ -277,23 +660,58 @@ LinearityMeasurement::LinearityMeasurement(const Calibrator* pCalibrator, const 
         //
     double border = k_student * estimateSCO;
 
-    setAdditionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER, border);
+    setAdditionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, border);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::~LinearityMeasurement()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString LinearityMeasurement::limitString(const int type) const
+QString LinearityMeasurement::nominalStr(int type) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
         assert(0);
         return QString();
+    }
+
+    if (m_hasRange[type] == false)
+    {
+        return QString("N/A");
+    }
+
+    return QString("%1 %2").arg(QString::number(m_nominal[type], 10, m_valuePrecision[type])).arg(m_unit[type]);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityMeasurement::measureStr(int type) const
+{
+    if (type < 0 || type >= VALUE_TYPE_COUNT)
+    {
+        assert(0);
+        return QString();
+    }
+
+    if (m_hasRange[type] == false)
+    {
+        return QString("N/A");
+    }
+
+    return QString("%1 %2").arg(QString::number(m_measure[type], 10, m_valuePrecision[type])).arg(m_unit[type]);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityMeasurement::limitStr(int type) const
+{
+    if (type < 0 || type >= VALUE_TYPE_COUNT)
+    {
+        assert(0);
+        return QString();
+    }
+
+    if (m_hasRange[type] == false)
+    {
+        return QString("N/A");
     }
 
     QString low = QString::number(m_lowLimit[type], 10, m_valuePrecision[type]);
@@ -304,33 +722,96 @@ QString LinearityMeasurement::limitString(const int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::nominalString(const int type) const
+QString LinearityMeasurement::errorInputStr(int type) const
 {
-    if (type < 0 || type >= VALUE_TYPE_COUNT)
+    if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT)
     {
         assert(0);
         return QString();
     }
 
-    return QString("%1 %2").arg(QString::number(m_nominal[type], 10, m_valuePrecision[type])).arg(m_unit[type]);
+    if ( m_hasRange[VALUE_TYPE_IN_ELECTRIC] == false)
+    {
+        return QString("N/A");
+    }
+
+    QString str;
+
+    if (type == MEASURE_ERROR_TYPE_ABSOLUTE)
+    {
+        str = QString::number(m_errorInput[type], 10, m_valuePrecision[VALUE_TYPE_PHYSICAL]) + " " + m_unit[VALUE_TYPE_PHYSICAL];
+    }
+    else
+    {
+        str = QString::number(m_errorInput[type], 10, 2) ;
+    }
+
+    return str;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::measureString(const int type) const
+QString LinearityMeasurement::errorOutputStr(int type) const
 {
-    if (type < 0 || type >= VALUE_TYPE_COUNT)
+    if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT)
     {
         assert(0);
         return QString();
     }
 
-    return QString("%1 %2").arg(QString::number(m_measure[type], 10, m_valuePrecision[type])).arg(m_unit[type]);
+    if ( m_hasRange[VALUE_TYPE_OUT_ELECTRIC] == false)
+    {
+        return QString("N/A");
+    }
+
+    QString str;
+
+    if (type == MEASURE_ERROR_TYPE_ABSOLUTE)
+    {
+        str = QString::number(m_errorOutput[type], 10, m_valuePrecision[VALUE_TYPE_OUT_ELECTRIC]) + " " + m_unit[VALUE_TYPE_OUT_ELECTRIC];
+    }
+    else
+    {
+        str = QString::number(m_errorOutput[type], 10, 2) ;
+    }
+
+    return str;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::measureItemString(const int type, const int index) const
+QString LinearityMeasurement::errorLimitStr(int type) const
+{
+    if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT)
+    {
+        assert(0);
+        return QString();
+    }
+
+    QString str;
+
+    if (type == MEASURE_ERROR_TYPE_ABSOLUTE)
+    {
+        if ( m_hasRange[VALUE_TYPE_IN_ELECTRIC] == true)
+        {
+            str = QString::number(m_errorLimit[type], 10, m_valuePrecision[VALUE_TYPE_PHYSICAL]) + " " + m_unit[VALUE_TYPE_PHYSICAL];;
+        }
+        else
+        {
+            str = QString::number(m_errorLimit[type], 10, m_valuePrecision[VALUE_TYPE_OUT_ELECTRIC]) + " " + m_unit[VALUE_TYPE_OUT_ELECTRIC];;
+        }
+    }
+    else
+    {
+        str = QString::number(m_errorLimit[type], 10, 2);
+    }
+
+    return str;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityMeasurement::measureItemStr(int type, int index) const
 {
     if (type < 0 || type >= VALUE_TYPE_COUNT)
     {
@@ -349,7 +830,7 @@ QString LinearityMeasurement::measureItemString(const int type, const int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::updateMeasureArray(const int valueType, Measurement* pMeasurement)
+void LinearityMeasurement::updateMeasureArray(int valueType, Measurement* pMeasurement)
 {
     if (pMeasurement == nullptr)
     {
@@ -364,7 +845,7 @@ void LinearityMeasurement::updateMeasureArray(const int valueType, Measurement* 
 
     LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
-    m_measureArrayCount = pLinearityMeasureItem->measureArrayCount();
+    m_measureCount = pLinearityMeasureItem->measureCount();
 
     for(int m = 0; m < MAX_MEASUREMENT_IN_POINT; m++)
     {
@@ -374,7 +855,7 @@ void LinearityMeasurement::updateMeasureArray(const int valueType, Measurement* 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::updateAdditionalValue(Measurement* pMeasurement)
+void LinearityMeasurement::updateAdditionalParam(Measurement* pMeasurement)
 {
     if (pMeasurement == nullptr)
     {
@@ -389,9 +870,9 @@ void LinearityMeasurement::updateAdditionalValue(Measurement* pMeasurement)
 
     LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
 
-    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
+    for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
     {
-        m_additionalValue[a] = pLinearityMeasureItem->additionalValue(a);
+        m_additionalParam[a] = pLinearityMeasureItem->additionalParam(a);
     }
 }
 
@@ -420,28 +901,27 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
         m_unit[v] = from.m_unit[v];;
 
         m_valuePrecision[v] = from.m_valuePrecision[v];
+
+        m_hasRange[v] = from.m_hasRange[v];
     }
 
     m_percent = from.m_percent;
-    m_measureArrayCount = from.m_measureArrayCount;
+    m_measureCount = from.m_measureCount;
 
-    m_hasOutput = from.m_hasOutput;
     m_adjustment = from.m_adjustment;
 
-    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+    for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
     {
         m_errorInput[e] = from.m_errorInput[e];;
         m_errorOutput[e] = from.m_errorOutput[e];;
         m_errorLimit[e] = from.m_errorLimit[e];;
-
-        m_errorPrecision[e] = from.m_errorPrecision[e];;
     }
 
-    m_additionalValueCount = from.m_additionalValueCount;
+    m_additionalParamCount = from.m_additionalParamCount;
 
-    for(int a = 0; a < ADDITIONAL_VALUE_COUNT; a++)
+    for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
     {
-        m_additionalValue[a] = from.m_additionalValue[a];;
+        m_additionalParam[a] = from.m_additionalParam[a];;
     }
 
     return *this;

@@ -105,7 +105,10 @@ SOURCES += \
     MeasurementBase.cpp \
     OutputSignal.cpp \
     ExportData.cpp \
-    FindData.cpp
+    FindData.cpp \
+    TuningSocket.cpp \
+    TuningSignalBase.cpp \
+    TuningSignalList.cpp
 
 
 HEADERS  += \
@@ -159,7 +162,10 @@ HEADERS  += \
     MeasurementBase.h \
     OutputSignal.h \
     ExportData.h \
-    FindData.h
+    FindData.h \
+    TuningSocket.h \
+    TuningSignalBase.h \
+    TuningSignalList.h
 
 
 FORMS    +=

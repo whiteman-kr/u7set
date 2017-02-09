@@ -97,7 +97,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    MeasureSignalParam param = signalParam(row);
+    SignalParam param = signalParam(row);
     if (param.isValid() == false)
     {
         return QVariant();
@@ -173,7 +173,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticTable::text(const int row, const int column, const MeasureSignalParam& param) const
+QString StatisticTable::text(int row, int column, const SignalParam& param) const
 {
     if (row < 0 || row >= signalCount())
     {
@@ -232,9 +232,9 @@ int StatisticTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureSignalParam StatisticTable::signalParam(const int index) const
+SignalParam StatisticTable::signalParam(int index) const
 {
-    MeasureSignalParam param;
+    SignalParam param;
 
     m_signalMutex.lock();
 
@@ -250,7 +250,7 @@ MeasureSignalParam StatisticTable::signalParam(const int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::set(const QList<MeasureSignalParam> list_add)
+void StatisticTable::set(const QList<SignalParam> list_add)
 {
     int count = list_add.count();
     if (count == 0)
@@ -377,7 +377,7 @@ void StatisticDialog::createInterface()
     setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     setWindowIcon(QIcon(":/icons/Statistics.png"));
     setWindowTitle(tr("Statistics"));
-    resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
+    resize(QApplication::desktop()->availableGeometry().width() - 800, 800);
     move(QApplication::desktop()->availableGeometry().center() - rect().center());
     installEventFilter(this);
 
@@ -430,7 +430,7 @@ void StatisticDialog::createInterface()
     m_pShowADCInHexAction->setChecked(m_signalParamTable.showADCInHex());
 
     m_pViewGotoMenu = new QMenu(tr("Go to next"), this);
-    m_pGotoNextNoMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
+    m_pGotoNextNotMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
     m_pGotoNextInvalidAction = m_pViewGotoMenu->addAction(tr("Invalid"));
 
     m_pViewMenu->addMenu(m_pViewMeasureTypeMenu);
@@ -456,7 +456,7 @@ void StatisticDialog::createInterface()
     connect(m_pTypeComparatorsAction, &QAction::triggered, this, &StatisticDialog::showTypeComparators);
     connect(m_pShowCustomIDAction, &QAction::triggered, this, &StatisticDialog::showCustomID);
     connect(m_pShowADCInHexAction, &QAction::triggered, this, &StatisticDialog::showADCInHex);
-    connect(m_pGotoNextNoMeasuredAction, &QAction::triggered, this, &StatisticDialog::gotoNextNoMeasured);
+    connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &StatisticDialog::gotoNextNotMeasured);
     connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticDialog::gotoNextInvalid);
 
 
@@ -571,12 +571,12 @@ void StatisticDialog::updateList()
 
     m_signalParamTable.clear();
 
-    QList<MeasureSignalParam> signalParamList;
+    QList<SignalParam> signalParamList;
 
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        MeasureSignalParam param = theSignalBase.signalParam(i);
+        SignalParam param = theSignalBase.signalParam(i);
         if (param.isValid() == false)
         {
             continue;
@@ -648,6 +648,7 @@ void StatisticDialog::updateVisibleColunm()
         hideColumn(c, false);
     }
 
+    hideColumn(STATISTIC_COLUMN_EQUIPMENT_ID, true);
     hideColumn(STATISTIC_COLUMN_ADC, true);
     hideColumn(STATISTIC_COLUMN_IN_PH_RANGE, true);
     hideColumn(STATISTIC_COLUMN_IN_EL_RANGE, true);
@@ -674,7 +675,7 @@ void StatisticDialog::updateVisibleColunm()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticDialog::hideColumn(const int column, const bool hide)
+void StatisticDialog::hideColumn(int column, bool hide)
 {
     if (column < 0 || column >= STATISTIC_COLUMN_COUNT)
     {
@@ -817,7 +818,7 @@ void StatisticDialog::showADCInHex()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticDialog::gotoNextNoMeasured()
+void StatisticDialog::gotoNextNotMeasured()
 {
     int signaCount = m_signalParamTable.signalCount();
     if (signaCount == 0)
@@ -826,16 +827,11 @@ void StatisticDialog::gotoNextNoMeasured()
     }
 
     int startIndex = m_pView->currentIndex().row() ;
-    if (startIndex == 0)
-    {
-        startIndex = -1;
-    }
-
     int foundIndex = -1;
 
     for(int i = startIndex + 1; i < signaCount; i++)
     {
-        MeasureSignalParam param = m_signalParamTable.signalParam(i);
+        SignalParam param = m_signalParamTable.signalParam(i);
         if (param.isValid() == false)
         {
             continue;
@@ -868,16 +864,11 @@ void StatisticDialog::gotoNextInvalid()
     }
 
     int startIndex = m_pView->currentIndex().row() ;
-    if (startIndex == 0)
-    {
-        startIndex = -1;
-    }
-
     int foundIndex = -1;
 
     for(int i = startIndex + 1; i < signaCount; i++)
     {
-        MeasureSignalParam param = m_signalParamTable.signalParam(i);
+        SignalParam param = m_signalParamTable.signalParam(i);
         if (param.isValid() == false)
         {
             continue;

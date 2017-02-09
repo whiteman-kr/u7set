@@ -6742,16 +6742,16 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, const int type, const MeasureSignalParam& param)
+double conversion(double val, int conversionType, const SignalParam& param)
 {
-    if (type < 0 || type > CT_COUNT)
+    if (conversionType < 0 || conversionType > CT_COUNT)
     {
         return 0;
     }
 
     double retVal = 0;
 
-    switch(type)
+    switch(conversionType)
     {
         case CT_PHYSICAL_TO_ELECTRIC:
 
@@ -6875,24 +6875,24 @@ double conversion(double val, const int type, const MeasureSignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, const int type, const E::InputUnit unitID, const E::SensorType sensorType)
+double conversion(double val, int conversionType, const E::InputUnit unitID, const E::SensorType sensorType)
 {
-    if (type < 0 || type > CT_COUNT)
+    if (conversionType < 0 || conversionType > CT_COUNT)
     {
         return 0;
     }
 
-    MeasureSignalParam param;
+    SignalParam param;
 
     param.setInputElectricUnitID(unitID);
     param.setInputElectricSensorType(sensorType);
 
-    return conversion(val, type, param);
+    return conversion(val, conversionType, param);
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double studentK(const int measureCount, const int p)
+double studentK(int measureCount, int p)
 {
     if (measureCount < 0 || measureCount >= K_STUDENT_COUNT)
     {

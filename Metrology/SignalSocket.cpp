@@ -29,7 +29,7 @@ SignalSocket::~SignalSocket()
 
 void SignalSocket::onClientThreadStarted()
 {
-    qDebug() << "SignalSocket::onSignalSocketThreadStarted()";
+    qDebug() << "SignalSocket::onClientThreadStarted()";
 
     return;
 }
@@ -38,7 +38,7 @@ void SignalSocket::onClientThreadStarted()
 
 void SignalSocket::onClientThreadFinished()
 {
-    qDebug() << "SignalSocket::onSignalSocketThreadFinished()";
+    qDebug() << "SignalSocket::onClientThreadFinished()";
 }
 
 
@@ -71,6 +71,12 @@ void SignalSocket::onDisconnection()
 
 void SignalSocket::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        return;
+    }
+
     switch(requestID)
     {
         case ADS_GET_APP_SIGNAL_LIST_START:
@@ -105,6 +111,8 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
 
 void SignalSocket::requestSignalListStart()
 {
+    assert(isClearToSendRequest());
+
     m_signalHashList.clear();
 
     sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
@@ -114,14 +122,19 @@ void SignalSocket::requestSignalListStart()
 
 void SignalSocket::replySignalListStart(const char* replyData, quint32 replyDataSize)
 {
-    bool result = m_getSignalListStartReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        requestSignalListStart();
+        return;
+    }
 
+    bool result = m_getSignalListStartReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
     if (result == false)
     {
-        assert(false);
-
+        qDebug() << "SignalSocket::replySignalListStart - error: ParseFromArray";
+        assert(result);
         requestSignalListStart();
-
         return;
     }
 
@@ -129,9 +142,7 @@ void SignalSocket::replySignalListStart(const char* replyData, quint32 replyData
     {
         qDebug() << "SignalSocket::replyAppSignalListStart - error: " << m_getSignalListStartReply.error();
         assert(m_getSignalListStartReply.error() != 0);
-
         requestSignalListStart();
-
         return;
     }
 
@@ -166,11 +177,6 @@ void SignalSocket::requestSignalListNext(int partIndex)
     {
         // all parts were requested, then begin to require params
         //
-        if (m_signalHashList.size() != m_getSignalListStartReply.totalitemcount())
-        {
-            assert(m_signalHashList.size() != m_getSignalListStartReply.totalitemcount());
-        }
-
         requestSignalParam(0);
 
         return;
@@ -187,14 +193,19 @@ void SignalSocket::requestSignalListNext(int partIndex)
 
 void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataSize)
 {
-    bool result = m_getSignalListNextReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        requestSignalListStart();
+        return;
+    }
 
+    bool result = m_getSignalListNextReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
     if (result == false)
     {
-        assert(false);
-
+        qDebug() << "SignalSocket::replySignalListNext - error: ParseFromArray";
+        assert(result);
         requestSignalListStart();
-
         return;
     }
 
@@ -202,9 +213,7 @@ void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataS
     {
         qDebug() << "SignalSocket::replySignalListNext - error: " << m_getSignalListStartReply.error();
         assert(m_getSignalListStartReply.error() != 0);
-
         requestSignalListStart();
-
         return;
     }
 
@@ -213,9 +222,7 @@ void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataS
         // different parts in Reply and Request
         //
         assert(m_getSignalListNextReply.part() == m_getSignalListNextRequest.part());
-
         requestSignalListStart();
-
         return;
     }
 
@@ -227,7 +234,17 @@ void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataS
 
     for(int i = 0; i < stringCount; i++)
     {
-        Hash hash = calcHash(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
+        QString appSignalID = QString::fromStdString(m_getSignalListNextReply.appsignalids(i));
+        if (appSignalID.isEmpty() == true)
+        {
+            continue;
+        }
+
+        Hash hash = calcHash(appSignalID);
+        if (hash == 0)
+        {
+            continue;
+        }
 
         m_signalHashList.append(hash);
     }
@@ -249,13 +266,15 @@ void SignalSocket::requestSignalParam(int startIndex)
         theSignalBase.clear();
     }
 
-    if (startIndex >= m_signalHashList.size())
+    int hashCount = m_signalHashList.size();
+
+    if (startIndex >= hashCount)
     {
         qDebug() << "SignalSocket::requestSignalParam - Signals were loaded:    " << theSignalBase.signalCount();
 
-        requestUnits();
-
         emit signalsLoaded();
+
+        requestUnits();
 
         startSignalStateTimer();
 
@@ -265,7 +284,7 @@ void SignalSocket::requestSignalParam(int startIndex)
     m_getSignalParamRequest.mutable_signalhashes()->Clear();
     m_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
 
-    for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX && i < m_signalHashList.size(); i++)
+    for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX && i < hashCount; i++)
     {
         m_getSignalParamRequest.add_signalhashes(m_signalHashList[i]);
     }
@@ -277,14 +296,19 @@ void SignalSocket::requestSignalParam(int startIndex)
 
 void SignalSocket::replySignalParam(const char* replyData, quint32 replyDataSize)
 {
-    bool result = m_getSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        requestSignalListStart();
+        return;
+    }
 
+    bool result = m_getSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
     if (result == false)
     {
-        assert(false);
-
+        qDebug() << "SignalSocket::replySignalParam - error: ParseFromArray";
+        assert(result);
         requestSignalListStart();
-
         return;
     }
 
@@ -292,9 +316,7 @@ void SignalSocket::replySignalParam(const char* replyData, quint32 replyDataSize
     {
         qDebug() << "SignalSocket::replySignalParam - error: " << m_getSignalParamReply.error();
         assert(m_getSignalParamReply.error() != 0);
-
         requestSignalListStart();
-
         return;
     }
 
@@ -329,12 +351,17 @@ void SignalSocket::requestUnits()
 
 void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
 {
-    bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        return;
+    }
 
+    bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
     if (result == false)
     {
-        assert(false);
-
+        qDebug() << "SignalSocket::replyUnits - error: ParseFromArray";
+        assert(result);
         return;
     }
 
@@ -342,7 +369,6 @@ void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
     {
         qDebug() << "SignalSocket::replyUnits - error: " << m_getUnitsReply.error();
         assert(m_getUnitsReply.error() != 0);
-
         return;
     }
 
@@ -366,14 +392,25 @@ void SignalSocket::requestSignalState()
     }
 
     int hashCount = theSignalBase.hashForRequestStateCount();
+    if (hashCount == 0)
+    {
+        return;
+    }
 
     m_getSignalStateRequest.mutable_signalhashes()->Clear();
-    m_getSignalStateRequest.mutable_signalhashes()->Reserve( hashCount );
+    m_getSignalStateRequest.mutable_signalhashes()->Reserve( SIGNAL_SOCKET_MAX_READ_SIGNAL );
 
-    for (int i = 0; i < hashCount && i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+    int startIndex = m_signalStateRequestIndex;
+
+    for (int i = 0; SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
     {
-        Hash hash = theSignalBase.hashForRequestState(i);
+        if (m_signalStateRequestIndex >= hashCount)
+        {
+            m_signalStateRequestIndex = 0;
+            break;
+        }
 
+        Hash hash = theSignalBase.hashForRequestState(i + startIndex);
         if (hash == 0)
         {
             assert(hash != 0);
@@ -381,6 +418,8 @@ void SignalSocket::requestSignalState()
         }
 
         m_getSignalStateRequest.add_signalhashes( hash );
+
+        m_signalStateRequestIndex++;
     }
 
     sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
@@ -390,11 +429,17 @@ void SignalSocket::requestSignalState()
 
 void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize)
 {
-    bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+    if (replyData == nullptr)
+    {
+        assert(replyData);
+        return;
+    }
 
+    bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
     if (result == false)
     {
-        assert(false);
+        qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";
+        assert(result);
         return;
     }
 
@@ -402,7 +447,6 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
     {
         qDebug() << "SignalSocket::replySignalState - error: " << m_getSignalStateReply.error();
         assert(m_getSignalStateReply.error() != 0);
-
         return;
     }
 
@@ -437,8 +481,9 @@ void SignalSocket::startSignalStateTimer()
     }
 
     // according to GOST MI-2002 in each point we need do twenty measurements per one second
+    // 50 ms
     //
-    m_updateSignalStateTimer->start(50); //   50 ms
+    m_updateSignalStateTimer->start(SIGNAL_SOCKET_TIMEOUT_STATE);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

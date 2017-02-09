@@ -26,6 +26,13 @@ void MeasureThread::init(QWidget* parent)
 {
     m_parent = parent;
 
+//    MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
+//    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+//    {
+//        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MeasureThread::stopMeasure, Qt::QueuedConnection);
+//        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MeasureThread::stopMeasure, Qt::QueuedConnection);
+//    }
+
     connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
     connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
@@ -34,11 +41,58 @@ void MeasureThread::init(QWidget* parent)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool MeasureThread::setActiveSignalParam()
+{
+    MeasureSignal activeSignal = theSignalBase.activeSignal();
+    if(activeSignal.isEmpty() == true)
+    {
+        return false;
+    }
+
+    // create param list for measure
+    //
+    for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+    {
+        m_activeSignalParam[c].clear();
+
+        for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+        {
+            Hash signalHash = activeSignal.signal(type).hash(c);
+            if (signalHash == 0)
+            {
+                continue;
+            }
+
+            SignalParam param =  theSignalBase.signalParam(signalHash);
+            if (param.isValid() == false)
+            {
+                continue;
+            }
+
+            CalibratorManager* pCalibratorManager = theCalibratorBase.сalibratorForMeasure(c);
+            if (calibratorIsValid(pCalibratorManager) == false)
+            {
+                continue;
+            }
+
+            m_activeSignalParam[c].setParam(type, param);
+            m_activeSignalParam[c].setOutputSignalType( activeSignal.outputSignalType() );
+            m_activeSignalParam[c].setCalibratorManager( pCalibratorManager );
+        }
+    }
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MeasureThread::waitMeasureTimeout()
 {
     // Timeout for Measure
     //
-    for(int t = 0; t < theOptions.toolBar().measureTimeout(); t += MEASURE_THREAD_TIMEOUT_STEP )
+    int measureTimeout = theOptions.toolBar().measureTimeout();
+
+    for(int t = 0; t <= measureTimeout; t += MEASURE_THREAD_TIMEOUT_STEP )
     {
         if (m_cmdStopMeasure == true)
         {
@@ -55,14 +109,14 @@ void MeasureThread::waitMeasureTimeout()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::calibratorIsValid(CalibratorManager* pManager)
+bool MeasureThread::calibratorIsValid(CalibratorManager* pCalibratorManager)
 {
-    if (pManager == nullptr)
+    if (pCalibratorManager == nullptr)
     {
         return false;
     }
 
-    if (pManager->calibratorIsConnected() == false)
+    if (pCalibratorManager->calibratorIsConnected() == false)
     {
         return false;
     }
@@ -72,15 +126,120 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pManager)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int calibratorMode, const E::InputUnit signalInputUnit, const double inputElectricHighLimit)
+bool MeasureThread::setCalibratorUnit()
 {
-    if (calibratorIsValid(pManager) == false)
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return false;
+    }
+
+    // select calibrator mode and calibrator unit
+    // depend from analog signal
+    //
+    switch (m_measureType)
+    {
+        case MEASURE_TYPE_LINEARITY:
+        case MEASURE_TYPE_COMPARATOR:
+            {
+                for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+                {
+                    CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
+                    if (calibratorIsValid(pCalibratorManager) == false)
+                    {
+                        continue;
+                    }
+
+                    switch ( m_activeSignalParam[c].outputSignalType() )
+                    {
+                        case OUTPUT_SIGNAL_TYPE_UNUSED:
+                        case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+                            {
+                                SignalParam inParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+                                if (inParam.isValid() == false)
+                                {
+                                    continue;
+                                }
+
+                                if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_SOURCE, inParam.inputElectricUnitID(), inParam.inputElectricHighLimit() ) == false)
+                                {
+                                    emit showMsgBox(QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->portName()));
+                                }
+
+                                SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+                                if (outParam.isValid() == false)
+                                {
+                                    continue;
+                                }
+
+                                if (outParam.isOutput() == false)
+                                {
+                                    continue;
+                                }
+
+                                if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.outputElectricUnitID(), outParam.outputElectricHighLimit() ) == false)
+                                {
+                                    emit showMsgBox(QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->portName()));
+                                }
+
+                            }
+                            break;
+
+                        case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+                            {
+
+                                SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+                                if (outParam.isValid() == false)
+                                {
+                                    continue;
+                                }
+
+                                if (outParam.isOutput() == false)
+                                {
+                                    continue;
+                                }
+
+                                if (prepareCalibrator(pCalibratorManager, CALIBRATOR_MODE_MEASURE, outParam.outputElectricUnitID(), outParam.outputElectricHighLimit() ) == false)
+                                {
+                                    emit showMsgBox(QString("Calibrator: %1 - can not set measure mode.").arg(pCalibratorManager->portName()));
+                                }
+                            }
+
+                            break;
+
+                        default:
+                            assert(0);
+                    }
+                }
+            }
+            break;
+
+        default:
+            assert(false);
+    }
+
+
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalInputUnit, double inputElectricHighLimit)
+{
+    if (calibratorIsValid(pCalibratorManager) == false)
     {
         return false;
     }
 
     if (calibratorMode < 0 || calibratorMode >= CALIBRATOR_MODE_COUNT)
     {
+        assert(0);
+        return false;
+    }
+
+    if (signalInputUnit < 0 || signalInputUnit >= theUnitBase.unitCount())
+    {
+        assert(0);
         return false;
     }
 
@@ -107,18 +266,25 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pManager, const int cal
 
             break;
 
-
         default: assert(0);
     }
 
     if (calibratorUnit < 0 || calibratorUnit >= CALIBRATOR_UNIT_COUNT)
     {
+        assert(0);
         return false;
     }
 
-    emit measureInfo(QString("Prepare calibrator: %1 ").arg(pManager->portName()));
+    emit measureInfo(QString("Prepare calibrator: %1 ").arg(pCalibratorManager->portName()));
 
-    return pManager->setUnit(calibratorMode, calibratorUnit);;
+    bool result =  pCalibratorManager->setUnit(calibratorMode, calibratorUnit);;
+
+    if (pCalibratorManager->calibrator()->type() == CALIBRATOR_TYPE_TRXII)
+    {
+        QThread::msleep(1000);
+    }
+
+    return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -130,10 +296,17 @@ void MeasureThread::run()
         return;
     }
 
-    int calibratorCount = theCalibratorBase.count();
-    if (calibratorCount == 0)
+    // set param of active signal for measure
+    //
+    if (setActiveSignalParam() == false)
     {
-        emit showMsgBox(QString("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators"));
+        return;
+    }
+
+    // set unit and mode on calibrators
+    //
+    if (setCalibratorUnit() == false)
+    {
         return;
     }
 
@@ -141,71 +314,13 @@ void MeasureThread::run()
     //
     m_cmdStopMeasure = false;
 
-    // create param list
-    //
-    for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
-    {
-        Hash signalHash = theSignalBase.activeSignal().hash(i);
-        if (signalHash == 0)
-        {
-            continue;
-        }
-
-        m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
-    }
-
-    // select calibrator mode and calibrator unit
-    // depend from analog signal
-    //
-    switch (m_measureType)
-    {
-        case MEASURE_TYPE_LINEARITY:
-        case MEASURE_TYPE_COMPARATOR:
-
-            // if m_measureKind == MEASURE_KIND_ONE (i.e measure in the one channel) then take first connected calibrator
-            // if m_measureKind == MEASURE_KIND_MULTI (i.e measure all channels) then attempt to take all calibrators
-            //
-            for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
-            {
-                MeasureSignalParam param = m_activeSignalParam[i];
-                if (param.isValid() == false)
-                {
-                    continue;
-                }
-
-                CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
-                if (calibratorIsValid(pManager) == false)
-                {
-                    continue;
-                }
-
-                if (prepareCalibrator(pManager, CALIBRATOR_MODE_SOURCE, param.inputElectricUnitID(), param.inputElectricHighLimit() ) == false)
-                {
-                    emit showMsgBox(QString("Calibrator: %1 - can not set source mode.").arg(pManager->portName()));
-                    continue;
-                }
-            }
-
-            break;
-
-        default:
-            assert(false);
-    }
-
     // start measure function
     //
     switch (m_measureType)
     {
-        case MEASURE_TYPE_LINEARITY:
-            measureLinearity();
-            break;
-
-        case MEASURE_TYPE_COMPARATOR:
-            measureComprators();
-            break;
-
-        default:
-            assert(0);
+        case MEASURE_TYPE_LINEARITY:    measureLinearity();     break;
+        case MEASURE_TYPE_COMPARATOR:   measureComprators();    break;
+        default:                        assert(0);
     }
 }
 
@@ -213,23 +328,10 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
-    int calibratorCount = theCalibratorBase.connectedCalibratorsCount();
-    if (calibratorCount == 0)
-    {
-        emit showMsgBox("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators");
-        return;
-    }
-
-    int pointCount = theOptions.linearity().m_pointBase.count();
+    int pointCount = theOptions.linearity().points().count();
     if (pointCount == 0)
     {
-        emit showMsgBox("No points for measure");
-        return;
-    }
-
-    MeasureMultiSignal& multiSignal = theSignalBase.activeSignal();
-    if (multiSignal.isEmpty() == true)
-    {
+        emit showMsgBox(tr("No points for measure"));
         return;
     }
 
@@ -240,48 +342,53 @@ void MeasureThread::measureLinearity()
             break;
         }
 
-        LinearityPoint point = theOptions.linearity().m_pointBase.at(p);
+        LinearityPoint point = theOptions.linearity().points().at(p);
 
         emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
 
-        // set electric value on calibrators
+        // set electric value on calibrators, depend from point value
         //
-
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
         {
-            MeasureSignalParam param = m_activeSignalParam[i];
+            CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
+            if (calibratorIsValid(pCalibratorManager) == false)
+            {
+                continue;
+            }
+
+            SignalParam param = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
             if (param.isValid() == false)
             {
                 continue;
             }
 
-            CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
-            if (calibratorIsValid(pManager) == false)
-            {
-                continue;
-            }
-
-
+            // at the beginning we need get physical value because if range is not Linear (for instance Ohm or mV)
+            // then by physical value we may get electric value
+            //
             double physicalVal = (point.percent() * (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) / 100) + param.inputPhysicalLowLimit();
             double electricVal = conversion(physicalVal, CT_PHYSICAL_TO_ELECTRIC, param);
 
-            pManager->setValue( electricVal );
+            switch ( m_activeSignalParam[c].outputSignalType() )
+            {
+                case OUTPUT_SIGNAL_TYPE_UNUSED:
+                case OUTPUT_SIGNAL_TYPE_FROM_INPUT:     pCalibratorManager->setValue( electricVal );                        break;
+                case OUTPUT_SIGNAL_TYPE_FROM_TUNING:    theTuningSignalBase.appendCmdFowWrite(param.hash(), physicalVal);   break;
+                default:                                assert(0);
+            }
         }
 
         // wait ready all calibrators,
         // wait until all calibrators will has fixed electric value
         //
-
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
         {
-            CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
-
-            if (calibratorIsValid(pManager) == false)
+            CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
+            if (calibratorIsValid(pCalibratorManager) == false)
             {
                 continue;
             }
 
-            while(pManager->isReady() != true)
+            while(pCalibratorManager->isReadyForManage() != true)
             {
                 if (m_cmdStopMeasure == true)
                 {
@@ -292,32 +399,28 @@ void MeasureThread::measureLinearity()
 
         // wait timeout for measure
         //
-
         emit measureInfo(tr("Wait timeout %1 / %2 ").arg(p + 1).arg(pointCount));
-
         waitMeasureTimeout();
 
         // save measurement
         //
+        emit measureInfo(tr("Save measurement "));
 
-        emit measureInfo(tr("Save measurements "));
-
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
         {
-            MeasureSignalParam param = m_activeSignalParam[i];
-            if (param.isValid() == false)
+            CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
+            if (calibratorIsValid(pCalibratorManager) == false)
             {
                 continue;
             }
 
-            CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(i);
-            if (calibratorIsValid(pManager) == false)
+            if (m_activeSignalParam[c].isValid() == false)
             {
                 continue;
             }
 
-            LinearityMeasurement* pMeasurement = new LinearityMeasurement(pManager->calibrator(), param);
-            if (pMeasurement == nullptr )
+            LinearityMeasurement* pMeasurement = new LinearityMeasurement(m_activeSignalParam[c]);
+            if (pMeasurement == nullptr)
             {
                 continue;
             }
@@ -331,14 +434,6 @@ void MeasureThread::measureLinearity()
 
 void MeasureThread::measureComprators()
 {
-    int calibratorCount = theCalibratorBase.connectedCalibratorsCount();
-    if (calibratorCount == 0)
-    {
-        emit showMsgBox("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators");
-        m_cmdStopMeasure = true;
-        return;
-    }
-
     emit measureInfo(tr("Comprators "));
 
     waitMeasureTimeout();
@@ -356,9 +451,12 @@ void MeasureThread::updateSignalParam(const Hash& signalHash)
 
     for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
     {
-        if (m_activeSignalParam[i].hash() == signalHash)
+        for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
         {
-            m_activeSignalParam[i] = theSignalBase.signalParam(signalHash);
+            if (m_activeSignalParam[i].param(type).hash() == signalHash)
+            {
+                m_activeSignalParam[i].setParam(type, theSignalBase.signalParam(signalHash));
+            }
         }
     }
 }

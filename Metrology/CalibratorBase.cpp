@@ -63,10 +63,11 @@ void CalibratorBase::createCalibrators(QWidget* parent)
             continue;
         }
 
-        if (m_calibratorManagerList.append(manager) == -1)
-        {
-            continue;
-        }
+        m_mutex.lock();
+
+            m_calibratorManagerList.append(manager);
+
+        m_mutex.unlock();
 
         QThread *pThread = new QThread;
         if (pThread != nullptr)
@@ -93,10 +94,10 @@ void CalibratorBase::removeCalibrators()
 {
     emit calibratorClose();
 
-    int count = m_calibratorManagerList.count();
+    int count = calibratorCount();
     for(int index = 0; index < count; index++)
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = calibratorManager(index);
         if (manager == nullptr)
         {
             continue;
@@ -117,7 +118,11 @@ void CalibratorBase::removeCalibrators()
         }
     }
 
-    m_calibratorManagerList.clear();
+    m_mutex.lock();
+
+        m_calibratorManagerList.clear();
+
+    m_mutex.unlock();
 
 }
 
@@ -126,7 +131,7 @@ void CalibratorBase::removeCalibrators()
 void CalibratorBase::createInitDialog(QWidget* parent)
 {
     m_pInitDialog = new QDialog(parent);
-    m_pInitDialog->setWindowFlags(Qt::Drawer);
+    m_pInitDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
     m_pInitDialog->setFixedSize(500, 200);
     m_pInitDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
     m_pInitDialog->setWindowTitle(tr("Calibrators initialization"));
@@ -232,10 +237,10 @@ void CalibratorBase::setHeaderList()
 
 void CalibratorBase::updateList()
 {
-    int count = m_calibratorManagerList.count();
+    int count = calibratorCount();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = calibratorManager(index);
         if (manager == nullptr)
         {
             continue;
@@ -262,10 +267,10 @@ void CalibratorBase::updateConnectedCalibrators()
 {
     m_connectedCalibratorsCount = 0;
 
-    int count = m_calibratorManagerList.count();
+    int count = calibratorCount();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = calibratorManager(index);
         if (manager == nullptr)
         {
             continue;
@@ -292,14 +297,35 @@ void CalibratorBase::showInitDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::at(const int index) const
+int CalibratorBase::calibratorCount() const
 {
-    if (index < 0 || index >= m_calibratorManagerList.count())
-    {
-        return nullptr;
-    }
+    int count = 0;
 
-    return m_calibratorManagerList.at(index);
+    m_mutex.lock();
+
+        count = m_calibratorManagerList.count();
+
+    m_mutex.unlock();
+
+    return count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+CalibratorManager* CalibratorBase::calibratorManager(int index) const
+{
+    CalibratorManager* pCalibratorManager = nullptr;
+
+    m_mutex.lock();
+
+        if (index >= 0 || index < m_calibratorManagerList.size())
+        {
+            pCalibratorManager = m_calibratorManagerList[index];
+        }
+
+    m_mutex.unlock();
+
+    return pCalibratorManager;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -308,10 +334,10 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 {
     CalibratorManager* pFirstConnected = nullptr;
 
-    int count = m_calibratorManagerList.count();
+    int count = calibratorCount();
     for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* pManager = m_calibratorManagerList.at(index);
+        CalibratorManager* pManager = calibratorManager(index);
         if (pManager == nullptr)
         {
             continue;
@@ -330,14 +356,14 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::сalibratorForMeasure(const int index) const
+CalibratorManager* CalibratorBase::сalibratorForMeasure(int index) const
 {
     CalibratorManager* pManager = nullptr;
 
     switch(theOptions.toolBar().measureKind())
     {
         case MEASURE_KIND_ONE:      pManager = firstConnectedCalibrator();  break;  // we need only one - connected;
-        case MEASURE_KIND_MULTI:    pManager = at(index);                   break;
+        case MEASURE_KIND_MULTI:    pManager = calibratorManager(index);                   break;
         default:                    assert(0);
     }
 
@@ -355,10 +381,10 @@ void CalibratorBase::onInitialization()
     m_pCalibratorMenu->setEnabled(false);
     m_pCalibratorView->setEnabled(false);
 
-    int calibratorCount = count();
-    for(int index = 0; index < calibratorCount; index++ )
+    int count = calibratorCount();
+    for(int index = 0; index < count; index++ )
     {
-        CalibratorManager* manager = at(index);
+        CalibratorManager* manager = calibratorManager(index);
         if (manager == nullptr)
         {
             continue;
@@ -396,7 +422,7 @@ void CalibratorBase::timeoutInitialization()
         m_pCalibratorMenu->setEnabled(true);
         m_pCalibratorView->setEnabled(true);
 
-        m_pInitDialog->setWindowFlags( Qt::Drawer );
+        m_pInitDialog->setWindowFlags( Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint );
         m_pInitDialog->show();
         m_pInitDialog->activateWindow();
 
@@ -409,13 +435,13 @@ void CalibratorBase::timeoutInitialization()
 void CalibratorBase::onManage()
 {
     int index = m_pCalibratorView->currentRow();
-    if (index < 0 || index >= count())
+    if (index < 0 || index >= calibratorCount())
     {
         QMessageBox::information(m_pInitDialog, m_pInitDialog->windowTitle(), tr("Please, select calibrator for manage!"));
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = calibratorManager(index);
     if (manager == nullptr)
     {
         return;
@@ -430,7 +456,7 @@ void CalibratorBase::onManage()
 void CalibratorBase::onSettings()
 {
     int index = m_pCalibratorView->currentRow();
-    if (index < 0 || index >= count())
+    if (index < 0 || index >= calibratorCount())
     {
         QMessageBox::information(m_pInitDialog, m_pInitDialog->windowTitle(), tr("Please, select calibrator for edit settings!"));
         return;
@@ -444,12 +470,12 @@ void CalibratorBase::onSettings()
 void CalibratorBase::onSettings(int row, int)
 {
     int index = row;
-    if (index < 0 || index >= count())
+    if (index < 0 || index >= calibratorCount())
     {
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = calibratorManager(index);
     if (manager == nullptr)
     {
         return;
@@ -549,13 +575,13 @@ void CalibratorBase::onSettings(int row, int)
 void CalibratorBase::onCopy()
 {
     int index = m_pCalibratorView->currentRow();
-    if (index < 0 || index >= count())
+    if (index < 0 || index >= calibratorCount())
     {
         QMessageBox::information(m_pInitDialog, m_pInitDialog->windowTitle(), tr("Please, select calibrator!"));
         return;
     }
 
-    CalibratorManager* manager = m_calibratorManagerList.at(index);
+    CalibratorManager* manager = calibratorManager(index);
     if (manager == nullptr)
     {
         return;
@@ -582,9 +608,9 @@ void CalibratorBase::onContextMenu(QPoint)
     menu->addAction(m_pSettingsAction);
 
     int index = m_pCalibratorView->currentRow();
-    if (index >= 0 && index < count())
+    if (index >= 0 && index < calibratorCount())
     {
-        CalibratorManager* manager = m_calibratorManagerList.at(index);
+        CalibratorManager* manager = calibratorManager(index);
         if (manager != nullptr)
         {
             Calibrator* calibrator = manager->calibrator();

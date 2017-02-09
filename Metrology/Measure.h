@@ -3,10 +3,10 @@
 #include <assert.h>
 #include <QDateTime>
 
+#include "../lib/Hash.h"
+
 #include "Calibrator.h"
 #include "SignalBase.h"
-
-#include "../lib/Hash.h"
 
 // ==============================================================================================
 
@@ -22,7 +22,6 @@ const int   MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
 const int   MEASURE_TYPE_UNKNOWN            = -1,
             MEASURE_TYPE_LINEARITY          = 0,
             MEASURE_TYPE_COMPARATOR         = 1;
-
 
 // ----------------------------------------------------------------------------------------------
 
@@ -74,15 +73,15 @@ const char* const ValueType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Electric"),
             QT_TRANSLATE_NOOP("Measure.h", "Physical"),
-            QT_TRANSLATE_NOOP("Measure.h", "Output"),
+            QT_TRANSLATE_NOOP("Measure.h", "OutElectric"),
 };
 
 const int	VALUE_TYPE_COUNT		= sizeof(ValueType)/sizeof(ValueType[0]);
 
 const int   VALUE_TYPE_UNKNOWN		= -1,
-            VALUE_TYPE_ELECTRIC		= 0,
-            VALUE_TYPE_PHYSICAL		= 1,
-            VALUE_TYPE_OUTPUT		= 2;
+            VALUE_TYPE_IN_ELECTRIC  = 0,
+            VALUE_TYPE_PHYSICAL     = 1,
+            VALUE_TYPE_OUT_ELECTRIC = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -99,22 +98,22 @@ const char* const ErrorType[] =
             QT_TRANSLATE_NOOP("Measure.h", "Relative"),
 };
 
-const int	ERROR_TYPE_COUNT		= sizeof(ErrorType)/sizeof(ErrorType[0]);
+const int	MEASURE_ERROR_TYPE_COUNT		= sizeof(ErrorType)/sizeof(ErrorType[0]);
 
-const int   ERROR_TYPE_UNKNOWN		= -1,
-            ERROR_TYPE_ABSOLUTE		= 0,
-            ERROR_TYPE_REDUCE		= 1,
-            ERROR_TYPE_RELATIVE		= 2;
+const int   MEASURE_ERROR_TYPE_UNKNOWN		= -1,
+            MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
+            MEASURE_ERROR_TYPE_REDUCE		= 1,
+            MEASURE_ERROR_TYPE_RELATIVE		= 2;
 
 // ----------------------------------------------------------------------------------------------
 
-#define     ERR_ERROR_TYPE(type) (type < 0 || type >= ERROR_TYPE_COUNT)
-#define		TEST_ERROR_TYPE(type)			if (ERR_ERROR_TYPE(type)) { return; }
-#define     TEST_ERROR_TYPE1(type, retVal)	if (ERR_ERROR_TYPE(type)) { return retVal; }
+#define     ERR_MEASURE_ERROR_TYPE(type) (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT)
+#define		TEST_MEASURE_ERROR_TYPE(type)			if (ERR_MEASURE_ERROR_TYPE(type)) { return; }
+#define     TEST_MEASURE_ERROR_TYPE1(type, retVal)	if (ERR_MEASURE_ERROR_TYPE(type)) { return retVal; }
 
 // ==============================================================================================
 
-const char* const AdditionalValue[] =
+const char* const MeasureAdditionalParam[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Measure value max"),
             QT_TRANSLATE_NOOP("Measure.h", "System error"),
@@ -122,28 +121,28 @@ const char* const AdditionalValue[] =
             QT_TRANSLATE_NOOP("Measure.h", "Low High border"),
 };
 
-const int	ADDITIONAL_VALUE_COUNT              = sizeof(AdditionalValue)/sizeof(AdditionalValue[0]);
+const int	MEASURE_ADDITIONAL_PARAM_COUNT              = sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
 
-const int   ADDITIONAL_VALUE_UNKNOWN            = -1,
-            ADDITIONAL_VALUE_MEASURE_MAX        = 0,
-            ADDITIONAL_VALUE_SYSTEM_ERROR       = 1,
-            ADDITIONAL_VALUE_MSE                = 2,
-            ADDITIONAL_VALUE_LOW_HIGH_BORDER    = 3;
+const int   MEASURE_ADDITIONAL_PARAM_UNKNOWN            = -1,
+            MEASURE_ADDITIONAL_PARAM_MAX_VALUE          = 0,
+            MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR       = 1,
+            MEASURE_ADDITIONAL_PARAM_MSE                = 2,
+            MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER    = 3;
 
             // maximum 16 items ( 0 .. 15)
             // now used 4 ( 0 .. 3 )
 
+
 // ==============================================================================================
 
 const int   MAX_MEASUREMENT_IN_POINT    = 20;
+// ==============================================================================================
+
+const int   INVALID_VALUE               = 0xFFFF;
 
 // ==============================================================================================
 
-const int   INVALID_VALUE           = 0xFFFF;
-
-// ==============================================================================================
-
-#define     MEASURE_TIME_FORMAT     "dd-MM-yyyy hh:mm:ss"
+#define     MEASURE_TIME_FORMAT         "dd-MM-yyyy hh:mm:ss"
 
 // ==============================================================================================
 
@@ -152,7 +151,7 @@ class Measurement
 
 public:
 
-    explicit        Measurement(const int measureType = MEASURE_TYPE_UNKNOWN);
+    explicit        Measurement(int measureType = MEASURE_TYPE_UNKNOWN);
                     ~Measurement();
 
 private:
@@ -168,26 +167,28 @@ private:
 
 public:
 
+    void            virtual clear() {}
+
     int             measureType() const { return m_measureType; }
-    void            setMeasureType(const int type) { m_measureType = type; }
+    void            setMeasureType(int type) { m_measureType = type; }
 
     Hash            signalHash() const { return m_signalHash; }
     void            setSignalHash(const Hash& hash) { m_signalHash = hash; }
     void            setSignalHash(const QString& id) { m_signalHash = calcHash(id); }
 
     int             measureID() const { return m_measureID; }
-    void            setMeasureID(const int id) { m_measureID = id; }
+    void            setMeasureID(int id) { m_measureID = id; }
 
     bool            filter() const { return m_filter; }
-    void            setFilter(const bool filter) { m_filter = filter; }
+    void            setFilter(bool filter) { m_filter = filter; }
 
     QDateTime       measureTime() const { return m_measureTime; }
     void            setMeasureTime(const QDateTime& time) { m_measureTime = time; }
 
     int             reportType() const { return m_reportType; }
-    void            setReportType(const int type) { m_reportType = type; }
+    void            setReportType(int type) { m_reportType = type; }
 
-    Measurement*    at(const int index);
+    Measurement*    at(int index);
 
     Measurement&    operator=(Measurement& from);
 };
@@ -200,7 +201,7 @@ class LinearityMeasurement : public Measurement
 public:
 
                     LinearityMeasurement();
-                    LinearityMeasurement(const Calibrator* pCalibrator, const MeasureSignalParam& param);
+                    LinearityMeasurement(const MeasureParam& measureParam);
                     ~LinearityMeasurement();
 
 private:
@@ -209,7 +210,7 @@ private:
     QString         m_customAppSignalID;
     QString         m_caption;
 
-    DevicePosition  m_position;
+    SignalPosition  m_position;
 
     double          m_nominal[VALUE_TYPE_COUNT];
 
@@ -217,7 +218,7 @@ private:
 
     double          m_measure[VALUE_TYPE_COUNT];
 
-    int             m_measureArrayCount = 0;
+    int             m_measureCount = 0;
     double          m_measureArray[VALUE_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
 
     double          m_lowLimit[VALUE_TYPE_COUNT];
@@ -226,19 +227,26 @@ private:
 
     int             m_valuePrecision[VALUE_TYPE_COUNT];
 
-    bool            m_hasOutput = false;
+    bool            m_hasRange[VALUE_TYPE_COUNT];
+
     double          m_adjustment = 0;
 
-    double          m_errorInput[ERROR_TYPE_COUNT];
-    double          m_errorOutput[ERROR_TYPE_COUNT];
-    double          m_errorLimit[ERROR_TYPE_COUNT];
+    double          m_errorInput[MEASURE_ERROR_TYPE_COUNT];
+    double          m_errorOutput[MEASURE_ERROR_TYPE_COUNT];
+    double          m_errorLimit[MEASURE_ERROR_TYPE_COUNT];
 
-    int             m_errorPrecision[ERROR_TYPE_COUNT];
-
-    int             m_additionalValueCount = 0;
-    double          m_additionalValue[ADDITIONAL_VALUE_COUNT];
+    int             m_additionalParamCount = 0;
+    double          m_additionalParam[MEASURE_ADDITIONAL_PARAM_COUNT];
 
 public:
+
+    void            virtual clear();
+
+    void            set1(const MeasureParam& measureParam);
+    void            set2(const MeasureParam& measureParam);
+    void            set3(const MeasureParam& measureParam);
+
+    void            calcAdditionalParam(double averageVal, int measureCount, int type);
 
     QString         appSignalID() const { return m_appSignalID; }
     void            setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID;  setSignalHash(m_appSignalID); }
@@ -246,73 +254,76 @@ public:
     QString         customAppSignalID() const { return m_customAppSignalID; }
     void            setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
-    QString         name() const { return m_caption; }
+    QString         caption() const { return m_caption; }
     void            setCaption(const QString& caption) { m_caption = caption; }
 
-    DevicePosition& position() { return m_position; }
-    void            setPosition(const DevicePosition& pos) { m_position = pos; }
+    SignalPosition& position() { return m_position; }
+    void            setPosition(const SignalPosition& pos) { m_position = pos; }
 
-    double          nominal(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_nominal[type]; }
-    void            setNominal(const int type, const double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_nominal[type] = value; }
+    double          nominal(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_nominal[type]; }
+    void            setNominal(int type, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_nominal[type] = value; }
 
-    QString         nominalString(const int type) const;
+    QString         nominalStr(int type) const;
 
     double          percent() const { return m_percent; }
-    void            setPercent(const double percent) { m_percent = percent; }
+    void            setPercent(double percent) { m_percent = percent; }
 
-    double          measure(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_measure[type]; }
-    void            setMeasure(const int type, const double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_measure[type] = value; }
+    double          measure(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_measure[type]; }
+    void            setMeasure(int type, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_measure[type] = value; }
 
-    QString         measureString(const int type) const;
+    QString         measureStr(int type) const;
 
-    int             measureArrayCount() const { return m_measureArrayCount; }
-    void            setMeasureArrayCount(const int count) { m_measureArrayCount = count; }
+    int             measureCount() const { return m_measureCount; }
+    void            setMeasureCount(int count) { m_measureCount = count; }
 
-    double          measureItemArray(const int type, const int index) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return 0; } return m_measureArray[type][index]; }
-    void            setMeasureItemArray(const int type, const int index, const double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return; } m_measureArray[type][index] = value; }
+    double          measureItemArray(int type, int index) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return 0; } return m_measureArray[type][index]; }
+    void            setMeasureItemArray(int type, int index, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return; } m_measureArray[type][index] = value; }
 
-    QString         measureItemString(const int type, const int index) const;
+    QString         measureItemStr(int type, int index) const;
 
-    double          lowLimit(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_lowLimit[type]; }
-    void            setLowLimit(const int type, const double lowLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_lowLimit[type] = lowLimit; }
+    double          lowLimit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_lowLimit[type]; }
+    void            setLowLimit(int type, double lowLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_lowLimit[type] = lowLimit; }
 
-    double          highLimit(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_highLimit[type]; }
-    void            setHighLimit(const int type, const double highLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_highLimit[type] = highLimit; }
+    double          highLimit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_highLimit[type]; }
+    void            setHighLimit(int type, double highLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_highLimit[type] = highLimit; }
 
-    QString         unit(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return QString(); } return m_unit[type]; }
-    void            setUnit(const int type, QString unit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_unit[type] = unit; }
+    QString         unit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return QString(); } return m_unit[type]; }
+    void            setUnit(int type, QString unit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_unit[type] = unit; }
 
-    QString         limitString(const int type) const;
+    QString         limitStr(int type) const;
 
-    int             valuePrecision(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_valuePrecision[type]; }
-    void            setValuePrecision(const int type, const int precision) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_valuePrecision[type] = precision; }
+    int             valuePrecision(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_valuePrecision[type]; }
+    void            setValuePrecision(int type, int precision) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_valuePrecision[type] = precision; }
 
-    bool            hasOutput() { return m_hasOutput; }
-    void            setHasOutput(bool hasOutput) { m_hasOutput = hasOutput; }
+    bool            hasRange(int type) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return false; } return m_hasRange[type]; }
+    void            setHasRange(int type, bool hasRange) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_hasRange[type] = hasRange; }
 
     double          adjustment() const { return m_adjustment; }
-    void            setAdjustment(const double adjustment) { m_adjustment = adjustment; }
+    void            setAdjustment(double adjustment) { m_adjustment = adjustment; }
 
-    double          errorInput(const int type) const { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorInput[type]; }
-    void            setErrorInput(const int type, const double value) { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return; } m_errorInput[type] = value; }
+    double          errorInput(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorInput[type]; }
+    void            setErrorInput(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorInput[type] = value; }
 
-    double          errorOutput(const int type) const { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorOutput[type]; }
-    void            setErrorOutput(const int type, const double value) { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return; } m_errorOutput[type] = value; }
+    QString         errorInputStr(int type) const;
 
-    double          errorLimit(const int type) const { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorLimit[type]; }
-    void            setErrorLimit(const int type, const double value) { if (type < 0 || type >= ERROR_TYPE_COUNT) { assert(0); return; } m_errorLimit[type] = value; }
+    double          errorOutput(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorOutput[type]; }
+    void            setErrorOutput(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorOutput[type] = value; }
 
-    int             errorPrecision(const int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_errorPrecision[type]; }
-    void            setErrorPrecision(const int type, const int precision) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_errorPrecision[type] = precision; }
+    QString         errorOutputStr(int type) const;
 
-    int             additionalValueCount() const { return m_additionalValueCount; }
-    void            setAdditionalValueCount(const int count) { m_additionalValueCount = count; }
+    double          errorLimit(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorLimit[type]; }
+    void            setErrorLimit(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorLimit[type] = value; }
 
-    double          additionalValue(const int type) const { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return 0; } return m_additionalValue[type]; }
-    void            setAdditionalValue(const int type, const double value) { if (type < 0 || type >= ADDITIONAL_VALUE_COUNT) { assert(0); return; } m_additionalValue[type] = value; }
+    QString         errorLimitStr(int type) const;
 
-    void            updateMeasureArray(const int type, Measurement* pMeasurement);
-    void            updateAdditionalValue(Measurement* pMeasurement);
+    int             additionalParamCount() const { return m_additionalParamCount; }
+    void            setAdditionalParamCount(int count) { m_additionalParamCount = count; }
+
+    double          additionalParam(int type) const { if (type < 0 || type >= MEASURE_ADDITIONAL_PARAM_COUNT) { assert(0); return 0; } return m_additionalParam[type]; }
+    void            setAdditionalParam(int type, double value) { if (type < 0 || type >= MEASURE_ADDITIONAL_PARAM_COUNT) { assert(0); return; } m_additionalParam[type] = value; }
+
+    void            updateMeasureArray(int type, Measurement* pMeasurement);
+    void            updateAdditionalParam(Measurement* pMeasurement);
 
     LinearityMeasurement& operator=(const LinearityMeasurement& from);
 };
@@ -334,7 +345,7 @@ private:
     QString         m_customAppSignalID;
     QString         m_caption;
 
-    DevicePosition  m_position;
+    SignalPosition  m_position;
 
 public:
 
@@ -347,7 +358,7 @@ public:
     QString         caption() const { return m_caption; }
     void            setCaption(const QString& name) { m_caption = name; }
 
-    DevicePosition& position() { return m_position; }
+    SignalPosition& position() { return m_position; }
 
     void updateHysteresis(Measurement* pMeasurement);
 };

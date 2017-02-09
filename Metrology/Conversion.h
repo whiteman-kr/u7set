@@ -3,8 +3,9 @@
 
 #include <QtGlobal>
 
-#include "SignalBase.h"
 #include "../lib/Types.h"
+
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -15,8 +16,8 @@ const int	CT_COUNT                = 2;
 
 // ==============================================================================================
 
-double      conversion(double val, const int type, const MeasureSignalParam& param);
-double      conversion(double val, const int type, const E::InputUnit unitID, const E::SensorType sensorType);
+double      conversion(double val, int conversionType, const SignalParam& param);
+double      conversion(double val, int conversionType, const E::InputUnit unitID, const E::SensorType sensorType);
 
 // ==============================================================================================
 
@@ -24,7 +25,7 @@ const int	CT_PROPABILITY_95    = 0;
 
 const int	CT_PROPABILITY_COUNT = 1;
 
-double      studentK(const int measureCount, const int p);
+double      studentK(int measureCount, int p);
 
 // ==============================================================================================
 
