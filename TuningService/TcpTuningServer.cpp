@@ -84,7 +84,15 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_getTuningSourcesInfo.clientequipmentid());
 
+		DEBUG_LOG_MSG(QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
+					  arg(clientRequestID).arg(peerAddr().addressStr()));
+
+
 		QVector<const TuningClientContext*> clientContexts;
+
+		QString msg;
+
+		NetworkError errCode = NetworkError::Success;
 
 		if (clientRequestID == SCM_CLIENT_ID)
 		{
@@ -99,8 +107,13 @@ namespace Tuning
 			{
 				// unknown clientID
 				//
-				m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+				errCode = NetworkError::UnknownTuningClientID;
+
+				m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 				sendReply(m_getTuningSourcesInfoReply);
+
+				DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
+							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 				return;
 			}
 
@@ -127,9 +140,14 @@ namespace Tuning
 			}
 		}
 
-		m_getTuningSourcesInfoReply.set_error(TO_INT(NetworkError::Success));
+		errCode = NetworkError::Success;
+
+		m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 
 		sendReply(m_getTuningSourcesInfoReply);
+
+		DEBUG_LOG_MSG(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
+					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 	}
 
 
@@ -156,8 +174,13 @@ namespace Tuning
 			{
 				// unknown clientID
 				//
-				m_getTuningSourcesStatesReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+				NetworkError errCode = NetworkError::UnknownTuningClientID;
+
+				m_getTuningSourcesStatesReply.set_error(TO_INT(errCode));
 				sendReply(m_getTuningSourcesStatesReply);
+
+				DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_STATES to %2")).
+							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 				return;
 			}
 
@@ -199,23 +222,40 @@ namespace Tuning
 		const TuningClientContext* clientContext =
 				m_service.getClientContext(clientRequestID);
 
+		NetworkError errCode = NetworkError::Success;
+
 		if (clientContext == nullptr)
 		{
 			// unknown clientID
 			//
 			m_tuningSignalsReadReply.Clear();
 
-			m_tuningSignalsReadReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+			errCode = NetworkError::UnknownTuningClientID;
+
+			m_tuningSignalsReadReply.set_error(TO_INT(errCode));
 
 			sendReply(m_tuningSignalsReadReply);
+
+			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
 
+		// m_tuningSignalsReadReply.set_error(???) is set inside clientContext->readSignalStates()
+		//
 		clientContext->readSignalStates(m_tuningSignalsReadRequest, m_tuningSignalsReadReply);
 
-		// m_tuningSignalsReadReply.set_error(???) must be set inside clientContext->getSignalStates()
-
 		sendReply(m_tuningSignalsReadReply);
+
+		errCode = static_cast<NetworkError>(m_tuningSignalsReadReply.error());
+
+		if (errCode != NetworkError::Success)
+		{
+			// log errors only
+			//
+			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
+		}
 	}
 
 
@@ -225,8 +265,16 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
 
+		DEBUG_LOG_MSG(QString(tr("TDS_TUNING_SIGNALS_WRITE request from client %1, %2 (Signals %3, AutoApply is %4)")).
+					  arg(clientRequestID).
+					  arg(peerAddr().addressStr()).
+					  arg(m_tuningSignalsWriteRequest.tuningsignalwrite_size()).
+					  arg(m_tuningSignalsWriteRequest.autoapply() == true ? "TRUE" : "FALSE"));
+
 		const TuningClientContext* clientContext =
 				m_service.getClientContext(clientRequestID);
+
+		NetworkError errCode = NetworkError::Success;
 
 		if (clientContext == nullptr)
 		{
@@ -234,15 +282,36 @@ namespace Tuning
 			//
 			m_tuningSignalsWriteReply.Clear();
 
-			m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
+			errCode = NetworkError::UnknownTuningClientID;
+
+			m_tuningSignalsWriteReply.set_error(TO_INT(errCode));
 
 			sendReply(m_tuningSignalsWriteReply);
+
+			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
 
+		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
+		//
 		clientContext->writeSignalStates(m_tuningSignalsWriteRequest, m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
+
+		errCode = static_cast<NetworkError>(m_tuningSignalsWriteReply.error());
+
+		QString msg = QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
+				arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr());
+
+		if (errCode == NetworkError::Success)
+		{
+			DEBUG_LOG_MSG(msg);
+		}
+		else
+		{
+			DEBUG_LOG_ERR(msg);
+		}
 	}
 
 
@@ -252,8 +321,14 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_tuningSignalsApplyRequest.clientequipmentid());
 
+		DEBUG_LOG_MSG(QString(tr("TDS_TUNING_SIGNALS_APPLY request from client %1, %2")).
+					  arg(clientRequestID).
+					  arg(peerAddr().addressStr()));
+
 		const TuningClientContext* clientContext =
 				m_service.getClientContext(clientRequestID);
+
+		NetworkError errCode = NetworkError::Success;
 
 		if (clientContext == nullptr)
 		{
@@ -264,14 +339,22 @@ namespace Tuning
 			m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::UnknownTuningClientID));
 
 			sendReply(m_tuningSignalsApplyReply);
+
+			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
 
 		clientContext->applySignalStates();
 
-		m_tuningSignalsApplyReply.set_error(TO_INT(NetworkError::Success));
+		errCode = NetworkError::Success;
+
+		m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
 		sendReply(m_tuningSignalsWriteReply);
+
+		DEBUG_LOG_MSG(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 	}
 
 

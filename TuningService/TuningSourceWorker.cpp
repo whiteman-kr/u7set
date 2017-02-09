@@ -1,7 +1,8 @@
 #include "../lib/WUtils.h"
 #include "../lib/Crc.h"
-#include "TuningSourceWorker.h"
+#include "../lib/CircularLogger.h"
 
+#include "TuningSourceWorker.h"
 
 namespace Tuning
 {
@@ -118,6 +119,19 @@ namespace Tuning
 	{
 		m_readHighBound = readHighBound;
 	}
+
+
+	QString TuningSourceWorker::TuningSignal::appSignalID() const
+	{
+		if (m_signal == nullptr)
+		{
+			assert(false);
+			return "<Signal pointer == nullptr!>";
+		}
+
+		return m_signal->appSignalID();
+	}
+
 
 	FotipV2::DataType TuningSourceWorker::TuningSignal::getTuningSignalType(const Signal* s)
 	{
@@ -271,9 +285,17 @@ namespace Tuning
 			return;
 		}
 
+		if (signalIndex >= m_tuningSignals.count())
+		{
+			assert(false);
+			DEBUG_LOG_ERR("Signal index out of range (TuningSourceWorker::writeSignalState)");
+			return;
+		}
+
 		TuningCommand cmd;
 
 		cmd.opCode = FotipV2::OpCode::Write;
+		cmd.autoCommand = false;
 
 		cmd.write.signalIndex = signalIndex;
 		cmd.write.value = value;
@@ -281,6 +303,12 @@ namespace Tuning
 		m_tuningCommandQueue.push(&cmd);
 
 		writeResult.set_error(TO_INT(NetworkError::Success));
+
+		DEBUG_LOG_MSG(QString(tr("Queue write command: source %1 (%2), signal %3, value %4")).
+					  arg(sourceEquipmentID()).
+					  arg(m_sourceIP.addressStr()).
+					  arg(m_tuningSignals[signalIndex].appSignalID()).
+					  arg(value));
 	}
 
 
@@ -291,6 +319,10 @@ namespace Tuning
 		cmd.opCode = FotipV2::OpCode::Apply;
 
 		m_tuningCommandQueue.push(&cmd);
+
+		DEBUG_LOG_MSG(QString(tr("Queue apply command: source %1 (%2)")).
+					  arg(sourceEquipmentID()).
+					  arg(m_sourceIP.addressStr()));
 	}
 
 
@@ -302,11 +334,14 @@ namespace Tuning
 		m_timerInterval = 5;
 
 		restartTimer();
+
+		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is started")).arg(m_sourceIP.addressStr()));
 	}
 
 
 	void TuningSourceWorker::onThreadFinished()
 	{
+		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is finished")).arg(m_sourceIP.addressStr()));
 	}
 
 
@@ -397,8 +432,6 @@ namespace Tuning
 				// retry last request
 				//
 				sendFotipRequest(m_request);
-
-//				qDebug() << "Retry last REQUEST" << C_STR(m_sourceIP.addressStr());
 			}
 		}
 
@@ -451,6 +484,7 @@ namespace Tuning
 
 		tuningCmd.opCode = FotipV2::OpCode::Read;
 		tuningCmd.read.frame = m_nextFrameToAutoRead;
+		tuningCmd.autoCommand = true;
 
 		m_tuningCommandQueue.push(&tuningCmd);
 
@@ -518,6 +552,35 @@ namespace Tuning
 		if (sent < sizeof(m_request))
 		{
 			m_stat.errPartialSent++;
+		}
+
+		// logging
+		//
+		switch(static_cast<FotipV2::OpCode>(request.fotipFrame.header.operationCode))
+		{
+		case FotipV2::OpCode::Write:
+			{
+				QString valueStr = request.fotipFrame.valueStr(true);
+
+				DEBUG_LOG_MSG(QString(tr("RupFotipV2 WRITE request is sent to %1 (%2), value %3")).
+							  arg(sourceEquipmentID()).
+							  arg(m_sourceIP.addressStr()).
+							  arg(valueStr));
+			}
+			break;
+
+		case FotipV2::OpCode::Apply:
+			DEBUG_LOG_MSG(QString(tr("RupFotipV2 APPLY request is sent to %1 (%2)")).
+						  arg(sourceEquipmentID()).
+						  arg(m_sourceIP.addressStr()));
+			break;
+
+		case FotipV2::OpCode::Read:
+			// no log read request
+			break;
+
+		default:
+			assert(false);
 		}
 	}
 
@@ -810,20 +873,64 @@ namespace Tuning
 	{
 		reply.fotipFrame.analogCmpErrors.all = reverseUint16(reply.fotipFrame.analogCmpErrors.all);
 
-		if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
+		QString msg;
+		bool hasErrors = false;
+
+		switch(static_cast<FotipV2::DataType>(reply.fotipFrame.header.dataType))
 		{
-			m_stat.errAnalogHighBoundCheck++;
+		case FotipV2::DataType::AnalogFloat:
+		case FotipV2::DataType::AnalogSignedInt:
+			{
+				QString boundCheckStr("No bound check errors");
+
+				if (reply.fotipFrame.analogCmpErrors.highBoundCheckError == 1)
+				{
+					m_stat.errAnalogHighBoundCheck++;
+
+					boundCheckStr = QString("HighBoundCheckError == 1 ");
+					hasErrors = true;
+				}
+
+				if (reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 1)
+				{
+					m_stat.errAnalogLowBoundCheck++;
+
+					boundCheckStr = QString("LowBoundCheckError == 1 ");
+					hasErrors = true;
+				}
+
+				msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request: %3")).
+								arg(sourceEquipmentID()).
+								arg(m_sourceIP.addressStr()).
+								arg(boundCheckStr);
+			}
+			break;
+
+		case FotipV2::DataType::Discrete:
+			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request")).
+							arg(sourceEquipmentID()).
+							arg(m_sourceIP.addressStr());
+
+		default:
+			assert(false);
 		}
 
-		if (reply.fotipFrame.analogCmpErrors.lowBoundCheckError == 1)
+		if (hasErrors == true)
 		{
-			m_stat.errAnalogLowBoundCheck++;
+			DEBUG_LOG_ERR(msg);
+		}
+		else
+		{
+			DEBUG_LOG_MSG(msg);
 		}
 	}
 
 
 	void TuningSourceWorker::processApplyReply(RupFotipV2&)
 	{
+		DEBUG_LOG_MSG(QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request")).
+					  arg(sourceEquipmentID()).
+					  arg(m_sourceIP.addressStr()));
 	}
 
 
@@ -1201,11 +1308,11 @@ namespace Tuning
 			//
 			connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketListener::onSocketReadyRead);
 
-			qDebug() << "Tuning listen socket created and bound to:" << C_STR(m_listenIP.addressPortStr());
+			DEBUG_LOG_MSG(QString(tr("Tuning listening socket is created and bound to %1")).arg(m_listenIP.addressPortStr()));
 		}
 		else
 		{
-			qDebug() << "Tuning listen error binding to:" << C_STR(m_listenIP.addressPortStr());
+			DEBUG_LOG_ERR(QString(tr("Tuning listening socket error binding to %1")).arg(m_listenIP.addressPortStr()));
 
 			// error binding
 			//
@@ -1298,40 +1405,14 @@ namespace Tuning
 	{
 		quint32 sourceIP = tuningSourceIP.toIPv4Address();
 
-		//
-
-		static QHash<QString, qint64> map;
-
-		qint64 count = 0;
-
-		count = map.value(tuningSourceIP.toString(), 0);
-
-		count++;
-
-		map.insert(tuningSourceIP.toString(), count);
-
-		if ( (count % 1000) == 0)
-		{
-			QString str;
-
-			QList<QString> keys = map.keys();
-
-			for(QString key : keys)
-			{
-
-				str.append(QString("%1 %2  ---\n").arg(key).arg(map.value(key, 0)));
-			}
-
-			qDebug() << C_STR(str);
-		}
-
-		//
-
 		TuningSourceWorkerThread* sourceWorkerThread = m_sourceWorkerMap.value(sourceIP, nullptr);
 
 		if (sourceWorkerThread == nullptr)
 		{
 			m_errUnknownTuningSource++;
+
+			DEBUG_LOG_ERR(QString(tr("Reply from unknown tuning source %1")).
+						  arg(tuningSourceIP.toString()));
 			return;
 		}
 

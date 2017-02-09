@@ -779,6 +779,16 @@ int QtServiceBase::exec()
 			return uninstallService();
 		}
 
+		if (a == QLatin1String("-t"))
+		{
+			return terminateService();
+		}
+
+		DEBUG_LOG_WRN(QString(tr("\nUnknown command line arguments of service.")));
+		DEBUG_LOG_MSG(QString(tr("Use -i, -u, -t keys to control service.")));
+		DEBUG_LOG_MSG(QString(tr("Use -h key to display available command line arguments of service.")));
+		DEBUG_LOG_MSG(QString(tr("Or use -e key to run service as a regular application with extended command line arguments.\n")));
+
 /*		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
 		{
 			return printVersion();
@@ -787,14 +797,9 @@ int QtServiceBase::exec()
 		if (a == QLatin1String("-e") || a == QLatin1String("-exec"))
 		{
 			return startAsRegularApplication();
-		}*/
-
-		if (a == QLatin1String("-t"))
-		{
-			return terminateService();
 		}
 
-/*		if (a == QLatin1String("-p") || a == QLatin1String("-pause"))
+		if (a == QLatin1String("-p") || a == QLatin1String("-pause"))
 		{
 			return pauseService();
 		}
@@ -813,8 +818,6 @@ int QtServiceBase::exec()
 		{
 			return printHelp();
 		}*/
-
-		DEBUG_LOG_WRN(QString(tr("Unknown command line arguments.")));
 
 		return 1;
 	}

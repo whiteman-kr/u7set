@@ -40,6 +40,10 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 
 	for (Signal& signal : signalVector)
 	{
+		if (!signalId.contains(signal.appSignalID()))
+		{
+			continue;
+		}
 		foundSignalID.push_back(signal.appSignalID());
 		signalPtrVector.push_back(&signal);
 	}
@@ -77,6 +81,10 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 		QString message;
 		for (int i = 0; i < signalPtrVector.count(); i++)
 		{
+			if (!dlg.isEditedSignal(signalPtrVector[i]->ID()))
+			{
+				continue;
+			}
 			ObjectState state;
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
@@ -361,6 +369,10 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 		int id = signal.ID();
 		if (signal.checkedOut() || m_editedSignalsId.contains(id))
 		{
+			if (!m_editedSignalsId.contains(id))
+			{
+				m_editedSignalsId.append(id);
+			}
 			continue;
 		}
 		QString message;

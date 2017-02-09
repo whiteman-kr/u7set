@@ -105,8 +105,8 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		// State
 		//
 		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-					   .arg(confiConnState.isConnected ? confiConnState.host.addressStr() : "NoConnection")
-						.arg(signalClientState.isConnected ? signalClientState.host.addressStr() : "NoConnection");
+					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressStr() : "NoConnection")
+						.arg(signalClientState.isConnected ? signalClientState.peerAddr.addressStr() : "NoConnection");
 
 		m_statusBarConnectionState->setText(text);
 

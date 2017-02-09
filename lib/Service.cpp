@@ -147,19 +147,21 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 }
 
 
-void ServiceWorker::clearSettings()
+bool ServiceWorker::clearSettings()
 {
 	m_settings.clear();
+
+	return checkSettingWriteStatus("");
 }
 
 
-void ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
+bool ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
 {
 	m_settings.setValue(settingName, QVariant(value));
 
 	m_settings.sync();
 
-	checkSettingWriteStatus(settingName);
+	return checkSettingWriteStatus(settingName);
 }
 
 
@@ -178,11 +180,25 @@ bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
 	switch(s)
 	{
 	case QSettings::Status::AccessError:
-		DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(QString(tr("Settings write error: QSettings::Status::AccessError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+		}
 		break;
 
 	case QSettings::Status::FormatError:
-		DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(QString(tr("Settings write error: QSettings::Status::FormatError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+		}
 		break;
 
 	case QSettings::Status::NoError:
@@ -586,11 +602,16 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 	//
 	if (cmdLineParser.optionIsSet("clr") == true)
 	{
-		m_serviceWorker.clearSettings();
+		bool res = m_serviceWorker.clearSettings();
 
-		std::cout << C_STR(QString(tr("\nService settings has been cleared.\n\n")));
-
-		LOG_MSG(QString(tr("Service settings has been cleared.")))
+		if (res == true)
+		{
+			DEBUG_LOG_MSG(QString(tr("\nService settings has been cleared.\n\n")));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(QString(tr("\nError cleaning of service settings. Adminirative rights rquired.\n\n")));
+		}
 
 		pauseAndExit = true;
 		return;

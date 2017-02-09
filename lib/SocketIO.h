@@ -401,3 +401,6 @@ enum class NetworkError
 	UnknownSignalHash,
 	InternalError,
 };
+
+
+extern QString getNetworkErrorStr(NetworkError err);

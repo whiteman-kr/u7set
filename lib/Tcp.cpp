@@ -12,7 +12,7 @@ namespace Tcp
 		else
 		{
 			qDebug() << "\nTcp::ConnectionState - is connected";
-			qDebug() << qPrintable(QString("Host: %1").arg(host.addressPortStr()));
+			qDebug() << qPrintable(QString("Peer: %1").arg(peerAddr.addressPortStr()));
 			qDebug() << qPrintable(QString("Start time: %1").arg(QDateTime::fromMSecsSinceEpoch(startTime).toString()));
 			qDebug() << qPrintable(QString("Sent bytes: %1").arg(sentBytes));
 			qDebug() << qPrintable(QString("Received bytes: %1").arg(receivedBytes));
@@ -92,11 +92,9 @@ namespace Tcp
 
 	void SocketWorker::onSocketDisconnected()
 	{
-		setStateDisconnected();
-
 		onDisconnection();
 
-		qDebug() << "Socket disconnected";
+		setStateDisconnected();
 
 		emit disconnected(this);
 	}
@@ -383,6 +381,27 @@ namespace Tcp
 	}
 
 
+	void SocketWorker::onConnection()
+	{
+		if (m_tcpSocket == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		qDebug() << C_STR(QString(tr("Socket connected with %1 (descriptor = %2)")).
+						  arg(peerAddr().addressStr()).
+						  arg(m_tcpSocket->socketDescriptor()));
+	}
+
+
+	void SocketWorker::onDisconnection()
+	{
+		qDebug() << C_STR(QString(tr("Socket disconnected (descriptor = %1)")).
+						  arg(m_tcpSocket->socketDescriptor()));
+	}
+
+
 	ConnectionState SocketWorker::getConnectionState()
 	{
 		m_stateMutex.lock();
@@ -395,12 +414,18 @@ namespace Tcp
 	}
 
 
-	void SocketWorker::setStateConnected(const HostAddressPort& hostPort)
+	HostAddressPort SocketWorker::peerAddr() const
+	{
+		return m_state.peerAddr;
+	}
+
+
+	void SocketWorker::setStateConnected(const HostAddressPort& peerAddr)
 	{
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.isConnected = true;
-		m_state.host = hostPort;
+		m_state.peerAddr = peerAddr;
 		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
@@ -414,7 +439,7 @@ namespace Tcp
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.isConnected = false;
-		m_state.host.clear();
+		m_state.peerAddr.clear();
 		m_state.startTime = 0;
 		m_state.sentBytes = 0;
 		m_state.receivedBytes = 0;
@@ -511,6 +536,10 @@ namespace Tcp
 		SocketWorker::createSocket();
 
 		m_tcpSocket->setSocketDescriptor(m_connectedSocketDescriptor);
+
+		// added 20_01_2017 by WhiteMan
+		//
+		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
 	}
 
 
@@ -520,15 +549,6 @@ namespace Tcp
 		m_readState = ReadState::WaitingForHeader;
 		m_readHeaderSize = 0;
 		m_readDataSize = 0;
-	}
-
-	void Server::onConnection()
-	{
-	}
-
-
-	void Server::onDisconnection()
-	{
 	}
 
 
@@ -760,6 +780,21 @@ namespace Tcp
 	}
 
 
+	void Listener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
+	{
+		Q_UNUSED(peerAddr)
+		Q_UNUSED(connectionNo)
+	}
+
+
+	void Listener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+	{
+		Q_UNUSED(startOk)
+		Q_UNUSED(addr)
+		Q_UNUSED(errStr)
+	}
+
+
 	void Listener::onThreadStarted()
 	{
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
@@ -769,11 +804,15 @@ namespace Tcp
 		m_periodicTimer.start();
 
 		startListening();
+
+		onListenerThreadStarted();
 	}
 
 
 	void Listener::onThreadFinished()
 	{
+		onListenerThreadFinished();
+
 		if (m_tcpServer != nullptr)
 		{
 			m_tcpServer->close();
@@ -793,22 +832,11 @@ namespace Tcp
 
 		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()))
 		{
-			qDebug() << qPrintable(QString("Start listening %1 OK").arg(m_listenAddressPort.addressPortStr()));
+			onStartListening(m_listenAddressPort, true, "");
 		}
 		else
 		{
-			qDebug() << qPrintable(QString("Error on start listening %1: %2").
-									arg(m_listenAddressPort.addressPortStr()).
-									arg(m_tcpServer->errorString()));
-		}
-	}
-
-
-	void Listener::onPeriodicTimer()
-	{
-		if (!m_tcpServer->isListening())
-		{
-			startListening();
+			onStartListening(m_listenAddressPort, false, m_tcpServer->errorString());
 		}
 	}
 
@@ -823,37 +851,38 @@ namespace Tcp
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
 
+		onNewConnectionAccepted(newServerInstance->peerAddr(), newServerInstance->id());
+
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
 		m_runningServers.insert(newServerInstance, newThread);
 
 		newThread->start();
-
-		qDebug() << "Accept new connection #" << newServerInstance->id();
 	}
 
 
-	void Listener::onAcceptError()
+	void Listener::onPeriodicTimer()
 	{
+		if (!m_tcpServer->isListening())
+		{
+			startListening();
+		}
 	}
 
 
 	void Listener::onServerDisconnected(const SocketWorker* server)
 	{
-		qDebug() << "onServerDisconnected";
+		SimpleThread* thread = m_runningServers.value(server, nullptr);
 
-		if (!m_runningServers.contains(server))
+		if (thread == nullptr)
 		{
 			assert(false);
 			return;
 		}
 
-		SimpleThread* thread = m_runningServers[server];
-
 		m_runningServers.remove(server);
 
 		thread->quit();
-
 		delete thread;
 	}
 
@@ -866,6 +895,12 @@ namespace Tcp
 
 	ServerThread::ServerThread(const HostAddressPort &listenAddressPort, Server* server) :
 		SimpleThread(new Listener(listenAddressPort, server))
+	{
+	}
+
+
+	ServerThread::ServerThread(Listener* listener) :
+		SimpleThread(listener)
 	{
 	}
 
@@ -991,6 +1026,12 @@ namespace Tcp
 	}
 
 
+	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
+	{
+		qDebug() << qPrintable(QString("Try connect to server %1").arg(serverAddr.addressPortStr()));
+	}
+
+
 	void Client::onAck(quint32 requestID, const char* replyData, quint32 replyDataSize)
 	{
 		Q_UNUSED(requestID);
@@ -1096,7 +1137,7 @@ namespace Tcp
 			return;
 		}
 
-		qDebug() << qPrintable(QString("Try connect to server %1").arg(m_selectedServer.addressPortStr()));
+		onTryConnectToServer(m_selectedServer);
 
 		m_tcpSocket->connectToHost(m_selectedServer.address(), m_selectedServer.port());
 	}

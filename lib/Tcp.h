@@ -28,7 +28,7 @@ namespace Tcp
 
 		// nex data is valid if isConnected == true
 		//
-		HostAddressPort host;
+		HostAddressPort peerAddr;
 		qint64 startTime = 0;					// milliseconds since epoch
 
 		qint64 sentBytes = 0;
@@ -129,7 +129,7 @@ namespace Tcp
 		void addRequest();
 		void addReply();
 
-		void setStateConnected(const HostAddressPort& hostPort);
+		void setStateConnected(const HostAddressPort& peerAddr);
 		void setStateDisconnected();
 
 	private:
@@ -159,8 +159,8 @@ namespace Tcp
 
 		void closeConnection();
 
-		virtual void onConnection() {}
-		virtual void onDisconnection() {}
+		virtual void onConnection();
+		virtual void onDisconnection();
 
 		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
 		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
@@ -169,6 +169,8 @@ namespace Tcp
 		void restartWatchdogTimer();
 
 		ConnectionState getConnectionState();
+
+		HostAddressPort peerAddr() const;
 	};
 
 
@@ -206,8 +208,6 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
-		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
-
 		virtual void onThreadStarted() final;
 		virtual void onThreadFinished() final;
 
@@ -217,26 +217,22 @@ namespace Tcp
 
 		void onHeaderAndDataReady() final;
 
-		friend class Listener;
-
 	private slots:
 		void onAutoAckTimer();
 
-	protected:
-
-		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
-												// { return new ServerDerivedClass(); }
 	public:
 		Server();
 		virtual ~Server();
+
+		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
+												// { return new ServerDerivedClass(); }
+
+		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
 
 		int id() const { return m_id; }
 
 		virtual void onServerThreadStarted() {}
 		virtual void onServerThreadFinished() {}
-
-		virtual void onConnection() override;
-		virtual void onDisconnection() override;
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) = 0;
 
@@ -280,6 +276,27 @@ namespace Tcp
 	{
 		Q_OBJECT
 
+	public:
+		Listener(const HostAddressPort& listenAddressPort, Server* server);
+		~Listener();
+
+		virtual void onListenerThreadStarted() {}
+		virtual void onListenerThreadFinished() {}
+
+		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo);
+		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
+
+	private:
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		void startListening();
+		void onNewConnection(qintptr socketDescriptor);
+
+	private slots:
+		void onPeriodicTimer();
+		void onServerDisconnected(const SocketWorker *server);
+
 	private:
 		HostAddressPort m_listenAddressPort;
 		TcpServer* m_tcpServer = nullptr;
@@ -290,22 +307,6 @@ namespace Tcp
 		QHash<const SocketWorker*, SimpleThread*> m_runningServers;
 
 		friend class TcpServer;
-
-	private:
-		void startListening();
-		void onNewConnection(qintptr socketDescriptor);
-
-	private slots:
-		void onAcceptError();
-		void onPeriodicTimer();
-		void onServerDisconnected(const SocketWorker *server);
-
-	public:
-		Listener(const HostAddressPort& listenAddressPort, Server* server);
-		~Listener();
-
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
 	};
 
 
@@ -321,6 +322,8 @@ namespace Tcp
 
 	public:
 		ServerThread(const HostAddressPort& listenAddressPort, Server* server);
+		ServerThread(Listener* listener);
+
 		~ServerThread();
 	};
 
@@ -407,6 +410,8 @@ namespace Tcp
 
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
+
+		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);
 
 		virtual void onAck(quint32 requestID, const char* replyData, quint32 replyDataSize);
 		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }

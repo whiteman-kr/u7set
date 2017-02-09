@@ -5,9 +5,7 @@
 #include "../lib/BuildInfo.h"
 
 
-
 typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -17,8 +15,8 @@ typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
 
 class CfgServerLoaderBase
 {
-private:
-	static bool m_BuildFileInfoArrayRegistered;
+public:
+	CfgServerLoaderBase();
 
 protected:
 
@@ -29,8 +27,8 @@ protected:
 		BuildCantRead
 	};
 
-public:
-	CfgServerLoaderBase();
+private:
+	static bool m_BuildFileInfoArrayRegistered;
 };
 
 
@@ -44,6 +42,18 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 {
 	Q_OBJECT
 
+public:
+	CfgServer(const QString& buildFolder);
+
+	virtual CfgServer* getNewInstance() override;
+
+	virtual void onServerThreadStarted() override;
+	virtual void onServerThreadFinished() override;
+
+private:
+	void onRootFolderChange();
+	void readBuildXml();
+
 private:
 	QString m_buildXmlPathFileName;
 
@@ -51,17 +61,6 @@ private:
 	HashedVector<QString, Builder::BuildFileInfo> m_buildFileInfo;
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
-
-	void onRootFolderChange();
-
-	void readBuildXml();
-
-public:
-	CfgServer(const QString& buildFolder);
-
-	virtual CfgServer* getNewInstance() override { return new CfgServer(m_rootFolder); }
-
-	virtual void onServerThreadStarted() override;
 };
 
 
@@ -116,7 +115,7 @@ private:
 		}
 	};
 
-	QString m_appStrID;
+	QString m_appEquipmentID;
 	int m_appInstance;
 
 	QString m_appDataPath;
@@ -184,7 +183,7 @@ private slots:
 	void slot_getFile(QString fileName, QByteArray *fileData);
 
 public:
-	CfgLoader(	const QString& appStrID,
+	CfgLoader(const QString& appEquipmentID,
 				int appInstance,
 				const HostAddressPort& serverAddressPort1,
 				const HostAddressPort& serverAddressPort2,
@@ -192,7 +191,7 @@ public:
 
 	virtual void onClientThreadStarted() override;
 
-	void changeApp(const QString& appStrID, int appInstance);
+	void changeApp(const QString& appEquipmentID, int appInstance);
 
 	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
 	bool getFile(QString pathFileName, QByteArray* fileData);
@@ -204,6 +203,9 @@ public:
 	QString getLastErrorStr();
 
 	bool isFileReady();
+
+	virtual void onStartDownload(const QString& fileName);
+	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
 	friend class CfgLoaderThread;
 };
@@ -232,6 +234,8 @@ public:
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg = false);
+
+	CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader);
 
 	void enableDownloadConfiguration();
 

@@ -253,12 +253,6 @@ namespace Tuning
 
 		bool autoApply = request.autoapply();
 
-		///////////////////////////////////////
-
-//		autoApply = false;
-
-		////////////////////////////////
-
 		reply.clear_writeresult();
 
 		QHash<TuningSourceContext*, TuningSourceContext*> m_usedSrcContexts;

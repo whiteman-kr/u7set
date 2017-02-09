@@ -87,6 +87,7 @@ namespace Tuning
 		struct TuningCommand
 		{
 			FotipV2::OpCode opCode = FotipV2::OpCode::Read;
+			bool autoCommand = false;
 
 			struct
 			{
@@ -120,6 +121,8 @@ namespace Tuning
 			void setState(bool valid, float value);
 			void setReadLowBound(float readLowBound);
 			void setReadHighBound(float readHighBound);
+
+			QString appSignalID() const;
 
 		private:
 			FotipV2::DataType getTuningSignalType(const Signal* s);

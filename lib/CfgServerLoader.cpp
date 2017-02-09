@@ -1,4 +1,6 @@
 #include "../lib/CfgServerLoader.h"
+#include "../lib/CircularLogger.h"
+
 #include <QXmlStreamReader>
 #include <QStandardPaths>
 
@@ -34,11 +36,20 @@ CfgServer::CfgServer(const QString& buildFolder) :
 }
 
 
+CfgServer* CfgServer::getNewInstance()
+{
+	return new CfgServer(m_rootFolder);
+}
+
+
 void CfgServer::onServerThreadStarted()
 {
-	Tcp::FileServer::onServerThreadStarted();
-
 	onRootFolderChange();
+}
+
+
+void CfgServer::onServerThreadFinished()
+{
 }
 
 
@@ -120,7 +131,7 @@ void CfgServer::readBuildXml()
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoader::CfgLoader(	const QString& appStrID,
+CfgLoader::CfgLoader(	const QString& appEquipmentID,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
 						const HostAddressPort& serverAddressPort2,
@@ -129,7 +140,7 @@ CfgLoader::CfgLoader(	const QString& appStrID,
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)
 {
-	changeApp(appStrID, appInstance);
+	changeApp(appEquipmentID, appInstance);
 
 	// DELETE after periodic CFG requests to be added
 	//
@@ -152,14 +163,14 @@ void CfgLoader::onClientThreadStarted()
 }
 
 
-void CfgLoader::changeApp(const QString& appStrID, int appInstance)
+void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 {
 	shutdown();
 
-	m_appStrID = appStrID;
+	m_appEquipmentID = appEquipmentID;
 	m_appInstance = appInstance;
 
-	m_appDataPath = "/" + m_appStrID + "-" + QString::number(m_appInstance);
+	m_appDataPath = "/" + m_appEquipmentID + "-" + QString::number(m_appInstance);
 
 	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
 
@@ -167,7 +178,7 @@ void CfgLoader::changeApp(const QString& appStrID, int appInstance)
 
 	setRootFolder(m_rootFolder);
 
-	m_configurationXmlPathFileName = "/" + m_appStrID + "/configuration.xml";
+	m_configurationXmlPathFileName = "/" + m_appEquipmentID + "/configuration.xml";
 
 	readSavedConfiguration();
 
@@ -293,6 +304,32 @@ bool CfgLoader::isFileReady()
 }
 
 
+void CfgLoader::onStartDownload(const QString& fileName)
+{
+	qDebug() << C_STR(QString(tr("Start download: %1")).arg(fileName));
+}
+
+
+void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
+{
+	QString msg;
+
+	if (errorCode != Tcp::FileTransferResult::Ok)
+	{
+		msg = QString("File %1 download error - %2").
+					arg(fileName).
+					arg(getErrorStr(errorCode));
+	}
+	else
+	{
+		msg = QString("File %1 download Ok").
+					arg(fileName);
+	}
+
+	qDebug() << msg;
+}
+
+
 QString CfgLoader::getLastErrorStr()
 {
 	return getErrorStr(getLastError());
@@ -374,9 +411,9 @@ void CfgLoader::startDownload()
 
 	m_currentDownloadRequest = m_downloadQueue.first();
 
-	qDebug() << "start request " << m_currentDownloadRequest.pathFileName;
-
 	m_downloadQueue.removeFirst();
+
+	onStartDownload(m_currentDownloadRequest.pathFileName);
 
 	slot_downloadFile(m_currentDownloadRequest.pathFileName);	// TcpFileTransfer::slot_downloadFile
 }
@@ -439,14 +476,10 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
 {
+	onEndDownload(fileName, errorCode);
+
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		QString msg = QString("File '%1' download error - %2").
-				arg(m_currentDownloadRequest.pathFileName).
-				arg(getErrorStr(errorCode));
-
-		qDebug() << msg;
-
 		setFileReady(true);
 		return;
 	}
@@ -799,6 +832,21 @@ CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
 									bool enableDownloadCfg)
 {
 	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2, enableDownloadCfg);		// it will be deleted during SimpleThread destruction
+
+	addWorker(m_cfgLoader);
+
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+}
+
+
+CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
+	m_cfgLoader(cfgLoader)
+{
+	if (m_cfgLoader == nullptr)
+	{
+		assert(false);
+		return;
+	}
 
 	addWorker(m_cfgLoader);
 

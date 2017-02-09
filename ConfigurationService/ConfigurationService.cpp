@@ -3,7 +3,6 @@
 
 #include "ConfigurationService.h"
 
-
 // ------------------------------------------------------------------------------------
 //
 // ConfigurationServiceWorker class implementation
@@ -103,7 +102,7 @@ void ConfigurationServiceWorker::initialize()
 {
 	startCfgServerThread();
 
-	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker initialized")));
+	DEBUG_LOG_MSG(QString(tr("ServiceWorker is initialized")));
 }
 
 
@@ -111,13 +110,18 @@ void ConfigurationServiceWorker::shutdown()
 {
 	stopCfgServerThread();
 
-	DEBUG_LOG_MSG(QString(tr("ConfigurationServiceWorker shutdown")));
+	DEBUG_LOG_MSG(QString(tr("ServiceWorker is shutting down")));
 }
 
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
-	m_cfgServerThread = new Tcp::ServerThread(m_clientIP, new CfgServer(m_buildPath));
+	CfgServerWithLog* cfgServer = new CfgServerWithLog(m_buildPath);
+
+	ListenerWithLog* listener = new ListenerWithLog(m_clientIP, cfgServer);
+
+	m_cfgServerThread = new Tcp::ServerThread(listener);
+
 	m_cfgServerThread->start();
 }
 
@@ -125,7 +129,6 @@ void ConfigurationServiceWorker::startCfgServerThread()
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
 	m_cfgServerThread->quit();
-
 	delete m_cfgServerThread;
 }
 
@@ -181,6 +184,64 @@ void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
 }
 
 
+// ------------------------------------------------------------------------------------
+//
+// ListenerWithLog class implementation
+//
+// ------------------------------------------------------------------------------------
 
+ListenerWithLog::ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server) :
+	Tcp::Listener(listenAddressPort, server)
+{
+}
+
+
+void ListenerWithLog::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+{
+	if (startOk)
+	{
+		DEBUG_LOG_MSG(QString("CfgServer start listening %1 OK").arg(addr.addressPortStr()));
+	}
+	else
+	{
+		DEBUG_LOG_ERR(QString("CfgServer error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+	}
+}
+
+
+// ------------------------------------------------------------------------------------
+//
+// CfgServerWithLog class implementation
+//
+// ------------------------------------------------------------------------------------
+
+CfgServerWithLog::CfgServerWithLog(const QString& buildFolder) :
+	CfgServer(buildFolder)
+{
+}
+
+
+CfgServer* CfgServerWithLog::getNewInstance()
+{
+	return new CfgServerWithLog(rootFolder());
+}
+
+
+void CfgServerWithLog::onConnection()
+{
+	DEBUG_LOG_MSG(QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
+}
+
+
+void CfgServerWithLog::onDisconnection()
+{
+	DEBUG_LOG_MSG(QString(tr("CfgServer connection #%1 closed")).arg(id()));
+}
+
+
+void CfgServerWithLog::onFileSent(const QString& fileName)
+{
+	DEBUG_LOG_MSG(QString(tr("File has been sent: %1")).arg(fileName));
+}
 
 

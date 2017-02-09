@@ -158,7 +158,7 @@ namespace FotipV2
 
 		FotipV2::SubsystemKey subsystemKey;
 
-		quint16 operationCode;						// enum FotipOpCode values
+		quint16 operationCode;						// enum FotipV2::OpCode values
 
 		FotipV2::HeaderFlags flags;
 
@@ -166,7 +166,7 @@ namespace FotipV2
 		quint16 fotipFrameSizeB;
 		quint32 romSizeB;
 		quint16 romFrameSizeB;
-		quint16 dataType;							// enum FotipDataType values
+		quint16 dataType;							// enum FotipV2::DataType values
 		quint32 offsetInFrameW;
 
 		quint8 reserve[HEADER_RESERVE_SIZE];
@@ -201,6 +201,10 @@ namespace FotipV2
 		AnalogComparisonErrors analogCmpErrors;
 
 		quint8 reserv[DATA_RESERV_SIZE];
+
+		// helper functions
+
+		QString valueStr(bool reverseValue);
 	};
 }
 

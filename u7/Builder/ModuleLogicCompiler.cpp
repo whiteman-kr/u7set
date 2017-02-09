@@ -227,12 +227,12 @@ namespace Builder
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.3f", static_cast<float>(idrPhaseTimeUsed));
-		str.sprintf("%.3f", static_cast<float>(idrPhaseTime * 1000000));
+		str_percent.sprintf("%.2f", static_cast<float>(idrPhaseTimeUsed));
+		str.sprintf("%.2f", static_cast<float>(idrPhaseTime * 1000000));
 
 		if (idrPhaseTimeUsed < 90)
 		{
-			LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+			LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 						arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 		}
 		else
@@ -240,13 +240,13 @@ namespace Builder
 			if (idrPhaseTimeUsed < 100)
 			{
 				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 								arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 			else
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+						  QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
 			}
 		}
@@ -261,12 +261,12 @@ namespace Builder
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
-		str_percent.sprintf("%.3f", static_cast<float>(alpPhaseTimeUsed));
-		str.sprintf("%.3f", static_cast<float>(alpPhaseTime * 1000000));
+		str_percent.sprintf("%.2f", static_cast<float>(alpPhaseTimeUsed));
+		str.sprintf("%.2f", static_cast<float>(alpPhaseTime * 1000000));
 
 		if (alpPhaseTimeUsed < 90)
 		{
-			LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+			LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 						arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 		}
 		else
@@ -274,13 +274,13 @@ namespace Builder
 			if (alpPhaseTimeUsed < 100)
 			{
 				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+							QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 			else
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 μs of %4 μs)")).
+						  QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
 							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
 			}
 		}
@@ -2219,7 +2219,7 @@ namespace Builder
 					else
 					{
 						cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.intValue()));
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem.intValue()));
 					}
 					break;
 
@@ -2234,7 +2234,7 @@ namespace Builder
 					else
 					{
 						cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.opName()).arg(constItem.floatValue()));
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem.floatValue()));
 					}
 					break;
 
@@ -4681,7 +4681,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calculateCodeRunTime()
 	{
-		bool result = m_code.getRunTimes(&m_idrPhaseClockCount, &m_alpPhaseClockCount);
+		bool result = m_code.getRunTimes(m_idrPhaseClockCount, m_alpPhaseClockCount);
 
 		if (result == false)
 		{

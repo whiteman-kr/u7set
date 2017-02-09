@@ -142,12 +142,18 @@ namespace Tcp
 
 	class FileServer : public Server, public FileTransfer
 	{
+	public:
+		FileServer(const QString& rootFolder);
+
+		virtual Server* getNewInstance() override;
+
+		virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+
+		QString rootFolder() const;
+
+		virtual void onFileSent(const QString& fileName);
+
 	private:
-		GetFileReply& m_reply;
-		char* m_fileData = nullptr;
-
-		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
-
 		void init();
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
@@ -155,12 +161,11 @@ namespace Tcp
 		void sendFirstFilePart(const QString& fileName);
 		void sendNextFilePart();
 
-	public:
-		FileServer(const QString& rootFolder);
+	private:
+		GetFileReply& m_reply;
+		char* m_fileData = nullptr;
 
-		virtual Server* getNewInstance() override { return new FileServer(m_rootFolder); }
-
-		virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
+		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
 	};
 
 }
