@@ -53,7 +53,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringLis
 
 	for (Signal* signal : signalPtrVector)
 	{
-		if (signal->checkedOut() && signal->userID() != dbController->currentUser().userId())
+		if (signal->checkedOut() && signal->userID() != dbController->currentUser().userId() && !dbController->currentUser().isAdminstrator())
 		{
 			readOnly = true;
 		}
@@ -402,7 +402,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 {
 	if (s.checkedOut())
 	{
-		if (s.userID() == m_dbController->currentUser().userId())
+		if (s.userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator())
 		{
 			return true;
 		}
@@ -431,7 +431,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-				&& objectState.userId != m_dbController->currentUser().userId())
+				&& objectState.userId != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator())
 		{
 			return false;
 		}

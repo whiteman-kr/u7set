@@ -475,7 +475,7 @@ void SignalsModel::changeCheckedoutSignalActionsVisibility()
 	for (int i = 0; i < m_signalSet.count(); i++)
 	{
 		const Signal& signal = m_signalSet[i];
-		if (signal.checkedOut() && signal.userID() == dbController()->currentUser().userId())
+		if (signal.checkedOut() && (signal.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			emit setCheckedoutSignalActionsVisibility(true);
 			return;
@@ -489,7 +489,7 @@ bool SignalsModel::checkoutSignal(int index)
 	Signal& s = m_signalSet[index];
 	if (s.checkedOut())
 	{
-		if (s.userID() == dbController()->currentUser().userId())
+		if (s.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 		{
 			return true;
 		}
@@ -518,7 +518,7 @@ bool SignalsModel::checkoutSignal(int index)
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-				&& objectState.userId != dbController()->currentUser().userId())
+				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
 		}
@@ -536,7 +536,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 	Signal& s = m_signalSet[index];
 	if (s.checkedOut())
 	{
-		if (s.userID() == dbController()->currentUser().userId())
+		if (s.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 		{
 			return true;
 		}
@@ -571,7 +571,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-				&& objectState.userId != dbController()->currentUser().userId())
+				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
 		}
@@ -762,7 +762,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		const Signal& signal = m_signalSet[section];
 		if (signal.checkedOut())
 		{
-			if (signal.userID() == dbController()->currentUser().userId())
+			if (signal.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 			{
 				switch (signal.instanceAction().value())
 				{
@@ -971,7 +971,7 @@ QVector<int> SignalsModel::getSameChannelSignals(int row)
 bool SignalsModel::isEditableSignal(int row)
 {
 	Signal& s = m_signalSet[row];
-	if (s.checkedOut() && s.userID() != dbController()->currentUser().userId())
+	if (s.checkedOut() && (s.userID() != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator()))
 	{
 		return false;
 	}
@@ -1174,7 +1174,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 	for (int i = 0; i < ids.count(); i++)
 	{
 		Signal& signal = m_signalSet[m_signalSet.keyIndex(ids[i])];
-		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			readOnly = true;
 		}
@@ -1199,10 +1199,12 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		showErrors(states);
 
 		loadSignalSet(ids);
+		changeCheckedoutSignalActionsVisibility();
 		return true;
 	}
 
 	loadSignalSet(ids);	//Signal could be checked out but not changed
+	changeCheckedoutSignalActionsVisibility();
 	return false;
 }
 
@@ -1343,6 +1345,7 @@ void SignalsModel::deleteSignal(int signalID)
 	{
 		showError(state);
 	}
+	changeCheckedoutSignalActionsVisibility();
 }
 
 DbController *SignalsModel::dbController()
@@ -2389,7 +2392,7 @@ Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
 bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
 	const Signal& signal = m_sourceModel->signal(source_row);
-	return signal.checkedOut() && signal.userID() == m_sourceModel->dbController()->currentUser().userId();
+	return signal.checkedOut() && (signal.userID() == m_sourceModel->dbController()->currentUser().userId() || m_sourceModel->dbController()->currentUser().isAdminstrator());
 }
 
 void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool fromSourceModel)

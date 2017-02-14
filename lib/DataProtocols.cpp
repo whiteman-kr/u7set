@@ -60,7 +60,7 @@ namespace FotipV2
 	{
 		assert(static_cast<FotipV2::OpCode>(header.operationCode) == FotipV2::OpCode::Write);
 
-		switch(header.dataType)
+		switch(static_cast<FotipV2::DataType>(header.dataType))
 		{
 		case FotipV2::DataType::AnalogFloat:
 			{
