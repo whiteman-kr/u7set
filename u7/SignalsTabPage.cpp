@@ -882,6 +882,7 @@ void SignalsModel::loadSignals()
 	}
 
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
+	*Signal::unitList = m_unitInfo;
 
 	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
 	{
