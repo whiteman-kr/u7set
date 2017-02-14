@@ -1025,7 +1025,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
@@ -1389,7 +1389,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	filterToolBar->addWidget(new QLabel(" complies ", this));
 	filterToolBar->addWidget(m_filterEdit);
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	m_filterHistory = settings.value("SignalsTabPage/filterHistory").toStringList();
 
 	m_completer = new QCompleter(m_filterHistory, this);
@@ -1872,6 +1872,7 @@ void SignalsTabPage::editColumnsVisibilityAndOrder()
 	{
 		auto item = new QStandardItem;
 		item->setCheckable(true);
+		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
 		model->setItem(i, item);
 	}
 
@@ -2178,7 +2179,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 			model->setStringList(m_filterHistory);
 		}
 
-		QSettings settings(QSettings::UserScope, qApp->organizationName());
+		QSettings settings;
 		settings.setValue("SignalsTabPage/filterHistory", m_filterHistory);
 	}
 
@@ -2322,19 +2323,19 @@ void SignalsTabPage::saveColumnWidth(int index)
 	{
 		return;
 	}
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), width);
 }
 
 void SignalsTabPage::saveColumnVisibility(int index, bool visible)
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
 }
 
 void SignalsTabPage::saveColumnPosition(int index, int position)
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnPosition/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), position);
 }
 
@@ -2461,7 +2462,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	m_signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
 													m_signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
 	for (int i = 1; i < COLUMNS_COUNT; i++)
@@ -2622,7 +2623,7 @@ void CheckinSignalsDialog::openUndoDialog()
 
 void CheckinSignalsDialog::saveGeometry()
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue("PendingChangesDialog/size", size());
 	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
 }
@@ -2635,7 +2636,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 {
 	setWindowTitle(tr("Undo signal changes"));
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
 
 	QVBoxLayout* vl = new QVBoxLayout;
@@ -2722,7 +2723,7 @@ void UndoSignalsDialog::undoSelected()
 		m_sourceModel->showErrors(states);
 	}
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue("UndoSignalsDialog/size", size());
 
 	accept();
