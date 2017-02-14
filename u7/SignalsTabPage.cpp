@@ -709,15 +709,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('D');
-				case SC_ANALOG_DATA_FORMAT:
-					if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
-					{
-						return m_dataFormatInfo.value(signal.analogSignalFormatInt());
-					}
-					else
-					{
-						return tr("Unknown data format");
-					}
+				case SC_ANALOG_DATA_FORMAT: return "";
 
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
