@@ -243,7 +243,8 @@ namespace Builder
 		void errALC5068(QString appSignalID);						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
 		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits to HighEngeneeringUnits.
 		void wrnALC5070(QString appSignalID);						// Signal '%1' has Little Endian byte order.
-		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+		void wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID);	// Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
 
 		// EQP			Equipment issues						6000-6999
 		//
