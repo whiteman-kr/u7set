@@ -59,7 +59,7 @@ private:
     void                updateList();
     void                clearList();
 
-    void                hideColumn(const int column, const bool hide);
+    void                hideColumn(int column, bool hide);
 
 protected:
 

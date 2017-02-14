@@ -19,7 +19,7 @@ class FindItem
 public:
 
                         FindItem();
-                        FindItem(const int row, const int column, const QString& text, const int beginPos, const int endPos);
+                        FindItem(int row, int column, const QString& text, int beginPos, int endPos);
                         ~FindItem();
 
 private:
@@ -35,21 +35,21 @@ private:
 public:
 
     int                 row() const { return m_row; }
-    void                setRow(const int row) { m_row = row; }
+    void                setRow(int row) { m_row = row; }
 
     int                 column() const { return m_column; }
-    void                setColumn(const int column) { m_column = column; }
+    void                setColumn(int column) { m_column = column; }
 
-    void                setCoordinates(const int row, const int column) { m_row = row; m_column = column; }
+    void                setCoordinates(int row, int column) { m_row = row; m_column = column; }
 
     QString             text() const { return m_text; }
     void                setText(const QString& text) { m_text = text; }
 
     int                 beginPos() const { return m_beginPos; }
-    void                setBeginPos(const int pos) { m_beginPos = pos; }
+    void                setBeginPos(int pos) { m_beginPos = pos; }
 
     int                 endPos() const { return m_endPos; }
-    void                setEndPos(const int pos) { m_endPos = pos; }
+    void                setEndPos(int pos) { m_endPos = pos; }
 
     void                setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
 
@@ -87,11 +87,11 @@ public:
                         ~FindMeasureTable();
 
     int                 count() const { return m_findItemList.count(); }
-    FindItem            at(const int index) const;
+    FindItem            at(int index) const;
     void                set(const QList<FindItem> list_add);
     void                clear();
 
-    QString             text(const int row, const int column) const;
+    QString             text(int row, int column) const;
 
 private:
 

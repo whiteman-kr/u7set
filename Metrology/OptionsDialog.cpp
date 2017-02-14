@@ -120,6 +120,7 @@ OptionsDialog::~OptionsDialog()
 
 void OptionsDialog::createInterface()
 {
+    setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
     setWindowIcon(QIcon(":/icons/Options.png"));
     setMinimumSize(850, 400);
     move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -158,7 +159,7 @@ QHBoxLayout* OptionsDialog::createPages()
     for(int group = 0; group < OPTION_GROUP_COUNT; group++)
     {
         QTreeWidgetItem* groupTreeItem = new QTreeWidgetItem;
-        groupTreeItem->setText(0, OptionGroup[group]);
+        groupTreeItem->setText(0, OptionGroupTitle[group]);
         m_pPageTree->addTopLevelItem(groupTreeItem);
 
         groupList.append(groupTreeItem);
@@ -175,7 +176,7 @@ QHBoxLayout* OptionsDialog::createPages()
         QTreeWidgetItem* groupTreeItem = groupList.at(groupIndex);
 
         QTreeWidgetItem* pageTreeItem = new QTreeWidgetItem;
-        pageTreeItem->setText(0, OptionPageShort[page]);
+        pageTreeItem->setText(0, OptionPageShortTitle[page]);
         pageTreeItem->setData(0, Qt::UserRole, page);
 
         groupTreeItem->addChild(pageTreeItem);
@@ -241,7 +242,7 @@ QHBoxLayout* OptionsDialog::createButtons()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPage(const int page)
+PropertyPage* OptionsDialog::createPage(int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -252,7 +253,9 @@ PropertyPage* OptionsDialog::createPage(const int page)
 
     switch (page)
     {
-        case OPTION_PAGE_TCP_IP:
+        case OPTION_PAGE_CONFIG_SOCKET:
+        case OPTION_PAGE_SIGNAL_SOCKET:
+        case OPTION_PAGE_TUNING_SOCKET:
         case OPTION_PAGE_LINEARITY_MEASURE:
         case OPTION_PAGE_COMPARATOR_MEASURE:
         case OPTION_PAGE_MEASURE_VIEW_TEXT:
@@ -270,7 +273,7 @@ PropertyPage* OptionsDialog::createPage(const int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyList(const int page)
+PropertyPage* OptionsDialog::createPropertyList(int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -290,26 +293,80 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
 
     switch (page)
     {
-        case OPTION_PAGE_TCP_IP:
+        case OPTION_PAGE_CONFIG_SOCKET:
             {
                 QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
 
-                    item = manager->addProperty(QVariant::String, TcpIpParamName[TCPIP_PARAM_SERVER_IP]);
-                    item->setValue( m_options.connectTcpIp().serverIP() );
-                    appendProperty(item, page, TCPIP_PARAM_SERVER_IP);
+                    item = manager->addProperty(QVariant::String, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_IP]);
+                    item->setValue( m_options.configSocket().serverIP() );
+                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_IP);
                     serverGroup->addSubProperty(item);
 
-                    item = manager->addProperty(QVariant::Int, TcpIpParamName[TCPIP_PARAM_SERVER_PORT]);
-                    item->setValue( m_options.connectTcpIp().serverPort() );
+                    item = manager->addProperty(QVariant::Int, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_PORT]);
+                    item->setValue( m_options.configSocket().serverPort() );
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 65535);
                     item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, TCPIP_PARAM_SERVER_PORT);
+                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_PORT);
                     serverGroup->addSubProperty(item);
 
                 editor->setFactoryForManager(manager, factory);
 
                 editor->addProperty(serverGroup);
+            }
+            break;
+
+        case OPTION_PAGE_SIGNAL_SOCKET:
+            {
+                QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
+
+                    item = manager->addProperty(QVariant::String, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_IP]);
+                    item->setValue( m_options.signalSocket().serverIP() );
+                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_IP);
+                    serverGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Int, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_PORT]);
+                    item->setValue( m_options.signalSocket().serverPort() );
+                    item->setAttribute(QLatin1String("minimum"), 1);
+                    item->setAttribute(QLatin1String("maximum"), 65535);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_PORT);
+                    serverGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(serverGroup);
+            }
+            break;
+
+        case OPTION_PAGE_TUNING_SOCKET:
+            {
+                QtProperty *serverGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server"));
+
+                    item = manager->addProperty(QVariant::String, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_IP]);
+                    item->setValue( m_options.tuningSocket().serverIP() );
+                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_IP);
+                    serverGroup->addSubProperty(item);
+
+                    item = manager->addProperty(QVariant::Int, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_PORT]);
+                    item->setValue( m_options.tuningSocket().serverPort() );
+                    item->setAttribute(QLatin1String("minimum"), 1);
+                    item->setAttribute(QLatin1String("maximum"), 65535);
+                    item->setAttribute(QLatin1String("singleStep"), 1);
+                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_PORT);
+                    serverGroup->addSubProperty(item);
+
+                QtProperty *tuningIdGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Tuning EquipmentID"));
+
+                    item = manager->addProperty(QVariant::String, TuningSocketParamName[TUNING_SOCKET_PARAM_EQUIPMENT_ID]);
+                    item->setValue( m_options.tuningSocket().equipmentID() );
+                    appendProperty(item, page, TUNING_SOCKET_PARAM_EQUIPMENT_ID);
+                    tuningIdGroup->addSubProperty(item);
+
+                editor->setFactoryForManager(manager, factory);
+
+                editor->addProperty(serverGroup);
+                editor->addProperty(tuningIdGroup);
             }
             break;
 
@@ -333,7 +390,7 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
 
                     item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_ERROR_TYPE]);
                     QStringList errorTypeList;
-                    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+                    for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
                     {
                         errorTypeList.append(ErrorType[e]);
                     }
@@ -345,22 +402,20 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                 QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurements at the single point"));
 
                     item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_TIME]);
-                    item->setValue(m_options.linearity().m_measureTimeInPoint);
+                    item->setValue(m_options.linearity().measureTimeInPoint());
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 60);
                     item->setAttribute(QLatin1String("singleStep"), 1);
                     appendProperty(item, page, LO_PARAM_MEASURE_TIME);
                     measureGroup->addSubProperty(item);
 
-
                     item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_MEASURE_IN_POINT]);
-                    item->setValue(m_options.linearity().m_measureCountInPoint);
+                    item->setValue(m_options.linearity().measureCountInPoint());
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), MAX_MEASUREMENT_IN_POINT);
                     item->setAttribute(QLatin1String("singleStep"), 1);
                     appendProperty(item, page, LO_PARAM_MEASURE_IN_POINT);
                     measureGroup->addSubProperty(item);
-
 
                 QtProperty *pointGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measurement points"));
 
@@ -376,7 +431,7 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                     pointGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::Int, LinearityParamName[LO_PARAM_POINT_COUNT]);
-                    item->setValue(m_options.linearity().m_pointBase.count());
+                    item->setValue(m_options.linearity().points().count());
                     switch( m_options.linearity().m_rangeType)
                     {
                         case LO_RANGE_TYPE_MANUAL:      item->setEnabled(false);    break;
@@ -413,7 +468,7 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
                     pointGroup->addSubProperty(item);
 
                     item = manager->addProperty(QVariant::String, LinearityParamName[LO_PARAM_VALUE_POINTS]);
-                    item->setValue(m_options.linearity().m_pointBase.text());
+                    item->setValue(m_options.linearity().points().text());
                     appendProperty(item, page, LO_PARAM_VALUE_POINTS);
                     pointGroup->addSubProperty(item);
 
@@ -472,7 +527,7 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
 
                     item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ComparatorParamName[CO_PARAM_ERROR_TYPE]);
                     QStringList errorTypeList;
-                    for(int e = 0; e < ERROR_TYPE_COUNT; e++)
+                    for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
                     {
                         errorTypeList.append(ErrorType[e]);
                     }
@@ -824,7 +879,7 @@ PropertyPage* OptionsDialog::createPropertyList(const int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PropertyPage* OptionsDialog::createPropertyDialog(const int page)
+PropertyPage* OptionsDialog::createPropertyDialog(int page)
 {
     if (page < 0 || page >= OPTION_PAGE_COUNT)
     {
@@ -860,7 +915,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(const int page)
 
     if (pDialogPage != nullptr)
     {
-        pDialogPage->setWindowTitle( OptionPage[page] );
+        pDialogPage->setWindowTitle( OptionPageTitle[page] );
     }
 
     return ( new PropertyPage(pDialogPage) );
@@ -868,7 +923,7 @@ PropertyPage* OptionsDialog::createPropertyDialog(const int page)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::appendProperty(QtProperty* property, const int page, const int param)
+void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
 {
     if (property == nullptr)
     {
@@ -886,7 +941,7 @@ void OptionsDialog::appendProperty(QtProperty* property, const int page, const i
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, const int page, const int param, const bool expanded)
+void OptionsDialog::expandProperty(QtTreePropertyBrowser* pEditor, int page, int param, bool expanded)
 {
     if (pEditor == nullptr)
     {
@@ -935,7 +990,7 @@ void OptionsDialog::onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* pre
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OptionsDialog::setActivePage(const int page)
+bool OptionsDialog::setActivePage(int page)
 {
     if (page < 0 || page >= m_pageList.count())
     {
@@ -966,7 +1021,7 @@ bool OptionsDialog::setActivePage(const int page)
         QWidget* pWidget = pActivePage->getWidget();
         if (pWidget != nullptr )
         {
-            setWindowTitle(tr("Options - %1").arg(OptionPage[page]));
+            setWindowTitle(tr("Options - %1").arg(OptionPageTitle[page]));
 
             m_pagesLayout->addWidget(pWidget);
             pWidget->show();
@@ -1074,13 +1129,36 @@ void OptionsDialog::applyProperty()
 
     switch (page)
     {
-        case OPTION_PAGE_TCP_IP:
+        case OPTION_PAGE_CONFIG_SOCKET:
             {
                 switch(param)
                 {
-                    case TCPIP_PARAM_SERVER_IP:     m_options.connectTcpIp().setServerIP(value.toString());                 break;
-                    case TCPIP_PARAM_SERVER_PORT:   m_options.connectTcpIp().setServerPort(value.toInt());                  break;
-                    default:                        assert(0);
+                    case CONFIG_SOCKET_PARAM_SERVER_IP:     m_options.configSocket().setServerIP(value.toString());         break;
+                    case CONFIG_SOCKET_PARAM_SERVER_PORT:   m_options.configSocket().setServerPort(value.toInt());          break;
+                    default:                                assert(0);
+                }
+            }
+            break;
+
+        case OPTION_PAGE_SIGNAL_SOCKET:
+            {
+                switch(param)
+                {
+                    case SIGNAL_SOCKET_PARAM_SERVER_IP:     m_options.signalSocket().setServerIP(value.toString());         break;
+                    case SIGNAL_SOCKET_PARAM_SERVER_PORT:   m_options.signalSocket().setServerPort(value.toInt());          break;
+                    default:                                assert(0);
+                }
+            }
+            break;
+
+        case OPTION_PAGE_TUNING_SOCKET:
+            {
+                switch(param)
+                {
+                    case TUNING_SOCKET_PARAM_SERVER_IP:     m_options.tuningSocket().setServerIP(value.toString());         break;
+                    case TUNING_SOCKET_PARAM_SERVER_PORT:   m_options.tuningSocket().setServerPort(value.toInt());          break;
+                    case TUNING_SOCKET_PARAM_EQUIPMENT_ID:  m_options.tuningSocket().setEquipmentID(value.toString());      break;
+                    default:                                assert(0);
                 }
             }
             break;
@@ -1089,32 +1167,29 @@ void OptionsDialog::applyProperty()
             {
                 switch(param)
                 {
-                    case LO_PARAM_ERROR:            m_options.linearity().m_errorValue = value.toDouble();                  break;
-                    case LO_PARAM_ERROR_CTRL:       m_options.linearity().m_errorCtrl = value.toDouble();                   break;
-                    case LO_PARAM_ERROR_TYPE:       m_options.linearity().m_errorType = value.toInt();
-                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
-                                                    break;
-                    case LO_PARAM_MEASURE_TIME:     m_options.linearity().m_measureTimeInPoint = value.toInt();             break;
-                    case LO_PARAM_MEASURE_IN_POINT: m_options.linearity().m_measureCountInPoint = value.toInt();            break;
-                    case LO_PARAM_RANGE_TYPE:       m_options.linearity().m_rangeType = value.toInt();
-                                                    m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                             break;
-                    case LO_PARAM_POINT_COUNT:      m_options.linearity().recalcPoints(value.toInt());
-                                                    updateLinearityPage(false);                                             break;
-                    case LO_PARAM_LOW_RANGE:        m_options.linearity().m_lowLimitRange = value.toDouble();
-                                                    m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                             break;
-                    case LO_PARAM_HIGH_RANGE:       m_options.linearity().m_highLimitRange = value.toDouble();
-                                                    m_options.linearity().recalcPoints();
-                                                    updateLinearityPage(false);                                             break;
-                    case LO_PARAM_VALUE_POINTS:     setActivePage(OPTION_PAGE_LINEARITY_POINT);                             break;
-                    case LO_PARAM_LIST_TYPE:        m_options.linearity().m_viewType = value.toInt();
-                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
-                                                    break;
-                    case LO_PARAM_OUTPUT_RANGE:     m_options.linearity().m_showOutputRangeColumn = value.toBool();
-                                                    m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;
-                                                    break;
-                    default:                        assert(0);
+                    case LO_PARAM_ERROR:                    m_options.linearity().m_errorValue = value.toDouble();          break;
+                    case LO_PARAM_ERROR_CTRL:               m_options.linearity().m_errorCtrl = value.toDouble();           break;
+                    case LO_PARAM_ERROR_TYPE:               m_options.linearity().m_errorType = value.toInt();
+                                                            m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;    break;
+                    case LO_PARAM_MEASURE_TIME:             m_options.linearity().setMeasureTimeInPoint(value.toInt());     break;
+                    case LO_PARAM_MEASURE_IN_POINT:         m_options.linearity().setMeasureCountInPoint(value.toInt());    break;
+                    case LO_PARAM_RANGE_TYPE:               m_options.linearity().m_rangeType = value.toInt();
+                                                            m_options.linearity().recalcPoints();
+                                                            updateLinearityPage(false);                                     break;
+                    case LO_PARAM_POINT_COUNT:              m_options.linearity().recalcPoints(value.toInt());
+                                                            updateLinearityPage(false);                                     break;
+                    case LO_PARAM_LOW_RANGE:                m_options.linearity().m_lowLimitRange = value.toDouble();
+                                                            m_options.linearity().recalcPoints();
+                                                            updateLinearityPage(false);                                     break;
+                    case LO_PARAM_HIGH_RANGE:               m_options.linearity().m_highLimitRange = value.toDouble();
+                                                            m_options.linearity().recalcPoints();
+                                                            updateLinearityPage(false);                                     break;
+                    case LO_PARAM_VALUE_POINTS:             setActivePage(OPTION_PAGE_LINEARITY_POINT);                     break;
+                    case LO_PARAM_LIST_TYPE:                m_options.linearity().m_viewType = value.toInt();
+                                                            m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;    break;
+                    case LO_PARAM_OUTPUT_RANGE:             m_options.linearity().m_showOutputRangeColumn = value.toBool();
+                                                            m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;    break;
+                    default:                                assert(0);
                 }
             }
             break;
@@ -1178,12 +1253,12 @@ void OptionsDialog::applyProperty()
         case OPTION_PAGE_REPORT:
             {
                 int type = m_options.report().type();
-                if (type < 0 || type >= m_options.report().m_headerBase.count())
+                if (type < 0 || type >= m_options.report().header().count())
                 {
                     break;
                 }
 
-                REPORT_HEADER header = m_options.report().m_headerBase.at(type);
+                REPORT_HEADER header = m_options.report().header().at(type);
 
                 switch(param)
                 {
@@ -1210,7 +1285,7 @@ void OptionsDialog::applyProperty()
                     default:                            assert(0);
                 }
 
-                m_options.report().m_headerBase.set(type, header);
+                m_options.report().header().set(type, header);
             }
             break;
 
@@ -1247,7 +1322,7 @@ void OptionsDialog::applyProperty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateLinearityPage(const bool isDialog)
+void OptionsDialog::updateLinearityPage(bool isDialog)
 {
     PropertyPage* page = m_pageList[OPTION_PAGE_LINEARITY_POINT];
     if (page == nullptr)
@@ -1285,7 +1360,7 @@ void OptionsDialog::updateLinearityPage(const bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_POINT_COUNT );
     if (property != nullptr)
     {
-        property->setValue( m_options.linearity().m_pointBase.count() );
+        property->setValue( m_options.linearity().points().count() );
 
         switch( m_options.linearity().m_rangeType)
         {
@@ -1325,13 +1400,13 @@ void OptionsDialog::updateLinearityPage(const bool isDialog)
     property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_VALUE_POINTS );
     if (property != nullptr)
     {
-        property->setValue( m_options.linearity().m_pointBase.text() );
+        property->setValue( m_options.linearity().points().text() );
     }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsDialog::updateMeasureViewPage(const bool isDialog)
+void OptionsDialog::updateMeasureViewPage(bool isDialog)
 {
     PropertyPage* page = m_pageList[OPTION_PAGE_MEASURE_VIEW_COLUMN];
     if (page == nullptr)
@@ -1372,9 +1447,9 @@ void OptionsDialog::updateReportHeaderPage()
     REPORT_HEADER header;
 
     int type = m_options.report().type();
-    if (type >= 0 && type < m_options.report().m_headerBase.count())
+    if (type >= 0 && type < m_options.report().header().count())
     {
-        header = m_options.report().m_headerBase.at(type);
+        header = m_options.report().header().at(type);
     }
 
     QtVariantProperty *property = nullptr;

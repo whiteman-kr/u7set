@@ -25,6 +25,16 @@
 
 #include "../Proto/network.pb.h"
 
+// ==============================================================================================
+
+const int           SIGNAL_SOCKET_TIMEOUT_STATE    = 50;  // 50 ms
+
+// ==============================================================================================
+
+const int           SIGNAL_SOCKET_MAX_READ_SIGNAL   = 100;
+
+// ==============================================================================================
+
 class SignalSocket : public Tcp::Client
 {
      Q_OBJECT
@@ -52,8 +62,10 @@ private:
     Network::GetSignalListStartReply    m_getSignalListStartReply;          // ADS_GET_APP_SIGNAL_LIST_START
     QVector<Hash>                       m_signalHashList;
 
+
     Network::GetSignalListNextRequest   m_getSignalListNextRequest;         // ADS_GET_APP_SIGNAL_LIST_NEXT
     Network::GetSignalListNextReply     m_getSignalListNextReply;
+
 
     Network::GetAppSignalParamRequest   m_getSignalParamRequest;            // ADS_GET_APP_SIGNAL_PARAM
     Network::GetAppSignalParamReply     m_getSignalParamReply;
@@ -62,8 +74,11 @@ private:
     Network::GetUnitsRequest            m_getUnitsRequest;                  // ADS_GET_UNITS
     Network::GetUnitsReply              m_getUnitsReply;
 
+
     Network::GetAppSignalStateRequest   m_getSignalStateRequest;            // ADS_GET_APP_SIGNAL_STATE
     Network::GetAppSignalStateReply     m_getSignalStateReply;
+
+    int                                 m_signalStateRequestIndex = 0;
 
     // functions: Request - Reply
     //
@@ -98,5 +113,7 @@ signals:
 
     void            signalsLoaded();
 };
+
+// ==============================================================================================
 
 #endif // SIGNALSOCKET_H

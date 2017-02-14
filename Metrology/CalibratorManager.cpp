@@ -31,7 +31,7 @@ CalibratorManager::~CalibratorManager()
     }
 
     m_pCalibrator = nullptr;
-    m_ready = false;
+    m_readyForManage = false;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ void CalibratorManager::onCalibratorConnect()
     }
 
     int index = m_pCalibrator->index();
-    if (index == INVALID_CALIBRATOR_INDEX)
+    if (index < 0 || index >= 6 )
     {
         return;
     }
@@ -319,7 +319,7 @@ void CalibratorManager::onCalibratorDisconnect()
     }
 
     int index = m_pCalibrator->index();
-    if (index == INVALID_CALIBRATOR_INDEX)
+    if (index < 0 || index >= 6 )
     {
         return;
     }
@@ -331,7 +331,7 @@ void CalibratorManager::onCalibratorDisconnect()
 
     enableInterface(false);
 
-    m_ready = true;
+    m_readyForManage = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ void CalibratorManager::onUnitChanged()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool CalibratorManager::setUnit(const int mode, const int unit)
+bool CalibratorManager::setUnit(int mode, int unit)
 {
     if (calibratorIsConnected() == false)
     {
@@ -377,7 +377,7 @@ bool CalibratorManager::setUnit(const int mode, const int unit)
         return false;
     }
 
-    m_ready = true;
+    m_readyForManage = true;
 
     emit calibratorSetUnit(mode, unit);
 
@@ -431,7 +431,7 @@ void CalibratorManager::onValueChanged()
 
     enableInterface(true);
 
-    m_ready = true;
+    m_readyForManage = true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -476,19 +476,21 @@ void CalibratorManager::value()
         return;
     }
 
+    m_readyForManage = false;
+
     emit calibratorGetValue();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void CalibratorManager::setValue(const double value)
+void CalibratorManager::setValue(double value)
 {
     if (calibratorIsConnected() == false)
     {
         return;
     }
 
-    m_ready = false;
+    m_readyForManage = false;
 
     emit calibratorSetValue(value);
 }
@@ -516,7 +518,7 @@ void CalibratorManager::stepDown()
         return;
     }
 
-    m_ready = false;
+    m_readyForManage = false;
 
     emit calibratorStepDown();
 }
@@ -537,7 +539,7 @@ void CalibratorManager::stepUp()
         return;
     }
 
-    m_ready = false;
+    m_readyForManage = false;
 
     emit calibratorStepUp();
 }
@@ -592,7 +594,6 @@ void CalibratorManager::loadCalibratorSettings(Calibrator* pCalibrator)
 
     pCalibrator->setPortName(portName);
     pCalibrator->setType(type);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------

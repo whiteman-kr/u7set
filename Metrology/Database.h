@@ -23,12 +23,12 @@ public:
                         SqlFieldBase();
                         ~SqlFieldBase();
 
-    int                 init(const int objectType, const int version);
+    int                 init(int objectType, int version);
 
     void                append(const QSqlField& field);
     void                append(QString name, QVariant::Type type = QVariant::Invalid, int length = 0);
 
-    QString             extFieldName(const int index);
+    QString             extFieldName(int index);
 };
 
 // ==============================================================================================
@@ -211,20 +211,20 @@ private:
 
 public:
 
-    bool                init(const int objectType);
+    bool                init(int objectType);
     void                clear();
 
     int                 objectType() const { return m_objectType; }
-    void                setObjectType(const int type) { m_objectType = type; }
+    void                setObjectType(int type) { m_objectType = type; }
 
     int                 objectID() const { return m_objectID; }
-    void                setObjectID(const int objectID) { m_objectID = objectID; }
+    void                setObjectID(int objectID) { m_objectID = objectID; }
 
     QString             name() const { return m_name; }
     void                setName(const QString& name) { m_name = name; }
 
     int                 version() const { return m_version; }
-    void                setVersion(const int verison) { m_version = verison; }
+    void                setVersion(int verison) { m_version = verison; }
 
     SqlObjectInfo&      operator=(SqlObjectInfo& from);
 };
@@ -237,7 +237,7 @@ class SqlHistoryDatabase
 public:
 
                         SqlHistoryDatabase();
-                        SqlHistoryDatabase(const int objectID, const int version, const QString& event, const QString& time);
+                        SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
                         ~SqlHistoryDatabase();
 
 private:
@@ -250,10 +250,10 @@ private:
 public:
 
     int                 objectID() const { return m_objectID; }
-    void                setObjectID(const int objectID) { m_objectID = objectID; }
+    void                setObjectID(int objectID) { m_objectID = objectID; }
 
     int                 version() const { return m_version; }
-    void                setVersion(const int verison) { m_version = verison; }
+    void                setVersion(int verison) { m_version = verison; }
 
     QString             event() const { return m_event; }
     void                setEvent(const QString& event) { m_event = event; }
@@ -288,7 +288,7 @@ public:
     int                 recordCount() const;
     int                 lastKey() const;
 
-    bool                init(const int objectType, QSqlDatabase* pDatabase);
+    bool                init(int objectType, QSqlDatabase* pDatabase);
 
     bool                isExist() const;
     bool                isOpen() const { return m_fieldBase.count() != 0; }
@@ -299,15 +299,15 @@ public:
     bool                drop();
     bool                clear();
 
-    int                 read(void* pRecord, const int key) { return read(pRecord, &key, 1); }
-    int                 read(void* pRecord, const int* key = nullptr, const int keyCount = 0);             // read record form table, if key == nullptr in the array pRecord will be record all records of table
+    int                 read(void* pRecord, int key) { return read(pRecord, &key, 1); }
+    int                 read(void* pRecord, int* key = nullptr, int keyCount = 0);             // read record form table, if key == nullptr in the array pRecord will be record all records of table
 
     int                 write(void* pRecord) { return write(pRecord, 1); }
-    int                 write(void* pRecord, const int count, const int key) { return write(pRecord, count, &key); }
-    int                 write(void* pRecord, const int recordCount, const int* key = nullptr);             // insert or update records (depend from key) in a table, pRecord - array of record, count - amount records
+    int                 write(void* pRecord, int count, int key) { return write(pRecord, count, &key); }
+    int                 write(void* pRecord, int recordCount, int* key = nullptr);             // insert or update records (depend from key) in a table, pRecord - array of record, count - amount records
 
-    int                 remove(const int key) { return remove(&key, 1); }                                  // remove records by key
-    int                 remove(const int* key, const int keyCount) const;
+    int                 remove(int key) { return remove(&key, 1); }                                  // remove records by key
+    int                 remove(const int* key, int keyCount) const;
 
     SqlTable&           operator=(SqlTable& from);
 };
@@ -327,10 +327,10 @@ public:
     bool                open();
     void                close();
 
-    SqlTable*           openTable(const int objectType);
+    SqlTable*           openTable(int objectType);
 
     bool                appendMeasure(Measurement* pMeasurement);
-    bool                removeMeasure(const int measuteType, const QVector<int> keyList);
+    bool                removeMeasure(int measuteType, const QVector<int>& keyList);
 
 private:
 

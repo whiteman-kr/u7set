@@ -10,14 +10,15 @@
 #include <QLabel>
 #include <QProgressBar>
 
+#include "../lib/SimpleThread.h"
+
 #include "MeasureView.h"
 #include "SignalSocket.h"
+#include "TuningSocket.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
 #include "SignalInfoPanel.h"
 #include "Calculator.h"
-
-#include "../lib/SimpleThread.h"
 
 // ==============================================================================================
 
@@ -53,7 +54,7 @@ public:
     QComboBox*          m_outputSignalTypeList;
 
     QComboBox*          m_asCaseTypeCombo;
-    QComboBox*          m_asMeasureSignalCombo;
+    QComboBox*          m_asSignalCombo;
     QComboBox*          m_asCaseNoCombo;
     QComboBox*          m_asSubblockCombo;
     QComboBox*          m_asBlockCombo;
@@ -77,12 +78,16 @@ public:
     QProgressBar*       m_statusMeasureTimeout = nullptr;
     QLabel*             m_statusMeasureThreadState = nullptr;
     QLabel*             m_statusCalibratorCount = nullptr;
-    QLabel*             m_statusConnectToServer = nullptr;
+    QLabel*             m_statusConnectToAppDataServer = nullptr;
+    QLabel*             m_statusConnectToTuningServer = nullptr;
 
 public:
 
     SignalSocket*       m_pSignalSocket = nullptr;
     SimpleThread*       m_pSignalSocketThread = nullptr;
+
+    TuningSocket*       m_pTuningSocket = nullptr;
+    SimpleThread*       m_pTuningSocketThread = nullptr;
 
     MeasureThread       m_measureThread;
 
@@ -108,11 +113,13 @@ public:
     void                createStatusBar();
     void                createContextMenu();
 
-    void                updateAnalogSignalToolBar();
+    void                updateCasesOnToolBar();
+    void                updateSignalsOnToolBar();
+    void                updateSignalPositionOnToolBar();
 
     MeasureView*        activeMeasureView() { return measureView(m_measureType); }
-    MeasureView*        measureView(const int measureType);
-    void                appendMeasureView(const int measureType, MeasureView* pView);
+    MeasureView*        measureView(int measureType);
+    void                appendMeasureView(int measureType, MeasureView* pView);
 
 private:
 
@@ -147,6 +154,7 @@ private:
     QAction*            m_pShowSignalListAction = nullptr;
     QAction*            m_pShowComparatorsListAction = nullptr;
     QAction*            m_pShowOutputSignalListAction = nullptr;
+    QAction*            m_pShowTuningSignalListAction = nullptr;
     QAction*            m_pOptionsAction;
 
     // menu - ?
@@ -192,8 +200,7 @@ private slots:
     void                showSignalList();
     void                showComparatorsList() {};
     void                showOutputSignalList();
-    void                showOutputRangeList() {};
-    void                showComlexComparatorList() {};
+    void                showTuningSignalList();
     void                options();
 
     // menu - ?
@@ -204,7 +211,7 @@ private slots:
 
     // Slots of tab -- page measure type
     //
-    void                setMeasureType(const int measureType);
+    void                setMeasureType(int measureType);
     void                measureCountChanged(int);
 
     // Slots of control panels
@@ -221,7 +228,7 @@ private slots:
     void                setSubblock(int index);
     void                setBlock(int index);
     void                setEntry(int index);
-    void                setMeasureSignalByPosition(int index);
+    void                setMetrologySignalByPosition(int index);
 
     // Slots of contex menu
     //
@@ -231,11 +238,16 @@ private slots:
     //
     void                calibratorConnectedChanged(int);
 
-    // Slots of socket for signals
+    // Slots of signalSocket
     //
     void                signalSocketConnected();
     void                signalSocketDisconnected();
     void                signalSocketSignalsLoaded();
+
+    // Slots of tuningSocket
+    //
+    void                tuningSocketConnected();
+    void                tuningSocketDisconnected();
 
     // Slots of measure thread
     //

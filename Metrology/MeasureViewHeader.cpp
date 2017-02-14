@@ -23,18 +23,17 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Entry"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_DISABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "El. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "El. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. nominal value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value to %"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "El. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "MSE"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Low border"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "High border"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Amount measuremets"), 80, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 1"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 2"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
@@ -56,10 +55,11 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 18"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 19"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 20"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 90, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_BOLD, MVC_CMN_COLOR_LIGHT_BLUE, MVC_CMN_ENABLE_DUPLICATE),
-        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of output"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_BOLD, MVC_CMN_COLOR_LIGHT_BLUE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_BOLD, MVC_CMN_COLOR_LIGHT_BLUE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of output"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_BOLD, MVC_CMN_COLOR_LIGHT_BLUE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
         MeasureViewColumn( QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_NO_BOLD, MVC_CMN_COLOR_WHITE, MVC_CMN_ENABLE_DUPLICATE),
+        MeasureViewColumn(),
         MeasureViewColumn(),
         MeasureViewColumn(),
         MeasureViewColumn(),
@@ -169,7 +169,7 @@ MeasureViewColumn::MeasureViewColumn(const MeasureViewColumn& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn::MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate) :
+MeasureViewColumn::MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool bold, const QColor& color, bool duplicate) :
     m_title(title) ,
     m_width(width) ,
     m_enableVisible(visible) ,
@@ -239,7 +239,7 @@ MeasureViewHeader::~MeasureViewHeader()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setMeasureType(const int measureType)
+void MeasureViewHeader::setMeasureType(int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -260,7 +260,7 @@ void MeasureViewHeader::setMeasureType(const int measureType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::init(const int type)
+void MeasureViewHeader::init(int type)
 {
     if (type < 0 || type >= MEASURE_TYPE_COUNT)
     {
@@ -293,7 +293,7 @@ int MeasureViewHeader::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureViewColumn* MeasureViewHeader::column(const int index) const
+MeasureViewColumn* MeasureViewHeader::column(int index) const
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {
@@ -337,8 +337,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_PERCENT, false);
                         setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
                         setColumnVisible(MVC_CMN_L_MSE, false);
-                        setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
-                        setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
+                        setColumnVisible(MVC_CMN_L_BORDER, false);
 
                         for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
@@ -356,8 +355,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_PERCENT, true);
                         setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, true);
                         setColumnVisible(MVC_CMN_L_MSE, true);
-                        setColumnVisible(MVC_CMN_L_LOW_BORDER, true);
-                        setColumnVisible(MVC_CMN_L_HIGH_BORDER, true);
+                        setColumnVisible(MVC_CMN_L_BORDER, true);
 
                         for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
@@ -376,8 +374,7 @@ void MeasureViewHeader::updateColumnState()
                         setColumnVisible(MVC_CMN_L_PERCENT, false);
                         setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
                         setColumnVisible(MVC_CMN_L_MSE, false);
-                        setColumnVisible(MVC_CMN_L_LOW_BORDER, false);
-                        setColumnVisible(MVC_CMN_L_HIGH_BORDER, false);
+                        setColumnVisible(MVC_CMN_L_BORDER, false);
 
                         for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
                         {
@@ -408,7 +405,7 @@ void MeasureViewHeader::updateColumnState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureViewHeader::setColumnVisible(const int column, const bool visible)
+void MeasureViewHeader::setColumnVisible(int column, bool visible)
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {

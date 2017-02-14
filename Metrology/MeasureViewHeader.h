@@ -2,6 +2,7 @@
 #define MEASUREVIEWHEADER_H
 
 #include <QColor>
+
 #include "Measure.h"
 
 // ==============================================================================================
@@ -26,7 +27,7 @@ public:
 
                         MeasureViewColumn();
                         MeasureViewColumn(const MeasureViewColumn& from);
-                        MeasureViewColumn(const QString& title, const int width, const bool visible, const int alignment, const bool bold, const QColor& color, const bool duplicate);
+                        MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool bold, const QColor& color, bool duplicate);
                         ~MeasureViewColumn();
 
 private:
@@ -46,21 +47,21 @@ private:
 public:
 
     int                 index() const { return m_index; }
-    void                setIndex(const int index) { m_index = index; }
+    void                setIndex(int index) { m_index = index; }
 
     QString             title() const { return m_title; }
 
     int                 width() const { return m_width; }
-    void                setWidth(const int width) { m_width = width; }
+    void                setWidth(int width) { m_width = width; }
 
 
     bool                enableVisible() const { return m_enableVisible; }
-    void                setVisible(const bool enable) { m_enableVisible = enable; }
+    void                setVisible(bool enable) { m_enableVisible = enable; }
 
     int                 alignment() const { return m_alignment; }
 
     bool                boldFont() const { return m_boldFont; }
-    void                setBoldFont(const bool bold) { m_boldFont = bold; }
+    void                setBoldFont(bool bold) { m_boldFont = bold; }
 
     QColor              color() const { return m_color; }
     void                setColor(const QColor& color) { m_color = color; }
@@ -91,16 +92,16 @@ public:
     explicit            MeasureViewHeader(QObject *parent = 0);
                         ~MeasureViewHeader();
 
-    void                setMeasureType(const int measureType);
+    void                setMeasureType(int measureType);
 
-    void                init(const int type);
+    void                init(int type);
 
     int                 count() const;
-    MeasureViewColumn*  column(const int index) const;
+    MeasureViewColumn*  column(int index) const;
 
     void                updateColumnState();
 
-    void                setColumnVisible(const int column, const bool visible);
+    void                setColumnVisible(int column, bool visible);
 
 private:
 
@@ -132,33 +133,32 @@ const int               MVC_CMN_L_PH_MEASURE        = 15;
 const int               MVC_CMN_L_OUT_MEASURE       = 16;
 const int               MVC_CMN_L_SYSTEM_ERROR      = 17;
 const int               MVC_CMN_L_MSE               = 18;
-const int               MVC_CMN_L_LOW_BORDER        = 19;
-const int               MVC_CMN_L_HIGH_BORDER       = 20;
-const int               MVC_CMN_L_VALUE_COUNT       = 21;
-const int               MVC_CMN_L_VALUE_0           = 22;
-const int               MVC_CMN_L_VALUE_1           = 23;
-const int               MVC_CMN_L_VALUE_2           = 24;
-const int               MVC_CMN_L_VALUE_3           = 25;
-const int               MVC_CMN_L_VALUE_4           = 26;
-const int               MVC_CMN_L_VALUE_5           = 27;
-const int               MVC_CMN_L_VALUE_6           = 28;
-const int               MVC_CMN_L_VALUE_7           = 29;
-const int               MVC_CMN_L_VALUE_8           = 30;
-const int               MVC_CMN_L_VALUE_9           = 31;
-const int               MVC_CMN_L_VALUE_10          = 32;
-const int               MVC_CMN_L_VALUE_11          = 33;
-const int               MVC_CMN_L_VALUE_12          = 34;
-const int               MVC_CMN_L_VALUE_13          = 35;
-const int               MVC_CMN_L_VALUE_14          = 36;
-const int               MVC_CMN_L_VALUE_15          = 37;
-const int               MVC_CMN_L_VALUE_16          = 38;
-const int               MVC_CMN_L_VALUE_17          = 39;
-const int               MVC_CMN_L_VALUE_18          = 40;
-const int               MVC_CMN_L_VALUE_19          = 41;
-const int               MVC_CMN_L_ERROR             = 42;
-const int               MVC_CMN_L_OUT_ERROR         = 43;
-const int               MVC_CMN_L_LIMIT_ERROR       = 44;
-const int               MVC_CMN_L_MEASUREMENT_TIME  = 45;
+const int               MVC_CMN_L_BORDER            = 19;
+const int               MVC_CMN_L_VALUE_COUNT       = 20;
+const int               MVC_CMN_L_VALUE_0           = 21;
+const int               MVC_CMN_L_VALUE_1           = 22;
+const int               MVC_CMN_L_VALUE_2           = 23;
+const int               MVC_CMN_L_VALUE_3           = 24;
+const int               MVC_CMN_L_VALUE_4           = 25;
+const int               MVC_CMN_L_VALUE_5           = 26;
+const int               MVC_CMN_L_VALUE_6           = 27;
+const int               MVC_CMN_L_VALUE_7           = 28;
+const int               MVC_CMN_L_VALUE_8           = 29;
+const int               MVC_CMN_L_VALUE_9           = 30;
+const int               MVC_CMN_L_VALUE_10          = 31;
+const int               MVC_CMN_L_VALUE_11          = 32;
+const int               MVC_CMN_L_VALUE_12          = 33;
+const int               MVC_CMN_L_VALUE_13          = 34;
+const int               MVC_CMN_L_VALUE_14          = 35;
+const int               MVC_CMN_L_VALUE_15          = 36;
+const int               MVC_CMN_L_VALUE_16          = 37;
+const int               MVC_CMN_L_VALUE_17          = 38;
+const int               MVC_CMN_L_VALUE_18          = 39;
+const int               MVC_CMN_L_VALUE_19          = 40;
+const int               MVC_CMN_L_ERROR             = 41;
+const int               MVC_CMN_L_OUT_ERROR         = 42;
+const int               MVC_CMN_L_LIMIT_ERROR       = 43;
+const int               MVC_CMN_L_MEASUREMENT_TIME  = 44;
 
 // ==============================================================================================
 

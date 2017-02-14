@@ -95,7 +95,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    MeasureSignalParam param = signalParam(row);
+    SignalParam param = signalParam(row);
     if (param.isValid() == false)
     {
         return QVariant();
@@ -119,6 +119,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
             case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_TUNING:         result = Qt::AlignCenter;   break;
             default:                                assert(0);
         }
 
@@ -140,7 +141,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalListTable::text(const int  row, const int column, const MeasureSignalParam& param) const
+QString SignalListTable::text(int  row, int column, const SignalParam& param) const
 {
     if (row < 0 || row >= signalCount())
     {
@@ -173,6 +174,7 @@ QString SignalListTable::text(const int  row, const int column, const MeasureSig
         case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = param.inputElectricRangeStr();     break;
         case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = param.outputPhysicalRangeStr();    break;
         case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = param.outputElectricRangeStr();    break;
+        case SIGNAL_LIST_COLUMN_TUNING:         result = param.enableTuning() == true ? tr("Yes") : QString(); break;
         default:                                assert(0);
     }
 
@@ -196,9 +198,9 @@ int SignalListTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureSignalParam SignalListTable::signalParam(const int index) const
+SignalParam SignalListTable::signalParam(int index) const
 {
-    MeasureSignalParam param;
+    SignalParam param;
 
     m_signalMutex.lock();
 
@@ -214,7 +216,7 @@ MeasureSignalParam SignalListTable::signalParam(const int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<MeasureSignalParam> list_add)
+void SignalListTable::set(const QList<SignalParam> list_add)
 {
     int count = list_add.count();
     if (count == 0)
@@ -294,11 +296,12 @@ int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
      60,    // LIST_COLUMN_SUBBLOCK
      60,    // LIST_COLUMN_BLOCK
      60,    // LIST_COLUMN_ENTRY
-    100,    // LIST_COLUMN_ADC
+    120,    // LIST_COLUMN_ADC
     150,    // LIST_COLUMN_IN_PH_RANGE
     150,    // LIST_COLUMN_IN_EL_RANGE
     150,    // LIST_COLUMN_OUT_PH_RANGE
     150,    // LIST_COLUMN_OUT_EL_RANGE
+     50,    // LIST_COLUMN_TUNING
 };
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -309,7 +312,7 @@ int                 SignalListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalListDialog::SignalListDialog(const bool hasButtons, QWidget *parent) :
+SignalListDialog::SignalListDialog(bool hasButtons, QWidget *parent) :
     QDialog(parent)
 {
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
@@ -331,7 +334,7 @@ SignalListDialog::~SignalListDialog()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::createInterface(const bool hasButtons)
+void SignalListDialog::createInterface(bool hasButtons)
 {
     setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     setWindowIcon(QIcon(":/icons/Signals.png"));
@@ -517,12 +520,12 @@ void SignalListDialog::updateList()
 
     m_signalParamTable.clear();
 
-    QList<MeasureSignalParam> signalParamList;
+    QList<SignalParam> signalParamList;
 
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        MeasureSignalParam param = theSignalBase.signalParam(i);
+        SignalParam param = theSignalBase.signalParam(i);
         if (param.isValid() == false)
         {
             continue;
@@ -554,10 +557,28 @@ void SignalListDialog::updateVisibleColunm()
         hideColumn(c, false);
     }
 
+    hideColumn(SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
+
+
+
     if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Input)
     {
         hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
         hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+    }
+
+
+    if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Internal)
+    {
+        hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+        hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+    }
+
+    if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Output)
+    {
+        hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
     }
 
     if (m_typeAD == E::SignalType::Discrete)
@@ -568,11 +589,16 @@ void SignalListDialog::updateVisibleColunm()
         hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
         hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
     }
+
+    if (m_typeIO != E::SignalInOutType::Internal)
+    {
+        hideColumn(SIGNAL_LIST_COLUMN_TUNING, true);
+    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::hideColumn(const int column, const bool hide)
+void SignalListDialog::hideColumn(int column, bool hide)
 {
     if (column < 0 || column >= SIGNAL_LIST_COLUMN_COUNT)
     {
@@ -683,7 +709,7 @@ void SignalListDialog::signalProperty()
         return;
     }
 
-    MeasureSignalParam param = m_signalParamTable.signalParam(index);
+    SignalParam param = m_signalParamTable.signalParam(index);
     if (param.isValid() == false)
     {
         return;
@@ -820,7 +846,7 @@ void SignalListDialog::onOk()
         return;
     }
 
-    MeasureSignalParam param = m_signalParamTable.signalParam(index);
+    SignalParam param = m_signalParamTable.signalParam(index);
     if (param.isValid() == false)
     {
         return;

@@ -88,7 +88,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    MeasureSignalParam param = signalParam(row);
+    SignalParam param = signalParam(row);
     if (param.isValid() == false)
     {
         return QVariant();
@@ -158,7 +158,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::text(const int row, const int column, const MeasureSignalParam& param, const AppSignalState& state) const
+QString SignalInfoTable::text(int row, int column, const SignalParam& param, const AppSignalState& state) const
 {
     if (row < 0 || row >= MAX_CHANNEL_COUNT)
     {
@@ -199,16 +199,21 @@ QString SignalInfoTable::text(const int row, const int column, const MeasureSign
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const AppSignalState& state) const
+QString SignalInfoTable::signalStateStr(const SignalParam& param, const AppSignalState& state) const
 {
     if (param.isValid() == false)
     {
         return QString();
     }
 
+    if (state.flags.valid == false)
+    {
+        return tr("No valid");
+    }
+
     QString stateStr, formatStr;
 
-    formatStr.sprintf( ("%%.%df"), param.inputPhysicalPrecise() );
+    formatStr.sprintf( ("%%.%df"), param.inputPhysicalPrecision() );
 
     stateStr.sprintf( formatStr.toAscii(), state.value );
 
@@ -223,7 +228,7 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
     if (theOptions.signalInfo().showElectricState() == true)
     {
         double electric = conversion( state.value, CT_PHYSICAL_TO_ELECTRIC, param);
-        stateStr.append( " = " + QString::number( electric, 10, param.inputElectricPrecise() ) );
+        stateStr.append( " = " + QString::number( electric, 10, param.inputElectricPrecision() ) );
 
         int electricUnit = param.inputElectricUnitID();
         if ( electricUnit >= 0 && electricUnit < theUnitBase.unitCount())
@@ -250,19 +255,14 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
 
     // check flags
     //
-    if (state.flags.underflow != 0)
+    if (state.flags.underflow == true)
     {
         stateStr.append(" - Underflow");
     }
 
-    if (state.flags.overflow != 0)
+    if (state.flags.overflow == true)
     {
         stateStr.append(" - Overflow");
-    }
-
-    if (state.flags.valid == 0)
-    {
-        stateStr = "No valid";
     }
 
     return stateStr;
@@ -270,7 +270,7 @@ QString SignalInfoTable::signalStateStr(const MeasureSignalParam& param, const A
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateColumn(const int column)
+void SignalInfoTable::updateColumn(int column)
 {
     if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
     {
@@ -287,9 +287,9 @@ void SignalInfoTable::updateColumn(const int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureSignalParam SignalInfoTable::signalParam(const int index) const
+SignalParam SignalInfoTable::signalParam(int index) const
 {
-    MeasureSignalParam param;
+    SignalParam param;
 
     m_signalMutex.lock();
 
@@ -305,7 +305,7 @@ MeasureSignalParam SignalInfoTable::signalParam(const int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::set(const MeasureMultiSignal& activeSignal)
+void SignalInfoTable::set(const MetrologyMultiSignal& activeSignal)
 {
     clear();
 
@@ -543,7 +543,7 @@ void SignalInfoPanel::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::hideColumn(const int column, const bool hide)
+void SignalInfoPanel::hideColumn(int column, bool hide)
 {
     if (column < 0 || column >= SIGNAL_INFO_COLUMN_COUNT)
     {
@@ -618,7 +618,7 @@ bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
 
 void SignalInfoPanel::onSetActiveSignal()
 {
-    m_signalParamTable.set( theSignalBase.activeSignal() );
+    m_signalParamTable.set( theSignalBase.activeSignal().signal(MEASURE_IO_SIGNAL_TYPE_INPUT) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -696,7 +696,7 @@ void SignalInfoPanel::signalProperty()
         return;
     }
 
-    MeasureSignalParam param = m_signalParamTable.signalParam(index);
+    SignalParam param = m_signalParamTable.signalParam(index);
     if (param.isValid() == false)
     {
         return;

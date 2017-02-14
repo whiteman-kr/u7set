@@ -35,7 +35,7 @@ void FindData::createFindDialog(QTableView *pView)
 
     m_pFindDialog = new QDialog(pView->parentWidget());
 
-    m_pFindDialog->setWindowFlags(Qt::Dialog );
+    m_pFindDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
     m_pFindDialog->setWindowTitle(tr("Find"));
     m_pFindDialog->setWindowIcon(QIcon(":/icons/Find.png"));
 
@@ -119,7 +119,7 @@ void FindData::findNext()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int FindData::find(const int start)
+int FindData::find(int start)
 {
     if (m_pView == nullptr)
     {
@@ -175,7 +175,7 @@ int FindData::find(const int start)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindData::enableFindNextButton(const int foundRow)
+void FindData::enableFindNextButton(int foundRow)
 {
     if (foundRow == -1)
     {

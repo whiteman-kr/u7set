@@ -10,12 +10,12 @@
 #include <QFont>
 #include <QTimer>
 
+#include "../lib/SocketIO.h"
+
 #include "CalibratorBase.h"
 #include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
-
-#include "../lib/SocketIO.h"
 
 // ==============================================================================================
 
@@ -23,32 +23,80 @@
 
 // ==============================================================================================
 
-#define                 TCPIP_OPTIONS_KEY               "Options/TcpIp/"
+#define                 CONFIG_SOCKET_OPTIONS_KEY       "Options/ConfigSocket/"
 
 // ----------------------------------------------------------------------------------------------
 
-const char* const       TcpIpParamName[] =
+const char* const       ConfigSocketParamName[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "IP"),
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
 };
 
-const int               TCPIP_PARAM_COUNT       = sizeof(TcpIpParamName)/sizeof(TcpIpParamName[0]);
+const int               CONFIG_SOCKET_PARAM_COUNT       = sizeof(ConfigSocketParamName)/sizeof(ConfigSocketParamName[0]);
 
-const int               TCPIP_PARAM_SERVER_IP   = 0,
-                        TCPIP_PARAM_SERVER_PORT = 1;
+const int               CONFIG_SOCKET_PARAM_SERVER_IP   = 0,
+                        CONFIG_SOCKET_PARAM_SERVER_PORT = 1;
 
 // ----------------------------------------------------------------------------------------------
 
-class TcpIpOption : public QObject
+class ConfigSocketOption : public QObject
 {
     Q_OBJECT
 
 public:
 
-    explicit            TcpIpOption(QObject *parent = 0);
-    explicit            TcpIpOption(const TcpIpOption& from, QObject *parent = 0);
-                        ~TcpIpOption();
+    explicit            ConfigSocketOption(QObject *parent = 0);
+    explicit            ConfigSocketOption(const ConfigSocketOption& from, QObject *parent = 0);
+                        ~ConfigSocketOption();
+private:
+
+    QString             m_serverIP = "127.0.0.1";
+    int                 m_serverPort = PORT_CONFIGURATION_SERVICE_REQUEST;
+
+public:
+
+    QString             serverIP() const { return m_serverIP; }
+    void                setServerIP(const QString& ip) { m_serverIP = ip; }
+
+    int                 serverPort() const { return m_serverPort; }
+    void                setServerPort(int port) { m_serverPort = port; }
+
+
+    void                load();
+    void                save();
+
+    ConfigSocketOption& operator=(const ConfigSocketOption& from);
+};
+
+// ==============================================================================================
+
+#define                 SIGNAL_SOCKET_OPTIONS_KEY       "Options/SignalSocket/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       SignalSocketParamName[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "IP"),
+                        QT_TRANSLATE_NOOP("Options.h", "Port"),
+};
+
+const int               SIGNAL_SOCKET_PARAM_COUNT       = sizeof(SignalSocketParamName)/sizeof(SignalSocketParamName[0]);
+
+const int               SIGNAL_SOCKET_PARAM_SERVER_IP   = 0,
+                        SIGNAL_SOCKET_PARAM_SERVER_PORT = 1;
+
+// ----------------------------------------------------------------------------------------------
+
+class SignalSocketOption : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    explicit            SignalSocketOption(QObject *parent = 0);
+    explicit            SignalSocketOption(const SignalSocketOption& from, QObject *parent = 0);
+                        ~SignalSocketOption();
 private:
 
     QString             m_serverIP = "127.0.0.1";
@@ -60,13 +108,67 @@ public:
     void                setServerIP(const QString& ip) { m_serverIP = ip; }
 
     int                 serverPort() const { return m_serverPort; }
-    void                setServerPort(const int port) { m_serverPort = port; }
+    void                setServerPort(int port) { m_serverPort = port; }
 
 
     void                load();
     void                save();
 
-    TcpIpOption&        operator=(const TcpIpOption& from);
+    SignalSocketOption& operator=(const SignalSocketOption& from);
+};
+
+// ==============================================================================================
+
+#define                 TUNING_SOCKET_OPTIONS_KEY       "Options/TuningSocket/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       TuningSocketParamName[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "IP"),
+                        QT_TRANSLATE_NOOP("Options.h", "Port"),
+                        QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+};
+
+const int               TUNING_SOCKET_PARAM_COUNT           = sizeof(TuningSocketParamName)/sizeof(TuningSocketParamName[0]);
+
+const int               TUNING_SOCKET_PARAM_SERVER_IP       = 0,
+                        TUNING_SOCKET_PARAM_SERVER_PORT     = 1,
+                        TUNING_SOCKET_PARAM_EQUIPMENT_ID    = 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class TuningSocketOption : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    explicit            TuningSocketOption(QObject *parent = 0);
+    explicit            TuningSocketOption(const TuningSocketOption& from, QObject *parent = 0);
+                        ~TuningSocketOption();
+private:
+
+    QString             m_serverIP = "127.0.0.1";
+    int                 m_serverPort = PORT_TUNING_SERVICE_CLIENT_REQUEST;
+
+    QString             m_equipmentID = "SYSTEM_RACKID_WS00_TUN";
+
+public:
+
+    QString             serverIP() const { return m_serverIP; }
+    void                setServerIP(const QString& ip) { m_serverIP = ip; }
+
+    int                 serverPort() const { return m_serverPort; }
+    void                setServerPort(int port) { m_serverPort = port; }
+
+    QString             equipmentID() const { return m_equipmentID; }
+    void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+
+    void                load();
+    void                save();
+
+    TuningSocketOption& operator=(const TuningSocketOption& from);
 };
 
 // ==============================================================================================
@@ -87,18 +189,18 @@ private:
 
     int                 m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
     int                 m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
-    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_NO_USED;  // selected type of output signal
+    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;      // selected type of output signal
 
 public:
 
     int                 measureTimeout() const { return m_measureTimeout; }
-    void                setMeasureTimeout(const int timeout) { m_measureTimeout = timeout; }
+    void                setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
 
     int                 measureKind() const { return m_measureKind; }
-    void                setMeasureKind(const int kind) { m_measureKind = kind; }
+    void                setMeasureKind(int kind) { m_measureKind = kind; }
 
     int                 outputSignalType() const { return m_outputSignalType; }
-    void                setOutputSignalType(const int type) { m_outputSignalType = type; }
+    void                setOutputSignalType(int type) { m_outputSignalType = type; }
 
 
     void                load();
@@ -169,7 +271,7 @@ private:
 public:
 
     int                 measureType() const { return m_measureType; }
-    void                setMeasureType(const int measureType) { m_measureType = measureType; }
+    void                setMeasureType(int measureType) { m_measureType = measureType; }
 
     QFont&              font() { return m_font; }
     void                setFont(QFont font) { m_font = font; }
@@ -178,7 +280,7 @@ public:
     void                setFontBold(QFont font) { m_fontBold = font; }
 
     bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(const bool show) { m_showCustomID = show; }
+    void                setShowCustomID(bool show) { m_showCustomID = show; }
 
     QColor              colorNotError() const { return m_colorNotError; }
     void                setColorNotError(QColor color) { m_colorNotError = color; }
@@ -263,16 +365,16 @@ public:
     void                setFont(QFont font) { m_font = font; }
 
     bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(const bool show) { m_showCustomID = show; }
+    void                setShowCustomID(bool show) { m_showCustomID = show; }
 
     bool                showElectricState() const { return m_showElectricState; }
-    void                setShowElectricState(const bool show) { m_showElectricState = show; }
+    void                setShowElectricState(bool show) { m_showElectricState = show; }
 
     bool                showAdcState() const { return m_showAdcState; }
-    void                setShowAdcState(const bool show) { m_showAdcState = show; }
+    void                setShowAdcState(bool show) { m_showAdcState = show; }
 
     bool                showAdcHexState() const { return m_showAdcHexState; }
-    void                setShowAdcHexState(const bool show) { m_showAdcHexState = show; }
+    void                setShowAdcHexState(bool show) { m_showAdcHexState = show; }
 
     QColor              colorFlagValid() const { return m_colorFlagValid; }
     void                setColorFlagValid(QColor color) { m_colorFlagValid = color; }
@@ -340,7 +442,7 @@ public:
     void                setPath(const QString& path) { m_path = path; }
 
     int                 type() const { return m_type; }
-    void                setType(const int type) { m_type = type; }
+    void                setType(int type) { m_type = type; }
 
 
     bool                create();
@@ -458,7 +560,7 @@ struct REPORT_HEADER
 
     int                 m_param = 0;
 
-    void                init(const int type);
+    void                init(int type);
 };
 
 
@@ -492,17 +594,19 @@ private:
     QString             m_path;
     int					m_type = REPORT_TYPE_LINEARITY;
 
+    ReportHeaderBase    m_headerBase;
+
 public:
 
     QString             path() const { return m_path; }
     void                setPath(const QString& path) { m_path = path; }
 
     int                 type() const { return m_type; }
-    void                setType(const int type) { m_type = type; }
+    void                setType(int type) { m_type = type; }
 
-    ReportHeaderBase    m_headerBase;
+    ReportHeaderBase&   header() { return m_headerBase; }
 
-    int                 reportTypeByMeasureType(const int measureType);
+    int                 reportTypeByMeasureType(int measureType);
 
     void                load();
     void                save();
@@ -557,12 +661,12 @@ private:
 public:
 
     int                 pointID() const { return m_pointID; }
-    void                setPointID(const int id) { m_pointID = id; }
+    void                setPointID(int id) { m_pointID = id; }
 
     double              percent() const {return m_percentValue; }
-    void                setPercent(const double value);
+    void                setPercent(double value);
 
-    double              sensorValue(const int sensor);
+    double              sensorValue(int sensor);
 };
 
 // ==============================================================================================
@@ -602,21 +706,20 @@ const char* const       LinearityParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Show column of output values"),
 };
 
-const int               LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
+const int               LO_PARAM_COUNT                      = sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
 
-const int               LO_PARAM_ERROR				= 0,
-                        LO_PARAM_ERROR_CTRL			= 1,
-                        LO_PARAM_ERROR_TYPE			= 2,
-                        LO_PARAM_MEASURE_TIME		= 3,
-                        LO_PARAM_MEASURE_IN_POINT	= 4,
-                        LO_PARAM_RANGE_TYPE			= 5,
-                        LO_PARAM_POINT_COUNT		= 6,
-                        LO_PARAM_LOW_RANGE			= 7,
-                        LO_PARAM_HIGH_RANGE			= 8,
-                        LO_PARAM_VALUE_POINTS       = 9,
-                        LO_PARAM_LIST_TYPE          = 10,
-                        LO_PARAM_OUTPUT_RANGE		= 11;
-
+const int               LO_PARAM_ERROR                      = 0,
+                        LO_PARAM_ERROR_CTRL                 = 1,
+                        LO_PARAM_ERROR_TYPE                 = 2,
+                        LO_PARAM_MEASURE_TIME               = 3,
+                        LO_PARAM_MEASURE_IN_POINT           = 4,
+                        LO_PARAM_RANGE_TYPE                 = 5,
+                        LO_PARAM_POINT_COUNT                = 6,
+                        LO_PARAM_LOW_RANGE                  = 7,
+                        LO_PARAM_HIGH_RANGE                 = 8,
+                        LO_PARAM_VALUE_POINTS               = 9,
+                        LO_PARAM_LIST_TYPE                  = 10,
+                        LO_PARAM_OUTPUT_RANGE               = 11;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -660,24 +763,34 @@ public:
     explicit            LinearityOption(const LinearityOption& from, QObject *parent = 0);
                         ~LinearityOption();
 
-//private:
+private:
+
+    LinearityPointBase  m_pointBase;                                                // list of measurement points
+
+    int                 m_measureTimeInPoint = 1;                                   // time, in seconds, during which will be made ​​N measurements at each point
+    int                 m_measureCountInPoint = 20;                                 // count of measurements in a point, according to GOST MI-2002 application 7
+
 public:
 
-    LinearityPointBase  m_pointBase;                                    // list of measurement points
+    LinearityPointBase& points() { return m_pointBase; }
 
-    double              m_errorValue = 0.2;                             // permissible error is given by specified documents
-    double              m_errorCtrl = 0.1;                              // control error is given by metrologists
-    int                 m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
 
-    int                 m_measureTimeInPoint = 1;                       // time, in seconds, during which will be made ​​N measurements at each point
-    int                 m_measureCountInPoint = 20;                     // количество измерений в точке, согласно госту МИ 2002-89 приложение 7
+    double              m_errorValue = 0.2;                                         // permissible error is given by specified documents
+    double              m_errorCtrl = 0.1;                                          // control error is given by metrologists
+    int                 m_errorType = MEASURE_ERROR_TYPE_REDUCE;                    // type of error absolute or reduced
 
-    int                 m_rangeType = LO_RANGE_TYPE_MANUAL;             // type of division measure range: manual - 0 or automatic - 1
-    double              m_lowLimitRange = 0;                            // lower limit of the range for automatic division
-    double              m_highLimitRange = 100;                         // high limit of the range for automatic division
+    int                 measureTimeInPoint() { return m_measureTimeInPoint; }
+    void                setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
 
-    int                 m_viewType = LO_VIEW_TYPE_SIMPLE;               // type of measurements list extended or simple
-    bool                m_showOutputRangeColumn = false;                // show column output values
+    int                 measureCountInPoint();
+    void                setMeasureCountInPoint(int measureCount);
+
+    int                 m_rangeType = LO_RANGE_TYPE_MANUAL;                         // type of division measure range: manual - 0 or automatic - 1
+    double              m_lowLimitRange = 0;                                        // lower limit of the range for automatic division
+    double              m_highLimitRange = 100;                                     // high limit of the range for automatic division
+
+    int                 m_viewType = LO_VIEW_TYPE_SIMPLE;                           // type of measurements list extended or simple
+    bool                m_showOutputRangeColumn = false;                            // show column output values
 
 public:
 
@@ -733,7 +846,7 @@ public:
     double				m_errorValue = 0.2;                             // permissible error is given by specified documents
     double				m_errorCtrl = 0.1;                              // control error is given by metrologists
     double				m_startValue = 0.1;                             // start value is given by metrologists
-    int					m_errorType = ERROR_TYPE_REDUCE;                // type of error absolute or reduced
+    int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;        // type of error absolute or reduced
 
     bool				m_enableMeasureHysteresis = false;              // enable flag to measure hysteresis of сomparator
     int					m_startComparatorIndex = 0;                     // start the measurement with the сomparators under the number ...
@@ -787,10 +900,10 @@ private:
 public:
 
     bool                onStart () const { return m_onStart; }
-    void                setOnStart(const bool onStart) { m_onStart = onStart; }
+    void                setOnStart(bool onStart) { m_onStart = onStart; }
 
     bool                onExit() const { return m_onExit; }
-    void                setOnExit(const bool onExit) { m_onExit = onExit; }
+    void                setOnExit(bool onExit) { m_onExit = onExit; }
 
     QString             path() const { return m_path; }
     void                setPath(const QString& path) { m_path = path; }
@@ -827,7 +940,9 @@ private:
     QMutex              m_mutex;
 
     ToolBarOption       m_toolBar;
-    TcpIpOption         m_connectTcpIp;
+    ConfigSocketOption  m_configSocket;
+    SignalSocketOption  m_signalSocket;
+    TuningSocketOption  m_tuningSocket;
     MeasureViewOption   m_measureView;
     SignalInfoOption    m_signalInfo;
     DatabaseOption      m_database;
@@ -841,8 +956,14 @@ public:
     ToolBarOption&      toolBar() { return m_toolBar; }
     void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
-    TcpIpOption&        connectTcpIp() { return m_connectTcpIp; }
-    void                setConnectTcpIp(const TcpIpOption& connectTcpIp) { m_connectTcpIp = connectTcpIp; }
+    ConfigSocketOption& configSocket() { return m_configSocket; }
+    void                setСonfigSocket(const ConfigSocketOption& configSocket) { m_configSocket = configSocket; }
+
+    SignalSocketOption& signalSocket() { return m_signalSocket; }
+    void                setSignalSocket(const SignalSocketOption& connectSocket) { m_signalSocket = connectSocket; }
+
+    TuningSocketOption& tuningSocket() { return m_tuningSocket; }
+    void                setTuningSocket(const TuningSocketOption& tuningSocket) { m_tuningSocket = tuningSocket; }
 
     MeasureViewOption&  measureView() { return m_measureView; }
     void                setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }

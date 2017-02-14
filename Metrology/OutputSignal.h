@@ -13,9 +13,9 @@
 #include <QCheckBox>
 #include <QDialogButtonBox>
 
-#include "SignalBase.h"
-
 #include "../lib/Signal.h"
+
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -59,11 +59,11 @@ public:
                         ~OutputSignalTable();
 
     int                 signalCount() const;
-    OutputSignal        at(const int index) const;
+    OutputSignal        at(int index) const;
     void                set(const QList<OutputSignal> list_add);
     void                clear();
 
-    QString             text(const int row, const int column, const OutputSignal& signal) const;
+    QString             text(int row, int column, const OutputSignal& signal) const;
 
     bool                showCustomID() const { return m_showCustomID; }
     void                setShowCustomID(bool show) { m_showCustomID = show; }
@@ -93,7 +93,7 @@ public:
     explicit            OutputSignalItemDialog(const OutputSignal& signal, QWidget *parent = 0);
                         ~OutputSignalItemDialog();
 
-    OutputSignal        signal() { return m_signal; }
+    OutputSignal        signal() const { return m_signal; }
 
 private:
 

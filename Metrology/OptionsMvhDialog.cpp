@@ -206,7 +206,7 @@ void OptionsMeasureViewHeaderDialog::clearList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OptionsMeasureViewHeaderDialog::setMeasureType(const int measureType)
+void OptionsMeasureViewHeaderDialog::setMeasureType(int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {

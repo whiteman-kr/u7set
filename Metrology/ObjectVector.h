@@ -4,7 +4,6 @@
 #include <QMutex>
 #include <QVector>
 
-
 #include "Database.h"
 
 // ==============================================================================================
@@ -31,19 +30,19 @@ public:
     int				count() const;
     bool            isEmpty() const;
 
-    // TYPE         operator[](const int index);       don't append this method
-    TYPE            at(const int index) const;
+    // TYPE         operator[](int index);       don't append this method
+    TYPE            at(int index) const;
 
-    int             set(const int index, const TYPE& item);
+    int             set(int index, const TYPE& item);
     void            set(const QVector<TYPE>& fromVector);
     ObjectVector&   operator=(const ObjectVector& from);
 
     int				append(const TYPE& item);
-    int             insert(const int index, const TYPE& item);
-    bool			remove(const int index);
+    int             insert(int index, const TYPE& item);
+    bool			remove(int index);
     void            clear();
 
-    void            swap(const int i, const int j);
+    void            swap(int i, int j);
 
     bool            contains(const TYPE& item) const;
     int				find(const TYPE& item) const;
@@ -110,7 +109,7 @@ bool ObjectVector<TYPE>::isEmpty() const
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-TYPE ObjectVector<TYPE>::at(const int index) const
+TYPE ObjectVector<TYPE>::at(int index) const
 {
     TYPE item;
 
@@ -131,7 +130,7 @@ TYPE ObjectVector<TYPE>::at(const int index) const
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int ObjectVector<TYPE>::set(const int index, const TYPE& item)
+int ObjectVector<TYPE>::set(int index, const TYPE& item)
 {
     if (index < 0 || index >= count())
     {
@@ -194,7 +193,7 @@ int ObjectVector<TYPE>::append(const TYPE& item)
 // -------------------------------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int ObjectVector<TYPE>::insert(const int index, const TYPE& item)
+int ObjectVector<TYPE>::insert(int index, const TYPE& item)
 {
     if (index < 0 || index > count())
     {
@@ -213,7 +212,7 @@ int ObjectVector<TYPE>::insert(const int index, const TYPE& item)
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-bool ObjectVector<TYPE>::remove(const int index)
+bool ObjectVector<TYPE>::remove(int index)
 {
     if (index < 0 || index >= count())
     {
@@ -245,7 +244,7 @@ void ObjectVector<TYPE>::clear()
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-void ObjectVector<TYPE>::swap(const int i, const int j)
+void ObjectVector<TYPE>::swap(int i, int j)
 {
     if ( (i < 0 || i >= count()) || (j < 0 || j >= count()) )
     {
@@ -433,20 +432,20 @@ public:
     int                 count() const;
     bool                isEmpty() const;
 
-    // TYPE*            operator[](const int index);       don't append this method
-    TYPE*               at(const int index) const;
+    // TYPE*            operator[](int index);       don't append this method
+    TYPE*               at(int index) const;
     QVector<TYPE*>      toVector() const;
 
-    int                 set(const int index, TYPE *ptr);
+    int                 set(int index, TYPE *ptr);
     void                set(const QVector<TYPE*>& fromVector);
     PtrObjectVector&    operator=(const PtrObjectVector& from);
 
     int                 append(TYPE *ptr);
-    int                 insert(const int index, TYPE *ptr);
-    bool                remove(const int index, const bool removeData = true);
-    void                clear(const bool removeData = true);
+    int                 insert(int index, TYPE *ptr);
+    bool                remove(int index, bool removeData = true);
+    void                clear(bool removeData = true);
 
-    void                swap(const int i, const int j);
+    void                swap(int i, int j);
 
     bool                contains(TYPE *ptr) const;
     int                 find(TYPE *ptr) const;
@@ -510,7 +509,7 @@ bool PtrObjectVector<TYPE>::isEmpty() const
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-TYPE* PtrObjectVector<TYPE>::at(const int index) const
+TYPE* PtrObjectVector<TYPE>::at(int index) const
 {
     if (index < 0 || index >= count())
     {
@@ -539,7 +538,7 @@ QVector<TYPE*> PtrObjectVector<TYPE>::toVector() const
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int PtrObjectVector<TYPE>::set(const int index, TYPE *ptr)
+int PtrObjectVector<TYPE>::set(int index, TYPE *ptr)
 {
     if (index < 0 || index >= count())
     {
@@ -615,7 +614,7 @@ int PtrObjectVector<TYPE>::append(TYPE *ptr)
 // -------------------------------------------------------------------------------------------------------------------
 
 template <class TYPE>
-int PtrObjectVector<TYPE>::insert(const int index, TYPE *ptr)
+int PtrObjectVector<TYPE>::insert(int index, TYPE *ptr)
 {
     if (index < 0 || index > count())
     {
@@ -639,7 +638,7 @@ int PtrObjectVector<TYPE>::insert(const int index, TYPE *ptr)
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-bool PtrObjectVector<TYPE>::remove(const int index, bool removeData)
+bool PtrObjectVector<TYPE>::remove(int index, bool removeData)
 {
     if (index < 0 || index >= count())
     {
@@ -668,7 +667,7 @@ bool PtrObjectVector<TYPE>::remove(const int index, bool removeData)
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-void PtrObjectVector<TYPE>::clear(const bool removeData)
+void PtrObjectVector<TYPE>::clear(bool removeData)
 {
     m_vectorMutex.lock();
 
@@ -695,7 +694,7 @@ void PtrObjectVector<TYPE>::clear(const bool removeData)
 // ----------------------------------------------------------------------------------------------
 
 template <class TYPE>
-void PtrObjectVector<TYPE>::swap(const int i, const int j)
+void PtrObjectVector<TYPE>::swap(int i, int j)
 {
     if ( (i < 0 || i >= count()) || (j < 0 || j >= count()) )
     {

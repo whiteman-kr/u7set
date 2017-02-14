@@ -19,9 +19,7 @@
 
 #include "SignalBase.h"
 
-
 // ==============================================================================================
-
 
 const char* const               SignalPropertyGroup[] =
 {
@@ -75,14 +73,14 @@ class SignalPropertyDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit                    SignalPropertyDialog(const MeasureSignalParam& param, QWidget *parent = 0);
+    explicit                    SignalPropertyDialog(const SignalParam& param, QWidget *parent = 0);
                                 ~SignalPropertyDialog();
 
-    MeasureSignalParam          param() const { return m_param; }
+    SignalParam                 param() const { return m_param; }
 
 private:
 
-    MeasureSignalParam          m_param;
+    SignalParam                 m_param;
 
     // Property list
     //
@@ -103,7 +101,7 @@ private:
 
     void                        createPropertyList();
 
-    void                        updateGroupHeader(const int index);
+    void                        updateGroupHeader(int index);
 
 signals:
 

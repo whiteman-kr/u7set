@@ -3,13 +3,13 @@
 
 #include <QAction>
 
-#include "Options.h"
-#include "MeasureView.h"
-
 //#include "ncreport.h"
 //#include "ncreportoutput.h"
 //#include "ncreportpreviewoutput.h"
 //#include "ncreportpreviewwindow.h"
+
+#include "Options.h"
+#include "MeasureView.h"
 
 // ==============================================================================================
 

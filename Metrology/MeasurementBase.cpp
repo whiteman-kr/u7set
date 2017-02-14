@@ -41,7 +41,7 @@ int MeasurementBase::measurementCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int MeasurementBase::measurementCount(const int measureType) const
+int MeasurementBase::measurementCount(int measureType) const
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -61,7 +61,7 @@ int MeasurementBase::measurementCount(const int measureType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasurementBase::clear(const bool removeData)
+void MeasurementBase::clear(bool removeData)
 {
     m_measurmentListMutex.lock();
 
@@ -96,7 +96,7 @@ void MeasurementBase::clear(const bool removeData)
 // firstly read data from the main table, and additional sub tables in memory
 // later update the data in the main table from sub tables
 //
-int MeasurementBase::load(const int measureType)
+int MeasurementBase::load(int measureType)
 {
     if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
     {
@@ -203,9 +203,9 @@ int MeasurementBase::load(const int measureType)
                 {
                     switch(subTable.objectType)
                     {
-                        case SQL_TABLE_LINEARITY_20_EL:                 static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_ELECTRIC, pSubMeasure); break;
+                        case SQL_TABLE_LINEARITY_20_EL:                 static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_IN_ELECTRIC, pSubMeasure); break;
                         case SQL_TABLE_LINEARITY_20_PH:                 static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(VALUE_TYPE_PHYSICAL, pSubMeasure); break;
-                        case SQL_TABLE_LINEARITY_ADD_VAL:               static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalValue(pSubMeasure);                   break;
+                        case SQL_TABLE_LINEARITY_ADD_VAL:               static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);                   break;
                         case SQL_TABLE_COMPARATOR_HYSTERESIS:           static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);                       break;
                     }
 
@@ -350,7 +350,7 @@ int MeasurementBase::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasurementBase::remove(const int index, const bool removeData)
+bool MeasurementBase::remove(int index, bool removeData)
 {
     if (index < 0 || index >= measurementCount())
     {
@@ -384,7 +384,7 @@ bool MeasurementBase::remove(const int index, const bool removeData)
 
 // ----------------------------------------------------------------------------------------------
 
-Measurement* MeasurementBase::measurement(const int index) const
+Measurement* MeasurementBase::measurement(int index) const
 {
     if (index < 0 || index >= measurementCount())
     {
@@ -441,7 +441,7 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
                         }
 
                         int errorType = theOptions.linearity().m_errorType;
-                        if (errorType < 0 || errorType >= ERROR_TYPE_COUNT)
+                        if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
                         {
                             break;
                         }

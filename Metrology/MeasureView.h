@@ -21,19 +21,19 @@ public:
                         ~MeasureTable();
 
     int                 measureType() const { return m_measureType; }
-    void                setMeasureType(const int measureType);
+    void                setMeasureType(int measureType);
 
     MeasureViewHeader&  header() { return m_header; }
 
     int                 count() const { return m_measureBase.measurementCount(); }
 
-    bool                columnIsVisible(const int column);
+    bool                columnIsVisible(int column);
 
     bool                append(Measurement* pMeasurement);
     bool                remove(const QList<int> removeIndexList);
 
-    QColor              backgroundColor(const int row, const int column) const;
-    QString             text(const int row, const int column) const;
+    QColor              backgroundColor(int row, int column) const;
+    QString             text(int row, int column) const;
 
     MeasurementBase     m_measureBase;
 
@@ -60,7 +60,7 @@ class MeasureView : public QTableView
     Q_OBJECT
 
 public:
-    explicit            MeasureView(const int measureType, QWidget *parent = 0);
+    explicit            MeasureView(int measureType, QWidget *parent = 0);
                         ~MeasureView();
 
     int                 measureType() const { return m_measureType; }

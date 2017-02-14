@@ -1,6 +1,12 @@
 #ifndef CALIBRATORBASE_H
 #define CALIBRATORBASE_H
 
+// This class contains list of CalibratorManager
+// each calibrator works in separete thread
+// each calibrator has own CalibratorManager
+// calibrator can be managed via CalibratorManager
+//
+
 #include <QObject>
 #include <QList>
 #include <QThread>
@@ -17,9 +23,8 @@
 
 // ==============================================================================================
 
-
 #define                     COLOR_CALIBRATOR_CONNECTED          QColor(0xA0, 0xFF, 0xA0)
-#define                     COLOR_CALIBRATOR_NOT_CONNECTED      QColor(0x00, 0x00, 0x00)
+#define                     COLOR_CALIBRATOR_NOT_CONNECTED      QColor(0xFF, 0xFF, 0xFF)
 
 // ==============================================================================================
 
@@ -52,11 +57,10 @@ public:
     void                    init(QWidget* parent = 0);
     void                    showInitDialog();
 
-    int                     count() const { return m_calibratorManagerList.count(); }
-
-    CalibratorManager*      at(const int  index) const ;
+    int                     calibratorCount() const;
+    CalibratorManager*      calibratorManager(int index) const ;
     CalibratorManager*      firstConnectedCalibrator() const;
-    CalibratorManager*      сalibratorForMeasure(const int index) const;
+    CalibratorManager*      сalibratorForMeasure(int index) const;
 
     int                     connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
 
@@ -67,7 +71,8 @@ private:
     QTimer                  m_timer;
     int                     m_timeout = 0;
 
-    CalibratorManagerList   m_calibratorManagerList;
+    mutable QMutex          m_mutex;
+    QVector<CalibratorManager*> m_calibratorManagerList;
 
     void                    createCalibrators(QWidget* parent);
     void                    removeCalibrators();

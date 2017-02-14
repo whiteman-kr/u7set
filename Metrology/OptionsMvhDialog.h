@@ -75,7 +75,7 @@ private:
 public:
 
     int                 measureType() const { return m_measureType; }
-    void                setMeasureType(const int measureType);
+    void                setMeasureType(int measureType);
 
 protected:
 

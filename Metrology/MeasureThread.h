@@ -7,6 +7,7 @@
 #include "Measure.h"
 #include "CalibratorBase.h"
 #include "SignalBase.h"
+#include "TuningSignalBase.h"
 
 // ==============================================================================================
 
@@ -24,8 +25,8 @@ public:
                             ~MeasureThread();
 
     void                    init(QWidget* parent = 0);
-
-    void                    setMeasureType(const int measureType) { m_measureType = measureType; }
+    void                    setMeasureType(int measureType) { m_measureType = measureType; }
+    bool                    setActiveSignalParam();
 
     void                    stop() { m_cmdStopMeasure = true; }
 
@@ -34,16 +35,24 @@ private:
     QWidget*                m_parent = nullptr;
 
     int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    MeasureSignalParam      m_activeSignalParam[MAX_CHANNEL_COUNT];
-
     bool                    m_cmdStopMeasure = true;
+
+    MeasureParam            m_activeSignalParam[MAX_CHANNEL_COUNT];
 
     void                    waitMeasureTimeout();
 
-    bool                    calibratorIsValid(CalibratorManager* pManager);
+    //
+    //
 
-    bool                    prepareCalibrator(CalibratorManager* pManager, const int calibratorMode, const E::InputUnit signalInputUnit, const double inputElectricHighLimit);
 
+    // calibrators
+    //
+    bool                    calibratorIsValid(CalibratorManager* pCalibratorManager);
+    bool                    setCalibratorUnit();
+    bool                    prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalInputUnit, double inputElectricHighLimit);
+
+    // function of measure
+    //
     void                    measureLinearity();
     void                    measureComprators();
 

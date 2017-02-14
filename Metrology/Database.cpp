@@ -24,8 +24,10 @@ SqlFieldBase::~SqlFieldBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlFieldBase::init(const int objectType, const int )
+int SqlFieldBase::init(int objectType, int)
 {
+
+
     switch(objectType)
     {
         case SQL_TABLE_DATABASE_INFO:
@@ -65,15 +67,15 @@ int SqlFieldBase::init(const int objectType, const int )
             append("Block",                         QVariant::Int);
             append("Entry",                         QVariant::Int);
 
-            append("NominalElectricValue",			QVariant::Double);
-            append("NominalPhysicalValue",			QVariant::Double);
-            append("NominalOutputValue",            QVariant::Double);
+            append("NominalElValue",                QVariant::Double);
+            append("NominalPhValue",                QVariant::Double);
+            append("NominalOutElValue",             QVariant::Double);
 
             append("PrecentFormRange",				QVariant::Double);
 
-            append("MeasureElectricValue",			QVariant::Double);
-            append("MeasurePhysicalValue",			QVariant::Double);
-            append("MeasureOutputValue",            QVariant::Double);
+            append("MeasureElValue",                QVariant::Double);
+            append("MeasurePhValue",                QVariant::Double);
+            append("MeasureOutElValue",             QVariant::Double);
 
             append("LowElectricRange",				QVariant::Double);
             append("HighElectricRange",             QVariant::Double);
@@ -83,15 +85,18 @@ int SqlFieldBase::init(const int objectType, const int )
             append("HighPhysicalRange",             QVariant::Double);
             append("PhysicalUnit",					QVariant::String, 32);
 
-            append("LowOutputRange",				QVariant::Double);
-            append("HighOutputRange",               QVariant::Double);
-            append("OutputUnit",					QVariant::String, 32);
+            append("LowOutputElectricRange",        QVariant::Double);
+            append("HighOutputElectricRange",       QVariant::Double);
+            append("OutputElectricUnit",			QVariant::String, 32);
 
             append("PrecisionElectric",             QVariant::Int);
             append("PrecisionPhysical",             QVariant::Int);
-            append("PrecisionOutput",               QVariant::Int);
+            append("PrecisionOutputElectric",       QVariant::Int);
 
-            append("HasOutput",						QVariant::Bool);
+            append("HasElectricRange",              QVariant::Bool);
+            append("HasPhysicalRange",				QVariant::Bool);
+            append("HasOutputElectricRange",        QVariant::Bool);
+
             append("Adjustment",					QVariant::Double);
 
             append("ErrorInputAbsolute",			QVariant::Double);
@@ -103,10 +108,6 @@ int SqlFieldBase::init(const int objectType, const int )
             append("ErrorLimitAbsolute",			QVariant::Double);
             append("ErrorLimitReduce",              QVariant::Double);
             append("ErrorLimitRelative",            QVariant::Double);
-
-            append("ErrorPrecisionAbsolute",        QVariant::Int);
-            append("ErrorPrecisionReduce",          QVariant::Int);
-            append("ErrorPrecisionRelative",        QVariant::Int);
 
             append("MeasureTime",					QVariant::String, 64);
 
@@ -317,7 +318,7 @@ void SqlFieldBase::append(QString name, QVariant::Type type, int length)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SqlFieldBase::extFieldName(const int index)
+QString SqlFieldBase::extFieldName(int index)
 {
     if (index < 0 || index >= count())
     {
@@ -357,7 +358,7 @@ SqlObjectInfo::~SqlObjectInfo()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SqlObjectInfo::init(const int objectType)
+bool SqlObjectInfo::init(int objectType)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -410,7 +411,7 @@ SqlHistoryDatabase::~SqlHistoryDatabase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlHistoryDatabase::SqlHistoryDatabase(const int objectID, const int version, const QString& event,  const QString& time)
+SqlHistoryDatabase::SqlHistoryDatabase(int objectID, int version, const QString& event,  const QString& time)
 {
     m_objectID = objectID;
     m_version = version;
@@ -494,7 +495,7 @@ int SqlTable::lastKey() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SqlTable::init(const int objectType, QSqlDatabase* pDatabase)
+bool SqlTable::init(int objectType, QSqlDatabase* pDatabase)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -672,7 +673,7 @@ bool SqlTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::read(void* pRecord, const int* key, const int keyCount)
+int SqlTable::read(void* pRecord, int* key, int keyCount)
 {
     if (isOpen() == false)
     {
@@ -775,48 +776,47 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
                     measure->position().setBlock(query.value(field++).toInt());
                     measure->position().setEntry(query.value(field++).toInt());
 
-                    measure->setNominal(VALUE_TYPE_ELECTRIC, query.value(field++).toDouble());
+                    measure->setNominal(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
                     measure->setNominal(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
-                    measure->setNominal(VALUE_TYPE_OUTPUT, query.value(field++).toDouble());
+                    measure->setNominal(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
 
                     measure->setPercent(query.value(field++).toDouble());
 
-                    measure->setMeasure(VALUE_TYPE_ELECTRIC, query.value(field++).toDouble());
+                    measure->setMeasure(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
                     measure->setMeasure(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
-                    measure->setMeasure(VALUE_TYPE_OUTPUT, query.value(field++).toDouble());
+                    measure->setMeasure(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
 
-                    measure->setLowLimit(VALUE_TYPE_ELECTRIC, query.value(field++).toDouble());
-                    measure->setHighLimit(VALUE_TYPE_ELECTRIC, query.value(field++).toDouble());
-                    measure->setUnit(VALUE_TYPE_ELECTRIC, query.value(field++).toString());
+                    measure->setLowLimit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
+                    measure->setHighLimit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
+                    measure->setUnit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toString());
 
                     measure->setLowLimit(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
                     measure->setHighLimit(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
                     measure->setUnit(VALUE_TYPE_PHYSICAL, query.value(field++).toString());
 
-                    measure->setLowLimit(VALUE_TYPE_OUTPUT, query.value(field++).toDouble());
-                    measure->setHighLimit(VALUE_TYPE_OUTPUT, query.value(field++).toDouble());
-                    measure->setUnit(VALUE_TYPE_OUTPUT, query.value(field++).toString());
+                    measure->setLowLimit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
+                    measure->setHighLimit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
+                    measure->setUnit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toString());
 
-                    measure->setValuePrecision(VALUE_TYPE_ELECTRIC, query.value(field++).toInt());
+                    measure->setValuePrecision(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toInt());
                     measure->setValuePrecision(VALUE_TYPE_PHYSICAL, query.value(field++).toInt());
-                    measure->setValuePrecision(VALUE_TYPE_OUTPUT, query.value(field++).toInt());
+                    measure->setValuePrecision(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toInt());
 
-                    measure->setHasOutput(query.value(field++).toBool());
+                    measure->setHasRange(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toBool());
+                    measure->setHasRange(VALUE_TYPE_PHYSICAL, query.value(field++).toBool());
+                    measure->setHasRange(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toBool());
+
                     measure->setAdjustment(query.value(field++).toDouble());
 
-                    measure->setErrorInput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorInput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorInput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
-                    measure->setErrorOutput(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorOutput(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorOutput(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
-                    measure->setErrorLimit(ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorLimit(ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorLimit(ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
-
-                    measure->setErrorPrecision(ERROR_TYPE_ABSOLUTE, query.value(field++).toInt());
-                    measure->setErrorPrecision(ERROR_TYPE_REDUCE, query.value(field++).toInt());
-                    measure->setErrorPrecision(ERROR_TYPE_RELATIVE, query.value(field++).toInt());
+                    measure->setErrorInput(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorInput(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorInput(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
+                    measure->setErrorOutput(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorOutput(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorOutput(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
+                    measure->setErrorLimit(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorLimit(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorLimit(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
 
                     measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
@@ -829,7 +829,7 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
 
                     switch(m_info.objectType())
                     {
-                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
+                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_IN_ELECTRIC;    break;
                         case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
@@ -843,7 +843,7 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
 
                     measure->setMeasureID(query.value(field++).toInt());
 
-                    measure->setMeasureArrayCount(query.value(field++).toInt());
+                    measure->setMeasureCount(query.value(field++).toInt());
 
                     measure->setMeasureItemArray(valueType, 0, query.value(field++).toDouble());
                     measure->setMeasureItemArray(valueType, 1, query.value(field++).toDouble());
@@ -874,12 +874,12 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
 
                     measure->setMeasureID(query.value(field++).toInt());
 
-                    measure->setAdditionalValueCount(query.value(field++).toInt());
+                    measure->setAdditionalParamCount(query.value(field++).toInt());
 
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_MEASURE_MAX, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_MSE, query.value(field++).toDouble());
-                    measure->setAdditionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER, query.value(field++).toDouble());
+                    measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MAX_VALUE, query.value(field++).toDouble());
+                    measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, query.value(field++).toDouble());
+                    measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MSE, query.value(field++).toDouble());
+                    measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, query.value(field++).toDouble());
                 }
                 break;
 
@@ -932,8 +932,8 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
                     signal->setType(query.value(field++).toInt());
                     query.value(field++).toInt();                           // reserve for Sum
 
-                    signal->setAppSignalID( OUTPUT_SIGNAL_KIND_INPUT, query.value(field++).toString() );
-                    signal->setAppSignalID( OUTPUT_SIGNAL_KIND_OUTPUT, query.value(field++).toString() );
+                    signal->setAppSignalID( MEASURE_IO_SIGNAL_TYPE_INPUT, query.value(field++).toString() );
+                    signal->setAppSignalID( MEASURE_IO_SIGNAL_TYPE_OUTPUT, query.value(field++).toString() );
                     query.value(field++).toString();                        // reserve for Sum
                 }
                 break;
@@ -983,7 +983,7 @@ int SqlTable::read(void* pRecord, const int* key, const int keyCount)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::write(void* pRecord, const int count, const int* key)
+int SqlTable::write(void* pRecord, int count, int* key)
 {
     if (isOpen() == false)
     {
@@ -1107,7 +1107,7 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
 
                     query.bindValue(field++, measure->appSignalID());
                     query.bindValue(field++, measure->customAppSignalID());
-                    query.bindValue(field++, measure->name());
+                    query.bindValue(field++, measure->caption());
 
                     query.bindValue(field++, measure->position().equipmentID());
                     query.bindValue(field++, measure->position().caseNo());
@@ -1117,50 +1117,49 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
                     query.bindValue(field++, measure->position().block());
                     query.bindValue(field++, measure->position().entry());
 
-                    query.bindValue(field++, measure->nominal(VALUE_TYPE_ELECTRIC));
+                    query.bindValue(field++, measure->nominal(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->nominal(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->nominal(VALUE_TYPE_OUTPUT));
+                    query.bindValue(field++, measure->nominal(VALUE_TYPE_OUT_ELECTRIC));
 
                     query.bindValue(field++, measure->percent());
 
-                    query.bindValue(field++, measure->measure(VALUE_TYPE_ELECTRIC));
+                    query.bindValue(field++, measure->measure(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->measure(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->measure(VALUE_TYPE_OUTPUT));
+                    query.bindValue(field++, measure->measure(VALUE_TYPE_OUT_ELECTRIC));
 
-                    query.bindValue(field++, measure->lowLimit(VALUE_TYPE_ELECTRIC));
-                    query.bindValue(field++, measure->highLimit(VALUE_TYPE_ELECTRIC));
-                    query.bindValue(field++, measure->unit(VALUE_TYPE_ELECTRIC));
+                    query.bindValue(field++, measure->lowLimit(VALUE_TYPE_IN_ELECTRIC));
+                    query.bindValue(field++, measure->highLimit(VALUE_TYPE_IN_ELECTRIC));
+                    query.bindValue(field++, measure->unit(VALUE_TYPE_IN_ELECTRIC));
 
                     query.bindValue(field++, measure->lowLimit(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->highLimit(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->unit(VALUE_TYPE_PHYSICAL));
 
-                    query.bindValue(field++, measure->lowLimit(VALUE_TYPE_OUTPUT));
-                    query.bindValue(field++, measure->highLimit(VALUE_TYPE_OUTPUT));
-                    query.bindValue(field++, measure->unit(VALUE_TYPE_OUTPUT));
+                    query.bindValue(field++, measure->lowLimit(VALUE_TYPE_OUT_ELECTRIC));
+                    query.bindValue(field++, measure->highLimit(VALUE_TYPE_OUT_ELECTRIC));
+                    query.bindValue(field++, measure->unit(VALUE_TYPE_OUT_ELECTRIC));
 
-                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_ELECTRIC));
+                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_OUTPUT));
+                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_OUT_ELECTRIC));
 
-                    query.bindValue(field++, measure->hasOutput());
+                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_IN_ELECTRIC));
+                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_PHYSICAL));
+                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_OUT_ELECTRIC));
+
                     query.bindValue(field++, measure->adjustment());
 
-                    query.bindValue(field++, measure->errorInput(ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorInput(ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorInput(ERROR_TYPE_RELATIVE));
+                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_RELATIVE));
 
-                    query.bindValue(field++, measure->errorOutput(ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorOutput(ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorOutput(ERROR_TYPE_RELATIVE));
+                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_RELATIVE));
 
-                    query.bindValue(field++, measure->errorLimit(ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorLimit(ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorLimit(ERROR_TYPE_RELATIVE));
-
-                    query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorPrecision(ERROR_TYPE_RELATIVE));
+                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_RELATIVE));
 
                     measure->setMeasureTime(QDateTime::currentDateTime());
 
@@ -1176,7 +1175,7 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
 
                     switch(m_info.objectType())
                     {
-                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_ELECTRIC;    break;
+                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_IN_ELECTRIC;    break;
                         case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
                         default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
                     }
@@ -1190,7 +1189,7 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
 
                     query.bindValue(field++, measure->measureID());
 
-                    query.bindValue(field++, measure->measureArrayCount());
+                    query.bindValue(field++, measure->measureCount());
 
                     query.bindValue(field++, measure->measureItemArray(valueType, 0));
                     query.bindValue(field++, measure->measureItemArray(valueType, 1));
@@ -1221,12 +1220,12 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
 
                     query.bindValue(field++, measure->measureID());
 
-                    query.bindValue(field++, measure->additionalValueCount());
+                    query.bindValue(field++, measure->additionalParamCount());
 
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MEASURE_MAX));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_SYSTEM_ERROR));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_MSE));
-                    query.bindValue(field++, measure->additionalValue(ADDITIONAL_VALUE_LOW_HIGH_BORDER));
+                    query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_MAX_VALUE));
+                    query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR));
+                    query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_MSE));
+                    query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER));
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
                     query.bindValue(field++, 0);
@@ -1293,8 +1292,8 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
                     query.bindValue(field++, signal->type());
                     query.bindValue(field++, OUTPUT_SIGNAL_SUM_TYPE_NO_USED);                   // reserve to Sum
 
-                    query.bindValue(field++, signal->appSignalID(OUTPUT_SIGNAL_KIND_INPUT) );
-                    query.bindValue(field++, signal->appSignalID(OUTPUT_SIGNAL_KIND_OUTPUT) );
+                    query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) );
+                    query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) );
                     query.bindValue(field++, QString() );                                       // reserve to Sum
                 }
                 break;
@@ -1354,7 +1353,7 @@ int SqlTable::write(void* pRecord, const int count, const int* key)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SqlTable::remove(const int* key, const int keyCount) const
+int SqlTable::remove(const int* key, int keyCount) const
 {
     if (isOpen() == false)
     {
@@ -1395,6 +1394,8 @@ int SqlTable::remove(const int* key, const int keyCount) const
 
     if(query.exec(request) == false)
     {
+        query.exec("END TRANSACTION");
+
         return 0;
     }
 
@@ -1521,7 +1522,7 @@ void Database::close()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SqlTable* Database::openTable(const int objectType)
+SqlTable* Database::openTable(int objectType)
 {
     if (objectType < 0 || objectType >= SQL_TABLE_COUNT)
     {
@@ -1656,7 +1657,7 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Database::removeMeasure(const int measuteType, const QVector<int> keyList)
+bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 {
     bool result = false;
 

@@ -16,7 +16,7 @@ bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalPropertyDialog::SignalPropertyDialog(const MeasureSignalParam& param, QWidget *parent) :
+SignalPropertyDialog::SignalPropertyDialog(const SignalParam& param, QWidget *parent) :
     QDialog(parent)
 {
     if (param.isValid() == false)
@@ -144,14 +144,14 @@ void SignalPropertyDialog::createPropertyList()
             item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
             item->setValue( m_param.inputPhysicalLowLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.inputPhysicalPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.inputPhysicalPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW);
             inputPhysicalRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
             item->setValue( m_param.inputPhysicalHighLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.inputPhysicalPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.inputPhysicalPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH);
             inputPhysicalRangeGroup->addSubProperty(item);
 
@@ -168,7 +168,7 @@ void SignalPropertyDialog::createPropertyList()
             inputPhysicalRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-            item->setValue( m_param.inputPhysicalPrecise() );
+            item->setValue( m_param.inputPhysicalPrecision() );
             item->setAttribute(QLatin1String("minimum"), 0);
             item->setAttribute(QLatin1String("maximum"), 10);
             item->setAttribute(QLatin1String("singleStep"), 1);
@@ -189,14 +189,14 @@ void SignalPropertyDialog::createPropertyList()
             item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
             item->setValue( m_param.inputElectricLowLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.inputElectricPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.inputElectricPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW);
             inputElectricRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
             item->setValue( m_param.inputElectricHighLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.inputElectricPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.inputElectricPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH);
             inputElectricRangeGroup->addSubProperty(item);
 
@@ -232,7 +232,7 @@ void SignalPropertyDialog::createPropertyList()
             inputElectricRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-            item->setValue( m_param.inputElectricPrecise() );
+            item->setValue( m_param.inputElectricPrecision() );
             item->setAttribute(QLatin1String("minimum"), 0);
             item->setAttribute(QLatin1String("maximum"), 10);
             item->setAttribute(QLatin1String("singleStep"), 1);
@@ -248,14 +248,14 @@ void SignalPropertyDialog::createPropertyList()
             item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
             item->setValue( m_param.outputPhysicalLowLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.outputPhysicalPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.outputPhysicalPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW);
             outputPhysicalRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
             item->setValue( m_param.outputPhysicalHighLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.outputPhysicalPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.outputPhysicalPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH);
             outputPhysicalRangeGroup->addSubProperty(item);
 
@@ -272,7 +272,7 @@ void SignalPropertyDialog::createPropertyList()
             outputPhysicalRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-            item->setValue( m_param.outputPhysicalPrecise() );
+            item->setValue( m_param.outputPhysicalPrecision() );
             item->setAttribute(QLatin1String("minimum"), 0);
             item->setAttribute(QLatin1String("maximum"), 10);
             item->setAttribute(QLatin1String("singleStep"), 1);
@@ -288,14 +288,14 @@ void SignalPropertyDialog::createPropertyList()
             item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
             item->setValue( m_param.outputElectricLowLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.outputElectricPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.outputElectricPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_LOW);
             outputElectricRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
             item->setValue( m_param.outputElectricHighLimit() );
             item->setAttribute(QLatin1String("singleStep"), 0.001);
-            item->setAttribute(QLatin1String("decimals"), m_param.outputElectricPrecise());
+            item->setAttribute(QLatin1String("decimals"), m_param.outputElectricPrecision());
             m_propertyMap.insert( item, SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_HIGH);
             outputElectricRangeGroup->addSubProperty(item);
 
@@ -330,7 +330,7 @@ void SignalPropertyDialog::createPropertyList()
             outputElectricRangeGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-            item->setValue( m_param.outputElectricPrecise() );
+            item->setValue( m_param.outputElectricPrecision() );
             item->setAttribute(QLatin1String("minimum"), 0);
             item->setAttribute(QLatin1String("maximum"), 10);
             item->setAttribute(QLatin1String("singleStep"), 1);
@@ -422,24 +422,24 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
         case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW:          m_param.setInputPhysicalLowLimit(value.toDouble());                                     groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
         case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH:         m_param.setInputPhysicalHighLimit(value.toDouble());                                    groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
         case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT:         m_param.setInputPhysicalUnitID(value.toInt());                                          groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION:    m_param.setInputPhysicalPrecise( value.toInt());                                        groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION:    m_param.setInputPhysicalPrecision( value.toInt());                                      groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;     break;
 
         case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW:          m_param.setInputElectricLowLimit(value.toDouble());                                     groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
         case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH:         m_param.setInputElectricHighLimit(value.toDouble());                                    groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
         case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT:         m_param.setInputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));     groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
         case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR:       m_param.setInputElectricSensorType(static_cast<E::SensorType>(value.toInt()));          groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
-        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION:    m_param.setInputElectricPrecise( value.toInt());                                        groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
+        case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION:    m_param.setInputElectricPrecision( value.toInt());                                      groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;     break;
 
         case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW:         m_param.setOutputPhysicalLowLimit(value.toDouble());                                    groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
         case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH:        m_param.setOutputPhysicalHighLimit(value.toDouble());                                   groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
         case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT:        m_param.setOutputPhysicalUnitID(value.toInt());                                         groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION:   m_param.setOutputPhysicalPrecise( value.toInt());                                       groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION:   m_param.setOutputPhysicalPrecision( value.toInt());                                     groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;    break;
 
         case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_LOW:         m_param.setOutputElectricLowLimit(value.toDouble());                                    groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
         case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_HIGH:        m_param.setOutputElectricHighLimit(value.toDouble());                                   groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
         case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT:        m_param.setOutputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));    groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
         case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR:      m_param.setOutputElectricSensorType(static_cast<E::SensorType>(value.toInt()));         groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
-        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION:   m_param.setOutputElectricPrecise( value.toInt());                                       groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
+        case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION:   m_param.setOutputElectricPrecision( value.toInt());                                     groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;    break;
     }
 
     if (groupIndex < 0 || groupIndex >= SIGNAL_PROPERTY_GROUP_COUNT)
@@ -452,7 +452,7 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalPropertyDialog::updateGroupHeader(const int index)
+void SignalPropertyDialog::updateGroupHeader(int index)
 {
     if (index < 0 || index >= SIGNAL_PROPERTY_GROUP_COUNT)
     {

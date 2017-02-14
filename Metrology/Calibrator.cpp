@@ -5,7 +5,7 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Calibrator::Calibrator(const int index, QObject *parent) :
+Calibrator::Calibrator(int index, QObject *parent) :
     m_index (index),
     QObject(parent),
     m_port(this)
@@ -49,7 +49,7 @@ void Calibrator::empty()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::setConnected(const bool connect)
+void Calibrator::setConnected(bool connect)
 {
     m_connected = connect;
 
@@ -762,7 +762,7 @@ double Calibrator::getValue()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::setBusy(const bool busy)
+void Calibrator::setBusy(bool busy)
 {
     m_busy = busy;
 
@@ -986,7 +986,7 @@ void Calibrator::parseResponse()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::convert(double& val, const int mode, const int order)
+void Calibrator::convert(double& val, int mode, int order)
 {
     bool enableCorrect = false;
 
