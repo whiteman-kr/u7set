@@ -3323,6 +3323,32 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5072
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
+	///
+	/// Parameters:
+	/// 	%1 AFB Poly CoefCount parameters value
+	///		%2 AFB Poly coeficient caption
+	/// 	%3 Logic schema ID
+	///
+	/// Description:
+	///		Value of CoefCount param of AFB Poly is less then number of coeficient, that is not equal to 0.
+	///		Check CoefCount value, or set specified coeficient to 0.
+	///
+	void IssueLogger::wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5072,
+				  QString(tr("Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema '%3').")).
+					 arg(coefCount).arg(coefCaption).arg(schemaID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 

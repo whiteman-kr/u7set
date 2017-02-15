@@ -475,7 +475,7 @@ void SignalsModel::changeCheckedoutSignalActionsVisibility()
 	for (int i = 0; i < m_signalSet.count(); i++)
 	{
 		const Signal& signal = m_signalSet[i];
-		if (signal.checkedOut() && signal.userID() == dbController()->currentUser().userId())
+		if (signal.checkedOut() && (signal.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
 		{
 			emit setCheckedoutSignalActionsVisibility(true);
 			return;
@@ -489,7 +489,7 @@ bool SignalsModel::checkoutSignal(int index)
 	Signal& s = m_signalSet[index];
 	if (s.checkedOut())
 	{
-		if (s.userID() == dbController()->currentUser().userId())
+		if (s.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 		{
 			return true;
 		}
@@ -518,7 +518,7 @@ bool SignalsModel::checkoutSignal(int index)
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-				&& objectState.userId != dbController()->currentUser().userId())
+				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
 		}
@@ -536,7 +536,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 	Signal& s = m_signalSet[index];
 	if (s.checkedOut())
 	{
-		if (s.userID() == dbController()->currentUser().userId())
+		if (s.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 		{
 			return true;
 		}
@@ -571,7 +571,7 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_ALREADY_CHECKED_OUT
-				&& objectState.userId != dbController()->currentUser().userId())
+				&& objectState.userId != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			return false;
 		}
@@ -709,15 +709,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				case SC_NAME: return signal.caption();
 				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 				case SC_TYPE: return QChar('D');
-				case SC_ANALOG_DATA_FORMAT:
-					if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
-					{
-						return m_dataFormatInfo.value(signal.analogSignalFormatInt());
-					}
-					else
-					{
-						return tr("Unknown data format");
-					}
+				case SC_ANALOG_DATA_FORMAT: return "";
 
 				case SC_DATA_SIZE: return signal.dataSize();
 				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
@@ -762,7 +754,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 		const Signal& signal = m_signalSet[section];
 		if (signal.checkedOut())
 		{
-			if (signal.userID() == dbController()->currentUser().userId())
+			if (signal.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
 			{
 				switch (signal.instanceAction().value())
 				{
@@ -882,6 +874,7 @@ void SignalsModel::loadSignals()
 	}
 
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
+	*Signal::unitList = m_unitInfo;
 
 	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
 	{
@@ -971,7 +964,7 @@ QVector<int> SignalsModel::getSameChannelSignals(int row)
 bool SignalsModel::isEditableSignal(int row)
 {
 	Signal& s = m_signalSet[row];
-	if (s.checkedOut() && s.userID() != dbController()->currentUser().userId())
+	if (s.checkedOut() && (s.userID() != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator()))
 	{
 		return false;
 	}
@@ -1032,7 +1025,7 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 
 	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
 	{
@@ -1174,7 +1167,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 	for (int i = 0; i < ids.count(); i++)
 	{
 		Signal& signal = m_signalSet[m_signalSet.keyIndex(ids[i])];
-		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId())
+		if (signal.checkedOut() && signal.userID() != dbController()->currentUser().userId() && !dbController()->currentUser().isAdminstrator())
 		{
 			readOnly = true;
 		}
@@ -1199,10 +1192,12 @@ bool SignalsModel::editSignals(QVector<int> ids)
 		showErrors(states);
 
 		loadSignalSet(ids);
+		changeCheckedoutSignalActionsVisibility();
 		return true;
 	}
 
 	loadSignalSet(ids);	//Signal could be checked out but not changed
+	changeCheckedoutSignalActionsVisibility();
 	return false;
 }
 
@@ -1343,6 +1338,7 @@ void SignalsModel::deleteSignal(int signalID)
 	{
 		showError(state);
 	}
+	changeCheckedoutSignalActionsVisibility();
 }
 
 DbController *SignalsModel::dbController()
@@ -1393,7 +1389,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	filterToolBar->addWidget(new QLabel(" complies ", this));
 	filterToolBar->addWidget(m_filterEdit);
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	m_filterHistory = settings.value("SignalsTabPage/filterHistory").toStringList();
 
 	m_completer = new QCompleter(m_filterHistory, this);
@@ -1876,6 +1872,7 @@ void SignalsTabPage::editColumnsVisibilityAndOrder()
 	{
 		auto item = new QStandardItem;
 		item->setCheckable(true);
+		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
 		model->setItem(i, item);
 	}
 
@@ -2182,7 +2179,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 			model->setStringList(m_filterHistory);
 		}
 
-		QSettings settings(QSettings::UserScope, qApp->organizationName());
+		QSettings settings;
 		settings.setValue("SignalsTabPage/filterHistory", m_filterHistory);
 	}
 
@@ -2326,19 +2323,19 @@ void SignalsTabPage::saveColumnWidth(int index)
 	{
 		return;
 	}
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), width);
 }
 
 void SignalsTabPage::saveColumnVisibility(int index, bool visible)
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
 }
 
 void SignalsTabPage::saveColumnPosition(int index, int position)
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue(QString("SignalsTabPage/ColumnPosition/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), position);
 }
 
@@ -2389,7 +2386,7 @@ Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
 bool CheckedoutSignalsModel::filterAcceptsRow(int source_row, const QModelIndex&) const
 {
 	const Signal& signal = m_sourceModel->signal(source_row);
-	return signal.checkedOut() && signal.userID() == m_sourceModel->dbController()->currentUser().userId();
+	return signal.checkedOut() && (signal.userID() == m_sourceModel->dbController()->currentUser().userId() || m_sourceModel->dbController()->currentUser().isAdminstrator());
 }
 
 void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool fromSourceModel)
@@ -2465,7 +2462,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	m_signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
 													m_signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
 	for (int i = 1; i < COLUMNS_COUNT; i++)
@@ -2626,7 +2623,7 @@ void CheckinSignalsDialog::openUndoDialog()
 
 void CheckinSignalsDialog::saveGeometry()
 {
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue("PendingChangesDialog/size", size());
 	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
 }
@@ -2639,7 +2636,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 {
 	setWindowTitle(tr("Undo signal changes"));
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
 
 	QVBoxLayout* vl = new QVBoxLayout;
@@ -2726,7 +2723,7 @@ void UndoSignalsDialog::undoSelected()
 		m_sourceModel->showErrors(states);
 	}
 
-	QSettings settings(QSettings::UserScope, qApp->organizationName());
+	QSettings settings;
 	settings.setValue("UndoSignalsDialog/size", size());
 
 	accept();

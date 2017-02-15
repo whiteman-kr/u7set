@@ -1526,8 +1526,46 @@ namespace Builder
 	{
 		m_runTime = 24 + 4;
 
-		LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined,
-				  QString(tr("Unknown runtime of FB POLY")));
+		const quint32 COEF_MAX_NUM = 10;
+
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
+		{
+			requiredParams.append(QString("i_%1_oprd").arg(n));
+		}
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		quint32 coefCount = i_conf.unsignedIntValue();
+
+		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
+		{
+			AppFbParamValue& i_N_oprd = m_paramValuesArray[QString("i_%1_oprd").arg(n)];
+
+			CHECK_FLOAT32(i_N_oprd);
+
+			if (n <= coefCount)
+			{
+				continue;
+			}
+
+			// Check: i_N_oprd, where N > coefCount  && N <= COEF_MAX_NUM], NOT equal to 0
+			//
+
+			if (i_N_oprd.floatValue() != 0)
+			{
+				// Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
+				//
+				m_log->wrnALC5072(coefCount, i_N_oprd.caption(), guid(), schemaID());
+			}
+		}
 
 		return true;
 	}
