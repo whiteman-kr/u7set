@@ -400,7 +400,7 @@ void SignalInfoTable::set(const MeasureSignal &activeSignal)
 
                     m_activeSignalParam[c].setParam(type, param);
                     m_activeSignalParam[c].setOutputSignalType( activeSignal.outputSignalType() );
-                    m_activeSignalParam[c].setCalibratorManager( theCalibratorBase.сalibratorForMeasure(c) );
+                    m_activeSignalParam[c].setCalibratorManager( theCalibratorBase.calibratorForMeasure(c) );
                 }
             }
 

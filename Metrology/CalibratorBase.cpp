@@ -351,7 +351,7 @@ CalibratorManager* CalibratorBase::firstConnectedCalibrator() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-CalibratorManager* CalibratorBase::сalibratorForMeasure(int index) const
+CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 {
     CalibratorManager* pManager = nullptr;
 

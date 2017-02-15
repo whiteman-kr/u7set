@@ -1091,19 +1091,19 @@ QString MeasureParam::caption(const QString& divider) const
             const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
             const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 
-            QString inСaptionStr, outСaptionStr;
+			QString inCaptionStr, outCaptionStr;
 
             if (inParam.isValid() == true)
             {
-                inСaptionStr = inParam.caption();
+				inCaptionStr = inParam.caption();
             }
 
             if (outParam.isValid() == true)
             {
-                outСaptionStr = outParam.caption();
+				outCaptionStr = outParam.caption();
             }
 
-            strResult = inСaptionStr + divider + outСaptionStr;
+			strResult = inCaptionStr + divider + outCaptionStr;
         }
 
     m_mutex.unlock();

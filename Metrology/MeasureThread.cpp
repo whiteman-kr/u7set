@@ -62,7 +62,7 @@ bool MeasureThread::setActiveSignalParam()
                 continue;
             }
 
-            CalibratorManager* pCalibratorManager = theCalibratorBase.сalibratorForMeasure(c);
+            CalibratorManager* pCalibratorManager = theCalibratorBase.calibratorForMeasure(c);
             if (calibratorIsValid(pCalibratorManager) == false)
             {
                 continue;

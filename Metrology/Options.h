@@ -1019,7 +1019,7 @@ public:
     void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
     ConfigSocketOption& configSocket() { return m_configSocket; }
-    void                setСonfigSocket(const ConfigSocketOption& configSocket) { m_configSocket = configSocket; }
+	void                setConfigSocket(const ConfigSocketOption& configSocket) { m_configSocket = configSocket; }
 
     SignalSocketOption& signalSocket() { return m_signalSocket; }
     void                setSignalSocket(const SignalSocketOption& connectSocket) { m_signalSocket = connectSocket; }

@@ -146,7 +146,7 @@ private:
 
     Hash                    m_hash = 0;
 
-    QString                 m_сase;
+	QString                 m_case;
     QString                 m_appSignalID;
     QString                 m_customAppSignalID;
     QString                 m_equipmentID;
@@ -165,8 +165,8 @@ public:
     Hash                    hash() const { return m_hash; }
     void                    setHash(Hash hash) { m_hash = hash; }
 
-    QString                 caseStr() const { return m_сase; }
-    void                    setCase(const QString& сaseStr) { m_сase = сaseStr; }
+	QString                 caseStr() const { return m_case; }
+	void                    setCase(const QString& caseStr) { m_case = caseStr; }
 
     QString                 appSignalID() const { return m_appSignalID; }
     void                    setAppSignalID(const QString& appSignalID);

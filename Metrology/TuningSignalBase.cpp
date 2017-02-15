@@ -56,7 +56,7 @@ TuningSignal::TuningSignal(const SignalParam& param)
 
     m_hash = param.hash();
 
-    m_сase = param.position().caseStr();
+    m_case = param.position().caseStr();
     m_appSignalID = param.appSignalID();
     m_customAppSignalID = param.customAppSignalID();
     m_equipmentID = param.position().equipmentID();
