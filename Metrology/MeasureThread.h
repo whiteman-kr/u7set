@@ -5,7 +5,6 @@
 #include <QMessageBox>
 
 #include "Measure.h"
-#include "CalibratorBase.h"
 #include "SignalBase.h"
 #include "TuningSignalBase.h"
 
@@ -41,15 +40,12 @@ private:
 
     void                    waitMeasureTimeout();
 
-    //
-    //
-
-
     // calibrators
     //
     bool                    calibratorIsValid(CalibratorManager* pCalibratorManager);
+    bool                    hasConnectedCalibrators();
     bool                    setCalibratorUnit();
-    bool                    prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalInputUnit, double inputElectricHighLimit);
+    bool                    prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit);
 
     // function of measure
     //
@@ -68,6 +64,11 @@ signals:
     void                    measureInfo(int);
 
     void                    measureComplite(Measurement*);
+
+public slots:
+
+    void                    signalSocketDisconnected();
+    void                    tuningSocketDisconnected();
 
 private slots:
 

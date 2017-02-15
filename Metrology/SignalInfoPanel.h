@@ -22,9 +22,8 @@ const char* const           SignalInfoColumn[] =
                             QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Caption"),
                             QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Ph. range"),
                             QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "El. range"),
+                            QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "El. sensor"),
                             QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Calibrator"),
-                            QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Out. Ph. range"),
-                            QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Out. El. range"),
 };
 
 const int                   SIGNAL_INFO_COLUMN_COUNT    = sizeof(SignalInfoColumn)/sizeof(SignalInfoColumn[0]);
@@ -36,11 +35,10 @@ const int                   SIGNAL_INFO_COLUMN_CASE         = 0,
                             SIGNAL_INFO_COLUMN_BLOCK        = 4,
                             SIGNAL_INFO_COLUMN_ENTRY        = 5,
                             SIGNAL_INFO_COLUMN_CAPTION      = 6,
-                            SIGNAL_INFO_COLUMN_IN_PH_RANGE  = 7,
-                            SIGNAL_INFO_COLUMN_IN_EL_RANGE  = 8,
-                            SIGNAL_INFO_COLUMN_CALIBRATOR   = 9,
-                            SIGNAL_INFO_COLUMN_OUT_PH_RANGE = 10,
-                            SIGNAL_INFO_COLUMN_OUT_EL_RANGE = 11;
+                            SIGNAL_INFO_COLUMN_PH_RANGE     = 7,
+                            SIGNAL_INFO_COLUMN_EL_RANGE     = 8,
+                            SIGNAL_INFO_COLUMN_EL_SENSOR    = 9,
+                            SIGNAL_INFO_COLUMN_CALIBRATOR   = 10;
 
 // ==============================================================================================
 
@@ -54,11 +52,11 @@ public:
                             ~SignalInfoTable();
 
     int                     signalCount() const { return MAX_CHANNEL_COUNT; }
-    SignalParam             signalParam(int index) const;
-    void                    set(const MetrologyMultiSignal& activeSignal);
+    MeasureParam            signalParam(int index) const;
+    void                    set(const MeasureSignal &activeSignal);
     void                    clear();
 
-    QString                 text(int row, int column, const SignalParam& param, const AppSignalState& state) const;
+    QString                 text(int row, int column, const MeasureParam &measureParam) const;
     QString                 signalStateStr(const SignalParam& param, const AppSignalState& state) const;
 
     void                    updateColumn(int column);
@@ -66,7 +64,7 @@ public:
 private:
 
     mutable QMutex          m_signalMutex;
-    SignalParam             m_activeSignalParam[MAX_CHANNEL_COUNT];
+    MeasureParam            m_activeSignalParam[MAX_CHANNEL_COUNT];
 
     int                     columnCount(const QModelIndex &parent) const;
     int                     rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -136,7 +134,7 @@ public slots:
 
     // slot informs that signal for measure was selected
     //
-    void                    onSetActiveSignal();
+    void                    activeSignalChanged(const MeasureSignal &signal);
 
     // slot informs that signal for measure has updated his state
     //

@@ -10,14 +10,12 @@
 #define                 MVC_CMN_HIDE                        false
 #define                 MVC_CMN_SHOW                        true
 
-#define                 MVC_CMN_NO_BOLD                     false
-#define                 MVC_CMN_BOLD                        true
-
-#define                 MVC_CMN_COLOR_LIGHT_BLUE            QColor(0xE0, 0xFF, 0xE0)
-#define                 MVC_CMN_COLOR_WHITE                 Qt::white
-
 #define                 MVC_CMN_DISABLE_DUPLICATE           false
 #define                 MVC_CMN_ENABLE_DUPLICATE            true
+
+// ==============================================================================================
+
+#define                 MVC_CMN_COLOR_LIGHT_BLUE            QColor(0xE0, 0xFF, 0xE0)
 
 // ==============================================================================================
 
@@ -27,7 +25,7 @@ public:
 
                         MeasureViewColumn();
                         MeasureViewColumn(const MeasureViewColumn& from);
-                        MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool bold, const QColor& color, bool duplicate);
+                        MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool duplicate);
                         ~MeasureViewColumn();
 
 private:
@@ -39,8 +37,6 @@ private:
     bool                m_enableVisible = MVC_CMN_SHOW;
 
     int                 m_alignment = Qt::AlignLeft;
-    bool                m_boldFont = MVC_CMN_NO_BOLD;
-    QColor              m_color = MVC_CMN_COLOR_WHITE;
 
     bool                m_enableDuplicate = MVC_CMN_ENABLE_DUPLICATE;
 
@@ -50,21 +46,15 @@ public:
     void                setIndex(int index) { m_index = index; }
 
     QString             title() const { return m_title; }
+    void                setTitle(const QString& title) { m_title = title; }
 
     int                 width() const { return m_width; }
     void                setWidth(int width) { m_width = width; }
-
 
     bool                enableVisible() const { return m_enableVisible; }
     void                setVisible(bool enable) { m_enableVisible = enable; }
 
     int                 alignment() const { return m_alignment; }
-
-    bool                boldFont() const { return m_boldFont; }
-    void                setBoldFont(bool bold) { m_boldFont = bold; }
-
-    QColor              color() const { return m_color; }
-    void                setColor(const QColor& color) { m_color = color; }
 
     bool                enableDuplicate() const { return m_enableDuplicate; }
 
@@ -101,6 +91,7 @@ public:
 
     void                updateColumnState();
 
+    void                setColumnTitle(int column, const QString& title);
     void                setColumnVisible(int column, bool visible);
 
 private:
@@ -121,14 +112,14 @@ const int               MVC_CMN_L_NAME              = 3;
 const int               MVC_CMN_L_SUBBLOCK          = 4;
 const int               MVC_CMN_L_BLOCK             = 5;
 const int               MVC_CMN_L_ENTRY             = 6;
-const int               MVC_CMN_L_EL_RANGE          = 7;
+const int               MVC_CMN_L_IN_EL_RANGE       = 7;
 const int               MVC_CMN_L_PH_RANGE          = 8;
 const int               MVC_CMN_L_OUT_RANGE         = 9;
-const int               MVC_CMN_L_EL_NOMINAL        = 10;
+const int               MVC_CMN_L_IN_EL_NOMINAL     = 10;
 const int               MVC_CMN_L_PH_NOMINAL        = 11;
 const int               MVC_CMN_L_OUT_NOMINAL       = 12;
 const int               MVC_CMN_L_PERCENT           = 13;
-const int               MVC_CMN_L_EL_MEASURE        = 14;
+const int               MVC_CMN_L_IN_EL_MEASURE     = 14;
 const int               MVC_CMN_L_PH_MEASURE        = 15;
 const int               MVC_CMN_L_OUT_MEASURE       = 16;
 const int               MVC_CMN_L_SYSTEM_ERROR      = 17;
@@ -155,10 +146,11 @@ const int               MVC_CMN_L_VALUE_16          = 37;
 const int               MVC_CMN_L_VALUE_17          = 38;
 const int               MVC_CMN_L_VALUE_18          = 39;
 const int               MVC_CMN_L_VALUE_19          = 40;
-const int               MVC_CMN_L_ERROR             = 41;
-const int               MVC_CMN_L_OUT_ERROR         = 42;
-const int               MVC_CMN_L_LIMIT_ERROR       = 43;
-const int               MVC_CMN_L_MEASUREMENT_TIME  = 44;
+const int               MVC_CMN_L_IN_ERROR          = 41;
+const int               MVC_CMN_L_IN_ERROR_LIMIT    = 42;
+const int               MVC_CMN_L_OUT_ERROR         = 43;
+const int               MVC_CMN_L_OUT_ERROR_LIMIT   = 44;
+const int               MVC_CMN_L_MEASUREMENT_TIME  = 45;
 
 // ==============================================================================================
 

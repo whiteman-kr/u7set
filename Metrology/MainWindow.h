@@ -169,8 +169,6 @@ signals:
 
     void                appendMeasure(Measurement*);
 
-    void                setActiveSignal();
-
 private slots:
 
     // Slots of main menu

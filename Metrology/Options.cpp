@@ -297,7 +297,6 @@ void MeasureViewOption::load()
             {
                 m_column[type][column].setWidth( s.value(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width()).toInt() );
                 m_column[type][column].setVisible( s.value(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible()).toBool() );
-                m_column[type][column].setColor( s.value(QString("%1/Header/%2/%3/Color").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.color().rgb()).toInt() );
             }
         }
     }
@@ -306,11 +305,11 @@ void MeasureViewOption::load()
     m_fontBold = m_font;
     m_fontBold.setBold(true);
 
-    m_showCustomID = s.value( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), true).toBool();
+    m_signalIdType = s.value( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), SIGNAL_ID_TYPE_CUSTOM).toInt();
 
     m_colorNotError = s.value( QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toInt();
-    m_colorLimitError = s.value( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toInt();
-    m_colorControlError = s.value( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toInt();
+    m_colorErrorLimit = s.value( QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toInt();
+    m_colorErrorControl = s.value( QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -329,18 +328,17 @@ void MeasureViewOption::save()
             {
                 s.setValue(QString("%1/Header/%2/%3/Width").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.width());
                 s.setValue(QString("%1/Header/%2/%3/Visible").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.enableVisible());
-                s.setValue(QString("%1/Header/%2/%3/Color").arg(MEASURE_VIEW_OPTIONS_KEY).arg(MeasureType[type]).arg(c.title()), c.color().rgb());
             }
         }
     }
 
     s.setValue( QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
 
-    s.setValue( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), m_showCustomID);
+    s.setValue( QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), m_signalIdType);
 
     s.setValue( QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorNotError.rgb() );
-    s.setValue( QString("%1ColorLimitError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorLimitError.rgb() );
-    s.setValue( QString("%1ColorControlError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorControlError.rgb() );
+    s.setValue( QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorLimit.rgb() );
+    s.setValue( QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb() );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -359,11 +357,11 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
     m_fontBold = m_font;
     m_fontBold.setBold(true);
 
-    m_showCustomID = from.m_showCustomID;
+    m_signalIdType = from.m_signalIdType;
 
     m_colorNotError = from.m_colorNotError;
-    m_colorLimitError = from.m_colorLimitError;
-    m_colorControlError = from.m_colorControlError;
+    m_colorErrorLimit = from.m_colorErrorLimit;
+    m_colorErrorControl = from.m_colorErrorControl;
 
     return *this;
 }
@@ -672,7 +670,7 @@ int ReportOption::reportTypeByMeasureType(int measureType)
     {
         case MEASURE_TYPE_LINEARITY:
 
-                switch(theOptions.linearity().m_viewType)
+                switch(theOptions.linearity().viewType())
                 {
                     case LO_VIEW_TYPE_SIMPLE:           reportType = REPORT_TYPE_LINEARITY;                 break;
                     case LO_VIEW_TYPE_EXTENDED:         reportType = REPORT_TYPE_LINEARITY_CERTIFICATION;   break;
@@ -929,9 +927,10 @@ void LinearityOption::load()
 
     m_pointBase.loadData(SQL_TABLE_LINEARITY_POINT);
 
-    m_errorValue = s.value( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
+    m_errorLimit = s.value( QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
     m_errorCtrl = s.value( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
-    m_errorType  = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
+    m_errorType = s.value( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
+    m_showInputErrorType = s.value( QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), LO_SHOW_INPUT_ERROR_PHYSICAL).toInt();
 
     m_measureTimeInPoint = s.value( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), 1).toInt();
     m_measureCountInPoint = s.value( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), 20).toInt();
@@ -941,6 +940,7 @@ void LinearityOption::load()
     m_highLimitRange = s.value( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
     m_viewType = s.value( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
+    m_showInputRangeColumn = s.value( QString("%1ShowInputRangeColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
     m_showOutputRangeColumn = s.value( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 }
 
@@ -950,9 +950,10 @@ void LinearityOption::save()
 {
     QSettings s;
 
-    s.setValue( QString("%1ErrorValue").arg(LINEARITY_OPTIONS_KEY), m_errorValue);
+    s.setValue( QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), m_errorLimit);
     s.setValue( QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
     s.setValue( QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
+    s.setValue( QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), m_showInputErrorType);
 
     s.setValue( QString("%1MeasureTimeInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureTimeInPoint);
     s.setValue( QString("%1MeasureCountInPoint").arg(LINEARITY_OPTIONS_KEY), m_measureCountInPoint);
@@ -962,6 +963,7 @@ void LinearityOption::save()
     s.setValue( QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
     s.setValue( QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
+    s.setValue( QString("%1ShowInputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showInputRangeColumn);
     s.setValue( QString("%1ShowOutputRangeColumn").arg(LINEARITY_OPTIONS_KEY), m_showOutputRangeColumn);
 
     m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
@@ -973,9 +975,10 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 {
     m_pointBase = from.m_pointBase;
 
-    m_errorValue = from.m_errorValue;
+    m_errorLimit = from.m_errorLimit;
     m_errorCtrl = from.m_errorCtrl;
     m_errorType = from.m_errorType;
+    m_showInputErrorType = from.m_showInputErrorType;
 
     m_measureTimeInPoint = from.m_measureTimeInPoint;
     m_measureCountInPoint = from.m_measureCountInPoint;
@@ -985,6 +988,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
     m_highLimitRange = from.m_highLimitRange;
 
     m_viewType = from.m_viewType;
+    m_showInputRangeColumn = from.m_showInputRangeColumn;
     m_showOutputRangeColumn = from.m_showOutputRangeColumn;
 
     return *this;

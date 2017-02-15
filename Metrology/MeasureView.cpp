@@ -141,12 +141,20 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::FontRole)
     {
-        return pColumn->boldFont() ? theOptions.measureView().fontBold() : theOptions.measureView().font();
+        if (indexColumn == MVC_CMN_L_ID || indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
+        {
+            return theOptions.measureView().fontBold();
+        }
+
+        return theOptions.measureView().font();
     }
 
     if (role == Qt::BackgroundColorRole)
     {
-        return backgroundColor(indexRow, indexColumn);
+        if (indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
+        {
+            return backgroundColor(indexRow, indexColumn);
+        }
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -160,27 +168,16 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 QColor MeasureTable::backgroundColor(int row, int column) const
 {
+    QColor result = MVC_CMN_COLOR_LIGHT_BLUE;
+
     if (row < 0 || row >= m_measureBase.measurementCount())
     {
-        return Qt::white;
+        return result;
     }
 
     if (column < 0 || column > m_header.count())
     {
-        return Qt::white;
-    }
-
-    MeasureViewColumn* pColumn = m_header.column(column);
-    if (pColumn == nullptr)
-    {
-        return Qt::white;
-    }
-
-    QColor result = pColumn->color();
-
-    if (column != MVC_CMN_L_ERROR)
-    {
-        return pColumn->color();
+        return result;
     }
 
     switch(m_measureType)
@@ -193,20 +190,42 @@ QColor MeasureTable::backgroundColor(int row, int column) const
                     break;
                 }
 
-                int errorType = theOptions.linearity().m_errorType;
+                int errorType = theOptions.linearity().errorType();
                 if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
                 {
                     break;
                 }
 
-                if ( pLinearityMeasurement->errorInput(MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().m_errorCtrl )
+                if (column == MVC_CMN_L_IN_ERROR)
                 {
-                    result = theOptions.measureView().colorControlError();
+                    if (errorType == MEASURE_ERROR_TYPE_REDUCE)
+                    {
+                        if ( pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl() )
+                        {
+                            result = theOptions.measureView().colorErrorControl();
+                        }
+                    }
+
+                    if ( pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType) )
+                    {
+                        result = theOptions.measureView().colorErrorLimit();
+                    }
                 }
 
-                if ( pLinearityMeasurement->errorInput(errorType) > pLinearityMeasurement->errorLimit(errorType) )
+                if (column == MVC_CMN_L_OUT_ERROR)
                 {
-                    result = theOptions.measureView().colorLimitError();
+                    if (errorType == MEASURE_ERROR_TYPE_REDUCE)
+                    {
+                        if ( pLinearityMeasurement->error(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl() )
+                        {
+                            result = theOptions.measureView().colorErrorControl();
+                        }
+                    }
+
+                    if ( pLinearityMeasurement->error(VALUE_TYPE_OUT_ELECTRIC, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_OUT_ELECTRIC, errorType) )
+                    {
+                        result = theOptions.measureView().colorErrorLimit();
+                    }
                 }
             }
             break;
@@ -282,12 +301,19 @@ QString MeasureTable::textLinearity(int row, int column) const
 
     int detailValueType = VALUE_TYPE_IN_ELECTRIC;
 
-    if (theOptions.linearity().m_viewType == LO_VIEW_TYPE_DETAIL_PHYSICAL)
+    if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_PHYSICAL)
     {
         detailValueType = VALUE_TYPE_PHYSICAL;
     }
 
-    int errorType = theOptions.linearity().m_errorType;
+    int inputlimitType = VALUE_TYPE_PHYSICAL;
+
+    switch(theOptions.linearity().showInputErrorType())
+    {
+        case LO_SHOW_INPUT_ERROR_ELECTRIC:  inputlimitType = VALUE_TYPE_IN_ELECTRIC;    break;
+        case LO_SHOW_INPUT_ERROR_PHYSICAL:  inputlimitType = VALUE_TYPE_PHYSICAL;       break;
+        default:                            assert(0);
+    }
 
     QString result;
 
@@ -296,24 +322,24 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
         case MVC_CMN_L_CASE:					result = m->position().caseStr(); break;
-        case MVC_CMN_L_ID:                      result = theOptions.measureView().showCustomID() == true ? m->customAppSignalID() : m->appSignalID(); break;
+        case MVC_CMN_L_ID:                      result = m->signalID( theOptions.measureView().signalIdType() ); break;
         case MVC_CMN_L_NAME:					result = m->caption(); break;
 
         case MVC_CMN_L_SUBBLOCK:				result = m->position().subblockStr(); break;
         case MVC_CMN_L_BLOCK:					result = m->position().blockStr(); break;
         case MVC_CMN_L_ENTRY:					result = m->position().entryStr(); break;
 
-        case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(VALUE_TYPE_IN_ELECTRIC); break;
+        case MVC_CMN_L_IN_EL_NOMINAL:			result = m->nominalStr(VALUE_TYPE_IN_ELECTRIC); break;
         case MVC_CMN_L_PH_NOMINAL:				result = m->nominalStr(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_NOMINAL:				result = m->nominalStr(VALUE_TYPE_OUT_ELECTRIC); break;
 
         case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
 
-        case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(VALUE_TYPE_IN_ELECTRIC); break;
+        case MVC_CMN_L_IN_EL_MEASURE:			result = m->measureStr(VALUE_TYPE_IN_ELECTRIC); break;
         case MVC_CMN_L_PH_MEASURE:				result = m->measureStr(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_MEASURE:				result = m->measureStr(VALUE_TYPE_OUT_ELECTRIC); break;
 
-        case MVC_CMN_L_EL_RANGE:				result = m->limitStr(VALUE_TYPE_IN_ELECTRIC); break;
+        case MVC_CMN_L_IN_EL_RANGE:				result = m->limitStr(VALUE_TYPE_IN_ELECTRIC); break;
         case MVC_CMN_L_PH_RANGE:				result = m->limitStr(VALUE_TYPE_PHYSICAL); break;
         case MVC_CMN_L_OUT_RANGE:				result = m->limitStr(VALUE_TYPE_OUT_ELECTRIC); break;
 
@@ -343,9 +369,10 @@ QString MeasureTable::textLinearity(int row, int column) const
         case MVC_CMN_L_MSE:                     result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_MSE), 10, 2); break;
         case MVC_CMN_L_BORDER:                  result = tr("± ") + QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER), 10, 2); break;
 
-        case MVC_CMN_L_ERROR:                   result = m->errorInputStr(errorType); break;
-        case MVC_CMN_L_OUT_ERROR:               result = m->errorOutputStr(errorType); break;
-        case MVC_CMN_L_LIMIT_ERROR:             result = m->errorLimitStr(errorType); break;
+        case MVC_CMN_L_IN_ERROR:                result = m->errorStr(inputlimitType); break;
+        case MVC_CMN_L_IN_ERROR_LIMIT:          result = m->errorLimitStr(inputlimitType); break;
+        case MVC_CMN_L_OUT_ERROR:               result = m->errorStr(VALUE_TYPE_OUT_ELECTRIC); break;
+        case MVC_CMN_L_OUT_ERROR_LIMIT:         result = m->errorLimitStr(VALUE_TYPE_OUT_ELECTRIC); break;
 
         case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString("dd-MM-yyyy hh:mm:ss"); break;
 
@@ -518,7 +545,7 @@ MeasureView::MeasureView(int measureType, QWidget *parent) :
     m_table.setMeasureType(measureType);
     setModel(&m_table);
 
-    //setSelectionBehavior(QAbstractItemView::SelectRows);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 
     createContextMenu();
 
@@ -661,6 +688,8 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
     }
 
     emit measureCountChanged(m_table.count());
+
+    setCurrentIndex( model()->index( model()->rowCount() - 1, MVC_CMN_L_ID ) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -727,14 +756,14 @@ void MeasureView::copy()
 
     for(int row = 0; row < rowCount; row++)
     {
+        if (selectionModel()->isRowSelected(row, QModelIndex() ) == false)
+        {
+            continue;
+        }
+
         for(int column = 0; column < columnCount; column++)
         {
             if (isColumnHidden(column) == true)
-            {
-                continue;
-            }
-
-            if (selectionModel()->isSelected( model()->index(row, column) ) == false)
             {
                 continue;
             }

@@ -26,13 +26,6 @@ void MeasureThread::init(QWidget* parent)
 {
     m_parent = parent;
 
-//    MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-//    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
-//    {
-//        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MeasureThread::stopMeasure, Qt::QueuedConnection);
-//        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MeasureThread::stopMeasure, Qt::QueuedConnection);
-//    }
-
     connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &MeasureThread::updateSignalParam, Qt::QueuedConnection);
 
     connect(this, &MeasureThread::showMsgBox, this, &MeasureThread::msgBox);
@@ -121,6 +114,42 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pCalibratorManager)
         return false;
     }
 
+    if (m_cmdStopMeasure == true)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureThread::hasConnectedCalibrators()
+{
+    if (m_cmdStopMeasure == true)
+    {
+        return false;
+    }
+
+    int connectedCalibratorCount = 0;
+
+    for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+    {
+        CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
+        if (calibratorIsValid(pCalibratorManager) == false)
+        {
+            continue;
+        }
+
+        connectedCalibratorCount++;
+    }
+
+    if (connectedCalibratorCount == 0)
+    {
+        emit showMsgBox(tr("No connected calibrators for measure"));
+        return false;
+    }
+
     return true;
 }
 
@@ -129,6 +158,11 @@ bool MeasureThread::calibratorIsValid(CalibratorManager* pCalibratorManager)
 bool MeasureThread::setCalibratorUnit()
 {
     if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return false;
+    }
+
+    if (hasConnectedCalibrators() == false)
     {
         return false;
     }
@@ -217,14 +251,12 @@ bool MeasureThread::setCalibratorUnit()
             assert(false);
     }
 
-
-
     return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalInputUnit, double inputElectricHighLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit)
 {
     if (calibratorIsValid(pCalibratorManager) == false)
     {
@@ -237,7 +269,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
         return false;
     }
 
-    if (signalInputUnit < 0 || signalInputUnit >= theUnitBase.unitCount())
+    if (theUnitBase.hasUnit( signalUnit ) == false)
     {
         assert(0);
         return false;
@@ -245,7 +277,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 
     int calibratorUnit = CALIBRATOR_UNIT_UNKNOWN;
 
-    switch(signalInputUnit)
+    switch(signalUnit)
     {
         case E::InputUnit::mA:  calibratorUnit = CALIBRATOR_UNIT_MA;    break;
         case E::InputUnit::mV:  calibratorUnit = CALIBRATOR_UNIT_MV;    break;
@@ -254,7 +286,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
             {
                 // Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
                 //
-                if (inputElectricHighLimit <= 400)
+                if (electricHighLimit <= 400)
                 {
                     calibratorUnit = CALIBRATOR_UNIT_LOW_OHM;
                 }
@@ -296,6 +328,10 @@ void MeasureThread::run()
         return;
     }
 
+    // set command for exit (stop measure) in state = FALSE
+    //
+    m_cmdStopMeasure = false;
+
     // set param of active signal for measure
     //
     if (setActiveSignalParam() == false)
@@ -309,10 +345,6 @@ void MeasureThread::run()
     {
         return;
     }
-
-    // set command for exit (stop measure) in state = FALSE
-    //
-    m_cmdStopMeasure = false;
 
     // start measure function
     //
@@ -337,7 +369,7 @@ void MeasureThread::measureLinearity()
 
     for(int p = 0; p < pointCount; p++)
     {
-        if (m_cmdStopMeasure == true)
+        if (hasConnectedCalibrators() == false)
         {
             break;
         }
@@ -441,6 +473,25 @@ void MeasureThread::measureComprators()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MeasureThread::signalSocketDisconnected()
+{
+    stopMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MeasureThread::tuningSocketDisconnected()
+{
+    if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+    {
+        return;
+    }
+
+    stopMeasure();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MeasureThread::updateSignalParam(const Hash& signalHash)
 {
     if (signalHash == 0)
@@ -449,13 +500,13 @@ void MeasureThread::updateSignalParam(const Hash& signalHash)
         return;
     }
 
-    for(int i = 0; i < MAX_CHANNEL_COUNT; i ++)
+    for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
     {
         for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
         {
-            if (m_activeSignalParam[i].param(type).hash() == signalHash)
+            if (m_activeSignalParam[c].param(type).hash() == signalHash)
             {
-                m_activeSignalParam[i].setParam(type, theSignalBase.signalParam(signalHash));
+                m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(signalHash));
             }
         }
     }

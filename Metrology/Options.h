@@ -218,7 +218,7 @@ public:
 const char* const		MeasureViewParam[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
-                        QT_TRANSLATE_NOOP("Options.h", "Show Custom ID"),
+                        QT_TRANSLATE_NOOP("Options.h", "Displaing type of signal ID"),
                         QT_TRANSLATE_NOOP("Options.h", "Color measurement that has not error"),
                         QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
                         QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
@@ -231,6 +231,21 @@ const int				MWO_PARAM_FONT					= 0,
                         MWO_PARAM_COLOR_NOT_ERROR       = 2,
                         MWO_PARAM_COLOR_LIMIT_ERROR     = 3,
                         MWO_PARAM_COLOR_CONTROL_ERROR   = 4;
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       TypeSignalID[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "AppSignalID"),
+                        QT_TRANSLATE_NOOP("Options.h", "CustomAppSignalID"),
+                        QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+};
+
+const int               SIGNAL_ID_TYPE_COUNT      = sizeof(TypeSignalID)/sizeof(TypeSignalID[0]);
+
+const int               SIGNAL_ID_TYPE_APP        = 0,
+                        SIGNAL_ID_TYPE_CUSTOM     = 1,
+                        SIGNAL_ID_TYPE_EQUIPMENT  = 2;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -261,12 +276,11 @@ private:
     QFont				m_font;
     QFont				m_fontBold;
 
-    bool				m_showCustomID = true;
+    int                 m_signalIdType = SIGNAL_ID_TYPE_CUSTOM;
 
     QColor              m_colorNotError = COLOR_NOT_ERROR;
-    QColor              m_colorLimitError = COLOR_OVER_LIMIT_ERROR;
-    QColor              m_colorControlError = COLOR_OVER_CONTROL_ERROR;
-
+    QColor              m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
+    QColor              m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
 
 public:
 
@@ -279,17 +293,17 @@ public:
     QFont               fontBold() const { return m_fontBold; }
     void                setFontBold(QFont font) { m_fontBold = font; }
 
-    bool                showCustomID() const { return m_showCustomID; }
-    void                setShowCustomID(bool show) { m_showCustomID = show; }
+    int                 signalIdType() const { return m_signalIdType; }
+    void                setSignalIdType(int type) { m_signalIdType = type; }
 
     QColor              colorNotError() const { return m_colorNotError; }
     void                setColorNotError(QColor color) { m_colorNotError = color; }
 
-    QColor              colorLimitError() const { return m_colorLimitError; }
-    void                setColorLimitError(QColor color) { m_colorLimitError = color; }
+    QColor              colorErrorLimit() const { return m_colorErrorLimit; }
+    void                setColorErrorLimit(QColor color) { m_colorErrorLimit = color; }
 
-    QColor              colorControlError() const { return m_colorControlError; }
-    void                setColorControlError(QColor color) { m_colorControlError = color; }
+    QColor              colorErrorControl() const { return m_colorErrorControl; }
+    void                setColorErrorControl(QColor color) { m_colorErrorControl = color; }
 
     void                init();
 
@@ -695,6 +709,7 @@ const char* const       LinearityParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "Limit error"),
                         QT_TRANSLATE_NOOP("Options.h", "Control error"),
                         QT_TRANSLATE_NOOP("Options.h", "Error type"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show absolute error of input as ..."),
                         QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
                         QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
                         QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
@@ -703,6 +718,7 @@ const char* const       LinearityParamName[] =
                         QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range, (%)"),
                         QT_TRANSLATE_NOOP("Options.h", "Points of range"),
                         QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
+                        QT_TRANSLATE_NOOP("Options.h", "Show column of input values"),
                         QT_TRANSLATE_NOOP("Options.h", "Show column of output values"),
 };
 
@@ -711,15 +727,30 @@ const int               LO_PARAM_COUNT                      = sizeof(LinearityPa
 const int               LO_PARAM_ERROR                      = 0,
                         LO_PARAM_ERROR_CTRL                 = 1,
                         LO_PARAM_ERROR_TYPE                 = 2,
-                        LO_PARAM_MEASURE_TIME               = 3,
-                        LO_PARAM_MEASURE_IN_POINT           = 4,
-                        LO_PARAM_RANGE_TYPE                 = 5,
-                        LO_PARAM_POINT_COUNT                = 6,
-                        LO_PARAM_LOW_RANGE                  = 7,
-                        LO_PARAM_HIGH_RANGE                 = 8,
-                        LO_PARAM_VALUE_POINTS               = 9,
-                        LO_PARAM_LIST_TYPE                  = 10,
-                        LO_PARAM_OUTPUT_RANGE               = 11;
+                        LO_PARAM_SHOW_INPUT_ERROR           = 3,
+                        LO_PARAM_MEASURE_TIME               = 4,
+                        LO_PARAM_MEASURE_IN_POINT           = 5,
+                        LO_PARAM_RANGE_TYPE                 = 6,
+                        LO_PARAM_POINT_COUNT                = 7,
+                        LO_PARAM_LOW_RANGE                  = 8,
+                        LO_PARAM_HIGH_RANGE                 = 9,
+                        LO_PARAM_VALUE_POINTS               = 10,
+                        LO_PARAM_LIST_TYPE                  = 11,
+                        LO_PARAM_SHOW_INPUT_RANGE           = 12,
+                        LO_PARAM_SHOW_OUTPUT_RANGE          = 13;
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const       ShowInputErrorStr[] =
+{
+                        QT_TRANSLATE_NOOP("Options.h", "Electrical"),
+                        QT_TRANSLATE_NOOP("Options.h", "Physical"),
+};
+
+const int               LO_SHOW_INPUT_ERROR_COUNT		= sizeof(ShowInputErrorStr)/sizeof(ShowInputErrorStr[0]);
+
+const int               LO_SHOW_INPUT_ERROR_ELECTRIC    = 0,
+                        LO_SHOW_INPUT_ERROR_PHYSICAL	= 1;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -767,30 +798,61 @@ private:
 
     LinearityPointBase  m_pointBase;                                                // list of measurement points
 
-    int                 m_measureTimeInPoint = 1;                                   // time, in seconds, during which will be made ​​N measurements at each point
-    int                 m_measureCountInPoint = 20;                                 // count of measurements in a point, according to GOST MI-2002 application 7
-
-public:
-
-    LinearityPointBase& points() { return m_pointBase; }
-
-
-    double              m_errorValue = 0.2;                                         // permissible error is given by specified documents
+    double              m_errorLimit = 0.2;                                         // permissible error is given by specified documents
     double              m_errorCtrl = 0.1;                                          // control error is given by metrologists
     int                 m_errorType = MEASURE_ERROR_TYPE_REDUCE;                    // type of error absolute or reduced
+    int                 m_showInputErrorType = LO_SHOW_INPUT_ERROR_ELECTRIC;        // type of displaing input error
 
-    int                 measureTimeInPoint() { return m_measureTimeInPoint; }
-    void                setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
-
-    int                 measureCountInPoint();
-    void                setMeasureCountInPoint(int measureCount);
+    int                 m_measureTimeInPoint = 1;                                   // time, in seconds, during which will be made ​​N measurements at each point
+    int                 m_measureCountInPoint = 20;                                 // count of measurements in a point, according to GOST MI-2002 application 7
 
     int                 m_rangeType = LO_RANGE_TYPE_MANUAL;                         // type of division measure range: manual - 0 or automatic - 1
     double              m_lowLimitRange = 0;                                        // lower limit of the range for automatic division
     double              m_highLimitRange = 100;                                     // high limit of the range for automatic division
 
     int                 m_viewType = LO_VIEW_TYPE_SIMPLE;                           // type of measurements list extended or simple
+    bool                m_showInputRangeColumn = true;                              // show column input values
     bool                m_showOutputRangeColumn = false;                            // show column output values
+
+public:
+
+    LinearityPointBase& points() { return m_pointBase; }
+
+    double              errorLimit() const { return m_errorLimit; }
+    void                setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
+
+    double              errorCtrl() const { return m_errorCtrl; }
+    void                setErrorCtrl(double errorCtrl) { m_errorCtrl = errorCtrl; }
+
+    int                 errorType() const { return m_errorType; }
+    void                setErrorType(int type) { m_errorType = type; }
+
+    int                 showInputErrorType() const { return m_showInputErrorType; }
+    void                setShowInputErrorType(int type) { m_showInputErrorType = type; }
+
+    int                 measureTimeInPoint() const { return m_measureTimeInPoint; }
+    void                setMeasureTimeInPoint(int sec) { m_measureTimeInPoint = sec; }
+
+    int                 measureCountInPoint();
+    void                setMeasureCountInPoint(int measureCount);
+
+    int                 rangeType() const { return m_rangeType; }
+    void                setRangeType(int type) { m_rangeType = type; }
+
+    double              lowLimitRange() const { return m_lowLimitRange; }
+    void                setLowLimitRange(double lowLimit) { m_lowLimitRange = lowLimit; }
+
+    double              highLimitRange() const { return m_highLimitRange; }
+    void                setHighLimitRange(double highLimit) { m_highLimitRange = highLimit; }
+
+    int                 viewType() const { return m_rangeType; }
+    void                setViewType(int type) { m_rangeType = type; }
+
+    bool                showInputRangeColumn() const { return m_showInputRangeColumn; }
+    void                setShowInputRangeColumn(bool show) { m_showInputRangeColumn = show; }
+
+    bool                showOutputRangeColumn() const { return m_showOutputRangeColumn; }
+    void                setShowOutputRangeColumn(bool show) { m_showOutputRangeColumn = show; }
 
 public:
 

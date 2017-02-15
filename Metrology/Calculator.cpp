@@ -43,22 +43,26 @@ void Calculator::createInterface()
 
     m_pTrDegreeRadio = new QRadioButton(this);
     m_pTrDegreeEdit = new QLineEdit(tr("0"), this);
+    QLabel* pTrDegreeLabel = new QLabel(tr("°C"), this);
+    pTrDegreeLabel->setFixedWidth(30);
     m_pTrDegreeEdit->setFont(*font);
 
     tr_C_Layout->addWidget(m_pTrDegreeRadio);
     tr_C_Layout->addWidget(m_pTrDegreeEdit);
-    tr_C_Layout->addWidget(new QLabel(tr("°C"), this));
+    tr_C_Layout->addWidget(pTrDegreeLabel);
     tr_C_Layout->addStretch();
 
     QHBoxLayout *tr_Ohm_Layout = new QHBoxLayout;
 
     m_pTrElectricRadio = new QRadioButton(this);
     m_pTrElectricEdit = new QLineEdit(this);
+    QLabel* pTrElectricLabel = new QLabel(tr("Ohm"), this);
+    pTrElectricLabel->setFixedWidth(30);
     m_pTrElectricEdit->setFont(*font);
 
     tr_Ohm_Layout->addWidget(m_pTrElectricRadio);
     tr_Ohm_Layout->addWidget(m_pTrElectricEdit);
-    tr_Ohm_Layout->addWidget(new QLabel(tr("Ohm"), this));
+    tr_Ohm_Layout->addWidget(pTrElectricLabel);
     tr_Ohm_Layout->addStretch();
 
     trLayout->addWidget(m_pTrList);
@@ -78,22 +82,26 @@ void Calculator::createInterface()
 
     m_pTcDegreeRadio = new QRadioButton(this);
     m_pTcDegreeEdit = new QLineEdit(tr("400"), this);
+    QLabel* pTcDegreeLabel = new QLabel(tr("°C"), this);
+    pTcDegreeLabel->setFixedWidth(30);
     m_pTcDegreeEdit->setFont(*font);
 
     tc_C_Layout->addWidget(m_pTcDegreeRadio);
     tc_C_Layout->addWidget(m_pTcDegreeEdit);
-    tc_C_Layout->addWidget(new QLabel(tr("°C"), this));
+    tc_C_Layout->addWidget(pTcDegreeLabel);
     tc_C_Layout->addStretch();
 
     QHBoxLayout *tc_mV_Layout = new QHBoxLayout;
 
     m_pTcElectricRadio = new QRadioButton(this);
     m_pTcElectricEdit = new QLineEdit(this);
+    QLabel* pTcElectricLabel = new QLabel(tr("mV"), this);
+    pTcElectricLabel->setFixedWidth(30);
     m_pTcElectricEdit->setFont(*font);
 
     tc_mV_Layout->addWidget(m_pTcElectricRadio);
     tc_mV_Layout->addWidget(m_pTcElectricEdit);
-    tc_mV_Layout->addWidget(new QLabel(tr("mV"), this));
+    tc_mV_Layout->addWidget(pTcElectricLabel);
     tc_mV_Layout->addStretch();
 
     tcLayout->addWidget(m_pTcList);
@@ -111,26 +119,26 @@ void Calculator::createInterface()
 
     m_pLinInRadio = new QRadioButton(this);
     m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
-    QLabel* pLinInValLable = new QLabel(tr("In"), this);
-    pLinInValLable->setFixedWidth(30);
+    QLabel* pLinInValLabel = new QLabel(tr("In"), this);
+    pLinInValLabel->setFixedWidth(30);
     m_pLinInValEdit->setFont(*font);
 
     lin_inval_Layout->addWidget(m_pLinInRadio);
     lin_inval_Layout->addWidget(m_pLinInValEdit);
-    lin_inval_Layout->addWidget(pLinInValLable);
+    lin_inval_Layout->addWidget(pLinInValLabel);
     lin_inval_Layout->addStretch();
 
     QHBoxLayout *lin_outval_Layout = new QHBoxLayout;
 
     m_pLinOutRadio = new QRadioButton(this);
     m_pLinOutValEdit = new QLineEdit(tr("0"), this);
-    QLabel* pLinOutValLable = new QLabel(tr("Out"), this);
-    pLinOutValLable->setFixedWidth(30);
+    QLabel* pLinOutValLabel = new QLabel(tr("Out"), this);
+    pLinOutValLabel->setFixedWidth(30);
     m_pLinOutValEdit->setFont(*font);
 
     lin_outval_Layout->addWidget(m_pLinOutRadio);
     lin_outval_Layout->addWidget(m_pLinOutValEdit);
-    lin_outval_Layout->addWidget(pLinOutValLable);
+    lin_outval_Layout->addWidget(pLinOutValLabel);
     lin_outval_Layout->addStretch();
 
     QHBoxLayout *lin_inrange_Layout = new QHBoxLayout;
@@ -198,7 +206,7 @@ void Calculator::initDialog()
             continue;
         }
 
-        if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
+        if (theUnitBase.hasSensorType( pair.sensorType ) == false)
         {
             continue;
         }
@@ -230,7 +238,7 @@ void Calculator::initDialog()
             continue;
         }
 
-        if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
+        if (theUnitBase.hasSensorType( pair.sensorType) == false)
         {
             continue;
         }
@@ -289,7 +297,7 @@ void Calculator::conversionTr()
     }
 
     E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
-    if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+    if (theUnitBase.hasSensorType( sensorType ) == false)
     {
         return;
     }
@@ -326,7 +334,7 @@ void Calculator::conversionTc()
     }
 
     E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-    if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+    if (theUnitBase.hasSensorType(sensorType ) == false)
     {
         return;
     }

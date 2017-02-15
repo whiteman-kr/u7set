@@ -417,17 +417,17 @@ void SignalParam::setAppSignalID(const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalParam::adcRangeStr(bool showInHex) const
+QString SignalParam::adcRangeStr(bool showHex) const
 {
     QString range;
 
-    if (showInHex == true)
+    if (showHex == false)
     {
-        range.sprintf("0x%04X .. 0x%04X", m_lowADC, m_highADC);
+        range.sprintf("%d .. %d", m_lowADC, m_highADC);
     }
     else
     {
-        range.sprintf("%d .. %d", m_lowADC, m_highADC);
+        range.sprintf("0x%04X .. 0x%04X", m_lowADC, m_highADC);
     }
 
     return range;
@@ -441,21 +441,26 @@ QString SignalParam::inputElectricRangeStr() const
 
     formatStr.sprintf( ("%%.%df"), m_inputElectricPrecision );
 
-    range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_inputElectricLowLimit, m_inputElectricHighLimit);
+    range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputElectricLowLimit, m_inputElectricHighLimit);
 
-    if ( m_inputElectricUnitID >= 0 && m_inputElectricUnitID < theUnitBase.unitCount())
+    if (theUnitBase.hasUnit( m_inputElectricUnitID ) == true)
     {
-        range.append( theUnitBase.unit( m_inputElectricUnitID ) );
-    }
-
-    if (m_inputElectricSensorType >= 1 && m_inputElectricSensorType < SENSOR_TYPE_COUNT)
-    {
-        range.append( " (" );
-        range.append( SensorTypeStr[ m_inputElectricSensorType ]  );
-        range.append( ")" );
+        range.append( " " + theUnitBase.unit( m_inputElectricUnitID ) );
     }
 
     return range;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SignalParam::inputElectricSensorStr() const
+{
+    if (theUnitBase.hasSensorType( m_inputElectricSensorType ) == false)
+    {
+        return QString();
+    }
+
+    return SensorTypeStr[ m_inputElectricSensorType ];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -466,11 +471,11 @@ QString SignalParam::inputPhysicalRangeStr() const
 
     formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
 
-    range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
+    range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
 
-    if ( m_inputPhysicalUnitID >= 0 && m_inputPhysicalUnitID < theUnitBase.unitCount())
+    if (theUnitBase.hasUnit( m_inputPhysicalUnitID ) == true)
     {
-        range.append( theUnitBase.unit( m_inputPhysicalUnitID ) );
+        range.append( " " + theUnitBase.unit( m_inputPhysicalUnitID ) );
     }
 
     return range;
@@ -484,21 +489,26 @@ QString SignalParam::outputElectricRangeStr() const
 
     formatStr.sprintf( ("%%.%df"), m_outputElectricPrecision );
 
-    range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_outputElectricLowLimit, m_outputElectricHighLimit);
+    range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputElectricLowLimit, m_outputElectricHighLimit);
 
-    if ( m_outputElectricUnitID >= 0 && m_outputElectricUnitID < theUnitBase.unitCount())
+    if (theUnitBase.hasUnit( m_outputElectricUnitID ) == true)
     {
-        range.append( theUnitBase.unit( m_outputElectricUnitID ) );
-    }
-
-    if (m_outputElectricSensorType >= 1 && m_outputElectricSensorType < SENSOR_TYPE_COUNT)
-    {
-        range.append( " (" );
-        range.append( SensorTypeStr[ m_outputElectricSensorType ]  );
-        range.append( ")" );
+        range.append( " " + theUnitBase.unit( m_outputElectricUnitID ) );
     }
 
     return range;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SignalParam::outputElectricSensorStr() const
+{
+    if (theUnitBase.hasSensorType( m_outputElectricSensorType ) == false)
+    {
+        return QString();
+    }
+
+    return SensorTypeStr[ m_outputElectricSensorType ];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -509,11 +519,11 @@ QString SignalParam::outputPhysicalRangeStr() const
 
     formatStr.sprintf( ("%%.%df"), m_outputPhysicalPrecision );
 
-    range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
+    range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
 
-    if ( m_outputPhysicalUnitID >= 0 && m_outputPhysicalUnitID < theUnitBase.unitCount())
+    if (theUnitBase.hasUnit( m_outputPhysicalUnitID ) == true)
     {
-        range.append( theUnitBase.unit( m_outputPhysicalUnitID ) );
+        range.append( " " + theUnitBase.unit( m_outputPhysicalUnitID ) );
     }
 
     return range;
@@ -521,15 +531,54 @@ QString SignalParam::outputPhysicalRangeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalParam::calibratorIndexStr(int index) const
+QString SignalParam::enableTuningStr() const
 {
-    CalibratorManager* pManager = theCalibratorBase.сalibratorForMeasure(index);
-    if (pManager == nullptr || pManager->calibratorIsConnected() == false)
+    if (m_enableTuning == false)
     {
-        return QString("Not connected");
+        return QString();
     }
 
-    return QString("Calibrator %1 (%2)").arg( pManager->index() + 1).arg(pManager->portName());
+    return QString("Yes");
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString SignalParam::tuningDefaultValueStr() const
+{
+    if (m_enableTuning == false)
+    {
+        return QString();
+    }
+
+    QString stateStr, formatStr;
+
+    switch (m_signalType)
+    {
+        case E::SignalType::Analog:
+
+            formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
+
+            stateStr.sprintf( formatStr.toAscii(), m_tuningDefaultValue);
+
+            if (theUnitBase.hasUnit( m_inputPhysicalUnitID ) == true)
+            {
+                stateStr.append(" " + theUnitBase.unit( m_inputPhysicalUnitID ) );
+            }
+
+            break;
+
+        case E::SignalType::Discrete:
+
+            stateStr = m_tuningDefaultValue == 0 ? QString("No") : QString("Yes");
+
+            break;
+
+        default:
+            assert(0);
+    }
+
+
+    return stateStr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -599,9 +648,9 @@ void MetrologyMultiSignal::clear()
 {
     m_mutex.lock();
 
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
         {
-            m_signalHash[i] = 0;
+            m_signalHash[c] = 0;
         }
 
         m_position.clear();
@@ -619,9 +668,9 @@ bool MetrologyMultiSignal::isEmpty() const
 
     m_mutex.lock();
 
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
         {
-            if (m_signalHash[i] != 0)
+            if (m_signalHash[c] != 0)
             {
                 empty = false;
 
@@ -705,9 +754,9 @@ MetrologyMultiSignal& MetrologyMultiSignal::operator=(const MetrologyMultiSignal
 {
     m_mutex.lock();
 
-        for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+        for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
         {
-            m_signalHash[i] = from.m_signalHash[i];
+            m_signalHash[c] = from.m_signalHash[c];
         }
 
         m_position = from.m_position;
@@ -729,6 +778,13 @@ MeasureParam::MeasureParam()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+MeasureParam::MeasureParam(const MeasureParam& from)
+{
+    *this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MeasureParam::~MeasureParam()
 {
 }
@@ -745,6 +801,8 @@ void MeasureParam::clear()
         }
 
         m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
+
+        m_equalPhysicalRange = false;
 
         m_pCalibratorManager = nullptr;
 
@@ -819,9 +877,403 @@ bool MeasureParam::setParam(int type, const SignalParam& param)
 
         m_param[type] = param;
 
+        m_equalPhysicalRange = testPhysicalRange();
+
     m_mutex.unlock();
 
     return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MeasureParam::testPhysicalRange()
+{
+    if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+    {
+        return true;
+    }
+
+    const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+    const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+
+    if (inParam.isValid() == false || outParam.isValid() == false)
+    {
+        return false;
+    }
+
+    if (inParam.inputPhysicalLowLimit() != outParam.inputPhysicalLowLimit())
+    {
+        return false;
+    }
+
+    if (inParam.inputPhysicalHighLimit() != outParam.inputPhysicalHighLimit())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::caseStr() const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().caseStr();
+            }
+        }
+        else
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().caseStr();
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::signalID(bool showCustomID, const QString& divider) const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = showCustomID == true ? param.customAppSignalID() : param.appSignalID();
+            }
+        }
+        else
+        {
+            const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (inParam.isValid() == true)
+            {
+                strResult = (showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID()) + divider;
+            }
+
+            const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+            if (outParam.isValid() == true)
+            {
+                strResult += (showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID());
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::subblockStr() const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().subblockStr();
+            }
+        }
+        else
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().subblockStr();
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::blockStr() const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().blockStr();
+            }
+        }
+        else
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().blockStr();
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::entryStr() const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().entryStr();
+            }
+        }
+        else
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.position().entryStr();
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::caption(const QString& divider) const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.caption();
+            }
+        }
+        else
+        {
+            const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+
+            QString inСaptionStr, outСaptionStr;
+
+            if (inParam.isValid() == true)
+            {
+                inСaptionStr = inParam.caption();
+            }
+
+            if (outParam.isValid() == true)
+            {
+                outСaptionStr = outParam.caption();
+            }
+
+            strResult = inСaptionStr + divider + outСaptionStr;
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::physicalRangeStr(const QString& divider) const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.inputPhysicalRangeStr();
+            }
+        }
+        else
+        {
+            const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+
+            QString inRangeStr, outRangeStr;
+
+            if (inParam.isValid() == true)
+            {
+                inRangeStr = inParam.inputPhysicalRangeStr();
+            }
+
+            if (outParam.isValid() == true)
+            {
+                outRangeStr = outParam.inputPhysicalRangeStr();
+            }
+
+            if (m_equalPhysicalRange == true)
+            {
+                strResult = outRangeStr;
+            }
+            else
+            {
+                strResult = inRangeStr + divider + outRangeStr;
+            }
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::electricRangeStr(const QString& divider) const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.inputElectricRangeStr();
+            }
+        }
+        else
+        {
+            const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+
+            QString inRangeStr, outRangeStr;
+
+            if (inParam.isValid() == true && inParam.isInput() == true)
+            {
+                inRangeStr = inParam.inputElectricRangeStr();
+            }
+
+            if (outParam.isValid() == true && outParam.isOutput() == true)
+            {
+                outRangeStr = outParam.outputElectricRangeStr();
+            }
+
+            strResult = inRangeStr + divider + outRangeStr;
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::electricSensorStr(const QString& divider) const
+{
+    QString strResult;
+
+    m_mutex.lock();
+
+        if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+        {
+            const SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            if (param.isValid() == true)
+            {
+                strResult = param.inputElectricSensorStr();
+            }
+        }
+        else
+        {
+            const SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+            const SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+
+            QString inSensorStr, outSensorStr;
+
+            if (inParam.isValid() == true && inParam.isInput() == true)
+            {
+                inSensorStr = inParam.inputElectricSensorStr();
+            }
+
+            if (outParam.isValid() == true && outParam.isOutput() == true)
+            {
+                outSensorStr = outParam.outputElectricSensorStr();
+            }
+
+            strResult = inSensorStr + divider + outSensorStr;
+        }
+
+    m_mutex.unlock();
+
+    return strResult;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureParam::calibratorStr() const
+{
+    if (m_pCalibratorManager == nullptr || m_pCalibratorManager->calibratorIsConnected() == false)
+    {
+        return QString("Not connected");
+    }
+
+    return QString("Calibrator %1 (%2)").arg( m_pCalibratorManager->channel() + 1).arg(m_pCalibratorManager->portName());
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MeasureParam& MeasureParam::operator=(const MeasureParam& from)
+{
+    m_mutex.lock();
+
+        for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+        {
+            m_param[type] = from.m_param[type];
+        }
+
+        m_outputSignalType = from.m_outputSignalType;
+
+        m_equalPhysicalRange = from.m_equalPhysicalRange;
+
+        m_pCalibratorManager = from.m_pCalibratorManager;
+
+    m_mutex.unlock();
+
+    return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1085,12 +1537,12 @@ SignalBase::~SignalBase()
 {
 }
 
- // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::clear()
 {
-
     m_activeSignal.clear();
+    emit activeSignalChanged(m_activeSignal);
 
     m_signalMesaureMutex.lock();
 
@@ -1999,7 +2451,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& multiSignal)
 
     m_activeSignalMutex.unlock();
 
-    emit setActiveSignal();
+    emit activeSignalChanged(m_activeSignal);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2056,10 +2508,47 @@ void UnitBase::appendUnit(int unitID, const QString& unit)
 
         if (m_unitMap.contains(unitID) == false)
         {
-            m_unitMap.insert(unitID, unit);
+            m_unitMap[unitID] = unit;
         }
 
     m_unitMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool UnitBase::hasUnit(int unitID)
+{
+    if (unitID == NO_UNIT_ID)
+    {
+        return false;
+    }
+
+    bool has;
+
+    m_unitMutex.lock();
+
+        has = m_unitMap.contains(unitID);
+
+    m_unitMutex.unlock();
+
+    return has;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool UnitBase::hasSensorType(int sensorType)
+{
+    if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+    {
+        return false;
+    }
+
+    if (sensorType == E::SensorType::NoSensorType)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

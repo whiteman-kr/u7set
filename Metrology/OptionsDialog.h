@@ -140,6 +140,8 @@ public:
     int                         m_page = OPTION_PAGE_UNKNOWN;
     QTreeWidgetItem*            m_pTreeWidgetItem = nullptr;
 
+    QtTreePropertyBrowser*      treeEditor() { return m_pEditor; }
+
 private:
 
     int                         m_type = PROPERTY_PAGE_TYPE_UNKNOWN;
@@ -218,7 +220,7 @@ private slots:
     void                        onPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
     void                        onPropertyValueChanged(QtProperty *property, const QVariant &value);
 
-    void                        onBrowserItem(QtBrowserItem*);
+    void                        onBrowserItem(QtBrowserItem*pItem);
 
     void                        updateLinearityPage(bool isDialog);
     void                        updateMeasureViewPage(bool isDialog);

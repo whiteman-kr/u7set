@@ -37,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     theCalibratorBase.init(this);
     connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
 
+    connect(&theSignalBase, &SignalBase::updatedSignalParam, &theTuningSignalBase, &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
+
     // load output signals base
     //
     theOutputSignalBase.load();
@@ -44,28 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // init interface
     //
     createInterface();
-
-    // init signal socket thread
-    //
-    HostAddressPort signalSocketAddress(theOptions.signalSocket().serverIP(), theOptions.signalSocket().serverPort());
-    m_pSignalSocket = new SignalSocket(signalSocketAddress);
-    m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
-    m_pSignalSocketThread->start();
-
-    connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
-    connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
-    connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
-
-
-    // init tuning socket thread
-    //
-    HostAddressPort tuningSocketAddress(theOptions.tuningSocket().serverIP(), theOptions.tuningSocket().serverPort());
-    m_pTuningSocket = new TuningSocket(tuningSocketAddress);
-    m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
-    m_pTuningSocketThread->start();
-
-    connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
-    connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
 
     // init measure thread
     //
@@ -76,6 +56,29 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
 
     m_measureThread.init(this);
+
+    // init signal socket thread
+    //
+    HostAddressPort signalSocketAddress(theOptions.signalSocket().serverIP(), theOptions.signalSocket().serverPort());
+    m_pSignalSocket = new SignalSocket(signalSocketAddress);
+    m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+    m_pSignalSocketThread->start();
+
+    connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+
+    // init tuning socket thread
+    //
+    HostAddressPort tuningSocketAddress(theOptions.tuningSocket().serverIP(), theOptions.tuningSocket().serverPort());
+    m_pTuningSocket = new TuningSocket(tuningSocketAddress);
+    m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
+    m_pTuningSocketThread->start();
+
+    connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
+    connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
+    connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
 
     measureThreadStoped();
 
@@ -1086,9 +1089,9 @@ void MainWindow::startMeasure()
 
     QString measuredSignalID;
 
-    for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+    for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
     {
-        Hash hash = signal.hash( i );
+        Hash hash = signal.hash( c );
         if (hash == 0)
         {
             continue;
@@ -1380,7 +1383,6 @@ void MainWindow::setMeasureSignal(int index)
     }
 
     theSignalBase.setActiveSignal( measureSignal );
-    emit setActiveSignal();
 
     MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
     if (signal.isEmpty() == true)

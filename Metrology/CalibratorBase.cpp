@@ -49,9 +49,9 @@ void CalibratorBase::init(QWidget* parent)
 
 void CalibratorBase::createCalibrators(QWidget* parent)
 {
-    for(int index = 0; index < MAX_CHANNEL_COUNT; index++ )
+    for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++ )
     {
-        Calibrator* calibrator = new Calibrator(index);
+        Calibrator* calibrator = new Calibrator(channel);
         if (calibrator == nullptr)
         {
             continue;
@@ -64,9 +64,7 @@ void CalibratorBase::createCalibrators(QWidget* parent)
         }
 
         m_mutex.lock();
-
             m_calibratorManagerList.append(manager);
-
         m_mutex.unlock();
 
         QThread *pThread = new QThread;
@@ -119,11 +117,8 @@ void CalibratorBase::removeCalibrators()
     }
 
     m_mutex.lock();
-
         m_calibratorManagerList.clear();
-
     m_mutex.unlock();
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -198,10 +193,10 @@ void CalibratorBase::setHeaderList()
     QStringList verticalHeaderLabels;
     m_pCalibratorView->setRowCount(MAX_CHANNEL_COUNT);
 
-    for(int index = 0; index < MAX_CHANNEL_COUNT; index++ )
+    for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++ )
     {
-        verticalHeaderLabels.append(QString("Calibrator %1").arg(index + 1));
-        m_pCalibratorView->setRowHeight(index, 18);
+        verticalHeaderLabels.append(QString("Calibrator %1").arg(channel + 1));
+        m_pCalibratorView->setRowHeight(channel, 18);
     }
     m_pCalibratorView->setVerticalHeaderLabels(verticalHeaderLabels);
 
@@ -493,7 +488,7 @@ void CalibratorBase::onSettings(int row, int)
     dialog->setWindowFlags(Qt::Drawer);
     dialog->setFixedSize(200, 120);
     m_pInitDialog->setWindowIcon(QIcon(":/icons/Settings.png"));
-    dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->index() + 1));
+    dialog->setWindowTitle(tr("Settings calibrator %1").arg(manager->channel() + 1));
     dialog->move(m_pInitDialog->geometry().center() - dialog->rect().center());
 
         // serial port

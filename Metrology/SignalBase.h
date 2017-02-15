@@ -231,7 +231,7 @@ public:
     int                     adcHighLimit() const { return m_highADC; }
     void                    setHighADC(int highADC) { m_highADC = highADC;}
 
-    QString                 adcRangeStr(bool showInHex) const;
+    QString                 adcRangeStr(bool showHex) const;
 
     double                  inputElectricLowLimit() const { return m_inputElectricLowLimit; }
     void                    setInputElectricLowLimit(double lowLimit) { m_inputElectricLowLimit = lowLimit; }
@@ -242,13 +242,14 @@ public:
     E::InputUnit            inputElectricUnitID() const { return m_inputElectricUnitID; }
     void                    setInputElectricUnitID(const E::InputUnit unit) { m_inputElectricUnitID = unit; }
 
+    QString                 inputElectricRangeStr() const;
+
     E::SensorType           inputElectricSensorType() const { return m_inputElectricSensorType; }
+    QString                 inputElectricSensorStr() const;
     void                    setInputElectricSensorType(const E::SensorType sensorType) { m_inputElectricSensorType = sensorType; }
 
     int                     inputElectricPrecision() const { return m_inputElectricPrecision; }
     void                    setInputElectricPrecision(int precision) { m_inputElectricPrecision = precision; }
-
-    QString                 inputElectricRangeStr() const;
 
     double                  inputPhysicalLowLimit() const { return m_inputPhysicalLowLimit; }
     void                    setInputPhysicalLowLimit(double lowLimit) { m_inputPhysicalLowLimit = lowLimit; }
@@ -259,10 +260,10 @@ public:
     int                     inputPhysicalUnitID() const { return m_inputPhysicalUnitID; }
     void                    setInputPhysicalUnitID(int unit) { m_inputPhysicalUnitID = unit; }
 
+    QString                 inputPhysicalRangeStr() const;
+
     int                     inputPhysicalPrecision() const { return m_inputPhysicalPrecision; }
     void                    setInputPhysicalPrecision(int precision) { m_inputPhysicalPrecision = precision; }
-
-    QString                 inputPhysicalRangeStr() const;
 
     double                  adjustment() const { return m_adjustment; }
     void                    setAdjustment(double adjustment) { m_adjustment = adjustment; }
@@ -279,13 +280,14 @@ public:
     E::InputUnit            outputElectricUnitID() const { return m_outputElectricUnitID; }
     void                    setOutputElectricUnitID(const E::InputUnit unit) { m_outputElectricUnitID = unit; }
 
+    QString                 outputElectricRangeStr() const;
+
     E::SensorType           outputElectricSensorType() const { return m_outputElectricSensorType; }
+    QString                 outputElectricSensorStr() const;
     void                    setOutputElectricSensorType(const E::SensorType sensorType) { m_outputElectricSensorType = sensorType; }
 
     int                     outputElectricPrecision() const { return m_outputElectricPrecision; }
     void                    setOutputElectricPrecision(int precision) { m_outputElectricPrecision = precision; }
-
-    QString                 outputElectricRangeStr() const;
 
     double                  outputPhysicalLowLimit() const { return m_outputPhysicalLowLimit; }
     void                    setOutputPhysicalLowLimit(double lowLimit) { m_outputPhysicalLowLimit = lowLimit; }
@@ -296,21 +298,21 @@ public:
     int                     outputPhysicalUnitID() const { return m_outputPhysicalUnitID; }
     void                    setOutputPhysicalUnitID(int unit) { m_outputPhysicalUnitID = unit; }
 
+    QString                 outputPhysicalRangeStr() const;
+
     int                     outputPhysicalPrecision() const { return m_outputPhysicalPrecision; }
     void                    setOutputPhysicalPrecision(int precision) { m_outputPhysicalPrecision = precision; }
-
-    QString                 outputPhysicalRangeStr() const;
 
     int                     normalState() const { return m_normalState; }
     void                    setNormalState(int normalState) { m_normalState = normalState; }
 
     bool                    enableTuning() const { return m_enableTuning; }
+    QString                 enableTuningStr() const;
     void                    setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
     double                  tuningDefaultValue() const { return m_tuningDefaultValue; }
+    QString                 tuningDefaultValueStr() const;
     void                    setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
-
-    QString                 calibratorIndexStr(int index) const;
 
     StatisticItem           statistic() const { return m_statistic; }
     void                    setStatistic(const StatisticItem& statistic) { m_statistic = statistic; }
@@ -471,6 +473,7 @@ class MeasureParam
 {
 public:
                             MeasureParam();
+                            MeasureParam(const MeasureParam& from);
                             ~MeasureParam();
 private:
 
@@ -479,6 +482,8 @@ private:
     SignalParam             m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
     int                     m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
+
+    bool                    m_equalPhysicalRange = false;
 
     CalibratorManager*      m_pCalibratorManager = nullptr;
 
@@ -493,8 +498,24 @@ public:
     int                     outputSignalType() const { return m_outputSignalType; }
     void                    setOutputSignalType(int type) { m_outputSignalType = type; }
 
+    bool                    equalPhysicalRange() const { return m_equalPhysicalRange; }
+    bool                    testPhysicalRange();
+
+    QString                 caseStr() const;
+    QString                 signalID(bool showCustomID, const QString& divider) const;
+    QString                 subblockStr() const;
+    QString                 blockStr() const;
+    QString                 entryStr() const;
+    QString                 caption(const QString &divider) const;
+    QString                 physicalRangeStr(const QString& divider) const;
+    QString                 electricRangeStr(const QString& divider) const;
+    QString                 electricSensorStr(const QString& divider) const;
+
     CalibratorManager*      calibratorManager() const { return m_pCalibratorManager; }
+    QString                 calibratorStr() const;
     void                    setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
+
+    MeasureParam&           operator=(const MeasureParam& from);
 };
 
 // ==============================================================================================
@@ -639,7 +660,7 @@ signals:
 
     void                    updatedSignalParam(Hash signalHash);
 
-    void                    setActiveSignal();
+    void                    activeSignalChanged(const MeasureSignal& signal);
 
 public slots:
 
@@ -665,6 +686,9 @@ public:
 
     void                    appendUnit(int unitID, const QString& unit);
 
+    bool                    hasUnit(int unitID);
+    bool                    hasSensorType(int sensorType);
+
     QString                 unit(int unitID);
 
 private:
@@ -673,6 +697,7 @@ private:
     //
     mutable QMutex          m_unitMutex;
     QMap<int, QString>      m_unitMap;
+
 
 signals:
 

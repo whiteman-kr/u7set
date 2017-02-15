@@ -147,9 +147,6 @@ void SignalSocket::replySignalListStart(const char* replyData, quint32 replyData
     }
 
     qDebug() << "SignalSocket::replyAppSignalListStart - Signals for load:  " << m_getSignalListStartReply.totalitemcount();
-    // qDebug() << "TotalItemCount:    "   << m_getSignalListStartReply.totalitemcount();
-    // qDebug() << "PartCount:         "   << m_getSignalListStartReply.partcount();
-    // qDebug() << "ItemsPerPart:      "   << m_getSignalListStartReply.itemsperpart();
 
     if (m_getSignalListStartReply.totalitemcount() == 0 || m_getSignalListStartReply.partcount() == 0)
     {

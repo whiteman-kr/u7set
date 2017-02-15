@@ -5,8 +5,8 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Calibrator::Calibrator(int index, QObject *parent) :
-    m_index (index),
+Calibrator::Calibrator(int channel, QObject *parent) :
+    m_channel(channel),
     QObject(parent),
     m_port(this)
 {

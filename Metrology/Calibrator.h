@@ -127,7 +127,7 @@ const char* const CalibratorTerminator[CALIBRATOR_TYPE_COUNT] =
 
 // ==============================================================================================
 
-const int		INVALID_CALIBRATOR_INDEX = -1;
+const int		INVALID_CALIBRATOR_CHANNEL = -1;
 
 // ==============================================================================================
 // common commands
@@ -208,14 +208,14 @@ class Calibrator : public QObject
 
 public:
 
-    explicit    Calibrator(int index = INVALID_CALIBRATOR_INDEX, QObject *parent = 0);
+    explicit    Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = 0);
                ~Calibrator();
 
 private:
 
     bool        m_connected = false;
 
-    int         m_index = INVALID_CALIBRATOR_INDEX;                                     // index calibrator in a common base calibrators CalibratorBase
+    int         m_channel = INVALID_CALIBRATOR_CHANNEL;                                 // index calibrator in a common base calibrators CalibratorBase
 
     QSerialPort m_port;                                                                 // object serial port for management of the calibrator
 
@@ -257,7 +257,7 @@ public:
 
     bool        isConnected() const { return m_connected; }
 
-    int         index() const{ return m_index; }
+    int         channel() const{ return m_channel; }
 
     bool        isOpenPort() const { return m_port.isOpen(); }
 

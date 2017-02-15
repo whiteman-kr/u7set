@@ -440,7 +440,7 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
                             break;
                         }
 
-                        int errorType = theOptions.linearity().m_errorType;
+                        int errorType = theOptions.linearity().errorType();
                         if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
                         {
                             break;
@@ -448,7 +448,7 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
 
                         si.incrementMeasureCount();
 
-                        if ( pLinearityMeasurement->errorInput(errorType) > pLinearityMeasurement->errorLimit(errorType) )
+                        if ( pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType) )
                         {
                             si.setState(STATISTIC_STATE_INVALID);
                         }

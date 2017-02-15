@@ -56,6 +56,7 @@ TuningSignal::TuningSignal(const SignalParam& param)
 
     m_hash = param.hash();
 
+    m_сase = param.position().caseStr();
     m_appSignalID = param.appSignalID();
     m_customAppSignalID = param.customAppSignalID();
     m_equipmentID = param.position().equipmentID();
@@ -120,16 +121,11 @@ QString TuningSignal::defaultValueStr() const
 
     QString stateStr, formatStr;
 
-    if (m_signalType == E::SignalType::Analog)
+    switch (m_signalType)
     {
-        formatStr.sprintf( ("%%.%df"), m_precision );
-
-        stateStr.sprintf( formatStr.toAscii(), m_defaultValue );
-    }
-
-    if (m_signalType == E::SignalType::Discrete)
-    {
-        stateStr = m_defaultValue == 0 ? QString("No") : QString("Yes");
+        case E::SignalType::Analog:     formatStr.sprintf( ("%%.%df"), m_precision );   stateStr.sprintf( formatStr.toAscii(), m_defaultValue );    break;
+        case E::SignalType::Discrete:   stateStr = m_defaultValue == 0 ? QString("No") : QString("Yes");                                            break;
+        default:                        assert(0);
     }
 
     return stateStr;
@@ -445,6 +441,31 @@ TuningSignal TuningSignalBase::signalForRead(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void TuningSignalBase::setSignalForRead(const TuningSignal& signal)
+{
+    if (signal.hash() == 0)
+    {
+        assert(signal.hash() != 0);
+        return;
+    }
+
+    m_signalMutex.lock();
+
+        if (m_signalHashMap.contains(signal.hash()) == true)
+        {
+            int index = m_signalHashMap[signal.hash()];
+
+            if (index >= 0 && index < m_signalList.size())
+            {
+                m_signalList[index] = signal;
+            }
+        }
+
+    m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 TuningSignalState TuningSignalBase::signalState(const Hash& hash)
 {
     if (hash == 0)
@@ -500,6 +521,41 @@ void TuningSignalBase::setSignalState(const Hash& hash, const Network::TuningSig
 
     m_signalMutex.unlock();
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalBase::updateSignalParam(const Hash& signalHash)
+{
+    if (signalHash == 0)
+    {
+        assert(signalHash != 0);
+        return;
+    }
+
+    SignalParam param = theSignalBase.signalParam(signalHash);
+    if (param.isValid() == false)
+    {
+        return;
+    }
+
+    m_signalMutex.lock();
+
+    if (m_signalHashMap.contains(signalHash) == true)
+    {
+        int index = m_signalHashMap[signalHash];
+
+        if (index >= 0 && index < m_signalList.size())
+        {
+            m_signalList[index].setCustomAppSignalID( param.customAppSignalID() );
+            m_signalList[index].setCaption( param.caption() );
+            m_signalList[index].setDefaultValue( param.tuningDefaultValue() );
+            m_signalList[index].setPrecision( param.inputPhysicalPrecision() );
+        }
+    }
+
+    m_signalMutex.unlock();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
