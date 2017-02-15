@@ -627,6 +627,7 @@ MetrologySignal& MetrologySignal::operator=(const MetrologySignal& from)
 
 MetrologyMultiSignal::MetrologyMultiSignal()
 {
+    clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1282,6 +1283,7 @@ MeasureParam& MeasureParam::operator=(const MeasureParam& from)
 
 MeasureSignal::MeasureSignal()
 {
+    clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1541,53 +1543,15 @@ SignalBase::~SignalBase()
 
 void SignalBase::clear()
 {
-    m_activeSignal.clear();
-    emit activeSignalChanged(m_activeSignal);
+    clearActiveSignal();
 
-    m_signalMesaureMutex.lock();
+    clearMeasureSignalList();
 
-        m_signalMesaureList.clear();
+    clearCaseTypeList();
 
-    m_signalMesaureMutex.unlock();
-
-    m_caseMutex.lock();
-
-        m_caseTypeList.clear();
-
-    m_caseMutex.unlock();
-
-    m_stateMutex.lock();
-
-        m_requestStateList.clear();
-
-    m_stateMutex.unlock();
-
-    m_signalMutex.lock();
-
-        m_signalHashMap.clear();
-        m_signalList.clear();
-
-        analogTuningSignalCount = 0;
-        discreteTuningSignalCount = 0;
-
-    m_signalMutex.unlock();
+    clearSignalList();
 
     theUnitBase.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int SignalBase::signalCount() const
-{
-    int count = 0;
-
-    m_signalMutex.lock();
-
-        count = m_signalList.size();
-
-    m_signalMutex.unlock();
-
-    return count;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1619,6 +1583,36 @@ void SignalBase::sortByPosition()
     m_signalMutex.unlock();
 
     qDebug() << __FUNCTION__ <<  responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SignalBase::signalCount() const
+{
+    int count = 0;
+
+    m_signalMutex.lock();
+
+        count = m_signalList.size();
+
+    m_signalMutex.unlock();
+
+    return count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::clearSignalList()
+{
+    m_signalMutex.lock();
+
+        m_signalHashMap.clear();
+        m_signalList.clear();
+
+        analogTuningSignalCount = 0;
+        discreteTuningSignalCount = 0;
+
+    m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2061,6 +2055,17 @@ int SignalBase::createCaseTypeList(int outputSignalType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::clearCaseTypeList()
+{
+    m_caseMutex.lock();
+
+        m_caseTypeList.clear();
+
+    m_caseMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::caseTypeCount() const
 {
     int count = 0;
@@ -2365,6 +2370,23 @@ int SignalBase::createMeasureSignalList(int caseType, int measureKind, int outpu
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalBase::clearMeasureSignalList()
+{
+    m_caseMutex.lock();
+
+        m_caseNoList.clear();
+
+    m_caseMutex.unlock();
+
+    m_signalMesaureMutex.lock();
+
+        m_signalMesaureList.clear();
+
+    m_signalMesaureMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::measureSignalCount() const
 {
     int count;
@@ -2413,11 +2435,11 @@ MeasureSignal SignalBase::activeSignal() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setActiveSignal(const MeasureSignal& multiSignal)
+void SignalBase::setActiveSignal(const MeasureSignal& signal)
 {
     m_activeSignalMutex.lock();
 
-        m_activeSignal = multiSignal;
+        m_activeSignal = signal;
 
         m_stateMutex.lock();
 
@@ -2446,6 +2468,25 @@ void SignalBase::setActiveSignal(const MeasureSignal& multiSignal)
 
                 m_requestStateList.append(hash);
             }
+
+        m_stateMutex.unlock();
+
+    m_activeSignalMutex.unlock();
+
+    emit activeSignalChanged(m_activeSignal);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::clearActiveSignal()
+{
+    m_activeSignalMutex.lock();
+
+        m_activeSignal.clear();
+
+        m_stateMutex.lock();
+
+            m_requestStateList.clear();
 
         m_stateMutex.unlock();
 

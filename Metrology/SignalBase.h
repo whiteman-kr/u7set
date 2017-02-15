@@ -566,11 +566,13 @@ public:
                             ~SignalBase();
 
     void                    clear();
-    int                     signalCount() const;
     void                    sortByPosition();
 
     // Signals
     //
+
+    int                     signalCount() const;
+    void                    clearSignalList();
 
     int                     appendSignal(const Signal& signal);
 
@@ -605,6 +607,7 @@ public:
                             // cases
                             //
     int                     createCaseTypeList(int outputSignalType);
+    void                    clearCaseTypeList();
 
                                     // type of cases
                                     //
@@ -619,13 +622,16 @@ public:
                             // signals
                             //
     int                     createMeasureSignalList(int caseType, int measureKind, int outputSignalType);
+    void                    clearMeasureSignalList();
+
     int                     measureSignalCount() const;
     MeasureSignal           measureSignal(int index);
 
     // Main signal for measure
     //
     MeasureSignal           activeSignal() const;
-    void                    setActiveSignal(const MeasureSignal& multiSignal);
+    void                    setActiveSignal(const MeasureSignal& signal);
+    void                    clearActiveSignal();
 
 private:
 

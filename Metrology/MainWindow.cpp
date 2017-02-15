@@ -36,7 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     theCalibratorBase.init(this);
     connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
+    connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
+    connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(&theSignalBase, &SignalBase::updatedSignalParam, &theTuningSignalBase, &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
 
     // load output signals base
@@ -51,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //
     connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection);
     connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
+    connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+    connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
     connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
     connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
@@ -67,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+    connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
 
     // init tuning socket thread
@@ -78,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
+    connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
 
     measureThreadStoped();
@@ -227,50 +233,6 @@ void  MainWindow::createActions()
     m_pAboutAppAction->setIcon(QIcon(":/icons/About Application.png"));
     m_pAboutAppAction->setToolTip("");
     connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::updateStartStopActions()
-{
-    m_pStartMeasureAction->setEnabled(true);
-    m_pStopMeasureAction->setEnabled(true);
-
-    return;
-
-    bool startMeasure = true;
-    bool stopMeasure = true;
-
-    if (m_measureThread.isRunning() == true)
-    {
-        startMeasure = false;
-    }
-    else
-    {
-        stopMeasure = false;
-    }
-
-    switch(m_measureType)
-    {
-        case MEASURE_TYPE_LINEARITY:
-        case MEASURE_TYPE_COMPARATOR:
-
-            if (theCalibratorBase.connectedCalibratorsCount() == 0)
-            {
-               startMeasure = false;
-            }
-
-            break;
-
-        default:
-
-            startMeasure = false;
-
-            break;
-    }
-
-    m_pStartMeasureAction->setEnabled(startMeasure);
-    m_pStopMeasureAction->setEnabled(stopMeasure);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -987,8 +949,6 @@ void MainWindow::setMeasureType(int measureType)
 
     m_measureType = measureType;
 
-    updateStartStopActions();
-
     m_pFindMeasurePanel->clear();
 }
 
@@ -1000,31 +960,43 @@ void MainWindow::measureCountChanged(int)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::startMeasure()
+bool MainWindow::signalSocketIsConnected()
 {
-    // test
-    //
-    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
-    {
-        return;
-    }
-
-    // test
-    //
-
     if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
     {
-        return;
+        return false;
     }
 
     if (m_pSignalSocket->isConnected() == false)
     {
-        QMessageBox::critical(this, windowTitle(), tr("No connect to Application Data Service!"));
-        return;
+        return false;
     }
 
-    // test
-    //
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::tuningSocketIsConnected()
+{
+    if (m_pTuningSocket == nullptr || m_pTuningSocketThread == nullptr)
+    {
+        return false;
+    }
+
+    if (m_pTuningSocket->isConnected() == false)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::signalSourceIsValid(bool showMsg)
+{
+    bool result = false;
 
     switch ( theOptions.toolBar().outputSignalType() )
     {
@@ -1033,25 +1005,29 @@ void MainWindow::startMeasure()
 
             if (theCalibratorBase.connectedCalibratorsCount() == 0)
             {
-                QMessageBox::critical(this, windowTitle(), tr("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators"));
-                return;
+                if (showMsg == true)
+                {
+                    QMessageBox::critical(this, windowTitle(), tr("Proccess of measure can not start, because no connected calibrators!\nPlease, make initialization calibrators"));
+                }
+                break;
             }
 
+            result = true;
 
             break;
 
         case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 
-            if (m_pTuningSocket == nullptr || m_pTuningSocketThread == nullptr)
+            if (tuningSocketIsConnected() == false)
             {
-                return;
+                if (showMsg == true)
+                {
+                    QMessageBox::critical(this, windowTitle(), tr("No connect to Tuning Service!"));
+                }
+                break;
             }
 
-            if (m_pTuningSocket->isConnected() == false)
-            {
-                QMessageBox::critical(this, windowTitle(), tr("No connect to Tuning Service!"));
-                return;
-            }
+            result = true;
 
             break;
 
@@ -1059,22 +1035,32 @@ void MainWindow::startMeasure()
             assert(0);
     }
 
+    return result;
+}
 
-    // test
-    //
+// -------------------------------------------------------------------------------------------------------------------
 
+bool MainWindow::signalIsMeasured(QString& signalID)
+{
     MeasureSignal measureSignal = theSignalBase.activeSignal();
     if(measureSignal.isEmpty() == true)
     {
-        assert(false);
-        return;
+        return false;
     }
 
-    MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+    MetrologyMultiSignal signal;
+
+    switch ( theOptions.toolBar().outputSignalType() )
+    {
+        case OUTPUT_SIGNAL_TYPE_UNUSED:         signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);    break;
+        case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+        case OUTPUT_SIGNAL_TYPE_FROM_TUNING:    signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);   break;
+        default:                                assert(0);
+    }
+
     if (signal.isEmpty() == true)
     {
-        QMessageBox::critical(this, windowTitle(), tr("Signal for measure is not selected!"));
-        return;
+        return false;
     }
 
     // temporary solution
@@ -1084,10 +1070,10 @@ void MainWindow::startMeasure()
     MeasureView* pMeasureView = activeMeasureView();
     if (pMeasureView == nullptr)
     {
-        return;
+        return false;
     }
 
-    QString measuredSignalID;
+    bool result = false;
 
     for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
     {
@@ -1102,38 +1088,58 @@ void MainWindow::startMeasure()
 
         if ( param.statistic().measureCount() != 0 )
         {
-            measuredSignalID.append( param.customAppSignalID() + "\n");
+            signalID.append( param.customAppSignalID() + "\n");
+
+            result = true;
         }
     }
     //
     //
     // temporary solution
 
-    if (measuredSignalID.isEmpty() == false)
-    {
-        if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignalID)) == QMessageBox::No)
-        {
-            return;
-        }
-    }
+    return result;
+}
 
-    // test
-    //
-    if (m_measureType == MEASURE_TYPE_LINEARITY)
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::startMeasure()
+{
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
     {
-        if (theOptions.linearity().points().count() == 0)
-        {
-            QMessageBox::critical(this, windowTitle(), tr("No points for measure"));
-            return;
-        }
+        return;
     }
 
     if (m_measureThread.isRunning() == true)
+    {
+        QMessageBox::critical(this, windowTitle(), tr("Measurement process is already running"));
+        return;
+    }
+
+    if (signalSocketIsConnected() == false)
+    {
+        QMessageBox::critical(this, windowTitle(), tr("No connect to Application Data Service!"));
+        return;
+    }
+
+    if (signalSourceIsValid(true) == false)
+    {
+        return;
+    }
+
+    QString measuredSignals;
+
+    if (signalIsMeasured(measuredSignals) == false)
+    {
+        return;
+    }
+
+    if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignals)) == QMessageBox::No)
     {
         return;
     }
 
     m_measureThread.setMeasureType(m_measureType);
+
     m_measureThread.start();
 }
 
@@ -1372,6 +1378,7 @@ void MainWindow::setMeasureSignal(int index)
 {
     if (index < 0 || index >= theSignalBase.measureSignalCount())
     {
+        theSignalBase.clearActiveSignal();
         return;
     }
 
@@ -1379,6 +1386,7 @@ void MainWindow::setMeasureSignal(int index)
     if(measureSignal.isEmpty() == true)
     {
         assert(false);
+        theSignalBase.clearActiveSignal();
         return;
     }
 
@@ -1611,8 +1619,6 @@ void MainWindow::onContextMenu(QPoint)
 
 void MainWindow::calibratorConnectedChanged(int count)
 {
-    updateStartStopActions();
-
     m_statusCalibratorCount->setText( tr(" Connected calibrators: %1 ").arg(count) );
 
     if (count == 0)
@@ -1631,8 +1637,6 @@ void MainWindow::calibratorConnectedChanged(int count)
 
 void MainWindow::signalSocketConnected()
 {
-    updateStartStopActions();
-
     m_statusConnectToAppDataServer->setText( tr(" AppDataService: on  ") );
     m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
     m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(theOptions.signalSocket().serverIP()).arg(theOptions.signalSocket().serverPort()) );
@@ -1646,8 +1650,6 @@ void MainWindow::signalSocketDisconnected()
     {
         m_measureThread.stop();
     }
-
-    updateStartStopActions();
 
     m_asCaseTypeCombo->clear();
     m_asCaseTypeCombo->setEnabled(false);
@@ -1723,8 +1725,6 @@ void MainWindow::tuningSocketDisconnected()
 
 void MainWindow::measureThreadStarted()
 {
-    updateStartStopActions();
-
     m_pMeasureKind->setDisabled(true);
     m_pOutputSignalToolBar->setDisabled(true);
     m_pAnalogSignalToolBar->setDisabled(true);
@@ -1751,8 +1751,6 @@ void MainWindow::measureThreadStarted()
 
 void MainWindow::measureThreadStoped()
 {
-    updateStartStopActions();
-
     m_pMeasureKind->setEnabled(true);
     m_pOutputSignalToolBar->setEnabled(true);
     m_pAnalogSignalToolBar->setEnabled(true);
@@ -1766,7 +1764,6 @@ void MainWindow::measureThreadStoped()
 
     m_statusMeasureThreadState->setText(tr(" Measure process is stopped "));
     m_statusMeasureThreadState->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1803,6 +1800,46 @@ void MainWindow::measureComplite(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::updateStartStopActions()
+{
+    m_pStartMeasureAction->setEnabled(false);
+    m_pStopMeasureAction->setEnabled(false);
+
+    if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
+    {
+        return;
+    }
+
+    if (signalSocketIsConnected() == false)
+    {
+        return;
+    }
+
+    if (signalSourceIsValid(false) == false)
+    {
+        return;
+    }
+
+    if(theSignalBase.activeSignal().isEmpty() == true)
+    {
+        return;
+    }
+
+    if (m_measureThread.isRunning() == false)
+    {
+        m_pStartMeasureAction->setEnabled(true);
+        m_pStopMeasureAction->setEnabled(false);
+    }
+    else
+    {
+        m_pStartMeasureAction->setEnabled(false);
+        m_pStopMeasureAction->setEnabled(true);
+    }
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::loadSettings()
 {
     QSettings s;
@@ -1831,6 +1868,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
     if (m_pCalculator != nullptr)
     {
         delete m_pCalculator;
+        m_pCalculator = nullptr;
     }
 
     if (m_measureThread.isRunning() == true)
@@ -1844,12 +1882,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
     {
         m_pTuningSocketThread->quitAndWait(10000);
         delete m_pTuningSocketThread;
+        m_pTuningSocketThread = nullptr;
     }
 
     if (m_pSignalSocketThread != nullptr)
     {
         m_pSignalSocketThread->quitAndWait(10000);
         delete m_pSignalSocketThread;
+        m_pSignalSocketThread = nullptr;
     }
 
     theTuningSignalBase.clear();
