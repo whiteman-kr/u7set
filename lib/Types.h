@@ -140,6 +140,7 @@ public:
 		TuningService = 9004,
 		DiagDataService = 9005,
 		TuningClient = 9006,
+		Metrology = 9007,
 	};
 	Q_ENUM(SoftwareType)
 
@@ -156,40 +157,40 @@ public:
 
 	// InputUnit
 	//
-    enum InputUnit
-    {
-        NoInputUnit = 1,
-        mA = 15,
-        mV = 11,
-        Ohm = 20,
-        V = 12,
-    };
-    Q_ENUM(InputUnit)
+	enum InputUnit
+	{
+		NoInputUnit = 1,
+		mA = 15,
+		mV = 11,
+		Ohm = 20,
+		V = 12,
+	};
+	Q_ENUM(InputUnit)
 
 	// SensorType
 	//
-    enum SensorType
-    {
-        NoSensorType = 0,
+	enum SensorType
+	{
+		NoSensorType = 0,
 
-        Ohm_Pt50_W1391 = 1,
-        Ohm_Pt100_W1391 = 2,
-        Ohm_Pt50_W1385 = 3,
-        Ohm_Pt100_W1385 = 4,
+		Ohm_Pt50_W1391 = 1,
+		Ohm_Pt100_W1391 = 2,
+		Ohm_Pt50_W1385 = 3,
+		Ohm_Pt100_W1385 = 4,
 
-        Ohm_Cu_50_W1428 = 5,
-        Ohm_Cu_100_W1428 = 6,
-        Ohm_Cu_50_W1426 = 7,
-        Ohm_Cu_100_W1426 = 8,
+		Ohm_Cu_50_W1428 = 5,
+		Ohm_Cu_100_W1428 = 6,
+		Ohm_Cu_50_W1426 = 7,
+		Ohm_Cu_100_W1426 = 8,
 
-        Ohm_Pt21 = 9,
-        Ohm_Cu23 = 10,
+		Ohm_Pt21 = 9,
+		Ohm_Cu23 = 10,
 
-        mV_K_TXA = 11,
-        mV_L_TXK = 12,
-        mV_N_THH = 13,
-    };
-    Q_ENUM(SensorType)
+		mV_K_TXA = 11,
+		mV_L_TXK = 12,
+		mV_N_THH = 13,
+	};
+	Q_ENUM(SensorType)
 
 	// SignalInOutType
 	//
