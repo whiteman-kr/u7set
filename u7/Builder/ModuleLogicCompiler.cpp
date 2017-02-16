@@ -3276,15 +3276,15 @@ namespace Builder
 
 				if (res == true)
 				{
-					idStr.sprintf("0x%X", port->txDataID());
+//					idStr.sprintf("0x%X", port->txDataID());
 
-					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', %2 settings: analog signals %3, discrete signals %4, data size %5 bytes, dataID %6")).
-							arg(port->connectionID()).
-							arg(port->manualSettings() == true ? "manual" : "automatic").
-							arg(port->txAnalogSignalsCount()).
-							arg(port->txDiscreteSignalsCount()).
-							arg(port->txDataSizeW() * 2).
-							arg(idStr)  );
+//					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', %2 settings: analog signals %3, discrete signals %4, data size %5 bytes, dataID %6")).
+//							arg(port->connectionID()).
+//							arg(port->manualSettings() == true ? "manual" : "automatic").
+//							arg(port->txAnalogSignalsCount()).
+//							arg(port->txDiscreteSignalsCount()).
+//							arg(port->txDataSizeW() * 2).
+//							arg(idStr)  );
 				}
 				else
 				{
@@ -3368,16 +3368,16 @@ namespace Builder
 
 				result &= port->calculateTxSignalsAddresses(m_log);
 
-				QString idStr;
-
-				idStr.sprintf("0x%X", port->txDataID());
-
-				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-							arg(port->connectionID()).
-							arg(port->txAnalogSignalsCount()).
-							arg(port->txDiscreteSignalsCount()).
-							arg(port->txDataSizeW() * 2).
-							arg(idStr)  );
+//				QString idStr;
+//
+//				idStr.sprintf("0x%X", port->txDataID());
+//
+//				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
+//							arg(port->connectionID()).
+//							arg(port->txAnalogSignalsCount()).
+//							arg(port->txDiscreteSignalsCount()).
+//							arg(port->txDataSizeW() * 2).
+//							arg(idStr)  );
 			}
 		}
 
