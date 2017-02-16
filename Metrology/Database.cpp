@@ -67,47 +67,49 @@ int SqlFieldBase::init(int objectType, int)
             append("Block",                         QVariant::Int);
             append("Entry",                         QVariant::Int);
 
-            append("NominalElValue",                QVariant::Double);
-            append("NominalPhValue",                QVariant::Double);
-            append("NominalOutElValue",             QVariant::Double);
+            append("PrecentFormLimit",				QVariant::Double);
 
-            append("PrecentFormRange",				QVariant::Double);
+            append("InElectricNominal",             QVariant::Double);
+            append("InElectricMeasure",             QVariant::Double);
 
-            append("MeasureElValue",                QVariant::Double);
-            append("MeasurePhValue",                QVariant::Double);
-            append("MeasureOutElValue",             QVariant::Double);
+            append("PhysicalNominal",               QVariant::Double);
+            append("PhysicalMeasure",               QVariant::Double);
 
-            append("LowElectricRange",				QVariant::Double);
-            append("HighElectricRange",             QVariant::Double);
-            append("ElectricUnit",					QVariant::String, 32);
+            append("OutElectricNominal",            QVariant::Double);
+            append("OutElectricMeasure",            QVariant::Double);
 
-            append("LowPhysicalRange",				QVariant::Double);
-            append("HighPhysicalRange",             QVariant::Double);
+            append("InElectricHasLimit",            QVariant::Bool);
+            append("InElectricLowLimit",			QVariant::Double);
+            append("InElectricHighLimit",           QVariant::Double);
+            append("InElectricUnit",				QVariant::String, 32);
+            append("InElectricPrecision",           QVariant::Int);
+
+            append("PhysicalHasLimit",              QVariant::Bool);
+            append("PhysicalLowLimit",				QVariant::Double);
+            append("PhysicalHighLimit",             QVariant::Double);
             append("PhysicalUnit",					QVariant::String, 32);
+            append("PhysicalPrecision",             QVariant::Int);
 
-            append("LowOutputElectricRange",        QVariant::Double);
-            append("HighOutputElectricRange",       QVariant::Double);
-            append("OutputElectricUnit",			QVariant::String, 32);
+            append("OutElectricHasLimit",           QVariant::Bool);
+            append("OutElectricLowLimit",           QVariant::Double);
+            append("OutElectricHighLimit",          QVariant::Double);
+            append("OutElectricUnit",               QVariant::String, 32);
+            append("OutElectricPrecision",          QVariant::Int);
 
-            append("PrecisionElectric",             QVariant::Int);
-            append("PrecisionPhysical",             QVariant::Int);
-            append("PrecisionOutputElectric",       QVariant::Int);
+            append("InElectricErrorAbsolute",       QVariant::Double);
+            append("InElectricErrorReduce",         QVariant::Double);
+            append("InElectricLimitErrorAbsolute",	QVariant::Double);
+            append("InElectricLimitErrorReduce",    QVariant::Double);
 
-            append("HasElectricRange",              QVariant::Bool);
-            append("HasPhysicalRange",				QVariant::Bool);
-            append("HasOutputElectricRange",        QVariant::Bool);
+            append("PhysicalErrorAbsolute",			QVariant::Double);
+            append("PhysicalErrorReduce",           QVariant::Double);
+            append("PhysicalLimitErrorAbsolute",	QVariant::Double);
+            append("PhysicalLimitErrorReduce",      QVariant::Double);
 
-            append("Adjustment",					QVariant::Double);
-
-            append("ErrorInputAbsolute",			QVariant::Double);
-            append("ErrorInputReduce",              QVariant::Double);
-            append("ErrorInputRelative",            QVariant::Double);
-            append("ErrorOutputAbsolute",			QVariant::Double);
-            append("ErrorOutputReduce",             QVariant::Double);
-            append("ErrorOutputRelative",           QVariant::Double);
-            append("ErrorLimitAbsolute",			QVariant::Double);
-            append("ErrorLimitReduce",              QVariant::Double);
-            append("ErrorLimitRelative",            QVariant::Double);
+            append("OutElectricErrorAbsolute",		QVariant::Double);
+            append("OutElectricErrorReduce",        QVariant::Double);
+            append("OutElectricLimitErrorAbsolute",	QVariant::Double);
+            append("OutElectricLimitErrorReduce",   QVariant::Double);
 
             append("MeasureTime",					QVariant::String, 64);
 
@@ -776,47 +778,49 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     measure->position().setBlock(query.value(field++).toInt());
                     measure->position().setEntry(query.value(field++).toInt());
 
-                    measure->setNominal(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
-                    measure->setNominal(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
-                    measure->setNominal(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
-
                     measure->setPercent(query.value(field++).toDouble());
 
+                    measure->setNominal(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
                     measure->setMeasure(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
+
+                    measure->setNominal(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
                     measure->setMeasure(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
+
+                    measure->setNominal(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
                     measure->setMeasure(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
 
+                    measure->setHasLimit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toBool());
                     measure->setLowLimit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
                     measure->setHighLimit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toDouble());
                     measure->setUnit(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toString());
+                    measure->setLimitPrecision(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toInt());
 
+                    measure->setHasLimit(VALUE_TYPE_PHYSICAL, query.value(field++).toBool());
                     measure->setLowLimit(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
                     measure->setHighLimit(VALUE_TYPE_PHYSICAL, query.value(field++).toDouble());
                     measure->setUnit(VALUE_TYPE_PHYSICAL, query.value(field++).toString());
+                    measure->setLimitPrecision(VALUE_TYPE_PHYSICAL, query.value(field++).toInt());
 
+                    measure->setHasLimit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toBool());
                     measure->setLowLimit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
                     measure->setHighLimit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toDouble());
                     measure->setUnit(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toString());
+                    measure->setLimitPrecision(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toInt());
 
-                    measure->setValuePrecision(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toInt());
-                    measure->setValuePrecision(VALUE_TYPE_PHYSICAL, query.value(field++).toInt());
-                    measure->setValuePrecision(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toInt());
+                    measure->setError(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setError(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
-                    measure->setHasRange(VALUE_TYPE_IN_ELECTRIC, query.value(field++).toBool());
-                    measure->setHasRange(VALUE_TYPE_PHYSICAL, query.value(field++).toBool());
-                    measure->setHasRange(VALUE_TYPE_OUT_ELECTRIC, query.value(field++).toBool());
+                    measure->setError(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setError(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
-                    measure->setAdjustment(query.value(field++).toDouble());
-
-                    measure->setErrorInput(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorInput(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorInput(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
-                    measure->setErrorOutput(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorOutput(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorOutput(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
-                    measure->setErrorLimit(MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
-                    measure->setErrorLimit(MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
-                    measure->setErrorLimit(MEASURE_ERROR_TYPE_RELATIVE, query.value(field++).toDouble());
+                    measure->setError(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+                    measure->setError(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+                    measure->setErrorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
                     measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
                 }
@@ -829,9 +833,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
                     switch(m_info.objectType())
                     {
-                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_IN_ELECTRIC;    break;
-                        case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;    break;
-                        default:                            valueType = VALUE_TYPE_UNKNOWN;     break;
+                        case SQL_TABLE_LINEARITY_20_EL:     valueType = VALUE_TYPE_IN_ELECTRIC;     break;
+                        case SQL_TABLE_LINEARITY_20_PH:     valueType = VALUE_TYPE_PHYSICAL;        break;
+                        default:                            valueType = VALUE_TYPE_UNKNOWN;         break;
                     }
 
                     if (valueType == VALUE_TYPE_UNKNOWN)
@@ -1117,49 +1121,49 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->position().block());
                     query.bindValue(field++, measure->position().entry());
 
-                    query.bindValue(field++, measure->nominal(VALUE_TYPE_IN_ELECTRIC));
-                    query.bindValue(field++, measure->nominal(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->nominal(VALUE_TYPE_OUT_ELECTRIC));
-
                     query.bindValue(field++, measure->percent());
 
+                    query.bindValue(field++, measure->nominal(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->measure(VALUE_TYPE_IN_ELECTRIC));
+
+                    query.bindValue(field++, measure->nominal(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->measure(VALUE_TYPE_PHYSICAL));
+
+                    query.bindValue(field++, measure->nominal(VALUE_TYPE_OUT_ELECTRIC));
                     query.bindValue(field++, measure->measure(VALUE_TYPE_OUT_ELECTRIC));
 
+                    query.bindValue(field++, measure->hasLimit(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->lowLimit(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->highLimit(VALUE_TYPE_IN_ELECTRIC));
                     query.bindValue(field++, measure->unit(VALUE_TYPE_IN_ELECTRIC));
+                    query.bindValue(field++, measure->limitPrecision(VALUE_TYPE_IN_ELECTRIC));
 
+                    query.bindValue(field++, measure->hasLimit(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->lowLimit(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->highLimit(VALUE_TYPE_PHYSICAL));
                     query.bindValue(field++, measure->unit(VALUE_TYPE_PHYSICAL));
+                    query.bindValue(field++, measure->limitPrecision(VALUE_TYPE_PHYSICAL));
 
+                    query.bindValue(field++, measure->hasLimit(VALUE_TYPE_OUT_ELECTRIC));
                     query.bindValue(field++, measure->lowLimit(VALUE_TYPE_OUT_ELECTRIC));
                     query.bindValue(field++, measure->highLimit(VALUE_TYPE_OUT_ELECTRIC));
                     query.bindValue(field++, measure->unit(VALUE_TYPE_OUT_ELECTRIC));
+                    query.bindValue(field++, measure->limitPrecision(VALUE_TYPE_OUT_ELECTRIC));
 
-                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_IN_ELECTRIC));
-                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->valuePrecision(VALUE_TYPE_OUT_ELECTRIC));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_IN_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
 
-                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_IN_ELECTRIC));
-                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_PHYSICAL));
-                    query.bindValue(field++, measure->hasRange(VALUE_TYPE_OUT_ELECTRIC));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE));
 
-                    query.bindValue(field++, measure->adjustment());
-
-                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorInput(MEASURE_ERROR_TYPE_RELATIVE));
-
-                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorOutput(MEASURE_ERROR_TYPE_RELATIVE));
-
-                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_ABSOLUTE));
-                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_REDUCE));
-                    query.bindValue(field++, measure->errorLimit(MEASURE_ERROR_TYPE_RELATIVE));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->error(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+                    query.bindValue(field++, measure->errorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
 
                     measure->setMeasureTime(QDateTime::currentDateTime());
 

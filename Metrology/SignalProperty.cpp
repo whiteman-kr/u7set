@@ -347,14 +347,31 @@ void SignalPropertyDialog::createPropertyList()
 
     if (m_param.isAnalog() == true)
     {
-        m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_PH_RANGE] = m_pEditor->addProperty(inputPhysicalRangeGroup);
-        m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_EL_RANGE] = m_pEditor->addProperty(inputElectricRangeGroup);
-    }
+        switch (m_param.inOutType())
+        {
+            case E::SignalInOutType::Input:
 
-    if (m_param.isOutput() == true)
-    {
-        m_browserItemList[SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE] = m_pEditor->addProperty(outputPhysicalRangeGroup);
-        m_browserItemList[SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE] = m_pEditor->addProperty(outputElectricRangeGroup);
+                m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_PH_RANGE] = m_pEditor->addProperty(inputPhysicalRangeGroup);
+                m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_EL_RANGE] = m_pEditor->addProperty(inputElectricRangeGroup);
+
+                break;
+
+            case E::SignalInOutType::Internal:
+
+                m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_PH_RANGE] = m_pEditor->addProperty(inputPhysicalRangeGroup);
+
+                break;
+
+            case E::SignalInOutType::Output:
+
+                m_browserItemList[SIGNAL_PROPERTY_GROUP_IN_PH_RANGE] = m_pEditor->addProperty(inputPhysicalRangeGroup);
+                m_browserItemList[SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE] = m_pEditor->addProperty(outputElectricRangeGroup);
+
+                break;
+
+            default:
+                assert(0);
+        }
     }
 
     for(int g = 0; g < SIGNAL_PROPERTY_GROUP_COUNT; g++)
@@ -470,9 +487,9 @@ void SignalPropertyDialog::updateGroupHeader(int index)
     switch(index)
     {
         case SIGNAL_PROPERTY_GROUP_IN_PH_RANGE:     header = SignalPropertyGroup[index] + m_param.inputPhysicalRangeStr(); break;
-        case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:     header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr(); break;
+        case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:     header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr() + " " + m_param.inputElectricSensorStr(); break;
         case SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE:    header = SignalPropertyGroup[index] + m_param.outputPhysicalRangeStr(); break;
-        case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:    header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr(); break;
+        case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:    header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr()+ " " + m_param.outputElectricSensorStr(); break;
     }
 
     browserItem->property()->setPropertyName(header);

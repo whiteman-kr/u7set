@@ -146,6 +146,7 @@ private:
 
     Hash                    m_hash = 0;
 
+	QString                 m_case;
     QString                 m_appSignalID;
     QString                 m_customAppSignalID;
     QString                 m_equipmentID;
@@ -163,6 +164,9 @@ public:
 
     Hash                    hash() const { return m_hash; }
     void                    setHash(Hash hash) { m_hash = hash; }
+
+	QString                 caseStr() const { return m_case; }
+	void                    setCase(const QString& caseStr) { m_case = caseStr; }
 
     QString                 appSignalID() const { return m_appSignalID; }
     void                    setAppSignalID(const QString& appSignalID);
@@ -260,6 +264,8 @@ public:
     TuningSignal            signalForRead(const Hash& hash) const;
     TuningSignal            signalForRead(int index) const;
 
+    void                    setSignalForRead(const TuningSignal& signal);
+
     TuningSignalState       signalState(const Hash& hash);
     void                    setSignalState(const Hash& hash, const Network::TuningSignalState& state);
 
@@ -293,6 +299,8 @@ private:
 signals:
 
 public slots:
+
+    void                    updateSignalParam(const Hash& signalHash);
 
 };
 

@@ -77,9 +77,6 @@ void OptionsMeasureViewHeaderDialog::setHeaderList()
 
     IntDelegate* delegate = new IntDelegate(this);
     m_columnList->setItemDelegateForColumn(MVH_COLUMN_WIDTH, delegate);
-
-    ColorDelegate* colorDelegate = new ColorDelegate(this);
-    m_columnList->setItemDelegateForColumn(MVH_COLUMN_COLOR, colorDelegate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -122,7 +119,6 @@ void OptionsMeasureViewHeaderDialog::updateList()
         MeasureViewColumn& column = m_header.m_column[m_measureType][index];
 
         bool visible = column.enableVisible();
-        bool bold = column.boldFont();
 
         cell = new QTableWidgetItem( column.title());
         cell->setTextAlignment(Qt::AlignLeft);
@@ -130,10 +126,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
         {
             cell->setTextColor(Qt::lightGray);
         }
-        if (bold == true)
-        {
-            cell->setFont(boldFont);
-        }
+
         m_columnList->setItem(index, MVH_COLUMN_TITLE, cell);
 
         cell = new QTableWidgetItem( visible ? tr("True") : tr("False"));
@@ -142,10 +135,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
         {
             cell->setTextColor(Qt::lightGray);
         }
-        if (bold == true)
-        {
-            cell->setFont(boldFont);
-        }
+
         m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
         cell = new QTableWidgetItem( QString::number( column.width(), 10, 0) );
@@ -154,28 +144,15 @@ void OptionsMeasureViewHeaderDialog::updateList()
         {
             cell->setTextColor(Qt::lightGray);
         }
-        if (bold == true)
-        {
-            cell->setFont(boldFont);
-        }
         m_columnList->setItem(index, MVH_COLUMN_WIDTH, cell);
 
         cell = new QTableWidgetItem("");
-        cell->setData(Qt::UserRole, column.color() );
-        m_columnList->setItem(index, MVH_COLUMN_COLOR, cell);
 
-        cell = new QTableWidgetItem( column.boldFont() ? tr("True") : tr("False"));
         cell->setTextAlignment(Qt::AlignHCenter);
         if (visible == false)
         {
             cell->setTextColor(Qt::lightGray);
         }
-        if (bold == true)
-        {
-            cell->setFont(boldFont);
-        }
-        m_columnList->setItem(index, MVH_COLUMN_BOLD, cell);
-
     }
 
     m_columnList->setVerticalHeaderLabels(verticalHeaderLabels);
@@ -310,27 +287,6 @@ void OptionsMeasureViewHeaderDialog::onEdit(int row, int column)
         case MVH_COLUMN_WIDTH:
             {
                 m_columnList->editItem(cell);
-            }
-            break;
-
-        case MVH_COLUMN_COLOR:
-            {
-                QColor color = QColorDialog::getColor(headerColumn.color(), this, tr("Select column color"));
-                if (color.rgb() == 0xFF000000)  // pressed button cancel
-                {
-                    break;
-                }
-
-                headerColumn.setColor( color );
-                cell->setText( QString("[%1,%2,%3]").arg(color.red()).arg(color.green()).arg(color.blue()) );
-            }
-            break;
-
-        case MVH_COLUMN_BOLD:
-            {
-                bool bold = !headerColumn.boldFont();
-                headerColumn.setBoldFont(bold);
-                cell->setText( bold ? tr("True") : tr("False"));
             }
             break;
 

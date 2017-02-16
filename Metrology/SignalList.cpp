@@ -107,20 +107,23 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
         switch (column)
         {
-            case SIGNAL_LIST_COLUMN_CASE:           result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_ID:             result = Qt::AlignLeft;     break;
-            case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = Qt::AlignLeft;     break;
-            case SIGNAL_LIST_COLUMN_CAPTION:        result = Qt::AlignLeft;     break;
-            case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_BLOCK:          result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_ENTRY:          result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_ADC:            result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = Qt::AlignCenter;   break;
-            case SIGNAL_LIST_COLUMN_TUNING:         result = Qt::AlignCenter;   break;
-            default:                                assert(0);
+            case SIGNAL_LIST_COLUMN_CASE:               result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_ID:                 result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:       result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_CAPTION:            result = Qt::AlignLeft;     break;
+            case SIGNAL_LIST_COLUMN_SUBBLOCK:           result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_BLOCK:              result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_ENTRY:              result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_ADC:                result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_IN_PH_RANGE:        result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_IN_EL_RANGE:        result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:       result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:       result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:       result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:      result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_TUN_SIGNAL:         result = Qt::AlignCenter;   break;
+            case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:    result = Qt::AlignCenter;   break;
+            default:                                    assert(0);
         }
 
         return result;
@@ -162,20 +165,23 @@ QString SignalListTable::text(int  row, int column, const SignalParam& param) co
 
     switch (column)
     {
-        case SIGNAL_LIST_COLUMN_CASE:           result = param.position().caseStr();        break;
-        case SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
-        case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = param.position().equipmentID();    break;
-        case SIGNAL_LIST_COLUMN_CAPTION:        result = param.caption();                   break;
-        case SIGNAL_LIST_COLUMN_SUBBLOCK:       result = param.position().subblockStr();    break;
-        case SIGNAL_LIST_COLUMN_BLOCK:          result = param.position().blockStr();       break;
-        case SIGNAL_LIST_COLUMN_ENTRY:          result = param.position().entryStr();       break;
-        case SIGNAL_LIST_COLUMN_ADC:            result = param.adcRangeStr(m_showADCInHex); break;
-        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:    result = param.inputPhysicalRangeStr();     break;
-        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:    result = param.inputElectricRangeStr();     break;
-        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:   result = param.outputPhysicalRangeStr();    break;
-        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:   result = param.outputElectricRangeStr();    break;
-        case SIGNAL_LIST_COLUMN_TUNING:         result = param.enableTuning() == true ? tr("Yes") : QString(); break;
-        default:                                assert(0);
+        case SIGNAL_LIST_COLUMN_CASE:               result = param.position().caseStr();            break;
+        case SIGNAL_LIST_COLUMN_ID:                 result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
+        case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:       result = param.position().equipmentID();        break;
+        case SIGNAL_LIST_COLUMN_CAPTION:            result = param.caption();                       break;
+        case SIGNAL_LIST_COLUMN_SUBBLOCK:           result = param.position().subblockStr();        break;
+        case SIGNAL_LIST_COLUMN_BLOCK:              result = param.position().blockStr();           break;
+        case SIGNAL_LIST_COLUMN_ENTRY:              result = param.position().entryStr();           break;
+        case SIGNAL_LIST_COLUMN_ADC:                result = param.adcRangeStr(m_showADCInHex);     break;
+        case SIGNAL_LIST_COLUMN_IN_PH_RANGE:        result = param.inputPhysicalRangeStr();         break;
+        case SIGNAL_LIST_COLUMN_IN_EL_RANGE:        result = param.inputElectricRangeStr();         break;
+        case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:       result = param.inputElectricSensorStr();    break;
+        case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:       result = param.outputPhysicalRangeStr();        break;
+        case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:       result = param.outputElectricRangeStr();        break;
+        case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:      result = param.outputElectricSensorStr();   break;
+        case SIGNAL_LIST_COLUMN_TUN_SIGNAL:         result = param.enableTuningStr();               break;
+        case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:    result = param.tuningDefaultValueStr();         break;
+        default:                                    assert(0);
     }
 
     return result;
@@ -289,19 +295,22 @@ void SignalListTable::updateSignalParam(const Hash& signalHash)
 
 int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
-    100,    // LIST_COLUMN_CASE
-    250,    // LIST_COLUMN_ID
-    250,    // LIST_COLUMN_EQUIPMENT_ID
-    150,    // LIST_COLUMN_CAPTION
-     60,    // LIST_COLUMN_SUBBLOCK
-     60,    // LIST_COLUMN_BLOCK
-     60,    // LIST_COLUMN_ENTRY
-    120,    // LIST_COLUMN_ADC
-    150,    // LIST_COLUMN_IN_PH_RANGE
-    150,    // LIST_COLUMN_IN_EL_RANGE
-    150,    // LIST_COLUMN_OUT_PH_RANGE
-    150,    // LIST_COLUMN_OUT_EL_RANGE
-     50,    // LIST_COLUMN_TUNING
+    100,    // SIGNAL_LIST_COLUMN_CASE
+    250,    // SIGNAL_LIST_COLUMN_ID
+    250,    // SIGNAL_LIST_COLUMN_EQUIPMENT_ID
+    150,    // SIGNAL_LIST_COLUMN_CAPTION
+     60,    // SIGNAL_LIST_COLUMN_SUBBLOCK
+     60,    // SIGNAL_LIST_COLUMN_BLOCK
+     60,    // SIGNAL_LIST_COLUMN_ENTRY
+    120,    // SIGNAL_LIST_COLUMN_ADC
+    150,    // SIGNAL_LIST_COLUMN_IN_PH_RANGE
+    150,    // SIGNAL_LIST_COLUMN_IN_EL_RANGE
+    100,    // SIGNAL_LIST_COLUMN_IN_EL_SENSOR
+    150,    // SIGNAL_LIST_COLUMN_OUT_PH_RANGE
+    150,    // SIGNAL_LIST_COLUMN_OUT_EL_RANGE
+    100,    // SIGNAL_LIST_COLUMN_OUT_EL_SENSOR
+     50,    // SIGNAL_LIST_COLUMN_TUN_SIGNAL
+    100,    // SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL
 };
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -560,39 +569,62 @@ void SignalListDialog::updateVisibleColunm()
     hideColumn(SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
 
 
-
-    if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Input)
+    switch (m_typeAD)
     {
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
-    }
+        case E::SignalType::Analog:
+
+            switch (m_typeIO)
+            {
+                case E::SignalInOutType::Input:
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
+                    break;
+
+                case E::SignalInOutType::Internal:
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
+                    break;
+
+                case E::SignalInOutType::Output:
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+                    hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
+                    break;
+
+                default:
+                    assert(0);
+            }
+
+            break;
+
+        case E::SignalType::Discrete:
+
+            hideColumn(SIGNAL_LIST_COLUMN_ADC, true);
+            hideColumn(SIGNAL_LIST_COLUMN_IN_PH_RANGE, true);
+            hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+            hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+            hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+            hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+            hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
+
+            break;
 
 
-    if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Internal)
-    {
-        hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
-    }
-
-    if (m_typeAD == E::SignalType::Analog && m_typeIO == E::SignalInOutType::Output)
-    {
-        hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
-    }
-
-    if (m_typeAD == E::SignalType::Discrete)
-    {
-        hideColumn(SIGNAL_LIST_COLUMN_ADC, true);
-        hideColumn(SIGNAL_LIST_COLUMN_IN_PH_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
-        hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+        default:
+            assert(0);
     }
 
     if (m_typeIO != E::SignalInOutType::Internal)
     {
-        hideColumn(SIGNAL_LIST_COLUMN_TUNING, true);
+        hideColumn(SIGNAL_LIST_COLUMN_TUN_SIGNAL, true);
+        hideColumn(SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL, true);
     }
 }
 
@@ -815,7 +847,7 @@ void SignalListDialog::onColumnAction(QAction* action)
     {
         if (m_pColumnAction[column] == action)
         {
-            hideColumn(column,  !action->isChecked());
+            hideColumn(column, !action->isChecked());
 
             break;
         }

@@ -16,7 +16,6 @@ const char* const MeasureType[] =
             QT_TRANSLATE_NOOP("Measure.h", "Measurements of comparators"),
 };
 
-
 const int   MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
 
 const int   MEASURE_TYPE_UNKNOWN            = -1,
@@ -71,7 +70,7 @@ const int	MEASURE_KIND_UNKNOWN			= -1,
 
 const char* const ValueType[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", "Electric"),
+            QT_TRANSLATE_NOOP("Measure.h", "InElectric"),
             QT_TRANSLATE_NOOP("Measure.h", "Physical"),
             QT_TRANSLATE_NOOP("Measure.h", "OutElectric"),
 };
@@ -95,15 +94,13 @@ const char* const ErrorType[] =
 {
             QT_TRANSLATE_NOOP("Measure.h", "Absolute"),
             QT_TRANSLATE_NOOP("Measure.h", "Reduce"),
-            QT_TRANSLATE_NOOP("Measure.h", "Relative"),
 };
 
 const int	MEASURE_ERROR_TYPE_COUNT		= sizeof(ErrorType)/sizeof(ErrorType[0]);
 
 const int   MEASURE_ERROR_TYPE_UNKNOWN		= -1,
             MEASURE_ERROR_TYPE_ABSOLUTE		= 0,
-            MEASURE_ERROR_TYPE_REDUCE		= 1,
-            MEASURE_ERROR_TYPE_RELATIVE		= 2;
+            MEASURE_ERROR_TYPE_REDUCE		= 1;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -131,7 +128,6 @@ const int   MEASURE_ADDITIONAL_PARAM_UNKNOWN            = -1,
 
             // maximum 16 items ( 0 .. 15)
             // now used 4 ( 0 .. 3 )
-
 
 // ==============================================================================================
 
@@ -212,28 +208,24 @@ private:
 
     SignalPosition  m_position;
 
-    double          m_nominal[VALUE_TYPE_COUNT];
-
     double          m_percent = 0;
 
+    double          m_nominal[VALUE_TYPE_COUNT];
     double          m_measure[VALUE_TYPE_COUNT];
 
-    int             m_measureCount = 0;
-    double          m_measureArray[VALUE_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
-
+    bool            m_hasLimit[VALUE_TYPE_COUNT];
     double          m_lowLimit[VALUE_TYPE_COUNT];
     double          m_highLimit[VALUE_TYPE_COUNT];
     QString         m_unit[VALUE_TYPE_COUNT];
-
-    int             m_valuePrecision[VALUE_TYPE_COUNT];
-
-    bool            m_hasRange[VALUE_TYPE_COUNT];
+    int             m_limitPrecision[VALUE_TYPE_COUNT];
 
     double          m_adjustment = 0;
 
-    double          m_errorInput[MEASURE_ERROR_TYPE_COUNT];
-    double          m_errorOutput[MEASURE_ERROR_TYPE_COUNT];
-    double          m_errorLimit[MEASURE_ERROR_TYPE_COUNT];
+    double          m_error[VALUE_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+    double          m_errorLimit[VALUE_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+
+    int             m_measureCount = 0;
+    double          m_measureArray[VALUE_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
 
     int             m_additionalParamCount = 0;
     double          m_additionalParam[MEASURE_ADDITIONAL_PARAM_COUNT];
@@ -246,7 +238,8 @@ public:
     void            set2(const MeasureParam& measureParam);
     void            set3(const MeasureParam& measureParam);
 
-    void            calcAdditionalParam(double averageVal, int measureCount, int type);
+    void            calcError();
+    void            calcAdditionalParam(int limitType);
 
     QString         appSignalID() const { return m_appSignalID; }
     void            setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID;  setSignalHash(m_appSignalID); }
@@ -254,75 +247,64 @@ public:
     QString         customAppSignalID() const { return m_customAppSignalID; }
     void            setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
+    QString         signalID(int type) const;
+
     QString         caption() const { return m_caption; }
     void            setCaption(const QString& caption) { m_caption = caption; }
 
     SignalPosition& position() { return m_position; }
     void            setPosition(const SignalPosition& pos) { m_position = pos; }
 
-    double          nominal(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_nominal[type]; }
-    void            setNominal(int type, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_nominal[type] = value; }
-
-    QString         nominalStr(int type) const;
-
     double          percent() const { return m_percent; }
     void            setPercent(double percent) { m_percent = percent; }
 
-    double          measure(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_measure[type]; }
-    void            setMeasure(int type, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_measure[type] = value; }
+    double          nominal(int limitType) const;
+    QString         nominalStr(int limitType) const;
+    void            setNominal(int limitType, double value);
 
-    QString         measureStr(int type) const;
+    double          measure(int limitType) const;
+    QString         measureStr(int limitType) const;
+    void            setMeasure(int limitType, double value);
+
+    bool            hasLimit(int limitType);
+    void            setHasLimit(int limitType, bool hasLimit);
+
+    double          lowLimit(int limitType) const;
+    void            setLowLimit(int limitType, double lowLimit);
+
+    double          highLimit(int limitType) const;
+    void            setHighLimit(int limitType, double highLimit);
+
+    QString         unit(int limitType) const;
+    void            setUnit(int limitType, QString unit);
+
+    int             limitPrecision(int limitType) const;
+    void            setLimitPrecision(int limitType, int precision);
+
+    QString         limitStr(int limitType) const;
+
+    double          error(int limitType, int errotType) const;
+    QString         errorStr(int limitType) const;
+    void            setError(int limitType, int errotType, double value);
+
+    double          errorLimit(int limitType, int errotType) const;
+    QString         errorLimitStr(int limitType) const;
+    void            setErrorLimit(int limitType, int errotType, double value);
 
     int             measureCount() const { return m_measureCount; }
     void            setMeasureCount(int count) { m_measureCount = count; }
 
-    double          measureItemArray(int type, int index) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return 0; } return m_measureArray[type][index]; }
-    void            setMeasureItemArray(int type, int index, double value) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } if (index < 0 || index >= MAX_MEASUREMENT_IN_POINT) { assert(0); return; } m_measureArray[type][index] = value; }
-
-    QString         measureItemStr(int type, int index) const;
-
-    double          lowLimit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_lowLimit[type]; }
-    void            setLowLimit(int type, double lowLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_lowLimit[type] = lowLimit; }
-
-    double          highLimit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_highLimit[type]; }
-    void            setHighLimit(int type, double highLimit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_highLimit[type] = highLimit; }
-
-    QString         unit(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return QString(); } return m_unit[type]; }
-    void            setUnit(int type, QString unit) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_unit[type] = unit; }
-
-    QString         limitStr(int type) const;
-
-    int             valuePrecision(int type) const { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return 0; } return m_valuePrecision[type]; }
-    void            setValuePrecision(int type, int precision) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_valuePrecision[type] = precision; }
-
-    bool            hasRange(int type) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return false; } return m_hasRange[type]; }
-    void            setHasRange(int type, bool hasRange) { if (type < 0 || type >= VALUE_TYPE_COUNT) { assert(0); return; } m_hasRange[type] = hasRange; }
-
-    double          adjustment() const { return m_adjustment; }
-    void            setAdjustment(double adjustment) { m_adjustment = adjustment; }
-
-    double          errorInput(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorInput[type]; }
-    void            setErrorInput(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorInput[type] = value; }
-
-    QString         errorInputStr(int type) const;
-
-    double          errorOutput(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorOutput[type]; }
-    void            setErrorOutput(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorOutput[type] = value; }
-
-    QString         errorOutputStr(int type) const;
-
-    double          errorLimit(int type) const { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return 0; } return m_errorLimit[type]; }
-    void            setErrorLimit(int type, double value) { if (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT) { assert(0); return; } m_errorLimit[type] = value; }
-
-    QString         errorLimitStr(int type) const;
+    double          measureItemArray(int limitType, int index) const;
+    QString         measureItemStr(int limitType, int index) const;
+    void            setMeasureItemArray(int limitType, int index, double value);
 
     int             additionalParamCount() const { return m_additionalParamCount; }
     void            setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
-    double          additionalParam(int type) const { if (type < 0 || type >= MEASURE_ADDITIONAL_PARAM_COUNT) { assert(0); return 0; } return m_additionalParam[type]; }
-    void            setAdditionalParam(int type, double value) { if (type < 0 || type >= MEASURE_ADDITIONAL_PARAM_COUNT) { assert(0); return; } m_additionalParam[type] = value; }
+    double          additionalParam(int paramType) const;
+    void            setAdditionalParam(int paramType, double value);
 
-    void            updateMeasureArray(int type, Measurement* pMeasurement);
+    void            updateMeasureArray(int limitType, Measurement* pMeasurement);
     void            updateAdditionalParam(Measurement* pMeasurement);
 
     LinearityMeasurement& operator=(const LinearityMeasurement& from);

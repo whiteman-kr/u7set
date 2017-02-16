@@ -32,7 +32,7 @@ public:
     Calibrator*     calibrator() const { return m_pCalibrator; }
     void            setCalibrator(Calibrator* pCalibrator) { m_pCalibrator = pCalibrator;  }
 
-    int             index() const;
+    int             channel() const;
     QString         portName() const;
 
     bool            isReadyForManage() const { return m_readyForManage; }

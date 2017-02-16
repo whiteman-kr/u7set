@@ -9,7 +9,6 @@
 #include "FindData.h"
 #include "SignalProperty.h"
 
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -151,7 +150,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
         {
             if (param.statistic().state() == STATISTIC_STATE_INVALID)
             {
-                return theOptions.measureView().colorLimitError();
+                return theOptions.measureView().colorErrorLimit();
             }
             if (param.statistic().state() == STATISTIC_STATE_SUCCESS)
             {

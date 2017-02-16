@@ -235,7 +235,7 @@ public:
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg = false);
 
-	CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader);
+	CfgLoaderThread(CfgLoader* cfgLoader);
 
 	void enableDownloadConfiguration();
 

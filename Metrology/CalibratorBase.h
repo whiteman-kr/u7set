@@ -60,7 +60,7 @@ public:
     int                     calibratorCount() const;
     CalibratorManager*      calibratorManager(int index) const ;
     CalibratorManager*      firstConnectedCalibrator() const;
-    CalibratorManager*      сalibratorForMeasure(int index) const;
+	CalibratorManager*      calibratorForMeasure(int index) const;
 
     int                     connectedCalibratorsCount() const { return m_connectedCalibratorsCount; }
 

@@ -105,7 +105,6 @@ public:
     bool                createInterface();
 
     void                createActions();
-    void                updateStartStopActions();
     void                createMenu();
     bool                createToolBars();
     void                createMeasurePages();
@@ -120,6 +119,11 @@ public:
     MeasureView*        activeMeasureView() { return measureView(m_measureType); }
     MeasureView*        measureView(int measureType);
     void                appendMeasureView(int measureType, MeasureView* pView);
+
+    bool                signalSocketIsConnected();
+    bool                tuningSocketIsConnected();
+    bool                signalSourceIsValid(bool showMsg);
+    bool                signalIsMeasured(QString& signalID);
 
 private:
 
@@ -168,8 +172,6 @@ private:
 signals:
 
     void                appendMeasure(Measurement*);
-
-    void                setActiveSignal();
 
 private slots:
 
@@ -256,6 +258,10 @@ private slots:
     void                setMeasureThreadInfo(QString msg);
     void                setMeasureThreadInfo(int timeout);
     void                measureComplite(Measurement* pMeasurement);
+
+    // Slots for enable measuring
+    //
+    void                updateStartStopActions();
 };
 
 // ==============================================================================================

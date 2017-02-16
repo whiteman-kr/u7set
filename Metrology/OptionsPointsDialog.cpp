@@ -166,7 +166,7 @@ void OptionsPointsDialog::setHeaderList()
 
 void OptionsPointsDialog::updateRangeType()
 {
-    switch(m_linearity.m_rangeType)
+    switch(m_linearity.rangeType())
     {
         case LO_RANGE_TYPE_MANUAL:
 
@@ -201,8 +201,8 @@ void OptionsPointsDialog::updateRangeType()
             m_downButton->hide();
 
             m_pointCountEdit->setText( QString::number( m_linearity.points().count() ) );
-            m_lowRangeEdit->setText( QString::number(m_linearity.m_lowLimitRange, 10, 2) );
-            m_highRangeEdit->setText( QString::number(m_linearity.m_highLimitRange, 10, 2) );
+            m_lowRangeEdit->setText( QString::number(m_linearity.lowLimitRange(), 10, 2) );
+            m_highRangeEdit->setText( QString::number(m_linearity.highLimitRange(), 10, 2) );
 
             break;
 
@@ -481,7 +481,7 @@ void OptionsPointsDialog::onRangeType(int type)
         return;
     }
 
-    m_linearity.m_rangeType = type;
+    m_linearity.setRangeType(type);
 
     updateRangeType();
 
@@ -492,7 +492,7 @@ void OptionsPointsDialog::onRangeType(int type)
 
 void OptionsPointsDialog::onAutomaticCalculatePoints()
 {
-    if (m_linearity.m_rangeType != LO_RANGE_TYPE_AUTOMATIC)
+    if (m_linearity.rangeType() != LO_RANGE_TYPE_AUTOMATIC)
     {
         return;
     }
@@ -529,8 +529,8 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
         return;
     }
 
-    m_linearity.m_lowLimitRange = low.toDouble();
-    m_linearity.m_highLimitRange = high.toDouble();
+    m_linearity.setLowLimitRange(low.toDouble());
+    m_linearity.setHighLimitRange(high.toDouble());
 
     m_linearity.recalcPoints( value.toDouble() );
 
@@ -601,7 +601,7 @@ void OptionsPointsDialog::keyPressEvent(QKeyEvent *e)
 
 void OptionsPointsDialog::showEvent(QShowEvent* e)
 {
-    m_rangeTypeList->setCurrentIndex(m_linearity.m_rangeType);
+    m_rangeTypeList->setCurrentIndex(m_linearity.rangeType());
     updateRangeType();
     updateList();
 

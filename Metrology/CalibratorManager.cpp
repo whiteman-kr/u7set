@@ -36,14 +36,14 @@ CalibratorManager::~CalibratorManager()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int CalibratorManager::index() const
+int CalibratorManager::channel() const
 {
     if (m_pCalibrator == nullptr)
     {
-        return INVALID_CALIBRATOR_INDEX;
+        return INVALID_CALIBRATOR_CHANNEL;
     }
 
-    return m_pCalibrator->index();
+    return m_pCalibrator->channel();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -294,13 +294,13 @@ void CalibratorManager::onCalibratorConnect()
         return;
     }
 
-    int index = m_pCalibrator->index();
-    if (index < 0 || index >= 6 )
+    int channel = m_pCalibrator->channel();
+    if (channel < 0 || channel >= 6 )
     {
         return;
     }
 
-    QString title = QString("c:%1 ").arg(index + 1) + m_pCalibrator->caption() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
+    QString title = QString("c:%1 ").arg(channel + 1) + m_pCalibrator->caption() + QString(" %1").arg(m_pCalibrator->serialNo()) ;
     setWindowTitle( title );
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
 
@@ -318,13 +318,13 @@ void CalibratorManager::onCalibratorDisconnect()
         return;
     }
 
-    int index = m_pCalibrator->index();
-    if (index < 0 || index >= 6 )
+    int channel = m_pCalibrator->channel();
+    if (channel < 0 || channel >= 6 )
     {
         return;
     }
 
-    QString title = QString("c:%1 (%2) - Disconnected").arg(index + 1).arg(m_pCalibrator->portName()) ;
+    QString title = QString("c:%1 (%2) - Disconnected").arg(channel + 1).arg(m_pCalibrator->portName()) ;
     setWindowTitle(title);
 
     m_pErrorDialog->setWindowTitle(title + tr(" : List errors"));
@@ -581,16 +581,16 @@ void CalibratorManager::loadCalibratorSettings(Calibrator* pCalibrator)
         return;
     }
 
-    int index = pCalibrator->index();
-    if (index == INVALID_CALIBRATOR_INDEX)
+    int channel = pCalibrator->channel();
+    if (channel == INVALID_CALIBRATOR_CHANNEL)
     {
         return;
     }
 
     QSettings s;
 
-    QString portName    = s.value(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), QString("COM%1").arg( index + 1)).toString();
-    int     type        = s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), CALIBRATOR_TYPE_TRXII).toInt();
+    QString portName    = s.value(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), QString("COM%1").arg( channel + 1)).toString();
+    int     type        = s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), CALIBRATOR_TYPE_TRXII).toInt();
 
     pCalibrator->setPortName(portName);
     pCalibrator->setType(type);
@@ -605,16 +605,16 @@ void CalibratorManager::saveCalibratorSettings(Calibrator* pCalibrator)
         return;
     }
 
-    int index = pCalibrator->index();
-    if (index == INVALID_CALIBRATOR_INDEX)
+    int channel = pCalibrator->channel();
+    if (channel == INVALID_CALIBRATOR_CHANNEL)
     {
         return;
     }
 
     QSettings s;
 
-    s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), pCalibrator->portName());
-    s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(index + 1), pCalibrator->type());
+    s.setValue(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), pCalibrator->portName());
+    s.setValue(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), pCalibrator->type());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

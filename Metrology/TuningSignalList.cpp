@@ -475,7 +475,7 @@ QString TuningSignalListTable::text(int  row, int column, const TuningSignal& si
 
     switch (column)
     {
-        case TUN_SIGNAL_LIST_COLUMN_CASE:           result = QString();                 break;
+        case TUN_SIGNAL_LIST_COLUMN_CASE:           result = signal.caseStr();          break;
         case TUN_SIGNAL_LIST_COLUMN_ID:             result = m_showCustomID == true ? signal.customAppSignalID() : signal.appSignalID(); break;
         case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:   result = signal.equipmentID();      break;
         case TUN_SIGNAL_LIST_COLUMN_CAPTION:        result = signal.caption();          break;
@@ -606,7 +606,7 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
                     continue;
                 }
 
-                TuningSignal& signal = theTuningSignalBase.signalForRead( m_signallList[i].hash() );
+                TuningSignal signal = theTuningSignalBase.signalForRead( m_signallList[i].hash() );
                 if (signal.hash() == 0)
                 {
                     continue;
@@ -614,10 +614,10 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
 
                 signal.setCustomAppSignalID( param.customAppSignalID() );
                 signal.setCaption( param.caption() );
-
                 signal.setDefaultValue( param.tuningDefaultValue() );
-
                 signal.setPrecision( param.inputPhysicalPrecision() );
+
+                theTuningSignalBase.setSignalForRead(signal);
 
                 break;
             }
@@ -632,27 +632,27 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
 
 int TuningSignalListDialog::m_sourceColumnWidth[TUN_SOURCE_LIST_COLUMN_COUNT] =
 {
-    250,    // LIST_COLUMN_EQUIPMENT_ID
-    150,    // LIST_COLUMN_CAPTION
-    150,    // LIST_COLUMN_IP
-    100,    // LIST_COLUMN_CHANNEL
-    100,    // LIST_COLUMN_SUBSYSTEM
-    100,    // LIST_COLUMN_LM_NUMBER
-    100,    // LIST_COLUMN_IS_REPLY
-    100,    // LIST_COLUMN_REQUESTS
-    100,    // LIST_COLUMN_REPLIES
-    100,    // LIST_COLUMN_COMMANDS
+    250,    // TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID
+    150,    // TUN_SOURCE_LIST_COLUMN_CAPTION
+    150,    // TUN_SOURCE_LIST_COLUMN_IP
+    100,    // TUN_SOURCE_LIST_COLUMN_CHANNEL
+    100,    // TUN_SOURCE_LIST_COLUMN_SUBSYSTEM
+    100,    // TUN_SOURCE_LIST_COLUMN_LM_NUMBER
+    100,    // TUN_SOURCE_LIST_COLUMN_IS_REPLY
+    100,    // TUN_SOURCE_LIST_COLUMN_REQUESTS
+    100,    // TUN_SOURCE_LIST_COLUMN_REPLIES
+    100,    // TUN_SOURCE_LIST_COLUMN_COMMANDS
 };
 
 int TuningSignalListDialog::m_signalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
 {
-    100,    // LIST_COLUMN_CASE
-    250,    // LIST_COLUMN_ID
-    250,    // LIST_COLUMN_EQUIPMENT_ID
-    150,    // LIST_COLUMN_CAPTION
-    100,    // LIST_COLUMN_VALUE
-    100,    // LIST_COLUMN_DEFAULT
-    150,    // LIST_COLUMN_RANGE
+    100,    // TUN_SIGNAL_LIST_COLUMN_CASE
+    250,    // TUN_SIGNAL_LIST_COLUMN_ID
+    250,    // TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID
+    150,    // TUN_SIGNAL_LIST_COLUMN_CAPTION
+    100,    // TUN_SIGNAL_LIST_COLUMN_VALUE
+    100,    // TUN_SIGNAL_LIST_COLUMN_DEFAULT
+    150,    // TUN_SIGNAL_LIST_COLUMN_RANGE
 };
 
 // -------------------------------------------------------------------------------------------------------------------
