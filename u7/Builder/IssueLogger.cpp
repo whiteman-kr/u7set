@@ -3348,6 +3348,188 @@ namespace Builder
 					 arg(coefCount).arg(coefCaption).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5073
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Usage of code memory exceed 95%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of code memory exceed 95%.
+	///
+	void IssueLogger::wrnALC5073()
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5073,
+				  QString(tr("Usage of code memory exceed 95%.")));
+	}
+
+	/// IssueCode: ALC5074
+	///
+	/// IssueType: Error
+	///
+	/// Title: Usage of code memory exceed 100%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of code memory exceed 100%.
+	///
+	void IssueLogger::errALC5074()
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5074,
+				  QString(tr("Usage of code memory exceed 100%.")));
+	}
+
+	/// IssueCode: ALC5075
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Usage of bit-addressed memory exceed 95%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of bit-addressed memory exceed 95%.
+	///
+	void IssueLogger::wrnALC5075()
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5075,
+				  QString(tr("Usage of bit-addressed memory exceed 95%.")));
+	}
+
+	/// IssueCode: ALC5076
+	///
+	/// IssueType: Error
+	///
+	/// Title: Usage of bit-addressed memory exceed 100%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of code bit-addressed memory exceed 100%.
+	///
+	void IssueLogger::errALC5076()
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5076,
+				  QString(tr("Usage of bit-addressed memory exceed 100%.")));
+	}
+
+	/// IssueCode: ALC5077
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Usage of word-addressed memory exceed 95%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of word-addressed memory exceed 95%.
+	///
+	void IssueLogger::wrnALC5077()
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5077,
+				  QString(tr("Usage of word-addressed memory exceed 95%.")));
+	}
+
+	/// IssueCode: ALC5078
+	///
+	/// IssueType: Error
+	///
+	/// Title: Usage of word-addressed memory exceed 100%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of code word-addressed memory exceed 100%.
+	///
+	void IssueLogger::errALC5078()
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5078,
+				  QString(tr("Usage of word-addressed memory exceed 100%.")));
+	}
+
+	/// IssueCode: ALC5079
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Usage of IDR phase time exceed 90%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of IDR phase time exceed 90%.
+	///
+	void IssueLogger::wrnALC5079()
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5079,
+				  QString(tr("Usage of IDR phase time exceed 90%.")));
+	}
+
+	/// IssueCode: ALC5080
+	///
+	/// IssueType: Error
+	///
+	/// Title: Usage of IDR phase time exceed 100%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of IDR phase time exceed 100%.
+	///
+	void IssueLogger::errALC5080()
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5080,
+				  QString(tr("Usage of IDR phase time exceed 100%.")));
+	}
+
+
+	/// IssueCode: ALC5081
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Usage of ALP phase time exceed 90%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of ALP phase time exceed 90%.
+	///
+	void IssueLogger::wrnALC5081()
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5081,
+				  QString(tr("Usage of ALP phase time exceed 90%.")));
+	}
+
+
+	/// IssueCode: ALC5082
+	///
+	/// IssueType: Error
+	///
+	/// Title: Usage of ALP phase time exceed 100%.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Usage of ALP phase time exceed 100%.
+	///
+	void IssueLogger::errALC5082()
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5082,
+				  QString(tr("Usage of ALP phase time exceed 100%.")));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

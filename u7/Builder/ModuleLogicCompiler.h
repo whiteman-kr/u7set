@@ -698,6 +698,7 @@ namespace Builder
 
 		bool writeResult();
 
+		void displayUsedMemoryInfo();
 		void displayTimingInfo();
 
 		void writeLMCodeTestFile();

@@ -245,6 +245,17 @@ namespace Builder
 		void wrnALC5070(QString appSignalID);						// Signal '%1' has Little Endian byte order.
 		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tuningable signal '%1' (Logic schema '%2').
 		void wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID);	// Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
+		void wrnALC5073();											// Usage of code memory exceed 95%.
+		void errALC5074();											// Usage of code memory exceed 100%.
+		void wrnALC5075();											// Usage of bit-addressed memory exceed 95%.
+		void errALC5076();											// Usage of bit-addressed memory exceed 100%.
+		void wrnALC5077();											// Usage of word-addressed memory exceed 95%.
+		void errALC5078();											// Usage of word-addressed memory exceed 100%.
+		void wrnALC5079();											// Usage of IDR phase time exceed 90%.
+		void errALC5080();											// Usage of IDR phase time exceed 100%.
+		void wrnALC5081();											// Usage of ALP phase time exceed 90%.
+		void errALC5082();											// Usage of ALP phase time exceed 100%.
+
 
 		// EQP			Equipment issues						6000-6999
 		//

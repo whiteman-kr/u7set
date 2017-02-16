@@ -174,31 +174,13 @@ namespace Builder
 
 		if (result == true)
 		{
+			displayUsedMemoryInfo();
+			displayTimingInfo();
+
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
 					arg(m_lm->equipmentIdTemplate());
 
 			LOG_SUCCESS(m_log, msg);
-
-			QString str;
-
-			if (m_code.commandAddress() != 0)
-			{
-				str.sprintf("%.2f", (m_code.commandAddress() * 100.0) / 65536.0);
-			}
-			else
-			{
-				str = "0.00";
-			}
-
-			LOG_MESSAGE(m_log, QString(tr("Code memory used - %1%")).arg(str));
-
-			str.sprintf("%.2f", m_memoryMap.bitAddressedMemoryUsed());
-			LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory used - %1%")).arg(str));
-
-			str.sprintf("%.2f", m_memoryMap.wordAddressedMemoryUsed());
-			LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
-
-			displayTimingInfo();
 		}
 		else
 		{
@@ -212,6 +194,79 @@ namespace Builder
 	}
 
 
+	void ModuleLogicCompiler::displayUsedMemoryInfo()
+	{
+		QString str;
+
+		double percentOfUsedCodeMemory = (m_code.commandAddress() * 100.0) / 65536.0;
+
+		str.sprintf("%.2f", percentOfUsedCodeMemory);
+		LOG_MESSAGE(m_log, QString(tr("Code memory used - %1%")).arg(str));
+
+		if (percentOfUsedCodeMemory > 95)
+		{
+			if (percentOfUsedCodeMemory < 100)
+			{
+				// Usage of code memory exceed 95%.
+				//
+				m_log->wrnALC5073();
+			}
+			else
+			{
+				// Usage of code memory exceed 100%.
+				//
+				m_log->errALC5074();
+			}
+		}
+
+		//
+
+		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
+
+		str.sprintf("%.2f", percentOfUsedBitMemory);
+		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory used - %1%")).arg(str));
+
+		if (percentOfUsedBitMemory > 95)
+		{
+			if (percentOfUsedBitMemory < 100)
+			{
+				// Usage of bit-addressed memory exceed 95%.
+				//
+				m_log->wrnALC5075();
+			}
+			else
+			{
+				// Usage of bit-addressed memory exceed 100%.
+				//
+				m_log->errALC5076();
+			}
+		}
+
+		//
+
+		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
+
+		str.sprintf("%.2f", percentOfUsedWordMemory);
+		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory used - %1%")).arg(str));
+
+		if (percentOfUsedWordMemory > 95)
+		{
+			if (percentOfUsedWordMemory < 100)
+			{
+				// Usage of word-addressed memory exceed 95%.
+				//
+				m_log->wrnALC5077();
+			}
+			else
+			{
+				// Usage of word-addressed memory exceed 100%.
+				//
+				m_log->errALC5078();
+			}
+		}
+	}
+
+
 	void ModuleLogicCompiler::displayTimingInfo()
 	{
 		QString str_percent;
@@ -222,7 +277,9 @@ namespace Builder
 		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrPhaseClockCount;
 		double idrPhaseTimeUsed = 0;
 
-		if (idrPhaseTime != 0)
+		assert(m_lmIDRPhaseTime != 0);
+
+		if (m_lmIDRPhaseTime != 0)
 		{
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
@@ -230,24 +287,22 @@ namespace Builder
 		str_percent.sprintf("%.2f", static_cast<float>(idrPhaseTimeUsed));
 		str.sprintf("%.2f", static_cast<float>(idrPhaseTime * 1000000));
 
-		if (idrPhaseTimeUsed < 90)
-		{
-			LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-						arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
-		}
-		else
+		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
+					arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
+
+		if (idrPhaseTimeUsed > 90)
 		{
 			if (idrPhaseTimeUsed < 100)
 			{
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-								arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
+				// Usage of IDR phase time exceed 90%.
+				//
+				m_log->wrnALC5079();
 			}
 			else
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Input Data Receive phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-							arg(str_percent).arg(m_idrPhaseClockCount).arg(str).arg(m_lmIDRPhaseTime));
+				// Usage of IDR phase time exceed 100%.
+				//
+				m_log->errALC5080();
 			}
 		}
 
@@ -256,7 +311,9 @@ namespace Builder
 		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpPhaseClockCount;
 		double alpPhaseTimeUsed = 0;
 
-		if (alpPhaseTime != 0)
+		assert(m_lmALPPhaseTime != 0);
+
+		if (m_lmALPPhaseTime != 0)
 		{
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
@@ -264,24 +321,22 @@ namespace Builder
 		str_percent.sprintf("%.2f", static_cast<float>(alpPhaseTimeUsed));
 		str.sprintf("%.2f", static_cast<float>(alpPhaseTime * 1000000));
 
-		if (alpPhaseTimeUsed < 90)
-		{
-			LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-						arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
-		}
-		else
+		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
+					arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
+
+		if (alpPhaseTimeUsed > 90)
 		{
 			if (alpPhaseTimeUsed < 100)
 			{
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
+				// Usage of ALP phase time exceed 90%.
+				//
+				m_log->wrnALC5081();
 			}
 			else
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Application Logic Processing phase time used - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-							arg(str_percent).arg(m_alpPhaseClockCount).arg(str).arg(m_lmALPPhaseTime));
+				// Usage of ALP phase time exceed 100%.
+				//
+				m_log->errALC5082();
 			}
 		}
 	}
