@@ -834,7 +834,7 @@ void MainWindow::updateSignalsOnToolBar()
             continue;
         }
 
-        m_asSignalCombo->addItem( signal.strID() );
+        m_asSignalCombo->addItem( signal.strID(), s );
 
 
         if (subblockMap.contains(signal.position().subblock()) == false)
@@ -865,6 +865,9 @@ void MainWindow::updateSignalsOnToolBar()
     {
         return;
     }
+
+    m_asSignalCombo->model()->sort(0);
+    //m_asSignalCombo->setEditable(true);
 
     updateSignalPositionOnToolBar();
 
@@ -1376,6 +1379,13 @@ void MainWindow::setCaseType(int index)
 
 void MainWindow::setMeasureSignal(int index)
 {
+    if (index == -1)
+    {
+        theSignalBase.clearActiveSignal();
+        return;
+    }
+
+    index = m_asSignalCombo->currentData().toInt();
     if (index < 0 || index >= theSignalBase.measureSignalCount())
     {
         theSignalBase.clearActiveSignal();
