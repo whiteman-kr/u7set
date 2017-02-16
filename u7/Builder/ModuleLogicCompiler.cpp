@@ -7319,7 +7319,7 @@ namespace Builder
 			return "";
 		}
 
-		QString strID = QString("%1_I%2_N%3_P%4").arg(appFb->afbStrID()).arg(appFb->instance()).arg(appFb->number()).arg(outputPin.afbOperandIndex());
+		QString strID = QString("%1_%2").arg(appFb->label()).arg(outputPin.caption());
 
 		strID = strID.toUpper();
 
