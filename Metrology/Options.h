@@ -189,7 +189,7 @@ private:
 
     int                 m_measureTimeout = 0;                               // in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
     int                 m_measureKind = MEASURE_KIND_ONE;                   // measure kind: each channel separately - 0 or for all channels together - 1
-    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;      // selected type of output signal
+    int                 m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;     // selected type of output signal
 
 public:
 

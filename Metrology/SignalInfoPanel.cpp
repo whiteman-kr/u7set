@@ -778,7 +778,17 @@ void SignalInfoPanel::signalProperty()
         return;
     }
 
-    SignalParam param = m_signalParamTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+    SignalParam param;
+
+    if ( theOptions.toolBar().outputSignalType() ==  OUTPUT_SIGNAL_TYPE_UNUSED)
+    {
+        param = m_signalParamTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+    }
+    else
+    {
+        param = m_signalParamTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+    }
+
     if (param.isValid() == false)
     {
         return;
