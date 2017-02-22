@@ -63,8 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init config socket thread
     //
-    HostAddressPort configSocketAddress(theOptions.configSocket().serverIP(), theOptions.configSocket().serverPort());
-    m_pConfigSocket = new ConfigSocket(configSocketAddress);
+    HostAddressPort configSocketAddress1(theOptions.configSocket().serverIP1(), theOptions.configSocket().serverPort1());
+    HostAddressPort configSocketAddress2(theOptions.configSocket().serverIP2(), theOptions.configSocket().serverPort2());
+    m_pConfigSocket = new ConfigSocket(configSocketAddress1, configSocketAddress2);
 
     connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
 
@@ -72,8 +73,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init signal socket thread
     //
-    HostAddressPort signalSocketAddress(theOptions.signalSocket().serverIP(), theOptions.signalSocket().serverPort());
-    m_pSignalSocket = new SignalSocket(signalSocketAddress);
+    HostAddressPort signalSocketAddress1(theOptions.signalSocket().serverIP1(), theOptions.signalSocket().serverPort1());
+    HostAddressPort signalSocketAddress2(theOptions.signalSocket().serverIP2(), theOptions.signalSocket().serverPort2());
+    m_pSignalSocket = new SignalSocket(signalSocketAddress1, signalSocketAddress2);
     m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
 
     connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
@@ -86,8 +88,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init tuning socket thread
     //
-    HostAddressPort tuningSocketAddress(theOptions.tuningSocket().serverIP(), theOptions.tuningSocket().serverPort());
-    m_pTuningSocket = new TuningSocket(tuningSocketAddress);
+    HostAddressPort tuningSocketAddress1(theOptions.tuningSocket().serverIP1(), theOptions.tuningSocket().serverPort1());
+    HostAddressPort tuningSocketAddress2(theOptions.tuningSocket().serverIP2(), theOptions.tuningSocket().serverPort2());
+    m_pTuningSocket = new TuningSocket(tuningSocketAddress1, tuningSocketAddress2);
     m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
     connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
@@ -1667,7 +1670,7 @@ void MainWindow::signalSocketConnected()
 {
     m_statusConnectToAppDataServer->setText( tr(" AppDataService: on  ") );
     m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-    m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(theOptions.signalSocket().serverIP()).arg(theOptions.signalSocket().serverPort()) );
+    m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: 0").arg(theOptions.signalSocket().serverIP1()).arg(theOptions.signalSocket().serverPort1()) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1710,7 +1713,7 @@ void MainWindow::signalSocketDisconnected()
 
 void MainWindow::signalSocketSignalsLoaded()
 {
-    m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: %3").arg(theOptions.signalSocket().serverIP()).arg(theOptions.signalSocket().serverPort()).arg(theSignalBase.signalCount()) );
+    m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: %3").arg(theOptions.signalSocket().serverIP1()).arg(theOptions.signalSocket().serverPort1()).arg(theSignalBase.signalCount()) );
 
     theSignalBase.sortByPosition();
 
@@ -1726,7 +1729,7 @@ void MainWindow::tuningSocketConnected()
 {
     m_statusConnectToTuningServer->setText( tr(" TuningService: on  ") );
     m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-    m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: %3").arg(theOptions.tuningSocket().serverIP()).arg(theOptions.tuningSocket().serverPort()).arg(theTuningSignalBase.signalCount()) );
+    m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: %3").arg(theOptions.tuningSocket().serverIP1()).arg(theOptions.tuningSocket().serverPort1()).arg(theTuningSignalBase.signalCount()) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------

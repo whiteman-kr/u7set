@@ -31,12 +31,18 @@ const char* const       ConfigSocketParamName[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "IP"),
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
+                        QT_TRANSLATE_NOOP("Options.h", "IP"),
+                        QT_TRANSLATE_NOOP("Options.h", "Port"),
+                        QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
 };
 
-const int               CONFIG_SOCKET_PARAM_COUNT       = sizeof(ConfigSocketParamName)/sizeof(ConfigSocketParamName[0]);
+const int               CONFIG_SOCKET_PARAM_COUNT           = sizeof(ConfigSocketParamName)/sizeof(ConfigSocketParamName[0]);
 
-const int               CONFIG_SOCKET_PARAM_SERVER_IP   = 0,
-                        CONFIG_SOCKET_PARAM_SERVER_PORT = 1;
+const int               CONFIG_SOCKET_PARAM_SERVER_IP1      = 0,
+                        CONFIG_SOCKET_PARAM_SERVER_PORT1    = 1,
+                        CONFIG_SOCKET_PARAM_SERVER_IP2      = 2,
+                        CONFIG_SOCKET_PARAM_SERVER_PORT2    = 3,
+                        CONFIG_SOCKET_PARAM_EQUIPMENT_ID    = 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -51,18 +57,27 @@ public:
                         ~ConfigSocketOption();
 private:
 
-    QString             m_serverIP = "127.0.0.1";
-    int                 m_serverPort = PORT_CONFIGURATION_SERVICE_REQUEST;
+    QString             m_serverIP1 = "127.0.0.1";
+    int                 m_serverPort1 = PORT_CONFIGURATION_SERVICE_REQUEST;
+
+    QString             m_serverIP2 = "127.0.0.1";
+    int                 m_serverPort2 = PORT_CONFIGURATION_SERVICE_REQUEST;
 
     QString             m_equipmentID = "SYSTEM_RACKID_WS00_METROLOGY";
 
 public:
 
-    QString             serverIP() const { return m_serverIP; }
-    void                setServerIP(const QString& ip) { m_serverIP = ip; }
+    QString             serverIP1() const { return m_serverIP1; }
+    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
 
-    int                 serverPort() const { return m_serverPort; }
-    void                setServerPort(int port) { m_serverPort = port; }
+    int                 serverPort1() const { return m_serverPort1; }
+    void                setServerPort1(int port) { m_serverPort1 = port; }
+
+    QString             serverIP2() const { return m_serverIP2; }
+    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
+
+    int                 serverPort2() const { return m_serverPort2; }
+    void                setServerPort2(int port) { m_serverPort2 = port; }
 
     QString             equipmentID() const { return m_equipmentID; }
     void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -84,12 +99,17 @@ const char* const       SignalSocketParamName[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "IP"),
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
+                        QT_TRANSLATE_NOOP("Options.h", "IP"),
+                        QT_TRANSLATE_NOOP("Options.h", "Port"),
+
 };
 
-const int               SIGNAL_SOCKET_PARAM_COUNT       = sizeof(SignalSocketParamName)/sizeof(SignalSocketParamName[0]);
+const int               SIGNAL_SOCKET_PARAM_COUNT           = sizeof(SignalSocketParamName)/sizeof(SignalSocketParamName[0]);
 
-const int               SIGNAL_SOCKET_PARAM_SERVER_IP   = 0,
-                        SIGNAL_SOCKET_PARAM_SERVER_PORT = 1;
+const int               SIGNAL_SOCKET_PARAM_SERVER_IP1      = 0,
+                        SIGNAL_SOCKET_PARAM_SERVER_PORT1    = 1,
+                        SIGNAL_SOCKET_PARAM_SERVER_IP2      = 2,
+                        SIGNAL_SOCKET_PARAM_SERVER_PORT2    = 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -104,16 +124,25 @@ public:
                         ~SignalSocketOption();
 private:
 
-    QString             m_serverIP = "127.0.0.1";
-    int                 m_serverPort = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
+    QString             m_serverIP1 = "127.0.0.1";
+    int                 m_serverPort1 = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
+
+    QString             m_serverIP2 = "127.0.0.1";
+    int                 m_serverPort2 = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
 
 public:
 
-    QString             serverIP() const { return m_serverIP; }
-    void                setServerIP(const QString& ip) { m_serverIP = ip; }
+    QString             serverIP1() const { return m_serverIP1; }
+    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
 
-    int                 serverPort() const { return m_serverPort; }
-    void                setServerPort(int port) { m_serverPort = port; }
+    int                 serverPort1() const { return m_serverPort1; }
+    void                setServerPort1(int port) { m_serverPort1 = port; }
+
+    QString             serverIP2() const { return m_serverIP2; }
+    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
+
+    int                 serverPort2() const { return m_serverPort2; }
+    void                setServerPort2(int port) { m_serverPort2 = port; }
 
 
     void                load();
@@ -132,14 +161,18 @@ const char* const       TuningSocketParamName[] =
 {
                         QT_TRANSLATE_NOOP("Options.h", "IP"),
                         QT_TRANSLATE_NOOP("Options.h", "Port"),
+                        QT_TRANSLATE_NOOP("Options.h", "IP"),
+                        QT_TRANSLATE_NOOP("Options.h", "Port"),
                         QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
 };
 
 const int               TUNING_SOCKET_PARAM_COUNT           = sizeof(TuningSocketParamName)/sizeof(TuningSocketParamName[0]);
 
-const int               TUNING_SOCKET_PARAM_SERVER_IP       = 0,
-                        TUNING_SOCKET_PARAM_SERVER_PORT     = 1,
-                        TUNING_SOCKET_PARAM_EQUIPMENT_ID    = 2;
+const int               TUNING_SOCKET_PARAM_SERVER_IP1      = 0,
+                        TUNING_SOCKET_PARAM_SERVER_PORT1    = 1,
+                        TUNING_SOCKET_PARAM_SERVER_IP2      = 2,
+                        TUNING_SOCKET_PARAM_SERVER_PORT2    = 3,
+                        TUNING_SOCKET_PARAM_EQUIPMENT_ID    = 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -154,18 +187,27 @@ public:
                         ~TuningSocketOption();
 private:
 
-    QString             m_serverIP = "127.0.0.1";
-    int                 m_serverPort = PORT_TUNING_SERVICE_CLIENT_REQUEST;
+    QString             m_serverIP1 = "127.0.0.1";
+    int                 m_serverPort1 = PORT_TUNING_SERVICE_CLIENT_REQUEST;
+
+    QString             m_serverIP2 = "127.0.0.1";
+    int                 m_serverPort2 = PORT_TUNING_SERVICE_CLIENT_REQUEST;
 
     QString             m_equipmentID = "SYSTEM_RACKID_WS00_TUN";
 
 public:
 
-    QString             serverIP() const { return m_serverIP; }
-    void                setServerIP(const QString& ip) { m_serverIP = ip; }
+    QString             serverIP1() const { return m_serverIP1; }
+    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
 
-    int                 serverPort() const { return m_serverPort; }
-    void                setServerPort(int port) { m_serverPort = port; }
+    int                 serverPort1() const { return m_serverPort1; }
+    void                setServerPort1(int port) { m_serverPort1 = port; }
+
+    QString             serverIP2() const { return m_serverIP2; }
+    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
+
+    int                 serverPort2() const { return m_serverPort2; }
+    void                setServerPort2(int port) { m_serverPort2 = port; }
 
     QString             equipmentID() const { return m_equipmentID; }
     void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
