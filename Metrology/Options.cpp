@@ -41,6 +41,8 @@ void ConfigSocketOption::load()
 
     m_serverIP = s.value( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
     m_serverPort = s.value( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+    m_equipmentID = s.value( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_METROLOGY").toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -51,6 +53,10 @@ void ConfigSocketOption::save()
 
     s.setValue( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP);
     s.setValue( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort);
+
+    s.setValue( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), m_equipmentID);
+
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------

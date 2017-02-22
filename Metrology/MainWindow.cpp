@@ -61,12 +61,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_measureThread.init(this);
 
+    // init config socket thread
+    //
+    HostAddressPort configSocketAddress(theOptions.configSocket().serverIP(), theOptions.configSocket().serverPort());
+    m_pConfigSocket = new ConfigSocket(configSocketAddress);
+
+    connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
+
+    m_pConfigSocket->start();
+
     // init signal socket thread
     //
     HostAddressPort signalSocketAddress(theOptions.signalSocket().serverIP(), theOptions.signalSocket().serverPort());
     m_pSignalSocket = new SignalSocket(signalSocketAddress);
     m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
-    m_pSignalSocketThread->start();
 
     connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
@@ -74,17 +82,20 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
 
+    m_pSignalSocketThread->start();
+
     // init tuning socket thread
     //
     HostAddressPort tuningSocketAddress(theOptions.tuningSocket().serverIP(), theOptions.tuningSocket().serverPort());
     m_pTuningSocket = new TuningSocket(tuningSocketAddress);
     m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
-    m_pTuningSocketThread->start();
 
     connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
+
+    m_pTuningSocketThread->start();
 
     measureThreadStoped();
 
@@ -1645,6 +1656,13 @@ void MainWindow::calibratorConnectedChanged(int count)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::configSocketConfigurationLoaded()
+{
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::signalSocketConnected()
 {
     m_statusConnectToAppDataServer->setText( tr(" AppDataService: on  ") );
@@ -1900,6 +1918,12 @@ void MainWindow::closeEvent(QCloseEvent* e)
         m_pSignalSocketThread->quitAndWait(10000);
         delete m_pSignalSocketThread;
         m_pSignalSocketThread = nullptr;
+    }
+
+    if (m_pConfigSocket != nullptr)
+    {
+        delete m_pConfigSocket;
+        m_pConfigSocket = nullptr;
     }
 
     theTuningSignalBase.clear();

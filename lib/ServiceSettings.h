@@ -10,6 +10,7 @@ const char* const CFG_FILE_ID_APP_SIGNALS = "APP_SIGNALS";
 const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
 const char* const CFG_FILE_ID_SCHEMAS_DETAILS = "TUNING_SCHEMAS";
 const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";
+const char* const CFG_FILE_ID_METROLOGY_SIGNALS = "METROLOGY_SIGNALS";
 
 
 class AppDataServiceChannel

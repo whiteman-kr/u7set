@@ -54,6 +54,8 @@ private:
     QString             m_serverIP = "127.0.0.1";
     int                 m_serverPort = PORT_CONFIGURATION_SERVICE_REQUEST;
 
+    QString             m_equipmentID = "SYSTEM_RACKID_WS00_METROLOGY";
+
 public:
 
     QString             serverIP() const { return m_serverIP; }
@@ -61,6 +63,9 @@ public:
 
     int                 serverPort() const { return m_serverPort; }
     void                setServerPort(int port) { m_serverPort = port; }
+
+    QString             equipmentID() const { return m_equipmentID; }
+    void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
 
     void                load();
