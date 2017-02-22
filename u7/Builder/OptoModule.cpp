@@ -482,11 +482,11 @@ namespace Hardware
 			//
 			setTxRawDataSizeW(rawDataSizeItem.rawDataSize);
 
-			LOG_MESSAGE(log, QString(tr("Port %1 manual rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
+			// LOG_MESSAGE(log, QString(tr("Port %1 manual rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 			return true;
 		}
 
-		LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID));
+		//LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID));
 
 		// automatic txRawDataSizeW calculation
 		//
@@ -508,8 +508,7 @@ namespace Hardware
 
 				size += partSizeW;
 
-				LOG_MESSAGE(log, QString(tr("ALL_NETIVE_RAW_DATA sizeW = %1")).arg(partSizeW));
-
+				// LOG_MESSAGE(log, QString(tr("ALL_NATIVE_RAW_DATA sizeW = %1")).arg(partSizeW));
 				break;
 
 			case RawDataDescriptionItemType::ModuleRawData:
@@ -520,7 +519,7 @@ namespace Hardware
 
 					size += partSizeW;
 
-					LOG_MESSAGE(log, QString(tr("MODULE_RAW_DATA=%1 sizeW = %2")).arg(item.modulePlace).arg(partSizeW));
+					// LOG_MESSAGE(log, QString(tr("MODULE_RAW_DATA=%1 sizeW = %2")).arg(item.modulePlace).arg(partSizeW));
 
 					if (moduleIsFound == false)
 					{
@@ -565,7 +564,7 @@ namespace Hardware
 
 						size += partSizeW;
 
-						LOG_MESSAGE(log, QString(tr("PORT_RAW_DATA=%1 sizeW = %2")).arg(item.portEquipmentID).arg(partSizeW));
+						// LOG_MESSAGE(log, QString(tr("PORT_RAW_DATA=%1 sizeW = %2")).arg(item.portEquipmentID).arg(partSizeW));
 					}
 					else
 					{
@@ -577,7 +576,8 @@ namespace Hardware
 			case RawDataDescriptionItemType::Const16:
 
 				size++;
-				LOG_MESSAGE(log, QString(tr("CONST16=%1 sizeW = 1")).arg(item.const16Value));
+
+				// LOG_MESSAGE(log, QString(tr("CONST16=%1 sizeW = 1")).arg(item.const16Value));
 
 				break;
 
@@ -595,7 +595,7 @@ namespace Hardware
 		if (result == true)
 		{
 			setTxRawDataSizeW(size);
-			LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
+			// LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 		}
 
 		m_txRawDataSizeWCalculationStarted = false;
