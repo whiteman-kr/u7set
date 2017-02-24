@@ -108,7 +108,11 @@ SOURCES += \
     FindData.cpp \
     TuningSocket.cpp \
     TuningSignalBase.cpp \
-    TuningSignalList.cpp
+    TuningSignalList.cpp \
+    ConfigSocket.cpp \
+    ../lib/CfgServerLoader.cpp \
+    ../lib/BuildInfo.cpp \
+    ../lib/TcpFileTransfer.cpp
 
 
 HEADERS  += \
@@ -165,7 +169,11 @@ HEADERS  += \
     FindData.h \
     TuningSocket.h \
     TuningSignalBase.h \
-    TuningSignalList.h
+    TuningSignalList.h \
+    ConfigSocket.h \
+    ../lib/CfgServerLoader.h \
+    ../lib/BuildInfo.h \
+    ../lib/TcpFileTransfer.h
 
 
 FORMS    +=

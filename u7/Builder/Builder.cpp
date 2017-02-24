@@ -20,6 +20,7 @@
 #include "TuningServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
+#include "MetrologyCfgGenerator.h"
 #include "IssueLogger.h"
 
 #include <QBuffer>
@@ -1008,6 +1009,10 @@ namespace Builder
 				case E::SoftwareType::ArchiveService:
 					softwareCfgGenerator = new ArchivingServiceCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
+
+                case E::SoftwareType::Metrology:
+                    softwareCfgGenerator = new MetrologyCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
+                    break;
 
 				default:
 					m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());

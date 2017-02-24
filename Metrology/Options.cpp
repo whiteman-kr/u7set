@@ -39,8 +39,13 @@ void ConfigSocketOption::load()
 {
     QSettings s;
 
-    m_serverIP = s.value( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort = s.value( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+    m_serverIP1 = s.value( QString("%1ServerIP1").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort1 = s.value( QString("%1ServerPort1").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+    m_serverIP2 = s.value( QString("%1ServerIP2").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort2 = s.value( QString("%1ServerPort2").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
+
+    m_equipmentID = s.value( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_METROLOGY").toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -49,16 +54,26 @@ void ConfigSocketOption::save()
 {
     QSettings s;
 
-    s.setValue( QString("%1ServerIP").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP);
-    s.setValue( QString("%1ServerPort").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort);
+    s.setValue( QString("%1ServerIP1").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP1);
+    s.setValue( QString("%1ServerPort1").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort1);
+
+    s.setValue( QString("%1ServerIP2").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP2);
+    s.setValue( QString("%1ServerPort2").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort2);
+
+    s.setValue( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), m_equipmentID);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocketOption& ConfigSocketOption::operator=(const ConfigSocketOption& from)
 {
-    m_serverIP = from.m_serverIP;
-    m_serverPort = from.m_serverPort;
+    m_serverIP1 = from.m_serverIP1;
+    m_serverPort1 = from.m_serverPort1;
+
+    m_serverIP2 = from.m_serverIP2;
+    m_serverPort2 = from.m_serverPort2;
+
+    m_equipmentID = from.m_equipmentID;
 
     return *this;
 }
@@ -93,8 +108,12 @@ void SignalSocketOption::load()
 {
     QSettings s;
 
-    m_serverIP = s.value( QString("%1ServerIP").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort = s.value( QString("%1ServerPort").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
+    m_serverIP1 = s.value( QString("%1ServerIP1").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort1 = s.value( QString("%1ServerPort1").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
+
+    m_serverIP2 = s.value( QString("%1ServerIP2").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort2 = s.value( QString("%1ServerPort2").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -103,16 +122,22 @@ void SignalSocketOption::save()
 {
     QSettings s;
 
-    s.setValue( QString("%1ServerIP").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP);
-    s.setValue( QString("%1ServerPort").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort);
+    s.setValue( QString("%1ServerIP1").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP1);
+    s.setValue( QString("%1ServerPort1").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort1);
+
+    s.setValue( QString("%1ServerIP2").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP2);
+    s.setValue( QString("%1ServerPort2").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort2);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalSocketOption& SignalSocketOption::operator=(const SignalSocketOption& from)
 {
-    m_serverIP = from.m_serverIP;
-    m_serverPort = from.m_serverPort;
+    m_serverIP1 = from.m_serverIP1;
+    m_serverPort1 = from.m_serverPort1;
+
+    m_serverIP2 = from.m_serverIP2;
+    m_serverPort2 = from.m_serverPort2;
 
     return *this;
 }
@@ -147,8 +172,11 @@ void TuningSocketOption::load()
 {
     QSettings s;
 
-    m_serverIP = s.value( QString("%1ServerIP").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort = s.value( QString("%1ServerPort").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
+    m_serverIP1 = s.value( QString("%1ServerIP1").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort1 = s.value( QString("%1ServerPort1").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
+
+    m_serverIP2 = s.value( QString("%1ServerIP2").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
+    m_serverPort2 = s.value( QString("%1ServerPort2").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
 
     m_equipmentID = s.value( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_TUN").toString();
 }
@@ -159,8 +187,11 @@ void TuningSocketOption::save()
 {
     QSettings s;
 
-    s.setValue( QString("%1ServerIP").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP);
-    s.setValue( QString("%1ServerPort").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort);
+    s.setValue( QString("%1ServerIP1").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP1);
+    s.setValue( QString("%1ServerPort1").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort1);
+
+    s.setValue( QString("%1ServerIP2").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP2);
+    s.setValue( QString("%1ServerPort2").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort2);
 
     s.setValue( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), m_equipmentID);
 }
@@ -169,8 +200,11 @@ void TuningSocketOption::save()
 
 TuningSocketOption& TuningSocketOption::operator=(const TuningSocketOption& from)
 {
-    m_serverIP = from.m_serverIP;
-    m_serverPort = from.m_serverPort;
+    m_serverIP1 = from.m_serverIP1;
+    m_serverPort1 = from.m_serverPort1;
+
+    m_serverIP2 = from.m_serverIP2;
+    m_serverPort2 = from.m_serverPort2;
 
     m_equipmentID = from.m_equipmentID;
 

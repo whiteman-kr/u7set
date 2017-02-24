@@ -1,7 +1,7 @@
 #ifndef TUNINGSOCKET_H
 #define TUNINGSOCKET_H
 
-// This class is designed to receive signals from AppDataSrv
+// This class is designed to receive signals from TuningSrv
 //
 // Algorithm:
 //

@@ -13,6 +13,7 @@
 #include "../lib/SimpleThread.h"
 
 #include "MeasureView.h"
+#include "ConfigSocket.h"
 #include "SignalSocket.h"
 #include "TuningSocket.h"
 #include "MeasureThread.h"
@@ -82,6 +83,8 @@ public:
     QLabel*             m_statusConnectToTuningServer = nullptr;
 
 public:
+
+    ConfigSocket*       m_pConfigSocket = nullptr;
 
     SignalSocket*       m_pSignalSocket = nullptr;
     SimpleThread*       m_pSignalSocketThread = nullptr;
@@ -239,6 +242,10 @@ private slots:
     // Slots of calibrator base
     //
     void                calibratorConnectedChanged(int);
+
+    // Slots of configSocket
+    //
+    void                configSocketConfigurationLoaded();
 
     // Slots of signalSocket
     //
