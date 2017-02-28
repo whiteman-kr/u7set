@@ -1934,7 +1934,7 @@ namespace Builder
 			}
 		}
 
-		if (appSignal.analogSignalFormat() != srcSignal.analogSignalFormat())
+		if (appSignal.isAnalog() && srcSignal.isAnalog() && appSignal.analogSignalFormat() != srcSignal.analogSignalFormat())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signals %1 and  %2 is not compatible by dataFormat")).
