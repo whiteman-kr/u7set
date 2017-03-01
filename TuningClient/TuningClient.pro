@@ -89,7 +89,7 @@ PRE_TARGETDEPS += version.h
 QMAKE_EXTRA_TARGETS += versionTarget
 
 
-SOURCES += main.cpp\
+SOURCES +=\
         MainWindow.cpp \
     TuningPage.cpp \
     TuningObject.cpp \
@@ -124,7 +124,8 @@ SOURCES += main.cpp\
     TuningObjectManager.cpp \
     TuningFilterEditor.cpp \
     TuningClientFilterEditor.cpp \
-    DialogPassword.cpp
+    DialogPassword.cpp \
+    Main.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -160,9 +161,9 @@ HEADERS  += MainWindow.h \
     DialogTuningSourceInfo.h \
     TuningObjectManager.h \
     TuningFilterEditor.h \
-    main.h \
     TuningClientFilterEditor.h \
-    DialogPassword.h
+    DialogPassword.h \
+    Main.h
 
 FORMS    += \
     DialogSettings.ui \

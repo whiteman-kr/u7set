@@ -37,6 +37,8 @@ void Settings::RestoreSystem()
 	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 	adminSettings.setValue("ApplicationName", qApp->applicationName());
 
+    adminSettings.sync();
+
 	if (adminSettings.status() == QSettings::AccessError)
 	{
 		m_admin = false;
