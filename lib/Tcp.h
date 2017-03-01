@@ -402,6 +402,8 @@ namespace Tcp
 		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
 		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
 
+		int selectedServerIndex() { return m_selectedServerIndex; }
+
 		bool isAutoSwitchServer() const { return m_autoSwitchServer; }
 		void setAutoSwitchServer(bool autoSwitch) { m_autoSwitchServer = autoSwitch; }
 
