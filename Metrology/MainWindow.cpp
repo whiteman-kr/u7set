@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(&theSignalBase, &SignalBase::updatedSignalParam, &theTuningSignalBase, &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
 
+	connect(&theTuningSignalBase, &TuningSignalBase::signalsLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
+
     // load output signals base
     //
     theOutputSignalBase.load();
@@ -96,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_pTuningSocket = new TuningSocket(tuningSocketAddress1, tuningSocketAddress2);
     m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
@@ -1675,7 +1678,7 @@ void MainWindow::configSocketConnected()
 		return;
 	}
 
-	HostAddressPort configSocketAddress = m_pConfigSocket->connectedAddress();
+	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
 	m_statusConnectToConfigServer->setText( tr(" ConfigService: on  ") );
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
@@ -1700,7 +1703,7 @@ void MainWindow::configSocketConfigurationLoaded()
 		return;
 	}
 
-	HostAddressPort configSocketAddress = m_pConfigSocket->connectedAddress();
+	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
 	QString connectedState = tr("Connected: %1 : %2\n").arg(configSocketAddress.addressStr() ).arg(configSocketAddress.port());
 
@@ -1823,7 +1826,7 @@ void MainWindow::tuningSocketConnected()
 
     m_statusConnectToTuningServer->setText( tr(" TuningService: on  ") );
     m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
-	m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: %3").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port()).arg(theTuningSignalBase.signalCount()) );
+	m_statusConnectToTuningServer->setToolTip(tr("Connected: %1 : %2\nTuning signals: 0").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port()) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1844,6 +1847,33 @@ void MainWindow::tuningSocketDisconnected()
     m_statusConnectToTuningServer->setText( tr(" TuningService: off ") );
     m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
     m_statusConnectToTuningServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::tuningSignalsLoaded()
+{
+	if (m_pTuningSocket == nullptr)
+	{
+		return;
+	}
+
+	int serverType = m_pTuningSocket->selectedServerIndex();
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		return;
+	}
+
+	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
+
+	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+
+	connectedState.append(tr("\nTuning sources: %1").arg(theTuningSignalBase.sourceCount()) );
+	connectedState.append(tr("\nTuning signals: %1").arg(theTuningSignalBase.signalCount()) );
+
+	m_statusConnectToTuningServer->setText( tr(" TuningService: on  ") );
+	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToTuningServer->setToolTip(connectedState);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

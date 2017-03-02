@@ -260,6 +260,7 @@ private slots:
     //
     void                tuningSocketConnected();
     void                tuningSocketDisconnected();
+	void                tuningSignalsLoaded();
 
     // Slots of measure thread
     //

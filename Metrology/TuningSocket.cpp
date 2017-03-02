@@ -12,7 +12,6 @@ TuningSocket::TuningSocket(const HostAddressPort& serverAddressPort) :
 {
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSocket::TuningSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
@@ -31,8 +30,6 @@ TuningSocket::~TuningSocket()
 void TuningSocket::onClientThreadStarted()
 {
     qDebug() << "TuningSocket::onClientThreadStarted()";
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -51,8 +48,6 @@ void TuningSocket::onConnection()
     emit socketConnected();
 
     requestTuningSourcesInfo();
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -63,7 +58,6 @@ void TuningSocket::onDisconnection()
 
     emit socketDisconnected();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -96,8 +90,6 @@ void TuningSocket::processReply(quint32 requestID, const char* replyData, quint3
         default:
             assert(false);
     }
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

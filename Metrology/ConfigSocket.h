@@ -42,7 +42,7 @@ private:
 public:
 
 	bool				isConnceted() { return m_connected; }
-	HostAddressPort		connectedAddress() { return m_address; }
+	HostAddressPort		address() { return m_address; }
 
 	void                start();
 

@@ -354,6 +354,8 @@ void TuningSignalBase::createSignalList()
 
         appendSignal( TuningSignal( param ) );
     }
+
+	emit signalsLoaded();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

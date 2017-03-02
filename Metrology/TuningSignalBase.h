@@ -298,6 +298,8 @@ private:
 
 signals:
 
+	void					signalsLoaded();
+
 public slots:
 
     void                    updateSignalParam(const Hash& signalHash);

@@ -11,7 +11,6 @@ SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort) :
 {
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalSocket::SignalSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
@@ -30,8 +29,6 @@ SignalSocket::~SignalSocket()
 void SignalSocket::onClientThreadStarted()
 {
     qDebug() << "SignalSocket::onClientThreadStarted()";
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -40,7 +37,6 @@ void SignalSocket::onClientThreadFinished()
 {
     qDebug() << "SignalSocket::onClientThreadFinished()";
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -65,7 +61,6 @@ void SignalSocket::onDisconnection()
 
     emit socketDisconnected();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -102,8 +97,6 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
         default:
             assert(false);
     }
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
