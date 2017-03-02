@@ -12,7 +12,6 @@
 
 #include "../lib/SocketIO.h"
 
-#include "CalibratorBase.h"
 #include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
@@ -23,200 +22,165 @@
 
 // ==============================================================================================
 
-#define                 CONFIG_SOCKET_OPTIONS_KEY       "Options/ConfigSocket/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const       ConfigSocketParamName[] =
+const char* const       SocketServerType[] =
 {
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-                        QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+						QT_TRANSLATE_NOOP("Options.h", "Primary"),
+						QT_TRANSLATE_NOOP("Options.h", "Reserve"),
 };
 
-const int               CONFIG_SOCKET_PARAM_COUNT           = sizeof(ConfigSocketParamName)/sizeof(ConfigSocketParamName[0]);
+const int               SOCKET_SERVER_TYPE_COUNT = sizeof(SocketServerType)/sizeof(SocketServerType[0]);
 
-const int               CONFIG_SOCKET_PARAM_SERVER_IP1      = 0,
-                        CONFIG_SOCKET_PARAM_SERVER_PORT1    = 1,
-                        CONFIG_SOCKET_PARAM_SERVER_IP2      = 2,
-                        CONFIG_SOCKET_PARAM_SERVER_PORT2    = 3,
-                        CONFIG_SOCKET_PARAM_EQUIPMENT_ID    = 4;
+const int               SOCKET_SERVER_TYPE_PRIMARY = 0,
+						SOCKET_SERVER_TYPE_RESERVE = 1;
 
 // ----------------------------------------------------------------------------------------------
 
-class ConfigSocketOption : public QObject
+const char* const       SocketClientParamNameForAll[] =
 {
-    Q_OBJECT
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+						QT_TRANSLATE_NOOP("Options.h", "IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Port"),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
+						QT_TRANSLATE_NOOP("Options.h", "IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Port"),
+};
 
+const int               SOCKET_CLIENT_PARAM_COUNT           = sizeof(SocketClientParamNameForAll)/sizeof(SocketClientParamNameForAll[0]);
+
+const int               SOCKET_CLIENT_PARAM_EQUIPMENT_ID1   = 0,
+						SOCKET_CLIENT_PARAM_SERVER_IP1      = 1,
+						SOCKET_CLIENT_PARAM_SERVER_PORT1    = 2,
+						SOCKET_CLIENT_PARAM_EQUIPMENT_ID2   = 3,
+						SOCKET_CLIENT_PARAM_SERVER_IP2      = 4,
+						SOCKET_CLIENT_PARAM_SERVER_PORT2    = 5;
+
+// ----------------------------------------------------------------------------------------------
+
+struct CONNECT_OPTION
+{
+	QString             m_equipmentID;
+
+	QString             m_serverIP;
+	int                 m_serverPort;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class SocketClientOption
+{
 public:
 
-    explicit            ConfigSocketOption(QObject *parent = 0);
-    explicit            ConfigSocketOption(const ConfigSocketOption& from, QObject *parent = 0);
-                        ~ConfigSocketOption();
+						SocketClientOption();
+						~SocketClientOption();
 private:
 
-    QString             m_serverIP1 = "127.0.0.1";
-    int                 m_serverPort1 = PORT_CONFIGURATION_SERVICE_REQUEST;
+	int                 m_type = -1;
 
-    QString             m_serverIP2 = "127.0.0.1";
-    int                 m_serverPort2 = PORT_CONFIGURATION_SERVICE_REQUEST;
-
-    QString             m_equipmentID = "SYSTEM_RACKID_WS00_METROLOGY";
+	CONNECT_OPTION		m_connect[SOCKET_SERVER_TYPE_COUNT];
 
 public:
 
-    QString             serverIP1() const { return m_serverIP1; }
-    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
+	int                 socketType() const { return m_type; }
+	void                setSocketType(int socketType) { m_type = socketType; }
 
-    int                 serverPort1() const { return m_serverPort1; }
-    void                setServerPort1(int port) { m_serverPort1 = port; }
+	QString             equipmentID(int serverType) const;
+	void                setEquipmentID(int serverType, const QString& equipmentID);
 
-    QString             serverIP2() const { return m_serverIP2; }
-    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
+	QString             serverIP(int serverType) const;
+	void                setServerIP(int serverType, const QString& ip);
 
-    int                 serverPort2() const { return m_serverPort2; }
-    void                setServerPort2(int port) { m_serverPort2 = port; }
+	int                 serverPort(int serverType) const;
+	void                setServerPort(int serverType, int port);
 
-    QString             equipmentID() const { return m_equipmentID; }
-    void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
+	HostAddressPort     address(int serverType) const;
 
-
-    void                load();
-    void                save();
-
-    ConfigSocketOption& operator=(const ConfigSocketOption& from);
+	void                load();
+	void                save();
 };
 
 // ==============================================================================================
 
-#define                 SIGNAL_SOCKET_OPTIONS_KEY       "Options/SignalSocket/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const       SignalSocketParamName[] =
+const char* const       SocketType[] =
 {
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-
+						QT_TRANSLATE_NOOP("Options.h", "ConfigSocket"),
+						QT_TRANSLATE_NOOP("Options.h", "SignalSocket"),
+						QT_TRANSLATE_NOOP("Options.h", "TuningSocket"),
 };
 
-const int               SIGNAL_SOCKET_PARAM_COUNT           = sizeof(SignalSocketParamName)/sizeof(SignalSocketParamName[0]);
+const int               SOCKET_TYPE_COUNT = sizeof(SocketType)/sizeof(SocketType[0]);
 
-const int               SIGNAL_SOCKET_PARAM_SERVER_IP1      = 0,
-                        SIGNAL_SOCKET_PARAM_SERVER_PORT1    = 1,
-                        SIGNAL_SOCKET_PARAM_SERVER_IP2      = 2,
-                        SIGNAL_SOCKET_PARAM_SERVER_PORT2    = 3;
+const int               SOCKET_TYPE_CONFIG = 0,
+						SOCKET_TYPE_SIGNAL = 1,
+						SOCKET_TYPE_TUNING = 2;
+
+const char* const       SocketDefaultID[SOCKET_TYPE_COUNT] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "_METROLOGY"),   // for ConfigSocket
+						QT_TRANSLATE_NOOP("Options.h", "_ADS"),         // for SignalSocket
+						QT_TRANSLATE_NOOP("Options.h", "_TUN"),         // for TuningSocket
+};
+
+const int               SocketDefaultPort[SOCKET_TYPE_COUNT] =
+{
+						PORT_CONFIGURATION_SERVICE_REQUEST,             // ConfigSocket
+						PORT_APP_DATA_SERVICE_CLIENT_REQUEST,           // SignalSocket
+						PORT_TUNING_SERVICE_CLIENT_REQUEST,             // TuningSocket
+};
+
+const char* const       SocketClientParamName[SOCKET_TYPE_COUNT][SOCKET_CLIENT_PARAM_COUNT] =
+{
+					{
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Metrology\""),
+						QT_TRANSLATE_NOOP("Options.h", "Configuration Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Configuration Service Port"),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Metrology\""),
+						QT_TRANSLATE_NOOP("Options.h", "Configuration Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Configuration Service Port"),
+					},
+					{
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Application Data Service\""),
+						QT_TRANSLATE_NOOP("Options.h", "Application Data Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Application Data Service Port"),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Application Data Service\""),
+						QT_TRANSLATE_NOOP("Options.h", "Application Data Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Application Data Service Port"),
+					},
+					{
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Tuning Client\""),
+						QT_TRANSLATE_NOOP("Options.h", "Tuning Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Tuning Service Port"),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Tuning Client\""),
+						QT_TRANSLATE_NOOP("Options.h", "Tuning Service IP"),
+						QT_TRANSLATE_NOOP("Options.h", "Tuning Service Port"),
+					},
+};
 
 // ----------------------------------------------------------------------------------------------
 
-class SignalSocketOption : public QObject
+class SocketOption : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    explicit            SignalSocketOption(QObject *parent = 0);
-    explicit            SignalSocketOption(const SignalSocketOption& from, QObject *parent = 0);
-                        ~SignalSocketOption();
+	explicit            SocketOption(QObject *parent = 0);
+	explicit            SocketOption(const SocketOption& from, QObject *parent = 0);
+						~SocketOption();
 private:
 
-    QString             m_serverIP1 = "127.0.0.1";
-    int                 m_serverPort1 = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
-
-    QString             m_serverIP2 = "127.0.0.1";
-    int                 m_serverPort2 = PORT_APP_DATA_SERVICE_CLIENT_REQUEST;
+	SocketClientOption  m_client[SOCKET_TYPE_COUNT];
 
 public:
 
-    QString             serverIP1() const { return m_serverIP1; }
-    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
+	SocketClientOption  client(int socketType) const;
+	void                setClient(int socketType, const SocketClientOption& client);
 
-    int                 serverPort1() const { return m_serverPort1; }
-    void                setServerPort1(int port) { m_serverPort1 = port; }
+	void                load();
+	void                save();
 
-    QString             serverIP2() const { return m_serverIP2; }
-    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
-
-    int                 serverPort2() const { return m_serverPort2; }
-    void                setServerPort2(int port) { m_serverPort2 = port; }
-
-
-    void                load();
-    void                save();
-
-    SignalSocketOption& operator=(const SignalSocketOption& from);
+	SocketOption&       operator=(const SocketOption& from);
 };
 
-// ==============================================================================================
-
-#define                 TUNING_SOCKET_OPTIONS_KEY       "Options/TuningSocket/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const       TuningSocketParamName[] =
-{
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-                        QT_TRANSLATE_NOOP("Options.h", "IP"),
-                        QT_TRANSLATE_NOOP("Options.h", "Port"),
-                        QT_TRANSLATE_NOOP("Options.h", "EquipmentID"),
-};
-
-const int               TUNING_SOCKET_PARAM_COUNT           = sizeof(TuningSocketParamName)/sizeof(TuningSocketParamName[0]);
-
-const int               TUNING_SOCKET_PARAM_SERVER_IP1      = 0,
-                        TUNING_SOCKET_PARAM_SERVER_PORT1    = 1,
-                        TUNING_SOCKET_PARAM_SERVER_IP2      = 2,
-                        TUNING_SOCKET_PARAM_SERVER_PORT2    = 3,
-                        TUNING_SOCKET_PARAM_EQUIPMENT_ID    = 4;
-
-// ----------------------------------------------------------------------------------------------
-
-class TuningSocketOption : public QObject
-{
-    Q_OBJECT
-
-public:
-
-    explicit            TuningSocketOption(QObject *parent = 0);
-    explicit            TuningSocketOption(const TuningSocketOption& from, QObject *parent = 0);
-                        ~TuningSocketOption();
-private:
-
-    QString             m_serverIP1 = "127.0.0.1";
-    int                 m_serverPort1 = PORT_TUNING_SERVICE_CLIENT_REQUEST;
-
-    QString             m_serverIP2 = "127.0.0.1";
-    int                 m_serverPort2 = PORT_TUNING_SERVICE_CLIENT_REQUEST;
-
-    QString             m_equipmentID = "SYSTEM_RACKID_WS00_TUN";
-
-public:
-
-    QString             serverIP1() const { return m_serverIP1; }
-    void                setServerIP1(const QString& ip) { m_serverIP1 = ip; }
-
-    int                 serverPort1() const { return m_serverPort1; }
-    void                setServerPort1(int port) { m_serverPort1 = port; }
-
-    QString             serverIP2() const { return m_serverIP2; }
-    void                setServerIP2(const QString& ip) { m_serverIP2 = ip; }
-
-    int                 serverPort2() const { return m_serverPort2; }
-    void                setServerPort2(int port) { m_serverPort2 = port; }
-
-    QString             equipmentID() const { return m_equipmentID; }
-    void                setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
-    void                load();
-    void                save();
-
-    TuningSocketOption& operator=(const TuningSocketOption& from);
-};
 
 // ==============================================================================================
 
@@ -1005,7 +969,6 @@ private:
     bool                m_onExit = true;
     QString				m_path;
 
-
 public:
 
     bool                onStart () const { return m_onStart; }
@@ -1049,9 +1012,7 @@ private:
     QMutex              m_mutex;
 
     ToolBarOption       m_toolBar;
-    ConfigSocketOption  m_configSocket;
-    SignalSocketOption  m_signalSocket;
-    TuningSocketOption  m_tuningSocket;
+	SocketOption        m_socket;
     MeasureViewOption   m_measureView;
     SignalInfoOption    m_signalInfo;
     DatabaseOption      m_database;
@@ -1065,14 +1026,8 @@ public:
     ToolBarOption&      toolBar() { return m_toolBar; }
     void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
-    ConfigSocketOption& configSocket() { return m_configSocket; }
-	void                setConfigSocket(const ConfigSocketOption& configSocket) { m_configSocket = configSocket; }
-
-    SignalSocketOption& signalSocket() { return m_signalSocket; }
-    void                setSignalSocket(const SignalSocketOption& connectSocket) { m_signalSocket = connectSocket; }
-
-    TuningSocketOption& tuningSocket() { return m_tuningSocket; }
-    void                setTuningSocket(const TuningSocketOption& tuningSocket) { m_tuningSocket = tuningSocket; }
+	SocketOption&       socket() { return m_socket; }
+	void                setSocket(const SocketOption& socket) { m_socket = socket; }
 
     MeasureViewOption&  measureView() { return m_measureView; }
     void                setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
@@ -1098,6 +1053,8 @@ public:
     void                load();
     void                save();
     void                unload();
+
+	bool                readFromXml(XmlReadHelper& xml);
 
     Options&            operator=(const Options& from);
 };

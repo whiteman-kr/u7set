@@ -112,7 +112,8 @@ SOURCES += \
     ConfigSocket.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
-    ../lib/TcpFileTransfer.cpp
+    ../lib/TcpFileTransfer.cpp \
+    ../lib/ServiceSettings.cpp
 
 
 HEADERS  += \
@@ -173,7 +174,8 @@ HEADERS  += \
     ConfigSocket.h \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
-    ../lib/TcpFileTransfer.h
+    ../lib/TcpFileTransfer.h \
+    ../lib/ServiceSettings.h
 
 
 FORMS    +=

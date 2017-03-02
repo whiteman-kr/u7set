@@ -4,13 +4,21 @@
 
 #include "Options.h"
 
+#include "../lib/ServiceSettings.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 {
-    HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
+	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
+	if (equipmentID.isEmpty() == true)
+	{
+		return;
+	}
 
-    m_cfgLoaderThread = new CfgLoaderThread(theOptions.configSocket().equipmentID(), 1, serverAddressPort, serverAddressPort2) ;
+	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
+
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort, serverAddressPort2) ;
     if (m_cfgLoaderThread == nullptr)
     {
         return;
@@ -24,7 +32,13 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 
 ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
 {
-    m_cfgLoaderThread = new CfgLoaderThread(theOptions.configSocket().equipmentID(), 1, serverAddressPort1,  serverAddressPort2);
+	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
+	if (equipmentID.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort1,  serverAddressPort2);
     if (m_cfgLoaderThread == nullptr)
     {
         return;
@@ -67,16 +81,26 @@ void ConfigSocket::start()
 
 void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
-    Q_UNUSED(configurationXmlData);
-
     qDebug() << "ConfigSocket::slot_configurationReady - file count: " << buildFileInfoArray.count();
+
+    if (m_cfgLoaderThread == nullptr)
+    {
+        return;
+	}
+
+    //clearConfiguration();
+
+    bool result = readConfiguration(configurationXmlData);
+
+    if (result == false)
+    {
+        return;
+    }
 
     for(Builder::BuildFileInfo bfi : buildFileInfoArray)
     {
         QByteArray fileData;
         QString errStr;
-
-        qDebug() << "ConfigSocket::slot_configurationReady - file: " << bfi.pathFileName;
 
         m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
@@ -86,13 +110,120 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
             continue;
         }
 
-        // to do
+		result = true;
 
+		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
+        {
+            result &= readMetrologySignals(fileData);				// fill Units and MetrologySignals
+        }
     }
 
     emit configurationLoaded();
 
     return;
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readConfiguration(const QByteArray& fileData)
+{
+    XmlReadHelper xml(fileData);
+
+	bool result = theOptions.readFromXml(xml);
+
+	if (result == true)
+	{
+		qDebug() << "ConfigSocket::readConfiguration - OK";
+	}
+	else
+	{
+		qDebug() << "ConfigSocket::readConfiguration - ERROR!";
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
+{
+    bool result = true;
+
+    XmlReadHelper xml(fileData);
+
+	if (xml.findElement("Units") == false)
+	{
+		return false;
+	}
+
+	int unitCount = 0;
+
+	result &= xml.readIntAttribute("Count", &unitCount);
+
+	for(int count = 0; count < unitCount; count++)
+	{
+		if(xml.findElement("Unit") == false)
+		{
+			result = false;
+			break;
+		}
+
+		int unitID = 0;
+		QString unitCaption;
+
+		result &= xml.readIntAttribute("ID", &unitID);
+		result &= xml.readStringAttribute("Caption", &unitCaption);
+
+		//m_unitInfo.append(unitID, unitCaption);
+	}
+
+//    if (m_unitInfo.count() != unitCount)
+//    {
+//        qDebug() << "Units loading error";
+//        assert(false);
+//        return false;
+//    }
+
+	if (xml.findElement("Signals") == false)
+	{
+		return false;
+	}
+
+	int signalCount = 0;
+
+	result &= xml.readIntAttribute("Count", &signalCount);
+
+	for(int count = 0; count < signalCount; count++)
+	{
+		if (xml.findElement("Signal") == false)
+		{
+			result = false;
+			break;
+		}
+
+		SignalParam param;
+
+		bool res = param.readFromXml(xml);	// time-expensive function !!!
+
+		if (res == true)
+		{
+//            if (m_appSignals.contains(signal->appSignalID()) == false)
+//            {
+//                m_appSignals.insert(signal->appSignalID(), signal);
+//            }
+//            else
+//            {
+//                res = false;
+//            }
+		}
+
+		result &= res;
+	}
+
+	//m_appSignals.buildHash2Signal();
+
+    return result;
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------

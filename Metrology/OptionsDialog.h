@@ -121,7 +121,6 @@ const int                       PROPERTY_PAGE_TYPE_UNKNOWN  = -1,
 
 const int                       PROPERTY_PAGE_TYPE_COUNT    = 2;
 
-
 // ----------------------------------------------------------------------------------------------
 
 class PropertyPage : public QObject
@@ -222,6 +221,7 @@ private slots:
 
     void                        onBrowserItem(QtBrowserItem*pItem);
 
+    void                        updateServerPage();
     void                        updateLinearityPage(bool isDialog);
     void                        updateMeasureViewPage(bool isDialog);
     void                        updateReportHeaderPage();

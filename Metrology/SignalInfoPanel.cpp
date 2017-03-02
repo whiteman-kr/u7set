@@ -9,6 +9,7 @@
 #include "Options.h"
 #include "SignalProperty.h"
 #include "Conversion.h"
+#include "CalibratorBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -303,7 +304,7 @@ QString SignalInfoTable::signalStateStr(const SignalParam& param, const AppSigna
     //
     if (theOptions.signalInfo().showAdcState() == true)
     {
-        int adc = (state.value - param.inputPhysicalLowLimit())*(param.adcHighLimit() - param.adcLowLimit())/( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
+        int adc = (state.value - param.inputPhysicalLowLimit())*(param.highADC() - param.lowADC())/( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
         stateStr.append( " = " + QString::number( adc, 10 ) );
     }
 
@@ -311,7 +312,7 @@ QString SignalInfoTable::signalStateStr(const SignalParam& param, const AppSigna
     //
     if (theOptions.signalInfo().showAdcHexState() == true)
     {
-        int adc = (state.value - param.inputPhysicalLowLimit())* (param.adcHighLimit() - param.adcLowLimit())/ ( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.adcLowLimit();
+        int adc = (state.value - param.inputPhysicalLowLimit())* (param.highADC() - param.lowADC())/ ( param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
         stateStr.append( " = 0x" + QString::number( adc, 16 ));
     }
 

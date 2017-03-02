@@ -91,15 +91,16 @@ void SignalPosition::clear()
 {
     m_equipmentID = QString();
 
-    m_caseNo = -1;
+    m_rackNo = -1;
 
-    m_caseType = -1;
-    m_caseCaption = QString();
+    m_rackType = -1;
+    m_rackCaption = QString();
 
     m_channel = -1;
-    m_subblock = -1;
-    m_block = -1;
-    m_entry = -1;
+    m_chassis = -1;
+    m_module = -1;
+    m_place = -1;
+    m_contact  = QString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -143,7 +144,7 @@ void SignalPosition::setFromID(const QString& equipmentID)
     value.remove(endPos - begPos - 1, value.count());
 
     //m_caseNo = value.toInt() - 1;
-    m_caseNo = value.toInt();
+    m_rackNo = value.toInt();
 
     // CaseType
     //
@@ -173,7 +174,7 @@ void SignalPosition::setFromID(const QString& equipmentID)
 
     value.remove(endPos, value.count());
 
-    m_caseCaption = value;
+    m_rackCaption = value;
 
     // Shassis
     //
@@ -197,7 +198,7 @@ void SignalPosition::setFromID(const QString& equipmentID)
     value.remove(endPos, value.count());
 
     //m_subblock = value.toInt() - 1;
-    m_subblock = value.toInt();
+    m_chassis = value.toInt();
 
     // Module
     //
@@ -212,7 +213,7 @@ void SignalPosition::setFromID(const QString& equipmentID)
 
     value.remove(0, begPos + 3);
 
-    m_block = value.toInt();
+    m_module = value.toInt();
 
     endPos = value.indexOf("_", 0);
     if (endPos == -1)
@@ -223,7 +224,7 @@ void SignalPosition::setFromID(const QString& equipmentID)
     value.remove(endPos, value.count());
 
     //m_block = value.toInt() - 1;
-    m_block = value.toInt();
+    m_module = value.toInt();
 
     // Input
     //
@@ -252,24 +253,45 @@ void SignalPosition::setFromID(const QString& equipmentID)
 
     value.remove(2, value.count());
 
-    m_entry = value.toInt() - 1;
+    m_place = value.toInt() - 1;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalPosition::readFromXml(XmlReadHelper& xml)
+{
+    bool result = true;
+
+    if (xml.name() != "Signal")
+    {
+        return false;
+    }
+
+    result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
+    result &= xml.readStringAttribute("Rack", &m_rackCaption);
+    result &= xml.readIntAttribute("Chassis", &m_chassis);
+    result &= xml.readIntAttribute("Module", &m_module);
+    result &= xml.readIntAttribute("Place", &m_place);
+    result &= xml.readStringAttribute("Contact", &m_contact);
+
+    return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 QString SignalPosition::caseStr() const
 {
-    QString caseNo = m_caseNo == -1 ? QString() : QString::number(m_caseNo + 1);
+    QString caseNo = m_rackNo == -1 ? QString() : QString::number(m_rackNo + 1);
 
     QString result;
 
-    if (caseNo.isEmpty() == false && m_caseCaption.isEmpty() == false)
+    if (caseNo.isEmpty() == false && m_rackCaption.isEmpty() == false)
     {
-        result = caseNo + " - " + m_caseCaption;
+        result = caseNo + " - " + m_rackCaption;
     }
     else
     {
-        result = caseNo + m_caseCaption;
+        result = caseNo + m_rackCaption;
     }
 
     return result;
@@ -286,21 +308,21 @@ QString SignalPosition::channelStr() const
 
 QString SignalPosition::subblockStr() const
 {
-    return m_subblock == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_subblock + 1);
+    return m_chassis == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_chassis + 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 QString SignalPosition::blockStr() const
 {
-    return m_block == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_block + 1);
+    return m_module == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_module + 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 QString SignalPosition::entryStr() const
 {
-    return m_entry == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_entry + 1);
+    return m_place == -1 ? QT_TRANSLATE_NOOP("SignalBase.cpp", "No") : QString::number(m_place + 1);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -341,6 +363,8 @@ bool SignalParam::isValid() const
 int analogTuningSignalCount = 0;
 int discreteTuningSignalCount = 0;
 
+// -------------------------------------------------------------------------------------------------------------------
+
 void SignalParam::setParam(const Signal& signal)
 {
     setAppSignalID(signal.appSignalID());
@@ -365,9 +389,6 @@ void SignalParam::setParam(const Signal& signal)
     setInputPhysicalHighLimit(signal.highEngeneeringUnits());
     setInputPhysicalUnitID(signal.unitID());
     setInputPhysicalPrecision(signal.decimalPlaces());
-    setAdjustment(0);
-
-    setHasOutput(false);
 
     switch(signal.outputMode())
     {
@@ -384,8 +405,6 @@ void SignalParam::setParam(const Signal& signal)
     setOutputPhysicalUnitID(signal.outputUnitID());
     setOutputPhysicalPrecision(signal.decimalPlaces());
 
-    setNormalState(signal.normalState());
-
     setEnableTuning(signal.enableTuning());
     setTuningDefaultValue(signal.tuningDefaultValue());
 
@@ -397,7 +416,75 @@ void SignalParam::setParam(const Signal& signal)
             case E::SignalType::Discrete:   m_position.setEntry( discreteTuningSignalCount++ ); break;
         }
     }
+}
 
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalParam::readFromXml(XmlReadHelper& xml)
+{
+    bool result = true;
+
+    if (xml.name() != "Signal")
+    {
+        return false;
+    }
+
+    result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
+    result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
+    result &= xml.readStringAttribute("Caption", &m_caption);
+
+    int type = 0;
+
+    result &= xml.readIntAttribute("SignalType", &type);
+    m_signalType = static_cast<E::SignalType>(type);
+
+    result &= xml.readIntAttribute("InOutType", &type);
+    m_inOutType  = static_cast<E::SignalInOutType>(type);
+
+    result &= m_position.readFromXml(xml);
+
+    result &= xml.readIntAttribute("LowADC", &m_lowADC);
+    result &= xml.readIntAttribute("HighADC", &m_highADC);
+
+    result &= xml.readDoubleAttribute("InputElectricLowLimit", &m_inputElectricLowLimit);
+    result &= xml.readDoubleAttribute("InputElectricHighLimit", &m_inputElectricHighLimit);
+    result &= xml.readIntAttribute("InputElectricUnitID", &type);
+    m_inputElectricUnitID = static_cast<E::InputUnit>(type);
+    result &= xml.readIntAttribute("InputElectricSensorType", &type);
+    m_inputElectricSensorType = static_cast<E::SensorType>(type);
+    result &= xml.readIntAttribute("InputElectricPrecision", &m_inputElectricPrecision);
+
+    result &= xml.readDoubleAttribute("InputPhysicalLowLimit", &m_inputPhysicalLowLimit);
+    result &= xml.readDoubleAttribute("InputPhysicalHighLimit", &m_inputPhysicalHighLimit);
+    result &= xml.readIntAttribute("InputPhysicalUnitID", &m_inputPhysicalUnitID);
+    result &= xml.readIntAttribute("InputPhysicalPrecision", &m_inputPhysicalPrecision);
+
+    result &= xml.readDoubleAttribute("OutputElectricLowLimit", &m_outputElectricLowLimit);
+    result &= xml.readDoubleAttribute("OutputElectricHighLimit", &m_outputElectricHighLimit);
+    result &= xml.readIntAttribute("OutputElectricUnitID", &type);
+    m_outputElectricUnitID = static_cast<E::InputUnit>(type);
+    result &= xml.readIntAttribute("OutputElectricSensorType", &type);
+    m_outputElectricSensorType = static_cast<E::SensorType>(type);
+    result &= xml.readIntAttribute("OutputElectricPrecision", &m_outputElectricPrecision);
+
+    result &= xml.readDoubleAttribute("OutputPhysicalLowLimit", &m_outputPhysicalLowLimit);
+    result &= xml.readDoubleAttribute("OutputPhysicalHighLimit", &m_outputPhysicalHighLimit);
+    result &= xml.readIntAttribute("OutputPhysicalUnitID", &m_outputPhysicalUnitID);
+    result &= xml.readIntAttribute("OutputPhysicalPrecision", &m_outputPhysicalPrecision);
+
+    result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+    result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+
+    if (m_enableTuning == true)
+    {
+        switch (signalType())
+        {
+            case E::SignalType::Analog:     m_position.setEntry( analogTuningSignalCount++ );   break;
+            case E::SignalType::Discrete:   m_position.setEntry( discreteTuningSignalCount++ ); break;
+        }
+    }
+
+    return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

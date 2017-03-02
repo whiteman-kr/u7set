@@ -109,7 +109,20 @@ void TuningSocket::requestTuningSourcesInfo()
 
     theTuningSignalBase.clearSourceList();
 
-    m_getTuningSourcesInfo.set_clientequipmentid( theOptions.tuningSocket().equipmentID().toUtf8() );
+    int serverType = selectedServerIndex();
+    if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+    {
+        return;
+    }
+
+    QString equipmentID = theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(serverType);
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(0);
+        return;
+    }
+
+    m_getTuningSourcesInfo.set_clientequipmentid( equipmentID.toUtf8() );
 
     sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_getTuningSourcesInfo);
 }
@@ -168,7 +181,20 @@ void TuningSocket::requestTuningSourcesState()
 
     QThread::msleep(TUNING_SOCKET_TIMEOUT_STATE);
 
-    m_getTuningSourcesStates.set_clientequipmentid( theOptions.tuningSocket().equipmentID().toUtf8() );
+    int serverType = selectedServerIndex();
+    if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+    {
+        return;
+    }
+
+    QString equipmentID = theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(serverType);
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(0);
+        return;
+    }
+
+    m_getTuningSourcesStates.set_clientequipmentid( equipmentID.toUtf8() );
 
     sendRequest(TDS_GET_TUNING_SOURCES_STATES, m_getTuningSourcesStates);
 }
@@ -219,6 +245,20 @@ void TuningSocket::requestReadTuningSignals()
 {
     assert(isClearToSendRequest());
 
+    int serverType = selectedServerIndex();
+    if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+    {
+        return;
+    }
+
+    QString equipmentID = theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(serverType);
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(0);
+        requestTuningSourcesState();
+        return;
+    }
+
     int signalForReadCount = theTuningSignalBase.signalCount();
     if (signalForReadCount == 0)
     {
@@ -226,7 +266,7 @@ void TuningSocket::requestReadTuningSignals()
         return;
     }
 
-    m_readTuningSignals.set_clientequipmentid( theOptions.tuningSocket().equipmentID().toUtf8() );
+    m_readTuningSignals.set_clientequipmentid( equipmentID.toUtf8() );
 
     m_readTuningSignals.mutable_signalhash()->Reserve(signalForReadCount);
 
@@ -310,6 +350,20 @@ void TuningSocket::requestWriteTuningSignals()
 {
     assert(isClearToSendRequest());
 
+    int serverType = selectedServerIndex();
+    if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+    {
+        return;
+    }
+
+    QString equipmentID = theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(serverType);
+    if (equipmentID.isEmpty() == true)
+    {
+        assert(0);
+        requestTuningSourcesState();
+        return;
+    }
+
     int cmdCount = theTuningSignalBase.cmdFowWriteCount();
     if (cmdCount == 0)
     {
@@ -317,7 +371,7 @@ void TuningSocket::requestWriteTuningSignals()
         return;
     }
 
-    m_writeTuningSignals.set_clientequipmentid( theOptions.tuningSocket().equipmentID().toUtf8() );
+    m_writeTuningSignals.set_clientequipmentid( equipmentID.toUtf8() );
     m_writeTuningSignals.set_autoapply(true);
 
     m_writeTuningSignals.mutable_tuningsignalwrite()->Reserve(cmdCount);

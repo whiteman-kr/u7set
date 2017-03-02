@@ -294,135 +294,76 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
     switch (page)
     {
         case OPTION_PAGE_CONFIG_SOCKET:
+		case OPTION_PAGE_SIGNAL_SOCKET:
+		case OPTION_PAGE_TUNING_SOCKET:
             {
-                QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 1 (primary)"));
+				int socketType = -1;
 
-                    item = manager->addProperty(QVariant::String, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_IP1]);
-                    item->setValue( m_options.configSocket().serverIP1() );
-                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_IP1);
+				switch (page)
+				{
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;    break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;    break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;    break;
+					default:                        socketType = -1;                    break;
+				}
+
+				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+				{
+					break;
+				}
+
+				SocketClientOption sco = m_options.socket().client(socketType);
+
+				QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 1 (primary)"));
+
+					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID1]);
+					item->setValue( sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY) );
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID1);
+					serverGroup1->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP1]);
+					item->setValue( sco.serverIP(SOCKET_SERVER_TYPE_PRIMARY) );
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP1);
                     serverGroup1->addSubProperty(item);
 
-                    item = manager->addProperty(QVariant::Int, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_PORT1]);
-                    item->setValue( m_options.configSocket().serverPort1() );
+					item = manager->addProperty(QVariant::Int, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT1]);
+					item->setValue( sco.serverPort(SOCKET_SERVER_TYPE_PRIMARY) );
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 65535);
                     item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_PORT1);
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_PORT1);
                     serverGroup1->addSubProperty(item);
 
-                QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 2 (reserve)"));
+				QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 2 (reserve)"));
 
-                    item = manager->addProperty(QVariant::String, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_IP2]);
-                    item->setValue( m_options.configSocket().serverIP2() );
-                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_IP2);
+					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_EQUIPMENT_ID2]);
+					item->setValue( sco.equipmentID(SOCKET_SERVER_TYPE_RESERVE) );
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_EQUIPMENT_ID2);
+					serverGroup2->addSubProperty(item);
+
+					if (socketType == SOCKET_TYPE_CONFIG)
+					{
+						item->setAttribute(QLatin1String("readOnly"), true);
+					}
+
+					item = manager->addProperty(QVariant::String, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_IP2]);
+					item->setValue( sco.serverIP(SOCKET_SERVER_TYPE_RESERVE) );
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_IP2);
                     serverGroup2->addSubProperty(item);
 
-                    item = manager->addProperty(QVariant::Int, ConfigSocketParamName[CONFIG_SOCKET_PARAM_SERVER_PORT2]);
-                    item->setValue( m_options.configSocket().serverPort2() );
+					item = manager->addProperty(QVariant::Int, SocketClientParamName[socketType][SOCKET_CLIENT_PARAM_SERVER_PORT2]);
+					item->setValue( sco.serverPort(SOCKET_SERVER_TYPE_RESERVE) );
                     item->setAttribute(QLatin1String("minimum"), 1);
                     item->setAttribute(QLatin1String("maximum"), 65535);
                     item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, CONFIG_SOCKET_PARAM_SERVER_PORT2);
-                    serverGroup2->addSubProperty(item);
-
-                QtProperty *equipmentIdGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrology EquipmentID"));
-
-                    item = manager->addProperty(QVariant::String, ConfigSocketParamName[CONFIG_SOCKET_PARAM_EQUIPMENT_ID]);
-                    item->setValue( m_options.configSocket().equipmentID() );
-                    appendProperty(item, page, CONFIG_SOCKET_PARAM_EQUIPMENT_ID);
-                    equipmentIdGroup->addSubProperty(item);
-
-                editor->setFactoryForManager(manager, factory);
-
-                editor->addProperty(serverGroup1);
-                editor->addProperty(serverGroup2);
-                editor->addProperty(equipmentIdGroup);
-            }
-            break;
-
-        case OPTION_PAGE_SIGNAL_SOCKET:
-            {
-                QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 1 (primary)"));
-
-                    item = manager->addProperty(QVariant::String, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_IP1]);
-                    item->setValue( m_options.signalSocket().serverIP1() );
-                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_IP1);
-                    serverGroup1->addSubProperty(item);
-
-                    item = manager->addProperty(QVariant::Int, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_PORT1]);
-                    item->setValue( m_options.signalSocket().serverPort1() );
-                    item->setAttribute(QLatin1String("minimum"), 1);
-                    item->setAttribute(QLatin1String("maximum"), 65535);
-                    item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_PORT1);
-                    serverGroup1->addSubProperty(item);
-
-                QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 2 (reserve)"));
-
-                    item = manager->addProperty(QVariant::String, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_IP2]);
-                    item->setValue( m_options.signalSocket().serverIP2() );
-                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_IP2);
-                    serverGroup2->addSubProperty(item);
-
-                    item = manager->addProperty(QVariant::Int, SignalSocketParamName[SIGNAL_SOCKET_PARAM_SERVER_PORT2]);
-                    item->setValue( m_options.signalSocket().serverPort2() );
-                    item->setAttribute(QLatin1String("minimum"), 1);
-                    item->setAttribute(QLatin1String("maximum"), 65535);
-                    item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, SIGNAL_SOCKET_PARAM_SERVER_PORT2);
+					appendProperty(item, page, SOCKET_CLIENT_PARAM_SERVER_PORT2);
                     serverGroup2->addSubProperty(item);
 
                 editor->setFactoryForManager(manager, factory);
 
-                editor->addProperty(serverGroup1);
+				editor->addProperty(serverGroup1);
                 editor->addProperty(serverGroup2);
-            }
-            break;
 
-        case OPTION_PAGE_TUNING_SOCKET:
-            {
-                QtProperty *serverGroup1 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 1 (primary)"));
-
-                    item = manager->addProperty(QVariant::String, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_IP1]);
-                    item->setValue( m_options.tuningSocket().serverIP1() );
-                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_IP1);
-                    serverGroup1->addSubProperty(item);
-
-                    item = manager->addProperty(QVariant::Int, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_PORT1]);
-                    item->setValue( m_options.tuningSocket().serverPort1() );
-                    item->setAttribute(QLatin1String("minimum"), 1);
-                    item->setAttribute(QLatin1String("maximum"), 65535);
-                    item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_PORT1);
-                    serverGroup1->addSubProperty(item);
-
-                QtProperty *serverGroup2 = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Server 2 (reserve)"));
-
-                    item = manager->addProperty(QVariant::String, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_IP2]);
-                    item->setValue( m_options.tuningSocket().serverIP2() );
-                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_IP2);
-                    serverGroup2->addSubProperty(item);
-
-                    item = manager->addProperty(QVariant::Int, TuningSocketParamName[TUNING_SOCKET_PARAM_SERVER_PORT2]);
-                    item->setValue( m_options.tuningSocket().serverPort2() );
-                    item->setAttribute(QLatin1String("minimum"), 1);
-                    item->setAttribute(QLatin1String("maximum"), 65535);
-                    item->setAttribute(QLatin1String("singleStep"), 1);
-                    appendProperty(item, page, TUNING_SOCKET_PARAM_SERVER_PORT2);
-                    serverGroup2->addSubProperty(item);
-
-                QtProperty *equipmentIdGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Tuning client EquipmentID"));
-
-                    item = manager->addProperty(QVariant::String, TuningSocketParamName[TUNING_SOCKET_PARAM_EQUIPMENT_ID]);
-                    item->setValue( m_options.tuningSocket().equipmentID() );
-                    appendProperty(item, page, TUNING_SOCKET_PARAM_EQUIPMENT_ID);
-                    equipmentIdGroup->addSubProperty(item);
-
-                editor->setFactoryForManager(manager, factory);
-
-                editor->addProperty(serverGroup1);
-                editor->addProperty(serverGroup2);
-                editor->addProperty(equipmentIdGroup);
             }
             break;
 
@@ -1208,43 +1149,40 @@ void OptionsDialog::applyProperty()
     switch (page)
     {
         case OPTION_PAGE_CONFIG_SOCKET:
-            {
-                switch(param)
-                {
-                    case CONFIG_SOCKET_PARAM_SERVER_IP1:    m_options.configSocket().setServerIP1(value.toString());        break;
-                    case CONFIG_SOCKET_PARAM_SERVER_PORT1:  m_options.configSocket().setServerPort1(value.toInt());         break;
-                    case CONFIG_SOCKET_PARAM_SERVER_IP2:    m_options.configSocket().setServerIP2(value.toString());        break;
-                    case CONFIG_SOCKET_PARAM_SERVER_PORT2:  m_options.configSocket().setServerPort2(value.toInt());         break;
-                    case CONFIG_SOCKET_PARAM_EQUIPMENT_ID:  m_options.configSocket().setEquipmentID(value.toString());      break;
-                    default:                                assert(0);
-                }
-            }
-            break;
+		case OPTION_PAGE_SIGNAL_SOCKET:
+		case OPTION_PAGE_TUNING_SOCKET:
+			{
+				int socketType = -1;
 
-        case OPTION_PAGE_SIGNAL_SOCKET:
-            {
-                switch(param)
-                {
-                    case SIGNAL_SOCKET_PARAM_SERVER_IP1:    m_options.signalSocket().setServerIP1(value.toString());        break;
-                    case SIGNAL_SOCKET_PARAM_SERVER_PORT1:  m_options.signalSocket().setServerPort1(value.toInt());         break;
-                    case SIGNAL_SOCKET_PARAM_SERVER_IP2:    m_options.signalSocket().setServerIP2(value.toString());        break;
-                    case SIGNAL_SOCKET_PARAM_SERVER_PORT2:  m_options.signalSocket().setServerPort2(value.toInt());         break;
-                    default:                                assert(0);
-                }
-            }
-            break;
+				switch (page)
+				{
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;    break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;    break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;    break;
+					default:                        socketType = -1;                    break;
+				}
 
-        case OPTION_PAGE_TUNING_SOCKET:
-            {
+				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+				{
+					break;
+				}
+
+				SocketClientOption sco = m_options.socket().client(socketType);
+
                 switch(param)
                 {
-                    case TUNING_SOCKET_PARAM_SERVER_IP1:    m_options.tuningSocket().setServerIP1(value.toString());        break;
-                    case TUNING_SOCKET_PARAM_SERVER_PORT1:  m_options.tuningSocket().setServerPort1(value.toInt());         break;
-                    case TUNING_SOCKET_PARAM_SERVER_IP2:    m_options.tuningSocket().setServerIP2(value.toString());        break;
-                    case TUNING_SOCKET_PARAM_SERVER_PORT2:  m_options.tuningSocket().setServerPort2(value.toInt());         break;
-                    case TUNING_SOCKET_PARAM_EQUIPMENT_ID:  m_options.tuningSocket().setEquipmentID(value.toString());      break;
-                    default:                                assert(0);
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID1:	sco.setEquipmentID(SOCKET_SERVER_TYPE_PRIMARY, value.toString());	break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP1:	sco.setServerIP(SOCKET_SERVER_TYPE_PRIMARY, value.toString());		break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT1:	sco.setServerPort(SOCKET_SERVER_TYPE_PRIMARY, value.toInt());		break;
+					case SOCKET_CLIENT_PARAM_EQUIPMENT_ID2:	sco.setEquipmentID(SOCKET_SERVER_TYPE_RESERVE, value.toString());	break;
+					case SOCKET_CLIENT_PARAM_SERVER_IP2:    sco.setServerIP(SOCKET_SERVER_TYPE_RESERVE, value.toString());		break;
+					case SOCKET_CLIENT_PARAM_SERVER_PORT2:  sco.setServerPort(SOCKET_SERVER_TYPE_RESERVE, value.toInt());		break;
+					default:                                assert(0);
                 }
+
+				m_options.socket().setClient(socketType, sco);
+				updateServerPage();
+
             }
             break;
 
@@ -1408,6 +1346,19 @@ void OptionsDialog::applyProperty()
     }
 
     m_currentPropertyItem = nullptr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OptionsDialog::updateServerPage()
+{
+	QtVariantProperty *property = nullptr;
+
+	property = (QtVariantProperty*) m_propertyItemList.key( (OPTION_PAGE_CONFIG_SOCKET << 8) | SOCKET_CLIENT_PARAM_EQUIPMENT_ID2 );
+	if (property != nullptr)
+	{
+		property->setValue( m_options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) );
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

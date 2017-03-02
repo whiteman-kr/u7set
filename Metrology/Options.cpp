@@ -13,202 +13,236 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocketOption::ConfigSocketOption(QObject *parent) :
-    QObject(parent)
+SocketClientOption::SocketClientOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocketOption::ConfigSocketOption(const ConfigSocketOption& from, QObject *parent) :
-    QObject(parent)
-{
-    *this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-
-ConfigSocketOption::~ConfigSocketOption()
+SocketClientOption::~SocketClientOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ConfigSocketOption::load()
+QString SocketClientOption::equipmentID(int serverType) const
 {
-    QSettings s;
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return QString();
+	}
 
-    m_serverIP1 = s.value( QString("%1ServerIP1").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort1 = s.value( QString("%1ServerPort1").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
-
-    m_serverIP2 = s.value( QString("%1ServerIP2").arg(CONFIG_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort2 = s.value( QString("%1ServerPort2").arg(CONFIG_SOCKET_OPTIONS_KEY), PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
-
-    m_equipmentID = s.value( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_METROLOGY").toString();
+	return m_connect[serverType].m_equipmentID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ConfigSocketOption::save()
+void SocketClientOption::setEquipmentID(int serverType, const QString& equipmentID)
 {
-    QSettings s;
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
 
-    s.setValue( QString("%1ServerIP1").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP1);
-    s.setValue( QString("%1ServerPort1").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort1);
-
-    s.setValue( QString("%1ServerIP2").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverIP2);
-    s.setValue( QString("%1ServerPort2").arg(CONFIG_SOCKET_OPTIONS_KEY), m_serverPort2);
-
-    s.setValue( QString("%1EquipmentID").arg(CONFIG_SOCKET_OPTIONS_KEY), m_equipmentID);
+	m_connect[serverType].m_equipmentID = equipmentID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocketOption& ConfigSocketOption::operator=(const ConfigSocketOption& from)
+QString SocketClientOption::serverIP(int serverType) const
 {
-    m_serverIP1 = from.m_serverIP1;
-    m_serverPort1 = from.m_serverPort1;
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return QString();
+	}
 
-    m_serverIP2 = from.m_serverIP2;
-    m_serverPort2 = from.m_serverPort2;
+	return m_connect[serverType].m_serverIP;
+}
 
-    m_equipmentID = from.m_equipmentID;
+// -------------------------------------------------------------------------------------------------------------------
 
-    return *this;
+void SocketClientOption::setServerIP(int serverType, const QString& ip)
+{
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	m_connect[serverType].m_serverIP = ip;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int SocketClientOption::serverPort(int serverType) const
+{
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return 0;
+	}
+
+	return m_connect[serverType].m_serverPort;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketClientOption::setServerPort(int serverType, int port)
+{
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	m_connect[serverType].m_serverPort = port;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+HostAddressPort SocketClientOption::address(int serverType) const
+{
+	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
+	{
+		assert(0);
+		return HostAddressPort();
+	}
+
+	return HostAddressPort(m_connect[serverType].m_serverIP, m_connect[serverType].m_serverPort);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketClientOption::load()
+{
+	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	{
+		return;
+	}
+
+	QString key = "Options/Socket/" + QString(SocketType[m_type]) + "/";
+
+	QSettings s;
+
+
+
+	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	{
+		m_connect[t].m_equipmentID = s.value( QString("%1EquipmentID%2").arg(key).arg(t), "SYSTEM_RACKID_WS00" + QString(SocketDefaultID[m_type])).toString();
+
+		m_connect[t].m_serverIP = s.value( QString("%1ServerIP%2").arg(key).arg(t), "127.0.0.1").toString();
+		m_connect[t].m_serverPort = s.value( QString("%1ServerPort%2").arg(key).arg(t), SocketDefaultPort[m_type]).toInt();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SocketClientOption::save()
+{
+	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	{
+		return;
+	}
+
+	QString key = "Options/Socket/" + QString(SocketType[m_type]) + "/";
+
+	QSettings s;
+
+
+	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
+	{
+		s.setValue( QString("%1EquipmentID%2").arg(key).arg(t), m_connect[t].m_equipmentID);
+
+		s.setValue( QString("%1ServerIP%2").arg(key).arg(t), m_connect[t].m_serverIP);
+		s.setValue( QString("%1ServerPort%2").arg(key).arg(t), m_connect[t].m_serverPort);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocketOption::SignalSocketOption(QObject *parent) :
-    QObject(parent)
+SocketOption::SocketOption(QObject *parent) :
+	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalSocketOption::SignalSocketOption(const SignalSocketOption& from, QObject *parent) :
-    QObject(parent)
+SocketOption::SocketOption(const SocketOption& from, QObject *parent) :
+	QObject(parent)
 {
-    *this = from;
+	*this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 
-SignalSocketOption::~SignalSocketOption()
+SocketOption::~SocketOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalSocketOption::load()
+SocketClientOption SocketOption::client(int socketType) const
 {
-    QSettings s;
+	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	{
+		assert(0);
+		return SocketClientOption();
+	}
 
-    m_serverIP1 = s.value( QString("%1ServerIP1").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort1 = s.value( QString("%1ServerPort1").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
-
-    m_serverIP2 = s.value( QString("%1ServerIP2").arg(SIGNAL_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort2 = s.value( QString("%1ServerPort2").arg(SIGNAL_SOCKET_OPTIONS_KEY), PORT_APP_DATA_SERVICE_CLIENT_REQUEST).toInt();
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocketOption::save()
-{
-    QSettings s;
-
-    s.setValue( QString("%1ServerIP1").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP1);
-    s.setValue( QString("%1ServerPort1").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort1);
-
-    s.setValue( QString("%1ServerIP2").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverIP2);
-    s.setValue( QString("%1ServerPort2").arg(SIGNAL_SOCKET_OPTIONS_KEY), m_serverPort2);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalSocketOption& SignalSocketOption::operator=(const SignalSocketOption& from)
-{
-    m_serverIP1 = from.m_serverIP1;
-    m_serverPort1 = from.m_serverPort1;
-
-    m_serverIP2 = from.m_serverIP2;
-    m_serverPort2 = from.m_serverPort2;
-
-    return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSocketOption::TuningSocketOption(QObject *parent) :
-    QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSocketOption::TuningSocketOption(const TuningSocketOption& from, QObject *parent) :
-    QObject(parent)
-{
-    *this = from;
+	return m_client[socketType];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 
-TuningSocketOption::~TuningSocketOption()
+void SocketOption::setClient(int socketType, const SocketClientOption& socketClient)
 {
+	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
+	{
+		assert(0);
+		return;
+	}
+
+	m_client[socketType] = socketClient;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSocketOption::load()
+void SocketOption::load()
 {
-    QSettings s;
-
-    m_serverIP1 = s.value( QString("%1ServerIP1").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort1 = s.value( QString("%1ServerPort1").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
-
-    m_serverIP2 = s.value( QString("%1ServerIP2").arg(TUNING_SOCKET_OPTIONS_KEY), "127.0.0.1").toString();
-    m_serverPort2 = s.value( QString("%1ServerPort2").arg(TUNING_SOCKET_OPTIONS_KEY), PORT_TUNING_SERVICE_CLIENT_REQUEST).toInt();
-
-    m_equipmentID = s.value( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), "SYSTEM_RACKID_WS00_TUN").toString();
+	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	{
+		m_client[t].setSocketType(t);
+		m_client[t].load();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSocketOption::save()
+void SocketOption::save()
 {
-    QSettings s;
-
-    s.setValue( QString("%1ServerIP1").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP1);
-    s.setValue( QString("%1ServerPort1").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort1);
-
-    s.setValue( QString("%1ServerIP2").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverIP2);
-    s.setValue( QString("%1ServerPort2").arg(TUNING_SOCKET_OPTIONS_KEY), m_serverPort2);
-
-    s.setValue( QString("%1EquipmentID").arg(TUNING_SOCKET_OPTIONS_KEY), m_equipmentID);
+	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	{
+		m_client[t].save();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSocketOption& TuningSocketOption::operator=(const TuningSocketOption& from)
+SocketOption& SocketOption::operator=(const SocketOption& from)
 {
-    m_serverIP1 = from.m_serverIP1;
-    m_serverPort1 = from.m_serverPort1;
+	for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+	{
+		m_client[t] = from.m_client[t];
+	}
 
-    m_serverIP2 = from.m_serverIP2;
-    m_serverPort2 = from.m_serverPort2;
-
-    m_equipmentID = from.m_equipmentID;
-
-    return *this;
+	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1225,8 +1259,8 @@ int Options::channelCount()
 
     switch(m_toolBar.measureKind())
     {
-        case MEASURE_KIND_ONE:      count = 1;                          break;
-        case MEASURE_KIND_MULTI:    count = MAX_CHANNEL_COUNT; break;
+		case MEASURE_KIND_ONE:      count = 1;                  break;
+		case MEASURE_KIND_MULTI:    count = MAX_CHANNEL_COUNT;  break;
         default:                    assert(0);
     }
 
@@ -1239,10 +1273,7 @@ void Options::load()
 {
     m_toolBar.load();
 
-    m_configSocket.load();
-    m_signalSocket.load();
-    m_tuningSocket.load();
-
+	m_socket.load();
 
     m_measureView.init();
     m_measureView.load();
@@ -1267,9 +1298,7 @@ void Options::load()
 void Options::save()
 {
     m_toolBar.save();
-    m_configSocket.save();
-    m_signalSocket.save();
-    m_tuningSocket.save();
+	m_socket.save();
     m_measureView.save();
     m_signalInfo.save();
     m_database.save();
@@ -1290,6 +1319,100 @@ void Options::unload()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool Options::readFromXml(XmlReadHelper& xml)
+{
+	bool result = false;
+
+	//
+	//
+	result = xml.findElement("DatabaseInfo");
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	QString dbName;
+	QString dbDescription;
+	int dbVersion;
+
+	result &= xml.readStringAttribute("DatabaseName", &dbName);
+	result &= xml.readStringAttribute("Description", &dbDescription);
+	result &= xml.readIntAttribute("Version", &dbVersion);
+
+
+	//
+	//
+	result = xml.findElement("AppDataService");
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	QString adsEquipmentID1;
+	QString adsIP1;
+	int adsPort1;
+
+	result &= xml.readStringAttribute("AppDataServiceID1", &adsEquipmentID1);
+	result &= xml.readStringAttribute("ip1", &adsIP1);
+	result &= xml.readIntAttribute("port1", &adsPort1);
+
+	QString adsEquipmentID2;
+	QString adsIP2;
+	int adsPort2;
+
+	result &= xml.readStringAttribute("AppDataServiceID2", &adsEquipmentID2);
+	result &= xml.readStringAttribute("ip2", &adsIP2);
+	result &= xml.readIntAttribute("port2", &adsPort2);
+
+	//
+	//
+	result = xml.findElement("TuningClient");
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	QString tcEquipmentID1;
+
+	result &= xml.readStringAttribute("TuningClientID1", &tcEquipmentID1);
+
+	QString tcEquipmentID2;
+
+	result &= xml.readStringAttribute("TuningClientID2", &tcEquipmentID2);
+
+	//
+	//
+	result = xml.findElement("TuningService");
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	QString tsEquipmentID1;
+	QString tsIP1;
+	int tsPort1;
+
+	//result &= xml.readStringAttribute("TuningServiceID1", &tsEquipmentID1);
+	result &= xml.readStringAttribute("ip1", &tsIP1);
+	result &= xml.readIntAttribute("port1", &tsPort1);
+
+	QString tsEquipmentID2;
+	QString tsIP2;
+	int tsPort2;
+
+	//result &= xml.readStringAttribute("TuningServiceID1", &tsEquipmentID2);
+	result &= xml.readStringAttribute("ip2", &tsIP2);
+	result &= xml.readIntAttribute("port2", &tsPort2);
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Options& Options::operator=(const Options& from)
 {
     m_mutex.lock();
@@ -1300,9 +1423,7 @@ Options& Options::operator=(const Options& from)
         }
 
         m_toolBar = from.m_toolBar;
-        m_configSocket = from.m_configSocket;
-        m_signalSocket = from.m_signalSocket;
-        m_tuningSocket = from.m_tuningSocket;
+		m_socket = from.m_socket;
         m_measureView = from.m_measureView;
         m_signalInfo = from.m_signalInfo;
         m_database = from.m_database;

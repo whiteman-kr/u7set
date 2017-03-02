@@ -6776,7 +6776,7 @@ double conversion(double val, int conversionType, const SignalParam& param)
                         case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, true);					break;
                         case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, true);					break;
 
-                        default:				assert(0);
+						default:								assert(0);
                     }
 
                     break;
@@ -6791,11 +6791,12 @@ double conversion(double val, int conversionType, const SignalParam& param)
                         case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
                         case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, true);					break;
 
-                        default:				assert(0);
+						default:								assert(0);
                     }
 
                     break;
 
+				case E::InputUnit::NoInputUnit:
                 case E::InputUnit::mA:
                 case E::InputUnit::V:
 
@@ -6833,7 +6834,7 @@ double conversion(double val, int conversionType, const SignalParam& param)
                         case E::SensorType::Ohm_Pt21:           retVal = findConversionVal( val, &PT_21[0][0], PT_21_COUNT, false);                 break;
                         case E::SensorType::Ohm_Cu23:           retVal = findConversionVal( val, &CU_23[0][0], CU_23_COUNT, false);                 break;
 
-                        default:				assert(0);
+						default:								assert(0);
                     }
 
                     break;
@@ -6848,11 +6849,12 @@ double conversion(double val, int conversionType, const SignalParam& param)
                         case E::SensorType::mV_L_TXK:			retVal = findConversionVal( val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
                         case E::SensorType::mV_N_THH:			retVal = findConversionVal( val, &N_THH[0][0], N_THH_COUNT, false);					break;
 
-                        default:				assert(0);
+						default:								assert(0);
                     }
 
                     break;
 
+				case E::InputUnit::NoInputUnit:
                 case E::InputUnit::mA:
                 case E::InputUnit::V:
 
