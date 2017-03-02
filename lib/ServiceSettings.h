@@ -11,8 +11,8 @@ const char* const CFG_FILE_ID_TUNING_SIGNALS = "TUNING_SIGNALS";
 const char* const CFG_FILE_ID_SCHEMAS_DETAILS = "TUNING_SCHEMAS";
 const char* const CFG_FILE_ID_TUNING_FILTERS = "TUNING_FILTERS";
 
-const int           CFG_FILE_VER_METROLOGY_SIGNALS  = 1;
-const char* const   CFG_FILE_ID_METROLOGY_SIGNALS   = "METROLOGY_SIGNALS";
+const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 1;
+const char* const	CFG_FILE_ID_METROLOGY_SIGNALS	= "METROLOGY_SIGNALS";
 
 class AppDataServiceChannel
 {
