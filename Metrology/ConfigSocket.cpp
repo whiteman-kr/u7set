@@ -25,6 +25,8 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
     }
 
     connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
+	startConnectionStateTimer();
 }
 
 
@@ -45,6 +47,8 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const Host
     }
 
     connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
+	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -59,6 +63,8 @@ ConfigSocket::~ConfigSocket()
     m_cfgLoaderThread->quit();
     delete m_cfgLoaderThread;
     m_cfgLoaderThread = nullptr;
+
+	stopConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -73,8 +79,6 @@ void ConfigSocket::start()
 
     m_cfgLoaderThread->start();
     m_cfgLoaderThread->enableDownloadConfiguration();
-
-    return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -83,10 +87,12 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 {
     qDebug() << "ConfigSocket::slot_configurationReady - file count: " << buildFileInfoArray.count();
 
-    if (m_cfgLoaderThread == nullptr)
+	if (m_cfgLoaderThread == nullptr)
     {
         return;
 	}
+
+	m_loadedFiles.clear();
 
     //clearConfiguration();
 
@@ -116,6 +122,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
         {
             result &= readMetrologySignals(fileData);				// fill Units and MetrologySignals
         }
+
+		m_loadedFiles.append(bfi.pathFileName);
     }
 
     emit configurationLoaded();
@@ -174,9 +182,12 @@ bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
 		result &= xml.readIntAttribute("ID", &unitID);
 		result &= xml.readStringAttribute("Caption", &unitCaption);
 
-		//m_unitInfo.append(unitID, unitCaption);
+		// theUnitBase.appendUnit(unitID, unitCaption);
+		// m_unitInfo.append(unitID, unitCaption);
 	}
 
+
+//    if (theUnitBase.unitCount() != unitCount)
 //    if (m_unitInfo.count() != unitCount)
 //    {
 //        qDebug() << "Units loading error";
@@ -225,5 +236,55 @@ bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
     return result;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::startConnectionStateTimer()
+{
+	if (m_connectionStateTimer == nullptr)
+	{
+		m_connectionStateTimer = new QTimer(this);
+		connect(m_connectionStateTimer, &QTimer::timeout, this, &ConfigSocket::updateConnectionState);
+	}
+
+	m_connectionStateTimer->start(CONFIG_SOCKET_TIMEOUT_STATE);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::stopConnectionStateTimer()
+{
+	if (m_connectionStateTimer != nullptr)
+	{
+		m_connectionStateTimer->stop();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::updateConnectionState()
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	if (m_cfgLoaderThread->getConnectionState().isConnected != m_connected)
+	{
+		m_connected = m_cfgLoaderThread->getConnectionState().isConnected;
+
+		if (m_connected == true)
+		{
+			m_address = m_cfgLoaderThread->getConnectionState().peerAddr;
+
+			emit socketConnected();
+		}
+		else
+		{
+			m_address.clear();
+
+			emit socketDisconnected();
+		}
+	}
+}
 
 // -------------------------------------------------------------------------------------------------------------------

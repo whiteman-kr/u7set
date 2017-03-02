@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	HostAddressPort configSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_RESERVE);;
     m_pConfigSocket = new ConfigSocket(configSocketAddress1, configSocketAddress2);
 
+
+	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
     connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
 
     m_pConfigSocket->start();
@@ -686,6 +689,7 @@ void MainWindow::createStatusBar()
     m_statusMeasureTimeout = new QProgressBar(pStatusBar);
     m_statusMeasureThreadState = new QLabel(pStatusBar);
     m_statusCalibratorCount = new QLabel(pStatusBar);
+	m_statusConnectToConfigServer = new QLabel(pStatusBar);
     m_statusConnectToAppDataServer = new QLabel(pStatusBar);
     m_statusConnectToTuningServer = new QLabel(pStatusBar);
 
@@ -697,6 +701,7 @@ void MainWindow::createStatusBar()
 
     pStatusBar->addWidget(m_statusConnectToTuningServer);
     pStatusBar->addWidget(m_statusConnectToAppDataServer);
+	pStatusBar->addWidget(m_statusConnectToConfigServer);
     pStatusBar->addWidget(m_statusCalibratorCount);
     pStatusBar->addWidget(m_statusMeasureThreadState);
     pStatusBar->addWidget(m_statusMeasureTimeout);
@@ -706,6 +711,10 @@ void MainWindow::createStatusBar()
     pStatusBar->setLayoutDirection(Qt::RightToLeft);
 
     m_statusEmpty->setText(QString());
+
+	m_statusConnectToConfigServer->setText(tr(" ConfigService: offline "));
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
     m_statusConnectToAppDataServer->setText(tr(" AppDataService: offline "));
     m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(255, 160, 160);");
@@ -1659,9 +1668,55 @@ void MainWindow::calibratorConnectedChanged(int count)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::configSocketConnected()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	HostAddressPort configSocketAddress = m_pConfigSocket->connectedAddress();
+
+	m_statusConnectToConfigServer->setText( tr(" ConfigService: on  ") );
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setToolTip(tr("Connected: %1 : %2\nLoaded files: 0").arg(configSocketAddress.addressStr() ).arg(configSocketAddress.port()) );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::configSocketDisconnected()
+{
+	m_statusConnectToConfigServer->setText( tr(" ConfigService: off ") );
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
+	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::configSocketConfigurationLoaded()
 {
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
 
+	HostAddressPort configSocketAddress = m_pConfigSocket->connectedAddress();
+
+	QString connectedState = tr("Connected: %1 : %2\n").arg(configSocketAddress.addressStr() ).arg(configSocketAddress.port());
+
+
+	int filesCount = m_pConfigSocket->loadedFilesCount();
+
+	connectedState.append(tr("Loaded files: %1").arg(filesCount));
+
+	for(int f = 0; f < filesCount; f++)
+	{
+		connectedState.append("\n" + m_pConfigSocket->loadedFile(f));
+	}
+
+	m_statusConnectToConfigServer->setText( tr(" ConfigService: on  ") );
+	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+	m_statusConnectToConfigServer->setToolTip( connectedState );
 }
 
 // -------------------------------------------------------------------------------------------------------------------

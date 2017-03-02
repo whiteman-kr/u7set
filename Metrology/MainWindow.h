@@ -79,6 +79,7 @@ public:
     QProgressBar*       m_statusMeasureTimeout = nullptr;
     QLabel*             m_statusMeasureThreadState = nullptr;
     QLabel*             m_statusCalibratorCount = nullptr;
+	QLabel*             m_statusConnectToConfigServer = nullptr;
     QLabel*             m_statusConnectToAppDataServer = nullptr;
     QLabel*             m_statusConnectToTuningServer = nullptr;
 
@@ -245,6 +246,8 @@ private slots:
 
     // Slots of configSocket
     //
+	void                configSocketConnected();
+	void                configSocketDisconnected();
     void                configSocketConfigurationLoaded();
 
     // Slots of signalSocket
