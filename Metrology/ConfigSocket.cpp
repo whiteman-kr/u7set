@@ -10,6 +10,8 @@
 
 ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 {
+	// use only SOCKET_SERVER_TYPE_PRIMARY
+	//
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
 	if (equipmentID.isEmpty() == true)
 	{
@@ -29,11 +31,12 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 	startConnectionStateTimer();
 }
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
 {
+	// use only SOCKET_SERVER_TYPE_PRIMARY
+	//
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
 	if (equipmentID.isEmpty() == true)
 	{
