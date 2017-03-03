@@ -964,6 +964,16 @@ namespace Tcp
 		selectServer1(reconnect);
 	}
 
+	HostAddressPort Client::serverAddressPort(int serverIndex)
+	{
+		if (serverIndex < 0 || serverIndex > 1)
+		{
+			assert(false);
+			return HostAddressPort();
+		}
+
+		return m_serversAddressPort[serverIndex];
+	}
 
 	void Client::onThreadStarted()
 	{
