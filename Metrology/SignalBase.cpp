@@ -2248,11 +2248,67 @@ void SignalBase::setCaseNoForAllSignals()
 	int caseNoCount = 0;
 	QMap<QString, int> caseNoMap;
 
+    QMap<QString, int> caseCaptionMap;
+    QVector<QString> caseCaptionList;
+
 	m_caseMutex.lock();
 
-		int count = m_signalList.size();
+        int signalCount = m_signalList.size();
 
-		for(int i = 0; i < count; i ++)
+        // create list for all cases
+        //
+        for(int i = 0; i < signalCount; i ++)
+        {
+            SignalParam& param = m_signalList[i].param();
+            if (param.isValid() == false)
+            {
+                continue;
+            }
+
+            const QString& caseCaption = param.position().caseCaption();
+
+            if (caseCaption.isEmpty() == true)
+            {
+                assert(false);
+                continue;
+            }
+
+            if (caseCaptionMap.contains( caseCaption ) == false)
+            {
+                caseCaptionList.append(caseCaption);
+                int index = caseCaptionList.count() - 1;
+
+                caseCaptionMap.insert(caseCaption, index);
+            }
+        }
+
+        // sort case list by caption
+        //
+        int caseCount = caseCaptionList.count();
+
+        for( int i = 0; i < caseCount - 1; i++)
+        {
+            for(int j = i+1; j < caseCount; j++)
+            {
+                if ( caseCaptionList[ i ] > caseCaptionList[ j ] )
+                {
+                    QString caseCaption     = caseCaptionList[ i ];
+                    caseCaptionList[ i ]    = caseCaptionList[ j ];
+                    caseCaptionList[ j ]    = caseCaption;
+                }
+            }
+        }
+
+        // create map for all cases
+        //
+        for( int i = 0; i < caseCount; i++)
+        {
+            caseNoMap.insert( caseCaptionList[i], i );
+        }
+
+        // create map for all cases
+        //
+        for(int i = 0; i < signalCount; i ++)
 		{
 			SignalParam& param = m_signalList[i].param();
 			if (param.isValid() == false)

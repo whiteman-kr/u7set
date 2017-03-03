@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
+    connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
 
     m_pSignalSocketThread->start();
 
@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pTuningSocket, &TuningSocket::configurationLoaded, Qt::QueuedConnection);
+    connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pTuningSocket, &TuningSocket::configurationLoaded, Qt::QueuedConnection);
 
     m_pTuningSocketThread->start();
 
@@ -781,9 +781,10 @@ void MainWindow::updateCasesOnToolBar()
 
     for(int c = 0; c < caseTypeCount; c++)
     {
-        m_asCaseTypeCombo->addItem( theSignalBase.caseTypeCaption(c) );
+        m_asCaseTypeCombo->addItem( theSignalBase.caseTypeCaption(c), c );
     }
 
+    m_asCaseTypeCombo->model()->sort(0);
     m_asCaseTypeCombo->setCurrentIndex(0);
     m_asCaseTypeCombo->setEnabled(true);
     m_asCaseTypeCombo->blockSignals(false);
@@ -808,7 +809,7 @@ void MainWindow::updateSignalsOnToolBar()
     m_asEntryCombo->clear();
     m_asEntryCombo->setEnabled(false);
 
-    int caseType = m_asCaseTypeCombo->currentIndex();
+    int caseType = m_asCaseTypeCombo->currentData().toInt();
     if (caseType == -1)
     {
         return;
@@ -1967,7 +1968,6 @@ void MainWindow::updateStartStopActions()
         m_pStopMeasureAction->setEnabled(true);
     }
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 

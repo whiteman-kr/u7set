@@ -428,10 +428,19 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 
 void TuningSocket::configurationLoaded()
 {
-	HostAddressPort address1 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort address2 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_RESERVE);
+    HostAddressPort addr1 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
+    HostAddressPort addr2 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_RESERVE);
 
-	setServers(address1, address2, true);
+    HostAddressPort currAddr1 = serverAddressPort(SOCKET_SERVER_TYPE_PRIMARY);
+    HostAddressPort currAddr2 = serverAddressPort(SOCKET_SERVER_TYPE_RESERVE);
+
+    if (    addr1.address32() == currAddr1.address32() && addr1.port() == currAddr1.port() &&
+            addr2.address32() == currAddr2.address32() && addr2.port() == currAddr2.port())
+    {
+        return;
+    }
+
+    setServers(addr1, addr2, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
