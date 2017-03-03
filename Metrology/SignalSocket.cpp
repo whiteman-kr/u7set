@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "Options.h"
 #include "SignalBase.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ void SignalSocket::onConnection()
 
     emit socketConnected();
 
-    requestSignalListStart();
+	startSignalStateTimer();
 
     return;
 }
@@ -57,7 +58,7 @@ void SignalSocket::onDisconnection()
 {
     qDebug() << "SignalSocket::onDisconnection";
 
-    stopSignalStateTimer();
+	stopSignalStateTimer();
 
     emit socketDisconnected();
 }
@@ -74,22 +75,6 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
 
     switch(requestID)
     {
-        case ADS_GET_APP_SIGNAL_LIST_START:
-            replySignalListStart(replyData, replyDataSize);
-            break;
-
-        case ADS_GET_APP_SIGNAL_LIST_NEXT:
-            replySignalListNext(replyData, replyDataSize);
-            break;
-
-        case ADS_GET_APP_SIGNAL_PARAM:
-            replySignalParam(replyData, replyDataSize);
-            break;
-
-        case ADS_GET_UNITS:
-            replyUnits(replyData, replyDataSize);
-            break;
-
         case ADS_GET_APP_SIGNAL_STATE:
             replySignalState(replyData, replyDataSize);
             break;
@@ -97,277 +82,6 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
         default:
             assert(false);
     }
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// ADS_GET_APP_SIGNAL_LIST_START
-
-void SignalSocket::requestSignalListStart()
-{
-    assert(isClearToSendRequest());
-
-    m_signalHashList.clear();
-
-    sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::replySignalListStart(const char* replyData, quint32 replyDataSize)
-{
-    if (replyData == nullptr)
-    {
-        assert(replyData);
-        requestSignalListStart();
-        return;
-    }
-
-    bool result = m_getSignalListStartReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-    if (result == false)
-    {
-        qDebug() << "SignalSocket::replySignalListStart - error: ParseFromArray";
-        assert(result);
-        requestSignalListStart();
-        return;
-    }
-
-    if (m_getSignalListStartReply.error() != 0)
-    {
-        qDebug() << "SignalSocket::replyAppSignalListStart - error: " << m_getSignalListStartReply.error();
-        assert(m_getSignalListStartReply.error() != 0);
-        requestSignalListStart();
-        return;
-    }
-
-    qDebug() << "SignalSocket::replyAppSignalListStart - Signals for load:  " << m_getSignalListStartReply.totalitemcount();
-
-    if (m_getSignalListStartReply.totalitemcount() == 0 || m_getSignalListStartReply.partcount() == 0)
-    {
-        // we have empty data
-        //
-        assert(m_getSignalListStartReply.totalitemcount() == 0);
-        assert(m_getSignalListStartReply.partcount() == 0);
-
-        // but need to risk, request params
-        //
-        requestSignalParam(0);
-    }
-
-    requestSignalListNext(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// ADS_GET_APP_SIGNAL_LIST_NEXT
-
-void SignalSocket::requestSignalListNext(int partIndex)
-{
-    assert(isClearToSendRequest());
-
-    if (partIndex >= m_getSignalListStartReply.partcount())
-    {
-        // all parts were requested, then begin to require params
-        //
-        requestSignalParam(0);
-
-        return;
-    }
-
-    m_getSignalListNextRequest.Clear();
-
-    m_getSignalListNextRequest.set_part(partIndex);
-
-    sendRequest(ADS_GET_APP_SIGNAL_LIST_NEXT, m_getSignalListNextRequest);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::replySignalListNext(const char* replyData, quint32 replyDataSize)
-{
-    if (replyData == nullptr)
-    {
-        assert(replyData);
-        requestSignalListStart();
-        return;
-    }
-
-    bool result = m_getSignalListNextReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-    if (result == false)
-    {
-        qDebug() << "SignalSocket::replySignalListNext - error: ParseFromArray";
-        assert(result);
-        requestSignalListStart();
-        return;
-    }
-
-    if (m_getSignalListStartReply.error() != 0)
-    {
-        qDebug() << "SignalSocket::replySignalListNext - error: " << m_getSignalListStartReply.error();
-        assert(m_getSignalListStartReply.error() != 0);
-        requestSignalListStart();
-        return;
-    }
-
-    if (m_getSignalListNextReply.part() != m_getSignalListNextRequest.part())
-    {
-        // different parts in Reply and Request
-        //
-        assert(m_getSignalListNextReply.part() == m_getSignalListNextRequest.part());
-        requestSignalListStart();
-        return;
-    }
-
-    // qDebug() << "SignalSocket::replySignalListNext";
-    // qDebug() << "PartIndex:         "   << m_getSignalListNextReply.part();
-    // qDebug() << "Items in the Part: "   << m_getSignalListNextReply.appsignalids_size();
-
-    int stringCount = m_getSignalListNextReply.appsignalids_size();
-
-    for(int i = 0; i < stringCount; i++)
-    {
-        QString appSignalID = QString::fromStdString(m_getSignalListNextReply.appsignalids(i));
-        if (appSignalID.isEmpty() == true)
-        {
-            continue;
-        }
-
-        Hash hash = calcHash(appSignalID);
-        if (hash == 0)
-        {
-            continue;
-        }
-
-        m_signalHashList.append(hash);
-    }
-
-    requestSignalListNext(m_getSignalListNextReply.part() + 1);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// ADS_GET_APP_SIGNAL_PARAM
-
-void SignalSocket::requestSignalParam(int startIndex)
-{
-    assert(isClearToSendRequest());
-
-    m_paramIndex = startIndex;
-
-    if (startIndex == 0)
-    {
-        theSignalBase.clear();
-    }
-
-    int hashCount = m_signalHashList.size();
-
-    if (startIndex >= hashCount)
-    {
-        qDebug() << "SignalSocket::requestSignalParam - Signals were loaded:    " << theSignalBase.signalCount();
-
-        emit signalsLoaded();
-
-        requestUnits();
-
-        startSignalStateTimer();
-
-        return;
-    }
-
-    m_getSignalParamRequest.mutable_signalhashes()->Clear();
-    m_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
-
-    for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX && i < hashCount; i++)
-    {
-        m_getSignalParamRequest.add_signalhashes(m_signalHashList[i]);
-    }
-
-    sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalParamRequest);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::replySignalParam(const char* replyData, quint32 replyDataSize)
-{
-    if (replyData == nullptr)
-    {
-        assert(replyData);
-        requestSignalListStart();
-        return;
-    }
-
-    bool result = m_getSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-    if (result == false)
-    {
-        qDebug() << "SignalSocket::replySignalParam - error: ParseFromArray";
-        assert(result);
-        requestSignalListStart();
-        return;
-    }
-
-    if (m_getSignalParamReply.error() != 0)
-    {
-        qDebug() << "SignalSocket::replySignalParam - error: " << m_getSignalParamReply.error();
-        assert(m_getSignalParamReply.error() != 0);
-        requestSignalListStart();
-        return;
-    }
-
-    for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
-    {
-        Signal param;
-        param.serializeFromProtoAppSignal(&m_getSignalParamReply.appsignalparams(i));
-
-        if (param.appSignalID().isEmpty() == true || param.hash() == 0)
-        {
-            assert(false);
-            continue;
-        }
-
-        theSignalBase.appendSignal( param ) ;
-    }
-
-    requestSignalParam(m_paramIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// ADS_GET_UNITS
-
-void SignalSocket::requestUnits()
-{
-    assert(isClearToSendRequest());
-
-    sendRequest(ADS_GET_UNITS, m_getUnitsRequest);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::replyUnits(const char* replyData, quint32 replyDataSize)
-{
-    if (replyData == nullptr)
-    {
-        assert(replyData);
-        return;
-    }
-
-    bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-    if (result == false)
-    {
-        qDebug() << "SignalSocket::replyUnits - error: ParseFromArray";
-        assert(result);
-        return;
-    }
-
-    if (m_getUnitsReply.error() != 0)
-    {
-        qDebug() << "SignalSocket::replyUnits - error: " << m_getUnitsReply.error();
-        assert(m_getUnitsReply.error() != 0);
-        return;
-    }
-
-    for (int i = 0; i < m_getUnitsReply.units_size(); i++)
-    {
-        theUnitBase.appendUnit(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
-    }
-
-    qDebug() << "SignalSocket::replyUnits - Units were loaded:              " << m_getUnitsReply.units_size();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -491,6 +205,16 @@ void SignalSocket::stopSignalStateTimer()
 void SignalSocket::updateSignalState()
 {
     requestSignalState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalSocket::configurationLoaded()
+{
+	HostAddressPort address1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
+	HostAddressPort address2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
+
+	setServers(address1, address2, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

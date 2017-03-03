@@ -13,6 +13,106 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+ProjectInfo::ProjectInfo(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ProjectInfo::~ProjectInfo()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ProjectInfo::save()
+{
+	QSettings s;
+
+	s.setValue( QString("%1ProjectName").arg(PROJECT_INFO_KEY), m_projectName);
+	s.setValue( QString("%1ID").arg(PROJECT_INFO_KEY), m_id);
+	s.setValue( QString("%1Type").arg(PROJECT_INFO_KEY), m_release);
+	s.setValue( QString("%1Date").arg(PROJECT_INFO_KEY), m_date);
+	s.setValue( QString("%1Changeset").arg(PROJECT_INFO_KEY), m_changeset);
+	s.setValue( QString("%1User").arg(PROJECT_INFO_KEY), m_user);
+	s.setValue( QString("%1Workstation").arg(PROJECT_INFO_KEY), m_workstation);
+
+	s.setValue( QString("%1DatabaseName").arg(PROJECT_INFO_KEY), m_dbName);
+	s.setValue( QString("%1DatabaseDescription").arg(PROJECT_INFO_KEY), m_dbDescription);
+	s.setValue( QString("%1DatabaseVersion").arg(PROJECT_INFO_KEY), m_dbVersion);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ProjectInfo::readFromXml(const QByteArray& fileData)
+{
+	bool result = false;
+
+	XmlReadHelper xml(fileData);
+
+	result = xml.findElement("BuildInfo");
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readStringAttribute("Project", &m_projectName);
+	result &= xml.readIntAttribute("ID", &m_id);
+	result &= xml.readStringAttribute("Type", &m_release);
+	result &= xml.readStringAttribute("Date", &m_date);
+	result &= xml.readIntAttribute("Changeset", &m_changeset);
+	result &= xml.readStringAttribute("User", &m_user);
+	result &= xml.readStringAttribute("Workstation", &m_workstation);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result = xml.findElement("DatabaseInfo");
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readStringAttribute("DatabaseName", &m_dbName);
+	result &= xml.readStringAttribute("Description", &m_dbDescription);
+	result &= xml.readIntAttribute("Version", &m_dbVersion);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	save();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
+{
+	m_dbName = from.m_dbName;
+	m_dbDescription = from.m_dbDescription;
+	m_dbVersion = from.m_dbVersion;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 SocketClientOption::SocketClientOption()
 {
 }
@@ -33,7 +133,7 @@ QString SocketClientOption::equipmentID(int serverType) const
 		return QString();
 	}
 
-	return m_connect[serverType].m_equipmentID;
+	return m_connectOption[serverType].equipmentID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -46,7 +146,7 @@ void SocketClientOption::setEquipmentID(int serverType, const QString& equipment
 		return;
 	}
 
-	m_connect[serverType].m_equipmentID = equipmentID;
+	m_connectOption[serverType].equipmentID = equipmentID;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -59,7 +159,7 @@ QString SocketClientOption::serverIP(int serverType) const
 		return QString();
 	}
 
-	return m_connect[serverType].m_serverIP;
+	return m_connectOption[serverType].serverIP;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -72,7 +172,7 @@ void SocketClientOption::setServerIP(int serverType, const QString& ip)
 		return;
 	}
 
-	m_connect[serverType].m_serverIP = ip;
+	m_connectOption[serverType].serverIP = ip;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -85,7 +185,7 @@ int SocketClientOption::serverPort(int serverType) const
 		return 0;
 	}
 
-	return m_connect[serverType].m_serverPort;
+	return m_connectOption[serverType].serverPort;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -98,7 +198,7 @@ void SocketClientOption::setServerPort(int serverType, int port)
 		return;
 	}
 
-	m_connect[serverType].m_serverPort = port;
+	m_connectOption[serverType].serverPort = port;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -111,7 +211,7 @@ HostAddressPort SocketClientOption::address(int serverType) const
 		return HostAddressPort();
 	}
 
-	return HostAddressPort(m_connect[serverType].m_serverIP, m_connect[serverType].m_serverPort);
+	return HostAddressPort(m_connectOption[serverType].serverIP, m_connectOption[serverType].serverPort);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -123,18 +223,16 @@ void SocketClientOption::load()
 		return;
 	}
 
-	QString key = "Options/Socket/" + QString(SocketType[m_type]) + "/";
-
 	QSettings s;
 
-
+	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
 
 	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
 	{
-		m_connect[t].m_equipmentID = s.value( QString("%1EquipmentID%2").arg(key).arg(t), "SYSTEM_RACKID_WS00" + QString(SocketDefaultID[m_type])).toString();
+		m_connectOption[t].equipmentID = s.value( QString("%1EquipmentID%2").arg(key).arg(t), "SYSTEM_RACKID_WS00" + QString(SocketDefaultID[m_type])).toString();
 
-		m_connect[t].m_serverIP = s.value( QString("%1ServerIP%2").arg(key).arg(t), "127.0.0.1").toString();
-		m_connect[t].m_serverPort = s.value( QString("%1ServerPort%2").arg(key).arg(t), SocketDefaultPort[m_type]).toInt();
+		m_connectOption[t].serverIP = s.value( QString("%1ServerIP%2").arg(key).arg(t), "127.0.0.1").toString();
+		m_connectOption[t].serverPort = s.value( QString("%1ServerPort%2").arg(key).arg(t), SocketDefaultPort[m_type]).toInt();
 	}
 }
 
@@ -147,18 +245,92 @@ void SocketClientOption::save()
 		return;
 	}
 
-	QString key = "Options/Socket/" + QString(SocketType[m_type]) + "/";
-
 	QSettings s;
 
+	QString key = SOCKET_OPTIONS_KEY + QString(SocketType[m_type]) + "/";
 
 	for(int t = 0; t < SOCKET_SERVER_TYPE_COUNT; t++)
 	{
-		s.setValue( QString("%1EquipmentID%2").arg(key).arg(t), m_connect[t].m_equipmentID);
+		s.setValue( QString("%1EquipmentID%2").arg(key).arg(t), m_connectOption[t].equipmentID);
 
-		s.setValue( QString("%1ServerIP%2").arg(key).arg(t), m_connect[t].m_serverIP);
-		s.setValue( QString("%1ServerPort%2").arg(key).arg(t), m_connect[t].m_serverPort);
+		s.setValue( QString("%1ServerIP%2").arg(key).arg(t), m_connectOption[t].serverIP);
+		s.setValue( QString("%1ServerPort%2").arg(key).arg(t), m_connectOption[t].serverPort);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SocketClientOption::readOptionsFromXml(const QByteArray& fileData)
+{
+	if (m_type < 0 || m_type >= SOCKET_TYPE_COUNT)
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	XmlReadHelper xml(fileData);
+
+	switch(m_type)
+	{
+		case SOCKET_TYPE_SIGNAL:
+
+			result = xml.findElement("AppDataService");
+			if (result == false)
+			{
+				break;
+			}
+
+			result &= xml.readStringAttribute("AppDataServiceID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
+			result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
+			result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
+
+			result &= xml.readStringAttribute("AppDataServiceID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
+			result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
+			result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
+
+			if (result == false)
+			{
+				break;
+			}
+
+            save();
+
+			break;
+
+		case SOCKET_TYPE_TUNING:
+
+			result = xml.findElement("TuningClient");
+			if (result == false)
+			{
+				break;
+			}
+
+			result &= xml.readStringAttribute("TuningClientID1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].equipmentID);
+			result &= xml.readStringAttribute("TuningClientID2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].equipmentID);
+
+			result &= xml.findElement("TuningService");
+			if (result == false)
+			{
+				break;
+			}
+			result &= xml.readStringAttribute("ip1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverIP);
+			result &= xml.readIntAttribute("port1", &m_connectOption[SOCKET_SERVER_TYPE_PRIMARY].serverPort);
+
+			result &= xml.readStringAttribute("ip2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverIP);
+			result &= xml.readIntAttribute("port2", &m_connectOption[SOCKET_SERVER_TYPE_RESERVE].serverPort);
+
+			if (result == false)
+			{
+				break;
+			}
+
+            save();
+
+			break;
+	}
+
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -192,7 +364,7 @@ SocketClientOption SocketOption::client(int socketType) const
 	if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
 	{
 		assert(0);
-		return SocketClientOption();
+        return SocketClientOption();
 	}
 
 	return m_client[socketType];
@@ -1273,7 +1445,7 @@ void Options::load()
 {
     m_toolBar.load();
 
-	m_socket.load();
+    m_socket.load();
 
     m_measureView.init();
     m_measureView.load();
@@ -1297,8 +1469,9 @@ void Options::load()
 
 void Options::save()
 {
+    m_projectInfo.save();
     m_toolBar.save();
-	m_socket.save();
+    m_socket.save();
     m_measureView.save();
     m_signalInfo.save();
     m_database.save();
@@ -1319,96 +1492,35 @@ void Options::unload()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool Options::readFromXml(XmlReadHelper& xml)
+bool Options::readFromXml(const QByteArray& fileData)
 {
-	bool result = false;
+    bool result = false;
 
-	//
-	//
-	result = xml.findElement("DatabaseInfo");
+    result = m_projectInfo.readFromXml(fileData);
+    if (result == false)
+    {
+        return false;
+    }
 
-	if (result == false)
-	{
-		return false;
-	}
+    for(int t = 0; t < SOCKET_TYPE_COUNT; t++)
+    {
+        if (t == SOCKET_TYPE_CONFIG)
+        {
+            continue;
+        }
 
-	QString dbName;
-	QString dbDescription;
-	int dbVersion;
+        SocketClientOption sco = m_socket.client(t);
 
-	result &= xml.readStringAttribute("DatabaseName", &dbName);
-	result &= xml.readStringAttribute("Description", &dbDescription);
-	result &= xml.readIntAttribute("Version", &dbVersion);
+        result &= sco.readOptionsFromXml(fileData);
+        if (result == false)
+        {
+            continue;
+        }
 
+        m_socket.setClient(t, sco);
+    }
 
-	//
-	//
-	result = xml.findElement("AppDataService");
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	QString adsEquipmentID1;
-	QString adsIP1;
-	int adsPort1;
-
-	result &= xml.readStringAttribute("AppDataServiceID1", &adsEquipmentID1);
-	result &= xml.readStringAttribute("ip1", &adsIP1);
-	result &= xml.readIntAttribute("port1", &adsPort1);
-
-	QString adsEquipmentID2;
-	QString adsIP2;
-	int adsPort2;
-
-	result &= xml.readStringAttribute("AppDataServiceID2", &adsEquipmentID2);
-	result &= xml.readStringAttribute("ip2", &adsIP2);
-	result &= xml.readIntAttribute("port2", &adsPort2);
-
-	//
-	//
-	result = xml.findElement("TuningClient");
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	QString tcEquipmentID1;
-
-	result &= xml.readStringAttribute("TuningClientID1", &tcEquipmentID1);
-
-	QString tcEquipmentID2;
-
-	result &= xml.readStringAttribute("TuningClientID2", &tcEquipmentID2);
-
-	//
-	//
-	result = xml.findElement("TuningService");
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	QString tsEquipmentID1;
-	QString tsIP1;
-	int tsPort1;
-
-	//result &= xml.readStringAttribute("TuningServiceID1", &tsEquipmentID1);
-	result &= xml.readStringAttribute("ip1", &tsIP1);
-	result &= xml.readIntAttribute("port1", &tsPort1);
-
-	QString tsEquipmentID2;
-	QString tsIP2;
-	int tsPort2;
-
-	//result &= xml.readStringAttribute("TuningServiceID1", &tsEquipmentID2);
-	result &= xml.readStringAttribute("ip2", &tsIP2);
-	result &= xml.readIntAttribute("port2", &tsPort2);
-
-	return result;
+    return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1422,8 +1534,9 @@ Options& Options::operator=(const Options& from)
             m_updateColumnView[type] = from.m_updateColumnView[type];
         }
 
+        m_projectInfo = from.m_projectInfo;
         m_toolBar = from.m_toolBar;
-		m_socket = from.m_socket;
+        m_socket = from.m_socket;
         m_measureView = from.m_measureView;
         m_signalInfo = from.m_signalInfo;
         m_database = from.m_database;

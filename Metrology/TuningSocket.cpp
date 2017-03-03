@@ -426,3 +426,13 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void TuningSocket::configurationLoaded()
+{
+	HostAddressPort address1 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
+	HostAddressPort address2 = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_RESERVE);
+
+	setServers(address1, address2, true);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+

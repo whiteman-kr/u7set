@@ -325,10 +325,9 @@ SignalListDialog::SignalListDialog(bool hasButtons, QWidget *parent) :
     QDialog(parent)
 {
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
     {
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &SignalListDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
     }
 
     createInterface(hasButtons);

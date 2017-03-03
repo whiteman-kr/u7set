@@ -1,22 +1,6 @@
 #ifndef SIGNALSOCKET_H
 #define SIGNALSOCKET_H
 
-// This class is designed to receive signals from AppDataSrv
-//
-// Algorithm:
-//
-// onConnection()
-//              |
-//              ADS_GET_APP_SIGNAL_LIST_START
-//              |
-//              ADS_GET_APP_SIGNAL_LIST_NEXT
-//              |
-//              ADS_GET_APP_SIGNAL_PARAM
-//              |                   |
-//              ADS_GET_UNITS       Start timer (m_updateSignalStateTimer -- updateSignalState())
-//                                  |
-//                                  ADS_GET_APP_SIGNAL_STATE (Hashes get from theSignalBase)
-
 
 #include "../lib/Tcp.h"
 #include "../lib/SocketIO.h"
@@ -59,22 +43,6 @@ private:
     // protobuf messages
     //
 
-    Network::GetSignalListStartReply    m_getSignalListStartReply;          // ADS_GET_APP_SIGNAL_LIST_START
-    QVector<Hash>                       m_signalHashList;
-
-
-    Network::GetSignalListNextRequest   m_getSignalListNextRequest;         // ADS_GET_APP_SIGNAL_LIST_NEXT
-    Network::GetSignalListNextReply     m_getSignalListNextReply;
-
-
-    Network::GetAppSignalParamRequest   m_getSignalParamRequest;            // ADS_GET_APP_SIGNAL_PARAM
-    Network::GetAppSignalParamReply     m_getSignalParamReply;
-    int                                 m_paramIndex = 0;
-
-    Network::GetUnitsRequest            m_getUnitsRequest;                  // ADS_GET_UNITS
-    Network::GetUnitsReply              m_getUnitsReply;
-
-
     Network::GetAppSignalStateRequest   m_getSignalStateRequest;            // ADS_GET_APP_SIGNAL_STATE
     Network::GetAppSignalStateReply     m_getSignalStateReply;
 
@@ -82,19 +50,6 @@ private:
 
     // functions: Request - Reply
     //
-
-    void            requestSignalListStart();                                               // ADS_GET_APP_SIGNAL_LIST_START
-    void            replySignalListStart(const char* replyData, quint32 replyDataSize);
-
-    void            requestSignalListNext(int partIndex);                                   // ADS_GET_APP_SIGNAL_LIST_NEXT
-    void            replySignalListNext(const char* replyData, quint32 replyDataSize);
-
-    void            requestSignalParam(int startIndex);                                     // ADS_GET_APP_SIGNAL_PARAM
-    void            replySignalParam(const char* replyData, quint32 replyDataSize);
-
-    void            requestUnits();                                                         // ADS_GET_UNITS
-    void            replyUnits(const char* replyData, quint32 replyDataSize);
-
     void            requestSignalState();                                                   // ADS_GET_APP_SIGNAL_STATE
     void            replySignalState(const char* replyData, quint32 replyDataSize);
 
@@ -106,12 +61,14 @@ private slots:
 
     void            updateSignalState();
 
+public slots:
+
+	void			configurationLoaded();
+
 signals:
 
     void            socketConnected();
     void            socketDisconnected();
-
-    void            signalsLoaded();
 };
 
 // ==============================================================================================

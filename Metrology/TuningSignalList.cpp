@@ -666,12 +666,11 @@ TuningSignalListDialog::TuningSignalListDialog(bool hasButtons, QWidget *parent)
     QDialog(parent)
 {
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
     {
-        if (pMainWindow->m_pSignalSocket != nullptr)
+		if (pMainWindow->m_pConfigSocket != nullptr)
         {
-            connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
-            connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
+			connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
         }
 
         if (pMainWindow->m_pTuningSocket != nullptr)

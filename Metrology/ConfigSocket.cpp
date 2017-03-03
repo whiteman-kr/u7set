@@ -3,6 +3,8 @@
 #include <assert.h>
 
 #include "Options.h"
+#include "SignalBase.h"
+#include "TuningSignalBase.h"
 
 #include "../lib/ServiceSettings.h"
 
@@ -70,6 +72,19 @@ ConfigSocket::~ConfigSocket()
 	stopConnectionStateTimer();
 }
 
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::clearConfiguration()
+{
+	m_loadedFiles.clear();
+
+	theUnitBase.clear();
+	theSignalBase.clear();
+
+	theTuningSignalBase.createSignalList();
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
 void ConfigSocket::start()
@@ -95,39 +110,38 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
         return;
 	}
 
-	m_loadedFiles.clear();
+	clearConfiguration();
 
-    //clearConfiguration();
+	bool result = false;
 
-    bool result = readConfiguration(configurationXmlData);
-
+	result = readConfiguration(configurationXmlData);
     if (result == false)
     {
         return;
     }
 
-    for(Builder::BuildFileInfo bfi : buildFileInfoArray)
-    {
-        QByteArray fileData;
-        QString errStr;
+	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
 
-        m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
-        if (errStr.isEmpty() == false)
-        {
-            qDebug() << errStr;
-            continue;
-        }
+		if (errStr.isEmpty() == false)
+		{
+			qDebug() << errStr;
+			continue;
+		}
 
 		result = true;
 
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
-        {
-            result &= readMetrologySignals(fileData);				// fill Units and MetrologySignals
-        }
+		{
+			result &= readMetrologySignals(fileData);				// fill Units and MetrologySignals
+		}
 
 		m_loadedFiles.append(bfi.pathFileName);
-    }
+	}
 
     emit configurationLoaded();
 
@@ -138,32 +152,27 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 {
-    XmlReadHelper xml(fileData);
+	bool result = theOptions.readFromXml(fileData);
 
-	bool result = theOptions.readFromXml(xml);
-
-	if (result == true)
-	{
-		qDebug() << "ConfigSocket::readConfiguration - OK";
-	}
-	else
-	{
-		qDebug() << "ConfigSocket::readConfiguration - ERROR!";
-	}
+	qDebug() << "ConfigSocket::readConfiguration - " << (result == true ? "OK" : "ERROR!");
 
 	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
+bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 {
     bool result = true;
 
     XmlReadHelper xml(fileData);
 
+	// load units
+	//
+
 	if (xml.findElement("Units") == false)
 	{
+		qDebug() << "ConfigSocket::readMetrologySignals - Units section not found";
 		return false;
 	}
 
@@ -185,21 +194,24 @@ bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
 		result &= xml.readIntAttribute("ID", &unitID);
 		result &= xml.readStringAttribute("Caption", &unitCaption);
 
-		// theUnitBase.appendUnit(unitID, unitCaption);
-		// m_unitInfo.append(unitID, unitCaption);
+		theUnitBase.appendUnit(unitID, unitCaption);
 	}
 
+	if (theUnitBase.unitCount() != unitCount)
+	{
+		qDebug() << "ConfigSocket::readMetrologySignals - Units loading error, loaded: " << theUnitBase.unitCount() << " from " << unitCount;
+		assert(false);
+		return false;
+	}
 
-//    if (theUnitBase.unitCount() != unitCount)
-//    if (m_unitInfo.count() != unitCount)
-//    {
-//        qDebug() << "Units loading error";
-//        assert(false);
-//        return false;
-//    }
+	qDebug() << "ConfigSocket::readMetrologySignals - Units were loaded:	" << theUnitBase.unitCount();
+
+	// load signals
+	//
 
 	if (xml.findElement("Signals") == false)
 	{
+		qDebug() << "ConfigSocket::readMetrologySignals - Signals section not found";
 		return false;
 	}
 
@@ -217,24 +229,31 @@ bool ConfigSocket::readMetrologySignals(QByteArray& fileData)
 
 		SignalParam param;
 
-		bool res = param.readFromXml(xml);	// time-expensive function !!!
-
+		bool res = param.readFromXml(xml);
 		if (res == true)
 		{
-//            if (m_appSignals.contains(signal->appSignalID()) == false)
-//            {
-//                m_appSignals.insert(signal->appSignalID(), signal);
-//            }
-//            else
-//            {
-//                res = false;
-//            }
+			if (theSignalBase.appendSignal(param) == -1)
+			{
+				res = false;
+			}
 		}
 
 		result &= res;
 	}
 
-	//m_appSignals.buildHash2Signal();
+	if (theSignalBase.signalCount() != signalCount)
+	{
+		qDebug() << "ConfigSocket::readMetrologySignals - Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalCount;
+		assert(false);
+		return false;
+	}
+
+	theSignalBase.sortByPosition();
+	theSignalBase.setCaseNoForAllSignals();
+
+	theTuningSignalBase.createSignalList();
+
+	qDebug() << "ConfigSocket::readMetrologySignals - Signals were loaded:	" << theSignalBase.signalCount();
 
     return result;
 }

@@ -113,7 +113,11 @@ SOURCES += \
     ../lib/CfgServerLoader.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/TcpFileTransfer.cpp \
-    ../lib/ServiceSettings.cpp
+    ../lib/ServiceSettings.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../u7/Builder/ModulesRawData.cpp \
+    ../u7/Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp
 
 
 HEADERS  += \
@@ -175,7 +179,11 @@ HEADERS  += \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/TcpFileTransfer.h \
-    ../lib/ServiceSettings.h
+    ../lib/ServiceSettings.h \
+    ../lib/DeviceHelper.h \
+    ../u7/Builder/ModulesRawData.h \
+    ../u7/Builder/IssueLogger.h \
+    ../lib/OutputLog.h
 
 
 FORMS    +=

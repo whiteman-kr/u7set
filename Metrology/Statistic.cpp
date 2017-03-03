@@ -350,12 +350,11 @@ StatisticDialog::StatisticDialog(QWidget *parent) :
     m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
 
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
     {
         m_measureType = pMainWindow->measureType();
 
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &StatisticDialog::updateList, Qt::QueuedConnection);
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &StatisticDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &StatisticDialog::updateList, Qt::QueuedConnection);
         connect(&pMainWindow->m_measureThread, &MeasureThread::measureComplite, this, &StatisticDialog::updateList, Qt::QueuedConnection);
     }
 

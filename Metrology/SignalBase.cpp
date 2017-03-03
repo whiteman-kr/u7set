@@ -422,7 +422,7 @@ void SignalParam::setParam(const Signal& signal)
 
 bool SignalParam::readFromXml(XmlReadHelper& xml)
 {
-    bool result = true;
+	bool result = true;
 
     if (xml.name() != "Signal")
     {
@@ -430,6 +430,17 @@ bool SignalParam::readFromXml(XmlReadHelper& xml)
     }
 
     result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
+	if (m_appSignalID.isEmpty() == true)
+	{
+		return false;
+	}
+
+	m_hash = calcHash(m_appSignalID);
+	if (m_hash == 0)
+	{
+		return false;
+	}
+
     result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
     result &= xml.readStringAttribute("Caption", &m_caption);
 
@@ -678,9 +689,9 @@ MetrologySignal::MetrologySignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal::MetrologySignal(const Signal& param)
+MetrologySignal::MetrologySignal(const Signal& signal)
 {
-    m_param.setParam(param);
+	m_param.setParam(signal);
 
     // temporary solution
     // because u7 can not set electric range
@@ -690,6 +701,23 @@ MetrologySignal::MetrologySignal(const Signal& param)
     m_param.setInputElectricUnitID( E::InputUnit::V );
     //
     // temporary solution
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MetrologySignal::MetrologySignal(const SignalParam& param)
+{
+	setParam(param);
+
+	// temporary solution
+	// because u7 can not set electric range
+	//
+	m_param.setInputElectricLowLimit(0);
+	m_param.setInputElectricHighLimit(5);
+	m_param.setInputElectricUnitID( E::InputUnit::V );
+	//
+	// temporary solution
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1733,6 +1761,35 @@ int SignalBase::appendSignal(const Signal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int SignalBase::appendSignal(const SignalParam& param)
+{
+	if (param.appSignalID().isEmpty() == true || param.hash() == 0)
+	{
+		assert(false);
+		return -1;
+	}
+
+	int index = -1;
+
+	m_signalMutex.lock();
+
+		if (m_signalHashMap.contains(param.hash()) == false)
+		{
+			MetrologySignal metrologySignal(param);
+
+			m_signalList.append(metrologySignal);
+			index = m_signalList.size() - 1;
+
+			m_signalHashMap.insert(param.hash(), index);
+		}
+
+	 m_signalMutex.unlock();
+
+	 return index;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MetrologySignal SignalBase::signal(const QString& appSignalID)
 {
     if (appSignalID.isEmpty() == true)
@@ -2054,7 +2111,6 @@ int SignalBase::createCaseTypeList(int outputSignalType)
     int caseTypeCount = 0;
     QMap<QString, int> caseTypeMap;
 
-
     // find all type of cases for selected outputSignalType and create caseTypeList for ToolBar
     //
     m_caseMutex.lock();
@@ -2183,6 +2239,49 @@ QString SignalBase::caseTypeCaption(int type)
     m_caseMutex.unlock();
 
     return caption;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::setCaseNoForAllSignals()
+{
+	int caseNoCount = 0;
+	QMap<QString, int> caseNoMap;
+
+	m_caseMutex.lock();
+
+		int count = m_signalList.size();
+
+		for(int i = 0; i < count; i ++)
+		{
+			SignalParam& param = m_signalList[i].param();
+			if (param.isValid() == false)
+			{
+				continue;
+			}
+
+			const QString& caseCaption = param.position().caseCaption();
+
+			if (caseCaption.isEmpty() == true)
+			{
+				continue;
+			}
+
+			if (caseNoMap.contains( caseCaption ) == true)
+			{
+				int caseNo = caseNoMap[ caseCaption ];
+				param.setCaseNo( caseNo );
+			}
+			else
+			{
+				caseNoMap.insert(caseCaption, caseNoCount);
+				param.setCaseNo(caseNoCount);
+
+				caseNoCount++;
+			}
+		}
+
+	m_caseMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -83,11 +83,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_pSignalSocket = new SignalSocket(signalSocketAddress1, signalSocketAddress2);
     m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
 
-    connect(m_pSignalSocket, &SignalSocket::signalsLoaded, this, &MainWindow::signalSocketSignalsLoaded, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
 
     m_pSignalSocketThread->start();
 
@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
     connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pTuningSocket, &TuningSocket::configurationLoaded, Qt::QueuedConnection);
 
     m_pTuningSocketThread->start();
 
@@ -1707,7 +1708,6 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	QString connectedState = tr("Connected: %1 : %2\n").arg(configSocketAddress.addressStr() ).arg(configSocketAddress.port());
 
-
 	int filesCount = m_pConfigSocket->loadedFilesCount();
 
 	connectedState.append(tr("Loaded files: %1").arg(filesCount));
@@ -1720,6 +1720,9 @@ void MainWindow::configSocketConfigurationLoaded()
 	m_statusConnectToConfigServer->setText( tr(" ConfigService: on  ") );
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip( connectedState );
+
+	updateCasesOnToolBar();
+	updateSignalsOnToolBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1753,58 +1756,31 @@ void MainWindow::signalSocketDisconnected()
         m_measureThread.stop();
     }
 
-    m_asCaseTypeCombo->clear();
-    m_asCaseTypeCombo->setEnabled(false);
+//    m_asCaseTypeCombo->clear();
+//    m_asCaseTypeCombo->setEnabled(false);
 
-    m_asSignalCombo->clear();
-    m_asSignalCombo->setEnabled(false);
+//    m_asSignalCombo->clear();
+//    m_asSignalCombo->setEnabled(false);
 
-    m_asCaseNoCombo->clear();
-    m_asCaseNoCombo->setEnabled(false);
+//    m_asCaseNoCombo->clear();
+//    m_asCaseNoCombo->setEnabled(false);
 
-    m_asSubblockCombo->clear();
-    m_asSubblockCombo->setEnabled(false);
+//    m_asSubblockCombo->clear();
+//    m_asSubblockCombo->setEnabled(false);
 
-    m_asBlockCombo->clear();
-    m_asBlockCombo->setEnabled(false);
+//    m_asBlockCombo->clear();
+//    m_asBlockCombo->setEnabled(false);
 
-    m_asEntryCombo->clear();
-    m_asEntryCombo->setEnabled(false);
+//    m_asEntryCombo->clear();
+//    m_asEntryCombo->setEnabled(false);
 
-    theTuningSignalBase.clearSignalLlst();
+//    theTuningSignalBase.clearSignalLlst();
 
-    theSignalBase.clear();
+//    theSignalBase.clear();
 
     m_statusConnectToAppDataServer->setText( tr(" AppDataService: off ") );
     m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(255, 160, 160);");
     m_statusConnectToAppDataServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::signalSocketSignalsLoaded()
-{
-	if (m_pSignalSocket == nullptr)
-	{
-		return;
-	}
-
-	int serverType = m_pSignalSocket->selectedServerIndex();
-	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
-	{
-		return;
-	}
-
-	HostAddressPort signalSocketAddress = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(serverType);
-
-	m_statusConnectToAppDataServer->setToolTip(tr("Connected: %1 : %2\nLoaded signals: %3").arg(signalSocketAddress.addressStr()).arg(signalSocketAddress.port()).arg(theSignalBase.signalCount()) );
-
-    theSignalBase.sortByPosition();
-
-    theTuningSignalBase.createSignalList();
-
-    updateCasesOnToolBar();
-    updateSignalsOnToolBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

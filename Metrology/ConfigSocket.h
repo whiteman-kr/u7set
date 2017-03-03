@@ -29,6 +29,8 @@ private:
 
 	CfgLoaderThread*	m_cfgLoaderThread = nullptr;
 
+	void				clearConfiguration();
+
 	QTimer*				m_connectionStateTimer = nullptr;
 	void				startConnectionStateTimer();
 	void				stopConnectionStateTimer();
@@ -54,7 +56,7 @@ private slots:
     void                slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
     bool                readConfiguration(const QByteArray& fileData);
-    bool                readMetrologySignals(QByteArray& fileData);
+    bool                readMetrologySignals(const QByteArray& fileData);
 
 signals:
 

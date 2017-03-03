@@ -605,10 +605,9 @@ OutputSignalDialog::OutputSignalDialog(QWidget *parent) :
     QDialog(parent)
 {
     MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-    if (pMainWindow != nullptr && pMainWindow->m_pSignalSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
     {
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::signalsLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
-        connect(pMainWindow->m_pSignalSocket, &SignalSocket::socketDisconnected, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
     }
 
     m_signalBase = theOutputSignalBase;

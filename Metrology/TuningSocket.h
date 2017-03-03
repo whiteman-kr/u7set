@@ -88,6 +88,10 @@ private:
 
 private slots:
 
+public slots:
+
+	void			configurationLoaded();
+
 signals:
 
     void            socketConnected();

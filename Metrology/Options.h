@@ -22,6 +22,60 @@
 
 // ==============================================================================================
 
+#define                 PROJECT_INFO_KEY				"Options/ProjectInfo/"
+
+// ----------------------------------------------------------------------------------------------
+
+class ProjectInfo: public QObject
+{
+	Q_OBJECT
+
+public:
+	explicit            ProjectInfo(QObject *parent = 0);
+	explicit            ProjectInfo(const ProjectInfo& from, QObject *parent = 0);
+						~ProjectInfo();
+private:
+
+	QString				m_projectName;
+	int					m_id = -1;
+	QString				m_release = false;
+	QString				m_date;
+	int					m_changeset = 0;
+	QString				m_user;
+	QString				m_workstation;
+
+	QString				m_dbName;
+	QString				m_dbDescription;
+	int					m_dbVersion;
+
+public:
+
+	QString				projectName() { return m_projectName; }
+	int					id() { return m_id; }
+	QString				release() { return m_release; }
+	QString				date() { return m_date; }
+	int					changeset() { return m_changeset; }
+	QString				user() { return m_user; }
+	QString				workstation() { return m_workstation; }
+
+
+	QString				dbName() { return m_dbName; }
+	QString				dbDescription() { return  m_dbDescription; }
+	int					dbVersion() { return m_dbVersion; }
+
+	void                save();
+
+	bool				readFromXml(const QByteArray& fileData);
+
+	ProjectInfo&		operator=(const ProjectInfo& from);
+};
+
+// ==============================================================================================
+
+#define                 SOCKET_OPTIONS_KEY             "Options/Socket/"
+
+// ----------------------------------------------------------------------------------------------
+
 const char* const       SocketServerType[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Primary"),
@@ -56,12 +110,12 @@ const int               SOCKET_CLIENT_PARAM_EQUIPMENT_ID1   = 0,
 
 // ----------------------------------------------------------------------------------------------
 
-struct CONNECT_OPTION
+struct CONNECTION_OPTION
 {
-	QString             m_equipmentID;
+	QString             equipmentID;
 
-	QString             m_serverIP;
-	int                 m_serverPort;
+	QString             serverIP;
+	int                 serverPort = 0;
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -76,7 +130,7 @@ private:
 
 	int                 m_type = -1;
 
-	CONNECT_OPTION		m_connect[SOCKET_SERVER_TYPE_COUNT];
+	CONNECTION_OPTION	m_connectOption[SOCKET_SERVER_TYPE_COUNT];
 
 public:
 
@@ -96,6 +150,8 @@ public:
 
 	void                load();
 	void                save();
+
+	bool				readOptionsFromXml(const QByteArray& fileData);
 };
 
 // ==============================================================================================
@@ -172,7 +228,7 @@ private:
 
 public:
 
-	SocketClientOption  client(int socketType) const;
+	SocketClientOption	client(int socketType) const;
 	void                setClient(int socketType, const SocketClientOption& client);
 
 	void                load();
@@ -529,7 +585,6 @@ const int				RO_PARAM_PATH           = 0,
                         RO_PARAM_CALIBRATOR_4	= 16,
                         RO_PARAM_CALIBRATOR_5	= 17,
                         RO_PARAM_REPORT_FILE    = 18;
-
 
 // ----------------------------------------------------------------------------------------------
 
@@ -1011,6 +1066,7 @@ private:
 
     QMutex              m_mutex;
 
+	ProjectInfo			m_projectInfo;
     ToolBarOption       m_toolBar;
 	SocketOption        m_socket;
     MeasureViewOption   m_measureView;
@@ -1022,6 +1078,9 @@ private:
     BackupOption        m_backup;
 
 public:
+
+	ProjectInfo&		projectInfo() { return m_projectInfo; }
+	void                setProjectInfo(const ProjectInfo& projectInfo) { m_projectInfo = projectInfo; }
 
     ToolBarOption&      toolBar() { return m_toolBar; }
     void                setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
@@ -1054,7 +1113,7 @@ public:
     void                save();
     void                unload();
 
-	bool                readFromXml(XmlReadHelper& xml);
+	bool                readFromXml(const QByteArray& fileData);
 
     Options&            operator=(const Options& from);
 };

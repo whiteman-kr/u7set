@@ -190,7 +190,7 @@ public:
     bool                    isValid() const;
 
     void                    setParam(const Signal& signal);
-    bool                    readFromXml(XmlReadHelper& xml);
+	bool                    readFromXml(XmlReadHelper& xml);
 
     Hash                    hash() const { return m_hash; }
 
@@ -220,6 +220,7 @@ public:
     void                    setPosition(const SignalPosition& position) { m_position = position; }
 
     void                    setCaseType(int type) { m_position.setCaseType(type); }
+	void                    setCaseNo(int caseNo) { m_position.setCaseNo(caseNo); }
 
     int                     lowADC() const { return m_lowADC; }
     void                    setLowADC(int lowADC) { m_lowADC = lowADC; }
@@ -338,7 +339,8 @@ class MetrologySignal
 public:
 
                             MetrologySignal();
-    explicit                MetrologySignal(const Signal& param);
+    explicit                MetrologySignal(const Signal& signal);
+    explicit                MetrologySignal(const SignalParam& param);
                             ~MetrologySignal();
 
 private:
@@ -562,6 +564,7 @@ public:
     void                    clearSignalList();
 
     int                     appendSignal(const Signal& signal);
+	int						appendSignal(const SignalParam& param);
 
     MetrologySignal         signal(const QString& appSignalID);
     MetrologySignal         signal(const Hash& hash);
@@ -603,6 +606,7 @@ public:
 
                                     // index of cases
                                     //
+	void                    setCaseNoForAllSignals();
     int                     caseNoCount() const;
     int                     caseNoByCaseIndex(int caseIndex);
 

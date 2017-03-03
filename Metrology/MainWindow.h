@@ -254,7 +254,6 @@ private slots:
     //
     void                signalSocketConnected();
     void                signalSocketDisconnected();
-    void                signalSocketSignalsLoaded();
 
     // Slots of tuningSocket
     //
