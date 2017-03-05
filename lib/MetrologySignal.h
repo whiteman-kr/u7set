@@ -27,8 +27,8 @@ namespace Metrology
 
 			Hash                m_hash = 0;         // hash calcHash from rack m_equipmentID
 
-			QString             m_equipmentID;
-			QString             m_caption;
+			QString             m_equipmentID;		// rack equipmentID
+			QString             m_caption;			// rack caption
 
 			int                 m_type = -1;        // field will be using if we have group measuring
 
@@ -64,8 +64,8 @@ namespace Metrology
 			virtual             ~SignalLocation() {}
 
 		private:
-			QString             m_equipmentID;
 
+			QString             m_equipmentID;
 
 			RackParam           m_rack;
 			int                 m_chassis = -1;
@@ -135,23 +135,29 @@ namespace Metrology
 		double                  m_inputElectricLowLimit = 0;
 		double                  m_inputElectricHighLimit = 0;
 		E::InputUnit            m_inputElectricUnitID = E::InputUnit::NoInputUnit;
+		QString                 m_inputElectricUnit;
 		E::SensorType           m_inputElectricSensorType = E::SensorType::NoSensorType;
+		QString                 m_inputElectricSensor;
 		int                     m_inputElectricPrecision = 3;
 
 		double                  m_inputPhysicalLowLimit = 0;
 		double                  m_inputPhysicalHighLimit = 0;
 		int                     m_inputPhysicalUnitID = NO_UNIT_ID;
+		QString                 m_inputPhysicalUnit;
 		int                     m_inputPhysicalPrecision = 2;
 
 		double                  m_outputElectricLowLimit = 0;
 		double                  m_outputElectricHighLimit = 0;
 		E::InputUnit            m_outputElectricUnitID  = E::InputUnit::NoInputUnit;
+		QString                 m_outputElectricUnit;
 		E::SensorType           m_outputElectricSensorType = E::SensorType::NoSensorType;
+		QString                 m_outputElectricSensor;
 		int                     m_outputElectricPrecision = 3;
 
 		double                  m_outputPhysicalLowLimit = 0;
 		double                  m_outputPhysicalHighLimit = 0;
 		int                     m_outputPhysicalUnitID = NO_UNIT_ID;
+		QString                 m_outputPhysicalUnit;
 		int                     m_outputPhysicalPrecision = 2;
 
 		bool                    m_enableTuning = false;
@@ -175,10 +181,17 @@ namespace Metrology
 		void                    setCaption(const QString& caption) { m_caption = caption; }
 
 		E::SignalType           signalType() const { return m_signalType; }
-		void                    setSignalType(const E::SignalType& type) { m_signalType = type; }
+		void                    setSignalType(E::SignalType type) { m_signalType = type; }
 
 		E::SignalInOutType      inOutType() const { return m_inOutType; }
-		void                    setInOutType(const E::SignalInOutType& inOutType) { m_inOutType = inOutType; }
+		void                    setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+
+		bool                    isAnalog() const { return m_signalType == E::SignalType::Analog; }
+		bool                    isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+
+		bool                    isInput() const { return m_inOutType == E::SignalInOutType::Input; }
+		bool                    isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
+		bool                    isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
 
 		SignalLocation          location() const { return m_location; }
 		void                    setLocation(const SignalLocation& location) { m_location = location; }
@@ -189,6 +202,8 @@ namespace Metrology
 		int                     highADC() const { return m_highADC; }
 		void                    setHighADC(int highADC) { m_highADC = highADC;}
 
+		QString                 adcRangeStr(bool showHex) const;
+
 		double                  inputElectricLowLimit() const { return m_inputElectricLowLimit; }
 		void                    setInputElectricLowLimit(double lowLimit) { m_inputElectricLowLimit = lowLimit; }
 
@@ -196,13 +211,21 @@ namespace Metrology
 		void                    setInputElectricHighLimit(double highLimit) { m_inputElectricHighLimit = highLimit; }
 
 		E::InputUnit            inputElectricUnitID() const { return m_inputElectricUnitID; }
-		void                    setInputElectricUnitID(const E::InputUnit unit) { m_inputElectricUnitID = unit; }
+		void                    setInputElectricUnitID(E::InputUnit unit) { m_inputElectricUnitID = unit; }
+
+		QString					inputElectricUnit() const { return m_inputElectricUnit; }
+		void                    setInputElectricUnit(const QString& unit) { m_inputElectricUnit = unit; }
 
 		E::SensorType           inputElectricSensorType() const { return m_inputElectricSensorType; }
-		void                    setInputElectricSensorType(const E::SensorType sensorType) { m_inputElectricSensorType = sensorType; }
+		void                    setInputElectricSensorType(E::SensorType sensorType) { m_inputElectricSensorType = sensorType; }
+
+		QString					inputElectricSensor() const { return m_inputElectricSensor; }
+		void                    setInputElectricSensor(const QString& sensor) { m_inputElectricSensor = sensor; }
 
 		int                     inputElectricPrecision() const { return m_inputElectricPrecision; }
 		void                    setInputElectricPrecision(int precision) { m_inputElectricPrecision = precision; }
+
+		QString                 inputElectricRangeStr() const;
 
 		double                  inputPhysicalLowLimit() const { return m_inputPhysicalLowLimit; }
 		void                    setInputPhysicalLowLimit(double lowLimit) { m_inputPhysicalLowLimit = lowLimit; }
@@ -213,8 +236,13 @@ namespace Metrology
 		int                     inputPhysicalUnitID() const { return m_inputPhysicalUnitID; }
 		void                    setInputPhysicalUnitID(int unit) { m_inputPhysicalUnitID = unit; }
 
+		QString					inputPhysicalUnit() const { return m_inputPhysicalUnit; }
+		void                    setInputPhysicalUnit(const QString& unit) { m_inputPhysicalUnit = unit; }
+
 		int                     inputPhysicalPrecision() const { return m_inputPhysicalPrecision; }
 		void                    setInputPhysicalPrecision(int precision) { m_inputPhysicalPrecision = precision; }
+
+		QString                 inputPhysicalRangeStr() const;
 
 		double                  outputElectricLowLimit() const { return m_outputElectricLowLimit; }
 		void                    setOutputElectricLowLimit(double lowLimit) { m_outputElectricLowLimit = lowLimit; }
@@ -225,11 +253,19 @@ namespace Metrology
 		E::InputUnit            outputElectricUnitID() const { return m_outputElectricUnitID; }
 		void                    setOutputElectricUnitID(const E::InputUnit unit) { m_outputElectricUnitID = unit; }
 
+		QString					outputElectricUnit() const { return m_outputElectricUnit; }
+		void                    setOutputElectricUnit(const QString& unit) { m_outputElectricUnit = unit; }
+
 		E::SensorType           outputElectricSensorType() const { return m_outputElectricSensorType; }
 		void                    setOutputElectricSensorType(const E::SensorType sensorType) { m_outputElectricSensorType = sensorType; }
 
+		QString					outputElectricSensor() const { return m_outputElectricSensor; }
+		void                    setOutputElectricSensor(const QString& sensor) { m_outputElectricSensor = sensor; }
+
 		int                     outputElectricPrecision() const { return m_outputElectricPrecision; }
 		void                    setOutputElectricPrecision(int precision) { m_outputElectricPrecision = precision; }
+
+		QString                 outputElectricRangeStr() const;
 
 		double                  outputPhysicalLowLimit() const { return m_outputPhysicalLowLimit; }
 		void                    setOutputPhysicalLowLimit(double lowLimit) { m_outputPhysicalLowLimit = lowLimit; }
@@ -240,13 +276,20 @@ namespace Metrology
 		int                     outputPhysicalUnitID() const { return m_outputPhysicalUnitID; }
 		void                    setOutputPhysicalUnitID(int unit) { m_outputPhysicalUnitID = unit; }
 
+		QString                 outputPhysicalUnit() const { return m_outputPhysicalUnit; }
+		void                    setOutputPhysicalUnit(const QString& unit) { m_outputPhysicalUnit = unit; }
+
 		int                     outputPhysicalPrecision() const { return m_outputPhysicalPrecision; }
 		void                    setOutputPhysicalPrecision(int precision) { m_outputPhysicalPrecision = precision; }
 
+		QString                 outputPhysicalRangeStr() const;
+
 		bool                    enableTuning() const { return m_enableTuning; }
+		QString                 enableTuningStr() const;
 		void                    setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
 		double                  tuningDefaultValue() const { return m_tuningDefaultValue; }
+		QString                 tuningDefaultValueStr() const;
 		void                    setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
 
 		bool                    readFromXml(XmlReadHelper& xml);

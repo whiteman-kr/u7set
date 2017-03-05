@@ -159,21 +159,21 @@ namespace Metrology
 
 	QString SignalLocation::chassisStr() const
 	{
-		return m_chassis == -1 ? QT_TRANSLATE_NOOP("MetrologySignal.cpp", "N/A") : QString::number(m_chassis + 1);
+		return m_chassis == -1 ? QString("N/A") : QString::number(m_chassis + 1);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::moduleStr() const
 	{
-		return m_module == -1 ? QT_TRANSLATE_NOOP("MetrologySignal.cpp", "N/A") : QString::number(m_module + 1);
+		return m_module == -1 ? QString("N/A") : QString::number(m_module + 1);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::placeStr() const
 	{
-		return m_place == -1 ? QT_TRANSLATE_NOOP("MetrologySignal.cpp", "N/A") : QString::number(m_place + 1);
+		return m_place == -1 ? QString("N/A") : QString::number(m_place + 1);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -392,6 +392,147 @@ namespace Metrology
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
 		}
 		xml.writeEndElement();  // </Signal>
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::adcRangeStr(bool showHex) const
+	{
+		QString range;
+
+		if (showHex == false)
+		{
+			range.sprintf("%d .. %d", m_lowADC, m_highADC);
+		}
+		else
+		{
+			range.sprintf("0x%04X .. 0x%04X", m_lowADC, m_highADC);
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::inputElectricRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf( ("%%.%df"), m_inputElectricPrecision );
+
+		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputElectricLowLimit, m_inputElectricHighLimit);
+
+		if (m_inputElectricUnit.isEmpty() == false)
+		{
+			range.append( " " + m_inputElectricUnit );
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::inputPhysicalRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
+
+		range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
+
+		if (m_inputPhysicalUnit.isEmpty() == false)
+		{
+			range.append( " " + m_inputPhysicalUnit );
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::outputElectricRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf( ("%%.%df"), m_outputElectricPrecision );
+
+		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputElectricLowLimit, m_outputElectricHighLimit);
+
+		if (m_outputElectricUnit.isEmpty() == false)
+		{
+			range.append( " " + m_outputElectricUnit);
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::outputPhysicalRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf( ("%%.%df"), m_outputPhysicalPrecision );
+
+		range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
+
+		if (m_outputPhysicalUnit.isEmpty() == false)
+		{
+			range.append( " " + m_outputPhysicalUnit);
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::enableTuningStr() const
+	{
+		if (m_enableTuning == false)
+		{
+			return QString();
+		}
+
+		return QString("Yes");
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::tuningDefaultValueStr() const
+	{
+		if (m_enableTuning == false)
+		{
+			return QString();
+		}
+
+		QString stateStr, formatStr;
+
+		switch (m_signalType)
+		{
+			case E::SignalType::Analog:
+
+				formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
+
+				stateStr.sprintf( formatStr.toAscii(), m_tuningDefaultValue);
+
+				if (m_inputPhysicalUnit.isEmpty() == false)
+				{
+					stateStr.append(" " + m_inputPhysicalUnit);
+				}
+
+				break;
+
+			case E::SignalType::Discrete:
+
+				stateStr = m_tuningDefaultValue == 0 ? QString("No") : QString("Yes");
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+		return stateStr;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
