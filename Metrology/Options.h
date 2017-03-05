@@ -32,7 +32,7 @@ class ProjectInfo: public QObject
 
 public:
 	explicit            ProjectInfo(QObject *parent = 0);
-	explicit            ProjectInfo(const ProjectInfo& from, QObject *parent = 0);
+    explicit            ProjectInfo(const ProjectInfo& from, QObject *parent = 0);
 						~ProjectInfo();
 private:
 
@@ -43,9 +43,6 @@ private:
 	int					m_changeset = 0;
 	QString				m_user;
 	QString				m_workstation;
-
-	QString				m_dbName;
-	QString				m_dbDescription;
 	int					m_dbVersion;
 
 public:
@@ -57,17 +54,13 @@ public:
 	int					changeset() { return m_changeset; }
 	QString				user() { return m_user; }
 	QString				workstation() { return m_workstation; }
-
-
-	QString				dbName() { return m_dbName; }
-	QString				dbDescription() { return  m_dbDescription; }
 	int					dbVersion() { return m_dbVersion; }
 
 	void                save();
 
 	bool				readFromXml(const QByteArray& fileData);
 
-	ProjectInfo&		operator=(const ProjectInfo& from);
+    ProjectInfo&		operator=(const ProjectInfo& from);
 };
 
 // ==============================================================================================

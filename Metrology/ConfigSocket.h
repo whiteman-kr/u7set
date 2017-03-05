@@ -58,6 +58,10 @@ private slots:
     bool                readConfiguration(const QByteArray& fileData);
     bool                readMetrologySignals(const QByteArray& fileData);
 
+    bool                readRacks(const QByteArray& fileData, int fileVersion);
+    bool                readUnits(const QByteArray& fileData, int fileVersion);
+    bool                readSignalParams(const QByteArray& fileData, int fileVersion);
+
 signals:
 
 	void				socketConnected();

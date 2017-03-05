@@ -267,6 +267,11 @@ namespace Builder
 		// Subset of EQP -- Generation Software Configuration
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
+		void errEQP6101(QString appSignalID, int unitID);
+		void errEQP6102(QString appSignalID, int sensorType);
+		void errEQP6103(QString appSignalID, int outputMode);
+		void errEQP6104(QString appSignalID, int inOutType);
+		void errEQP6105(QString appSignalID, int byteOrder);
 
 
 	public:

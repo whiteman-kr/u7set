@@ -3666,6 +3666,127 @@ namespace Builder
 				  );
 	}
 
+
+	/// IssueCode: EQP6101
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong unit: %2.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong unit
+	///
+	/// Description:
+	///		Wrong unit. It is required to set unit to the correct value.
+	///
+	void IssueLogger::errEQP6101(QString appSignalID, int unitID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6101,
+				  tr("Signal %1 has wrong unit: %2.")
+				  .arg(appSignalID)
+				  .arg(unitID)
+				  );
+	}
+
+
+	/// IssueCode: EQP6102
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong type of sensor: %2.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong type of sensor
+	///
+	/// Description:
+	///		Wrong type of sensor. It is required to set type of sensor to the correct value.
+	///
+	void IssueLogger::errEQP6102(QString appSignalID, int sensorType)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6102,
+				  tr("Signal %1 has wrong type of sensor: %2.")
+				  .arg(appSignalID)
+				  .arg(sensorType)
+				  );
+	}
+
+
+	/// IssueCode: EQP6103
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong type of output range mode: %2.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong type of output range mode
+	///
+	/// Description:
+	///		Wrong type of output range mode. It is required to set type of output range mode to the correct value.
+	///
+	void IssueLogger::errEQP6103(QString appSignalID, int outputMode)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6103,
+				  tr("Signal %1 has wrong type of output range mode: %2.")
+				  .arg(appSignalID)
+				  .arg(outputMode)
+				  );
+	}
+
+
+	/// IssueCode: EQP6104
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong input/output type: %2.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong input/output type of signal
+	///
+	/// Description:
+	///		Wrong input/output type of signal. It is required to set input/output type to the correct value.
+	///
+	void IssueLogger::errEQP6104(QString appSignalID, int inOutType)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6104,
+				  tr("Signal %1 has wrong input/output type: %2.")
+				  .arg(appSignalID)
+				  .arg(inOutType)
+				  );
+	}
+
+
+	/// IssueCode: EQP6105
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong order of byte: %2.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Wrong order of byte
+	///
+	/// Description:
+	///		Wrong order of byte. It is required to set order of byte to the correct value.
+	///
+	void IssueLogger::errEQP6105(QString appSignalID, int byteOrder)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6105,
+				  tr("Signal %1 has wrong order of byte: %2.")
+				  .arg(appSignalID)
+				  .arg(byteOrder)
+				  );
+	}
+
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

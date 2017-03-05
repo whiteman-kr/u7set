@@ -21,9 +21,9 @@ ProjectInfo::ProjectInfo(QObject *parent) :
 // -------------------------------------------------------------------------------------------------------------------
 
 ProjectInfo::ProjectInfo(const ProjectInfo& from, QObject *parent) :
-	QObject(parent)
+    QObject(parent)
 {
-	*this = from;
+    *this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -45,9 +45,6 @@ void ProjectInfo::save()
 	s.setValue( QString("%1Changeset").arg(PROJECT_INFO_KEY), m_changeset);
 	s.setValue( QString("%1User").arg(PROJECT_INFO_KEY), m_user);
 	s.setValue( QString("%1Workstation").arg(PROJECT_INFO_KEY), m_workstation);
-
-	s.setValue( QString("%1DatabaseName").arg(PROJECT_INFO_KEY), m_dbName);
-	s.setValue( QString("%1DatabaseDescription").arg(PROJECT_INFO_KEY), m_dbDescription);
 	s.setValue( QString("%1DatabaseVersion").arg(PROJECT_INFO_KEY), m_dbVersion);
 }
 
@@ -84,8 +81,6 @@ bool ProjectInfo::readFromXml(const QByteArray& fileData)
 		return false;
 	}
 
-	result &= xml.readStringAttribute("DatabaseName", &m_dbName);
-	result &= xml.readStringAttribute("Description", &m_dbDescription);
 	result &= xml.readIntAttribute("Version", &m_dbVersion);
 
 	if (result == false)
@@ -102,11 +97,16 @@ bool ProjectInfo::readFromXml(const QByteArray& fileData)
 
 ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 {
-	m_dbName = from.m_dbName;
-	m_dbDescription = from.m_dbDescription;
-	m_dbVersion = from.m_dbVersion;
+    m_projectName = from.m_projectName;
+    m_id = from.m_id;
+    m_release = from.m_release;
+    m_date = from.m_release;
+    m_changeset = from.m_changeset;
+    m_user = from.m_user;
+    m_workstation = from.m_workstation;
+    m_dbVersion = from.m_dbVersion;
 
-	return *this;
+    return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -708,6 +708,40 @@ extern UnitBase theUnitBase;
 
 // ==============================================================================================
 
+class RackBase : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit                RackBase(QObject *parent = 0);
+                            ~RackBase();
+
+    void                    clear();
+
+    int                     count() const;
+
+    void                    appendRack(const QString& rackID, const QString& caption);
+
+    QString                 rackCaption(const QString &rackID);
+
+private:
+
+    mutable QMutex          m_rackMutex;
+    QMap<QString, QString>  m_rackMap;
+
+
+signals:
+
+public slots:
+
+};
+
+// ==============================================================================================
+
+extern RackBase theRackBase;
+
+// ==============================================================================================
+
 const char* const OutputSignalSumType[] =
 {
                             QT_TRANSLATE_NOOP("Measure.h", "Addition (+)"),

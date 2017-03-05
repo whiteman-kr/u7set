@@ -186,7 +186,8 @@ SOURCES +=\
     Forms/ComparePropertyObjectDialog.cpp \
     ../TuningIPEN/TuningIPENDataStorage.cpp \
     DialogConnections.cpp \
-    Builder/MetrologyCfgGenerator.cpp
+    Builder/MetrologyCfgGenerator.cpp \
+    ../lib/MetrologySignal.cpp
 
 
 HEADERS  += \
@@ -304,7 +305,8 @@ HEADERS  += \
     ../lib/diff_match_patch.h \
     ../TuningIPEN/TuningIPENDataStorage.h \
     DialogConnections.h \
-    Builder/MetrologyCfgGenerator.h
+    Builder/MetrologyCfgGenerator.h \
+    ../lib/MetrologySignal.h
 
 FORMS    += \
     CreateProjectDialog.ui \

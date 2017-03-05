@@ -267,8 +267,7 @@ bool SignalPosition::readFromXml(XmlReadHelper& xml)
         return false;
     }
 
-    result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
-    result &= xml.readStringAttribute("Rack", &m_rackCaption);
+    result &= xml.readStringAttribute("RackID", &m_equipmentID);
     result &= xml.readIntAttribute("Chassis", &m_chassis);
     result &= xml.readIntAttribute("Module", &m_module);
     result &= xml.readIntAttribute("Place", &m_place);
@@ -2265,13 +2264,18 @@ void SignalBase::setCaseNoForAllSignals()
                 continue;
             }
 
-            const QString& caseCaption = param.position().caseCaption();
+            SignalPosition pos = param.position();
 
+            const QString& caseCaption = theRackBase.rackCaption( pos.equipmentID() );
             if (caseCaption.isEmpty() == true)
             {
                 assert(false);
                 continue;
             }
+
+            pos.setCaseCaption(caseCaption);
+
+            param.setPosition(pos);
 
             if (caseCaptionMap.contains( caseCaption ) == false)
             {
@@ -2850,6 +2854,84 @@ QString UnitBase::unit(int unitID)
     m_unitMutex.unlock();
 
     return strUnit;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+RackBase theRackBase;
+
+// -------------------------------------------------------------------------------------------------------------------
+
+RackBase::RackBase(QObject *parent) :
+    QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+RackBase::~RackBase()
+{
+}
+
+ // -------------------------------------------------------------------------------------------------------------------
+
+void RackBase::clear()
+{
+    m_rackMutex.lock();
+
+        m_rackMap.clear();
+
+    m_rackMutex.unlock();
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int RackBase::count() const
+{
+    int count = 0;
+
+    m_rackMutex.lock();
+
+        count = m_rackMap.size();
+
+    m_rackMutex.unlock();
+
+    return count;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void RackBase::appendRack(const QString &rackID, const QString& caption)
+{
+    m_rackMutex.lock();
+
+        if (m_rackMap.contains(rackID) == false)
+        {
+            m_rackMap[rackID] = caption;
+        }
+
+    m_rackMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString RackBase::rackCaption(const QString& rackID)
+{
+    QString caption;
+
+    m_rackMutex.lock();
+
+        if (m_rackMap.contains(rackID) == true)
+        {
+            caption = m_rackMap[rackID];
+        }
+
+    m_rackMutex.unlock();
+
+    return caption;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

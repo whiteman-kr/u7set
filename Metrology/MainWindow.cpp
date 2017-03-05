@@ -784,7 +784,7 @@ void MainWindow::updateCasesOnToolBar()
         m_asCaseTypeCombo->addItem( theSignalBase.caseTypeCaption(c), c );
     }
 
-    m_asCaseTypeCombo->model()->sort(0);
+    //m_asCaseTypeCombo->model()->sort(0);
     m_asCaseTypeCombo->setCurrentIndex(0);
     m_asCaseTypeCombo->setEnabled(true);
     m_asCaseTypeCombo->blockSignals(false);
