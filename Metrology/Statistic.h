@@ -67,11 +67,11 @@ public:
                             ~StatisticTable();
 
     int                     signalCount() const;
-    SignalParam             signalParam(int index) const;
-    void                    set(const QList<SignalParam> list_add);
+	MetrologySignal*		signal(int index) const;
+	void                    set(const QList<MetrologySignal*> list_add);
     void                    clear();
 
-    QString                 text(int row, int column, const SignalParam& param) const;
+	QString                 text(int row, int column, MetrologySignal* pSignal) const;
 
     bool                    showCustomID() const { return m_showCustomID; }
     void                    setShowCustomID(bool show) { m_showCustomID = show; }
@@ -82,7 +82,7 @@ public:
 private:
 
     mutable QMutex          m_signalMutex;
-    QList<SignalParam>      m_signalParamList;
+	QList<MetrologySignal*>	m_signalList;
 
     static bool             m_showCustomID;
     static bool             m_showADCInHex;
@@ -145,7 +145,7 @@ private:
 
 
     QTableView*             m_pView = nullptr;
-    StatisticTable          m_signalParamTable;
+	StatisticTable          m_signalTable;
 
     QAction*                m_pColumnAction[STATISTIC_COLUMN_COUNT];
     QMenu*                  m_headerContextMenu = nullptr;
@@ -165,8 +165,6 @@ private:
     void                    hideColumn(int column, bool hide);
 
 protected:
-
-    bool                    eventFilter(QObject *object, QEvent *event);
 
 signals:
 
@@ -206,10 +204,6 @@ private slots:
     //
     void                    onHeaderContextMenu(QPoint);
     void                    onColumnAction(QAction* action);
-
-    // slots for list
-    //
-    void                    onListDoubleClicked(const QModelIndex&) { }
 };
 
 // ==============================================================================================
