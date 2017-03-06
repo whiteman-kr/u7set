@@ -3671,20 +3671,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 has wrong unit: %2.
+	/// Title: Signal %1 has wrong unitID: %2.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Wrong unit
+	///		%2 Wrong unitID
 	///
 	/// Description:
-	///		Wrong unit. It is required to set unit to the correct value.
+	///		Wrong unitID. It is required to set unitID to the correct value.
 	///
 	void IssueLogger::errEQP6101(QString appSignalID, int unitID)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6101,
-				  tr("Signal %1 has wrong unit: %2.")
+				  tr("Signal %1 has wrong unitID: %2.")
 				  .arg(appSignalID)
 				  .arg(unitID)
 				  );
