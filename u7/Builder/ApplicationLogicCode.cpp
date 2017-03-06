@@ -275,9 +275,43 @@ namespace Builder
 
 	// ---------------------------------------------------------------------------------------
 	//
+	// CodeItem class implementation
+	//
+	// ---------------------------------------------------------------------------------------
+
+	CodeItem::CodeItem()
+	{
+	}
+
+
+	CodeItem::CodeItem(const CodeItem& codeItem)
+	{
+		m_comment = codeItem.m_comment;
+		m_binCode = codeItem.m_binCode;
+	}
+
+
+	// ---------------------------------------------------------------------------------------
+	//
 	// Comment class implementation
 	//
 	// ---------------------------------------------------------------------------------------
+
+	Comment::Comment()
+	{
+	}
+
+
+	Comment::Comment(const Comment& comment) :
+		CodeItem(comment)
+	{
+	}
+
+
+	Comment::Comment(const QString& comment)
+	{
+		setComment(comment);
+	}
 
 
 	QString Comment::toString()
@@ -300,7 +334,7 @@ namespace Builder
 	// ---------------------------------------------------------------------------------------
 
 	QHash<int, const LmCommand*> Command::m_lmCommands;
-	 QHash<quint16, int> Command::m_executedFb;
+	QHash<quint16, int> Command::m_executedFb;
 
 	LmMemoryMap* Command::m_memoryMap = nullptr;
 	IssueLogger* Command::m_log = nullptr;
@@ -311,7 +345,8 @@ namespace Builder
     }
 
 
-	Command::Command(const Command& cmd)
+	Command::Command(const Command& cmd) :
+		CodeItem(cmd)
 	{
 		initStaticMembers();
 
