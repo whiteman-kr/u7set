@@ -29,7 +29,7 @@ StatisticTable::~StatisticTable()
 {
     m_signalMutex.lock();
 
-        m_signalParamList.clear();
+		m_signalList.clear();
 
     m_signalMutex.unlock();
 }
@@ -96,8 +96,13 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    SignalParam param = signalParam(row);
-    if (param.isValid() == false)
+	MetrologySignal* pSignal = signal(row);
+	if (pSignal == nullptr)
+	{
+		return QVariant();
+	}
+
+	if ( pSignal->param().isValid() == false)
     {
         return QVariant();
     }
@@ -136,7 +141,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::TextColorRole)
     {
-        if (column == STATISTIC_COLUMN_STATE && param.statistic().measureCount() == 0)
+		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().measureCount() == 0)
         {
             return QColor( Qt::lightGray );
         }
@@ -146,13 +151,13 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::BackgroundColorRole)
     {
-        if (column == STATISTIC_COLUMN_STATE && param.statistic().measureCount() != 0)
+		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().measureCount() != 0)
         {
-            if (param.statistic().state() == STATISTIC_STATE_INVALID)
+			if (pSignal->statistic().state() == STATISTIC_STATE_INVALID)
             {
                 return theOptions.measureView().colorErrorLimit();
             }
-            if (param.statistic().state() == STATISTIC_STATE_SUCCESS)
+			if (pSignal->statistic().state() == STATISTIC_STATE_SUCCESS)
             {
                 return theOptions.measureView().colorNotError();
             }
@@ -164,7 +169,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-        return text(row, column, param);
+		return text(row, column, pSignal);
     }
 
     return QVariant();
@@ -172,7 +177,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticTable::text(int row, int column, const SignalParam& param) const
+QString StatisticTable::text(int row, int column, MetrologySignal* pSignal) const
 {
     if (row < 0 || row >= signalCount())
     {
@@ -184,6 +189,12 @@ QString StatisticTable::text(int row, int column, const SignalParam& param) cons
         return QString();
     }
 
+	if (pSignal == nullptr)
+	{
+		return QString();
+	}
+
+	SignalParam& param = pSignal->param();
     if (param.isValid() == false)
     {
         return QString();
@@ -206,8 +217,8 @@ QString StatisticTable::text(int row, int column, const SignalParam& param) cons
         case STATISTIC_COLUMN_OUTPUT_TYPE:      result = QString();                                         break;
         case STATISTIC_COLUMN_OUT_PH_RANGE:     result = param.outputPhysicalRangeStr();                    break;
         case STATISTIC_COLUMN_OUT_EL_RANGE:     result = param.outputElectricRangeStr();                    break;
-        case STATISTIC_COLUMN_MEASURE_COUNT:    result = param.statistic().measureCountStr();               break;
-        case STATISTIC_COLUMN_STATE:            result = param.statistic().stateStr();                      break;
+		case STATISTIC_COLUMN_MEASURE_COUNT:    result = pSignal->statistic().measureCountStr();			break;
+		case STATISTIC_COLUMN_STATE:            result = pSignal->statistic().stateStr();                   break;
         default:                                assert(0);
     }
 
@@ -222,7 +233,7 @@ int StatisticTable::signalCount() const
 
     m_signalMutex.lock();
 
-        count = m_signalParamList.size();
+		count = m_signalList.size();
 
     m_signalMutex.unlock();
 
@@ -231,25 +242,25 @@ int StatisticTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalParam StatisticTable::signalParam(int index) const
+MetrologySignal* StatisticTable::signal(int index) const
 {
-    SignalParam param;
+	MetrologySignal* pSignal = nullptr;
 
     m_signalMutex.lock();
 
-        if (index >= 0 && index < m_signalParamList.size())
+		if (index >= 0 && index < m_signalList.size())
         {
-             param = m_signalParamList[index];
+			 pSignal = m_signalList[index];
         }
 
     m_signalMutex.unlock();
 
-    return param;
+	return pSignal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::set(const QList<SignalParam> list_add)
+void StatisticTable::set(const QList<MetrologySignal*> list_add)
 {
     int count = list_add.count();
     if (count == 0)
@@ -261,7 +272,7 @@ void StatisticTable::set(const QList<SignalParam> list_add)
 
         m_signalMutex.lock();
 
-            m_signalParamList = list_add;
+			m_signalList = list_add;
 
         m_signalMutex.unlock();
 
@@ -272,7 +283,7 @@ void StatisticTable::set(const QList<SignalParam> list_add)
 
 void StatisticTable::clear()
 {
-    int count = m_signalParamList.count();
+	int count = m_signalList.count();
     if (count == 0)
     {
         return;
@@ -282,7 +293,15 @@ void StatisticTable::clear()
 
         m_signalMutex.lock();
 
-            m_signalParamList.clear();
+			for(int i = count - 1; i >= 0; i--)
+			{
+				if (m_signalList[i] != nullptr)
+				{
+					delete m_signalList[i];
+				}
+			}
+
+			m_signalList.clear();
 
         m_signalMutex.unlock();
 
@@ -301,13 +320,19 @@ void StatisticTable::updateSignalParam(const Hash& signalHash)
 
     m_signalMutex.lock();
 
-        int count = m_signalParamList.count();
+		int count = m_signalList.count();
 
         for(int i = 0; i < count; i ++)
         {
-            if (m_signalParamList[i].hash() == signalHash)
+			 MetrologySignal* pSignal = m_signalList[i];
+			 if (pSignal == nullptr)
+			 {
+				 continue;
+			 }
+
+			if (pSignal->param().hash() == signalHash)
             {
-                m_signalParamList[i] = theSignalBase.signalParam(signalHash);
+				pSignal->setParam( theSignalBase.signalParam(signalHash) );
 
                 break;
             }
@@ -366,6 +391,7 @@ StatisticDialog::StatisticDialog(QWidget *parent) :
 
 StatisticDialog::~StatisticDialog()
 {
+	m_signalTable.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -377,7 +403,6 @@ void StatisticDialog::createInterface()
     setWindowTitle(tr("Statistics"));
     resize(QApplication::desktop()->availableGeometry().width() - 800, 800);
     move(QApplication::desktop()->availableGeometry().center() - rect().center());
-    installEventFilter(this);
 
     m_pMenuBar = new QMenuBar(this);
     m_pSignalMenu = new QMenu(tr("&Signal"), this);
@@ -420,12 +445,12 @@ void StatisticDialog::createInterface()
     m_pViewShowMenu = new QMenu(tr("Show"), this);
     m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
     m_pShowCustomIDAction->setCheckable(true);
-    m_pShowCustomIDAction->setChecked(m_signalParamTable.showCustomID());
+	m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
     m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 
     m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
     m_pShowADCInHexAction->setCheckable(true);
-    m_pShowADCInHexAction->setChecked(m_signalParamTable.showADCInHex());
+	m_pShowADCInHexAction->setChecked(m_signalTable.showADCInHex());
 
     m_pViewGotoMenu = new QMenu(tr("Go to next"), this);
     m_pGotoNextNotMeasuredAction = m_pViewGotoMenu->addAction(tr("Not measured"));
@@ -459,7 +484,7 @@ void StatisticDialog::createInterface()
 
 
     m_pView = new QTableView(this);
-    m_pView->setModel(&m_signalParamTable);
+	m_pView->setModel(&m_signalTable);
     QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
     m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
@@ -470,7 +495,6 @@ void StatisticDialog::createInterface()
 
     m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    connect(m_pView, &QTableView::doubleClicked , this, &StatisticDialog::onListDoubleClicked);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
 
@@ -567,20 +591,22 @@ void StatisticDialog::updateList()
 
     updateVisibleColunm();
 
-    m_signalParamTable.clear();
+	m_signalTable.clear();
 
-    QList<SignalParam> signalParamList;
+	QList<MetrologySignal*> signalList;
 
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        SignalParam param = theSignalBase.signalParam(i);
-        if (param.isValid() == false)
+		MetrologySignal signal = theSignalBase.signal(i);
+		if (signal.param().isValid() == false)
         {
             continue;
         }
 
-        if (param.isAnalog() == false || param.isInput() == false)
+		SignalParam& param = signal.param();
+
+		if (param.isAnalog() == false || param.isInput() == false)
         {
             continue;
         }
@@ -590,30 +616,30 @@ void StatisticDialog::updateList()
             continue;
         }
 
-        // temporary solution // param.setStatistic( theMeasureBase.statisticItem( param.hash() ) );
+		// temporary solution // signal.setStatistic( theMeasureBase.statisticItem( param.hash() ) );
         //
             MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
             if (pMeasureView != nullptr)
             {
-                param.setStatistic( pMeasureView->table().m_measureBase.statistic( param.hash() ) );
+				signal.setStatistic( pMeasureView->table().m_measureBase.statistic( param.hash() ) );
             }
         //
         // temporary solution
 
-        if (param.statistic().measureCount() != 0)
+		if (signal.statistic().measureCount() != 0)
         {
             m_MeasuredCount++;
         }
 
-        if (param.statistic().state() == STATISTIC_STATE_INVALID)
+		if (signal.statistic().state() == STATISTIC_STATE_INVALID)
         {
             m_invalidMeasureCount ++;
         }
 
-        signalParamList.append( param );
+		signalList.append( new MetrologySignal(signal) );
     }
 
-    m_signalParamTable.set(signalParamList);
+	m_signalTable.set(signalList);
 
     updateStatusBar();
 }
@@ -622,7 +648,7 @@ void StatisticDialog::updateList()
 
 void StatisticDialog::updateStatusBar()
 {
-    int signalCount = m_signalParamTable.signalCount();
+	int signalCount = m_signalTable.signalCount();
 
     m_statusMeasured->setText(tr("Measured: %1 / %2").arg(m_MeasuredCount).arg(signalCount));
     m_statusMeasureInavlid->setText(tr("Invalid: %1").arg(m_invalidMeasureCount));
@@ -653,22 +679,6 @@ void StatisticDialog::updateVisibleColunm()
     hideColumn(STATISTIC_COLUMN_OUTPUT_TYPE, true);
     hideColumn(STATISTIC_COLUMN_OUT_PH_RANGE, true);
     hideColumn(STATISTIC_COLUMN_OUT_EL_RANGE, true);
-
-//    if (m_measureType == MEASURE_TYPE_LINEARITY)
-//    {
-//        hideColumn(STATISTIC_COLUMN_OUT_PH_RANGE, true);
-//        hideColumn(STATISTIC_COLUMN_OUT_EL_RANGE, true);
-//
-//    }
-
-//    if (m_typeAD == MEASURE_TYPE_COMPARATOR)
-//    {
-//        hideColumn(STATISTIC_COLUMN_ADC, true);
-//        hideColumn(STATISTIC_COLUMN_IN_PH_RANGE, true);
-//        hideColumn(STATISTIC_COLUMN_IN_EL_RANGE, true);
-//        hideColumn(STATISTIC_COLUMN_OUT_PH_RANGE, true);
-//        hideColumn(STATISTIC_COLUMN_OUT_EL_RANGE, true);
-//    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -690,23 +700,6 @@ void StatisticDialog::hideColumn(int column, bool hide)
         m_pView->showColumn(column);
         m_pColumnAction[column]->setChecked(true);
     }
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool StatisticDialog::eventFilter(QObject *object, QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
-
-        if (keyEvent->key() == Qt::Key_Return)
-        {
-            // stat
-        }
-    }
-
-    return QObject::eventFilter(object, event);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -800,7 +793,7 @@ void StatisticDialog::showTypeComparators()
 
 void StatisticDialog::showCustomID()
 {
-    m_signalParamTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+	m_signalTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
 
     updateList();
 }
@@ -809,7 +802,7 @@ void StatisticDialog::showCustomID()
 
 void StatisticDialog::showADCInHex()
 {
-    m_signalParamTable.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
+	m_signalTable.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
 
     updateList();
 }
@@ -818,7 +811,7 @@ void StatisticDialog::showADCInHex()
 
 void StatisticDialog::gotoNextNotMeasured()
 {
-    int signaCount = m_signalParamTable.signalCount();
+	int signaCount = m_signalTable.signalCount();
     if (signaCount == 0)
     {
         return;
@@ -829,13 +822,18 @@ void StatisticDialog::gotoNextNotMeasured()
 
     for(int i = startIndex + 1; i < signaCount; i++)
     {
-        SignalParam param = m_signalParamTable.signalParam(i);
-        if (param.isValid() == false)
+		MetrologySignal* pSignal = m_signalTable.signal(i);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		if (pSignal->param().isValid() == false)
         {
             continue;
         }
 
-        if (param.statistic().measureCount() == 0)
+		if (pSignal->statistic().measureCount() == 0)
         {
             foundIndex = i;
 
@@ -855,7 +853,7 @@ void StatisticDialog::gotoNextNotMeasured()
 
 void StatisticDialog::gotoNextInvalid()
 {
-    int signaCount = m_signalParamTable.signalCount();
+	int signaCount = m_signalTable.signalCount();
     if (signaCount == 0)
     {
         return;
@@ -866,13 +864,18 @@ void StatisticDialog::gotoNextInvalid()
 
     for(int i = startIndex + 1; i < signaCount; i++)
     {
-        SignalParam param = m_signalParamTable.signalParam(i);
-        if (param.isValid() == false)
-        {
-            continue;
-        }
+		MetrologySignal* pSignal = m_signalTable.signal(i);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
 
-        if (param.statistic().state() == STATISTIC_STATE_INVALID)
+		if (pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		if (pSignal->statistic().state() == STATISTIC_STATE_INVALID)
         {
             foundIndex = i;
 

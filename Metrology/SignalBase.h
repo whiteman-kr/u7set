@@ -182,9 +182,6 @@ private:
     bool                    m_enableTuning = false;
     double                  m_tuningDefaultValue = 0;
 
-
-    StatisticItem           m_statistic;
-
 public:
 
     bool                    isValid() const;
@@ -301,9 +298,6 @@ public:
     double                  tuningDefaultValue() const { return m_tuningDefaultValue; }
     QString                 tuningDefaultValueStr() const;
     void                    setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
-
-    StatisticItem           statistic() const { return m_statistic; }
-    void                    setStatistic(const StatisticItem& statistic) { m_statistic = statistic; }
 };
 
 // ==============================================================================================
@@ -348,6 +342,8 @@ private:
     SignalParam             m_param;
     AppSignalState          m_state;
 
+	StatisticItem           m_statistic;
+
 public:
 
     SignalParam&            param() { return m_param; }
@@ -355,6 +351,9 @@ public:
 
     AppSignalState&         state() { return m_state; }
     void                    setState(const AppSignalState& state) { m_state = state; }
+
+	StatisticItem&          statistic() { return m_statistic; }
+	void                    setStatistic(const StatisticItem& statistic) { m_statistic = statistic; }
 
     MetrologySignal&        operator=(const MetrologySignal& from);
 };

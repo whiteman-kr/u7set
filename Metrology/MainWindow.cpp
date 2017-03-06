@@ -1095,7 +1095,7 @@ bool MainWindow::signalIsMeasured(QString& signalID)
     }
 
     // temporary solution
-    // param.setStatistic( theMeasureBase.statisticItem( param.hash() ) );
+	// metrologySignal.setStatistic( theMeasureBase.statisticItem( param.hash() ) );
     //
     //
     MeasureView* pMeasureView = activeMeasureView();
@@ -1114,12 +1114,16 @@ bool MainWindow::signalIsMeasured(QString& signalID)
             continue;
         }
 
-        SignalParam param = theSignalBase.signalParam(hash);
-        param.setStatistic( pMeasureView->table().m_measureBase.statistic( hash ) );
+		MetrologySignal metrologySignal = theSignalBase.signal(hash);
+		if (metrologySignal.param().isValid() == false)
+		{
+			continue;
+		}
 
-        if ( param.statistic().measureCount() != 0 )
+		metrologySignal.setStatistic( pMeasureView->table().m_measureBase.statistic( hash ) );
+		if ( metrologySignal.statistic().measureCount() != 0 )
         {
-            signalID.append( param.customAppSignalID() + "\n");
+			signalID.append( metrologySignal.param().customAppSignalID() + "\n");
 
             result = true;
         }
