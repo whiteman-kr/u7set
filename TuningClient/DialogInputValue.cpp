@@ -2,11 +2,13 @@
 #include "ui_DialogInputValue.h"
 #include <QMessageBox>
 
-DialogInputValue::DialogInputValue(bool analog, float value, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget *parent) :
+DialogInputValue::DialogInputValue(bool analog, float value, float defaultValue, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+    m_defaultValue(defaultValue),
 	m_analog(analog),
     m_lowLimit(lowLimit),
     m_highLimit(highLimit),
+    m_decimalPlaces(decimalPlaces),
 	ui(new Ui::DialogInputValue)
 {
 	ui->setupUi(this);
@@ -14,7 +16,9 @@ DialogInputValue::DialogInputValue(bool analog, float value, bool sameValue, flo
 	ui->m_checkBox->setVisible(analog == false);
 	ui->m_lineEdit->setVisible(analog == true);
 
-	if (analog == true)
+    ui->m_buttonDefault->setText(tr("Default: ") + QString::number(m_defaultValue, 'f', m_decimalPlaces));
+
+    if (analog == true)
 	{
 
         QString str = tr("Enter the value (%1 - %2):")
@@ -34,7 +38,7 @@ DialogInputValue::DialogInputValue(bool analog, float value, bool sameValue, flo
 		if (sameValue == true)
 		{
 			ui->m_checkBox->setChecked(value != 0);
-			ui->m_checkBox->setText(value != 0 ? tr("Yes") : tr("No"));
+            ui->m_checkBox->setText(value != 0 ? tr("1") : tr("0"));
 		}
 		else
 		{
@@ -100,5 +104,22 @@ void DialogInputValue::accept()
 
 void DialogInputValue::on_m_checkBox_clicked(bool checked)
 {
-	ui->m_checkBox->setText(checked ? tr("Yes") : tr("No"));
+    ui->m_checkBox->setText(checked ? tr("1") : tr("0"));
+}
+
+void DialogInputValue::on_m_buttonDefault_clicked()
+{
+    if (m_analog == true)
+    {
+        ui->m_lineEdit->setText(QString::number(m_defaultValue, 'f', m_decimalPlaces));
+    }
+    else
+    {
+        bool defaultState = m_defaultValue == 0.0 ? false : true;
+
+        ui->m_checkBox->setChecked(defaultState);
+
+        ui->m_checkBox->setText(defaultState ? tr("1") : tr("0"));
+    }
+
 }

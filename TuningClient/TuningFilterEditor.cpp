@@ -709,7 +709,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	std::shared_ptr<TuningFilter> newFilter = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 
 	QUuid uid = QUuid::createUuid();
-	newFilter->setStrID(uid.toString());
+	newFilter->setID(uid.toString());
     newFilter->setCaption(tr("New Filter"));
 
 	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
@@ -909,7 +909,7 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
         std::shared_ptr<TuningFilter> newFilter = pastedRoot->childFilter(i);
 
         QUuid uid = QUuid::createUuid();
-        newFilter->setStrID(uid.toString());
+        newFilter->setID(uid.toString());
 
         QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
         setFilterItemText(newPresetItem, newFilter.get());
@@ -1118,10 +1118,11 @@ void TuningFilterEditor::on_m_setValue_clicked()
 {
     bool first = true;
     bool analog = false;
-    float lowLimit = 0;
-    float highLimit = 0;
+    float lowLimit = 0.0;
+    float highLimit = 0.0;
     int decimalPlaces = 0;
-    float firstValue = 0;
+    float value = 0.0;
+    float defaultValue = 0.0;
 
 	bool sameValue = true;
 
@@ -1153,7 +1154,8 @@ void TuningFilterEditor::on_m_setValue_clicked()
             lowLimit = object->lowLimit();
             highLimit = object->highLimit();
             decimalPlaces = object->decimalPlaces();
-            firstValue = ov.value();
+            value = ov.value();
+            defaultValue = object->defaultValue();
             first = false;
 		}
 		else
@@ -1173,14 +1175,20 @@ void TuningFilterEditor::on_m_setValue_clicked()
                 }
             }
 
-            if (ov.value() != firstValue)
+            if (object->defaultValue() != defaultValue)
+            {
+                QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different default value."));
+                return;
+            }
+
+            if (ov.value() != value)
 			{
 				sameValue = false;
 			}
 		}
 	}
 
-    DialogInputValue d(analog, firstValue, sameValue, lowLimit, highLimit, decimalPlaces);
+    DialogInputValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, decimalPlaces, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

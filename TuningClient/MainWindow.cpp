@@ -308,6 +308,7 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
 
     if (settings.updateFilters == true || settings.updateSignals == true)
     {
+
         bool removedNotFound = false;
 
         theFilters.checkSignals(&objects, removedNotFound, this);
@@ -421,6 +422,17 @@ void MainWindow::showSettings()
     DialogSettings* d = new DialogSettings(this);
 
     d->exec();
+
+    if (d->filterSettingsChanged() == true)
+    {
+        TuningObjectStorage objects = theObjectManager->objectStorage();
+
+        theFilters.removeAutomaticFilters();
+
+        theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+
+        createWorkspace(&objects);
+    }
 
     delete d;
 }

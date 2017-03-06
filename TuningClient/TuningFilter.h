@@ -9,7 +9,7 @@
 struct SchemaDetails
 {
 	QString m_caption;
-	QString m_strId;
+    QString m_Id;
 	QStringList m_appSignalIDs;
 
 };
@@ -104,8 +104,8 @@ public:
 public:
 	// Properties
 	//
-	QString strID() const;
-	void setStrID(const QString& value);
+	QString ID() const;
+	void setID(const QString& value);
 
 	QString caption() const;
 	void setCaption(const QString& value);
@@ -170,7 +170,7 @@ public:
 	void addChild(const std::shared_ptr<TuningFilter>& child);
 
 	void removeChild(const std::shared_ptr<TuningFilter>& child);
-    bool removeChild(const QString& strID);
+    bool removeChild(const QString& ID);
 
 	void removeAllChildren();
     void removeAutomaticChildren();
@@ -186,7 +186,7 @@ private:
     // Properties
     //
 
-	QString m_strID;
+	QString m_ID;
 	QString m_caption;
 
     bool m_automatic = false;

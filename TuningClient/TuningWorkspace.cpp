@@ -160,7 +160,7 @@ void TuningWorkspace::fillFiltersTree()
         m_treeMask = new QLineEdit();
         connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
 
-        m_treeMaskApply = new QPushButton(tr("Search"));
+        m_treeMaskApply = new QPushButton(tr("Filter"));
         connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
         QHBoxLayout* searchLayout = new QHBoxLayout();

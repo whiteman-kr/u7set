@@ -153,12 +153,13 @@ void DialogCheckFilterSignals::buttonClicked(QAbstractButton* button)
 
 TuningFilter::TuningFilter()
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "StrID", true, TuningFilter::strID, TuningFilter::setStrID);
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, TuningFilter::filterType);
-	propFilterType->setCategory("Debug");
+    //auto propFilterID = ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
+    //propFilterID->setCategory("Debug");
+    //auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, TuningFilter::filterType);
+    //propFilterType->setCategory("Debug");
 
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
@@ -169,11 +170,11 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-    auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-    propBackColor->setCategory("Color");
+    //auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
+    //propBackColor->setCategory("Color");
 
-    auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-    propTextColor->setCategory("Color");
+    //auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
+    //propTextColor->setCategory("Color");
 
 }
 
@@ -198,7 +199,7 @@ TuningFilter& TuningFilter::operator=(const TuningFilter& That)
 
 void TuningFilter::copy(const TuningFilter& That)
 {
-	m_strID = That.m_strID;
+    m_ID = That.m_ID;
 	m_caption = That.m_caption;
 
     m_automatic = That.m_automatic;
@@ -232,9 +233,14 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
 {
     if (isRoot() == false)
     {
-        if (reader.attributes().hasAttribute("StrID"))
+        if (reader.attributes().hasAttribute("StrID"))  // This is for reading obsolete files!!!
         {
-            setStrID(reader.attributes().value("StrID").toString());
+            setID(reader.attributes().value("StrID").toString());
+        }
+
+        if (reader.attributes().hasAttribute("ID"))
+        {
+            setID(reader.attributes().value("ID").toString());
         }
 
         if (reader.attributes().hasAttribute("Caption"))
@@ -411,7 +417,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 		}
 	}
 
-	writer.writeAttribute("StrID", strID());
+    writer.writeAttribute("ID", ID());
 	writer.writeAttribute("Caption", caption());
 
     writer.writeAttribute("BackColor", backColor().name());
@@ -442,14 +448,14 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	return true;
 }
 
-QString TuningFilter::strID() const
+QString TuningFilter::ID() const
 {
-	return m_strID;
+    return m_ID;
 }
 
-void TuningFilter::setStrID(const QString& value)
+void TuningFilter::setID(const QString& value)
 {
-	m_strID = value;
+    m_ID = value;
 }
 
 QString TuningFilter::caption() const
@@ -769,13 +775,13 @@ void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 	}
 }
 
-bool TuningFilter::removeChild(const QString& strID)
+bool TuningFilter::removeChild(const QString& ID)
 {
     bool found = false;
 
     for (auto it = m_childFilters.begin(); it != m_childFilters.end(); it++)
     {
-        if (it->get()->strID() == strID)
+        if (it->get()->ID() == ID)
         {
             m_childFilters.erase(it);
             found = true;
@@ -1033,7 +1039,7 @@ void TuningFilter::removeNotExistingSignals(const TuningObjectStorage *objects, 
 TuningFilterStorage::TuningFilterStorage()
 {
 	m_root = std::make_shared<TuningFilter>();
-    m_root->setStrID("%FILTER%ROOT");
+    m_root->setID("%FILTER%ROOT");
     m_root->setCaption(QObject::tr("All Signals"));
 	m_root->setFilterType(TuningFilter::FilterType::Root);
 
@@ -1319,7 +1325,7 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 				QJsonValue jValue = jDetails.value("SchemaID");
 				if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
 				{
-					sd.m_strId = jValue.toString();
+                    sd.m_Id = jValue.toString();
 				}
 
 
@@ -1369,7 +1375,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 		// Filter for Schema
 		//
 		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
-		ofSchema->setStrID("%AUTOFILTER%_SCHEMA");
+        ofSchema->setID("%AUTOFILTER%_SCHEMA");
         ofSchema->setCaption(QObject::tr("Schemas"));
         ofSchema->setAutomatic(true);
 
@@ -1399,9 +1405,9 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
                 continue;
             }
 
-			ofTs->setStrID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_strId);
+            ofTs->setID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_Id);
 
-            //QString s = QString("%1 - %2").arg(schemasDetails.m_strId).arg(schemasDetails.m_caption);
+            //QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
             ofTs->setCaption(schemasDetails.m_caption);
             ofTs->setAutomatic(true);
 
@@ -1418,7 +1424,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 		// Filter for EquipmentId
 		//
 		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
-		ofEquipment->setStrID("%AUTOFILTER%_EQUIPMENT");
+        ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
         ofEquipment->setCaption(QObject::tr("Equipment"));
         ofEquipment->setAutomatic(true);
 
@@ -1426,7 +1432,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* obje
 		{
 			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 			ofTs->setEquipmentIDMask(ts);
-			ofTs->setStrID("%AUFOFILTER%_EQUIPMENT_" + ts);
+            ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
             ofTs->setCaption(ts);
             ofTs->setAutomatic(true);
 
