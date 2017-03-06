@@ -678,6 +678,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 	bool first = true;
 	bool analog = false;
     float value = 0.0;
+    float defaultValue = 0.0;
 	bool sameValue = true;
 	int decimalPlaces = 0;
     float lowLimit = 0;
@@ -704,6 +705,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		{
 			analog = o.analog();
             value = o.value();
+            defaultValue = o.defaultValue();
             lowLimit = o.lowLimit();
             highLimit = o.highLimit();
             first = false;
@@ -725,6 +727,12 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
                 }
             }
 
+            if (defaultValue != o.defaultValue())
+            {
+                QMessageBox::warning(m_parent, tr("Set Value"), tr("Selected objects have different default values."));
+                return;
+            }
+
             if (value != o.value())
 			{
 				sameValue = false;
@@ -732,7 +740,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 		}
 	}
 
-    DialogInputValue d(analog, value, sameValue, lowLimit, highLimit, decimalPlaces, m_parent);
+    DialogInputValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, decimalPlaces, m_parent);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -1048,53 +1056,79 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 	return false;
 }
 
-void TuningItemModelMain::slot_setDefaults()
+void TuningItemModelMain::slot_setAll()
 {
-	for (TuningObject& o : m_objects)
-	{
-        if (o.valid() == false)
-        {
-            continue;
-        }
+    QMenu menu(m_parent);
 
-		if (o.analog() == true)
-		{
-            o.onEditValue(o.defaultValue());
-		}
-	}
+    // Set All To On
+    QAction* actionAllToOn = new QAction(tr("Set All Discretes To On"), &menu);
+
+    auto fAllToOn = [this]() -> void
+             {
+                for (TuningObject& o : m_objects)
+                {
+                    if (o.valid() == false)
+                    {
+                        continue;
+                    }
+
+                    if (o.analog() == false)
+                    {
+                        o.onEditValue(1);
+                    }
+                }
+            };
+    connect(actionAllToOn, &QAction::triggered, this, fAllToOn);
+
+    // Set All To Onff
+    QAction* actionAllToOff = new QAction(tr("Set All Discretes To Off"), &menu);
+
+    auto fAllToOff = [this]() -> void
+             {
+                for (TuningObject& o : m_objects)
+                {
+                    if (o.valid() == false)
+                    {
+                        continue;
+                    }
+
+                    if (o.analog() == false)
+                    {
+                        o.onEditValue(0);
+                    }
+                }
+            };
+
+    connect(actionAllToOff, &QAction::triggered, this, fAllToOff);
+
+    // Set All To Defaults
+    QAction* actionAllToDefault = new QAction(tr("Set All To Defaults"), &menu);
+
+    auto fAllToDefault = [this]() -> void
+             {
+                for (TuningObject& o : m_objects)
+                {
+                    if (o.valid() == false)
+                    {
+                        continue;
+                    }
+
+                    o.onEditValue(o.defaultValue());
+                }
+            };
+
+    connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
+
+    // Run the menu
+
+    menu.addAction(actionAllToOn);
+    menu.addAction(actionAllToOff);
+    menu.addSeparator();
+    menu.addAction(actionAllToDefault);
+
+    menu.exec(QCursor::pos());
 }
 
-void TuningItemModelMain::slot_setOn()
-{
-	for (TuningObject& o : m_objects)
-	{
-        if (o.valid() == false)
-        {
-            continue;
-        }
-
-        if (o.analog() == false)
-		{
-            o.onEditValue(1);
-		}
-	}
-}
-
-void TuningItemModelMain::slot_setOff()
-{
-	for (TuningObject& o : m_objects)
-	{
-        if (o.valid() == false)
-        {
-            continue;
-        }
-
-        if (o.analog() == false)
-		{
-            o.onEditValue(0);
-		}
-	}
-}
 
 void TuningItemModelMain::slot_undo()
 {
@@ -1104,14 +1138,14 @@ void TuningItemModelMain::slot_undo()
 	}
 }
 
-void TuningItemModelMain::slot_Apply()
+void TuningItemModelMain::slot_Submit()
 {
     if (theUserManager.requestPassword(m_parent, false) == false)
 	{
 		return;
 	}
 
-    QString str = tr("New values will be applied:") + QString("\r\n\r\n");
+    QString str = tr("New values will be submitted:") + QString("\r\n\r\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -1164,7 +1198,7 @@ void TuningItemModelMain::slot_Apply()
 
     str += QString("\r\n") + tr("Are you sure you want to continue?");
 
-	if (QMessageBox::warning(m_parent, tr("Apply Changes"),
+    if (QMessageBox::warning(m_parent, tr("Sumbit Changes"),
 							 str,
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
@@ -1173,6 +1207,11 @@ void TuningItemModelMain::slot_Apply()
 	}
 
     theObjectManager->writeModifiedTuningObjects(m_objects);
+}
+
+void TuningItemModelMain::slot_Conclude()
+{
+
 }
 
 
@@ -1371,7 +1410,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_filterEdit = new QLineEdit();
     connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
 
-    m_filterButton = new QPushButton(tr("Search"));
+    m_filterButton = new QPushButton(tr("Filter"));
     connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
 
     // Button controls
@@ -1380,34 +1419,30 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_setValueButton = new QPushButton(tr("Set Value"));
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
-    m_setOnButton = new QPushButton(tr("Set all to On"));
-	connect(m_setOnButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOn);
+    m_setAllButton = new QPushButton(tr("Set All"));
+    connect(m_setAllButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setAll);
 
-    m_setOffButton = new QPushButton(tr("Set all to Off"));
-	connect(m_setOffButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setOff);
-
-    m_setToDefaultButton = new QPushButton(tr("Set to Defaults"));
-	connect(m_setToDefaultButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setDefaults);
-
-    m_applyButton = new QPushButton(tr("Apply"));
-	connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
+    m_submitButton = new QPushButton(tr("Submit"));
+    connect(m_submitButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Submit);
 
     m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
-	m_bottomLayout = new QHBoxLayout();
+    m_concludeButton = new QPushButton(tr("Conclude"));
+    connect(m_concludeButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Conclude);
+
+    m_bottomLayout = new QHBoxLayout();
 
     m_bottomLayout->addWidget(m_filterTypeCombo);
     m_bottomLayout->addWidget(m_filterEdit);
     m_bottomLayout->addWidget(m_filterButton);
 	m_bottomLayout->addStretch();
 	m_bottomLayout->addWidget(m_setValueButton);
-	m_bottomLayout->addWidget(m_setOnButton);
-	m_bottomLayout->addWidget(m_setOffButton);
-	m_bottomLayout->addWidget(m_setToDefaultButton);
+    m_bottomLayout->addWidget(m_setAllButton);
 	m_bottomLayout->addStretch();
-	m_bottomLayout->addWidget(m_applyButton);
+    m_bottomLayout->addWidget(m_submitButton);
 	m_bottomLayout->addWidget(m_undoButton);
+    m_bottomLayout->addWidget(m_concludeButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -1827,7 +1862,7 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 		{
             if (m_objectList->editorActive() == false)
             {
-                m_model->slot_Apply();
+                m_model->slot_Submit();
                 return true;
             }
             return true;

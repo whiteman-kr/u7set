@@ -120,11 +120,12 @@ protected:
 	bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
 public slots:
-	void slot_setDefaults();
-	void slot_setOn();
-	void slot_setOff();
+
+    void slot_setAll();
+
 	void slot_undo();
-	void slot_Apply();
+	void slot_Submit();
+    void slot_Conclude();
 
 
 };
@@ -233,15 +234,13 @@ private:
 
 	QPushButton* m_setValueButton = nullptr;
 
-	QPushButton* m_setOnButton = nullptr;
+    QPushButton* m_setAllButton = nullptr;
 
-	QPushButton* m_setOffButton = nullptr;
-
-	QPushButton* m_setToDefaultButton = nullptr;
-
-	QPushButton* m_applyButton = nullptr;
+	QPushButton* m_submitButton = nullptr;
 
 	QPushButton* m_undoButton = nullptr;
+
+    QPushButton* m_concludeButton = nullptr;
 
     QPushButton* m_filterButton = nullptr;
 

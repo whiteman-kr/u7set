@@ -68,9 +68,18 @@ DialogSettings::~DialogSettings()
 	delete ui;
 }
 
+bool DialogSettings::filterSettingsChanged()
+{
+    return m_filterSettingsChanged;
+}
+
 void DialogSettings::on_DialogSettings_accepted()
 {
+    // ID
+
 	theSettings.setInstanceId(ui->m_instanceID->text());
+
+    // IP Configuration
 
     QString configIP1 = ui->m_IP1->text();
     int configPort1 = ui->m_port1->text().toInt();
@@ -81,14 +90,25 @@ void DialogSettings::on_DialogSettings_accepted()
     if (configIP1 != theSettings.configuratorAddress1().addressStr() || configIP2 != theSettings.configuratorAddress2().addressStr()
             || configPort1 != theSettings.configuratorAddress1().port() || configPort2 != theSettings.configuratorAddress2().port())
     {
+
         theSettings.setConfiguratorAddress1(configIP1, configPort1);
         theSettings.setConfiguratorAddress2(configIP2, configPort2);
 
         QMessageBox::warning(this, tr("TuningClient"), tr("Configurator address has been changed, please restart the application."));
     }
 
-	theSettings.setFilterByEquipment(ui->m_filterByEquipment->checkState() == Qt::Checked);
-	theSettings.setFilterBySchema(ui->m_filterBySchema->checkState() == Qt::Checked);
+    // Filters
+
+    bool filterByEquipment = ui->m_filterByEquipment->checkState() == Qt::Checked;
+    bool filterBySchema = ui->m_filterBySchema->checkState() == Qt::Checked;
+
+    if (filterByEquipment != theSettings.filterByEquipment() || filterBySchema != theSettings.filterBySchema())
+    {
+        m_filterSettingsChanged = true;
+
+        theSettings.setFilterByEquipment(filterByEquipment);
+        theSettings.setFilterBySchema(filterBySchema);
+    }
 
     // Language
 
