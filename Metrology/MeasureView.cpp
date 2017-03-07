@@ -321,13 +321,13 @@ QString MeasureTable::textLinearity(int row, int column) const
     {
         case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
-        case MVC_CMN_L_CASE:					result = m->position().caseStr(); break;
+		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
         case MVC_CMN_L_ID:                      result = m->signalID( theOptions.measureView().signalIdType() ); break;
         case MVC_CMN_L_NAME:					result = m->caption(); break;
 
-        case MVC_CMN_L_SUBBLOCK:				result = m->position().subblockStr(); break;
-        case MVC_CMN_L_BLOCK:					result = m->position().blockStr(); break;
-        case MVC_CMN_L_ENTRY:					result = m->position().entryStr(); break;
+		case MVC_CMN_L_SUBBLOCK:				result = m->location().chassisStr(); break;
+		case MVC_CMN_L_BLOCK:					result = m->location().moduleStr(); break;
+		case MVC_CMN_L_ENTRY:					result = m->location().placeStr(); break;
 
         case MVC_CMN_L_IN_EL_NOMINAL:			result = m->nominalStr(VALUE_TYPE_IN_ELECTRIC); break;
         case MVC_CMN_L_PH_NOMINAL:				result = m->nominalStr(VALUE_TYPE_PHYSICAL); break;

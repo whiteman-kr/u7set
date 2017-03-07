@@ -106,7 +106,7 @@ private:
 // ==============================================================================================
 
 const int               MVC_CMN_L_INDEX             = 0;
-const int               MVC_CMN_L_CASE              = 1;
+const int               MVC_CMN_L_RACK              = 1;
 const int               MVC_CMN_L_ID                = 2;
 const int               MVC_CMN_L_NAME              = 3;
 const int               MVC_CMN_L_SUBBLOCK          = 4;

@@ -57,7 +57,7 @@ public:
     void                    clear();
 
     QString                 text(int row, int column, const MeasureParam &measureParam) const;
-    QString                 signalStateStr(const SignalParam& param, const AppSignalState& state) const;
+	QString                 signalStateStr(const Metrology::SignalParam& param, const AppSignalState& state) const;
 
     void                    updateColumn(int column);
 

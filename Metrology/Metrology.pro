@@ -117,7 +117,9 @@ SOURCES += \
     ../lib/DeviceHelper.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../u7/Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+    ../lib/OutputLog.cpp \
+    ../lib/MetrologySignal.cpp
+
 
 
 HEADERS  += \
@@ -183,7 +185,8 @@ HEADERS  += \
     ../lib/DeviceHelper.h \
     ../u7/Builder/ModulesRawData.h \
     ../u7/Builder/IssueLogger.h \
-    ../lib/OutputLog.h
+    ../lib/OutputLog.h \
+    ../lib/MetrologySignal.h
 
 
 FORMS    +=

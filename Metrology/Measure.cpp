@@ -116,7 +116,7 @@ void LinearityMeasurement::clear()
     m_customAppSignalID = QString();
     m_caption = QString();
 
-    m_position.clear();
+	m_location.clear();
 
     m_percent = 0;
 
@@ -159,7 +159,7 @@ void LinearityMeasurement::clear()
 
 void LinearityMeasurement::set1(const MeasureParam &measureParam)
 {
-    SignalParam param = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam param = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
     if (param.isValid() == false)
     {
         assert(false);
@@ -191,7 +191,7 @@ void LinearityMeasurement::set1(const MeasureParam &measureParam)
     setCustomAppSignalID( param.customAppSignalID() );
     setCaption( param.caption() );
 
-    setPosition( param.position() );
+    setLocation( param.location() );
 
     // nominal
     //
@@ -304,8 +304,8 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
         return;
     }
 
-    SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-    SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 
     //
     //
@@ -319,7 +319,7 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
     setCustomAppSignalID( outParam.customAppSignalID() );
     setCaption( outParam.caption() );
 
-    setPosition( outParam.position() );
+    setLocation( outParam.location() );
 
     // nominal
     //
@@ -450,8 +450,8 @@ void LinearityMeasurement::set3(const MeasureParam &measureParam)
         return;
     }
 
-    SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-    SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 
     //
     //
@@ -464,7 +464,7 @@ void LinearityMeasurement::set3(const MeasureParam &measureParam)
     setCustomAppSignalID( outParam.customAppSignalID() );
     setCaption( outParam.caption() );
 
-    setPosition( outParam.position() );
+    setLocation( outParam.location() );
 
     // nominal
     //
@@ -651,7 +651,7 @@ QString LinearityMeasurement::signalID(int type) const
     {
         case SIGNAL_ID_TYPE_APP:        strID = m_appSignalID;              break;
         case SIGNAL_ID_TYPE_CUSTOM:     strID = m_customAppSignalID;        break;
-        case SIGNAL_ID_TYPE_EQUIPMENT:  strID = m_position.equipmentID();   break;
+		case SIGNAL_ID_TYPE_EQUIPMENT:  strID = m_location.equipmentID();   break;
         default:                        assert(0);
     }
 
@@ -1217,7 +1217,7 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
     m_customAppSignalID = from.m_customAppSignalID;
     m_caption = from.m_caption;
 
-    m_position = from.m_position;
+	m_location = from.m_location;
     m_percent = from.m_percent;
 
     for(int t = 0; t < VALUE_TYPE_COUNT; t++)
@@ -1282,13 +1282,6 @@ ComparatorMeasurement::ComparatorMeasurement(Calibrator* pCalibrator)
     setAppSignalID(QString());
     setCustomAppSignalID(QString());
     setCaption(QString());
-
-    position().setCaseNo(0);
-    position().setCaseCaption(QString());
-    position().setChannel(0);
-    position().setBlock(0);
-    position().setSubblock(0);
-    position().setEntry(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

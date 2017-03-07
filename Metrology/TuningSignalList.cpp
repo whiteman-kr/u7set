@@ -600,7 +600,7 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
         {
             if (m_signallList[i].hash() == signalHash)
             {
-                SignalParam param = theSignalBase.signalParam(signalHash);
+				Metrology::SignalParam param = theSignalBase.signalParam(signalHash);
                 if (param.isValid() == false)
                 {
                     continue;

@@ -46,7 +46,7 @@ TuningSignal::TuningSignal(const TuningSignal& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignal::TuningSignal(const SignalParam& param)
+TuningSignal::TuningSignal(const Metrology::SignalParam& param)
 {
     if (param.isValid() == false)
     {
@@ -56,10 +56,10 @@ TuningSignal::TuningSignal(const SignalParam& param)
 
     m_hash = param.hash();
 
-    m_case = param.position().caseStr();
+	m_rack = param.location().rack().caption();
     m_appSignalID = param.appSignalID();
     m_customAppSignalID = param.customAppSignalID();
-    m_equipmentID = param.position().equipmentID();
+    m_equipmentID = param.location().equipmentID();
     m_caption = param.caption();
 
     m_signalType = param.signalType();
@@ -341,7 +341,7 @@ void TuningSignalBase::createSignalList()
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        SignalParam param = theSignalBase.signalParam(i);
+		Metrology::SignalParam param = theSignalBase.signalParam(i);
         if (param.isValid() == false)
         {
             continue;
@@ -534,7 +534,7 @@ void TuningSignalBase::updateSignalParam(const Hash& signalHash)
         return;
     }
 
-    SignalParam param = theSignalBase.signalParam(signalHash);
+	Metrology::SignalParam param = theSignalBase.signalParam(signalHash);
     if (param.isValid() == false)
     {
         return;

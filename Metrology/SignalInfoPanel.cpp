@@ -209,7 +209,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
     if (column == SIGNAL_INFO_COLUMN_STATE)
     {
-        SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
         if (inParam.isValid() == true)
         {
             AppSignalState inState = theSignalBase.signalState(inParam.hash());
@@ -218,7 +218,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
         if (measureParam.outputSignalType() != OUTPUT_SIGNAL_TYPE_UNUSED)
         {
-            SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
             if (outParam.isValid() == true)
             {
                 AppSignalState outState = theSignalBase.signalState(outParam.hash());
@@ -231,12 +231,12 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
     switch (column)
     {
-        case SIGNAL_INFO_COLUMN_CASE:           result = measureParam.caseStr();                        break;
+        case SIGNAL_INFO_COLUMN_CASE:           result = measureParam.rackCaption();                        break;
         case SIGNAL_INFO_COLUMN_ID:             result = measureParam.signalID(showCustomID, divider);  break;
         case SIGNAL_INFO_COLUMN_STATE:          result = stateStr;                                      break;
-        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = measureParam.subblockStr();                    break;
-        case SIGNAL_INFO_COLUMN_BLOCK:          result = measureParam.blockStr();                       break;
-        case SIGNAL_INFO_COLUMN_ENTRY:          result = measureParam.entryStr();                       break;
+        case SIGNAL_INFO_COLUMN_SUBBLOCK:       result = measureParam.chassisStr();                    break;
+        case SIGNAL_INFO_COLUMN_BLOCK:          result = measureParam.moduleStr();                       break;
+        case SIGNAL_INFO_COLUMN_ENTRY:          result = measureParam.placeStr();                       break;
         case SIGNAL_INFO_COLUMN_CAPTION:        result = measureParam.caption(divider);                 break;
         case SIGNAL_INFO_COLUMN_PH_RANGE:       result = measureParam.physicalRangeStr(divider);        break;
         case SIGNAL_INFO_COLUMN_EL_RANGE:       result = measureParam.electricRangeStr(divider);        break;
@@ -250,7 +250,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::signalStateStr(const SignalParam& param, const AppSignalState& state) const
+QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, const AppSignalState& state) const
 {
     if (param.isValid() == false)
     {
@@ -393,7 +393,7 @@ void SignalInfoTable::set(const MeasureSignal &activeSignal)
                         continue;
                     }
 
-                    SignalParam param =  theSignalBase.signalParam(signalHash);
+					Metrology::SignalParam param =  theSignalBase.signalParam(signalHash);
                     if (param.isValid() == false)
                     {
                         continue;
@@ -779,7 +779,7 @@ void SignalInfoPanel::signalProperty()
         return;
     }
 
-    SignalParam param;
+	Metrology::SignalParam param;
 
     if ( theOptions.toolBar().outputSignalType() ==  OUTPUT_SIGNAL_TYPE_UNUSED)
     {

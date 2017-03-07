@@ -50,8 +50,8 @@ const int   MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0
 
 const char* const	MeasureKind[] =
 {
-            QT_TRANSLATE_NOOP("Measure.h", " in one channel"),
-            QT_TRANSLATE_NOOP("Measure.h", " in all channels"),
+			QT_TRANSLATE_NOOP("Measure.h", " in one rack"),
+			QT_TRANSLATE_NOOP("Measure.h", " in several racks"),
 };
 
 const int   MEASURE_KIND_COUNT = sizeof(MeasureKind)/sizeof(MeasureKind[0]);
@@ -206,7 +206,7 @@ private:
     QString         m_customAppSignalID;
     QString         m_caption;
 
-    SignalPosition  m_position;
+	Metrology::SignalLocation  m_location;
 
     double          m_percent = 0;
 
@@ -252,8 +252,8 @@ public:
     QString         caption() const { return m_caption; }
     void            setCaption(const QString& caption) { m_caption = caption; }
 
-    SignalPosition& position() { return m_position; }
-    void            setPosition(const SignalPosition& pos) { m_position = pos; }
+	Metrology::SignalLocation& location() { return m_location; }
+	void            setLocation(const Metrology::SignalLocation& location) { m_location = location; }
 
     double          percent() const { return m_percent; }
     void            setPercent(double percent) { m_percent = percent; }
@@ -327,8 +327,6 @@ private:
     QString         m_customAppSignalID;
     QString         m_caption;
 
-    SignalPosition  m_position;
-
 public:
 
     QString         appSignalID() const { return m_appSignalID; }
@@ -340,9 +338,7 @@ public:
     QString         caption() const { return m_caption; }
     void            setCaption(const QString& name) { m_caption = name; }
 
-    SignalPosition& position() { return m_position; }
-
-    void updateHysteresis(Measurement* pMeasurement);
+	void			updateHysteresis(Measurement* pMeasurement);
 };
 
 // ==============================================================================================

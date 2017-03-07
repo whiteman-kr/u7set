@@ -54,9 +54,8 @@ public:
     //
     QComboBox*          m_outputSignalTypeList;
 
-    QComboBox*          m_asCaseTypeCombo;
+	QComboBox*          m_asRackCombo;
     QComboBox*          m_asSignalCombo;
-    QComboBox*          m_asCaseNoCombo;
     QComboBox*          m_asSubblockCombo;
     QComboBox*          m_asBlockCombo;
     QComboBox*          m_asEntryCombo;
@@ -116,7 +115,7 @@ public:
     void                createStatusBar();
     void                createContextMenu();
 
-    void                updateCasesOnToolBar();
+	void                updateCasesOnToolBar();
     void                updateSignalsOnToolBar();
     void                updateSignalPositionOnToolBar();
 
@@ -228,7 +227,7 @@ private slots:
 
     // Slots of analog signal toolbar
     //
-    void                setCaseType(int index);
+	void                setRack(int index);
     void                setMeasureSignal(int index);
     void                setCaseNo(int index);
     void                setSubblock(int index);

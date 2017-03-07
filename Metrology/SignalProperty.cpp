@@ -16,7 +16,7 @@ bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalPropertyDialog::SignalPropertyDialog(const SignalParam& param, QWidget *parent) :
+SignalPropertyDialog::SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent) :
     QDialog(parent)
 {
     if (param.isValid() == false)
@@ -111,27 +111,27 @@ void SignalPropertyDialog::createPropertyList()
         QtProperty *positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
 
             item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
-            item->setValue( m_param.position().equipmentID() );
+            item->setValue( m_param.location().equipmentID() );
             item->setAttribute(QLatin1String("readOnly"), true);
             positionGroup->addSubProperty(item);
 
-            item = m_pManager->addProperty(QVariant::String, tr("Case"));
-            item->setValue( m_param.position().caseStr() );
+			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
+			item->setValue( m_param.location().rack().caption() );
             item->setAttribute(QLatin1String("readOnly"), true);
             positionGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Subblock"));
-            item->setValue(m_param.position().subblock() + 1);
+			item->setValue(m_param.location().chassis() + 1);
             item->setAttribute(QLatin1String("readOnly"), true);
             positionGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Block"));
-            item->setValue(m_param.position().block() + 1);
+			item->setValue(m_param.location().module() + 1);
             item->setAttribute(QLatin1String("readOnly"), true);
             positionGroup->addSubProperty(item);
 
             item = m_pManager->addProperty(QVariant::Int, tr("Entry"));
-            item->setValue(m_param.position().entry() + 1);
+			item->setValue(m_param.location().place() + 1);
             item->setAttribute(QLatin1String("readOnly"), true);
             positionGroup->addSubProperty(item);
 
@@ -487,9 +487,9 @@ void SignalPropertyDialog::updateGroupHeader(int index)
     switch(index)
     {
         case SIGNAL_PROPERTY_GROUP_IN_PH_RANGE:     header = SignalPropertyGroup[index] + m_param.inputPhysicalRangeStr(); break;
-        case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:     header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr() + " " + m_param.inputElectricSensorStr(); break;
+		case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:     header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr() + " " + m_param.inputElectricSensor(); break;
         case SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE:    header = SignalPropertyGroup[index] + m_param.outputPhysicalRangeStr(); break;
-        case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:    header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr()+ " " + m_param.outputElectricSensorStr(); break;
+		case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:    header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr()+ " " + m_param.outputElectricSensor(); break;
     }
 
     browserItem->property()->setPropertyName(header);

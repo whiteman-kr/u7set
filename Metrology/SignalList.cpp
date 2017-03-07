@@ -95,7 +95,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    SignalParam param = signalParam(row);
+	Metrology::SignalParam param = signalParam(row);
     if (param.isValid() == false)
     {
         return QVariant();
@@ -107,7 +107,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
         switch (column)
         {
-            case SIGNAL_LIST_COLUMN_CASE:               result = Qt::AlignCenter;   break;
+			case SIGNAL_LIST_COLUMN_RACK:               result = Qt::AlignCenter;   break;
             case SIGNAL_LIST_COLUMN_ID:                 result = Qt::AlignLeft;     break;
             case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:       result = Qt::AlignLeft;     break;
             case SIGNAL_LIST_COLUMN_CAPTION:            result = Qt::AlignLeft;     break;
@@ -144,7 +144,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalListTable::text(int  row, int column, const SignalParam& param) const
+QString SignalListTable::text(int  row, int column, const Metrology::SignalParam& param) const
 {
     if (row < 0 || row >= signalCount())
     {
@@ -165,20 +165,20 @@ QString SignalListTable::text(int  row, int column, const SignalParam& param) co
 
     switch (column)
     {
-        case SIGNAL_LIST_COLUMN_CASE:               result = param.position().caseStr();            break;
+		case SIGNAL_LIST_COLUMN_RACK:               result = param.location().rack().caption();		break;
         case SIGNAL_LIST_COLUMN_ID:                 result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
-        case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:       result = param.position().equipmentID();        break;
+		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:       result = param.location().equipmentID();        break;
         case SIGNAL_LIST_COLUMN_CAPTION:            result = param.caption();                       break;
-        case SIGNAL_LIST_COLUMN_SUBBLOCK:           result = param.position().subblockStr();        break;
-        case SIGNAL_LIST_COLUMN_BLOCK:              result = param.position().blockStr();           break;
-        case SIGNAL_LIST_COLUMN_ENTRY:              result = param.position().entryStr();           break;
-        case SIGNAL_LIST_COLUMN_ADC:                result = param.adcRangeStr(m_showADCInHex);     break;
+		case SIGNAL_LIST_COLUMN_SUBBLOCK:           result = param.location().chassisStr();			break;
+		case SIGNAL_LIST_COLUMN_BLOCK:              result = param.location().moduleStr();          break;
+		case SIGNAL_LIST_COLUMN_ENTRY:              result = param.location().placeStr();           break;
+		case SIGNAL_LIST_COLUMN_ADC:                result = param.adcRangeStr(m_showADCInHex);		break;
         case SIGNAL_LIST_COLUMN_IN_PH_RANGE:        result = param.inputPhysicalRangeStr();         break;
         case SIGNAL_LIST_COLUMN_IN_EL_RANGE:        result = param.inputElectricRangeStr();         break;
-        case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:       result = param.inputElectricSensorStr();    break;
+		case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:       result = param.inputElectricSensor();			break;
         case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:       result = param.outputPhysicalRangeStr();        break;
         case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:       result = param.outputElectricRangeStr();        break;
-        case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:      result = param.outputElectricSensorStr();   break;
+		case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:      result = param.outputElectricSensor();			break;
         case SIGNAL_LIST_COLUMN_TUN_SIGNAL:         result = param.enableTuningStr();               break;
         case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:    result = param.tuningDefaultValueStr();         break;
         default:                                    assert(0);
@@ -204,9 +204,9 @@ int SignalListTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalParam SignalListTable::signalParam(int index) const
+Metrology::SignalParam SignalListTable::signalParam(int index) const
 {
-    SignalParam param;
+	Metrology::SignalParam param;
 
     m_signalMutex.lock();
 
@@ -222,7 +222,7 @@ SignalParam SignalListTable::signalParam(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<SignalParam> list_add)
+void SignalListTable::set(const QList<Metrology::SignalParam> list_add)
 {
     int count = list_add.count();
     if (count == 0)
@@ -528,12 +528,12 @@ void SignalListDialog::updateList()
 
     m_signalParamTable.clear();
 
-    QList<SignalParam> signalParamList;
+	QList<Metrology::SignalParam> signalParamList;
 
     int count = theSignalBase.signalCount();
     for(int i = 0; i < count; i++)
     {
-        SignalParam param = theSignalBase.signalParam(i);
+		Metrology::SignalParam param = theSignalBase.signalParam(i);
         if (param.isValid() == false)
         {
             continue;
@@ -740,7 +740,7 @@ void SignalListDialog::signalProperty()
         return;
     }
 
-    SignalParam param = m_signalParamTable.signalParam(index);
+	Metrology::SignalParam param = m_signalParamTable.signalParam(index);
     if (param.isValid() == false)
     {
         return;
@@ -877,7 +877,7 @@ void SignalListDialog::onOk()
         return;
     }
 
-    SignalParam param = m_signalParamTable.signalParam(index);
+	Metrology::SignalParam param = m_signalParamTable.signalParam(index);
     if (param.isValid() == false)
     {
         return;

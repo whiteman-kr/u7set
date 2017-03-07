@@ -38,11 +38,11 @@ const int               OUTPUT_SIGNAL_COLUMN_COUNT        = sizeof(OutputSignalC
 
 const int               OUTPUT_SIGNAL_COLUMN_TYPE           = 0,
                         OUTPUT_SIGNAL_COLUMN_SEPARATOR1     = 1,
-                        OUTPUT_SIGNAL_COLUMN_IN_CASE        = 2,
+                        OUTPUT_SIGNAL_COLUMN_IN_RACK        = 2,
                         OUTPUT_SIGNAL_COLUMN_IN_ID          = 3,
                         OUTPUT_SIGNAL_COLUMN_IN_CAPTION     = 4,
                         OUTPUT_SIGNAL_COLUMN_SEPARATOR2     = 5,
-                        OUTPUT_SIGNAL_COLUMN_OUT_CASE       = 6,
+                        OUTPUT_SIGNAL_COLUMN_OUT_RACK       = 6,
                         OUTPUT_SIGNAL_COLUMN_OUT_ID         = 7,
                         OUTPUT_SIGNAL_COLUMN_OUT_CAPTION    = 8,
                         OUTPUT_SIGNAL_COLUMN_SEPARATOR3     = 9;

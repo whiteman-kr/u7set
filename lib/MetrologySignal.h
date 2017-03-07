@@ -37,6 +37,7 @@ namespace Metrology
 
 		public:
 
+			bool				isValid() const;
 			void				clear();
 
 			int					index() const { return m_index; }
@@ -84,7 +85,7 @@ namespace Metrology
 			void				setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
 			RackParam&			rack() { return m_rack; }
-			QString				rackCaption(bool showIndex) const;
+			QString				rackCaption(bool showIndex = false) const;
 			void				setRack(const RackParam& rack) { m_rack = rack; }
 
 			int					chassis() const { return m_chassis; }
@@ -172,7 +173,7 @@ namespace Metrology
 		Hash					hash() const { return m_hash; }
 
 		QString					appSignalID() const { return m_appSignalID; }
-		void					setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
+		void					setAppSignalID(const QString& appSignalID);
 
 		QString					customAppSignalID() const { return m_customAppSignalID; }
 		void					setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
@@ -195,6 +196,9 @@ namespace Metrology
 
 		SignalLocation			location() const { return m_location; }
 		void					setLocation(const SignalLocation& location) { m_location = location; }
+
+		void					setRack(const Metrology::RackParam& rack) { m_location.setRack(rack); }
+		void					setPlace(int place) { m_location.setPlace(place); }
 
 		int						lowADC() const { return m_lowADC; }
 		void					setLowADC(int lowADC) { m_lowADC = lowADC; }

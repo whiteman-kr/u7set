@@ -183,7 +183,7 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 
     result &= readRacks(fileData, fileVersion);
     result &= readUnits(fileData, fileVersion);
-    result &= readSignalParams(fileData, fileVersion);
+	result &= readSignals(fileData, fileVersion);
 
     return result;
 }
@@ -200,12 +200,13 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
     if (xml.findElement("Racks") == false)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Racks section not found";
+		qDebug() << "ConfigSocket::readRacks - Racks section not found";
         return false;
     }
 
-    int racksCount = 0;
+	Metrology::RackParam rack;
 
+    int racksCount = 0;
     result &= xml.readIntAttribute("Count", &racksCount);
 
     for(int r = 0; r < racksCount; r++)
@@ -216,25 +217,23 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
             break;
         }
 
-        int rackIndex = 0;
-        QString rackID;
-        QString rackCaption;
+		result &= rack.readFromXml(xml);
+		if (result == false)
+		{
+			continue;
+		}
 
-        result &= xml.readIntAttribute("ID", &rackIndex);
-        result &= xml.readStringAttribute("EquipmentID", &rackID);
-        result &= xml.readStringAttribute("Caption", &rackCaption);
-
-        theRackBase.appendRack(rackID, rackCaption);
+		theRackBase.appendRack(rack);
     }
 
     if (theRackBase.count() != racksCount)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Racks loading error, loaded: " << theRackBase.count() << " from " << racksCount;
+		qDebug() << "ConfigSocket::readRacks - Racks loading error, loaded: " << theRackBase.count() << " from " << racksCount;
         assert(false);
         return false;
     }
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Racks were loaded:	" << theRackBase.count();
+	qDebug() << "ConfigSocket::readRacks - Racks were loaded:	" << theRackBase.count();
 
     return result;
 }
@@ -251,12 +250,11 @@ bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 
     if (xml.findElement("Units") == false)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Units section not found";
+		qDebug() << "ConfigSocket::readUnits - Units section not found";
         return false;
     }
 
     int unitsCount = 0;
-
     result &= xml.readIntAttribute("Count", &unitsCount);
 
     for(int u = 0; u < unitsCount; u++)
@@ -278,19 +276,19 @@ bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 
     if (theUnitBase.unitCount() != unitsCount)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Units loading error, loaded: " << theUnitBase.unitCount() << " from " << unitsCount;
+		qDebug() << "ConfigSocket::readUnits - Units loading error, loaded: " << theUnitBase.unitCount() << " from " << unitsCount;
         assert(false);
         return false;
     }
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Units were loaded:	" << theUnitBase.unitCount();
+	qDebug() << "ConfigSocket::readUnits - Units were loaded:	" << theUnitBase.unitCount();
 
     return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readSignalParams(const QByteArray& fileData, int fileVersion)
+bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 {
     Q_UNUSED(fileVersion);
 
@@ -300,12 +298,13 @@ bool ConfigSocket::readSignalParams(const QByteArray& fileData, int fileVersion)
 
     if (xml.findElement("Signals") == false)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Signals section not found";
+		qDebug() << "ConfigSocket::readSignals - Signals section not found";
         return false;
     }
 
-    int signalsCount = 0;
+	Metrology::SignalParam param;
 
+    int signalsCount = 0;
     result &= xml.readIntAttribute("Count", &signalsCount);
 
     for(int s = 0; s < signalsCount; s++)
@@ -315,8 +314,6 @@ bool ConfigSocket::readSignalParams(const QByteArray& fileData, int fileVersion)
             result = false;
             break;
         }
-
-        SignalParam param;
 
         bool res = param.readFromXml(xml);
         if (res == true)
@@ -332,17 +329,16 @@ bool ConfigSocket::readSignalParams(const QByteArray& fileData, int fileVersion)
 
     if (theSignalBase.signalCount() != signalsCount)
     {
-        qDebug() << "ConfigSocket::readMetrologySignals - Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalsCount;
+		qDebug() << "ConfigSocket::readSignals- Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalsCount;
         assert(false);
         return false;
     }
 
-    theSignalBase.sortByPosition();
-    theSignalBase.setCaseNoForAllSignals();
+	theSignalBase.initSignals();
 
     theTuningSignalBase.createSignalList();
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Signals were loaded:	" << theSignalBase.signalCount();
+	qDebug() << "ConfigSocket::readSignals - Signals were loaded:	" << theSignalBase.signalCount();
 
     return result;
 }

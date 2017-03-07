@@ -454,11 +454,11 @@ bool MainWindow::createToolBars()
         asCaseLabel->setText(tr(" Case "));
         asCaseLabel->setEnabled(false);
 
-        m_asCaseTypeCombo = new QComboBox(m_pAnalogSignalToolBar);
-        m_pAnalogSignalToolBar->addWidget(m_asCaseTypeCombo);
-        m_asCaseTypeCombo->setEnabled(false);
-        m_asCaseTypeCombo->setFixedWidth(100);
-        connect(m_asCaseTypeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setCaseType);
+		m_asRackCombo = new QComboBox(m_pAnalogSignalToolBar);
+		m_pAnalogSignalToolBar->addWidget(m_asRackCombo);
+		m_asRackCombo->setEnabled(false);
+		m_asRackCombo->setFixedWidth(100);
+		connect(m_asRackCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setRack);
 
         QLabel* asSignalLabel = new QLabel(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(asSignalLabel);
@@ -472,17 +472,6 @@ bool MainWindow::createToolBars()
         connect(m_asSignalCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setMeasureSignal);
 
         m_pAnalogSignalToolBar->addSeparator();
-
-        QLabel* asChannelLabel = new QLabel(m_pAnalogSignalToolBar);
-        m_pAnalogSignalToolBar->addWidget(asChannelLabel);
-        asChannelLabel->setText(tr(" Case No "));
-        asChannelLabel->setEnabled(false);
-
-        m_asCaseNoCombo = new QComboBox(m_pAnalogSignalToolBar);
-        m_pAnalogSignalToolBar->addWidget(m_asCaseNoCombo);
-        m_asCaseNoCombo->setEnabled(false);
-        m_asCaseNoCombo->setFixedWidth(60);
-        connect(m_asCaseNoCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setCaseNo);
 
         QLabel* asSubblockLabel = new QLabel(m_pAnalogSignalToolBar);
         m_pAnalogSignalToolBar->addWidget(asSubblockLabel);
@@ -760,8 +749,8 @@ void MainWindow::createContextMenu()
 
 void MainWindow::updateCasesOnToolBar()
 {
-    m_asCaseTypeCombo->clear();
-    m_asCaseTypeCombo->setEnabled(false);
+	m_asRackCombo->clear();
+	m_asRackCombo->setEnabled(false);
 
     int outputSignalType = theOptions.toolBar().outputSignalType();
     if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
@@ -769,25 +758,34 @@ void MainWindow::updateCasesOnToolBar()
         return;
     }
 
-    theSignalBase.createCaseTypeList( theOptions.toolBar().outputSignalType() );
-
-    int caseTypeCount = theSignalBase.caseTypeCount();
-    if (caseTypeCount == 0)
+	int rackCount = theSignalBase.createRackList( outputSignalType );
+	if (rackCount == 0)
     {
         return;
     }
 
-    m_asCaseTypeCombo->blockSignals(true);
+	m_asRackCombo->blockSignals(true);
 
-    for(int c = 0; c < caseTypeCount; c++)
+	for(int r = 0; r < rackCount; r++)
     {
-        m_asCaseTypeCombo->addItem( theSignalBase.caseTypeCaption(c), c );
+		Metrology::RackParam rack = theSignalBase.rack(r);
+		if (rack.isValid() == false)
+		{
+			continue;
+		}
+
+		QString caption = rack.caption();
+		if (caption.isEmpty() == true)
+		{
+			continue;
+		}
+
+		m_asRackCombo->addItem(caption);
     }
 
-    //m_asCaseTypeCombo->model()->sort(0);
-    m_asCaseTypeCombo->setCurrentIndex(0);
-    m_asCaseTypeCombo->setEnabled(true);
-    m_asCaseTypeCombo->blockSignals(false);
+	m_asRackCombo->setCurrentIndex(0);
+	m_asRackCombo->setEnabled(true);
+	m_asRackCombo->blockSignals(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -796,9 +794,6 @@ void MainWindow::updateSignalsOnToolBar()
 {
     m_asSignalCombo->clear();
     m_asSignalCombo->setEnabled(false);
-
-    m_asCaseNoCombo->clear();
-    m_asCaseNoCombo->setEnabled(false);
 
     m_asSubblockCombo->clear();
     m_asSubblockCombo->setEnabled(false);
@@ -809,25 +804,31 @@ void MainWindow::updateSignalsOnToolBar()
     m_asEntryCombo->clear();
     m_asEntryCombo->setEnabled(false);
 
-    int caseType = m_asCaseTypeCombo->currentData().toInt();
-    if (caseType == -1)
-    {
-        return;
-    }
+	int measureKind = theOptions.toolBar().measureKind();
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
 
-    int measureKind = theOptions.toolBar().measureKind();
-    if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
-    {
-        return;
-    }
+	int outputSignalType = theOptions.toolBar().outputSignalType();
+	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	{
+		return;
+	}
 
-    int outputSignalType = theOptions.toolBar().outputSignalType();
-    if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
-    {
-        return;
-    }
+	int rackIndex = m_asRackCombo->currentIndex();
+	if (rackIndex == -1 || rackIndex >= theSignalBase.rackCount())
+	{
+		return;
+	}
 
-    int signalCount = theSignalBase.createMeasureSignalList(caseType, measureKind, outputSignalType);
+	Metrology::RackParam rackParam = theSignalBase.rack(rackIndex);
+	if (rackParam.isValid() == false)
+	{
+		return;
+	}
+
+	int signalCount = theSignalBase.createMeasureSignalList(measureKind, outputSignalType, rackParam.hash());
     if (signalCount == 0)
     {
         return;
@@ -865,25 +866,25 @@ void MainWindow::updateSignalsOnToolBar()
         m_asSignalCombo->addItem( signal.strID(), s );
 
 
-        if (subblockMap.contains(signal.position().subblock()) == false)
+		if (subblockMap.contains(signal.location().chassis()) == false)
         {
-            subblockMap.insert(signal.position().subblock(), s);
+			subblockMap.insert(signal.location().chassis(), s);
 
-            m_asSubblockCombo->addItem( QString::number( signal.position().subblock() + 1 ), signal.position().subblock() );
+			m_asSubblockCombo->addItem( QString::number( signal.location().chassis() + 1 ), signal.location().chassis() );
         }
 
-        if (blockMap.contains(signal.position().block()) == false)
+		if (blockMap.contains(signal.location().module()) == false)
         {
-            blockMap.insert(signal.position().block(), s);
+			blockMap.insert(signal.location().module(), s);
 
-            m_asBlockCombo->addItem( QString::number( signal.position().block() + 1 ), signal.position().block() );
+			m_asBlockCombo->addItem( QString::number( signal.location().module() + 1 ), signal.location().module() );
         }
 
-        if (entryMap.contains(signal.position().entry()) == false)
+		if (entryMap.contains(signal.location().place()) == false)
         {
-            entryMap.insert(signal.position().entry(), s);
+			entryMap.insert(signal.location().place(), s);
 
-            m_asEntryCombo->addItem( QString::number( signal.position().entry() + 1 ), signal.position().entry() );
+			m_asEntryCombo->addItem( QString::number( signal.location().place() + 1 ), signal.location().place() );
         }
     }
 
@@ -913,33 +914,6 @@ void MainWindow::updateSignalsOnToolBar()
 
 void MainWindow::updateSignalPositionOnToolBar()
 {
-    m_asCaseNoCombo->clear();
-    m_asCaseNoCombo->setEnabled(false);
-
-    int measureKind = theOptions.toolBar().measureKind();
-    if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
-    {
-        return;
-    }
-
-    // fill caseNo on Tool bar
-    //
-
-    if (measureKind == MEASURE_KIND_ONE)
-    {
-        int CaseNoCount = theSignalBase.caseNoCount();
-        if (CaseNoCount != 0)
-        {
-            for(int i = 0; i < CaseNoCount; i++)
-            {
-                int caseNo = theSignalBase.caseNoByCaseIndex( i );
-                m_asCaseNoCombo->addItem( QString::number( caseNo + 1 ), caseNo );
-            }
-
-            m_asCaseNoCombo->setCurrentIndex(0);
-            m_asCaseNoCombo->setEnabled(true);
-        }
-    }
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1396,10 +1370,9 @@ void MainWindow::setOutputSignalType(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setCaseType(int index)
+void MainWindow::setRack(int index)
 {
-    int type = index;
-    if (type < 0 || type >= theSignalBase.caseTypeCount())
+	if (index < 0 || index >= theSignalBase.rackCount())
     {
         return;
     }
@@ -1440,14 +1413,9 @@ void MainWindow::setMeasureSignal(int index)
         return;
     }
 
-    if (theOptions.toolBar().measureKind() == MEASURE_KIND_ONE)
-    {
-        m_asCaseNoCombo->setCurrentText( QString::number( signal.position().caseNo() + 1) );
-    }
-
-    m_asSubblockCombo->setCurrentText( QString::number( signal.position().subblock() + 1) );
-    m_asBlockCombo->setCurrentText( QString::number( signal.position().block() + 1) );
-    m_asEntryCombo->setCurrentText( QString::number( signal.position().entry() + 1) );
+	m_asSubblockCombo->setCurrentText( QString::number( signal.location().chassis() + 1) );
+	m_asBlockCombo->setCurrentText( QString::number( signal.location().module() + 1) );
+	m_asEntryCombo->setCurrentText( QString::number( signal.location().place() + 1) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1721,6 +1689,8 @@ void MainWindow::configSocketConfigurationLoaded()
 	{
 		connectedState.append("\n" + m_pConfigSocket->loadedFile(f));
 	}
+
+	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
 	m_statusConnectToConfigServer->setText( tr(" ConfigService: on  ") );
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");

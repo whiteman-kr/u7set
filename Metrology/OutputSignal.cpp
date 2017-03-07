@@ -111,12 +111,12 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 
     if (role == Qt::TextColorRole)
     {
-        if ((column == OUTPUT_SIGNAL_COLUMN_IN_CASE || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
+		if ((column == OUTPUT_SIGNAL_COLUMN_IN_RACK || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
         {
             return QColor( Qt::red );
         }
 
-        if ((column == OUTPUT_SIGNAL_COLUMN_OUT_CASE || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).isValid() == false)
+		if ((column == OUTPUT_SIGNAL_COLUMN_OUT_RACK || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).isValid() == false)
         {
             return QColor( Qt::red );
         }
@@ -162,23 +162,23 @@ QString OutputSignalTable::text(int row, int column, const OutputSignal& signal)
         return QString();
     }
 
-    SignalParam inParam = signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-    SignalParam outParam = signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam inParam = signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam outParam = signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 
     QString result;
 
     switch (column)
     {
-        case OUTPUT_SIGNAL_COLUMN_TYPE:         result = signal.typeStr();                                                                              break;
-        case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:   result = QString();                                                                                     break;
-        case OUTPUT_SIGNAL_COLUMN_IN_CASE:      inParam.isValid() == false  ?   result = QString("???")     : result = inParam.position().caseStr();    break;
+		case OUTPUT_SIGNAL_COLUMN_TYPE:         result = signal.typeStr();																						break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:   result = QString();																								break;
+		case OUTPUT_SIGNAL_COLUMN_IN_RACK:      inParam.isValid() == false  ?   result = QString("???")     : result = inParam.location().rack().caption();		break;
         case OUTPUT_SIGNAL_COLUMN_IN_ID:        inParam.isValid() == false  ?   result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) : result = m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID();      break;
-        case OUTPUT_SIGNAL_COLUMN_IN_CAPTION:   inParam.isValid() == false  ?   result = QString("???")     : result = inParam.caption();               break;
-        case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:   result = QString();                                                                                     break;
-        case OUTPUT_SIGNAL_COLUMN_OUT_CASE:     outParam.isValid() == false ?   result = QString("???")     : result = outParam.position().caseStr();   break;
+		case OUTPUT_SIGNAL_COLUMN_IN_CAPTION:   inParam.isValid() == false  ?   result = QString("???")     : result = inParam.caption();						break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:   result = QString();																								break;
+		case OUTPUT_SIGNAL_COLUMN_OUT_RACK:     outParam.isValid() == false ?   result = QString("???")     : result = outParam.location().rack().caption();	break;
         case OUTPUT_SIGNAL_COLUMN_OUT_ID:       outParam.isValid() == false ?   result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) : result =  m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID();  break;
-        case OUTPUT_SIGNAL_COLUMN_OUT_CAPTION:  outParam.isValid() == false ?   result = QString("???")     : result = outParam.caption();              break;
-        case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:   result = QString();                                                                                     break;
+		case OUTPUT_SIGNAL_COLUMN_OUT_CAPTION:  outParam.isValid() == false ?   result = QString("???")     : result = outParam.caption();						break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:   result = QString();																								break;
         default:                                assert(0);
     }
 
@@ -433,7 +433,7 @@ void OutputSignalItemDialog::updateSignals()
         return;
     }
 
-    SignalParam inParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam inParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
     if (inParam.isValid() == true)
     {
         m_pInputSignalIDEdit->setText( m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID()  );
@@ -445,7 +445,7 @@ void OutputSignalItemDialog::updateSignals()
         m_pInputSignalCaptionEdit->setText( QString() );
     }
 
-    SignalParam outParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam outParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
     if (outParam.isValid() == true)
     {
         m_pOutputSignalIDEdit->setText( m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID()  );
@@ -499,7 +499,7 @@ void OutputSignalItemDialog::selectInputSignal()
         return;
     }
 
-    SignalParam param = theSignalBase.signalParam(selectedSignalHash);
+	Metrology::SignalParam param = theSignalBase.signalParam(selectedSignalHash);
     if (param.isValid() == false)
     {
         return;
@@ -532,7 +532,7 @@ void OutputSignalItemDialog::selectOutputSignal()
         return;
     }
 
-    SignalParam param = theSignalBase.signalParam(selectedSignalHash);
+	Metrology::SignalParam param = theSignalBase.signalParam(selectedSignalHash);
     if (param.isValid() == false)
     {
         return;

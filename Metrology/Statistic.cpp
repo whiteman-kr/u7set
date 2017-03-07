@@ -113,7 +113,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
         switch (column)
         {
-            case STATISTIC_COLUMN_CASE:             result = Qt::AlignCenter;   break;
+			case STATISTIC_COLUMN_RACK:             result = Qt::AlignCenter;   break;
             case STATISTIC_COLUMN_ID:               result = Qt::AlignLeft;     break;
             case STATISTIC_COLUMN_EQUIPMENT_ID:     result = Qt::AlignLeft;     break;
             case STATISTIC_COLUMN_CAPTION:          result = Qt::AlignLeft;     break;
@@ -194,7 +194,7 @@ QString StatisticTable::text(int row, int column, MetrologySignal* pSignal) cons
 		return QString();
 	}
 
-	SignalParam& param = pSignal->param();
+	Metrology::SignalParam& param = pSignal->param();
     if (param.isValid() == false)
     {
         return QString();
@@ -204,13 +204,13 @@ QString StatisticTable::text(int row, int column, MetrologySignal* pSignal) cons
 
     switch (column)
     {
-        case STATISTIC_COLUMN_CASE:             result = param.position().caseStr();                        break;
+		case STATISTIC_COLUMN_RACK:             result = param.location().rack().caption();                 break;
         case STATISTIC_COLUMN_ID:               result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
-        case STATISTIC_COLUMN_EQUIPMENT_ID:     result = param.position().equipmentID();                    break;
+        case STATISTIC_COLUMN_EQUIPMENT_ID:     result = param.location().equipmentID();                    break;
         case STATISTIC_COLUMN_CAPTION:          result = param.caption();                                   break;
-        case STATISTIC_COLUMN_SUBBLOCK:         result = param.position().subblockStr();                    break;
-        case STATISTIC_COLUMN_BLOCK:            result = param.position().blockStr();                       break;
-        case STATISTIC_COLUMN_ENTRY:            result = param.position().entryStr();                       break;
+		case STATISTIC_COLUMN_SUBBLOCK:         result = param.location().chassisStr();                    break;
+		case STATISTIC_COLUMN_BLOCK:            result = param.location().moduleStr();                       break;
+		case STATISTIC_COLUMN_ENTRY:            result = param.location().placeStr();                       break;
         case STATISTIC_COLUMN_ADC:              result = param.adcRangeStr(m_showADCInHex);                 break;
         case STATISTIC_COLUMN_IN_PH_RANGE:      result = param.inputPhysicalRangeStr();                     break;
         case STATISTIC_COLUMN_IN_EL_RANGE:      result = param.inputElectricRangeStr();                     break;
@@ -604,14 +604,14 @@ void StatisticDialog::updateList()
             continue;
         }
 
-		SignalParam& param = signal.param();
+		Metrology::SignalParam& param = signal.param();
 
 		if (param.isAnalog() == false || param.isInput() == false)
         {
             continue;
         }
 
-        if (param.position().subblock() == -1 || param.position().block() == -1 || param.position().entry() == -1)
+		if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
         {
             continue;
         }

@@ -73,14 +73,14 @@ class SignalPropertyDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit                    SignalPropertyDialog(const SignalParam& param, QWidget *parent = 0);
+	explicit                    SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent = 0);
                                 ~SignalPropertyDialog();
 
-    SignalParam                 param() const { return m_param; }
+	Metrology::SignalParam		param() const { return m_param; }
 
 private:
 
-    SignalParam                 m_param;
+	Metrology::SignalParam      m_param;
 
     // Property list
     //

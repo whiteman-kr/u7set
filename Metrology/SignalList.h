@@ -38,7 +38,7 @@ const char* const           SignalListColumn[] =
 
 const int                   SIGNAL_LIST_COLUMN_COUNT            = sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
-const int                   SIGNAL_LIST_COLUMN_CASE             = 0,
+const int                   SIGNAL_LIST_COLUMN_RACK             = 0,
                             SIGNAL_LIST_COLUMN_ID               = 1,
                             SIGNAL_LIST_COLUMN_EQUIPMENT_ID     = 2,
                             SIGNAL_LIST_COLUMN_CAPTION          = 3,
@@ -67,11 +67,11 @@ public:
                             ~SignalListTable();
 
     int                     signalCount() const;
-    SignalParam             signalParam(int index) const;
-    void                    set(const QList<SignalParam> list_add);
+	Metrology::SignalParam	signalParam(int index) const;
+	void                    set(const QList<Metrology::SignalParam> list_add);
     void                    clear();
 
-    QString                 text(int row, int column, const SignalParam& param) const;
+	QString                 text(int row, int column, const Metrology::SignalParam& param) const;
 
     bool                    showCustomID() const { return m_showCustomID; }
     void                    setShowCustomID(bool show) { m_showCustomID = show; }
@@ -82,7 +82,7 @@ public:
 private:
 
     mutable QMutex          m_signalMutex;
-    QList<SignalParam>      m_signalParamList;
+	QList<Metrology::SignalParam> m_signalParamList;
 
     static bool             m_showCustomID;
     static bool             m_showADCInHex;

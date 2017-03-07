@@ -60,8 +60,8 @@ int SqlFieldBase::init(int objectType, int)
             append("Caption",                       QVariant::String, 256);
 
             append("EquipmentID",					QVariant::String, 256);
-            append("CaseNo",                        QVariant::Int);
-            append("CaseType",						QVariant::String, 64);
+			append("RackIndex",                     QVariant::Int);
+			append("RackCaption",					QVariant::String, 64);
             append("Channel",						QVariant::Int);
             append("Subblock",						QVariant::Int);
             append("Block",                         QVariant::Int);
@@ -770,13 +770,13 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
                     measure->setCustomAppSignalID(query.value(field++).toString());
                     measure->setCaption(query.value(field++).toString());
 
-                    measure->position().setEquipmentID(query.value(field++).toString());
-                    measure->position().setCaseNo(query.value(field++).toInt());
-                    measure->position().setCaseCaption(query.value(field++).toString());
-                    measure->position().setChannel(query.value(field++).toInt());
-                    measure->position().setSubblock(query.value(field++).toInt());
-                    measure->position().setBlock(query.value(field++).toInt());
-                    measure->position().setEntry(query.value(field++).toInt());
+					measure->location().setEquipmentID(query.value(field++).toString());
+					measure->location().rack().setIndex(query.value(field++).toInt());
+					measure->location().rack().setCaption(query.value(field++).toString());
+					query.value(field++); // reserve channel
+					measure->location().setChassis(query.value(field++).toInt());
+					measure->location().setModule(query.value(field++).toInt());
+					measure->location().setPlace(query.value(field++).toInt());
 
                     measure->setPercent(query.value(field++).toDouble());
 
@@ -1113,13 +1113,13 @@ int SqlTable::write(void* pRecord, int count, int* key)
                     query.bindValue(field++, measure->customAppSignalID());
                     query.bindValue(field++, measure->caption());
 
-                    query.bindValue(field++, measure->position().equipmentID());
-                    query.bindValue(field++, measure->position().caseNo());
-                    query.bindValue(field++, measure->position().caseCaption());
-                    query.bindValue(field++, measure->position().channel());
-                    query.bindValue(field++, measure->position().subblock());
-                    query.bindValue(field++, measure->position().block());
-                    query.bindValue(field++, measure->position().entry());
+					query.bindValue(field++, measure->location().equipmentID());
+					query.bindValue(field++, measure->location().rack().index());
+					query.bindValue(field++, measure->location().rack().caption());
+					query.bindValue(field++, -1); // reserve channel
+					query.bindValue(field++, measure->location().chassis());
+					query.bindValue(field++, measure->location().module());
+					query.bindValue(field++, measure->location().place());
 
                     query.bindValue(field++, measure->percent());
 

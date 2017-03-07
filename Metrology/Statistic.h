@@ -39,7 +39,7 @@ const char* const           StatisticColumn[] =
 
 const int                   STATISTIC_COLUMN_COUNT          = sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
 
-const int                   STATISTIC_COLUMN_CASE           = 0,
+const int                   STATISTIC_COLUMN_RACK           = 0,
                             STATISTIC_COLUMN_ID             = 1,
                             STATISTIC_COLUMN_EQUIPMENT_ID   = 2,
                             STATISTIC_COLUMN_CAPTION        = 3,

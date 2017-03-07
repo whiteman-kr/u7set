@@ -140,13 +140,13 @@ public:
 
                             TuningSignal();
                             TuningSignal(const TuningSignal& from);
-    explicit                TuningSignal(const SignalParam& param);
+	explicit                TuningSignal(const Metrology::SignalParam& param);
                             ~TuningSignal();
 private:
 
     Hash                    m_hash = 0;
 
-	QString                 m_case;
+	QString                 m_rack;
     QString                 m_appSignalID;
     QString                 m_customAppSignalID;
     QString                 m_equipmentID;
@@ -165,8 +165,8 @@ public:
     Hash                    hash() const { return m_hash; }
     void                    setHash(Hash hash) { m_hash = hash; }
 
-	QString                 caseStr() const { return m_case; }
-	void                    setCase(const QString& caseStr) { m_case = caseStr; }
+	QString                 caseStr() const { return m_rack; }
+	void                    setCase(const QString& caseStr) { m_rack = caseStr; }
 
     QString                 appSignalID() const { return m_appSignalID; }
     void                    setAppSignalID(const QString& appSignalID);
