@@ -187,7 +187,13 @@ SOURCES +=\
     ../TuningIPEN/TuningIPENDataStorage.cpp \
     DialogConnections.cpp \
     Builder/MetrologyCfgGenerator.cpp \
-    ../lib/MetrologySignal.cpp
+    ../lib/MetrologySignal.cpp \
+    ../lib/TuningFilter.cpp \
+    ../lib/TuningFilterEditor.cpp \
+    ../lib/TuningObject.cpp \
+    DialogTuningFiltersEditor.cpp \
+    ../lib/TuningModel.cpp \
+    DialogTuningClients.cpp
 
 
 HEADERS  += \
@@ -306,7 +312,13 @@ HEADERS  += \
     ../TuningIPEN/TuningIPENDataStorage.h \
     DialogConnections.h \
     Builder/MetrologyCfgGenerator.h \
-    ../lib/MetrologySignal.h
+    ../lib/MetrologySignal.h \
+    ../lib/TuningFilter.h \
+    ../lib/TuningFilterEditor.h \
+    ../lib/TuningObject.h \
+    DialogTuningFiltersEditor.h \
+    ../lib/TuningModel.h \
+    DialogTuningClients.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -331,7 +343,8 @@ FORMS    += \
     Forms/FileHistoryDialog.ui \
     Forms/ChangesetDetailsDialog.ui \
     Forms/CompareDialog.ui \
-    Forms/ComparePropertyObjectDialog.ui
+    Forms/ComparePropertyObjectDialog.ui \
+    DialogTuningClients.ui
 
 RESOURCES += \
 	Resources.qrc \

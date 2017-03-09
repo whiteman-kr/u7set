@@ -87,6 +87,7 @@
 #include <QProgressDialog>
 #include <QFileDialog>
 #include <QErrorMessage>
+#include <QDialogButtonBox>
 
 #include <QAbstractItemModel>
 #include <QAbstractTableModel>

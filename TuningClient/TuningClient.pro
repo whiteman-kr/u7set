@@ -92,7 +92,6 @@ QMAKE_EXTRA_TARGETS += versionTarget
 SOURCES +=\
         MainWindow.cpp \
     TuningPage.cpp \
-    TuningObject.cpp \
     Settings.cpp \
     TuningWorkspace.cpp \
     ConfigController.cpp \
@@ -112,8 +111,6 @@ SOURCES +=\
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
-    DialogInputValue.cpp \
-    TuningFilter.cpp \
     LogFile.cpp \
     ../u7/Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
@@ -122,15 +119,17 @@ SOURCES +=\
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     TuningObjectManager.cpp \
-    TuningFilterEditor.cpp \
     TuningClientFilterEditor.cpp \
     DialogPassword.cpp \
-    Main.cpp
+    Main.cpp \
+    ../lib/TuningFilter.cpp \
+    ../lib/TuningFilterEditor.cpp \
+    ../lib/TuningModel.cpp \
+    ../lib/TuningObject.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
     TuningPage.h \
-    TuningObject.h \
     Settings.h \
     TuningWorkspace.h \
     ConfigController.h \
@@ -150,8 +149,6 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
-    DialogInputValue.h \
-    TuningFilter.h \
     LogFile.h \
     ../u7/Builder/IssueLogger.h \
     ../lib/OutputLog.h \
@@ -160,15 +157,17 @@ HEADERS  += MainWindow.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
     TuningObjectManager.h \
-    TuningFilterEditor.h \
     TuningClientFilterEditor.h \
     DialogPassword.h \
-    Main.h
+    Main.h \
+    ../lib/TuningFilter.h \
+    ../lib/TuningFilterEditor.h \
+    ../lib/TuningModel.h \
+    ../lib/TuningObject.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogTuningSources.ui \
-    DialogInputValue.ui \
     DialogUsers.ui \
     DialogTuningSourceInfo.ui \
     DialogPassword.ui

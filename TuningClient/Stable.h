@@ -15,6 +15,7 @@
 #include <QListView>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QTableView>
 #include <QAbstractItemModel>

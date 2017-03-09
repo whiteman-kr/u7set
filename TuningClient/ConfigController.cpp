@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "Settings.h"
 #include "ConfigController.h"
-#include "TuningFilter.h"
+#include "../lib/TuningFilter.h"
 #include "TuningObjectManager.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
