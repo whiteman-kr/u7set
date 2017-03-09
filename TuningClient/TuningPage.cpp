@@ -550,14 +550,14 @@ void TuningItemModelMain::slot_undo()
 	}
 }
 
-void TuningItemModelMain::slot_Submit()
+void TuningItemModelMain::slot_Write()
 {
     if (theUserManager.requestPassword(m_parent, false) == false)
 	{
 		return;
 	}
 
-    QString str = tr("New values will be submitted:") + QString("\r\n\r\n");
+    QString str = tr("New values will be written:") + QString("\r\n\r\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -610,7 +610,7 @@ void TuningItemModelMain::slot_Submit()
 
     str += QString("\r\n") + tr("Are you sure you want to continue?");
 
-    if (QMessageBox::warning(m_parent, tr("Sumbit Changes"),
+    if (QMessageBox::warning(m_parent, tr("Write Changes"),
 							 str,
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
@@ -834,14 +834,14 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_setAllButton = new QPushButton(tr("Set All"));
     connect(m_setAllButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_setAll);
 
-    m_submitButton = new QPushButton(tr("Submit"));
-    connect(m_submitButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Submit);
+    m_writeButton = new QPushButton(tr("Write"));
+    connect(m_writeButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Write);
 
     m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
-    m_concludeButton = new QPushButton(tr("Conclude"));
-    connect(m_concludeButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Conclude);
+    //m_concludeButton = new QPushButton(tr("Conclude"));
+    //connect(m_concludeButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Conclude);
 
     m_bottomLayout = new QHBoxLayout();
 
@@ -852,9 +852,9 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_bottomLayout->addWidget(m_setValueButton);
     m_bottomLayout->addWidget(m_setAllButton);
 	m_bottomLayout->addStretch();
-    m_bottomLayout->addWidget(m_submitButton);
+    m_bottomLayout->addWidget(m_writeButton);
 	m_bottomLayout->addWidget(m_undoButton);
-    m_bottomLayout->addWidget(m_concludeButton);
+    //m_bottomLayout->addWidget(m_concludeButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -1274,7 +1274,7 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 		{
             if (m_objectList->editorActive() == false)
             {
-                m_model->slot_Submit();
+                m_model->slot_Write();
                 return true;
             }
             return true;
