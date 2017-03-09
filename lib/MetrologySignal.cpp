@@ -26,10 +26,8 @@ namespace Metrology
 
 		m_hash = 0;
 
-		m_equipmentID = QString();
-		m_caption = QString();
-
-		m_type = -1;
+		m_equipmentID.clear();
+		m_caption.clear();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -99,14 +97,14 @@ namespace Metrology
 	void SignalLocation::clear()
 	{
 
-		m_equipmentID = QString();
+		m_equipmentID.clear();
 
 		m_rack.clear();
 		m_chassis = -1;
 		m_module = -1;
 		m_place = -1;
 
-		m_contact = QString();
+		m_contact.clear();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -207,14 +205,14 @@ namespace Metrology
 
 	void SignalLocation::writeToXml(XmlWriteHelper& xml)
 	{
-		xml.writeStringAttribute("EquipmentID", equipmentID());         // signal equipmentID
+		xml.writeStringAttribute("EquipmentID", equipmentID());			// signal equipmentID
 
-		xml.writeStringAttribute("RackID", rack().equipmentID());       // signal rack      ( other info about rack ref. in RackParam by rack hash)
-		xml.writeIntAttribute("Chassis", chassis());                    // signal chassis
-		xml.writeIntAttribute("Module", module());                      // signal module
-		xml.writeIntAttribute("Place", place());                        // signal place
+		xml.writeStringAttribute("RackID", rack().equipmentID());		// signal rack      ( other info about rack ref. in RackParam by rack hash)
+		xml.writeIntAttribute("Chassis", chassis());					// signal chassis
+		xml.writeIntAttribute("Module", module());						// signal module
+		xml.writeIntAttribute("Place", place());						// signal place
 
-		xml.writeStringAttribute("Contact", contact());                 // signal contact for input: _IN00A or _IN00B, for output: only _OUT00
+		xml.writeStringAttribute("Contact", contact());					// signal contact for input: _IN00A or _IN00B, for output: only _OUT00
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -235,46 +233,47 @@ namespace Metrology
 
 	void SignalParam::setParam(const Signal& signal, const SignalLocation& location)
 	{
-		setAppSignalID(signal.appSignalID());
-		setCustomAppSignalID(signal.customAppSignalID());
-		setCaption(signal.caption());
+		m_appSignalID = signal.appSignalID();
+		m_customAppSignalID = signal.customAppSignalID();
+		m_caption = signal.caption();
 
-		setSignalType(signal.signalType());
-		setInOutType(signal.inOutType());
+		m_signalType = signal.signalType();
+		m_inOutType = signal.inOutType();
 
-		setLocation(location);
+		m_location = location;
 
-		setLowADC(signal.lowADC());
-		setHighADC(signal.highADC());
+		m_lowADC = signal.lowADC();
+		m_highADC = signal.highADC();
 
-		setInputElectricLowLimit(signal.inputLowLimit());
-		setInputElectricHighLimit(signal.inputHighLimit());
-		setInputElectricUnitID(signal.inputUnitID());
-		setInputElectricSensorType(signal.inputSensorType());
-		setInputElectricPrecision(3);
+		m_inputElectricLowLimit = signal.inputLowLimit();
+		m_inputElectricHighLimit = signal.inputHighLimit();
+		m_inputElectricUnitID = signal.inputUnitID();
+		m_inputElectricSensorType = signal.inputSensorType();
+		m_inputElectricPrecision = 3;
 
-		setInputPhysicalLowLimit(signal.lowEngeneeringUnits());
-		setInputPhysicalHighLimit(signal.highEngeneeringUnits());
-		setInputPhysicalUnitID(signal.unitID());
-		setInputPhysicalPrecision(signal.decimalPlaces());
+		m_inputPhysicalLowLimit = signal.lowEngeneeringUnits();
+		m_inputPhysicalHighLimit = signal.highEngeneeringUnits();
+		m_inputPhysicalUnitID = signal.unitID();
+		m_inputPhysicalPrecision = signal.decimalPlaces();
 
 		switch(signal.outputMode())
 		{
-			case E::OutputMode::Plus0_Plus5_V:     setOutputElectricLowLimit(0);    setOutputElectricHighLimit(5);  setOutputElectricUnitID(E::InputUnit::V);   break;
-			case E::OutputMode::Plus4_Plus20_mA:   setOutputElectricLowLimit(4);    setOutputElectricHighLimit(20); setOutputElectricUnitID(E::InputUnit::mA);  break;
-			case E::OutputMode::Minus10_Plus10_V:  setOutputElectricLowLimit(-10);  setOutputElectricHighLimit(10); setOutputElectricUnitID(E::InputUnit::V);   break;
-			case E::OutputMode::Plus0_Plus5_mA:    setOutputElectricLowLimit(0);    setOutputElectricHighLimit(5);  setOutputElectricUnitID(E::InputUnit::mA);  break;
+			case E::OutputMode::Plus0_Plus5_V:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::InputUnit::V;	break;
+			case E::OutputMode::Plus4_Plus20_mA:	m_outputElectricLowLimit = 4;	m_outputElectricHighLimit = 20;	m_outputElectricUnitID = E::InputUnit::mA;	break;
+			case E::OutputMode::Minus10_Plus10_V:	m_outputElectricLowLimit = -10;	m_outputElectricHighLimit = 10;	m_outputElectricUnitID = E::InputUnit::V;	break;
+			case E::OutputMode::Plus0_Plus5_mA:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::InputUnit::mA;	break;
+			default:								assert(0);
 		}
-		setOutputElectricSensorType(signal.outputSensorType());
-		setOutputElectricPrecision(3);
+		m_outputElectricSensorType = signal.outputSensorType();
+		m_outputElectricPrecision = 3;
 
-		setOutputPhysicalLowLimit(signal.outputLowLimit());
-		setOutputPhysicalHighLimit(signal.outputHighLimit());
-		setOutputPhysicalUnitID(signal.outputUnitID());
-		setOutputPhysicalPrecision(signal.decimalPlaces());
+		m_outputPhysicalLowLimit = signal.outputLowLimit();
+		m_outputPhysicalHighLimit = signal.outputHighLimit();
+		m_outputPhysicalUnitID = signal.outputUnitID();
+		m_outputPhysicalPrecision = signal.decimalPlaces();
 
-		setEnableTuning(signal.enableTuning());
-		setTuningDefaultValue(signal.tuningDefaultValue());
+		m_enableTuning = signal.enableTuning();
+		m_tuningDefaultValue = signal.tuningDefaultValue();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -418,13 +417,13 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf( ("%%.%df"), m_inputElectricPrecision );
+		formatStr.sprintf(("%%.%df"), m_inputElectricPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputElectricLowLimit, m_inputElectricHighLimit);
 
 		if (m_inputElectricUnit.isEmpty() == false)
 		{
-			range.append( " " + m_inputElectricUnit );
+			range.append(" " + m_inputElectricUnit);
 		}
 
 		return range;
@@ -436,13 +435,13 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
+		formatStr.sprintf(("%%.%df"), m_inputPhysicalPrecision);
 
-		range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
+		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
 
 		if (m_inputPhysicalUnit.isEmpty() == false)
 		{
-			range.append( " " + m_inputPhysicalUnit );
+			range.append(" " + m_inputPhysicalUnit );
 		}
 
 		return range;
@@ -454,13 +453,13 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf( ("%%.%df"), m_outputElectricPrecision );
+		formatStr.sprintf(("%%.%df"), m_outputElectricPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputElectricLowLimit, m_outputElectricHighLimit);
 
 		if (m_outputElectricUnit.isEmpty() == false)
 		{
-			range.append( " " + m_outputElectricUnit);
+			range.append(" " + m_outputElectricUnit);
 		}
 
 		return range;
@@ -472,13 +471,13 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf( ("%%.%df"), m_outputPhysicalPrecision );
+		formatStr.sprintf(("%%.%df"), m_outputPhysicalPrecision );
 
-		range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
+		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
 
 		if (m_outputPhysicalUnit.isEmpty() == false)
 		{
-			range.append( " " + m_outputPhysicalUnit);
+			range.append(" " + m_outputPhysicalUnit);
 		}
 
 		return range;
@@ -511,9 +510,9 @@ namespace Metrology
 		{
 			case E::SignalType::Analog:
 
-				formatStr.sprintf( ("%%.%df"), m_inputPhysicalPrecision );
+				formatStr.sprintf(("%%.%df"), m_inputPhysicalPrecision);
 
-				stateStr.sprintf( formatStr.toAscii(), m_tuningDefaultValue);
+				stateStr.sprintf(formatStr.toAscii(), m_tuningDefaultValue);
 
 				if (m_inputPhysicalUnit.isEmpty() == false)
 				{
