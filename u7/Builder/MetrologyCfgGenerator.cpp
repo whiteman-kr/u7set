@@ -35,15 +35,13 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::writeSettings()
 	{
-		m_log;
-
 		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
 
 		//
 		//
 		xmlWriter.writeStartElement("DatabaseInfo");
 		{
-			xmlWriter.writeAttribute("Version", QString::number( m_dbController->databaseVersion() ));
+			xmlWriter.writeAttribute("Version", QString::number(m_dbController->databaseVersion()));
 		}
 		xmlWriter.writeEndElement();
 
@@ -53,6 +51,8 @@ namespace Builder
 		Hardware::DeviceObject* pObjectSoftware = m_equipment->deviceObject(m_software->equipmentId());
 		if (pObjectSoftware == nullptr || pObjectSoftware->isSoftware() == false )
 		{
+			// Unknown software type (Software object StrID '%1').
+			//
 			m_log->errEQP6100(m_software->equipmentId(), m_software->uuid());
 			xmlWriter.writeTextElement("Error", tr("Software Metrology (%1) not found").arg(m_software->equipmentId()));
 			return false;
@@ -80,6 +80,8 @@ namespace Builder
 
 			if (appDataServiceId1.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID1");
 				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 is empty"));
 				return false;
@@ -87,6 +89,8 @@ namespace Builder
 
 			if (appDataServiceId2.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID2");
 				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID2 is empty"));
 				return false;
@@ -97,6 +101,8 @@ namespace Builder
 
 			if (appDataObject1 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId1));
 				return false;
@@ -104,6 +110,8 @@ namespace Builder
 
 			if (appDataObject2 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId2));
 				return false;
@@ -143,6 +151,8 @@ namespace Builder
 
 			if (tuningClientId1.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "TuningClientID1");
 				xmlWriter.writeTextElement("Error", tr("Property TuningClientID1 is empty"));
 				return false;
@@ -150,6 +160,8 @@ namespace Builder
 
 			if (tuningClientId2.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "TuningClientID2");
 				xmlWriter.writeTextElement("Error", tr("Property TuningClientID2 is empty"));
 				return false;
@@ -160,6 +172,8 @@ namespace Builder
 
 			if (tuningClientObject1 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "TuningClientID1", tuningClientId1);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(tuningClientId1));
 				return false;
@@ -167,6 +181,8 @@ namespace Builder
 
 			if (tuningClientObject2 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "TuningClientID2", tuningClientId2);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(tuningClientId2));
 				return false;
@@ -195,6 +211,8 @@ namespace Builder
 
 			if (tuningServiceId1.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID1");
 				xmlWriter.writeTextElement("Error", tr("Property TuningServiceID1 is empty"));
 				return false;
@@ -202,6 +220,8 @@ namespace Builder
 
 			if (tuningServiceId2.isEmpty() == true)
 			{
+				// Property '%1.%2' is empty.
+				//
 				m_log->errCFG3022(m_software->equipmentId(), "TuningServiceID2");
 				xmlWriter.writeTextElement("Error", tr("Property TuningServiceID2 is empty"));
 				return false;
@@ -212,6 +232,8 @@ namespace Builder
 
 			if (tuningServiceObject1 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID1", tuningServiceId1);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(tuningServiceId1));
 				return false;
@@ -219,6 +241,8 @@ namespace Builder
 
 			if (tuningServiceObject2 == nullptr)
 			{
+				// Property '%1.%2' is linked to undefined software ID '%3'.
+				//
 				m_log->errCFG3021(m_software->equipmentId(), "TuningServiceID2", tuningServiceId2);
 				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(tuningServiceId2));
 				return false;
@@ -263,53 +287,51 @@ namespace Builder
 			xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_SIGNALS);			// version of MetrologySignal file
 
 
-            // Creating rack list from equipment tree
-            //
-            QVector<Metrology::RackParam> racks;
+			// Creating rack list from equipment tree
+			//
+			QVector<Metrology::RackParam> racks;
 
-            int systemsCount = m_equipment->root()->childrenCount();
-            for (int s = 0; s < systemsCount; s++)
-            {
-                Hardware::DeviceObject* pSystem = m_equipment->root()->child(s);
-                if (pSystem == nullptr || pSystem->isSystem() == false)
-                {
-                    continue;
-                }
+			int systemsCount = m_equipment->root()->childrenCount();
+			for (int s = 0; s < systemsCount; s++)
+			{
+				Hardware::DeviceObject* pSystem = m_equipment->root()->child(s);
+				if (pSystem == nullptr || pSystem->isSystem() == false)
+				{
+					continue;
+				}
 
-                // find all racks in system
-                //
-                int racksCount = pSystem->childrenCount();
-                for (int r = 0; r < racksCount; r++)
-                {
-                    Hardware::DeviceObject* pRack = pSystem->child(r);
-                    if (pRack == nullptr || pRack->isRack() == false)
-                    {
-                        continue;
-                    }
+				// find all racks in system
+				//
+				int racksCount = pSystem->childrenCount();
+				for (int r = 0; r < racksCount; r++)
+				{
+					Hardware::DeviceObject* pRack = pSystem->child(r);
+					if (pRack == nullptr || pRack->isRack() == false)
+					{
+						continue;
+					}
 
-                    racks.append( Metrology::RackParam( racks.count() , pRack->equipmentId(), pRack->caption() ) );
-                }
-            }
+					racks.append(Metrology::RackParam(racks.count() , pRack->equipmentId(), pRack->caption()));
+				}
+			}
 
-            // Writing racks
-            //
-            xml.writeStartElement("Racks");
-            {
-                xml.writeIntAttribute("Count", racks.count());
+			// Writing racks
+			//
+			xml.writeStartElement("Racks");
+			{
+				xml.writeIntAttribute("Count", racks.count());
 
-                int racksCount = racks.count();
+				for(Metrology::RackParam rack : racks)
+				{
+					if (rack.equipmentID().isEmpty() == true)
+					{
+						continue;
+					}
 
-                for (int i = 0; i < racksCount; i++)
-                {
-                    if (racks[i].equipmentID().isEmpty() == true || racks[i].hash() == 0)
-                    {
-                        continue;
-                    }
-
-                    racks[i].writeToXml(xml);
-                }
-            }
-            xml.writeEndElement();
+					rack.writeToXml(xml);
+				}
+			}
+			xml.writeEndElement();
 
 
 			// Writing units
@@ -335,7 +357,7 @@ namespace Builder
 
 			// Creating signal list
 			//
-            QVector<Metrology::SignalParam> signalsToWrite;
+			QVector<Metrology::SignalParam> signalsToWrite;
 
 			int signalCount = m_signalSet->count();
 
@@ -347,42 +369,56 @@ namespace Builder
 
 				if (unitInfo.contains(signal.unitID()) == false)
 				{
+					// Signal %1 has wrong unitID: %2.
+					//
 					m_log->errEQP6101(signal.appSignalID(), signal.unitID());
 					hasWrongField = true;
 				}
 
 				if (unitInfo.contains(signal.inputUnitID()) == false)
 				{
+					// Signal %1 has wrong unitID: %2.
+					//
 					m_log->errEQP6101(signal.appSignalID(), signal.inputUnitID());
 					hasWrongField = true;
 				}
 
 				if (unitInfo.contains(signal.outputUnitID()) == false)
 				{
+					// Signal %1 has wrong unitID: %2.
+					//
 					m_log->errEQP6101(signal.appSignalID(), signal.outputUnitID());
 					hasWrongField = true;
 				}
 
 				if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
 				{
+					// Signal %1 has wrong type of sensor: %2.
+					//
 					m_log->errEQP6102(signal.appSignalID(), signal.inputSensorType());
 					hasWrongField = true;
 				}
 
 				if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
 				{
+					// Signal %1 has wrong type of sensor: %2.
+					//
 					m_log->errEQP6102(signal.appSignalID(), signal.outputSensorType());
 					hasWrongField = true;
 				}
 
 				if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 				{
+					// Signal %1 has wrong type of output range mode: %2.
+					//
 					m_log->errEQP6103(signal.appSignalID(), signal.outputMode());
 					hasWrongField = true;
 				}
 
 				if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
 				{
+					// Signal %1 has wrong input/output type: %2.
+					//
 					m_log->errEQP6104(signal.appSignalID(), TO_INT(signal.inOutType()));
 					hasWrongField = true;
 				}
@@ -392,13 +428,13 @@ namespace Builder
 					continue;
 				}
 
-                // find location of signal in the equipment Tree by signal equipmentID
+				// find location of signal in the equipment Tree by signal equipmentID
 				//
-                Metrology::SignalLocation location( m_equipment->deviceObject(signal.equipmentID() ) );
+				Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()));
 
 				// append signal into list
 				//
-                signalsToWrite.append( Metrology::SignalParam( signal, location) );
+				signalsToWrite.append(Metrology::SignalParam(signal, location));
 			}
 
 			// Writing signals
@@ -407,7 +443,7 @@ namespace Builder
 			{
 				xml.writeIntAttribute("Count", signalsToWrite.count());
 
-                for(Metrology::SignalParam signal : signalsToWrite)
+				for(Metrology::SignalParam signal : signalsToWrite)
 				{
 					signal.writeToXml(xml);
 				}
