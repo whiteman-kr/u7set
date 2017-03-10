@@ -34,6 +34,53 @@ int main(int argc, char *argv[])
 	//
 	theSettings.load();
 
+	// Create memory segment for check single Instance
+	//
+
+	QSharedMemory instanceChecker;
+	instanceChecker.setKey(MonitorMainWindow::getInstanceKey());
+
+	bool ok = instanceChecker.create(sizeof(char));
+
+	if (ok == true)
+	{
+		// If it was created, we should initialize it with 0
+		//
+
+		instanceChecker.lock();
+
+		char* sharedData = static_cast<char*>(instanceChecker.data());
+		*sharedData = 0;
+
+		instanceChecker.unlock();
+	}
+	else
+	{
+		if (instanceChecker.error() == QSharedMemory::SharedMemoryError::AlreadyExists &&
+		        theSettings.singleInstance() == true)
+		{
+			// In other way, if memory segment exists, write there
+			// value "1" and exit.
+
+			instanceChecker.attach();
+			instanceChecker.lock();
+
+			char* sharedData = static_cast<char*>(instanceChecker.data());
+			*sharedData = 1;
+
+			instanceChecker.unlock();
+			qDebug() << "Another instance is active";
+
+			return 0;
+		}
+		else
+		{
+			// If other error occured - show it on debug console
+			//
+			qDebug() << "Shared memory: " << instanceChecker.errorString();
+		}
+	}
+
 	// --
 	//
 	VFrame30::VFrame30Library::Init();
