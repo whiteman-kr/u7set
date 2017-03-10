@@ -3530,6 +3530,53 @@ namespace Builder
 				  QString(tr("Usage of ALP phase time exceed 100%.")));
 	}
 
+	/// IssueCode: ALC5083
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver of connection '%1' (port '%2') is not associated with LM '%3'
+	///
+	/// Parameters:
+	///		%1 Connection ID
+	///		%2 Connection port EquipmentID
+	///		%3 Logic module EquipmentID
+	///
+	/// Description:
+	///		Receiver of connection is not associated with specified LM. Check receiver placement.
+	///
+	void IssueLogger::errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5083,
+				  QString(tr("Receiver of connection '%1' (port '%2') is not associated with LM '%3'.")).
+						arg(connectionID).arg(receiverPortID).arg(lmID));
+	}
+
+	/// IssueCode: ALC5084
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Connection ID
+	///
+	/// Description:
+	///		Signal is not exists in specified serial connection. Use PortRawDataDescription to define receiving signals.
+	///
+	void IssueLogger::errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5084,
+				  QString(tr("Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.")).
+						arg(appSignalID).arg(connectionID));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//

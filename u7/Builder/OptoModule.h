@@ -50,12 +50,13 @@ namespace Hardware
 			AllNativeRawData,
 			ModuleRawData,
 			PortRawData,
-			Const16
+			Const16,
+			InSignal
 		};
 
 		struct RawDataDescriptionItem
 		{
-			RawDataDescriptionItemType type;
+			RawDataDescriptionItemType type = RawDataDescriptionItemType::RawDataSize;
 
 			bool rawDataSizeIsAuto = false;			// for type - RawDataSize
 			int rawDataSize = 0;					//
@@ -65,6 +66,14 @@ namespace Hardware
 			int const16Value = 0;					// for type - Const16
 
 			QString portEquipmentID;				// for type - PortRawData
+
+			QString appSignalID;									// for type - InSignal
+			E::SignalType signalType = E::SignalType::Discrete;		//
+			E::DataFormat dataFormat = E::DataFormat::UnsignedInt;	//
+			int dataSize = 0;										//
+			E::ByteOrder byteOrder = E::ByteOrder::BigEndian;		//
+			int offsetW = 0;										//
+			int bitNo = 0;											//
 		};
 
 		const int RAW_DATA_SIZE_INDEX = 0;
@@ -75,6 +84,7 @@ namespace Hardware
 		static const char* MODULE_RAW_DATA;
 		static const char* PORT_RAW_DATA;
 		static const char* CONST16;
+		static const char* IN_SIGNAL;
 
 		QString m_equipmentID;
 		DeviceController* m_deviceController = nullptr;
@@ -129,7 +139,6 @@ namespace Hardware
 		void sortTxSignals(QVector<TxSignal> &array);
 
 		DeviceModule* getLM();
-
 
 	public:
 		OptoPort(const QString& optoModuleID, DeviceController* optoPortController, int port);
@@ -227,7 +236,15 @@ namespace Hardware
 		Address16 getTxSignalAddress(const QString& appSignalID) const;
 
 		bool parseRawDescriptionStr(Builder::IssueLogger* log);
+		bool parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
+
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
+
+		bool getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
+										const QString& appSignalID,
+										QUuid receiverUuid,
+										SignalAddress16 &addr,
+										Builder::IssueLogger* log);
 	};
 
 
@@ -330,6 +347,18 @@ namespace Hardware
 
 		void clear();
 
+		bool getSignalRxAddressOpto(std::shared_ptr<Connection> connection,
+									const QString& appSignalID,
+									const QString& receiverLM,
+									QUuid receiverUuid,
+									SignalAddress16 &addr);
+
+		bool getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
+										const QString& appSignalID,
+										const QString& receiverLM,
+										QUuid receiverUuid,
+										SignalAddress16 &addr);
+
 	public:
 		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::IssueLogger* log);
 		~OptoModuleStorage();
@@ -365,6 +394,10 @@ namespace Hardware
 
 		QVector<OptoModule*> getOptoModulesSorted();
 
-		bool getSignalRxAddress(QString connectionID, QString appSignalID, QString receiverLM, QUuid receiverUuid, Address16& addr);
+		bool getSignalRxAddress(const QString& connectionID,
+								const QString& appSignalID,
+								const QString& receiverLM,
+								QUuid receiverUuid,
+								SignalAddress16& addr);
 	};
 }
