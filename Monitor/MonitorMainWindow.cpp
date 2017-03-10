@@ -10,6 +10,8 @@
 #include "DialogSignalSnapshot.h"
 #include "../VFrame30/Schema.h"
 
+const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
+
 MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	m_configController(theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
@@ -65,6 +67,18 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	m_configController.start();
 
 	m_updateStatusBarTimerId = startTimer(100);
+
+	// Try attach memory segment, that keep information
+	// about instance status
+	//
+
+	m_instanceTimer = new QTimer(this);
+	m_instanceTimer->start(100);
+
+	connect (m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
+
+	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
+	m_appInstanceSharedMemory.attach();
 
 	return;
 }
@@ -194,6 +208,11 @@ void MonitorMainWindow::showLogo()
 	}
 
 	return;
+}
+
+QString MonitorMainWindow::getInstanceKey()
+{
+	return m_monitorSingleInstanceKey;
 }
 
 void MonitorMainWindow::createActions()
@@ -494,6 +513,65 @@ void MonitorMainWindow::debug()
 //	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
 
 #endif	// Q_DEBUG
+}
+
+void MonitorMainWindow::checkMonitorSingleInstance()
+{
+	if (m_appInstanceSharedMemory.isAttached() == true &&
+	        theSettings.singleInstance() == true)
+	{
+		// If memory segment is attached, and singleInstance option is set,
+		// get information from this memory segment
+		//
+
+		m_appInstanceSharedMemory.lock();
+
+		char* sharedData = static_cast<char*>(m_appInstanceSharedMemory.data());
+
+		// If memory segment contains "1" value - other instance of program
+		// has been executed. Show message of execution on debug console, and move window
+		// to top
+		//
+
+		if (*sharedData != 0)
+		{
+			qDebug() << "Another instance of Monitor has been started";
+
+			*sharedData = 0;
+
+			// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
+			// to do this. When flags added - activateWindow and show it to apply changes. After that, window
+			// will be every time on top, so we need remove WindowStaysOnTop flag, apply changes, and only then remove
+			// X11Bypass flag.
+			//
+
+			this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
+			this->activateWindow();
+			this->show();
+			this->setWindowFlags(this->windowFlags() & (~Qt::WindowStaysOnTopHint));
+			this->activateWindow();
+			this->show();
+			this->setWindowFlags(this->windowFlags() & (~Qt::X11BypassWindowManagerHint));
+			this->activateWindow();
+			this->show();
+		}
+
+		m_appInstanceSharedMemory.unlock();
+	}
+	else
+	{
+		if (m_appInstanceSharedMemory.isAttached() == false &&
+		        theSettings.singleInstance() == true)
+		{
+			qDebug() << "Single instance checker shared Memory segment is not attached";
+
+			bool result = m_appInstanceSharedMemory.attach();
+			if (result == false)
+			{
+				qDebug() << "Single instance attach error: " << m_appInstanceSharedMemory.errorString();
+			}
+		}
+	}
 }
 
 void MonitorMainWindow::slot_signalSnapshot()
