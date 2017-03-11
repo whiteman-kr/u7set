@@ -150,6 +150,17 @@ namespace VFrame30
 	{
 	}
 
+	void PosConnectionImpl::dump() const
+	{
+		qDebug() << "Item: " << metaObject()->className();
+		qDebug() << "\tguid:" << guid();
+		qDebug() << "\tpoints:";
+		for (const SchemaPoint& p : points)
+		{
+			qDebug() << "\t\t" << p.X << ", " << p.Y;
+		}
+	}
+
 	// Draw Functions
 	//
 

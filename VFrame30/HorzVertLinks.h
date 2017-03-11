@@ -40,7 +40,13 @@ namespace VFrame30
 
 			bool IsValInRange(double val)
 			{
-				return val >= Pos1 && val <= Pos2;
+				// Fake link are squized to the same Pos1 and Pos2,
+				// make it a bit wider to fit point
+				//
+				return  val >= std::min(Pos1, Pos2) - 0.000001 &&
+						val <= std::max(Pos1, Pos2) + 0.000001;
+
+				//return val >= Pos1 && val <= Pos2;		// This will not work for fake points when Pos1 == Pos2
 			}
 
 			bool IsValOnEndPoints(double val)

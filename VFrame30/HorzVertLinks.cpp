@@ -128,16 +128,27 @@ namespace VFrame30
 
 		// есть ли такая точка в вертикальных отрезках?
 		//
-		auto vertline = vertlinks.find(pt.X);
-		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
+//		auto vertline = vertlinks.find(pt.X);
+
+//		while (vertline != vertlinks.end() && std::abs(vertline->first - pt.X) < 0.000001)
+//		{
+//			if (vertline->second.IsValInRange(pt.Y) == true &&
+//				schemaItemGuid != vertline->second.SchemaItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+//			{
+//				items.push_back(vertline->second.SchemaItemGuid);
+//			}
+
+//			++ vertline;
+//		}
+		auto vertlineRange = vertlinks.equal_range(pt.X);
+
+		for (auto vertline = vertlineRange.first; vertline != vertlineRange.second; ++vertline)
 		{
 			if (vertline->second.IsValInRange(pt.Y) == true &&
 				schemaItemGuid != vertline->second.SchemaItemGuid)	// лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				items.push_back(vertline->second.SchemaItemGuid);
 			}
-
-			++ vertline;
 		}
 
 		// есть ли такая точка в горизонтальных отрезках?
@@ -148,18 +159,28 @@ namespace VFrame30
 		// [_]--x-0---- примерно такой рисунок получится
 		//
 
-		auto horzline = horzlinks.find(pt.Y);
-		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
+//		auto horzline = horzlinks.find(pt.Y);
+
+//		while (horzline != horzlinks.end() && std::abs(horzline->first - pt.Y) < 0.000001)
+//		{
+//			if (horzline->second.IsValInRange(pt.X) == true &&
+//				schemaItemGuid != horzline->second.SchemaItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
+//			{
+//				items.push_back(horzline->second.SchemaItemGuid);
+//			}
+
+//			++ horzline;
+//		}
+		auto horzlineRange = horzlinks.equal_range(pt.Y);
+
+		for (auto horzline = horzlineRange.first; horzline != horzlineRange.second; ++horzline)
 		{
 			if (horzline->second.IsValInRange(pt.X) == true &&
 				schemaItemGuid != horzline->second.SchemaItemGuid) // лежит ли точка в диапазоне, и не пенедалжеит ли эта точка этому же эелементу
 			{
 				items.push_back(horzline->second.SchemaItemGuid);
 			}
-
-			++ horzline;
 		}
-
 
 		return items;
 	}
