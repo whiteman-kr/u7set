@@ -100,7 +100,6 @@ SOURCES += \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
-    SignalProperty.cpp \
     Statistic.cpp \
     MeasurementBase.cpp \
     OutputSignal.cpp \
@@ -117,7 +116,11 @@ SOURCES += \
     ../lib/DeviceHelper.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../u7/Builder/IssueLogger.cpp \
-    ../lib/OutputLog.cpp
+    ../lib/OutputLog.cpp \
+    ../lib/MetrologySignal.cpp \
+    RackList.cpp \
+    ObjectProperty.cpp
+
 
 
 HEADERS  += \
@@ -166,7 +169,6 @@ HEADERS  += \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
-    SignalProperty.h \
     Statistic.h \
     MeasurementBase.h \
     OutputSignal.h \
@@ -183,7 +185,10 @@ HEADERS  += \
     ../lib/DeviceHelper.h \
     ../u7/Builder/ModulesRawData.h \
     ../u7/Builder/IssueLogger.h \
-    ../lib/OutputLog.h
+    ../lib/OutputLog.h \
+    ../lib/MetrologySignal.h \
+    RackList.h \
+    ObjectProperty.h
 
 
 FORMS    +=

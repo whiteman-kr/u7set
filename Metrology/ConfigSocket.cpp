@@ -23,12 +23,12 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
 
 	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort, serverAddressPort2) ;
-    if (m_cfgLoaderThread == nullptr)
-    {
-        return;
-    }
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
 
-    connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
 	startConnectionStateTimer();
 }
@@ -46,12 +46,12 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const Host
 	}
 
 	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort1,  serverAddressPort2);
-    if (m_cfgLoaderThread == nullptr)
-    {
-        return;
-    }
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
 
-    connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
 	startConnectionStateTimer();
 }
@@ -60,14 +60,14 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const Host
 
 ConfigSocket::~ConfigSocket()
 {
-    if (m_cfgLoaderThread == nullptr)
-    {
-        return;
-    }
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
 
-    m_cfgLoaderThread->quit();
-    delete m_cfgLoaderThread;
-    m_cfgLoaderThread = nullptr;
+	m_cfgLoaderThread->quit();
+	delete m_cfgLoaderThread;
+	m_cfgLoaderThread = nullptr;
 
 	stopConnectionStateTimer();
 }
@@ -89,25 +89,25 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
-    if (m_cfgLoaderThread == nullptr)
-    {
-        assert(m_cfgLoaderThread);
-        return;
-    }
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread);
+		return;
+	}
 
-    m_cfgLoaderThread->start();
-    m_cfgLoaderThread->enableDownloadConfiguration();
+	m_cfgLoaderThread->start();
+	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
-    qDebug() << "ConfigSocket::slot_configurationReady - file count: " << buildFileInfoArray.count();
+	qDebug() << "ConfigSocket::slot_configurationReady - file count: " << buildFileInfoArray.count();
 
 	if (m_cfgLoaderThread == nullptr)
-    {
-        return;
+	{
+		return;
 	}
 
 	clearConfiguration();
@@ -115,10 +115,10 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 	bool result = false;
 
 	result = readConfiguration(configurationXmlData);
-    if (result == false)
-    {
-        return;
-    }
+	if (result == false)
+	{
+		return;
+	}
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{
@@ -143,9 +143,9 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 
-    emit configurationLoaded();
+	emit configurationLoaded();
 
-    return;
+	return;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -163,188 +163,186 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 
 bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 {
-    bool result = true;
+	bool result = true;
 
-    XmlReadHelper xml(fileData);
+	XmlReadHelper xml(fileData);
 
-    if (xml.findElement("MetrologySignals") == false)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - section Version not found";
-        return false;
-    }
+	if (xml.findElement("MetrologySignals") == false)
+	{
+		qDebug() << "ConfigSocket::readMetrologySignals - section Version not found";
+		return false;
+	}
 
-    int fileVersion = 0;
-    result &= xml.readIntAttribute("Version", &fileVersion);
-    if (result == false || fileVersion == 0)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - file version undefined";
-        return false;
-    }
+	int fileVersion = 0;
+	result &= xml.readIntAttribute("Version", &fileVersion);
+	if (result == false || fileVersion == 0)
+	{
+		qDebug() << "ConfigSocket::readMetrologySignals - file version undefined";
+		return false;
+	}
 
-    result &= readRacks(fileData, fileVersion);
-    result &= readUnits(fileData, fileVersion);
-    result &= readSignalParams(fileData, fileVersion);
+	result &= readRacks(fileData, fileVersion);
+	result &= readUnits(fileData, fileVersion);
+	result &= readSignals(fileData, fileVersion);
 
-    return result;
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 {
-    Q_UNUSED(fileVersion);
+	Q_UNUSED(fileVersion);
 
-    bool result = true;
+	bool result = true;
 
-    XmlReadHelper xml(fileData);
+	XmlReadHelper xml(fileData);
 
-    if (xml.findElement("Racks") == false)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Racks section not found";
-        return false;
-    }
+	if (xml.findElement("Racks") == false)
+	{
+		qDebug() << "ConfigSocket::readRacks - Racks section not found";
+		return false;
+	}
 
-    int racksCount = 0;
+	Metrology::RackParam rack;
 
-    result &= xml.readIntAttribute("Count", &racksCount);
+	int racksCount = 0;
+	result &= xml.readIntAttribute("Count", &racksCount);
 
-    for(int r = 0; r < racksCount; r++)
-    {
-        if(xml.findElement("Rack") == false)
-        {
-            result = false;
-            break;
-        }
+	for(int r = 0; r < racksCount; r++)
+	{
+		if(xml.findElement("Rack") == false)
+		{
+			result = false;
+			break;
+		}
 
-        int rackIndex = 0;
-        QString rackID;
-        QString rackCaption;
+		result &= rack.readFromXml(xml);
+		if (result == false)
+		{
+			continue;
+		}
 
-        result &= xml.readIntAttribute("ID", &rackIndex);
-        result &= xml.readStringAttribute("EquipmentID", &rackID);
-        result &= xml.readStringAttribute("Caption", &rackCaption);
+		theRackBase.append(rack);
+	}
 
-        theRackBase.appendRack(rackID, rackCaption);
-    }
+	if (theRackBase.count() != racksCount)
+	{
+		qDebug() << "ConfigSocket::readRacks - Racks loading error, loaded: " << theRackBase.count() << " from " << racksCount;
+		assert(false);
+		return false;
+	}
 
-    if (theRackBase.count() != racksCount)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Racks loading error, loaded: " << theRackBase.count() << " from " << racksCount;
-        assert(false);
-        return false;
-    }
+	qDebug() << "ConfigSocket::readRacks - Racks were loaded:	" << theRackBase.count();
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Racks were loaded:	" << theRackBase.count();
+	theRackBase.updateParamFromGroups();
 
-    return result;
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 {
-    Q_UNUSED(fileVersion);
+	Q_UNUSED(fileVersion);
 
-    bool result = true;
+	bool result = true;
 
-    XmlReadHelper xml(fileData);
+	XmlReadHelper xml(fileData);
 
-    if (xml.findElement("Units") == false)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Units section not found";
-        return false;
-    }
+	if (xml.findElement("Units") == false)
+	{
+		qDebug() << "ConfigSocket::readUnits - Units section not found";
+		return false;
+	}
 
-    int unitsCount = 0;
+	int unitsCount = 0;
+	result &= xml.readIntAttribute("Count", &unitsCount);
 
-    result &= xml.readIntAttribute("Count", &unitsCount);
+	for(int u = 0; u < unitsCount; u++)
+	{
+		if(xml.findElement("Unit") == false)
+		{
+			result = false;
+			break;
+		}
 
-    for(int u = 0; u < unitsCount; u++)
-    {
-        if(xml.findElement("Unit") == false)
-        {
-            result = false;
-            break;
-        }
+		int unitID = 0;
+		QString unitCaption;
 
-        int unitID = 0;
-        QString unitCaption;
+		result &= xml.readIntAttribute("ID", &unitID);
+		result &= xml.readStringAttribute("Caption", &unitCaption);
 
-        result &= xml.readIntAttribute("ID", &unitID);
-        result &= xml.readStringAttribute("Caption", &unitCaption);
+		theUnitBase.appendUnit(unitID, unitCaption);
+	}
 
-        theUnitBase.appendUnit(unitID, unitCaption);
-    }
+	if (theUnitBase.unitCount() != unitsCount)
+	{
+		qDebug() << "ConfigSocket::readUnits - Units loading error, loaded: " << theUnitBase.unitCount() << " from " << unitsCount;
+		assert(false);
+		return false;
+	}
 
-    if (theUnitBase.unitCount() != unitsCount)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Units loading error, loaded: " << theUnitBase.unitCount() << " from " << unitsCount;
-        assert(false);
-        return false;
-    }
+	qDebug() << "ConfigSocket::readUnits - Units were loaded:	" << theUnitBase.unitCount();
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Units were loaded:	" << theUnitBase.unitCount();
-
-    return result;
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readSignalParams(const QByteArray& fileData, int fileVersion)
+bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 {
-    Q_UNUSED(fileVersion);
+	Q_UNUSED(fileVersion);
 
-    bool result = true;
+	bool result = true;
 
-    XmlReadHelper xml(fileData);
+	XmlReadHelper xml(fileData);
 
-    if (xml.findElement("Signals") == false)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Signals section not found";
-        return false;
-    }
+	if (xml.findElement("Signals") == false)
+	{
+		qDebug() << "ConfigSocket::readSignals - Signals section not found";
+		return false;
+	}
 
-    int signalsCount = 0;
+	Metrology::SignalParam param;
 
-    result &= xml.readIntAttribute("Count", &signalsCount);
+	int signalsCount = 0;
+	result &= xml.readIntAttribute("Count", &signalsCount);
 
-    for(int s = 0; s < signalsCount; s++)
-    {
-        if (xml.findElement("Signal") == false)
-        {
-            result = false;
-            break;
-        }
+	for(int s = 0; s < signalsCount; s++)
+	{
+		if (xml.findElement("Signal") == false)
+		{
+			result = false;
+			break;
+		}
 
-        SignalParam param;
+		bool res = param.readFromXml(xml);
+		if (res == true)
+		{
+			if (theSignalBase.appendSignal(param) == -1)
+			{
+				res = false;
+			}
+		}
 
-        bool res = param.readFromXml(xml);
-        if (res == true)
-        {
-            if (theSignalBase.appendSignal(param) == -1)
-            {
-                res = false;
-            }
-        }
+		result &= res;
+	}
 
-        result &= res;
-    }
+	if (theSignalBase.signalCount() != signalsCount)
+	{
+		qDebug() << "ConfigSocket::readSignals- Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalsCount;
+		assert(false);
+		return false;
+	}
 
-    if (theSignalBase.signalCount() != signalsCount)
-    {
-        qDebug() << "ConfigSocket::readMetrologySignals - Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalsCount;
-        assert(false);
-        return false;
-    }
+	theSignalBase.initSignals();
 
-    theSignalBase.sortByPosition();
-    theSignalBase.setCaseNoForAllSignals();
+	theTuningSignalBase.createSignalList();
 
-    theTuningSignalBase.createSignalList();
+	qDebug() << "ConfigSocket::readSignals - Signals were loaded:	" << theSignalBase.signalCount();
 
-    qDebug() << "ConfigSocket::readMetrologySignals - Signals were loaded:	" << theSignalBase.signalCount();
-
-    return result;
+	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

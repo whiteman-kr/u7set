@@ -285,7 +285,48 @@ namespace Builder
 	//
 	int BushContainer::getBranchByPinPos(VFrame30::SchemaPoint pt) const
 	{
+		// First pass by real link, they must be processed first
+		//
 		size_t bushesSize = bushes.size();
+		for (size_t i = 0; i < bushesSize; ++i)
+		{
+			const Bush& branch = bushes[i];
+
+			auto link = std::find_if(branch.links.cbegin(), branch.links.cend(),
+				[&pt](const std::pair<QUuid, Link>& link)
+				{
+					// Check that this link is not fake one, actually it does not matter, as if reak link and fake one connected, they must be joined,
+					// so this just precaution
+					//
+					QUuid linkUuid = link.first;
+					if (linkUuid.data4[0] == 0 &&
+						linkUuid.data4[1] == 0 &&
+						linkUuid.data4[2] == 0 &&
+						linkUuid.data4[3] == 0 &&
+						linkUuid.data4[4] == 0 &&
+						linkUuid.data4[5] == 0 &&
+						linkUuid.data4[6] == 0 &&
+						linkUuid.data4[7] == 0)
+					{
+						return false;
+					}
+
+					if (link.second.ptBegin() == pt || link.second.ptEnd() == pt)
+					{
+						return true;
+					}
+
+					return link.second.isPinOnLink(pt);
+				});
+
+			if (link != branch.links.end())
+			{
+				return static_cast<int>(i);
+			}
+		}
+
+		// Second pass by fake links, fakes have less priority
+		//
 		for (size_t i = 0; i < bushesSize; ++i)
 		{
 			const Bush& branch = bushes[i];
@@ -306,7 +347,6 @@ namespace Builder
 				return static_cast<int>(i);
 			}
 		}
-
 		return -1;
 	}
 
@@ -3694,7 +3734,6 @@ namespace Builder
 
 		// For all links in branches get its end points
 		//
-
 		bushContainer->bushes.reserve(bushes.size());
 
 		for (const std::set<QUuid>& b : bushes)

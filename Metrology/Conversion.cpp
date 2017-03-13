@@ -6742,7 +6742,7 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int conversionType, const SignalParam& param)
+double conversion(double val, int conversionType, const Metrology::SignalParam& param)
 {
     if (conversionType < 0 || conversionType > CT_COUNT)
     {
@@ -6884,7 +6884,7 @@ double conversion(double val, int conversionType, const E::InputUnit unitID, con
         return 0;
     }
 
-    SignalParam param;
+	Metrology::SignalParam param;
 
     param.setInputElectricUnitID(unitID);
     param.setInputElectricSensorType(sensorType);

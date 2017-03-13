@@ -10,20 +10,19 @@
 
 // ==============================================================================================
 
-const int				CONFIG_SOCKET_TIMEOUT_STATE    = 50;  // 50 ms
+const int				CONFIG_SOCKET_TIMEOUT_STATE		= 50;	// 50 ms
 
 // ==============================================================================================
 
 class ConfigSocket : public QObject
 {
-     Q_OBJECT
+	Q_OBJECT
 
 public:
-                        ConfigSocket(const HostAddressPort& serverAddressPort);
-                        ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
-                        ~ConfigSocket();
 
-
+	ConfigSocket(const HostAddressPort& serverAddressPort);
+	ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	~ConfigSocket();
 
 private:
 
@@ -46,28 +45,28 @@ public:
 	bool				isConnceted() { return m_connected; }
 	HostAddressPort		address() { return m_address; }
 
-	void                start();
+	void				start();
 
 	int					loadedFilesCount() { return m_loadedFiles.count(); }
 	QString				loadedFile(int index) { if (index < 0 || index >= m_loadedFiles.count()) { return QString(); } return m_loadedFiles[index]; }
 
 private slots:
 
-    void                slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void				slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
-    bool                readConfiguration(const QByteArray& fileData);
-    bool                readMetrologySignals(const QByteArray& fileData);
+	bool				readConfiguration(const QByteArray& fileData);
+	bool				readMetrologySignals(const QByteArray& fileData);
 
-    bool                readRacks(const QByteArray& fileData, int fileVersion);
-    bool                readUnits(const QByteArray& fileData, int fileVersion);
-    bool                readSignalParams(const QByteArray& fileData, int fileVersion);
+	bool				readRacks(const QByteArray& fileData, int fileVersion);
+	bool				readUnits(const QByteArray& fileData, int fileVersion);
+	bool				readSignals(const QByteArray& fileData, int fileVersion);
 
 signals:
 
 	void				socketConnected();
 	void				socketDisconnected();
 
-    void                configurationLoaded();
+	void				configurationLoaded();
 };
 
 // ==============================================================================================

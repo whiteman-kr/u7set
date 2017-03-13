@@ -20,6 +20,18 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool RackParam::isValid() const
+	{
+		if (m_index == -1 || m_equipmentID.isEmpty() == true)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void RackParam::clear()
 	{
 		m_index = -1;
@@ -43,6 +55,13 @@ namespace Metrology
 		}
 
 		m_hash = calcHash(equipmentID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString RackParam::channelStr() const
+	{
+		return m_channel == -1 ? QString() : QString::number(m_channel + 1);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -77,6 +96,8 @@ namespace Metrology
 		xml.writeEndElement();
 	}
 
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
 	SignalLocation::SignalLocation(Hardware::DeviceObject* pDeviceObject)
@@ -231,6 +252,21 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	void SignalParam::setAppSignalID(const QString& appSignalID)
+	{
+		m_appSignalID = appSignalID;
+
+		if (appSignalID.isEmpty() == true)
+		{
+			m_hash = 0;
+			return;
+		}
+
+		m_hash = calcHash(appSignalID);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	void SignalParam::setParam(const Signal& signal, const SignalLocation& location)
 	{
 		m_appSignalID = signal.appSignalID();
@@ -351,7 +387,7 @@ namespace Metrology
 
 	void SignalParam::writeToXml(XmlWriteHelper& xml)
 	{
-		xml.writeStartElement("Signal");    // <Signal>
+		xml.writeStartElement("Signal");
 		{
 			xml.writeStringAttribute("AppSignalID", appSignalID());
 			xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
@@ -390,7 +426,7 @@ namespace Metrology
 			xml.writeBoolAttribute("EnableTuning", enableTuning());
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
 		}
-		xml.writeEndElement();  // </Signal>
+		xml.writeEndElement();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -417,7 +453,7 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf(("%%.%df"), m_inputElectricPrecision);
+		formatStr.sprintf("%%.%df", m_inputElectricPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputElectricLowLimit, m_inputElectricHighLimit);
 
@@ -435,7 +471,7 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf(("%%.%df"), m_inputPhysicalPrecision);
+		formatStr.sprintf("%%.%df", m_inputPhysicalPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_inputPhysicalLowLimit, m_inputPhysicalHighLimit);
 
@@ -453,7 +489,7 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf(("%%.%df"), m_outputElectricPrecision);
+		formatStr.sprintf("%%.%df", m_outputElectricPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputElectricLowLimit, m_outputElectricHighLimit);
 
@@ -471,7 +507,7 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf(("%%.%df"), m_outputPhysicalPrecision );
+		formatStr.sprintf("%%.%df", m_outputPhysicalPrecision);
 
 		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
 
@@ -510,7 +546,7 @@ namespace Metrology
 		{
 			case E::SignalType::Analog:
 
-				formatStr.sprintf(("%%.%df"), m_inputPhysicalPrecision);
+				formatStr.sprintf("%%.%df", m_inputPhysicalPrecision);
 
 				stateStr.sprintf(formatStr.toAscii(), m_tuningDefaultValue);
 

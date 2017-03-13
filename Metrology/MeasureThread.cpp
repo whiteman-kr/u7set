@@ -57,7 +57,7 @@ bool MeasureThread::setActiveSignalParam()
                 continue;
             }
 
-            SignalParam param =  theSignalBase.signalParam(signalHash);
+			Metrology::SignalParam param =  theSignalBase.signalParam(signalHash);
             if (param.isValid() == false)
             {
                 continue;
@@ -189,7 +189,7 @@ bool MeasureThread::setCalibratorUnit()
                         case OUTPUT_SIGNAL_TYPE_UNUSED:
                         case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
                             {
-                                SignalParam inParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+								Metrology::SignalParam inParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
                                 if (inParam.isValid() == false)
                                 {
                                     continue;
@@ -200,7 +200,7 @@ bool MeasureThread::setCalibratorUnit()
                                     emit showMsgBox(QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->portName()));
                                 }
 
-                                SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+								Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
                                 if (outParam.isValid() == false)
                                 {
                                     continue;
@@ -222,7 +222,7 @@ bool MeasureThread::setCalibratorUnit()
                         case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
                             {
 
-                                SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+								Metrology::SignalParam outParam = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
                                 if (outParam.isValid() == false)
                                 {
                                     continue;
@@ -389,7 +389,7 @@ void MeasureThread::measureLinearity()
                 continue;
             }
 
-            SignalParam param = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+			Metrology::SignalParam param = m_activeSignalParam[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
             if (param.isValid() == false)
             {
                 continue;

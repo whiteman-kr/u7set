@@ -265,15 +265,29 @@ namespace VFrame30
 
 		// Calc
 		//
+//		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
+
+//		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+//		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
+
+//		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
+
+//		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
+//		y = CUtils::snapToGrid(y, gridSize);
+
+//		return SchemaPoint(x, y);
+
 		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
 
-		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-		double halfpinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
+		double pinVertGap =	gridSize * static_cast<double>(pinGridStep);
+		double halfpinVertGap =	gridSize * static_cast<double>(pinGridStep) / 2.0;
 
 		double top = CUtils::snapToGrid(fblItemRect.top(), gridSize);
 
 		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
+
 		y = CUtils::snapToGrid(y, gridSize);
+		x = CUtils::snapToGrid(x, gridSize);
 
 		return SchemaPoint(x, y);
 	}
@@ -640,7 +654,7 @@ namespace VFrame30
 			const std::vector<VFrame30::AfbPin>& ins = inputs();
 			for (const VFrame30::AfbPin& pin : ins)
 			{
-				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption() << " Pos(x, y):" << pin.x() << pin.y();
 
 				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)
@@ -659,7 +673,7 @@ namespace VFrame30
 			const std::vector<VFrame30::AfbPin>& outs = outputs();
 			for (const VFrame30::AfbPin& pin : outs)
 			{
-				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption();
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption() << " Pos(x, y):" << pin.x() << pin.y();
 
 				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)

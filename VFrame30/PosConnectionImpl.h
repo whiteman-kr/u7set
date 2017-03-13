@@ -58,6 +58,11 @@ namespace VFrame30
 		virtual void SetWidthInDocPt(double val) override;
 		virtual void SetHeightInDocPt(double val) override;
 
+		// Othre funcs
+		//
+	public:
+		virtual void dump() const override;
+
 		// Draw Functions
 		//
 	public:
