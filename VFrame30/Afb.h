@@ -125,6 +125,8 @@ namespace Afb
 		Q_INVOKABLE int size() const;
 		void setSize(int value);
 
+		E::ByteOrder byteOrder() const;
+
 		bool isAnalog() const;
 		bool isDiscrete() const;
 

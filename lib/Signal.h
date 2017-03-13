@@ -423,9 +423,11 @@ public:
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }
 
-	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size) const;
+	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
+	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 
 	QString regValueAddrStr() const;
+
 
 	friend class DbWorker;
 };

@@ -410,8 +410,11 @@ namespace Builder
 					result = false;
 				}
 
-				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
-							arg(connection->connectionID()).arg(portID));
+				if (result == true)
+				{
+					LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
+								arg(connection->connectionID()).arg(portID));
+				}
 			}
 			else
 			{
@@ -485,8 +488,11 @@ namespace Builder
 				optoPort1->setLinkedPortID(optoPort2->equipmentID());
 				optoPort2->setLinkedPortID(optoPort1->equipmentID());
 
-				LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
-							arg(connection->connectionID()).arg(portID));
+				if (result == true)
+				{
+					LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
+								arg(connection->connectionID()).arg(portID));
+				}
 			}
 		}
 

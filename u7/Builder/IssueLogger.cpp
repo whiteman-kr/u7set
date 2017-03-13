@@ -1105,7 +1105,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Schema is excluded from build (Schema '%1').
+	/// Title: Schema '%1' is excluded from build.
 	///
 	/// Parameters:
 	///		%1 Schema StrID
@@ -1120,7 +1120,7 @@ namespace Builder
 
 		LOG_WARNING1(IssueType::AlParsing,
 					4004,
-					tr("Schema is excluded from build (Schem '%1').")
+					tr("Schema '%1' is excluded from build.")
 					.arg(schema));
 	}
 
@@ -1886,17 +1886,19 @@ namespace Builder
 	///		%1 Application signal ID
 	///		%2 AFB caption
 	///		%3 AFB input
+	///		%4 Logic schema ID
 	///
 	/// Description:
 	///		Outpuf of AFB is connected to signal with uncompatible data format.
 	///
-	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString& schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
-				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')").
+					arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 
 
@@ -3340,7 +3342,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Warning0, itemUuid);
 
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5072,

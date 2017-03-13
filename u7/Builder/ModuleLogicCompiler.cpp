@@ -2336,7 +2336,7 @@ namespace Builder
 
 			if (appSignal.isCompatibleDataFormat(afbSignal) == false)
 			{
-				m_log->errALC5008(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+				m_log->errALC5008(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid(), appFb.schemaID());
 				return false;
 			}
 		}
@@ -2453,6 +2453,19 @@ namespace Builder
 				//
 				m_log->errALC5000(receiver.appSignalId(), receiver.guid());
 				return false;
+			}
+
+			if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+			{
+				// check serial InSignal parameters compatibility with srcSignal
+				//
+				if (srcSignal->isCompatibleFormat(rxAddress) == false)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString("Uncompatible format of serial IN_SIGNAL with aplication signal '%1'. (Connection '%2')").
+										arg(srcSignal->appSignalID()).arg(connection->connectionID()));
+					return false;
+				}
 			}
 
 			if (checkSignalsCompatibility(*srcSignal, receiver.guid(), fb, afbSignal) == false)
@@ -2685,11 +2698,11 @@ namespace Builder
 				return false;
 			}
 
-			if (srcSignal.isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size()) == false)
+			if (srcSignal.isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder()) == false)
 			{
 				// Signal '%1' is connected to input '%2.%3' with uncompatible data format.
 				//
-				m_log->errALC5008(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				m_log->errALC5008(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid, fb.schemaID());
 				return false;
 			}
 
@@ -7142,7 +7155,7 @@ namespace Builder
 
 	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
 	{
-		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size());
+		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
 
