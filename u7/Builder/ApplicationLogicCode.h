@@ -254,7 +254,7 @@ namespace Builder
 	{
 	public:
 		Comment();
-		Comment::Comment(const Comment& comment);
+		Comment(const Comment& comment);
 		Comment(const QString& comment);
 
 		QString toString() override;

@@ -29,6 +29,8 @@ protected:
 	//
 public:
 
+	static QString getInstanceKey();
+
 	// Protected methods
 	//
 protected:
@@ -67,6 +69,8 @@ protected:
 	void tcpSignalClient_signalParamAndUnitsArrived();
 	void tcpSignalClient_connectionReset();
 
+	void checkMonitorSingleInstance();
+
 signals:
 	void signalParamAndUnitsArrived();
 	void connectionReset();
@@ -78,6 +82,18 @@ protected:
 	// Data
 	//
 private:
+	// Monitor instance key value
+	//
+
+	static const QString m_monitorSingleInstanceKey;
+
+	QSharedMemory m_appInstanceSharedMemory;
+
+	// Instance checker timer
+	//
+
+	QTimer* m_instanceTimer = nullptr;
+
 	MonitorConfigController m_configController;
 	SchemaManager m_schemaManager;
 

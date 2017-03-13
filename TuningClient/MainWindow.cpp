@@ -5,7 +5,7 @@
 #include <QDesktopWidget>
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "TuningFilter.h"
+#include "../lib/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
 #include "TuningClientFilterEditor.h"

@@ -1,6 +1,5 @@
 #include "TuningFilterEditor.h"
-#include "DialogProperties.h"
-#include "DialogInputValue.h"
+#include "../lib/PropertyEditorDialog.h"
 
 //
 //
@@ -742,7 +741,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 void TuningFilterEditor::on_m_editPreset_clicked()
 {
-	QTreeWidgetItem* editItem = nullptr;
+    QTreeWidgetItem* editItem = nullptr;
 	std::shared_ptr<TuningFilter> editFilter = selectedFilter(&editItem);
 
 	if (editItem == nullptr || editFilter == nullptr)
@@ -752,13 +751,13 @@ void TuningFilterEditor::on_m_editPreset_clicked()
 
     bool readOnly = editFilter->automatic();
 
-    DialogProperties d(editFilter, this, readOnly);
+    PropertyEditorDialog d(editFilter, this, readOnly);
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());
 
 		m_modified = true;
-	}
+    }
 }
 
 void TuningFilterEditor::on_m_removePreset_clicked()
@@ -1188,7 +1187,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
 		}
 	}
 
-    DialogInputValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, decimalPlaces, this);
+    DialogInputTuningValue d(analog, value, defaultValue, sameValue, lowLimit, highLimit, decimalPlaces, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

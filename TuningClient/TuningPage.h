@@ -2,104 +2,9 @@
 #define TUNINGPAGE_H
 
 #include "Stable.h"
-#include "TuningObject.h"
-#include "TuningFilter.h"
-
-
-class TuningItemModel;
-
-class TuningItemSorter
-{
-public:
-	  TuningItemSorter(int column, Qt::SortOrder order);
-
-	  bool operator()(const TuningObject& o1, const TuningObject& o2) const
-	  {
-		  return sortFunction(o1, o2, m_column, m_order);
-	  }
-
-	  bool sortFunction(const TuningObject& o1, const TuningObject& o2, int column, Qt::SortOrder order) const;
-
-private:
-	  int m_column = -1;
-
-	  Qt::SortOrder m_order = Qt::AscendingOrder;
-};
-
-class TuningItemModel : public QAbstractItemModel
-{
-	Q_OBJECT
-
-public:
-	TuningItemModel(QWidget *parent);
-	~TuningItemModel();
-
-public:
-
-    enum class Columns
-	{
-		CustomAppSignalID = 0,
-		EquipmentID,
-		AppSignalID,
-		Caption,
-		Units,
-		Type,
-
-		Value,
-        LowLimit,
-        HighLimit,
-        Default,
-		Valid,
-		Underflow,
-		Overflow,
-	};
-
-
-public:
-    void setObjects(std::vector<TuningObject>& objects);
-
-    TuningObject* object(int index);
-
-	void addColumn(Columns column);
-	int columnIndex(int index) const;
-	std::vector<int> columnsIndexes();
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
-
-    void updateStates();
-
-	void setFont(const QString& fontName, int fontSize, bool fontBold);
-    void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-
-	void sort(int column, Qt::SortOrder order) override;
-
-protected:
-	QModelIndex parent(const QModelIndex &index) const override;
-	virtual	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-	virtual QBrush backColor(const QModelIndex& index) const;
-	virtual QBrush foregroundColor(const QModelIndex& index) const;
-
-private:
-
-	QStringList m_columnsNames;
-
-	QFont* m_font = nullptr;
-    QFont* m_importantFont = nullptr;
-
-protected:
-	std::vector<int> m_columnsIndexes;
-
-	std::vector<TuningObject> m_objects;
-
-	bool m_blink = false;
-
-	QWidget* m_parent = nullptr;
-};
+#include "../lib/TuningModel.h"
+#include "../lib/TuningObject.h"
+#include "../lib/TuningFilter.h"
 
 class TuningItemModelMain : public TuningItemModel
 {
@@ -109,6 +14,8 @@ public:
 
 	void setValue(const std::vector<int>& selectedRows);
 	void invertValue(const std::vector<int>& selectedRows);
+
+	void updateStates();
 
 protected:
 	virtual QBrush backColor(const QModelIndex& index) const override;
@@ -124,7 +31,7 @@ public slots:
     void slot_setAll();
 
 	void slot_undo();
-	void slot_Submit();
+    void slot_Write();
     void slot_Conclude();
 
 
@@ -236,11 +143,11 @@ private:
 
     QPushButton* m_setAllButton = nullptr;
 
-	QPushButton* m_submitButton = nullptr;
+    QPushButton* m_writeButton = nullptr;
 
 	QPushButton* m_undoButton = nullptr;
 
-    QPushButton* m_concludeButton = nullptr;
+    //QPushButton* m_concludeButton = nullptr;
 
     QPushButton* m_filterButton = nullptr;
 

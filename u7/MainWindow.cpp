@@ -15,6 +15,7 @@
 #include "DialogAfblEditor.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
+#include "DialogTuningClients.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "GlobalMessanger.h"
@@ -259,6 +260,11 @@ void MainWindow::createActions()
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
+    m_tuningFiltersEditorAction = new QAction(tr("Tuning Clients Filters Editor..."), this);
+    m_tuningFiltersEditorAction->setStatusTip(tr("Run Tuning Clients Filters Editor"));
+    m_tuningFiltersEditorAction->setEnabled(false);
+    connect(m_tuningFiltersEditorAction, &QAction::triggered, this, &MainWindow::runTuningFiltersEditor);
+
     m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
@@ -326,6 +332,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_ufbLibraryAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
+    pToolsMenu->addAction(m_tuningFiltersEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
@@ -506,6 +513,23 @@ void MainWindow::runConnectionsEditor()
 	}
 }
 
+void MainWindow::runTuningFiltersEditor()
+{
+    if (dbController()->isProjectOpened() == false)
+    {
+        return;
+    }
+
+    if (theDialogTuningClients == nullptr)
+    {
+        theDialogTuningClients = new DialogTuningClients(this);
+        theDialogTuningClients->show();
+    }
+    else
+    {
+        theDialogTuningClients->activateWindow();
+    }
+}
 
 void MainWindow::showAbout()
 {
@@ -629,6 +653,8 @@ void MainWindow::projectOpened(DbProject project)
 	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
+    m_tuningFiltersEditorAction->setEnabled(true);
+
 
 	// Status bar
 	//
@@ -659,6 +685,7 @@ void MainWindow::projectClosed()
 	m_ufbLibraryAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
+    m_tuningFiltersEditorAction->setEnabled(false);
 
 	// Status bar
 	//
