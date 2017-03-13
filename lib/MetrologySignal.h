@@ -35,6 +35,9 @@ namespace Metrology
 			QString				m_equipmentID;		// rack equipmentID
 			QString				m_caption;			// rack caption
 
+			int					m_groupIndex = -1;	// for multichannel measuring - index rack group (several racks can be combine in groups)
+			int					m_channel = -1;		// for multichannel measuring - index channel in rack group
+
 		public:
 
 			bool				isValid() const;
@@ -50,6 +53,13 @@ namespace Metrology
 
 			QString				caption() const { return m_caption; }
 			void				setCaption(const QString& caption) { m_caption = caption; }
+
+			int					groupIndex() const { return m_groupIndex; }
+			void				setGroupIndex(int index) { m_groupIndex = index; }
+
+			int					channel() const { return m_channel; }
+			QString				channelStr() const;
+			void				setChannel(int channel) { m_channel = channel; }
 
 			bool				readFromXml(XmlReadHelper& xml);
 			void				writeToXml(XmlWriteHelper& xml);
