@@ -2434,7 +2434,7 @@ namespace Builder
 
 		if (receiver.isOutputPin(receiverPinGuid) == true)
 		{
-			Address16 rxAddress;
+			SignalAddress16 rxAddress;
 
 			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
 														receiver.appSignalId(),
@@ -2536,7 +2536,7 @@ namespace Builder
 
 		if (receiver.isOutputPin(pinGuid) == true)
 		{
-			Address16 rxAddress;
+			SignalAddress16 rxAddress;
 
 			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
 																 receiver.appSignalId(),

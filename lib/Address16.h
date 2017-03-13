@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include "../lib/Types.h"
 
 // ----------------------------------------------------------------------------------------
 //
@@ -21,7 +22,9 @@ private:
 
 public:
 	Address16() {}
+	Address16(const Address16& addr) : m_offset(addr.m_offset), m_bit(addr.m_bit) {}
 	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
+
 
 	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
@@ -97,4 +100,51 @@ public:
 	}
 
 	int bitAddress() const { return m_offset * 16 + m_bit; }
+};
+
+
+class SignalAddress16 : public Address16
+{
+public:
+	SignalAddress16() {}
+
+	SignalAddress16(const Address16& addr16) :
+		Address16(addr16)
+	{
+	}
+
+	SignalAddress16(const SignalAddress16& addr) :
+		Address16(addr)
+	{
+		m_signalType = addr.m_signalType;
+		m_dataFormat = addr.m_dataFormat;
+		m_dataSize = addr.m_dataSize;
+		m_byteOrder = addr.m_byteOrder;
+	}
+
+	SignalAddress16& operator = (const Address16& addr16)
+	{
+		setOffset(addr16.offset());
+		setBit(addr16.bit());
+
+		return *this;
+	}
+
+	void setSignalType(E::SignalType st) { m_signalType = st; }
+	E::SignalType signalType() const { return m_signalType; }
+
+	void setDataFormat(E::DataFormat df) { m_dataFormat = df; }
+	E::DataFormat dataFormat() const { return m_dataFormat; }
+
+	void setDataSize(int ds) { m_dataSize = ds; }
+	int dataSize() const { return m_dataSize; }
+
+	void setByteOrder(E::ByteOrder bo) { m_byteOrder = bo; }
+	E::ByteOrder byteOrder() const { return m_byteOrder; }
+
+private:
+	E::SignalType m_signalType = E::SignalType::Discrete;
+	E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
+	int m_dataSize = 0;
+	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 };

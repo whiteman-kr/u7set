@@ -2,7 +2,7 @@
 #define OBJECTMANAGER_H
 
 #include "Stable.h"
-#include "TuningObject.h"
+#include "../lib/TuningObject.h"
 #include "TuningObjectManager.h"
 
 #include "../Proto/network.pb.h"

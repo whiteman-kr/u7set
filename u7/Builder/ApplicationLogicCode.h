@@ -6,59 +6,59 @@
 
 namespace Builder
 {
-    enum class LmCommandCode
-    {
-        NoCommand = 0,
-        NOP = 1,
-        START = 2,
-        STOP = 3,
-        MOV = 4,
-        MOVMEM = 5,
-        MOVC = 6,
-        MOVBC = 7,
-        WRFB = 8,
-        RDFB = 9,
-        WRFBC = 10,
-        WRFBB = 11,
-        RDFBB = 12,
-        RDFBTS = 13,
-        SETMEM = 14,
-        MOVB = 15,
-        NSTART = 16,
-        APPSTART = 17,
-        MOV32 = 18,
-        MOVC32 = 19,
-        WRFB32 = 20,
-        RDFB32 = 21,
-        WRFBC32 = 22,
-        RDFBTS32 = 23,
+	enum class LmCommandCode
+	{
+		NoCommand = 0,
+		NOP = 1,
+		START = 2,
+		STOP = 3,
+		MOV = 4,
+		MOVMEM = 5,
+		MOVC = 6,
+		MOVBC = 7,
+		WRFB = 8,
+		RDFB = 9,
+		WRFBC = 10,
+		WRFBB = 11,
+		RDFBB = 12,
+		RDFBTS = 13,
+		SETMEM = 14,
+		MOVB = 15,
+		NSTART = 16,
+		APPSTART = 17,
+		MOV32 = 18,
+		MOVC32 = 19,
+		WRFB32 = 20,
+		RDFB32 = 21,
+		WRFBC32 = 22,
+		RDFBTS32 = 23,
 		MOVCF = 24,
 		PMOV = 25,
 		PMOV32 = 26,
-    };
+	};
 
 
-    struct LmCommand
-    {
+	struct LmCommand
+	{
 		LmCommandCode code;
-        int sizeW;
-        const char* str;
+		int sizeW;
+		const char* str;
 
 		bool waitFbExecution;
 
 		int readTime;
-        int runTime;
+		int runTime;
 
-        static bool isValidCode(int commandCode);
-        static int getSizeW(int commandCode);
-        static const char* getStr(int commandCode);
-    };
+		static bool isValidCode(int commandCode);
+		static int getSizeW(int commandCode);
+		static const char* getStr(int commandCode);
+	};
 
 
 	const int CALC_RUNTIME = 99999;
 
-    const LmCommand LmCommands[] =
-    {
+	const LmCommand LmCommands[] =
+	{
 		{	LmCommandCode::NoCommand,	0,	"NO_CMD",	false,	0,	0					},
 		{	LmCommandCode::NOP,			1,	"NOP",		false,	5,	2					},
 		{	LmCommandCode::START,		2,	"START",	true,	8,	6					},
@@ -86,185 +86,189 @@ namespace Builder
 		{	LmCommandCode::MOVCF,		3,	"MOVCF",	false,	11,	6					},
 		{	LmCommandCode::PMOV,		3,	"PMOV",		false,	11,	CALC_RUNTIME		},
 		{	LmCommandCode::PMOV32,		3,	"PMOV32",	false,	11,	14					},
-    };
+	};
 
-    const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
+	const int LM_COMMAND_COUNT = sizeof(LmCommands) / sizeof(LmCommand);
 
 
-    const quint16	MIN_FB_TYPE = 1,
-                    MAX_FB_TYPE = 64 - 1,
+	const quint16	MIN_FB_TYPE = 1,
+					MAX_FB_TYPE = 64 - 1,
 
-                    MIN_FB_INSTANCE = 1,
-                    MAX_FB_INSTANCE = 1024 - 1,
+					MIN_FB_INSTANCE = 1,
+					MAX_FB_INSTANCE = 1024 - 1,
 
-                    MIN_FB_PARAM_NO = 0,
-                    MAX_FB_PARAM_NO = 64 - 1,
+					MIN_FB_PARAM_NO = 0,
+					MAX_FB_PARAM_NO = 64 - 1,
 
-                    MAX_BIT_NO_16 = 16 - 1;
+					MAX_BIT_NO_16 = 16 - 1;
 
-    class CommandCode
-    {
-    private:
+	class CommandCode
+	{
+	private:
 
 #pragma pack(push, 1)
-        union
-        {
-            struct
-            {
-                quint16 fbType : 6;
-                quint16 code : 5;
-                quint16 CRC5 : 5;
-            } opCode;
+		union
+		{
+			struct
+			{
+				quint16 fbType : 6;
+				quint16 code : 5;
+				quint16 CRC5 : 5;
+			} opCode;
 
-            quint16 word1 = 0;
-        };
+			quint16 word1 = 0;
+		};
 
-        union
-        {
-            struct
-            {
-                quint16 fbParamNo : 6;
-                quint16 fbInstance : 10;
-            } param;
+		union
+		{
+			struct
+			{
+				quint16 fbParamNo : 6;
+				quint16 fbInstance : 10;
+			} param;
 
-            quint16 word2 = 0;
-        };
+			quint16 word2 = 0;
+		};
 
-        quint16 word3 = 0;
+		quint16 word3 = 0;
 
-        union
-        {
-            struct
-            {
-                quint8 b1;
-                quint8 b2;
-            } bitNo;
+		union
+		{
+			struct
+			{
+				quint8 b1;
+				quint8 b2;
+			} bitNo;
 
-            quint16 word4 = 0;
-        };
+			quint16 word4 = 0;
+		};
 
 #pragma pack(pop)
 
-        QString m_fbCaption;
+		QString m_fbCaption;
 
-        union
-        {
-            qint32 int32Value;
-            float floatValue;
+		union
+		{
+			qint32 int32Value;
+			float floatValue;
 			quint32 uint32Value;
-        } m_const;
+		} m_const;
 
 		E::DataFormat m_constDataFormat = E::DataFormat::Float;
 
-    public:
+	public:
 		CommandCode();
 		CommandCode(const CommandCode& cCode);
 
 		CommandCode& operator = (const CommandCode& cCode);
 
-        void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
+		void setNoCommand() { opCode.code = static_cast<int>(LmCommandCode::NoCommand); }
 
 		bool isNoCommand() const { return opCode.code == TO_INT(LmCommandCode::NoCommand); }
 
-        void setOpCode(LmCommandCode code);
-        int getOpCodeInt() const { return opCode.code; }
-        LmCommandCode getOpCode() const { return static_cast<LmCommandCode>(opCode.code); }
+		void setOpCode(LmCommandCode code);
+		int getOpCodeInt() const { return opCode.code; }
+		LmCommandCode getOpCode() const { return static_cast<LmCommandCode>(opCode.code); }
 
-        void setFbType(quint16 fbType);
-        quint16 getFbType() const { return opCode.fbType; }
-        QString getFbTypeStr() const;
+		void setFbType(quint16 fbType);
+		quint16 getFbType() const { return opCode.fbType; }
+		QString getFbTypeStr() const;
 
-        void setFbInstance(quint16 fbInstance);
-        quint16 getFbInstance() const { return param.fbInstance; }
-        int getFbInstanceInt() { return int(param.fbInstance); }
+		void setFbInstance(quint16 fbInstance);
+		quint16 getFbInstance() const { return param.fbInstance; }
+		int getFbInstanceInt() { return int(param.fbInstance); }
 
-        void setFbCaption(const QString& fbCaption) { m_fbCaption = fbCaption.toUpper(); }
-        QString getFbCaption() const { return m_fbCaption; }
+		void setFbCaption(const QString& fbCaption) { m_fbCaption = fbCaption.toUpper(); }
+		QString getFbCaption() const { return m_fbCaption; }
 
-        void setFbParamNo(quint16 fbParamNo);
-        quint16 getFbParamNo() const { return param.fbParamNo; }
-        int getFbParamNoInt() const { return int(param.fbParamNo); }
+		void setFbParamNo(quint16 fbParamNo);
+		quint16 getFbParamNo() const { return param.fbParamNo; }
+		int getFbParamNoInt() const { return int(param.fbParamNo); }
 
-        void setWord2(quint16 value) { word2 = value; }
-        quint16 getWord2() const { return word2; }
+		void setWord2(quint16 value) { word2 = value; }
+		quint16 getWord2() const { return word2; }
 
-        void setWord3(quint16 value) { word3 = value; }
-        quint16 getWord3() const { return word3; }
+		void setWord3(quint16 value) { word3 = value; }
+		quint16 getWord3() const { return word3; }
 
-        void setWord4(quint16 value) { word4 = value; }
-        quint16 getWord4() const { return word4; }
+		void setWord4(quint16 value) { word4 = value; }
+		quint16 getWord4() const { return word4; }
 
-        void setBitNo(quint16 bitNo);
+		void setBitNo(quint16 bitNo);
 
-        void setBitNo1(quint16 bitNo);
-        quint16 getBitNo1() const { return bitNo.b1; }
+		void setBitNo1(quint16 bitNo);
+		quint16 getBitNo1() const { return bitNo.b1; }
 
-        void setBitNo2(quint16 bitNo);
-        quint16 getBitNo2() const { return bitNo.b2; }
+		void setBitNo2(quint16 bitNo);
+		quint16 getBitNo2() const { return bitNo.b2; }
 
-        quint16 getWord(int index) const;
+		quint16 getWord(int index) const;
 
-        void setConstFloat(float floatValue);
-        float getConstFloat() const;
+		void setConstFloat(float floatValue);
+		float getConstFloat() const;
 
-        void setConstInt32(qint32 int32Value);
-        qint32 getConstInt32() const;
+		void setConstInt32(qint32 int32Value);
+		qint32 getConstInt32() const;
 
 		void setConstUInt32(quint32 uint32Value);
 		quint32 getConstUInt32() const;
 
 		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
-        int sizeW() const;
-    };
+		int sizeW() const;
+	};
 
 
-    class CodeItem
-    {
-    private:
-        QString m_comment;
+	class CodeItem
+	{
+	private:
+		QString m_comment;
 
-    protected:
-        QByteArray m_binCode;
+	protected:
+		QByteArray m_binCode;
 
-    public:
-        virtual ~CodeItem() {}
+	public:
+		CodeItem();
+		CodeItem(const CodeItem& codeItem);
 
-        virtual QString toString() = 0;
-        virtual int sizeW()= 0;
+		virtual ~CodeItem() {}
 
-        virtual bool isCommand() = 0;
-        virtual bool isComment() = 0;
+		virtual QString toString() = 0;
+		virtual int sizeW()= 0;
 
-        virtual void generateBinCode(E::ByteOrder byteOrder) = 0;
-        virtual const QByteArray& getBinCode() { return m_binCode; }
+		virtual bool isCommand() = 0;
+		virtual bool isComment() = 0;
 
-        void setComment(const QString& comment) { m_comment = comment; }
-        QString getComment() { return m_comment; }
+		virtual void generateBinCode(E::ByteOrder byteOrder) = 0;
+		virtual const QByteArray& getBinCode() { return m_binCode; }
+
+		void setComment(const QString& comment) { m_comment = comment; }
+		QString getComment() { return m_comment; }
 		void clearComment() { m_comment.clear(); }
 
-        bool commentIsEmpty() { return m_comment.isEmpty(); }
-    };
+		bool commentIsEmpty() { return m_comment.isEmpty(); }
+	};
 
 
-    class Comment : public CodeItem
-    {
-    public:
-        Comment() {}
-        Comment(const QString& comment) { setComment(comment); }
+	class Comment : public CodeItem
+	{
+	public:
+		Comment();
+		Comment(const Comment& comment);
+		Comment(const QString& comment);
 
-        QString toString() override;
-        int sizeW() override { return 0; }
+		QString toString() override;
+		int sizeW() override { return 0; }
 
-        void generateBinCode(E::ByteOrder) override {}
+		void generateBinCode(E::ByteOrder) override {}
 
-        bool isCommand() override { return false; }
-        bool isComment() override { return true; }
-    };
+		bool isCommand() override { return false; }
+		bool isComment() override { return true; }
+	};
 
 
-    class Command : public CodeItem
-    {
+	class Command : public CodeItem
+	{
 	public:
 		Command();
 		Command(const Command& cmd);
@@ -356,7 +360,7 @@ namespace Builder
 		bool write32(int addrTo);
 		bool writeArea(int addrTo, int sizeW);
 
-    private:
+	private:
 		int m_address = -1;
 
 		CommandCode m_code;
@@ -372,52 +376,52 @@ namespace Builder
 		static QHash<quint16, int> m_executedFb;				// fbType => remaining FB exec time
 
 		// initialized by ApplicationLogicCode::setMemoryMap()
-        //
+		//
 		static LmMemoryMap* m_memoryMap;
 		static IssueLogger* m_log;
-    };
+	};
 
 
-    class ApplicationLogicCode : public QObject
-    {
-        Q_OBJECT
+	class ApplicationLogicCode : public QObject
+	{
+		Q_OBJECT
 
-    private:
-        QVector<CodeItem*> m_codeItems;
+	private:
+		QVector<CodeItem*> m_codeItems;
 
-        int m_commandAddress = 0;
+		int m_commandAddress = 0;
 
-        E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
 	public:
 		ApplicationLogicCode();
-        ~ApplicationLogicCode();
+		~ApplicationLogicCode();
 
 		void setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log);
 
 		void append(const Command& cmd);
 		void append(const Comment& cmt);
-        void comment(QString commentStr);
-        void newLine();
+		void comment(QString commentStr);
+		void newLine();
 
-        void replaceAt(int commandIndex, const Command &cmd);
+		void replaceAt(int commandIndex, const Command &cmd);
 
-        void clear();
+		void clear();
 
-        void generateBinCode();
+		void generateBinCode();
 
-        void getAsmCode(QStringList& asmCode);
-        void getBinCode(QByteArray& byteArray);
-        void getMifCode(QStringList& mifCode);
+		void getAsmCode(QStringList& asmCode);
+		void getBinCode(QByteArray& byteArray);
+		void getMifCode(QStringList& mifCode);
 
 		void getAsmMetadataFields(QStringList& metadataFields);
 		void getAsmMetadata(std::vector<QVariantList>& metadata);
 
 		bool getRunTimes(int& idrPhaseClockCount, int& alpPhaseClockCount);
 
-        void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
+		void setByteOrder(E::ByteOrder byteOrder) { m_byteOrder = byteOrder; }
 
-        int commandAddress() const { return m_commandAddress; }
-    };
+		int commandAddress() const { return m_commandAddress; }
+	};
 
 }

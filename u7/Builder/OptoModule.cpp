@@ -18,6 +18,8 @@ namespace Hardware
 	const char* OptoPort::MODULE_RAW_DATA = "MODULE_RAW_DATA";
 	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
 	const char* OptoPort::CONST16 = "CONST16";
+	const char* OptoPort::IN_SIGNAL = "IN_SIGNAL";
+
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
 		m_deviceController(optoPortController),
@@ -415,6 +417,20 @@ namespace Hardware
 				continue;
 			}
 
+			if (itemTypeStr == IN_SIGNAL)
+			{
+				bool parseResult = parseInSignalRawDescriptionStr(str, item, log);
+
+				if (parseResult == true)
+				{
+					m_rawDataDescription.append(item);
+				}
+
+				result &= parseResult;
+
+				continue;
+			}
+
 			msg = QString("Unknown item %1 in opto-port '%2' raw data description.").arg(itemTypeStr).arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			result = false;
@@ -430,6 +446,121 @@ namespace Hardware
 		}
 
 		return result;
+	}
+
+
+	bool OptoPort::parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
+	{
+		QString msg;
+
+		bool res = true;
+
+		QString inSignalDescription = str.section("=", 1).trimmed();
+
+		QStringList descItemsList = inSignalDescription.split(",", QString::SkipEmptyParts);
+
+		if (descItemsList.size() != 7)
+		{
+			msg = QString("Invalid IN_SIGNAL value in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		item.type = RawDataDescriptionItemType::InSignal;
+
+		item.appSignalID = descItemsList.at(0).trimmed();
+
+		QString signalTypeStr = descItemsList.at(1).trimmed();
+
+		if (signalTypeStr != "A" && signalTypeStr != "D")
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter SignalType in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (signalTypeStr == "A")
+		{
+			item.signalType = E::SignalType::Analog;
+		}
+		else
+		{
+			item.signalType = E::SignalType::Discrete;
+		}
+
+		QString dataFormatStr = descItemsList.at(2).trimmed();
+
+		if (dataFormatStr != "FLOAT" &&
+			dataFormatStr != "SINT" &&
+			dataFormatStr != "UINT")
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter DataFormat in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (dataFormatStr == "FLOAT")
+		{
+			item.dataFormat = E::DataFormat::Float;
+		}
+		else
+		{
+			if (dataFormatStr == "SINT")
+			{
+				item.dataFormat = E::DataFormat::SignedInt;
+			}
+			else
+			{
+				item.dataFormat = E::DataFormat::UnsignedInt;
+			}
+		}
+
+		item.dataSize = descItemsList.at(3).trimmed().toInt(&res);
+
+		if (res == false)
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter DataSize in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		QString byteOrderStr = descItemsList.at(4).trimmed();
+
+		if (byteOrderStr != "BE" && byteOrderStr != "LE")
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter ByteOrder in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (byteOrderStr == "BE")
+		{
+			item.byteOrder = E::ByteOrder::BigEndian;
+		}
+		else
+		{
+			item.byteOrder = E::ByteOrder::LittleEndian;
+		}
+
+		item.offsetW = descItemsList.at(5).trimmed().toInt(&res);
+
+		if (res == false)
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter OffsetW in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		item.bitNo = descItemsList.at(6).trimmed().toInt(&res);
+
+		if (res == false)
+		{
+			msg = QString("Invalid IN_SIGNAL value of parameter BitNo in opto-port '%1' raw data description.").arg(equipmentID());
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		return true;
 	}
 
 
@@ -602,6 +733,65 @@ namespace Hardware
 
 		return result;
 	}
+
+
+	bool OptoPort::getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
+												const QString& appSignalID,
+												QUuid receiverUuid,
+												SignalAddress16& addr, Builder::IssueLogger *log)
+	{
+		if (connection->mode() != OptoPort::Mode::Serial)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		for(const RawDataDescriptionItem& rdi : m_rawDataDescription)
+		{
+			if (rdi.type != RawDataDescriptionItemType::InSignal)
+			{
+				continue;
+			}
+
+			// rdi.type == RawDataDescriptionItemType::InSignal
+
+			if (rdi.appSignalID != appSignalID)
+			{
+				continue;
+			}
+
+			addr.setSignalType(rdi.signalType);
+			addr.setDataFormat(rdi.dataFormat);
+			addr.setDataSize(rdi.dataSize);
+			addr.setByteOrder(rdi.byteOrder);
+
+			addr.setOffset(rxStartAddress() + rdi.offsetW);
+
+			if (rdi.signalType == E::SignalType::Discrete)
+			{
+				addr.setBit(rdi.bitNo);
+			}
+			else
+			{
+				addr.setBit(0);
+			}
+
+			return true;
+		}
+
+		// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
+		//
+		log->errALC5084(appSignalID, connection->connectionID(), receiverUuid);
+
+		return false;
+	}
+
 
 
 	// ------------------------------------------------------------------
@@ -1729,7 +1919,11 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::getSignalRxAddress(QString connectionID, QString appSignalID, QString receiverLM, QUuid receiverUuid, Address16& addr)
+	bool OptoModuleStorage::getSignalRxAddress(const QString& connectionID,
+											   const QString& appSignalID,
+											   const QString& receiverLM,
+											   QUuid receiverUuid,
+											   SignalAddress16 &addr)
 	{
 		addr.reset();
 
@@ -1740,6 +1934,30 @@ namespace Hardware
 			m_log->errALC5040(connectionID);
 			return false;
 		}
+
+		switch(connection->mode())
+		{
+		case OptoPort::Mode::Optical:
+			return getSignalRxAddressOpto(connection, appSignalID, receiverLM, receiverUuid, addr);
+
+		case OptoPort::Mode::Serial:
+			return getSignalRxAddressSerial(connection, appSignalID, receiverLM, receiverUuid, addr);
+
+		default:
+			assert(false);
+		}
+
+		return false;
+	}
+
+
+	bool OptoModuleStorage::getSignalRxAddressOpto(	std::shared_ptr<Connection> connection,
+													const QString& appSignalID,
+													const QString& receiverLM,
+													QUuid receiverUuid,
+													SignalAddress16& addr)
+	{
+		assert(connection->mode() == OptoPort::Mode::Optical);
 
 		OptoPort* port1 = getOptoPort(connection->port1EquipmentID());
 
@@ -1819,6 +2037,38 @@ namespace Hardware
 		//
 		m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
 		return false;
+	}
+
+
+	bool OptoModuleStorage::getSignalRxAddressSerial(	std::shared_ptr<Connection> connection,
+														const QString& appSignalID,
+														const QString& receiverLM,
+														QUuid receiverUuid,
+														SignalAddress16& addr)
+	{
+		assert(connection->mode() == OptoPort::Mode::Serial);
+
+		// only  port1 is used in serial connections
+		//
+		OptoPort* port1 = getOptoPort(connection->port1EquipmentID());
+
+		if (port1 == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		OptoModule* module1 = getOptoModule(port1->optoModuleID());
+
+		if (module1->lmID() != receiverLM)
+		{
+			// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
+			//
+			m_log->errALC5083(port1->equipmentID(), connection->connectionID(), receiverLM, receiverUuid);
+			return false;
+		}
+
+		return port1->getSignalRxAddressSerial(connection, appSignalID, receiverUuid, addr, m_log);
 	}
 
 }
