@@ -13,7 +13,7 @@ class MeasurementBase : public QObject
 public:
 
 	explicit MeasurementBase(QObject *parent = 0);
-	~MeasurementBase();
+	virtual ~MeasurementBase();
 
 private:
 

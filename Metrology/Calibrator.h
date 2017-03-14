@@ -12,107 +12,107 @@
 
 // ==============================================================================================
 
-const int		CALIBRATOR_TIMEOUT              = 10000,    // 10 seconds
-                CALIBRATOR_TIMEOUT_STEP         = 10;       // 10 milliseconds
+const int		CALIBRATOR_TIMEOUT			= 10000,	// 10 seconds
+				CALIBRATOR_TIMEOUT_STEP		= 10;		// 10 milliseconds
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorType[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "TRX-II"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "CALYS-75"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "TRX-II"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "CALYS-75"),
 };
 
-const int		CALIBRATOR_TYPE_COUNT           = sizeof(CalibratorType)/sizeof(CalibratorType[0]);
+const int		CALIBRATOR_TYPE_COUNT			= sizeof(CalibratorType)/sizeof(CalibratorType[0]);
 
-const int		CALIBRATOR_TYPE_UNKNOWN         = -1,
-                CALIBRATOR_TYPE_TRXII           = 0,
-                CALIBRATOR_TYPE_CALYS75         = 1;
+const int		CALIBRATOR_TYPE_UNKNOWN		= -1,
+				CALIBRATOR_TYPE_TRXII		= 0,
+				CALIBRATOR_TYPE_CALYS75		= 1;
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorMode[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "Measure"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "Source"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Measure"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Source"),
 };
 
-const int		CALIBRATOR_MODE_COUNT           = sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
+const int		CALIBRATOR_MODE_COUNT			= sizeof(CalibratorMode)/sizeof(CalibratorMode[0]);
 
-const int		CALIBRATOR_MODE_UNKNOWN         = -1,
-                CALIBRATOR_MODE_MEASURE         = 0,
-                CALIBRATOR_MODE_SOURCE          = 1;
+const int		CALIBRATOR_MODE_UNKNOWN		= -1,
+				CALIBRATOR_MODE_MEASURE		= 0,
+				CALIBRATOR_MODE_SOURCE		= 1;
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorUnit[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "mV"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "mA"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "V"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "kHz"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (Low)"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (High)"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "mV"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "mA"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "V"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "kHz"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (Low)"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Ohm (High)"),
 };
 
-const int		CALIBRATOR_UNIT_COUNT          = sizeof(CalibratorUnit)/sizeof(CalibratorUnit[0]);
+const int		CALIBRATOR_UNIT_COUNT		= sizeof(CalibratorUnit)/sizeof(CalibratorUnit[0]);
 
-const int		CALIBRATOR_UNIT_UNKNOWN         = -1,
-                CALIBRATOR_UNIT_MV              = 0,
-                CALIBRATOR_UNIT_MA              = 1,
-                CALIBRATOR_UNIT_V               = 2,
-                CALIBRATOR_UNIT_KHZ             = 3,
-                CALIBRATOR_UNIT_LOW_OHM         = 4,
-                CALIBRATOR_UNIT_HIGH_OHM        = 5;
+const int		CALIBRATOR_UNIT_UNKNOWN		= -1,
+				CALIBRATOR_UNIT_MV			= 0,
+				CALIBRATOR_UNIT_MA			= 1,
+				CALIBRATOR_UNIT_V			= 2,
+				CALIBRATOR_UNIT_KHZ			= 3,
+				CALIBRATOR_UNIT_LOW_OHM		= 4,
+				CALIBRATOR_UNIT_HIGH_OHM	= 5;
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorStep[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "Step down"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "Step up"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Step down"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Step up"),
 };
 
-const int		CALIBRATOR_STEP_COUNT           = sizeof(CalibratorStep)/sizeof(CalibratorStep[0]);
+const int		CALIBRATOR_STEP_COUNT			= sizeof(CalibratorStep)/sizeof(CalibratorStep[0]);
 
-const int		CALIBRATOR_STEP_UNKNOWN        = -1,
-                CALIBRATOR_STEP_DOWN            = 0,
-                CALIBRATOR_STEP_UP              = 1;
+const int		CALIBRATOR_STEP_UNKNOWN		= -1,
+				CALIBRATOR_STEP_DOWN		= 0,
+				CALIBRATOR_STEP_UP			= 1;
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorReset[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "Hard reset"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "Soft reset"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Hard reset"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Soft reset"),
 };
 
-const int		CALIBRATOR_RESET_COUNT          = sizeof(CalibratorStep)/sizeof(CalibratorReset[0]);
+const int		CALIBRATOR_RESET_COUNT		  = sizeof(CalibratorStep)/sizeof(CalibratorReset[0]);
 
-const int		CALIBRATOR_RESET_UNKNOWN        = -1,
-                CALIBRATOR_RESET_HARD           = 0,
-                CALIBRATOR_RESET_SOFT           = 1;
+const int		CALIBRATOR_RESET_UNKNOWN	= -1,
+				CALIBRATOR_RESET_HARD		= 0,
+				CALIBRATOR_RESET_SOFT		= 1;
 
 // ----------------------------------------------------------------------------------------------
 
 const char* const CalibratorConvert[] =
 {
-                QT_TRANSLATE_NOOP("Calibrator.h", "Hz to kHz"),
-                QT_TRANSLATE_NOOP("Calibrator.h", "kHz to Hz"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "Hz to kHz"),
+				QT_TRANSLATE_NOOP("Calibrator.h", "kHz to Hz"),
 };
 
-const int		CALIBRATOR_CONVERT_COUNT        = sizeof(CalibratorConvert)/sizeof(CalibratorConvert[0]);
+const int		CALIBRATOR_CONVERT_COUNT		= sizeof(CalibratorConvert)/sizeof(CalibratorConvert[0]);
 
-const int		CALIBRATOR_CONVERT_HZ_TO_KHZ    = 0,
-                CALIBRATOR_CONVERT_KHZ_TO_HZ    = 1;
+const int		CALIBRATOR_CONVERT_HZ_TO_KHZ	= 0,
+				CALIBRATOR_CONVERT_KHZ_TO_HZ	= 1;
 
 
 // ----------------------------------------------------------------------------------------------
 
-const int       CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
+const int		CalibratorBaudRate[CALIBRATOR_TYPE_COUNT] =
 {
-                QSerialPort::Baud9600,
-                QSerialPort::Baud115200,
+				QSerialPort::Baud9600,
+				QSerialPort::Baud115200,
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -121,8 +121,8 @@ const int		CALIBRATOR_TERMINATOR_LEN = 2;
 
 const char* const CalibratorTerminator[CALIBRATOR_TYPE_COUNT] =
 {
-                "\n\r",
-                "\r\n",
+				"\n\r",
+				"\r\n",
 };
 
 // ==============================================================================================
@@ -134,12 +134,11 @@ const int		INVALID_CALIBRATOR_CHANNEL = -1;
 
 #define CALIBRATOR_IDN					"*IDN?"
 #define CALIBRATOR_RESET				"*RST"
-#define CALIBRATOR_BEEP                 ":SYSTEM:BEEP"
+#define CALIBRATOR_BEEP					":SYSTEM:BEEP"
 
 
 // ==============================================================================================
 // Commands - model TRX-II
-
 
 #define TRXII_RESET_SOFT				":SYSTEM:RESET"
 
@@ -165,7 +164,6 @@ const int		INVALID_CALIBRATOR_CHANNEL = -1;
 
 // ==============================================================================================
 // Commands - model Calys 75
-
 
 #define CALYS75_RESET_SOFT				"*RST"
 
@@ -199,126 +197,125 @@ const int		INVALID_CALIBRATOR_CHANNEL = -1;
 #define CALYS75_REMOTE_CONTROL			"REM"
 #define CALYS75_MANUAL_CONTROL			"LOC"
 
-
 // ==============================================================================================
 
 class Calibrator : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    explicit    Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = 0);
-               ~Calibrator();
+	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = 0);
+	virtual ~Calibrator();
 
 private:
 
-    bool        m_connected = false;
+	bool		m_connected = false;
 
-    int         m_channel = INVALID_CALIBRATOR_CHANNEL;                                 // index calibrator in a common base calibrators CalibratorBase
+	int			m_channel = INVALID_CALIBRATOR_CHANNEL;									// index calibrator in a common base calibrators CalibratorBase
 
-    QSerialPort m_port;                                                                 // object serial port for management of the calibrator
+	QSerialPort m_port;																	// object serial port for management of the calibrator
 
-    QString		m_portName;													            // string containing the name of the serial port
-    int			m_type = CALIBRATOR_TYPE_UNKNOWN;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
-    QString		m_caption;													            // name of calibrator
-    QString		m_serialNo;												                // serial number of calibrator
+	QString		m_portName;																// string containing the name of the serial port
+	int			m_type = CALIBRATOR_TYPE_UNKNOWN;										// calibrator type: 0 - CALIBRATOR_TYPE_TRXII or 1 - CALIBRATOR_TYPE_CALYS75
+	QString		m_caption;																// name of calibrator
+	QString		m_serialNo;																// serial number of calibrator
 
-    int			m_timeout = 0;												            // time counter waits for a response from the calibrator
+	int			m_timeout = 0;															// time counter waits for a response from the calibrator
 
-    int			m_mode = CALIBRATOR_MODE_UNKNOWN;										// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
-    int			m_measureUnit = 0;											            // measure unit: mA, mV and etc.
-    int			m_sourceUnit = 0;											            // source unit: mA, mV and etc.
+	int			m_mode = CALIBRATOR_MODE_UNKNOWN;										// calibrator mode: 0 - CALIBRATOR_MODE_MEASURE or 1 - CALIBRATOR_MODE_SOURCE
+	int			m_measureUnit = 0;														// measure unit: mA, mV and etc.
+	int			m_sourceUnit = 0;														// source unit: mA, mV and etc.
 
-    double		m_measureValue = 0;											            // contains measured electrical value of the calibrator
-    double		m_sourceValue = 0;											            // contains installed electrical value of the calibrator
+	double		m_measureValue = 0;														// contains measured electrical value of the calibrator
+	double		m_sourceValue = 0;														// contains installed electrical value of the calibrator
 
-    QString		m_lastResponse;                                                         // string containing the last response data from the calibrator
-    QString		m_lastError;                                                            // in the case of an error of the calibrator, this string contains the description
+	QString		m_lastResponse;															// string containing the last response data from the calibrator
+	QString		m_lastError;															// in the case of an error of the calibrator, this string contains the description
 
-    bool        m_enableWaitResponse = false;                                           // enbale wait response from calibrator after open port
+	bool		m_enableWaitResponse = false;											// enbale wait response from calibrator after open port
 
-    bool        m_busy = false;
+	bool		m_busy = false;
 
-    void        empty();                                                                // erases all information on the calibrator: SerialNo, Name and etc.
+	void		empty();																// erases all information on the calibrator: SerialNo, Name and etc.
 
-    void        setConnected(bool connect);                                             // function changes status calibrator: connected or disconnected
+	void		setConnected(bool connect);												// function changes status calibrator: connected or disconnected
 
-    bool        openPort();                                                             // open the serial port to manage the calibrator
-    bool        getIDN();                                                               // identify the calibrator, get: SerialNo, Type and etc.
+	bool		openPort();																// open the serial port to manage the calibrator
+	bool		getIDN();																// identify the calibrator, get: SerialNo, Type and etc.
 
-    bool		send(QString cmd);                                                      // sending commands to the calibrator
-    bool		recv();                                                                 // receiving a response from the calibrator
+	bool		send(QString cmd);														// sending commands to the calibrator
+	bool		recv();																	// receiving a response from the calibrator
 
-    void        parseResponse();                                                        // extracts from the string of the last response from the calibrator current electrical values
-    void		convert(double& val, int mode, int order);                              // translation from Kilo to Mega, from Hz to kHz, etc.
+	void		parseResponse();														// extracts from the string of the last response from the calibrator current electrical values
+	void		convert(double& val, int mode, int order);								// translation from Kilo to Mega, from Hz to kHz, etc.
 
 public:
 
-    bool        isConnected() const { return m_connected; }
+	bool		isConnected() const { return m_connected; }
 
-    int         channel() const{ return m_channel; }
+	int			channel() const{ return m_channel; }
 
-    bool        isOpenPort() const { return m_port.isOpen(); }
+	bool		isOpenPort() const { return m_port.isOpen(); }
 
-    QString		portName() const { return m_portName; }
-    void		setPortName(const QString& portName) { m_portName = portName; }
+	QString		portName() const { return m_portName; }
+	void		setPortName(const QString& portName) { m_portName = portName; }
 
-    int			type() const { return m_type; }
-    QString		typeStr() const;
-    void		setType(int type) { m_type = type; }
+	int			type() const { return m_type; }
+	QString		typeStr() const;
+	void		setType(int type) { m_type = type; }
 
-    QString     caption() const { return m_caption; }
-    QString		serialNo() const { return m_serialNo; }
+	QString		caption() const { return m_caption; }
+	QString		serialNo() const { return m_serialNo; }
 
-    int			timeout() const { return m_timeout;    }
+	int			timeout() const { return m_timeout;	}
 
-    int			mode() const { return m_mode; }
-    int			measureUnit() const { return m_measureUnit; }
-    int			sourceUnit() const { return m_sourceUnit; }
+	int			mode() const { return m_mode; }
+	int			measureUnit() const { return m_measureUnit; }
+	int			sourceUnit() const { return m_sourceUnit; }
 
-    double		measureValue() const { return m_measureValue; }
-    double		sourceValue() const { return m_sourceValue; }
+	double		measureValue() const { return m_measureValue; }
+	double		sourceValue() const { return m_sourceValue; }
 
-    QString     lastError() const { return m_lastError; }
+	QString		lastError() const { return m_lastError; }
 
-    void        setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
+	void		setWaitResponse(bool enable) { m_enableWaitResponse = enable; }
 
-    bool        isBusy() const { return m_busy; }
-    void        setBusy(bool busy);
+	bool		isBusy() const { return m_busy; }
+	void		setBusy(bool busy);
 
 signals:
 
-    void        connected();
-    void        disconnected();
+	void		connected();
+	void		disconnected();
 
-    void        unitIsChanged();
-    void        commandIsSent(QString);
-    void        responseIsReceived(QString);
-    void        valueIsRequested();
-    void        valueIsReceived();
+	void		unitIsChanged();
+	void		commandIsSent(QString);
+	void		responseIsReceived(QString);
+	void		valueIsRequested();
+	void		valueIsReceived();
 
-    void        error(QString);
+	void		error(QString);
 
 public slots:
 
-    bool        open();                                                                 // initialization of the calibrator
+	bool		open();																	// initialization of the calibrator
 
-    bool		setUnit(int mode, int unit);                                            // select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
-                                                                                        // select unit: mA, mV and etc.
-    bool		setValue(double value);                                                 // set value
-    bool		stepDown();                                                             // decrease the value on the calibrator
-    bool		stepUp();                                                               // increasing the value on the calibrator
-    bool		step(int stepType);                                                     // imitation of the "step"
+	bool		setUnit(int mode, int unit);											// select mode: measure - 0 (CALIBRATOR_MODE_MEASURE) or source - 1 (CALIBRATOR_MODE_SOURCE)
+																						// select unit: mA, mV and etc.
+	bool		setValue(double value);													// set value
+	bool		stepDown();																// decrease the value on the calibrator
+	bool		stepUp();																// increasing the value on the calibrator
+	bool		step(int stepType);														// imitation of the "step"
 
-    double		getValue();     											            // get electrical values ​​with calibrator
+	double		getValue();																// get electrical values ​​with calibrator
 
-    bool        beep();                                                                 // beep
-    bool		reset(int resetType);      								                // reset: hard: 0 - CALIBRATOR_RESET_HARD or soft: 1 - CALIBRATOR_RESET_SOFT
+	bool		beep();																	// beep
+	bool		reset(int resetType);	  												// reset: hard: 0 - CALIBRATOR_RESET_HARD or soft: 1 - CALIBRATOR_RESET_SOFT
 
-    bool		setRemoteControl(bool enable);							                // allow remote control of the calibrator (only model CALYS75)
+	bool		setRemoteControl(bool enable);											// allow remote control of the calibrator (only model CALYS75)
 
-    void		close();												                // the end of the session with a calibrator
+	void		close();																// the end of the session with a calibrator
 };
 
 // ==============================================================================================

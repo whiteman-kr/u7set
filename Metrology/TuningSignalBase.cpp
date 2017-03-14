@@ -11,14 +11,14 @@ TuningSource::TuningSource()
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSource::TuningSource(const Network::DataSourceInfo& info) :
-	m_sourceID (info.id() ),
-	m_equipmentID (info.equipmentid().c_str() ),
-	m_caption (info.caption().c_str() ),
-	m_serverIP (info.ip().c_str() ),
-	m_serverPort (info.port() ),
-	m_channel (info.channel() ),
-	m_subSystem (info.subsystem().c_str() ),
-	m_lmNumber (info.lmnumber() )
+	m_sourceID (info.id()),
+	m_equipmentID (info.equipmentid().c_str()),
+	m_caption (info.caption().c_str()),
+	m_serverIP (info.ip().c_str()),
+	m_serverPort (info.port()),
+	m_channel (info.channel()),
+	m_subSystem (info.subsystem().c_str()),
+	m_lmNumber (info.lmnumber())
 {
 
 }
@@ -66,8 +66,8 @@ TuningSignal::TuningSignal(const Metrology::SignalParam& param)
 
 	m_defaultValue = param.tuningDefaultValue();
 
-	m_state.setLowLimit( param.inputPhysicalLowLimit() );
-	m_state.setHighLimit( param.inputPhysicalHighLimit() );
+	m_state.setLowLimit(param.inputPhysicalLowLimit());
+	m_state.setHighLimit(param.inputPhysicalHighLimit());
 
 	m_precision = param.inputPhysicalPrecision();
 }
@@ -97,9 +97,9 @@ QString TuningSignal::valueStr() const
 
 	if (m_signalType == E::SignalType::Analog)
 	{
-		formatStr.sprintf( ("%%.%df"), m_precision );
+		formatStr.sprintf(("%%.%df"), m_precision);
 
-		stateStr.sprintf( formatStr.toAscii(),  m_state.value());
+		stateStr.sprintf(formatStr.toAscii(),  m_state.value());
 	}
 
 	if (m_signalType == E::SignalType::Discrete)
@@ -123,8 +123,8 @@ QString TuningSignal::defaultValueStr() const
 
 	switch (m_signalType)
 	{
-		case E::SignalType::Analog:		formatStr.sprintf( ("%%.%df"), m_precision );	stateStr.sprintf( formatStr.toAscii(), m_defaultValue );	break;
-		case E::SignalType::Discrete:	stateStr = m_defaultValue == 0 ? QString("No") : QString("Yes");											break;
+		case E::SignalType::Analog:		formatStr.sprintf(("%%.%df"), m_precision);	stateStr.sprintf(formatStr.toAscii(), m_defaultValue);	break;
+		case E::SignalType::Discrete:	stateStr = m_defaultValue == 0 ? QString("No") : QString("Yes");									break;
 		default:						assert(0);
 	}
 
@@ -147,9 +147,9 @@ QString TuningSignal::rangeStr() const
 
 	QString range, formatStr;
 
-	formatStr.sprintf( ("%%.%df"), m_precision );
+	formatStr.sprintf(("%%.%df"), m_precision);
 
-	range.sprintf( formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_state.lowLimit(), m_state.highLimit());
+	range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_state.lowLimit(), m_state.highLimit());
 
 	return range;
 }
@@ -165,7 +165,7 @@ TuningWriteCmd::TuningWriteCmd()
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningWriteCmd::TuningWriteCmd(const Hash& signalHash, float value) :
-	m_signalHash (signalHash ),
+	m_signalHash (signalHash),
 	m_value (value)
 {
 }
@@ -243,7 +243,7 @@ int TuningSignalBase::appendSource(const TuningSource& source)
 
 	m_sourceMutex.lock();
 
-		if ( m_sourceIdMap.contains(source.sourceID()) == false )
+		if (m_sourceIdMap.contains(source.sourceID()) == false)
 		{
 			m_sourceList.append(source);
 
@@ -352,7 +352,7 @@ void TuningSignalBase::createSignalList()
 			continue;
 		}
 
-		appendSignal( TuningSignal( param ) );
+		appendSignal(TuningSignal(param));
 	}
 
 	emit signalsLoaded();
@@ -515,9 +515,9 @@ void TuningSignalBase::setSignalState(const Hash& hash, const Network::TuningSig
 			{
 				TuningSignalState& signalState = m_signalList[index].state();
 
-				signalState.setValid( state.valid() );
-				signalState.setValue( state.value() );
-				signalState.setLimits( state.readlowbound(), state.readhighbound() );
+				signalState.setValid(state.valid());
+				signalState.setValue(state.value());
+				signalState.setLimits(state.readlowbound(), state.readhighbound());
 			}
 		}
 
@@ -548,10 +548,10 @@ void TuningSignalBase::updateSignalParam(const Hash& signalHash)
 
 		if (index >= 0 && index < m_signalList.size())
 		{
-			m_signalList[index].setCustomAppSignalID( param.customAppSignalID() );
-			m_signalList[index].setCaption( param.caption() );
-			m_signalList[index].setDefaultValue( param.tuningDefaultValue() );
-			m_signalList[index].setPrecision( param.inputPhysicalPrecision() );
+			m_signalList[index].setCustomAppSignalID(param.customAppSignalID());
+			m_signalList[index].setCaption(param.caption());
+			m_signalList[index].setDefaultValue(param.tuningDefaultValue());
+			m_signalList[index].setPrecision(param.inputPhysicalPrecision());
 		}
 	}
 
@@ -567,7 +567,7 @@ void TuningSignalBase::singalsSetNovalid()
 
 		int count = m_signalList.count();
 
-		for(int i = 0; i < count; i++ )
+		for(int i = 0; i < count; i++)
 		{
 			m_signalList[i].state().setValid(false);
 		}

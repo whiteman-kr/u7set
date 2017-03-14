@@ -55,6 +55,26 @@ const int					SIGNAL_LIST_COLUMN_RACK				= 0,
 							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 14,
 							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 15;
 
+const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
+{
+							100,	// SIGNAL_LIST_COLUMN_RACK
+							250,	// SIGNAL_LIST_COLUMN_ID
+							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
+							150,	// SIGNAL_LIST_COLUMN_CAPTION
+							 60,	// SIGNAL_LIST_COLUMN_CHASSIS
+							 60,	// SIGNAL_LIST_COLUMN_MODULE
+							 60,	// SIGNAL_LIST_COLUMN_PLACE
+							120,	// SIGNAL_LIST_COLUMN_ADC
+							150,	// SIGNAL_LIST_COLUMN_IN_PH_RANGE
+							150,	// SIGNAL_LIST_COLUMN_IN_EL_RANGE
+							100,	// SIGNAL_LIST_COLUMN_IN_EL_SENSOR
+							150,	// SIGNAL_LIST_COLUMN_OUT_PH_RANGE
+							150,	// SIGNAL_LIST_COLUMN_OUT_EL_RANGE
+							100,	// SIGNAL_LIST_COLUMN_OUT_EL_SENSOR
+							 50,	// SIGNAL_LIST_COLUMN_TUN_SIGNAL
+							100,	// SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL
+};
+
 // ==============================================================================================
 
 class SignalListTable : public QAbstractTableModel
@@ -64,7 +84,7 @@ class SignalListTable : public QAbstractTableModel
 public:
 
 	explicit SignalListTable(QObject* parent = 0);
-	~SignalListTable();
+	virtual ~SignalListTable();
 
 private:
 
@@ -109,11 +129,9 @@ class SignalListDialog : public QDialog
 public:
 
 	explicit SignalListDialog(bool hasButtons, QWidget *parent = 0);
-	~SignalListDialog();
+	virtual ~SignalListDialog();
 
 private:
-
-	static int				m_columnWidth[SIGNAL_LIST_COLUMN_COUNT];
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;

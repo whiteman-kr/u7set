@@ -40,6 +40,21 @@ const int					SIGNAL_INFO_COLUMN_RACK			= 0,
 							SIGNAL_INFO_COLUMN_EL_SENSOR	= 9,
 							SIGNAL_INFO_COLUMN_CALIBRATOR	= 10;
 
+const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
+{
+							100,	// SIGNAL_INFO_COLUMN_RACK
+							270,	// SIGNAL_INFO_COLUMN_ID
+							150,	// SIGNAL_INFO_COLUMN_STATE
+							 60,	// SIGNAL_INFO_COLUMN_CHASSIS
+							 60,	// SIGNAL_INFO_COLUMN_MODULE
+							 60,	// SIGNAL_INFO_COLUMN_PLACE
+							150,	// SIGNAL_INFO_COLUMN_CAPTION
+							150,	// SIGNAL_INFO_COLUMN_PH_RANGE
+							150,	// SIGNAL_INFO_COLUMN_EL_RANGE
+							100,	// SIGNAL_INFO_COLUMN_EL_SENSOR
+							150,	// SIGNAL_INFO_COLUMN_CALIBRATOR
+};
+
 // ==============================================================================================
 
 class SignalInfoTable : public QAbstractTableModel
@@ -49,7 +64,7 @@ class SignalInfoTable : public QAbstractTableModel
 public:
 
 	explicit SignalInfoTable(QObject* parent = 0);
-	~SignalInfoTable();
+	virtual ~SignalInfoTable();
 
 private:
 
@@ -92,11 +107,9 @@ class SignalInfoPanel : public QDockWidget
 public:
 
 	explicit SignalInfoPanel(QWidget* parent = 0);
-	~SignalInfoPanel();
+	virtual ~SignalInfoPanel();
 
 private:
-
-	static int				m_columnWidth[SIGNAL_INFO_COLUMN_COUNT];
 
 	// elements of interface
 	//

@@ -6,11 +6,11 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 Calibrator::Calibrator(int channel, QObject *parent) :
-    m_channel(channel),
-    QObject(parent),
-    m_port(this)
+	m_channel(channel),
+	QObject(parent),
+	m_port(this)
 {
-    empty();
+	empty();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -23,44 +23,44 @@ Calibrator::~Calibrator()
 
 void Calibrator::empty()
 {
-    if (m_port.isOpen() == true)
-    {
-        m_port.clear();
-        m_port.close();
-    }
+	if (m_port.isOpen() == true)
+	{
+		m_port.clear();
+		m_port.close();
+	}
 
-    m_connected = false;
+	m_connected = false;
 
-    m_caption = QString();
-    m_serialNo = QString();
+	m_caption.clear();
+	m_serialNo.clear();
 
-    m_timeout = 0;
+	m_timeout = 0;
 
-    m_mode = CALIBRATOR_MODE_UNKNOWN;
-    m_measureUnit = CALIBRATOR_UNIT_UNKNOWN;
-    m_sourceUnit = CALIBRATOR_UNIT_UNKNOWN;
+	m_mode = CALIBRATOR_MODE_UNKNOWN;
+	m_measureUnit = CALIBRATOR_UNIT_UNKNOWN;
+	m_sourceUnit = CALIBRATOR_UNIT_UNKNOWN;
 
-    m_measureValue = 0;
-    m_sourceValue = 0;
+	m_measureValue = 0;
+	m_sourceValue = 0;
 
-    m_lastResponse = QString();
-    m_lastError = QString();
+	m_lastResponse.clear();
+	m_lastError.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Calibrator::setConnected(bool connect)
 {
-    m_connected = connect;
+	m_connected = connect;
 
-    if (connect == true)
-    {
-        emit connected();
-    }
-    else
-    {
-        emit disconnected();
-    }
+	if (connect == true)
+	{
+		emit connected();
+	}
+	else
+	{
+		emit disconnected();
+	}
 
 }
 
@@ -68,646 +68,646 @@ void Calibrator::setConnected(bool connect)
 
 bool Calibrator::open()
 {
-    empty();
+	empty();
 
-    if (m_portName.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Error description: Don't defined port name").arg(__FUNCTION__);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_portName.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Error description: Don't defined port name").arg(__FUNCTION__);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (openPort() == false)
-    {
-        return false;
-    }
+	if (openPort() == false)
+	{
+		return false;
+	}
 
-    if (getIDN() == false)
-    {
-        return false;
-    }
+	if (getIDN() == false)
+	{
+		return false;
+	}
 
-    setConnected(true);
+	setConnected(true);
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::getIDN()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    setRemoteControl(true);
+	setRemoteControl(true);
 
-    send(CALIBRATOR_IDN);
-    if (recv() == false)
-    {
-        return false;
-    }
+	send(CALIBRATOR_IDN);
+	if (recv() == false)
+	{
+		return false;
+	}
 
-    // Extracts from the string of the last response from the calibrator name and serial number
-    //
-    int begPos = 0, endPos = 0;
+	// Extracts from the string of the last response from the calibrator name and serial number
+	//
+	int begPos = 0, endPos = 0;
 
-    begPos = m_lastResponse.indexOf(',', 0);
-    endPos = m_lastResponse.indexOf(',', begPos+1);
+	begPos = m_lastResponse.indexOf(',', 0);
+	endPos = m_lastResponse.indexOf(',', begPos+1);
 
-    // Calibrator name
-    //
-    m_caption = m_lastResponse.left(endPos);
-    m_caption = m_caption.right(endPos - begPos - 1);
+	// Calibrator name
+	//
+	m_caption = m_lastResponse.left(endPos);
+	m_caption = m_caption.right(endPos - begPos - 1);
 
-    if (m_caption.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration name").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_caption.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration name").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    begPos = endPos;
-    endPos = m_lastResponse.indexOf(',', begPos+1);
+	begPos = endPos;
+	endPos = m_lastResponse.indexOf(',', begPos+1);
 
-    // Calibrator serial number
-    //
-    m_serialNo = m_lastResponse.left(endPos);
-    m_serialNo = m_serialNo.right(endPos - begPos -1);
+	// Calibrator serial number
+	//
+	m_serialNo = m_lastResponse.left(endPos);
+	m_serialNo = m_serialNo.right(endPos - begPos -1);
 
-    if (m_serialNo.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration serial number").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_serialNo.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration serial number").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::openPort()
 {
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    m_port.setPortName(m_portName);
+	m_port.setPortName(m_portName);
 
-    m_port.setBaudRate( CalibratorBaudRate[m_type] );
+	m_port.setBaudRate(CalibratorBaudRate[m_type]);
 
-    m_port.setDataBits(QSerialPort::Data8);
-    m_port.setParity(QSerialPort::NoParity);
-    m_port.setStopBits(QSerialPort::OneStop);
-    m_port.setFlowControl(QSerialPort::NoFlowControl);
+	m_port.setDataBits(QSerialPort::Data8);
+	m_port.setParity(QSerialPort::NoParity);
+	m_port.setStopBits(QSerialPort::OneStop);
+	m_port.setFlowControl(QSerialPort::NoFlowControl);
 
-    if (m_port.open(QIODevice::ReadWrite) == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: %3 (%4)").arg(__FUNCTION__).arg(m_portName).arg(m_port.errorString()).arg(m_port.error());
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.open(QIODevice::ReadWrite) == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: %3 (%4)").arg(__FUNCTION__).arg(m_portName).arg(m_port.errorString()).arg(m_port.error());
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    setWaitResponse(true);
+	setWaitResponse(true);
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::send(QString cmd)
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (cmd.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (cmd.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    // add ending
-    //
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:     cmd.append("\n\r"); break;
-        case CALIBRATOR_TYPE_CALYS75:	cmd.append("\r\r"); break;
-        default:                        assert(false);      break;
-    }
+	// add ending
+	//
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:		cmd.append("\n\r"); break;
+		case CALIBRATOR_TYPE_CALYS75:	cmd.append("\r\r"); break;
+		default:						assert(false);
+	}
 
-    QByteArray cmdData = cmd.toLocal8Bit();;
+	QByteArray cmdData = cmd.toLocal8Bit();;
 
-    // send
-    //
-    qint64 writtenBytes = m_port.write(cmdData);
-    if (writtenBytes != cmdData.count())
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Command is sent is not fully").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	// send
+	//
+	qint64 writtenBytes = m_port.write(cmdData);
+	if (writtenBytes != cmdData.count())
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Command is sent is not fully").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    emit commandIsSent(cmd);
+	emit commandIsSent(cmd);
 
-    while(m_port.waitForBytesWritten((CALIBRATOR_TIMEOUT_STEP)));
+	while(m_port.waitForBytesWritten((CALIBRATOR_TIMEOUT_STEP)));
 
-    //qDebug("Serial Port: " + m_portName.toLocal8Bit() + " send: "+ cmd.toLocal8Bit());
+	//qDebug("Serial Port: " + m_portName.toLocal8Bit() + " send: "+ cmd.toLocal8Bit());
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::recv()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    m_lastResponse = QString();
+	m_lastResponse.clear();
 
-    QByteArray requestData;
+	QByteArray requestData;
 
-    m_timeout = 0;
-    while(m_timeout < CALIBRATOR_TIMEOUT)
-    {
-        if (m_enableWaitResponse == false)
-        {
-            m_timeout = CALIBRATOR_TIMEOUT;
-            break;
-        }
+	m_timeout = 0;
+	while(m_timeout < CALIBRATOR_TIMEOUT)
+	{
+		if (m_enableWaitResponse == false)
+		{
+			m_timeout = CALIBRATOR_TIMEOUT;
+			break;
+		}
 
-        while (m_port.waitForReadyRead(CALIBRATOR_TIMEOUT_STEP))
-        {
-            requestData += m_port.readAll();
-        }
+		while (m_port.waitForReadyRead(CALIBRATOR_TIMEOUT_STEP))
+		{
+			requestData += m_port.readAll();
+		}
 
-        if (requestData.isEmpty() == false)
-        {
-            if (memcmp(requestData.data() + requestData.count() - CALIBRATOR_TERMINATOR_LEN, CalibratorTerminator[m_type], CALIBRATOR_TERMINATOR_LEN) == 0)
-            {
-                break;
-            }
-        }
+		if (requestData.isEmpty() == false)
+		{
+			if (memcmp(requestData.data() + requestData.count() - CALIBRATOR_TERMINATOR_LEN, CalibratorTerminator[m_type], CALIBRATOR_TERMINATOR_LEN) == 0)
+			{
+				break;
+			}
+		}
 
-        m_timeout += CALIBRATOR_TIMEOUT_STEP;
-    }
+		m_timeout += CALIBRATOR_TIMEOUT_STEP;
+	}
 
-    setWaitResponse(true);
+	setWaitResponse(true);
 
-    if (m_timeout == CALIBRATOR_TIMEOUT && requestData.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Calibrator don't sent a response").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
+	if (m_timeout == CALIBRATOR_TIMEOUT && requestData.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Calibrator don't sent a response").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
 
-        close();
+		close();
 
-        return false;
-    }
+		return false;
+	}
 
-    m_lastResponse = requestData;
-    m_lastResponse.remove(CalibratorTerminator[m_type]);
+	m_lastResponse = requestData;
+	m_lastResponse.remove(CalibratorTerminator[m_type]);
 
-    //qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", response: " + m_lastResponse.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
-    qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
+	//qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", response: " + m_lastResponse.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
+	qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
 
-    emit responseIsReceived(m_lastResponse);
+	emit responseIsReceived(m_lastResponse);
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 QString Calibrator::typeStr() const
 {
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        return QString ();
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		return QString ();
+	}
 
-    return CalibratorType[ m_type ];
+	return CalibratorType[ m_type ];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::setUnit(int mode, int unit)
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError)); emit error( m_lastError);
-        return false;
-    }
+	if (mode < 0 || mode >= CALIBRATOR_MODE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError)); emit error(m_lastError);
+		return false;
+	}
 
-    m_mode = mode;
+	m_mode = mode;
 
-    if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (unit < 0 || unit >= CALIBRATOR_UNIT_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    QString cmdUnit, cmdRange;
+	QString cmdUnit, cmdRange;
 
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:
 
-            switch(m_mode)
-            {
-                case CALIBRATOR_MODE_MEASURE:
+			switch(m_mode)
+			{
+				case CALIBRATOR_MODE_MEASURE:
 
-                    switch(unit)
-                    {
-                        case CALIBRATOR_UNIT_MV:		cmdUnit = TRXII_MEASURE_UNIT_MV;		break;
-                        case CALIBRATOR_UNIT_MA:		cmdUnit = TRXII_MEASURE_UNIT_MA;		break;
-                        case CALIBRATOR_UNIT_V:         cmdUnit = TRXII_MEASURE_UNIT_V;			break;
-                        case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_MEASURE_UNIT_KHZ;		break;
-                        case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
-                        case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
-                        default:                        assert(false);                          break;
-                    }
+					switch(unit)
+					{
+						case CALIBRATOR_UNIT_MV:		cmdUnit = TRXII_MEASURE_UNIT_MV;		break;
+						case CALIBRATOR_UNIT_MA:		cmdUnit = TRXII_MEASURE_UNIT_MA;		break;
+						case CALIBRATOR_UNIT_V:			cmdUnit = TRXII_MEASURE_UNIT_V;			break;
+						case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_MEASURE_UNIT_KHZ;		break;
+						case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
+						case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_MEASURE_UNIT_OHM;		break;
+						default:						assert(false);
+					}
 
-                    break;
+					break;
 
-                case CALIBRATOR_MODE_SOURCE:
+				case CALIBRATOR_MODE_SOURCE:
 
-                    switch(unit)
-                    {
-                        case CALIBRATOR_UNIT_MV:		cmdUnit = TRXII_SOURCE_UNIT_MV;			break;
-                        case CALIBRATOR_UNIT_MA:		cmdUnit = TRXII_SOURCE_UNIT_MA;			break;
-                        case CALIBRATOR_UNIT_V:         cmdUnit = TRXII_SOURCE_UNIT_V;			break;
-                        case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_SOURCE_UNIT_KHZ;		break;
-                        case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_SOURCE_UNIT_LOW_OHM;	break;
-                        case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_SOURCE_UNIT_HIGH_OHM;	break;
-                        default:                        assert(false);                          break;
-                    }
+					switch(unit)
+					{
+						case CALIBRATOR_UNIT_MV:		cmdUnit = TRXII_SOURCE_UNIT_MV;			break;
+						case CALIBRATOR_UNIT_MA:		cmdUnit = TRXII_SOURCE_UNIT_MA;			break;
+						case CALIBRATOR_UNIT_V:			cmdUnit = TRXII_SOURCE_UNIT_V;			break;
+						case CALIBRATOR_UNIT_KHZ:		cmdUnit = TRXII_SOURCE_UNIT_KHZ;		break;
+						case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = TRXII_SOURCE_UNIT_LOW_OHM;	break;
+						case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = TRXII_SOURCE_UNIT_HIGH_OHM;	break;
+						default:						assert(false);
+					}
 
-                    break;
+					break;
 
-                default:
-                    assert(false);
-                    break;
-            }
+				default:
+					assert(false);
+					break;
+			}
 
-            send(cmdUnit);
+			send(cmdUnit);
 
-            break;
+			break;
 
-        case CALIBRATOR_TYPE_CALYS75:
+		case CALIBRATOR_TYPE_CALYS75:
 
-            switch(m_mode)
-            {
-                case CALIBRATOR_MODE_MEASURE:
+			switch(m_mode)
+			{
+				case CALIBRATOR_MODE_MEASURE:
 
-                    switch(unit)
-                    {
-                        case CALIBRATOR_UNIT_MV:		cmdUnit = CALYS75_MEASURE_UNIT_MV;	cmdRange = CALYS75_MEASURE_RANG_MV;			break;
-                        case CALIBRATOR_UNIT_MA:		cmdUnit = CALYS75_MEASURE_UNIT_MA;	cmdRange = CALYS75_MEASURE_RANG_MA;			break;
-                        case CALIBRATOR_UNIT_V:         cmdUnit = CALYS75_MEASURE_UNIT_V;	cmdRange = CALYS75_MEASURE_RANG_V;			break;
-                        case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_MEASURE_UNIT_KHZ;	cmdRange = CALYS75_MEASURE_RANG_KHZ;		break;
-                        case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_LOW_RANG_OHM;	break;
-                        case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_HIGH_RANG_OHM;	break;
-                        default:                        assert(false);                                                                  break;
-                    }
+					switch(unit)
+					{
+						case CALIBRATOR_UNIT_MV:		cmdUnit = CALYS75_MEASURE_UNIT_MV;	cmdRange = CALYS75_MEASURE_RANG_MV;			break;
+						case CALIBRATOR_UNIT_MA:		cmdUnit = CALYS75_MEASURE_UNIT_MA;	cmdRange = CALYS75_MEASURE_RANG_MA;			break;
+						case CALIBRATOR_UNIT_V:			cmdUnit = CALYS75_MEASURE_UNIT_V;	cmdRange = CALYS75_MEASURE_RANG_V;			break;
+						case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_MEASURE_UNIT_KHZ;	cmdRange = CALYS75_MEASURE_RANG_KHZ;		break;
+						case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_LOW_RANG_OHM;	break;
+						case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_MEASURE_UNIT_OHM;	cmdRange = CALYS75_MEASURE_HIGH_RANG_OHM;	break;
+						default:						assert(false);
+					}
 
-                    break;
+					break;
 
-                case CALIBRATOR_MODE_SOURCE:
+				case CALIBRATOR_MODE_SOURCE:
 
-                    switch(unit)
-                    {
-                        case CALIBRATOR_UNIT_MV:		cmdUnit = CALYS75_SOURCE_UNIT_MV;	cmdRange = CALYS75_SOURCE_RANG_MV;			break;
-                        case CALIBRATOR_UNIT_MA:		cmdUnit = CALYS75_SOURCE_UNIT_MA;	cmdRange = CALYS75_SOURCE_RANG_MA;			break;
-                        case CALIBRATOR_UNIT_V:         cmdUnit = CALYS75_SOURCE_UNIT_V;	cmdRange = CALYS75_SOURCE_RANG_V;			break;
-                        case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_SOURCE_UNIT_KHZ;	cmdRange = CALYS75_SOURCE_RANG_KHZ;			break;
-                        case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_LOW_RANG_OHM;		break;
-                        case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_HIGH_RANG_OHM;	break;
-                        default:                        assert(false);                                                                  break;
-                    }
+					switch(unit)
+					{
+						case CALIBRATOR_UNIT_MV:		cmdUnit = CALYS75_SOURCE_UNIT_MV;	cmdRange = CALYS75_SOURCE_RANG_MV;			break;
+						case CALIBRATOR_UNIT_MA:		cmdUnit = CALYS75_SOURCE_UNIT_MA;	cmdRange = CALYS75_SOURCE_RANG_MA;			break;
+						case CALIBRATOR_UNIT_V:			cmdUnit = CALYS75_SOURCE_UNIT_V;	cmdRange = CALYS75_SOURCE_RANG_V;			break;
+						case CALIBRATOR_UNIT_KHZ:		cmdUnit = CALYS75_SOURCE_UNIT_KHZ;	cmdRange = CALYS75_SOURCE_RANG_KHZ;			break;
+						case CALIBRATOR_UNIT_LOW_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_LOW_RANG_OHM;		break;
+						case CALIBRATOR_UNIT_HIGH_OHM:	cmdUnit = CALYS75_SOURCE_UNIT_OM;	cmdRange = CALYS75_SOURCE_HIGH_RANG_OHM;	break;
+						default:						assert(false);
+					}
 
-                    break;
+					break;
 
-                default:
-                    assert(false);
-                    break;
-            }
+				default:
+					assert(false);
+					break;
+			}
 
-            send(cmdUnit);
-            send(cmdRange);
+			send(cmdUnit);
+			send(cmdRange);
 
-            break;
+			break;
 
-        default:
-            assert(false);
-            break;
-    }
+		default:
+			assert(false);
+			break;
+	}
 
-    switch(m_mode)
-    {
-        case CALIBRATOR_MODE_MEASURE:	m_measureUnit = unit;	break;
-        case CALIBRATOR_MODE_SOURCE:	m_sourceUnit = unit;	break;
-        default:                        assert(false);          break;
-    }
+	switch(m_mode)
+	{
+		case CALIBRATOR_MODE_MEASURE:	m_measureUnit = unit;	break;
+		case CALIBRATOR_MODE_SOURCE:	m_sourceUnit = unit;	break;
+		default:						assert(false);
+	}
 
-    qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorMode[mode], CalibratorUnit[unit]);
+	qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorMode[mode], CalibratorUnit[unit]);
 
-    emit unitIsChanged();
+	emit unitIsChanged();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::setValue(double value)
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
 
-    convert(value, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
+	convert(value, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
 
-    QString cmdSetValue;
+	QString cmdSetValue;
 
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:     cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 10, 3));      break;
-        case CALIBRATOR_TYPE_CALYS75:   cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 10, 5));    break;
-        default:                        assert(false);                                                                          break;
-    }
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:		cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 10, 3));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 10, 5));	break;
+		default:						assert(false);
+	}
 
-    if (cmdSetValue.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (cmdSetValue.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    send(cmdSetValue);
+	send(cmdSetValue);
 
-    getValue();
+	getValue();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::stepDown()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    switch(m_sourceUnit)
-    {
-        case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue -= 0.01;	break;
-        case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue -= 0.1;	break;
-        default:						m_sourceValue -= 0.001;	break;
-    }
+	switch(m_sourceUnit)
+	{
+		case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue -= 0.01;	break;
+		case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue -= 0.1;	break;
+		default:						m_sourceValue -= 0.001;	break;
+	}
 
-    convert(m_sourceValue, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
+	convert(m_sourceValue, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
 
-    QString cmdKeyDown;
+	QString cmdKeyDown;
 
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:     cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));    break;
-        case CALIBRATOR_TYPE_CALYS75:   cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));  break;
-        default:                        assert(false);                                                                              break;
-    }
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));	break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));	break;
+		default:						assert(false);
+	}
 
-    if (cmdKeyDown.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (cmdKeyDown.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    send(cmdKeyDown);
+	send(cmdKeyDown);
 
-    getValue();
+	getValue();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::stepUp()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_mode < 0 || m_mode >= CALIBRATOR_MODE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined mode").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_sourceUnit < 0 || m_sourceUnit >= CALIBRATOR_UNIT_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined unit").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    switch(m_sourceUnit)
-    {
-        case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue += 0.01;	break;
-        case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue += 0.1;	break;
-        default:						m_sourceValue += 0.001;	break;
-    }
+	switch(m_sourceUnit)
+	{
+		case CALIBRATOR_UNIT_LOW_OHM:	m_sourceValue += 0.01;	break;
+		case CALIBRATOR_UNIT_HIGH_OHM:	m_sourceValue += 0.1;	break;
+		default:						m_sourceValue += 0.001;	break;
+	}
 
-    convert(m_sourceValue, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
+	convert(m_sourceValue, CALIBRATOR_MODE_SOURCE, CALIBRATOR_CONVERT_KHZ_TO_HZ);
 
-    QString cmdKeyUp;
+	QString cmdKeyUp;
 
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:     cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));      break;
-        case CALIBRATOR_TYPE_CALYS75:   cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));    break;
-        default:                        assert(false);                                                                              break;
-    }
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));	break;
+		default:						assert(false);
+	}
 
-    if (cmdKeyUp.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (cmdKeyUp.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    send(cmdKeyUp);
+	send(cmdKeyUp);
 
-    getValue();
+	getValue();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::step(int stepType)
 {
-    if (stepType < 0 || stepType >= CALIBRATOR_STEP_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined step type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (stepType < 0 || stepType >= CALIBRATOR_STEP_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined step type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    bool stepResult = false;
+	bool stepResult = false;
 
-    switch(stepType)
-    {
-        case CALIBRATOR_STEP_DOWN:  stepResult = stepDown();    break;
-        case CALIBRATOR_STEP_UP:    stepResult = stepUp();      break;
-        default:                    assert(false);              break;
-    }
+	switch(stepType)
+	{
+		case CALIBRATOR_STEP_DOWN:  stepResult = stepDown();	break;
+		case CALIBRATOR_STEP_UP:	stepResult = stepUp();		break;
+		default:					assert(false);				break;
+	}
 
-    return stepResult;
+	return stepResult;
 }
 
 
@@ -715,168 +715,167 @@ bool Calibrator::step(int stepType)
 
 double Calibrator::getValue()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return 0;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return 0;
+	}
 
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return 0;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return 0;
+	}
 
-    QString cmdGetValue;
+	QString cmdGetValue;
 
-    switch(m_type)
-    {
-        case CALIBRATOR_TYPE_TRXII:     cmdGetValue = TRXII_GET_VALUE;		break;
-        case CALIBRATOR_TYPE_CALYS75:   cmdGetValue = CALYS75_GET_VALUE;    break;
-        default:                        assert(0);                          break;
-    }
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:		cmdGetValue = TRXII_GET_VALUE;		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdGetValue = CALYS75_GET_VALUE;	break;
+		default:						assert(0);							break;
+	}
 
-    if (cmdGetValue.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return 0;
-    }
+	if (cmdGetValue.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return 0;
+	}
 
-    setBusy(true);
+	setBusy(true);
 
-        send(cmdGetValue);
+		send(cmdGetValue);
 
-        recv();
-        parseResponse();
+		recv();
+		parseResponse();
 
-    setBusy(false);
+	setBusy(false);
 
-    return m_sourceValue;
+	return m_sourceValue;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Calibrator::setBusy(bool busy)
 {
-    m_busy = busy;
+	m_busy = busy;
 
-    if (busy == true)
-    {
-        emit valueIsRequested();
-    }
-    else
-    {
-        emit valueIsReceived();
-    }
+	if (busy == true)
+	{
+		emit valueIsRequested();
+	}
+	else
+	{
+		emit valueIsReceived();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::beep()
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    send(CALIBRATOR_BEEP);
+	send(CALIBRATOR_BEEP);
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::reset(int resetType)
 {
-    if (m_port.isOpen() == false)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_port.isOpen() == false)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Port is not open").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (resetType < 0 || resetType >= CALIBRATOR_RESET_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined reset type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (resetType < 0 || resetType >= CALIBRATOR_RESET_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined reset type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
 
-    QString cmd;
+	QString cmd;
 
-    switch(resetType)
-    {
-        case CALIBRATOR_RESET_HARD:
+	switch(resetType)
+	{
+		case CALIBRATOR_RESET_HARD:
 
-            cmd = CALIBRATOR_RESET;
+			cmd = CALIBRATOR_RESET;
 
-            break;
+			break;
 
-        case CALIBRATOR_RESET_SOFT:
+		case CALIBRATOR_RESET_SOFT:
 
-            if (m_type == CALIBRATOR_TYPE_TRXII)
-            {
-                cmd = TRXII_RESET_SOFT;
-            }
+			if (m_type == CALIBRATOR_TYPE_TRXII)
+			{
+				cmd = TRXII_RESET_SOFT;
+			}
 
-            break;
+			break;
 
-        default:
-            assert(false);
-            break;
-    }
+		default:
+			assert(false);
+	}
 
-    if (cmd.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (cmd.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty command").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    send(cmd);
-    recv();
+	send(cmd);
+	recv();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool Calibrator::setRemoteControl(bool enable)
 {
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return false;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return false;
+	}
 
-    if (m_type == CALIBRATOR_TYPE_CALYS75)
-    {
-        if (enable == true)
-        {
-            send(CALYS75_REMOTE_CONTROL);
-        }
-        else
-        {
-            send(CALYS75_MANUAL_CONTROL);
-        }
-    }
+	if (m_type == CALIBRATOR_TYPE_CALYS75)
+	{
+		if (enable == true)
+		{
+			send(CALYS75_REMOTE_CONTROL);
+		}
+		else
+		{
+			send(CALYS75_MANUAL_CONTROL);
+		}
+	}
 
-    return true;
+	return true;
 }
 
 
@@ -884,169 +883,165 @@ bool Calibrator::setRemoteControl(bool enable)
 
 void Calibrator::parseResponse()
 {
-    if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
-        return;
-    }
+	if (m_type < 0 || m_type >= CALIBRATOR_TYPE_COUNT)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Don't defined calibration type").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
+		return;
+	}
 
-    if (m_lastResponse.isEmpty() == true)
-    {
-        m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty response").arg(__FUNCTION__).arg(m_portName);
-        qDebug("%s", qPrintable(m_lastError));
-        emit error( m_lastError);
+	if (m_lastResponse.isEmpty() == true)
+	{
+		m_lastError = tr("Calibrator error! Function: %1, Serial port: %2, Error description: Empty response").arg(__FUNCTION__).arg(m_portName);
+		qDebug("%s", qPrintable(m_lastError));
+		emit error(m_lastError);
 
-        m_measureValue = 0;
-        m_sourceValue = 0;
+		m_measureValue = 0;
+		m_sourceValue = 0;
 
-        return;
-    }
+		return;
+	}
 
 
-    QString value, valueMeasure;
-    int begPos, endPos;
+	QString value, valueMeasure;
+	int begPos, endPos;
 
-    // Extracts from the string of the last response from the calibrator current electrical values
-    //
-    switch(m_type)
-    {
-    case CALIBRATOR_TYPE_TRXII:
+	// Extracts from the string of the last response from the calibrator current electrical values
+	//
+	switch(m_type)
+	{
+		case CALIBRATOR_TYPE_TRXII:
 
-        value = m_lastResponse;
-        value.remove(' ');
+			value = m_lastResponse;
+			value.remove(' ');
 
-        begPos = value.indexOf(',');
-        if (begPos == -1)
-        {
-            break;
-        }
+			begPos = value.indexOf(',');
+			if (begPos == -1)
+			{
+				break;
+			}
 
-        valueMeasure = value.left(begPos);
-        value.remove(0, begPos + 1);
+			valueMeasure = value.left(begPos);
+			value.remove(0, begPos + 1);
 
-        m_measureValue = valueMeasure.toDouble();
-        m_sourceValue = value.toDouble();
+			m_measureValue = valueMeasure.toDouble();
+			m_sourceValue = value.toDouble();
 
-        break;
+			break;
 
-    case CALIBRATOR_TYPE_CALYS75:
+		case CALIBRATOR_TYPE_CALYS75:
 
-        value = m_lastResponse;
+			value = m_lastResponse;
 
-        begPos = value.indexOf("<MEAS>", 0);
-        if (begPos == -1)
-        {
-            break;
-        }
+			begPos = value.indexOf("<MEAS>", 0);
+			if (begPos == -1)
+			{
+				break;
+			}
 
-        value.remove(0, begPos + 6);
+			value.remove(0, begPos + 6);
 
-        endPos = value.indexOf("</MEAS>", 0);
-        if (endPos == -1)
-        {
-            break;
-        }
+			endPos = value.indexOf("</MEAS>", 0);
+			if (endPos == -1)
+			{
+				break;
+			}
 
-        value.remove(endPos, value.count());
+			value.remove(endPos, value.count());
 
-        m_measureValue = value.toDouble();
+			m_measureValue = value.toDouble();
 
-        value = m_lastResponse;
+			value = m_lastResponse;
 
-        begPos = value.indexOf("<MEAS>", begPos + 1);
-        if (begPos == -1)
-        {
-            break;
-        }
+			begPos = value.indexOf("<MEAS>", begPos + 1);
+			if (begPos == -1)
+			{
+				break;
+			}
 
-        value.remove(0, begPos + 6);
+			value.remove(0, begPos + 6);
 
-        endPos = value.indexOf("</MEAS>", 0);
-        if (endPos == -1)
-        {
-            break;
-        }
+			endPos = value.indexOf("</MEAS>", 0);
+			if (endPos == -1)
+			{
+				break;
+			}
 
-        value.remove(endPos, value.count());
+			value.remove(endPos, value.count());
 
-        m_sourceValue = value.toDouble();
+			m_sourceValue = value.toDouble();
 
-        break;
+			break;
 
-    default:
-        assert(0);
-        break;
-    }
+		default:
+			assert(0);
+	}
 
-    convert(m_measureValue,	CALIBRATOR_MODE_MEASURE,	CALIBRATOR_CONVERT_HZ_TO_KHZ);
-    convert(m_sourceValue,	CALIBRATOR_MODE_SOURCE	,	CALIBRATOR_CONVERT_HZ_TO_KHZ);
+	convert(m_measureValue,	CALIBRATOR_MODE_MEASURE,	CALIBRATOR_CONVERT_HZ_TO_KHZ);
+	convert(m_sourceValue,	CALIBRATOR_MODE_SOURCE	,	CALIBRATOR_CONVERT_HZ_TO_KHZ);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Calibrator::convert(double& val, int mode, int order)
 {
-    bool enableCorrect = false;
+	bool enableCorrect = false;
 
-    switch(mode)
-    {
-        case CALIBRATOR_MODE_MEASURE:
+	switch(mode)
+	{
+		case CALIBRATOR_MODE_MEASURE:
 
-            if (m_measureUnit	== CALIBRATOR_UNIT_KHZ)
-            {
-                enableCorrect = true;
-            }
+			if (m_measureUnit	== CALIBRATOR_UNIT_KHZ)
+			{
+				enableCorrect = true;
+			}
 
-            break;
+			break;
 
-        case CALIBRATOR_MODE_SOURCE:
+		case CALIBRATOR_MODE_SOURCE:
 
-            if (m_type == CALIBRATOR_TYPE_TRXII)
-            {
-                if (m_sourceUnit == CALIBRATOR_UNIT_KHZ)
-                {
-                    enableCorrect = true;
-                }
-            }
+			if (m_type == CALIBRATOR_TYPE_TRXII)
+			{
+				if (m_sourceUnit == CALIBRATOR_UNIT_KHZ)
+				{
+					enableCorrect = true;
+				}
+			}
 
-            break;
+			break;
 
-        default:
-            assert(0);
-            break;
-;
-    }
+		default:
+			assert(0);
+	}
 
-    if (enableCorrect == false)
-    {
-        return;
-    }
+	if (enableCorrect == false)
+	{
+		return;
+	}
 
-    switch(order)
-    {
-        case CALIBRATOR_CONVERT_HZ_TO_KHZ:	val /=  1000;	break;
-        case CALIBRATOR_CONVERT_KHZ_TO_HZ:	val *=  1000;	break;
-        default:                            assert(0);      break;
-;
-    }
+	switch(order)
+	{
+		case CALIBRATOR_CONVERT_HZ_TO_KHZ:	val /=  1000;	break;
+		case CALIBRATOR_CONVERT_KHZ_TO_HZ:	val *=  1000;	break;
+		default:							assert(0);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Calibrator::close()
 {
-    setWaitResponse(false);
+	setWaitResponse(false);
 
-    if (m_port.isOpen() == true)
-    {
-        setRemoteControl(false);
-    }
+	if (m_port.isOpen() == true)
+	{
+		setRemoteControl(false);
+	}
 
-    empty();
+	empty();
 
-    setConnected(false);
+	setConnected(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

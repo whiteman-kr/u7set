@@ -102,7 +102,6 @@ SOURCES += \
     SignalInfoPanel.cpp \
     Statistic.cpp \
     MeasurementBase.cpp \
-    OutputSignal.cpp \
     ExportData.cpp \
     FindData.cpp \
     TuningSocket.cpp \
@@ -119,7 +118,8 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
     RackList.cpp \
-    ObjectProperty.cpp
+    ObjectProperty.cpp \
+    OutputSignalList.cpp
 
 
 
@@ -171,7 +171,6 @@ HEADERS  += \
     SignalInfoPanel.h \
     Statistic.h \
     MeasurementBase.h \
-    OutputSignal.h \
     ExportData.h \
     FindData.h \
     TuningSocket.h \
@@ -188,7 +187,8 @@ HEADERS  += \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
     RackList.h \
-    ObjectProperty.h
+    ObjectProperty.h \
+    OutputSignalList.h
 
 
 FORMS    +=

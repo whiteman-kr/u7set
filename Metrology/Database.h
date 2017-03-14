@@ -21,7 +21,7 @@ class SqlFieldBase : public QSqlRecord
 public:
 
 	SqlFieldBase();
-	~SqlFieldBase();
+	virtual ~SqlFieldBase();
 
 public:
 
@@ -230,7 +230,7 @@ class SqlObjectInfo
 public:
 
 	SqlObjectInfo();
-	~SqlObjectInfo();
+	virtual ~SqlObjectInfo();
 
 private:
 
@@ -268,7 +268,7 @@ public:
 
 	SqlHistoryDatabase();
 	SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
-	~SqlHistoryDatabase();
+	virtual ~SqlHistoryDatabase();
 
 private:
 
@@ -301,7 +301,7 @@ class SqlTable
 public:
 
 	SqlTable();
-	~SqlTable();
+	virtual ~SqlTable();
 
 private:
 
@@ -351,7 +351,7 @@ class Database : public QObject
 public:
 
 	explicit Database(QObject* parent = 0);
-	~Database();
+	virtual ~Database();
 
 private:
 

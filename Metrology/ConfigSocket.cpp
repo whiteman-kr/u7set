@@ -211,7 +211,7 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 	for(int r = 0; r < racksCount; r++)
 	{
-		if(xml.findElement("Rack") == false)
+		if (xml.findElement("Rack") == false)
 		{
 			result = false;
 			break;
@@ -261,7 +261,7 @@ bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 
 	for(int u = 0; u < unitsCount; u++)
 	{
-		if(xml.findElement("Unit") == false)
+		if (xml.findElement("Unit") == false)
 		{
 			result = false;
 			break;

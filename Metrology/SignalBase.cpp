@@ -56,7 +56,7 @@ MetrologySignal::MetrologySignal(const Metrology::SignalParam& param)
 	//
 	m_param.setInputElectricLowLimit(0);
 	m_param.setInputElectricHighLimit(5);
-	m_param.setInputElectricUnitID( E::InputUnit::V );
+	m_param.setInputElectricUnitID(E::InputUnit::V);
 	//
 	// temporary solution
 }
@@ -175,15 +175,15 @@ bool MetrologyMultiSignal::setSignal(int channel, int measureKind, const Metrolo
 
 		m_signalHash[channel] = param.hash();
 
-		m_location.setRack( param.location().rack() );
-		m_location.setChassis( param.location().chassis() );
-		m_location.setModule( param.location().module() );
-		m_location.setPlace( param.location().place() );
+		m_location.setRack(param.location().rack());
+		m_location.setChassis(param.location().chassis());
+		m_location.setModule(param.location().module());
+		m_location.setPlace(param.location().place());
 
 		switch(measureKind)
 		{
-			case MEASURE_KIND_ONE:		m_strID = param.customAppSignalID(); break;
-			case MEASURE_KIND_MULTI:	m_strID.sprintf( "CH %02d _ MD %02d _ IN %02d", m_location.chassis() + 1, m_location.module() + 1, m_location.place() + 1); break;
+			case MEASURE_KIND_ONE:		m_strID = param.customAppSignalID();																						break;
+			case MEASURE_KIND_MULTI:	m_strID.sprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis() + 1, m_location.module() + 1, m_location.place() + 1);	break;
 			default:					assert(false);
 		}
 
@@ -264,7 +264,7 @@ bool MeasureParam::isValid() const
 		{
 			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 			{
-				if (m_param[type].isValid() == false )
+				if (m_param[type].isValid() == false)
 				{
 					valid = false;
 
@@ -689,7 +689,7 @@ QString MeasureParam::calibratorStr() const
 		return QString("Not connected");
 	}
 
-	return QString("Calibrator %1 (%2)").arg( m_pCalibratorManager->channel() + 1).arg(m_pCalibratorManager->portName());
+	return QString("Calibrator %1 (%2)").arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
 }
 
 
@@ -757,7 +757,7 @@ bool MeasureSignal::isEmpty() const
 
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 		{
-			if (m_signal[type].isEmpty() == false )
+			if (m_signal[type].isEmpty() == false)
 			{
 				empty = false;
 
@@ -993,11 +993,11 @@ void SignalBase::sortByPosition()
 
 		int count = m_signalList.size();
 
-		for( int i = 0; i < count - 1; i++)
+		for(int i = 0; i < count - 1; i++)
 		{
 			for(int j = i+1; j < count; j++)
 			{
-				if ( m_signalList[i].param().location().equipmentID() > m_signalList[j].param().location().equipmentID() )
+				if (m_signalList[i].param().location().equipmentID() > m_signalList[j].param().location().equipmentID())
 				{
 					MetrologySignal signal	= m_signalList[ i ];
 					m_signalList[ i ]		= m_signalList[ j ];
@@ -1077,7 +1077,7 @@ MetrologySignal SignalBase::signal(const QString& appSignalID)
 		return MetrologySignal();
 	}
 
-	return signal( calcHash(appSignalID) );
+	return signal(calcHash(appSignalID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1137,7 +1137,7 @@ Metrology::SignalParam SignalBase::signalParam(const QString& appSignalID)
 		return Metrology::SignalParam();
 	}
 
-	return signalParam( calcHash(appSignalID) );
+	return signalParam(calcHash(appSignalID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1488,7 +1488,7 @@ int SignalBase::createRackList(int outputSignalType)
 				continue;
 			}
 
-			if (rackHashMap.contains( rackHash ) == false)
+			if (rackHashMap.contains(rackHash) == false)
 			{
 				rackHashMap.insert(rackHash, param.location().rack().index());
 
@@ -1500,11 +1500,11 @@ int SignalBase::createRackList(int outputSignalType)
 		//
 		int rackCount = m_rackList.size();
 
-		for( int i = 0; i < rackCount - 1; i++)
+		for(int i = 0; i < rackCount - 1; i++)
 		{
 			for(int j = i+1; j < rackCount; j++)
 			{
-				if ( m_rackList[i].index() > m_rackList[j].index() )
+				if (m_rackList[i].index() > m_rackList[j].index())
 				{
 					Metrology::RackParam rack	= m_rackList[ i ];
 					m_rackList[ i ]				= m_rackList[ j ];
@@ -1550,23 +1550,23 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			param.setInputElectricUnit( theUnitBase.unit( param.inputElectricUnitID() ) );
-			param.setInputPhysicalUnit( theUnitBase.unit( param.inputPhysicalUnitID() ) );
-			param.setOutputElectricUnit( theUnitBase.unit( param.outputElectricUnitID() ) );
-			param.setOutputPhysicalUnit( theUnitBase.unit( param.outputPhysicalUnitID() ) );
+			param.setInputElectricUnit(theUnitBase.unit(param.inputElectricUnitID()));
+			param.setInputPhysicalUnit(theUnitBase.unit(param.inputPhysicalUnitID()));
+			param.setOutputElectricUnit(theUnitBase.unit(param.outputElectricUnitID()));
+			param.setOutputPhysicalUnit(theUnitBase.unit(param.outputPhysicalUnitID()));
 
 			// sensors
 			//
 			int sensorType = param.inputElectricSensorType();
 			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 			{
-				param.setInputElectricSensor( SensorTypeStr[ sensorType ] );
+				param.setInputElectricSensor(SensorTypeStr[ sensorType ]);
 			}
 
 			sensorType = param.outputElectricSensorType();
 			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 			{
-				param.setOutputElectricSensor( SensorTypeStr[ sensorType ] );
+				param.setOutputElectricSensor(SensorTypeStr[ sensorType ]);
 			}
 
 			// places for tuning signals
@@ -1575,15 +1575,15 @@ void SignalBase::initSignals()
 			{
 				switch (param.signalType())
 				{
-					case E::SignalType::Analog:		param.setPlace( analogTuningSignalCount++ );	break;
-					case E::SignalType::Discrete:	param.setPlace( discreteTuningSignalCount++ );	break;
+					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
+					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
 					default:						assert(0);
 				}
 			}
 
 			// fistly we are now only rackID, so we must set RackParam from RackBase for every signal
 			//
-			Metrology::RackParam rack = theRackBase.rack( param.location().rack().hash() );
+			Metrology::RackParam rack = theRackBase.rack(param.location().rack().hash());
 			if (rack.isValid() == true)
 			{
 				param.setRack(rack);
@@ -1747,7 +1747,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 							if (index >= 0 && index < m_signalMesaureList.size())
 							{
 								int channel = param.location().rack().channel();
-								if ( channel >= 0 && channel < MAX_CHANNEL_COUNT )
+								if (channel >= 0 && channel < MAX_CHANNEL_COUNT)
 								{
 									m_signalMesaureList[index].setSignal(channel, measureKind, outputSignalType, param);
 								}
@@ -1759,7 +1759,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 						mesaureSignalMap.insert(hashid, signalIndex);
 
 						int channel = param.location().rack().channel();
-						if ( channel >= 0 && channel < MAX_CHANNEL_COUNT )
+						if (channel >= 0 && channel < MAX_CHANNEL_COUNT)
 						{
 							measureSignal.setSignal(channel, measureKind, outputSignalType, param);
 						}
@@ -1771,7 +1771,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 					continue;
 			}
 
-			if(measureSignal.isEmpty() == true)
+			if (measureSignal.isEmpty() == true)
 			{
 				// assert(false);
 				continue;
@@ -2228,13 +2228,13 @@ bool RackGroupBase::save()
 
 	m_groupMutex.lock();
 
-		writtenRecordCount = table->write(m_groupList.data(), m_groupList.count() );
+		writtenRecordCount = table->write(m_groupList.data(), m_groupList.count());
 
 	m_groupMutex.unlock();
 
 	table->close();
 
-	if (writtenRecordCount != count() )
+	if (writtenRecordCount != count())
 	{
 		return false;
 	}
@@ -2473,14 +2473,14 @@ void RackBase::updateParamFromGroups()
 				continue;
 			}
 
-			Metrology::RackParam r = rack( rackID );
+			Metrology::RackParam r = rack(rackID);
 			if (r.isValid() == false)
 			{
 				continue;
 			}
 
-			r.setGroupIndex( group.Index() );
-			r.setChannel( channel );
+			r.setGroupIndex(group.Index());
+			r.setChannel(channel);
 
 			setRack(r.hash(), r);
 		}
@@ -2561,7 +2561,7 @@ bool OutputSignal::setHash()
 		return false;
 	}
 
-	m_hash = calcHash( strID );
+	m_hash = calcHash(strID);
 	if (m_hash == 0)
 	{
 		return false;
@@ -2815,13 +2815,13 @@ bool OutputSignalBase::save()
 
 	m_signalMutex.lock();
 
-		writtenRecordCount = table->write(m_signalList.data(), m_signalList.count() );
+		writtenRecordCount = table->write(m_signalList.data(), m_signalList.count());
 
 	m_signalMutex.unlock();
 
 	table->close();
 
-	if (writtenRecordCount != signalCount() )
+	if (writtenRecordCount != signalCount())
 	{
 		return false;
 	}

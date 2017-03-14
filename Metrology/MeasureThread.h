@@ -10,73 +10,75 @@
 
 // ==============================================================================================
 
-const int                   MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
+const int				   MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
 
 // ==============================================================================================
 
 class MeasureThread : public QThread
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    explicit                MeasureThread(QObject *parent = 0);
-                            ~MeasureThread();
-
-    void                    init(QWidget* parent = 0);
-    void                    setMeasureType(int measureType) { m_measureType = measureType; }
-    bool                    setActiveSignalParam();
-
-    void                    stop() { m_cmdStopMeasure = true; }
+	explicit MeasureThread(QObject *parent = 0);
+	virtual ~MeasureThread();
 
 private:
 
-    QWidget*                m_parent = nullptr;
+	QWidget*				m_parent = nullptr;
 
-    int                     m_measureType = MEASURE_TYPE_UNKNOWN;
-    bool                    m_cmdStopMeasure = true;
+	int						m_measureType = MEASURE_TYPE_UNKNOWN;
+	bool					m_cmdStopMeasure = true;
 
-    MeasureParam            m_activeSignalParam[MAX_CHANNEL_COUNT];
+	MeasureParam			m_activeSignalParam[MAX_CHANNEL_COUNT];
 
-    void                    waitMeasureTimeout();
+	void					waitMeasureTimeout();
 
-    // calibrators
-    //
-    bool                    calibratorIsValid(CalibratorManager* pCalibratorManager);
-    bool                    hasConnectedCalibrators();
-    bool                    setCalibratorUnit();
-    bool                    prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit);
+	// calibrators
+	//
+	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
+	bool					hasConnectedCalibrators();
+	bool					setCalibratorUnit();
+	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit);
 
-    // function of measure
-    //
-    void                    measureLinearity();
-    void                    measureComprators();
+	// function of measure
+	//
+	void					measureLinearity();
+	void					measureComprators();
+
+public:
+
+	void					init(QWidget* parent = 0);
+	void					setMeasureType(int measureType) { m_measureType = measureType; }
+	bool					setActiveSignalParam();
+
+	void					stop() { m_cmdStopMeasure = true; }
 
 protected:
 
-    void                    run();
+	void					run();
 
 signals:
 
-    void                    showMsgBox(QString);
+	void					showMsgBox(QString);
 
-    void                    measureInfo(QString);
-    void                    measureInfo(int);
+	void					measureInfo(QString);
+	void					measureInfo(int);
 
-    void                    measureComplite(Measurement*);
+	void					measureComplite(Measurement*);
 
 public slots:
 
-    void                    signalSocketDisconnected();
-    void                    tuningSocketDisconnected();
+	void					signalSocketDisconnected();
+	void					tuningSocketDisconnected();
 
 private slots:
 
-    void                    msgBox(QString text) const { QMessageBox::information(m_parent, tr("Measurement process"), text); }
+	void					msgBox(QString text) const { QMessageBox::information(m_parent, tr("Measurement process"), text); }
 
-    void                    updateSignalParam(const Hash& signalHash);
+	void					updateSignalParam(const Hash& signalHash);
 
-    void                    stopMeasure();
+	void					stopMeasure();
 };
 
 // ==============================================================================================

@@ -154,7 +154,7 @@ int MeasurementBase::load(int measureType)
 				{
 					if (table->read(data.pMeasurement) == data.recordCount)
 					{
-						loadedTablesInMemory.append( data );
+						loadedTablesInMemory.append(data);
 					}
 				}
 
@@ -448,7 +448,7 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
 
 						si.incrementMeasureCount();
 
-						if ( pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType) )
+						if (pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType))
 						{
 							si.setState(STATISTIC_STATE_INVALID);
 						}

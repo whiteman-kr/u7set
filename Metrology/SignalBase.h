@@ -21,7 +21,7 @@ public:
 
 	SignalState() {}
 	explicit SignalState(const AppSignalState& state) { setState(state); }
-	~SignalState() {}
+	virtual ~SignalState() {}
 
 private:
 
@@ -373,8 +373,7 @@ public:
 
 	// hashs for update signal state
 	//
-
-	int					 hashForRequestStateCount() const;
+	int						hashForRequestStateCount() const;
 	Hash					hashForRequestState(int index);
 
 	// Racks and Signals for measure

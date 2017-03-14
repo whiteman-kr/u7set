@@ -21,7 +21,7 @@ class TuningSourceState
 public:
 
 	TuningSourceState() {}
-	~TuningSourceState() {}
+	virtual ~TuningSourceState() {}
 
 private:
 
@@ -53,7 +53,7 @@ public:
 
 	TuningSource();
 	explicit TuningSource(const Network::DataSourceInfo& info);
-	~TuningSource();
+	virtual ~TuningSource();
 
 private:
 
@@ -110,7 +110,7 @@ class TuningSignalState
 public:
 
 	TuningSignalState() {}
-	~TuningSignalState() {}
+	virtual ~TuningSignalState() {}
 
 private:
 
@@ -147,7 +147,7 @@ public:
 	TuningSignal();
 	TuningSignal(const TuningSignal& from);
 	explicit TuningSignal(const Metrology::SignalParam& param);
-	~TuningSignal();
+	virtual ~TuningSignal();
 
 private:
 
@@ -217,7 +217,7 @@ public:
 
 	TuningWriteCmd();
 	TuningWriteCmd(const Hash &signalHash, float value);
-	~TuningWriteCmd();
+	virtual ~TuningWriteCmd();
 
 private:
 
@@ -242,7 +242,7 @@ class TuningSignalBase : public QObject
 public:
 
 	explicit TuningSignalBase(QObject *parent = 0);
-	~TuningSignalBase();
+	virtual ~TuningSignalBase();
 
 private:
 

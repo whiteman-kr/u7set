@@ -29,9 +29,54 @@ class MainWindow : public QMainWindow
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+	virtual ~MainWindow();
 
-	int						measureType() const { return m_measureType; }
+private:
+
+	int						m_measureType = MEASURE_TYPE_UNKNOWN;
+
+	QMap<int, MeasureView*> m_measureViewMap;
+
+	// Actions of main menu
+	//
+
+	// menu - Measure
+	//
+	QAction*				m_pStartMeasureAction = nullptr;
+	QAction*				m_pStopMeasureAction = nullptr;
+	QAction*				m_pPrintMeasureAction = nullptr;
+	QAction*				m_pExportMeasureAction = nullptr;
+
+	// menu - Edit
+	//
+	QAction*				m_pCopyMeasureAction = nullptr;
+	QAction*				m_pRemoveMeasureAction = nullptr;
+	QAction*				m_pSelectAllMeasureAction = nullptr;
+
+	// menu - View
+	//
+	QAction*				m_pShowReportsAction = nullptr;
+	QAction*				m_pShowCalculatorAction = nullptr;
+
+	// menu - Tools
+	//
+	QAction*				m_pCalibratorsAction = nullptr;
+	QAction*				m_pShowRackListAction = nullptr;
+	QAction*				m_pShowSignalListAction = nullptr;
+	QAction*				m_pShowComparatorsListAction = nullptr;
+	QAction*				m_pShowOutputSignalListAction = nullptr;
+	QAction*				m_pShowTuningSignalListAction = nullptr;
+	QAction*				m_pOptionsAction;
+
+	// menu - ?
+	//
+	QAction*				m_pShowStatisticAction = nullptr;
+	QAction*				m_pAboutConnectionAction = nullptr;
+	QAction*				m_pAboutAppAction = nullptr;
+
+	QMenu*					m_pContextMenu = nullptr;
+
+private:
 
 	// Elements of interface - Menu
 	//
@@ -100,11 +145,9 @@ public:
 	void					loadSettings();
 	void					saveSettings();
 
-protected:
-
-	void					closeEvent(QCloseEvent* e);
-
 public:
+
+	int						measureType() const { return m_measureType; }
 
 	bool					createInterface();
 
@@ -129,50 +172,9 @@ public:
 	bool					signalSourceIsValid(bool showMsg);
 	bool					signalIsMeasured(QString& signalID);
 
-private:
+protected:
 
-	int						m_measureType = MEASURE_TYPE_UNKNOWN;
-
-	QMap<int, MeasureView*> m_measureViewMap;
-
-	// Actions of main menu
-	//
-
-	// menu - Measure
-	//
-	QAction*				m_pStartMeasureAction = nullptr;
-	QAction*				m_pStopMeasureAction = nullptr;
-	QAction*				m_pPrintMeasureAction = nullptr;
-	QAction*				m_pExportMeasureAction = nullptr;
-
-	// menu - Edit
-	//
-	QAction*				m_pCopyMeasureAction = nullptr;
-	QAction*				m_pRemoveMeasureAction = nullptr;
-	QAction*				m_pSelectAllMeasureAction = nullptr;
-
-	// menu - View
-	//
-	QAction*				m_pShowReportsAction = nullptr;
-	QAction*				m_pShowCalculatorAction = nullptr;
-
-	// menu - Tools
-	//
-	QAction*				m_pCalibratorsAction = nullptr;
-	QAction*				m_pShowRackListAction = nullptr;
-	QAction*				m_pShowSignalListAction = nullptr;
-	QAction*				m_pShowComparatorsListAction = nullptr;
-	QAction*				m_pShowOutputSignalListAction = nullptr;
-	QAction*				m_pShowTuningSignalListAction = nullptr;
-	QAction*				m_pOptionsAction;
-
-	// menu - ?
-	//
-	QAction*				m_pShowStatisticAction = nullptr;
-	QAction*				m_pAboutConnectionAction = nullptr;
-	QAction*				m_pAboutAppAction = nullptr;
-
-	QMenu*					m_pContextMenu = nullptr;
+	void					closeEvent(QCloseEvent* e);
 
 signals:
 

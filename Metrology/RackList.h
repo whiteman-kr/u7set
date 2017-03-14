@@ -29,6 +29,14 @@ const int					RACK_LIST_COLUMN_CAPTION		= 0,
 							RACK_LIST_COLUMN_GROUP			= 2,
 							RACK_LIST_COLUMN_CHANNEL		= 3;
 
+const int					RackListColumnWidth[RACK_LIST_COLUMN_COUNT] =
+{
+							150,	// RACK_LIST_COLUMN_CAPTION
+							250,	// RACK_LIST_COLUMN_ID
+							100,	// RACK_LIST_COLUMN_GROUP
+							100,	// RACK_LIST_COLUMN_CHANNEL
+};
+
 // ==============================================================================================
 
 class RackListTable : public QAbstractTableModel
@@ -38,7 +46,7 @@ class RackListTable : public QAbstractTableModel
 public:
 
 	explicit RackListTable(QObject* parent = 0);
-	~RackListTable();
+	virtual ~RackListTable();
 
 private:
 
@@ -77,13 +85,11 @@ class RackListDialog : public QDialog
 public:
 
 	explicit RackListDialog(QWidget *parent = 0);
-	~RackListDialog();
+	virtual ~RackListDialog();
 
 private:
 
 	RackBase				m_rackBase;
-
-	static int				m_columnWidth[RACK_LIST_COLUMN_COUNT];
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pRackMenu = nullptr;

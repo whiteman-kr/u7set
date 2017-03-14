@@ -47,6 +47,20 @@ const int				OUTPUT_SIGNAL_COLUMN_TYPE			= 0,
 						OUTPUT_SIGNAL_COLUMN_OUT_CAPTION	= 8,
 						OUTPUT_SIGNAL_COLUMN_SEPARATOR3		= 9;
 
+const int				OutputSignalColumnWidth[OUTPUT_SIGNAL_COLUMN_COUNT] =
+{
+						110,	// OUTPUT_SIGNAL_COLUMN_TYPE
+						  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR1
+						100,	// OUTPUT_SIGNAL_COLUMN_IN_RACK
+						250,	// OUTPUT_SIGNAL_COLUMN_IN_ID
+						150,	// OUTPUT_SIGNAL_COLUMN_IN_CAPTION
+						  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR2
+						100,	// OUTPUT_SIGNAL_COLUMN_OUT_RACK
+						250,	// OUTPUT_SIGNAL_COLUMN_OUT_ID
+						150,	// OUTPUT_SIGNAL_COLUMN_OUT_CAPTION
+						  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR3
+};
+
 // ==============================================================================================
 
 class OutputSignalTable : public QAbstractTableModel
@@ -56,7 +70,7 @@ class OutputSignalTable : public QAbstractTableModel
 public:
 
 	explicit OutputSignalTable(QObject* parent = 0);
-	~OutputSignalTable();
+	virtual ~OutputSignalTable();
 
 private:
 
@@ -94,7 +108,7 @@ public:
 
 	explicit OutputSignalItemDialog(QWidget *parent = 0);
 	explicit OutputSignalItemDialog(const OutputSignal& signal, QWidget *parent = 0);
-	~OutputSignalItemDialog();
+	virtual ~OutputSignalItemDialog();
 
 private:
 
@@ -147,11 +161,9 @@ class OutputSignalDialog : public QDialog
 public:
 
 	explicit OutputSignalDialog(QWidget *parent = 0);
-	~OutputSignalDialog();
+	virtual ~OutputSignalDialog();
 
 private:
-
-	static int			m_columnWidth[OUTPUT_SIGNAL_COLUMN_COUNT];
 
 	QMenuBar*			m_pMenuBar = nullptr;
 	QMenu*				m_pSignalMenu = nullptr;

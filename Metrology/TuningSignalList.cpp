@@ -52,17 +52,17 @@ QVariant TuningSourceListTable::headerData(int section, Qt::Orientation orientat
 
 	QVariant result = QVariant();
 
-	if(orientation == Qt::Horizontal )
+	if (orientation == Qt::Horizontal)
 	{
 		if (section >= 0 && section < TUN_SOURCE_LIST_COLUMN_COUNT)
 		{
-			result = TuningSourceListColumn[section];
+			result = TuningSourceColumn[section];
 		}
 	}
 
-	if(orientation == Qt::Vertical )
+	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg( section + 1 );
+		result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -93,11 +93,11 @@ QVariant TuningSourceListTable::data(const QModelIndex &index, int role) const
 
 	TuningSourceState sourceState = src.state();
 
-	if (column == TUN_SOURCE_LIST_COLUMN_IS_REPLY || column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS )
+	if (column == TUN_SOURCE_LIST_COLUMN_IS_REPLY || column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
 	{
 		// get fresh state from base
 		//
-		 sourceState = theTuningSignalBase.sourceState( src.sourceID() );
+		 sourceState = theTuningSignalBase.sourceState(src.sourceID());
 	}
 
 	if (role == Qt::TextAlignmentRole)
@@ -129,11 +129,11 @@ QVariant TuningSourceListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextColorRole)
 	{
-		if (column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS )
+		if (column == TUN_SOURCE_LIST_COLUMN_REQUESTS || column == TUN_SOURCE_LIST_COLUMN_REPLIES || column == TUN_SOURCE_LIST_COLUMN_COMMANDS)
 		{
 			if (sourceState.isReply() == false)
 			{
-				return QColor( Qt::darkGray );
+				return QColor(Qt::darkGray);
 			}
 		}
 
@@ -186,14 +186,14 @@ QString TuningSourceListTable::text(int row, int column, const TuningSource& sou
 	{
 		case TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = source.equipmentID();							break;
 		case TUN_SOURCE_LIST_COLUMN_CAPTION:		result = source.caption();								break;
-		case TUN_SOURCE_LIST_COLUMN_IP:				result = source.serverIP() + " ( " + QString::number( source.serverPort() ) + " )";	 break;
-		case TUN_SOURCE_LIST_COLUMN_CHANNEL:		result = QString::number( source.channel() + 1);		break;
+		case TUN_SOURCE_LIST_COLUMN_IP:				result = source.serverIP() + " (" + QString::number(source.serverPort()) + ")";	break;
+		case TUN_SOURCE_LIST_COLUMN_CHANNEL:		result = QString::number(source.channel() + 1);			break;
 		case TUN_SOURCE_LIST_COLUMN_SUBSYSTEM:		result = source.subSystem();							break;
-		case TUN_SOURCE_LIST_COLUMN_LM_NUMBER:		result = QString::number( source.lmNumber() );			break;
+		case TUN_SOURCE_LIST_COLUMN_LM_NUMBER:		result = QString::number(source.lmNumber());			break;
 		case TUN_SOURCE_LIST_COLUMN_IS_REPLY:		result = state.isReply() == false ? "No" : "Yes";		break;
-		case TUN_SOURCE_LIST_COLUMN_REQUESTS:		result = QString::number( state.requestCount() );		break;
-		case TUN_SOURCE_LIST_COLUMN_REPLIES:		result = QString::number( state.replyCount() );			break;
-		case TUN_SOURCE_LIST_COLUMN_COMMANDS:		result = QString::number( state.commandQueueSize() );	break;
+		case TUN_SOURCE_LIST_COLUMN_REQUESTS:		result = QString::number(state.requestCount());			break;
+		case TUN_SOURCE_LIST_COLUMN_REPLIES:		result = QString::number(state.replyCount());			break;
+		case TUN_SOURCE_LIST_COLUMN_COMMANDS:		result = QString::number(state.commandQueueSize());		break;
 		default:									assert(0);
 	}
 
@@ -215,7 +215,7 @@ void TuningSourceListTable::updateColumn(int column)
 	{
 		QModelIndex cellIndex = index(row, column);
 
-		emit dataChanged( cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
+		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
 	}
 }
 
@@ -283,7 +283,7 @@ void TuningSourceListTable::clear()
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, count - 1 );
+	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_sourceMutex.lock();
 
@@ -343,17 +343,17 @@ QVariant TuningSignalListTable::headerData(int section, Qt::Orientation orientat
 
 	QVariant result = QVariant();
 
-	if(orientation == Qt::Horizontal )
+	if (orientation == Qt::Horizontal)
 	{
 		if (section >= 0 && section < TUN_SIGNAL_LIST_COLUMN_COUNT)
 		{
-			result = TuningSignalListColumn[section];
+			result = TuningSignalColumn[section];
 		}
 	}
 
-	if(orientation == Qt::Vertical )
+	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg( section + 1 );
+		result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -390,8 +390,8 @@ QVariant TuningSignalListTable::data(const QModelIndex &index, int role) const
 	{
 		// get fresh state from base
 		//
-		TuningSignalState signalState = theTuningSignalBase.signalState( signal.hash() );
-		signal.setState( signalState );
+		TuningSignalState signalState = theTuningSignalBase.signalState(signal.hash());
+		signal.setState(signalState);
 	}
 
 	if (role == Qt::TextAlignmentRole)
@@ -422,7 +422,7 @@ QVariant TuningSignalListTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == TUN_SIGNAL_LIST_COLUMN_DEFAULT)
 		{
-			return QColor( Qt::darkGray );
+			return QColor(Qt::darkGray);
 		}
 
 		return QVariant();
@@ -503,7 +503,7 @@ void TuningSignalListTable::updateColumn(int column)
 	{
 		QModelIndex cellIndex = index(row, column);
 
-		emit dataChanged( cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
+		emit dataChanged(cellIndex, cellIndex, QVector<int>() << Qt::DisplayRole);
 	}
 }
 
@@ -571,7 +571,7 @@ void TuningSignalListTable::clear()
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, count - 1 );
+	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_signalMutex.lock();
 
@@ -606,16 +606,16 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
 					continue;
 				}
 
-				TuningSignal signal = theTuningSignalBase.signalForRead( m_signallList[i].hash() );
+				TuningSignal signal = theTuningSignalBase.signalForRead(m_signallList[i].hash());
 				if (signal.hash() == 0)
 				{
 					continue;
 				}
 
-				signal.setCustomAppSignalID( param.customAppSignalID() );
-				signal.setCaption( param.caption() );
-				signal.setDefaultValue( param.tuningDefaultValue() );
-				signal.setPrecision( param.inputPhysicalPrecision() );
+				signal.setCustomAppSignalID(param.customAppSignalID());
+				signal.setCaption(param.caption());
+				signal.setDefaultValue(param.tuningDefaultValue());
+				signal.setPrecision(param.inputPhysicalPrecision());
 
 				theTuningSignalBase.setSignalForRead(signal);
 
@@ -630,35 +630,8 @@ void TuningSignalListTable::updateSignalParam(const Hash& signalHash)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalListDialog::m_sourceColumnWidth[TUN_SOURCE_LIST_COLUMN_COUNT] =
-{
-	250,	 // TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID
-	150,	 // TUN_SOURCE_LIST_COLUMN_CAPTION
-	150,	 // TUN_SOURCE_LIST_COLUMN_IP
-	100,	 // TUN_SOURCE_LIST_COLUMN_CHANNEL
-	100,	 // TUN_SOURCE_LIST_COLUMN_SUBSYSTEM
-	100,	 // TUN_SOURCE_LIST_COLUMN_LM_NUMBER
-	100,	 // TUN_SOURCE_LIST_COLUMN_IS_REPLY
-	100,	 // TUN_SOURCE_LIST_COLUMN_REQUESTS
-	100,	 // TUN_SOURCE_LIST_COLUMN_REPLIES
-	100,	 // TUN_SOURCE_LIST_COLUMN_COMMANDS
-};
-
-int TuningSignalListDialog::m_signalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
-{
-	100,	 // TUN_SIGNAL_LIST_COLUMN_RACK
-	250,	 // TUN_SIGNAL_LIST_COLUMN_ID
-	250,	 // TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID
-	150,	 // TUN_SIGNAL_LIST_COLUMN_CAPTION
-	100,	 // TUN_SIGNAL_LIST_COLUMN_VALUE
-	100,	 // TUN_SIGNAL_LIST_COLUMN_DEFAULT
-	150,	 // TUN_SIGNAL_LIST_COLUMN_RANGE
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
-E::SignalType		 TuningSignalListDialog::m_typeAD = E::SignalType::Analog;
-bool					 TuningSignalListDialog::m_showSource = false;
+E::SignalType	TuningSignalListDialog::m_typeAD = E::SignalType::Analog;
+bool			TuningSignalListDialog::m_showSource = false;
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -777,12 +750,12 @@ void TuningSignalListDialog::createInterface(bool hasButtons)
 
 	m_pSourceView = new QTableView(this);
 	m_pSourceView->setModel(&m_sourceTable);
-	QSize sourceCellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+	QSize sourceCellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pSourceView->verticalHeader()->setDefaultSectionSize(sourceCellSize.height());
 
 	for(int column = 0; column < TUN_SOURCE_LIST_COLUMN_COUNT; column++)
 	{
-		m_pSourceView->setColumnWidth(column, m_sourceColumnWidth[column]);
+		m_pSourceView->setColumnWidth(column, TuningSourceColumnWidth[column]);
 	}
 
 	m_pSourceView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -795,12 +768,12 @@ void TuningSignalListDialog::createInterface(bool hasButtons)
 
 	m_pSignalView = new QTableView(this);
 	m_pSignalView->setModel(&m_signalTable);
-	QSize signalCellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+	QSize signalCellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pSignalView->verticalHeader()->setDefaultSectionSize(signalCellSize.height());
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pSignalView->setColumnWidth(column, m_signalColumnWidth[column]);
+		m_pSignalView->setColumnWidth(column, TuningSignalColumnWidth[column]);
 	}
 
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -844,7 +817,7 @@ void TuningSignalListDialog::createHeaderContexMenu()
 
 	for(int column = 0; column < TUN_SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(TuningSignalListColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(TuningSignalColumn[column]);
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
@@ -892,7 +865,7 @@ void TuningSignalListDialog::updateSourceList()
 			continue;
 		}
 
-		sourceList.append( src );
+		sourceList.append(src);
 	}
 
 	m_sourceTable.set(sourceList);
@@ -924,7 +897,7 @@ void TuningSignalListDialog::updateSignalList()
 			continue;
 		}
 
-		signalList.append( signal );
+		signalList.append(signal);
 	}
 
 	m_signalTable.set(signalList);
@@ -1014,7 +987,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
@@ -1062,7 +1035,7 @@ void TuningSignalListDialog::copy()
 
 	for(int row = 0; row < rowCount; row++)
 	{
-		if (m_pSignalView->selectionModel()->isRowSelected(row, QModelIndex() ) == false)
+		if (m_pSignalView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
 		{
 			continue;
 		}
@@ -1074,7 +1047,7 @@ void TuningSignalListDialog::copy()
 				continue;
 			}
 
-			textClipboard.append(m_pSignalView->model()->data( m_pSignalView->model()->index(row, column)).toString() + "\t");
+			textClipboard.append(m_pSignalView->model()->data(m_pSignalView->model()->index(row, column)).toString() + "\t");
 		}
 
 		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
@@ -1122,7 +1095,7 @@ void TuningSignalListDialog::showSources()
 
 void TuningSignalListDialog::showCustomID()
 {
-	m_signalTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateSignalList();
 }

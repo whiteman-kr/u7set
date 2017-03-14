@@ -11,11 +11,11 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 ExportData::ExportData(QTableView *pView, const QString& fileName) :
-    QObject(pView),
-    m_pView(pView),
-    m_fileName(fileName)
+	QObject(pView),
+	m_pView(pView),
+	m_fileName(fileName)
 {
-    createProgressDialog(pView);
+	createProgressDialog(pView);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -28,180 +28,180 @@ ExportData::~ExportData()
 
 void ExportData::createProgressDialog(QTableView *pView)
 {
-    if (pView == nullptr)
-    {
-        return;
-    }
+	if (pView == nullptr)
+	{
+		return;
+	}
 
-    m_pProgressDialog = new QDialog(pView->parentWidget());
+	m_pProgressDialog = new QDialog(pView->parentWidget());
 
-    m_pProgressDialog->setWindowFlags(Qt::Drawer);
-    m_pProgressDialog->setFixedSize(300, 70);
-    m_pProgressDialog->setWindowTitle(EXPORT_WINDOW_TITLE);
-    m_pProgressDialog->setWindowIcon(QIcon(":/icons/Export.png"));
+	m_pProgressDialog->setWindowFlags(Qt::Drawer);
+	m_pProgressDialog->setFixedSize(300, 70);
+	m_pProgressDialog->setWindowTitle(EXPORT_WINDOW_TITLE);
+	m_pProgressDialog->setWindowIcon(QIcon(":/icons/Export.png"));
 
-        m_progress = new QProgressBar;
-        m_progress->setTextVisible(false);
-        m_progress->setRange(0, 100);
-        m_progress->setFixedHeight(10);
+		m_progress = new QProgressBar;
+		m_progress->setTextVisible(false);
+		m_progress->setRange(0, 100);
+		m_progress->setFixedHeight(10);
 
-        m_cancelButton = new QPushButton;
-        m_cancelButton->setText(tr("Cancel"));
+		m_cancelButton = new QPushButton;
+		m_cancelButton->setText(tr("Cancel"));
 
-        QHBoxLayout *buttonLayout = new QHBoxLayout ;
+		QHBoxLayout *buttonLayout = new QHBoxLayout ;
 
-        buttonLayout->addStretch();
-        buttonLayout->addWidget(m_cancelButton);
-        buttonLayout->addStretch();
+		buttonLayout->addStretch();
+		buttonLayout->addWidget(m_cancelButton);
+		buttonLayout->addStretch();
 
-        QVBoxLayout *mainLayout = new QVBoxLayout ;
+		QVBoxLayout *mainLayout = new QVBoxLayout ;
 
-        mainLayout->addWidget(m_progress);
-        mainLayout->addLayout(buttonLayout);
+		mainLayout->addWidget(m_progress);
+		mainLayout->addLayout(buttonLayout);
 
-    m_pProgressDialog->setLayout(mainLayout);
+	m_pProgressDialog->setLayout(mainLayout);
 
-    connect(this, &ExportData::setValue, m_progress, &QProgressBar::setValue);
-    connect(this, &ExportData::setRange, m_progress, &QProgressBar::setRange);
+	connect(this, &ExportData::setValue, m_progress, &QProgressBar::setValue);
+	connect(this, &ExportData::setRange, m_progress, &QProgressBar::setRange);
 
-    connect(this, &ExportData::exportThreadFinish, m_pProgressDialog, &QDialog::reject);
-    connect(this, &ExportData::exportThreadFinish, this, &ExportData::exportComplited);
-    connect(m_cancelButton, &QPushButton::clicked, m_pProgressDialog, &QDialog::reject);
-    connect(m_pProgressDialog, &QDialog::rejected, this, &ExportData::exportCancel);
+	connect(this, &ExportData::exportThreadFinish, m_pProgressDialog, &QDialog::reject);
+	connect(this, &ExportData::exportThreadFinish, this, &ExportData::exportComplited);
+	connect(m_cancelButton, &QPushButton::clicked, m_pProgressDialog, &QDialog::reject);
+	connect(m_pProgressDialog, &QDialog::rejected, this, &ExportData::exportCancel);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void ExportData::exec()
 {
-    if (m_pProgressDialog == nullptr)
-    {
-        return;
-    }
+	if (m_pProgressDialog == nullptr)
+	{
+		return;
+	}
 
-    if (m_pView == nullptr)
-    {
-        return;
-    }
+	if (m_pView == nullptr)
+	{
+		return;
+	}
 
-    if (m_fileName.isEmpty() == true)
-    {
-        m_fileName = tr("Export");
-    }
+	if (m_fileName.isEmpty() == true)
+	{
+		m_fileName = tr("Export");
+	}
 
-    if (m_pView->model()->rowCount()  == 0)
-    {
-        QMessageBox::information(m_pProgressDialog, EXPORT_WINDOW_TITLE, tr("Data is absent!"));
-        return;
-    }
+	if (m_pView->model()->rowCount() == 0)
+	{
+		QMessageBox::information(m_pProgressDialog, EXPORT_WINDOW_TITLE, tr("Data is absent!"));
+		return;
+	}
 
-    //QString filter = tr("CSV files (*.csv);;PDF files (*.pdf)");
-    QString filter = tr("CSV files (*.csv);;");
+	//QString filter = tr("CSV files (*.csv);;PDF files (*.pdf)");
+	QString filter = tr("CSV files (*.csv);;");
 
-    QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog, EXPORT_WINDOW_TITLE, m_fileName, filter);
-    if (fileName.isEmpty() == true)
-    {
-        return;
-    }
+	QString fileName = QFileDialog::getSaveFileName(m_pProgressDialog, EXPORT_WINDOW_TITLE, m_fileName, filter);
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
 
-    QString fileExt = fileName.right(fileName.count() - fileName.lastIndexOf(".") - 1);
-    if (fileExt.isEmpty() == true)
-    {
-        return;
-    }
+	QString fileExt = fileName.right(fileName.count() - fileName.lastIndexOf(".") - 1);
+	if (fileExt.isEmpty() == true)
+	{
+		return;
+	}
 
-    if (fileExt == "csv")
-    {
-        m_pProgressDialog->show();
-        QtConcurrent::run(ExportData::startExportThread, this, fileName);
+	if (fileExt == "csv")
+	{
+		m_pProgressDialog->show();
+		QtConcurrent::run(ExportData::startExportThread, this, fileName);
 
-        //QFuture<void> result = QtConcurrent::run(ExportData::startExportThread, this, fileName);
-        //result.waitForFinished();
-    }
+		//QFuture<void> result = QtConcurrent::run(ExportData::startExportThread, this, fileName);
+		//result.waitForFinished();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 {
-    if (pThis == nullptr)
-    {
-        return;
-    }
+	if (pThis == nullptr)
+	{
+		return;
+	}
 
-    pThis->saveFile(fileName);
+	pThis->saveFile(fileName);
 
-    emit pThis->exportThreadFinish();
+	emit pThis->exportThreadFinish();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 bool ExportData::saveFile(QString fileName)
 {
-    if (m_pView == nullptr)
-    {
-        return false;
-    }
+	if (m_pView == nullptr)
+	{
+		return false;
+	}
 
-    if (fileName.isEmpty() == true)
-    {
-        return false;
-    }
+	if (fileName.isEmpty() == true)
+	{
+		return false;
+	}
 
-    m_exportCancel = false;
+	m_exportCancel = false;
 
-    QFile file;
-    file.setFileName(fileName);
-    if (file.open(QIODevice::WriteOnly) == false)
-    {
-        return false;
-    }
+	QFile file;
+	file.setFileName(fileName);
+	if (file.open(QIODevice::WriteOnly) == false)
+	{
+		return false;
+	}
 
-    int columnCount = m_pView->model()->columnCount();
-    for(int column = 0; column < columnCount; column++)
-    {
-        if (m_pView->isColumnHidden(column) == true)
-        {
-            continue;
-        }
+	int columnCount = m_pView->model()->columnCount();
+	for(int column = 0; column < columnCount; column++)
+	{
+		if (m_pView->isColumnHidden(column) == true)
+		{
+			continue;
+		}
 
-        file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
-        file.write(";");
-    }
+		file.write(m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
+		file.write(";");
+	}
 
-    file.write("\n");
+	file.write("\n");
 
-    int rowCount = m_pView->model()->rowCount();
+	int rowCount = m_pView->model()->rowCount();
 
-    setRange(0, rowCount);
+	setRange(0, rowCount);
 
-    for(int row = 0; row < rowCount; row++)
-    {
-        if (m_exportCancel == true)
-        {
-            break;
-        }
+	for(int row = 0; row < rowCount; row++)
+	{
+		if (m_exportCancel == true)
+		{
+			break;
+		}
 
-        for(int column = 0; column < columnCount; column++)
-        {
-            if (m_pView->isColumnHidden(column) == true)
-            {
-                continue;
-            }
+		for(int column = 0; column < columnCount; column++)
+		{
+			if (m_pView->isColumnHidden(column) == true)
+			{
+				continue;
+			}
 
-            file.write(m_pView->model()->data( m_pView->model()->index(row, column)).toString().toLocal8Bit());
-            file.write(";");
-        }
+			file.write(m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+			file.write(";");
+		}
 
-        file.write("\n");
-        file.flush();
+		file.write("\n");
+		file.flush();
 
-        setValue(row);
-    }
+		setValue(row);
+	}
 
-    file.close();
+	file.close();
 
-    return true;
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

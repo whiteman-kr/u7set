@@ -14,7 +14,7 @@
 
 // ==============================================================================================
 
-const char* const		TuningSourceListColumn[] =
+const char* const		TuningSourceColumn[] =
 {
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "EquipmentID"),
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Caption"),
@@ -28,7 +28,7 @@ const char* const		TuningSourceListColumn[] =
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Cmd queue size"),
 };
 
-const int				TUN_SOURCE_LIST_COLUMN_COUNT		= sizeof(TuningSourceListColumn)/sizeof(TuningSourceListColumn[0]);
+const int				TUN_SOURCE_LIST_COLUMN_COUNT		= sizeof(TuningSourceColumn)/sizeof(TuningSourceColumn[0]);
 
 const int				TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID	= 0,
 						TUN_SOURCE_LIST_COLUMN_CAPTION		= 1,
@@ -41,6 +41,21 @@ const int				TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID	= 0,
 						TUN_SOURCE_LIST_COLUMN_REPLIES		= 8,
 						TUN_SOURCE_LIST_COLUMN_COMMANDS		= 9;
 
+const int				TuningSourceColumnWidth[TUN_SOURCE_LIST_COLUMN_COUNT] =
+{
+						250,	 // TUN_SOURCE_LIST_COLUMN_EQUIPMENT_ID
+						150,	 // TUN_SOURCE_LIST_COLUMN_CAPTION
+						150,	 // TUN_SOURCE_LIST_COLUMN_IP
+						100,	 // TUN_SOURCE_LIST_COLUMN_CHANNEL
+						100,	 // TUN_SOURCE_LIST_COLUMN_SUBSYSTEM
+						100,	 // TUN_SOURCE_LIST_COLUMN_LM_NUMBER
+						100,	 // TUN_SOURCE_LIST_COLUMN_IS_REPLY
+						100,	 // TUN_SOURCE_LIST_COLUMN_REQUESTS
+						100,	 // TUN_SOURCE_LIST_COLUMN_REPLIES
+						100,	 // TUN_SOURCE_LIST_COLUMN_COMMANDS
+};
+
+
 // ==============================================================================================
 
 class TuningSourceListTable : public QAbstractTableModel
@@ -50,7 +65,7 @@ class TuningSourceListTable : public QAbstractTableModel
 public:
 
 	explicit TuningSourceListTable(QObject* parent = 0);
-	~TuningSourceListTable();
+	virtual ~TuningSourceListTable();
 
 private:
 
@@ -76,10 +91,9 @@ public:
 
 };
 
-
 // ==============================================================================================
 
-const char* const		TuningSignalListColumn[] =
+const char* const		TuningSignalColumn[] =
 {
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Rack"),
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "ID"),
@@ -90,7 +104,7 @@ const char* const		TuningSignalListColumn[] =
 						QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Range"),
 };
 
-const int				TUN_SIGNAL_LIST_COLUMN_COUNT		= sizeof(TuningSignalListColumn)/sizeof(TuningSignalListColumn[0]);
+const int				TUN_SIGNAL_LIST_COLUMN_COUNT		= sizeof(TuningSignalColumn)/sizeof(TuningSignalColumn[0]);
 
 const int				TUN_SIGNAL_LIST_COLUMN_RACK			= 0,
 						TUN_SIGNAL_LIST_COLUMN_ID			= 1,
@@ -100,6 +114,18 @@ const int				TUN_SIGNAL_LIST_COLUMN_RACK			= 0,
 						TUN_SIGNAL_LIST_COLUMN_DEFAULT		= 5,
 						TUN_SIGNAL_LIST_COLUMN_RANGE		= 6;
 
+const int				TuningSignalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
+{
+						100,	 // TUN_SIGNAL_LIST_COLUMN_RACK
+						250,	 // TUN_SIGNAL_LIST_COLUMN_ID
+						250,	 // TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID
+						150,	 // TUN_SIGNAL_LIST_COLUMN_CAPTION
+						100,	 // TUN_SIGNAL_LIST_COLUMN_VALUE
+						100,	 // TUN_SIGNAL_LIST_COLUMN_DEFAULT
+						150,	 // TUN_SIGNAL_LIST_COLUMN_RANGE
+};
+
+
 // ==============================================================================================
 
 class TuningSignalListTable : public QAbstractTableModel
@@ -108,8 +134,8 @@ class TuningSignalListTable : public QAbstractTableModel
 
 public:
 
-	explicit			TuningSignalListTable(QObject* parent = 0);
-						~TuningSignalListTable();
+	explicit TuningSignalListTable(QObject* parent = 0);
+	virtual ~TuningSignalListTable();
 
 private:
 
@@ -141,7 +167,6 @@ public:
 private slots:
 
 	void				updateSignalParam(const Hash& signalHash);
-
 };
 
 // ==============================================================================================
@@ -153,12 +178,9 @@ class TuningSignalListDialog : public QDialog
 public:
 
 	explicit TuningSignalListDialog(bool hasButtons, QWidget *parent = 0);
-	~TuningSignalListDialog();
+	virtual ~TuningSignalListDialog();
 
 private:
-
-	static int			m_sourceColumnWidth[TUN_SOURCE_LIST_COLUMN_COUNT];
-	static int			m_signalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT];
 
 	QMenuBar*			m_pMenuBar = nullptr;
 	QMenu*				m_pSignalMenu = nullptr;
@@ -247,7 +269,6 @@ private slots:
 	void				showTypeDiscrete();
 	void				showSources();
 	void				showCustomID();
-
 
 	void				onContextMenu(QPoint);
 

@@ -153,7 +153,7 @@ namespace Metrology
 
 			case Hardware::DeviceType::Signal:
 				setPlace(pDeviceObject->place());
-				setContact( pDeviceObject->equipmentId().remove( pDeviceObject->parent()->equipmentId() ) );
+				setContact(pDeviceObject->equipmentId().remove(pDeviceObject->parent()->equipmentId()));
 				break;
 		}
 
@@ -228,7 +228,7 @@ namespace Metrology
 	{
 		xml.writeStringAttribute("EquipmentID", equipmentID());			// signal equipmentID
 
-		xml.writeStringAttribute("RackID", rack().equipmentID());		// signal rack      ( other info about rack ref. in RackParam by rack hash)
+		xml.writeStringAttribute("RackID", rack().equipmentID());		// signal rack		(other info about rack ref. in RackParam by rack hash)
 		xml.writeIntAttribute("Chassis", chassis());					// signal chassis
 		xml.writeIntAttribute("Module", module());						// signal module
 		xml.writeIntAttribute("Place", place());						// signal place
@@ -477,7 +477,7 @@ namespace Metrology
 
 		if (m_inputPhysicalUnit.isEmpty() == false)
 		{
-			range.append(" " + m_inputPhysicalUnit );
+			range.append(" " + m_inputPhysicalUnit);
 		}
 
 		return range;
