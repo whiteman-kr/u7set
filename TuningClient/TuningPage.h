@@ -32,7 +32,7 @@ public slots:
 
 	void slot_undo();
     void slot_Write();
-    void slot_Conclude();
+    void slot_Apply();
 
 
 };
@@ -147,7 +147,7 @@ private:
 
 	QPushButton* m_undoButton = nullptr;
 
-    //QPushButton* m_concludeButton = nullptr;
+    QPushButton* m_applyButton = nullptr;
 
     QPushButton* m_filterButton = nullptr;
 

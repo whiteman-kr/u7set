@@ -296,6 +296,18 @@ void TuningItemModel::addColumn(Columns column)
     m_columnsIndexes.push_back(static_cast<int>(column));
 }
 
+void TuningItemModel::removeColumn(Columns column)
+{
+    for (auto it = m_columnsIndexes.begin(); it != m_columnsIndexes.end(); it++)
+    {
+        if (*it == static_cast<int>(column))
+        {
+            m_columnsIndexes.erase(it);
+            break;
+        }
+    }
+}
+
 QModelIndex TuningItemModel::index(int row, int column, const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
@@ -479,6 +491,16 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
                     {
                         QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
                         return tr("Writing %1").arg(editValueString);
+                    }
+
+                    if (o.underflow() == true)
+                    {
+                        return tr("UNDRFLW");
+                    }
+
+                    if (o.overflow() == true)
+                    {
+                        return tr("OVERFLW");
                     }
 
                     return valueString;

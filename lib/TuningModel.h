@@ -60,7 +60,8 @@ public:
     TuningObject* object(int index);
 
 	void addColumn(Columns column);
-	int columnIndex(int index) const;
+    void removeColumn(Columns column);
+    int columnIndex(int index) const;
 	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 

@@ -398,6 +398,11 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
 
+	if (result == false)
+	{
+		return false;
+	}
+
 	result = xml.findElement(TUNING_MEMORY_SETTINGS_ELEMENT);
 
 	if (result == false)
@@ -410,6 +415,11 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_COUNT, &tuningRomFrameCount);
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_FRAME_SIZE, &tuningRomFrameSizeW);
 	result &= xml.readIntAttribute(PROP_TUNING_ROM_SIZE, &tuningRomSizeW);
+
+	if (result == false)
+	{
+		return false;
+	}
 
 	// read tuning clients info
 	//
@@ -424,7 +434,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	int clientsCount = 0;
 
-	result &= xml.readIntAttribute(ATTR_COUNT, &clientsCount);
+	result = xml.readIntAttribute(ATTR_COUNT, &clientsCount);
+
+	if (result == false)
+	{
+		return false;
+	}
 
 	for(int i = 0; i < clientsCount; i++)
 	{
@@ -437,7 +452,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			break;
 		}
 
-		result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &tc.equipmentID);
+		result = xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &tc.equipmentID);
+
+		if (result == false)
+		{
+			break;
+		}
 
 		result = xml.findElement(TUNING_SOURCES);
 
@@ -448,7 +468,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		int sourcesCount = 0;
 
-		result &= xml.readIntAttribute(ATTR_COUNT, &sourcesCount);
+		result = xml.readIntAttribute(ATTR_COUNT, &sourcesCount);
+
+		if (result == false)
+		{
+			break;
+		}
 
 		for(int s = 0; s < sourcesCount; s++)
 		{
@@ -461,7 +486,12 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 			QString sourceID;
 
-			result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &sourceID);
+			result = xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &sourceID);
+
+			if (result == false)
+			{
+				break;
+			}
 
 			tc.sourcesIDs.append(sourceID);
 		}

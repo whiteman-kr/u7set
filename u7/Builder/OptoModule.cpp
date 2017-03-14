@@ -304,6 +304,8 @@ namespace Hardware
 		QStringList list = m_rawDataDescriptionStr.split("\n", QString::SkipEmptyParts);
 
 		bool rawDataSizeFound = false;
+		bool needRawDataSize = false;
+
 		QString msg;
 
 		for(QString str : list)
@@ -356,13 +358,18 @@ namespace Hardware
 
 			if (itemTypeStr == ALL_NATIVE_RAW_DATA)
 			{
+				needRawDataSize = true;
+
 				item.type = RawDataDescriptionItemType::AllNativeRawData;
 				m_rawDataDescription.append(item);
+
 				continue;
 			}
 
 			if (itemTypeStr == MODULE_RAW_DATA)
 			{
+				needRawDataSize = true;
+
 				QString placeStr = str.section("=", 1, 1).trimmed();
 
 				int place = placeStr.toInt(&res);
@@ -386,6 +393,8 @@ namespace Hardware
 
 			if (itemTypeStr == PORT_RAW_DATA)
 			{
+				needRawDataSize = true;
+
 				QString portEquipmentID = str.section("=", 1, 1).trimmed();
 
 				item.type = RawDataDescriptionItemType::PortRawData;
@@ -396,6 +405,8 @@ namespace Hardware
 
 			if (itemTypeStr == CONST16)
 			{
+				needRawDataSize = true;
+
 				QString constStr = str.section("=", 1, 1).trimmed();
 
 				int const16 = constStr.toInt(&res);
@@ -419,6 +430,8 @@ namespace Hardware
 
 			if (itemTypeStr == IN_SIGNAL)
 			{
+				//	needRawDataSize = true;		- not need!
+
 				bool parseResult = parseInSignalRawDescriptionStr(str, item, log);
 
 				if (parseResult == true)
@@ -438,7 +451,7 @@ namespace Hardware
 			break;
 		}
 
-		if (rawDataSizeFound == false)
+		if (needRawDataSize == true && rawDataSizeFound == false)
 		{
 			msg = QString("RAW_DATA_SIZE value is not found in opto-port '%1' raw data description.").arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
@@ -455,26 +468,35 @@ namespace Hardware
 
 		bool res = true;
 
+		// InSignal description examples:
+		//
+		// IN_SIGNAL=#EXT_DISCRETE1,D,UINT,1,BE,3,4
+		// IN_SIGNAL=#EXT_ANALOG1,A,FLOAT,32,LE,6,0
+
 		QString inSignalDescription = str.section("=", 1).trimmed();
 
 		QStringList descItemsList = inSignalDescription.split(",", QString::SkipEmptyParts);
 
-		if (descItemsList.size() != 7)
+		if (descItemsList.size() != 7)			// must be 7 parameters!
 		{
-			msg = QString("Invalid IN_SIGNAL value in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL description parameters count, must be 7. (Port '%1')").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
 
 		item.type = RawDataDescriptionItemType::InSignal;
 
+		// 1) AppSignalID
+
 		item.appSignalID = descItemsList.at(0).trimmed();
+
+		// 2) Signal type
 
 		QString signalTypeStr = descItemsList.at(1).trimmed();
 
 		if (signalTypeStr != "A" && signalTypeStr != "D")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter SignalType in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter SignalType in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -488,13 +510,15 @@ namespace Hardware
 			item.signalType = E::SignalType::Discrete;
 		}
 
+		// 3) DataFormat
+
 		QString dataFormatStr = descItemsList.at(2).trimmed();
 
 		if (dataFormatStr != "FLOAT" &&
 			dataFormatStr != "SINT" &&
 			dataFormatStr != "UINT")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter DataFormat in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter DataFormat in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -515,20 +539,24 @@ namespace Hardware
 			}
 		}
 
+		// 4) DataSize
+
 		item.dataSize = descItemsList.at(3).trimmed().toInt(&res);
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter DataSize in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter DataSize in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
+
+		// 5) ByteOrder
 
 		QString byteOrderStr = descItemsList.at(4).trimmed();
 
 		if (byteOrderStr != "BE" && byteOrderStr != "LE")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter ByteOrder in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter ByteOrder in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -542,20 +570,24 @@ namespace Hardware
 			item.byteOrder = E::ByteOrder::LittleEndian;
 		}
 
+		// 6) OffsetW
+
 		item.offsetW = descItemsList.at(5).trimmed().toInt(&res);
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter OffsetW in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter OffsetW in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
+
+		// 7) BitNo
 
 		item.bitNo = descItemsList.at(6).trimmed().toInt(&res);
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter BitNo in opto-port '%1' raw data description.").arg(equipmentID());
+			msg = QString("Invalid IN_SIGNAL value of parameter BitNo in opto-port '%1' raw data description.").arg(m_equipmentID);
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}

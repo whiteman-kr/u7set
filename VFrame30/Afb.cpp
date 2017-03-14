@@ -386,6 +386,11 @@ namespace Afb
 		m_size = value;
 	}
 
+	E::ByteOrder AfbSignal::byteOrder() const
+	{
+		return E::ByteOrder::BigEndian;			// consider that all AfbSignals is in BigEndian format
+	}
+
 	bool AfbSignal::isAnalog() const
 	{
 		return m_type == E::SignalType::Analog;

@@ -32,14 +32,17 @@ TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
         addColumn(Columns::LowLimit);
         addColumn(Columns::HighLimit);
         addColumn(Columns::Default);
-        addColumn(Columns::Valid);
+        //addColumn(Columns::Valid);
         addColumn(Columns::Underflow);
         addColumn(Columns::Overflow);
 	}
 	else
 	{
 		m_columnsIndexes  = pageSettings->m_columnsIndexes;
-	}
+        removeColumn(Columns::Valid);
+        removeColumn(Columns::Underflow);
+        removeColumn(Columns::Overflow);
+    }
 }
 
 void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
@@ -215,7 +218,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.valid() == false)
+        if (o.valid() == false || o.limitsUnbalance() == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -308,7 +311,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.valid() == false)
+        if (o.valid() == false || o.limitsUnbalance() == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -621,7 +624,7 @@ void TuningItemModelMain::slot_Write()
     theObjectManager->writeModifiedTuningObjects(m_objects);
 }
 
-void TuningItemModelMain::slot_Conclude()
+void TuningItemModelMain::slot_Apply()
 {
 
 }
@@ -840,8 +843,8 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
-    //m_concludeButton = new QPushButton(tr("Conclude"));
-    //connect(m_concludeButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Conclude);
+    m_applyButton = new QPushButton(tr("Apply"));
+    connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
     m_bottomLayout = new QHBoxLayout();
 
@@ -854,7 +857,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_bottomLayout->addStretch();
     m_bottomLayout->addWidget(m_writeButton);
 	m_bottomLayout->addWidget(m_undoButton);
-    //m_bottomLayout->addWidget(m_concludeButton);
+    m_bottomLayout->addWidget(m_applyButton);
 
 	m_mainLayout = new QVBoxLayout(this);
 

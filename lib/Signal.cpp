@@ -1156,9 +1156,14 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 }
 
 
-bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size) const
+bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const
 {
 	if (m_signalType != signalType)
+	{
+		return false;
+	}
+
+	if (m_byteOrder != byteOrder)
 	{
 		return false;
 	}
@@ -1193,6 +1198,13 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataForm
 	assert(false);
 	return false;
 }
+
+
+bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
+{
+	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
+}
+
 
 
 QString Signal::regValueAddrStr() const
