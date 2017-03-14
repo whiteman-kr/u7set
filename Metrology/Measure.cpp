@@ -248,11 +248,11 @@ void LinearityMeasurement::set1(const MeasureParam &measureParam)
 
 	setLowLimit(VALUE_TYPE_IN_ELECTRIC, param.inputElectricLowLimit());
 	setHighLimit(VALUE_TYPE_IN_ELECTRIC, param.inputElectricHighLimit());
-	setUnit(VALUE_TYPE_IN_ELECTRIC, theUnitBase.unit(param.inputElectricUnitID()));
+	setUnit(VALUE_TYPE_IN_ELECTRIC, param.inputElectricUnit());
 
 	setLowLimit(VALUE_TYPE_PHYSICAL, param.inputPhysicalLowLimit());
 	setHighLimit(VALUE_TYPE_PHYSICAL, param.inputPhysicalHighLimit());
-	setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit(param.inputPhysicalUnitID()));
+	setUnit(VALUE_TYPE_PHYSICAL, param.inputPhysicalUnit());
 
 	setLowLimit(VALUE_TYPE_OUT_ELECTRIC, 0);
 	setHighLimit(VALUE_TYPE_OUT_ELECTRIC, 0);
@@ -393,15 +393,15 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
 
 	setLowLimit(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricLowLimit());
 	setHighLimit(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricHighLimit());
-	setUnit(VALUE_TYPE_IN_ELECTRIC, theUnitBase.unit(inParam.inputElectricUnitID()));
+	setUnit(VALUE_TYPE_IN_ELECTRIC, inParam.inputElectricUnit());
 
 	setLowLimit(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalLowLimit());
 	setHighLimit(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalHighLimit());
-	setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit(inParam.inputPhysicalUnitID()));
+	setUnit(VALUE_TYPE_PHYSICAL, inParam.inputPhysicalUnit());
 
 	setLowLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricLowLimit() : 0);
 	setHighLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricHighLimit() : 0);
-	setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? theUnitBase.unit(outParam.outputElectricUnitID()) : QString());
+	setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricUnit() : QString());
 
 	// precision
 	//
@@ -537,11 +537,11 @@ void LinearityMeasurement::set3(const MeasureParam &measureParam)
 
 	setLowLimit(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalLowLimit());
 	setHighLimit(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalHighLimit());
-	setUnit(VALUE_TYPE_PHYSICAL, theUnitBase.unit(outParam.inputPhysicalUnitID()));
+	setUnit(VALUE_TYPE_PHYSICAL, outParam.inputPhysicalUnit());
 
 	setLowLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricLowLimit() : 0);
 	setHighLimit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricHighLimit() : 0);
-	setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? theUnitBase.unit(outParam.outputElectricUnitID()) : QString());
+	setUnit(VALUE_TYPE_OUT_ELECTRIC, outParam.isOutput() == true ? outParam.outputElectricUnit() : QString());
 
 	// precision
 	//

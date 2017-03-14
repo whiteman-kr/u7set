@@ -976,8 +976,6 @@ void SignalBase::clear()
 	clearRackList();
 
 	clearSignalList();
-
-	theUnitBase.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1031,6 +1029,8 @@ int SignalBase::signalCount() const
 void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
+
+		m_unitList.clear();
 
 		m_signalHashMap.clear();
 		m_signalList.clear();
@@ -1550,10 +1550,10 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			param.setInputElectricUnit(theUnitBase.unit(param.inputElectricUnitID()));
-			param.setInputPhysicalUnit(theUnitBase.unit(param.inputPhysicalUnitID()));
-			param.setOutputElectricUnit(theUnitBase.unit(param.outputElectricUnitID()));
-			param.setOutputPhysicalUnit(theUnitBase.unit(param.outputPhysicalUnitID()));
+			param.setInputElectricUnit(m_unitList.value(param.inputElectricUnitID()));
+			param.setInputPhysicalUnit(m_unitList.value(param.inputPhysicalUnitID()));
+			param.setOutputElectricUnit(m_unitList.value(param.outputElectricUnitID()));
+			param.setOutputPhysicalUnit(m_unitList.value(param.outputPhysicalUnitID()));
 
 			// sensors
 			//
@@ -1874,116 +1874,6 @@ void SignalBase::clearActiveSignal()
 
 	emit activeSignalChanged(m_activeSignal);
 }
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-UnitBase theUnitBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
-UnitBase::UnitBase(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void UnitBase::clear()
-{
-	m_unitMutex.lock();
-
-		m_unitMap.clear();
-
-	m_unitMutex.unlock();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int UnitBase::unitCount() const
-{
-	int count = 0;
-
-	m_unitMutex.lock();
-
-		count = m_unitMap.size();
-
-	m_unitMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void UnitBase::appendUnit(int unitID, const QString& unit)
-{
-	m_unitMutex.lock();
-
-		if (m_unitMap.contains(unitID) == false)
-		{
-			m_unitMap[unitID] = unit;
-		}
-
-	m_unitMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool UnitBase::hasUnit(int unitID)
-{
-	if (unitID == NO_UNIT_ID)
-	{
-		return false;
-	}
-
-	bool has;
-
-	m_unitMutex.lock();
-
-		has = m_unitMap.contains(unitID);
-
-	m_unitMutex.unlock();
-
-	return has;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool UnitBase::hasSensorType(int sensorType)
-{
-	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
-	{
-		return false;
-	}
-
-	if (sensorType == E::SensorType::NoSensorType)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString UnitBase::unit(int unitID)
-{
-	QString strUnit;
-
-	m_unitMutex.lock();
-
-		if (m_unitMap.contains(unitID) == true)
-		{
-			strUnit = m_unitMap[unitID];
-		}
-
-	m_unitMutex.unlock();
-
-	return strUnit;
-}
-
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

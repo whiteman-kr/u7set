@@ -270,7 +270,7 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		return false;
 	}
 
-	if (theUnitBase.hasUnit(signalUnit) == false)
+	if (theSignalBase.units().contains(signalUnit) == false)
 	{
 		assert(0);
 		return false;

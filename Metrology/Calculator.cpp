@@ -206,12 +206,17 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (theUnitBase.hasSensorType(pair.sensorType) == false)
+		if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
 		{
 			continue;
 		}
 
-		m_pTrList->addItem(SensorTypeStr[ pair.sensorType ], pair.sensorType);
+		if (pair.sensorType == E::SensorType::NoSensorType)
+		{
+			continue;
+		}
+
+		m_pTrList->addItem(SensorTypeStr[pair.sensorType], pair.sensorType);
 	}
 	m_pTrList->setCurrentIndex(0);
 
@@ -238,7 +243,12 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (theUnitBase.hasSensorType(pair.sensorType) == false)
+		if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
+		{
+			continue;
+		}
+
+		if (pair.sensorType == E::SensorType::NoSensorType)
 		{
 			continue;
 		}
@@ -297,7 +307,12 @@ void Calculator::conversionTr()
 	}
 
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
-	if (theUnitBase.hasSensorType(sensorType) == false)
+	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (sensorType == E::SensorType::NoSensorType)
 	{
 		return;
 	}
@@ -334,7 +349,12 @@ void Calculator::conversionTc()
 	}
 
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-	if (theUnitBase.hasSensorType(sensorType) == false)
+	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+	{
+		return;
+	}
+
+	if (sensorType == E::SensorType::NoSensorType)
 	{
 		return;
 	}

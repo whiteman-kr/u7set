@@ -268,9 +268,9 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	stateStr.sprintf(formatStr.toAscii(), state.value);
 
-	if (theUnitBase.hasUnit(param.inputPhysicalUnitID()) == true)
+	if (param.inputPhysicalUnit().isEmpty() == false)
 	{
-		stateStr.append(" " + theUnitBase.unit(param.inputPhysicalUnitID()));
+		stateStr.append(" " + param.inputPhysicalUnit());
 	}
 
 	// append electrical equivalent
@@ -282,9 +282,9 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 			double electric = conversion(state.value, CT_PHYSICAL_TO_ELECTRIC, param);
 			stateStr.append(" = " + QString::number(electric, 10, param.inputElectricPrecision()));
 
-			if (theUnitBase.hasUnit(param.inputElectricUnitID()) == true)
+			if (param.inputElectricUnit().isEmpty() == false)
 			{
-				stateStr.append(" " + theUnitBase.unit(param.inputElectricUnitID()));
+				stateStr.append(" " + param.inputElectricUnit());
 			}
 		}
 
@@ -293,9 +293,9 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 			double electric = (state.value - param.inputPhysicalLowLimit()) * (param.outputElectricHighLimit() - param.outputElectricLowLimit()) / (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.outputElectricLowLimit();
 			stateStr.append(" = " + QString::number(electric, 10, param.outputElectricPrecision()));
 
-			if (theUnitBase.hasUnit(param.outputElectricUnitID()) == true)
+			if (param.outputElectricUnit().isEmpty() == false)
 			{
-				stateStr.append(" " + theUnitBase.unit(param.outputElectricUnitID()));
+				stateStr.append(" " + param.outputElectricUnit());
 			}
 		}
 	}

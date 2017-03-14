@@ -225,7 +225,7 @@ namespace Metrology
 		void					setInputElectricHighLimit(double highLimit) { m_inputElectricHighLimit = highLimit; }
 
 		E::InputUnit			inputElectricUnitID() const { return m_inputElectricUnitID; }
-		void					setInputElectricUnitID(E::InputUnit unit) { m_inputElectricUnitID = unit; }
+		void					setInputElectricUnitID(E::InputUnit unitID) { m_inputElectricUnitID = unitID; }
 
 		QString					inputElectricUnit() const { return m_inputElectricUnit; }
 		void					setInputElectricUnit(const QString& unit) { m_inputElectricUnit = unit; }
@@ -248,7 +248,7 @@ namespace Metrology
 		void					setInputPhysicalHighLimit(double highLimit) { m_inputPhysicalHighLimit = highLimit; }
 
 		int						inputPhysicalUnitID() const { return m_inputPhysicalUnitID; }
-		void					setInputPhysicalUnitID(int unit) { m_inputPhysicalUnitID = unit; }
+		void					setInputPhysicalUnitID(int unitID) { m_inputPhysicalUnitID = unitID; }
 
 		QString					inputPhysicalUnit() const { return m_inputPhysicalUnit; }
 		void					setInputPhysicalUnit(const QString& unit) { m_inputPhysicalUnit = unit; }
@@ -265,7 +265,7 @@ namespace Metrology
 		void					setOutputElectricHighLimit(double highLimit) { m_outputElectricHighLimit = highLimit; }
 
 		E::InputUnit			outputElectricUnitID() const { return m_outputElectricUnitID; }
-		void					setOutputElectricUnitID(const E::InputUnit unit) { m_outputElectricUnitID = unit; }
+		void					setOutputElectricUnitID(const E::InputUnit unitID) { m_outputElectricUnitID = unitID; }
 
 		QString					outputElectricUnit() const { return m_outputElectricUnit; }
 		void					setOutputElectricUnit(const QString& unit) { m_outputElectricUnit = unit; }
@@ -288,7 +288,7 @@ namespace Metrology
 		void					setOutputPhysicalHighLimit(double highLimit) { m_outputPhysicalHighLimit = highLimit; }
 
 		int						outputPhysicalUnitID() const { return m_outputPhysicalUnitID; }
-		void					setOutputPhysicalUnitID(int unit) { m_outputPhysicalUnitID = unit; }
+		void					setOutputPhysicalUnitID(int unitID) { m_outputPhysicalUnitID = unitID; }
 
 		QString					outputPhysicalUnit() const { return m_outputPhysicalUnit; }
 		void					setOutputPhysicalUnit(const QString& unit) { m_outputPhysicalUnit = unit; }

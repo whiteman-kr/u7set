@@ -318,6 +318,10 @@ private:
 	QMap<Hash, int>			m_signalHashMap;
 	QVector<MetrologySignal> m_signalList;
 
+	//  units that received form CgfSrv
+	//
+	UnitList				m_unitList;
+
 	// list of hashes in order to receive signal state form AppDataSrv
 	//
 	mutable QMutex			m_stateMutex;
@@ -371,6 +375,8 @@ public:
 	void					setSignalState(const Hash& hash, const AppSignalState& state);
 	void					setSignalState(int index, const AppSignalState& state);
 
+	UnitList&				units() { return m_unitList; }
+
 	// hashs for update signal state
 	//
 	int						hashForRequestStateCount() const;
@@ -415,47 +421,6 @@ public slots:
 // ==============================================================================================
 
 extern SignalBase theSignalBase;
-
-// ==============================================================================================
-
-class UnitBase : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit UnitBase(QObject *parent = 0);
-	virtual ~UnitBase() {}
-
-private:
-
-	// all units that received form CgfSrv
-	//
-	mutable QMutex			m_unitMutex;
-	QMap<int, QString>		m_unitMap;
-
-public:
-
-	void					clear();
-
-	int						unitCount() const;
-
-	void					appendUnit(int unitID, const QString& unit);
-
-	bool					hasUnit(int unitID);
-	bool					hasSensorType(int sensorType);
-
-	QString					unit(int unitID);
-
-signals:
-
-public slots:
-
-};
-
-// ==============================================================================================
-
-extern UnitBase theUnitBase;
 
 // ==============================================================================================
 

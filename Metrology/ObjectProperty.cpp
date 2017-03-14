@@ -141,7 +141,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// input physical range group
 
-		QtProperty *inputPhysicalRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Input physical ranges: ") + m_param.inputPhysicalRangeStr());
+		QtProperty *inputPhysicalRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_IN_PH_RANGE] + m_param.inputPhysicalRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.inputPhysicalLowLimit());
@@ -159,13 +159,19 @@ void SignalPropertyDialog::createPropertyList()
 
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
 			QStringList inputPhysicalUnitList;
-			int inputPhysicalUnitCount = theUnitBase.unitCount();
+			int inputPhysicalUnitIndex = 0;
+			int inputPhysicalUnitCount = theSignalBase.units().count();
 			for(int u = 0; u < inputPhysicalUnitCount; u++)
 			{
-				inputPhysicalUnitList.append(theUnitBase.unit(u));
+				inputPhysicalUnitList.append(theSignalBase.units().valueAt(u));
+
+				if (m_param.inputPhysicalUnitID() == theSignalBase.units().keyAt(u))
+				{
+					inputPhysicalUnitIndex = u;
+				}
 			}
 			item->setAttribute(QLatin1String("enumNames"), inputPhysicalUnitList);
-			item->setValue(m_param.inputPhysicalUnitID());
+			item->setValue(inputPhysicalUnitIndex);
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT);
 			inputPhysicalRangeGroup->addSubProperty(item);
 
@@ -186,7 +192,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// input electric range group
 
-		QtProperty *inputElectricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Input electric ranges: ") + m_param.inputElectricRangeStr());
+		QtProperty *inputElectricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_IN_EL_RANGE] + m_param.inputElectricRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.inputElectricLowLimit());
@@ -205,20 +211,21 @@ void SignalPropertyDialog::createPropertyList()
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
 			QStringList inputElectricUnitList;
 			QMetaEnum ieume = QMetaEnum::fromType<E::InputUnit>();
+			int inputElectricUnitIndex = 0;
 			int inputElectricUnitCount = ieume.keyCount();
-			int currentInputElectricUnit = NO_UNIT_ID;
 			for(int u = 0; u < inputElectricUnitCount; u++)
 			{
-				inputElectricUnitList.append(theUnitBase.unit(ieume.value(u)));
+				int electricUnitID = ieume.value(u);
 
-				if (m_param.inputElectricUnitID() == ieume.value(u))
+				inputElectricUnitList.append(theSignalBase.units().value(electricUnitID));
+
+				if (m_param.inputElectricUnitID() == electricUnitID)
 				{
-					currentInputElectricUnit = u;
+					inputElectricUnitIndex = u;
 				}
-
 			}
 			item->setAttribute(QLatin1String("enumNames"), inputElectricUnitList);
-			item->setValue(currentInputElectricUnit);
+			item->setValue(inputElectricUnitIndex);
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT);
 			inputElectricRangeGroup->addSubProperty(item);
 
@@ -245,7 +252,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// output physical ranges group
 
-		QtProperty *outputPhysicalRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Output physical range: ") + m_param.outputPhysicalRangeStr());
+		QtProperty *outputPhysicalRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE] + m_param.outputPhysicalRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.outputPhysicalLowLimit());
@@ -263,13 +270,19 @@ void SignalPropertyDialog::createPropertyList()
 
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
 			QStringList outputPhysicalUnitList;
-			int outputPhysicalUnitCount = theUnitBase.unitCount();
+			int outputPhysicalUnitIndex = 0;
+			int outputPhysicalUnitCount = theSignalBase.units().count();
 			for(int u = 0; u < outputPhysicalUnitCount; u++)
 			{
-				outputPhysicalUnitList.append(theUnitBase.unit(u));
+				outputPhysicalUnitList.append(theSignalBase.units().valueAt(u));
+
+				if (m_param.outputPhysicalUnitID() == theSignalBase.units().keyAt(u))
+				{
+					outputPhysicalUnitIndex = u;
+				}
 			}
 			item->setAttribute(QLatin1String("enumNames"), outputPhysicalUnitList);
-			item->setValue(m_param.outputPhysicalUnitID());
+			item->setValue(outputPhysicalUnitIndex);
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT);
 			outputPhysicalRangeGroup->addSubProperty(item);
 
@@ -285,7 +298,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// output electric ranges group
 
-		QtProperty *outputElectricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Output electric range: ") + m_param.outputElectricRangeStr());
+		QtProperty *outputElectricRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE] + m_param.outputElectricRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.outputElectricLowLimit());
@@ -304,19 +317,21 @@ void SignalPropertyDialog::createPropertyList()
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Unit"));
 			QStringList outputElectricUnitList;
 			QMetaEnum oeume = QMetaEnum::fromType<E::InputUnit>();
+			int outputElectricUnitIndex = 0;
 			int outputElectricUnitCount = oeume.keyCount();
-			int currentOutputElectricUnit = NO_UNIT_ID;
 			for(int u = 0; u < outputElectricUnitCount; u++)
 			{
-				outputElectricUnitList.append(theUnitBase.unit(oeume.value(u)));
+				int electricUnitID = oeume.value(u);
 
-				if (m_param.outputElectricUnitID() == oeume.value(u))
+				outputElectricUnitList.append(theSignalBase.units().value(electricUnitID));
+
+				if (m_param.outputElectricUnitID() == electricUnitID)
 				{
-					currentOutputElectricUnit = u;
+					outputElectricUnitIndex = u;
 				}
 			}
 			item->setAttribute(QLatin1String("enumNames"), outputElectricUnitList);
-			item->setValue(currentOutputElectricUnit);
+			item->setValue(outputElectricUnitIndex);
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT);
 			outputElectricRangeGroup->addSubProperty(item);
 
@@ -438,26 +453,40 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		case SIGNAL_PROPERTY_ITEM_CUSTOM_ID:				m_param.setCustomAppSignalID(value.toString());											groupIndex = SIGNAL_PROPERTY_GROUP_ID;				break;
 		case SIGNAL_PROPERTY_ITEM_CAPTION:					m_param.setCaption(value.toString());													groupIndex = SIGNAL_PROPERTY_GROUP_ID;				break;
 
+		// Input physical limit
+		//
 		case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW:			m_param.setInputPhysicalLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;		break;
 		case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH:			m_param.setInputPhysicalHighLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;		break;
-		case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT:			m_param.setInputPhysicalUnitID(value.toInt());											groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;		break;
+		case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT:			m_param.setInputPhysicalUnitID(theSignalBase.units().keyAt(value.toInt()));
+															m_param.setInputPhysicalUnit(theSignalBase.units().valueAt(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;		break;
 		case SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION:	m_param.setInputPhysicalPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_IN_PH_RANGE;		break;
 
+		// Input electric limit
+		//
 		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW:			m_param.setInputElectricLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
 		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH:			m_param.setInputElectricHighLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
-		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT:			m_param.setInputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));		groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
-		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR:		m_param.setInputElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
+		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT:			m_param.setInputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));
+															m_param.setInputElectricUnit(theSignalBase.units().value(me.value(value.toInt())));		groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
+		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR:		m_param.setInputElectricSensorType(static_cast<E::SensorType>(value.toInt()));
+															m_param.setInputElectricSensor(SensorTypeStr[value.toInt()]);							groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
 		case SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION:	m_param.setInputElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_IN_EL_RANGE;		break;
 
+		// Output physical limit
+		//
 		case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW:			m_param.setOutputPhysicalLowLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH:		m_param.setOutputPhysicalHighLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT:		m_param.setOutputPhysicalUnitID(value.toInt());											groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT:		m_param.setOutputPhysicalUnitID(theSignalBase.units().keyAt(value.toInt()));
+															m_param.setOutputPhysicalUnit(theSignalBase.units().valueAt(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION:	m_param.setOutputPhysicalPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE;	break;
 
+		// Output electric limit
+		//
 		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_LOW:			m_param.setOutputElectricLowLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_HIGH:		m_param.setOutputElectricHighLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT:		m_param.setOutputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));	groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR:		m_param.setOutputElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT:		m_param.setOutputElectricUnitID(static_cast<E::InputUnit>(me.value(value.toInt())));
+															m_param.setOutputElectricUnit(theSignalBase.units().value(me.value(value.toInt())));	groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR:		m_param.setOutputElectricSensorType(static_cast<E::SensorType>(value.toInt()));
+															m_param.setOutputElectricSensor(SensorTypeStr[value.toInt()]);							groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION:	m_param.setOutputElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE;	break;
 	}
 
@@ -488,10 +517,11 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 
 	switch(index)
 	{
-		case SIGNAL_PROPERTY_GROUP_IN_PH_RANGE:		header = SignalPropertyGroup[index] + m_param.inputPhysicalRangeStr();											break;
-		case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:		header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr() + " " + m_param.inputElectricSensor();	break;
-		case SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE:	header = SignalPropertyGroup[index] + m_param.outputPhysicalRangeStr();											break;
-		case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr()+ " " + m_param.outputElectricSensor();	break;
+		case SIGNAL_PROPERTY_GROUP_IN_PH_RANGE:		header = SignalPropertyGroup[index] + m_param.inputPhysicalRangeStr();	break;
+		case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:		header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr();	break;
+		case SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE:	header = SignalPropertyGroup[index] + m_param.outputPhysicalRangeStr();	break;
+		case SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.outputElectricRangeStr();	break;
+		default:									assert(0);
 	}
 
 	browserItem->property()->setPropertyName(header);
