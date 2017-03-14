@@ -33,131 +33,6 @@ TuningSource::~TuningSource()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignal::TuningSignal()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignal::TuningSignal(const TuningSignal& from)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignal::TuningSignal(const Metrology::SignalParam& param)
-{
-	if (param.isValid() == false)
-	{
-		assert(false);
-		return;
-	}
-
-	m_hash = param.hash();
-
-	m_rack = param.location().rack().caption();
-	m_appSignalID = param.appSignalID();
-	m_customAppSignalID = param.customAppSignalID();
-	m_equipmentID = param.location().equipmentID();
-	m_caption = param.caption();
-
-	m_signalType = param.signalType();
-
-	m_defaultValue = param.tuningDefaultValue();
-
-	m_state.setLowLimit(param.inputPhysicalLowLimit());
-	m_state.setHighLimit(param.inputPhysicalHighLimit());
-
-	m_precision = param.inputPhysicalPrecision();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignal::~TuningSignal()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString TuningSignal::valueStr() const
-{
-	if (m_hash == 0)
-	{
-		return QString();
-	}
-
-	if (m_state.valid() == false)
-	{
-		return QString("No valid");
-	}
-
-	QString stateStr, formatStr;
-
-
-	if (m_signalType == E::SignalType::Analog)
-	{
-		formatStr.sprintf(("%%.%df"), m_precision);
-
-		stateStr.sprintf(formatStr.toAscii(),  m_state.value());
-	}
-
-	if (m_signalType == E::SignalType::Discrete)
-	{
-		stateStr = m_state.value() == 0 ? QString("No") : QString("Yes");
-	}
-
-	return stateStr;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString TuningSignal::defaultValueStr() const
-{
-	if (m_hash == 0)
-	{
-		return QString();
-	}
-
-	QString stateStr, formatStr;
-
-	switch (m_signalType)
-	{
-		case E::SignalType::Analog:		formatStr.sprintf(("%%.%df"), m_precision);	stateStr.sprintf(formatStr.toAscii(), m_defaultValue);	break;
-		case E::SignalType::Discrete:	stateStr = m_defaultValue == 0 ? QString("No") : QString("Yes");									break;
-		default:						assert(0);
-	}
-
-	return stateStr;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString TuningSignal::rangeStr() const
-{
-	if (m_hash == 0)
-	{
-		return QString();
-	}
-
-	if (m_signalType == E::SignalType::Discrete)
-	{
-		return QString();
-	}
-
-	QString range, formatStr;
-
-	formatStr.sprintf(("%%.%df"), m_precision);
-
-	range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii() + " ", m_state.lowLimit(), m_state.highLimit());
-
-	return range;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 TuningWriteCmd::TuningWriteCmd()
 {
 }
@@ -207,6 +82,15 @@ void TuningSignalBase::clear()
 	m_sourceMutex.unlock();
 
 	m_signalMutex.lock();
+
+		int count = m_signalList.size();
+		for(int i = count - 1; i >= 0; i--)
+		{
+			if (m_signalList[i] != nullptr)
+			{
+				delete m_signalList[i];
+			}
+		}
 
 		m_signalList.clear();
 		m_signalHashMap.clear();
@@ -341,18 +225,20 @@ void TuningSignalBase::createSignalList()
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::SignalParam param = theSignalBase.signalParam(i);
-		if (param.isValid() == false)
+		MetrologySignal signal = theSignalBase.signal(i);
+		if (signal.param().isValid() == false)
 		{
 			continue;
 		}
+
+		Metrology::SignalParam& param = signal.param();
 
 		if (param.enableTuning() == false)
 		{
 			continue;
 		}
 
-		appendSignal(TuningSignal(param));
+		appendSignal(new MetrologySignal(signal));
 	}
 
 	emit signalsLoaded();
@@ -375,18 +261,29 @@ int TuningSignalBase::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::appendSignal(const TuningSignal& signal)
+int TuningSignalBase::appendSignal(MetrologySignal* pSignal)
 {
+	if (pSignal == nullptr)
+	{
+		return -1;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
+	if (param.isValid() == false || param.enableTuning() == false)
+	{
+		return -1;
+	}
+
 	int index = -1;
 
 	m_signalMutex.lock();
 
-		if (m_signalHashMap.contains(signal.hash()) == false)
+		if (m_signalHashMap.contains(param.hash()) == false)
 		{
-			m_signalList.append(signal);
+			m_signalList.append(pSignal);
 			index = m_signalList.size() - 1;
 
-			m_signalHashMap[signal.hash()] = index;
+			m_signalHashMap[param.hash()] = index;
 		}
 
 	m_signalMutex.unlock();
@@ -396,15 +293,15 @@ int TuningSignalBase::appendSignal(const TuningSignal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignal TuningSignalBase::signalForRead(const Hash& hash) const
+MetrologySignal* TuningSignalBase::signalForRead(const Hash& hash) const
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return TuningSignal();
+		return nullptr;
 	}
 
-	TuningSignal signal;
+	MetrologySignal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
@@ -414,69 +311,44 @@ TuningSignal TuningSignalBase::signalForRead(const Hash& hash) const
 
 			if (index >= 0 && index < m_signalList.size())
 			{
-				signal = m_signalList[index];
+				pSignal = m_signalList[index];
 			}
 		}
 
 	m_signalMutex.unlock();
 
-	return signal;
+	return pSignal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignal TuningSignalBase::signalForRead(int index) const
+MetrologySignal* TuningSignalBase::signalForRead(int index) const
 {
-	TuningSignal signal;
+	MetrologySignal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
 		if (index >= 0 && index < m_signalList.size())
 		{
-			signal = m_signalList[index];
+			pSignal = m_signalList[index];
 		}
 
 	m_signalMutex.unlock();
 
-	return signal;
+	return pSignal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::setSignalForRead(const TuningSignal& signal)
-{
-	if (signal.hash() == 0)
-	{
-		assert(signal.hash() != 0);
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		if (m_signalHashMap.contains(signal.hash()) == true)
-		{
-			int index = m_signalHashMap[signal.hash()];
-
-			if (index >= 0 && index < m_signalList.size())
-			{
-				m_signalList[index] = signal;
-			}
-		}
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignalState TuningSignalBase::signalState(const Hash& hash)
+SignalState TuningSignalBase::signalState(const Hash& hash)
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return TuningSignalState();
+		return SignalState();
 	}
 
-	TuningSignalState state;
+	SignalState state;
 
 	m_signalMutex.lock();
 
@@ -486,7 +358,11 @@ TuningSignalState TuningSignalBase::signalState(const Hash& hash)
 
 			if (index >= 0 && index < m_signalList.size())
 			{
-				state = m_signalList[index].state();
+				MetrologySignal* pSignal = m_signalList[index];
+				if (pSignal != nullptr)
+				{
+					state = pSignal->state();
+				}
 			}
 		}
 
@@ -497,11 +373,11 @@ TuningSignalState TuningSignalBase::signalState(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::setSignalState(const Hash& hash, const Network::TuningSignalState& state)
+void TuningSignalBase::setSignalState(const Network::TuningSignalState& state)
 {
-	if (hash == 0)
+	if (state.signalhash() == 0)
 	{
-		assert(hash != 0);
+		assert(state.signalhash() != 0);
 		return;
 	}
 
@@ -513,11 +389,12 @@ void TuningSignalBase::setSignalState(const Hash& hash, const Network::TuningSig
 
 			if (index >= 0 && index < m_signalList.size())
 			{
-				TuningSignalState& signalState = m_signalList[index].state();
-
-				signalState.setValid(state.valid());
-				signalState.setValue(state.value());
-				signalState.setLimits(state.readlowbound(), state.readhighbound());
+				MetrologySignal* pSignal = m_signalList[index];
+				if (pSignal != nullptr)
+				{
+					pSignal->state().setValid(state.valid());
+					pSignal->state().setValue(state.value());
+				}
 			}
 		}
 
@@ -534,30 +411,28 @@ void TuningSignalBase::updateSignalParam(const Hash& signalHash)
 		return;
 	}
 
-	Metrology::SignalParam param = theSignalBase.signalParam(signalHash);
-	if (param.isValid() == false)
-	{
-		return;
-	}
-
 	m_signalMutex.lock();
 
-	if (m_signalHashMap.contains(signalHash) == true)
-	{
-		int index = m_signalHashMap[signalHash];
+		int count = m_signalList.count();
 
-		if (index >= 0 && index < m_signalList.size())
+		for(int i = 0; i < count; i ++)
 		{
-			m_signalList[index].setCustomAppSignalID(param.customAppSignalID());
-			m_signalList[index].setCaption(param.caption());
-			m_signalList[index].setDefaultValue(param.tuningDefaultValue());
-			m_signalList[index].setPrecision(param.inputPhysicalPrecision());
+			 MetrologySignal* pSignal = m_signalList[i];
+			 if (pSignal == nullptr)
+			 {
+				 continue;
+			 }
+
+			if (pSignal->param().hash() == signalHash)
+			{
+				pSignal->setParam(theSignalBase.signalParam(signalHash));
+
+				break;
+			}
 		}
-	}
 
 	m_signalMutex.unlock();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -569,7 +444,13 @@ void TuningSignalBase::singalsSetNovalid()
 
 		for(int i = 0; i < count; i++)
 		{
-			m_signalList[i].state().setValid(false);
+			MetrologySignal* pSignal = m_signalList[i];
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			pSignal->state().setValid(false);
 		}
 
 	m_signalMutex.unlock();

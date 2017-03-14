@@ -118,8 +118,8 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
     RackList.cpp \
-    ObjectProperty.cpp \
-    OutputSignalList.cpp
+    OutputSignalList.cpp \
+    ObjectProperties.cpp
 
 
 
@@ -187,8 +187,8 @@ HEADERS  += \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
     RackList.h \
-    ObjectProperty.h \
-    OutputSignalList.h
+    OutputSignalList.h \
+    ObjectProperties.h
 
 
 FORMS    +=

@@ -7,7 +7,7 @@
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
-#include "ObjectProperty.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -97,12 +97,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	}
 
 	MetrologySignal* pSignal = signal(row);
-	if (pSignal == nullptr)
-	{
-		return QVariant();
-	}
-
-	if (pSignal->param().isValid() == false)
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
 	}
@@ -283,7 +278,7 @@ void StatisticTable::set(const QList<MetrologySignal*> list_add)
 
 void StatisticTable::clear()
 {
-	int count = m_signalList.count();
+	int count = signalCount();
 	if (count == 0)
 	{
 		return;
@@ -340,6 +335,7 @@ void StatisticTable::updateSignalParam(const Hash& signalHash)
 
 	m_signalMutex.unlock();
 }
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

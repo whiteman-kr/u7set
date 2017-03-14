@@ -7,7 +7,7 @@
 #include <QClipboard>
 
 #include "Options.h"
-#include "ObjectProperty.h"
+#include "ObjectProperties.h"
 #include "Conversion.h"
 #include "CalibratorBase.h"
 
@@ -144,7 +144,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == SIGNAL_INFO_COLUMN_STATE)
 		{
-			AppSignalState state;
+			SignalState state;
 
 			if (measureParam.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 			{
@@ -155,17 +155,17 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 				state = theSignalBase.signalState(measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).hash());
 			}
 
-			if (state.flags.valid == false)
+			if (state.flags().valid == false)
 			{
 				return theOptions.signalInfo().colorFlagValid();
 			}
 
-			if (state.flags.overflow == true)
+			if (state.flags().overflow == true)
 			{
 				return theOptions.signalInfo().colorFlagOverflow();
 			}
 
-			if (state.flags.underflow == true)
+			if (state.flags().underflow == true)
 			{
 				return theOptions.signalInfo().colorFlagUnderflow();
 			}
@@ -212,7 +212,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 		Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == true)
 		{
-			AppSignalState inState = theSignalBase.signalState(inParam.hash());
+			SignalState inState = theSignalBase.signalState(inParam.hash());
 			stateStr = signalStateStr(inParam, inState);
 		}
 
@@ -221,7 +221,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 			Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
 			{
-				AppSignalState outState = theSignalBase.signalState(outParam.hash());
+				SignalState outState = theSignalBase.signalState(outParam.hash());
 				stateStr += divider + signalStateStr(outParam, outState);
 			}
 		}
@@ -250,14 +250,14 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, const AppSignalState& state) const
+QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, const SignalState& state) const
 {
 	if (param.isValid() == false)
 	{
 		return QString();
 	}
 
-	if (state.flags.valid == false)
+	if (state.flags().valid == false)
 	{
 		return tr("No valid");
 	}
@@ -266,7 +266,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	formatStr.sprintf(("%%.%df"), param.inputPhysicalPrecision());
 
-	stateStr.sprintf(formatStr.toAscii(), state.value);
+	stateStr.sprintf(formatStr.toAscii(), state.value());
 
 	if (param.inputPhysicalUnit().isEmpty() == false)
 	{
@@ -279,7 +279,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	{
 		if (param.isInput() == true)
 		{
-			double electric = conversion(state.value, CT_PHYSICAL_TO_ELECTRIC, param);
+			double electric = conversion(state.value(), CT_PHYSICAL_TO_ELECTRIC, param);
 			stateStr.append(" = " + QString::number(electric, 10, param.inputElectricPrecision()));
 
 			if (param.inputElectricUnit().isEmpty() == false)
@@ -290,7 +290,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 		if (param.isOutput() == true)
 		{
-			double electric = (state.value - param.inputPhysicalLowLimit()) * (param.outputElectricHighLimit() - param.outputElectricLowLimit()) / (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.outputElectricLowLimit();
+			double electric = (state.value() - param.inputPhysicalLowLimit()) * (param.outputElectricHighLimit() - param.outputElectricLowLimit()) / (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.outputElectricLowLimit();
 			stateStr.append(" = " + QString::number(electric, 10, param.outputElectricPrecision()));
 
 			if (param.outputElectricUnit().isEmpty() == false)
@@ -304,7 +304,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	//
 	if (theOptions.signalInfo().showAdcState() == true)
 	{
-		int adc = (state.value - param.inputPhysicalLowLimit())*(param.highADC() - param.lowADC())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
+		int adc = (state.value() - param.inputPhysicalLowLimit())*(param.highADC() - param.lowADC())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
 		stateStr.append(" = " + QString::number(adc, 10));
 	}
 
@@ -312,18 +312,18 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	//
 	if (theOptions.signalInfo().showAdcHexState() == true)
 	{
-		int adc = (state.value - param.inputPhysicalLowLimit())* (param.highADC() - param.lowADC())/ (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
+		int adc = (state.value() - param.inputPhysicalLowLimit())* (param.highADC() - param.lowADC())/ (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
 		stateStr.append(" = 0x" + QString::number(adc, 16));
 	}
 
 	// check flags
 	//
-	if (state.flags.underflow == true)
+	if (state.flags().underflow == true)
 	{
 		stateStr.append(" - Underflow");
 	}
 
-	if (state.flags.overflow == true)
+	if (state.flags().overflow == true)
 	{
 		stateStr.append(" - Overflow");
 	}

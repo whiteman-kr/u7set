@@ -274,13 +274,19 @@ void TuningSocket::requestReadTuningSignals()
 			break;
 		}
 
-		TuningSignal signal = theTuningSignalBase.signalForRead(i + startIndex);
-		if (signal.hash() == 0)
+		MetrologySignal* pSignal = theTuningSignalBase.signalForRead(i + startIndex);
+		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(signal.hash());
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
+
+		m_readTuningSignals.mutable_signalhash()->AddAlreadyReserved(param.hash());
 
 		m_readTuningSignalsIndex ++;
 	}
@@ -320,16 +326,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 
 	for (int i = 0; i < readReplyCount; i++)
 	{
-		const ::Network::TuningSignalState& tss = m_readTuningSignalsReply.tuningsignalstate(i);
-
-		Hash hash = tss.signalhash();
-		if (hash == 0)
-		{
-			assert(hash != 0);
-			continue;
-		}
-
-		theTuningSignalBase.setSignalState(hash, tss);
+		theTuningSignalBase.setSignalState(m_readTuningSignalsReply.tuningsignalstate(i));
 	}
 
 	requestWriteTuningSignals();

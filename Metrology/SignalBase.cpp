@@ -1232,12 +1232,12 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(const QString& appSignalID)
+SignalState SignalBase::signalState(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{
 		assert(false);
-		return AppSignalState();
+		return SignalState();
 	}
 
 	return signalState(calcHash(appSignalID));
@@ -1245,15 +1245,15 @@ AppSignalState SignalBase::signalState(const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(const Hash& hash)
+SignalState SignalBase::signalState(const Hash& hash)
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return AppSignalState();
+		return SignalState();
 	}
 
-	AppSignalState state;
+	SignalState state;
 
 	m_signalMutex.lock();
 
@@ -1274,9 +1274,9 @@ AppSignalState SignalBase::signalState(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(int index)
+SignalState SignalBase::signalState(int index)
 {
-	AppSignalState state;
+	SignalState state;
 
 	m_signalMutex.lock();
 
@@ -1292,7 +1292,7 @@ AppSignalState SignalBase::signalState(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(const QString& appSignalID, const AppSignalState &state)
+void SignalBase::setSignalState(const QString& appSignalID, const SignalState& state)
 {
 	if (appSignalID.isEmpty() == true)
 	{
@@ -1305,7 +1305,7 @@ void SignalBase::setSignalState(const QString& appSignalID, const AppSignalState
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
+void SignalBase::setSignalState(const Hash& hash, const SignalState &state)
 {
 	if (hash == 0)
 	{
@@ -1332,7 +1332,7 @@ void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(int index, const AppSignalState &state)
+void SignalBase::setSignalState(int index, const SignalState& state)
 {
 	m_signalMutex.lock();
 

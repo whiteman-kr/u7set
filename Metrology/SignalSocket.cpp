@@ -164,12 +164,13 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 			continue;
 		}
 
-		AppSignalState state;
-		state.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+		AppSignalState appState;
+		appState.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
 
 //		state.flags.valid = true;
 //		state.value = 50;
 
+		SignalState state(appState.value, appState.flags);
 		theSignalBase.setSignalState(hash, state);
 	}
 }

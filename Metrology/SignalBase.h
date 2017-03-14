@@ -19,18 +19,26 @@ class SignalState
 {
 public:
 
-	SignalState() {}
-	explicit SignalState(const AppSignalState& state) { setState(state); }
+	SignalState()  {}
+	SignalState(double value, AppSignalStateFlags flags) : m_value(value), m_flags(flags)  {}
 	virtual ~SignalState() {}
 
 private:
 
-	AppSignalState			m_state;
+	double					m_value = 0;
+
+	AppSignalStateFlags		m_flags;
 
 public:
 
-	AppSignalState			state() const { return m_state; }
-	void					setState(const AppSignalState& state) { m_state = state; }
+	double					value() const { return m_value; }
+	void					setValue(double value) { m_value = value; }
+
+	AppSignalStateFlags		flags() const { return m_flags; }
+	void					setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
+
+	bool					valid() const { return m_flags.valid; }
+	void					setValid(bool valid) { m_flags.valid = valid; }
 };
 
 
@@ -69,7 +77,7 @@ public:
 	Hash					signalHash() const { return m_signalHash; }
 	void					setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
-	int						 incrementMeasureCount() { m_measureCount++; return m_measureCount; }
+	int						incrementMeasureCount() { m_measureCount++; return m_measureCount; }
 	int						measureCount() const { return m_measureCount; }
 	QString					measureCountStr() const;
 
@@ -91,7 +99,7 @@ public:
 private:
 
 	Metrology::SignalParam	m_param;
-	AppSignalState			m_state;
+	SignalState				m_state;
 
 	StatisticItem			m_statistic;
 
@@ -100,8 +108,8 @@ public:
 	Metrology::SignalParam&	param() { return m_param; }
 	void					setParam(const Metrology::SignalParam& param) { m_param = param; }
 
-	AppSignalState&			state() { return m_state; }
-	void					setState(const AppSignalState& state) { m_state = state; }
+	SignalState&			state() { return m_state; }
+	void					setState(const SignalState& state) { m_state = state; }
 
 	StatisticItem&			statistic() { return m_statistic; }
 	void					setStatistic(const StatisticItem& statistic) { m_statistic = statistic; }
@@ -367,13 +375,13 @@ public:
 	void					setSignalParam(const Hash& hash, const Metrology::SignalParam& param);
 	void					setSignalParam(int index, const Metrology::SignalParam& param);
 
-	AppSignalState			signalState(const QString& appSignalID);
-	AppSignalState			signalState(const Hash& hash);
-	AppSignalState			signalState(int index);
+	SignalState				signalState(const QString& appSignalID);
+	SignalState				signalState(const Hash& hash);
+	SignalState				signalState(int index);
 
-	void					setSignalState(const QString& appSignalID, const AppSignalState& state);
-	void					setSignalState(const Hash& hash, const AppSignalState& state);
-	void					setSignalState(int index, const AppSignalState& state);
+	void					setSignalState(const QString& appSignalID, const SignalState& state);
+	void					setSignalState(const Hash& hash, const SignalState& state);
+	void					setSignalState(int index, const SignalState& state);
 
 	UnitList&				units() { return m_unitList; }
 

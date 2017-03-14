@@ -1334,7 +1334,7 @@ void MainWindow::showOutputSignalList()
 
 void MainWindow::showTuningSignalList()
 {
-	TuningSignalListDialog dialog(false, this);
+	TuningSignalListDialog dialog(this);
 	dialog.exec();
 }
 

@@ -217,10 +217,10 @@ void LinearityMeasurement::set1(const MeasureParam &measureParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		AppSignalState signalState = theSignalBase.signalState(param.hash());
+		SignalState signalState = theSignalBase.signalState(param.hash());
 
-		double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, param);
-		double phVal = signalState.value;
+		double elVal = conversion(signalState.value(), CT_PHYSICAL_TO_ELECTRIC, param);
+		double phVal = signalState.value();
 
 		setMeasureItemArray(VALUE_TYPE_IN_ELECTRIC, index, elVal);
 		setMeasureItemArray(VALUE_TYPE_PHYSICAL, index, phVal);
@@ -354,10 +354,10 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		AppSignalState signalState = theSignalBase.signalState(inParam.hash());
+		SignalState signalState = theSignalBase.signalState(inParam.hash());
 
-		double elVal = conversion(signalState.value, CT_PHYSICAL_TO_ELECTRIC, inParam);
-		double phVal = signalState.value;
+		double elVal = conversion(signalState.value(), CT_PHYSICAL_TO_ELECTRIC, inParam);
+		double phVal = signalState.value();
 		double OutElVal = 0;
 
 		if (outParam.isOutput() == true)
@@ -468,7 +468,7 @@ void LinearityMeasurement::set3(const MeasureParam &measureParam)
 
 	// nominal
 	//
-	double physical = theSignalBase.signalState(outParam.hash()).value;
+	double physical = theSignalBase.signalState(outParam.hash()).value();
 
 	setPercent(((physical - outParam.inputPhysicalLowLimit()) * 100)/(outParam.inputPhysicalHighLimit() - outParam.inputPhysicalLowLimit()));
 
@@ -502,7 +502,7 @@ void LinearityMeasurement::set3(const MeasureParam &measureParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		double phVal = theSignalBase.signalState(outParam.hash()).value;
+		double phVal = theSignalBase.signalState(outParam.hash()).value();
 		double OutElVal = 0;
 
 		if (outParam.isOutput() == true)

@@ -6,7 +6,7 @@
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
-#include "ObjectProperty.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -233,7 +233,7 @@ void RackListTable::set(const QList<Metrology::RackParam*> list_add)
 
 void RackListTable::clear()
 {
-	int count = m_rackList.count();
+	int count = rackCount();
 	if (count == 0)
 	{
 		return;
