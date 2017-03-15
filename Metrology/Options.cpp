@@ -1431,8 +1431,8 @@ int Options::channelCount()
 
 	switch(m_toolBar.measureKind())
 	{
-		case MEASURE_KIND_ONE:		count = 1;					break;
-		case MEASURE_KIND_MULTI:	count = MAX_CHANNEL_COUNT;	break;
+		case MEASURE_KIND_ONE:		count = 1;							break;
+		case MEASURE_KIND_MULTI:	count = Metrology::ChannelCount;	break;
 		default:					assert(0);
 	}
 

@@ -1,137 +1,14 @@
 #ifndef SIGNALBASE_H
 #define SIGNALBASE_H
 
-// This is class was designed to save and distribute signals for measure
-//
-
-#include <QObject>
-
 #include "../lib/Hash.h"
 #include "../lib/Signal.h"
-#include "../lib/AppSignalState.h"
 #include "../lib/MetrologySignal.h"
 
 #include "CalibratorManager.h"
-
-// ==============================================================================================
-
-class SignalState
-{
-public:
-
-	SignalState()  {}
-	SignalState(double value, AppSignalStateFlags flags) : m_value(value), m_flags(flags)  {}
-	virtual ~SignalState() {}
-
-private:
-
-	double					m_value = 0;
-
-	AppSignalStateFlags		m_flags;
-
-public:
-
-	double					value() const { return m_value; }
-	void					setValue(double value) { m_value = value; }
-
-	AppSignalStateFlags		flags() const { return m_flags; }
-	void					setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
-
-	bool					valid() const { return m_flags.valid; }
-	void					setValid(bool valid) { m_flags.valid = valid; }
-};
-
-
-// ==============================================================================================
-
-const char* const			StatisticStateStr[] =
-{
-							QT_TRANSLATE_NOOP("SignalBase.h", "Invalid"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Ok"),
-};
-
-const int					STATISTIC_STATE_COUNT = sizeof(StatisticStateStr)/sizeof(StatisticStateStr[0]);
-
-const int					STATISTIC_STATE_INVALID	= 0,
-							STATISTIC_STATE_SUCCESS	= 1;
-
-// ==============================================================================================
-
-class StatisticItem
-{
-public:
-
-	StatisticItem() {}
-	explicit StatisticItem(const Hash& signalHash);
-	virtual ~StatisticItem() {}
-
-private:
-
-	Hash					m_signalHash = 0;
-
-	int						m_measureCount = 0;
-	int						m_state = STATISTIC_STATE_SUCCESS;
-
-public:
-
-	Hash					signalHash() const { return m_signalHash; }
-	void					setSignalHash(const Hash& hash) { m_signalHash = hash; }
-
-	int						incrementMeasureCount() { m_measureCount++; return m_measureCount; }
-	int						measureCount() const { return m_measureCount; }
-	QString					measureCountStr() const;
-
-	int						state() const { return m_state; }
-	QString					stateStr() const;
-	void					setState(bool state) { m_state = state; }
-};
-
-// ==============================================================================================
-
-class MetrologySignal
-{
-public:
-
-	MetrologySignal() {}
-	explicit MetrologySignal(const Metrology::SignalParam& param);
-	virtual ~MetrologySignal() {}
-
-private:
-
-	Metrology::SignalParam	m_param;
-	SignalState				m_state;
-
-	StatisticItem			m_statistic;
-
-public:
-
-	Metrology::SignalParam&	param() { return m_param; }
-	void					setParam(const Metrology::SignalParam& param) { m_param = param; }
-
-	SignalState&			state() { return m_state; }
-	void					setState(const SignalState& state) { m_state = state; }
-
-	StatisticItem&			statistic() { return m_statistic; }
-	void					setStatistic(const StatisticItem& statistic) { m_statistic = statistic; }
-
-	MetrologySignal&		operator=(const MetrologySignal& from);
-};
-
-// ==============================================================================================
-
-							Q_DECLARE_METATYPE(MetrologySignal)
-							Q_DECLARE_METATYPE(MetrologySignal*)
-
-// ==============================================================================================
-
-const int					CHANNEL_0				= 0,
-							CHANNEL_1				= 1,
-							CHANNEL_2				= 2,
-							CHANNEL_3				= 3,
-							CHANNEL_4				= 4,
-							CHANNEL_5				= 5;
-
-const int					MAX_CHANNEL_COUNT		= 6;
+#include "RackBase.h"
+#include "OutputSignalBase.h"
+#include "TuningSignalBase.h"
 
 // ==============================================================================================
 
@@ -145,85 +22,39 @@ public:
 
 private:
 
-	mutable QMutex			m_mutex;
+	mutable QMutex				m_mutex;
 
-	Hash					m_signalHash[MAX_CHANNEL_COUNT];
+	Hash						m_signalHash[Metrology::ChannelCount];
 
 	Metrology::SignalLocation	m_location;
 
-	QString					m_strID;
+	QString						m_strID;
 
 public:
 
-	void					clear();
-	bool					isEmpty() const;
+	bool						isEmpty() const;
+	void						clear();
 
-	Hash					hash(int channel) const;
-	bool					setSignal(int channel, int measureKind, const Metrology::SignalParam& param);
+	Hash						hash(int channel) const;
+	bool						setSignal(int channel, int measureKind, const Metrology::SignalParam& param);
 
-	Metrology::SignalLocation& location() { return m_location; }
-	void					setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+	Metrology::SignalLocation&	location() { return m_location; }
+	void						setLocation(const Metrology::SignalLocation& location) { m_location = location; }
 
-	QString&				strID() { return m_strID; }
+	QString&					strID() { return m_strID; }
 
-	MetrologyMultiSignal&	operator=(const MetrologyMultiSignal& from);
+	MetrologyMultiSignal&		operator=(const MetrologyMultiSignal& from);
 };
 
 // ==============================================================================================
 
-							Q_DECLARE_METATYPE(MetrologyMultiSignal)
-							Q_DECLARE_METATYPE(MetrologyMultiSignal*)
-
-// ==============================================================================================
-
-const char* const			MeasureIoSignalType[] =
-{
-							QT_TRANSLATE_NOOP("SignalBase.h", "Input"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Output"),
-};
-
-const int					MEASURE_IO_SIGNAL_TYPE_COUNT = sizeof(MeasureIoSignalType)/sizeof(MeasureIoSignalType[0]);
-
-const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
-							MEASURE_IO_SIGNAL_TYPE_INPUT	= 0,
-							MEASURE_IO_SIGNAL_TYPE_OUTPUT	= 1;
-
-// ----------------------------------------------------------------------------------------------
-
-#define						ERR_MEASURE_IO_SIGNAL_TYPE(type) (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-#define						TEST_MEASURE_IO_SIGNAL_TYPE(type)			if (ERR_MEASURE_IO_SIGNAL_TYPE(type)) { return; }
-#define						TEST_MEASURE_IO_SIGNAL_TYPE1(type, retVal)	if (ERR_MEASURE_IO_SIGNAL_TYPE(type)) { return retVal; }
-
-// ==============================================================================================
-
-const char* const			OutputSignalType[] =
-{
-							QT_TRANSLATE_NOOP("SignalBase.h", "Not output"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Input → Output"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Tuning → Output"),
-};
-
-const int					OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(OutputSignalType[0]);
-
-const int					OUTPUT_SIGNAL_TYPE_UNUSED		= 0,
-							OUTPUT_SIGNAL_TYPE_FROM_INPUT	= 1,
-							OUTPUT_SIGNAL_TYPE_FROM_TUNING	= 2;
-
-// ----------------------------------------------------------------------------------------------
-
-#define						ERR_OUTPUT_SIGNAL_TYPE(type) (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
-#define						TEST_OUTPUT_SIGNAL_TYPE(type)			if (ERR_OUTPUT_SIGNAL_TYPE(type)) { return; }
-#define						TEST_OUTPUT_SIGNAL_TYPE1(type, retVal)	if (ERR_OUTPUT_SIGNAL_TYPE(type)) { return retVal; }
-
-// ==============================================================================================
-
-class MeasureParam
+class MeasureMultiParam
 {
 public:
 
-	MeasureParam();
-	MeasureParam(const MeasureParam& from);
-	virtual~MeasureParam() {}
+	MeasureMultiParam();
+	MeasureMultiParam(const MeasureMultiParam& from);
+	virtual~MeasureMultiParam() {}
 
 private:
 
@@ -265,7 +96,7 @@ public:
 	QString					calibratorStr() const;
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
 
-	MeasureParam&			operator=(const MeasureParam& from);
+	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };
 
 // ==============================================================================================
@@ -304,8 +135,7 @@ public:
 
 // ==============================================================================================
 
-							Q_DECLARE_METATYPE(MeasureSignal)
-							Q_DECLARE_METATYPE(MeasureSignal*)
+Q_DECLARE_METATYPE(MeasureSignal)
 
 // ==============================================================================================
 
@@ -320,13 +150,17 @@ public:
 
 private:
 
+	// racks that received form CgfSrv
+	//
+	RackBase				m_rackBase;
+
 	// all signals that received form CgfSrv
 	//
 	mutable QMutex			m_signalMutex;
 	QMap<Hash, int>			m_signalHashMap;
-	QVector<MetrologySignal> m_signalList;
+	QVector<Metrology::Signal> m_signalList;
 
-	//  units that received form CgfSrv
+	// units that received form CgfSrv
 	//
 	UnitList				m_unitList;
 
@@ -350,6 +184,14 @@ private:
 	mutable QMutex			m_activeSignalMutex;
 	MeasureSignal			m_activeSignal;
 
+	// output signals
+	//
+	OutputSignalBase		m_outputSignalBase;
+
+	// signals of tuning
+	//
+	TuningSignalBase		m_tuningSignalBase;
+
 public:
 
 	void					clear();
@@ -357,15 +199,14 @@ public:
 
 	// Signals
 	//
-
 	int						signalCount() const;
 	void					clearSignalList();
 
 	int						appendSignal(const Metrology::SignalParam& param);
 
-	MetrologySignal			signal(const QString& appSignalID);
-	MetrologySignal			signal(const Hash& hash);
-	MetrologySignal			signal(int index);
+	Metrology::Signal		signal(const QString& appSignalID);
+	Metrology::Signal		signal(const Hash& hash);
+	Metrology::Signal		signal(int index);
 
 	Metrology::SignalParam	signalParam(const QString& appSignalID);
 	Metrology::SignalParam	signalParam(const Hash& hash);
@@ -375,34 +216,33 @@ public:
 	void					setSignalParam(const Hash& hash, const Metrology::SignalParam& param);
 	void					setSignalParam(int index, const Metrology::SignalParam& param);
 
-	SignalState				signalState(const QString& appSignalID);
-	SignalState				signalState(const Hash& hash);
-	SignalState				signalState(int index);
+	Metrology::SignalState	signalState(const QString& appSignalID);
+	Metrology::SignalState	signalState(const Hash& hash);
+	Metrology::SignalState	signalState(int index);
 
-	void					setSignalState(const QString& appSignalID, const SignalState& state);
-	void					setSignalState(const Hash& hash, const SignalState& state);
-	void					setSignalState(int index, const SignalState& state);
-
-	UnitList&				units() { return m_unitList; }
+	void					setSignalState(const QString& appSignalID, const Metrology::SignalState& state);
+	void					setSignalState(const Hash& hash, const Metrology::SignalState& state);
+	void					setSignalState(int index, const Metrology::SignalState& state);
 
 	// hashs for update signal state
 	//
 	int						hashForRequestStateCount() const;
 	Hash					hashForRequestState(int index);
 
-	// Racks and Signals for measure
+	// racks for measure
 	//
-							// racks
-							//
-	int						createRackList(int outputSignalType);
-	void					clearRackList();
+	RackBase&				racks() { return m_rackBase; }
 
-	int						rackCount() const;
-	Metrology::RackParam	rack(int index);
+	int						createMeasureRackList(int outputSignalType);
+	void					clearMeasureRackList();
 
-							// signals
-							//
+	int						measureRackCount() const;
+	Metrology::RackParam	measureRack(int index);
+
+	// signals for measure
+	//
 	void					initSignals();
+	void					updateRackParam();
 
 	int						createMeasureSignalList(int measureKind, int outputSignalType, int rackIndex);
 	void					clearMeasureSignalList();
@@ -410,11 +250,23 @@ public:
 	int						measureSignalCount() const;
 	MeasureSignal			measureSignal(int index);
 
-	// Main signal for measure
+	// main signal for measure
 	//
 	MeasureSignal			activeSignal() const;
 	void					setActiveSignal(const MeasureSignal& signal);
 	void					clearActiveSignal();
+
+	// units
+	//
+	UnitList&				units() { return m_unitList; }
+
+	// output signals
+	//
+	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }
+
+	// signals of tuning
+	//
+	TuningSignalBase&		tuningSignals() { return m_tuningSignalBase; }
 
 signals:
 
@@ -429,251 +281,6 @@ public slots:
 // ==============================================================================================
 
 extern SignalBase theSignalBase;
-
-// ==============================================================================================
-
-class RackGroup
-{
-public:
-
-	RackGroup() {}
-	RackGroup(const QString& caption);
-	virtual ~RackGroup() {}
-
-private:
-
-	Hash				m_hash = 0;			// hash calcHash from rack caption
-
-	int					m_Index = -1;
-
-	QString				m_caption;			// rack group caption
-
-	QString				m_rackID[MAX_CHANNEL_COUNT];
-
-public:
-
-	bool				isValid() const;
-	void				clear();
-
-	Hash				hash() const { return m_hash; }
-
-	int					Index() const { return m_Index; }
-	void				setIndex(int index) { m_Index = index; }
-
-	QString				caption() const { return m_caption; }
-	void				setCaption(const QString& caption);
-
-	QString				rackID(int channel) const;
-	void				setRackID(int channel, const QString& rackID);
-};
-
-// ==============================================================================================
-
-class RackGroupBase : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit RackGroupBase(QObject *parent = 0);
-	virtual ~RackGroupBase() {}
-
-private:
-
-	mutable QMutex			m_groupMutex;
-	QVector<RackGroup>		m_groupList;
-
-public:
-
-	void					clear();
-	int						count() const;
-
-	int						append(const RackGroup& group);
-
-	RackGroup				group(int index) const;
-	bool					setGroup(int index, const RackGroup& group);
-
-	bool					remove(int index);
-
-	int						load();
-	bool					save();
-
-	RackGroupBase&			operator=(const RackGroupBase& from);
-
-signals:
-
-public slots:
-
-};
-
-// ==============================================================================================
-
-class RackBase : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit RackBase(QObject *parent = 0);
-	virtual ~RackBase() {}
-
-private:
-
-	mutable QMutex			m_rackMutex;
-	QMap<Hash, int>			m_rackHashMap;
-	QVector<Metrology::RackParam> m_rackList;
-
-	RackGroupBase			m_groupBase;
-
-public:
-
-	void					clear();
-	int						count() const;
-
-	int						append(const Metrology::RackParam& rack);
-
-	Metrology::RackParam	rack(const QString& rackID);
-	Metrology::RackParam	rack(const Hash& hash);
-	Metrology::RackParam	rack(int index);
-
-	void					setRack(const QString& rackID, const Metrology::RackParam& rack);
-	void					setRack(const Hash& hash, const Metrology::RackParam& rack);
-	void					setRack(int index, const Metrology::RackParam& rack);
-
-	RackGroupBase&			groups() { return m_groupBase; }
-	void					updateParamFromGroups();
-
-	RackBase&				operator=(const RackBase& from);
-
-signals:
-
-public slots:
-
-};
-
-// ==============================================================================================
-
-extern RackBase theRackBase;
-
-// ==============================================================================================
-
-const char* const OutputSignalSumType[] =
-{
-							QT_TRANSLATE_NOOP("Measure.h", "Addition (+)"),
-							QT_TRANSLATE_NOOP("Measure.h", "Subtraction (-)"),
-};
-
-const int					OUTPUT_SIGNAL_SUM_TYPE_COUNT	= sizeof(OutputSignalSumType)/sizeof(OutputSignalSumType[0]);
-
-const int					OUTPUT_SIGNAL_SUM_TYPE_NO_USED	= -1,
-							OUTPUT_SIGNAL_SUM_TYPE_ADD		= 0,
-							OUTPUT_SIGNAL_SUM_TYPE_SUB		= 1;
-
-// ----------------------------------------------------------------------------------------------
-
-#define						ERR_OUTPUT_SIGNAL_SUM_TYPE(type) (type < 0 || type >= OUTPUT_SIGNAL_SUM_TYPE_COUNT)
-#define						TEST_OUTPUT_SIGNAL_SUM_TYPE(type)			if (ERR_OUTPUT_SIGNAL_SUM_TYPE(type)) { return; }
-#define						TEST_OUTPUT_SIGNAL_SUM_TYPE1(type, retVal)	if (ERR_OUTPUT_SIGNAL_SUM_TYPE(type)) { return retVal; }
-
-// ==============================================================================================
-
-class OutputSignal
-{
-public:
-
-	OutputSignal();
-	OutputSignal(const OutputSignal& from);
-	virtual ~OutputSignal() {}
-
-private:
-
-	int						m_signalID = -1;
-	Hash					m_hash = 0;
-
-	int						m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
-
-	mutable QMutex			m_signalMutex;
-
-	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	Metrology::SignalParam	m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
-
-public:
-
-	void					clear();
-	bool					isValid() const;
-
-	int						signalID() const { return m_signalID; }
-	void					setSignalID(int id) { m_signalID = id; }
-
-	Hash					hash() const { return m_hash; }
-	bool					setHash();
-
-	int						type() const { return m_type; }
-	QString					typeStr() const;
-	void					setType(int type) { m_type = type; }
-
-	QString					appSignalID(int type) const;
-	void					setAppSignalID(int type, const QString& appSignalID);
-
-	Metrology::SignalParam	param(int type) const;
-	void					setParam(int type, const Metrology::SignalParam& param);
-	void					updateParam();
-
-	OutputSignal&			operator=(const OutputSignal& from);
-};
-
-// ==============================================================================================
-
-							Q_DECLARE_METATYPE(OutputSignal)
-							Q_DECLARE_METATYPE(OutputSignal*)
-
-// ==============================================================================================
-
-class OutputSignalBase : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit OutputSignalBase(QObject *parent = 0);
-	virtual ~OutputSignalBase() {}
-
-private:
-
-	mutable QMutex			m_signalMutex;
-	QVector<OutputSignal>	m_signalList;
-
-public:
-
-	void					clear();
-	int						signalCount() const;
-	void					sort();
-
-	int						load();
-	bool					save();
-
-	int						appendSignal(const OutputSignal& signal);
-
-	OutputSignal			signal(int index) const;
-	void					setSignal(int index, const OutputSignal& signal);
-
-	void					remove(const OutputSignal& signal);
-	void					remove(int index);
-
-	int						find(int measureIoType, const Hash& hash, int outputSignalType);
-	int						find(const OutputSignal& signal);
-
-	OutputSignalBase&		operator=(const OutputSignalBase& from);
-
-signals:
-
-public slots:
-
-};
-
-// ==============================================================================================
-
-extern OutputSignalBase theOutputSignalBase;
 
 // ==============================================================================================
 

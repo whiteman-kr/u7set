@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QCloseEvent>
 
+#include "Options.h"
 #include "OptionsDialog.h"
 #include "CalibratorBase.h"
 #include "Database.h"
@@ -40,17 +41,17 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, &theTuningSignalBase, &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::updatedSignalParam, &theSignalBase.tuningSignals(), &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
 
-	connect(&theTuningSignalBase, &TuningSignalBase::signalsLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
+	connect(&theSignalBase.tuningSignals(), &TuningSignalBase::signalsLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
 
 	// load rack groups for multichannel measuring
 	//
-	theRackBase.groups().load();
+	theSignalBase.racks().groups().load();
 
 	// load output signals base
 	//
-	theOutputSignalBase.load();
+	theSignalBase.outputSignals().load();
 
 	// init interface
 	//
@@ -775,7 +776,7 @@ void MainWindow::updateRacksOnToolBar()
 		return;
 	}
 
-	int rackCount = theSignalBase.createRackList(outputSignalType);
+	int rackCount = theSignalBase.createMeasureRackList(outputSignalType);
 	if (rackCount == 0)
 	{
 		return;
@@ -791,7 +792,7 @@ void MainWindow::updateRacksOnToolBar()
 			{
 				for(int r = 0; r < rackCount; r++)
 				{
-					Metrology::RackParam rack = theSignalBase.rack(r);
+					Metrology::RackParam rack = theSignalBase.measureRack(r);
 					if (rack.isValid() == false)
 					{
 						continue;
@@ -812,11 +813,11 @@ void MainWindow::updateRacksOnToolBar()
 
 		case MEASURE_KIND_MULTI:
 			{
-				int rackGroupCount = theRackBase.groups().count();
+				int rackGroupCount = theSignalBase.racks().groups().count();
 
 				for(int g = 0; g < rackGroupCount; g++)
 				{
-					RackGroup group = theRackBase.groups().group(g);
+					RackGroup group = theSignalBase.racks().groups().group(g);
 					if (group.isValid() == false)
 					{
 						continue;
@@ -1130,7 +1131,7 @@ bool MainWindow::signalIsMeasured(QString& signalID)
 
 	bool result = false;
 
-	for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
+	for(int c = 0; c < Metrology::ChannelCount; c++)
 	{
 		Hash hash = signal.hash(c);
 		if (hash == 0)
@@ -1138,7 +1139,7 @@ bool MainWindow::signalIsMeasured(QString& signalID)
 			continue;
 		}
 
-		MetrologySignal metrologySignal = theSignalBase.signal(hash);
+		Metrology::Signal metrologySignal = theSignalBase.signal(hash);
 		if (metrologySignal.param().isValid() == false)
 		{
 			continue;
@@ -1323,7 +1324,7 @@ void MainWindow::showOutputSignalList()
 		return;
 	}
 
-	if (theOutputSignalBase.save() == false)
+	if (theSignalBase.outputSignals().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save output signals was unsuccessfully!"));
 		return;
@@ -1348,10 +1349,18 @@ void MainWindow::showRackList()
 		return;
 	}
 
-	if (theRackBase.groups().save()== false)
+	theSignalBase.updateRackParam();
+
+	if (theSignalBase.racks().groups().save() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
 		return;
+	}
+
+	if (theOptions.toolBar().measureKind() == MEASURE_KIND_MULTI)
+	{
+		updateRacksOnToolBar();
+		updateSignalsOnToolBar();
 	}
 }
 
@@ -1397,7 +1406,7 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	if (theRackBase.groups().count() == 0)
+	if (theSignalBase.racks().groups().count() == 0)
 	{
 		m_measureKindList->blockSignals(true);
 		m_measureKindList->setCurrentIndex(MEASURE_KIND_ONE);
@@ -1457,7 +1466,7 @@ void MainWindow::setOutputSignalType(int index)
 
 void MainWindow::setRack(int index)
 {
-	if (index < 0 || index >= theSignalBase.rackCount())
+	if (index < 0 || index >= theSignalBase.measureRackCount())
 	{
 		return;
 	}
@@ -1771,7 +1780,7 @@ void MainWindow::signalSocketDisconnected()
 //	m_asPlaceCombo->clear();
 //	m_asPlaceCombo->setEnabled(false);
 
-//	theTuningSignalBase.clearSignalLlst();
+//	theSignalBase.tuningSignals().clearSignalLlst();
 
 //	theSignalBase.clear();
 
@@ -1814,8 +1823,8 @@ void MainWindow::tuningSocketDisconnected()
 		}
 	}
 
-	theTuningSignalBase.clearSourceList();
-	theTuningSignalBase.singalsSetNovalid();
+	theSignalBase.tuningSignals().clearSourceList();
+	theSignalBase.tuningSignals().singalsSetNovalid();
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
@@ -1841,8 +1850,8 @@ void MainWindow::tuningSignalsLoaded()
 
 	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
-	connectedState.append(tr("\nTuning sources: %1").arg(theTuningSignalBase.sourceCount()));
-	connectedState.append(tr("\nTuning signals: %1").arg(theTuningSignalBase.signalCount()));
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuningSignals().sourceCount()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuningSignals().signalCount()));
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
@@ -2025,7 +2034,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		m_pConfigSocket = nullptr;
 	}
 
-	theTuningSignalBase.clear();
+	theSignalBase.tuningSignals().clear();
 
 	theSignalBase.clear();
 

@@ -6,7 +6,6 @@
 #include <QAction>
 #include <QTableView>
 
-#include "Measure.h"
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -69,7 +68,7 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	MeasureParam			m_activeSignalParam[MAX_CHANNEL_COUNT];
+	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -79,13 +78,13 @@ private:
 
 public:
 
-	int						signalCount() const { return MAX_CHANNEL_COUNT; }
-	MeasureParam			signalParam(int index) const;
+	int						signalCount() const { return Metrology::ChannelCount; }
+	MeasureMultiParam		signalParam(int index) const;
 	void					set(const MeasureSignal &activeSignal);
 	void					clear();
 
-	QString					text(int row, int column, const MeasureParam &measureParam) const;
-	QString					signalStateStr(const Metrology::SignalParam& param, const SignalState& state) const;
+	QString					text(int row, int column, const MeasureMultiParam &measureParam) const;
+	QString					signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const;
 
 	void					updateColumn(int column);
 

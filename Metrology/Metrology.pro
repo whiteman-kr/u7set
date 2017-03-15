@@ -119,7 +119,9 @@ SOURCES += \
     ../lib/MetrologySignal.cpp \
     RackList.cpp \
     OutputSignalList.cpp \
-    ObjectProperties.cpp
+    ObjectProperties.cpp \
+    OutputSignalBase.cpp \
+    RackBase.cpp
 
 
 
@@ -188,7 +190,9 @@ HEADERS  += \
     ../lib/MetrologySignal.h \
     RackList.h \
     OutputSignalList.h \
-    ObjectProperties.h
+    ObjectProperties.h \
+    OutputSignalBase.h \
+    RackBase.h
 
 
 FORMS    +=

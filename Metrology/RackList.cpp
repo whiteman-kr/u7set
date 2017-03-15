@@ -271,7 +271,7 @@ RackListDialog::RackListDialog(QWidget *parent) :
 		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &RackListDialog::updateList, Qt::QueuedConnection);
 	}
 
-	m_rackBase = theRackBase;
+	m_rackBase = theSignalBase.racks();
 	m_rackTable.setRackGroups(m_rackBase.groups());
 
 	createInterface();
@@ -571,7 +571,7 @@ void RackListDialog::onListDoubleClicked(const QModelIndex&)
 
 void RackListDialog::onOk()
 {
-	theRackBase = m_rackBase;
+	theSignalBase.racks() = m_rackBase;
 
 	accept();
 }

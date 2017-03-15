@@ -675,7 +675,7 @@ void RackPropertyDialog::createPropertyList()
 		item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Channel"));
 		QStringList channelList;
 		channelList.append(QString());
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
+		for(int c = 0; c < Metrology::ChannelCount; c++)
 		{
 			channelList.append(QString::number(c + 1));
 		}
@@ -909,7 +909,7 @@ void RackGroupPropertyDialog::createPropertyList()
 	//
 	QtProperty *racks = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Racks"));
 
-		for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
+		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 		{
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Channel %1").arg(channel + 1));
 
@@ -1031,7 +1031,7 @@ void RackGroupPropertyDialog::updateRackList()
 
 	QtVariantProperty *property = nullptr;
 
-	for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
 		property = (QtVariantProperty*) m_propertyMap.key(channel);
 		if (property == nullptr)
@@ -1089,7 +1089,7 @@ void RackGroupPropertyDialog::removeGroup()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete group %1?").arg(group.caption())) == QMessageBox::No)
+	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete group \"%1\"?").arg(group.caption())) == QMessageBox::No)
 	{
 		return;
 	}
@@ -1126,7 +1126,7 @@ void RackGroupPropertyDialog::onPropertyValueChanged(QtProperty *property, const
 	}
 
 	int channel = m_propertyMap[property];
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		return;
 	}
@@ -1201,6 +1201,17 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 		return;
 	}
 
+
+	int groupCount = m_groupBase.count();
+	for(int i = 0; i < groupCount; i++)
+	{
+		if (m_groupBase.group(i).caption() == caption)
+		{
+			QMessageBox::information(this, tr("Group caption"), tr("Group caption \"%1\" already exists!").arg(caption));
+			return;
+		}
+	}
+
 	group.setCaption(caption);
 	m_groupBase.setGroup(index, group);
 
@@ -1259,7 +1270,7 @@ bool RackGroupPropertyDialog::foundDuplicateRacks()
 			continue;
 		}
 
-		for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
+		for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 		{
 			QString currRackID = group.rackID(channel);
 

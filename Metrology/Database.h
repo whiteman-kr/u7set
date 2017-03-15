@@ -79,14 +79,6 @@ const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_RACK_GROUP					= 14,
 						SQL_TABLE_OUTPUT_SIGNAL					= 15;
 
-
-// ----------------------------------------------------------------------------------------------
-
-#define					ERR_SQL_TABLE(table) (table < 0 || table >= SQL_TABLE_COUNT)
-#define					TEST_SQL_TABLE(table)			if (ERR_SQL_TABLE(table)) { return; }
-#define					TEST_SQL_TABLE1(table, retVal)	if (ERR_SQL_TABLE(table)) { return retVal; }
-
-
 // ==============================================================================================
 
 const int				SQL_TABLE_VER_UNKNONW = -1;

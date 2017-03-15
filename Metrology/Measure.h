@@ -24,12 +24,6 @@ const int	MEASURE_TYPE_UNKNOWN	= -1,
 
 // ----------------------------------------------------------------------------------------------
 
-#define		ERR_MEASURE_TYPE(type) (type < 0 || type >= MEASURE_TYPE_COUNT)
-#define		TEST_MEASURE_TYPE(type)				if (ERR_MEASURE_TYPE(type)) { return; }
-#define		TEST_MEASURE_TYPE1(type, retVal)	if (ERR_MEASURE_TYPE(type)) { return retVal; }
-
-// ----------------------------------------------------------------------------------------------
-
 const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
 {
 			QT_TRANSLATE_NOOP("Measure.h", "Linearity"),
@@ -60,12 +54,6 @@ const int	MEASURE_KIND_UNKNOWN			= -1,
 			MEASURE_KIND_ONE				= 0,
 			MEASURE_KIND_MULTI				= 1;
 
-// ----------------------------------------------------------------------------------------------
-
-#define		ERR_MEASURE_KIND(kind) (kind < 0 || kind >= MEASURE_KIND_COUNT)
-#define		TEST_MEASURE_KIND(kind)				if (ERR_MEASURE_KIND(kind)) { return; }
-#define		TEST_MEASURE_KIND1(kind, retVal)	if (ERR_MEASURE_KIND(kind)) { return retVal; }
-
 // ==============================================================================================
 
 const char* const ValueType[] =
@@ -82,12 +70,6 @@ const int	VALUE_TYPE_UNKNOWN		= -1,
 			VALUE_TYPE_PHYSICAL		= 1,
 			VALUE_TYPE_OUT_ELECTRIC	= 2;
 
-// ----------------------------------------------------------------------------------------------
-
-#define		ERR_VALUE_TYPE(type) (type < 0 || type >= VALUE_TYPE_COUNT)
-#define		TEST_VALUE_TYPE(type)			if (ERR_VALUE_TYPE(type)) { return; }
-#define		TEST_VALUE_TYPE1(type, retVal)	if (ERR_VALUE_TYPE(type)) { return retVal; }
-
 // ==============================================================================================
 
 const char* const ErrorType[] =
@@ -101,12 +83,6 @@ const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(ErrorType)/sizeof(ErrorType[0]);
 const int	MEASURE_ERROR_TYPE_UNKNOWN	= -1,
 			MEASURE_ERROR_TYPE_ABSOLUTE	= 0,
 			MEASURE_ERROR_TYPE_REDUCE	= 1;
-
-// ----------------------------------------------------------------------------------------------
-
-#define		ERR_MEASURE_ERROR_TYPE(type) (type < 0 || type >= MEASURE_ERROR_TYPE_COUNT)
-#define		TEST_MEASURE_ERROR_TYPE(type)			if (ERR_MEASURE_ERROR_TYPE(type)) { return; }
-#define		TEST_MEASURE_ERROR_TYPE1(type, retVal)	if (ERR_MEASURE_ERROR_TYPE(type)) { return retVal; }
 
 // ==============================================================================================
 
@@ -197,7 +173,7 @@ class LinearityMeasurement : public Measurement
 public:
 
 	LinearityMeasurement();
-	LinearityMeasurement(const MeasureParam& measureParam);
+	LinearityMeasurement(const MeasureMultiParam& measureParam);
 	virtual ~LinearityMeasurement();
 
 private:
@@ -234,9 +210,9 @@ public:
 
 	void			virtual clear();
 
-	void			set1(const MeasureParam& measureParam);
-	void			set2(const MeasureParam& measureParam);
-	void			set3(const MeasureParam& measureParam);
+	void			set1(const MeasureMultiParam& measureParam);
+	void			set2(const MeasureMultiParam& measureParam);
+	void			set3(const MeasureMultiParam& measureParam);
 
 	void			calcError();
 	void			calcAdditionalParam(int limitType);

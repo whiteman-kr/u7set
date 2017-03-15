@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <QMessageBox>
+
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -955,12 +956,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					header->m_V = query.value(field++).toDouble();
 					header->m_F = query.value(field++).toDouble();
 
-					header->m_calibrator[CHANNEL_0] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_1] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_2] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_3] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_4] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_5] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_0] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_1] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_2] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_3] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_4] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_5] = query.value(field++).toString();
 
 					header->m_linkObjectID = query.value(field++).toInt();
 					header->m_reportFile = query.value(field++).toString();
@@ -976,12 +977,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					group->setIndex(query.value(field++).toInt());
 					group->setCaption(query.value(field++).toString());
 
-					group->setRackID(CHANNEL_0, query.value(field++).toString());
-					group->setRackID(CHANNEL_1, query.value(field++).toString());
-					group->setRackID(CHANNEL_2, query.value(field++).toString());
-					group->setRackID(CHANNEL_3, query.value(field++).toString());
-					group->setRackID(CHANNEL_4, query.value(field++).toString());
-					group->setRackID(CHANNEL_5, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_0, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_1, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_2, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_3, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_4, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_5, query.value(field++).toString());
 				}
 				break;
 
@@ -1327,12 +1328,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, header->m_V);
 					query.bindValue(field++, header->m_F);
 
-					query.bindValue(field++, header->m_calibrator[CHANNEL_0]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_1]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_2]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_3]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_4]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_5]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_0]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_1]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_2]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_3]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_4]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_5]);
 
 					query.bindValue(field++, header->m_linkObjectID);
 					query.bindValue(field++, header->m_reportFile);
@@ -1348,12 +1349,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, group->Index());
 					query.bindValue(field++, group->caption());
 
-					query.bindValue(field++, group->rackID(CHANNEL_0));
-					query.bindValue(field++, group->rackID(CHANNEL_1));
-					query.bindValue(field++, group->rackID(CHANNEL_2));
-					query.bindValue(field++, group->rackID(CHANNEL_3));
-					query.bindValue(field++, group->rackID(CHANNEL_4));
-					query.bindValue(field++, group->rackID(CHANNEL_5));
+					query.bindValue(field++, group->rackID(Metrology::Channel_0));
+					query.bindValue(field++, group->rackID(Metrology::Channel_1));
+					query.bindValue(field++, group->rackID(Metrology::Channel_2));
+					query.bindValue(field++, group->rackID(Metrology::Channel_3));
+					query.bindValue(field++, group->rackID(Metrology::Channel_4));
+					query.bindValue(field++, group->rackID(Metrology::Channel_5));
 				}
 				break;
 

@@ -49,7 +49,7 @@ void CalibratorBase::init(QWidget* parent)
 
 void CalibratorBase::createCalibrators(QWidget* parent)
 {
-	for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
 		Calibrator* calibrator = new Calibrator(channel);
 		if (calibrator == nullptr)
@@ -191,9 +191,9 @@ void CalibratorBase::setHeaderList()
 	// init rows
 	//
 	QStringList verticalHeaderLabels;
-	m_pCalibratorView->setRowCount(MAX_CHANNEL_COUNT);
+	m_pCalibratorView->setRowCount(Metrology::ChannelCount);
 
-	for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
+	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
 		verticalHeaderLabels.append(QString("Calibrator %1").arg(channel + 1));
 		m_pCalibratorView->setRowHeight(channel, 18);
@@ -205,7 +205,7 @@ void CalibratorBase::setHeaderList()
 	int count = horizontalHeaderLabels.count();
 	for(int column = 0; column < count; column++)
 	{
-		for(int row = 0; row < MAX_CHANNEL_COUNT; row++)
+		for(int row = 0; row < Metrology::ChannelCount; row++)
 		{
 			QTableWidgetItem* item = new QTableWidgetItem(QString());
 			item->setTextAlignment(Qt::AlignHCenter);
@@ -394,9 +394,9 @@ void CalibratorBase::onInitialization()
 		calibrator->setWaitResponse(false);
 	}
 
-	emit calibratorClose();							// close all calibratirs serial port
-	QThread::msleep(MAX_CHANNEL_COUNT * 100);		// wait, until all the serial ports will be closed
-	emit calibratorOpen();							// open all calibratirs
+	emit calibratorClose();									// close all calibratirs serial port
+	QThread::msleep(Metrology::ChannelCount * 100);			// wait, until all the serial ports will be closed
+	emit calibratorOpen();									// open all calibratirs
 
 	m_timeout = 0;
 	m_timer.start(CALIBRATOR_TIMEOUT_STEP);

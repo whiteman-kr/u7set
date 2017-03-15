@@ -1,5 +1,7 @@
 #include "TuningSignalBase.h"
 
+#include "SignalBase.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -53,10 +55,6 @@ TuningWriteCmd::~TuningWriteCmd()
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignalBase theTuningSignalBase;
-
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSignalBase::TuningSignalBase(QObject *parent) :
@@ -225,7 +223,7 @@ void TuningSignalBase::createSignalList()
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		MetrologySignal signal = theSignalBase.signal(i);
+		Metrology::Signal signal = theSignalBase.signal(i);
 		if (signal.param().isValid() == false)
 		{
 			continue;
@@ -238,7 +236,7 @@ void TuningSignalBase::createSignalList()
 			continue;
 		}
 
-		appendSignal(new MetrologySignal(signal));
+		appendSignal(new Metrology::Signal(signal));
 	}
 
 	emit signalsLoaded();
@@ -261,7 +259,7 @@ int TuningSignalBase::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::appendSignal(MetrologySignal* pSignal)
+int TuningSignalBase::appendSignal(Metrology::Signal* pSignal)
 {
 	if (pSignal == nullptr)
 	{
@@ -293,7 +291,7 @@ int TuningSignalBase::appendSignal(MetrologySignal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal* TuningSignalBase::signalForRead(const Hash& hash) const
+Metrology::Signal* TuningSignalBase::signalForRead(const Hash& hash) const
 {
 	if (hash == 0)
 	{
@@ -301,7 +299,7 @@ MetrologySignal* TuningSignalBase::signalForRead(const Hash& hash) const
 		return nullptr;
 	}
 
-	MetrologySignal* pSignal = nullptr;
+	Metrology::Signal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
@@ -322,9 +320,9 @@ MetrologySignal* TuningSignalBase::signalForRead(const Hash& hash) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal* TuningSignalBase::signalForRead(int index) const
+Metrology::Signal* TuningSignalBase::signalForRead(int index) const
 {
-	MetrologySignal* pSignal = nullptr;
+	Metrology::Signal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
@@ -340,15 +338,15 @@ MetrologySignal* TuningSignalBase::signalForRead(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalState TuningSignalBase::signalState(const Hash& hash)
+Metrology::SignalState TuningSignalBase::signalState(const Hash& hash)
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return SignalState();
+		return Metrology::SignalState();
 	}
 
-	SignalState state;
+	Metrology::SignalState state;
 
 	m_signalMutex.lock();
 
@@ -358,7 +356,7 @@ SignalState TuningSignalBase::signalState(const Hash& hash)
 
 			if (index >= 0 && index < m_signalList.size())
 			{
-				MetrologySignal* pSignal = m_signalList[index];
+				Metrology::Signal* pSignal = m_signalList[index];
 				if (pSignal != nullptr)
 				{
 					state = pSignal->state();
@@ -389,7 +387,7 @@ void TuningSignalBase::setSignalState(const Network::TuningSignalState& state)
 
 			if (index >= 0 && index < m_signalList.size())
 			{
-				MetrologySignal* pSignal = m_signalList[index];
+				Metrology::Signal* pSignal = m_signalList[index];
 				if (pSignal != nullptr)
 				{
 					pSignal->state().setValid(state.valid());
@@ -417,7 +415,7 @@ void TuningSignalBase::updateSignalParam(const Hash& signalHash)
 
 		for(int i = 0; i < count; i ++)
 		{
-			 MetrologySignal* pSignal = m_signalList[i];
+			 Metrology::Signal* pSignal = m_signalList[i];
 			 if (pSignal == nullptr)
 			 {
 				 continue;
@@ -444,7 +442,7 @@ void TuningSignalBase::singalsSetNovalid()
 
 		for(int i = 0; i < count; i++)
 		{
-			MetrologySignal* pSignal = m_signalList[i];
+			Metrology::Signal* pSignal = m_signalList[i];
 			if (pSignal == nullptr)
 			{
 				continue;

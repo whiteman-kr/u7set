@@ -96,7 +96,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	MetrologySignal* pSignal = signal(row);
+	Metrology::Signal* pSignal = signal(row);
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
@@ -148,11 +148,11 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().measureCount() != 0)
 		{
-			if (pSignal->statistic().state() == STATISTIC_STATE_INVALID)
+			if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
 			{
 				return theOptions.measureView().colorErrorLimit();
 			}
-			if (pSignal->statistic().state() == STATISTIC_STATE_SUCCESS)
+			if (pSignal->statistic().state() == Metrology::StatisticStateSuccess)
 			{
 				return theOptions.measureView().colorNotError();
 			}
@@ -172,7 +172,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString StatisticTable::text(int row, int column, MetrologySignal* pSignal) const
+QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) const
 {
 	if (row < 0 || row >= signalCount())
 	{
@@ -237,9 +237,9 @@ int StatisticTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal* StatisticTable::signal(int index) const
+Metrology::Signal* StatisticTable::signal(int index) const
 {
-	MetrologySignal* pSignal = nullptr;
+	Metrology::Signal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
@@ -255,7 +255,7 @@ MetrologySignal* StatisticTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticTable::set(const QList<MetrologySignal*> list_add)
+void StatisticTable::set(const QList<Metrology::Signal*> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -319,7 +319,7 @@ void StatisticTable::updateSignalParam(const Hash& signalHash)
 
 		for(int i = 0; i < count; i ++)
 		{
-			 MetrologySignal* pSignal = m_signalList[i];
+			 Metrology::Signal* pSignal = m_signalList[i];
 			 if (pSignal == nullptr)
 			 {
 				 continue;
@@ -568,12 +568,12 @@ void StatisticDialog::updateList()
 
 	m_signalTable.clear();
 
-	QList<MetrologySignal*> signalList;
+	QList<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		MetrologySignal signal = theSignalBase.signal(i);
+		Metrology::Signal signal = theSignalBase.signal(i);
 		if (signal.param().isValid() == false)
 		{
 			continue;
@@ -606,12 +606,12 @@ void StatisticDialog::updateList()
 			m_MeasuredCount++;
 		}
 
-		if (signal.statistic().state() == STATISTIC_STATE_INVALID)
+		if (signal.statistic().state() == Metrology::StatisticStateInvalid)
 		{
 			m_invalidMeasureCount ++;
 		}
 
-		signalList.append(new MetrologySignal(signal));
+		signalList.append(new Metrology::Signal(signal));
 	}
 
 	m_signalTable.set(signalList);
@@ -625,8 +625,8 @@ void StatisticDialog::updateStatusBar()
 {
 	int signalCount = m_signalTable.signalCount();
 
-	m_statusMeasured->setText(tr("Measured: %1 / %2").arg(m_MeasuredCount).arg(signalCount));
-	m_statusMeasureInavlid->setText(tr("Invalid: %1").arg(m_invalidMeasureCount));
+	m_statusMeasured->setText(tr(" Measured: %1 / %2").arg(m_MeasuredCount).arg(signalCount));
+	m_statusMeasureInavlid->setText(tr(" Invalid: %1").arg(m_invalidMeasureCount));
 
 	if (m_invalidMeasureCount == 0)
 	{
@@ -797,7 +797,7 @@ void StatisticDialog::gotoNextNotMeasured()
 
 	for(int i = startIndex + 1; i < signaCount; i++)
 	{
-		MetrologySignal* pSignal = m_signalTable.signal(i);
+		Metrology::Signal* pSignal = m_signalTable.signal(i);
 		if (pSignal == nullptr)
 		{
 			continue;
@@ -839,7 +839,7 @@ void StatisticDialog::gotoNextInvalid()
 
 	for(int i = startIndex + 1; i < signaCount; i++)
 	{
-		MetrologySignal* pSignal = m_signalTable.signal(i);
+		Metrology::Signal* pSignal = m_signalTable.signal(i);
 		if (pSignal == nullptr)
 		{
 			continue;
@@ -850,7 +850,7 @@ void StatisticDialog::gotoNextInvalid()
 			continue;
 		}
 
-		if (pSignal->statistic().state() == STATISTIC_STATE_INVALID)
+		if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
 		{
 			foundIndex = i;
 

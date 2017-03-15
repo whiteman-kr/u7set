@@ -594,7 +594,7 @@ OutputSignalDialog::OutputSignalDialog(QWidget *parent) :
 		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
 	}
 
-	m_signalBase = theOutputSignalBase;
+	m_signalBase = theSignalBase.outputSignals();
 
 	createInterface();
 	updateList();
@@ -925,8 +925,7 @@ void OutputSignalDialog::onContextMenu(QPoint)
 
 void OutputSignalDialog::onOk()
 {
-	theOutputSignalBase.clear();
-	theOutputSignalBase = m_signalBase;
+	theSignalBase.outputSignals() = m_signalBase;
 
 	accept();
 }

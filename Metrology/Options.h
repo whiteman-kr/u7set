@@ -8,9 +8,8 @@
 #include <QVector>
 #include <QColor>
 #include <QFont>
-#include <QTimer>
 
-#include "../lib/SocketIO.h"
+//#include "../lib/SocketIO.h"
 
 #include "Measure.h"
 #include "MeasureViewHeader.h"
@@ -46,6 +45,7 @@ private:
 	QString				m_user;
 	QString				m_workstation;
 	int					m_dbVersion = 0;
+	int					m_cfgFileVersion = 0;
 
 public:
 
@@ -57,6 +57,8 @@ public:
 	QString				user() { return m_user; }
 	QString				workstation() { return m_workstation; }
 	int					dbVersion() { return m_dbVersion; }
+	int					cfgFileVersion() { return m_cfgFileVersion; }
+	void				setCfgFileVersion(int version) { m_cfgFileVersion = version; }
 
 	void				save();
 
@@ -634,7 +636,7 @@ struct REPORT_HEADER
 	double				m_V = 0;
 	double				m_F = 0;
 
-	QString				m_calibrator[MAX_CHANNEL_COUNT];
+	QString				m_calibrator[Metrology::ChannelCount];
 
 	int					m_linkObjectID;
 	QString				m_reportFile;

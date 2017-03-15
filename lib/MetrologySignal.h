@@ -8,7 +8,7 @@
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
 // and write log history about changing
 
-const int CFG_FILE_VER_METROLOGY_SIGNALS = 1;
+const int	CFG_FILE_VER_METROLOGY_SIGNALS = 1;
 
 // Historty of version
 //
@@ -17,6 +17,27 @@ const int CFG_FILE_VER_METROLOGY_SIGNALS = 1;
 
 namespace Metrology
 {
+
+	// ==============================================================================================
+
+	const char* const ChannelLetter [] = {"A", "B", "C", "D", "E", "F"};
+
+	const int	ChannelCount	= sizeof(ChannelLetter)/sizeof(ChannelLetter[0]);
+
+	const int	Channel_A		= 0,
+				Channel_B		= 1,
+				Channel_C		= 2,
+				Channel_D		= 3,
+				Channel_E		= 4,
+				Channel_F		= 5;
+
+	const int	Channel_0		= 0,
+				Channel_1		= 1,
+				Channel_2		= 2,
+				Channel_3		= 3,
+				Channel_4		= 4,
+				Channel_5		= 5;
+
 	// ==============================================================================================
 
 	class RackParam
@@ -178,7 +199,7 @@ namespace Metrology
 
 		bool					isValid() const;
 
-		void					setParam(const Signal& signal, const SignalLocation& location);
+		void					setParam(const ::Signal& signal, const SignalLocation& location);
 
 		Hash					hash() const { return m_hash; }
 
@@ -308,6 +329,121 @@ namespace Metrology
 
 		bool					readFromXml(XmlReadHelper& xml);
 		void					writeToXml(XmlWriteHelper& xml);
+	};
+
+	// ==============================================================================================
+
+	class SignalState
+	{
+	public:
+
+		SignalState()  {}
+		SignalState(const AppSignalState& state) : m_value(state.value), m_flags(state.flags)  {}
+		SignalState(double value, const AppSignalStateFlags& flags) : m_value(value), m_flags(flags)  {}
+		virtual ~SignalState() {}
+
+	private:
+
+		double					m_value = 0;
+
+		AppSignalStateFlags		m_flags;
+
+	public:
+
+		void					setState(const AppSignalState& state) { m_value = state.value; m_flags = state.flags; }
+
+		double					value() const { return m_value; }
+		void					setValue(double value) { m_value = value; }
+
+		AppSignalStateFlags		flags() const { return m_flags; }
+		void					setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
+
+		bool					valid() const { return m_flags.valid; }
+		void					setValid(bool valid) { m_flags.valid = valid; }
+	};
+
+	// ==============================================================================================
+
+	const char* const StatisticState[] =
+	{
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Invalid"),
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Ok"),
+	};
+
+	const int	StatisticStateCount		= sizeof(StatisticState)/sizeof(StatisticState[0]);
+
+	const int	StatisticStateInvalid	= 0,
+				StatisticStateSuccess	= 1;
+
+	// ----------------------------------------------------------------------------------------------
+
+	class SignalStatistic
+	{
+	public:
+
+		SignalStatistic() {}
+		explicit SignalStatistic(const Hash& signalHash) : m_signalHash (signalHash) {}
+		virtual ~SignalStatistic() {}
+
+	private:
+
+		Hash					m_signalHash = 0;
+
+		int						m_measureCount = 0;
+		int						m_state = StatisticStateSuccess;
+
+	public:
+
+		Hash					signalHash() const { return m_signalHash; }
+		void					setSignalHash(const Hash& hash) { m_signalHash = hash; }
+
+		int&					measureCount() { return m_measureCount; }
+		QString					measureCountStr() const;
+
+		int						state() const { return m_state; }
+		QString					stateStr() const;
+		void					setState(bool state) { m_state = state; }
+	};
+
+	// ==============================================================================================
+
+	class Signal
+	{
+	public:
+
+		Signal() {}
+
+		explicit Signal(const SignalParam& param)
+		{
+			setParam(param);
+
+			// temporary solution
+			// because u7 can not set electric range
+			//
+			m_param.setInputElectricLowLimit(0);
+			m_param.setInputElectricHighLimit(5);
+			m_param.setInputElectricUnitID(E::InputUnit::V);
+		}
+
+		virtual ~Signal() {}
+
+	private:
+
+		SignalParam				m_param;
+		SignalState				m_state;
+
+		SignalStatistic			m_statistic;
+
+	public:
+
+		SignalParam&			param() { return m_param; }
+		void					setParam(const Metrology::SignalParam& param) { m_param = param; }
+
+		SignalState&			state() { return m_state; }
+		void					setState(const Metrology::SignalState& state) { m_state = state; }
+
+		SignalStatistic&		statistic() { return m_statistic; }
+		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
 
 	// ==============================================================================================

@@ -167,10 +167,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		AppSignalState appState;
 		appState.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
 
-//		state.flags.valid = true;
-//		state.value = 50;
-
-		SignalState state(appState.value, appState.flags);
+		Metrology::SignalState state(appState);
 		theSignalBase.setSignalState(hash, state);
 	}
 }

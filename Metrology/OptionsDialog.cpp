@@ -1290,25 +1290,25 @@ void OptionsDialog::applyProperty()
 
 				switch(param)
 				{
-					case RO_PARAM_PATH:					m_options.report().setPath(value.toString());		break;
+					case RO_PARAM_PATH:					m_options.report().setPath(value.toString());					break;
 					case RO_PARAM_TYPE:					m_options.report().setType(value.toInt());
-														updateReportHeaderPage();							break;
-					case RO_PARAM_DOCUMENT_TITLE:		header.m_documentTitle = value.toString();			break;
-					case RO_PARAM_REPORT_TITLE:			header.m_reportTitle = value.toString();			break;
-					case RO_PARAM_DATE:					header.m_date = value.toString();					break;
-					case RO_PARAM_TABLE_TITLE:			header.m_tableTitle = value.toString();				break;
-					case RO_PARAM_CONCLUSION:			header.m_conclusion = value.toString();				break;
-					case RO_PARAM_T:					header.m_T = value.toDouble();						break;
-					case RO_PARAM_P:					header.m_P = value.toDouble();						break;
-					case RO_PARAM_H:					header.m_H = value.toDouble();						break;
-					case RO_PARAM_V:					header.m_V = value.toDouble();						break;
-					case RO_PARAM_F:					header.m_F = value.toDouble();						break;
-					case RO_PARAM_CALIBRATOR_0:			header.m_calibrator[CHANNEL_0] = value.toString();	break;
-					case RO_PARAM_CALIBRATOR_1:			header.m_calibrator[CHANNEL_1] = value.toString();	break;
-					case RO_PARAM_CALIBRATOR_2:			header.m_calibrator[CHANNEL_2] = value.toString();	break;
-					case RO_PARAM_CALIBRATOR_3:			header.m_calibrator[CHANNEL_3] = value.toString();	break;
-					case RO_PARAM_CALIBRATOR_4:			header.m_calibrator[CHANNEL_4] = value.toString();	break;
-					case RO_PARAM_CALIBRATOR_5:			header.m_calibrator[CHANNEL_5] = value.toString();	break;
+														updateReportHeaderPage();										break;
+					case RO_PARAM_DOCUMENT_TITLE:		header.m_documentTitle = value.toString();						break;
+					case RO_PARAM_REPORT_TITLE:			header.m_reportTitle = value.toString();						break;
+					case RO_PARAM_DATE:					header.m_date = value.toString();								break;
+					case RO_PARAM_TABLE_TITLE:			header.m_tableTitle = value.toString();							break;
+					case RO_PARAM_CONCLUSION:			header.m_conclusion = value.toString();							break;
+					case RO_PARAM_T:					header.m_T = value.toDouble();									break;
+					case RO_PARAM_P:					header.m_P = value.toDouble();									break;
+					case RO_PARAM_H:					header.m_H = value.toDouble();									break;
+					case RO_PARAM_V:					header.m_V = value.toDouble();									break;
+					case RO_PARAM_F:					header.m_F = value.toDouble();									break;
+					case RO_PARAM_CALIBRATOR_0:			header.m_calibrator[Metrology::Channel_0] = value.toString();	break;
+					case RO_PARAM_CALIBRATOR_1:			header.m_calibrator[Metrology::Channel_1] = value.toString();	break;
+					case RO_PARAM_CALIBRATOR_2:			header.m_calibrator[Metrology::Channel_2] = value.toString();	break;
+					case RO_PARAM_CALIBRATOR_3:			header.m_calibrator[Metrology::Channel_3] = value.toString();	break;
+					case RO_PARAM_CALIBRATOR_4:			header.m_calibrator[Metrology::Channel_4] = value.toString();	break;
+					case RO_PARAM_CALIBRATOR_5:			header.m_calibrator[Metrology::Channel_5] = value.toString();	break;
 					case RO_PARAM_REPORT_FILE:			break;
 					default:							assert(0);
 				}
@@ -1558,37 +1558,37 @@ void OptionsDialog::updateReportHeaderPage()
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_0);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_0]);
+		property->setValue(header.m_calibrator[Metrology::Channel_0]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_1);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_1]);
+		property->setValue(header.m_calibrator[Metrology::Channel_1]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_2);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_2]);
+		property->setValue(header.m_calibrator[Metrology::Channel_2]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_3);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_3]);
+		property->setValue(header.m_calibrator[Metrology::Channel_3]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_4);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_4]);
+		property->setValue(header.m_calibrator[Metrology::Channel_4]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_CALIBRATOR_5);
 	if (property != nullptr)
 	{
-		property->setValue(header.m_calibrator[CHANNEL_5]);
+		property->setValue(header.m_calibrator[Metrology::Channel_5]);
 	}
 
 	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_REPORT << 8) | RO_PARAM_REPORT_FILE);

@@ -37,7 +37,7 @@ int SignalInfoTable::columnCount(const QModelIndex&) const
 
 int SignalInfoTable::rowCount(const QModelIndex&) const
 {
-	return MAX_CHANNEL_COUNT;
+	return Metrology::ChannelCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= MAX_CHANNEL_COUNT)
+	if (row < 0 || row >= Metrology::ChannelCount)
 	{
 		return QVariant();
 	}
@@ -88,7 +88,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	MeasureParam measureParam = signalParam(row);
+	MeasureMultiParam measureParam = signalParam(row);
 	if (measureParam.isValid() == false)
 	{
 		return QVariant();
@@ -144,7 +144,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == SIGNAL_INFO_COLUMN_STATE)
 		{
-			SignalState state;
+			Metrology::SignalState state;
 
 			if (measureParam.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 			{
@@ -184,9 +184,9 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::text(int row, int column, const MeasureParam& measureParam) const
+QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& measureParam) const
 {
-	if (row < 0 || row >= MAX_CHANNEL_COUNT)
+	if (row < 0 || row >= Metrology::ChannelCount)
 	{
 		return QString();
 	}
@@ -212,7 +212,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 		Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == true)
 		{
-			SignalState inState = theSignalBase.signalState(inParam.hash());
+			Metrology::SignalState inState = theSignalBase.signalState(inParam.hash());
 			stateStr = signalStateStr(inParam, inState);
 		}
 
@@ -221,7 +221,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 			Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
 			{
-				SignalState outState = theSignalBase.signalState(outParam.hash());
+				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
 				stateStr += divider + signalStateStr(outParam, outState);
 			}
 		}
@@ -250,7 +250,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureParam& measurePa
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, const SignalState& state) const
+QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const
 {
 	if (param.isValid() == false)
 	{
@@ -340,7 +340,7 @@ void SignalInfoTable::updateColumn(int column)
 		return;
 	}
 
-	for (int row = 0; row < MAX_CHANNEL_COUNT; row ++)
+	for (int row = 0; row < Metrology::ChannelCount; row ++)
 	{
 		QModelIndex cellIndex = index(row, column);
 
@@ -350,14 +350,14 @@ void SignalInfoTable::updateColumn(int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureParam SignalInfoTable::signalParam(int index) const
+MeasureMultiParam SignalInfoTable::signalParam(int index) const
 {
-	if (index < 0 || index >= MAX_CHANNEL_COUNT)
+	if (index < 0 || index >= Metrology::ChannelCount)
 	{
-		return MeasureParam();
+		return MeasureMultiParam();
 	}
 
-	MeasureParam param;
+	MeasureMultiParam param;
 
 	m_signalMutex.lock();
 
@@ -377,11 +377,11 @@ void SignalInfoTable::set(const MeasureSignal &activeSignal)
 		return;
 	}
 
-	beginInsertRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1);
+	beginInsertRows(QModelIndex(), 0, Metrology::ChannelCount - 1);
 
 		m_signalMutex.lock();
 
-			for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+			for(int c = 0; c < Metrology::ChannelCount; c ++)
 			{
 				m_activeSignalParam[c].clear();
 
@@ -414,11 +414,11 @@ void SignalInfoTable::set(const MeasureSignal &activeSignal)
 
 void SignalInfoTable::clear()
 {
-	beginRemoveRows(QModelIndex(), 0, MAX_CHANNEL_COUNT - 1);
+	beginRemoveRows(QModelIndex(), 0, Metrology::ChannelCount - 1);
 
 		m_signalMutex.lock();
 
-			for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+			for(int c = 0; c < Metrology::ChannelCount; c ++)
 			{
 				m_activeSignalParam[c].clear();
 			}
@@ -440,7 +440,7 @@ void SignalInfoTable::updateSignalParam(const Hash& signalHash)
 
 	m_signalMutex.lock();
 
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+		for(int c = 0; c < Metrology::ChannelCount; c ++)
 		{
 			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 			{

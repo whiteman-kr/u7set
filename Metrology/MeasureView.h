@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QList>
 
-#include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "MeasurementBase.h"
 

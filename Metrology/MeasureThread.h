@@ -30,7 +30,7 @@ private:
 	int						m_measureType = MEASURE_TYPE_UNKNOWN;
 	bool					m_cmdStopMeasure = true;
 
-	MeasureParam			m_activeSignalParam[MAX_CHANNEL_COUNT];
+	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
 
 	void					waitMeasureTimeout();
 

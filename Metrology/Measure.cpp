@@ -69,7 +69,7 @@ LinearityMeasurement::LinearityMeasurement() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::LinearityMeasurement(const MeasureParam &measureParam)
+LinearityMeasurement::LinearityMeasurement(const MeasureMultiParam &measureParam)
 {
 	clear();
 
@@ -157,7 +157,7 @@ void LinearityMeasurement::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set1(const MeasureParam &measureParam)
+void LinearityMeasurement::set1(const MeasureMultiParam &measureParam)
 {
 	Metrology::SignalParam param = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (param.isValid() == false)
@@ -217,7 +217,7 @@ void LinearityMeasurement::set1(const MeasureParam &measureParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		SignalState signalState = theSignalBase.signalState(param.hash());
+		Metrology::SignalState signalState = theSignalBase.signalState(param.hash());
 
 		double elVal = conversion(signalState.value(), CT_PHYSICAL_TO_ELECTRIC, param);
 		double phVal = signalState.value();
@@ -276,7 +276,7 @@ void LinearityMeasurement::set1(const MeasureParam &measureParam)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set2(const MeasureParam &measureParam)
+void LinearityMeasurement::set2(const MeasureMultiParam &measureParam)
 {
 	if (measureParam.isValid() == false)
 	{
@@ -354,7 +354,7 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
 
 	for(int index = 0; index < measureCount; index++)
 	{
-		SignalState signalState = theSignalBase.signalState(inParam.hash());
+		Metrology::SignalState signalState = theSignalBase.signalState(inParam.hash());
 
 		double elVal = conversion(signalState.value(), CT_PHYSICAL_TO_ELECTRIC, inParam);
 		double phVal = signalState.value();
@@ -422,7 +422,7 @@ void LinearityMeasurement::set2(const MeasureParam &measureParam)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set3(const MeasureParam &measureParam)
+void LinearityMeasurement::set3(const MeasureMultiParam &measureParam)
 {
 	if (measureParam.isValid() == false)
 	{

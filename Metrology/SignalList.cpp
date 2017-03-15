@@ -95,7 +95,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	MetrologySignal* pSignal = signal(row);
+	Metrology::Signal* pSignal = signal(row);
 	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
@@ -144,7 +144,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalListTable::text(int row, int column, MetrologySignal* pSignal) const
+QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) const
 {
 	if (row < 0 || row >= signalCount())
 	{
@@ -210,9 +210,9 @@ int SignalListTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal* SignalListTable::signal(int index) const
+Metrology::Signal* SignalListTable::signal(int index) const
 {
-	MetrologySignal* signal;
+	Metrology::Signal* signal;
 
 	m_signalMutex.lock();
 
@@ -228,7 +228,7 @@ MetrologySignal* SignalListTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<MetrologySignal*> list_add)
+void SignalListTable::set(const QList<Metrology::Signal*> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -292,7 +292,7 @@ void SignalListTable::updateSignalParam(const Hash& signalHash)
 
 		for(int i = 0; i < count; i ++)
 		{
-			 MetrologySignal* pSignal = m_signalList[i];
+			 Metrology::Signal* pSignal = m_signalList[i];
 			 if (pSignal == nullptr)
 			 {
 				 continue;
@@ -525,12 +525,12 @@ void SignalListDialog::updateList()
 
 	m_signalTable.clear();
 
-	QList<MetrologySignal*> signalList;
+	QList<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		MetrologySignal signal = theSignalBase.signal(i);
+		Metrology::Signal signal = theSignalBase.signal(i);
 		if (signal.param().isValid() == false)
 		{
 			continue;
@@ -543,7 +543,7 @@ void SignalListDialog::updateList()
 			continue;
 		}
 
-		signalList.append(new MetrologySignal(signal));
+		signalList.append(new Metrology::Signal(signal));
 	}
 
 	m_signalTable.set(signalList);
@@ -739,7 +739,7 @@ void SignalListDialog::signalProperties()
 		return;
 	}
 
-	MetrologySignal* pSignal = m_signalTable.signal(index);
+	Metrology::Signal* pSignal = m_signalTable.signal(index);
 	if (pSignal == nullptr)
 	{
 		return;
@@ -881,7 +881,7 @@ void SignalListDialog::onOk()
 		return;
 	}
 
-	MetrologySignal* pSignal = m_signalTable.signal(index);
+	Metrology::Signal* pSignal = m_signalTable.signal(index);
 	if (pSignal == nullptr)
 	{
 		return;

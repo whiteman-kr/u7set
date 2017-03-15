@@ -267,7 +267,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::setParam(const Signal& signal, const SignalLocation& location)
+	void SignalParam::setParam(const ::Signal& signal, const SignalLocation& location)
 	{
 		m_appSignalID = signal.appSignalID();
 		m_customAppSignalID = signal.customAppSignalID();
@@ -568,6 +568,37 @@ namespace Metrology
 		}
 
 		return stateStr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalStatistic::measureCountStr() const
+	{
+		if (m_measureCount == 0)
+		{
+			return QString();
+		}
+
+		return QString::number(m_measureCount);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalStatistic::stateStr() const
+	{
+		if (m_measureCount == 0)
+		{
+			return QString("Not measured");
+		}
+
+		if (m_state < 0 || m_state >= StatisticStateCount)
+		{
+			return QString();
+		}
+
+		return StatisticState[m_state];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

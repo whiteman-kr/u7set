@@ -45,7 +45,7 @@ bool MeasureThread::setActiveSignalParam()
 
 	// create param list for measure
 	//
-	for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
 	{
 		m_activeSignalParam[c].clear();
 
@@ -134,7 +134,7 @@ bool MeasureThread::hasConnectedCalibrators()
 
 	int connectedCalibratorCount = 0;
 
-	for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
 	{
 		CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
 		if (calibratorIsValid(pCalibratorManager) == false)
@@ -176,7 +176,7 @@ bool MeasureThread::setCalibratorUnit()
 		case MEASURE_TYPE_LINEARITY:
 		case MEASURE_TYPE_COMPARATOR:
 			{
-				for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+				for(int c = 0; c < Metrology::ChannelCount; c ++)
 				{
 					CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
 					if (calibratorIsValid(pCalibratorManager) == false)
@@ -382,7 +382,7 @@ void MeasureThread::measureLinearity()
 
 		// set electric value on calibrators, depend from point value
 		//
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+		for(int c = 0; c < Metrology::ChannelCount; c ++)
 		{
 			CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
@@ -405,8 +405,8 @@ void MeasureThread::measureLinearity()
 			switch (m_activeSignalParam[c].outputSignalType())
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:
-				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(electricVal);							break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theTuningSignalBase.appendCmdFowWrite(param.hash(), physicalVal);	break;
+				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(electricVal);									break;
+				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuningSignals().appendCmdFowWrite(param.hash(), physicalVal);	break;
 				default:								assert(0);
 			}
 		}
@@ -414,7 +414,7 @@ void MeasureThread::measureLinearity()
 		// wait ready all calibrators,
 		// wait until all calibrators will has fixed electric value
 		//
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+		for(int c = 0; c < Metrology::ChannelCount; c ++)
 		{
 			CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
@@ -440,7 +440,7 @@ void MeasureThread::measureLinearity()
 		//
 		emit measureInfo(tr("Save measurement "));
 
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+		for(int c = 0; c < Metrology::ChannelCount; c ++)
 		{
 			CalibratorManager* pCalibratorManager = m_activeSignalParam[c].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
@@ -502,7 +502,7 @@ void MeasureThread::updateSignalParam(const Hash& signalHash)
 		return;
 	}
 
-	for(int c = 0; c < MAX_CHANNEL_COUNT; c ++)
+	for(int c = 0; c < Metrology::ChannelCount; c ++)
 	{
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{

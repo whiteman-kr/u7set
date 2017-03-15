@@ -140,7 +140,7 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	QList<MetrologySignal*>	m_signalList;
+	QList<Metrology::Signal*>	m_signalList;
 
 	static bool				m_showCustomID;
 
@@ -153,12 +153,12 @@ private:
 public:
 
 	int						signalCount() const;
-	MetrologySignal*		signal(int index) const;
-	void					set(const QList<MetrologySignal*> list_add);
+	Metrology::Signal*		signal(int index) const;
+	void					set(const QList<Metrology::Signal*> list_add);
 	void					clear();
 
-	QString					text(int row, int column, MetrologySignal* pSignal) const;
-	QString					signalStateStr(MetrologySignal* pSignal) const;
+	QString					text(int row, int column, Metrology::Signal* pSignal) const;
+	QString					signalStateStr(Metrology::Signal* pSignal) const;
 
 	void					updateColumn(int column);
 

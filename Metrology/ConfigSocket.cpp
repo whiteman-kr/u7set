@@ -81,7 +81,7 @@ void ConfigSocket::clearConfiguration()
 
 	theSignalBase.clear();
 
-	theTuningSignalBase.createSignalList();
+	theSignalBase.tuningSignals().createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -180,6 +180,8 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 		return false;
 	}
 
+	theOptions.projectInfo().setCfgFileVersion(fileVersion);
+
 	result &= readRacks(fileData, fileVersion);
 	result &= readUnits(fileData, fileVersion);
 	result &= readSignals(fileData, fileVersion);
@@ -222,19 +224,19 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 			continue;
 		}
 
-		theRackBase.append(rack);
+		theSignalBase.racks().append(rack);
 	}
 
-	if (theRackBase.count() != rackCount)
+	if (theSignalBase.racks().count() != rackCount)
 	{
-		qDebug() << "ConfigSocket::readRacks - Racks loading error, loaded: " << theRackBase.count() << " from " << rackCount;
+		qDebug() << "ConfigSocket::readRacks - Racks loading error, loaded: " << theSignalBase.racks().count() << " from " << rackCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << "ConfigSocket::readRacks - Racks were loaded:	" << theRackBase.count();
+	qDebug() << "ConfigSocket::readRacks - Racks were loaded:	" << theSignalBase.racks().count();
 
-	theRackBase.updateParamFromGroups();
+	theSignalBase.racks().updateParamFromGroups();
 
 	return result;
 }
@@ -337,7 +339,7 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 
 	theSignalBase.initSignals();
 
-	theTuningSignalBase.createSignalList();
+	theSignalBase.tuningSignals().createSignalList();
 
 	qDebug() << "ConfigSocket::readSignals - Signals were loaded:	" << theSignalBase.signalCount();
 
