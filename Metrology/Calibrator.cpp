@@ -10,7 +10,7 @@ Calibrator::Calibrator(int channel, QObject *parent) :
 	QObject(parent),
 	m_port(this)
 {
-	empty();
+	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ Calibrator::~Calibrator()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void Calibrator::empty()
+void Calibrator::clear()
 {
 	if (m_port.isOpen() == true)
 	{
@@ -68,7 +68,7 @@ void Calibrator::setConnected(bool connect)
 
 bool Calibrator::open()
 {
-	empty();
+	clear();
 
 	if (m_portName.isEmpty() == true)
 	{
@@ -1039,7 +1039,7 @@ void Calibrator::close()
 		setRemoteControl(false);
 	}
 
-	empty();
+	clear();
 
 	setConnected(false);
 }

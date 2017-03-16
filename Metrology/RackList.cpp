@@ -183,7 +183,7 @@ int RackListTable::rackCount() const
 
 	m_rackMutex.lock();
 
-		count = m_rackList.size();
+		count = m_rackList.count();
 
 	m_rackMutex.unlock();
 
@@ -198,7 +198,7 @@ Metrology::RackParam* RackListTable::rack(int index) const
 
 	m_rackMutex.lock();
 
-		if (index >= 0 && index < m_rackList.size())
+		if (index >= 0 && index < m_rackList.count())
 		{
 			 pRack = m_rackList[index];
 		}
@@ -243,14 +243,6 @@ void RackListTable::clear()
 
 		m_rackMutex.lock();
 
-			for(int i = count - 1; i >= 0; i--)
-			{
-				if (m_rackList[i] != nullptr)
-				{
-					delete m_rackList[i];
-				}
-			}
-
 			m_rackList.clear();
 
 		m_rackMutex.unlock();
@@ -266,9 +258,9 @@ RackListDialog::RackListDialog(QWidget *parent) :
 	QDialog(parent)
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
-		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &RackListDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &RackListDialog::updateList, Qt::QueuedConnection);
 	}
 
 	m_rackBase = theSignalBase.racks();
@@ -409,13 +401,13 @@ void RackListDialog::updateList()
 	int count = m_rackBase.count();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::RackParam rack = m_rackBase.rack(i);
-		if (rack.isValid() == false)
+		Metrology::RackParam* pRack = m_rackBase.rackPtr(i);
+		if (pRack == nullptr || pRack->isValid() == false)
 		{
 			continue;
 		}
 
-		rackList.append(new Metrology::RackParam(rack));
+		rackList.append(pRack);
 	}
 
 	m_rackTable.set(rackList);

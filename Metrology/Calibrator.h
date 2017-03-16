@@ -237,7 +237,7 @@ private:
 
 	bool		m_busy = false;
 
-	void		empty();																// erases all information on the calibrator: SerialNo, Name and etc.
+	void		clear();																// erases all information on the calibrator: SerialNo, Name and etc.
 
 	void		setConnected(bool connect);												// function changes status calibrator: connected or disconnected
 

@@ -97,14 +97,14 @@ private:
 
 	// Elements of interface - Items of ToolBars
 	//
-	QComboBox*				m_measureKindList;
-	QComboBox*				m_outputSignalTypeList;
+	QComboBox*				m_measureKindList = nullptr;
+	QComboBox*				m_outputSignalTypeList = nullptr;
 
-	QComboBox*				m_asRackCombo;
-	QComboBox*				m_asSignalCombo;
-	QComboBox*				m_asChassisCombo;
-	QComboBox*				m_asModuleCombo;
-	QComboBox*				m_asPlaceCombo;
+	QComboBox*				m_asRackCombo = nullptr;
+	QComboBox*				m_asSignalCombo = nullptr;
+	QComboBox*				m_asChassisCombo = nullptr;
+	QComboBox*				m_asModuleCombo = nullptr;
+	QComboBox*				m_asPlaceCombo = nullptr;
 
 	// Elements of interface - Pages of Tab
 	//
@@ -128,7 +128,7 @@ private:
 	QLabel*					m_statusConnectToAppDataServer = nullptr;
 	QLabel*					m_statusConnectToTuningServer = nullptr;
 
-public:
+private:
 
 	ConfigSocket*			m_pConfigSocket = nullptr;
 
@@ -144,6 +144,7 @@ public:
 
 	void					loadSettings();
 	void					saveSettings();
+
 
 public:
 
@@ -162,13 +163,25 @@ public:
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
 	void					updateSignalPositionOnToolBar();
+	void					updateChassisOnToolBar(const Metrology::SignalLocation& location);
+	void					updateModuleOnToolBar(const Metrology::SignalLocation& location);
+	void					updatePlaceOnToolBar(const Metrology::SignalLocation& location);
+
+	QComboBox*				rackCombo() { return m_asRackCombo; }
+	QComboBox*				signalCombo() { return m_asSignalCombo; }
 
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
 
+	ConfigSocket*			configSocket() { return m_pConfigSocket; }
+	SignalSocket*			signalSocket() { return m_pSignalSocket; }
 	bool					signalSocketIsConnected();
+	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
 	bool					tuningSocketIsConnected();
+
+	MeasureThread&			measureThread() { return m_measureThread; }
+
 	bool					signalSourceIsValid(bool showMsg);
 	bool					signalIsMeasured(QString& signalID);
 

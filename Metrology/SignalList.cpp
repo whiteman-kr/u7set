@@ -201,7 +201,7 @@ int SignalListTable::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.size();
+		count = m_signalList.count();
 
 	m_signalMutex.unlock();
 
@@ -216,7 +216,7 @@ Metrology::Signal* SignalListTable::signal(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			 signal = m_signalList[index];
 		}
@@ -260,14 +260,6 @@ void SignalListTable::clear()
 	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_signalMutex.lock();
-
-			for(int i = count - 1; i >= 0; i--)
-			{
-				if (m_signalList[i] != nullptr)
-				{
-					delete m_signalList[i];
-				}
-			}
 
 			m_signalList.clear();
 
@@ -323,9 +315,9 @@ SignalListDialog::SignalListDialog(bool hasButtons, QWidget *parent) :
 	QDialog(parent)
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
-		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalListDialog::updateList, Qt::QueuedConnection);
 	}
 
 	createInterface(hasButtons);
@@ -530,20 +522,24 @@ void SignalListDialog::updateList()
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::Signal signal = theSignalBase.signal(i);
-		if (signal.param().isValid() == false)
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		Metrology::SignalParam& param = signal.param();
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
 
 		if (param.signalType() != m_typeAD || param.inOutType() != m_typeIO)
 		{
 			continue;
 		}
 
-		signalList.append(new Metrology::Signal(signal));
+		signalList.append(pSignal);
 	}
 
 	m_signalTable.set(signalList);

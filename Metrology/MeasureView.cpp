@@ -149,6 +149,11 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 		return theOptions.measureView().font();
 	}
 
+	if (role == Qt::TextColorRole)
+	{
+		return QVariant();
+	}
+
 	if (role == Qt::BackgroundColorRole)
 	{
 		if (indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)

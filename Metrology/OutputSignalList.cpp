@@ -111,19 +111,26 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextColorRole)
 	{
-		if ((column == OUTPUT_SIGNAL_COLUMN_IN_RACK || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
+		if ((column == OUTPUT_SIGNAL_COLUMN_IN_RACK || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION))
 		{
-			return QColor(Qt::red);
+			Metrology::Signal* pSignal = signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			{
+				return QColor(Qt::red);
+			}
 		}
 
-		if ((column == OUTPUT_SIGNAL_COLUMN_OUT_RACK || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).isValid() == false)
+		if ((column == OUTPUT_SIGNAL_COLUMN_OUT_RACK || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION))
 		{
-			return QColor(Qt::red);
+			Metrology::Signal* pSignal = signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			if (pSignal == nullptr || pSignal->param().isValid() == false)
+			{
+				return QColor(Qt::red);
+			}
 		}
 
 		return QVariant();
 	}
-
 
 	if (role == Qt::BackgroundColorRole)
 	{
@@ -162,23 +169,36 @@ QString OutputSignalTable::text(int row, int column, const OutputSignal& signal)
 		return QString();
 	}
 
-	Metrology::SignalParam inParam = signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-	Metrology::SignalParam outParam = signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam inParam;
+	Metrology::SignalParam outParam;
+
+	Metrology::Signal* pInSignal = signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::Signal* pOutSignal = signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+
+	if (pInSignal != nullptr)
+	{
+		inParam = pInSignal->param();
+	}
+
+	if (pOutSignal != nullptr)
+	{
+		outParam = pOutSignal->param();
+	}
 
 	QString result;
 
 	switch (column)
 	{
 		case OUTPUT_SIGNAL_COLUMN_TYPE:			result = signal.typeStr();																						break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:	result.clear();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:	result.clear();																									break;
 		case OUTPUT_SIGNAL_COLUMN_IN_RACK:		inParam.isValid() == false ?	result = QString("???")	 : result = inParam.location().rack().caption();		break;
 		case OUTPUT_SIGNAL_COLUMN_IN_ID:		inParam.isValid() == false ?	result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) : result = m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID();		break;
 		case OUTPUT_SIGNAL_COLUMN_IN_CAPTION:	inParam.isValid() == false ?	result = QString("???")	 : result = inParam.caption();							break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:	result.clear();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:	result.clear();																									break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_RACK:		outParam.isValid() == false ?	result = QString("???")	 : result = outParam.location().rack().caption();		break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_ID:		outParam.isValid() == false ?	result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) : result = m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID();	break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_CAPTION:	outParam.isValid() == false ?	result = QString("???")	 : result = outParam.caption();							break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:	result.clear();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:	result.clear();																									break;
 		default:								assert(0);
 	}
 
@@ -398,7 +418,7 @@ void OutputSignalItemDialog::createInterface()
 	m_pTypeList->removeItem(OUTPUT_SIGNAL_TYPE_UNUSED);
 
 	int type = m_signal.type() ;
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if ((type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT) || type == OUTPUT_SIGNAL_TYPE_UNUSED)
 	{
 		type = OUTPUT_SIGNAL_TYPE_FROM_INPUT;
 		m_signal.setType(type);
@@ -433,11 +453,11 @@ void OutputSignalItemDialog::updateSignals()
 		return;
 	}
 
-	Metrology::SignalParam inParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-	if (inParam.isValid() == true)
+	Metrology::Signal* pInSignal = m_signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (pInSignal != nullptr && pInSignal->param().isValid() == true)
 	{
-		m_pInputSignalIDEdit->setText(m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID());
-		m_pInputSignalCaptionEdit->setText(inParam.caption());
+		m_pInputSignalIDEdit->setText(m_showCustomID == true ? pInSignal->param().customAppSignalID() : pInSignal->param().appSignalID());
+		m_pInputSignalCaptionEdit->setText(pInSignal->param().caption());
 	}
 	else
 	{
@@ -445,11 +465,11 @@ void OutputSignalItemDialog::updateSignals()
 		m_pInputSignalCaptionEdit->setText(QString());
 	}
 
-	Metrology::SignalParam outParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-	if (outParam.isValid() == true)
+	Metrology::Signal* pOutSignal = m_signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (pOutSignal != nullptr &&  pOutSignal->param().isValid() == true)
 	{
-		m_pOutputSignalIDEdit->setText(m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID());
-		m_pOutputSignalCaptionEdit->setText(outParam.caption());
+		m_pOutputSignalIDEdit->setText(m_showCustomID == true ? pOutSignal->param().customAppSignalID() : pOutSignal->param().appSignalID());
+		m_pOutputSignalCaptionEdit->setText(pOutSignal->param().caption());
 	}
 	else
 	{
@@ -499,13 +519,14 @@ void OutputSignalItemDialog::selectInputSignal()
 		return;
 	}
 
-	Metrology::SignalParam param = theSignalBase.signalParam(selectedSignalHash);
-	if (param.isValid() == false)
+	Metrology::Signal* pSignal = theSignalBase.signalPtr(selectedSignalHash);
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
+		assert(0);
 		return;
 	}
 
-	m_signal.setParam(MEASURE_IO_SIGNAL_TYPE_INPUT, param);
+	m_signal.setMetrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal);
 
 	updateSignals();
 }
@@ -532,13 +553,14 @@ void OutputSignalItemDialog::selectOutputSignal()
 		return;
 	}
 
-	Metrology::SignalParam param = theSignalBase.signalParam(selectedSignalHash);
-	if (param.isValid() == false)
+	Metrology::Signal* pSignal = theSignalBase.signalPtr(selectedSignalHash);
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
+		assert(0);
 		return;
 	}
 
-	m_signal.setParam(MEASURE_IO_SIGNAL_TYPE_OUTPUT, param);
+	m_signal.setMetrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT, pSignal);
 
 	updateSignals();
 }
@@ -557,21 +579,23 @@ void OutputSignalItemDialog::showCustomID()
 void OutputSignalItemDialog::onOk()
 {
 	int type = m_signal.type();
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if ((type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT) || type == OUTPUT_SIGNAL_TYPE_UNUSED)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select output signal type!"));
 		m_pTypeList->setFocus();
 		return;
 	}
 
-	if (m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
+	Metrology::Signal* pInSignal = m_signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (pInSignal == nullptr || pInSignal->param().isValid() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select input signal!"));
 		m_pInputSignalButton->setFocus();
 		return;
 	}
 
-	if (m_signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).isValid() == false)
+	Metrology::Signal* pOutSignal = m_signal.metrologySignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	if (pOutSignal == nullptr || pOutSignal->param().isValid() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select output signal!"));
 		m_pOutputSignalButton->setFocus();
@@ -589,9 +613,9 @@ OutputSignalDialog::OutputSignalDialog(QWidget *parent) :
 	QDialog(parent)
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
-		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
 	}
 
 	m_signalBase = theSignalBase.outputSignals();
@@ -747,8 +771,6 @@ void OutputSignalDialog::updateList()
 			continue;
 		}
 
-		outputSignal.updateParam();
-
 		signalList.append(outputSignal);
 	}
 
@@ -771,7 +793,7 @@ void OutputSignalDialog::addSignal()
 		return;
 	}
 
-	int foundIndex = m_signalBase.find(signal);
+	int foundIndex = m_signalBase.findIndex(signal);
 	if (foundIndex != -1)
 	{
 		m_pView->setCurrentIndex(m_signalTable.index(foundIndex, OUTPUT_SIGNAL_COLUMN_TYPE));

@@ -81,15 +81,6 @@ void TuningSignalBase::clear()
 
 	m_signalMutex.lock();
 
-		int count = m_signalList.size();
-		for(int i = count - 1; i >= 0; i--)
-		{
-			if (m_signalList[i] != nullptr)
-			{
-				delete m_signalList[i];
-			}
-		}
-
 		m_signalList.clear();
 		m_signalHashMap.clear();
 
@@ -110,7 +101,7 @@ int TuningSignalBase::sourceCount() const
 
 	m_sourceMutex.lock();
 
-		count = m_sourceList.size();
+		count = m_sourceList.count();
 
 	m_sourceMutex.unlock();
 
@@ -129,7 +120,7 @@ int TuningSignalBase::appendSource(const TuningSource& source)
 		{
 			m_sourceList.append(source);
 
-			index = m_sourceList.size() - 1;
+			index = m_sourceList.count() - 1;
 
 			m_sourceIdMap[source.sourceID() ] = index;
 		}
@@ -147,7 +138,7 @@ TuningSource TuningSignalBase::source(int index) const
 
 	m_sourceMutex.lock();
 
-		if (index >= 0 && index < m_sourceList.size())
+		if (index >= 0 && index < m_sourceList.count())
 		{
 			source = m_sourceList[index];
 		}
@@ -169,7 +160,7 @@ TuningSourceState TuningSignalBase::sourceState(quint64 sourceID)
 		{
 			int index = m_sourceIdMap[sourceID];
 
-			if (index >= 0 && index < m_sourceList.size())
+			if (index >= 0 && index < m_sourceList.count())
 			{
 				state = m_sourceList[index].state();
 			}
@@ -190,7 +181,7 @@ void TuningSignalBase::setSourceState(quint64 sourceID, const Network::TuningSou
 		{
 			int index = m_sourceIdMap[sourceID];
 
-			if (index >= 0 && index < m_sourceList.size())
+			if (index >= 0 && index < m_sourceList.count())
 			{
 				TuningSourceState& sourceState = m_sourceList[index].state();
 
@@ -223,20 +214,24 @@ void TuningSignalBase::createSignalList()
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::Signal signal = theSignalBase.signal(i);
-		if (signal.param().isValid() == false)
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		Metrology::SignalParam& param = signal.param();
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
 
 		if (param.enableTuning() == false)
 		{
 			continue;
 		}
 
-		appendSignal(new Metrology::Signal(signal));
+		appendSignal(pSignal);
 	}
 
 	emit signalsLoaded();
@@ -250,7 +245,7 @@ int TuningSignalBase::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.size();
+		count = m_signalList.count();
 
 	m_signalMutex.unlock();
 
@@ -279,7 +274,7 @@ int TuningSignalBase::appendSignal(Metrology::Signal* pSignal)
 		if (m_signalHashMap.contains(param.hash()) == false)
 		{
 			m_signalList.append(pSignal);
-			index = m_signalList.size() - 1;
+			index = m_signalList.count() - 1;
 
 			m_signalHashMap[param.hash()] = index;
 		}
@@ -307,7 +302,7 @@ Metrology::Signal* TuningSignalBase::signalForRead(const Hash& hash) const
 		{
 			int index = m_signalHashMap[hash];
 
-			if (index >= 0 && index < m_signalList.size())
+			if (index >= 0 && index < m_signalList.count())
 			{
 				pSignal = m_signalList[index];
 			}
@@ -326,7 +321,7 @@ Metrology::Signal* TuningSignalBase::signalForRead(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			pSignal = m_signalList[index];
 		}
@@ -354,7 +349,7 @@ Metrology::SignalState TuningSignalBase::signalState(const Hash& hash)
 		{
 			int index = m_signalHashMap[hash];
 
-			if (index >= 0 && index < m_signalList.size())
+			if (index >= 0 && index < m_signalList.count())
 			{
 				Metrology::Signal* pSignal = m_signalList[index];
 				if (pSignal != nullptr)
@@ -385,7 +380,7 @@ void TuningSignalBase::setSignalState(const Network::TuningSignalState& state)
 		{
 			int index = m_signalHashMap[state.signalhash()];
 
-			if (index >= 0 && index < m_signalList.size())
+			if (index >= 0 && index < m_signalList.count())
 			{
 				Metrology::Signal* pSignal = m_signalList[index];
 				if (pSignal != nullptr)
@@ -475,7 +470,7 @@ int TuningSignalBase::cmdFowWriteCount() const
 
 	m_cmdFowWriteMutex.lock();
 
-		count = m_cmdFowWriteList.size();
+		count = m_cmdFowWriteList.count();
 
 	m_cmdFowWriteMutex.unlock();
 
@@ -530,7 +525,7 @@ TuningWriteCmd TuningSignalBase::cmdFowWrite(int index)
 
 	m_cmdFowWriteMutex.lock();
 
-		if (index >= 0 && index < m_cmdFowWriteList.size())
+		if (index >= 0 && index < m_cmdFowWriteList.count())
 		{
 			cmd = m_cmdFowWriteList[index];
 

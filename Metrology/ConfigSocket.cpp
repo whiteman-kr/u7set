@@ -339,6 +339,8 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 
 	theSignalBase.initSignals();
 
+	theSignalBase.outputSignals().initSignals();
+
 	theSignalBase.tuningSignals().createSignalList();
 
 	qDebug() << "ConfigSocket::readSignals - Signals were loaded:	" << theSignalBase.signalCount();

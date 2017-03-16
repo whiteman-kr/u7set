@@ -99,7 +99,7 @@ int RackGroupBase::count() const
 
 	m_groupMutex.lock();
 
-		count = m_groupList.size();
+		count = m_groupList.count();
 
 	m_groupMutex.unlock();
 
@@ -121,7 +121,7 @@ int RackGroupBase::append(const RackGroup& group)
 	m_groupMutex.lock();
 
 		m_groupList.append(group);
-		index = m_groupList.size() - 1;
+		index = m_groupList.count() - 1;
 
 	m_groupMutex.unlock();
 
@@ -136,7 +136,7 @@ RackGroup RackGroupBase::group(int index) const
 
 	m_groupMutex.lock();
 
-		if (index >= 0 && index < m_groupList.size())
+		if (index >= 0 && index < m_groupList.count())
 		{
 			group = m_groupList[index];
 		}
@@ -154,7 +154,7 @@ bool RackGroupBase::setGroup(int index, const RackGroup& group)
 
 	m_groupMutex.lock();
 
-		if (index >= 0 && index < m_groupList.size())
+		if (index >= 0 && index < m_groupList.count())
 		{
 			m_groupList[index] = group;
 
@@ -174,7 +174,7 @@ bool RackGroupBase::remove(int index)
 
 	m_groupMutex.lock();
 
-		if (index >= 0 && index < m_groupList.size())
+		if (index >= 0 && index < m_groupList.count())
 		{
 			m_groupList.remove(index);
 
@@ -305,7 +305,7 @@ int RackBase::count() const
 
 	m_rackMutex.lock();
 
-		count = m_rackList.size();
+		count = m_rackList.count();
 
 	m_rackMutex.unlock();
 
@@ -329,7 +329,7 @@ int RackBase::append(const Metrology::RackParam& rack)
 		if (m_rackHashMap.contains(rack.hash()) == false)
 		{
 			m_rackList.append(rack);
-			index = m_rackList.size() - 1;
+			index = m_rackList.count() - 1;
 
 			m_rackHashMap.insert(rack.hash(), index);
 		}
@@ -337,6 +337,66 @@ int RackBase::append(const Metrology::RackParam& rack)
 	 m_rackMutex.unlock();
 
 	 return index;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Metrology::RackParam* RackBase::rackPtr(const QString& rackID)
+{
+	if (rackID.isEmpty() == true)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return rackPtr(calcHash(rackID));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Metrology::RackParam* RackBase::rackPtr(const Hash& hash)
+{
+	if (hash == 0)
+	{
+		assert(hash != 0);
+		return nullptr;
+	}
+
+	Metrology::RackParam* pRack = nullptr;
+
+	m_rackMutex.lock();
+
+		if (m_rackHashMap.contains(hash) == true)
+		{
+			int index = m_rackHashMap[hash];
+
+			if (index >= 0 && index < m_rackList.count())
+			{
+				pRack = &m_rackList[index];
+			}
+		}
+
+	m_rackMutex.unlock();
+
+	return pRack;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+Metrology::RackParam* RackBase::rackPtr(int index)
+{
+	Metrology::RackParam* pRack = nullptr;
+
+	m_rackMutex.lock();
+
+		if (index >= 0 && index < m_rackList.count())
+		{
+			pRack = &m_rackList[index];
+		}
+
+	m_rackMutex.unlock();
+
+	return pRack;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -370,7 +430,7 @@ Metrology::RackParam RackBase::rack(const Hash& hash)
 		{
 			int index = m_rackHashMap[hash];
 
-			if (index >= 0 && index < m_rackList.size())
+			if (index >= 0 && index < m_rackList.count())
 			{
 				rack = m_rackList[index];
 			}
@@ -389,7 +449,7 @@ Metrology::RackParam RackBase::rack(int index)
 
 	m_rackMutex.lock();
 
-		if (index >= 0 && index < m_rackList.size())
+		if (index >= 0 && index < m_rackList.count())
 		{
 			rack = m_rackList[index];
 		}
@@ -438,7 +498,7 @@ void RackBase::setRack(const Hash& hash, const Metrology::RackParam& rack)
 		{
 			int index = m_rackHashMap[rack.hash()];
 
-			if (index >= 0 && index < m_rackList.size())
+			if (index >= 0 && index < m_rackList.count())
 			{
 				m_rackList[index] = rack;
 			}
@@ -458,7 +518,7 @@ void RackBase::setRack(int index, const Metrology::RackParam& rack)
 
 	m_rackMutex.lock();
 
-		if (index >= 0 && index < m_rackList.size())
+		if (index >= 0 && index < m_rackList.count())
 		{
 			m_rackList[index] = rack;
 		}
@@ -474,7 +534,7 @@ void RackBase::updateParamFromGroups()
 	//
 	m_rackMutex.lock();
 
-		int rackCount = m_rackList.size();
+		int rackCount = m_rackList.count();
 		for(int i = 0; i < rackCount; i++)
 		{
 			Metrology::RackParam& r = m_rackList[i];

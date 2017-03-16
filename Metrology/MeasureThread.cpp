@@ -51,13 +51,13 @@ bool MeasureThread::setActiveSignalParam()
 
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			Hash signalHash = activeSignal.signal(type).hash(c);
-			if (signalHash == 0)
+			Metrology::Signal* pSignal = activeSignal.signal(type).metrologySignal(c);
+			if (pSignal == nullptr)
 			{
 				continue;
 			}
 
-			Metrology::SignalParam param =  theSignalBase.signalParam(signalHash);
+			Metrology::SignalParam& param = pSignal->param();
 			if (param.isValid() == false)
 			{
 				continue;
