@@ -22,7 +22,7 @@ public:
 
 	ConfigSocket(const HostAddressPort& serverAddressPort);
 	ConfigSocket(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
-	~ConfigSocket();
+	virtual ~ConfigSocket();
 
 private:
 

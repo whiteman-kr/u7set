@@ -9,72 +9,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem::StatisticItem(const Hash& signalHash):
-	m_signalHash (signalHash)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString StatisticItem::measureCountStr() const
-{
-	if (m_measureCount == 0)
-	{
-		return QString();
-	}
-
-	return QString::number(m_measureCount);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString StatisticItem::stateStr() const
-{
-	if (m_measureCount == 0)
-	{
-		return QString("Not measured");
-	}
-
-	if (m_state < 0 || m_state >= STATISTIC_STATE_COUNT)
-	{
-		return QString();
-	}
-
-	return StatisticStateStr[m_state];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-MetrologySignal::MetrologySignal(const Metrology::SignalParam& param)
-{
-	setParam(param);
-
-	// temporary solution
-	// because u7 can not set electric range
-	//
-	m_param.setInputElectricLowLimit(0);
-	m_param.setInputElectricHighLimit(5);
-	m_param.setInputElectricUnitID( E::InputUnit::V );
-	//
-	// temporary solution
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MetrologySignal& MetrologySignal::operator=(const MetrologySignal& from)
-{
-	m_param = from.m_param;
-	m_state = from.m_state;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 MetrologyMultiSignal::MetrologyMultiSignal()
 {
 	clear();
@@ -89,31 +23,13 @@ MetrologyMultiSignal::MetrologyMultiSignal(const MetrologyMultiSignal& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MetrologyMultiSignal::clear()
-{
-	m_mutex.lock();
-
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
-		{
-			m_signalHash[c] = 0;
-		}
-
-		m_location.clear();
-
-		m_strID = QString();
-
-	m_mutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool MetrologyMultiSignal::isEmpty() const
 {
 	bool empty = true;
 
 	m_mutex.lock();
 
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
+		for(int c = 0; c < Metrology::ChannelCount; c++)
 		{
 			if (m_signalHash[c] != 0)
 			{
@@ -130,9 +46,27 @@ bool MetrologyMultiSignal::isEmpty() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MetrologyMultiSignal::clear()
+{
+	m_mutex.lock();
+
+		for(int c = 0; c < Metrology::ChannelCount; c++)
+		{
+			m_signalHash[c] = 0;
+		}
+
+		m_location.clear();
+
+		m_strID = QString();
+
+	m_mutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Hash MetrologyMultiSignal::hash(int channel) const
 {
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		assert(0);
 		return 0;
@@ -153,7 +87,7 @@ Hash MetrologyMultiSignal::hash(int channel) const
 
 bool MetrologyMultiSignal::setSignal(int channel, int measureKind, const Metrology::SignalParam& param)
 {
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		assert(0);
 		return false;
@@ -175,15 +109,15 @@ bool MetrologyMultiSignal::setSignal(int channel, int measureKind, const Metrolo
 
 		m_signalHash[channel] = param.hash();
 
-		m_location.setRack( param.location().rack() );
-		m_location.setChassis( param.location().chassis() );
-		m_location.setModule( param.location().module() );
-		m_location.setPlace( param.location().place() );
+		m_location.setRack(param.location().rack());
+		m_location.setChassis(param.location().chassis());
+		m_location.setModule(param.location().module());
+		m_location.setPlace(param.location().place());
 
 		switch(measureKind)
 		{
-			case MEASURE_KIND_ONE:		m_strID = param.customAppSignalID(); break;
-			case MEASURE_KIND_MULTI:	m_strID.sprintf( "CH %02d _ MD %02d _ IN %02d", m_location.chassis() + 1, m_location.module() + 1, m_location.place() + 1); break;
+			case MEASURE_KIND_ONE:		m_strID = param.customAppSignalID();																						break;
+			case MEASURE_KIND_MULTI:	m_strID.sprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis() + 1, m_location.module() + 1, m_location.place() + 1);	break;
 			default:					assert(false);
 		}
 
@@ -198,7 +132,7 @@ MetrologyMultiSignal& MetrologyMultiSignal::operator=(const MetrologyMultiSignal
 {
 	m_mutex.lock();
 
-		for(int c = 0; c < MAX_CHANNEL_COUNT; c++)
+		for(int c = 0; c < Metrology::ChannelCount; c++)
 		{
 			m_signalHash[c] = from.m_signalHash[c];
 		}
@@ -216,21 +150,21 @@ MetrologyMultiSignal& MetrologyMultiSignal::operator=(const MetrologyMultiSignal
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureParam::MeasureParam()
+MeasureMultiParam::MeasureMultiParam()
 {
 	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureParam::MeasureParam(const MeasureParam& from)
+MeasureMultiParam::MeasureMultiParam(const MeasureMultiParam& from)
 {
 	*this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureParam::clear()
+void MeasureMultiParam::clear()
 {
 	m_mutex.lock();
 
@@ -250,7 +184,7 @@ void MeasureParam::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureParam::isValid() const
+bool MeasureMultiParam::isValid() const
 {
 	bool valid = true;
 
@@ -264,7 +198,7 @@ bool MeasureParam::isValid() const
 		{
 			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 			{
-				if (m_param[type].isValid() == false )
+				if (m_param[type].isValid() == false)
 				{
 					valid = false;
 
@@ -280,7 +214,7 @@ bool MeasureParam::isValid() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalParam MeasureParam::param(int type) const
+Metrology::SignalParam MeasureMultiParam::param(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -300,7 +234,7 @@ Metrology::SignalParam MeasureParam::param(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureParam::setParam(int type, const Metrology::SignalParam& param)
+bool MeasureMultiParam::setParam(int type, const Metrology::SignalParam& param)
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -325,7 +259,7 @@ bool MeasureParam::setParam(int type, const Metrology::SignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureParam::testPhysicalRange()
+bool MeasureMultiParam::testPhysicalRange()
 {
 	if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
 	{
@@ -355,7 +289,7 @@ bool MeasureParam::testPhysicalRange()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::rackCaption() const
+QString MeasureMultiParam::rackCaption() const
 {
 	QString result;
 
@@ -385,7 +319,7 @@ QString MeasureParam::rackCaption() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::signalID(bool showCustomID, const QString& divider) const
+QString MeasureMultiParam::signalID(bool showCustomID, const QString& divider) const
 {
 	QString strResult;
 
@@ -421,7 +355,7 @@ QString MeasureParam::signalID(bool showCustomID, const QString& divider) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::chassisStr() const
+QString MeasureMultiParam::chassisStr() const
 {
 	QString strResult;
 
@@ -451,7 +385,7 @@ QString MeasureParam::chassisStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::moduleStr() const
+QString MeasureMultiParam::moduleStr() const
 {
 	QString strResult;
 
@@ -481,7 +415,7 @@ QString MeasureParam::moduleStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::placeStr() const
+QString MeasureMultiParam::placeStr() const
 {
 	QString strResult;
 
@@ -511,7 +445,7 @@ QString MeasureParam::placeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::caption(const QString& divider) const
+QString MeasureMultiParam::caption(const QString& divider) const
 {
 	QString strResult;
 
@@ -552,7 +486,7 @@ QString MeasureParam::caption(const QString& divider) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::physicalRangeStr(const QString& divider) const
+QString MeasureMultiParam::physicalRangeStr(const QString& divider) const
 {
 	QString strResult;
 
@@ -600,7 +534,7 @@ QString MeasureParam::physicalRangeStr(const QString& divider) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::electricRangeStr(const QString& divider) const
+QString MeasureMultiParam::electricRangeStr(const QString& divider) const
 {
 	QString strResult;
 
@@ -641,7 +575,7 @@ QString MeasureParam::electricRangeStr(const QString& divider) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::electricSensorStr(const QString& divider) const
+QString MeasureMultiParam::electricSensorStr(const QString& divider) const
 {
 	QString result;
 
@@ -682,20 +616,20 @@ QString MeasureParam::electricSensorStr(const QString& divider) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureParam::calibratorStr() const
+QString MeasureMultiParam::calibratorStr() const
 {
 	if (m_pCalibratorManager == nullptr || m_pCalibratorManager->calibratorIsConnected() == false)
 	{
 		return QString("Not connected");
 	}
 
-	return QString("Calibrator %1 (%2)").arg( m_pCalibratorManager->channel() + 1).arg(m_pCalibratorManager->portName());
+	return QString("Calibrator %1 (%2)").arg(m_pCalibratorManager->calibratorChannel() + 1).arg(m_pCalibratorManager->calibratorPort());
 }
 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureParam& MeasureParam::operator=(const MeasureParam& from)
+MeasureMultiParam& MeasureMultiParam::operator=(const MeasureMultiParam& from)
 {
 	m_mutex.lock();
 
@@ -757,7 +691,7 @@ bool MeasureSignal::isEmpty() const
 
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 		{
-			if (m_signal[type].isEmpty() == false )
+			if (m_signal[type].isEmpty() == false)
 			{
 				empty = false;
 
@@ -799,7 +733,7 @@ Hash MeasureSignal::signalHash(int type, int channel) const
 		return 0;
 	}
 
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		return 0;
 	}
@@ -837,7 +771,7 @@ bool MeasureSignal::setSignal(int type, const MetrologyMultiSignal& signal)
 
 bool MeasureSignal::setSignal(int channel, int measureKind, int outputSignalType, const Metrology::SignalParam& param)
 {
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		assert(0);
 		return false;
@@ -880,14 +814,14 @@ bool MeasureSignal::setSignal(int channel, int measureKind, int outputSignalType
 		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 			{
-				int index = theOutputSignalBase.find(MEASURE_IO_SIGNAL_TYPE_INPUT, param.hash(), outputSignalType);
+				int index = theSignalBase.outputSignals().find(MEASURE_IO_SIGNAL_TYPE_INPUT, param.hash(), outputSignalType);
 				if (index == -1)
 				{
 					result = false;
 					break;
 				}
 
-				OutputSignal outputSignal = theOutputSignalBase.signal(index);
+				OutputSignal outputSignal = theSignalBase.outputSignals().signal(index);
 				if (outputSignal.isValid() == false)
 				{
 					result = false;
@@ -973,11 +907,9 @@ void SignalBase::clear()
 
 	clearMeasureSignalList();
 
-	clearRackList();
+	clearMeasureRackList();
 
 	clearSignalList();
-
-	theUnitBase.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -993,15 +925,15 @@ void SignalBase::sortByPosition()
 
 		int count = m_signalList.size();
 
-		for( int i = 0; i < count - 1; i++)
+		for(int i = 0; i < count - 1; i++)
 		{
 			for(int j = i+1; j < count; j++)
 			{
-				if ( m_signalList[i].param().location().equipmentID() > m_signalList[j].param().location().equipmentID() )
+				if (m_signalList[i].param().location().equipmentID() > m_signalList[j].param().location().equipmentID())
 				{
-					MetrologySignal signal	= m_signalList[ i ];
-					m_signalList[ i ]		= m_signalList[ j ];
-					m_signalList[ j ]		= signal;
+					Metrology::Signal signal	= m_signalList[ i ];
+					m_signalList[ i ]			= m_signalList[ j ];
+					m_signalList[ j ]			= signal;
 				}
 			}
 		}
@@ -1032,6 +964,8 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
+		m_unitList.clear();
+
 		m_signalHashMap.clear();
 		m_signalList.clear();
 
@@ -1054,7 +988,7 @@ int SignalBase::appendSignal(const Metrology::SignalParam& param)
 
 		if (m_signalHashMap.contains(param.hash()) == false)
 		{
-			MetrologySignal metrologySignal(param);
+			Metrology::Signal metrologySignal(param);
 
 			m_signalList.append(metrologySignal);
 			index = m_signalList.size() - 1;
@@ -1069,28 +1003,28 @@ int SignalBase::appendSignal(const Metrology::SignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal SignalBase::signal(const QString& appSignalID)
+Metrology::Signal SignalBase::signal(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{
 		assert(false);
-		return MetrologySignal();
+		return Metrology::Signal();
 	}
 
-	return signal( calcHash(appSignalID) );
+	return signal(calcHash(appSignalID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal SignalBase::signal(const Hash& hash)
+Metrology::Signal SignalBase::signal(const Hash& hash)
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return MetrologySignal();
+		return Metrology::Signal();
 	}
 
-	MetrologySignal signal;
+	Metrology::Signal signal;
 
 	m_signalMutex.lock();
 
@@ -1111,9 +1045,9 @@ MetrologySignal SignalBase::signal(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MetrologySignal SignalBase::signal(int index)
+Metrology::Signal SignalBase::signal(int index)
 {
-	MetrologySignal signal;
+	Metrology::Signal signal;
 
 	m_signalMutex.lock();
 
@@ -1137,7 +1071,7 @@ Metrology::SignalParam SignalBase::signalParam(const QString& appSignalID)
 		return Metrology::SignalParam();
 	}
 
-	return signalParam( calcHash(appSignalID) );
+	return signalParam(calcHash(appSignalID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1232,12 +1166,12 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(const QString& appSignalID)
+Metrology::SignalState SignalBase::signalState(const QString& appSignalID)
 {
 	if (appSignalID.isEmpty() == true)
 	{
 		assert(false);
-		return AppSignalState();
+		return Metrology::SignalState();
 	}
 
 	return signalState(calcHash(appSignalID));
@@ -1245,15 +1179,15 @@ AppSignalState SignalBase::signalState(const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(const Hash& hash)
+Metrology::SignalState SignalBase::signalState(const Hash& hash)
 {
 	if (hash == 0)
 	{
 		assert(hash != 0);
-		return AppSignalState();
+		return Metrology::SignalState();
 	}
 
-	AppSignalState state;
+	Metrology::SignalState state;
 
 	m_signalMutex.lock();
 
@@ -1274,9 +1208,9 @@ AppSignalState SignalBase::signalState(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-AppSignalState SignalBase::signalState(int index)
+Metrology::SignalState SignalBase::signalState(int index)
 {
-	AppSignalState state;
+	Metrology::SignalState state;
 
 	m_signalMutex.lock();
 
@@ -1292,7 +1226,7 @@ AppSignalState SignalBase::signalState(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(const QString& appSignalID, const AppSignalState &state)
+void SignalBase::setSignalState(const QString& appSignalID, const Metrology::SignalState& state)
 {
 	if (appSignalID.isEmpty() == true)
 	{
@@ -1305,7 +1239,7 @@ void SignalBase::setSignalState(const QString& appSignalID, const AppSignalState
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
+void SignalBase::setSignalState(const Hash& hash, const Metrology::SignalState &state)
 {
 	if (hash == 0)
 	{
@@ -1332,7 +1266,7 @@ void SignalBase::setSignalState(const Hash& hash, const AppSignalState &state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::setSignalState(int index, const AppSignalState &state)
+void SignalBase::setSignalState(int index, const Metrology::SignalState& state)
 {
 	m_signalMutex.lock();
 
@@ -1379,7 +1313,7 @@ Hash SignalBase::hashForRequestState(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::rackCount() const
+int SignalBase::measureRackCount() const
 {
 	int count = 0;
 
@@ -1395,7 +1329,7 @@ int SignalBase::rackCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::RackParam SignalBase::rack(int index)
+Metrology::RackParam SignalBase::measureRack(int index)
 {
 	Metrology::RackParam param;
 
@@ -1413,7 +1347,7 @@ Metrology::RackParam SignalBase::rack(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::createRackList(int outputSignalType)
+int SignalBase::createMeasureRackList(int outputSignalType)
 {
 	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
@@ -1488,7 +1422,7 @@ int SignalBase::createRackList(int outputSignalType)
 				continue;
 			}
 
-			if (rackHashMap.contains( rackHash ) == false)
+			if (rackHashMap.contains(rackHash) == false)
 			{
 				rackHashMap.insert(rackHash, param.location().rack().index());
 
@@ -1500,11 +1434,11 @@ int SignalBase::createRackList(int outputSignalType)
 		//
 		int rackCount = m_rackList.size();
 
-		for( int i = 0; i < rackCount - 1; i++)
+		for(int i = 0; i < rackCount - 1; i++)
 		{
 			for(int j = i+1; j < rackCount; j++)
 			{
-				if ( m_rackList[i].index() > m_rackList[j].index() )
+				if (m_rackList[i].index() > m_rackList[j].index())
 				{
 					Metrology::RackParam rack	= m_rackList[ i ];
 					m_rackList[ i ]				= m_rackList[ j ];
@@ -1520,7 +1454,7 @@ int SignalBase::createRackList(int outputSignalType)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::clearRackList()
+void SignalBase::clearMeasureRackList()
 {
 	m_rackMutex.lock();
 
@@ -1550,23 +1484,23 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			param.setInputElectricUnit( theUnitBase.unit( param.inputElectricUnitID() ) );
-			param.setInputPhysicalUnit( theUnitBase.unit( param.inputPhysicalUnitID() ) );
-			param.setOutputElectricUnit( theUnitBase.unit( param.outputElectricUnitID() ) );
-			param.setOutputPhysicalUnit( theUnitBase.unit( param.outputPhysicalUnitID() ) );
+			param.setInputElectricUnit(m_unitList.value(param.inputElectricUnitID()));
+			param.setInputPhysicalUnit(m_unitList.value(param.inputPhysicalUnitID()));
+			param.setOutputElectricUnit(m_unitList.value(param.outputElectricUnitID()));
+			param.setOutputPhysicalUnit(m_unitList.value(param.outputPhysicalUnitID()));
 
 			// sensors
 			//
 			int sensorType = param.inputElectricSensorType();
 			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 			{
-				param.setInputElectricSensor( SensorTypeStr[ sensorType ] );
+				param.setInputElectricSensor(SensorTypeStr[ sensorType ]);
 			}
 
 			sensorType = param.outputElectricSensorType();
 			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 			{
-				param.setOutputElectricSensor( SensorTypeStr[ sensorType ] );
+				param.setOutputElectricSensor(SensorTypeStr[ sensorType ]);
 			}
 
 			// places for tuning signals
@@ -1575,15 +1509,37 @@ void SignalBase::initSignals()
 			{
 				switch (param.signalType())
 				{
-					case E::SignalType::Analog:		param.setPlace( analogTuningSignalCount++ );	break;
-					case E::SignalType::Discrete:	param.setPlace( discreteTuningSignalCount++ );	break;
+					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
+					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
 					default:						assert(0);
 				}
+			}
+		}
+
+	m_signalMutex.unlock();
+
+	updateRackParam();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::updateRackParam()
+{
+	m_signalMutex.lock();
+
+		int count = m_signalList.count();
+
+		for(int i = 0; i < count; i ++)
+		{
+			Metrology::SignalParam& param = m_signalList[i].param();
+			if (param.isValid() == false)
+			{
+				continue;
 			}
 
 			// fistly we are now only rackID, so we must set RackParam from RackBase for every signal
 			//
-			Metrology::RackParam rack = theRackBase.rack( param.location().rack().hash() );
+			Metrology::RackParam rack = m_rackBase.rack(param.location().rack().hash());
 			if (rack.isValid() == true)
 			{
 				param.setRack(rack);
@@ -1721,7 +1677,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 							continue;
 						}
 
-						measureSignal.setSignal(CHANNEL_0, measureKind, outputSignalType, param);
+						measureSignal.setSignal(Metrology::Channel_0, measureKind, outputSignalType, param);
 					}
 					break;
 
@@ -1747,7 +1703,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 							if (index >= 0 && index < m_signalMesaureList.size())
 							{
 								int channel = param.location().rack().channel();
-								if ( channel >= 0 && channel < MAX_CHANNEL_COUNT )
+								if (channel >= 0 && channel < Metrology::ChannelCount)
 								{
 									m_signalMesaureList[index].setSignal(channel, measureKind, outputSignalType, param);
 								}
@@ -1759,7 +1715,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 						mesaureSignalMap.insert(hashid, signalIndex);
 
 						int channel = param.location().rack().channel();
-						if ( channel >= 0 && channel < MAX_CHANNEL_COUNT )
+						if (channel >= 0 && channel < Metrology::ChannelCount)
 						{
 							measureSignal.setSignal(channel, measureKind, outputSignalType, param);
 						}
@@ -1771,7 +1727,7 @@ int SignalBase::createMeasureSignalList(int measureKind, int outputSignalType, i
 					continue;
 			}
 
-			if(measureSignal.isEmpty() == true)
+			if (measureSignal.isEmpty() == true)
 			{
 				// assert(false);
 				continue;
@@ -1825,7 +1781,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 			m_requestStateList.clear();
 
-			for(int i = 0; i < MAX_CHANNEL_COUNT; i++)
+			for(int i = 0; i < Metrology::ChannelCount; i++)
 			{
 				Hash hash = m_activeSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).hash(i);
 				if (hash == 0)
@@ -1873,1124 +1829,6 @@ void SignalBase::clearActiveSignal()
 	m_activeSignalMutex.unlock();
 
 	emit activeSignalChanged(m_activeSignal);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-UnitBase theUnitBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
-UnitBase::UnitBase(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void UnitBase::clear()
-{
-	m_unitMutex.lock();
-
-		m_unitMap.clear();
-
-	m_unitMutex.unlock();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int UnitBase::unitCount() const
-{
-	int count = 0;
-
-	m_unitMutex.lock();
-
-		count = m_unitMap.size();
-
-	m_unitMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void UnitBase::appendUnit(int unitID, const QString& unit)
-{
-	m_unitMutex.lock();
-
-		if (m_unitMap.contains(unitID) == false)
-		{
-			m_unitMap[unitID] = unit;
-		}
-
-	m_unitMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool UnitBase::hasUnit(int unitID)
-{
-	if (unitID == NO_UNIT_ID)
-	{
-		return false;
-	}
-
-	bool has;
-
-	m_unitMutex.lock();
-
-		has = m_unitMap.contains(unitID);
-
-	m_unitMutex.unlock();
-
-	return has;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool UnitBase::hasSensorType(int sensorType)
-{
-	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
-	{
-		return false;
-	}
-
-	if (sensorType == E::SensorType::NoSensorType)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString UnitBase::unit(int unitID)
-{
-	QString strUnit;
-
-	m_unitMutex.lock();
-
-		if (m_unitMap.contains(unitID) == true)
-		{
-			strUnit = m_unitMap[unitID];
-		}
-
-	m_unitMutex.unlock();
-
-	return strUnit;
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-RackGroup::RackGroup(const QString& caption)
-{
-	setCaption(caption);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool RackGroup::isValid() const
-{
-	if (m_caption.isEmpty() == true || m_hash == 0)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackGroup::clear()
-{
-	m_hash = 0;
-	m_caption.clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackGroup::setCaption(const QString& caption)
-{
-	m_caption = caption;
-
-	if (m_caption.isEmpty() == true)
-	{
-		m_hash = 0;
-		return;
-	}
-
-	m_hash = calcHash(m_caption);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString RackGroup::rackID(int channel) const
-{
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
-	{
-		return QString();
-	}
-
-	return m_rackID[channel];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackGroup::setRackID(int channel, const QString& rackID)
-{
-	if (channel < 0 || channel >= MAX_CHANNEL_COUNT)
-	{
-		return;
-	}
-
-	m_rackID[channel] = rackID;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-RackGroupBase::RackGroupBase(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackGroupBase::clear()
-{
-	m_groupMutex.lock();
-
-		m_groupList.clear();
-
-	m_groupMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackGroupBase::count() const
-{
-	int count = 0;
-
-	m_groupMutex.lock();
-
-		count = m_groupList.size();
-
-	m_groupMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackGroupBase::append(const RackGroup& group)
-{
-	if (group.isValid() == false)
-	{
-		assert(false);
-		return -1;
-	}
-
-	int index = -1;
-
-	m_groupMutex.lock();
-
-		m_groupList.append(group);
-		index = m_groupList.size() - 1;
-
-	m_groupMutex.unlock();
-
-	return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-RackGroup RackGroupBase::group(int index) const
-{
-	RackGroup group;
-
-	m_groupMutex.lock();
-
-		if (index >= 0 && index < m_groupList.size())
-		{
-			group = m_groupList[index];
-		}
-
-	m_groupMutex.unlock();
-
-	return group;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool RackGroupBase::setGroup(int index, const RackGroup& group)
-{
-	bool result = false;
-
-	m_groupMutex.lock();
-
-		if (index >= 0 && index < m_groupList.size())
-		{
-			m_groupList[index] = group;
-
-			result = true;
-		}
-
-	m_groupMutex.unlock();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool RackGroupBase::remove(int index)
-{
-	bool result = false;
-
-	m_groupMutex.lock();
-
-		if (index >= 0 && index < m_groupList.size())
-		{
-			m_groupList.remove(index);
-
-			result = true;
-		}
-
-	m_groupMutex.unlock();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackGroupBase::load()
-{
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
-	QTime responseTime;
-	responseTime.start();
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
-	if (table == nullptr)
-	{
-		return false;
-	}
-
-	int readedRecordCount = 0;
-
-	m_groupMutex.lock();
-
-		m_groupList.resize(table->recordCount());
-
-		readedRecordCount = table->read(m_groupList.data());
-
-	m_groupMutex.unlock();
-
-	table->close();
-
-	qDebug() << "RackBase::loadGroup() - Loaded rack groups: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
-
-	return readedRecordCount;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool RackGroupBase::save()
-{
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_RACK_GROUP);
-	if (table == nullptr)
-	{
-		return false;
-	}
-
-	if (table->clear() == false)
-	{
-		table->close();
-		return false;
-	}
-
-	int writtenRecordCount = 0;
-
-	m_groupMutex.lock();
-
-		writtenRecordCount = table->write(m_groupList.data(), m_groupList.count() );
-
-	m_groupMutex.unlock();
-
-	table->close();
-
-	if (writtenRecordCount != count() )
-	{
-		return false;
-	}
-
-	qDebug() << "RackBase::saveGroup() - Written rack groups: " << writtenRecordCount;
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-RackGroupBase& RackGroupBase::operator=(const RackGroupBase& from)
-{
-	m_groupMutex.lock();
-
-		m_groupList = from.m_groupList;
-
-	m_groupMutex.unlock();
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-RackBase theRackBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
-RackBase::RackBase(QObject *parent) :
-	QObject(parent)
-{
-}
-
- // -------------------------------------------------------------------------------------------------------------------
-
-void RackBase::clear()
-{
-	m_rackMutex.lock();
-
-		m_rackHashMap.clear();
-		m_rackList.clear();
-
-	m_rackMutex.unlock();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackBase::count() const
-{
-	int count = 0;
-
-	m_rackMutex.lock();
-
-		count = m_rackList.size();
-
-	m_rackMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int RackBase::append(const Metrology::RackParam& rack)
-{
-	if (rack.isValid() == false)
-	{
-		assert(false);
-		return -1;
-	}
-
-	int index = -1;
-
-	m_rackMutex.lock();
-
-		if (m_rackHashMap.contains(rack.hash()) == false)
-		{
-			m_rackList.append(rack);
-			index = m_rackList.size() - 1;
-
-			m_rackHashMap.insert(rack.hash(), index);
-		}
-
-	 m_rackMutex.unlock();
-
-	 return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::RackParam RackBase::rack(const QString& rackID)
-{
-	if (rackID.isEmpty() == true)
-	{
-		assert(false);
-		return Metrology::RackParam();
-	}
-
-	return rack(calcHash(rackID));
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::RackParam RackBase::rack(const Hash& hash)
-{
-	if (hash == 0)
-	{
-		assert(hash != 0);
-		return Metrology::RackParam();
-	}
-
-	Metrology::RackParam rack;
-
-	m_rackMutex.lock();
-
-		if (m_rackHashMap.contains(hash) == true)
-		{
-			int index = m_rackHashMap[hash];
-
-			if (index >= 0 && index < m_rackList.size())
-			{
-				rack = m_rackList[index];
-			}
-		}
-
-	m_rackMutex.unlock();
-
-	return rack;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::RackParam RackBase::rack(int index)
-{
-	Metrology::RackParam rack;
-
-	m_rackMutex.lock();
-
-		if (index >= 0 && index < m_rackList.size())
-		{
-			rack = m_rackList[index];
-		}
-
-	m_rackMutex.unlock();
-
-	return rack;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackBase::setRack(const QString& rackID, const Metrology::RackParam& rack)
-{
-	if (rackID.isEmpty() == true)
-	{
-		assert(false);
-		return;
-	}
-
-	if (rack.isValid() == false)
-	{
-		return;
-	}
-
-	setRack(calcHash(rackID), rack);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackBase::setRack(const Hash& hash, const Metrology::RackParam& rack)
-{
-	if (hash == 0)
-	{
-		assert(hash != 0);
-		return;
-	}
-
-	if (rack.isValid() == false)
-	{
-		return;
-	}
-
-	m_rackMutex.lock();
-
-		if (m_rackHashMap.contains(rack.hash()) == true)
-		{
-			int index = m_rackHashMap[rack.hash()];
-
-			if (index >= 0 && index < m_rackList.size())
-			{
-				m_rackList[index] = rack;
-			}
-		}
-
-	m_rackMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackBase::setRack(int index, const Metrology::RackParam& rack)
-{
-	if (rack.isValid() == false)
-	{
-		return;
-	}
-
-	m_rackMutex.lock();
-
-		if (index >= 0 && index < m_rackList.size())
-		{
-			m_rackList[index] = rack;
-		}
-
-	m_rackMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackBase::updateParamFromGroups()
-{
-	int count = groups().count();
-	for(int i = 0; i < count; i++)
-	{
-		RackGroup group = groups().group(i);
-		if (group.isValid() == false)
-		{
-			continue;
-		}
-
-		for(int channel = 0; channel < MAX_CHANNEL_COUNT; channel++)
-		{
-			QString rackID = group.rackID(channel);
-			if (rackID.isEmpty() == true)
-			{
-				continue;
-			}
-
-			Metrology::RackParam r = rack( rackID );
-			if (r.isValid() == false)
-			{
-				continue;
-			}
-
-			r.setGroupIndex( group.Index() );
-			r.setChannel( channel );
-
-			setRack(r.hash(), r);
-		}
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-RackBase& RackBase::operator=(const RackBase& from)
-{
-	m_rackMutex.lock();
-
-		m_rackHashMap = from.m_rackHashMap;
-		m_rackList = from.m_rackList;
-
-		m_groupBase = from.m_groupBase;
-
-	m_rackMutex.unlock();
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignal::OutputSignal()
-{
-	clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignal::OutputSignal(const OutputSignal& from)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignal::clear()
-{
-	m_hash = 0;
-
-	m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
-
-	for(int k = 0; k < MEASURE_IO_SIGNAL_TYPE_COUNT; k++)
-	{
-		m_param[k].setAppSignalID(QString());
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool OutputSignal::isValid() const
-{
-	if (m_hash == 0)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool OutputSignal::setHash()
-{
-	QString strID;
-
-	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-	{
-		strID.append(m_appSignalID[type]);
-	}
-
-	if (strID.isEmpty() == true)
-	{
-		return false;
-	}
-
-	m_hash = calcHash( strID );
-	if (m_hash == 0)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString OutputSignal::typeStr() const
-{
-	if (m_type < 0 || m_type >= OUTPUT_SIGNAL_TYPE_COUNT)
-	{
-		return QString();
-	}
-
-	return OutputSignalType[m_type];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-QString OutputSignal::appSignalID(int type) const
-{
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return QString();
-	}
-
-	QString appSignalID;
-
-	m_signalMutex.lock();
-
-		appSignalID = m_appSignalID[type];
-
-	m_signalMutex.unlock();
-
-	return appSignalID;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignal::setAppSignalID(int type, const QString& appSignalID)
-{
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		m_appSignalID[type] = appSignalID;
-
-		setHash();
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-Metrology::SignalParam OutputSignal::param(int type) const
-{
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return Metrology::SignalParam();
-	}
-
-	Metrology::SignalParam param;
-
-	m_signalMutex.lock();
-
-		param = m_param[type];
-
-	m_signalMutex.unlock();
-
-	return param;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignal::setParam(int type, const Metrology::SignalParam& param)
-{
-	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		return;
-	}
-
-	if (param.isValid() == false)\
-	{
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		m_appSignalID[type] = param.appSignalID();
-
-		setHash();
-
-		m_param[type] = param;
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignal::updateParam()
-{
-	m_signalMutex.lock();
-
-		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-		{
-			if (m_appSignalID[type].isEmpty() == true)
-			{
-				continue;
-			}
-
-			Hash signalHash = calcHash(m_appSignalID[type]);
-			if (signalHash == 0)
-			{
-				continue;
-			}
-
-			m_param[type] = theSignalBase.signalParam(signalHash);
-		}
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignal& OutputSignal::operator=(const OutputSignal& from)
-{
-	m_signalID = from.m_signalID;
-	m_hash = from.m_signalID;
-
-	m_type = from.m_type;
-
-	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-	{
-		m_appSignalID[type] = from.m_appSignalID[type];
-
-		m_param[type] = from.m_param[type];
-	}
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignalBase theOutputSignalBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignalBase::OutputSignalBase(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::clear()
-{
-	m_signalMutex.lock();
-
-		m_signalList.clear();
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int OutputSignalBase::signalCount() const
-{
-	int count = 0;
-
-	m_signalMutex.lock();
-
-		count = m_signalList.size();
-
-	m_signalMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::sort()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int OutputSignalBase::load()
-{
-	if (thePtrDB == nullptr)
-	{
-		return 0;
-	}
-
-	QTime responseTime;
-	responseTime.start();
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_OUTPUT_SIGNAL);
-	if (table == nullptr)
-	{
-		return false;
-	}
-
-	int readedRecordCount = 0;
-
-	m_signalMutex.lock();
-
-		m_signalList.resize(table->recordCount());
-
-		readedRecordCount = table->read(m_signalList.data());
-
-	m_signalMutex.unlock();
-
-	table->close();
-
-	qDebug() << "OutputSignalBase::load() - Loaded output signals: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
-
-	return readedRecordCount;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool OutputSignalBase::save()
-{
-	if (thePtrDB == nullptr)
-	{
-		return false;
-	}
-
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_OUTPUT_SIGNAL);
-	if (table == nullptr)
-	{
-		return false;
-	}
-
-	if (table->clear() == false)
-	{
-		table->close();
-		return false;
-	}
-
-	int writtenRecordCount = 0;
-
-	m_signalMutex.lock();
-
-		writtenRecordCount = table->write(m_signalList.data(), m_signalList.count() );
-
-	m_signalMutex.unlock();
-
-	table->close();
-
-	if (writtenRecordCount != signalCount() )
-	{
-		return false;
-	}
-
-	qDebug() << "OutputSignalBase::save() - Written output signals: " << writtenRecordCount;
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int OutputSignalBase::appendSignal(const OutputSignal& signal)
-{
-	int index = -1;
-
-	m_signalMutex.lock();
-
-			m_signalList.append(signal);
-			index = m_signalList.size() - 1;
-
-	m_signalMutex.unlock();
-
-	return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignal OutputSignalBase::signal(int index) const
-{
-	OutputSignal signal;
-
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.size())
-		{
-			signal = m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return signal;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::setSignal(int index, const OutputSignal& signal)
-{
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.size())
-		{
-			m_signalList[index] = signal;
-		}
-
-	m_signalMutex.unlock();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::remove(const OutputSignal& signal)
-{
-	int index = find(signal);
-
-	return remove(index);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::remove(int index)
-{
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.size())
-		{
-			m_signalList.remove(index);
-		}
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int OutputSignalBase::find(int measureIoType, const Hash& hash, int outputSignalType)
-{
-	if (measureIoType < 0 || measureIoType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
-	{
-		assert(0);
-		return -1;
-	}
-
-	if (hash == 0)
-	{
-		assert(hash != 0);
-		return -1;
-	}
-
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
-	{
-		assert(0);
-		return -1;
-	}
-
-	int foundIndex = -1;
-
-	m_signalMutex.lock();
-
-		int count = m_signalList.size();
-
-		for(int i = 0; i < count; i ++)
-		{
-			const OutputSignal& signal = m_signalList[i];
-
-			if (calcHash(m_signalList[i].appSignalID(measureIoType)) != hash)
-			{
-				continue;
-			}
-
-			if (signal.type() != outputSignalType)
-			{
-				continue;
-			}
-
-			foundIndex = i;
-			break;
-		}
-
-	m_signalMutex.unlock();
-
-	return foundIndex;
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int OutputSignalBase::find(const OutputSignal& signal)
-{
-	int foundIndex = -1;
-
-		m_signalMutex.lock();
-
-		int count = m_signalList.size();
-
-		for(int i = 0; i < count; i ++)
-		{
-			if (m_signalList[i].hash() == signal.hash())
-			{
-				foundIndex = i;
-
-				break;
-			}
-		 }
-
-	m_signalMutex.unlock();
-
-	return foundIndex;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-OutputSignalBase& OutputSignalBase::operator=(const OutputSignalBase& from)
-{
-	m_signalMutex.lock();
-
-		m_signalList = from.m_signalList;
-
-	m_signalMutex.unlock();
-
-	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

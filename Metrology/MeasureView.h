@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QList>
 
-#include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "MeasurementBase.h"
 
@@ -18,7 +17,7 @@ class MeasureTable : public QAbstractTableModel
 public:
 
 	explicit MeasureTable(QObject* parent = 0);
-	~MeasureTable();
+	virtual ~MeasureTable();
 
 private:
 
@@ -62,13 +61,9 @@ class MeasureView : public QTableView
 	Q_OBJECT
 
 public:
+
 	explicit MeasureView(int measureType, QWidget *parent = 0);
-	~MeasureView();
-
-	int					measureType() const { return m_measureType; }
-	MeasureTable&		table() { return m_table; }
-
-	void				updateColumn();
+	virtual ~MeasureView();
 
 private:
 
@@ -79,6 +74,13 @@ private:
 	QList<QAction*>		m_actionList;
 
 	void				createContextMenu();
+
+public:
+
+	int					measureType() const { return m_measureType; }
+	MeasureTable&		table() { return m_table; }
+
+	void				updateColumn();
 
 signals:
 

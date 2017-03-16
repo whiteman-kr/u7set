@@ -77,7 +77,7 @@ class SignalPropertyDialog : public QDialog
 public:
 
 	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent = 0);
-	~SignalPropertyDialog();
+	virtual ~SignalPropertyDialog();
 
 private:
 
@@ -136,7 +136,7 @@ class RackPropertyDialog : public QDialog
 public:
 
 	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = 0);
-	~RackPropertyDialog();
+	virtual ~RackPropertyDialog();
 
 private:
 
@@ -185,7 +185,7 @@ class RackGroupPropertyDialog : public QDialog
 public:
 
 	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = 0);
-	~RackGroupPropertyDialog();
+	virtual ~RackGroupPropertyDialog();
 
 private:
 
@@ -210,7 +210,7 @@ private:
 	// Property list
 	//
 	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*	 m_pFactory = nullptr;
+	QtVariantEditorFactory*		m_pFactory = nullptr;
 	QtTreePropertyBrowser*		m_pEditor = nullptr;
 
 	void						createPropertyList();

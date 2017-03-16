@@ -1,4 +1,4 @@
-#include "OutputSignal.h"
+#include "OutputSignalList.h"
 
 #include <QClipboard>
 
@@ -56,7 +56,7 @@ QVariant OutputSignalTable::headerData(int section, Qt::Orientation orientation,
 
 	QVariant result = QVariant();
 
-	if(orientation == Qt::Horizontal )
+	if (orientation == Qt::Horizontal)
 	{
 		if (section >= 0 && section < OUTPUT_SIGNAL_COLUMN_COUNT)
 		{
@@ -64,9 +64,9 @@ QVariant OutputSignalTable::headerData(int section, Qt::Orientation orientation,
 		}
 	}
 
-	if(orientation == Qt::Vertical )
+	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg( section + 1 );
+		result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -94,7 +94,7 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 	}
 
 	OutputSignal signal = at(row);
-	if(signal.isValid() == false)
+	if (signal.isValid() == false)
 	{
 		return QVariant();
 	}
@@ -113,12 +113,12 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 	{
 		if ((column == OUTPUT_SIGNAL_COLUMN_IN_RACK || column == OUTPUT_SIGNAL_COLUMN_IN_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
 		{
-			return QColor( Qt::red );
+			return QColor(Qt::red);
 		}
 
 		if ((column == OUTPUT_SIGNAL_COLUMN_OUT_RACK || column == OUTPUT_SIGNAL_COLUMN_OUT_CAPTION) && signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).isValid() == false)
 		{
-			return QColor( Qt::red );
+			return QColor(Qt::red);
 		}
 
 		return QVariant();
@@ -129,7 +129,7 @@ QVariant OutputSignalTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == OUTPUT_SIGNAL_COLUMN_SEPARATOR1 || column == OUTPUT_SIGNAL_COLUMN_SEPARATOR2 || column == OUTPUT_SIGNAL_COLUMN_SEPARATOR3)
 		{
-			return QColor( Qt::lightGray );
+			return QColor(Qt::lightGray);
 		}
 
 		return QVariant();
@@ -170,15 +170,15 @@ QString OutputSignalTable::text(int row, int column, const OutputSignal& signal)
 	switch (column)
 	{
 		case OUTPUT_SIGNAL_COLUMN_TYPE:			result = signal.typeStr();																						break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:	result = QString();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR1:	result.clear();																								break;
 		case OUTPUT_SIGNAL_COLUMN_IN_RACK:		inParam.isValid() == false ?	result = QString("???")	 : result = inParam.location().rack().caption();		break;
 		case OUTPUT_SIGNAL_COLUMN_IN_ID:		inParam.isValid() == false ?	result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) : result = m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID();		break;
 		case OUTPUT_SIGNAL_COLUMN_IN_CAPTION:	inParam.isValid() == false ?	result = QString("???")	 : result = inParam.caption();							break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:	result = QString();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR2:	result.clear();																								break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_RACK:		outParam.isValid() == false ?	result = QString("???")	 : result = outParam.location().rack().caption();		break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_ID:		outParam.isValid() == false ?	result = signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) : result = m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID();	break;
 		case OUTPUT_SIGNAL_COLUMN_OUT_CAPTION:	outParam.isValid() == false ?	result = QString("???")	 : result = outParam.caption();							break;
-		case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:	result = QString();																								break;
+		case OUTPUT_SIGNAL_COLUMN_SEPARATOR3:	result.clear();																								break;
 		default:								assert(0);
 	}
 
@@ -251,7 +251,7 @@ void OutputSignalTable::clear()
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, count - 1 );
+	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_signalMutex.lock();
 
@@ -350,9 +350,9 @@ void OutputSignalItemDialog::createInterface()
 
 	m_pInputSignalIDEdit->setReadOnly(true);
 	m_pInputSignalCaptionEdit->setReadOnly(true);
-	m_pInputSignalButton->setEnabled( theSignalBase.signalCount() != 0 );
+	m_pInputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
-	inputSignalLayout->addWidget(pInputSignalLabel );
+	inputSignalLayout->addWidget(pInputSignalLabel);
 	inputSignalLayout->addWidget(m_pInputSignalIDEdit);
 	inputSignalLayout->addWidget(new QLabel(tr(" - "), this));
 	inputSignalLayout->addWidget(m_pInputSignalCaptionEdit);
@@ -373,7 +373,7 @@ void OutputSignalItemDialog::createInterface()
 
 	m_pOutputSignalIDEdit->setReadOnly(true);
 	m_pOutputSignalCaptionEdit->setReadOnly(true);
-	m_pOutputSignalButton->setEnabled( theSignalBase.signalCount() != 0 );
+	m_pOutputSignalButton->setEnabled(theSignalBase.signalCount() != 0);
 
 	outputSignalLayout->addWidget(pOutputSignalLabel);
 	outputSignalLayout->addWidget(m_pOutputSignalIDEdit);
@@ -393,17 +393,17 @@ void OutputSignalItemDialog::createInterface()
 	//
 	for (int type = 0; type < OUTPUT_SIGNAL_TYPE_COUNT; type++)
 	{
-		m_pTypeList->addItem( OutputSignalType[type], type );
+		m_pTypeList->addItem(OutputSignalType[type], type);
 	}
 	m_pTypeList->removeItem(OUTPUT_SIGNAL_TYPE_UNUSED);
 
 	int type = m_signal.type() ;
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT )
+	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		type = OUTPUT_SIGNAL_TYPE_FROM_INPUT;
-		m_signal.setType( type );
+		m_signal.setType(type);
 	}
-	m_pTypeList->setCurrentIndex( type - 1);
+	m_pTypeList->setCurrentIndex(type - 1);
 
 	// connects
 	//
@@ -428,7 +428,7 @@ void OutputSignalItemDialog::createInterface()
 void OutputSignalItemDialog::updateSignals()
 {
 	int type = m_signal.type();
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT )
+	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
@@ -436,25 +436,25 @@ void OutputSignalItemDialog::updateSignals()
 	Metrology::SignalParam inParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == true)
 	{
-		m_pInputSignalIDEdit->setText( m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID());
-		m_pInputSignalCaptionEdit->setText( inParam.caption() );
+		m_pInputSignalIDEdit->setText(m_showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID());
+		m_pInputSignalCaptionEdit->setText(inParam.caption());
 	}
 	else
 	{
-		m_pInputSignalIDEdit->setText( m_signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) );
-		m_pInputSignalCaptionEdit->setText( QString() );
+		m_pInputSignalIDEdit->setText(m_signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
+		m_pInputSignalCaptionEdit->setText(QString());
 	}
 
 	Metrology::SignalParam outParam = m_signal.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == true)
 	{
-		m_pOutputSignalIDEdit->setText( m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID());
-		m_pOutputSignalCaptionEdit->setText( outParam.caption() );
+		m_pOutputSignalIDEdit->setText(m_showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID());
+		m_pOutputSignalCaptionEdit->setText(outParam.caption());
 	}
 	else
 	{
-		m_pOutputSignalIDEdit->setText( m_signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) );
-		m_pOutputSignalCaptionEdit->setText( QString() );
+		m_pOutputSignalIDEdit->setText(m_signal.appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
+		m_pOutputSignalCaptionEdit->setText(QString());
 	}
 
 
@@ -469,12 +469,12 @@ void OutputSignalItemDialog::updateSignals()
 void OutputSignalItemDialog::selectedType(int)
 {
 	int type = m_pTypeList->currentData().toInt() ;
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT )
+	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
 
-	m_signal.setType( type );
+	m_signal.setType(type);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -557,14 +557,14 @@ void OutputSignalItemDialog::showCustomID()
 void OutputSignalItemDialog::onOk()
 {
 	int type = m_signal.type();
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT )
+	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select output signal type!"));
 		m_pTypeList->setFocus();
 		return;
 	}
 
-	if ( m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
+	if (m_signal.param(MEASURE_IO_SIGNAL_TYPE_INPUT).isValid() == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select input signal!"));
 		m_pInputSignalButton->setFocus();
@@ -585,22 +585,6 @@ void OutputSignalItemDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalDialog::m_columnWidth[OUTPUT_SIGNAL_COLUMN_COUNT] =
-{
-	110,	// OUTPUT_SIGNAL_COLUMN_TYPE
-	  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR1
-	100,	// OUTPUT_SIGNAL_COLUMN_IN_RACK
-	250,	// OUTPUT_SIGNAL_COLUMN_IN_ID
-	150,	// OUTPUT_SIGNAL_COLUMN_IN_CAPTION
-	  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR2
-	100,	// OUTPUT_SIGNAL_COLUMN_OUT_RACK
-	250,	// OUTPUT_SIGNAL_COLUMN_OUT_ID
-	150,	// OUTPUT_SIGNAL_COLUMN_OUT_CAPTION
-	  3,	// OUTPUT_SIGNAL_COLUMN_SEPARATOR3
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
 OutputSignalDialog::OutputSignalDialog(QWidget *parent) :
 	QDialog(parent)
 {
@@ -610,7 +594,7 @@ OutputSignalDialog::OutputSignalDialog(QWidget *parent) :
 		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &OutputSignalDialog::updateList, Qt::QueuedConnection);
 	}
 
-	m_signalBase = theOutputSignalBase;
+	m_signalBase = theSignalBase.outputSignals();
 
 	createInterface();
 	updateList();
@@ -696,12 +680,12 @@ void OutputSignalDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_signalTable);
-	QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < OUTPUT_SIGNAL_COLUMN_COUNT; column++)
 	{
-		m_pView->setColumnWidth(column, m_columnWidth[column]);
+		m_pView->setColumnWidth(column, OutputSignalColumnWidth[column]);
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -765,7 +749,7 @@ void OutputSignalDialog::updateList()
 
 		outputSignal.updateParam();
 
-		signalList.append( outputSignal );
+		signalList.append(outputSignal);
 	}
 
 	m_signalTable.set(signalList);
@@ -846,15 +830,15 @@ void OutputSignalDialog::removeSignal()
 		return;
 	}
 
-	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 signal(s)?").arg(selectedSignalCount) ) == QMessageBox::No)
+	if (QMessageBox::question(this, windowTitle(), tr("Do you want delete %1 signal(s)?").arg(selectedSignalCount)) == QMessageBox::No)
 	{
 		return;
 	}
 
 	int count = m_signalTable.signalCount();
-	for(int index = count - 1; index >= 0; index -- )
+	for(int index = count - 1; index >= 0; index --)
 	{
-		if (m_pView->selectionModel()->isRowSelected(index, QModelIndex() ) == true)
+		if (m_pView->selectionModel()->isRowSelected(index, QModelIndex()) == true)
 		{
 			if (index >= 0 && index < m_signalTable.signalCount())
 			{
@@ -899,7 +883,7 @@ void OutputSignalDialog::copy()
 
 	for(int row = 0; row < rowCount; row++)
 	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex() ) == false)
+		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
 		{
 			continue;
 		}
@@ -911,7 +895,7 @@ void OutputSignalDialog::copy()
 				continue;
 			}
 
-			textClipboard.append(m_pView->model()->data( m_pView->model()->index(row, column)).toString() + "\t");
+			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
 		}
 
 		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
@@ -925,7 +909,7 @@ void OutputSignalDialog::copy()
 
 void OutputSignalDialog::showCustomID()
 {
-	m_signalTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateList();
 }
@@ -941,8 +925,7 @@ void OutputSignalDialog::onContextMenu(QPoint)
 
 void OutputSignalDialog::onOk()
 {
-	theOutputSignalBase.clear();
-	theOutputSignalBase = m_signalBase;
+	theSignalBase.outputSignals() = m_signalBase;
 
 	accept();
 }

@@ -26,7 +26,7 @@ public:
 	MeasureViewColumn();
 	MeasureViewColumn(const MeasureViewColumn& from);
 	MeasureViewColumn(const QString& title, int width, bool visible, int alignment, bool duplicate);
-	~MeasureViewColumn();
+	virtual ~MeasureViewColumn();
 
 private:
 
@@ -80,7 +80,7 @@ class MeasureViewHeader : public QObject
 public:
 
 	explicit MeasureViewHeader(QObject *parent = 0);
-	~MeasureViewHeader();
+	virtual ~MeasureViewHeader();
 
 private:
 
@@ -103,7 +103,6 @@ public:
 
 	void				setColumnTitle(int column, const QString& title);
 	void				setColumnVisible(int column, bool visible);
-
 };
 
 // ==============================================================================================

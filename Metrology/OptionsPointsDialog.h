@@ -13,78 +13,82 @@
 #include <QTableWidget>
 
 #include "Options.h"
+#include "Measure.h"
 
 // ==============================================================================================
 
 class OptionsPointsDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit            OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
-                        ~OptionsPointsDialog();
 
-    LinearityOption     m_linearity;
+	explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
+	virtual ~OptionsPointsDialog();
 
 private:
 
-    QAction*            m_pColumnAction[POINT_SENSOR_COUNT];
-    QMenu*              m_headerContextMenu = nullptr;
+	QAction*			m_pColumnAction[POINT_SENSOR_COUNT];
+	QMenu*				m_headerContextMenu = nullptr;
 
-    // elements of interface
-    //
-    QLabel*             m_rangeTypeLabel = nullptr;
-    QComboBox*          m_rangeTypeList = nullptr;
+	// elements of interface
+	//
+	QLabel*				m_rangeTypeLabel = nullptr;
+	QComboBox*			m_rangeTypeList = nullptr;
 
-    QLabel*             m_pointCountLabel = nullptr;
-    QLineEdit*          m_pointCountEdit = nullptr;
-    QLabel*             m_lowRangeLabel = nullptr;
-    QLineEdit*          m_lowRangeEdit = nullptr;
-    QLabel*             m_highRangeLabel = nullptr;
-    QLineEdit*          m_highRangeEdit = nullptr;
+	QLabel*				m_pointCountLabel = nullptr;
+	QLineEdit*			m_pointCountEdit = nullptr;
+	QLabel*				m_lowRangeLabel = nullptr;
+	QLineEdit*			m_lowRangeEdit = nullptr;
+	QLabel*				m_highRangeLabel = nullptr;
+	QLineEdit*			m_highRangeEdit = nullptr;
 
 
-    QPushButton*        m_addButton = nullptr;
-    QPushButton*        m_editButton = nullptr;
-    QPushButton*        m_removeButton = nullptr;
-    QPushButton*        m_upButton = nullptr;
-    QPushButton*        m_downButton = nullptr;
+	QPushButton*		m_addButton = nullptr;
+	QPushButton*		m_editButton = nullptr;
+	QPushButton*		m_removeButton = nullptr;
+	QPushButton*		m_upButton = nullptr;
+	QPushButton*		m_downButton = nullptr;
 
-    QTableWidget*       m_pointList = nullptr;
+	QTableWidget*		m_pointList = nullptr;
 
-    bool                m_updatingList = false;
+	bool				m_updatingList = false;
 
-    void                setHeaderList();
-    void                updateRangeType();
-    void                updateList();
-    void                clearList();
+	void				setHeaderList();
+	void				updateRangeType();
+	void				updateList();
+	void				clearList();
 
-    void                hideColumn(int column, bool hide);
+	void				hideColumn(int column, bool hide);
+
+public:
+
+	LinearityOption		m_linearity;
 
 protected:
 
-    void                keyPressEvent(QKeyEvent* e);
-    void                showEvent(QShowEvent* e);
+	void				keyPressEvent(QKeyEvent* e);
+	void				showEvent(QShowEvent* e);
 
 signals:
 
-    void                updateLinearityPage(bool isDialog);
+	void				updateLinearityPage(bool isDialog);
 
 private slots:
 
-    void                onAddPoint();
-    void                onEditPoint();
-    void                onRemovePoint();
-    void                onUpPoint();
-    void                onDownPoint();
-    void                onRangeType(int type);
-    void                onAutomaticCalculatePoints();
+	void				onAddPoint();
+	void				onEditPoint();
+	void				onRemovePoint();
+	void				onUpPoint();
+	void				onDownPoint();
+	void				onRangeType(int type);
+	void				onAutomaticCalculatePoints();
 
-    void                cellChanged(int,int);
-    void                currentCellChanged(int,int,int,int);
+	void				cellChanged(int,int);
+	void				currentCellChanged(int,int,int,int);
 
-    void                onHeaderContextMenu(QPoint);
-    void                onColumnAction(QAction* action);
+	void				onHeaderContextMenu(QPoint);
+	void				onColumnAction(QAction* action);
 };
 
 // ==============================================================================================

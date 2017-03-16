@@ -154,7 +154,7 @@ int MeasurementBase::load(int measureType)
 				{
 					if (table->read(data.pMeasurement) == data.recordCount)
 					{
-						loadedTablesInMemory.append( data );
+						loadedTablesInMemory.append(data);
 					}
 				}
 
@@ -404,15 +404,15 @@ Measurement* MeasurementBase::measurement(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-StatisticItem MeasurementBase::statistic(const Hash& signalHash)
+Metrology::SignalStatistic MeasurementBase::statistic(const Hash& signalHash)
 {
 	if (signalHash == 0)
 	{
 		assert(signalHash != 0);
-		return StatisticItem();
+		return Metrology::SignalStatistic();
 	}
 
-	StatisticItem si(signalHash);
+	Metrology::SignalStatistic si(signalHash);
 
 	m_measurmentListMutex.lock();
 
@@ -446,11 +446,11 @@ StatisticItem MeasurementBase::statistic(const Hash& signalHash)
 							break;
 						}
 
-						si.incrementMeasureCount();
+						si.measureCount()++;
 
-						if ( pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType) )
+						if (pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType))
 						{
-							si.setState(STATISTIC_STATE_INVALID);
+							si.setState(Metrology::StatisticStateInvalid);
 						}
 					}
 					break;

@@ -6,7 +6,7 @@
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
-#include "ObjectProperty.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ SignalListTable::~SignalListTable()
 {
 	m_signalMutex.lock();
 
-		m_signalParamList.clear();
+		m_signalList.clear();
 
 	m_signalMutex.unlock();
 }
@@ -58,7 +58,7 @@ QVariant SignalListTable::headerData(int section, Qt::Orientation orientation, i
 
 	QVariant result = QVariant();
 
-	if(orientation == Qt::Horizontal )
+	if (orientation == Qt::Horizontal)
 	{
 		if (section >= 0 && section < SIGNAL_LIST_COLUMN_COUNT)
 		{
@@ -66,9 +66,9 @@ QVariant SignalListTable::headerData(int section, Qt::Orientation orientation, i
 		}
 	}
 
-	if(orientation == Qt::Vertical )
+	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg( section + 1 );
+		result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -95,8 +95,8 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	Metrology::SignalParam param = signalParam(row);
-	if (param.isValid() == false)
+	Metrology::Signal* pSignal = signal(row);
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
 	{
 		return QVariant();
 	}
@@ -136,7 +136,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, param);
+		return text(row, column, pSignal);
 	}
 
 	return QVariant();
@@ -144,7 +144,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalListTable::text(int row, int column, const Metrology::SignalParam& param) const
+QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) const
 {
 	if (row < 0 || row >= signalCount())
 	{
@@ -156,6 +156,12 @@ QString SignalListTable::text(int row, int column, const Metrology::SignalParam&
 		return QString();
 	}
 
+	if (pSignal == nullptr)
+	{
+		return QString();
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
 	if (param.isValid() == false)
 	{
 		return QString();
@@ -166,7 +172,7 @@ QString SignalListTable::text(int row, int column, const Metrology::SignalParam&
 	switch (column)
 	{
 		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
-		case SIGNAL_LIST_COLUMN_ID:					result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID(); break;
+		case SIGNAL_LIST_COLUMN_ID:					result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();	break;
 		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();	break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
@@ -195,7 +201,7 @@ int SignalListTable::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalParamList.size();
+		count = m_signalList.size();
 
 	m_signalMutex.unlock();
 
@@ -204,25 +210,25 @@ int SignalListTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalParam SignalListTable::signalParam(int index) const
+Metrology::Signal* SignalListTable::signal(int index) const
 {
-	Metrology::SignalParam param;
+	Metrology::Signal* signal;
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalParamList.size())
+		if (index >= 0 && index < m_signalList.size())
 		{
-			 param = m_signalParamList[index];
+			 signal = m_signalList[index];
 		}
 
 	m_signalMutex.unlock();
 
-	return param;
+	return signal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<Metrology::SignalParam> list_add)
+void SignalListTable::set(const QList<Metrology::Signal*> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -234,7 +240,7 @@ void SignalListTable::set(const QList<Metrology::SignalParam> list_add)
 
 		m_signalMutex.lock();
 
-			m_signalParamList = list_add;
+			m_signalList = list_add;
 
 		m_signalMutex.unlock();
 
@@ -245,17 +251,25 @@ void SignalListTable::set(const QList<Metrology::SignalParam> list_add)
 
 void SignalListTable::clear()
 {
-	int count = m_signalParamList.count();
+	int count = signalCount();
 	if (count == 0)
 	{
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, count - 1 );
+	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_signalMutex.lock();
 
-			m_signalParamList.clear();
+			for(int i = count - 1; i >= 0; i--)
+			{
+				if (m_signalList[i] != nullptr)
+				{
+					delete m_signalList[i];
+				}
+			}
+
+			m_signalList.clear();
 
 		m_signalMutex.unlock();
 
@@ -274,13 +288,19 @@ void SignalListTable::updateSignalParam(const Hash& signalHash)
 
 	m_signalMutex.lock();
 
-		int count = m_signalParamList.count();
+		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_signalParamList[i].hash() == signalHash)
+			 Metrology::Signal* pSignal = m_signalList[i];
+			 if (pSignal == nullptr)
+			 {
+				 continue;
+			 }
+
+			if (pSignal->param().hash() == signalHash)
 			{
-				m_signalParamList[i] = theSignalBase.signalParam(signalHash);
+				pSignal->setParam(theSignalBase.signalParam(signalHash));
 
 				break;
 			}
@@ -293,30 +313,8 @@ void SignalListTable::updateSignalParam(const Hash& signalHash)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalListDialog::m_columnWidth[SIGNAL_LIST_COLUMN_COUNT] =
-{
-	100,	// SIGNAL_LIST_COLUMN_RACK
-	250,	// SIGNAL_LIST_COLUMN_ID
-	250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
-	150,	// SIGNAL_LIST_COLUMN_CAPTION
-	 60,	// SIGNAL_LIST_COLUMN_CHASSIS
-	 60,	// SIGNAL_LIST_COLUMN_MODULE
-	 60,	// SIGNAL_LIST_COLUMN_PLACE
-	120,	// SIGNAL_LIST_COLUMN_ADC
-	150,	// SIGNAL_LIST_COLUMN_IN_PH_RANGE
-	150,	// SIGNAL_LIST_COLUMN_IN_EL_RANGE
-	100,	// SIGNAL_LIST_COLUMN_IN_EL_SENSOR
-	150,	// SIGNAL_LIST_COLUMN_OUT_PH_RANGE
-	150,	// SIGNAL_LIST_COLUMN_OUT_EL_RANGE
-	100,	// SIGNAL_LIST_COLUMN_OUT_EL_SENSOR
-	 50,	// SIGNAL_LIST_COLUMN_TUN_SIGNAL
-	100,	// SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
-E::SignalType		SignalListDialog::m_typeAD = E::SignalType::Analog;
-E::SignalInOutType	SignalListDialog::m_typeIO = E::SignalInOutType::Input;
+E::SignalType		SignalListDialog::m_typeAD		= E::SignalType::Analog;
+E::SignalInOutType	SignalListDialog::m_typeIO		= E::SignalInOutType::Input;
 int					SignalListDialog::m_currenIndex = 0;
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -405,11 +403,11 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pViewShowMenu = new QMenu(tr("Show"), this);
 	m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
 	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(m_signalParamTable.showCustomID());
+	m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
 	m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 	m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
 	m_pShowADCInHexAction->setCheckable(true);
-	m_pShowADCInHexAction->setChecked(m_signalParamTable.showADCInHex());
+	m_pShowADCInHexAction->setChecked(m_signalTable.showADCInHex());
 
 	m_pViewMenu->addMenu(m_pViewTypeADMenu);
 	m_pViewMenu->addMenu(m_pViewTypeIOMenu);
@@ -426,7 +424,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 	connect(m_pFindAction, &QAction::triggered, this, &SignalListDialog::find);
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalListDialog::copy);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &SignalListDialog::selectAll);
-	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalListDialog::signalProperty);
+	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalListDialog::signalProperties);
 
 	connect(m_pTypeAnalogAction, &QAction::triggered, this, &SignalListDialog::showTypeAnalog);
 	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &SignalListDialog::showTypeDiscrete);
@@ -438,13 +436,13 @@ void SignalListDialog::createInterface(bool hasButtons)
 
 
 	m_pView = new QTableView(this);
-	m_pView->setModel(&m_signalParamTable);
-	QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+	m_pView->setModel(&m_signalTable);
+	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
 	{
-		m_pView->setColumnWidth(column, m_columnWidth[column]);
+		m_pView->setColumnWidth(column, SignalListColumnWidth[column]);
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -525,28 +523,30 @@ void SignalListDialog::updateList()
 {
 	updateVisibleColunm();
 
-	m_signalParamTable.clear();
+	m_signalTable.clear();
 
-	QList<Metrology::SignalParam> signalParamList;
+	QList<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::SignalParam param = theSignalBase.signalParam(i);
-		if (param.isValid() == false)
+		Metrology::Signal signal = theSignalBase.signal(i);
+		if (signal.param().isValid() == false)
 		{
 			continue;
 		}
+
+		Metrology::SignalParam& param = signal.param();
 
 		if (param.signalType() != m_typeAD || param.inOutType() != m_typeIO)
 		{
 			continue;
 		}
 
-		signalParamList.append( param );
+		signalList.append(new Metrology::Signal(signal));
 	}
 
-	m_signalParamTable.set(signalParamList);
+	m_signalTable.set(signalList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -653,13 +653,13 @@ bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
 			if (m_buttonBox == nullptr)
 			{
-				signalProperty();
+				signalProperties();
 			}
 			else
 			{
@@ -705,7 +705,7 @@ void SignalListDialog::copy()
 
 	for(int row = 0; row < rowCount; row++)
 	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex() ) == false)
+		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
 		{
 			continue;
 		}
@@ -717,7 +717,7 @@ void SignalListDialog::copy()
 				continue;
 			}
 
-			textClipboard.append(m_pView->model()->data( m_pView->model()->index(row, column)).toString() + "\t");
+			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
 		}
 
 		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
@@ -729,26 +729,31 @@ void SignalListDialog::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListDialog::signalProperty()
+void SignalListDialog::signalProperties()
 {
 	QModelIndex visibleIndex = m_pView->currentIndex();
 
 	int index = visibleIndex .row();
-	if (index < 0 || index >= m_signalParamTable.signalCount())
+	if (index < 0 || index >= m_signalTable.signalCount())
 	{
 		return;
 	}
 
-	Metrology::SignalParam param = m_signalParamTable.signalParam(index);
+	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
 	if (param.isValid() == false)
 	{
 		return;
 	}
 
-	SignalPropertyDialog dialog( param );
+	SignalPropertyDialog dialog(param);
 	dialog.exec();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -799,7 +804,7 @@ void SignalListDialog::showTypeOutput()
 
 void SignalListDialog::showCustomID()
 {
-	m_signalParamTable.setShowCustomID( m_pShowCustomIDAction->isChecked() );
+	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateList();
 }
@@ -808,7 +813,7 @@ void SignalListDialog::showCustomID()
 
 void SignalListDialog::showADCInHex()
 {
-	m_signalParamTable.setShowADCInHex( m_pShowADCInHexAction->isChecked() );
+	m_signalTable.setShowADCInHex(m_pShowADCInHexAction->isChecked());
 
 	updateList();
 }
@@ -858,7 +863,7 @@ void SignalListDialog::onListDoubleClicked(const QModelIndex&)
 {
 	if (m_buttonBox == nullptr)
 	{
-		signalProperty();
+		signalProperties();
 	}
 	else
 	{
@@ -871,12 +876,18 @@ void SignalListDialog::onListDoubleClicked(const QModelIndex&)
 void SignalListDialog::onOk()
 {
 	int index = m_pView->currentIndex().row();
-	if (index < 0 || index >= m_signalParamTable.signalCount())
+	if (index < 0 || index >= m_signalTable.signalCount())
 	{
 		return;
 	}
 
-	Metrology::SignalParam param = m_signalParamTable.signalParam(index);
+	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
 	if (param.isValid() == false)
 	{
 		return;

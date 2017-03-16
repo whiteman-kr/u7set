@@ -15,41 +15,41 @@ class ObjectVector
 {
 public:
 
-                    ObjectVector();
-                    ObjectVector(const ObjectVector& from);
-    virtual         ~ObjectVector();
+	ObjectVector();
+	ObjectVector(const ObjectVector& from);
+	virtual ~ObjectVector();
 
 private:
 
-    mutable QMutex  m_vectorMutex;
+	mutable QMutex	m_vectorMutex;
 
-    QVector<TYPE>   m_vector;
+	QVector<TYPE>	m_vector;
 
 public:
 
-    int				count() const;
-    bool            isEmpty() const;
+	int				count() const;
+	bool			isEmpty() const;
 
-    // TYPE         operator[](int index);       don't append this method
-    TYPE            at(int index) const;
+	// TYPE			operator[](int index);	don't append this method
+	TYPE			at(int index) const;
 
-    int             set(int index, const TYPE& item);
-    void            set(const QVector<TYPE>& fromVector);
-    ObjectVector&   operator=(const ObjectVector& from);
+	int				set(int index, const TYPE& item);
+	void			set(const QVector<TYPE>& fromVector);
+	ObjectVector&	operator=(const ObjectVector& from);
 
-    int				append(const TYPE& item);
-    int             insert(int index, const TYPE& item);
-    bool			remove(int index);
-    void            clear();
+	int				append(const TYPE& item);
+	int				insert(int index, const TYPE& item);
+	bool			remove(int index);
+	void			clear();
 
-    void            swap(int i, int j);
+	void			swap(int i, int j);
 
-    bool            contains(const TYPE& item) const;
-    int				find(const TYPE& item) const;
+	bool			contains(const TYPE& item) const;
+	int				find(const TYPE& item) const;
 
-    virtual void    initEmptyData(QVector<TYPE>& data);
-    bool            loadData(int table);
-    bool            saveData(int table);
+	virtual void	initEmptyData(QVector<TYPE>& data);
+	bool			loadData(int table);
+	bool			saveData(int table);
 };
 
 // ==============================================================================================
@@ -64,7 +64,7 @@ ObjectVector<TYPE>::ObjectVector()
 template <class TYPE>
 ObjectVector<TYPE>::ObjectVector(const ObjectVector& from)
 {
-    *this = from;
+	*this = from;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -79,15 +79,15 @@ ObjectVector<TYPE>::~ObjectVector()
 template <class TYPE>
 int ObjectVector<TYPE>::count() const
 {
-    int count = 0;
+	int count = 0;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        count = m_vector.count();
+		count = m_vector.count();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return count;
+	return count;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -95,15 +95,15 @@ int ObjectVector<TYPE>::count() const
 template <class TYPE>
 bool ObjectVector<TYPE>::isEmpty() const
 {
-    bool empty = false;
+	bool empty = false;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        empty = m_vector.isEmpty();
+		empty = m_vector.isEmpty();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return empty;
+	return empty;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -111,20 +111,20 @@ bool ObjectVector<TYPE>::isEmpty() const
 template <class TYPE>
 TYPE ObjectVector<TYPE>::at(int index) const
 {
-    TYPE item;
+	TYPE item;
 
-    if (index < 0 || index >= count())
-    {
-        return item;
-    }
+	if (index < 0 || index >= count())
+	{
+		return item;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        item = m_vector[index];
+		item = m_vector[index];
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return item;
+	return item;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -132,18 +132,18 @@ TYPE ObjectVector<TYPE>::at(int index) const
 template <class TYPE>
 int ObjectVector<TYPE>::set(int index, const TYPE& item)
 {
-    if (index < 0 || index >= count())
-    {
-        return -1;
-    }
+	if (index < 0 || index >= count())
+	{
+		return -1;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector[index] = item;
+		m_vector[index] = item;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 
@@ -152,11 +152,11 @@ int ObjectVector<TYPE>::set(int index, const TYPE& item)
 template <class TYPE>
 void ObjectVector<TYPE>::set(const QVector<TYPE>& fromVector)
 {
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector = fromVector;
+		m_vector = fromVector;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -164,13 +164,13 @@ void ObjectVector<TYPE>::set(const QVector<TYPE>& fromVector)
 template <class TYPE>
 ObjectVector<TYPE>& ObjectVector<TYPE>::operator=(const ObjectVector& from)
 {
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector = from.m_vector;
+		m_vector = from.m_vector;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return *this;
+	return *this;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -178,16 +178,16 @@ ObjectVector<TYPE>& ObjectVector<TYPE>::operator=(const ObjectVector& from)
 template <class TYPE>
 int ObjectVector<TYPE>::append(const TYPE& item)
 {
-    int index = -1;
+	int index = -1;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.append(item);
-        index = m_vector.count() - 1;
+		m_vector.append(item);
+		index = m_vector.count() - 1;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -195,18 +195,18 @@ int ObjectVector<TYPE>::append(const TYPE& item)
 template <class TYPE>
 int ObjectVector<TYPE>::insert(int index, const TYPE& item)
 {
-    if (index < 0 || index > count())
-    {
-        return -1;
-    }
+	if (index < 0 || index > count())
+	{
+		return -1;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.insert(index, item);
+		m_vector.insert(index, item);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -214,18 +214,18 @@ int ObjectVector<TYPE>::insert(int index, const TYPE& item)
 template <class TYPE>
 bool ObjectVector<TYPE>::remove(int index)
 {
-    if (index < 0 || index >= count())
-    {
-        return false;
-    }
+	if (index < 0 || index >= count())
+	{
+		return false;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.remove(index);
+		m_vector.remove(index);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return true;
+	return true;
 }
 
 
@@ -234,11 +234,11 @@ bool ObjectVector<TYPE>::remove(int index)
 template <class TYPE>
 void ObjectVector<TYPE>::clear()
 {
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.clear();
+		m_vector.clear();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -246,18 +246,18 @@ void ObjectVector<TYPE>::clear()
 template <class TYPE>
 void ObjectVector<TYPE>::swap(int i, int j)
 {
-    if ( (i < 0 || i >= count()) || (j < 0 || j >= count()) )
-    {
-        return;
-    }
+	if ((i < 0 || i >= count()) || (j < 0 || j >= count()))
+	{
+		return;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        TYPE item   = m_vector[j];
-        m_vector[j] = m_vector[i];
-        m_vector[i] = item;
+		TYPE item	= m_vector[j];
+		m_vector[j]	= m_vector[i];
+		m_vector[i]	= item;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
 }
 
@@ -266,15 +266,15 @@ void ObjectVector<TYPE>::swap(int i, int j)
 template <class TYPE>
 bool ObjectVector<TYPE>::contains(const TYPE& item) const
 {
-    bool isContain = false;
+	bool isContain = false;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        isContain = m_vector.contains(item);
+		isContain = m_vector.contains(item);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return isContain;
+	return isContain;
 }
 
 
@@ -283,24 +283,24 @@ bool ObjectVector<TYPE>::contains(const TYPE& item) const
 template <class TYPE>
 int ObjectVector<TYPE>::find(const TYPE& item) const
 {
-    int index = -1;
+	int index = -1;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        int count = m_vector.count();
-        for(int i = 0; i < count; i++)
-        {
-            if (m_vector[i] == item)
-            {
-                index = i;
+		int count = m_vector.count();
+		for(int i = 0; i < count; i++)
+		{
+			if (m_vector[i] == item)
+			{
+				index = i;
 
-                break;
-            }
-        }
+				break;
+			}
+		}
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ int ObjectVector<TYPE>::find(const TYPE& item) const
 template <class TYPE>
 void ObjectVector<TYPE>::initEmptyData(QVector<TYPE>& data)
 {
-    data.clear();
+	data.clear();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -316,57 +316,57 @@ void ObjectVector<TYPE>::initEmptyData(QVector<TYPE>& data)
 template <class TYPE>
 bool ObjectVector<TYPE>::loadData(int table)
 {
-    if (thePtrDB == nullptr)
-    {
-        return false;
-    }
+	if (thePtrDB == nullptr)
+	{
+		return false;
+	}
 
-    if (thePtrDB->isOpen() == false)
-    {
-        return false;
-    }
+	if (thePtrDB->isOpen() == false)
+	{
+		return false;
+	}
 
-    if (table < 0 || table >= SQL_TABLE_COUNT)
-    {
-        return false;
-    }
+	if (table < 0 || table >= SQL_TABLE_COUNT)
+	{
+		return false;
+	}
 
-    SqlTable* pTable = thePtrDB->openTable(table);
-    if (pTable == nullptr)
-    {
-        return false;
-    }
+	SqlTable* pTable = thePtrDB->openTable(table);
+	if (pTable == nullptr)
+	{
+		return false;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        QVector<TYPE> dataVector;
+		QVector<TYPE> dataVector;
 
-        int recordCount = pTable->recordCount();
-        if (recordCount == 0)
-        {
-            // if table is empty then initialize data
-            //
-            initEmptyData(dataVector);
+		int recordCount = pTable->recordCount();
+		if (recordCount == 0)
+		{
+			// if table is empty then initialize data
+			//
+			initEmptyData(dataVector);
 
-            // update table
-            //
-            pTable->write(dataVector.data(), dataVector.count());
-        }
-        else
-        {
-            // if table is not empty then read data from table
-            //
-            dataVector.resize(recordCount);
-            pTable->read(dataVector.data());
-        }
+			// update table
+			//
+			pTable->write(dataVector.data(), dataVector.count());
+		}
+		else
+		{
+			// if table is not empty then read data from table
+			//
+			dataVector.resize(recordCount);
+			pTable->read(dataVector.data());
+		}
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    set(dataVector);
+	set(dataVector);
 
-    pTable->close();
+	pTable->close();
 
-    return true;
+	return true;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -374,39 +374,39 @@ bool ObjectVector<TYPE>::loadData(int table)
 template <class TYPE>
 bool ObjectVector<TYPE>::saveData(int table)
 {
-    if (thePtrDB == nullptr)
-    {
-        return false;
-    }
+	if (thePtrDB == nullptr)
+	{
+		return false;
+	}
 
-    if (thePtrDB->isOpen() == false)
-    {
-        return false;
-    }
+	if (thePtrDB->isOpen() == false)
+	{
+		return false;
+	}
 
-    if (table < 0 || table >= SQL_TABLE_COUNT)
-    {
-        return false;
-    }
+	if (table < 0 || table >= SQL_TABLE_COUNT)
+	{
+		return false;
+	}
 
-    SqlTable* pTable = thePtrDB->openTable(table);
-    if (pTable == nullptr)
-    {
-        return false;
-    }
+	SqlTable* pTable = thePtrDB->openTable(table);
+	if (pTable == nullptr)
+	{
+		return false;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        if (pTable->clear() == true)
-        {
-            pTable->write(m_vector.data(), m_vector.count());
-        }
+		if (pTable->clear() == true)
+		{
+			pTable->write(m_vector.data(), m_vector.count());
+		}
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    pTable->close();
+	pTable->close();
 
-    return true;
+	return true;
 }
 
 // ==============================================================================================
@@ -417,38 +417,39 @@ template <class TYPE>
 class PtrObjectVector
 {
 public:
-                        PtrObjectVector();
-                        PtrObjectVector(const PtrObjectVector& from);
-    virtual             ~PtrObjectVector();
+
+	PtrObjectVector();
+	PtrObjectVector(const PtrObjectVector& from);
+	virtual ~PtrObjectVector();
 
 protected:
 
-    mutable QMutex      m_vectorMutex;
+	mutable QMutex		m_vectorMutex;
 
-    QVector<TYPE*>      m_vector;
+	QVector<TYPE*>		m_vector;
 
 public:
 
-    int                 count() const;
-    bool                isEmpty() const;
+	int					count() const;
+	bool				isEmpty() const;
 
-    // TYPE*            operator[](int index);       don't append this method
-    TYPE*               at(int index) const;
-    QVector<TYPE*>      toVector() const;
+	// TYPE*			operator[](int index);	don't append this method
+	TYPE*				at(int index) const;
+	QVector<TYPE*>		toVector() const;
 
-    int                 set(int index, TYPE *ptr);
-    void                set(const QVector<TYPE*>& fromVector);
-    PtrObjectVector&    operator=(const PtrObjectVector& from);
+	int					set(int index, TYPE *ptr);
+	void				set(const QVector<TYPE*>& fromVector);
+	PtrObjectVector&	operator=(const PtrObjectVector& from);
 
-    int                 append(TYPE *ptr);
-    int                 insert(int index, TYPE *ptr);
-    bool                remove(int index, bool removeData = true);
-    void                clear(bool removeData = true);
+	int					append(TYPE *ptr);
+	int					insert(int index, TYPE *ptr);
+	bool				remove(int index, bool removeData = true);
+	void				clear(bool removeData = true);
 
-    void                swap(int i, int j);
+	void				swap(int i, int j);
 
-    bool                contains(TYPE *ptr) const;
-    int                 find(TYPE *ptr) const;
+	bool				contains(TYPE *ptr) const;
+	int					find(TYPE *ptr) const;
 };
 
 // ==============================================================================================
@@ -463,7 +464,7 @@ PtrObjectVector<TYPE>::PtrObjectVector()
 template <class TYPE>
 PtrObjectVector<TYPE>::PtrObjectVector(const PtrObjectVector& from)
 {
-    *this = from;
+	*this = from;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -471,7 +472,7 @@ PtrObjectVector<TYPE>::PtrObjectVector(const PtrObjectVector& from)
 template <class TYPE>
 PtrObjectVector<TYPE>::~PtrObjectVector()
 {
-    clear();
+	clear();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -479,15 +480,15 @@ PtrObjectVector<TYPE>::~PtrObjectVector()
 template <class TYPE>
 int PtrObjectVector<TYPE>::count() const
 {
-    int count = 0;
+	int count = 0;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        count = m_vector.count();
+		count = m_vector.count();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return count;
+	return count;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -495,15 +496,15 @@ int PtrObjectVector<TYPE>::count() const
 template <class TYPE>
 bool PtrObjectVector<TYPE>::isEmpty() const
 {
-    bool empty = false;
+	bool empty = false;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        empty = m_vector.isEmpty();
+		empty = m_vector.isEmpty();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return empty;
+	return empty;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -511,20 +512,20 @@ bool PtrObjectVector<TYPE>::isEmpty() const
 template <class TYPE>
 TYPE* PtrObjectVector<TYPE>::at(int index) const
 {
-    if (index < 0 || index >= count())
-    {
-        return nullptr;
-    }
+	if (index < 0 || index >= count())
+	{
+		return nullptr;
+	}
 
-    TYPE *ptr = nullptr;
+	TYPE *ptr = nullptr;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        ptr = m_vector[index];
+		ptr = m_vector[index];
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return ptr;
+	return ptr;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -532,7 +533,7 @@ TYPE* PtrObjectVector<TYPE>::at(int index) const
 template <class TYPE>
 QVector<TYPE*> PtrObjectVector<TYPE>::toVector() const
 {
-    return m_vector;
+	return m_vector;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -540,23 +541,23 @@ QVector<TYPE*> PtrObjectVector<TYPE>::toVector() const
 template <class TYPE>
 int PtrObjectVector<TYPE>::set(int index, TYPE *ptr)
 {
-    if (index < 0 || index >= count())
-    {
-        return -1;
-    }
+	if (index < 0 || index >= count())
+	{
+		return -1;
+	}
 
-    if (ptr == nullptr)
-    {
-        return -1;
-    }
+	if (ptr == nullptr)
+	{
+		return -1;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector[index] = ptr;
+		m_vector[index] = ptr;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -564,13 +565,13 @@ int PtrObjectVector<TYPE>::set(int index, TYPE *ptr)
 template <class TYPE>
 void PtrObjectVector<TYPE>::set(const QVector<TYPE*>& fromVector)
 {
-    clear();
+	clear();
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector = fromVector;
+		m_vector = fromVector;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -578,15 +579,15 @@ void PtrObjectVector<TYPE>::set(const QVector<TYPE*>& fromVector)
 template <class TYPE>
 PtrObjectVector<TYPE>& PtrObjectVector<TYPE>::operator=(const PtrObjectVector& from)
 {
-    clear();
+	clear();
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector = from.toVector();
+		m_vector = from.toVector();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return *this;
+	return *this;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -594,21 +595,21 @@ PtrObjectVector<TYPE>& PtrObjectVector<TYPE>::operator=(const PtrObjectVector& f
 template <class TYPE>
 int PtrObjectVector<TYPE>::append(TYPE *ptr)
 {
-    if (ptr == nullptr)
-    {
-        return -1;
-    }
+	if (ptr == nullptr)
+	{
+		return -1;
+	}
 
-    int index = -1;
+	int index = -1;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.append(ptr);
-        index = m_vector.count() - 1;
+		m_vector.append(ptr);
+		index = m_vector.count() - 1;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -616,23 +617,23 @@ int PtrObjectVector<TYPE>::append(TYPE *ptr)
 template <class TYPE>
 int PtrObjectVector<TYPE>::insert(int index, TYPE *ptr)
 {
-    if (index < 0 || index > count())
-    {
-        return -1;
-    }
+	if (index < 0 || index > count())
+	{
+		return -1;
+	}
 
-    if (ptr == nullptr)
-    {
-        return -1;
-    }
+	if (ptr == nullptr)
+	{
+		return -1;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        m_vector.insert(index, ptr);
+		m_vector.insert(index, ptr);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -640,27 +641,27 @@ int PtrObjectVector<TYPE>::insert(int index, TYPE *ptr)
 template <class TYPE>
 bool PtrObjectVector<TYPE>::remove(int index, bool removeData)
 {
-    if (index < 0 || index >= count())
-    {
-        return false;
-    }
+	if (index < 0 || index >= count())
+	{
+		return false;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        if (removeData == true)
-        {
-            TYPE *ptr = m_vector[index];
-            if (ptr != nullptr)
-            {
-                delete ptr;
-            }
-        }
+		if (removeData == true)
+		{
+			TYPE *ptr = m_vector[index];
+			if (ptr != nullptr)
+			{
+				delete ptr;
+			}
+		}
 
-        m_vector.remove(index);
+		m_vector.remove(index);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return true;
+	return true;
 }
 
 
@@ -669,26 +670,26 @@ bool PtrObjectVector<TYPE>::remove(int index, bool removeData)
 template <class TYPE>
 void PtrObjectVector<TYPE>::clear(bool removeData)
 {
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        if (removeData == true)
-        {
-            int count = m_vector.count();
-            for(int i = count - 1; i >= 0; i--)
-            {
-                TYPE *ptr = m_vector[i];
-                if (ptr == nullptr)
-                {
-                    continue;
-                }
+		if (removeData == true)
+		{
+			int count = m_vector.count();
+			for(int i = count - 1; i >= 0; i--)
+			{
+				TYPE *ptr = m_vector[i];
+				if (ptr == nullptr)
+				{
+					continue;
+				}
 
-                delete ptr;
-            }
-        }
+				delete ptr;
+			}
+		}
 
-        m_vector.clear();
+		m_vector.clear();
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -696,18 +697,18 @@ void PtrObjectVector<TYPE>::clear(bool removeData)
 template <class TYPE>
 void PtrObjectVector<TYPE>::swap(int i, int j)
 {
-    if ( (i < 0 || i >= count()) || (j < 0 || j >= count()) )
-    {
-        return;
-    }
+	if ((i < 0 || i >= count()) || (j < 0 || j >= count()))
+	{
+		return;
+	}
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        TYPE *ptr   = m_vector[j];
-        m_vector[j] = m_vector[i];
-        m_vector[i] = ptr;
+		TYPE *ptr	= m_vector[j];
+		m_vector[j]	= m_vector[i];
+		m_vector[i]	= ptr;
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
 }
 
@@ -716,20 +717,20 @@ void PtrObjectVector<TYPE>::swap(int i, int j)
 template <class TYPE>
 bool PtrObjectVector<TYPE>::contains(TYPE *ptr) const
 {
-    if (ptr == nullptr)
-    {
-        return false;
-    }
+	if (ptr == nullptr)
+	{
+		return false;
+	}
 
-    bool isContain = false;
+	bool isContain = false;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        isContain = m_vector.contains(ptr);
+		isContain = m_vector.contains(ptr);
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return isContain;
+	return isContain;
 }
 
 
@@ -738,29 +739,29 @@ bool PtrObjectVector<TYPE>::contains(TYPE *ptr) const
 template <class TYPE>
 int PtrObjectVector<TYPE>::find(TYPE *ptr) const
 {
-    if (ptr == nullptr)
-    {
-        return -1;
-    }
+	if (ptr == nullptr)
+	{
+		return -1;
+	}
 
-    int index = -1;
+	int index = -1;
 
-    m_vectorMutex.lock();
+	m_vectorMutex.lock();
 
-        int count = m_vector.count();
-        for(int i = 0; i < count; i++)
-        {
-            if (m_vector[i] == ptr)
-            {
-                index = i;
+		int count = m_vector.count();
+		for(int i = 0; i < count; i++)
+		{
+			if (m_vector[i] == ptr)
+			{
+				index = i;
 
-                break;
-            }
-        }
+				break;
+			}
+		}
 
-    m_vectorMutex.unlock();
+	m_vectorMutex.unlock();
 
-    return index;
+	return index;
 }
 
 // ----------------------------------------------------------------------------------------------

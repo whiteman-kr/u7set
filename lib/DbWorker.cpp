@@ -149,7 +149,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0131.sql", "Upgrade to version 131, afb elements damp and latch were changed"},
 	{":/DatabaseUpgrade/Upgrade0132.sql", "Upgrade to version 132, force users to use latest software version"},
     {":/DatabaseUpgrade/Upgrade0133.sql", "Upgrade to version 133, AFB elements update"},
-    {":/DatabaseUpgrade/Upgrade0134.sql", "Upgrade to version 134, DOM, LM-1, OCM and OCMN presets update by RPCT-1455"},
+	{":/DatabaseUpgrade/Upgrade0134.sql", "Upgrade to version 134, DOM, LM-1, OCM and OCMN presets update by RPCT-1455"},
+	{":/DatabaseUpgrade/Upgrade0135.sql", "Upgrade to version 135, Added metrology preset"},
+    {":/DatabaseUpgrade/Upgrade0136.sql", "Upgrade to version 136, Fixed caption in AIM"},
+    {":/DatabaseUpgrade/Upgrade0137.sql", "Upgrade to version 137, Removed EnableSerial property from OCM and OCMN script"},
 };
 
 

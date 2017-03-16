@@ -391,7 +391,6 @@ namespace Builder
 				optoPort1->setPortID(portID);
 				optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
 				optoPort1->setSerialMode(connection->serialMode());
-				optoPort1->setEnableSerial(connection->enableSerial());
 				optoPort1->setEnableDuplex(connection->enableDuplex());
 
 				optoPort1->setManualSettings(connection->manualSettings());

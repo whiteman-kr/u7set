@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <QMessageBox>
+
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -276,11 +277,9 @@ int SqlFieldBase::init(int objectType, int)
 			append("SignalID",						QVariant::Int);
 
 			append("OutputSignalType",				QVariant::Int);
-			append("SumType",						QVariant::Int);
 
 			append("InputAppSignalID",				QVariant::String, 64);
 			append("OutputAppSignalID",				QVariant::String, 64);
-			append("SumAppSignalID",				QVariant::String, 64);
 
 			break;
 
@@ -319,12 +318,12 @@ void SqlFieldBase::append(QString name, QVariant::Type type, int length)
 
 	QSqlField field(name, type);
 
-	if (type == QVariant::Double )
+	if (type == QVariant::Double)
 	{
 		field.setPrecision(9);
 	}
 
-	if (type == QVariant::String )
+	if (type == QVariant::String)
 	{
 		field.setLength(length);
 	}
@@ -347,11 +346,11 @@ QString SqlFieldBase::extFieldName(int index)
 
 	switch(f.type())
 	{
-		case QVariant::Bool:	result = QString("%1 BOOL").arg( f.name() );								break;
-		case QVariant::Int:		result = QString("%1 INTEGER").arg( f.name() );								break;
-		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg( f.name() ).arg(f.precision());	break;
-		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg( f.name()).arg(f.length());			break;
-		default:				result = QString();
+		case QVariant::Bool:	result = QString("%1 BOOL").arg(f.name());									break;
+		case QVariant::Int:		result = QString("%1 INTEGER").arg(f.name());								break;
+		case QVariant::Double:	result = QString("%1 DOUBLE(0, %2)").arg(f.name()).arg(f.precision());		break;
+		case QVariant::String:	result = QString("%1 VARCHAR(%2)").arg(f.name()).arg(f.length());			break;
+		default:				result.clear();
 	}
 
 	return result;
@@ -558,7 +557,7 @@ bool SqlTable::isExist() const
 	int existTableCount = m_pDatabase->tables().count();
 	for(int et = 0; et < existTableCount; et++)
 	{
-		if ( m_pDatabase->tables().at(et).compare(SqlTabletName[type]) == 0)
+		if (m_pDatabase->tables().at(et).compare(SqlTabletName[type]) == 0)
 		{
 			tableIsExist = true;
 			break;
@@ -612,13 +611,13 @@ bool SqlTable::create()
 	QString request = QString("CREATE TABLE if not exists %1 (").arg(m_info.caption());
 
 	int filedCount = m_fieldBase.count();
-	for(int field = 0; field < filedCount; field++ )
+	for(int field = 0; field < filedCount; field++)
 	{
-		request.append( m_fieldBase.extFieldName(field) );
+		request.append(m_fieldBase.extFieldName(field));
 
 		if (field == SQL_FIELD_KEY)
 		{
-			request.append( " PRIMARY KEY NOT NULL" );
+			request.append(" PRIMARY KEY NOT NULL");
 
 			switch(m_info.objectType())
 			{
@@ -636,7 +635,7 @@ bool SqlTable::create()
 		}
 	}
 
-	request.append(" );");
+	request.append(");");
 
 	return query.exec(request);
 }
@@ -708,7 +707,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 		request.append(" WHERE ");
 		QString keyFieldName = m_fieldBase.field(SQL_FIELD_KEY).name();
 
-		for(int k = 0; k < keyCount; k++ )
+		for(int k = 0; k < keyCount; k++)
 		{
 			request.append(QString("%1=%2").arg(keyFieldName).arg(key[k]));
 
@@ -763,7 +762,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				{
 					SqlHistoryDatabase* history = static_cast<SqlHistoryDatabase*> (pRecord) + readedCount;
 
-					history->setObjectID( objectID );
+					history->setObjectID(objectID);
 					history->setVersion(query.value(field++).toInt());
 					history->setEvent(query.value(field++).toString());
 					history->setTime(query.value(field++).toString());
@@ -785,7 +784,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->location().setEquipmentID(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
-					query.value(field++); // reserve channel
+					measure->location().rack().setChannel(query.value(field++).toInt());
 					measure->location().setChassis(query.value(field++).toInt());
 					measure->location().setModule(query.value(field++).toInt());
 					measure->location().setPlace(query.value(field++).toInt());
@@ -834,7 +833,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setErrorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
 					measure->setErrorLimit(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
 
-					measure->setMeasureTime( QDateTime::fromString( query.value(field++).toString(), MEASURE_TIME_FORMAT));
+					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 				}
 				break;
 
@@ -845,9 +844,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					switch(m_info.objectType())
 					{
-						case SQL_TABLE_LINEARITY_20_EL:	  valueType = VALUE_TYPE_IN_ELECTRIC;	  break;
-						case SQL_TABLE_LINEARITY_20_PH:	  valueType = VALUE_TYPE_PHYSICAL;		  break;
-						default:									 valueType = VALUE_TYPE_UNKNOWN;			break;
+						case SQL_TABLE_LINEARITY_20_EL:	valueType = VALUE_TYPE_IN_ELECTRIC;	break;
+						case SQL_TABLE_LINEARITY_20_PH:	valueType = VALUE_TYPE_PHYSICAL;	break;
+						default:						valueType = VALUE_TYPE_UNKNOWN;		break;
 					}
 
 					if (valueType == VALUE_TYPE_UNKNOWN)
@@ -903,7 +902,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				{
 					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + readedCount;
 
-					point->setPointID(query.value(field++).toInt());
+					point->setIndex(query.value(field++).toInt());
 					point->setPercent(query.value(field++).toDouble());
 				}
 				break;
@@ -957,12 +956,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					header->m_V = query.value(field++).toDouble();
 					header->m_F = query.value(field++).toDouble();
 
-					header->m_calibrator[CHANNEL_0] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_1] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_2] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_3] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_4] = query.value(field++).toString();
-					header->m_calibrator[CHANNEL_5] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_0] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_1] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_2] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_3] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_4] = query.value(field++).toString();
+					header->m_calibrator[Metrology::Channel_5] = query.value(field++).toString();
 
 					header->m_linkObjectID = query.value(field++).toInt();
 					header->m_reportFile = query.value(field++).toString();
@@ -978,12 +977,12 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					group->setIndex(query.value(field++).toInt());
 					group->setCaption(query.value(field++).toString());
 
-					group->setRackID(CHANNEL_0, query.value(field++).toString());
-					group->setRackID(CHANNEL_1, query.value(field++).toString());
-					group->setRackID(CHANNEL_2, query.value(field++).toString());
-					group->setRackID(CHANNEL_3, query.value(field++).toString());
-					group->setRackID(CHANNEL_4, query.value(field++).toString());
-					group->setRackID(CHANNEL_5, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_0, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_1, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_2, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_3, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_4, query.value(field++).toString());
+					group->setRackID(Metrology::Channel_5, query.value(field++).toString());
 				}
 				break;
 
@@ -994,11 +993,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					signal->setSignalID(query.value(field++).toInt());
 
 					signal->setType(query.value(field++).toInt());
-					query.value(field++).toInt();									// reserve for Sum
 
-					signal->setAppSignalID( MEASURE_IO_SIGNAL_TYPE_INPUT, query.value(field++).toString() );
-					signal->setAppSignalID( MEASURE_IO_SIGNAL_TYPE_OUTPUT, query.value(field++).toString() );
-					query.value(field++).toString();								// reserve for Sum
+					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT, query.value(field++).toString());
+					signal->setAppSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT, query.value(field++).toString());
 				}
 				break;
 
@@ -1042,9 +1039,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 		request = QString("INSERT INTO %1 (").arg(m_info.caption());
 
 		int filedCount = m_fieldBase.count();
-		for(int f = 0; f < filedCount; f++ )
+		for(int f = 0; f < filedCount; f++)
 		{
-			request.append( m_fieldBase.field(f).name() );
+			request.append(m_fieldBase.field(f).name());
 
 			if (f != filedCount - 1)
 			{
@@ -1054,9 +1051,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 		request.append(") VALUES (");
 
-		for(int f = 0; f < filedCount; f++ )
+		for(int f = 0; f < filedCount; f++)
 		{
-			request.append( "?" );
+			request.append("?");
 
 			if (f != filedCount - 1)
 			{
@@ -1064,14 +1061,14 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			}
 		}
 
-		request.append(" );");
+		request.append(");");
 	}
 	else
 	{
 		request = QString("UPDATE %1 SET ").arg(m_info.caption());
 
 		int filedCount = m_fieldBase.count();
-		for(int f = 0; f < filedCount; f++ )
+		for(int f = 0; f < filedCount; f++)
 		{
 			request.append(QString("%1=?").arg(m_fieldBase.field(f).name()));
 
@@ -1131,7 +1128,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				{
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
 
-					measure->setMeasureID( lastKey() + 1);
+					measure->setMeasureID(lastKey() + 1);
 
 					query.bindValue(field++, measure->measureID());
 
@@ -1144,7 +1141,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->location().equipmentID());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
-					query.bindValue(field++, -1); // reserve channel
+					query.bindValue(field++, measure->location().rack().channel());
 					query.bindValue(field++, measure->location().chassis());
 					query.bindValue(field++, measure->location().module());
 					query.bindValue(field++, measure->location().place());
@@ -1207,9 +1204,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					switch(m_info.objectType())
 					{
-						case SQL_TABLE_LINEARITY_20_EL:	  valueType = VALUE_TYPE_IN_ELECTRIC;	 break;
-						case SQL_TABLE_LINEARITY_20_PH:	  valueType = VALUE_TYPE_PHYSICAL;	 break;
-						default:									 valueType = VALUE_TYPE_UNKNOWN;	  break;
+						case SQL_TABLE_LINEARITY_20_EL:	valueType = VALUE_TYPE_IN_ELECTRIC;	break;
+						case SQL_TABLE_LINEARITY_20_PH:	valueType = VALUE_TYPE_PHYSICAL;	break;
+						default:						valueType = VALUE_TYPE_UNKNOWN;		break;
 					}
 
 					if (valueType == VALUE_TYPE_UNKNOWN)
@@ -1277,7 +1274,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				{
 					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + r;
 
-					query.bindValue(field++, point->pointID());
+					query.bindValue(field++, point->Index());
 					query.bindValue(field++, point->percent());
 				}
 				break;
@@ -1331,12 +1328,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, header->m_V);
 					query.bindValue(field++, header->m_F);
 
-					query.bindValue(field++, header->m_calibrator[CHANNEL_0]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_1]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_2]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_3]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_4]);
-					query.bindValue(field++, header->m_calibrator[CHANNEL_5]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_0]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_1]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_2]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_3]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_4]);
+					query.bindValue(field++, header->m_calibrator[Metrology::Channel_5]);
 
 					query.bindValue(field++, header->m_linkObjectID);
 					query.bindValue(field++, header->m_reportFile);
@@ -1352,12 +1349,12 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, group->Index());
 					query.bindValue(field++, group->caption());
 
-					query.bindValue(field++, group->rackID(CHANNEL_0));
-					query.bindValue(field++, group->rackID(CHANNEL_1));
-					query.bindValue(field++, group->rackID(CHANNEL_2));
-					query.bindValue(field++, group->rackID(CHANNEL_3));
-					query.bindValue(field++, group->rackID(CHANNEL_4));
-					query.bindValue(field++, group->rackID(CHANNEL_5));
+					query.bindValue(field++, group->rackID(Metrology::Channel_0));
+					query.bindValue(field++, group->rackID(Metrology::Channel_1));
+					query.bindValue(field++, group->rackID(Metrology::Channel_2));
+					query.bindValue(field++, group->rackID(Metrology::Channel_3));
+					query.bindValue(field++, group->rackID(Metrology::Channel_4));
+					query.bindValue(field++, group->rackID(Metrology::Channel_5));
 				}
 				break;
 
@@ -1369,11 +1366,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, signal->signalID());
 
 					query.bindValue(field++, signal->type());
-					query.bindValue(field++, OUTPUT_SIGNAL_SUM_TYPE_NO_USED);								// reserve to Sum
 
-					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT) );
-					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT) );
-					query.bindValue(field++, QString() );													// reserve to Sum
+					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_INPUT));
+					query.bindValue(field++, signal->appSignalID(MEASURE_IO_SIGNAL_TYPE_OUTPUT));
 				}
 				break;
 
@@ -1439,7 +1434,7 @@ int SqlTable::remove(const int* key, int keyCount) const
 		return 0;
 	}
 
-	if(query.exec(request) == false)
+	if (query.exec(request) == false)
 	{
 		query.exec("END TRANSACTION");
 
@@ -1600,7 +1595,7 @@ void Database::initVersion()
 
 	QVector<SqlObjectInfo> info;
 
-	if (table.isExist() == false )
+	if (table.isExist() == false)
 	{
 		if (table.create() == true)
 		{
@@ -1627,7 +1622,7 @@ void Database::initVersion()
 				{
 					if (m_table[t].info().objectID() == info[i].objectID())
 					{
-						m_table[t].info().setVersion( info[i].version() );
+						m_table[t].info().setVersion(info[i].version());
 						break;
 					}
 				}
@@ -1680,7 +1675,7 @@ bool Database::appendMeasure(Measurement* pMeasurement)
 
 	for (int type = 0; type < SQL_TABLE_COUNT; type++)
 	{
-		if ( SqlTableByMeasureType[type] != measureType )
+		if (SqlTableByMeasureType[type] != measureType)
 		{
 			continue;
 		}
@@ -1709,7 +1704,7 @@ bool Database::removeMeasure(int measuteType, const QVector<int>& keyList)
 
 	for (int type = 0; type < SQL_TABLE_COUNT; type++)
 	{
-		if ( SqlTableByMeasureType[type] != measuteType )
+		if (SqlTableByMeasureType[type] != measuteType)
 		{
 			continue;
 		}

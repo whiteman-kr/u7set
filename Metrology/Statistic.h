@@ -55,6 +55,25 @@ const int					STATISTIC_COLUMN_RACK			= 0,
 							STATISTIC_COLUMN_MEASURE_COUNT	= 13,
 							STATISTIC_COLUMN_STATE			= 14;
 
+const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
+{
+							100,	// STATISTIC_COLUMN_RACK
+							250,	// STATISTIC_COLUMN_ID
+							250,	// STATISTIC_COLUMN_EQUIPMENT_ID
+							150,	// STATISTIC_COLUMN_CAPTION
+							 60,	// STATISTIC_COLUMN_CHASSIS
+							 60,	// STATISTIC_COLUMN_MODULE
+							 60,	// STATISTIC_COLUMN_PLACE
+							100,	// STATISTIC_COLUMN_ADC
+							150,	// STATISTIC_COLUMN_IN_PH_RANGE
+							150,	// STATISTIC_COLUMN_IN_EL_RANGE
+							100,	// STATISTIC_COLUMN_OUTPUT_TYPE
+							150,	// STATISTIC_COLUMN_OUT_PH_RANGE
+							150,	// STATISTIC_COLUMN_OUT_EL_RANGE
+							100,	// STATISTIC_COLUMN_MEASURE_COUNT
+							100,	// STATISTIC_COLUMN_MEASURE_STATE
+};
+
 // ==============================================================================================
 
 class StatisticTable : public QAbstractTableModel
@@ -64,12 +83,12 @@ class StatisticTable : public QAbstractTableModel
 public:
 
 	explicit StatisticTable(QObject* parent = 0);
-	~StatisticTable();
+	virtual ~StatisticTable();
 
 private:
 
 	mutable QMutex			m_signalMutex;
-	QList<MetrologySignal*>	m_signalList;
+	QList<Metrology::Signal*> m_signalList;
 
 	static bool				m_showCustomID;
 	static bool				m_showADCInHex;
@@ -83,11 +102,11 @@ private:
 public:
 
 	int						signalCount() const;
-	MetrologySignal*		signal(int index) const;
-	void					set(const QList<MetrologySignal*> list_add);
+	Metrology::Signal*		signal(int index) const;
+	void					set(const QList<Metrology::Signal*> list_add);
 	void					clear();
 
-	QString					text(int row, int column, MetrologySignal* pSignal) const;
+	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 
 	bool					showCustomID() const { return m_showCustomID; }
 	void					setShowCustomID(bool show) { m_showCustomID = show; }
@@ -109,13 +128,11 @@ class StatisticDialog : public QDialog
 public:
 
 	explicit StatisticDialog(QWidget *parent = 0);
-	~StatisticDialog();
+	virtual ~StatisticDialog();
 
 private:
 
 	QMainWindow*			m_pMainWindow = nullptr;
-
-	static int				m_columnWidth[STATISTIC_COLUMN_COUNT];
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;

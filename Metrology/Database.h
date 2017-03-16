@@ -21,7 +21,7 @@ class SqlFieldBase : public QSqlRecord
 public:
 
 	SqlFieldBase();
-	~SqlFieldBase();
+	virtual ~SqlFieldBase();
 
 public:
 
@@ -78,14 +78,6 @@ const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_REPORT_HEADER					= 13,
 						SQL_TABLE_RACK_GROUP					= 14,
 						SQL_TABLE_OUTPUT_SIGNAL					= 15;
-
-
-// ----------------------------------------------------------------------------------------------
-
-#define					ERR_SQL_TABLE(table) (table < 0 || table >= SQL_TABLE_COUNT)
-#define					TEST_SQL_TABLE(table)			if (ERR_SQL_TABLE(table)) { return; }
-#define					TEST_SQL_TABLE1(table, retVal)	if (ERR_SQL_TABLE(table)) { return retVal; }
-
 
 // ==============================================================================================
 
@@ -230,7 +222,7 @@ class SqlObjectInfo
 public:
 
 	SqlObjectInfo();
-	~SqlObjectInfo();
+	virtual ~SqlObjectInfo();
 
 private:
 
@@ -268,7 +260,7 @@ public:
 
 	SqlHistoryDatabase();
 	SqlHistoryDatabase(int objectID, int version, const QString& event, const QString& time);
-	~SqlHistoryDatabase();
+	virtual ~SqlHistoryDatabase();
 
 private:
 
@@ -301,7 +293,7 @@ class SqlTable
 public:
 
 	SqlTable();
-	~SqlTable();
+	virtual ~SqlTable();
 
 private:
 
@@ -351,7 +343,7 @@ class Database : public QObject
 public:
 
 	explicit Database(QObject* parent = 0);
-	~Database();
+	virtual ~Database();
 
 private:
 

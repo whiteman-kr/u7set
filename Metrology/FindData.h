@@ -10,35 +10,38 @@
 
 class FindData : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-                    FindData(QTableView* pView);
-                    ~FindData();
 
-    int             exec();
+	FindData(QTableView* pView);
+	virtual ~FindData();
 
 private:
 
-    QTableView*     m_pView = nullptr;
+	QTableView*		m_pView = nullptr;
 
-    QDialog*        m_pFindDialog = nullptr;
-    QLineEdit*      m_pFindTextEdit = nullptr;
-    QPushButton*    m_findNextButton = nullptr;
+	QDialog*		m_pFindDialog = nullptr;
+	QLineEdit*		m_pFindTextEdit = nullptr;
+	QPushButton*	m_findNextButton = nullptr;
 
-    static QString  m_findText;
+	static QString	m_findText;
 
-    void            createFindDialog(QTableView *pView);
+	void			createInterface(QTableView *pView);
 
-    int             find(int start);
-    void            enableFindNextButton(int start);
+	int				find(int start);
+	void			enableFindNextButton(int start);
+
+public:
+
+	int				exec();
 
 signals:
 
 public slots:
 
-    void            findTextChanged();
-    void            findNext();
+	void			findTextChanged();
+	void			findNext();
 };
 
 // ==============================================================================================

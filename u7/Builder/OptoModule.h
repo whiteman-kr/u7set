@@ -127,7 +127,6 @@ namespace Hardware
 
 		// serial RS323/485 mode properies only
 		//
-		bool m_enableSerial = true;
 		bool m_enableDuplex = false;    // serial mode and OCMN only
 
 		bool m_manualSettings = false;
@@ -175,9 +174,6 @@ namespace Hardware
 
 		int absTxStartAddress() { return m_absTxStartAddress; }
 		void setAbsTxStartAddress(int address) { m_absTxStartAddress = address; }
-
-		Q_INVOKABLE bool enableSerial() const { return m_enableSerial; }
-		void setEnableSerial(bool enable) { m_enableSerial = enable; }
 
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }

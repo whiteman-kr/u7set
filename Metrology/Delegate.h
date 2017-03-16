@@ -10,52 +10,52 @@
 
 class IntDelegate : public QItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    IntDelegate(QObject *parent);
+	IntDelegate(QObject *parent);
 
-    QWidget*    createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+	QWidget*	createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
 };
 
 // ==============================================================================================
 
 class DoubleDelegate : public QItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    DoubleDelegate(QObject *parent);
+	DoubleDelegate(QObject *parent);
 
-    QWidget*    createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
+	QWidget*	createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex &/* index */) const;
 };
 
 // ==============================================================================================
 
 class ColorDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    ColorDelegate(QObject *parent);
+	ColorDelegate(QObject *parent);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
 
 // ==============================================================================================
 
 class FindTextDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    FindTextDelegate(QObject *parent);
+	FindTextDelegate(QObject *parent);
 
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
 
 // ==============================================================================================

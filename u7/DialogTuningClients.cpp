@@ -14,6 +14,8 @@ DialogTuningClients::DialogTuningClients(QWidget *parent) :
 
 DialogTuningClients::~DialogTuningClients()
 {
+    theDialogTuningClients = nullptr;
+
     delete ui;
 }
 

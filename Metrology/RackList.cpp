@@ -6,7 +6,7 @@
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
-#include "ObjectProperty.h"
+#include "ObjectProperties.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 
 	QVariant result = QVariant();
 
-	if(orientation == Qt::Horizontal )
+	if (orientation == Qt::Horizontal)
 	{
 		if (section >= 0 && section < RACK_LIST_COLUMN_COUNT)
 		{
@@ -60,9 +60,9 @@ QVariant RackListTable::headerData(int section, Qt::Orientation orientation, int
 		}
 	}
 
-	if(orientation == Qt::Vertical )
+	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg( section + 1 );
+		result = QString("%1").arg(section + 1);
 	}
 
 	return result;
@@ -165,10 +165,10 @@ QString RackListTable::text(int row, int column, const Metrology::RackParam* pRa
 
 	switch (column)
 	{
-		case RACK_LIST_COLUMN_CAPTION:	result = pRack->caption();			break;
-		case RACK_LIST_COLUMN_ID:		result = pRack->equipmentID();		break;
-		case RACK_LIST_COLUMN_GROUP:	result = groupCaption;				break;
-		case RACK_LIST_COLUMN_CHANNEL:	result = pRack->channelStr();		break;
+		case RACK_LIST_COLUMN_CAPTION:	result = pRack->caption();		break;
+		case RACK_LIST_COLUMN_ID:		result = pRack->equipmentID();	break;
+		case RACK_LIST_COLUMN_GROUP:	result = groupCaption;			break;
+		case RACK_LIST_COLUMN_CHANNEL:	result = pRack->channelStr();	break;
 		default:						assert(0);
 	}
 
@@ -233,13 +233,13 @@ void RackListTable::set(const QList<Metrology::RackParam*> list_add)
 
 void RackListTable::clear()
 {
-	int count = m_rackList.count();
+	int count = rackCount();
 	if (count == 0)
 	{
 		return;
 	}
 
-	beginRemoveRows(QModelIndex(), 0, count - 1 );
+	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_rackMutex.lock();
 
@@ -262,16 +262,6 @@ void RackListTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-int RackListDialog::m_columnWidth[RACK_LIST_COLUMN_COUNT] =
-{
-	150,	// RACK_LIST_COLUMN_CAPTION
-	250,	// RACK_LIST_COLUMN_ID
-	100,	// RACK_LIST_COLUMN_GROUP
-	100,	// RACK_LIST_COLUMN_CHANNEL
-};
-
-// -------------------------------------------------------------------------------------------------------------------
-
 RackListDialog::RackListDialog(QWidget *parent) :
 	QDialog(parent)
 {
@@ -281,7 +271,7 @@ RackListDialog::RackListDialog(QWidget *parent) :
 		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &RackListDialog::updateList, Qt::QueuedConnection);
 	}
 
-	m_rackBase = theRackBase;
+	m_rackBase = theSignalBase.racks();
 	m_rackTable.setRackGroups(m_rackBase.groups());
 
 	createInterface();
@@ -362,12 +352,12 @@ void RackListDialog::createInterface()
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_rackTable);
-	QSize cellSize = QFontMetrics( theOptions.measureView().font() ).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	for(int column = 0; column < RACK_LIST_COLUMN_COUNT; column++)
 	{
-		m_pView->setColumnWidth(column, m_columnWidth[column]);
+		m_pView->setColumnWidth(column, RackListColumnWidth[column]);
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -425,7 +415,7 @@ void RackListDialog::updateList()
 			continue;
 		}
 
-		rackList.append( new Metrology::RackParam(rack) );
+		rackList.append(new Metrology::RackParam(rack));
 	}
 
 	m_rackTable.set(rackList);
@@ -437,7 +427,7 @@ bool RackListDialog::eventFilter(QObject *object, QEvent *event)
 {
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent *>( event );
+		QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
@@ -507,7 +497,7 @@ void RackListDialog::copy()
 
 	for(int row = 0; row < rowCount; row++)
 	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex() ) == false)
+		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
 		{
 			continue;
 		}
@@ -519,7 +509,7 @@ void RackListDialog::copy()
 				continue;
 			}
 
-			textClipboard.append(m_pView->model()->data( m_pView->model()->index(row, column)).toString() + "\t");
+			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
 		}
 
 		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
@@ -557,8 +547,8 @@ void RackListDialog::rackProperty()
 		return;
 	}
 
-	pRack->setGroupIndex( dialog.rack().groupIndex() );
-	pRack->setChannel( dialog.rack().channel() );
+	pRack->setGroupIndex(dialog.rack().groupIndex());
+	pRack->setChannel(dialog.rack().channel());
 
 	m_rackBase.setRack(index, *pRack);
 }
@@ -581,7 +571,7 @@ void RackListDialog::onListDoubleClicked(const QModelIndex&)
 
 void RackListDialog::onOk()
 {
-	theRackBase = m_rackBase;
+	theSignalBase.racks() = m_rackBase;
 
 	accept();
 }
