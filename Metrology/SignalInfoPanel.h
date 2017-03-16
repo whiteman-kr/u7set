@@ -14,6 +14,7 @@ const char* const			SignalInfoColumn[] =
 {
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Rack"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "ID"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Sate"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Chassis"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Module"),
@@ -29,20 +30,22 @@ const int					SIGNAL_INFO_COLUMN_COUNT		= sizeof(SignalInfoColumn)/sizeof(Signal
 
 const int					SIGNAL_INFO_COLUMN_RACK			= 0,
 							SIGNAL_INFO_COLUMN_ID			= 1,
-							SIGNAL_INFO_COLUMN_STATE		= 2,
-							SIGNAL_INFO_COLUMN_CHASSIS		= 3,
-							SIGNAL_INFO_COLUMN_MODULE		= 4,
-							SIGNAL_INFO_COLUMN_PLACE		= 5,
-							SIGNAL_INFO_COLUMN_CAPTION		= 6,
-							SIGNAL_INFO_COLUMN_PH_RANGE		= 7,
-							SIGNAL_INFO_COLUMN_EL_RANGE		= 8,
-							SIGNAL_INFO_COLUMN_EL_SENSOR	= 9,
-							SIGNAL_INFO_COLUMN_CALIBRATOR	= 10;
+							SIGNAL_INFO_COLUMN_EQUIPMENT_ID	= 2,
+							SIGNAL_INFO_COLUMN_STATE		= 3,
+							SIGNAL_INFO_COLUMN_CHASSIS		= 4,
+							SIGNAL_INFO_COLUMN_MODULE		= 5,
+							SIGNAL_INFO_COLUMN_PLACE		= 6,
+							SIGNAL_INFO_COLUMN_CAPTION		= 7,
+							SIGNAL_INFO_COLUMN_PH_RANGE		= 8,
+							SIGNAL_INFO_COLUMN_EL_RANGE		= 9,
+							SIGNAL_INFO_COLUMN_EL_SENSOR	= 10,
+							SIGNAL_INFO_COLUMN_CALIBRATOR	= 11;
 
 const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 {
 							100,	// SIGNAL_INFO_COLUMN_RACK
 							270,	// SIGNAL_INFO_COLUMN_ID
+							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_INFO_COLUMN_STATE
 							 60,	// SIGNAL_INFO_COLUMN_CHASSIS
 							 60,	// SIGNAL_INFO_COLUMN_MODULE

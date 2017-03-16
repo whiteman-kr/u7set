@@ -34,6 +34,9 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 
 	m_columnList = new QTableWidget;
+	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
+	m_columnList->verticalHeader()->setDefaultSectionSize(cellSize.height());
+	m_columnList->setFont(theOptions.measureView().font());
 
 	mainLayout->addLayout(measureTypeLayout);
 	mainLayout->addWidget(m_columnList);
@@ -115,7 +118,6 @@ void OptionsMeasureViewHeaderDialog::updateList()
 	for(int index = 0; index < rowCount; index++)
 	{
 		verticalHeaderLabels.append(QString("%1").arg(index + 1));
-		m_columnList->setRowHeight(index, 20);
 
 		MeasureViewColumn& column = m_header.m_column[m_measureType][index];
 

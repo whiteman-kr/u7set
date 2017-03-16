@@ -23,25 +23,21 @@ public:
 private:
 
 	mutable QMutex				m_mutex;
-
-	Hash						m_signalHash[Metrology::ChannelCount];
+	Metrology::Signal*			m_pSignal[Metrology::ChannelCount];
 
 	Metrology::SignalLocation	m_location;
-
-	QString						m_strID;
+	QString						m_strID;		// depend from SignalLocation and measureKind
 
 public:
 
 	bool						isEmpty() const;
 	void						clear();
 
-	Hash						hash(int channel) const;
-	bool						setSignal(int channel, int measureKind, const Metrology::SignalParam& param);
+	Metrology::Signal*			metrologySignal(int channel) const;
+	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
 
-	Metrology::SignalLocation&	location() { return m_location; }
-	void						setLocation(const Metrology::SignalLocation& location) { m_location = location; }
-
-	QString&					strID() { return m_strID; }
+	Metrology::SignalLocation	location() const { return m_location; }
+	QString						strID() const { return m_strID; }
 
 	MetrologyMultiSignal&		operator=(const MetrologyMultiSignal& from);
 };
@@ -61,17 +57,16 @@ private:
 	mutable QMutex			m_mutex;
 
 	Metrology::SignalParam	m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
-
 	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 
-	bool					m_equalPhysicalRange = false;
+	QString					m_divider;
 
 public:
 
-	void					clear();
 	bool					isValid() const;
+	void					clear();
 
 	Metrology::SignalParam	param(int type) const;
 	bool					setParam(int type, const Metrology::SignalParam& param);
@@ -79,22 +74,23 @@ public:
 	int						outputSignalType() const { return m_outputSignalType; }
 	void					setOutputSignalType(int type) { m_outputSignalType = type; }
 
-	bool					equalPhysicalRange() const { return m_equalPhysicalRange; }
-	bool					testPhysicalRange();
-
 	QString					rackCaption() const;
-	QString					signalID(bool showCustomID, const QString& divider) const;
+	QString					signalID(bool showCustomID) const;
+	QString					equipmentID() const;
 	QString					chassisStr() const;
 	QString					moduleStr() const;
 	QString					placeStr() const;
-	QString					caption(const QString &divider) const;
-	QString					physicalRangeStr(const QString& divider) const;
-	QString					electricRangeStr(const QString& divider) const;
-	QString					electricSensorStr(const QString& divider) const;
+	QString					caption() const;
+	QString					physicalRangeStr() const;
+	QString					electricRangeStr() const;
+	QString					electricSensorStr() const;
 
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
+
+	QString					divider() const { return m_divider; }
+	void					setDivider(const QString& divider) { m_divider = divider; }
 
 	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };
@@ -125,10 +121,12 @@ public:
 	int						outputSignalType() const { return m_outputSignalType; }
 
 	MetrologyMultiSignal	signal(int type) const;
-	Hash					signalHash(int type, int channel) const;
-
 	bool					setSignal(int type, const MetrologyMultiSignal& signal);
-	bool					setSignal(int channel, int measureKind, int outputSignalType, const Metrology::SignalParam& param);
+
+	Metrology::Signal*		metrologySignal(int type, int channel) const;
+	bool					setMetrologySignal(int measureKind, int outputSignalType, int channel, Metrology::Signal* pSignal);
+
+	bool					contains(Metrology::Signal* pSignal);
 
 	MeasureSignal&			operator=(const MeasureSignal& from);
 };
@@ -177,7 +175,7 @@ private:
 	// list of signals for measure
 	//
 	mutable QMutex			m_signalMesaureMutex;
-	QVector<MeasureSignal>	m_signalMesaureList;
+	QVector<MeasureSignal>	m_signalMeasureList;
 
 	// main signal that are measuring at the current moment
 	//
@@ -195,7 +193,6 @@ private:
 public:
 
 	void					clear();
-	void					sortByPosition();
 
 	// Signals
 	//
@@ -203,6 +200,10 @@ public:
 	void					clearSignalList();
 
 	int						appendSignal(const Metrology::SignalParam& param);
+
+	Metrology::Signal*		signalPtr(const QString& appSignalID);
+	Metrology::Signal*		signalPtr(const Hash& hash);
+	Metrology::Signal*		signalPtr(int index);
 
 	Metrology::Signal		signal(const QString& appSignalID);
 	Metrology::Signal		signal(const Hash& hash);
@@ -233,22 +234,22 @@ public:
 	//
 	RackBase&				racks() { return m_rackBase; }
 
-	int						createMeasureRackList(int outputSignalType);
-	void					clearMeasureRackList();
+	int						createRackListForMeasure(int outputSignalType);
+	void					clearRackListForMeasure();
 
-	int						measureRackCount() const;
-	Metrology::RackParam	measureRack(int index);
+	int						rackCountForMeasure() const;
+	Metrology::RackParam	rackForMeasure(int index);
 
 	// signals for measure
 	//
 	void					initSignals();
 	void					updateRackParam();
 
-	int						createMeasureSignalList(int measureKind, int outputSignalType, int rackIndex);
-	void					clearMeasureSignalList();
+	int						createSignalListForMeasure(int measureKind, int outputSignalType, int rackIndex);
+	void					clearSignalListForMeasure();
 
-	int						measureSignalCount() const;
-	MeasureSignal			measureSignal(int index);
+	int						signalForMeasureCount() const;
+	MeasureSignal			signalForMeasure(int index);
 
 	// main signal for measure
 	//

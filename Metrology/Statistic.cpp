@@ -228,7 +228,7 @@ int StatisticTable::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.size();
+		count = m_signalList.count();
 
 	m_signalMutex.unlock();
 
@@ -243,7 +243,7 @@ Metrology::Signal* StatisticTable::signal(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			 pSignal = m_signalList[index];
 		}
@@ -287,14 +287,6 @@ void StatisticTable::clear()
 	beginRemoveRows(QModelIndex(), 0, count - 1);
 
 		m_signalMutex.lock();
-
-			for(int i = count - 1; i >= 0; i--)
-			{
-				if (m_signalList[i] != nullptr)
-				{
-					delete m_signalList[i];
-				}
-			}
 
 			m_signalList.clear();
 
@@ -350,12 +342,12 @@ StatisticDialog::StatisticDialog(QWidget *parent) :
 	m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
 
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
 		m_measureType = pMainWindow->measureType();
 
-		connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &StatisticDialog::updateList, Qt::QueuedConnection);
-		connect(&pMainWindow->m_measureThread, &MeasureThread::measureComplite, this, &StatisticDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &StatisticDialog::updateList, Qt::QueuedConnection);
+		connect(&pMainWindow->measureThread(), &MeasureThread::measureComplite, this, &StatisticDialog::updateList, Qt::QueuedConnection);
 	}
 
 	createInterface();
@@ -573,13 +565,17 @@ void StatisticDialog::updateList()
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
 	{
-		Metrology::Signal signal = theSignalBase.signal(i);
-		if (signal.param().isValid() == false)
+		Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+		if (pSignal == nullptr)
 		{
 			continue;
 		}
 
-		Metrology::SignalParam& param = signal.param();
+		Metrology::SignalParam& param = pSignal->param();
+		if (param.isValid() == false)
+		{
+			continue;
+		}
 
 		if (param.isAnalog() == false || param.isInput() == false)
 		{
@@ -596,22 +592,22 @@ void StatisticDialog::updateList()
 			MeasureView* pMeasureView = pMainWindow->measureView(m_measureType);
 			if (pMeasureView != nullptr)
 			{
-				signal.setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
+				pSignal->setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
 			}
 		//
 		// temporary solution
 
-		if (signal.statistic().measureCount() != 0)
+		if (pSignal->statistic().measureCount() != 0)
 		{
 			m_MeasuredCount++;
 		}
 
-		if (signal.statistic().state() == Metrology::StatisticStateInvalid)
+		if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
 		{
 			m_invalidMeasureCount ++;
 		}
 
-		signalList.append(new Metrology::Signal(signal));
+		signalList.append(pSignal);
 	}
 
 	m_signalTable.set(signalList);
@@ -696,7 +692,127 @@ void StatisticDialog::exportSignal()
 
 void StatisticDialog::selectSignalForMeasure()
 {
+	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
+	if (pMainWindow == nullptr)
+	{
+		return;
+	}
 
+	if (pMainWindow->rackCombo() == nullptr || pMainWindow->signalCombo() == nullptr)
+	{
+		return;
+	}
+
+	//
+	//
+	int metrologySignalIndex = m_pView->currentIndex().row();
+	if (metrologySignalIndex < 0 || metrologySignalIndex >= m_signalTable.signalCount())
+	{
+		return;
+	}
+
+	Metrology::Signal* pMetrologySignal = m_signalTable.signal(metrologySignalIndex);
+	if (pMetrologySignal == nullptr || pMetrologySignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	//
+	//
+	int rackComboIndex = -1;
+
+	int rackComboCount = pMainWindow->rackCombo()->count();
+	for(int i = 0; i < rackComboCount; i++)
+	{
+		switch (theOptions.toolBar().measureKind())
+		{
+			case MEASURE_KIND_ONE:
+
+				if (pMainWindow->rackCombo()->itemData(i).toInt() == pMetrologySignal->param().location().rack().index())
+				{
+					rackComboIndex = i;
+				}
+
+				break;
+
+			case MEASURE_KIND_MULTI:
+
+				if (pMainWindow->rackCombo()->itemData(i).toInt() == pMetrologySignal->param().location().rack().groupIndex())
+				{
+					rackComboIndex = i;
+				}
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+		if (rackComboIndex != -1)
+		{
+			break;
+		}
+	}
+
+	if (rackComboIndex == -1)
+	{
+		return;
+	}
+
+	//
+	//
+	pMainWindow->rackCombo()->setCurrentIndex(rackComboIndex);
+
+	//
+	//
+	int measureSignalIndex = -1;
+
+	int signalComboCount = theSignalBase.signalForMeasureCount();
+	for(int i = 0; i < signalComboCount; i++)
+	{
+		MeasureSignal measureSignal = theSignalBase.signalForMeasure(i);
+		if (measureSignal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		if (measureSignal.contains(pMetrologySignal) == false)
+		{
+			continue;
+		}
+
+		measureSignalIndex = i;
+
+		break;
+	}
+
+	if (measureSignalIndex == -1)
+	{
+		return;
+	}
+
+	//
+	//
+	int signalComboIndex = -1;
+
+	signalComboCount = pMainWindow->signalCombo()->count();
+	for(int i = 0; i < signalComboCount; i++)
+	{
+		if (pMainWindow->signalCombo()->itemData(i).toInt() ==  measureSignalIndex)
+		{
+			signalComboIndex = i;
+			break;
+		}
+	}
+
+	if (signalComboIndex == -1)
+	{
+		return;
+	}
+
+	//
+	//
+	pMainWindow->signalCombo()->setCurrentIndex(signalComboIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

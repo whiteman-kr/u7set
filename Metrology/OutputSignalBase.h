@@ -45,23 +45,24 @@ public:
 
 private:
 
-	int						m_signalID = -1;
-	Hash					m_hash = 0;
+	mutable QMutex			m_signalMutex;
+
+	int						m_index = -1;	// for database
+
+	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	Hash					m_hash = 0;		// calcHash form m_appSignalID
 
 	int						m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
 
-	mutable QMutex			m_signalMutex;
-
-	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	Metrology::SignalParam	m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	Metrology::Signal*		m_pSignal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
 public:
 
-	void					clear();
 	bool					isValid() const;
+	void					clear();
 
-	int						signalID() const { return m_signalID; }
-	void					setSignalID(int id) { m_signalID = id; }
+	int						index() const { return m_index; }
+	void					setIndex(int index) { m_index = index; }
 
 	Hash					hash() const { return m_hash; }
 	bool					setHash();
@@ -73,9 +74,9 @@ public:
 	QString					appSignalID(int type) const;
 	void					setAppSignalID(int type, const QString& appSignalID);
 
-	Metrology::SignalParam	param(int type) const;
-	void					setParam(int type, const Metrology::SignalParam& param);
-	void					updateParam();
+	Metrology::Signal*		metrologySignal(int type) const;
+	void					setMetrologySignal(int type, Metrology::Signal* pSignal);
+	void					initMetrologySignal();		// set Metrology::Signal* from SignalBase by signalHash
 
 	OutputSignal&			operator=(const OutputSignal& from);
 };
@@ -104,17 +105,17 @@ public:
 
 	int						load();
 	bool					save();
+	void					initSignals();		// set Metrology::Signal from SignalBase by signalHash
 
 	int						appendSignal(const OutputSignal& signal);
 
 	OutputSignal			signal(int index) const;
 	void					setSignal(int index, const OutputSignal& signal);
 
-	void					remove(const OutputSignal& signal);
 	void					remove(int index);
 
-	int						find(int measureIoType, const Hash& hash, int outputSignalType);
-	int						find(const OutputSignal& signal);
+	int						findIndex(int outputSignalType, int measureIoType, Metrology::Signal* pSignal);
+	int						findIndex(const OutputSignal& signal);
 
 	OutputSignalBase&		operator=(const OutputSignalBase& from);
 

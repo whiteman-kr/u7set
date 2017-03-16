@@ -47,7 +47,7 @@ void SignalSocket::onConnection()
 
 	emit socketConnected();
 
-	startSignalStateTimer();
+	requestSignalState();
 
 	return;
 }
@@ -57,8 +57,6 @@ void SignalSocket::onConnection()
 void SignalSocket::onDisconnection()
 {
 	qDebug() << "SignalSocket::onDisconnection";
-
-	stopSignalStateTimer();
 
 	emit socketDisconnected();
 }
@@ -73,14 +71,9 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
 		return;
 	}
 
-	switch(requestID)
+	if(requestID == ADS_GET_APP_SIGNAL_STATE)
 	{
-		case ADS_GET_APP_SIGNAL_STATE:
-			replySignalState(replyData, replyDataSize);
-			break;
-
-		default:
-			assert(false);
+		replySignalState(replyData, replyDataSize);
 	}
 }
 
@@ -89,17 +82,14 @@ void SignalSocket::processReply(quint32 requestID, const char* replyData, quint3
 
 void SignalSocket::requestSignalState()
 {
-	if (isClearToSendRequest() == false)
-	{
-		assert(false);
-		return;
-	}
+	assert(isClearToSendRequest());
+
+	// according to GOST MI-2002 in each point we need do twenty measurements per one second
+	// 50 ms
+	//
+	QThread::msleep(SIGNAL_SOCKET_TIMEOUT_STATE);
 
 	int hashCount = theSignalBase.hashForRequestStateCount();
-	if (hashCount == 0)
-	{
-		return;
-	}
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
 	m_getSignalStateRequest.mutable_signalhashes()->Reserve(SIGNAL_SOCKET_MAX_READ_SIGNAL);
@@ -136,6 +126,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 	if (replyData == nullptr)
 	{
 		assert(replyData);
+		requestSignalState();
 		return;
 	}
 
@@ -144,6 +135,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 	{
 		qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";
 		assert(result);
+		requestSignalState();
 		return;
 	}
 
@@ -151,13 +143,13 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 	{
 		qDebug() << "SignalSocket::replySignalState - error: " << m_getSignalStateReply.error();
 		assert(m_getSignalStateReply.error() != 0);
+		requestSignalState();
 		return;
 	}
 
 	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
 	{
 		Hash hash = m_getSignalStateReply.appsignalstates(i).hash();
-
 		if (hash == 0)
 		{
 			assert(hash != 0);
@@ -167,41 +159,13 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		AppSignalState appState;
 		appState.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
 
+		//appState.flags.valid = 1;
+		//appState.value = rand();
+
 		Metrology::SignalState state(appState);
 		theSignalBase.setSignalState(hash, state);
 	}
-}
 
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::startSignalStateTimer()
-{
-	if (m_updateSignalStateTimer == nullptr)
-	{
-		m_updateSignalStateTimer = new QTimer(this);
-		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalSocket::updateSignalState);
-	}
-
-	// according to GOST MI-2002 in each point we need do twenty measurements per one second
-	// 50 ms
-	//
-	m_updateSignalStateTimer->start(SIGNAL_SOCKET_TIMEOUT_STATE);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::stopSignalStateTimer()
-{
-	if (m_updateSignalStateTimer != nullptr)
-	{
-		m_updateSignalStateTimer->stop();
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalSocket::updateSignalState()
-{
 	requestSignalState();
 }
 

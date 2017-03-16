@@ -10,6 +10,8 @@
 #include <QGroupBox>
 #include <QDesktopWidget>
 
+#include "../lib/MetrologySignal.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
@@ -307,7 +309,7 @@ void CalibratorManager::onCalibratorConnect()
 	}
 
 	int channel = m_pCalibrator->channel();
-	if (channel < 0 || channel >= 6)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		return;
 	}
@@ -331,7 +333,7 @@ void CalibratorManager::onCalibratorDisconnect()
 	}
 
 	int channel = m_pCalibrator->channel();
-	if (channel < 0 || channel >= 6)
+	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
 		return;
 	}

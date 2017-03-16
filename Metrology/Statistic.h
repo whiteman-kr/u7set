@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QDialog>
+#include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>

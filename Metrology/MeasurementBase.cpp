@@ -416,7 +416,7 @@ Metrology::SignalStatistic MeasurementBase::statistic(const Hash& signalHash)
 
 	m_measurmentListMutex.lock();
 
-		int measureCount = m_measurementList.size();
+		int measureCount = m_measurementList.count();
 		for(int i = 0; i < measureCount; i ++)
 		{
 			Measurement* pMeasurement = m_measurementList[i];

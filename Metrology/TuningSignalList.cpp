@@ -227,7 +227,7 @@ int TuningSourceTable::sourceCount() const
 
 	m_sourceMutex.lock();
 
-		count = m_sourceIdList.size();
+		count = m_sourceIdList.count();
 
 	m_sourceMutex.unlock();
 
@@ -242,7 +242,7 @@ TuningSource TuningSourceTable::source(int index) const
 
 	m_sourceMutex.lock();
 
-		if (index >= 0 && index < m_sourceIdList.size())
+		if (index >= 0 && index < m_sourceIdList.count())
 		{
 			 param = m_sourceIdList[index];
 		}
@@ -562,7 +562,7 @@ int TuningSignalTable::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.size();
+		count = m_signalList.count();
 
 	m_signalMutex.unlock();
 
@@ -577,7 +577,7 @@ Metrology::Signal* TuningSignalTable::signal(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			 pSignal = m_signalList[index];
 		}
@@ -675,17 +675,17 @@ TuningSignalListDialog::TuningSignalListDialog(QWidget *parent) :
 	QDialog(parent)
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
-	if (pMainWindow != nullptr && pMainWindow->m_pConfigSocket != nullptr)
+	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
-		if (pMainWindow->m_pConfigSocket != nullptr)
+		if (pMainWindow->configSocket() != nullptr)
 		{
-			connect(pMainWindow->m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
+			connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &TuningSignalListDialog::updateSignalList, Qt::QueuedConnection);
 		}
 
-		if (pMainWindow->m_pTuningSocket != nullptr)
+		if (pMainWindow->tuningSocket() != nullptr)
 		{
-			connect(pMainWindow->m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
-			connect(pMainWindow->m_pTuningSocket, &TuningSocket::socketDisconnected, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
+			connect(pMainWindow->tuningSocket(), &TuningSocket::sourcesLoaded, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
+			connect(pMainWindow->tuningSocket(), &TuningSocket::socketDisconnected, this, &TuningSignalListDialog::updateSourceList, Qt::QueuedConnection);
 		}
 	}
 

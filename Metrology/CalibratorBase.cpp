@@ -114,6 +114,8 @@ void CalibratorBase::removeCalibrators()
 				pThread->deleteLater();
 			}
 		}
+
+		delete manager;
 	}
 
 	m_mutex.lock();
@@ -313,7 +315,7 @@ CalibratorManager* CalibratorBase::calibratorManager(int index) const
 
 	m_mutex.lock();
 
-		if (index >= 0 || index < m_calibratorManagerList.size())
+		if (index >= 0 || index < m_calibratorManagerList.count())
 		{
 			pCalibratorManager = m_calibratorManagerList[index];
 		}

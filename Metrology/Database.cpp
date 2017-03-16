@@ -990,7 +990,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				{
 					OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + readedCount;
 
-					signal->setSignalID(query.value(field++).toInt());
+					signal->setIndex(query.value(field++).toInt());
 
 					signal->setType(query.value(field++).toInt());
 
@@ -1362,8 +1362,8 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				{
 					OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + r;
 
-					signal->setSignalID(lastKey() + 1);
-					query.bindValue(field++, signal->signalID());
+					signal->setIndex(lastKey() + 1);
+					query.bindValue(field++, signal->index());
 
 					query.bindValue(field++, signal->type());
 

@@ -776,7 +776,7 @@ void MainWindow::updateRacksOnToolBar()
 		return;
 	}
 
-	int rackCount = theSignalBase.createMeasureRackList(outputSignalType);
+	int rackCount = theSignalBase.createRackListForMeasure(outputSignalType);
 	if (rackCount == 0)
 	{
 		return;
@@ -792,7 +792,7 @@ void MainWindow::updateRacksOnToolBar()
 			{
 				for(int r = 0; r < rackCount; r++)
 				{
-					Metrology::RackParam rack = theSignalBase.measureRack(r);
+					Metrology::RackParam rack = theSignalBase.rackForMeasure(r);
 					if (rack.isValid() == false)
 					{
 						continue;
@@ -882,7 +882,7 @@ void MainWindow::updateSignalsOnToolBar()
 		return;
 	}
 
-	int signalCount = theSignalBase.createMeasureSignalList(measureKind, outputSignalType, rackIndex);
+	int signalCount = theSignalBase.createSignalListForMeasure(measureKind, outputSignalType, rackIndex);
 	if (signalCount == 0)
 	{
 		return;
@@ -899,7 +899,7 @@ void MainWindow::updateSignalsOnToolBar()
 
 	for(int s = 0; s < signalCount; s++)
 	{
-		MeasureSignal measureSignal = theSignalBase.measureSignal(s);
+		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
 		if (measureSignal.isEmpty() == true)
 		{
 			continue;
@@ -948,8 +948,6 @@ void MainWindow::updateSignalsOnToolBar()
 		return;
 	}
 
-	updateSignalPositionOnToolBar();
-
 	m_asSignalCombo->model()->sort(0);
 	m_asSignalCombo->setEnabled(true);
 	m_asSignalCombo->setCurrentIndex(0);
@@ -958,6 +956,8 @@ void MainWindow::updateSignalsOnToolBar()
 	m_asModuleCombo->setEnabled(true);
 	m_asPlaceCombo->setEnabled(true);
 
+	//updateChassisOnToolBar(theSignalBase.signalForMeasure(0).signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location());
+
 	setMeasureSignal(0);
 }
 
@@ -965,6 +965,277 @@ void MainWindow::updateSignalsOnToolBar()
 
 void MainWindow::updateSignalPositionOnToolBar()
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateChassisOnToolBar(const Metrology::SignalLocation& location)
+{
+	m_asChassisCombo->clear();
+	m_asChassisCombo->setEnabled(false);
+
+	int measureKind = theOptions.toolBar().measureKind();
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	// get rackIndex or rackGroupIndex, it depend from measureKind
+	//
+	int rackIndex = m_asRackCombo->currentData().toInt();
+	if (rackIndex == -1)
+	{
+		return;
+	}
+
+	QMap<int, int> chassisMap;
+
+	int signalCount = theSignalBase.signalForMeasureCount();
+
+	m_asChassisCombo->blockSignals(true);
+
+	for(int s = 0; s < signalCount; s++)
+	{
+		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
+		if (measureSignal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (signal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		switch (measureKind)
+		{
+			case MEASURE_KIND_ONE:
+
+				if (rackIndex != signal.location().rack().index())
+				{
+					continue;
+				}
+
+				break;
+
+			case MEASURE_KIND_MULTI:
+
+				if (rackIndex != signal.location().rack().groupIndex())
+				{
+					continue;
+				}
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+
+		if (chassisMap.contains(signal.location().chassis()) == false)
+		{
+			chassisMap.insert(signal.location().chassis(), s);
+
+			m_asChassisCombo->addItem(QString::number(signal.location().chassis() + 1), signal.location().chassis());
+		}
+	}
+
+	m_asChassisCombo->blockSignals(false);
+	m_asChassisCombo->setCurrentIndex(0);
+
+	if (m_asChassisCombo->count() == 0)
+	{
+		return;
+	}
+
+	m_asChassisCombo->model()->sort(0);
+	m_asChassisCombo->setEnabled(true);
+
+	updateModuleOnToolBar(location);
+	updatePlaceOnToolBar(location);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateModuleOnToolBar(const Metrology::SignalLocation& location)
+{
+	m_asModuleCombo->clear();
+	m_asModuleCombo->setEnabled(false);
+
+	int measureKind = theOptions.toolBar().measureKind();
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	// get rackIndex or rackGroupIndex, it depend from measureKind
+	//
+	int rackIndex = m_asRackCombo->currentData().toInt();
+	if (rackIndex == -1)
+	{
+		return;
+	}
+
+	QMap<int, int> moduleMap;
+
+	int signalCount = theSignalBase.signalForMeasureCount();
+
+	m_asModuleCombo->blockSignals(true);
+
+	for(int s = 0; s < signalCount; s++)
+	{
+		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
+		if (measureSignal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (signal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		switch (measureKind)
+		{
+			case MEASURE_KIND_ONE:
+
+				if (rackIndex != signal.location().rack().index())
+				{
+					continue;
+				}
+
+				break;
+
+			case MEASURE_KIND_MULTI:
+
+				if (rackIndex != signal.location().rack().groupIndex())
+				{
+					continue;
+				}
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+		if (location.chassis() != signal.location().chassis())
+		{
+			continue;
+		}
+
+		if (moduleMap.contains(signal.location().module()) == false)
+		{
+			moduleMap.insert(signal.location().module(), s);
+
+			m_asModuleCombo->addItem(QString::number(signal.location().module() + 1), signal.location().module());
+		}
+	}
+
+	m_asModuleCombo->blockSignals(false);
+	m_asModuleCombo->setCurrentIndex(0);
+
+	if (m_asModuleCombo->count() == 0)
+	{
+		return;
+	}
+
+	m_asModuleCombo->model()->sort(0);
+	m_asModuleCombo->setEnabled(true);
+
+	updatePlaceOnToolBar(location);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updatePlaceOnToolBar(const Metrology::SignalLocation& location)
+{
+	m_asPlaceCombo->clear();
+	m_asPlaceCombo->setEnabled(false);
+
+	int measureKind = theOptions.toolBar().measureKind();
+	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
+	{
+		return;
+	}
+
+	// get rackIndex or rackGroupIndex, it depend from measureKind
+	//
+	int rackIndex = m_asRackCombo->currentData().toInt();
+	if (rackIndex == -1)
+	{
+		return;
+	}
+
+	QMap<int, int> placeMap;
+
+	int signalCount = theSignalBase.signalForMeasureCount();
+
+	m_asPlaceCombo->blockSignals(true);
+
+	for(int s = 0; s < signalCount; s++)
+	{
+		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
+		if (measureSignal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (signal.isEmpty() == true)
+		{
+			continue;
+		}
+
+		switch (measureKind)
+		{
+			case MEASURE_KIND_ONE:
+
+				if (rackIndex != signal.location().rack().index())
+				{
+					continue;
+				}
+
+				break;
+
+			case MEASURE_KIND_MULTI:
+
+				if (rackIndex != signal.location().rack().groupIndex())
+				{
+					continue;
+				}
+
+				break;
+
+			default:
+				assert(0);
+		}
+
+		if (location.chassis() != signal.location().chassis())
+		{
+			continue;
+		}
+
+		if (placeMap.contains(signal.location().place()) == false)
+		{
+			placeMap.insert(signal.location().place(), s);
+
+			m_asPlaceCombo->addItem(QString::number(signal.location().place() + 1), signal.location().place());
+		}
+	}
+
+	m_asPlaceCombo->blockSignals(false);
+	m_asPlaceCombo->setCurrentIndex(0);
+
+	if (m_asPlaceCombo->count() == 0)
+	{
+		return;
+	}
+
+	m_asPlaceCombo->model()->sort(0);
+	m_asPlaceCombo->setEnabled(true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1133,22 +1404,22 @@ bool MainWindow::signalIsMeasured(QString& signalID)
 
 	for(int c = 0; c < Metrology::ChannelCount; c++)
 	{
-		Hash hash = signal.hash(c);
-		if (hash == 0)
+		Metrology::Signal* pMetrologySignal = signal.metrologySignal(c);
+		if (pMetrologySignal == nullptr)
 		{
 			continue;
 		}
 
-		Metrology::Signal metrologySignal = theSignalBase.signal(hash);
-		if (metrologySignal.param().isValid() == false)
+		Metrology::SignalParam& param = pMetrologySignal->param();
+		if (param.isValid() == false)
 		{
 			continue;
 		}
 
-		metrologySignal.setStatistic(pMeasureView->table().m_measureBase.statistic(hash));
-		if (metrologySignal.statistic().measureCount() != 0)
+		pMetrologySignal->setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
+		if (pMetrologySignal->statistic().measureCount() != 0)
 		{
-			signalID.append(metrologySignal.param().customAppSignalID() + "\n");
+			signalID.append(param.customAppSignalID() + "\n");
 
 			result = true;
 		}
@@ -1466,7 +1737,7 @@ void MainWindow::setOutputSignalType(int index)
 
 void MainWindow::setRack(int index)
 {
-	if (index < 0 || index >= theSignalBase.measureRackCount())
+	if (index < 0 || index >= theSignalBase.rackCountForMeasure())
 	{
 		return;
 	}
@@ -1478,6 +1749,12 @@ void MainWindow::setRack(int index)
 
 void MainWindow::setMeasureSignal(int index)
 {
+	if (m_measureThread.isRunning() == true)
+	{
+		QMessageBox::critical(this, windowTitle(), tr("Measurement process is running"));
+		return;
+	}
+
 	if (index == -1)
 	{
 		theSignalBase.clearActiveSignal();
@@ -1485,13 +1762,13 @@ void MainWindow::setMeasureSignal(int index)
 	}
 
 	index = m_asSignalCombo->currentData().toInt();
-	if (index < 0 || index >= theSignalBase.measureSignalCount())
+	if (index < 0 || index >= theSignalBase.signalForMeasureCount())
 	{
 		theSignalBase.clearActiveSignal();
 		return;
 	}
 
-	MeasureSignal measureSignal = theSignalBase.measureSignal(index);
+	MeasureSignal measureSignal = theSignalBase.signalForMeasure(index);
 	if (measureSignal.isEmpty() == true)
 	{
 		assert(false);
@@ -1516,95 +1793,56 @@ void MainWindow::setMeasureSignal(int index)
 
 void MainWindow::setChassis(int index)
 {
-	if (index = -1)
+	if (index == -1)
 	{
 		return;
 	}
 
-//	int chassis = index;
-
-//	m_asModuleCombo->clear();
-//	m_asPlaceCombo->clear();
-
-//	QMap<int, int> moduleMap;
-//	QMap<int, int> placeMap;
-
-//	int signalCount = theSignalBase.signalForMeasureCount();
-//	for(int s = 0; s < signalCount; s++)
+//	MeasureSignal activeSgnal = theSignalBase.activeSignal();
+//	if (activeSgnal.isEmpty() == true)
 //	{
-//		MeasureSignal ms;
-
-//		if (theSignalBase.signalForMeasure(s, ms) == false)
-//		{
-//			continue;
-//		}
-
-//		if (ms.caseNo() != caseNo || ms.chassis() != chassis)
-//		{
-//			continue;
-//		}
-
-//		if (moduleMap.contains(ms.module()) == false)
-//		{
-//			moduleMap.insert(ms.module(), s);
-
-//			m_asModuleCombo->addItem(QString::number(ms.module() + 1), ms.module());
-//		}
-
-//		if (placeMap.contains(ms.place()) == false)
-//		{
-//			placeMap.insert(ms.place(), s);
-
-//			m_asPlaceCombo->addItem(QString::number(ms.place() + 1), ms.place());
-//		}
+//		return;
 //	}
+
+//	MetrologyMultiSignal signal = activeSgnal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+//	if (signal.isEmpty()  == true)
+//	{
+//		return;
+//	}
+
+
+//	updateModuleOnToolBar(signal.location());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::setModule(int index)
 {
-	if (index = -1)
+	if (index == -1)
 	{
 		return;
 	}
 
-//	int chassis = m_asChassisCombo->currentData().toInt();
-//	int module = index;
-
-//	m_asPlaceCombo->clear();
-
-//	QMap<int, int> placeMap;
-
-//	int signalCount = theSignalBase.signalForMeasureCount();
-//	for(int s = 0; s < signalCount; s++)
+//	MeasureSignal activeSgnal = theSignalBase.activeSignal();
+//	if (activeSgnal.isEmpty() == true)
 //	{
-//		MeasureSignal ms;
-
-//		if (theSignalBase.signalForMeasure(s, ms) == false)
-//		{
-//			continue;
-//		}
-
-//		if (ms.caseNo() != caseNo || ms.chassis() != chassis || ms.module() != module)
-//		{
-//			continue;
-//		}
-
-//		if (placeMap.contains(ms.place()) == false)
-//		{
-//			placeMap.insert(ms.place(), s);
-
-//			m_asPlaceCombo->addItem(QString::number(ms.place() + 1), ms.place());
-//		}
+//		return;
 //	}
+
+//	MetrologyMultiSignal signal = activeSgnal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+//	if (signal.isEmpty()  == true)
+//	{
+//		return;
+//	}
+
+//	updatePlaceOnToolBar(signal.location());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::setPlace(int index)
 {
-	if (index = -1)
+	if (index == -1)
 	{
 		return;
 	}
@@ -1614,27 +1852,6 @@ void MainWindow::setPlace(int index)
 //	int place = m_asPlaceCombo->currentData().toInt();
 
 //	qDebug() << "setMetrologySignalByPosition: C" << caseNo << " - S" << chassis << " - B" << module << " - E" << place;
-
-//	int signalCount = theSignalBase.signalForMeasureCount();
-
-//	for(int s = 0; s < signalCount; s++)
-//	{
-//		MeasureSignal ms;
-
-//		if (theSignalBase.signalForMeasure(s, ms) == false)
-//		{
-//			continue;
-//		}
-
-//		if (ms.caseNo() == caseNo && ms.chassis() == chassis && ms.module() == module && ms.place() == place)
-//		{
-//			theSignalBase.setActiveSignal(ms);
-
-//			m_asMetrologySignalCombo->setCurrentIndex(s);
-
-//			break;
-//		}
-//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

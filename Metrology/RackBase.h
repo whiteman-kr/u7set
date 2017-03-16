@@ -105,6 +105,10 @@ public:
 
 	int						append(const Metrology::RackParam& rack);
 
+	Metrology::RackParam*	rackPtr(const QString& rackID);
+	Metrology::RackParam*	rackPtr(const Hash& hash);
+	Metrology::RackParam*	rackPtr(int index);
+
 	Metrology::RackParam	rack(const QString& rackID);
 	Metrology::RackParam	rack(const Hash& hash);
 	Metrology::RackParam	rack(int index);

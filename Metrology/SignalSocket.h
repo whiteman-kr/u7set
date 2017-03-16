@@ -37,16 +37,12 @@ private:
 	Network::GetAppSignalStateRequest	m_getSignalStateRequest;							// ADS_GET_APP_SIGNAL_STATE
 	Network::GetAppSignalStateReply		m_getSignalStateReply;
 
-	int				m_signalStateRequestIndex = 0;
+	int									m_signalStateRequestIndex = 0;
 
 	// functions: Request - Reply
 	//
 	void			requestSignalState();													// ADS_GET_APP_SIGNAL_STATE
 	void			replySignalState(const char* replyData, quint32 replyDataSize);
-
-	QTimer*			m_updateSignalStateTimer = nullptr;
-	void			startSignalStateTimer();
-	void			stopSignalStateTimer();
 
 public:
 
@@ -57,10 +53,6 @@ public:
 	virtual void	onDisconnection() override;
 
 	virtual void	processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;		// for processing functions: Request - Reply
-
-private slots:
-
-	void			updateSignalState();
 
 public slots:
 

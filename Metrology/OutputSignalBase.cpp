@@ -21,20 +21,6 @@ OutputSignal::OutputSignal(const OutputSignal& from)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::clear()
-{
-	m_hash = 0;
-
-	m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
-
-	for(int k = 0; k < MEASURE_IO_SIGNAL_TYPE_COUNT; k++)
-	{
-		m_param[k].setAppSignalID(QString());
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool OutputSignal::isValid() const
 {
 	if (m_hash == 0)
@@ -43,6 +29,20 @@ bool OutputSignal::isValid() const
 	}
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OutputSignal::clear()
+{
+	m_hash = 0;
+
+	m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
+
+	for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
+	{
+		m_pSignal[t] = nullptr;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -122,34 +122,40 @@ void OutputSignal::setAppSignalID(int type, const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalParam OutputSignal::param(int type) const
+Metrology::Signal* OutputSignal::metrologySignal(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
-		return Metrology::SignalParam();
+		return nullptr;
 	}
 
-	Metrology::SignalParam param;
+	Metrology::Signal* pSignal = nullptr;
 
 	m_signalMutex.lock();
 
-		param = m_param[type];
+		pSignal = m_pSignal[type];
 
 	m_signalMutex.unlock();
 
-	return param;
+	return pSignal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::setParam(int type, const Metrology::SignalParam& param)
+void OutputSignal::setMetrologySignal(int type, Metrology::Signal* pSignal)
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		return;
 	}
 
-	if (param.isValid() == false)\
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
+	if (param.isValid() == false)
 	{
 		return;
 	}
@@ -160,14 +166,15 @@ void OutputSignal::setParam(int type, const Metrology::SignalParam& param)
 
 		setHash();
 
-		m_param[type] = param;
+		m_pSignal[type] = pSignal;
 
 	m_signalMutex.unlock();
 }
 
+
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::updateParam()
+void OutputSignal::initMetrologySignal()
 {
 	m_signalMutex.lock();
 
@@ -184,7 +191,7 @@ void OutputSignal::updateParam()
 				continue;
 			}
 
-			m_param[type] = theSignalBase.signalParam(signalHash);
+			m_pSignal[type] = theSignalBase.signalPtr(signalHash);
 		}
 
 	m_signalMutex.unlock();
@@ -194,16 +201,16 @@ void OutputSignal::updateParam()
 
 OutputSignal& OutputSignal::operator=(const OutputSignal& from)
 {
-	m_signalID = from.m_signalID;
-	m_hash = from.m_signalID;
+	m_index = from.m_index;
 
 	m_type = from.m_type;
+
+	m_hash = from.m_hash;
 
 	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
 	{
 		m_appSignalID[type] = from.m_appSignalID[type];
-
-		m_param[type] = from.m_param[type];
+		m_pSignal[type] = from.m_pSignal[type];
 	}
 
 	return *this;
@@ -237,7 +244,7 @@ int OutputSignalBase::signalCount() const
 
 	m_signalMutex.lock();
 
-		count = m_signalList.size();
+		count = m_signalList.count();
 
 	m_signalMutex.unlock();
 
@@ -329,14 +336,29 @@ bool OutputSignalBase::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void OutputSignalBase::initSignals()
+{
+	m_signalMutex.lock();
+
+		int count = m_signalList.count();
+		for(int i = 0; i < count; i++)
+		{
+			m_signalList[i].initMetrologySignal();
+		}
+
+	m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int OutputSignalBase::appendSignal(const OutputSignal& signal)
 {
 	int index = -1;
 
 	m_signalMutex.lock();
 
-			m_signalList.append(signal);
-			index = m_signalList.size() - 1;
+		m_signalList.append(signal);
+		index = m_signalList.count() - 1;
 
 	m_signalMutex.unlock();
 
@@ -351,7 +373,7 @@ OutputSignal OutputSignalBase::signal(int index) const
 
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			signal = m_signalList[index];
 		}
@@ -367,22 +389,12 @@ void OutputSignalBase::setSignal(int index, const OutputSignal& signal)
 {
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			m_signalList[index] = signal;
 		}
 
 	m_signalMutex.unlock();
-}
-
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void OutputSignalBase::remove(const OutputSignal& signal)
-{
-	int index = find(signal);
-
-	return remove(index);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -391,7 +403,7 @@ void OutputSignalBase::remove(int index)
 {
 	m_signalMutex.lock();
 
-		if (index >= 0 && index < m_signalList.size())
+		if (index >= 0 && index < m_signalList.count())
 		{
 			m_signalList.remove(index);
 		}
@@ -401,23 +413,23 @@ void OutputSignalBase::remove(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::find(int measureIoType, const Hash& hash, int outputSignalType)
+int OutputSignalBase::findIndex(int outputSignalType, int measureIoType, Metrology::Signal* pSignal)
 {
+	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	{
+		assert(0);
+		return -1;
+	}
+
 	if (measureIoType < 0 || measureIoType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		assert(0);
 		return -1;
 	}
 
-	if (hash == 0)
+	if (pSignal == nullptr)
 	{
-		assert(hash != 0);
-		return -1;
-	}
-
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
-	{
-		assert(0);
+		assert(pSignal != nullptr);
 		return -1;
 	}
 
@@ -425,41 +437,39 @@ int OutputSignalBase::find(int measureIoType, const Hash& hash, int outputSignal
 
 	m_signalMutex.lock();
 
-		int count = m_signalList.size();
+		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
 		{
-			const OutputSignal& signal = m_signalList[i];
-
-			if (calcHash(m_signalList[i].appSignalID(measureIoType)) != hash)
+			if (m_signalList[i].type() != outputSignalType)
 			{
 				continue;
 			}
 
-			if (signal.type() != outputSignalType)
+			if (m_signalList[i].metrologySignal(measureIoType) != pSignal)
 			{
 				continue;
 			}
 
 			foundIndex = i;
+
 			break;
 		}
 
 	m_signalMutex.unlock();
 
 	return foundIndex;
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::find(const OutputSignal& signal)
+int OutputSignalBase::findIndex(const OutputSignal& signal)
 {
 	int foundIndex = -1;
 
 		m_signalMutex.lock();
 
-		int count = m_signalList.size();
+		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
 		{
