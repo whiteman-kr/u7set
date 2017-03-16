@@ -129,9 +129,6 @@ namespace Hardware
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
 
-		bool enableSerial() const;
-		void setEnableSerial(bool value);
-
 		bool enableDuplex() const;
 		void setEnableDuplex(bool value);
 
@@ -173,7 +170,6 @@ namespace Hardware
 		OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
 		OptoPort::Mode m_mode = OptoPort::Mode::Optical;
 
-		bool m_enableSerial = false;
 		bool m_enableDuplex = false;
 		bool m_manualSettings = false;
 
