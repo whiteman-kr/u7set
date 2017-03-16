@@ -231,7 +231,7 @@ namespace Hardware
 
 		bool isTxSignalIDExists(const QString& appSignalID);
 
-		bool isConnected() const;
+		bool isUsedInConnection() const;
 
 		Address16 getTxSignalAddress(const QString& appSignalID) const;
 

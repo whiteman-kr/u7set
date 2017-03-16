@@ -551,15 +551,18 @@ void MainWindow::showAbout()
 #else
 	text += "Build: Debug";
 #endif
+	text += "<br>Commit date: " LAST_SERVER_COMMIT_DATE;
 	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
-	text += "<br>Supported project database version: " + QString::number(DbController::databaseVersion());
+	text += "<br>Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br>";
 
 	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setIndent(10);
 	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	vl->addWidget(label);
 
 	label = new QLabel(&aboutDialog);
-	label->setText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.");
+	label->setIndent(10);
+	label->setText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.<br>");
 	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	label->setWordWrap(true);
 	vl->addWidget(label);
