@@ -252,12 +252,13 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 				return;
 			}
 
-			if (tuningClient->type() != E::SoftwareType::TuningClient)
+			if (tuningClient->type() != E::SoftwareType::TuningClient &&
+				tuningClient->type() != E::SoftwareType::Metrology)
 			{
 				return;
 			}
 
-			// sw is TuningClient
+			// sw is TuningClient or Metrology
 			//
 			QString tuningServiceID1;
 			QString tuningServiceID2;

@@ -78,68 +78,70 @@ namespace Builder
 				return false;
 			}
 
-			if (appDataServiceId1.isEmpty() == true)
+			if (appDataServiceId1.isEmpty() == true &&
+				appDataServiceId2.isEmpty() == true)
 			{
 				// Property '%1.%2' is empty.
 				//
 				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID1");
-				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 is empty"));
-				return false;
-			}
-
-			if (appDataServiceId2.isEmpty() == true)
-			{
-				// Property '%1.%2' is empty.
-				//
 				m_log->errCFG3022(m_software->equipmentId(), "AppDataServiceID2");
-				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID2 is empty"));
+
+				xmlWriter.writeTextElement("Error", tr("Property AppDataServiceID1 and AppDataServiceID2 is empty"));
 				return false;
 			}
-
-			Hardware::Software* appDataObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-			Hardware::Software* appDataObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
-
-			if (appDataObject1 == nullptr)
-			{
-				// Property '%1.%2' is linked to undefined software ID '%3'.
-				//
-				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
-				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId1));
-				return false;
-			}
-
-			if (appDataObject2 == nullptr)
-			{
-				// Property '%1.%2' is linked to undefined software ID '%3'.
-				//
-				m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
-				xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId2));
-				return false;
-			}
-
-			AppDataServiceSettings adsSettings1;
-			AppDataServiceSettings adsSettings2;
-
-			adsSettings1.readFromDevice(appDataObject1, m_log);
-			adsSettings2.readFromDevice(appDataObject2, m_log);
 
 			xmlWriter.writeStartElement("AppDataService");
+
+			if (appDataServiceId1.isEmpty() == false)
 			{
+				Hardware::Software* appDataObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
+
+				if (appDataObject1 == nullptr)
+				{
+					// Property '%1.%2' is linked to undefined software ID '%3'.
+					//
+					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
+					xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId1));
+					return false;
+				}
+
+				AppDataServiceSettings adsSettings1;
+
+				adsSettings1.readFromDevice(appDataObject1, m_log);
+
 				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
 				xmlWriter.writeAttribute("ip1", adsSettings1.clientRequestIP.address().toString());
 				xmlWriter.writeAttribute("port1", QString::number(adsSettings1.clientRequestIP.port()));
+			}
+
+			if (appDataServiceId2.isEmpty() == false)
+			{
+				Hardware::Software* appDataObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
+
+				if (appDataObject2 == nullptr)
+				{
+					// Property '%1.%2' is linked to undefined software ID '%3'.
+					//
+					m_log->errCFG3021(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
+					xmlWriter.writeTextElement("Error", tr("Object %1 is not found").arg(appDataServiceId2));
+					return false;
+				}
+
+				AppDataServiceSettings adsSettings2;
+
+				adsSettings2.readFromDevice(appDataObject2, m_log);
 
 				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
 				xmlWriter.writeAttribute("ip2", adsSettings2.clientRequestIP.address().toString());
 				xmlWriter.writeAttribute("port2", QString::number(adsSettings2.clientRequestIP.port()));
 			}
-			xmlWriter.writeEndElement();
 
+			xmlWriter.writeEndElement();		// </AppDataService>
 
 			// TuningClient
 			//
 
-			QString tuningClientId1, tuningClientId2;
+/*			QString tuningClientId1, tuningClientId2;
 
 			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningClientID1" , &tuningClientId1, m_log);
 			result &= DeviceHelper::getStrProperty(pObjectSoftware, "TuningClientID2" , &tuningClientId2, m_log);
@@ -194,7 +196,7 @@ namespace Builder
 				xmlWriter.writeAttribute("TuningClientID2", tuningClientId2);
 			}
 			xmlWriter.writeEndElement();
-
+*/
 
 			// TuningService
 			//
