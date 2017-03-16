@@ -50,7 +50,6 @@ namespace Hardware
         static QString s_port2TxRsID = "Port2TxRsID";
         static QString s_port2TxRsDataUID = "Port2TxRsDataUID";
 
-        static QString s_enableSerial = "EnableSerial";
         static QString s_serialMode = "SerialMode";
         static QString s_enableDuplex = "EnableDuplex";
         static QString s_enableManualSettings = "EnableManualSettings";
@@ -110,9 +109,6 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(int, s_port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
         ADD_PROPERTY_GETTER_SETTER(quint32, s_port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-        auto propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, s_enableSerial, true, Connection::enableSerial, Connection::setEnableSerial);
-        propEnableSerial->setCategory(s_serialCommunicationsOCM);
-
         auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, s_serialMode, true, Connection::serialMode, Connection::setSerialMode);
         propSerialMode->setCategory(s_serialCommunicationsOCM);
 
@@ -149,7 +145,6 @@ namespace Hardware
 
 		mutableConnection->set_serialmode(static_cast<int>(serialMode()));
 		mutableConnection->set_mode(static_cast<int>(mode()));
-		mutableConnection->set_enableserial(m_enableSerial);
 		mutableConnection->set_enableduplex(m_enableDuplex);
 		mutableConnection->set_manualsettings(m_manualSettings);
 		mutableConnection->set_disabledataid(m_disableDataID);
@@ -185,7 +180,6 @@ namespace Hardware
 
 		m_serialMode = static_cast<OptoPort::SerialMode>(connection.serialmode());
 		m_mode = static_cast<OptoPort::Mode>(connection.mode());
-		m_enableSerial = connection.enableserial();
 		m_enableDuplex = connection.enableduplex();
 		m_manualSettings = connection.manualsettings();
 		m_disableDataID = connection.disabledataid();
@@ -244,11 +238,6 @@ namespace Hardware
         if (reader.attributes().hasAttribute("Mode"))
         {
             setMode(static_cast<OptoPort::Mode>(reader.attributes().value("Mode").toInt()));
-        }
-
-        if (reader.attributes().hasAttribute("Enable"))
-        {
-			setEnableSerial(reader.attributes().value("Enable").toString() == "true" ? true : false);
         }
 
         if (reader.attributes().hasAttribute("EnableDuplex"))
@@ -597,16 +586,6 @@ namespace Hardware
     void Connection::setMode(const OptoPort::Mode value)
     {
         m_mode = value;
-    }
-
-	bool Connection::enableSerial() const
-    {
-		return m_enableSerial;
-    }
-
-	void Connection::setEnableSerial(bool value)
-    {
-		m_enableSerial = value;
     }
 
     bool Connection::enableDuplex() const

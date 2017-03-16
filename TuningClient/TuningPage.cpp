@@ -844,6 +844,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
     m_applyButton = new QPushButton(tr("Apply"));
+    m_applyButton->setEnabled(false);
     connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
     m_bottomLayout = new QHBoxLayout();

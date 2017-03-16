@@ -233,9 +233,9 @@ namespace Hardware
 	}
 
 
-	bool OptoPort::isConnected() const
+	bool OptoPort::isUsedInConnection() const
 	{
-		return linkedPortID().isEmpty() != true;
+		return m_connectionID.isEmpty() != true;
 	}
 
 
@@ -1461,15 +1461,19 @@ namespace Hardware
 			{
 				// RS232/485 port has no linked ports
 				//
-				if (port->manualSettings())
+				if (port->manualSettings() == true)
 				{
 					port->setRxDataSizeW(port->manualRxSizeW());
+				}
+				else
+				{
+					m_log->errALC5085(port->equipmentID(), port->connectionID());
 				}
 
 				continue;
 			}
 
-			if (port->isConnected() == false)
+			if (port->isLinked() == false)
 			{
 				// optical port is not linked (used in connection)
 				//
@@ -1686,13 +1690,10 @@ namespace Hardware
 						return false;
 					}
 
-
-					if (port->isConnected() == false)
+					if (port->isUsedInConnection() == false)
 					{
 						port->setRxStartAddress(0);
-
 						i++;
-
 						continue;
 					}
 
@@ -1744,14 +1745,48 @@ namespace Hardware
 						return false;
 					}
 
+					port->setRxStartAddress(0);
+
 					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
 
-					if (port->isConnected() == false)
+					if (port->isUsedInConnection() == false)
 					{
-						port->setRxStartAddress(0);
+						continue;			// port is not connected
+					}
+
+					std::shared_ptr<Connection> connection = getConnection(port->connectionID());
+
+					if (connection == nullptr)
+					{
+						assert(false);
 						continue;
 					}
+
+					if (connection->mode() == OptoPort::Mode::Serial)
+					{
+						if (connection->port1EquipmentID() != port->equipmentID() )
+						{
+							continue;
+						}
+
+						port->setRxStartAddress(rxStartAddress);
+
+						if (port->manualSettings() == true)
+						{
+							rxStartAddress += port->manualRxSizeW();
+						}
+						else
+						{
+							// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
+							//
+							m_log->errALC5085(port->equipmentID(), port->connectionID());
+						}
+
+						continue;
+					}
+
+					// connection is in OptoPort::Mode::Opto
 
 					port->setRxStartAddress(rxStartAddress);
 

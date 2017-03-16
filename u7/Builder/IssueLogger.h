@@ -257,6 +257,7 @@ namespace Builder
 		void errALC5082();											// Usage of ALP phase time exceed 100%.
 		void errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid);	// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
 		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
+		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 
 
 		// EQP			Equipment issues						6000-6999

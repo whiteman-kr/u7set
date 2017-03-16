@@ -3342,7 +3342,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Warning0, itemUuid);
+		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
 
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5072,
@@ -3577,6 +3577,27 @@ namespace Builder
 				  5084,
 				  QString(tr("Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.")).
 						arg(appSignalID).arg(connectionID));
+	}
+
+	/// IssueCode: ALC5085
+	///
+	/// IssueType: Error
+	///
+	/// Title: Rx data size of RS232/485 port '%1' is undefined (connection '%2').
+	///
+	/// Parameters:
+	///		%1 Serial port EquipmentID
+	///		%2 Serial connection ID
+	///
+	/// Description:
+	///		Receving data size of specified RS232/485 port is undefined. Use Manual Settings to determine Rx data size.
+	///
+	void IssueLogger::errALC5085(const QString& portEquipmentID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5085,
+				  QString(tr("Rx data size of RS232/485 port '%1' is undefined (connection '%2').")).
+						arg(portEquipmentID).arg(connectionID));
 	}
 
 

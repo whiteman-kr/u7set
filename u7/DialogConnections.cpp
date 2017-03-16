@@ -800,8 +800,6 @@ void DialogConnections::onReport()
         {
             textStream << tr("Port mode: Serial") << "\r\n";
 
-            textStream << tr("Serial mode enabled: ") << (connection->enableSerial() == true ? tr("Yes") : tr("No")) <<"\r\n";
-
             textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
 
         }

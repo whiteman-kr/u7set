@@ -919,7 +919,6 @@ message Connection
 	//
     optional int32 SerialMode = 7 [default = 0];
     optional int32 Mode = 8 [default = 0];
-    optional bool EnableSerial = 9 [default = false];
     optional bool EnableDuplex = 10 [default = false];
     optional bool ManualSettings = 11 [default = false];
     optional bool DisableDataID = 12 [default = false];
