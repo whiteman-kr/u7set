@@ -653,7 +653,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
-    m_tuningFiltersEditorAction->setEnabled(true);
+    m_tuningFiltersEditorAction->setEnabled(/*true*/false);
 
 
 	// Status bar
