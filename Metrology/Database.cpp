@@ -1407,43 +1407,64 @@ int SqlTable::remove(const int* key, int keyCount) const
 		return 0;
 	}
 
+	QString keyFieldName = m_fieldBase.field(SQL_FIELD_KEY).name();
+	if (keyFieldName.isEmpty() == true)
+	{
+		return 0;
+	}
+
 	int count = recordCount();
 	if (count == 0)
 	{
 		return 0;
 	}
 
-	QString request = QString("DELETE FROM %1 WHERE ").arg(m_info.caption());
-	QString keyFieldName = m_fieldBase.field(SQL_FIELD_KEY).name();
+	int transactionCount = keyCount / REMOVE_TRANSACTION_RECORD_COUNT;
 
-	for (int k = 0; k < keyCount; k++)
+	if (keyCount % REMOVE_TRANSACTION_RECORD_COUNT != 0)
 	{
-		request.append(QString("%1=%2").arg(keyFieldName).arg(key[k]));
+		transactionCount++;
+	}
 
-		if (k != keyCount - 1)
+	int record = 0;
+
+	for (int t = 0; t < transactionCount; t++)
+	{
+		QString request = QString("DELETE FROM %1 WHERE ").arg(m_info.caption());
+
+		for (int k = 0; k < REMOVE_TRANSACTION_RECORD_COUNT; k++)
 		{
-			request.append(" OR ");
+			request.append(QString("%1=%2").arg(keyFieldName).arg(key[record++]));
+
+			if (record >= keyCount )
+			{
+				break;
+			}
+
+			if (k != REMOVE_TRANSACTION_RECORD_COUNT - 1)
+			{
+				request.append(" OR ");
+			}
 		}
 
-	}
+		QSqlQuery query;
 
-	QSqlQuery query;
+		if (query.exec("BEGIN TRANSACTION") == false)
+		{
+			return 0;
+		}
 
-	if (query.exec("BEGIN TRANSACTION") == false)
-	{
-		return 0;
-	}
+		if (query.exec(request) == false)
+		{
+			query.exec("END TRANSACTION");
 
-	if (query.exec(request) == false)
-	{
-		query.exec("END TRANSACTION");
+			return 0;
+		}
 
-		return 0;
-	}
-
-	if (query.exec("COMMIT") == false)
-	{
-		return 0;
+		if (query.exec("COMMIT") == false)
+		{
+			return 0;
+		}
 	}
 
 	return count - recordCount();
