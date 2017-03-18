@@ -272,7 +272,7 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 			}
 
 			if (tuningServiceID1 != software->equipmentIdTemplate() &&
-				tuningServiceID1 != software->equipmentIdTemplate())
+				tuningServiceID2 != software->equipmentIdTemplate())
 			{
 				return;
 			}

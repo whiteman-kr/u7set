@@ -80,8 +80,6 @@ void ConfigSocket::clearConfiguration()
 	m_loadedFiles.clear();
 
 	theSignalBase.clear();
-
-	theSignalBase.tuningSignals().createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -183,6 +181,7 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 	theOptions.projectInfo().setCfgFileVersion(fileVersion);
 
 	result &= readRacks(fileData, fileVersion);
+	result &= readTuningSources(fileData, fileVersion);
 	result &= readUnits(fileData, fileVersion);
 	result &= readSignals(fileData, fileVersion);
 
@@ -234,9 +233,55 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
-	qDebug() << "ConfigSocket::readRacks - Racks were loaded:	" << theSignalBase.racks().count();
+	qDebug() << "ConfigSocket::readRacks - Racks were loaded: " << theSignalBase.racks().count();
 
 	theSignalBase.racks().updateParamFromGroups();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion)
+{
+	Q_UNUSED(fileVersion);
+
+	bool result = true;
+
+	XmlReadHelper xml(fileData);
+
+	if (xml.findElement("TuningSources") == false)
+	{
+		qDebug() << "ConfigSocket::readTuningSources - TuningSources section not found";
+		return false;
+	}
+
+	int tuningSourceCount = 0;
+	result &= xml.readIntAttribute("Count", &tuningSourceCount);
+
+	for(int t = 0; t < tuningSourceCount; t++)
+	{
+		if (xml.findElement("TuningSource") == false)
+		{
+			result = false;
+			break;
+		}
+
+		QString equipmentID;
+
+		result &= xml.readStringAttribute("EquipmentID", &equipmentID);
+
+		theSignalBase.tuning().Sources().sourceEquipmentID().append(equipmentID);
+	}
+
+	if (tuningSourceCount != theSignalBase.tuning().Sources().sourceEquipmentID().count())
+	{
+		qDebug() << "ConfigSocket::readTuningSources - Tuning sources loading error, loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count() << " from " << tuningSourceCount;
+		assert(false);
+		return false;
+	}
+
+	qDebug() << "ConfigSocket::readTuningSources - Tuning sources were loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count();
 
 	return result;
 }
@@ -284,7 +329,7 @@ bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
-	qDebug() << "ConfigSocket::readUnits - Units were loaded:	" << theSignalBase.units().count();
+	qDebug() << "ConfigSocket::readUnits - Units were loaded: " << theSignalBase.units().count();
 
 	return result;
 }
@@ -339,11 +384,8 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 
 	theSignalBase.initSignals();
 
-	theSignalBase.outputSignals().initSignals();
 
-	theSignalBase.tuningSignals().createSignalList();
-
-	qDebug() << "ConfigSocket::readSignals - Signals were loaded:	" << theSignalBase.signalCount();
+	qDebug() << "ConfigSocket::readSignals - Signals were loaded: " << theSignalBase.signalCount();
 
 	return result;
 }

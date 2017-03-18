@@ -100,14 +100,14 @@ private:
 public:
 
 	void					clear();
-	int						signalCount() const;
+	int						count() const;
 	void					sort();
 
 	int						load();
 	bool					save();
-	void					initSignals();		// set Metrology::Signal from SignalBase by signalHash
+	void					init();										// set Metrology::Signal* from SignalBase by signalHash
 
-	int						appendSignal(const OutputSignal& signal);
+	int						append(const OutputSignal& signal);
 
 	OutputSignal			signal(int index) const;
 	void					setSignal(int index, const OutputSignal& signal);

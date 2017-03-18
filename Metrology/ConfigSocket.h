@@ -38,7 +38,7 @@ private:
 	bool				m_connected = false;
 	HostAddressPort		m_address;
 
-	QVector<QString>	m_loadedFiles;
+	QStringList			m_loadedFiles;
 
 public:
 
@@ -47,8 +47,7 @@ public:
 
 	void				start();
 
-	int					loadedFilesCount() { return m_loadedFiles.count(); }
-	QString				loadedFile(int index) { if (index < 0 || index >= m_loadedFiles.count()) { return QString(); } return m_loadedFiles[index]; }
+	QStringList&		loadedFiles() { return m_loadedFiles; }
 
 private slots:
 
@@ -58,6 +57,7 @@ private slots:
 	bool				readMetrologySignals(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
+	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
 	bool				readUnits(const QByteArray& fileData, int fileVersion);
 	bool				readSignals(const QByteArray& fileData, int fileVersion);
 

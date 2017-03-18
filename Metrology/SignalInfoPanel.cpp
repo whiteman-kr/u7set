@@ -216,7 +216,7 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 			if (outParam.isValid() == true)
 			{
 				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
-				stateStr += measureParam.divider() + signalStateStr(outParam, outState);
+				stateStr += MultiTextDivider + signalStateStr(outParam, outState);
 			}
 		}
 	}

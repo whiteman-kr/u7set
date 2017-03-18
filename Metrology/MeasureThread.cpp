@@ -405,8 +405,8 @@ void MeasureThread::measureLinearity()
 			switch (m_activeSignalParam[c].outputSignalType())
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:
-				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(electricVal);									break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuningSignals().appendCmdFowWrite(param.hash(), physicalVal);	break;
+				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(electricVal);								break;
+				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), physicalVal);	break;
 				default:								assert(0);
 			}
 		}

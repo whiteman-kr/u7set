@@ -19,7 +19,6 @@ bool SignalListTable::m_showADCInHex = true;
 
 SignalListTable::SignalListTable(QObject*)
 {
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &SignalListTable::updateSignalParam, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -266,39 +265,6 @@ void SignalListTable::clear()
 		m_signalMutex.unlock();
 
 	endRemoveRows();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListTable::updateSignalParam(const Hash& signalHash)
-{
-	if (signalHash == 0)
-	{
-		assert(signalHash != 0);
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		int count = m_signalList.count();
-
-		for(int i = 0; i < count; i ++)
-		{
-			 Metrology::Signal* pSignal = m_signalList[i];
-			 if (pSignal == nullptr)
-			 {
-				 continue;
-			 }
-
-			if (pSignal->param().hash() == signalHash)
-			{
-				pSignal->setParam(theSignalBase.signalParam(signalHash));
-
-				break;
-			}
-		}
-
-	m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

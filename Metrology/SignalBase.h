@@ -44,6 +44,10 @@ public:
 
 // ==============================================================================================
 
+#define						MultiTextDivider	"\n"
+
+// ----------------------------------------------------------------------------------------------
+
 class MeasureMultiParam
 {
 public:
@@ -60,8 +64,6 @@ private:
 	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
-
-	QString					m_divider;
 
 public:
 
@@ -88,9 +90,6 @@ public:
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
-
-	QString					divider() const { return m_divider; }
-	void					setDivider(const QString& divider) { m_divider = divider; }
 
 	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };
@@ -148,19 +147,19 @@ public:
 
 private:
 
-	// racks that received form CgfSrv
+	// all racks that received form CgfSrv
 	//
 	RackBase				m_rackBase;
+
+	// all units that received form CgfSrv
+	//
+	UnitList				m_unitList;
 
 	// all signals that received form CgfSrv
 	//
 	mutable QMutex			m_signalMutex;
 	QMap<Hash, int>			m_signalHashMap;
 	QVector<Metrology::Signal> m_signalList;
-
-	// units that received form CgfSrv
-	//
-	UnitList				m_unitList;
 
 	// list of hashes in order to receive signal state form AppDataSrv
 	//
@@ -186,9 +185,9 @@ private:
 	//
 	OutputSignalBase		m_outputSignalBase;
 
-	// signals of tuning
+	// sources and signals of tuning
 	//
-	TuningSignalBase		m_tuningSignalBase;
+	TuningBase				m_tuningBase;
 
 public:
 
@@ -257,17 +256,11 @@ public:
 	void					setActiveSignal(const MeasureSignal& signal);
 	void					clearActiveSignal();
 
-	// units
+	// other bases
 	//
-	UnitList&				units() { return m_unitList; }
-
-	// output signals
-	//
-	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }
-
-	// signals of tuning
-	//
-	TuningSignalBase&		tuningSignals() { return m_tuningSignalBase; }
+	UnitList&				units() { return m_unitList; }						// units that received form CgfSrv
+	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
+	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
 
 signals:
 

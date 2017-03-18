@@ -238,7 +238,7 @@ void OutputSignalBase::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::signalCount() const
+int OutputSignalBase::count() const
 {
 	int count = 0;
 
@@ -324,7 +324,7 @@ bool OutputSignalBase::save()
 
 	table->close();
 
-	if (writtenRecordCount != signalCount())
+	if (writtenRecordCount != count())
 	{
 		return false;
 	}
@@ -336,7 +336,7 @@ bool OutputSignalBase::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::initSignals()
+void OutputSignalBase::init()
 {
 	m_signalMutex.lock();
 
@@ -351,7 +351,7 @@ void OutputSignalBase::initSignals()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::appendSignal(const OutputSignal& signal)
+int OutputSignalBase::append(const OutputSignal& signal)
 {
 	int index = -1;
 

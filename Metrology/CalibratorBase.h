@@ -117,17 +117,17 @@ signals:
 
 public slots:
 
-	void					timeoutInitialization();					// Slot of timer
+	void					timeoutInitialization();				// Slot of timer
 
-	void					onInitialization();						 // Slot of calibrator menu - Initialization
-	void					onManage();								 // Slot of calibrator menu - Manage
-	void					onSettings();								 // Slot of calibrator menu - Edit setting
-	void					onSettings(int row, int);					 // Slot for edit serial port and type of calibrator
-	void					onCopy();									 // Slot of calibrator menu - Copy serail number
-	void					onContextMenu(QPoint);						// Slot of context menu
+	void					onInitialization();						// Slot of calibrator menu - Initialization
+	void					onManage();								// Slot of calibrator menu - Manage
+	void					onSettings();							// Slot of calibrator menu - Edit setting
+	void					onSettings(int row, int);				// Slot for edit serial port and type of calibrator
+	void					onCopy();								// Slot of calibrator menu - Copy serail number
+	void					onContextMenu(QPoint);					// Slot of context menu
 
-	void					onCalibratorConnected();					// Slots events from calibrator
-	void					onCalibratorDisconnected();				 // Slots events from calibrator
+	void					onCalibratorConnected();				// Slots events from calibrator
+	void					onCalibratorDisconnected();				// Slots events from calibrator
 };
 
 // ==============================================================================================

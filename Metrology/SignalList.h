@@ -89,7 +89,7 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	QList<Metrology::Signal*>	m_signalList;
+	QList<Metrology::Signal*> m_signalList;
 
 	static bool				m_showCustomID;
 	static bool				m_showADCInHex;
@@ -114,10 +114,6 @@ public:
 
 	bool					showADCInHex() const { return m_showADCInHex; }
 	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
-
-private slots:
-
-	void					updateSignalParam(const Hash& signalHash);
 };
 
 // ==============================================================================================

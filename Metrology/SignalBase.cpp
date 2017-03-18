@@ -214,8 +214,6 @@ void MeasureMultiParam::clear()
 
 		m_pCalibratorManager = nullptr;
 
-		m_divider = "\n";
-
 	m_mutex.unlock();
 }
 
@@ -283,7 +281,7 @@ QString MeasureMultiParam::rackCaption() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().rack().caption() + m_divider;
+				result = inParam.location().rack().caption() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -326,7 +324,7 @@ QString MeasureMultiParam::signalID(bool showCustomID) const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = (showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID()) + m_divider;
+				result = (showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID()) + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -362,7 +360,7 @@ QString MeasureMultiParam::equipmentID() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().equipmentID() + m_divider;
+				result = inParam.location().equipmentID() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -406,7 +404,7 @@ QString MeasureMultiParam::chassisStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().chassisStr() + m_divider;
+				result = inParam.location().chassisStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -449,7 +447,7 @@ QString MeasureMultiParam::moduleStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().moduleStr() + m_divider;
+				result = inParam.location().moduleStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -492,7 +490,7 @@ QString MeasureMultiParam::placeStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().placeStr() + m_divider;
+				result = inParam.location().placeStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -535,7 +533,7 @@ QString MeasureMultiParam::caption() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.caption() + m_divider;
+				result = inParam.caption() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -578,7 +576,7 @@ QString MeasureMultiParam::physicalRangeStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.inputPhysicalRangeStr() + m_divider;
+				result = inParam.inputPhysicalRangeStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -621,7 +619,7 @@ QString MeasureMultiParam::electricRangeStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.inputElectricRangeStr() + m_divider;
+				result = inParam.inputElectricRangeStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -664,7 +662,7 @@ QString MeasureMultiParam::electricSensorStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.inputElectricSensor() + m_divider;
+				result = inParam.inputElectricSensor() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
@@ -713,8 +711,6 @@ MeasureMultiParam& MeasureMultiParam::operator=(const MeasureMultiParam& from)
 		m_outputSignalType = from.m_outputSignalType;
 
 		m_pCalibratorManager = from.m_pCalibratorManager;
-
-		m_divider = from.m_divider;
 
 	m_mutex.unlock();
 
@@ -1008,6 +1004,8 @@ SignalBase::SignalBase(QObject *parent) :
 
 void SignalBase::clear()
 {
+	m_tuningBase.clear();
+
 	clearActiveSignal();
 
 	clearSignalListForMeasure();
@@ -1038,10 +1036,10 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
-		m_unitList.clear();
-
 		m_signalHashMap.clear();
 		m_signalList.clear();
+
+		m_unitList.clear();
 
 	m_signalMutex.unlock();
 }
@@ -1653,6 +1651,10 @@ void SignalBase::initSignals()
 	m_signalMutex.unlock();
 
 	updateRackParam();
+
+	m_outputSignalBase.init();
+
+	m_tuningBase.Signals().createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

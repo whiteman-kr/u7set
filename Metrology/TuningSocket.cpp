@@ -99,7 +99,7 @@ void TuningSocket::requestTuningSourcesInfo()
 {
 	assert(isClearToSendRequest());
 
-	theSignalBase.tuningSignals().clearSourceList();
+	theSignalBase.tuning().Sources().clear();
 
 	int serverType = selectedServerIndex();
 	if (serverType < 0 || serverType >= SOCKET_SERVER_TYPE_COUNT)
@@ -154,7 +154,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 	for (int i = 0; i < sourceCount; i++)
 	{
 		const ::Network::DataSourceInfo& dsi = m_tuningDataSourcesInfoReply.datasourceinfo(i);
-		theSignalBase.tuningSignals().appendSource(TuningSource(dsi));
+		theSignalBase.tuning().Sources().append(TuningSource(dsi));
 
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.subsystem().c_str() << ", EquipmentID:" << dsi.equipmentid().c_str() << ", IP:" << dsi.ip().c_str();
 	}
@@ -224,7 +224,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 	for (int i = 0; i < sourceCount; i++)
 	{
 		const ::Network::TuningSourceState& tss = m_tuningDataSourcesStatesReply.tuningsourcesstate(i);
-		theSignalBase.tuningSignals().setSourceState(tss.sourceid(), tss);
+		theSignalBase.tuning().Sources().setState(tss.sourceid(), tss);
 	}
 
 	requestReadTuningSignals();
@@ -251,7 +251,7 @@ void TuningSocket::requestReadTuningSignals()
 		return;
 	}
 
-	int signalForReadCount = theSignalBase.tuningSignals().signalCount();
+	int signalForReadCount = theSignalBase.tuning().Signals().count();
 	if (signalForReadCount == 0)
 	{
 		requestTuningSourcesState();
@@ -274,7 +274,7 @@ void TuningSocket::requestReadTuningSignals()
 			break;
 		}
 
-		Metrology::Signal* pSignal = theSignalBase.tuningSignals().signalForRead(i + startIndex);
+		Metrology::Signal* pSignal = theSignalBase.tuning().Signals().signal(i + startIndex);
 		if (pSignal == nullptr)
 		{
 			continue;
@@ -326,7 +326,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 
 	for (int i = 0; i < readReplyCount; i++)
 	{
-		theSignalBase.tuningSignals().setSignalState(m_readTuningSignalsReply.tuningsignalstate(i));
+		theSignalBase.tuning().Signals().setState(m_readTuningSignalsReply.tuningsignalstate(i));
 	}
 
 	requestWriteTuningSignals();
@@ -353,7 +353,7 @@ void TuningSocket::requestWriteTuningSignals()
 		return;
 	}
 
-	int cmdCount = theSignalBase.tuningSignals().cmdFowWriteCount();
+	int cmdCount = theSignalBase.tuning().cmdFowWriteCount();
 	if (cmdCount == 0)
 	{
 		requestTuningSourcesState();
@@ -369,7 +369,7 @@ void TuningSocket::requestWriteTuningSignals()
 
 	for (int i = 0; i < cmdCount && i < TUNING_SOCKET_MAX_WRITE_CMD; i++)
 	{
-		TuningWriteCmd cmd = theSignalBase.tuningSignals().cmdFowWrite(i);
+		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite(i);
 		if (cmd.signalHash() == 0)
 		{
 			assert(cmd.signalHash() != 0);

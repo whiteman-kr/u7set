@@ -517,6 +517,7 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 
 	switch(index)
 	{
+		case SIGNAL_PROPERTY_GROUP_ID:				header = tr("Signal ID");												break;
 		case SIGNAL_PROPERTY_GROUP_IN_PH_RANGE:		header = SignalPropertyGroup[index] + m_param.inputPhysicalRangeStr();	break;
 		case SIGNAL_PROPERTY_GROUP_IN_EL_RANGE:		header = SignalPropertyGroup[index] + m_param.inputElectricRangeStr();	break;
 		case SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE:	header = SignalPropertyGroup[index] + m_param.outputPhysicalRangeStr();	break;

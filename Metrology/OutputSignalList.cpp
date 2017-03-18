@@ -762,7 +762,7 @@ void OutputSignalDialog::updateList()
 
 	QList<OutputSignal> signalList;
 
-	int count = m_signalBase.signalCount();
+	int count = m_signalBase.count();
 	for(int i = 0; i < count; i++)
 	{
 		OutputSignal outputSignal = m_signalBase.signal(i);
@@ -802,11 +802,11 @@ void OutputSignalDialog::addSignal()
 		return;
 	}
 
-	m_signalBase.appendSignal(signal);
+	m_signalBase.append(signal);
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_signalTable.index(m_signalBase.signalCount() - 1, OUTPUT_SIGNAL_COLUMN_TYPE));
+	m_pView->setCurrentIndex(m_signalTable.index(m_signalBase.count() - 1, OUTPUT_SIGNAL_COLUMN_TYPE));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

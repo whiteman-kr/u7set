@@ -98,13 +98,87 @@ public:
 
 // ==============================================================================================
 
+class TuningSourceBase : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit TuningSourceBase(QObject *parent = 0);
+	virtual ~TuningSourceBase();
+
+private:
+
+	QStringList				m_tuningSourceEquipmentID;
+
+	mutable QMutex			m_sourceMutex;
+	QVector<TuningSource>	m_sourceList;
+	QMap<quint64, int>		m_sourceIdMap;
+
+public:
+
+	void					clear();
+	int						count() const;
+
+	QStringList&			sourceEquipmentID() {  return m_tuningSourceEquipmentID; }
+
+	int						append(const TuningSource& source);
+
+	TuningSource			source(int index) const;
+
+	TuningSourceState		state(quint64 sourceID);
+	void					setState(quint64 sourceID, const Network::TuningSourceState& state);
+};
+
+// ==============================================================================================
+
+class TuningSignalBase : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit TuningSignalBase(QObject *parent = 0);
+	virtual ~TuningSignalBase();
+
+private:
+
+	mutable QMutex			m_signalMutex;
+	QVector<Metrology::Signal*> m_signalList;
+	QMap<Hash, int>			m_signalHashMap;
+
+
+public:
+
+	void					clear();
+	int						count() const;
+
+	void					createSignalList();
+
+	int						append(Metrology::Signal* pSignal);
+
+	Metrology::Signal*		signal(const Hash& hash) const;
+	Metrology::Signal*		signal(int index) const;
+
+	Metrology::SignalState	state(const Hash& hash);
+	void					setState(const Network::TuningSignalState& state);
+
+	void					setNovalid();
+
+signals:
+
+	void					signalsCreated();
+};
+
+// ==============================================================================================
+
 class TuningWriteCmd
 {
 public:
 
-	TuningWriteCmd();
-	TuningWriteCmd(const Hash &signalHash, float value);
-	virtual ~TuningWriteCmd();
+	TuningWriteCmd() {}
+	TuningWriteCmd(const Hash &signalHash, float value) : m_signalHash (signalHash), m_value (value) {}
+	virtual ~TuningWriteCmd() {}
 
 private:
 
@@ -122,24 +196,19 @@ public:
 
 // ==============================================================================================
 
-class TuningSignalBase : public QObject
+class TuningBase: public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningSignalBase(QObject *parent = 0);
-	virtual ~TuningSignalBase();
+	explicit TuningBase(QObject *parent = 0);
+	virtual ~TuningBase();
 
 private:
 
-	mutable QMutex			m_sourceMutex;
-	QVector<TuningSource>	m_sourceList;
-	QMap<quint64, int>		m_sourceIdMap;
-
-	mutable QMutex			m_signalMutex;
-	QVector<Metrology::Signal*> m_signalList;
-	QMap<Hash, int>			m_signalHashMap;
+	TuningSourceBase		m_sourceBase;
+	TuningSignalBase		m_signalsBase;
 
 	mutable QMutex			m_cmdFowWriteMutex;
 	QVector<TuningWriteCmd>	m_cmdFowWriteList;
@@ -148,42 +217,13 @@ public:
 
 	void					clear();
 
-	// Source
+	// sources and signal
 	//
-
-	int						sourceCount() const;
-
-	int						appendSource(const TuningSource& source);
-
-	TuningSource			source(int index) const;
-
-	TuningSourceState		sourceState(quint64 sourceID);
-	void					setSourceState(quint64 sourceID, const Network::TuningSourceState& state);
-
-	void					clearSourceList();
-
-	// Signal for read
-	//
-
-	void					createSignalList();
-
-	int						signalCount() const;
-
-	int						appendSignal(Metrology::Signal* pSignal);
-
-	Metrology::Signal*		signalForRead(const Hash& hash) const;
-	Metrology::Signal*		signalForRead(int index) const;
-
-	Metrology::SignalState	signalState(const Hash& hash);
-	void					setSignalState(const Network::TuningSignalState& state);
-
-	void					singalsSetNovalid();
-
-	void					clearSignalLlst();
+	TuningSourceBase&		Sources() { return m_sourceBase; }
+	TuningSignalBase&		Signals() { return m_signalsBase; }
 
 	// Commands for write
 	//
-
 	int						cmdFowWriteCount() const;
 
 	void					appendCmdFowWrite(const TuningWriteCmd& cmd);
@@ -193,11 +233,9 @@ public:
 
 signals:
 
-	void					signalsLoaded();
-
 public slots:
 
-	void					updateSignalParam(const Hash& signalHash);
+
 };
 
 // ==============================================================================================

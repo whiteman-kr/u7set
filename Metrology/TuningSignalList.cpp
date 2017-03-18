@@ -97,7 +97,7 @@ QVariant TuningSourceTable::data(const QModelIndex &index, int role) const
 	{
 		// get fresh state from base
 		//
-		 sourceState = theSignalBase.tuningSignals().sourceState(src.sourceID());
+		 sourceState = theSignalBase.tuning().Sources().state(src.sourceID());
 	}
 
 	if (role == Qt::TextAlignmentRole)
@@ -304,7 +304,6 @@ bool TuningSignalTable::m_showCustomID = true;
 
 TuningSignalTable::TuningSignalTable(QObject*)
 {
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &TuningSignalTable::updateSignalParam, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -630,39 +629,6 @@ void TuningSignalTable::clear()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalTable::updateSignalParam(const Hash& signalHash)
-{
-	if (signalHash == 0)
-	{
-		assert(signalHash != 0);
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		int count = m_signalList.count();
-
-		for(int i = 0; i < count; i ++)
-		{
-			 Metrology::Signal* pSignal = m_signalList[i];
-			 if (pSignal == nullptr)
-			 {
-				 continue;
-			 }
-
-			if (pSignal->param().hash() == signalHash)
-			{
-				pSignal->setParam(theSignalBase.signalParam(signalHash));
-
-				break;
-			}
-		}
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -880,10 +846,10 @@ void TuningSignalListDialog::updateSourceList()
 
 	QList<TuningSource> sourceList;
 
-	int souceCount = theSignalBase.tuningSignals().sourceCount();
+	int souceCount = theSignalBase.tuning().Sources().count();
 	for(int i = 0; i < souceCount; i++)
 	{
-		TuningSource src = theSignalBase.tuningSignals().source(i);
+		TuningSource src = theSignalBase.tuning().Sources().source(i);
 		if (src.sourceID() == 0)
 		{
 			continue;
@@ -907,10 +873,10 @@ void TuningSignalListDialog::updateSignalList()
 
 	QList<Metrology::Signal*> signalList;
 
-	int sigbalCount = theSignalBase.tuningSignals().signalCount();
-	for(int i = 0; i < sigbalCount; i++)
+	int signalCount = theSignalBase.tuning().Signals().count();
+	for(int i = 0; i < signalCount; i++)
 	{
-		Metrology::Signal* pSignal = theSignalBase.tuningSignals().signalForRead(i);
+		Metrology::Signal* pSignal = theSignalBase.tuning().Signals().signal(i);
 		if (pSignal == nullptr)
 		{
 			continue;

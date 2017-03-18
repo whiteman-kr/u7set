@@ -35,67 +35,34 @@ TuningSource::~TuningSource()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningWriteCmd::TuningWriteCmd()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningWriteCmd::TuningWriteCmd(const Hash& signalHash, float value) :
-	m_signalHash (signalHash),
-	m_value (value)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningWriteCmd::~TuningWriteCmd()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSignalBase::TuningSignalBase(QObject *parent) :
+TuningSourceBase::TuningSourceBase(QObject *parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSignalBase::~TuningSignalBase()
+TuningSourceBase::~TuningSourceBase()
 {
 }
 
  // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::clear()
+void TuningSourceBase::clear()
 {
 	m_sourceMutex.lock();
+
+		m_tuningSourceEquipmentID.clear();
 
 		m_sourceList.clear();
 		m_sourceIdMap.clear();
 
 	m_sourceMutex.unlock();
-
-	m_signalMutex.lock();
-
-		m_signalList.clear();
-		m_signalHashMap.clear();
-
-	m_signalMutex.unlock();
-
-	m_cmdFowWriteMutex.lock();
-
-		m_cmdFowWriteList.clear();
-
-	m_cmdFowWriteMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::sourceCount() const
+int TuningSourceBase::count() const
 {
 	int count = 0;
 
@@ -110,7 +77,7 @@ int TuningSignalBase::sourceCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::appendSource(const TuningSource& source)
+int TuningSourceBase::append(const TuningSource& source)
 {
 	int index = -1;
 
@@ -132,7 +99,7 @@ int TuningSignalBase::appendSource(const TuningSource& source)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSource TuningSignalBase::source(int index) const
+TuningSource TuningSourceBase::source(int index) const
 {
 	TuningSource source;
 
@@ -150,7 +117,7 @@ TuningSource TuningSignalBase::source(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSourceState TuningSignalBase::sourceState(quint64 sourceID)
+TuningSourceState TuningSourceBase::state(quint64 sourceID)
 {
 	TuningSourceState state;
 
@@ -173,7 +140,7 @@ TuningSourceState TuningSignalBase::sourceState(quint64 sourceID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::setSourceState(quint64 sourceID, const Network::TuningSourceState& state)
+void TuningSourceBase::setState(quint64 sourceID, const Network::TuningSourceState& state)
 {
 	m_sourceMutex.lock();
 
@@ -196,15 +163,45 @@ void TuningSignalBase::setSourceState(quint64 sourceID, const Network::TuningSou
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::clearSourceList()
+TuningSignalBase::TuningSignalBase(QObject *parent) :
+	QObject(parent)
 {
-	m_sourceMutex.lock();
+}
 
-		m_sourceList.clear();
-		m_sourceIdMap.clear();
+// -------------------------------------------------------------------------------------------------------------------
 
-	m_sourceMutex.unlock();
+TuningSignalBase::~TuningSignalBase()
+{
+}
+
+ // -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalBase::clear()
+{
+	m_signalMutex.lock();
+
+		m_signalList.clear();
+		m_signalHashMap.clear();
+
+	m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int TuningSignalBase::count() const
+{
+	int count = 0;
+
+	m_signalMutex.lock();
+
+		count = m_signalList.count();
+
+	m_signalMutex.unlock();
+
+	return count;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -231,30 +228,16 @@ void TuningSignalBase::createSignalList()
 			continue;
 		}
 
-		appendSignal(pSignal);
+		append(pSignal);
 	}
 
-	emit signalsLoaded();
+	emit signalsCreated();
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::signalCount() const
-{
-	int count = 0;
-
-	m_signalMutex.lock();
-
-		count = m_signalList.count();
-
-	m_signalMutex.unlock();
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int TuningSignalBase::appendSignal(Metrology::Signal* pSignal)
+int TuningSignalBase::append(Metrology::Signal* pSignal)
 {
 	if (pSignal == nullptr)
 	{
@@ -286,7 +269,7 @@ int TuningSignalBase::appendSignal(Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* TuningSignalBase::signalForRead(const Hash& hash) const
+Metrology::Signal* TuningSignalBase::signal(const Hash& hash) const
 {
 	if (hash == 0)
 	{
@@ -315,7 +298,7 @@ Metrology::Signal* TuningSignalBase::signalForRead(const Hash& hash) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* TuningSignalBase::signalForRead(int index) const
+Metrology::Signal* TuningSignalBase::signal(int index) const
 {
 	Metrology::Signal* pSignal = nullptr;
 
@@ -333,7 +316,7 @@ Metrology::Signal* TuningSignalBase::signalForRead(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalState TuningSignalBase::signalState(const Hash& hash)
+Metrology::SignalState TuningSignalBase::state(const Hash& hash)
 {
 	if (hash == 0)
 	{
@@ -366,7 +349,7 @@ Metrology::SignalState TuningSignalBase::signalState(const Hash& hash)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::setSignalState(const Network::TuningSignalState& state)
+void TuningSignalBase::setState(const Network::TuningSignalState& state)
 {
 	if (state.signalhash() == 0)
 	{
@@ -396,40 +379,7 @@ void TuningSignalBase::setSignalState(const Network::TuningSignalState& state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::updateSignalParam(const Hash& signalHash)
-{
-	if (signalHash == 0)
-	{
-		assert(signalHash != 0);
-		return;
-	}
-
-	m_signalMutex.lock();
-
-		int count = m_signalList.count();
-
-		for(int i = 0; i < count; i ++)
-		{
-			 Metrology::Signal* pSignal = m_signalList[i];
-			 if (pSignal == nullptr)
-			 {
-				 continue;
-			 }
-
-			if (pSignal->param().hash() == signalHash)
-			{
-				pSignal->setParam(theSignalBase.signalParam(signalHash));
-
-				break;
-			}
-		}
-
-	m_signalMutex.unlock();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalBase::singalsSetNovalid()
+void TuningSignalBase::setNovalid()
 {
 	m_signalMutex.lock();
 
@@ -449,22 +399,36 @@ void TuningSignalBase::singalsSetNovalid()
 	m_signalMutex.unlock();
 }
 
-
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::clearSignalLlst()
+TuningBase::TuningBase(QObject *parent) :
+	QObject(parent)
 {
-	m_signalMutex.lock();
-
-		m_signalList.clear();
-		m_signalHashMap.clear();
-
-	m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int TuningSignalBase::cmdFowWriteCount() const
+TuningBase::~TuningBase()
+{
+}
+
+void TuningBase::clear()
+{
+	m_sourceBase.clear();
+	m_signalsBase.clear();
+
+	m_cmdFowWriteMutex.lock();
+
+		m_cmdFowWriteList.clear();
+
+	m_cmdFowWriteMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int TuningBase::cmdFowWriteCount() const
 {
 	int count = 0;
 
@@ -479,7 +443,7 @@ int TuningSignalBase::cmdFowWriteCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
+void TuningBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 {
 	if (cmd.signalHash() == 0)
 	{
@@ -497,7 +461,7 @@ void TuningSignalBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalBase::appendCmdFowWrite(const Hash& signalHash, float value)
+void TuningBase::appendCmdFowWrite(const Hash& signalHash, float value)
 {
 	if (signalHash == 0)
 	{
@@ -519,7 +483,7 @@ void TuningSignalBase::appendCmdFowWrite(const Hash& signalHash, float value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningWriteCmd TuningSignalBase::cmdFowWrite(int index)
+TuningWriteCmd TuningBase::cmdFowWrite(int index)
 {
 	TuningWriteCmd cmd;
 

@@ -41,9 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&theSignalBase, &SignalBase::updatedSignalParam, &theSignalBase.tuningSignals(), &TuningSignalBase::updateSignalParam, Qt::QueuedConnection);
 
-	connect(&theSignalBase.tuningSignals(), &TuningSignalBase::signalsLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
+	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
 	// load rack groups for multichannel measuring
 	//
@@ -104,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_pTuningSocket = new TuningSocket(tuningSocketAddress1, tuningSocketAddress2);
 	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
-	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsLoaded, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 	connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
 	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
 	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
@@ -1932,13 +1931,13 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	QString connectedState = tr("Connected: %1 : %2\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
 
-	int filesCount = m_pConfigSocket->loadedFilesCount();
+	int filesCount = m_pConfigSocket->loadedFiles().count();
 
 	connectedState.append(tr("Loaded files: %1").arg(filesCount));
 
 	for(int f = 0; f < filesCount; f++)
 	{
-		connectedState.append("\n" + m_pConfigSocket->loadedFile(f));
+		connectedState.append("\n" + m_pConfigSocket->loadedFiles().at(f));
 	}
 
 	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
@@ -1982,25 +1981,6 @@ void MainWindow::signalSocketDisconnected()
 		m_measureThread.stop();
 	}
 
-//	m_asRackTypeCombo->clear();
-//	m_asRackTypeCombo->setEnabled(false);
-
-//	m_asSignalCombo->clear();
-//	m_asSignalCombo->setEnabled(false);
-
-//	m_asChassisCombo->clear();
-//	m_asChassisCombo->setEnabled(false);
-
-//	m_asModuleCombo->clear();
-//	m_asModuleCombo->setEnabled(false);
-
-//	m_asPlaceCombo->clear();
-//	m_asPlaceCombo->setEnabled(false);
-
-//	theSignalBase.tuningSignals().clearSignalLlst();
-
-//	theSignalBase.clear();
-
 	m_statusConnectToAppDataServer->setText(tr(" AppDataService: off "));
 	m_statusConnectToAppDataServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToAppDataServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
@@ -2040,8 +2020,8 @@ void MainWindow::tuningSocketDisconnected()
 		}
 	}
 
-	theSignalBase.tuningSignals().clearSourceList();
-	theSignalBase.tuningSignals().singalsSetNovalid();
+	theSignalBase.tuning().Sources().clear();
+	theSignalBase.tuning().Signals().setNovalid();
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: off "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(255, 160, 160);");
@@ -2050,7 +2030,7 @@ void MainWindow::tuningSocketDisconnected()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::tuningSignalsLoaded()
+void MainWindow::tuningSignalsCreated()
 {
 	if (m_pTuningSocket == nullptr)
 	{
@@ -2067,8 +2047,8 @@ void MainWindow::tuningSignalsLoaded()
 
 	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
-	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuningSignals().sourceCount()));
-	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuningSignals().signalCount()));
+	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
+	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
 
 	m_statusConnectToTuningServer->setText(tr(" TuningService: on "));
 	m_statusConnectToTuningServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
@@ -2250,8 +2230,6 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		delete m_pConfigSocket;
 		m_pConfigSocket = nullptr;
 	}
-
-	theSignalBase.tuningSignals().clear();
 
 	theSignalBase.clear();
 

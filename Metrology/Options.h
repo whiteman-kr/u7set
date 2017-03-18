@@ -109,8 +109,9 @@ const int				SOCKET_CLIENT_PARAM_EQUIPMENT_ID1	= 0,
 
 struct CONNECTION_OPTION
 {
-	QString				equipmentID;
+	bool				readFromCfgSrv = false;
 
+	QString				equipmentID;
 	QString				serverIP;
 	int					serverPort = 0;
 };
@@ -171,7 +172,7 @@ const char* const		SocketDefaultID[SOCKET_TYPE_COUNT] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "_METROLOGY"),	// for ConfigSocket
 						QT_TRANSLATE_NOOP("Options.h", "_ADS"),			// for SignalSocket
-						QT_TRANSLATE_NOOP("Options.h", "_TUN"),			// for TuningSocket
+						QT_TRANSLATE_NOOP("Options.h", "_METROLOGY"),	// for TuningSocket
 };
 
 const int				SocketDefaultPort[SOCKET_TYPE_COUNT] =
@@ -200,10 +201,10 @@ const char* const		SocketClientParamName[SOCKET_TYPE_COUNT][SOCKET_CLIENT_PARAM_
 						QT_TRANSLATE_NOOP("Options.h", "Application Data Service Port"),
 					},
 					{
-						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Tuning Client\""),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Metrology\""),
 						QT_TRANSLATE_NOOP("Options.h", "Tuning Service IP"),
 						QT_TRANSLATE_NOOP("Options.h", "Tuning Service Port"),
-						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Tuning Client\""),
+						QT_TRANSLATE_NOOP("Options.h", "EquipmentID of software \"Metrology\""),
 						QT_TRANSLATE_NOOP("Options.h", "Tuning Service IP"),
 						QT_TRANSLATE_NOOP("Options.h", "Tuning Service Port"),
 					},

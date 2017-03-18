@@ -164,10 +164,6 @@ public:
 
 	bool					showCustomID() const { return m_showCustomID; }
 	void					setShowCustomID(bool show) { m_showCustomID = show; }
-
-private slots:
-
-	void					updateSignalParam(const Hash& signalHash);
 };
 
 // ==============================================================================================
@@ -185,7 +181,7 @@ private:
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;
-	QMenu*						m_pEditMenu = nullptr;
+	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewTypeADMenu = nullptr;
 	QMenu*					m_pViewShowMenu = nullptr;

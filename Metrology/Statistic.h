@@ -114,10 +114,6 @@ public:
 
 	bool					showADCInHex() const { return m_showADCInHex; }
 	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
-
-private slots:
-
-	void					updateSignalParam(const Hash& signalHash);
 };
 
 // ==============================================================================================
