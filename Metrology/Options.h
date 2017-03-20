@@ -39,7 +39,7 @@ private:
 
 	QString				m_projectName;
 	int					m_id = -1;
-	QString				m_release = false;
+	QString				m_release;
 	QString				m_date;
 	int					m_changeset = 0;
 	QString				m_user;

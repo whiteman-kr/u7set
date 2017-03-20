@@ -1190,7 +1190,7 @@ void RackGroupPropertyDialog::captionGroupChanged(int row, int column)
 		return;
 	}
 
-	RackGroup& group = m_groupBase.group(index);
+	RackGroup group = m_groupBase.group(index);
 	if (group.isValid() == false)
 	{
 		return;
