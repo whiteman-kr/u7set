@@ -7,7 +7,8 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignal::OutputSignal()
+OutputSignal::OutputSignal() :
+	m_hash(0)
 {
 	clear();
 }
@@ -35,39 +36,37 @@ bool OutputSignal::isValid() const
 
 void OutputSignal::clear()
 {
-	m_hash = 0;
+	m_signalMutex.lock();
 
-	m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
+		m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
 
-	for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
-	{
-		m_pSignal[t] = nullptr;
-	}
+		for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
+		{
+			m_pSignal[t] = nullptr;
+		}
+
+	m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OutputSignal::setHash()
+void OutputSignal::setHash()
 {
 	QString strID;
 
-	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-	{
-		strID.append(m_appSignalID[type]);
-	}
+	m_signalMutex.lock();
 
-	if (strID.isEmpty() == true)
-	{
-		return false;
-	}
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+		{
+			strID.append(m_appSignalID[type]);
+		}
 
-	m_hash = calcHash(strID);
-	if (m_hash == 0)
-	{
-		return false;
-	}
+		if (strID.isEmpty() == false)
+		{
+			m_hash = calcHash(strID);
+		}
 
-	return true;
+	m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -115,9 +114,9 @@ void OutputSignal::setAppSignalID(int type, const QString& appSignalID)
 
 		m_appSignalID[type] = appSignalID;
 
-		setHash();
-
 	m_signalMutex.unlock();
+
+	setHash();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -164,13 +163,12 @@ void OutputSignal::setMetrologySignal(int type, Metrology::Signal* pSignal)
 
 		m_appSignalID[type] = param.appSignalID();
 
-		setHash();
-
 		m_pSignal[type] = pSignal;
 
 	m_signalMutex.unlock();
-}
 
+	setHash();
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -201,17 +199,21 @@ void OutputSignal::initMetrologySignal()
 
 OutputSignal& OutputSignal::operator=(const OutputSignal& from)
 {
-	m_index = from.m_index;
+	m_signalMutex.lock();
 
-	m_type = from.m_type;
+		m_index = from.m_index;
 
-	m_hash = from.m_hash;
+		m_type = from.m_type;
 
-	for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
-	{
-		m_appSignalID[type] = from.m_appSignalID[type];
-		m_pSignal[type] = from.m_pSignal[type];
-	}
+		m_hash = from.m_hash;
+
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type++)
+		{
+			m_appSignalID[type] = from.m_appSignalID[type];
+			m_pSignal[type] = from.m_pSignal[type];
+		}
+
+	m_signalMutex.unlock();
 
 	return *this;
 }
@@ -348,6 +350,22 @@ void OutputSignalBase::init()
 
 	m_signalMutex.unlock();
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void OutputSignalBase::empty()
+{
+	m_signalMutex.lock();
+
+		int count = m_signalList.count();
+		for(int i = 0; i < count; i++)
+		{
+			m_signalList[i].clear();
+		}
+
+	m_signalMutex.unlock();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 

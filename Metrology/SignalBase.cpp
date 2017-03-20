@@ -1036,10 +1036,12 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
+		m_unitList.clear();
+		m_outputSignalBase.empty();			// set all output signals vlue nullptr
+		m_tuningBase.Signals().clear();		// remove all tuning signals
+
 		m_signalHashMap.clear();
 		m_signalList.clear();
-
-		m_unitList.clear();
 
 	m_signalMutex.unlock();
 }

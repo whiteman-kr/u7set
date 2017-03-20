@@ -65,7 +65,7 @@ public:
 	void					setIndex(int index) { m_index = index; }
 
 	Hash					hash() const { return m_hash; }
-	bool					setHash();
+	void					setHash();
 
 	int						type() const { return m_type; }
 	QString					typeStr() const;
@@ -105,7 +105,9 @@ public:
 
 	int						load();
 	bool					save();
-	void					init();										// set Metrology::Signal* from SignalBase by signalHash
+
+	void					init();										// set all Metrology::Signal* from SignalBase by signalHash
+	void					empty();									// set all Metrology::Signal* value nullptr
 
 	int						append(const OutputSignal& signal);
 
