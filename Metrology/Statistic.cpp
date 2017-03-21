@@ -342,10 +342,6 @@ void StatisticDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
 
-	m_pPrintAction = m_pSignalMenu->addAction(tr("&Print ..."));
-	m_pPrintAction->setIcon(QIcon(":/icons/Print.png"));
-	m_pPrintAction->setShortcut(Qt::CTRL + Qt::Key_P);
-
 	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
@@ -401,7 +397,6 @@ void StatisticDialog::createInterface()
 
 	createStatusBar();
 
-	connect(m_pPrintAction, &QAction::triggered, this, &StatisticDialog::printSignal);
 	connect(m_pExportAction, &QAction::triggered, this, &StatisticDialog::exportSignal);
 
 	connect(m_pFindAction, &QAction::triggered, this, &StatisticDialog::find);
@@ -637,13 +632,6 @@ void StatisticDialog::hideColumn(int column, bool hide)
 		m_pView->showColumn(column);
 		m_pColumnAction[column]->setChecked(true);
 	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void StatisticDialog::printSignal()
-{
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------

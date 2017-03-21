@@ -140,7 +140,6 @@ private:
 	QMenu*					m_pViewGotoMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 
-	QAction*				m_pPrintAction = nullptr;
 	QAction*				m_pExportAction = nullptr;
 	QAction*				m_pSelectSignalForMeasure = nullptr;
 
@@ -193,7 +192,6 @@ private slots:
 	//
 							// Signal
 							//
-	void					printSignal();
 	void					exportSignal();
 	void					selectSignalForMeasure();
 

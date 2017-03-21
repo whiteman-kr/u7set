@@ -312,10 +312,6 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
 
-	m_pPrintAction = m_pSignalMenu->addAction(tr("&Print ..."));
-	m_pPrintAction->setIcon(QIcon(":/icons/Print.png"));
-	m_pPrintAction->setShortcut(Qt::CTRL + Qt::Key_P);
-
 	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
@@ -376,7 +372,6 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pPrintAction, &QAction::triggered, this, &SignalListDialog::printSignal);
 	connect(m_pExportAction, &QAction::triggered, this, &SignalListDialog::exportSignal);
 
 	connect(m_pFindAction, &QAction::triggered, this, &SignalListDialog::find);
@@ -631,13 +626,6 @@ bool SignalListDialog::eventFilter(QObject *object, QEvent *event)
 	}
 
 	return QObject::eventFilter(object, event);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListDialog::printSignal()
-{
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------

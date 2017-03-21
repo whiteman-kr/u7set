@@ -21,7 +21,6 @@
 #include "Database.h"
 #include "SignalBase.h"
 #include "TuningSignalBase.h"
-#include "ReportView.h"
 #include "ExportData.h"
 #include "RackList.h"
 #include "SignalList.h"
@@ -114,6 +113,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	measureThreadStoped();
 
+	// calculator
+	//
 	m_pCalculator = new Calculator(this);
 }
 
@@ -164,12 +165,6 @@ void MainWindow::createActions()
 	m_pStopMeasureAction->setToolTip(tr("To stop the measurement process"));
 	connect(m_pStopMeasureAction, &QAction::triggered, this, &MainWindow::stopMeasure);
 
-	m_pPrintMeasureAction = new QAction(tr("&Print ..."), this);
-	m_pPrintMeasureAction->setShortcut(Qt::CTRL + Qt::Key_P);
-	m_pPrintMeasureAction->setIcon(QIcon(":/icons/Print.png"));
-	m_pPrintMeasureAction->setToolTip(tr("Printing of the measurements"));
-	connect(m_pPrintMeasureAction, &QAction::triggered, this, &MainWindow::printMeasure);
-
 	m_pExportMeasureAction = new QAction(tr("&Export ..."), this);
 	m_pExportMeasureAction->setShortcut(Qt::CTRL + Qt::Key_E);
 	m_pExportMeasureAction->setIcon(QIcon(":/icons/Export.png"));
@@ -198,12 +193,6 @@ void MainWindow::createActions()
 
 	// View
 	//
-	m_pShowReportsAction = new QAction(tr("&Reports ..."), this);
-	m_pShowReportsAction->setShortcut(Qt::CTRL + Qt::Key_R);
-	m_pShowReportsAction->setIcon(QIcon(":/icons/Reports.png"));
-	m_pShowReportsAction->setToolTip(tr("Preview the report on the measurements"));
-	connect(m_pShowReportsAction, &QAction::triggered, this, &MainWindow::showReports);
-
 	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
 	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
 	m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
@@ -281,7 +270,6 @@ void MainWindow::createMenu()
 	m_pMeasureMenu->addAction(m_pStartMeasureAction);
 	m_pMeasureMenu->addAction(m_pStopMeasureAction);
 	m_pMeasureMenu->addSeparator();
-	m_pMeasureMenu->addAction(m_pPrintMeasureAction);
 	m_pMeasureMenu->addAction(m_pExportMeasureAction);
 
 	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
@@ -296,7 +284,6 @@ void MainWindow::createMenu()
 
 	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
-	m_pViewMenu->addAction(m_pShowReportsAction);
 	m_pViewMenu->addSeparator();
 	m_pViewMenu->addAction(m_pShowCalculatorAction);
 
@@ -339,8 +326,6 @@ bool MainWindow::createToolBars()
 
 		m_pMeasureControlToolBar->addAction(m_pStartMeasureAction);
 		m_pMeasureControlToolBar->addAction(m_pStopMeasureAction);
-		m_pMeasureControlToolBar->addSeparator();
-		m_pMeasureControlToolBar->addAction(m_pPrintMeasureAction);
 		m_pMeasureControlToolBar->addSeparator();
 		m_pMeasureControlToolBar->addAction(m_pCopyMeasureAction);
 		m_pMeasureControlToolBar->addAction(m_pRemoveMeasureAction);
@@ -1483,20 +1468,6 @@ void MainWindow::stopMeasure()
 	}
 
 	m_measureThread.stop();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::printMeasure()
-{
-	MeasureView* pMeasureView = activeMeasureView();
-	if (pMeasureView == nullptr)
-	{
-		return;
-	}
-
-	ReportView report;
-	report.preview(pMeasureView);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -296,12 +296,6 @@ void RackListDialog::createInterface()
 
 	m_pRackMenu->addSeparator();
 
-	m_pPrintAction = m_pRackMenu->addAction(tr("&Print ..."));
-	m_pPrintAction->setIcon(QIcon(":/icons/Print.png"));
-	m_pPrintAction->setShortcut(Qt::CTRL + Qt::Key_P);
-
-	m_pRackMenu->addSeparator();
-
 	m_pImportAction = m_pRackMenu->addAction(tr("&Import ..."));
 	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
 	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
@@ -333,7 +327,6 @@ void RackListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 
 	connect(m_pRackGroupsAction, &QAction::triggered, this, &RackListDialog::rackGroups);
-	connect(m_pPrintAction, &QAction::triggered, this, &RackListDialog::printRack);
 	connect(m_pImportAction, &QAction::triggered, this, &RackListDialog::importRack);
 	connect(m_pExportAction, &QAction::triggered, this, &RackListDialog::exportRack);
 
@@ -446,13 +439,6 @@ void RackListDialog::rackGroups()
 	m_rackBase.updateParamFromGroups();
 
 	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackListDialog::printRack()
-{
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
