@@ -7,9 +7,12 @@ Remote:	       	????
 2. Clonning
 
 	Clone u7set git repository
+
 	$ git clone ssh://git@192.168.75.3:/opt/git/u7set.git
 
+
 	Clone u7set install git repository
+
 	$ git clone ssh://git@192.168.75.3:/opt/git/u7setinstall.git
 
 
@@ -29,31 +32,49 @@ Remote:	       	????
 	topic-<name>	- specific topic developmnet or bugfix branch, "topic-tbupgrade43", "topic-rpct-652". 
 			  Shoud be merged to develop
 
-		
 
 3.1     Show branch list (the asterisk indicates the current active branch)
+
 	$ git branch
 
+
 3.2	Create branch
+
 	$ git branch <branch>
 
+
 3.3	Swicth to branch
+
 	$ git checkout <branch>
 
+
 3.4	Create branch and switch to it (3.2 + 3.3)
+
 	$ git checkout -b <branch>
+
+
+3.5	Clone branch from remote server into local branch
+
+	$ git checkout --track -b local_branch_name origin/remote_branch_name
+
 
 4. Stable/release instruction
 
 	1. Switch to master branch
+
 	$ git checkout master
 	
+	
 	2. Merge changes from develop
+
 	$ git merge develop
 
+	
 	3. Push changes to remote server
+	
 	$ git push
 
+	
 	4. Delete current Release Build if exists!
 
 	5. Make new Release Build of project
@@ -61,9 +82,12 @@ Remote:	       	????
 	6. Run u7.exe and call About dialog to show program version (v0.0.0000)
 
 	7. Give a version tag to current commit
+
 	$ git tag v0.7.1798
 
-	8 Switch back to develop
+	
+	8. Switch back to develop
+
 	$ git checkout develop
 
 4.1
