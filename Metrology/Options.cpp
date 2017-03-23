@@ -786,202 +786,6 @@ DatabaseOption& DatabaseOption::operator=(const DatabaseOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-void REPORT_HEADER::init(int type)
-{
-	if (type < 0 || type >= REPORT_TYPE_COUNT)
-	{
-		return;
-	}
-
-	m_type = type;
-
-	m_documentTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Protocol №")).arg(m_type + 1);
-	m_reportTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Report of ")).arg(ReportType[m_type]);;
-	m_date = QDate::currentDate().toString("dd.MM.yyyy");
-	m_tableTitle = QString("%1 %2").arg(QT_TRANSLATE_NOOP("Options.cpp", "Table: ")).arg(ReportType[m_type]);
-	m_conclusion = QT_TRANSLATE_NOOP("Options.cpp", "This is report has not problems");
-
-	m_T = 20;
-	m_P = 100;
-	m_H = 70;
-	m_V = 220;
-	m_F = 50;
-
-	int tableID = SQL_TABLE_UNKNONW;
-
-	switch(m_type)
-	{
-		case REPORT_TYPE_LINEARITY:					tableID = SqlObjectID[SQL_TABLE_LINEARITY];				break;
-		case REPORT_TYPE_LINEARITY_CERTIFICATION:	tableID = SqlObjectID[SQL_TABLE_LINEARITY_ADD_VAL];		break;
-		case REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC: tableID = SqlObjectID[SQL_TABLE_LINEARITY_20_EL];		break;
-		case REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL: tableID = SqlObjectID[SQL_TABLE_LINEARITY_20_PH];		break;
-		case REPORT_TYPE_COMPARATOR:				tableID = SqlObjectID[SQL_TABLE_COMPARATOR];			break;
-		default:									assert(0);												break;
-	}
-
-	m_linkObjectID = tableID;
-
-	m_reportFile = ReportFileName[m_type];
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportHeaderBase::ReportHeaderBase()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportHeaderBase::~ReportHeaderBase()
-{
-	clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ReportHeaderBase::reportsIsExist()
-{
-	QString dontExistReports;
-
-	int reportCount = count();
-	for (int r = 0; r < reportCount; r++)
-	{
-		REPORT_HEADER header = at(r);
-
-		QString path = theOptions.report().path() + QDir::separator() + header.m_reportFile;
-		if (QFile::exists(path) == false)
-		{
-			dontExistReports.append("- " + header.m_reportFile + "\n");
-		}
-	}
-
-	if (dontExistReports.isEmpty() == true)
-	{
-		return true;
-	}
-
-	dontExistReports.insert(0, QT_TRANSLATE_NOOP("Options.cpp", "The application can not detect the following reports, functions of the application will be limited.\n\n"));
-
-	QMessageBox::information(nullptr, QT_TRANSLATE_NOOP("Options.cpp", "Reports"), dontExistReports);
-
-	return false;
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportHeaderBase::initEmptyData(QVector<REPORT_HEADER> &data)
-{
-	for(int type = 0; type < REPORT_TYPE_COUNT; type++)
-	{
-		REPORT_HEADER header;
-
-		header.init(type);
-
-		data.append(header);
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportOption::ReportOption(QObject *parent) :
-	QObject(parent)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportOption::ReportOption(const ReportOption& from, QObject *parent) :
-	QObject(parent)
-{
-	*this = from;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportOption::~ReportOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-int ReportOption::reportTypeByMeasureType(int measureType)
-{
-	if (measureType < 0 || measureType >= MEASURE_TYPE_COUNT)
-	{
-		return REPORT_TYPE_UNKNOWN;
-	}
-
-	int reportType = REPORT_TYPE_UNKNOWN;
-
-	switch (measureType)
-	{
-		case MEASURE_TYPE_LINEARITY:
-
-				switch(theOptions.linearity().viewType())
-				{
-					case LO_VIEW_TYPE_SIMPLE:			reportType = REPORT_TYPE_LINEARITY;					break;
-					case LO_VIEW_TYPE_EXTENDED:			reportType = REPORT_TYPE_LINEARITY_CERTIFICATION;	break;
-					case LO_VIEW_TYPE_DETAIL_ELRCTRIC:	reportType = REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC;	break;
-					case LO_VIEW_TYPE_DETAIL_PHYSICAL:	reportType = REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL;	break;
-					default:							reportType = REPORT_TYPE_UNKNOWN;					break;
-				}
-
-			break;
-
-		case MEASURE_TYPE_COMPARATOR:			reportType = REPORT_TYPE_COMPARATOR;						break;
-		default:								reportType = REPORT_TYPE_UNKNOWN;							break;
-	}
-
-	return reportType;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportOption::load()
-{
-	QSettings s;
-
-	m_headerBase.loadData(SQL_TABLE_REPORT_HEADER);
-
-	m_path = s.value(QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), QDir::currentPath() + "/reports").toString();
-	m_type = s.value(QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), REPORT_TYPE_LINEARITY).toInt();
-
-	//m_headerBase.reportsIsExist();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ReportOption::save()
-{
-	QSettings s;
-
-	s.setValue(QString("%1Path").arg(REPORT_OPTIONS_REG_KEY), m_path);
-	s.setValue(QString("%1Type").arg(REPORT_OPTIONS_REG_KEY), m_type);
-
-	m_headerBase.saveData(SQL_TABLE_REPORT_HEADER);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-ReportOption& ReportOption::operator=(const ReportOption& from)
-{
-	m_path = from.m_path;
-	m_type = from.m_type;
-
-	m_headerBase = from.m_headerBase;
-
-	return *this;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 void LinearityPoint::setPercent(double value)
 {
 	m_percentValue = value;
@@ -1467,8 +1271,6 @@ void Options::load()
 	m_database.load();
 	m_database.create();
 
-	m_report.load();
-
 	m_linearity.load();
 
 	m_comparator.load();
@@ -1487,7 +1289,6 @@ void Options::save()
 	m_measureView.save();
 	m_signalInfo.save();
 	m_database.save();
-	m_report.save();
 	m_linearity.save();
 	m_comparator.save();
 	m_backup.save();
@@ -1552,7 +1353,6 @@ Options& Options::operator=(const Options& from)
 		m_measureView = from.m_measureView;
 		m_signalInfo = from.m_signalInfo;
 		m_database = from.m_database;
-		m_report = from.m_report;
 		m_linearity = from.m_linearity;
 		m_comparator = from.m_comparator;
 		m_backup = from.m_backup;

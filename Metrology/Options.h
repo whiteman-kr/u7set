@@ -541,168 +541,6 @@ public:
 
 // ==============================================================================================
 
-#define					REPORT_OPTIONS_REG_KEY		"Options/Reports/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ReportParam[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Path"),
-						QT_TRANSLATE_NOOP("Options.h", "Type"),
-						QT_TRANSLATE_NOOP("Options.h", "Document title"),
-						QT_TRANSLATE_NOOP("Options.h", "Report title"),
-						QT_TRANSLATE_NOOP("Options.h", "Date of measuring"),
-						QT_TRANSLATE_NOOP("Options.h", "Table title"),
-						QT_TRANSLATE_NOOP("Options.h", "Conclusion"),
-						QT_TRANSLATE_NOOP("Options.h", "Environment temperature, °С"),
-						QT_TRANSLATE_NOOP("Options.h", "Atmospheric pressure, kPa"),
-						QT_TRANSLATE_NOOP("Options.h", "Relative humidity, %"),
-						QT_TRANSLATE_NOOP("Options.h", "Power voltage, V"),
-						QT_TRANSLATE_NOOP("Options.h", "Power frequency, Hz"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 1"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 2"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 3"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 4"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 5"),
-						QT_TRANSLATE_NOOP("Options.h", "Calibrator 6"),
-						QT_TRANSLATE_NOOP("Options.h", "File name"),
-};
-
-const int				RO_PARAM_COUNT			= sizeof(ReportParam)/sizeof(ReportParam[0]);
-
-const int				RO_PARAM_PATH			= 0,
-						RO_PARAM_TYPE			= 1,
-						RO_PARAM_DOCUMENT_TITLE	= 2,
-						RO_PARAM_REPORT_TITLE	= 3,
-						RO_PARAM_DATE			= 4,
-						RO_PARAM_TABLE_TITLE	= 5,
-						RO_PARAM_CONCLUSION		= 6,
-						RO_PARAM_T				= 7,
-						RO_PARAM_P				= 8,
-						RO_PARAM_H				= 9,
-						RO_PARAM_V				= 10,
-						RO_PARAM_F				= 11,
-						RO_PARAM_CALIBRATOR_0	= 12,
-						RO_PARAM_CALIBRATOR_1	= 13,
-						RO_PARAM_CALIBRATOR_2	= 14,
-						RO_PARAM_CALIBRATOR_3	= 15,
-						RO_PARAM_CALIBRATOR_4	= 16,
-						RO_PARAM_CALIBRATOR_5	= 17,
-						RO_PARAM_REPORT_FILE	= 18;
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ReportType[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Linearity"),
-						QT_TRANSLATE_NOOP("Options.h", "Linearity metrological certification"),
-						QT_TRANSLATE_NOOP("Options.h", "Linearity detail electric"),
-						QT_TRANSLATE_NOOP("Options.h", "Linearity detail physical"),
-						QT_TRANSLATE_NOOP("Options.h", "Comparators"),
-};
-
-const int				REPORT_TYPE_COUNT						= sizeof(ReportType)/sizeof(ReportType[0]);
-
-const int				REPORT_TYPE_UNKNOWN						= -1,
-						REPORT_TYPE_LINEARITY					= 0,
-						REPORT_TYPE_LINEARITY_CERTIFICATION		= 1,
-						REPORT_TYPE_LINEARITY_DETAIL_ELRCTRIC	= 2,
-						REPORT_TYPE_LINEARITY_DETAIL_PHYSICAL	= 3,
-						REPORT_TYPE_COMPARATOR					= 4;
-
-const char* const		ReportFileName[REPORT_TYPE_COUNT] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Linearity.ncr"),
-						QT_TRANSLATE_NOOP("Options.h", "LinearityCertification.ncr"),
-						QT_TRANSLATE_NOOP("Options.h", "LinearityDetailEl.ncr"),
-						QT_TRANSLATE_NOOP("Options.h", "LinearityDetailPh.ncr"),
-						QT_TRANSLATE_NOOP("Options.h", "Comparators.ncr"),
-};
-
-// ==============================================================================================
-
-struct REPORT_HEADER
-{
-	int					m_type = REPORT_TYPE_UNKNOWN;
-
-	QString				m_documentTitle;
-	QString				m_reportTitle;
-	QString				m_date;
-	QString				m_tableTitle;
-	QString				m_conclusion;
-
-	double				m_T = 0;
-	double				m_P = 0;
-	double				m_H = 0;
-	double				m_V = 0;
-	double				m_F = 0;
-
-	QString				m_calibrator[Metrology::ChannelCount];
-
-	int					m_linkObjectID;
-	QString				m_reportFile;
-
-	int					m_param = 0;
-
-	void				init(int type);
-};
-
-// ==============================================================================================
-
-class ReportHeaderBase : public ObjectVector<REPORT_HEADER>
-{
-public:
-
-	ReportHeaderBase();
-	virtual ~ReportHeaderBase();
-
-public:
-
-	bool				reportsIsExist();
-
-	virtual void		initEmptyData(QVector<REPORT_HEADER> &data);
-};
-
-// ==============================================================================================
-
-class ReportOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit ReportOption(QObject *parent = 0);
-	explicit ReportOption(const ReportOption& from, QObject *parent = 0);
-	virtual ~ReportOption();
-
-private:
-
-	QString				m_path;
-	int					m_type = REPORT_TYPE_LINEARITY;
-
-	ReportHeaderBase	m_headerBase;
-
-public:
-
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
-
-	int					type() const { return m_type; }
-	void				setType(int type) { m_type = type; }
-
-	ReportHeaderBase&	header() { return m_headerBase; }
-
-	int					reportTypeByMeasureType(int measureType);
-
-	void				load();
-	void				save();
-
-	ReportOption&		operator=(const ReportOption& from);
-
-};
-
-// ==============================================================================================
-
 const char* const		LinearityPointSensor[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "%"),
@@ -1083,7 +921,6 @@ private:
 	MeasureViewOption	m_measureView;
 	SignalInfoOption	m_signalInfo;
 	DatabaseOption		m_database;
-	ReportOption		m_report;
 	LinearityOption		m_linearity;
 	ComparatorOption	m_comparator;
 	BackupOption		m_backup;
@@ -1107,9 +944,6 @@ public:
 
 	DatabaseOption&		database() { return m_database; }
 	void				setDatabase(const DatabaseOption& database) { m_database = database; }
-
-	ReportOption&		report() { return m_report; }
-	void				setReport(const ReportOption& report) { m_report = report; }
 
 	LinearityOption&	linearity() { return m_linearity; }
 	void				setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }

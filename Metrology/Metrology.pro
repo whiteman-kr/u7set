@@ -78,7 +78,6 @@ SOURCES += \
     Delegate.cpp \
     FolderPropertyManager.cpp \
     Database.cpp \
-    ReportView.cpp \
     Conversion.cpp \
     Calculator.cpp \
     ../lib/Crc.cpp \
@@ -141,7 +140,6 @@ HEADERS  += \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
-    ReportView.h \
     version.h \
     Conversion.h \
     Calculator.h \
@@ -205,12 +203,7 @@ TRANSLATIONS = translations/Metrology_ru.ts \
 
 OTHER_FILES += \
     translations/Metrology_ru.ts \
-    translations/Metrology_uk.ts \
-    reports/Linearity.ncr \
-    reports/Comparators.ncr \
-    reports/LinearityCertification.ncr \
-    reports/LinearityDetailEl.ncr \
-    reports/LinearityDetailPh.ncr
+    translations/Metrology_uk.ts
 
 
 #c++11 support for GCC
@@ -261,32 +254,3 @@ win32{
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
-
-# NCReport
-#
-#win32 {
-#    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReportDebug2
-#    else: CONFIG(release, debug|release) : LIBS += -L"C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReport2
-
-#    CONFIG(debug, debug|release): LIBS += -L"C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReportDebug2
-#    else: CONFIG(release, debug|release) : LIBS += -L"C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/lib/" -lNCReport2
-
-#    INCLUDEPATH += "C:/Program Files/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
-#    INCLUDEPATH += "C:/Program Files (x86)/NCReport/2.13.0.VS2013.Qt5.3.2.eval/include"
-#}
-
-#unix {
-#        contains(QMAKE_HOST.arch, x86_64) {
-#            CONFIG(debug, debug|release): LIBS += -L"$$PWD/../NCReport/NCReport2.15.0.x64.Qt5.3.2.eval/lib" -lNCReportDebug
-#            else: CONFIG(release, debug|release) : LIBS += -L"$$PWD/../NCReport/NCReport2.15.0.x64.Qt5.3.2.eval/lib" -lNCReport
-#            INCLUDEPATH += "$$PWD/../NCReport/NCReport2.15.0.x64.Qt5.3.2.eval/include"
-#        }
-#        else{
-#            CONFIG(debug, debug|release): LIBS += -L"$$PWD/../NCReport/NCReport2.15.0.x86.Qt5.3.2.eval/lib" -lNCReportDebug
-#            else: CONFIG(release, debug|release) : LIBS += -L"$$PWD/../NCReport/NCReport2.15.0.x86.Qt5.3.2.eval/lib" -lNCReport
-#            INCLUDEPATH += "$$PWD/../NCReport/NCReport2.15.0.x86.Qt5.3.2.eval/include"
-#        }
-#}
-
-
-

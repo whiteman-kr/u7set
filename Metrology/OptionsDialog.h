@@ -25,7 +25,6 @@ const char* const				OptionGroupTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Panel signal information"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
 };
@@ -38,9 +37,8 @@ const int						OPTION_GROUP_UNKNOWN		= -1,
 								OPTION_GROUP_SETTING		= 2,
 								OPTION_GROUP_MEASURE_VIEW	= 3,
 								OPTION_GROUP_SIGNAL_INFO	= 4,
-								OPTION_GROUP_REPORT_HEADER	= 5,
-								OPTION_GROUP_DATABASE		= 6,
-								OPTION_GROUP_BACKUP			= 7;
+								OPTION_GROUP_DATABASE		= 5,
+								OPTION_GROUP_BACKUP			= 6;
 
 // ==============================================================================================
 
@@ -55,7 +53,6 @@ const char* const				OptionPageTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying data in the list of measurements"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying columns in the list of measurements"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying information of signal"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Reports of metrological inspection"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Database settings"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Backup measurements"),
 };
@@ -72,9 +69,8 @@ const int						OPTION_PAGE_UNKNOWN				= -1,
 								OPTION_PAGE_MEASURE_VIEW_TEXT	= 6,
 								OPTION_PAGE_MEASURE_VIEW_COLUMN	= 7,
 								OPTION_PAGE_SIGNAL_INFO			= 8,
-								OPTION_PAGE_REPORT				= 9,
-								OPTION_PAGE_DATABASE			= 10,
-								OPTION_PAGE_BACKUP				= 11;
+								OPTION_PAGE_DATABASE			= 9,
+								OPTION_PAGE_BACKUP				= 10;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -89,7 +85,6 @@ const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Columns"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Displaying"),
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Settings"),
 };
@@ -107,7 +102,6 @@ const int						OptionGroupPage[OPTION_PAGE_COUNT] =
 								OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --	Page : Display"),
 								OPTION_GROUP_MEASURE_VIEW,	// Group: List of measurements --	Page : Columns"),
 								OPTION_GROUP_SIGNAL_INFO,	// Group: Information of signal --	Page : Displaying"),
-								OPTION_GROUP_REPORT_HEADER,	// Group: Reports --				Page : Settings"),
 								OPTION_GROUP_DATABASE,		// Group: Database --				Page : Settings"),
 								OPTION_GROUP_BACKUP,		// Group: Backup measurements --	Page : Settings"),
 };
@@ -225,7 +219,6 @@ private slots:
 	void						updateServerPage();
 	void						updateLinearityPage(bool isDialog);
 	void						updateMeasureViewPage(bool isDialog);
-	void						updateReportHeaderPage();
 
 	void						onOk();
 	void						onApply();

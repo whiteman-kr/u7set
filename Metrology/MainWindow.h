@@ -44,7 +44,6 @@ private:
 	//
 	QAction*				m_pStartMeasureAction = nullptr;
 	QAction*				m_pStopMeasureAction = nullptr;
-	QAction*				m_pPrintMeasureAction = nullptr;
 	QAction*				m_pExportMeasureAction = nullptr;
 
 	// menu - Edit
@@ -55,7 +54,6 @@ private:
 
 	// menu - View
 	//
-	QAction*				m_pShowReportsAction = nullptr;
 	QAction*				m_pShowCalculatorAction = nullptr;
 
 	// menu - Tools
@@ -145,7 +143,6 @@ private:
 	void					loadSettings();
 	void					saveSettings();
 
-
 public:
 
 	int						measureType() const { return m_measureType; }
@@ -202,7 +199,6 @@ private slots:
 	//
 	void					startMeasure();
 	void					stopMeasure();
-	void					printMeasure();
 	void					exportMeasure();
 
 	// menu - Edit
@@ -213,7 +209,6 @@ private slots:
 
 	// menu - View
 	//
-	void					showReports() {};
 	void					showCalculator();
 
 	// menu - Tools
