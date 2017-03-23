@@ -232,6 +232,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
 		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
 	}
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::rejectCheckoutProperty);
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
 	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
 
@@ -325,6 +326,22 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	saveLastEditedSignalProperties();
 
 	accept();
+}
+
+
+void SignalPropertiesDialog::rejectCheckoutProperty()
+{
+	for (std::shared_ptr<PropertyObject> object : m_objList)
+	{
+		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
+		Signal& signal = signalProperites->signal();
+		int id = signal.ID();
+		if (!signal.checkedOut() && m_editedSignalsId.contains(id))
+		{
+			ObjectState state;
+			m_dbController->undoSignalChanges(id, &state, this);
+		}
+	}
 }
 
 

@@ -115,7 +115,7 @@ SignalsDelegate::SignalsDelegate(DataFormatList& dataFormatInfo, UnitList& unitI
 	m_model(model),
 	m_proxyModel(proxyModel)
 {
-
+	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
 
 QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -123,13 +123,24 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
 
+	m_model->loadSignal(m_model->key(row), false);	// get current checkedOut state
+
+	Signal& s = m_signalSet[row];
+	if (!s.checkedOut())
+	{
+		signalIdForUndoOnCancelEditing = s.ID();
+	}
+	else
+	{
+		signalIdForUndoOnCancelEditing = -1;
+	}
+
 	if (!m_model->checkoutSignal(row))
 	{
 		return nullptr;
 	}
 
-	m_model->loadSignal(m_model->key(row), false);
-	m_model->checkoutSignal(row);
+	m_model->loadSignal(m_model->key(row), false);	// update new checkedOut state on view
 
 	switch (col)
 	{
@@ -376,6 +387,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 	}
 
 	m_model->saveSignal(s);
+	signalIdForUndoOnCancelEditing = -1;
 }
 
 void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const
@@ -385,6 +397,15 @@ void SignalsDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionVi
 	if (cb)
 	{
 		cb->showPopup();
+	}
+}
+
+void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEditHint hint)
+{
+	if (hint == QAbstractItemDelegate::RevertModelCache && signalIdForUndoOnCancelEditing != -1)
+	{
+		m_model->undoSignal(signalIdForUndoOnCancelEditing);
+		signalIdForUndoOnCancelEditing = -1;
 	}
 }
 
@@ -581,6 +602,48 @@ bool SignalsModel::checkoutSignal(int index, QString& message)
 		loadSignal(id, true);
 	}
 	emit setCheckedoutSignalActionsVisibility(true);
+	return true;
+}
+
+bool SignalsModel::undoSignal(int id)
+{
+	const Signal& s = m_signalSet[m_signalSet.keyIndex(id)];
+	if (!s.checkedOut())
+	{
+		return false;
+	}
+
+	QVector<int> signalsIDs;
+	if (s.signalGroupID() != 0)
+	{
+		signalsIDs = m_signalSet.getChannelSignalsID(s.signalGroupID());
+	}
+	else
+	{
+		signalsIDs << id;
+	}
+	QVector<ObjectState> states;
+
+	for (int id : signalsIDs)
+	{
+		ObjectState state;
+		dbController()->undoSignalChanges(id, &state, parentWindow());
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			states << state;
+		}
+	}
+
+	if (!states.isEmpty())
+	{
+		showErrors(states);
+	}
+
+	for (int id : signalsIDs)
+	{
+		loadSignal(id, true);
+	}
+
 	return true;
 }
 
