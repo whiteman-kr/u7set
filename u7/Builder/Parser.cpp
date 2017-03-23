@@ -7,6 +7,7 @@
 
 #include "IssueLogger.h"
 #include "GlobalMessanger.h"
+#include "Builder.h"
 
 #include "../../lib/DbController.h"
 
@@ -497,8 +498,9 @@ namespace Builder
 	//		ApplicationLogicModule
 	//
 	// ------------------------------------------------------------------------
-	AppLogicModule::AppLogicModule(QString moduleId) :
-		m_equipmentId(moduleId)
+	AppLogicModule::AppLogicModule(QString moduleId, QString lmDescriptionFile) :
+		m_equipmentId(moduleId),
+		m_lmDescriptionFile(lmDescriptionFile)
 	{
 	}
 
@@ -521,6 +523,11 @@ namespace Builder
 
 			return false;
 		}
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO
+		// Check if schema->LmDescriptionFile is same as here
+		//
+
 
 		// Create a copy of bushcontainer, as in case of processing multisignlas in multichannel schemas
 		// these multisignals will be created for all channels
@@ -838,7 +845,7 @@ namespace Builder
 			}
 		}
 
-		std::shared_ptr<AppLogicModule> copy = std::make_shared<AppLogicModule>(this->m_equipmentId);
+		std::shared_ptr<AppLogicModule> copy = std::make_shared<AppLogicModule>(this->m_equipmentId, this->m_lmDescriptionFile);
 
 		copy->m_items = itemsCopy;
 
@@ -1520,9 +1527,9 @@ namespace Builder
 		return m_equipmentId;
 	}
 
-	void AppLogicModule::setEquipmentId(QString value)
+	QString AppLogicModule::lmDescriptionFile() const
 	{
-		m_equipmentId = value;
+		return m_lmDescriptionFile;
 	}
 
 	const std::list<AppLogicItem>& AppLogicModule::items() const
@@ -1553,7 +1560,7 @@ namespace Builder
 	{
 		if (equipmentId.isEmpty() == true)
 		{
-			log->errALP4001(schema->schemaId());
+			log->errALP4001(schema->schemaId(), VFrame30::PropertyNames::equipmentIds);
 			return false;
 		}
 
@@ -1592,7 +1599,7 @@ namespace Builder
 		{
 			// Module was not found, addit
 			//
-			module = std::make_shared<AppLogicModule>(equipmentId);
+			module = std::make_shared<AppLogicModule>(equipmentId, schema->lmDescriptionFile());
 			m_modules.push_back(module);
 		}
 		else
@@ -1601,6 +1608,14 @@ namespace Builder
 		}
 
 		assert(module);
+
+		// Check if the schema and module have the same LmDescritionFile
+		//
+		if (schema->lmDescriptionFile() != module->lmDescriptionFile())
+		{
+			log->errALP4018(schema->schemaId(), equipmentId, module->equipmentId(), schema->lmDescriptionFile());
+			result = false;
+		}
 
 		// add new branch to module
 		//
@@ -1647,7 +1662,7 @@ namespace Builder
 		{
 			// Module was not found, addit
 			//
-			module = std::make_shared<AppLogicModule>(schema->schemaId());
+			module = std::make_shared<AppLogicModule>(schema->schemaId(), schema->lmDescriptionFile());
 			m_ufbs[schema->schemaId()] = module;
 		}
 		else
@@ -2199,6 +2214,55 @@ namespace Builder
 		return true;
 	}
 
+	bool AppLogicData::setAfbComponents(const LmDescriptionSet* lmDescriptionSet, IssueLogger* log)
+	{
+		if (lmDescriptionSet == nullptr ||
+			log == nullptr)
+		{
+			assert(lmDescriptionSet);
+			assert(log);
+			return false;
+		}
+
+		bool result = true;
+
+		for (std::shared_ptr<AppLogicModule> module : m_modules)
+		{
+			assert(module->lmDescriptionFile().isEmpty() == false);
+
+			std::shared_ptr<LogicModule> logicModuleDescription = lmDescriptionSet->get(module->lmDescriptionFile());
+			if (logicModuleDescription == nullptr)
+			{
+				log->errALP4016(QString("Look schema for %1").arg(module->equipmentId()), module->lmDescriptionFile());
+				result = false;
+				continue;
+			}
+
+			for (AppLogicItem& item : module->items())
+			{
+				if (item.m_fblItem->isAfbElement() == true)
+				{
+					assert(item.m_fblItem->toAfbElement()->afbElement().opCode() == item.m_afbElement.opCode());
+
+					std::shared_ptr<Afb::AfbComponent> afbComponent = logicModuleDescription->component(item.m_afbElement.opCode());
+
+					if (afbComponent == nullptr)
+					{
+						log->errALP4017(item.m_schema->schemaId(), module->lmDescriptionFile(), item.m_afbElement.opCode(), item.m_fblItem->guid());
+						result = false;
+					}
+					else
+					{
+						item.m_fblItem->toAfbElement()->afbElement().setComponent(afbComponent);
+						item.m_afbElement.setComponent(afbComponent);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
 	const std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules() const
 	{
 		return m_modules;
@@ -2252,7 +2316,7 @@ namespace Builder
 	Parser::Parser(DbController* db,
 				   IssueLogger* log,
 				   AppLogicData* appLogicData,
-				   Afb::AfbElementCollection* afbCollection,
+				   LmDescriptionSet* lmDescriptions,
 				   Hardware::EquipmentSet* equipmentSet,
 				   SignalSet* signalSet,
 				   int changesetId,
@@ -2262,14 +2326,14 @@ namespace Builder
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_applicationData(appLogicData),
-		m_afbCollection(afbCollection),
+		m_lmDescriptions(lmDescriptions),
 		m_equipmentSet(equipmentSet),
 		m_signalSet(signalSet)
 	{
 		assert(m_db);
 		assert(m_log);
 		assert(m_applicationData);
-		assert(m_afbCollection);
+		assert(m_lmDescriptions);
 		assert(m_equipmentSet);
 		assert(m_signalSet);
 
@@ -2284,11 +2348,28 @@ namespace Builder
 	{
 		bool result = true;
 
-		// Get User Functional Blocks
+		// Load User Functional Blocks
 		//
 		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
 
 		bool ok = loadUfbFiles(db(), &ufbs);
+		if (ok == false)
+		{
+			return ok;
+		}
+
+		// Check if some LmDescripnFiles were not loaded
+		//
+		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
+		{
+			if (m_lmDescriptions->has(schema->lmDescriptionFile()) == false)
+			{
+				// Try to load it
+				//
+				ok &= m_lmDescriptions->loadFile(log(), db(), schema->schemaId(), schema->lmDescriptionFile());
+			}
+		}
+
 		if (ok == false)
 		{
 			return ok;
@@ -2361,6 +2442,23 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
 			return true;
+		}
+
+		// Check if some LmDescripnFiles were not loaded
+		//
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
+		{
+			if (m_lmDescriptions->has(schema->lmDescriptionFile()) == false)
+			{
+				// Try to load it
+				//
+				ok &= m_lmDescriptions->loadFile(log(), db(), schema->schemaId(), schema->lmDescriptionFile());
+			}
+		}
+
+		if (ok == false)
+		{
+			return ok;
 		}
 
 		// Check for the same lables in schemas
@@ -2455,6 +2553,15 @@ namespace Builder
 			result = false;
 		}
 
+		// Set AfbComponent to AfbElements
+		//
+		ok = m_applicationData->setAfbComponents(m_lmDescriptions, m_log);
+
+		if (ok == false)
+		{
+			result = false;
+		}
+
 		//  In debug mode save/show item order for displaying on schemas
 		//
 		setDebugInfo();
@@ -2464,7 +2571,8 @@ namespace Builder
 
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
 	{
-		return loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+		return ok;
 	}
 
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
@@ -2547,6 +2655,7 @@ namespace Builder
 
 		// Get file data and read it
 		//
+		bool result = true;
 		for (DbFileInfo& fi : fileList)
 		{
 			// Check for cancel
@@ -2576,7 +2685,9 @@ namespace Builder
 				// Getting file instance error, file ID %1, file name '%2', database message '%3'.
 				//
 				m_log->errPDB2002(fi.fileId(), fi.fileName(), db->lastError());
-				return false;
+
+				result = false;
+				continue;
 			}
 
 			// Read schema files
@@ -2592,7 +2703,17 @@ namespace Builder
 				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
 				//
 				m_log->errCMN0010(file->fileName());
-				return false;
+
+				result = false;
+				continue;
+			}
+
+			if (ls->excludeFromBuild() == true)
+			{
+				// Schema is excluded from build (Schema '%1').
+				//
+				m_log->wrnALP4004(ls->schemaId());
+				continue;
 			}
 
 			// Remove all commented items from the schema
@@ -2603,6 +2724,8 @@ namespace Builder
 
 				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
 				{
+					assert(item);
+
 					if (item->isCommented() == false)
 					{
 						newItemList.push_back(item);
@@ -2614,22 +2737,10 @@ namespace Builder
 
 			// Add to schema list
 			//
-			if (ls->excludeFromBuild() == true)
-			{
-				// Schema is excluded from build (Schema '%1').
-				//
-				m_log->wrnALP4004(ls->schemaId());
-				continue;
-			}
-			else
-			{
-				// Add schema to result
-				//
-				out->push_back(ls);
-			}
+			out->push_back(ls);
 		}
 
-		return true;
+		return result;
 	}
 
 	template<typename SchemaType>
@@ -2649,11 +2760,6 @@ namespace Builder
 
 			uuids.insert(std::make_pair(schema->guid(), schema->schemaId()));			// Schema guid is also included in check
 
-//			if (schema->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
-//			{
-//				//assert(false);
-//			}
-
 			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
 			{
 				if (layer->compile() == false)
@@ -2663,11 +2769,6 @@ namespace Builder
 
 				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
 
-//				if (layer->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
-//				{
-//					assert(false);
-//				}
-
 				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 				{
 					if (item->isFblItem() == false)
@@ -2676,11 +2777,6 @@ namespace Builder
 					}
 
 					uuids.insert(std::make_pair(item->guid(), schema->schemaId()));
-
-//					if (item->guid() == QUuid("{2bd52324-2d66-4bb9-8e96-3efbc8249a5f}"))
-//					{
-//						assert(false);
-//					}
 
 					if (item->isFblItemRect() == true)
 					{
@@ -2695,21 +2791,11 @@ namespace Builder
 						for (auto& pin : fblItemRect->inputs())
 						{
 							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
-
-//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
-//							{
-//								assert(false);
-//							}
 						}
 
 						for (auto& pin : fblItemRect->outputs())
 						{
 							uuids.insert(std::make_pair(pin.guid(), schema->schemaId()));
-
-//							if (pin.guid() == QUuid("{01a7e299-434a-4c55-88f7-94e953010134}"))
-//							{
-//								assert(false);
-//							}
 						}
 					}
 				}
@@ -2763,7 +2849,7 @@ namespace Builder
 		{
 			// Property EquipmentIds is not set (LogicSchema '%1')
 			//
-			m_log->errALP4001(logicSchema->schemaId());
+			m_log->errALP4001(logicSchema->schemaId(), VFrame30::PropertyNames::equipmentIds);
 			return false;
 		}
 
@@ -2817,19 +2903,51 @@ namespace Builder
 	bool Parser::checkAfbItemsVersion(VFrame30::Schema* schema)
 	{
 		if (schema == nullptr ||
-			m_afbCollection == nullptr)
+			m_lmDescriptions == nullptr)
 		{
 			assert(schema);
-			assert(m_afbCollection);
+			assert(m_lmDescriptions);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_afbCollection %2")
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_lmDescriptions %2")
 							  .arg(reinterpret_cast<size_t>(schema))
-							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
+							  .arg(reinterpret_cast<size_t>(m_lmDescriptions)));
 			return false;
 		}
 
 		bool ok = true;
 
+		// Get Description File
+		//
+		QString lmDescriptionFile;
+
+		if (schema->isLogicSchema() == true)
+		{
+			lmDescriptionFile = schema->toLogicSchema()->lmDescriptionFile();
+		}
+
+		if (schema->isUfbSchema() == true)
+		{
+			lmDescriptionFile = schema->toUfbSchema()->lmDescriptionFile();
+		}
+
+		if (lmDescriptionFile.isEmpty() == true)
+		{
+			log()->errALP4001(schema->schemaId(), VFrame30::PropertyNames::lmDescriptionFile);
+			return false;
+		}
+
+		std::shared_ptr<LogicModule> lmd = m_lmDescriptions->get(lmDescriptionFile);
+		if (lmd == nullptr)
+		{
+			assert(lmd);
+			return false;
+		}
+
+		Afb::AfbElementCollection afbs;
+		afbs.setElements(lmd->afbs());
+
+		// Check AFBs
+		//
 		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
 		{
 			if (l->compile() == true)
@@ -2840,7 +2958,7 @@ namespace Builder
 					{
 						VFrame30::SchemaItemAfb* afbItem = dynamic_cast<VFrame30::SchemaItemAfb*>(si.get());
 
-						std::shared_ptr<Afb::AfbElement> afbDescription = m_afbCollection->get(afbItem->afbStrID());
+						std::shared_ptr<Afb::AfbElement> afbDescription = afbs.get(afbItem->afbStrID());
 
 						if (afbDescription.get() == nullptr)
 						{
@@ -2878,15 +2996,12 @@ namespace Builder
 	bool Parser::checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
 									  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs)
 	{
-		if (logicSchema == nullptr ||
-			m_afbCollection == nullptr)
+		if (logicSchema == nullptr)
 		{
 			assert(logicSchema);
-			assert(m_afbCollection);
 
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_afbCollection %2")
-							  .arg(reinterpret_cast<size_t>(logicSchema))
-							  .arg(reinterpret_cast<size_t>(m_afbCollection)));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1")
+							  .arg(reinterpret_cast<size_t>(logicSchema)));
 			return false;
 		}
 
@@ -3311,7 +3426,7 @@ namespace Builder
 
 		if (equipmentId.isEmpty() == true)
 		{
-			m_log->errALP4001(schema->schemaId());
+			m_log->errALP4001(schema->schemaId(), VFrame30::PropertyNames::equipmentIds);
 			return false;
 		}
 

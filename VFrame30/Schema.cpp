@@ -939,6 +939,16 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
 	}
 
+	UfbSchema* Schema::toUfbSchema()
+	{
+		return dynamic_cast<VFrame30::UfbSchema*>(this);
+	}
+
+	const UfbSchema* Schema::toUfbSchema() const
+	{
+		return dynamic_cast<const VFrame30::UfbSchema*>(this);
+	}
+
 	int Schema::changeset() const
 	{
 		return m_changeset;

@@ -8,6 +8,7 @@
 #include "../lib/PropertyObject.h"
 #include "Builder/OptoModule.h"
 #include "version.h"
+#include "LogicModule.h"
 
 #include <QtQml>
 
@@ -124,6 +125,34 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<QJsVariantList>();
     qmlRegisterType<Hardware::OptoPort>();
+
+	// !!!!!!!!!!!! TEST
+	//
+//	LogicModule lm;
+
+//	QString errorMessage;
+
+//	QFile f("d:/Develop/LogicModule0000_1.xml");
+//	if (!f.open(QIODevice::ReadOnly))
+//	{
+//		QMessageBox::critical(0, "", "Can't Open LogicModuleFile");
+//		return 1;
+//	}
+
+//	QByteArray ba = f.readAll();
+//	bool ok = lm.load(ba, &errorMessage);
+
+//	if (ok == false)
+//	{
+//		QMessageBox::critical(0, "", errorMessage);
+//		return 1;
+//	}
+//	else
+//	{
+//		lm.dump();
+//		return 0;
+//	}
+	// !!!!!!!!!!!! TEST
 
     // Start database communication thread
 	//

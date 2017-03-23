@@ -23,7 +23,7 @@ namespace Builder
 													   Hardware::OptoModuleStorage *optoModuleStorage,
 													   Hardware::ConnectionStorage *connections,
 													   SignalSet* signalSet,
-													   Afb::AfbElementCollection *afblSet,
+													   LmDescriptionSet* lmDescriptions,
 													   AppLogicData* appLogicData,
 													   Tuning::TuningDataStorage* tuningDataStorage,
 													   BuildResultWriter* buildResultWriter,
@@ -32,7 +32,7 @@ namespace Builder
 		m_equipmentSet(equipmentSet),
 		m_optoModuleStorage(optoModuleStorage),
 		m_signals(signalSet),
-		m_afbl(afblSet),
+		m_lmDescriptions(lmDescriptions),
 		m_appLogicData(appLogicData),
 		m_tuningDataStorage(tuningDataStorage),
 		m_resultWriter(buildResultWriter),
@@ -86,7 +86,7 @@ namespace Builder
 		if (m_subsystems == nullptr ||
 			m_equipmentSet == nullptr ||
 			m_signals == nullptr ||
-			m_afbl == nullptr ||
+			m_lmDescriptions == nullptr ||
 			m_appLogicData == nullptr ||
 			m_tuningDataStorage == nullptr ||
 			m_resultWriter == nullptr ||
@@ -214,7 +214,7 @@ namespace Builder
 				{
 					Hardware::DeviceModule* module = device->toModule();
 
-					if (module != nullptr && module->isLM())
+					if (module != nullptr && module->isLogicModule())
 					{
 						deviceOK = true;
 					}

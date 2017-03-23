@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core network qml
+QT       += core network qml xml
 
 QT       -= gui
 

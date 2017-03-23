@@ -178,27 +178,6 @@ namespace Builder
 			}
 
 			//
-			// Loading AFB elements
-			//
-			LOG_EMPTY_LINE(m_log);
-			LOG_MESSAGE(m_log, tr("Loading AFB elements"));
-
-			Afb::AfbElementCollection afbCollection;
-
-			ok = loadAfbl(&db, &afbCollection);
-
-			if (ok == false)
-			{
-				break;
-			}
-			else
-			{
-				LOG_SUCCESS(m_log, tr("Ok"));
-			}
-
-			LOG_MESSAGE(m_log, tr("%1 elements loaded.").arg(afbCollection.elements().size()));
-
-			//
 			// Loading subsystems
 			//
 			Hardware::SubsystemStorage subsystems;
@@ -217,10 +196,30 @@ namespace Builder
 			}
 
 			//
-			// Find all LM Modules
+			// Find all LM Modules and load their descriptions
 			//
-			std::vector<Hardware::DeviceModule *> lmModules;
-			findLmModules(equipmentSet.root(), lmModules);
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Loading LogicModule descriptions..."));
+
+			std::vector<Hardware::DeviceModule*> lmModules;
+			findLmModules(equipmentSet.root(), &lmModules);
+
+			LmDescriptionSet lmDescriptions;
+
+			ok = true;
+			for (Hardware::DeviceModule* lm : lmModules)
+			{
+				ok &= loadLogicModuleDescription(&db, lm, &lmDescriptions);
+			}
+
+			if (ok == false)
+			{
+				break;
+			}
+			else
+			{
+				LOG_SUCCESS(m_log, tr("Ok"));
+			}
 
 			//
 			// Loading connections
@@ -246,7 +245,7 @@ namespace Builder
 			//
 			AppLogicData appLogicData;
 
-			ok = parseApplicationLogic(&db, &appLogicData, &afbCollection, &equipmentSet, &signalSet, lastChangesetId);
+			ok = parseApplicationLogic(&db, &appLogicData, lmDescriptions, &equipmentSet, &signalSet, lastChangesetId);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -259,7 +258,7 @@ namespace Builder
 			//
 			Tuning::TuningDataStorage tuningDataStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &afbCollection, &appLogicData, &tuningDataStorage, &buildWriter);
+			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &lmDescriptions, &appLogicData, &tuningDataStorage, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -454,11 +453,13 @@ namespace Builder
 		return true;
 	}
 
-	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules)
+	void BuildWorkerThread::findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
 	{
-		if (object == nullptr)
+		if (object == nullptr ||
+			out == nullptr)
 		{
 			assert(object);
+			assert(out);
 			return;
 		}
 
@@ -470,13 +471,16 @@ namespace Builder
 			{
 				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
 
-				if (module->moduleFamily() == Hardware::DeviceModule::LM)
+				if (module->isLogicModule() == true)
 				{
-					modules.push_back(module);
+					out->push_back(module);
 				}
 			}
 
-			findLmModules(child, modules);
+			if (child->deviceType() < Hardware::DeviceType::Module)
+			{
+				findLmModules(child, out);
+			}
 		}
 
 		return;
@@ -720,7 +724,7 @@ namespace Builder
 						continue;
 					}
 
-					if (module->isLM())
+					if (module->isLogicModule())
 					{
 						s.setLm(std::dynamic_pointer_cast<Hardware::DeviceModule>(deviceObjectShared));
 					}
@@ -803,94 +807,65 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::loadAfbl(DbController* db, Afb::AfbElementCollection* afbCollection)
+	bool BuildWorkerThread::loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions)
 	{
 		if (db == nullptr ||
-			afbCollection == nullptr)
+			logicModule == nullptr ||
+			lmDescriptions == nullptr)
 		{
 			assert(db);
-			assert(afbCollection);
+			assert(logicModule);
+			assert(lmDescriptions);
 			return false;
 		}
 
-		bool result = true;
-
-		// Get file list from the DB
+		// Get LmDescriptionFile property value
 		//
-		std::vector<DbFileInfo> files;
+		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
 
-		if (db->getFileList(&files, db->afblFileId(), "afb", true, nullptr) == false)
+		if (lmDescriptionFileProp == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QObject::tr("Cannot get application functional block file list."));
+			m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, logicModule->equipmentIdTemplate());
 			return false;
 		}
 
-		// Get files from the DB
-		//
-		std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
-		afbs.reserve(files.size());
+		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
 
-		for (DbFileInfo& fi : files)
+		if (lmDescriptionFile.isEmpty() == true)
 		{
-			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
-			{
-				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
-				continue;
-			}
-
-			std::shared_ptr<DbFile> f;
-
-			if (db->getLatestVersion(fi, &f, nullptr) == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QObject::tr("Getting the latest version of the file %1 failed.").arg(fi.fileName()));
-				result = false;
-				continue;
-			}
-
-			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
-
-			QXmlStreamReader reader(f->data());
-
-			if (e->loadFromXml(&reader) == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QObject::tr("Reading contents of the file %1 failed.").arg(fi.fileName()));
-
-				if (reader.errorString().isEmpty() == false)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, "XML error: " + reader.errorString());
-				}
-
-				result = false;
-				continue;
-			}
-
-			afbs.push_back(e);
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QObject::tr("Property LmDescriptionFile is empty. LogicModule %1").arg(logicModule->equipmentIdTemplate()));
+			return false;
 		}
 
-		afbCollection->setElements(afbs);
+		// Has file already been loaded?
+		//
+		if (lmDescriptions->has(lmDescriptionFile) == true)
+		{
+			return true;
+		}
 
-		return result;
+		// Load file
+		//
+		bool ok = lmDescriptions->loadFile(m_log, db, logicModule->equipmentIdTemplate(), lmDescriptionFile);
+
+		return ok;
 	}
 
 
 	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,
-												  Afb::AfbElementCollection* afbCollection,
+												  LmDescriptionSet& lmDescriptions,
 												  Hardware::EquipmentSet* equipment,
 												  SignalSet* signalSet,
 												  int changesetId)
 	{
 		if (db == nullptr ||
 			appLogicData == nullptr ||
-			afbCollection == nullptr ||
 			equipment == nullptr ||
 			signalSet == nullptr)
 		{
 			assert(db);
 			assert(appLogicData);
-			assert(afbCollection);
 			assert(equipment);
 			assert(signalSet);
 			return false;
@@ -899,7 +874,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic parsing..."));
 
-		Parser alPareser = {db, m_log, appLogicData, afbCollection, equipment, signalSet, changesetId, debug()};
+		Parser alPareser(db, m_log, appLogicData, &lmDescriptions, equipment, signalSet, changesetId, debug());
 
 		bool result = alPareser.parse();
 
@@ -920,7 +895,7 @@ namespace Builder
 													Hardware::OptoModuleStorage* optoModuleStorage,
 													Hardware::ConnectionStorage* connections,
 													SignalSet* signalSet,
-													Afb::AfbElementCollection* afbCollection,
+													LmDescriptionSet* lmDescriptions,
 													AppLogicData* appLogicData,
 													Tuning::TuningDataStorage* tuningDataStorage,
 													BuildResultWriter* buildResultWriter)
@@ -928,7 +903,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, afbCollection, appLogicData, tuningDataStorage, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, lmDescriptions, appLogicData, tuningDataStorage, buildResultWriter, m_log);
 
 		bool result = appLogicCompiler.run();
 
@@ -1218,6 +1193,154 @@ namespace Builder
 		return QThread::currentThread()->isInterruptionRequested();
 	}
 
+	//
+	//
+	//		LmDescriptionSet
+	//
+	bool LmDescriptionSet::has(QString fileName) const
+	{
+		return m_lmDescriptions.count(fileName) > 0;
+	}
+
+	bool LmDescriptionSet::loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName)
+	{
+		assert(log);
+		assert(db);
+		assert(objectId.isEmpty() == false);
+		assert(fileName.isEmpty() == false);
+
+		std::vector<DbFileInfo> fileList;
+
+		bool result = db->getFileList(&fileList, db->afblFileId(), fileName, true, nullptr);
+		if (result == false)
+		{
+			log->errPDB2001(db->afblFileId(), fileName, db->lastError());
+			return false;
+		}
+
+		if (fileList.size() != 1)
+		{
+			log->errEQP6004(objectId, fileName, QUuid());
+			return false;
+		}
+
+		// Get description file from the DB
+		//
+		std::shared_ptr<DbFile> file;
+		result = db->getLatestVersion(fileList[0], &file, nullptr);
+		if (result == false)
+		{
+			log->errPDB2002(fileList[0].fileId(), fileList[0].fileName(), db->lastError());
+			return false;
+		}
+
+		// Parse file
+		//
+		QString parseErrorMessage;
+
+		std::shared_ptr<LogicModule> lmd = std::make_shared<LogicModule>();
+
+		result = lmd->load(file->data(), &parseErrorMessage);
+
+		if (result == false)
+		{
+			QString errorMsg = QString("Cannot parse file %1. Error message: %2").arg(fileName).arg(parseErrorMessage);
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined, errorMsg);
+			return false;
+		}
+
+		add(fileName, lmd);
+
+		return true;
+	}
+
+	void LmDescriptionSet::add(QString fileName, std::shared_ptr<LogicModule> lm)
+	{
+		assert(lm);
+		m_lmDescriptions[fileName] = lm;
+	}
+
+	std::shared_ptr<LogicModule> LmDescriptionSet::get(QString fileName) const
+	{
+		auto it = m_lmDescriptions.find(fileName);
+
+		if (it == std::end(m_lmDescriptions))
+		{
+			return std::shared_ptr<LogicModule>();
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+	std::shared_ptr<LogicModule> LmDescriptionSet::get(QString fileName)
+	{
+		auto it = m_lmDescriptions.find(fileName);
+
+		if (it == std::end(m_lmDescriptions))
+		{
+			return std::shared_ptr<LogicModule>();
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+	std::shared_ptr<LogicModule> LmDescriptionSet::get(Hardware::DeviceModule* logicModule) const
+	{
+		if (logicModule == nullptr ||
+			logicModule->isLogicModule() == false)
+		{
+			assert(logicModule);
+			assert(logicModule->isLogicModule());
+			return std::shared_ptr<LogicModule>();
+		}
+
+		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+		if (lmDescriptionFileProp == nullptr)
+		{
+			assert(lmDescriptionFileProp);
+			return std::shared_ptr<LogicModule>();
+		}
+
+		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
+		if (lmDescriptionFile.isEmpty() == true)
+		{
+			assert(lmDescriptionFile.isEmpty() == false);
+			return std::shared_ptr<LogicModule>();
+		}
+
+		return get(lmDescriptionFile);
+	}
+
+	std::shared_ptr<LogicModule> LmDescriptionSet::get(Hardware::DeviceModule* logicModule)
+	{
+		if (logicModule == nullptr ||
+			logicModule->isLogicModule() == false)
+		{
+			assert(logicModule);
+			assert(logicModule->isLogicModule());
+			return std::shared_ptr<LogicModule>();
+		}
+
+		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+		if (lmDescriptionFileProp == nullptr)
+		{
+			assert(lmDescriptionFileProp);
+			return std::shared_ptr<LogicModule>();
+		}
+
+		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
+		if (lmDescriptionFile.isEmpty() == true)
+		{
+			assert(lmDescriptionFile.isEmpty() == false);
+			return std::shared_ptr<LogicModule>();
+		}
+
+		return get(lmDescriptionFile);
+	}
 	// ------------------------------------------------------------------------
 	//
 	//		Builder
@@ -1308,7 +1431,6 @@ namespace Builder
 	void Builder::handleResults(QString /*result*/)
 	{
 	}
-
 
 }
 

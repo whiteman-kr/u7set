@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml
 
 TARGET = u7
 TEMPLATE = app
@@ -193,7 +193,8 @@ SOURCES +=\
     ../lib/TuningObject.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/TuningModel.cpp \
-    DialogTuningClients.cpp
+    DialogTuningClients.cpp \
+    LogicModule.cpp
 
 
 HEADERS  += \
@@ -318,7 +319,8 @@ HEADERS  += \
     ../lib/TuningObject.h \
     DialogTuningFiltersEditor.h \
     ../lib/TuningModel.h \
-    DialogTuningClients.h
+    DialogTuningClients.h \
+    LogicModule.h
 
 FORMS    += \
     CreateProjectDialog.ui \

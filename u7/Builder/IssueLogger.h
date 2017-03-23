@@ -137,7 +137,7 @@ namespace Builder
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);
-		void errALP4001(QString schema);
+		void errALP4001(QString schema, QString propertyName);
 		void errALP4002(QString schema, QString hardwareStrId);
 		void errALP4003(QString schema, QString hardwareStrId);
 		void wrnALP4004(QString schema);
@@ -154,9 +154,15 @@ namespace Builder
 		void errALP4014(QString schema, QString schemaItem, QString itemType, QUuid itemUuid);
 		void errALP4015(QString schema, QString schemaItem, QUuid itemUuid);
 
+		void errALP4016(QString schema, QString lmDecriptionFile);
+		void errALP4017(QString schema, QString lmDecriptionFile, int opCode);
+		void errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid);
+		void errALP4018(QString schema, QString equipmentId, QString lmDecriptionFile1, QString lmDecriptionFile2);
+
 		void errALP4020(QString logicModule);
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
+
 
 		// Multichannel pasing errors
 		//
@@ -265,6 +271,7 @@ namespace Builder
 		void errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2);
 		void errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2);
 		void errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid);		//	Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.
+		void errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid);							//	file lmDescriptionFile is not found.
 
 		// Subset of EQP -- Generation Software Configuration
 		//

@@ -120,6 +120,9 @@ namespace VFrame30
 		LogicSchema* toLogicSchema();
 		const LogicSchema* toLogicSchema() const;
 
+		UfbSchema* toUfbSchema();
+		const UfbSchema* toUfbSchema() const;
+
 		int changeset() const;
 		void setChangeset(int value);
 		

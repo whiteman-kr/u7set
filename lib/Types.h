@@ -249,6 +249,31 @@ public:
 		return result;
 	}
 
+	// Convert enum value (not index) to QString
+	//
+	template <typename ENUM_TYPE>
+	static QString valueToString(ENUM_TYPE value)
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return QString();
+		}
+
+		const char* str = me.valueToKey(static_cast<int>(value));
+		if (str == nullptr)
+		{
+			assert(str);
+			return QString();
+		}
+
+		QString result(str);
+		return result;
+	}
+
 	// Get list of enum values and assigned String
 	//
 	template <typename ENUM_TYPE>

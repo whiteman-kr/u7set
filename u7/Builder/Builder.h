@@ -7,6 +7,7 @@
 #include "../Builder/BuildResultWriter.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "../Builder/IssueLogger.h"
+#include "../LogicModule.h"
 
 // Forware declarations
 //
@@ -38,11 +39,11 @@ namespace VFrame30
 
 namespace Afb
 {
-	class AfbElementCollection;
 }
 
 namespace Builder
 {
+	struct LmDescriptionSet;
 
 	typedef QHash<QString, quint64> LmsUniqueIdMap;		// LM's equipmentID => LM's uniqueID map
 
@@ -63,7 +64,7 @@ namespace Builder
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
 
-		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule *> &modules);
+		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 
 		// Expand Devices StrId
 		//
@@ -84,11 +85,11 @@ namespace Builder
 
 		// Load Application Functional Block Library
 		//
-		bool loadAfbl(DbController *db, Afb::AfbElementCollection* afbCollection);
+		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
 
 		// Build Application Logic
 		//
-		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, Afb::AfbElementCollection* afbCollection, Hardware::EquipmentSet* equipment, SignalSet* signalSet, int changesetId);
+		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, LmDescriptionSet& lmDescriptions, Hardware::EquipmentSet* equipment, SignalSet* signalSet, int changesetId);
 
 		// Compile Application Logic
 		//
@@ -97,7 +98,7 @@ namespace Builder
 										Hardware::OptoModuleStorage* optoModuleStorage,
 										Hardware::ConnectionStorage* connections,
 										SignalSet* signalSet,
-										Afb::AfbElementCollection* afbCollection,
+										LmDescriptionSet* lmDescriptions,
 										AppLogicData* appLogicData,
 										Tuning::TuningDataStorage* tuningDataStorage,
 										BuildResultWriter* buildResultWriter);
@@ -179,6 +180,26 @@ namespace Builder
 		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 	};
 
+	// LogicModule Description Set
+	//
+	struct LmDescriptionSet
+	{
+		bool has(QString fileName) const;
+
+		bool loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName);
+
+		void add(QString fileName, std::shared_ptr<LogicModule> lm);
+
+		std::shared_ptr<LogicModule> get(QString fileName) const;
+		std::shared_ptr<LogicModule> get(QString fileName);
+
+		std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule) const;
+		std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule);
+
+		// Data
+		//
+		std::map<QString, std::shared_ptr<LogicModule>> m_lmDescriptions;		// Key is LmDescriptionFile
+	};
 
 	// ------------------------------------------------------------------------
 	//
@@ -230,7 +251,6 @@ namespace Builder
 		BuildWorkerThread* m_thread = nullptr;
 		IssueLogger* m_log = nullptr;
 	};
-
 }
 
 #endif // BUILDER_H

@@ -450,13 +450,13 @@ namespace Builder
 	///			%2 Object StrID
 	///
 	/// Description:
-	///			Occurs if a property does not exist an object
+	///			Occurs if a property does not exist in an object
 	///
 	void IssueLogger::errCFG3000(QString propertyName, QString object)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3000,
-				  tr("Property '%1' does not exist in object '%2'.")
+				  tr("Property '%1' does not exist in an object '%2'.")
 				  .arg(propertyName)
 				  .arg(object));
 	}
@@ -1034,22 +1034,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').
+	/// Title: Property %1 for Schema is not set (LogicSchema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///		Property EquipmentIDs for an application logic schema is empty. To bind a schema to a Logic Module this field must be set
+	///		Some property for an application logic or user functional block schema is empty.
 	///		to the Logic Module EquipmentID.
 	///
-	void IssueLogger::errALP4001(QString schema)
+	void IssueLogger::errALP4001(QString schema, QString propertyName)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4001,
-				  tr("Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').")
+				  tr("Property %1 for Schema is not set (LogicSchema '%2').")
+				  .arg(propertyName)
 				  .arg(schema));
 	}
 
@@ -1413,6 +1414,105 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4016
+	///
+	/// IssueType: Error
+	///
+	/// Title: File LmDescriptionFile %1 is not found (Schema '%2').
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		File LmDescriptionFile %1 is not found (Schema '%2').
+	///
+	void IssueLogger::errALP4016(QString schema, QString lmDecriptionFile)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4016,
+				  tr("File LmDescriptionFile %1 is not found (Schema '%2').")
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4017
+	///
+	/// IssueType: Error
+	///
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	/// Parameters:
+	///		%1 OpCode
+	///		%2 LmDescription filename
+	///		%3 Schema
+	///
+	/// Description:
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4017,
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+					.arg(opCode)
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4017
+	///
+	/// IssueType: Error
+	///
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	/// Parameters:
+	///		%1 OpCode
+	///		%2 LmDescription filename
+	///		%3 Schema
+	///
+	/// Description:
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4017,
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+					.arg(opCode)
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4018
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.
+	///
+	/// Parameters:
+	///		%1 LogicModule EquipmentID
+	///		%2 LmDescription filename 1
+	///		%3 LmDescription filename 2
+	///		%4 Schema
+	///
+	/// Description:
+	///		Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.
+	///
+	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString lmDecriptionFile1, QString lmDecriptionFile2)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4018,
+				  tr("Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.")
+					.arg(equipmentId)
+					.arg(lmDecriptionFile1)
+					.arg(lmDecriptionFile2)
+					.arg(schema));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error
@@ -1484,7 +1584,6 @@ namespace Builder
 				  4022,
 				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
 	}
-
 
 	/// IssueCode: ALP4030
 	///
@@ -3689,6 +3788,30 @@ namespace Builder
 				  .arg(lm2)
 				  .arg(ipAddress)
 				  );
+	}
+
+	/// IssueCode: EQP6004
+	///
+	/// IssueType: Error
+	///
+	/// Title: File LmDescriptionFile %1 is not found, LogicModule %2.
+	///
+	/// Parameters:
+	///		%1 LmDescriptionFile filename
+	///		%2 LogicModule EquipmentID
+	///
+	/// Description:
+	///		LogicModule has property LmDescriptionFile, but this file is missing in $(root)/AFBL.
+	///
+	void IssueLogger::errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6004,
+				  tr("File LmDescriptionFile %1 is not found, LogicModule %2.")
+				  .arg(lmDescriptionFile)
+				  .arg(lm));
 	}
 
 

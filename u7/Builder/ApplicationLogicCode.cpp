@@ -209,7 +209,10 @@ namespace Builder
 
 	QString CommandCode::getFbTypeStr() const
 	{
-		return Afb::AfbType::toText(getFbType());
+		assert(false);
+		return QString();
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//return Afb::AfbType::toText(getFbType());
 	}
 
 

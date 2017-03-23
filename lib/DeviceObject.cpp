@@ -102,6 +102,8 @@ namespace Hardware
 	const QString PropertyNames::presetName = "PresetName";
 	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
 
+	const QString PropertyNames::lmDescriptionFile = "LmDescriptionFile";
+
 	const QString PropertyNames::type = "Type";
 	const QString PropertyNames::function = "Function";
 	const QString PropertyNames::byteOrder = "ByteOrder";
@@ -560,6 +562,9 @@ namespace Hardware
 		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
 		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible
+		3;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true
+
 		version:            record version
 		name:               property name
 		category:           category name
@@ -896,11 +901,11 @@ namespace Hardware
 		}
 
 		if (type != "qint32" &&
-				type != "quint32" &&
-				type != "bool" &&
-				type != "double" &&
-				type != "E::Channel" &&
-				type != "string")
+			type != "quint32" &&
+			type != "bool" &&
+			type != "double" &&
+			type != "E::Channel" &&
+			type != "string")
 		{
 			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
 			return;
@@ -1132,11 +1137,11 @@ namespace Hardware
 		}
 
 		if (type != "qint32" &&
-				type != "quint32" &&
-				type != "bool" &&
-				type != "double" &&
-				type != "E::Channel" &&
-				type != "string")
+			type != "quint32" &&
+			type != "bool" &&
+			type != "double" &&
+			type != "E::Channel" &&
+			type != "string")
 		{
 			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
 			return;
@@ -2632,7 +2637,7 @@ R"DELIM({
 					continue;
 				}
 
-				if (module->isLM())
+				if (module->isLogicModule())
 				{
 					return module;
 				}
@@ -2844,9 +2849,9 @@ R"DELIM({
 				family == FamilyType::DOM;
 	}
 
-	bool DeviceModule::isLM() const
+	bool DeviceModule::isLogicModule() const
 	{
-		return	moduleFamily() == FamilyType::LM;
+		return moduleFamily() == FamilyType::LM;
 	}
 
 	//
