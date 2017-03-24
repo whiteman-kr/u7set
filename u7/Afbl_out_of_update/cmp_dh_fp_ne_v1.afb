@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationFunctionalBlocks>
+    <AfbElement StrId="#cmp_dh_fp_ne_v1">
+        <Properties>
+            <Caption>cmp_dh_fp_ne</Caption>
+            <Version>1.0001</Version>
+            <Implementation Version="2" OpIndex="16"/>
+            <Description>Comparator Block, not equal single-precision floating-point format comparison (dynamic deadband)</Description>
+            <Category>Compare</Category>
+            <OpCode>20</OpCode>
+            <HasRam>true</HasRam>
+            <RequiredStart>true</RequiredStart>
+            <InternalUse>false</InternalUse>
+        </Properties>
+        <InputSignals>
+            <AfbElementSignal OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>
+            <AfbElementSignal OpName="i_sp_in" Caption="set" Type="Analog" DataFormat="Float" OpIndex="6" Size="32"/>
+            <AfbElementSignal OpName="hysteresis" Caption="db" Type="Analog" DataFormat="Float" OpIndex="1" Size="32"/>
+        </InputSignals>
+        <OutputSignals>
+            <AfbElementSignal OpName="o_result" Caption="out" Type="Discrete" OpIndex="9" Size="1"/>
+
+            <AfbElementSignal OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="10" Size="1"/>
+            <AfbElementSignal OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="11" Size="1"/>
+            <AfbElementSignal OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="13" Size="1"/>
+        </OutputSignals>
+        <Params>
+            <AfbElementParam OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+                <Value>8</Value>
+                <Default>8</Default>
+                <LowLimit>1</LowLimit>
+                <HighLimit>8</HighLimit>
+                <Script>
+                    <Changed></Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+                <Value>1</Value>
+                <Default>1</Default>
+                <Script>
+                    <Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+		</Changed>
+                </Script>
+            </AfbElementParam>
+            <AfbElementParam OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
+                <Value>1</Value>
+                <Default>1</Default>
+                <LowLimit>0</LowLimit>
+                <HighLimit>65535</HighLimit>
+                <Script>
+                    <Changed>
+		</Changed>
+                </Script>
+            </AfbElementParam>
+        </Params>
+        <CommonScript>
+            <Library>
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+            </Library>
+            <AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+            </AfterCreation>
+        </CommonScript>
+    </AfbElement>
+</ApplicationFunctionalBlocks>
