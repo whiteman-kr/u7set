@@ -3814,6 +3814,66 @@ namespace Builder
 				  .arg(lm));
 	}
 
+	/// IssueCode: EQP6005
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem list has duplicate SubsystemIDs %1.
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		Subsystem list has duplicate SubsystemIDs. All subsystems must have unique SubsystemID.
+	///
+	void IssueLogger::errEQP6005(QString subsystemId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6005,
+				  tr("Subsystem list has duplicate SubsystemIDs %1.")
+				  .arg(subsystemId));
+	}
+
+	/// IssueCode: EQP6006
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem list has duplicate ssKeys %1.
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		Subsystem list has duplicate ssKeys. All subsystems must have unique ssKeys.
+	///
+	void IssueLogger::errEQP6006(int subsystemKey)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6006,
+				  tr("Subsystem list has duplicate ssKeys %1.")
+				  .arg(subsystemKey));
+	}
+
+	/// IssueCode: EQP6007
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem %1 has distinct LogicModule type, version or LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile).
+	///
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
+	///
+	void IssueLogger::errEQP6007(QString subsystemId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6007,
+				  tr("Subsystem %1 has distinct LogicModule type, version or LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile).")
+				  .arg(subsystemId));
+	}
 
 	/// IssueCode: EQP6100
 	///

@@ -77,6 +77,9 @@ namespace Hardware
 		static const QString presetObjectUuid;
 
 		static const QString lmDescriptionFile;
+		static const QString lmNumber;
+		static const QString lmSubsystemChannel;
+		static const QString lmSubsystemID;
 
 		static const QString type;
 		static const QString function;

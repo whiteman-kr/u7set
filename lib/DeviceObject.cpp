@@ -103,6 +103,9 @@ namespace Hardware
 	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
 
 	const QString PropertyNames::lmDescriptionFile = "LmDescriptionFile";
+	const QString PropertyNames::lmNumber = "LMNumber";
+	const QString PropertyNames::lmSubsystemChannel = "SubsystemChannel";
+	const QString PropertyNames::lmSubsystemID = "SubsystemID";
 
 	const QString PropertyNames::type = "Type";
 	const QString PropertyNames::function = "Function";

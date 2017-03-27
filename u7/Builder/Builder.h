@@ -70,6 +70,10 @@ namespace Builder
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);
 
+		// Load subsystems
+		//
+		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems);
+
 		// Check same Uuids and same StrIds
 		//
 		bool checkUuidAndStrId(Hardware::DeviceObject* root);

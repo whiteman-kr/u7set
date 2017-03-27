@@ -23,9 +23,11 @@
 #include "MetrologyCfgGenerator.h"
 #include "IssueLogger.h"
 
+#include <functional>
+#include <set>
+
 #include <QBuffer>
 #include <QtConcurrent/QtConcurrent>
-#include <functional>
 
 
 
@@ -178,24 +180,6 @@ namespace Builder
 			}
 
 			//
-			// Loading subsystems
-			//
-			Hardware::SubsystemStorage subsystems;
-
-			QString errorCode;
-			ok = subsystems.load(&db, errorCode);
-
-			if (ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load subsystems file"));
-				if (errorCode.isEmpty() == false)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorCode);
-					break;
-				}
-			}
-
-			//
 			// Find all LM Modules and load their descriptions
 			//
 			LOG_EMPTY_LINE(m_log);
@@ -222,8 +206,29 @@ namespace Builder
 			}
 
 			//
+			// Loading subsystems
+			//
+			LOG_EMPTY_LINE(m_log);
+			LOG_MESSAGE(m_log, tr("Loading subsystems..."));
+
+			Hardware::SubsystemStorage subsystems;
+
+			ok = loadSubsystems(db, lmModules, &subsystems);
+
+			if (ok == false)
+			{
+				break;
+			}
+			else
+			{
+				LOG_SUCCESS(m_log, tr("Ok"));
+			}
+
+			//
 			// Loading connections
 			//
+			QString errorCode;
+
             Hardware::ConnectionStorage connections(&db, nullptr);
 
             ok = connections.load();
@@ -497,6 +502,148 @@ namespace Builder
 		device->expandEquipmentId();
 
 		return true;
+	}
+
+	bool BuildWorkerThread::loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicMoudles, Hardware::SubsystemStorage* subsystems)
+	{
+		if (subsystems == nullptr)
+		{
+			assert(subsystems);
+			return false;
+		}
+
+		QString errorCode;
+
+		bool ok = subsystems->load(&db, errorCode);
+
+		if (ok == false)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load subsystems file"));
+			if (errorCode.isEmpty() == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorCode);
+				return false;
+			}
+		}
+
+		// Check if subsystems have same id or sskey
+		//
+		std::set<QString> ids;
+		std::set<int> sskeys;
+
+		bool result = true;
+
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : subsystems->subsystems())
+		{
+			assert(subsystem);
+
+			if (ids.count(subsystem->subsystemId()) > 0)
+			{
+				// Duplicate SubsystemID
+				//
+				result = false;
+				m_log->errEQP6005(subsystem->subsystemId());
+			}
+			else
+			{
+				ids.insert(subsystem->subsystemId());
+			}
+
+			if (sskeys.count(subsystem->key()) > 0)
+			{
+				// Duplicate ssKey
+				//
+				result = false;
+				m_log->errEQP6006(subsystem->key());
+			}
+			else
+			{
+				sskeys.insert(subsystem->key());
+			}
+		}
+
+		// Check if all LMs in subsystem have the same version and LmDescriptionFile
+		//
+		for (std::shared_ptr<Hardware::Subsystem> subsystem : subsystems->subsystems())
+		{
+			assert(subsystem);
+
+			Hardware::DeviceModule::FamilyType moduleFamily = Hardware::DeviceModule::FamilyType::OTHER;
+			int moduleVersion = -1;
+			QString LmDescriptionFile;
+
+			for (const Hardware::DeviceModule* lm : logicMoudles)
+			{
+				assert(lm);
+				assert(lm->isLogicModule() == true);
+
+				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
+				if (lmSubsystemIdProp == nullptr)
+				{
+					m_log->errCFG3000(Hardware::PropertyNames::lmSubsystemID, lm->equipmentIdTemplate());
+					return false;
+				}
+
+				if (lmSubsystemIdProp->value() != subsystem->subsystemId())
+				{
+					continue;
+				}
+
+				// Check moduleFamily
+				//
+				if (moduleFamily == Hardware::DeviceModule::FamilyType::OTHER)
+				{
+					moduleFamily = lm->moduleFamily();			// Init start value
+				}
+				else
+				{
+					if (moduleFamily != lm->moduleFamily())
+					{
+						result = false;
+						m_log->errEQP6007(subsystem->subsystemId());
+					}
+				}
+
+				// Check moduleVersion
+				//
+				if (moduleVersion == -1)
+				{
+					moduleVersion = lm->moduleVersion();			// Init start value
+				}
+				else
+				{
+					if (moduleVersion != lm->moduleVersion())
+					{
+						result = false;
+						m_log->errEQP6007(subsystem->subsystemId());
+					}
+				}
+
+				// Check LmDescriptionFile
+				//
+				auto LmDescriptionFileProp = lm->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+				if (LmDescriptionFileProp == nullptr)
+				{
+					m_log->errCFG3000(Hardware::PropertyNames::lmDescriptionFile, lm->equipmentIdTemplate());
+					return false;
+				}
+
+				if (LmDescriptionFile.isEmpty() == true)
+				{
+					LmDescriptionFile = LmDescriptionFileProp->value().toString();	// Init start value
+				}
+				else
+				{
+					if (LmDescriptionFile != LmDescriptionFileProp->value().toString())
+					{
+						result = false;
+						m_log->errEQP6007(subsystem->subsystemId());
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 
 	bool BuildWorkerThread::checkUuidAndStrId(Hardware::DeviceObject* root)

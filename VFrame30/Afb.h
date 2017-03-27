@@ -169,7 +169,7 @@ namespace Afb
 		const QString& opName() const;
 		void setOpName(const QString& value);
 
-		const QString& caption() const;
+		Q_INVOKABLE QString caption() const;
 		Q_INVOKABLE QString jsCaption();
 		void setCaption(const QString& caption);
 

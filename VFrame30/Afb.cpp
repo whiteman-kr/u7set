@@ -446,7 +446,7 @@ namespace Afb
 	{
 		return caption();
 	}
-	const QString& AfbSignal::caption() const
+	QString AfbSignal::caption() const
 	{
 		return m_caption;
 	}

@@ -273,6 +273,10 @@ namespace Builder
 		void errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid);		//	Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.
 		void errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid);							//	file lmDescriptionFile is not found.
 
+		void errEQP6005(QString subsystemId);	//	Same SubystemIds in subsystems
+		void errEQP6006(int subsystemKey);		//	Same ssKey in subsystems
+		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
+
 		// Subset of EQP -- Generation Software Configuration
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
