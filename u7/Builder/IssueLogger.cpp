@@ -1514,6 +1514,36 @@ namespace Builder
 
 	}
 
+	/// IssueCode: ALP4019
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	///
+	/// Parameters:
+	///		%1 Schema item description
+	///		%2 UFB SchemaID
+	///		%3 Logic schema StrID
+	///		%4 UFBSchema LmDescriptionFile
+	///		%5 LogicSchema LmDescriptionFile
+	///
+	/// Description:
+	///		UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	///
+	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString UfbLmDecriptionFile, QString schemaLmDecriptionFile)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4019,
+				  tr("UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
+				  .arg(schemaItem)
+				  .arg(ufbElement)
+				  .arg(schema)
+				  .arg(UfbLmDecriptionFile)
+				  .arg(schemaLmDecriptionFile));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error

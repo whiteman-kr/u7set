@@ -40,6 +40,9 @@ namespace Hardware
 		int key() const;
 		void setKey(int value);
 
+	public:
+		static const int MaxKeyValue = 63;
+
 	private:
 		int m_index;
 		int m_key;

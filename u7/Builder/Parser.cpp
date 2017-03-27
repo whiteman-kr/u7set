@@ -1823,7 +1823,20 @@ namespace Builder
 
 				if (parsedUfb == nullptr)
 				{
+					// UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
+					//
 					log->errALP4009(item.m_schema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid());
+					result = false;
+					continue;
+				}
+
+				// Check: UfbSchema.LmDescriptionFile must be the same as in LogicSchema (or logic module here)
+				//
+				if (parsedUfb->lmDescriptionFile() != module->lmDescriptionFile())
+				{
+
+					log->errALP4019(item.m_schema->schemaId(), ufbItem->label(), ufbItem->ufbSchemaId(), ufbItem->guid(),
+									parsedUfb->lmDescriptionFile(), module->lmDescriptionFile());
 					result = false;
 					continue;
 				}
