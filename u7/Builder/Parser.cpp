@@ -1613,8 +1613,7 @@ namespace Builder
 		//
 		if (schema->lmDescriptionFile() != module->lmDescriptionFile())
 		{
-			log->errALP4018(schema->schemaId(), equipmentId, module->equipmentId(), schema->lmDescriptionFile());
-			result = false;
+			result = false;				// errALP4018 prevents it
 		}
 
 		// add new branch to module
@@ -2476,6 +2475,13 @@ namespace Builder
 			checkEquipmentIds(schema.get());
 		}
 
+		// Check LmDescriptionFile must be as in LogicModule
+		//
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
+		{
+			checkLmDescription(schema.get());
+		}
+
 		// Check SchemaItemAfb.afbElement versions
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
@@ -2894,6 +2900,71 @@ namespace Builder
 					ok = false;
 					continue;
 				}
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkLmDescription(VFrame30::LogicSchema* logicSchema)
+	{
+		if (logicSchema == nullptr ||
+			m_equipmentSet == nullptr)
+		{
+			assert(logicSchema);
+			assert(m_equipmentSet);
+
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1, Parser::m_equipmentSet %2")
+							  .arg(reinterpret_cast<size_t>(logicSchema))
+							  .arg(reinterpret_cast<size_t>(m_equipmentSet)));
+			return false;
+		}
+
+		QStringList equipmentIds = logicSchema->equipmentIdList();
+
+		bool ok = true;
+
+		for (QString eqid : equipmentIds)
+		{
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(eqid);
+
+			if (device == nullptr)
+			{
+				// EquipmentID '%1' is not found in the project equipment (Logic Schema '%2')
+				//
+				continue;	// The error will fire in another checks;
+			}
+
+			if (device->isModule() == false)
+			{
+				// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
+				//
+				continue;	// The error will fire in another checks;
+			}
+
+			Hardware::DeviceModule* module = device->toModule();
+			assert(module);
+
+			if (module == nullptr || module->isLogicModule() == false)
+			{
+				// It's not LM
+				//
+				continue;	// The error will fire in another checks;
+			}
+
+			// Is module, check if logicSchema->LmDescriptionFile is same with LogicModule
+			//
+			auto prop = module->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+			if (prop == nullptr)
+			{
+				continue;	// The error will fire in another checks;
+			}
+
+			if (prop->value() != logicSchema->lmDescriptionFile())
+			{
+				ok = false;
+
+				m_log->errALP4018(logicSchema->schemaId(), module->equipmentIdTemplate(), logicSchema->lmDescriptionFile(), prop->value().toString());
 			}
 		}
 

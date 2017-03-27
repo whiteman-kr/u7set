@@ -1490,7 +1490,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.
+	/// Title: LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%2 and %3).
 	///
 	/// Parameters:
 	///		%1 LogicModule EquipmentID
@@ -1499,18 +1499,19 @@ namespace Builder
 	///		%4 Schema
 	///
 	/// Description:
-	///		Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.
+	///		LogicSchema and assigned LogicModule must have the same value of LmDescriptionFile.
 	///
-	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString lmDecriptionFile1, QString lmDecriptionFile2)
+	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4018,
-				  tr("Schemas for the same LogicModule (%1) have different LmDescriptionFiles (%2 and %3), LogicSchema %4.")
+				  tr("LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%3 and %4).")
+					.arg(schema)
 					.arg(equipmentId)
-					.arg(lmDecriptionFile1)
-					.arg(lmDecriptionFile2)
-					.arg(schema));
+					.arg(schemaLmDecriptionFile1)
+					.arg(moduleLmDecriptionFile2));
+
 	}
 
 	/// IssueCode: ALP4020

@@ -269,6 +269,8 @@ namespace Builder
 
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
 
+		bool checkLmDescription(VFrame30::LogicSchema* logicSchema);
+
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
 		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
 								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
