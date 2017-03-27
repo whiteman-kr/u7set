@@ -160,11 +160,8 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT SchemaDetails
 	{
 	public:
-//		SchemaDetails();
-//		SchemaDetails(const SchemaDetails& src) = default;
-//		SchemaDetails(SchemaDetails&& r) = default;
-
-//		SchemaDetails& operator= (const SchemaDetails& src) = default;
+		SchemaDetails();
+		SchemaDetails(const QString& details);
 
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
@@ -172,19 +169,16 @@ namespace VFrame30
 		bool searchForString(const QString& searchText) const;
 
 	public:
-		// WARNING !!!! If add any new members, add them to the move construnctor;
-		//
 		int m_version = 0;
 		QString m_schemaId;
 		QString m_caption;
 		bool m_excludedFromBuild = false;
 		QString m_equipmentId;			// Valid for LogicSchemas
+		QString m_lmDescriptionFile;	// Valid for LogicSchemas and UfbSchemas
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
 		std::set<QUuid> m_guids;
-		// WARNING !!!! If add any new members, add them to the move construnctor;
-		//
 	};
 
 

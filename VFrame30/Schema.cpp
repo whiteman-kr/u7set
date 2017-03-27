@@ -965,9 +965,14 @@ namespace VFrame30
 	//
 	//
 
-//	SchemaDetails::SchemaDetails()
-//	{
-//	}
+	SchemaDetails::SchemaDetails()
+	{
+	}
+
+	SchemaDetails::SchemaDetails(const QString& details)
+	{
+		parseDetails(details);
+	}
 
 //	SchemaDetails::SchemaDetails(SchemaDetails&& src)
 //	{
@@ -1061,10 +1066,22 @@ namespace VFrame30
 
 		if (schema->isLogicSchema() == true)
 		{
-			assert(schema->toLogicSchema() != nullptr);
-			QString equipIds = schema->toLogicSchema()->equipmentIds();
+			const LogicSchema* logicSchema = schema->toLogicSchema();
+			assert(logicSchema);
+
+			QString equipIds = logicSchema->equipmentIds();
 			equipIds = equipIds.replace('\n', ' ');
 			jsonObject.insert("EquipmentID", QJsonValue(equipIds));
+
+			jsonObject.insert(PropertyNames::lmDescriptionFile, QJsonValue(logicSchema->lmDescriptionFile()));
+		}
+
+		if (schema->isUfbSchema() == true)
+		{
+			const UfbSchema* ufbSchema = schema->toUfbSchema();
+			assert(ufbSchema);
+
+			jsonObject.insert(PropertyNames::lmDescriptionFile, QJsonValue(ufbSchema->lmDescriptionFile()));
 		}
 
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
@@ -1150,6 +1167,18 @@ namespace VFrame30
 				else
 				{
 					m_equipmentId.clear();
+				}
+
+				// LmDescriptionFile
+				//
+				QJsonValue lmdescrValue = jsonObject.value(PropertyNames::lmDescriptionFile).toString();
+				if (lmdescrValue.isUndefined() == false)
+				{
+					m_lmDescriptionFile = lmdescrValue.toString();
+				}
+				else
+				{
+					m_lmDescriptionFile.clear();
 				}
 
 				// Signals

@@ -259,12 +259,12 @@ namespace Afb
 			return *this;
 		}
 
-		QDomDocument d;
-		QDomElement e = d.createElement(QLatin1String("Pin"));
-		that.saveToXml(&e);
-
-		QString errorMessage;
-		this->loadFromXml(e, &errorMessage);
+		m_opName = that.m_opName;
+		m_caption = that.m_caption;
+		m_type = that.m_type;
+		m_dataFormat = that.m_dataFormat;
+		m_operandIndex = that.m_operandIndex;
+		m_size = that.m_size;
 
 		return *this;
 	}

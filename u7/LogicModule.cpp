@@ -29,7 +29,7 @@ bool LogicModule::load(const QByteArray& file, QString* errorMessage)
 	int parseErrorLine = -1;
 	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(file, errorMessage, &parseErrorLine, &parseErrorColumn);
+	bool ok = doc.setContent(file, false, errorMessage, &parseErrorLine, &parseErrorColumn);
 	if (ok == false)
 	{
 		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));

@@ -7,14 +7,6 @@
 #include <QXmlStreamReader>
 #include <QDomElement>
 
-//namespace Afb
-//{
-//	//class AfbType;
-//}
-
-//bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
-//bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
-//bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
 
 namespace Afb
 {
@@ -88,63 +80,6 @@ namespace Afb
 		Last = MISMATCH,
 	};
 
-//	class VFRAME30LIBSHARED_EXPORT AfbType
-//	{
-//		friend bool ::operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
-//		friend bool ::operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
-//		friend bool ::operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
-
-//	public:
-//		// This type is actual OpCode from the Application Functional Block Library documentaion
-//		//
-//		enum Type
-//		{
-//			UNKNOWN = 0,
-//			LOGIC = 1,B
-//			NOT = 2,
-//			TCT = 3,
-//			FLIP_FLOP = 4,
-//			CTUD = 5,
-//			MAJ = 6,
-//			SRSST = 7,
-//			BCOD = 8,
-//			BDEC = 9,
-//			BCOMP = 10,
-//			DAMPER = 11,
-//			MEM = 12,
-//			MATH = 13,
-//			SCALE = 14,
-//			SCALE_P = 15,
-//			FUNC = 16,
-//			INT = 17,
-//			DPCOMP = 20,
-//			MUX = 21,
-//			LATCH = 22,
-//			LIM = 23,
-//			DEAD_ZONE = 24,
-//			POL = 25,
-//			DER = 26,
-//			MISMATCH = 27,
-//			First = LOGIC,
-//			Last = MISMATCH,
-//		};
-
-//		AfbType();
-//		AfbType(const AfbType& t);
-//		AfbType(AfbType::Type t);
-
-//		void fromOpCode(int opCode);
-//		int toOpCode() const;
-
-//		QString text() const;
-//		QString toText() const;
-//		static QString toText(int opCode);
-
-//	private:
-//		Type m_type;
-//	};
-
-
 	//
 	// AfbSignal
 	//
@@ -194,12 +129,16 @@ namespace Afb
 		// Data
 		//
 private:
+		// Operator= is present, don't forget to add new fields to it
+		//
 		QString m_opName;
 		QString m_caption;
 		E::SignalType m_type = E::SignalType::Analog;
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		int m_operandIndex = 0;
 		int m_size = 0;
+		// Operator= is present, don't forget to add new fields to it
+		//
 	};
 
 	//
@@ -313,8 +252,6 @@ private:
 
 		// Serialization
 		//
-		//friend Proto::ObjectSerialization<AfbElement>;
-
 	public:
 		bool loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg);
 //		bool loadFromXml(const QByteArray& data, QString &errorMsg);

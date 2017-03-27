@@ -4966,11 +4966,33 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 		return false;
 	}
 
+	// Get UFBs where LmDescriptionFile same with this chema
+	//
+	std::vector<DbFileInfo> filteredFileList;
+	filteredFileList.reserve(fileList.size());
+
+	if (schema()->isLogicSchema() == true)
+	{
+		for (const DbFileInfo& fi : fileList)
+		{
+			VFrame30::SchemaDetails details(fi.details());
+
+			if (details.m_lmDescriptionFile == schema()->toLogicSchema()->lmDescriptionFile())
+			{
+				filteredFileList.push_back(fi);
+			}
+		}
+	}
+	else
+	{
+		filteredFileList = fileList;
+	}
+
 	// Get UFBs latest version from the DB
 	//
 	std::vector<std::shared_ptr<DbFile>> files;
 
-	ok = db()->getLatestVersion(fileList, &files, this);
+	ok = db()->getLatestVersion(filteredFileList, &files, this);
 
 	if (ok == false)
 	{
