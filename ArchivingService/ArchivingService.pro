@@ -10,6 +10,7 @@ QT  -= gui
 QT  += widgets
 QT  += qml
 QT  += sql
+QT  += xml
 
 TARGET = ArchSrv
 CONFIG   += console

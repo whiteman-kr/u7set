@@ -273,6 +273,7 @@ namespace VFrame30
 
 		// --
 		//
+		adjustHeight();
 
 		return true;
 	}

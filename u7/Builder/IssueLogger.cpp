@@ -450,13 +450,13 @@ namespace Builder
 	///			%2 Object StrID
 	///
 	/// Description:
-	///			Occurs if a property does not exist an object
+	///			Occurs if a property does not exist in an object
 	///
 	void IssueLogger::errCFG3000(QString propertyName, QString object)
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3000,
-				  tr("Property '%1' does not exist in object '%2'.")
+				  tr("Property '%1' does not exist in an object '%2'.")
 				  .arg(propertyName)
 				  .arg(object));
 	}
@@ -1034,22 +1034,23 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').
+	/// Title: Property %1 for Schema is not set (LogicSchema '%2').
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
 	///
 	/// Description:
-	///		Property EquipmentIDs for an application logic schema is empty. To bind a schema to a Logic Module this field must be set
+	///		Some property for an application logic or user functional block schema is empty.
 	///		to the Logic Module EquipmentID.
 	///
-	void IssueLogger::errALP4001(QString schema)
+	void IssueLogger::errALP4001(QString schema, QString propertyName)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4001,
-				  tr("Property EquipmentIDs for Logic Schema is not set (LogicSchema '%1').")
+				  tr("Property %1 for Schema is not set (LogicSchema '%2').")
+				  .arg(propertyName)
 				  .arg(schema));
 	}
 
@@ -1413,6 +1414,136 @@ namespace Builder
 				  .arg(schema));
 	}
 
+	/// IssueCode: ALP4016
+	///
+	/// IssueType: Error
+	///
+	/// Title: File LmDescriptionFile %1 is not found (Schema '%2').
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		File LmDescriptionFile %1 is not found (Schema '%2').
+	///
+	void IssueLogger::errALP4016(QString schema, QString lmDecriptionFile)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4016,
+				  tr("File LmDescriptionFile %1 is not found (Schema '%2').")
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4017
+	///
+	/// IssueType: Error
+	///
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	/// Parameters:
+	///		%1 OpCode
+	///		%2 LmDescription filename
+	///		%3 Schema
+	///
+	/// Description:
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4017,
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+					.arg(opCode)
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4017
+	///
+	/// IssueType: Error
+	///
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	/// Parameters:
+	///		%1 OpCode
+	///		%2 LmDescription filename
+	///		%3 Schema
+	///
+	/// Description:
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///
+	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4017,
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+					.arg(opCode)
+					.arg(lmDecriptionFile)
+					.arg(schema));
+	}
+
+	/// IssueCode: ALP4018
+	///
+	/// IssueType: Error
+	///
+	/// Title: LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%2 and %3).
+	///
+	/// Parameters:
+	///		%1 LogicModule EquipmentID
+	///		%2 LmDescription filename 1
+	///		%3 LmDescription filename 2
+	///		%4 Schema
+	///
+	/// Description:
+	///		LogicSchema and assigned LogicModule must have the same value of LmDescriptionFile.
+	///
+	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4018,
+				  tr("LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%3 and %4).")
+					.arg(schema)
+					.arg(equipmentId)
+					.arg(schemaLmDecriptionFile1)
+					.arg(moduleLmDecriptionFile2));
+
+	}
+
+	/// IssueCode: ALP4019
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	///
+	/// Parameters:
+	///		%1 Schema item description
+	///		%2 UFB SchemaID
+	///		%3 Logic schema StrID
+	///		%4 UFBSchema LmDescriptionFile
+	///		%5 LogicSchema LmDescriptionFile
+	///
+	/// Description:
+	///		UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
+	///
+	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString UfbLmDecriptionFile, QString schemaLmDecriptionFile)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4019,
+				  tr("UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
+				  .arg(schemaItem)
+				  .arg(ufbElement)
+				  .arg(schema)
+				  .arg(UfbLmDecriptionFile)
+				  .arg(schemaLmDecriptionFile));
+	}
+
 	/// IssueCode: ALP4020
 	///
 	/// IssueType: Error
@@ -1484,7 +1615,6 @@ namespace Builder
 				  4022,
 				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
 	}
-
 
 	/// IssueCode: ALP4030
 	///
@@ -3712,6 +3842,90 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6004
+	///
+	/// IssueType: Error
+	///
+	/// Title: File LmDescriptionFile %1 is not found, LogicModule %2.
+	///
+	/// Parameters:
+	///		%1 LmDescriptionFile filename
+	///		%2 LogicModule EquipmentID
+	///
+	/// Description:
+	///		LogicModule has property LmDescriptionFile, but this file is missing in $(root)/AFBL.
+	///
+	void IssueLogger::errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6004,
+				  tr("File LmDescriptionFile %1 is not found, LogicModule %2.")
+				  .arg(lmDescriptionFile)
+				  .arg(lm));
+	}
+
+	/// IssueCode: EQP6005
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem list has duplicate SubsystemIDs %1.
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		Subsystem list has duplicate SubsystemIDs. All subsystems must have unique SubsystemID.
+	///
+	void IssueLogger::errEQP6005(QString subsystemId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6005,
+				  tr("Subsystem list has duplicate SubsystemIDs %1.")
+				  .arg(subsystemId));
+	}
+
+	/// IssueCode: EQP6006
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem list has duplicate ssKeys %1.
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		Subsystem list has duplicate ssKeys. All subsystems must have unique ssKeys.
+	///
+	void IssueLogger::errEQP6006(int subsystemKey)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6006,
+				  tr("Subsystem list has duplicate ssKeys %1.")
+				  .arg(subsystemKey));
+	}
+
+	/// IssueCode: EQP6007
+	///
+	/// IssueType: Error
+	///
+	/// Title: Subsystem %1 has distinct LogicModule type, version or LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile).
+	///
+	///
+	/// Parameters:
+	///		%1 Duplicate SubsystemID
+	///
+	/// Description:
+	///		All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
+	///
+	void IssueLogger::errEQP6007(QString subsystemId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6007,
+				  tr("Subsystem %1 has distinct LogicModule type, version or LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile).")
+				  .arg(subsystemId));
+	}
 
 	/// IssueCode: EQP6100
 	///

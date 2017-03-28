@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-QT       += network qml
+QT       += network qml xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

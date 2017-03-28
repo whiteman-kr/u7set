@@ -2181,18 +2181,34 @@ class LogicSchema : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 counter() const;
   inline void set_counter(::google::protobuf::int32 value);
 
+  // optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+  inline bool has_lmdescriptionfile() const;
+  inline void clear_lmdescriptionfile();
+  static const int kLmDescriptionFileFieldNumber = 3;
+  inline const ::std::string& lmdescriptionfile() const;
+  inline void set_lmdescriptionfile(const ::std::string& value);
+  inline void set_lmdescriptionfile(const char* value);
+  inline void set_lmdescriptionfile(const char* value, size_t size);
+  inline ::std::string* mutable_lmdescriptionfile();
+  inline ::std::string* release_lmdescriptionfile();
+  inline void set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile);
+
   // @@protoc_insertion_point(class_scope:Proto.LogicSchema)
  private:
   inline void set_has_counter();
   inline void clear_has_counter();
+  inline void set_has_lmdescriptionfile();
+  inline void clear_has_lmdescriptionfile();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::wstring > equipmentids_;
+  ::std::string* lmdescriptionfile_;
+  static ::std::string* _default_lmdescriptionfile_;
   ::google::protobuf::int32 counter_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -2276,20 +2292,36 @@ class UfbSchema : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 version() const;
   inline void set_version(::google::protobuf::int32 value);
 
+  // optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+  inline bool has_lmdescriptionfile() const;
+  inline void clear_lmdescriptionfile();
+  static const int kLmDescriptionFileFieldNumber = 3;
+  inline const ::std::string& lmdescriptionfile() const;
+  inline void set_lmdescriptionfile(const ::std::string& value);
+  inline void set_lmdescriptionfile(const char* value);
+  inline void set_lmdescriptionfile(const char* value, size_t size);
+  inline ::std::string* mutable_lmdescriptionfile();
+  inline ::std::string* release_lmdescriptionfile();
+  inline void set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile);
+
   // @@protoc_insertion_point(class_scope:Proto.UfbSchema)
  private:
   inline void set_has_description();
   inline void clear_has_description();
   inline void set_has_version();
   inline void clear_has_version();
+  inline void set_has_lmdescriptionfile();
+  inline void clear_has_lmdescriptionfile();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* description_;
+  ::std::string* lmdescriptionfile_;
+  static ::std::string* _default_lmdescriptionfile_;
   ::google::protobuf::int32 version_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4584,14 +4616,14 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 precision() const;
   inline void set_precision(::google::protobuf::int32 value);
 
-  // optional .Proto.AfbElementXml afbelement = 5;
-  inline bool has_afbelement() const;
-  inline void clear_afbelement();
-  static const int kAfbelementFieldNumber = 5;
-  inline const ::Proto::AfbElementXml& afbelement() const;
-  inline ::Proto::AfbElementXml* mutable_afbelement();
-  inline ::Proto::AfbElementXml* release_afbelement();
-  inline void set_allocated_afbelement(::Proto::AfbElementXml* afbelement);
+  // optional .Proto.AfbElementXml deprecated_afbelement = 5;
+  inline bool has_deprecated_afbelement() const;
+  inline void clear_deprecated_afbelement();
+  static const int kDeprecatedAfbelementFieldNumber = 5;
+  inline const ::Proto::AfbElementXml& deprecated_afbelement() const;
+  inline ::Proto::AfbElementXml* mutable_deprecated_afbelement();
+  inline ::Proto::AfbElementXml* release_deprecated_afbelement();
+  inline void set_allocated_deprecated_afbelement(::Proto::AfbElementXml* deprecated_afbelement);
 
   // optional string deprecated_label = 6;
   inline bool has_deprecated_label() const;
@@ -4605,27 +4637,39 @@ class SchemaItemAfb : public ::google::protobuf::Message {
   inline ::std::string* release_deprecated_label();
   inline void set_allocated_deprecated_label(::std::string* deprecated_label);
 
+  // optional .Proto.AfbElementXml afbelement = 7;
+  inline bool has_afbelement() const;
+  inline void clear_afbelement();
+  static const int kAfbelementFieldNumber = 7;
+  inline const ::Proto::AfbElementXml& afbelement() const;
+  inline ::Proto::AfbElementXml* mutable_afbelement();
+  inline ::Proto::AfbElementXml* release_afbelement();
+  inline void set_allocated_afbelement(::Proto::AfbElementXml* afbelement);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemAfb)
  private:
   inline void set_has_afbstrid();
   inline void clear_has_afbstrid();
   inline void set_has_precision();
   inline void clear_has_precision();
-  inline void set_has_afbelement();
-  inline void clear_has_afbelement();
+  inline void set_has_deprecated_afbelement();
+  inline void clear_has_deprecated_afbelement();
   inline void set_has_deprecated_label();
   inline void clear_has_deprecated_label();
+  inline void set_has_afbelement();
+  inline void clear_has_afbelement();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::Proto::wstring* afbstrid_;
-  ::Proto::AfbElementXml* afbelement_;
+  ::Proto::AfbElementXml* deprecated_afbelement_;
   ::std::string* deprecated_label_;
+  ::Proto::AfbElementXml* afbelement_;
   ::google::protobuf::int32 precision_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -10377,6 +10421,76 @@ inline void LogicSchema::set_counter(::google::protobuf::int32 value) {
   counter_ = value;
 }
 
+// optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+inline bool LogicSchema::has_lmdescriptionfile() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void LogicSchema::set_has_lmdescriptionfile() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void LogicSchema::clear_has_lmdescriptionfile() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void LogicSchema::clear_lmdescriptionfile() {
+  if (lmdescriptionfile_ != _default_lmdescriptionfile_) {
+    lmdescriptionfile_->assign(*_default_lmdescriptionfile_);
+  }
+  clear_has_lmdescriptionfile();
+}
+inline const ::std::string& LogicSchema::lmdescriptionfile() const {
+  return *lmdescriptionfile_;
+}
+inline void LogicSchema::set_lmdescriptionfile(const ::std::string& value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void LogicSchema::set_lmdescriptionfile(const char* value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void LogicSchema::set_lmdescriptionfile(const char* value, size_t size) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* LogicSchema::mutable_lmdescriptionfile() {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string(*_default_lmdescriptionfile_);
+  }
+  return lmdescriptionfile_;
+}
+inline ::std::string* LogicSchema::release_lmdescriptionfile() {
+  clear_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmdescriptionfile_;
+    lmdescriptionfile_ = const_cast< ::std::string*>(_default_lmdescriptionfile_);
+    return temp;
+  }
+}
+inline void LogicSchema::set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile) {
+  if (lmdescriptionfile_ != _default_lmdescriptionfile_) {
+    delete lmdescriptionfile_;
+  }
+  if (lmdescriptionfile) {
+    set_has_lmdescriptionfile();
+    lmdescriptionfile_ = lmdescriptionfile;
+  } else {
+    clear_has_lmdescriptionfile();
+    lmdescriptionfile_ = const_cast< ::std::string*>(_default_lmdescriptionfile_);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // UfbSchema
@@ -10471,6 +10585,76 @@ inline ::google::protobuf::int32 UfbSchema::version() const {
 inline void UfbSchema::set_version(::google::protobuf::int32 value) {
   set_has_version();
   version_ = value;
+}
+
+// optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
+inline bool UfbSchema::has_lmdescriptionfile() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void UfbSchema::set_has_lmdescriptionfile() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void UfbSchema::clear_has_lmdescriptionfile() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void UfbSchema::clear_lmdescriptionfile() {
+  if (lmdescriptionfile_ != _default_lmdescriptionfile_) {
+    lmdescriptionfile_->assign(*_default_lmdescriptionfile_);
+  }
+  clear_has_lmdescriptionfile();
+}
+inline const ::std::string& UfbSchema::lmdescriptionfile() const {
+  return *lmdescriptionfile_;
+}
+inline void UfbSchema::set_lmdescriptionfile(const ::std::string& value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void UfbSchema::set_lmdescriptionfile(const char* value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void UfbSchema::set_lmdescriptionfile(const char* value, size_t size) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* UfbSchema::mutable_lmdescriptionfile() {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    lmdescriptionfile_ = new ::std::string(*_default_lmdescriptionfile_);
+  }
+  return lmdescriptionfile_;
+}
+inline ::std::string* UfbSchema::release_lmdescriptionfile() {
+  clear_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == _default_lmdescriptionfile_) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmdescriptionfile_;
+    lmdescriptionfile_ = const_cast< ::std::string*>(_default_lmdescriptionfile_);
+    return temp;
+  }
+}
+inline void UfbSchema::set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile) {
+  if (lmdescriptionfile_ != _default_lmdescriptionfile_) {
+    delete lmdescriptionfile_;
+  }
+  if (lmdescriptionfile) {
+    set_has_lmdescriptionfile();
+    lmdescriptionfile_ = lmdescriptionfile;
+  } else {
+    clear_has_lmdescriptionfile();
+    lmdescriptionfile_ = const_cast< ::std::string*>(_default_lmdescriptionfile_);
+  }
 }
 
 // -------------------------------------------------------------------
@@ -13092,41 +13276,41 @@ inline void SchemaItemAfb::set_precision(::google::protobuf::int32 value) {
   precision_ = value;
 }
 
-// optional .Proto.AfbElementXml afbelement = 5;
-inline bool SchemaItemAfb::has_afbelement() const {
+// optional .Proto.AfbElementXml deprecated_afbelement = 5;
+inline bool SchemaItemAfb::has_deprecated_afbelement() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void SchemaItemAfb::set_has_afbelement() {
+inline void SchemaItemAfb::set_has_deprecated_afbelement() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void SchemaItemAfb::clear_has_afbelement() {
+inline void SchemaItemAfb::clear_has_deprecated_afbelement() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void SchemaItemAfb::clear_afbelement() {
-  if (afbelement_ != NULL) afbelement_->::Proto::AfbElementXml::Clear();
-  clear_has_afbelement();
+inline void SchemaItemAfb::clear_deprecated_afbelement() {
+  if (deprecated_afbelement_ != NULL) deprecated_afbelement_->::Proto::AfbElementXml::Clear();
+  clear_has_deprecated_afbelement();
 }
-inline const ::Proto::AfbElementXml& SchemaItemAfb::afbelement() const {
-  return afbelement_ != NULL ? *afbelement_ : *default_instance_->afbelement_;
+inline const ::Proto::AfbElementXml& SchemaItemAfb::deprecated_afbelement() const {
+  return deprecated_afbelement_ != NULL ? *deprecated_afbelement_ : *default_instance_->deprecated_afbelement_;
 }
-inline ::Proto::AfbElementXml* SchemaItemAfb::mutable_afbelement() {
-  set_has_afbelement();
-  if (afbelement_ == NULL) afbelement_ = new ::Proto::AfbElementXml;
-  return afbelement_;
+inline ::Proto::AfbElementXml* SchemaItemAfb::mutable_deprecated_afbelement() {
+  set_has_deprecated_afbelement();
+  if (deprecated_afbelement_ == NULL) deprecated_afbelement_ = new ::Proto::AfbElementXml;
+  return deprecated_afbelement_;
 }
-inline ::Proto::AfbElementXml* SchemaItemAfb::release_afbelement() {
-  clear_has_afbelement();
-  ::Proto::AfbElementXml* temp = afbelement_;
-  afbelement_ = NULL;
+inline ::Proto::AfbElementXml* SchemaItemAfb::release_deprecated_afbelement() {
+  clear_has_deprecated_afbelement();
+  ::Proto::AfbElementXml* temp = deprecated_afbelement_;
+  deprecated_afbelement_ = NULL;
   return temp;
 }
-inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbelement) {
-  delete afbelement_;
-  afbelement_ = afbelement;
-  if (afbelement) {
-    set_has_afbelement();
+inline void SchemaItemAfb::set_allocated_deprecated_afbelement(::Proto::AfbElementXml* deprecated_afbelement) {
+  delete deprecated_afbelement_;
+  deprecated_afbelement_ = deprecated_afbelement;
+  if (deprecated_afbelement) {
+    set_has_deprecated_afbelement();
   } else {
-    clear_has_afbelement();
+    clear_has_deprecated_afbelement();
   }
 }
 
@@ -13197,6 +13381,44 @@ inline void SchemaItemAfb::set_allocated_deprecated_label(::std::string* depreca
   } else {
     clear_has_deprecated_label();
     deprecated_label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.AfbElementXml afbelement = 7;
+inline bool SchemaItemAfb::has_afbelement() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemAfb::set_has_afbelement() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemAfb::clear_has_afbelement() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemAfb::clear_afbelement() {
+  if (afbelement_ != NULL) afbelement_->::Proto::AfbElementXml::Clear();
+  clear_has_afbelement();
+}
+inline const ::Proto::AfbElementXml& SchemaItemAfb::afbelement() const {
+  return afbelement_ != NULL ? *afbelement_ : *default_instance_->afbelement_;
+}
+inline ::Proto::AfbElementXml* SchemaItemAfb::mutable_afbelement() {
+  set_has_afbelement();
+  if (afbelement_ == NULL) afbelement_ = new ::Proto::AfbElementXml;
+  return afbelement_;
+}
+inline ::Proto::AfbElementXml* SchemaItemAfb::release_afbelement() {
+  clear_has_afbelement();
+  ::Proto::AfbElementXml* temp = afbelement_;
+  afbelement_ = NULL;
+  return temp;
+}
+inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbelement) {
+  delete afbelement_;
+  afbelement_ = afbelement;
+  if (afbelement) {
+    set_has_afbelement();
+  } else {
+    clear_has_afbelement();
   }
 }
 

@@ -198,16 +198,19 @@ void DialogAfblEditor::on_m_add_clicked()
 
 	// Store and add to the database
 
-	QByteArray byteArray;
-	QXmlStreamWriter xmlWriter(&byteArray);
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	assert(false);	// Implement
 
-	afb.saveToXml(&xmlWriter);
+//	QByteArray byteArray;
+//	QXmlStreamWriter xmlWriter(&byteArray);
 
-    std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
-    pf->setFileName(caption + ".afb");
-    pf->swapData(byteArray);
+//	afb.saveToXml(&xmlWriter);
 
-	addFile(pf);
+//    std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
+//    pf->setFileName(caption + ".afb");
+//    pf->swapData(byteArray);
+
+//	addFile(pf);
 }
 
 void DialogAfblEditor::on_m_addXsd_clicked()

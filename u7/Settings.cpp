@@ -68,10 +68,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
-    s.setValue("Connection/pos", m_connectionPropertiesWindowPos);
-    s.setValue("Connection/geometry", m_connectionPropertiesWindowGeometry);
-    s.setValue("Connection/Splitter/state", m_connectionSplitterState);
-
 	s.setValue("ConnectionEditor/pos", m_connectionEditorWindowPos);
 	s.setValue("ConnectionEditor/geometry", m_connectionEditorWindowGeometry);
     s.setValue("ConnectionEditor/splitter", m_connectionEditorSplitterState);
@@ -81,6 +77,8 @@ void Settings::writeUserScope() const
 	s.setValue("ConnectionEditor/sortOrder", static_cast<int>(m_connectionEditorSortOrder));
 
 	s.setValue("ConnectionEditor/masks", m_connectionEditorMasks);
+
+	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
 	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
 	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
@@ -152,16 +150,8 @@ void Settings::loadUserScope()
 	m_connectionEditorSortOrder = static_cast<Qt::SortOrder>(s.value("ConnectionEditor/sortOrder").toInt());
 	m_connectionEditorMasks = s.value("ConnectionEditor/masks").toStringList();
 
-    m_connectionPropertiesWindowPos = s.value("Connection/pos", QPoint(-1, -1)).toPoint();
-    m_connectionPropertiesWindowGeometry = s.value("Connection/geometry").toByteArray();
-
-    m_connectionSplitterState = s.value("Connection/Splitter/state").toInt();
-    if (m_connectionSplitterState < 150)
-	{
-        m_connectionSplitterState = 150;
-	}
-
     //
+	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
 
 	m_schemaItemPropertiesWindowPos = s.value("SchemaItem/pos", QPoint(-1, -1)).toPoint();
 	m_schemaItemPropertiesWindowGeometry = s.value("SchemaItem/geometry").toByteArray();

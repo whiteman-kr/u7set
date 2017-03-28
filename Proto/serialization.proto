@@ -307,6 +307,7 @@ message LogicSchema
 {
 	repeated wstring equipmentids = 1;
 	optional int32 counter = 2 [default = 0];
+	optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
 }
 
 //
@@ -318,6 +319,7 @@ message UfbSchema
 {
     optional string description = 1;
 	optional int32 version = 2 [default = 1];
+	optional string lmDescriptionFile = 3 [default = "LogicModule0000.xml"];
 }
 
 
@@ -601,8 +603,9 @@ message SchemaItemAfb
 	repeated AfbParam params = 2;					// NOT USED anymore, keep it for a while, RPCT-812
 	optional wstring afbStrid = 3;					// NOT USED anymore, keep it for a while, RPCT-812
 	optional int32 precision = 4 [default = 2];
-	optional AfbElementXml afbelement = 5;			// RPCT-812
-	optional string deprecated_label = 6;			// Don't use 6 anymore
+	optional AfbElementXml deprecated_afbelement = 5;	// Old formatted XML for AFB, use now afbelement = 7
+	optional string deprecated_label = 6;				// Don't use 6 anymore
+	optional AfbElementXml afbelement = 7;
 }
 
 //

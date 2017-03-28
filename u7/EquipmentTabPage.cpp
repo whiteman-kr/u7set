@@ -2119,7 +2119,7 @@ void EquipmentView::addInOutsToSignals()
 
 	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
 
-	if (module == nullptr || (module->isIOModule() == false && module->isLM() == false))
+	if (module == nullptr || (module->isIOModule() == false && module->isLogicModule() == false))
 	{
 		assert(module);
 		return;
@@ -2329,7 +2329,7 @@ void EquipmentView::addAppSignal()
 
 	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
 
-	if (module == nullptr || module->isLM() == false)
+	if (module == nullptr || module->isLogicModule() == false)
 	{
 		assert(module);
 		return;
@@ -3960,13 +3960,13 @@ void EquipmentTabPage::setActionState()
 
 		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
 
-		if (module != nullptr && (module->isIOModule() == true || module->isLM()))
+		if (module != nullptr && (module->isIOModule() == true || module->isLogicModule()))
 		{
 			m_inOutsToSignals->setEnabled(true);
 			m_inOutsToSignals->setVisible(true);
 		}
 
-		if (module != nullptr && module->isLM())
+		if (module != nullptr && module->isLogicModule())
 		{
 			m_addAppSignal->setEnabled(true);
 			m_addAppSignal->setVisible(true);

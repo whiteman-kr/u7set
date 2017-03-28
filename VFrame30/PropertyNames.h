@@ -42,6 +42,9 @@ namespace VFrame30
 		static const QString userText;
 		static const QString userTextPos;
 
+		static const QString equipmentIds;
+		static const QString lmDescriptionFile;
+
 		static const QString ufbSchemaId;
 		static const QString ufbSchemaVersion;
 

@@ -12,6 +12,7 @@
 namespace Builder
 {
 	class ApplicationLogicCompiler;
+	struct LmDescriptionSet;
 
 	typedef bool (ApplicationLogicCompiler::*ApplicationLogicCompilerProc)(void);
 
@@ -25,7 +26,7 @@ namespace Builder
 								 Hardware::OptoModuleStorage* optoModuleStorage,
 								 Hardware::ConnectionStorage* connections,
 								 SignalSet* signalSet,
-								 Afb::AfbElementCollection* afblSet,
+								 LmDescriptionSet* lmDescriptions,
 								 AppLogicData* appLogicData,
 								 Tuning::TuningDataStorage* tuningDataStorage,
 								 BuildResultWriter* buildResultWriter,
@@ -65,7 +66,7 @@ namespace Builder
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
-		Afb::AfbElementCollection* m_afbl = nullptr;
+		LmDescriptionSet* m_lmDescriptions = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;

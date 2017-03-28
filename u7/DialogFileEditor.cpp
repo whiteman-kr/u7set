@@ -268,26 +268,29 @@ bool DialogFileEditor::validate(int schemaFileId)
 
 void DialogFileEditor::on_btnLoadFbl_clicked()
 {
-	if (m_pData == nullptr)
-	{
-		Q_ASSERT(m_pData);
-		return;
-	}
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	assert(false);
 
-	Afb::AfbElement afb;
+//	if (m_pData == nullptr)
+//	{
+//		Q_ASSERT(m_pData);
+//		return;
+//	}
 
-	QString s = ui->m_text->toPlainText();
-	QByteArray textData = s.toUtf8();
+//	Afb::AfbElement afb;
 
-	QXmlStreamReader xmlReader(textData);
+//	QString s = ui->m_text->toPlainText();
+//	QByteArray textData = s.toUtf8();
 
-	if (afb.loadFromXml(&xmlReader) == true)
-	{
-        QMessageBox::information(this, "XML Read", "XML debug read finished!");
-	}
-	else
-	{
-		QMessageBox::critical(this, "XML Read Error", xmlReader.errorString());
-	}
+//	QXmlStreamReader xmlReader(textData);
+
+//	if (afb.loadFromXml(&xmlReader) == true)
+//	{
+//        QMessageBox::information(this, "XML Read", "XML debug read finished!");
+//	}
+//	else
+//	{
+//		QMessageBox::critical(this, "XML Read Error", xmlReader.errorString());
+//	}
 
 }

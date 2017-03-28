@@ -3,6 +3,7 @@ QT  -= gui
 QT  += network
 QT  += widgets
 QT  += qml
+QT  += xml
 
 TARGET = AppDataSrv
 CONFIG += console

@@ -4,6 +4,8 @@
 #include "../lib/Crc.h"
 #include "Connection.h"
 #include "../TuningIPEN/TuningIPENDataStorage.h"
+#include "Parser.h"
+#include "Builder.h"
 
 namespace Builder
 {
@@ -27,7 +29,9 @@ namespace Builder
 		m_equipmentSet = appLogicCompiler.m_equipmentSet;
 		m_deviceRoot = m_equipmentSet->root();
 		m_signals = appLogicCompiler.m_signals;
-		m_afbl = appLogicCompiler.m_afbl;
+
+		m_lmDescription = appLogicCompiler.m_lmDescriptions->get(lm);
+
 		m_appLogicData = appLogicCompiler.m_appLogicData;
 		m_resultWriter = appLogicCompiler.m_resultWriter;
 		m_log = appLogicCompiler.m_log;
@@ -362,62 +366,86 @@ namespace Builder
 		bool result = true;
 
 		MemoryArea m_moduleData;
+		m_moduleData.setStartAddress(m_lmDescription->memory().moduleDataOffset);
+		m_moduleData.setSizeW(m_lmDescription->memory().moduleDataSize);
+
 		MemoryArea m_optoInterfaceData;
+		m_optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().optoInterfaceDataOffset);
+
 		MemoryArea m_appLogicBitData;
+		m_appLogicBitData.setStartAddress(m_lmDescription->memory().appLogicBitDataOffset);
+		m_appLogicBitData.setSizeW(m_lmDescription->memory().appLogicBitDataSize);
+
 		MemoryArea m_tuningData;
+		m_tuningData.setStartAddress(m_lmDescription->memory().tuningDataOffset);
+		m_tuningData.setSizeW(m_lmDescription->memory().tuningDataSize);
+
 		MemoryArea m_appLogicWordData;
+		m_appLogicWordData.setStartAddress(m_lmDescription->memory().appLogicWordDataOffset);
+		m_appLogicWordData.setSizeW(m_lmDescription->memory().appLogicWordDataSize);
+
 		MemoryArea m_lmDiagData;
+		m_lmDiagData.setStartAddress(m_lmDescription->memory().txDiagDataOffset);
+		m_lmDiagData.setSizeW(m_lmDescription->memory().txDiagDataSize);
+
 		MemoryArea m_lmAppData;
+		m_lmAppData.setStartAddress(m_lmDescription->memory().appDataOffset);
+		m_lmAppData.setSizeW(m_lmDescription->memory().appDataSize);
 
-		const DeviceHelper::IntPropertyNameVar memSettings[] =
-		{
-			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
-			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
+//		const DeviceHelper::IntPropertyNameVar memSettings[] =
+//		{
+//			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
+//			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
 
-			{	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
+//			{	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
 
-			{	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
-			{	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
+//			{	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
+//			{	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
 
-			{	"TuningDataOffset", m_tuningData.ptrStartAddress() },
-			{	"TuningDataSize", m_tuningData.ptrSizeW() },
+//			{	"TuningDataOffset", m_tuningData.ptrStartAddress() },
+//			{	"TuningDataSize", m_tuningData.ptrSizeW() },
 
-			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
-			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
+//			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
+//			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
 
-			{	"TxDiagDataOffset", m_lmDiagData.ptrStartAddress() },
-			{	"TxDiagDataSize", m_lmDiagData.ptrSizeW() },
+//			{	"TxDiagDataOffset", m_lmDiagData.ptrStartAddress() },
+//			{	"TxDiagDataSize", m_lmDiagData.ptrSizeW() },
 
-			{	"AppDataOffset", m_lmAppData.ptrStartAddress() },
-			{	"AppDataSize", m_lmAppData.ptrSizeW() }
-		};
+//			{	"AppDataOffset", m_lmAppData.ptrStartAddress() },
+//			{	"AppDataSize", m_lmAppData.ptrSizeW() }
+//		};
 
-		for(DeviceHelper::IntPropertyNameVar memSetting : memSettings)
-		{
-			result &= getLMIntProperty(memSetting.name, memSetting.var);
-		}
+//		for(DeviceHelper::IntPropertyNameVar memSetting : memSettings)
+//		{
+//			result &= getLMIntProperty(memSetting.name, memSetting.var);
+//		}
 
-		if (result == true)
-		{
-			m_memoryMap.init(m_moduleData,
-							 m_optoInterfaceData,
-							 m_appLogicBitData,
-							 m_tuningData,
-							 m_appLogicWordData,
-							 m_lmDiagData,
-							 m_lmAppData);
+		m_memoryMap.init(m_moduleData,
+						 m_optoInterfaceData,
+						 m_appLogicBitData,
+						 m_tuningData,
+						 m_appLogicWordData,
+						 m_lmDiagData,
+						 m_lmAppData);
 
-			m_code.setMemoryMap(&m_memoryMap, m_log);
-		}
+		m_code.setMemoryMap(&m_memoryMap, m_log);
 
-		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
-		result &= getLMIntProperty("ALPPhaseTime", &m_lmALPPhaseTime);
-		result &= getLMIntProperty("IDRPhaseTime", &m_lmIDRPhaseTime);
+		m_lmClockFrequency = m_lmDescription->logicUnit().clockFrequency;
+		m_lmALPPhaseTime = m_lmDescription->logicUnit().alpPhaseTime;
+		m_lmIDRPhaseTime = m_lmDescription->logicUnit().idrPhaseTime;
+		m_lmCycleDuration = m_lmDescription->logicUnit().cycleDuration;
 
-		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
-		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);
+		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().appLogicFrameSize;
+		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().appLogicFrameCount;
 
-		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
+//		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
+//		result &= getLMIntProperty("ALPPhaseTime", &m_lmALPPhaseTime);
+//		result &= getLMIntProperty("IDRPhaseTime", &m_lmIDRPhaseTime);
+
+//		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
+//		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);
+
+//		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
@@ -5183,7 +5211,7 @@ namespace Builder
 		{
 			bool fbFound = false;
 
-			for(std::shared_ptr<Afb::AfbElement> afbElement : m_afbl->elements())
+			for(std::shared_ptr<Afb::AfbElement> afbElement : m_lmDescription->afbs())
 			{
 				if (afbElement->caption() != fbCaption)
 				{
@@ -5609,7 +5637,7 @@ namespace Builder
 	{
 		m_afbs.clear();
 
-		for(std::shared_ptr<Afb::AfbElement> afbl : m_afbl->elements())
+		for(std::shared_ptr<Afb::AfbElement> afbl : m_lmDescription->afbs())
 		{
 			m_afbs.insert(afbl);
 		}
@@ -6531,9 +6559,9 @@ namespace Builder
 
 		// initialize map Fbl opCode -> current instance
 		//
-		if (!m_fblInstance.contains(logicAfb->type().toOpCode()))
+		if (!m_fblInstance.contains(logicAfb->opCode()))
 		{
-			m_fblInstance.insert(logicAfb->type().toOpCode(), 0);
+			m_fblInstance.insert(logicAfb->opCode(), 0);
 		}
 
 		// add AfbElement in/out signals to m_fblsSignals map
@@ -6633,15 +6661,15 @@ namespace Builder
 
 		if (fbl->hasRam())
 		{
-			Afb::AfbType afbType = fbl->type();
+			int opCode = fbl->opCode();
 
-			if (m_fblInstance.contains(afbType.toOpCode()))
+			if (m_fblInstance.contains(opCode))
 			{
-				instance = m_fblInstance[afbType.toOpCode()];
+				instance = m_fblInstance[opCode];
 
 				instance++;
 
-				m_fblInstance[afbType.toOpCode()] = instance;
+				m_fblInstance[opCode] = instance;
 
 				m_nonRamFblInstance.insert(instantiatorID, instance);
 			}
@@ -6660,15 +6688,14 @@ namespace Builder
 			}
 			else
 			{
-				Afb::AfbType afbType = fbl->type();
-
-				if (m_fblInstance.contains(afbType.toOpCode()))
+				int opCode = fbl->opCode();
+				if (m_fblInstance.contains(opCode))
 				{
-					instance = m_fblInstance[afbType.toOpCode()];
+					instance = m_fblInstance[opCode];
 
 					instance++;
 
-					m_fblInstance[afbType.toOpCode()] = instance;
+					m_fblInstance[opCode] = instance;
 
 					m_nonRamFblInstance.insert(instantiatorID, instance);
 				}
@@ -6731,7 +6758,7 @@ namespace Builder
 	// AppItem class implementation
 	//
 
-	AppItem::AppItem(const Builder::AppLogicItem &appLogicItem) :
+	AppItem::AppItem(const AppLogicItem& appLogicItem) :
 		m_appLogicItem(appLogicItem)
 	{
 	}
