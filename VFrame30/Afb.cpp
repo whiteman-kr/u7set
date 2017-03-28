@@ -998,7 +998,7 @@ namespace Afb
 
 				if (sc.isNull() == false)
 				{
-					m_changedScript = sc.text();
+					m_changedScript = sc.text().trimmed();
 				}
 			}
 		}
@@ -1293,7 +1293,7 @@ namespace Afb
 
 	void AfbParam::setChangedScript(const QString &value)
 	{
-		m_changedScript = value;
+		m_changedScript = value.trimmed();
 	}
 
 	QString AfbParam::units() const
@@ -1343,7 +1343,6 @@ namespace Afb
 
 	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg)
 	{
-		// Debug it!!!!!!!!!!!!!!!!!!!!!!!1
 		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
 
 		QDomDocument doc;
@@ -1358,19 +1357,6 @@ namespace Afb
 
 		return result;
 	}
-
-//	bool AfbElement::loadFromXml(const QByteArray& data, QString& errorMsg)
-//	{
-//		QXmlStreamReader reader(data);
-//		bool result = loadFromXml(&reader);
-
-//		errorMsg.clear();
-//		if (result == false)
-//		{
-//			errorMsg = reader.errorString();
-//		}
-//		return result;
-//	}
 
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
@@ -1602,7 +1588,7 @@ namespace Afb
 
 				if (libraryElement.isNull() == false)
 				{
-					m_libraryScript = libraryElement.text();
+					m_libraryScript = libraryElement.text().trimmed();
 				}
 
 				// Section <AfterCreation>
@@ -1611,7 +1597,7 @@ namespace Afb
 
 				if (afterCreationElement.isNull() == false)
 				{
-					m_afterCreationScript = afterCreationElement.text();
+					m_afterCreationScript = afterCreationElement.text().trimmed();
 				}
 			}
 		}
@@ -2011,7 +1997,7 @@ namespace Afb
 
 	void AfbElement::setLibraryScript(const QString& value)
 	{
-		m_libraryScript = value;
+		m_libraryScript = value.trimmed();
 	}
 
 	QString AfbElement::afterCreationScript() const
@@ -2021,7 +2007,7 @@ namespace Afb
 
 	void AfbElement::setAfterCreationScript(const QString& value)
 	{
-		m_afterCreationScript = value;
+		m_afterCreationScript = value.trimmed();
 	}
 
 	// InputSignals

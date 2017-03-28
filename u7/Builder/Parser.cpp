@@ -524,11 +524,6 @@ namespace Builder
 			return false;
 		}
 
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TO DO
-		// Check if schema->LmDescriptionFile is same as here
-		//
-
-
 		// Create a copy of bushcontainer, as in case of processing multisignlas in multichannel schemas
 		// these multisignals will be created for all channels
 		//

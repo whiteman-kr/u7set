@@ -2,8 +2,7 @@
 
 result_file="_afbl_all.sql"
 out_folder="\$root\$/AFBL"
-
-
+                      
 for f in *.afb
 do 
     echo "Processing $f"

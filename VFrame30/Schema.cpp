@@ -45,7 +45,6 @@ namespace VFrame30
 	//
 	bool Schema::SaveData(Proto::Envelope* message) const
 	{
-//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
 //		// Set new uuids and labels to the schema
 //		//
 //		Schema* sss = const_cast<Schema*>(this);
@@ -67,7 +66,6 @@ namespace VFrame30
 //				}
 //			}
 //		}
-//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
