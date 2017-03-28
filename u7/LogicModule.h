@@ -104,6 +104,8 @@ public:
 	//
 private:
 	int m_descriptionNumber = -1;
+    QString m_configurationScriptFile;
+    QString m_version;
 
 	FlashMemory m_flashMemory;
 	Memory m_memory;

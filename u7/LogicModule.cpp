@@ -111,7 +111,27 @@ bool LogicModule::load(QDomDocument doc, QString* errorMessage)
 		return false;
 	}
 
-	// <FlashMemory> -> m_flashMemory
+    // Attribute ConfigurationScriptFile
+    //
+    m_configurationScriptFile = logicModuleElement.attribute("ConfigurationScriptFile");
+
+    if (m_configurationScriptFile.isEmpty() == true)
+    {
+        errorMessage->append(tr("Cant't find attribute ConfigurationScriptFile"));
+        return false;
+    }
+
+    // Attribute Version
+    //
+    m_version = logicModuleElement.attribute("Version");
+
+    if (m_version.isEmpty() == true)
+    {
+        errorMessage->append(tr("Cant't find attribute Version"));
+        return false;
+    }
+
+    // <FlashMemory> -> m_flashMemory
 	//
 	ok = m_flashMemory.load(doc, errorMessage);
 
