@@ -95,16 +95,6 @@ public:
 	//
 	QByteArray m_buildTabPageSplitterState;
 
-    // AFBL Editor options
-    //
-    QPoint m_abflEditorWindowPos;
-    QByteArray m_abflEditorWindowGeometry;
-
-    // AFBL Editor options
-    //
-    QPoint m_abflPropertiesWindowPos;
-    QByteArray m_abflPropertiesWindowGeometry;
-
     // Text Editor options
     //
     QPoint m_DialogTextEditorWindowPos;

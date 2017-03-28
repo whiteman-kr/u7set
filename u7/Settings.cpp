@@ -54,12 +54,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
-    s.setValue("AFBLEditor/pos", m_abflEditorWindowPos);
-    s.setValue("AFBLEditor/geometry", m_abflEditorWindowGeometry);
-
-    s.setValue("AFBLProperties/pos", m_abflPropertiesWindowPos);
-    s.setValue("AFBLProperties/geometry", m_abflPropertiesWindowGeometry);
-
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
 
@@ -116,12 +110,6 @@ void Settings::loadUserScope()
 	}
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
-
-    m_abflEditorWindowPos = s.value("AFBLEditor/pos", QPoint(-1, -1)).toPoint();
-    m_abflEditorWindowGeometry = s.value("AFBLEditor/geometry").toByteArray();
-
-    m_abflPropertiesWindowPos = s.value("AFBLProperties/pos", QPoint(-1, -1)).toPoint();
-    m_abflPropertiesWindowGeometry = s.value("AFBLProperties/geometry").toByteArray();
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();

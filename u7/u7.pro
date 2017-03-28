@@ -103,7 +103,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    DialogAfblEditor.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
@@ -224,7 +223,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    DialogAfblEditor.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
@@ -329,7 +327,6 @@ FORMS    += \
     LoginDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
-    DialogAfblEditor.ui \
     DialogFileEditor.ui \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \
