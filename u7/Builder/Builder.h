@@ -197,8 +197,10 @@ namespace Builder
 		std::shared_ptr<LogicModule> get(QString fileName) const;
 		std::shared_ptr<LogicModule> get(QString fileName);
 
-		std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule) const;
+		std::shared_ptr<LogicModule> get(const Hardware::DeviceModule* logicModule) const;
 		std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule);
+
+		static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
 
 		// Data
 		//

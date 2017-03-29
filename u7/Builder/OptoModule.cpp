@@ -1,12 +1,13 @@
 #include "OptoModule.h"
 
+#include "../LogicModule.h"
 #include "../Builder/Builder.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
 
+
 namespace Hardware
 {
-
 	// ------------------------------------------------------------------
 	//
 	// OptoPort class implementation
@@ -832,11 +833,12 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModule::OptoModule(DeviceModule* module, Builder::IssueLogger* log) :
+	OptoModule::OptoModule(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log) :
 		m_deviceModule(module),
+		m_lmDescription(lmDescription),
 		m_log(log)
 	{
-		if (module == nullptr || m_log == nullptr)
+		if (module == nullptr || m_lmDescription == nullptr || m_log == nullptr)
 		{
 			assert(false);
 			return;
@@ -845,18 +847,11 @@ namespace Hardware
 		m_equipmentID = module->equipmentIdTemplate();
 		m_place = module->place();
 
-		bool result = true;
-
-		result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
-		result &= DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
-		result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
-		result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
-		result &= DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
-
-		if (result == false)
-		{
-			return;
-		}
+		m_optoInterfaceDataOffset = m_lmDescription->optoInterface().optoInterfaceDataOffset;
+		m_optoPortDataSize = m_lmDescription->optoInterface().optoPortDataSize;
+		m_optoPortAppDataOffset = m_lmDescription->optoInterface().optoPortAppDataOffset;
+		m_optoPortAppDataSize = m_lmDescription->optoInterface().optoPortAppDataSize;
+		m_optoPortCount = m_lmDescription->optoInterface().optoPortCount;
 
 		// set actual OptoInterfaceDataOffset for OCM module according to place of module
 		//
@@ -1221,8 +1216,9 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::IssueLogger *log) :
+	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger *log) :
 		m_equipmentSet(equipmentSet),
+		m_lmDescriptionSet(lmDescriptionSet),
 		m_log(log)
 	{
 	}
@@ -1312,7 +1308,30 @@ namespace Hardware
 			return true;
 		}
 
-		OptoModule* optoModule = new OptoModule(module, m_log);
+		// Get LogicModule description
+		//
+		assert(m_lmDescriptionSet);
+
+		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLM(module);
+		if (chassisLm == nullptr)
+		{
+			assert(chassisLm);
+			return false;
+		}
+
+		std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(chassisLm);
+
+		if (lmDescription == nullptr)
+		{
+			QString lmDescriptionFile = LogicModule::lmDescriptionFile(module);
+
+			m_log->errEQP6004(module->equipmentIdTemplate(), lmDescriptionFile, module->uuid());
+			return false;
+		}
+
+		// Create and add OptoModule
+		//
+		OptoModule* optoModule = new OptoModule(module, lmDescription.get(), m_log);
 
 		if (optoModule->isValid() == false)
 		{

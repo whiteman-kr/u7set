@@ -496,19 +496,13 @@ namespace Builder
 
 			if (device->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 			{
-				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
-				{
-					{	"TxDiagDataOffset", &m.txDiagDataOffset },
-					{	"TxDiagDataSize", &m.txDiagDataSize },
+				assert(m_lmDescription);
 
-					{	"AppDataOffset", &m.txAppDataOffset },
-					{	"AppDataSize", &m.txAppDataSize },
-				};
+				m.txDiagDataOffset = m_lmDescription->memory().txDiagDataOffset;
+				m.txDiagDataSize = m_lmDescription->memory().txDiagDataSize;
 
-				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
-				{
-					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
-				}
+				m.txAppDataOffset = m_lmDescription->memory().appDataOffset;
+				m.txAppDataSize = m_lmDescription->memory().appDataSize;
 
 				m.moduleDataOffset = 0;
 
@@ -3928,18 +3922,9 @@ namespace Builder
 
 		const QVector<ModuleRawDataDescription::Item>& items = desc->items();
 
-		bool result = true;
-
-		int moduleAppDataOffset = 0;
-		int moduleDiagDataOffset = 0;
-
-		result &= DeviceHelper::getIntProperty(module, "TxAppDataOffset", &moduleAppDataOffset, m_log);
-		result &= DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &moduleDiagDataOffset, m_log);
-
-		if (result == false)
-		{
-			return false;
-		}
+		assert(m_lmDescription != nullptr);
+		int moduleAppDataOffset = m_lmDescription->memory().appDataOffset;
+		int moduleDiagDataOffset = m_lmDescription->memory().txDiagDataOffset;
 
 		int localOffset = 0;
 		int toAddr = 0;
@@ -4492,21 +4477,11 @@ namespace Builder
 	bool ModuleLogicCompiler::buildTuningData()
 	{
 		assert(m_tuningData == nullptr);
+		assert(m_lmDescription);
 
-		bool result = true;
-
-		int tuningMemoryStartAddrW = 0;
-		int tuningFrameSizeBytes = 0;
-		int tuningFrameCount = 0;
-
-		result &= getLMIntProperty("TuningDataOffset", &tuningMemoryStartAddrW);
-		result &= getLMIntProperty("TuningFrameSize", &tuningFrameSizeBytes);
-		result &= getLMIntProperty("TuningFrameCount", &tuningFrameCount);
-
-		if (result == false)
-		{
-			return false;
-		}
+		int tuningMemoryStartAddrW = m_lmDescription->memory().tuningDataOffset;
+		int tuningFrameSizeBytes = m_lmDescription->flashMemory().tuningFrameSize;
+		int tuningFrameCount = m_lmDescription->flashMemory().tuningFrameCount;
 
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:
@@ -4524,6 +4499,8 @@ namespace Builder
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
+		bool result = true;
+
 		result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
 		result &= tuningData->buildTuningData();
 

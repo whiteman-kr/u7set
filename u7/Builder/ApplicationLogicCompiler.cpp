@@ -1259,7 +1259,11 @@ namespace Builder
 	}
 
 
-
+	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const
+	{
+		assert(m_lmDescriptions);
+		return *m_lmDescriptions;
+	}
 
 
 }
