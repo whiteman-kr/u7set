@@ -1,4 +1,5 @@
 #include "LogicModule.h"
+#include "../lib/DeviceObject.h"
 
 LogicModule::LogicModule(QObject *parent)
 	: QObject(parent)
@@ -331,6 +332,27 @@ bool LogicModule::loadAfbs(const QDomElement& element, QString* errorMessage)
 	}
 
 	return true;
+}
+
+QString LogicModule::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
+{
+	if (logicModule == nullptr ||
+		logicModule->isLogicModule() == false)
+	{
+		assert(logicModule);
+		assert(logicModule->isLogicModule());
+		return QString();
+	}
+
+	auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
+	if (lmDescriptionFileProp == nullptr)
+	{
+		assert(lmDescriptionFileProp);
+		return QString();
+	}
+
+	QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
+	return lmDescriptionFile;
 }
 
 void LogicModule::dump() const

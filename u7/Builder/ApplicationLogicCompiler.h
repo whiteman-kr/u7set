@@ -58,6 +58,8 @@ namespace Builder
 
 		void writeOptoPortInfo(Hardware::OptoPort* port, QStringList& list);
 
+		const LmDescriptionSet& lmDescriptionSet() const;
+
 		void clear();
 
 	private:

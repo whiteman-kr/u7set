@@ -243,7 +243,7 @@ namespace Builder
 				}
 			}
 
-			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, m_log);
+			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &lmDescriptions, m_log);
 
 			//
 			// Parse application logic
@@ -1435,7 +1435,7 @@ namespace Builder
 		}
 	}
 
-	std::shared_ptr<LogicModule> LmDescriptionSet::get(Hardware::DeviceModule* logicModule) const
+	std::shared_ptr<LogicModule> LmDescriptionSet::get(const Hardware::DeviceModule* logicModule) const
 	{
 		if (logicModule == nullptr ||
 			logicModule->isLogicModule() == false)
@@ -1488,6 +1488,14 @@ namespace Builder
 
 		return get(lmDescriptionFile);
 	}
+
+	QString LmDescriptionSet::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
+	{
+		assert(logicModule);
+		assert(logicModule->isLogicModule());
+		return LogicModule::lmDescriptionFile(logicModule);
+	}
+
 	// ------------------------------------------------------------------------
 	//
 	//		Builder

@@ -6,8 +6,15 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
 #include "../lib/Signal.h"
-#include "IssueLogger.h"
 
+class LogicModule;
+class OutputLog;
+
+namespace Builder
+{
+	class IssueLogger;
+	struct LmDescriptionSet;
+}
 
 namespace Hardware
 {
@@ -255,6 +262,8 @@ namespace Hardware
 		//
 		QString m_equipmentID;
 		DeviceModule* m_deviceModule = nullptr;
+		LogicModule* m_lmDescription = nullptr;
+
 		int m_place = 0;
 
 		int m_optoInterfaceDataOffset = 0;
@@ -276,7 +285,7 @@ namespace Hardware
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports);
 
 	public:
-		OptoModule(DeviceModule* module, Builder::IssueLogger* log);
+		OptoModule(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log);
 		~OptoModule();
 
 		bool isValid() const { return m_valid; }
@@ -327,6 +336,7 @@ namespace Hardware
 
 	private:
 		EquipmentSet* m_equipmentSet = nullptr;
+		Builder::LmDescriptionSet* m_lmDescriptionSet = nullptr;
 		Builder::IssueLogger* m_log = nullptr;
 
 		HashedVector<QString, OptoModule*> m_modules;
@@ -356,7 +366,7 @@ namespace Hardware
 										SignalAddress16 &addr);
 
 	public:
-		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::IssueLogger* log);
+		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger* log);
 		~OptoModuleStorage();
 
 		bool build();

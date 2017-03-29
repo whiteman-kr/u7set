@@ -5,6 +5,11 @@
 #include <QDomDocument>
 #include "../VFrame30/Afb.h"
 
+namespace Hardware
+{
+	class DeviceModule;
+}
+
 class LogicModule : public QObject
 {
 	Q_OBJECT
@@ -26,6 +31,7 @@ protected:
 	// Methods
 	//
 public:
+	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
 	void dump() const;
 
 signals:
