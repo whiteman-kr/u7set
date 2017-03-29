@@ -44,9 +44,9 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+        ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, const std::vector<Hardware::DeviceModule *> &lmModules, LmDescriptionSet* lmDescriptions, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 							 Hardware::OptoModuleStorage *opticModuleStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
-							 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> &lmModules);
+                             QString projectName, QString userName);
 		virtual ~ConfigurationBuilder();
 
 		bool build(BuildResultWriter &buildResultWriter);
@@ -71,17 +71,21 @@ namespace Builder
 		bool debug() const;
 		bool release() const;
 
+        bool runConfigurationScriptFile(const QString& subsystemID, const QString& configurationScriptFile);
+
+
 	private:
 		Hardware::ModuleFirmwareCollection m_confCollection;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
-		SignalSet* m_signalSet = nullptr;
+        std::vector<Hardware::DeviceModule*> m_lmModules;
+        LmDescriptionSet *m_lmDescriptions = nullptr;
+        SignalSet* m_signalSet = nullptr;
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
-		std::vector<Hardware::DeviceModule*> m_lmModules;
 
 		int m_buildNo = 0;
 		int m_changesetId = 0;

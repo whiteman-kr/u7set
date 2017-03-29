@@ -33,10 +33,11 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 22;		// added builder parameter to interrupt build
 //var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
 //var configScriptVersion = 25;		// buildThread has been replaced by builder, added buildNo
-var configScriptVersion = 26;		// added UniqueID computing
+//var configScriptVersion = 26;		// added UniqueID computing
+var configScriptVersion = 27;		// First script that supports subsystems filtering
 
 
-function(builder, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
+function(builder, root, subsystemID, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)
 {
     log.writeMessage("Start LogicModuleConfiguration");
     log.writeMessage("Configuration script version is " + configScriptVersion);

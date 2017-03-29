@@ -294,8 +294,8 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), &signalSet, &subsystems, &opticModuleStorage, m_log,
-											   buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules);
+            ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), lmModules, &lmDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
+                                               buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName());
 
 			ok = cfgBuilder.build(buildWriter);
 

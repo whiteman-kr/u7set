@@ -640,6 +640,16 @@ int LogicModule::descriptionNumber() const
 	return m_descriptionNumber;
 }
 
+const QString& LogicModule::configurationStringFile() const
+{
+    return m_configurationScriptFile;
+}
+
+const QString& LogicModule::version() const
+{
+    return m_version;
+}
+
 const LogicModule::FlashMemory& LogicModule::flashMemory() const
 {
 	return m_flashMemory;

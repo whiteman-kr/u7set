@@ -90,6 +90,8 @@ public:
 	//
 public:
 	int descriptionNumber() const;
+    const QString& configurationStringFile() const;
+    const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
 	const Memory& memory() const;

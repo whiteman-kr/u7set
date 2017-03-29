@@ -50,14 +50,16 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet,
-											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
-											   IssueLogger *log, int buildNo, int changesetId, bool debug, QString projectName, QString userName,
-											   const std::vector<Hardware::DeviceModule*>& lmModules):
+    ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, DbController* db, Hardware::DeviceRoot* deviceRoot,
+                                               const std::vector<Hardware::DeviceModule*>& lmModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
+                                               Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
+                                               IssueLogger *log, int buildNo, int changesetId, bool debug, QString projectName, QString userName):
 		m_buildWorkerThread(buildWorkerThread),
 		m_db(db),
 		m_deviceRoot(deviceRoot),
-		m_signalSet(signalSet),
+        m_lmModules(lmModules),
+        m_lmDescriptions(lmDescriptions),
+        m_signalSet(signalSet),
 		m_subsystems(subsystems),
 		m_opticModuleStorage(opticModuleStorage),
 		m_log(log),
@@ -65,8 +67,7 @@ namespace Builder
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName),
-		m_lmModules(lmModules)
+        m_userName(userName)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -92,120 +93,83 @@ namespace Builder
 			return false;
 		}
 
-		//
-		// Generate Module Confuiguration Binary File
-		//
-		LOG_MESSAGE(m_log, "");
-		LOG_MESSAGE(m_log, tr("Generating modules configurations"));
+        //
+        // Generate Module Confuiguration Binary File
+        //
+        LOG_MESSAGE(m_log, "");
+        LOG_MESSAGE(m_log, tr("Generating modules configurations"));
 
-		bool ok = false;
+        // Find Logic modules for each subsystem and execute configuration script for each subsystem
+        //
 
-		// Get script file from the project databse
-		//
-		std::vector<DbFileInfo> fileList;
+        int subsystemsCount = m_subsystems->count();
 
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			ok = db()->getFileList(&fileList, db()->mcFileId(), "ModulesConfigurations.descr", true, nullptr);
-		}
+        for (int i = 0; i < subsystemsCount; i++)
+        {
+            std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+            if (subsystem == nullptr)
+            {
+                assert(subsystem);
+                return false;
+            }
 
-		if (ok == false || fileList.size() != 1)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  tr("Can't get file list and find Module Configuration description file"));
-			return false;
-		}
+            QString configurationScriptFile;
 
-		std::shared_ptr<DbFile> scriptFile;
+            for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+            {
+                const Hardware::DeviceModule* lm = *it;
+                if (lm == nullptr)
+                {
+                    assert(lm);
+                    return false;
+                }
 
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			ok = db()->getLatestVersion(fileList[0], &scriptFile, nullptr);
-		}
+                if (lm->propertyExists("SubsystemID") == false)
+                {
+                    m_log->errCFG3000("SubsystemID", lm->equipmentId());
+                    return false;
+                }
 
-		if (ok == false || scriptFile == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
-					  tr("Can't get Module Configuration description file"));
-			return false;
-		}
+                QString subsystemID = lm->propertyValue("SubsystemID").toString();
 
-		QString contents = QString::fromLocal8Bit(scriptFile->data());
-
-		// Attach objects
-		//
-		QJSEngine jsEngine;
-
-		//qmlRegisterType<MySliderItem>("com.mycompany.qmlcomponents", 1, 0, "Slider");
+                if (subsystemID != subsystem->caption())
+                {
+                    continue;
+                }
 
 
-		JsSignalSet jsSignalSet(m_signalSet);
+                if (lm->propertyExists("LMDescriptionFile") == false)
+                {
+                    m_log->errCFG3000("LMDescriptionFile", lm->equipmentId());
+                    return false;
+                }
 
-		m_confCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
+                QString lmDescriptionFile = lm->propertyValue("LMDescriptionFile").toString();
 
-		QJSValue jsBuilder = jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+                std::shared_ptr<LogicModule> lmDescription = m_lmDescriptions->get(lmDescriptionFile);
 
-		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
-		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+                configurationScriptFile = lmDescription->configurationStringFile();
 
-		QJSValue jsConfCollection = jsEngine.newQObject(&m_confCollection);
-		QQmlEngine::setObjectOwnership(&m_confCollection, QQmlEngine::CppOwnership);
+                // CHECK HERE IF ALL LMS IN SUBSYSTEM HAVE SAME FILENAME AND SAME VERSION
 
-		QJSValue jsLog = jsEngine.newQObject(m_log);
-		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
+                break;
+            }
 
-		QJSValue jsSignalSetObject = jsEngine.newQObject(&jsSignalSet);
-		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
+            if (configurationScriptFile.isEmpty() == true)
+            {
+                LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, ConfigurationScriptFile for subsystem %2 is empty !").arg(__FUNCTION__).arg(subsystem->caption()));
+                return false;
+            }
 
-		QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
-		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
-
-		QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
-		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
-
-		// Run script
-		//
-		QJSValue jsEval = jsEngine.evaluate(contents, "ModulesConfigurations.descr");
-		if (jsEval.isError() == true)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Module configuration script evaluation failed: %1").arg(jsEval.toString()));
-			return false;
-		}
-
-		QJSValueList args;
-
-		args << jsBuilder;
-		args << jsRoot;
-		args << jsConfCollection;
-		args << jsLog;
-		args << jsSignalSetObject;
-		args << jsSubsystems;
-		args << jsOpticModuleStorage;
-
-		QJSValue jsResult = jsEval.call(args);
-
-		if (jsResult.isError() == true)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Uncaught exception while generating module configuration: %1").arg(jsResult.toString()));
-			return false;
-		}
-
-		if (jsResult.toBool() == false)
-		{
-			return false;
-		}
+            if (runConfigurationScriptFile(subsystem->caption(), configurationScriptFile) == false)
+            {
+                return false;
+            }
+        }
 
 		// Find all LM modules and save ssKey and channel information
 		//
+
 		std::sort(m_lmModules.begin(), m_lmModules.end(),
 				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
 				  {
@@ -271,6 +235,118 @@ namespace Builder
 
 		return true;
 	}
+
+    bool ConfigurationBuilder::runConfigurationScriptFile(const QString& subsystemID, const QString& configurationScriptFile)
+    {
+        bool ok = false;
+
+        // Get script file from the project databse
+        //
+        std::vector<DbFileInfo> fileList;
+
+        if (release() == true)
+        {
+            assert(false);
+        }
+        else
+        {
+            ok = db()->getFileList(&fileList, db()->mcFileId(), configurationScriptFile, true, nullptr);
+        }
+
+        if (ok == false || fileList.size() != 1)
+        {
+            LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+                      tr("Can't get file list and find module configuration description file %1").arg(configurationScriptFile));
+            return false;
+        }
+
+        std::shared_ptr<DbFile> scriptFile;
+
+        if (release() == true)
+        {
+            assert(false);
+        }
+        else
+        {
+            ok = db()->getLatestVersion(fileList[0], &scriptFile, nullptr);
+        }
+
+        if (ok == false || scriptFile == nullptr)
+        {
+            LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+                      tr("Can't get module configuration description file %1").arg(configurationScriptFile));
+            return false;
+        }
+
+        QString contents = QString::fromLocal8Bit(scriptFile->data());
+
+        // Attach objects
+        //
+        QJSEngine jsEngine;
+
+        JsSignalSet jsSignalSet(m_signalSet);
+
+        m_confCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
+
+        QJSValue jsBuilder = jsEngine.newQObject(this);
+        QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+        QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
+        QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
+
+        QJSValue jsSubsystemID(subsystemID);
+
+        QJSValue jsConfCollection = jsEngine.newQObject(&m_confCollection);
+        QQmlEngine::setObjectOwnership(&m_confCollection, QQmlEngine::CppOwnership);
+
+        QJSValue jsLog = jsEngine.newQObject(m_log);
+        QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
+
+        QJSValue jsSignalSetObject = jsEngine.newQObject(&jsSignalSet);
+        QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
+
+        QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
+        QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
+
+        QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
+        QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
+
+        // Run script
+        //
+        QJSValue jsEval = jsEngine.evaluate(contents, configurationScriptFile);
+        if (jsEval.isError() == true)
+        {
+            LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Module configuration script '%1' evaluation failed: %2").arg(configurationScriptFile).arg(jsEval.toString()));
+            return false;
+        }
+
+        QJSValueList args;
+
+        args << jsBuilder;
+        args << jsRoot;
+        args << jsSubsystemID;
+        args << jsConfCollection;
+        args << jsLog;
+        args << jsSignalSetObject;
+        args << jsSubsystems;
+        args << jsOpticModuleStorage;
+
+        QJSValue jsResult = jsEval.call(args);
+
+        if (jsResult.isError() == true)
+        {
+            LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Uncaught exception while generating module configuration '1': %2").arg(configurationScriptFile).arg(jsResult.toString()));
+            return false;
+        }
+
+        if (jsResult.toBool() == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 
 	bool ConfigurationBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
 	{
