@@ -3922,9 +3922,18 @@ namespace Builder
 
 		const QVector<ModuleRawDataDescription::Item>& items = desc->items();
 
-		assert(m_lmDescription != nullptr);
-		int moduleAppDataOffset = m_lmDescription->memory().appDataOffset;
-		int moduleDiagDataOffset = m_lmDescription->memory().txDiagDataOffset;
+		bool result = true;
+
+		int moduleAppDataOffset = 0;
+		int moduleDiagDataOffset = 0;
+
+		result &= DeviceHelper::getIntProperty(module, "TxAppDataOffset", &moduleAppDataOffset, m_log);
+		result &= DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &moduleDiagDataOffset, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
 
 		int localOffset = 0;
 		int toAddr = 0;
