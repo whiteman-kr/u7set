@@ -30,8 +30,8 @@ namespace Afb
 	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-			xmlElement.isNull() == true ||
-			xmlElement.tagName() != QLatin1String("AFBComponent"))
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("AFBComponent"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -69,15 +69,15 @@ namespace Afb
 
 		m_impVersion = xmlElement.attribute(QLatin1String("ImpVersion")).toInt();
 
-		// OpIndex
+		// VersionOpIndex
 		//
-		if (xmlElement.hasAttribute(QLatin1String("OpIndex")) == false)
+		if (xmlElement.hasAttribute(QLatin1String("VersionOpIndex")) == false)
 		{
-			*errorMessage = QString("AFBCompoment %1 does not have attribute OpIndex").arg(m_caption);
+			*errorMessage = QString("AFBCompoment %1 does not have attribute VersionOpIndex").arg(m_caption);
 			return false;
 		}
 
-		m_opIndex = xmlElement.attribute(QLatin1String("OpIndex")).toInt();
+		m_versionOpIndex = xmlElement.attribute(QLatin1String("VersionOpIndex")).toInt();
 
 		return true;
 	}
@@ -120,124 +120,124 @@ namespace Afb
 		m_impVersion = value;
 	}
 
-	int AfbComponent::opIndex() const
+	int AfbComponent::versionOpIndex() const
 	{
-		return m_opIndex;
+		return m_versionOpIndex;
 	}
 
-	void AfbComponent::setIndex(int value)
+	void AfbComponent::setVersionOpIndex(int value)
 	{
-		m_opIndex = value;
+		m_versionOpIndex = value;
 	}
 
 	//
 	//				AfbComponenAfbType
 	//
-//	AfbType::AfbType() :
-//		m_type(Type::UNKNOWN)
-//	{
-//	}
+	//	AfbType::AfbType() :
+	//		m_type(Type::UNKNOWN)
+	//	{
+	//	}
 
-//	AfbType::AfbType(const AfbType& t) :
-//		m_type(t.m_type)
-//	{
-//	}
+	//	AfbType::AfbType(const AfbType& t) :
+	//		m_type(t.m_type)
+	//	{
+	//	}
 
-//	AfbType::AfbType(AfbType::Type t) :
-//		m_type(t)
-//	{
-//	}
+	//	AfbType::AfbType(AfbType::Type t) :
+	//		m_type(t)
+	//	{
+	//	}
 
-//	void AfbType::fromOpCode(int opCode)
-//	{
-//#ifdef Q_DEBUG
-//		if (toText(opCode) == "UNKNOWN")
-//		{
-//			//assert(false);
-//			m_type = Type::UNKNOWN;
-//			return;
-//		}
-//#endif
-//		m_type = static_cast<Type>(opCode);
-//		return;
-//	}
+	//	void AfbType::fromOpCode(int opCode)
+	//	{
+	//#ifdef Q_DEBUG
+	//		if (toText(opCode) == "UNKNOWN")
+	//		{
+	//			//assert(false);
+	//			m_type = Type::UNKNOWN;
+	//			return;
+	//		}
+	//#endif
+	//		m_type = static_cast<Type>(opCode);
+	//		return;
+	//	}
 
-//	int AfbType::toOpCode() const
-//	{
-//		return static_cast<int>(m_type);
-//	}
+	//	int AfbType::toOpCode() const
+	//	{
+	//		return static_cast<int>(m_type);
+	//	}
 
-//	QString AfbType::text() const
-//	{
-//		return toText(toOpCode());
-//	}
+	//	QString AfbType::text() const
+	//	{
+	//		return toText(toOpCode());
+	//	}
 
-//	QString AfbType::toText() const
-//	{
-//		return toText(toOpCode());
-//	}
+	//	QString AfbType::toText() const
+	//	{
+	//		return toText(toOpCode());
+	//	}
 
-//	QString AfbType::toText(int opCode)
-//	{
-//		switch (static_cast<Type>(opCode))
-//		{
-//			case Type::UNKNOWN:
-//				return "UNKNOWN";
-//			case Type::LOGIC:
-//				return "LOGIC";
-//			case Type::NOT:
-//				return "NOT";
-//			case Type::TCT:
-//				return "TCT";
-//			case Type::FLIP_FLOP:
-//				return "FLIP_FLOP";
-//			case Type::CTUD:
-//				return "CTUD";
-//			case Type::MAJ:
-//				return "MAJ";
-//			case Type::SRSST:
-//				return "SRSST";
-//			case Type::BCOD:
-//				return "BCOD";
-//			case Type::BDEC:
-//				return "BDEC";
-//			case Type::BCOMP:
-//				return "BCOMP";
-//			case Type::DAMPER:
-//				return "DAMPER";
-//			case Type::MEM:
-//				return "MEM";
-//			case Type::MATH:
-//				return "MATH";
-//			case Type::SCALE:
-//				return "SCALE";
-//			case Type::SCALE_P:
-//				return "SCALE_P";
-//			case Type::FUNC:
-//				return "FUNC";
-//			case Type::INT:
-//				return "INT";
-//			case Type::DPCOMP:
-//				return "DPCOMP";
-//			case Type::MUX:
-//				return "MUX";
-//			case Type::LATCH:
-//				return "LATCH";
-//			case Type::LIM:
-//				return "LIM";
-//			case Type::DEAD_ZONE:
-//				return "DEAD_ZONE";
-//			case Type::POL:
-//				return "POL";
-//			case Type::DER:
-//				return "DER";
-//			case Type::MISMATCH:
-//				return "MISMATCH";
-//			default:
-//				assert(false);
-//				return "UNKNOWN";
-//		}
-//	}
+	//	QString AfbType::toText(int opCode)
+	//	{
+	//		switch (static_cast<Type>(opCode))
+	//		{
+	//			case Type::UNKNOWN:
+	//				return "UNKNOWN";
+	//			case Type::LOGIC:
+	//				return "LOGIC";
+	//			case Type::NOT:
+	//				return "NOT";
+	//			case Type::TCT:
+	//				return "TCT";
+	//			case Type::FLIP_FLOP:
+	//				return "FLIP_FLOP";
+	//			case Type::CTUD:
+	//				return "CTUD";
+	//			case Type::MAJ:
+	//				return "MAJ";
+	//			case Type::SRSST:
+	//				return "SRSST";
+	//			case Type::BCOD:
+	//				return "BCOD";
+	//			case Type::BDEC:
+	//				return "BDEC";
+	//			case Type::BCOMP:
+	//				return "BCOMP";
+	//			case Type::DAMPER:
+	//				return "DAMPER";
+	//			case Type::MEM:
+	//				return "MEM";
+	//			case Type::MATH:
+	//				return "MATH";
+	//			case Type::SCALE:
+	//				return "SCALE";
+	//			case Type::SCALE_P:
+	//				return "SCALE_P";
+	//			case Type::FUNC:
+	//				return "FUNC";
+	//			case Type::INT:
+	//				return "INT";
+	//			case Type::DPCOMP:
+	//				return "DPCOMP";
+	//			case Type::MUX:
+	//				return "MUX";
+	//			case Type::LATCH:
+	//				return "LATCH";
+	//			case Type::LIM:
+	//				return "LIM";
+	//			case Type::DEAD_ZONE:
+	//				return "DEAD_ZONE";
+	//			case Type::POL:
+	//				return "POL";
+	//			case Type::DER:
+	//				return "DER";
+	//			case Type::MISMATCH:
+	//				return "MISMATCH";
+	//			default:
+	//				assert(false);
+	//				return "UNKNOWN";
+	//		}
+	//	}
 
 
 	//
@@ -273,8 +273,8 @@ namespace Afb
 	bool AfbSignal::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-			xmlElement.isNull() == true ||
-			xmlElement.tagName() != QLatin1String(QLatin1String("Pin")))
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String(QLatin1String("Pin")))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -661,9 +661,9 @@ namespace Afb
 
 
 			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0 ||
-				QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0 ||
-				QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0 ||
-				QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
+					QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0 ||
+					QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0 ||
+					QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 			{
 				QString str = xmlReader->readElementText();
 				QVariant val;
@@ -672,19 +672,19 @@ namespace Afb
 				{
 					switch (dataFormat())
 					{
-						case E::DataFormat::UnsignedInt:
-						case E::DataFormat::SignedInt:
-						{
-							val = str.toInt();
-							break;
-						}
-						case E::DataFormat::Float:
-						{
-							val = str.toDouble();
-							break;
-						}
-						default:
-							assert(false);
+					case E::DataFormat::UnsignedInt:
+					case E::DataFormat::SignedInt:
+					{
+						val = str.toInt();
+						break;
+					}
+					case E::DataFormat::Float:
+					{
+						val = str.toDouble();
+						break;
+					}
+					default:
+						assert(false);
 					}
 				}
 				else
@@ -724,8 +724,8 @@ namespace Afb
 	bool AfbParam::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-			xmlElement.isNull() == true ||
-			xmlElement.tagName() != QLatin1String("Param"))
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("Param"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -871,30 +871,30 @@ namespace Afb
 		//
 		std::function<QVariant(QString, E::SignalType, E::DataFormat)> valToDataFormat =
 				[](QString str, E::SignalType type, E::DataFormat dataFormat) -> QVariant
+		{
+			if (type == E::SignalType::Analog)
+			{
+				switch (dataFormat)
 				{
-					if (type == E::SignalType::Analog)
-					{
-						switch (dataFormat)
-						{
-						case E::DataFormat::UnsignedInt:
-						case E::DataFormat::SignedInt:
-							return QVariant(str.toInt());
-						case E::DataFormat::Float:
-							return QVariant(str.toDouble());
-						default:
-							assert(false);
-							return QVariant();
-						}
-					}
-
-					if (type == E::SignalType::Discrete)
-					{
-						return QVariant(str == "1" ? true : false);
-					}
-
+				case E::DataFormat::UnsignedInt:
+				case E::DataFormat::SignedInt:
+					return QVariant(str.toInt());
+				case E::DataFormat::Float:
+					return QVariant(str.toDouble());
+				default:
 					assert(false);
 					return QVariant();
-				};
+				}
+			}
+
+			if (type == E::SignalType::Discrete)
+			{
+				return QVariant(str == "1" ? true : false);
+			}
+
+			assert(false);
+			return QVariant();
+		};
 
 		{
 			QDomElement valueElement = xmlElement.firstChildElement("Value");
@@ -915,7 +915,7 @@ namespace Afb
 			QDomElement defaultElement = xmlElement.firstChildElement("Default");
 
 			if (user() == true &&
-				defaultElement.isNull() == true)
+					defaultElement.isNull() == true)
 			{
 				*errorMessage = QString("Can't find section Default. Param %1.").arg(m_caption);
 				return false;
@@ -936,7 +936,7 @@ namespace Afb
 				QDomElement e = xmlElement.firstChildElement("LowLimit");
 
 				if (user() == true &&
-					e.isNull() == true)
+						e.isNull() == true)
 				{
 					*errorMessage = QString("Can't find section LowLimit. Param %1.").arg(m_caption);
 					return false;
@@ -955,7 +955,7 @@ namespace Afb
 				QDomElement e = xmlElement.firstChildElement("HighLimit");
 
 				if (user() == true &&
-					e.isNull() == true)
+						e.isNull() == true)
 				{
 					*errorMessage = QString("Can't find section HighLimit. Param %1.").arg(m_caption);
 					return false;
@@ -1009,7 +1009,7 @@ namespace Afb
 	bool AfbParam::saveToXml(QDomElement* xmlElement) const
 	{
 		if (xmlElement == nullptr ||
-			xmlElement->isNull() == true)
+				xmlElement->isNull() == true)
 		{
 			assert(xmlElement);
 			assert(xmlElement->isNull() == false);
@@ -1361,8 +1361,8 @@ namespace Afb
 	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
 		if (errorMessage == nullptr ||
-			xmlElement.isNull() == true ||
-			xmlElement.tagName() != QLatin1String("AFB"))
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("AFB"))
 		{
 			assert(errorMessage);
 			assert(xmlElement.isNull() == false);
@@ -1693,17 +1693,17 @@ namespace Afb
 		return result;
 	}
 
-//	bool AfbElement::saveToXml(QByteArray* dst) const
-//	{
-//		QXmlStreamWriter writer(dst);
-//		bool result = saveToXml(&writer);
-//		return result;
-//	}
+	//	bool AfbElement::saveToXml(QByteArray* dst) const
+	//	{
+	//		QXmlStreamWriter writer(dst);
+	//		bool result = saveToXml(&writer);
+	//		return result;
+	//	}
 
 	bool AfbElement::saveToXml(QDomElement* xmlElement) const
 	{
 		if (xmlElement == nullptr ||
-			xmlElement->isNull() == true)
+				xmlElement->isNull() == true)
 		{
 			assert(xmlElement);
 			assert(xmlElement->isNull() == false);
@@ -1891,10 +1891,10 @@ namespace Afb
 		for (const AfbParam& p : params)
 		{
 			std::vector<AfbParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
-				[&p](const AfbParam& mp)
-				{
-					return p.opName() == mp.opName() && p.type() == mp.type();
-				});
+																 [&p](const AfbParam& mp)
+			{
+				return p.opName() == mp.opName() && p.type() == mp.type();
+			});
 
 			if (found != m_params.end())
 			{
@@ -2151,10 +2151,10 @@ namespace Afb
 	std::shared_ptr<AfbElement> AfbElementCollection::get(const QString& strID) const
 	{
 		auto result = std::find_if(m_elements.begin(), m_elements.end(),
-			[&strID](const std::shared_ptr<AfbElement>& fblelement)
-			{
-				return fblelement->strID() == strID;
-			});
+								   [&strID](const std::shared_ptr<AfbElement>& fblelement)
+		{
+			return fblelement->strID() == strID;
+		});
 
 		return result == m_elements.end() ? std::shared_ptr<AfbElement>() : *result;
 	}

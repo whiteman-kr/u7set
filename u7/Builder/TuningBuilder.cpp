@@ -10,7 +10,7 @@ namespace Builder
 
 	TuningBuilder::TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
 								 Tuning::TuningDataStorage *tuningDataStorage, IssueLogger *log, int buildNo, int changesetId, bool debug,
-								 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules):
+                                 QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules, const LmDescriptionSet* lmDescriptionSet):
 		m_db(db),
 		m_deviceRoot(deviceRoot),
 		m_signalSet(signalSet),
@@ -22,7 +22,8 @@ namespace Builder
 		m_debug(debug),
 		m_projectName(projectName),
 		m_userName(userName),
-		m_lmModules(lmModules)
+        m_lmModules(lmModules),
+        m_lmDescriptionSet(lmDescriptionSet)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);
@@ -30,6 +31,7 @@ namespace Builder
 		assert(m_subsystems);
 		assert(m_tuningDataStorage);
 		assert(m_log);
+        assert(m_lmDescriptionSet);
 
 		return;
 	}
@@ -67,27 +69,21 @@ namespace Builder
 				return false;
 			}
 
-			if (m->propertyExists("TuningFrameSize") == false)
-			{
-				assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property TuningFrameSize found in LM %1")).arg(m->caption()));
-				return false;
-			}
-
-			if (m->propertyExists("TuningFrameCount") == false)
-			{
-				assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property TuningFrameCount found in LM %1")).arg(m->caption()));
-				return false;
-			}
+            std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(m);
+            if (lmDescription == nullptr)
+            {
+                assert(lmDescription);
+                LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No LMDescription for in LM %1")).arg(m->caption()));
+                return false;
+            }
 
 			QString subsysStrID = m->propertyValue("SubsystemID").toString();
 
 			int channel = m->propertyValue("LMNumber").toInt();
 
-			int frameSize = m->propertyValue("TuningFrameSize").toInt();
+			int frameSize = lmDescription->flashMemory().m_tuningFrameSize;
 
-			int frameCount = m->propertyValue("TuningFrameCount").toInt();
+			int frameCount = lmDescription->flashMemory().m_tuningFrameCount;
 
 			int subsysID = m_subsystems->ssKey(subsysStrID);
 

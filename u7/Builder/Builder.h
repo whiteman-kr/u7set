@@ -43,7 +43,7 @@ namespace Afb
 
 namespace Builder
 {
-	struct LmDescriptionSet;
+    class LmDescriptionSet;
 
 	typedef QHash<QString, quint64> LmsUniqueIdMap;		// LM's equipmentID => LM's uniqueID map
 
@@ -186,8 +186,12 @@ namespace Builder
 
 	// LogicModule Description Set
 	//
-	struct LmDescriptionSet
+    class LmDescriptionSet : public QObject
 	{
+        Q_OBJECT
+
+    public:
+
 		bool has(QString fileName) const;
 
 		bool loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName);

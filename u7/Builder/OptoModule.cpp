@@ -847,11 +847,11 @@ namespace Hardware
 		m_equipmentID = module->equipmentIdTemplate();
 		m_place = module->place();
 
-		m_optoInterfaceDataOffset = m_lmDescription->optoInterface().optoInterfaceDataOffset;
-		m_optoPortDataSize = m_lmDescription->optoInterface().optoPortDataSize;
-		m_optoPortAppDataOffset = m_lmDescription->optoInterface().optoPortAppDataOffset;
-		m_optoPortAppDataSize = m_lmDescription->optoInterface().optoPortAppDataSize;
-		m_optoPortCount = m_lmDescription->optoInterface().optoPortCount;
+		m_optoInterfaceDataOffset = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
+		m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
+		m_optoPortAppDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
+		m_optoPortAppDataSize = m_lmDescription->optoInterface().m_optoPortAppDataSize;
+		m_optoPortCount = m_lmDescription->optoInterface().m_optoPortCount;
 
 		// set actual OptoInterfaceDataOffset for OCM module according to place of module
 		//

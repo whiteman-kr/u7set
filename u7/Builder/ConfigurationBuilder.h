@@ -71,7 +71,7 @@ namespace Builder
 		bool debug() const;
 		bool release() const;
 
-        bool runConfigurationScriptFile(const QString& subsystemID, const QString& configurationScriptFile);
+		bool runConfigurationScriptFile(const std::vector<Hardware::DeviceModule *> &subsystemModules, LogicModule *logicModuleDescription);
 
 
 	private:

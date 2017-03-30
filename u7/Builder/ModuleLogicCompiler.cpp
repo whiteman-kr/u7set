@@ -366,31 +366,31 @@ namespace Builder
 		bool result = true;
 
 		MemoryArea m_moduleData;
-		m_moduleData.setStartAddress(m_lmDescription->memory().moduleDataOffset);
-		m_moduleData.setSizeW(m_lmDescription->memory().moduleDataSize);
+		m_moduleData.setStartAddress(m_lmDescription->memory().m_moduleDataOffset);
+		m_moduleData.setSizeW(m_lmDescription->memory().m_moduleDataSize);
 
 		MemoryArea m_optoInterfaceData;
-		m_optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().optoInterfaceDataOffset);
+		m_optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().m_optoInterfaceDataOffset);
 
 		MemoryArea m_appLogicBitData;
-		m_appLogicBitData.setStartAddress(m_lmDescription->memory().appLogicBitDataOffset);
-		m_appLogicBitData.setSizeW(m_lmDescription->memory().appLogicBitDataSize);
+		m_appLogicBitData.setStartAddress(m_lmDescription->memory().m_appLogicBitDataOffset);
+		m_appLogicBitData.setSizeW(m_lmDescription->memory().m_appLogicBitDataSize);
 
 		MemoryArea m_tuningData;
-		m_tuningData.setStartAddress(m_lmDescription->memory().tuningDataOffset);
-		m_tuningData.setSizeW(m_lmDescription->memory().tuningDataSize);
+		m_tuningData.setStartAddress(m_lmDescription->memory().m_tuningDataOffset);
+		m_tuningData.setSizeW(m_lmDescription->memory().m_tuningDataSize);
 
 		MemoryArea m_appLogicWordData;
-		m_appLogicWordData.setStartAddress(m_lmDescription->memory().appLogicWordDataOffset);
-		m_appLogicWordData.setSizeW(m_lmDescription->memory().appLogicWordDataSize);
+		m_appLogicWordData.setStartAddress(m_lmDescription->memory().m_appLogicWordDataOffset);
+		m_appLogicWordData.setSizeW(m_lmDescription->memory().m_appLogicWordDataSize);
 
 		MemoryArea m_lmDiagData;
-		m_lmDiagData.setStartAddress(m_lmDescription->memory().txDiagDataOffset);
-		m_lmDiagData.setSizeW(m_lmDescription->memory().txDiagDataSize);
+		m_lmDiagData.setStartAddress(m_lmDescription->memory().m_txDiagDataOffset);
+		m_lmDiagData.setSizeW(m_lmDescription->memory().m_txDiagDataSize);
 
 		MemoryArea m_lmAppData;
-		m_lmAppData.setStartAddress(m_lmDescription->memory().appDataOffset);
-		m_lmAppData.setSizeW(m_lmDescription->memory().appDataSize);
+		m_lmAppData.setStartAddress(m_lmDescription->memory().m_appDataOffset);
+		m_lmAppData.setSizeW(m_lmDescription->memory().m_appDataSize);
 
 //		const DeviceHelper::IntPropertyNameVar memSettings[] =
 //		{
@@ -430,13 +430,13 @@ namespace Builder
 
 		m_code.setMemoryMap(&m_memoryMap, m_log);
 
-		m_lmClockFrequency = m_lmDescription->logicUnit().clockFrequency;
-		m_lmALPPhaseTime = m_lmDescription->logicUnit().alpPhaseTime;
-		m_lmIDRPhaseTime = m_lmDescription->logicUnit().idrPhaseTime;
-		m_lmCycleDuration = m_lmDescription->logicUnit().cycleDuration;
+		m_lmClockFrequency = m_lmDescription->logicUnit().m_clockFrequency;
+		m_lmALPPhaseTime = m_lmDescription->logicUnit().m_alpPhaseTime;
+		m_lmIDRPhaseTime = m_lmDescription->logicUnit().m_idrPhaseTime;
+		m_lmCycleDuration = m_lmDescription->logicUnit().m_cycleDuration;
 
-		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().appLogicFrameSize;
-		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().appLogicFrameCount;
+		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
+		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
 //		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
 //		result &= getLMIntProperty("ALPPhaseTime", &m_lmALPPhaseTime);
@@ -498,11 +498,11 @@ namespace Builder
 			{
 				assert(m_lmDescription);
 
-				m.txDiagDataOffset = m_lmDescription->memory().txDiagDataOffset;
-				m.txDiagDataSize = m_lmDescription->memory().txDiagDataSize;
+				m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
+				m.txDiagDataSize = m_lmDescription->memory().m_txDiagDataSize;
 
-				m.txAppDataOffset = m_lmDescription->memory().appDataOffset;
-				m.txAppDataSize = m_lmDescription->memory().appDataSize;
+				m.txAppDataOffset = m_lmDescription->memory().m_appDataOffset;
+				m.txAppDataSize = m_lmDescription->memory().m_appDataSize;
 
 				m.moduleDataOffset = 0;
 
@@ -3923,8 +3923,8 @@ namespace Builder
 		const QVector<ModuleRawDataDescription::Item>& items = desc->items();
 
 		assert(m_lmDescription != nullptr);
-		int moduleAppDataOffset = m_lmDescription->memory().appDataOffset;
-		int moduleDiagDataOffset = m_lmDescription->memory().txDiagDataOffset;
+		int moduleAppDataOffset = m_lmDescription->memory().m_appDataOffset;
+		int moduleDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
 
 		int localOffset = 0;
 		int toAddr = 0;
@@ -4479,9 +4479,9 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
-		int tuningMemoryStartAddrW = m_lmDescription->memory().tuningDataOffset;
-		int tuningFrameSizeBytes = m_lmDescription->flashMemory().tuningFrameSize;
-		int tuningFrameCount = m_lmDescription->flashMemory().tuningFrameCount;
+		int tuningMemoryStartAddrW = m_lmDescription->memory().m_tuningDataOffset;
+		int tuningFrameSizeBytes = m_lmDescription->flashMemory().m_tuningFrameSize;
+		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
 
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:

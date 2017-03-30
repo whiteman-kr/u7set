@@ -12,7 +12,7 @@
 namespace Builder
 {
 	class ApplicationLogicCompiler;
-	struct LmDescriptionSet;
+	class LmDescriptionSet;
 
 	typedef bool (ApplicationLogicCompiler::*ApplicationLogicCompilerProc)(void);
 

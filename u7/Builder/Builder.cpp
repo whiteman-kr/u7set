@@ -278,7 +278,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Tuning parameters compilation"));
 
 			TuningBuilder tuningBuilder(&db, equipmentSet.root(), &signalSet, &subsystems, &tuningDataStorage, m_log,
-										buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules);
+                                        buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName(), lmModules, &lmDescriptions);
 
 			ok = tuningBuilder.build();
 

@@ -425,12 +425,12 @@ bool LogicModule::FlashMemory::load(const QDomDocument& document, QString* error
 
 	errorMessage->clear();	// Just in case
 
-	appLogicFrameCount = getSectionUintValue(QLatin1String("AppLogicFrameCount"), errorMessage);
-	appLogicFrameSize= getSectionUintValue(QLatin1String("AppLogicFrameSize"), errorMessage);
-	configFrameCount = getSectionUintValue(QLatin1String("ConfigFrameCount"), errorMessage);
-	configFrameSize = getSectionUintValue(QLatin1String("ConfigFrameSize"), errorMessage);
-	tuningFrameCount = getSectionUintValue(QLatin1String("TuningFrameCount"), errorMessage);
-	tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
+	m_appLogicFrameCount = getSectionUintValue(QLatin1String("AppLogicFrameCount"), errorMessage);
+	m_appLogicFrameSize= getSectionUintValue(QLatin1String("AppLogicFrameSize"), errorMessage);
+	m_configFrameCount = getSectionUintValue(QLatin1String("ConfigFrameCount"), errorMessage);
+	m_configFrameSize = getSectionUintValue(QLatin1String("ConfigFrameSize"), errorMessage);
+	m_tuningFrameCount = getSectionUintValue(QLatin1String("TuningFrameCount"), errorMessage);
+	m_tuningFrameSize = getSectionUintValue(QLatin1String("TuningFrameSize"), errorMessage);
 
 	return errorMessage->isEmpty();
 }
@@ -496,23 +496,23 @@ bool LogicModule::Memory::load(const QDomDocument& document, QString* errorMessa
 	//
 	errorMessage->clear();	// Just in case
 
-	appDataOffset = getSectionUintValue(QLatin1String("AppDataOffset"), errorMessage);
-	appDataSize= getSectionUintValue(QLatin1String("AppDataSize"), errorMessage);
+	m_appDataOffset = getSectionUintValue(QLatin1String("AppDataOffset"), errorMessage);
+	m_appDataSize= getSectionUintValue(QLatin1String("AppDataSize"), errorMessage);
 
-	appLogicBitDataOffset = getSectionUintValue(QLatin1String("AppLogicBitDataOffset"), errorMessage);
-	appLogicBitDataSize = getSectionUintValue(QLatin1String("AppLogicBitDataSize"), errorMessage);
+	m_appLogicBitDataOffset = getSectionUintValue(QLatin1String("AppLogicBitDataOffset"), errorMessage);
+	m_appLogicBitDataSize = getSectionUintValue(QLatin1String("AppLogicBitDataSize"), errorMessage);
 
-	appLogicWordDataOffset = getSectionUintValue(QLatin1String("AppLogicWordDataOffset"), errorMessage);
-	appLogicWordDataSize = getSectionUintValue(QLatin1String("AppLogicWordDataSize"), errorMessage);
+	m_appLogicWordDataOffset = getSectionUintValue(QLatin1String("AppLogicWordDataOffset"), errorMessage);
+	m_appLogicWordDataSize = getSectionUintValue(QLatin1String("AppLogicWordDataSize"), errorMessage);
 
-	moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
-	moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
+	m_moduleDataOffset = getSectionUintValue(QLatin1String("ModuleDataOffset"), errorMessage);
+	m_moduleDataSize = getSectionUintValue(QLatin1String("ModuleDataSize"), errorMessage);
 
-	tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
-	tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
+	m_tuningDataOffset = getSectionUintValue(QLatin1String("TuningDataOffset"), errorMessage);
+	m_tuningDataSize = getSectionUintValue(QLatin1String("TuningDataSize"), errorMessage);
 
-	txDiagDataOffset = getSectionUintValue(QLatin1String("TxDiagDataOffset"), errorMessage);
-	txDiagDataSize = getSectionUintValue(QLatin1String("TxDiagDataSize"), errorMessage);
+	m_txDiagDataOffset = getSectionUintValue(QLatin1String("TxDiagDataOffset"), errorMessage);
+	m_txDiagDataSize = getSectionUintValue(QLatin1String("TxDiagDataSize"), errorMessage);
 
 	return errorMessage->isEmpty();
 }
@@ -578,10 +578,10 @@ bool LogicModule::LogicUnit::load(const QDomDocument& document, QString* errorMe
 	//
 	errorMessage->clear();	// Just in case
 
-	alpPhaseTime = getSectionUintValue(QLatin1String("ALPPhaseTime"), errorMessage);
-	clockFrequency= getSectionUintValue(QLatin1String("ClockFrequency"), errorMessage);
-	cycleDuration = getSectionUintValue(QLatin1String("CycleDuration"), errorMessage);
-	idrPhaseTime = getSectionUintValue(QLatin1String("IDRPhaseTime"), errorMessage);
+	m_alpPhaseTime = getSectionUintValue(QLatin1String("ALPPhaseTime"), errorMessage);
+	m_clockFrequency= getSectionUintValue(QLatin1String("ClockFrequency"), errorMessage);
+	m_cycleDuration = getSectionUintValue(QLatin1String("CycleDuration"), errorMessage);
+	m_idrPhaseTime = getSectionUintValue(QLatin1String("IDRPhaseTime"), errorMessage);
 
 	return errorMessage->isEmpty();
 }
@@ -647,11 +647,11 @@ bool LogicModule::OptoInterface::load(const QDomDocument& document, QString* err
 	//
 	errorMessage->clear();	// Just in case
 
-	optoPortCount = getSectionUintValue(QLatin1String("OptoPortCount"), errorMessage);
-	optoPortAppDataOffset= getSectionUintValue(QLatin1String("OptoPortAppDataOffset"), errorMessage);
-	optoPortAppDataSize = getSectionUintValue(QLatin1String("OptoPortAppDataSize"), errorMessage);
-	optoInterfaceDataOffset = getSectionUintValue(QLatin1String("OptoInterfaceDataOffset"), errorMessage);
-	optoPortDataSize = getSectionUintValue(QLatin1String("OptoPortDataSize"), errorMessage);
+	m_optoPortCount = getSectionUintValue(QLatin1String("OptoPortCount"), errorMessage);
+	m_optoPortAppDataOffset= getSectionUintValue(QLatin1String("OptoPortAppDataOffset"), errorMessage);
+	m_optoPortAppDataSize = getSectionUintValue(QLatin1String("OptoPortAppDataSize"), errorMessage);
+	m_optoInterfaceDataOffset = getSectionUintValue(QLatin1String("OptoInterfaceDataOffset"), errorMessage);
+	m_optoPortDataSize = getSectionUintValue(QLatin1String("OptoPortDataSize"), errorMessage);
 
 	return errorMessage->isEmpty();
 }
@@ -665,6 +665,11 @@ int LogicModule::descriptionNumber() const
 const QString& LogicModule::configurationStringFile() const
 {
     return m_configurationScriptFile;
+}
+
+QString LogicModule::jsConfigurationStringFile() const
+{
+	return m_configurationScriptFile;
 }
 
 const QString& LogicModule::version() const

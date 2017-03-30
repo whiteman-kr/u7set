@@ -32,7 +32,7 @@ namespace VFrame30
 namespace Builder
 {
 	class IssueLogger;
-	struct LmDescriptionSet;
+	class LmDescriptionSet;
 
 	struct Link
 	{

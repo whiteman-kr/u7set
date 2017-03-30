@@ -33,14 +33,14 @@ namespace Afb
 		int impVersion() const;
 		void setImpVersion(int value);
 
-		int opIndex() const;
-		void setIndex(int value);
+        int versionOpIndex() const;
+        void setVersionOpIndex(int value);
 
 	private:
 		int m_opCode = -1;
 		QString m_caption;
 		int m_impVersion = -1;
-		int m_opIndex = -1;
+        int m_versionOpIndex = -1;
 	};
 
 

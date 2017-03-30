@@ -13,7 +13,7 @@ class OutputLog;
 namespace Builder
 {
 	class IssueLogger;
-	struct LmDescriptionSet;
+	class LmDescriptionSet;
 }
 
 namespace Hardware

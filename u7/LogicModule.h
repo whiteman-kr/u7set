@@ -13,6 +13,14 @@ namespace Hardware
 class LogicModule : public QObject
 {
 	Q_OBJECT
+
+	// Properties needed for accessing the data by configuration script
+	//
+	Q_PROPERTY(quint32 FlashMemory_ConfigFrameCount READ (m_flashMemory.configFrameCount))
+	Q_PROPERTY(quint32 FlashMemory_ConfigFrameSize	READ (m_flashMemory.configFrameSize))
+	Q_PROPERTY(quint32 Memory_TxDiagDataSize		READ (m_memory.txDiagDataSize))
+	Q_PROPERTY(quint32 OptoInterface_OptoPortCount	READ (m_optoInterface.optoPortCount))
+
 public:
 	explicit LogicModule(QObject* parent = 0);
 	virtual ~LogicModule();
@@ -43,51 +51,58 @@ public slots:
 public:
 	struct FlashMemory
 	{
-		quint32 appLogicFrameCount = 0xFFFFFFFF;
-		quint32 appLogicFrameSize = 0xFFFFFFFF;
-		quint32 configFrameCount = 0xFFFFFFFF;
-		quint32 configFrameSize = 0xFFFFFFFF;
-		quint32 tuningFrameCount = 0xFFFFFFFF;
-		quint32 tuningFrameSize = 0xFFFFFFFF;
+		quint32 m_appLogicFrameCount = 0xFFFFFFFF;
+		quint32 m_appLogicFrameSize = 0xFFFFFFFF;
+		quint32 m_configFrameCount = 0xFFFFFFFF;
+		quint32 m_configFrameSize = 0xFFFFFFFF;
+		quint32 m_tuningFrameCount = 0xFFFFFFFF;
+		quint32 m_tuningFrameSize = 0xFFFFFFFF;
+
+		quint32 configFrameCount() const { return m_configFrameCount; }
+		quint32 configFrameSize() const { return m_configFrameSize; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
 	struct Memory
 	{
-		quint32 appDataOffset = 0xFFFFFFFF;
-		quint32 appDataSize = 0xFFFFFFFF;
-		quint32 appLogicBitDataOffset = 0xFFFFFFFF;
-		quint32 appLogicBitDataSize = 0xFFFFFFFF;
-		quint32 appLogicWordDataOffset = 0xFFFFFFFF;
-		quint32 appLogicWordDataSize = 0xFFFFFFFF;
-		quint32 moduleDataOffset = 0xFFFFFFFF;
-		quint32 moduleDataSize = 0xFFFFFFFF;
-		quint32 tuningDataOffset = 0xFFFFFFFF;
-		quint32 tuningDataSize = 0xFFFFFFFF;
-		quint32 txDiagDataOffset = 0xFFFFFFFF;
-		quint32 txDiagDataSize = 0xFFFFFFFF;
+		quint32 m_appDataOffset = 0xFFFFFFFF;
+		quint32 m_appDataSize = 0xFFFFFFFF;
+		quint32 m_appLogicBitDataOffset = 0xFFFFFFFF;
+		quint32 m_appLogicBitDataSize = 0xFFFFFFFF;
+		quint32 m_appLogicWordDataOffset = 0xFFFFFFFF;
+		quint32 m_appLogicWordDataSize = 0xFFFFFFFF;
+		quint32 m_moduleDataOffset = 0xFFFFFFFF;
+		quint32 m_moduleDataSize = 0xFFFFFFFF;
+		quint32 m_tuningDataOffset = 0xFFFFFFFF;
+		quint32 m_tuningDataSize = 0xFFFFFFFF;
+		quint32 m_txDiagDataOffset = 0xFFFFFFFF;
+		quint32 m_txDiagDataSize = 0xFFFFFFFF;
+
+		quint32 txDiagDataSize() const { return m_txDiagDataSize; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
 	struct LogicUnit
 	{
-		quint32 alpPhaseTime = 0xFFFFFFFF;
-		quint32 clockFrequency = 0xFFFFFFFF;
-		quint32 cycleDuration = 0xFFFFFFFF;
-		quint32 idrPhaseTime = 0xFFFFFFFF;
+		quint32 m_alpPhaseTime = 0xFFFFFFFF;
+		quint32 m_clockFrequency = 0xFFFFFFFF;
+		quint32 m_cycleDuration = 0xFFFFFFFF;
+		quint32 m_idrPhaseTime = 0xFFFFFFFF;
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
 
 	struct OptoInterface
 	{
-		quint32 optoPortCount = 0xFFFFFFFF;
-		quint32 optoPortAppDataOffset = 0xFFFFFFFF;
-		quint32 optoPortAppDataSize = 0xFFFFFFFF;
-		quint32 optoInterfaceDataOffset = 0xFFFFFFFF;
-		quint32 optoPortDataSize = 0xFFFFFFFF;
+		quint32 m_optoPortCount = 0xFFFFFFFF;
+		quint32 m_optoPortAppDataOffset = 0xFFFFFFFF;
+		quint32 m_optoPortAppDataSize = 0xFFFFFFFF;
+		quint32 m_optoInterfaceDataOffset = 0xFFFFFFFF;
+		quint32 m_optoPortDataSize = 0xFFFFFFFF;
+
+		quint32 optoPortCount() const { return m_optoPortCount; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};
@@ -96,10 +111,12 @@ public:
 	//
 public:
 	int descriptionNumber() const;
-    const QString& configurationStringFile() const;
+	const QString& configurationStringFile() const;
+	Q_INVOKABLE QString jsConfigurationStringFile() const;
     const QString& version() const;
 
 	const FlashMemory& flashMemory() const;
+
 	const Memory& memory() const;
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
