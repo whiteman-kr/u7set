@@ -36,7 +36,7 @@ namespace Builder
 
 		bool result = true;
 
-		switch(afb().opCode())
+		switch(static_cast<Afb::AfbType>(afb().opCode()))
 		{
 		case Afb::AfbType::LOGIC:			// opcode 1
 			result = calculate_LOGIC_paramValues();
