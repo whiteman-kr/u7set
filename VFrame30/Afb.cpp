@@ -1687,6 +1687,7 @@ namespace Afb
 						AfbParam afbParam;
 						afbParam.deprecatedLoadFromXml(&xmlReader);
 						params.push_back(afbParam);
+						xmlReader.skipCurrentElement();
 					}
 					else
 					{
