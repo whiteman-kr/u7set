@@ -161,7 +161,7 @@ void ProjectsTabPage::createProject()
 
 		auto findPredicate = [&projectName](const DbProject& p) -> bool
 			{
-				return p.projectName() == projectName;
+				return p.projectName().compare(projectName, Qt::CaseInsensitive) == 0;
 			};
 
 		auto findResult = std::find_if(projects.begin(), projects.end(), findPredicate);
