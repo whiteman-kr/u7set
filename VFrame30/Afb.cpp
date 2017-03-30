@@ -1646,6 +1646,36 @@ namespace Afb
 
 		while (xmlReader.readNextStartElement())
 		{
+			if (QString::compare(xmlReader.name().toString(), "Properties", Qt::CaseInsensitive) == 0)
+			{
+				while (xmlReader.readNextStartElement())
+				{
+					if (QString::compare(xmlReader.name().toString(), "Caption", Qt::CaseInsensitive) == 0)
+					{
+						setCaption(xmlReader.readElementText());
+						continue;
+					}
+
+					if (QString::compare(xmlReader.name().toString(), "Version", Qt::CaseInsensitive) == 0)
+					{
+						setVersion(xmlReader.readElementText());
+						continue;
+					}
+
+					if (QString::compare(xmlReader.name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+					{
+						int opCode = xmlReader.readElementText().toInt();
+						setOpCode(opCode);
+						continue;
+					}
+
+					xmlReader.skipCurrentElement();
+				}
+
+				continue;
+			}
+
+
 			if (QString::compare(xmlReader.name().toString(), "Params", Qt::CaseInsensitive) == 0)
 			{
 				// Read params
