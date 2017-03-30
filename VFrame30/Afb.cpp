@@ -1,149 +1,253 @@
 #include "Stable.h"
 #include "Afb.h"
-#include <QXmlStreamWriter>
-#include <QXmlStreamReader>
+#include <QDomElement>
 
-bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2)
-{
-	return t1.m_type == t2.m_type;
-}
+//bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2)
+//{
+//	return t1.m_type == t2.m_type;
+//}
 
-bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2)
-{
-	return t1.m_type != t2.m_type;
-}
+//bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2)
+//{
+//	return t1.m_type != t2.m_type;
+//}
 
 
-bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2)
-{
-	return t1.m_type < t2.m_type;
-}
+//bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2)
+//{
+//	return t1.m_type < t2.m_type;
+//}
 
 namespace Afb
 {
-	AfbType::AfbType() :
-		m_type(Type::UNKNOWN)
+	//
+	//				AfbComponent
+	//
+	AfbComponent::AfbComponent()
 	{
 	}
 
-	AfbType::AfbType(const AfbType& t) :
-		m_type(t.m_type)
+	bool AfbComponent::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
-	}
-
-	AfbType::AfbType(AfbType::Type t) :
-		m_type(t)
-	{
-	}
-
-	void AfbType::fromOpCode(int opCode)
-	{
-#ifdef Q_DEBUG
-		if (toText(opCode) == "UNKNOWN")
+		if (errorMessage == nullptr ||
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("AFBComponent"))
 		{
-			//assert(false);
-			m_type = Type::UNKNOWN;
-			return;
+			assert(errorMessage);
+			assert(xmlElement.isNull() == false);
+			assert(xmlElement.tagName() == QLatin1String("AFBComponent"));
+			return false;
 		}
-#endif
-		m_type = static_cast<Type>(opCode);
-		return;
-	}
 
-	int AfbType::toOpCode() const
-	{
-		return static_cast<int>(m_type);
-	}
-
-	QString AfbType::text() const
-	{
-		return toText(toOpCode());
-	}
-
-	QString AfbType::toText() const
-	{
-		return toText(toOpCode());
-	}
-
-	QString AfbType::toText(int opCode)
-	{
-		switch (static_cast<Type>(opCode))
+		// Caption
+		//
+		if (xmlElement.hasAttribute(QLatin1String("Caption")) == false)
 		{
-			case Type::UNKNOWN:
-				return "UNKNOWN";
-			case Type::LOGIC:
-				return "LOGIC";
-			case Type::NOT:
-				return "NOT";
-			case Type::TCT:
-				return "TCT";
-			case Type::FLIP_FLOP:
-				return "FLIP_FLOP";
-			case Type::CTUD:
-				return "CTUD";
-			case Type::MAJ:
-				return "MAJ";
-			case Type::SRSST:
-				return "SRSST";
-			case Type::BCOD:
-				return "BCOD";
-			case Type::BDEC:
-				return "BDEC";
-			case Type::BCOMP:
-				return "BCOMP";
-			case Type::DAMPER:
-				return "DAMPER";
-			case Type::MEM:
-				return "MEM";
-			case Type::MATH:
-				return "MATH";
-			case Type::SCALE:
-				return "SCALE";
-			case Type::SCALE_P:
-				return "SCALE_P";
-			case Type::FUNC:
-				return "FUNC";
-			case Type::INT:
-				return "INT";
-			case Type::DPCOMP:
-				return "DPCOMP";
-			case Type::MUX:
-				return "MUX";
-			case Type::LATCH:
-				return "LATCH";
-			case Type::LIM:
-				return "LIM";
-			case Type::DEAD_ZONE:
-				return "DEAD_ZONE";
-			case Type::POL:
-				return "POL";
-			case Type::DER:
-				return "DER";
-			case Type::MISMATCH:
-				return "MISMATCH";
-			default:
-				assert(false);
-				return "UNKNOWN";
+			*errorMessage = "AFBCompoment does not have attribute Caption";
+			return false;
 		}
+
+		m_caption = xmlElement.attribute(QLatin1String("Caption"));
+
+		// OpCode
+		//
+		if (xmlElement.hasAttribute(QLatin1String("OpCode")) == false)
+		{
+			*errorMessage = QString("AFBCompoment %1 does not have attribute OpCode").arg(m_caption);
+			return false;
+		}
+
+		m_opCode = xmlElement.attribute(QLatin1String("OpCode")).toInt();
+
+		// ImpVersion
+		//
+		if (xmlElement.hasAttribute(QLatin1String("ImpVersion")) == false)
+		{
+			*errorMessage = QString("AFBCompoment %1 does not have attribute ImpVersion").arg(m_caption);
+			return false;
+		}
+
+		m_impVersion = xmlElement.attribute(QLatin1String("ImpVersion")).toInt();
+
+		// VersionOpIndex
+		//
+		if (xmlElement.hasAttribute(QLatin1String("VersionOpIndex")) == false)
+		{
+			*errorMessage = QString("AFBCompoment %1 does not have attribute VersionOpIndex").arg(m_caption);
+			return false;
+		}
+
+		m_versionOpIndex = xmlElement.attribute(QLatin1String("VersionOpIndex")).toInt();
+
+		return true;
 	}
+
+	bool AfbComponent::saveToXml(QDomElement* /*xmlElement*/) const
+	{
+		// To Do
+		//
+		assert(false);
+		return false;
+	}
+
+	int AfbComponent::opCode() const
+	{
+		return m_opCode;
+	}
+
+	void AfbComponent::setOpCode(int value)
+	{
+		m_opCode = value;
+	}
+
+	QString AfbComponent::caption() const
+	{
+		return m_caption;
+	}
+
+	void AfbComponent::setCaption(const QString& value)
+	{
+		m_caption = value;
+	}
+
+	int AfbComponent::impVersion() const
+	{
+		return m_impVersion;
+	}
+
+	void AfbComponent::setImpVersion(int value)
+	{
+		m_impVersion = value;
+	}
+
+	int AfbComponent::versionOpIndex() const
+	{
+		return m_versionOpIndex;
+	}
+
+	void AfbComponent::setVersionOpIndex(int value)
+	{
+		m_versionOpIndex = value;
+	}
+
+	//
+	//				AfbComponenAfbType
+	//
+	//	AfbType::AfbType() :
+	//		m_type(Type::UNKNOWN)
+	//	{
+	//	}
+
+	//	AfbType::AfbType(const AfbType& t) :
+	//		m_type(t.m_type)
+	//	{
+	//	}
+
+	//	AfbType::AfbType(AfbType::Type t) :
+	//		m_type(t)
+	//	{
+	//	}
+
+	//	void AfbType::fromOpCode(int opCode)
+	//	{
+	//#ifdef Q_DEBUG
+	//		if (toText(opCode) == "UNKNOWN")
+	//		{
+	//			//assert(false);
+	//			m_type = Type::UNKNOWN;
+	//			return;
+	//		}
+	//#endif
+	//		m_type = static_cast<Type>(opCode);
+	//		return;
+	//	}
+
+	//	int AfbType::toOpCode() const
+	//	{
+	//		return static_cast<int>(m_type);
+	//	}
+
+	//	QString AfbType::text() const
+	//	{
+	//		return toText(toOpCode());
+	//	}
+
+	//	QString AfbType::toText() const
+	//	{
+	//		return toText(toOpCode());
+	//	}
+
+	//	QString AfbType::toText(int opCode)
+	//	{
+	//		switch (static_cast<Type>(opCode))
+	//		{
+	//			case Type::UNKNOWN:
+	//				return "UNKNOWN";
+	//			case Type::LOGIC:
+	//				return "LOGIC";
+	//			case Type::NOT:
+	//				return "NOT";
+	//			case Type::TCT:
+	//				return "TCT";
+	//			case Type::FLIP_FLOP:
+	//				return "FLIP_FLOP";
+	//			case Type::CTUD:
+	//				return "CTUD";
+	//			case Type::MAJ:
+	//				return "MAJ";
+	//			case Type::SRSST:
+	//				return "SRSST";
+	//			case Type::BCOD:
+	//				return "BCOD";
+	//			case Type::BDEC:
+	//				return "BDEC";
+	//			case Type::BCOMP:
+	//				return "BCOMP";
+	//			case Type::DAMPER:
+	//				return "DAMPER";
+	//			case Type::MEM:
+	//				return "MEM";
+	//			case Type::MATH:
+	//				return "MATH";
+	//			case Type::SCALE:
+	//				return "SCALE";
+	//			case Type::SCALE_P:
+	//				return "SCALE_P";
+	//			case Type::FUNC:
+	//				return "FUNC";
+	//			case Type::INT:
+	//				return "INT";
+	//			case Type::DPCOMP:
+	//				return "DPCOMP";
+	//			case Type::MUX:
+	//				return "MUX";
+	//			case Type::LATCH:
+	//				return "LATCH";
+	//			case Type::LIM:
+	//				return "LIM";
+	//			case Type::DEAD_ZONE:
+	//				return "DEAD_ZONE";
+	//			case Type::POL:
+	//				return "POL";
+	//			case Type::DER:
+	//				return "DER";
+	//			case Type::MISMATCH:
+	//				return "MISMATCH";
+	//			default:
+	//				assert(false);
+	//				return "UNKNOWN";
+	//		}
+	//	}
 
 
 	//
 	//							AfbSignal
 	//
-	AfbSignal::AfbSignal(void):
-		m_type(E::SignalType::Analog),
-		m_dataFormat(E::DataFormat::UnsignedInt),
-		m_operandIndex(0),
-		m_size(0)
+	AfbSignal::AfbSignal(void)
 	{
 	}
 
-	AfbSignal::~AfbSignal(void)
-	{
-	}
-
-	AfbSignal::AfbSignal(const AfbSignal& that) : QObject()
+	AfbSignal::AfbSignal(const AfbSignal& that)
 	{
 		*this = that;
 	}
@@ -165,160 +269,170 @@ namespace Afb
 		return *this;
 	}
 
-// Serialization
-	//
-	bool AfbSignal::SaveData(Proto::AfbSignal* /*message*/) const
+
+	bool AfbSignal::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
-		assert(false);
-		return false;
-
-		//message->set_index(index());
-		//message->set_size(size());
-//		Proto::Write(message->mutable_caption(), m_caption);
-//		message->set_type(static_cast<Proto::FblSignalType>(m_type));
-//		return true;
-	}
-
-	bool AfbSignal::LoadData(const Proto::AfbSignal& /*message*/)
-	{
-		assert(false);
-		return false;
-
-//		m_caption = Proto::Read(message.caption());
-//		m_type = static_cast<FblSignalType>(message.type());
-//		return true;
-	}
-
-	bool AfbSignal::saveToXml(QXmlStreamWriter* xmlWriter) const
-	{
-		if (xmlWriter == nullptr)
+		if (errorMessage == nullptr ||
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String(QLatin1String("Pin")))
 		{
-			Q_ASSERT(xmlWriter);
+			assert(errorMessage);
+			assert(xmlElement.isNull() == false);
+			assert(xmlElement.tagName() == QLatin1String("Pin"));
 			return false;
 		}
 
-		xmlWriter->writeStartElement("AfbElementSignal");
-		xmlWriter->writeAttribute("OpName", opName());
-		xmlWriter->writeAttribute("Caption", caption());
-		xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
-
-		switch (dataFormat())
+		// OpName
+		//
+		if (xmlElement.hasAttribute(QLatin1String("OpName")) == false)
 		{
-		case E::DataFormat::UnsignedInt:
+			*errorMessage = QString("Can't find attribute OpName.");
+			return false;
+		}
+
+		m_opName = xmlElement.attribute(QLatin1String("OpName"));
+
+		// Caption
+		//
+		if (xmlElement.hasAttribute(QLatin1String("Caption")) == false)
+		{
+			*errorMessage = QString("Can't find attribute Caption.");
+			return false;
+		}
+
+		m_caption = xmlElement.attribute(QLatin1String("Caption"));
+
+		// Type
+		//
+		if (xmlElement.hasAttribute(QLatin1String("Type")) == false)
+		{
+			*errorMessage = QString("Can't find attribute Type. Pin %1").arg(m_caption);
+			return false;
+		}
+
+		QString typeAttribute = xmlElement.attribute(QLatin1String("Type"));
+
+		if (typeAttribute.compare(QLatin1String("Analog"), Qt::CaseInsensitive) == 0)
+		{
+			m_type = E::SignalType::Analog;
+		}
+		else
+		{
+			if (typeAttribute.compare(QLatin1String("Discrete"), Qt::CaseInsensitive) == 0)
 			{
-				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
-				break;
+				m_type = E::SignalType::Discrete;
 			}
-		case E::DataFormat::SignedInt:
+			else
 			{
-				xmlWriter->writeAttribute("DataFormat", "SignedInt");
-				break;
-			}
-		case E::DataFormat::Float:
-			{
-				xmlWriter->writeAttribute("DataFormat", "Float");
-				break;
-			}
-		default:
-			{
-				xmlWriter->writeAttribute("DataFormat", "Unknown");
-				assert(false);
+				*errorMessage = QString("Unknown SignalType %1. Pin %2").arg(typeAttribute).arg(m_caption);
+				return false;
 			}
 		}
 
-		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
-		xmlWriter->writeAttribute("Size", QString::number(size()));
-		xmlWriter->writeEndElement();
+		// DataFormat
+		//
+		if (xmlElement.hasAttribute(QLatin1String("DataFormat")) == false)
+		{
+			if (type() == E::SignalType::Analog)
+			{
+				*errorMessage = QString("Can't find attribute DataFormat. Pin %1").arg(m_caption);
+				return false;
+			}
+
+			assert(type() == E::SignalType::Discrete);
+		}
+		else
+		{
+			QString dataFormatAttribute = xmlElement.attribute(QLatin1String("DataFormat"));
+
+			if (dataFormatAttribute.compare(QLatin1String("UnsignedInt"), Qt::CaseInsensitive) == 0)
+			{
+				m_dataFormat = E::DataFormat::UnsignedInt;
+			}
+			else
+			{
+				if (dataFormatAttribute.compare(QLatin1String("SignedInt"), Qt::CaseInsensitive) == 0)
+				{
+					m_dataFormat = E::DataFormat::SignedInt;
+				}
+				else
+				{
+					if (dataFormatAttribute.compare(QLatin1String("Float"), Qt::CaseInsensitive) == 0)
+					{
+						m_dataFormat = E::DataFormat::Float;
+					}
+					else
+					{
+						*errorMessage = QString("Unknown DataFormat %1. Pin %2").arg(dataFormatAttribute).arg(m_caption);
+						return false;
+					}
+				}
+			}
+		}
+
+		// OpIndex
+		//
+		if (xmlElement.hasAttribute(QLatin1String("OpIndex")) == false)
+		{
+			*errorMessage = QString("Can't find attribute OpIndex. Pin %1").arg(m_caption);
+			return false;
+		}
+
+		m_operandIndex = xmlElement.attribute(QLatin1String("OpIndex")).toInt();
+
+		// Size
+		//
+		if (xmlElement.hasAttribute(QLatin1String("Size")) == false)
+		{
+			*errorMessage = QString("Can't find attribute Size. Pin %1").arg(m_caption);
+			return false;
+		}
+
+		m_size= xmlElement.attribute(QLatin1String("Size")).toInt();
 
 		return true;
 	}
 
-	bool AfbSignal::loadFromXml(QXmlStreamReader* xmlReader)
+	bool AfbSignal::saveToXml(QDomElement* element) const
 	{
-		if (xmlReader == nullptr)
+		if (element == nullptr)
 		{
-			Q_ASSERT(xmlReader);
+			assert(element);
 			return false;
 		}
 
-		if (QString::compare(xmlReader->name().toString(), "AfbElementSignal", Qt::CaseInsensitive) != 0)
-		{
-			xmlReader->raiseError(QObject::tr("AfbElementSignal expected."));
-			return !xmlReader->hasError();
-		}
+		element->setTagName(QLatin1String("Pin"));
 
-		if (xmlReader->attributes().hasAttribute("OpName"))
-		{
-			setOpName(xmlReader->attributes().value("OpName").toString());
-		}
+		// OpName
+		//
+		element->setAttribute(QLatin1String("OpName"), m_opName);
 
-		if (xmlReader->attributes().hasAttribute("Caption"))
-		{
-			setCaption(xmlReader->attributes().value("Caption").toString());
-		}
+		// Caption
+		//
+		element->setAttribute(QLatin1String("Caption"), m_caption);
 
-		if (xmlReader->attributes().hasAttribute("Type"))
-		{
-			if (QString::compare(xmlReader->attributes().value("Type").toString(), "Analog", Qt::CaseInsensitive) == 0)
-			{
-				setType(E::SignalType::Analog);
-			}
-			else
-				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
-				{
-					setType(E::SignalType::Discrete);
-				}
-				else
-				{
-					xmlReader->raiseError(QObject::tr("AfbSignal, unknown Type"));
-					return false;
-				}
-		}
+		// Type
+		//
+		element->setAttribute(QLatin1String("Type"), E::valueToString(m_type));
 
-		if (xmlReader->attributes().hasAttribute("DataFormat"))
-		{
-			if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "UnsignedInt", Qt::CaseInsensitive) == 0)
-			{
-				setDataFormat(E::DataFormat::UnsignedInt);
-			}
-			else
-				if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "SignedInt", Qt::CaseInsensitive) == 0)
-				{
-					setDataFormat(E::DataFormat::SignedInt);
-				}
-				else
-					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
-					{
-						setDataFormat(E::DataFormat::Float);
-					}
-					else
-					{
-						xmlReader->raiseError(QObject::tr("AfbSignal, unknown DataFormat"));
-						return false;
-					}
-		}
+		// DataFormat
+		//
+		element->setAttribute(QLatin1String("DataFormat"), E::valueToString(m_dataFormat));
 
-		if (xmlReader->attributes().hasAttribute("OpIndex"))
-		{
-			setOperandIndex(xmlReader->attributes().value("OpIndex").toInt());
-		}
+		// OpIndex
+		//
+		element->setAttribute(QLatin1String("OpIndex"), m_operandIndex);
 
-		if (xmlReader->attributes().hasAttribute("Size"))
-		{
-			setSize(xmlReader->attributes().value("Size").toInt());
-		}
+		// Size
+		//
+		element->setAttribute(QLatin1String("Size"), m_size);
 
-		QXmlStreamReader::TokenType endToken = xmlReader->readNext();
-		Q_ASSERT(endToken == QXmlStreamReader::EndElement || endToken == QXmlStreamReader::Invalid);
-
-		return !xmlReader->hasError();
-
+		return true;
 	}
 
 	const QString& AfbSignal::opName() const
 	{
 		return m_opName;
-
 	}
 
 	void AfbSignal::setOpName(const QString& value)
@@ -332,7 +446,7 @@ namespace Afb
 	{
 		return caption();
 	}
-	const QString& AfbSignal::caption() const
+	QString AfbSignal::caption() const
 	{
 		return m_caption;
 	}
@@ -423,10 +537,6 @@ namespace Afb
 		m_highLimit = 0;
 	}
 
-	AfbParam::~AfbParam(void)
-	{
-	}
-
 	void AfbParam::update(const E::SignalType& type, const E::DataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
 	{
 
@@ -438,65 +548,13 @@ namespace Afb
 		return;
 	}
 
-	bool AfbParam::SaveData(Proto::AfbParam* /*message*/) const
-	{
-		assert(false);	// Use XML version
-		return false;
-
-//		Proto::Write(message->mutable_opname(), m_opName);
-//		Proto::Write(message->mutable_caption(), m_caption);
-//		message->set_visible(visible());
-//        message->set_type(static_cast<Proto::FblSignalType>(m_type));
-//        message->set_dataformat(static_cast<Proto::FblDataFormat>(m_dataFormat));
-
-//		Proto::Write(message->mutable_value(), m_value);
-//		Proto::Write(message->mutable_defaultvalue(), m_defaultValue);
-//		Proto::Write(message->mutable_lowlimit(), m_lowLimit);
-//		Proto::Write(message->mutable_highlimit(), m_highLimit);
-
-//		message->set_operandindex(operandIndex());
-//        message->set_size(size());
-//		message->set_instantiator(instantiator());
-//		message->set_user(user());
-//		Proto::Write(message->mutable_changedscript(), m_changedScript);
-
-//		return true;
-	}
-
-	bool AfbParam::LoadData(const Proto::AfbParam& /*message*/)
-	{
-		assert(false);	// Use XML version
-		return false;
-
-//		Proto::Read(message.opname(), &m_opName);
-//		Proto::Read(message.caption(), &m_caption);
-//        m_type = static_cast<AfbSignalType>(message.type());
-//        m_dataFormat = static_cast<AfbDataFormat>(message.dataformat());
-//        m_visible = message.visible();
-
-//		m_value = Proto::Read(message.value());
-//		m_defaultValue = Proto::Read(message.defaultvalue());
-//		m_lowLimit = Proto::Read(message.lowlimit());
-//		m_highLimit = Proto::Read(message.highlimit());
-
-//		m_operandIndex = message.operandindex();
-//		m_size = message.size();
-//		m_instantiator = message.instantiator();
-//		m_user = message.user();
-//		Proto::Read(message.changedscript(), &m_changedScript);
-
-//		return true;
-	}
-
-	bool AfbParam::loadFromXml(QXmlStreamReader* xmlReader)
+	bool AfbParam::deprecatedLoadFromXml(QXmlStreamReader* xmlReader)
 	{
 		if (xmlReader == nullptr)
 		{
 			Q_ASSERT(xmlReader);
 			return false;
 		}
-
-		m_units.clear();
 
 		if (xmlReader->name() != "AfbElementParam")
 		{
@@ -526,7 +584,6 @@ namespace Afb
 				setType(E::SignalType::Analog);
 			}
 			else
-			{
 				if (QString::compare(xmlReader->attributes().value("Type").toString(), "Discrete", Qt::CaseInsensitive) == 0)
 				{
 					setType(E::SignalType::Discrete);
@@ -536,7 +593,6 @@ namespace Afb
 					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown Type"));
 					return false;
 				}
-			}
 		}
 
 		if (xmlReader->attributes().hasAttribute("DataFormat"))
@@ -551,7 +607,6 @@ namespace Afb
 					setDataFormat(E::DataFormat::SignedInt);
 				}
 				else
-				{
 					if (QString::compare(xmlReader->attributes().value("DataFormat").toString(), "Float", Qt::CaseInsensitive) == 0)
 					{
 						setDataFormat(E::DataFormat::Float);
@@ -561,7 +616,6 @@ namespace Afb
 						xmlReader->raiseError(QObject::tr("AfbElementParam, unknown DataFormat"));
 						return false;
 					}
-				}
 		}
 
 		if (xmlReader->attributes().hasAttribute("OpIndex"))
@@ -605,10 +659,11 @@ namespace Afb
 				}
 			}
 
-			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0
-					|| QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0
-					|| QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0
-					|| QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
+
+			if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0 ||
+					QString::compare(valueName, "Default", Qt::CaseInsensitive) == 0 ||
+					QString::compare(valueName, "LowLimit", Qt::CaseInsensitive) == 0 ||
+					QString::compare(valueName, "HighLimit", Qt::CaseInsensitive) == 0)
 			{
 				QString str = xmlReader->readElementText();
 				QVariant val;
@@ -617,19 +672,19 @@ namespace Afb
 				{
 					switch (dataFormat())
 					{
-						case E::DataFormat::UnsignedInt:
-						case E::DataFormat::SignedInt:
-						{
-							val = str.toInt();
-							break;
-						}
-						case E::DataFormat::Float:
-						{
-							val = str.toDouble();
-							break;
-						}
-						default:
-							assert(false);
+					case E::DataFormat::UnsignedInt:
+					case E::DataFormat::SignedInt:
+					{
+						val = str.toInt();
+						break;
+					}
+					case E::DataFormat::Float:
+					{
+						val = str.toDouble();
+						break;
+					}
+					default:
+						assert(false);
 					}
 				}
 				else
@@ -637,7 +692,11 @@ namespace Afb
 					val = str == "1" ? true : false;
 				}
 
-				if (val.isNull() == false)
+				if (val.isNull())
+				{
+					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown type, tag ") + valueName + QObject::tr(", data ") + str);
+				}
+				else
 				{
 					if (QString::compare(valueName, "Value", Qt::CaseInsensitive) == 0)
 					{
@@ -656,85 +715,426 @@ namespace Afb
 						setHighLimit(val);
 					}
 				}
-				else
-				{
-					xmlReader->raiseError(QObject::tr("AfbElementParam, unknown type, tag ") + valueName + QObject::tr(", data ") + str);
-				}
-			}
-
-			if (QString::compare(valueName, "Units", Qt::CaseInsensitive) == 0)
-			{
-				m_units = xmlReader->readElementText();
 			}
 		}
 
 		return !xmlReader->hasError();
 	}
 
-	bool AfbParam::saveToXml(QXmlStreamWriter* xmlWriter) const
+	bool AfbParam::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
 	{
-		if (xmlWriter == nullptr)
+		if (errorMessage == nullptr ||
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("Param"))
 		{
-			Q_ASSERT(xmlWriter);
+			assert(errorMessage);
+			assert(xmlElement.isNull() == false);
+			assert(xmlElement.tagName() == QLatin1String("Param"));
 			return false;
 		}
 
-		xmlWriter->writeStartElement("AfbElementParam");
-		xmlWriter->writeAttribute("OpName", opName());
-		xmlWriter->writeAttribute("Caption", caption());
-		xmlWriter->writeAttribute("Visible", visible() ? "true" : "false");
-		xmlWriter->writeAttribute("OpIndex", QString::number(operandIndex()));
-		xmlWriter->writeAttribute("Size", QString::number(size()));
-		xmlWriter->writeAttribute("Instantiator", instantiator() ? "true" : "false");
-		xmlWriter->writeAttribute("User", user() ? "true" : "false");
-		xmlWriter->writeAttribute("Type", isAnalog() ? "Analog" : "Discrete");
-
-		switch (dataFormat())
+		// OpName
+		//
+		if (xmlElement.hasAttribute("OpName") == false)
 		{
-		case E::DataFormat::UnsignedInt:
-			{
-				xmlWriter->writeAttribute("DataFormat", "UnsignedInt");
-				break;
-			}
-		case E::DataFormat::SignedInt:
-			{
-				xmlWriter->writeAttribute("DataFormat", "SignedInt");
-				break;
-			}
-		case E::DataFormat::Float:
-			{
-				xmlWriter->writeAttribute("DataFormat", "Float");
-				break;
-			}
-		default:
-			{
-				xmlWriter->writeAttribute("DataFormat", "Unknown");
-				assert(false);
-			}
+			*errorMessage = "Can't find attribute OpName.";
+			return false;
 		}
 
-		if (isDiscrete())
+		m_opName = xmlElement.attribute("OpName");
+
+		// Caption
+		//
+		if (xmlElement.hasAttribute("Caption") == false)
 		{
-			xmlWriter->writeTextElement("Value", value() == true ? "1" : "0");
-			xmlWriter->writeTextElement("Default", defaultValue() == true ? "1" : "0");
-			xmlWriter->writeTextElement("LowLimit", lowLimit() == true ? "1" : "0");
-			xmlWriter->writeTextElement("HighLimit", highLimit() == true ? "1" : "0");
+			*errorMessage = "Can't find attribute Caption.";
+			return false;
+		}
+
+		m_caption = xmlElement.attribute("Caption");
+
+		// Visible
+		//
+		if (xmlElement.hasAttribute("Visible") == false)
+		{
+			*errorMessage = "Can't find attribute Visible.";
+			return false;
+		}
+
+		m_visible = xmlElement.attribute("Visible").compare("true", Qt::CaseInsensitive) == 0;
+
+		// OpIndex
+		//
+		if (xmlElement.hasAttribute("OpIndex") == false)
+		{
+			*errorMessage = "Can't find attribute OpIndex.";
+			return false;
+		}
+
+		m_operandIndex = xmlElement.attribute("OpIndex").toInt();
+
+		// Size
+		//
+		if (xmlElement.hasAttribute("Size") == false)
+		{
+			*errorMessage = "Can't find attribute Size.";
+			return false;
+		}
+
+		m_size = xmlElement.attribute("Size").toInt();
+
+		// Instantiator
+		//
+		if (xmlElement.hasAttribute("Instantiator") == false)
+		{
+			*errorMessage = "Can't find attribute Instantiator.";
+			return false;
+		}
+
+		m_instantiator = xmlElement.attribute("Instantiator").compare("true", Qt::CaseInsensitive) == 0;
+
+		// User
+		//
+		if (xmlElement.hasAttribute("User") == false)
+		{
+			*errorMessage = "Can't find attribute User.";
+			return false;
+		}
+
+		m_user = xmlElement.attribute("User").compare("true", Qt::CaseInsensitive) == 0;
+
+		// Type
+		//
+		if (xmlElement.hasAttribute("Type") == false)
+		{
+			*errorMessage = QString("Can't find attribute Type. Pin %1").arg(m_caption);
+			return false;
+		}
+
+		QString typeAttribute = xmlElement.attribute("Type");
+
+		if (typeAttribute.compare(QLatin1String("Analog"), Qt::CaseInsensitive) == 0)
+		{
+			m_type = E::SignalType::Analog;
 		}
 		else
 		{
-			xmlWriter->writeTextElement("Value", value().toString());
-			xmlWriter->writeTextElement("Default", defaultValue().toString());
-			xmlWriter->writeTextElement("LowLimit", lowLimit().toString());
-			xmlWriter->writeTextElement("HighLimit", highLimit().toString());
-        }
+			if (typeAttribute.compare(QLatin1String("Discrete"), Qt::CaseInsensitive) == 0)
+			{
+				m_type = E::SignalType::Discrete;
+			}
+			else
+			{
+				*errorMessage = QString("Unknown SignalType %1. Param %2").arg(typeAttribute).arg(m_caption);
+				return false;
+			}
+		}
 
-		xmlWriter->writeStartElement("Script");
-		xmlWriter->writeTextElement("Changed", changedScript());
-		xmlWriter->writeEndElement();
+		// DataFormat
+		//
+		if (isAnalog() == true)
+		{
+			if (xmlElement.hasAttribute("DataFormat") == false)
+			{
+				*errorMessage = QString("Can't find attribute DataFormat. Param %1").arg(m_caption);
+				return false;
+			}
 
-		xmlWriter->writeTextElement("Units", units());
+			QString dataFormatAttribute = xmlElement.attribute("DataFormat");
 
-		xmlWriter->writeEndElement();
+			if (dataFormatAttribute.compare(QLatin1String("UnsignedInt"), Qt::CaseInsensitive) == 0)
+			{
+				m_dataFormat = E::DataFormat::UnsignedInt;
+			}
+			else
+			{
+				if (dataFormatAttribute.compare(QLatin1String("SignedInt"), Qt::CaseInsensitive) == 0)
+				{
+					m_dataFormat = E::DataFormat::SignedInt;
+				}
+				else
+				{
+					if (dataFormatAttribute.compare(QLatin1String("Float"), Qt::CaseInsensitive) == 0)
+					{
+						m_dataFormat = E::DataFormat::Float;
+					}
+					else
+					{
+						*errorMessage = QString("Unknown DataFormat %1. Param %2").arg(dataFormatAttribute).arg(m_caption);
+						return false;
+					}
+				}
+			}
+		}
+
+		// Section <Value>
+		//
+		std::function<QVariant(QString, E::SignalType, E::DataFormat)> valToDataFormat =
+				[](QString str, E::SignalType type, E::DataFormat dataFormat) -> QVariant
+		{
+			if (type == E::SignalType::Analog)
+			{
+				switch (dataFormat)
+				{
+				case E::DataFormat::UnsignedInt:
+				case E::DataFormat::SignedInt:
+					return QVariant(str.toInt());
+				case E::DataFormat::Float:
+					return QVariant(str.toDouble());
+				default:
+					assert(false);
+					return QVariant();
+				}
+			}
+
+			if (type == E::SignalType::Discrete)
+			{
+				return QVariant(str == "1" ? true : false);
+			}
+
+			assert(false);
+			return QVariant();
+		};
+
+		{
+			QDomElement valueElement = xmlElement.firstChildElement("Value");
+
+			if (valueElement.isNull() == true)
+			{
+				*errorMessage = QString("Can't find section Value. Param %1.").arg(m_caption);
+				return false;
+			}
+
+			QVariant v = valToDataFormat(valueElement.text(), type(), dataFormat());
+			setValue(v);
+		}
+
+		// Section <Default>
+		//
+		{
+			QDomElement defaultElement = xmlElement.firstChildElement("Default");
+
+			if (user() == true &&
+					defaultElement.isNull() == true)
+			{
+				*errorMessage = QString("Can't find section Default. Param %1.").arg(m_caption);
+				return false;
+			}
+
+			if (defaultElement.isNull() == false)
+			{
+				QVariant v = valToDataFormat(defaultElement.text(), type(), dataFormat());
+				setDefaultValue(v);
+			}
+		}
+
+		if (isAnalog() == true)
+		{
+			// Section <LowLimit>
+			//
+			{
+				QDomElement e = xmlElement.firstChildElement("LowLimit");
+
+				if (user() == true &&
+						e.isNull() == true)
+				{
+					*errorMessage = QString("Can't find section LowLimit. Param %1.").arg(m_caption);
+					return false;
+				}
+
+				if (e.isNull() == false)
+				{
+					QVariant v = valToDataFormat(e.text(), type(), dataFormat());
+					setLowLimit(v);
+				}
+			}
+
+			// Section <HighLimit>
+			//
+			{
+				QDomElement e = xmlElement.firstChildElement("HighLimit");
+
+				if (user() == true &&
+						e.isNull() == true)
+				{
+					*errorMessage = QString("Can't find section HighLimit. Param %1.").arg(m_caption);
+					return false;
+				}
+
+				if (e.isNull() == false)
+				{
+					QVariant v = valToDataFormat(e.text(), type(), dataFormat());
+					setHighLimit(v);
+				}
+			}
+		}
+
+		// Section <Units>
+		//
+		{
+			QDomElement e = xmlElement.firstChildElement("Units");
+
+			if (e.isNull() == true)
+			{
+				m_units.clear();
+			}
+			else
+			{
+				m_units = e.text();
+			}
+		}
+
+
+		// Section <Script>::<Changed>
+		//
+		m_changedScript.clear();
+
+		{
+			QDomElement s = xmlElement.firstChildElement("Script");
+
+			if (s.isNull() == false)
+			{
+				QDomElement sc = s.firstChildElement("Changed");
+
+				if (sc.isNull() == false)
+				{
+					m_changedScript = sc.text().trimmed();
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool AfbParam::saveToXml(QDomElement* xmlElement) const
+	{
+		if (xmlElement == nullptr ||
+				xmlElement->isNull() == true)
+		{
+			assert(xmlElement);
+			assert(xmlElement->isNull() == false);
+			return false;
+		}
+
+		xmlElement->setTagName(QLatin1String("Param"));
+
+		// OpName
+		//
+		xmlElement->setAttribute(QLatin1String("OpName"), m_opName);
+
+		// Caption
+		//
+		xmlElement->setAttribute(QLatin1String("Caption"), m_caption);
+
+		// Visible
+		//
+		xmlElement->setAttribute(QLatin1String("Visible"), m_visible ? QLatin1String("true") : QLatin1String("false"));
+
+		// OpIndex
+		//
+		xmlElement->setAttribute(QLatin1String("OpIndex"), m_operandIndex);
+
+		// Size
+		//
+		xmlElement->setAttribute(QLatin1String("Size"), m_size);
+
+		// Instantiator
+		//
+		xmlElement->setAttribute(QLatin1String("Instantiator"), m_instantiator ? QLatin1String("true") : QLatin1String("false"));
+
+		// User
+		//
+		xmlElement->setAttribute(QLatin1String("User"), m_user ? QLatin1String("true") : QLatin1String("false"));
+
+		// Type
+		//
+		xmlElement->setAttribute(QLatin1String("Type"), E::valueToString(m_type));
+
+		// DataFormat
+		//
+		xmlElement->setAttribute(QLatin1String("DataFormat"), E::valueToString(m_dataFormat));
+
+		// Sections "Values"
+		//
+		QDomDocument doc = xmlElement->ownerDocument();
+		assert(doc.isNull() == false);
+
+		if (isDiscrete() == true)
+		{
+			// Value
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Value")));
+				QDomText text = doc.createTextNode(value() == true ? "1" : "0");
+				node.appendChild(text);
+			}
+			// Default
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Default")));
+				QDomText text = doc.createTextNode(defaultValue() == true ? "1" : "0");
+				node.appendChild(text);
+			}
+			// LowLimit
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("LowLimit")));
+				QDomText text = doc.createTextNode(lowLimit() == true ? "1" : "0");
+				node.appendChild(text);
+			}
+			// HighLimit
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("HighLimit")));
+				QDomText text = doc.createTextNode(highLimit() == true ? "1" : "0");
+				node.appendChild(text);
+			}
+		}
+		else
+		{
+			// Value
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Value")));
+				QDomText text = doc.createTextNode(value().toString());
+				node.appendChild(text);
+			}
+			// Default
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Default")));
+				QDomText text = doc.createTextNode(defaultValue().toString());
+				node.appendChild(text);
+			}
+			// LowLimit
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("LowLimit")));
+				QDomText text = doc.createTextNode(lowLimit().toString());
+				node.appendChild(text);
+			}
+			// HighLimit
+			{
+				QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("HighLimit")));
+				QDomText text = doc.createTextNode(highLimit().toString());
+				node.appendChild(text);
+			}
+		}
+
+		// Section <Units>
+		//
+		{
+			QDomNode node = xmlElement->appendChild(doc.createElement(QLatin1String("Units")));
+			QDomText text = doc.createTextNode(m_units);
+			node.appendChild(text);
+		}
+
+		// Section <Script>
+		//
+		{
+			QDomNode scriptNode = xmlElement->appendChild(doc.createElement(QLatin1String("Script")));
+
+			// Section <Changed>
+			//
+			{
+				QDomNode scriptChaneNode = scriptNode.appendChild(doc.createElement(QLatin1String("Changed")));
+				QDomText text = doc.createTextNode(m_changedScript);
+				scriptChaneNode.appendChild(text);
+			}
+		}
 
 		return true;
 	}
@@ -825,6 +1225,7 @@ namespace Afb
 	}
 
 	// LowLimit
+	//
 	const QVariant& AfbParam::lowLimit() const
 	{
 		return m_lowLimit;
@@ -892,7 +1293,7 @@ namespace Afb
 
 	void AfbParam::setChangedScript(const QString &value)
 	{
-		m_changedScript = value;
+		m_changedScript = value.trimmed();
 	}
 
 	QString AfbParam::units() const
@@ -910,18 +1311,7 @@ namespace Afb
 	//							FblElement
 	//
 	//
-
-	AfbElement::AfbElement(void) :
-		m_version("0.0"),
-		m_implementationVersion(0),
-		m_implementationOpIndex(0),
-		m_hasRam(false),
-		m_requiredStart(true),
-		m_internalUse(false)
-	{
-	}
-
-	AfbElement::~AfbElement(void)
+	AfbElement::AfbElement(void)
 	{
 	}
 
@@ -939,366 +1329,549 @@ namespace Afb
 			return *this;
 		}
 
-		m_strID = that.m_strID;
-		m_caption = that.m_caption;
-		m_description = that.m_description;
-		m_version = that.m_version;
-		m_implementationVersion = that.m_implementationVersion;
-		m_implementationOpIndex = that.m_implementationOpIndex;
-		m_category = that.m_category;
-		m_type = that.m_type;
-		m_hasRam = that.m_hasRam;
-		m_requiredStart = that.m_requiredStart;
-		m_internalUse = that.m_internalUse;
+		QDomDocument d;
+		QDomElement e = d.createElement(QLatin1String("AFB"));
+		that.saveToXml(&e);
 
-		m_libraryScript = that.m_libraryScript;
-		m_afterCreationScript = that.m_afterCreationScript;
+		QString errorMessage;
+		this->loadFromXml(e, &errorMessage);
 
-		m_inputSignals = that.m_inputSignals;
-		m_outputSignals = that.m_outputSignals;
-		m_params = that.m_params;
+		this->m_component = that.m_component;
 
 		return *this;
 	}
 
-	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString& errorMsg)
+	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg)
 	{
 		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
-		bool result = loadFromXml(ba, errorMsg);
 
-		return result;
-	}
+		QDomDocument doc;
 
-	bool AfbElement::loadFromXml(const QByteArray& data, QString& errorMsg)
-	{
-		QXmlStreamReader reader(data);
-		bool result = loadFromXml(&reader);
-
-		errorMsg.clear();
+		bool result = doc.setContent(ba, errorMsg);
 		if (result == false)
 		{
-			errorMsg = reader.errorString();
-		}
-		return result;
-	}
-
-	bool AfbElement::loadFromXml(QXmlStreamReader* xmlReader)
-	{
-		if (xmlReader == nullptr)
-		{
-			Q_ASSERT(xmlReader);
 			return false;
 		}
 
-		if (xmlReader->readNextStartElement() == false)
+		result = loadFromXml(doc.firstChild().toElement(), errorMsg);
+
+		return result;
+	}
+
+	bool AfbElement::loadFromXml(const QDomElement& xmlElement, QString* errorMessage)
+	{
+		if (errorMessage == nullptr ||
+				xmlElement.isNull() == true ||
+				xmlElement.tagName() != QLatin1String("AFB"))
 		{
-			return !xmlReader->hasError();
+			assert(errorMessage);
+			assert(xmlElement.isNull() == false);
+			assert(xmlElement.tagName() == QLatin1String("AFB"));
+			return false;
 		}
 
-		if (QString::compare(xmlReader->name().toString(), "ApplicationFunctionalBlocks", Qt::CaseInsensitive) != 0)
+		// id
+		//
+		if (xmlElement.hasAttribute("id") == false)
 		{
-			xmlReader->raiseError(QObject::tr("The file is not an ApplicationFunctionalBlocks file."));
-			return !xmlReader->hasError();
+			*errorMessage = tr("Cant find attribute id.");
+			return false;
 		}
 
-		if (xmlReader->readNextStartElement() == false)
+		m_strID = xmlElement.attribute("id");
+
+		// Caption
+		//
+		if (xmlElement.hasAttribute("Caption") == false)
 		{
-			return !xmlReader->hasError();
+			*errorMessage = tr("Cant find attribute Caption. AFB %1").arg(m_strID);
+			return false;
+		}
+
+		m_caption = xmlElement.attribute("Caption");
+
+		// Version
+		//
+		if (xmlElement.hasAttribute("Version") == false)
+		{
+			*errorMessage = tr("Cant find attribute Version. AFB %1").arg(m_strID);
+			return false;
+		}
+
+		m_version = xmlElement.attribute("Version");
+
+		// Section Properties
+		//
+		{
+			QDomElement properties = xmlElement.firstChildElement("Properties");
+
+			if (properties.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Properties. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			// Section Properties::Description
+			//
+			QDomElement description = properties.firstChildElement("Description");
+
+			if (description.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Description. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			m_description = description.text();
+
+			// Section Properties::Category
+			//
+			QDomElement category = properties.firstChildElement("Category");
+
+			if (category.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Category. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			m_category = category.text();
+
+			// Section Properties::OpCode
+			//
+			QDomElement opCode = properties.firstChildElement("OpCode");
+
+			if (opCode.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section OpCode. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			m_opCode = opCode.text().toInt();
+			//m_type.fromOpCode(m_opCode);
+
+			// Section Properties::HasRam
+			//
+			QDomElement hasRam = properties.firstChildElement("HasRam");
+
+			if (hasRam.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			m_hasRam = hasRam.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+
+			// Section Properties::InternalUse
+			//
+			QDomElement internalUse = properties.firstChildElement("InternalUse");
+
+			if (internalUse.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section InternalUse. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			m_internalUse = internalUse.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		}
+
+		// Section <Inputs>
+		//
+		{
+			QDomElement inputsElement = xmlElement.firstChildElement("Inputs");
+
+			if (inputsElement.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Inputs. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			QDomElement p = inputsElement.firstChildElement("Pin");
+			m_inputSignals.clear();
+
+			while (p.isNull() == false)
+			{
+				// p is Pin section
+				//
+				AfbSignal afbSignal;
+
+				bool ok = afbSignal.loadFromXml(p, errorMessage);
+				if (ok == false)
+				{
+					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					return false;
+				}
+
+				m_inputSignals.push_back(afbSignal);
+
+				p = p.nextSiblingElement("Pin");
+			}
+		}
+
+		// Section <Outputs>
+		//
+		{
+			QDomElement outputsElement = xmlElement.firstChildElement("Outputs");
+
+			if (outputsElement.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Outputs. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			QDomElement p = outputsElement.firstChildElement("Pin");
+			m_outputSignals.clear();
+
+			while (p.isNull() == false)
+			{
+				// p is Pin section
+				//
+				AfbSignal afbSignal;
+
+				bool ok = afbSignal.loadFromXml(p, errorMessage);
+				if (ok == false)
+				{
+					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					return false;
+				}
+
+				m_outputSignals.push_back(afbSignal);
+
+				p = p.nextSiblingElement("Pin");
+			}
+		}
+
+		// Section <Params>
+		//
+		{
+			QDomElement paramsElement = xmlElement.firstChildElement("Params");
+
+			if (paramsElement.isNull() == true)
+			{
+				*errorMessage = tr("Cant find section Params. AFB %1").arg(m_strID);
+				return false;
+			}
+
+			QDomElement p = paramsElement.firstChildElement("Param");
+			m_params.clear();
+
+			while (p.isNull() == false)
+			{
+				// p is Pin section
+				//
+				AfbParam afbParam;
+
+				bool ok = afbParam.loadFromXml(p, errorMessage);
+				if (ok == false)
+				{
+					errorMessage->append(tr(" AFB %1").arg(m_strID));
+					return false;
+				}
+
+				m_params.push_back(afbParam);
+
+				p = p.nextSiblingElement("Param");
+			}
+		}
+
+		// Section <CommonScript>
+		//
+		m_libraryScript.clear();
+		m_afterCreationScript.clear();
+
+		{
+			QDomElement commonScriptElement = xmlElement.firstChildElement("CommonScript");
+
+			if (commonScriptElement.isNull() == false)
+			{
+				// Section <Library>
+				//
+				QDomElement libraryElement = commonScriptElement.firstChildElement("Library");
+
+				if (libraryElement.isNull() == false)
+				{
+					m_libraryScript = libraryElement.text().trimmed();
+				}
+
+				// Section <AfterCreation>
+				//
+				QDomElement afterCreationElement = commonScriptElement.firstChildElement("AfterCreation");
+
+				if (afterCreationElement.isNull() == false)
+				{
+					m_afterCreationScript = afterCreationElement.text().trimmed();
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool AfbElement::deprecatedFormatLoad(const Proto::AfbElementXml& data, QString& errorMsg)
+	{
+		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
+		QXmlStreamReader xmlReader(ba);
+
+		// Read only StrID of element and PARAMS
+		//
+		if (xmlReader.readNextStartElement() == false)
+		{
+			return !xmlReader.hasError();
+		}
+
+		if (QString::compare(xmlReader.name().toString(), "ApplicationFunctionalBlocks", Qt::CaseInsensitive) != 0)
+		{
+			errorMsg = QObject::tr("The file is not an ApplicationFunctionalBlocks file.");
+			return !xmlReader.hasError();
+		}
+
+		if (xmlReader.readNextStartElement() == false)
+		{
+			return !xmlReader.hasError();
 		}
 
 
-		if (QString::compare(xmlReader->name().toString(), "AfbElement", Qt::CaseInsensitive) != 0)
+		if (QString::compare(xmlReader.name().toString(), "AfbElement", Qt::CaseInsensitive) != 0)
 		{
-			xmlReader->raiseError(QObject::tr("AfbElement expected."));
-			return !xmlReader->hasError();
+			errorMsg = QObject::tr("AfbElement expected.");
+			return !xmlReader.hasError();
 		}
 
-		if (xmlReader->attributes().hasAttribute("StrId"))
+		if (xmlReader.attributes().hasAttribute("StrId"))
 		{
-			setStrID(xmlReader->attributes().value("StrId").toString());
+			setStrID(xmlReader.attributes().value("StrId").toString());
 		}
 
-		std::vector<AfbSignal> inputSignals;
-		std::vector<AfbSignal> outputSignals;
+		// Reading params
+		//
 		std::vector<AfbParam> params;
 
-		while (xmlReader->readNextStartElement())
+		while (xmlReader.readNextStartElement())
 		{
-			if (QString::compare(xmlReader->name().toString(), "Properties", Qt::CaseInsensitive) == 0)
+			if (QString::compare(xmlReader.name().toString(), "Properties", Qt::CaseInsensitive) == 0)
 			{
-				while (xmlReader->readNextStartElement())
+				while (xmlReader.readNextStartElement())
 				{
-					if (QString::compare(xmlReader->name().toString(), "Caption", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), "Caption", Qt::CaseInsensitive) == 0)
 					{
-						setCaption(xmlReader->readElementText());
+						setCaption(xmlReader.readElementText());
 						continue;
 					}
 
-					if (QString::compare(xmlReader->name().toString(), "Description", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), "Version", Qt::CaseInsensitive) == 0)
 					{
-						setDescription(xmlReader->readElementText());
+						setVersion(xmlReader.readElementText());
 						continue;
 					}
 
-					if (QString::compare(xmlReader->name().toString(), "Version", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
 					{
-						setVersion(xmlReader->readElementText());
+						int opCode = xmlReader.readElementText().toInt();
+						setOpCode(opCode);
 						continue;
 					}
 
-					if (QString::compare(xmlReader->name().toString(), "Implementation", Qt::CaseInsensitive) == 0)
-					{
-						if (xmlReader->attributes().hasAttribute("Version"))
-						{
-							setImplementationVersion(xmlReader->attributes().value("Version").toInt());
-						}
-						if (xmlReader->attributes().hasAttribute("OpIndex"))
-						{
-							setImplementationOpIndex(xmlReader->attributes().value("OpIndex").toInt());
-						}
-
-						xmlReader->readElementText();
-						continue;
-					}
-
-					if (QString::compare(xmlReader->name().toString(), "Category", Qt::CaseInsensitive) == 0)
-					{
-						setCategory(xmlReader->readElementText());
-						continue;
-					}
-
-					if (QString::compare(xmlReader->name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
-					{
-						int opCode = xmlReader->readElementText().toInt();
-
-						if (opCode < Afb::AfbType::First || opCode > Afb::AfbType::Last)
-						{
-							xmlReader->raiseError(QObject::tr("AfbElement '%1': wrong opCode (%2), expected %3..%4.").arg(strID()).arg(opCode).arg(Afb::AfbType::First).arg(Afb::AfbType::Last));
-							return !xmlReader->hasError();
-						}
-
-						Afb::AfbType type;
-						type.fromOpCode(opCode);
-
-						setType(type);
-						continue;
-					}
-
-					if (QString::compare(xmlReader->name().toString(), "HasRam", Qt::CaseInsensitive) == 0)
-					{
-						setHasRam(xmlReader->readElementText() == "true" ? true : false);
-						continue;
-					}
-
-					if (QString::compare(xmlReader->name().toString(), "RequiredStart", Qt::CaseInsensitive) == 0)
-					{
-						setRequiredStart(xmlReader->readElementText() == "true" ? true : false);
-						continue;
-					}
-
-					if (QString::compare(xmlReader->name().toString(), "InternalUse", Qt::CaseInsensitive) == 0)
-					{
-						setInternalUse(xmlReader->readElementText() == "true" ? true : false);
-						continue;
-					}
-
-					xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-					xmlReader->skipCurrentElement();
+					xmlReader.skipCurrentElement();
 				}
 
 				continue;
 			}
 
-			// Input or output signals
-			//
-			if (QString::compare(xmlReader->name().toString(), "OutputSignals", Qt::CaseInsensitive) == 0
-					|| 	QString::compare(xmlReader->name().toString(), "InputSignals", Qt::CaseInsensitive) == 0)
-			{
-				enum LoadSignalType {InputSignal, OutputSignal} loadSignalType;
 
-				if (QString::compare(xmlReader->name().toString(), "OutputSignals", Qt::CaseInsensitive) == 0)
-				{
-					loadSignalType = LoadSignalType::OutputSignal;
-				}
-				else
-				{
-					loadSignalType = LoadSignalType::InputSignal;
-				}
-
-				// Read signals
-				//
-				while (xmlReader->readNextStartElement())
-				{
-					if (QString::compare(xmlReader->name().toString(), "AfbElementSignal", Qt::CaseInsensitive) == 0)
-					{
-						AfbSignal afbSignal;
-						afbSignal.loadFromXml(xmlReader);
-						if (loadSignalType == LoadSignalType::InputSignal)
-						{
-							inputSignals.push_back(afbSignal);
-						}
-						else
-						{
-							outputSignals.push_back(afbSignal);
-						}
-					}
-					else
-					{
-						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-						xmlReader->skipCurrentElement();
-					}
-				}
-				continue;
-			}
-
-			if (QString::compare(xmlReader->name().toString(), "Params", Qt::CaseInsensitive) == 0)
+			if (QString::compare(xmlReader.name().toString(), "Params", Qt::CaseInsensitive) == 0)
 			{
 				// Read params
 				//
-				while (xmlReader->readNextStartElement())
+				while (xmlReader.readNextStartElement())
 				{
-					if (QString::compare(xmlReader->name().toString(), "AfbElementParam", Qt::CaseInsensitive) == 0)
+					if (QString::compare(xmlReader.name().toString(), "AfbElementParam", Qt::CaseInsensitive) == 0)
 					{
 						AfbParam afbParam;
-						afbParam.loadFromXml(xmlReader);
+						afbParam.deprecatedLoadFromXml(&xmlReader);
 						params.push_back(afbParam);
+						xmlReader.skipCurrentElement();
 					}
 					else
 					{
-						xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-						xmlReader->skipCurrentElement();
+						errorMsg = QObject::tr("Unknown tag: ") + xmlReader.name().toString();
+						xmlReader.skipCurrentElement();
 					}
 				}
-				continue;
 			}
 
-			if (QString::compare(xmlReader->name().toString(), "CommonScript", Qt::CaseInsensitive) == 0)
-			{
-				// Read params
-				//
-				while (xmlReader->readNextStartElement())
-				{
-					if (QString::compare(xmlReader->name().toString(), "Library", Qt::CaseInsensitive) == 0)
-					{
-						setLibraryScript(xmlReader->readElementText());
-					}
-					else
-					{
-						if (QString::compare(xmlReader->name().toString(), "AfterCreation", Qt::CaseInsensitive) == 0)
-						{
-							setAfterCreationScript(xmlReader->readElementText());
-						}
-						else
-						{
-							xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-						}
-					}
-				}
-				continue;
-			}
-
-			xmlReader->raiseError(QObject::tr("Unknown tag: ") + xmlReader->name().toString());
-			xmlReader->skipCurrentElement();
+			xmlReader.skipCurrentElement();
 		}
 
-		setInputSignals(inputSignals);
-		setOutputSignals(outputSignals);
 		setParams(params);
 
-		return !xmlReader->hasError();
-
+		return !xmlReader.hasError();
 	}
 
 	bool AfbElement::saveToXml(Proto::AfbElementXml* dst) const
 	{
-		QByteArray ba;
+		QDomDocument d;
+		QDomElement xmlSection = d.createElement(QLatin1String("AFB"));
 
-		QXmlStreamWriter writer(&ba);
-		bool result = saveToXml(&writer);
+		bool result = saveToXml(&xmlSection);
 
 		if (result == true)
 		{
+			QByteArray ba;
+			QTextStream stream(&ba);
+			stream << xmlSection;
+
 			dst->set_data(ba.data(), ba.size());
 		}
 
 		return result;
 	}
 
-	bool AfbElement::saveToXml(QByteArray* dst) const
-	{
-		QXmlStreamWriter writer(dst);
-		bool result = saveToXml(&writer);
-		return result;
-	}
+	//	bool AfbElement::saveToXml(QByteArray* dst) const
+	//	{
+	//		QXmlStreamWriter writer(dst);
+	//		bool result = saveToXml(&writer);
+	//		return result;
+	//	}
 
-	bool AfbElement::saveToXml(QXmlStreamWriter* xmlWriter) const
+	bool AfbElement::saveToXml(QDomElement* xmlElement) const
 	{
-		if (xmlWriter == nullptr)
+		if (xmlElement == nullptr ||
+				xmlElement->isNull() == true)
 		{
-			Q_ASSERT(xmlWriter);
+			assert(xmlElement);
+			assert(xmlElement->isNull() == false);
 			return false;
 		}
 
-		xmlWriter->setAutoFormatting(true);
-		xmlWriter->writeStartDocument();
+		QDomDocument doc = xmlElement->ownerDocument();
+		assert(doc.isNull() == false);
 
-		xmlWriter->writeStartElement("ApplicationFunctionalBlocks");
+		xmlElement->setTagName(QLatin1String("AFB"));
 
-		xmlWriter->writeStartElement("AfbElement");
-		xmlWriter->writeAttribute("StrId", strID());
+		// id
+		//
+		xmlElement->setAttribute(QLatin1String("id"), m_strID);
 
+		// Caption
+		//
+		xmlElement->setAttribute(QLatin1String("Caption"), m_caption);
 
-		xmlWriter->writeStartElement("Properties");
-		xmlWriter->writeTextElement("Caption", caption());
-		xmlWriter->writeTextElement("Description", description());
-		xmlWriter->writeTextElement("Version", version());
+		// Version
+		//
+		xmlElement->setAttribute(QLatin1String("Version"), m_version);
 
-		xmlWriter->writeStartElement("Implementation");
-		xmlWriter->writeAttribute("Version", QString::number(implementationVersion()));
-		xmlWriter->writeAttribute("OpIndex", QString::number(implementationOpIndex()));
-		xmlWriter->writeEndElement();
-
-		xmlWriter->writeTextElement("Category", category());
-		xmlWriter->writeTextElement("OpCode", QString::number(type().toOpCode()));
-		xmlWriter->writeTextElement("HasRam", hasRam() ? "true" : "false");
-		xmlWriter->writeTextElement("RequiredStart", requiredStart() ? "true" : "false");
-		xmlWriter->writeTextElement("InternalUse", internalUse() ? "true" : "false");
-		xmlWriter->writeEndElement();
-
-		xmlWriter->writeStartElement("InputSignals");
-		for (auto s : inputSignals())
+		// Section <Properties>
+		//
 		{
-			s.saveToXml(xmlWriter);
-		}
-		xmlWriter->writeEndElement(); //"InputSignals"
+			QDomElement properies = doc.createElement(QLatin1String("Properties"));
+			properies = xmlElement->appendChild(properies).toElement();
 
-		xmlWriter->writeStartElement("OutputSignals");
-		for (auto s : outputSignals())
+			// Section Properties::Description
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("Description"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_description));
+			}
+
+			// Section Properties::Category
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("Category"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_category));
+			}
+
+			// Section Properties::OpCode
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("OpCode"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(QString::number(opCode())));
+			}
+
+			// Section Properties::HasRam
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("HasRam"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_hasRam ? "true" : "false"));
+			}
+
+			// Section Properties::InternalUse
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("InternalUse"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_internalUse ? "true" : "false"));
+			}
+		}
+
+		// Section <Inputs>
+		//
 		{
-			s.saveToXml(xmlWriter);
-		}
-		xmlWriter->writeEndElement(); //"OutputSignals"
+			QDomElement inputs = doc.createElement(QLatin1String("Inputs"));
+			inputs = xmlElement->appendChild(inputs).toElement();
 
-		xmlWriter->writeStartElement("Params");
-		for (auto s : params())
+			for (const AfbSignal& pin : m_inputSignals)
+			{
+				QDomElement pinXml = doc.createElement(QLatin1String("Pin"));
+				pinXml = inputs.appendChild(pinXml).toElement();
+
+				pin.saveToXml(&pinXml);
+			}
+		}
+
+		// Section <Outputs>
+		//
 		{
-			s.saveToXml(xmlWriter);
+			QDomElement outputs = doc.createElement(QLatin1String("Outputs"));
+			outputs = xmlElement->appendChild(outputs).toElement();
+
+			for (const AfbSignal& pin : m_outputSignals)
+			{
+				QDomElement pinXml = doc.createElement(QLatin1String("Pin"));
+				pinXml = outputs.appendChild(pinXml).toElement();
+
+				pin.saveToXml(&pinXml);
+			}
 		}
-		xmlWriter->writeEndElement(); //"Params"
 
-		xmlWriter->writeStartElement("CommonScript");
+		// Section <Params>
+		//
+		{
+			QDomElement paramas = doc.createElement(QLatin1String("Params"));
+			paramas = xmlElement->appendChild(paramas).toElement();
 
-		xmlWriter->writeTextElement("Library", libraryScript());
-		xmlWriter->writeTextElement("AfterCreation", afterCreationScript());
+			for (const AfbParam& param : m_params)
+			{
+				QDomElement paramXml = doc.createElement(QLatin1String("Param"));
+				paramXml = paramas.appendChild(paramXml).toElement();
 
-		xmlWriter->writeEndElement(); //"CommonScript"
+				param.saveToXml(&paramXml);
+			}
+		}
 
-		xmlWriter->writeEndElement(); //"AfbElement"
+		// Section <CommonScript>
+		//
+		{
+			QDomElement ñommonScriptXml = doc.createElement(QLatin1String("CommonScript"));
+			ñommonScriptXml = xmlElement->appendChild(ñommonScriptXml).toElement();
 
-		xmlWriter->writeEndElement(); //"ApplicationFunctionalBlocks"
+			// LibraryScript
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("Library"));
+				s = ñommonScriptXml.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_libraryScript));
+			}
 
-		xmlWriter->writeEndDocument();
-
+			// AfterCreation
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("AfterCreation"));
+				s = ñommonScriptXml.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(m_afterCreationScript));
+			}
+		}
 
 		return true;
 	}
@@ -1341,118 +1914,6 @@ namespace Afb
 		return nullptr;
 	}
 
-	// Serialization
-	//
-	bool AfbElement::SaveData(Proto::Envelope* /*message*/) const
-	{
-		assert(false);
-		return false;
-
-//		quint32 classnamehash = CUtils::GetClassHashCode("FblElement");
-//		message->set_classnamehash(classnamehash);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
-
-//		Proto::FblElement* pMutableFblElement = message->mutable_fblelement();
-
-//		Proto::Write(pMutableFblElement->mutable_uuid(), m_guid);
-//		Proto::Write(pMutableFblElement->mutable_strid(), m_strID);
-//		Proto::Write(pMutableFblElement->mutable_caption(), m_caption);
-//		pMutableFblElement->set_opcode(m_opcode);
-
-//		for (auto signal = m_inputSignals.begin(); signal != m_inputSignals.end(); ++signal)
-//		{
-//			Proto::FblElementSignal* s = pMutableFblElement->mutable_inputsignals()->Add();
-//			signal->SaveData(s);
-//		}
-
-//		for (auto signal = m_outputSignals.begin(); signal != m_outputSignals.end(); ++signal)
-//		{
-//			Proto::FblElementSignal* s = pMutableFblElement->mutable_outputsignals()->Add();
-//			signal->SaveData(s);
-//		}
-
-//		for (auto param = m_params.begin(); param != m_params.end(); ++param)
-//		{
-//			Proto::FblElementParam* p = pMutableFblElement->mutable_params()->Add();
-//			param->SaveData(p);
-//		}
-
-//		return true;
-	}
-
-	bool AfbElement::LoadData(const Proto::Envelope& /*message*/)
-	{
-		assert(false);
-		return false;
-
-//		if (message.has_fblelement() == false)
-//		{
-//			assert(message.has_fblelement());
-//			return false;
-//		}
-
-//		const Proto::FblElement& fblelement = message.fblelement();
-
-//		m_guid = Proto::Read(fblelement.uuid());
-//		m_strID = Proto::Read(fblelement.strid());
-//		m_caption = Proto::Read(fblelement.caption());
-//		m_opcode = fblelement.opcode();
-
-//		// Read input signals
-//		//
-//		m_inputSignals.clear();
-//		for (int i = 0; i < fblelement.inputsignals().size(); i++)
-//		{
-//			Fbl::FblElementSignal s;
-//			s.LoadData(fblelement.inputsignals(i));
-
-//			m_inputSignals.push_back(s);
-//		}
-
-//		// Read output signals
-//		//
-//		m_outputSignals.clear();
-//		for (int i = 0; i < fblelement.outputsignals().size(); i++)
-//		{
-//			Fbl::FblElementSignal s;
-//			s.LoadData(fblelement.outputsignals(i));
-
-//			m_outputSignals.push_back(s);
-//		}
-
-//		// Read params
-//		//
-//		m_params.clear();
-//		for (int i = 0; i < fblelement.params().size(); i++)
-//		{
-//			Fbl::FblElementParam p;
-//			p.LoadData(fblelement.params(i));
-
-//			m_params.push_back(p);
-//		}
-
-//		return true;
-	}
-
-	std::shared_ptr<AfbElement> AfbElement::CreateObject(const Proto::Envelope& /*message*/)
-	{
-		assert(false);
-		return std::shared_ptr<AfbElement>();
-
-//		// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-//		//
-//		if (message.has_fblelement() == false)
-//		{
-//			assert(message.has_fblelement());
-//			return nullptr;
-//		}
-
-//		FblElement* pFblElement = new FblElement();
-
-//		pFblElement->LoadData(message);
-
-//		return pFblElement;
-	}
-
 	void AfbElement::updateParams(const std::vector<AfbParam>& params)
 	{
 		std::vector<AfbParam> newParams;
@@ -1461,10 +1922,10 @@ namespace Afb
 		for (const AfbParam& p : params)
 		{
 			std::vector<AfbParam>::iterator found = std::find_if(m_params.begin(), m_params.end(),
-				[&p](const AfbParam& mp)
-				{
-					return p.opName() == mp.opName() && p.type() == mp.type();
-				});
+																 [&p](const AfbParam& mp)
+			{
+				return p.opName() == mp.opName() && p.type() == mp.type();
+			});
 
 			if (found != m_params.end())
 			{
@@ -1480,9 +1941,6 @@ namespace Afb
 
 	// Properties and Data
 	//
-
-	// StrID
-	//
 	const QString& AfbElement::strID() const
 	{
 		return m_strID;
@@ -1492,8 +1950,6 @@ namespace Afb
 		m_strID = strID;
 	}
 
-	// Caption
-	//
 	QString AfbElement::caption() const
 	{
 		return m_caption;
@@ -1523,26 +1979,6 @@ namespace Afb
 		m_version = value;
 	}
 
-	int AfbElement::implementationVersion() const
-	{
-		return m_implementationVersion;
-	}
-
-	void AfbElement::setImplementationVersion(int value)
-	{
-		m_implementationVersion = value;
-	}
-
-	int AfbElement::implementationOpIndex() const
-	{
-		return m_implementationOpIndex;
-	}
-
-	void AfbElement::setImplementationOpIndex(int value)
-	{
-		m_implementationOpIndex = value;
-	}
-
 	QString AfbElement::category() const
 	{
 		return m_category;
@@ -1553,23 +1989,16 @@ namespace Afb
 		m_category = value;
 	}
 
-
 	// Type - Opcode
 	//
-
-	const Afb::AfbType& AfbElement::type() const
+	int AfbElement::opCode() const
 	{
-		return m_type;
+		return m_opCode;
 	}
 
-	Afb::AfbType& AfbElement::type()
+	void AfbElement::setOpCode(int value)
 	{
-		return m_type;
-	}
-
-	void AfbElement::setType(const Afb::AfbType& value)
-	{
-		m_type = value;
+		m_opCode = value;
 	}
 
 	bool AfbElement::hasRam() const
@@ -1580,16 +2009,6 @@ namespace Afb
 	void AfbElement::setHasRam(bool value)
 	{
 		m_hasRam = value;
-	}
-
-	bool AfbElement::requiredStart() const
-	{
-		return m_requiredStart;
-	}
-
-	void AfbElement::setRequiredStart(bool value)
-	{
-		m_requiredStart = value;
 	}
 
 	bool AfbElement::internalUse() const
@@ -1609,7 +2028,7 @@ namespace Afb
 
 	void AfbElement::setLibraryScript(const QString& value)
 	{
-		m_libraryScript = value;
+		m_libraryScript = value.trimmed();
 	}
 
 	QString AfbElement::afterCreationScript() const
@@ -1619,7 +2038,7 @@ namespace Afb
 
 	void AfbElement::setAfterCreationScript(const QString& value)
 	{
-		m_afterCreationScript = value;
+		m_afterCreationScript = value.trimmed();
 	}
 
 	// InputSignals
@@ -1666,9 +2085,38 @@ namespace Afb
 		m_params = params;
 	}
 
+	std::shared_ptr<Afb::AfbComponent> AfbElement::component()
+	{
+		assert(opCode() == m_component->opCode());
+		return m_component;
+	}
+
+	std::shared_ptr<Afb::AfbComponent> AfbElement::component() const
+	{
+		assert(opCode() == m_component->opCode());
+		return m_component;
+	}
+
+	void AfbElement::setComponent(std::shared_ptr<Afb::AfbComponent> value)
+	{
+		m_component = value;
+		assert(opCode() == m_component->opCode());
+	}
+
+	QString AfbElement::componentCaption() const
+	{
+		if (m_component == nullptr)
+		{
+			assert(m_component);
+			return QString();
+		}
+
+		return m_component->caption();
+	}
+
 	//
 	//
-	//				FblElementCollection - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FBL ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//		FblElementCollection
 	//
 	//
 
@@ -1705,7 +2153,8 @@ namespace Afb
 			std::shared_ptr<Afb::AfbElement> e = std::make_shared<Afb::AfbElement>();
 
 			QString errorMsg;
-			bool result = e->loadFromXml(message.elements(i), errorMsg);
+			bool result = e->loadFromXml(message.elements(i), &errorMsg);
+
 			if (result == true)
 			{
 				m_elements.push_back(e);
@@ -1733,10 +2182,10 @@ namespace Afb
 	std::shared_ptr<AfbElement> AfbElementCollection::get(const QString& strID) const
 	{
 		auto result = std::find_if(m_elements.begin(), m_elements.end(),
-			[&strID](const std::shared_ptr<AfbElement>& fblelement)
-			{
-				return fblelement->strID() == strID;
-			});
+								   [&strID](const std::shared_ptr<AfbElement>& fblelement)
+		{
+			return fblelement->strID() == strID;
+		});
 
 		return result == m_elements.end() ? std::shared_ptr<AfbElement>() : *result;
 	}

@@ -32,11 +32,15 @@ namespace VFrame30
 
 		int version() const;
 
+		QString lmDescriptionFile() const;
+		void setLmDescriptionFile(QString value);
+
 		// Data
 		//
 	private:
 		QString m_description;
 		int m_version = 1;							// Version is inceremented every save
+		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
 	};
 
 }

@@ -32,6 +32,7 @@ namespace VFrame30
 namespace Builder
 {
 	class IssueLogger;
+	class LmDescriptionSet;
 
 	struct Link
 	{
@@ -97,7 +98,7 @@ namespace Builder
 		//
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
-		Afb::AfbElement m_afbElement;					// Specific instance with initialized Params
+		Afb::AfbElement m_afbElement;					// Specific instance!!! with initialized Params
 
 		QUuid m_groupId;								// ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
 														// This id is empty if item is not in group
@@ -109,12 +110,10 @@ namespace Builder
 		AppLogicItem(std::shared_ptr<VFrame30::FblItemRect> fblItem,
 					 std::shared_ptr<VFrame30::Schema> schema);
 
-
 		// Items can be kept in set, it is just comparing m_fblItem pointres
 		//
 		bool operator < (const AppLogicItem& li) const;
 		bool operator == (const AppLogicItem& li) const;
-
 	};
 
 
@@ -129,7 +128,7 @@ namespace Builder
 
 	public:
 		AppLogicModule() = delete;
-		AppLogicModule(QString moduleId);
+		AppLogicModule(QString moduleId, QString lmDescriptionFile);
 
 		bool addBranch(std::shared_ptr<VFrame30::Schema> schema,
 					   const BushContainer& bushes,
@@ -174,13 +173,14 @@ namespace Builder
 
 	public:
 		QString equipmentId() const;
-		void setEquipmentId(QString value);
+		QString lmDescriptionFile() const;
 
 		const std::list<AppLogicItem>& items() const;
 		std::list<AppLogicItem>& items();
 
 	private:
 		QString m_equipmentId;							// EuqipmentId or UFB SchemaID
+		QString m_lmDescriptionFile;					// LogicModule description filename
 		std::list<AppLogicItem> m_items;				// Ordered items
 		std::map<QUuid, AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
 	};
@@ -215,6 +215,8 @@ namespace Builder
 
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
+		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet, IssueLogger* log);
+
 		// Properties
 		//
 	public:
@@ -245,7 +247,7 @@ namespace Builder
 		Parser(DbController* db,
 			   IssueLogger* log,
 			   AppLogicData* appLogicData,
-			   Afb::AfbElementCollection* afbCollection,
+			   LmDescriptionSet* lmDescriptions,
 			   Hardware::EquipmentSet* equipmentSet,
 			   SignalSet* signalSet,
 			   int changesetId,
@@ -266,6 +268,8 @@ namespace Builder
 		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType> >& schemas) const;
 
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
+
+		bool checkLmDescription(VFrame30::LogicSchema* logicSchema);
 
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
 		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
@@ -318,7 +322,7 @@ namespace Builder
 		int m_debug = false;
 
 		AppLogicData* m_applicationData = nullptr;
-		Afb::AfbElementCollection* m_afbCollection = nullptr;
+		LmDescriptionSet* m_lmDescriptions = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;
 	};

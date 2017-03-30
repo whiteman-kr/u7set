@@ -34,6 +34,9 @@ const QString PropertyNames::caption("Caption");
 const QString PropertyNames::userText("UserText");
 const QString PropertyNames::userTextPos("UserTextPos");
 
+const QString PropertyNames::equipmentIds("EquipmentIDs");
+const QString PropertyNames::lmDescriptionFile("LmDescriptionFile");
+
 const QString PropertyNames::ufbSchemaId("UFBSchemaID");
 const QString PropertyNames::ufbSchemaVersion("UFBSchemaVersion");
 

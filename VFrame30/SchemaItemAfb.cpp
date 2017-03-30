@@ -228,14 +228,36 @@ namespace VFrame30
 		
 		m_precision = vifble.precision();
 
-		QString errorMsg;
-		bool ok = m_afbElement.loadFromXml(vifble.afbelement(), errorMsg);
+		if (vifble.has_deprecated_afbelement() == true)
+		{
+			QString errorMsg;
+			bool ok = m_afbElement.deprecatedFormatLoad(vifble.deprecated_afbelement(), errorMsg);
+
+			if (ok == false)
+			{
+				qDebug() << "SchemaItemAfb::LoadData: Parsing AFB element error: " << errorMsg;
+				return false;
+			}
+		}
+		else
+		{
+			assert(vifble.has_afbelement());
+
+			QString errorMsg;
+			bool ok = m_afbElement.loadFromXml(vifble.afbelement(), &errorMsg);
+
+			if (ok == false)
+			{
+				qDebug() << "SchemaItemAfb::LoadData: Parsing AFB element error: " << errorMsg;
+				return false;
+			}
+		}
 
 		// Add afb properties to class meta object
 		//
 		addSpecificParamProperties();
 
-		return ok;
+		return true;
 	}
 
 	QString SchemaItemAfb::buildName() const
@@ -671,6 +693,11 @@ namespace VFrame30
 	const QString& SchemaItemAfb::afbStrID() const
 	{
 		return m_afbElement.strID();
+	}
+
+	Afb::AfbElement& SchemaItemAfb::afbElement()
+	{
+		return m_afbElement;
 	}
 
 	const Afb::AfbElement& SchemaItemAfb::afbElement() const

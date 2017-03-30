@@ -1,14 +1,20 @@
 #pragma once
 
 #include <QDialog>
-#include "../VFrame30/VFrame30.h"
-#include "../lib/DbStruct.h"
 
 namespace Ui {
 	class CreateSchemaDialog;
 }
 
+namespace VFrame30
+{
+	class Schema;
+	class LogicSchema;
+	class UfbSchema;
+}
+
 class DbController;
+class DbFile;
 
 class CreateSchemaDialog : public QDialog
 {
@@ -16,7 +22,7 @@ class CreateSchemaDialog : public QDialog
 	
 public:
 	CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent);
-	~CreateSchemaDialog();
+	virtual ~CreateSchemaDialog();
 
 protected slots:
 	virtual void accept();
@@ -26,10 +32,12 @@ private:
 	void setWidthHeight(VFrame30::Schema* schema);
 
 	bool isLogicSchema() const;
+	bool isUfbSchema() const;
 	bool isMonitorSchema() const;
 	bool isDiagSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
+	std::shared_ptr<VFrame30::UfbSchema> ufbSchema();
 	
 private:
 	Ui::CreateSchemaDialog *ui;
@@ -40,6 +48,5 @@ private:
 	std::shared_ptr<VFrame30::Schema> m_templateSchema;
 
 	std::vector<std::shared_ptr<DbFile>> m_templates;
-
 };
 

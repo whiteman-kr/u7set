@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets concurrent serialport network sql qml
+QT       += core gui widgets concurrent serialport network sql qml xml
 
 TARGET = Metrology
 TEMPLATE = app

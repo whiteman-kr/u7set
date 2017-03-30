@@ -23,6 +23,8 @@
 
 #include "../u7/Connection.h"
 
+class LogicModule;
+
 namespace Builder
 {
 
@@ -56,11 +58,11 @@ namespace Builder
 		~LogicAfb();
 
 		bool hasRam() const { return m_afb->hasRam(); }
+		int opCode() const	{ return m_afb->opCode(); }
 
 		const Afb::AfbElement& afb() const { return *m_afb; }
 
 		QString strID() const { return m_afb->strID(); }
-		Afb::AfbType type() const { return m_afb->type(); }
 	};
 
 
@@ -276,9 +278,9 @@ namespace Builder
 		AppFb(const AppItem &appItem);
 
 		quint16 instance() const { return m_instance; }
-		quint16 opcode() const { return afb().type().toOpCode(); }		// return FB type
+		quint16 opcode() const { return afb().opCode(); }		// return FB type
 		QString caption() const { return afb().caption(); }
-		QString typeCaption() const { return afb().type().text(); }
+		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
 
 		QString instantiatorID();
@@ -483,7 +485,7 @@ namespace Builder
 
 		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 
-		Afb::AfbElementCollection* m_afbl = nullptr;
+		std::shared_ptr<LogicModule> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
