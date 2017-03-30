@@ -143,14 +143,19 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	QSettings settings;
 
 	QVBoxLayout* vl = new QVBoxLayout;
-	ExtWidgets::PropertyEditor* pe = new ExtWidgets::PropertyEditor(this);
+	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
 
-	connect(pe, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
 	for (int i = 0; i < signalVector.count(); i++)
 	{
 		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
+
+		for (auto property : signalProperties->propertiesDependentOnPrecision())
+		{
+			property->setPrecision(signalVector[i]->decimalPlaces());
+		}
 
 		if (readOnly)
 		{
@@ -216,9 +221,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		m_objList.push_back(signalProperties);
 	}
 
-	pe->setObjects(m_objList);
-	pe->resizeColumnToContents(0);
-	vl->addWidget(pe);
+	m_propertyEditor->setObjects(m_objList);
+	m_propertyEditor->resizeColumnToContents(0);
+	vl->addWidget(m_propertyEditor);
 
 	if (!readOnly)
 	{
@@ -359,12 +364,22 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 	}
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
+		SignalProperties* signalProperties = dynamic_cast<SignalProperties*>(object.get());
+
+		if (signalProperties == nullptr)
+		{
+			continue;
+		}
+
+		Signal& signal = signalProperties->signal();
+
+		for (auto property : signalProperties->propertiesDependentOnPrecision())
+		{
+			property->setPrecision(signal.decimalPlaces());
+			m_propertyEditor->updateProperty(property->caption());
+		}
 		/* WhiteMan 04.10.2016
 		 *
-		SignalProperties* signalProperites = dynamic_cast<SignalProperties*>(object.get());
-
-		Signal& signal = signalProperites->signal();
-
 		if (signal.isDiscrete() && signal.dataFormat() != E::DataFormat::UnsignedInt)
 		{
 			signal.setAnalogSignalFormat(E::DataFormat::UnsignedInt);
