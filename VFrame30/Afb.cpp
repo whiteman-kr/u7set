@@ -1646,6 +1646,36 @@ namespace Afb
 
 		while (xmlReader.readNextStartElement())
 		{
+			if (QString::compare(xmlReader.name().toString(), "Properties", Qt::CaseInsensitive) == 0)
+			{
+				while (xmlReader.readNextStartElement())
+				{
+					if (QString::compare(xmlReader.name().toString(), "Caption", Qt::CaseInsensitive) == 0)
+					{
+						setCaption(xmlReader.readElementText());
+						continue;
+					}
+
+					if (QString::compare(xmlReader.name().toString(), "Version", Qt::CaseInsensitive) == 0)
+					{
+						setVersion(xmlReader.readElementText());
+						continue;
+					}
+
+					if (QString::compare(xmlReader.name().toString(), "OpCode", Qt::CaseInsensitive) == 0)
+					{
+						int opCode = xmlReader.readElementText().toInt();
+						setOpCode(opCode);
+						continue;
+					}
+
+					xmlReader.skipCurrentElement();
+				}
+
+				continue;
+			}
+
+
 			if (QString::compare(xmlReader.name().toString(), "Params", Qt::CaseInsensitive) == 0)
 			{
 				// Read params
@@ -1657,6 +1687,7 @@ namespace Afb
 						AfbParam afbParam;
 						afbParam.deprecatedLoadFromXml(&xmlReader);
 						params.push_back(afbParam);
+						xmlReader.skipCurrentElement();
 					}
 					else
 					{
@@ -1822,14 +1853,14 @@ namespace Afb
 		// Section <CommonScript>
 		//
 		{
-			QDomElement ñommonScriptXml = doc.createElement(QLatin1String("CommonScript"));
-			ñommonScriptXml = xmlElement->appendChild(ñommonScriptXml).toElement();
+			QDomElement commonScriptXml = doc.createElement(QLatin1String("CommonScript"));
+			commonScriptXml = xmlElement->appendChild(commonScriptXml).toElement();
 
 			// LibraryScript
 			//
 			{
 				QDomElement s = doc.createElement(QLatin1String("Library"));
-				s = ñommonScriptXml.appendChild(s).toElement();
+				s = commonScriptXml.appendChild(s).toElement();
 				s.appendChild(doc.createTextNode(m_libraryScript));
 			}
 
@@ -1837,7 +1868,7 @@ namespace Afb
 			//
 			{
 				QDomElement s = doc.createElement(QLatin1String("AfterCreation"));
-				s = ñommonScriptXml.appendChild(s).toElement();
+				s = commonScriptXml.appendChild(s).toElement();
 				s.appendChild(doc.createTextNode(m_afterCreationScript));
 			}
 		}

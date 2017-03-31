@@ -16,6 +16,12 @@ class QDialogButtonBox;
 enum class SignalType;
 
 
+namespace ExtWidgets
+{
+	class PropertyEditor;
+}
+
+
 std::vector<std::pair<QString, QString> > editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget *parent = 0);
 
 
@@ -47,6 +53,7 @@ private:
 	QList<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;
 	QWidget* m_parent;
+	ExtWidgets::PropertyEditor* m_propertyEditor;
 
 	bool checkoutSignal(Signal& s, QString& message);
 	QString errorMessage(const ObjectState& state) const;

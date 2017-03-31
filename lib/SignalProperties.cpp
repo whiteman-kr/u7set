@@ -95,6 +95,7 @@ void SignalProperties::initProperties()
 	enableTuningProperty->setCategory(tuningCategory);
 
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
+	m_propertiesDependentOnPrecision.push_back(tuningDefaultValueProperty);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
 
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
@@ -134,19 +135,19 @@ void SignalProperties::initProperties()
 		highDACProperty->setCategory(signalProcessingCategory);
 
 		auto lowEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, lowEngeneeringUnitsCaption, true, Signal::lowEngeneeringUnits, Signal::setLowEngeneeringUnits, m_signal);
-		lowEngeneeringUnitsProperty->setPrecision(m_signal.decimalPlaces());
+		m_propertiesDependentOnPrecision.push_back(lowEngeneeringUnitsProperty);
 		lowEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
 
 		auto highEngeneeringUnitsProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, highEngeneeringUnitsCaption, true, Signal::highEngeneeringUnits, Signal::setHighEngeneeringUnits, m_signal);
-		highEngeneeringUnitsProperty->setPrecision(m_signal.decimalPlaces());
+		m_propertiesDependentOnPrecision.push_back(highEngeneeringUnitsProperty);
 		highEngeneeringUnitsProperty->setCategory(signalProcessingCategory);
 
 		auto lowValidRangeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, lowValidRangeCaption, true, Signal::lowValidRange, Signal::setLowValidRange, m_signal);
-		lowValidRangeProperty->setPrecision(m_signal.decimalPlaces());
+		m_propertiesDependentOnPrecision.push_back(lowValidRangeProperty);
 		lowValidRangeProperty->setCategory(signalProcessingCategory);
 
 		auto highValidRangeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, highValidRangeCaption, true, Signal::highValidRange, Signal::setHighValidRange, m_signal);
-		highValidRangeProperty->setPrecision(m_signal.decimalPlaces());
+		m_propertiesDependentOnPrecision.push_back(highValidRangeProperty);
 		highValidRangeProperty->setCategory(signalProcessingCategory);
 
 		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
@@ -156,6 +157,7 @@ void SignalProperties::initProperties()
 		unitProperty->setCategory(dataFormatCategory);
 
 		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
+		m_propertiesDependentOnPrecision.push_back(unbalanceLimitProperty);
 		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
@@ -165,6 +167,7 @@ void SignalProperties::initProperties()
 		apertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance, m_signal);
+		m_propertiesDependentOnPrecision.push_back(spreadToleranceProperty);
 		spreadToleranceProperty->setCategory(signalProcessingCategory);
 
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime, m_signal);
