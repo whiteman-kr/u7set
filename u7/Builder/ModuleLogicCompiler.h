@@ -638,13 +638,13 @@ namespace Builder
 		bool setLmAppLANDataSize();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
 
-		bool generateRS232ConectionCode();
-		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);
+		/*bool generateRS232ConectionCode();
+		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);*/
 
 		bool copyOptoConnectionsTxData();
 		bool copyOptoPortTxData(Hardware::OptoPort* port);
 
-		bool copyOptoPortTxRawDataData(Hardware::OptoPort* port);
+		bool copyOptoPortTxRawData(Hardware::OptoPort* port);
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPort* port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port);
 
@@ -653,6 +653,8 @@ namespace Builder
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
 		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
 		bool copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset);
+		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem &item, int portDataOffset);
+		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem& item, int portDataOffset);
 
 		bool copyRS232Signals();
 		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);

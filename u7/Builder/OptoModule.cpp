@@ -19,6 +19,7 @@ namespace Hardware
 	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
 	const char* OptoPort::CONST16 = "CONST16";
 	const char* OptoPort::IN_SIGNAL = "IN_SIGNAL";
+	const char* OptoPort::OUT_SIGNAL = "OUT_SIGNAL";
 
 
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
@@ -97,16 +98,6 @@ namespace Hardware
 			assert(false);
 			return false;
 		}
-
-		/*if (m_txRawDataSizeW == 0 &&
-			m_txAnalogSignals.count() == 0 &&
-			m_txDiscreteSignals.count() == 0)
-		{
-			m_txAnalogSignalsSizeW = 0;
-			m_txDiscreteSignalsSizeW = 0;
-			m_txDataSizeW = 0;
-			return true;
-		}*/
 
 		sortTxSignals();
 
@@ -428,6 +419,23 @@ namespace Hardware
 				continue;
 			}
 
+			if (itemTypeStr == OUT_SIGNAL)
+			{
+				needRawDataSize = true;
+
+				bool parseResult = parseOutSignalRawDescriptionStr(str, item, log);
+
+				if (parseResult == true)
+				{
+					m_rawDataDescription.append(item);
+				}
+
+				result &= parseResult;
+
+				continue;
+			}
+
+
 			if (itemTypeStr == IN_SIGNAL)
 			{
 				//	needRawDataSize = true;		- not need!
@@ -464,6 +472,42 @@ namespace Hardware
 
 	bool OptoPort::parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
 	{
+		item.type = RawDataDescriptionItemType::InSignal;
+
+		return parseSignalRawDescriptionStr(str, item, log);
+	}
+
+
+	bool OptoPort::parseOutSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
+	{
+		item.type = RawDataDescriptionItemType::OutSignal;
+
+		return parseSignalRawDescriptionStr(str, item, log);
+	}
+
+
+	bool OptoPort::parseSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
+	{
+		QString keywordStr;
+
+		// item.type must be already filled !
+		//
+		switch(item.type)
+		{
+		case RawDataDescriptionItemType::InSignal:
+			keywordStr = IN_SIGNAL;
+			break;
+
+		case RawDataDescriptionItemType::OutSignal:
+			keywordStr = OUT_SIGNAL;
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+
 		QString msg;
 
 		bool res = true;
@@ -479,12 +523,12 @@ namespace Hardware
 
 		if (descItemsList.size() != 7)			// must be 7 parameters!
 		{
-			msg = QString("Invalid IN_SIGNAL description parameters count, must be 7. (Port '%1')").arg(m_equipmentID);
+			msg = QString("Invalid %1 description parameters count, must be 7. (Port '%2')").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
-
-		item.type = RawDataDescriptionItemType::InSignal;
 
 		// 1) AppSignalID
 
@@ -496,7 +540,9 @@ namespace Hardware
 
 		if (signalTypeStr != "A" && signalTypeStr != "D")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter SignalType in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter SignalType in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -518,7 +564,9 @@ namespace Hardware
 			dataFormatStr != "SINT" &&
 			dataFormatStr != "UINT")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter DataFormat in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter DataFormat in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -545,7 +593,9 @@ namespace Hardware
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter DataSize in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter DataSize in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -556,7 +606,9 @@ namespace Hardware
 
 		if (byteOrderStr != "BE" && byteOrderStr != "LE")
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter ByteOrder in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter ByteOrder in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -576,7 +628,9 @@ namespace Hardware
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter OffsetW in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter OffsetW in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -587,7 +641,9 @@ namespace Hardware
 
 		if (res == false)
 		{
-			msg = QString("Invalid IN_SIGNAL value of parameter BitNo in opto-port '%1' raw data description.").arg(m_equipmentID);
+			msg = QString("Invalid %1 value of parameter BitNo in opto-port '%2' raw data description.").
+					arg(keywordStr).arg(m_equipmentID);
+
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
@@ -1055,10 +1111,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Optical)
-			{
-				optoPorts.append(port);
-			}
+			optoPorts.append(port);
 		}
 
 		return optoPorts;
@@ -1106,7 +1159,7 @@ namespace Hardware
 	}
 
 
-	// return only opto-mode ports sorted by equipmentID ascending alphabetical order
+	// return ports sorted by equipmentID ascending alphabetical order
 	//
 	QVector<OptoPort*> OptoModule::getOptoPortsSorted()
 	{
@@ -1120,10 +1173,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Optical)
-			{
-				ports.append(port);
-			}
+			ports.append(port);
 		}
 
 		sortPortsByEquipmentIDAscending(ports);
@@ -1190,28 +1240,6 @@ namespace Hardware
 		}
 
 		return true;
-	}
-
-
-	int OptoModule::allOptoPortsTxDataSizeW()
-	{
-		QList<OptoPort*> ports = getOptoPorts();
-
-		int txDataSizeW = 0;
-
-		for(OptoPort* port : ports)
-		{
-			if (port != nullptr)
-			{
-				txDataSizeW += port->txDataSizeW();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-
-		return txDataSizeW;
 	}
 
 
@@ -1477,7 +1505,6 @@ namespace Hardware
 			{
 				// optical port is not linked (used in connection)
 				//
-				assert(port->txDataSizeW() == 0);
 				continue;
 			}
 

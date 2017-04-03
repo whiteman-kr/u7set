@@ -3600,6 +3600,27 @@ namespace Builder
 						arg(portEquipmentID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5186
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not found (opto port '%2' raw data description).
+	///
+	/// Parameters:
+	///		%1 Application signalID
+	///		%2 Opto port equpment ID
+	///
+	/// Description:
+	///		Signal specified in opto port raw data description is not found. Check ID of signal.
+	///
+	void IssueLogger::errALC5186(const QString& appSignalID, const QString& portEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5186,
+				  QString(tr("Signal '%1' is not found (opto port '%2' raw data description).")).
+						arg(appSignalID).arg(portEquipmentID));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//
