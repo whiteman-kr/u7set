@@ -39,17 +39,19 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::calibratorConnectedChanged, Qt::QueuedConnection);
 	connect(&theCalibratorBase, &CalibratorBase::calibratorConnectedChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 
+	// load signal base
+	//
+	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
+	theSignalBase.outputSignals().load();		// load output signals base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-
 	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
-	// load rack groups for multichannel measuring
+	// load measurements
 	//
-	theSignalBase.racks().groups().load();
-
-	// load output signals base
-	//
-	theSignalBase.outputSignals().load();
+	//	for(int type = 0; type < MEASURE_YPE_COUNT; type++)
+	//	{
+	//		theMeasurementBase.load(type);
+	//	}
 
 	// init interface
 	//
@@ -135,7 +137,7 @@ bool MainWindow::createInterface()
 	createActions();
 	createMenu();
 	createToolBars();
-	createMeasurePages();
+	createMeasureViews();
 	createPanels();
 	createStatusBar();
 	createContextMenu();
@@ -508,7 +510,7 @@ bool MainWindow::createToolBars()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::createMeasurePages()
+void MainWindow::createMeasureViews()
 {
 	m_pMainTab = new QTabWidget();
 	m_pMainTab->setTabPosition(QTabWidget::South);
@@ -528,7 +530,6 @@ void MainWindow::createMeasurePages()
 		appendMeasureView(measureType, pView);
 
 		connect(this, &MainWindow::appendMeasure, pView, &MeasureView::appendMeasure, Qt::QueuedConnection);
-		connect(pView, &MeasureView::measureCountChanged, this, &MainWindow::measureCountChanged, Qt::QueuedConnection);
 	}
 
 	setCentralWidget(m_pMainTab);
@@ -1237,8 +1238,6 @@ void MainWindow::setMeasureType(int measureType)
 		return;
 	}
 
-	measureCountChanged(pView->table().count());
-
 	switch(measureType)
 	{
 		case MEASURE_TYPE_LINEARITY:
@@ -1261,12 +1260,6 @@ void MainWindow::setMeasureType(int measureType)
 	m_measureType = measureType;
 
 	m_pFindMeasurePanel->clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::measureCountChanged(int)
-{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2204,7 +2197,7 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
 	theSignalBase.clear();
 
-	theMeasurementBase.clear();
+	theMeasureBase.clear();
 
 	theCalibratorBase.clear();
 
