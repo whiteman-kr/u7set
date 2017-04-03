@@ -1,8 +1,10 @@
 #include "CreateSchemaDialog.h"
 #include "ui_CreateSchemaDialog.h"
+#include "Settings.h"
 #include "../lib/DbController.h"
+#include "../lib/DbStruct.h"
+#include "../VFrame30/VFrame30.h"
 #include "../VFrame30/Settings.h"
-#include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/FblItemRect.h"
 
 CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent) :
@@ -68,6 +70,55 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		ui->equipmentIdLabel->setVisible(false);
 		ui->equipmentIdEdit->setVisible(false);
 	}
+
+	// LogicSchame/UfbSchema LmDescriptionFile
+	//
+	if (isLogicSchema() == true ||
+		isUfbSchema() == true)
+	{
+		ui->lmDescrFileLabel->setVisible(true);
+		ui->lmDescriptionFileComboBox->setVisible(true);
+
+		std::vector<DbFileInfo> files;
+		bool ok = db->getFileList(&files, db->afblFileId(), "%.xml", true, this);
+
+		if (ok == true)
+		{
+			std::sort(files.begin(), files.end(),
+				[](const DbFileInfo& f1, const DbFileInfo& f2) -> bool
+				{
+					return f1.fileName() < f2.fileName();
+				});
+
+			for (const DbFileInfo& fi : files)
+			{
+				ui->lmDescriptionFileComboBox->addItem(fi.fileName());
+			}
+		}
+
+		if (theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true)
+		{
+			if (isLogicSchema() == true)
+			{
+				ui->lmDescriptionFileComboBox->setEditText(logicSchema()->lmDescriptionFile());
+			}
+
+			if (isUfbSchema() == true)
+			{
+				ui->lmDescriptionFileComboBox->setEditText(ufbSchema()->lmDescriptionFile());
+			}
+		}
+		else
+		{
+			ui->lmDescriptionFileComboBox->setEditText(theSettings.m_lastSelectedLmDescriptionFile);
+		}
+	}
+	else
+	{
+		ui->lmDescrFileLabel->setVisible(false);
+		ui->lmDescriptionFileComboBox->setVisible(false);
+	}
+
 
 	setWindowTitle(tr("Schema Properties"));
 
@@ -214,6 +265,16 @@ void CreateSchemaDialog::accept()
 		equipmnetId = ui->equipmentIdEdit->text();
 	}
 
+	// LmDescriptionFile for LogicSchema or UfbSchema
+	//
+	QString lmDescriptionFile;
+
+	if (isLogicSchema() == true ||
+		isUfbSchema())
+	{
+		lmDescriptionFile = ui->lmDescriptionFileComboBox->currentText();
+	}
+
 	// Assign values to the schema
 	//
 	if (m_templateSchema == nullptr)
@@ -277,6 +338,15 @@ void CreateSchemaDialog::accept()
 	if (isLogicSchema() == true)
 	{
 		logicSchema()->setEquipmentIds(equipmnetId);
+		logicSchema()->setLmDescriptionFile(lmDescriptionFile);
+
+		theSettings.m_lastSelectedLmDescriptionFile = lmDescriptionFile;
+	}
+
+	if (isUfbSchema() == true)
+	{
+		ufbSchema()->setLmDescriptionFile(lmDescriptionFile);
+		theSettings.m_lastSelectedLmDescriptionFile = lmDescriptionFile;
 	}
 
 	QDialog::accept();
@@ -397,6 +467,11 @@ bool CreateSchemaDialog::isLogicSchema() const
 	return (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr);
 }
 
+bool CreateSchemaDialog::isUfbSchema() const
+{
+	return (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr);
+}
+
 bool CreateSchemaDialog::isMonitorSchema() const
 {
 	return (dynamic_cast<VFrame30::MonitorSchema*>(m_schema.get()) != nullptr);
@@ -410,6 +485,11 @@ bool CreateSchemaDialog::isDiagSchema() const
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()
 {
 	assert(isLogicSchema());
-
 	return std::dynamic_pointer_cast<VFrame30::LogicSchema>(m_schema);
+}
+
+std::shared_ptr<VFrame30::UfbSchema> CreateSchemaDialog::ufbSchema()
+{
+	assert(isUfbSchema());
+	return std::dynamic_pointer_cast<VFrame30::UfbSchema>(m_schema);
 }

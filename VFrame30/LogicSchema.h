@@ -41,11 +41,15 @@ namespace VFrame30
 
 		int nextCounterValue();
 
+		QString lmDescriptionFile() const;
+		void setLmDescriptionFile(QString value);
+
 		// Data
 		//
 	private:
 		QStringList m_equipmentIds;
-		int m_counter = 0;					// Count is used to generate new uniques StrIDs for App Siagnals
+		int m_counter = 0;										// Count is used to generate new uniques StrIDs for App Siagnals
+		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
 	};
 
 }

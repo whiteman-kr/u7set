@@ -277,7 +277,7 @@ const Hardware::DeviceModule* DeviceHelper::getLM(const Hardware::DeviceChassis*
 			continue;
 		}
 
-		if (module->isLM() == true)
+		if (module->isLogicModule() == true)
 		{
 			if (module->place() == LM1_PLACE)
 			{

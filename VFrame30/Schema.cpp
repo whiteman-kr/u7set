@@ -45,7 +45,6 @@ namespace VFrame30
 	//
 	bool Schema::SaveData(Proto::Envelope* message) const
 	{
-//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
 //		// Set new uuids and labels to the schema
 //		//
 //		Schema* sss = const_cast<Schema*>(this);
@@ -67,7 +66,6 @@ namespace VFrame30
 //				}
 //			}
 //		}
-//		//!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
@@ -939,6 +937,16 @@ namespace VFrame30
 		return dynamic_cast<const VFrame30::LogicSchema*>(this);
 	}
 
+	UfbSchema* Schema::toUfbSchema()
+	{
+		return dynamic_cast<VFrame30::UfbSchema*>(this);
+	}
+
+	const UfbSchema* Schema::toUfbSchema() const
+	{
+		return dynamic_cast<const VFrame30::UfbSchema*>(this);
+	}
+
 	int Schema::changeset() const
 	{
 		return m_changeset;
@@ -955,9 +963,14 @@ namespace VFrame30
 	//
 	//
 
-//	SchemaDetails::SchemaDetails()
-//	{
-//	}
+	SchemaDetails::SchemaDetails()
+	{
+	}
+
+	SchemaDetails::SchemaDetails(const QString& details)
+	{
+		parseDetails(details);
+	}
 
 //	SchemaDetails::SchemaDetails(SchemaDetails&& src)
 //	{
@@ -1051,10 +1064,22 @@ namespace VFrame30
 
 		if (schema->isLogicSchema() == true)
 		{
-			assert(schema->toLogicSchema() != nullptr);
-			QString equipIds = schema->toLogicSchema()->equipmentIds();
+			const LogicSchema* logicSchema = schema->toLogicSchema();
+			assert(logicSchema);
+
+			QString equipIds = logicSchema->equipmentIds();
 			equipIds = equipIds.replace('\n', ' ');
 			jsonObject.insert("EquipmentID", QJsonValue(equipIds));
+
+			jsonObject.insert(PropertyNames::lmDescriptionFile, QJsonValue(logicSchema->lmDescriptionFile()));
+		}
+
+		if (schema->isUfbSchema() == true)
+		{
+			const UfbSchema* ufbSchema = schema->toUfbSchema();
+			assert(ufbSchema);
+
+			jsonObject.insert(PropertyNames::lmDescriptionFile, QJsonValue(ufbSchema->lmDescriptionFile()));
 		}
 
 		jsonObject.insert("Signals", QJsonValue::fromVariant(signaListVariant));
@@ -1140,6 +1165,18 @@ namespace VFrame30
 				else
 				{
 					m_equipmentId.clear();
+				}
+
+				// LmDescriptionFile
+				//
+				QJsonValue lmdescrValue = jsonObject.value(PropertyNames::lmDescriptionFile).toString();
+				if (lmdescrValue.isUndefined() == false)
+				{
+					m_lmDescriptionFile = lmdescrValue.toString();
+				}
+				else
+				{
+					m_lmDescriptionFile.clear();
 				}
 
 				// Signals

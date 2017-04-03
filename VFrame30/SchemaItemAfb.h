@@ -65,6 +65,8 @@ namespace VFrame30
 		//
 	public:
 		const QString& afbStrID() const;
+
+		Afb::AfbElement& afbElement();
 		const Afb::AfbElement& afbElement() const;
 
 		std::vector<Afb::AfbParam>& params();

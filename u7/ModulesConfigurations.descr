@@ -33,7 +33,7 @@ var FamilyLMID = 	0x1100;
 //var configScriptVersion = 22;		// added builder parameter to interrupt build
 //var configScriptVersion = 23;		// added OverrideApp(Diag)DataWordCount properties processing
 //var configScriptVersion = 25;		// buildThread has been replaced by builder, added buildNo
-var configScriptVersion = 25;		// added UniqueID computing
+var configScriptVersion = 26;		// added UniqueID computing
 
 
 function(builder, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage)

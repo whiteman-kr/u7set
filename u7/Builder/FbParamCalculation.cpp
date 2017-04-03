@@ -36,7 +36,7 @@ namespace Builder
 
 		bool result = true;
 
-		switch(afb().type().toOpCode())
+		switch(static_cast<Afb::AfbType>(afb().opCode()))
 		{
 		case Afb::AfbType::LOGIC:			// opcode 1
 			result = calculate_LOGIC_paramValues();
@@ -141,7 +141,7 @@ namespace Builder
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
-			m_log->errALC5044(afb().caption(), afb().type().toOpCode(), guid());
+			m_log->errALC5044(afb().caption(), afb().opCode(), guid());
 			result = false;
 		}
 
@@ -1274,13 +1274,26 @@ namespace Builder
 	{
 		QStringList requiredParams;
 
+		bool hasHysteresisParam = true;
+
+		if (caption() == "cmp_dh_fp_eq" ||
+			caption() == "cmp_dh_fp_ne" ||
+			caption() == "cmp_dh_fp_gr" ||
+			caption() == "cmp_dh_fp_ls")
+		{
+			hasHysteresisParam = false;
+		}
+
 		requiredParams.append("i_conf");
-		requiredParams.append("hysteresis");
+
+		if (hasHysteresisParam == true)
+		{
+			requiredParams.append("hysteresis");
+		}
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
 		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
-		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1304,19 +1317,24 @@ namespace Builder
 		{
 			m_runTime = 5 + 14;
 
-			// comparison of signed int values
-			//
-			CHECK_SIGNED_INT32(hysteresisParam)
-
-			int hysteresis = hysteresisParam.signedIntValue();
-
-			if (hysteresis < 0)
+			if (hasHysteresisParam == true)
 			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
-				//
-				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+				AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
-				return false;
+				// comparison of signed int values
+				//
+				CHECK_SIGNED_INT32(hysteresisParam)
+
+				int hysteresis = hysteresisParam.signedIntValue();
+
+				if (hysteresis < 0)
+				{
+					// Value of parameter '%1.%2' must be greater or equal to 0.
+					//
+					m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+
+					return false;
+				}
 			}
 
 			return true;
@@ -1329,19 +1347,24 @@ namespace Builder
 		{
 			m_runTime = 16 + 14;
 
-			// comparison of floating point values
-			//
-			CHECK_FLOAT32(hysteresisParam)
-
-			float hysteresis = hysteresisParam.floatValue();
-
-			if (hysteresis < 0)
+			if (hasHysteresisParam == true)
 			{
-				// Value of parameter '%1.%2' must be greater or equal to 0.
-				//
-				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+				AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
-				return false;
+				// comparison of floating point values
+				//
+				CHECK_FLOAT32(hysteresisParam)
+
+				float hysteresis = hysteresisParam.floatValue();
+
+				if (hysteresis < 0)
+				{
+					// Value of parameter '%1.%2' must be greater or equal to 0.
+					//
+					m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
+
+					return false;
+				}
 			}
 
 			return true;

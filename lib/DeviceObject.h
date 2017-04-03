@@ -76,6 +76,11 @@ namespace Hardware
 		static const QString presetName;
 		static const QString presetObjectUuid;
 
+		static const QString lmDescriptionFile;
+		static const QString lmNumber;
+		static const QString lmSubsystemChannel;
+		static const QString lmSubsystemID;
+
 		static const QString type;
 		static const QString function;
 		static const QString byteOrder;
@@ -508,7 +513,7 @@ namespace Hardware
 		bool isIOModule() const;
 		bool isInputModule() const;
 		bool isOutputModule() const;
-		bool isLM() const;
+		bool isLogicModule() const;
 
 		// Data
 		//

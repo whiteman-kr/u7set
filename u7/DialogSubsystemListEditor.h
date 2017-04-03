@@ -64,7 +64,6 @@ private:
 	bool m_modified = false;
 	EditorDelegate* m_editorDelegate = nullptr;
 
-
 	DbController* db();
 	DbController* m_dbController;
 };

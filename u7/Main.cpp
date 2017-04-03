@@ -8,6 +8,7 @@
 #include "../lib/PropertyObject.h"
 #include "Builder/OptoModule.h"
 #include "version.h"
+#include "LogicModule.h"
 
 #include <QtQml>
 

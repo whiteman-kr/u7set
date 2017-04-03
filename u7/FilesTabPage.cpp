@@ -1529,6 +1529,7 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_editableExtensions << tr("xml");
 	m_editableExtensions << tr("xsd");
     m_editableExtensions << tr("descr");
+	m_editableExtensions << tr("js");
 
 	//
 	// Controls

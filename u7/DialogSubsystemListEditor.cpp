@@ -2,6 +2,7 @@
 #include "ui_DialogSubsystemListEditor.h"
 #include <QMessageBox>
 #include <QInputDialog>
+#include <set>
 
 //
 //
@@ -90,7 +91,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	ui->m_list->setColumnCount(3);
 	QStringList l;
 	l << tr("Index");
-    l << tr("Key [0-63]");
+	l << tr("Key [0-%1]").arg(Hardware::Subsystem::MaxKeyValue);
 	l << tr("SubsystemID");
 	l << tr("Caption");
 	ui->m_list->setHeaderLabels(l);
@@ -203,9 +204,9 @@ bool DialogSubsystemListEditor::saveChanges()
         QString strId = item->text(SubsystemID);
         QString caption = item->text(Caption);
 
-        if (key < 0 || key > 63)
+		if (key < 0 || key > Hardware::Subsystem::MaxKeyValue)
         {
-            QMessageBox::warning(this, "Subsystem List Editor", tr("Wrong key value '%1' for SubsystemID '%2'!\n\nKey value must be in range 0-63.").arg(key).arg(strId));
+			QMessageBox::warning(this, "Subsystem List Editor", tr("Wrong key value '%1' for SubsystemID '%2'!\n\nKey value must be in range 0-%3.").arg(key).arg(strId).arg(Hardware::Subsystem::MaxKeyValue));
             return false;
         }
 
@@ -286,6 +287,39 @@ void DialogSubsystemListEditor::closeEvent(QCloseEvent* e)
 
 void DialogSubsystemListEditor::on_m_add_clicked()
 {
+	// Get default ssKey
+	//
+	std::set<int> usedSsKeys;
+
+	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
+		assert(item);
+
+		int key = item->text(Key).toInt();
+		usedSsKeys.insert(key);
+	}
+
+	int defaultKey = -1;
+
+	if (usedSsKeys.empty() == true)
+	{
+		defaultKey = 0;
+	}
+	else
+	{
+		for (int i = 0; i <= Hardware::Subsystem::MaxKeyValue; i++)
+		{
+			if (usedSsKeys.count(i) == 0)
+			{
+				defaultKey = i;
+				break;
+			}
+		}
+	}
+
+	// --
+	//
 	int index = -1;
 
 	QList<QTreeWidgetItem*> items = ui->m_list->selectedItems();
@@ -298,7 +332,7 @@ void DialogSubsystemListEditor::on_m_add_clicked()
 		index = items[0]->data(0, Qt::UserRole).toInt() + 1;
 	}
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << "5" << "SubsystemID" << "Caption");
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << "0" << QString::number(defaultKey) << QString("SUBSYSTEM%1ID").arg(defaultKey) << "Subsystem Caption");
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	ui->m_list->insertTopLevelItem(index, item);
 
