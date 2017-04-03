@@ -24,6 +24,7 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/Session.h"
+#include "LogicModule.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 
@@ -1826,7 +1827,103 @@ bool EditSchemaView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>&
 // EditSchemaWidget
 //
 //
+EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController) :
+	VFrame30::BaseSchemaWidget(schema, new EditSchemaView(schema)),
+	m_fileInfo(fileInfo),
+	m_dbcontroller(dbController)
+{
+	assert(schema != nullptr);
+	assert(m_dbcontroller);
 
+	createActions();
+
+	// Left Button Down
+	//
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseLeftDown_None, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosLineStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosRectStartPoint, this, std::placeholders::_1)));
+	m_mouseLeftDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionStartPoint, std::bind(&EditSchemaWidget::mouseLeftDown_AddSchemaPosConnectionStartPoint, this, std::placeholders::_1)));
+
+	// Left Button Up
+	//
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseLeftUp_Selection, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseLeftUp_Moving, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseLeftUp_SizingRect, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+	m_mouseLeftUpStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1)));
+
+	// Moouse Mov
+	//
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::Moving, std::bind(&EditSchemaWidget::mouseMove_Moving, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTop, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingTopRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomRight, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottom, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingBottomLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::SizingLeft, std::bind(&EditSchemaWidget::mouseMove_SizingRect, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingStartLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingEndLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingLinePoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosLineEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosLineEndPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosRectEndPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosRectEndPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseMove_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingHorizontalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+	m_mouseMoveStateAction.push_back(MouseStateAction(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseMove_MovingEdgesOrVertex, this, std::placeholders::_1)));
+
+	// Mouse Right Button Down
+	//
+	//m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightDown_None, this, std::placeholders::_1)));
+	m_mouseRightDownStateAction.push_back(MouseStateAction(MouseState::AddSchemaPosConnectionNextPoint, std::bind(&EditSchemaWidget::mouseRightDown_AddSchemaPosConnectionNextPoint, this, std::placeholders::_1)));
+
+	// Mouse Right Button Up
+	//
+	m_mouseRightUpStateAction.push_back(MouseStateAction(MouseState::None, std::bind(&EditSchemaWidget::mouseRightUp_None, this, std::placeholders::_1)));
+
+	// Init Session Variables
+	//
+	schemaView()->session().setProject(dbController->currentProject().projectName());
+	schemaView()->session().setUsername(dbController->currentUser().username());
+	schemaView()->session().setHost(QHostInfo::localHostName());
+
+	// --
+	//
+	connect(this, &QWidget::customContextMenuRequested, this, &EditSchemaWidget::contextMenu);
+	setCorrespondingContextMenu();
+
+	// Edit Engine
+	//
+	m_editEngine = new EditEngine::EditEngine(editSchemaView(), horizontalScrollBar(), verticalScrollBar(), this);
+
+	connect(m_editEngine, &EditEngine::EditEngine::stateChanged, this, &EditSchemaWidget::editEngineStateChanged);
+	connect(m_editEngine, &EditEngine::EditEngine::modifiedChanged, this, &EditSchemaWidget::modifiedChangedSlot);
+
+	connect(editSchemaView(), &EditSchemaView::selectionChanged, this, &EditSchemaWidget::selectionChanged);
+
+	// Clipboard
+	//
+	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EditSchemaWidget::clipboardDataChanged);
+
+	clipboardDataChanged();		// Enable m_editPasteAction if somthing in clipborad
+
+	return;
+}
 
 EditSchemaWidget::~EditSchemaWidget()
 {
@@ -2032,10 +2129,10 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemTerminator>(schema()->unit()));
 			});
 
-	m_addFblElementAction = new QAction(tr("App Functional Block"), this);
-	m_addFblElementAction->setEnabled(true);
-	m_addFblElementAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
-	connect(m_addFblElementAction, &QAction::triggered, this, &EditSchemaWidget::addFblElement);
+	m_addAfbAction = new QAction(tr("App Functional Block"), this);
+	m_addAfbAction->setEnabled(true);
+	m_addAfbAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
+	connect(m_addAfbAction, &QAction::triggered, this, &EditSchemaWidget::addAfbElement);
 
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
@@ -2396,7 +2493,7 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addInOutSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
-			m_addMenu->addAction(m_addFblElementAction);
+			m_addMenu->addAction(m_addAfbAction);
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
 			m_addMenu->addAction(m_addUfbAction);
@@ -2409,7 +2506,7 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
-			m_addMenu->addAction(m_addFblElementAction);
+			m_addMenu->addAction(m_addAfbAction);
 		}
 
 	m_editMenu = new QMenu(this);
@@ -4775,9 +4872,36 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 		return false;
 	}
 
+	if (isLogicSchema() == false &&
+		isUfbSchema() == false)
+	{
+		// this function is not applicable
+		//
+		return false;
+	}
+
+	QString LmDescriptionFile;
+
+	if (isLogicSchema() == true)
+	{
+		LmDescriptionFile = schema()->toLogicSchema()->lmDescriptionFile();
+	}
+
+	if (isUfbSchema() == true)
+	{
+		LmDescriptionFile = schema()->toUfbSchema()->lmDescriptionFile();
+	}
+
+	if (LmDescriptionFile.isEmpty() == true)
+	{
+		QString errorMsg = tr("Scheme property LmDescription is empty. It must contain LogicModuleDescription filename.");
+		QMessageBox::critical(this, qApp->applicationName(), errorMsg);
+		return false;
+	}
+
 	std::vector<DbFileInfo> fileList;
 
-	bool result = db()->getFileList(&fileList, db()->afblFileId(), "afb", true, this);
+	bool result = db()->getFileList(&fileList, db()->afblFileId(), LmDescriptionFile, true, this);
 	if (result == false)
 	{
 		return false;
@@ -4785,46 +4909,39 @@ bool EditSchemaWidget::loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::Afb
 
 	if (fileList.empty() == true)
 	{
-		return true;
+		QString errorMsg = tr("Cannot find file %1.").arg(LmDescriptionFile);
+		QMessageBox::critical(this, qApp->applicationName(), errorMsg);
+		return false;
 	}
 
-	// Read all Afb's and refresh it in schema
+	// Get description file from the DB
 	//
-	std::vector<std::shared_ptr<DbFile>> files;
-	result = db()->getLatestVersion(fileList, &files, this);
+	std::shared_ptr<DbFile> file;
+	result = db()->getLatestVersion(fileList[0], &file, this);
 	if (result == false)
 	{
 		return false;
 	}
 
-	std::vector<std::shared_ptr<Afb::AfbElement>> elements;
-	elements.reserve(files.size());
+	// Parse file
+	//
+	LogicModule lm;
+	QString parseErrorMessage;
 
-	for (std::shared_ptr<DbFile> f : files)
+	result = lm.load(file->data(), &parseErrorMessage);
+
+	if (result == false)
 	{
-		if (f->deleted() == true ||
-			f->action() == VcsItemAction::Deleted)
-		{
-			continue;
-		}
-
-		std::shared_ptr<Afb::AfbElement> afb = std::make_shared<Afb::AfbElement>();
-
-		QString errorMsg;
-		result = afb->loadFromXml(f->data(), errorMsg);
-		if (result == true)
-		{
-			elements.push_back(afb);
-		}
-		else
-		{
-			QString errorMsg = tr("Error parsing AFB %1 description. These items will not be updated.").arg(f->fileName());
-			QMessageBox::critical(this, qApp->applicationName(), errorMsg);
-			continue;
-		}
+		QString errorMsg = tr("Cannot parse file %1. Error message: %2").arg(LmDescriptionFile).arg(parseErrorMessage);
+		QMessageBox::critical(this, qApp->applicationName(), errorMsg);
+		return false;
 	}
 
-	std::swap(*out, elements);
+	// Get the AFBs and return them
+	//
+	std::vector<std::shared_ptr<Afb::AfbElement>> afbs = lm.afbs();
+
+	std::swap(*out, afbs);
 
 	return true;
 }
@@ -4849,11 +4966,33 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 		return false;
 	}
 
+	// Get UFBs where LmDescriptionFile same with this chema
+	//
+	std::vector<DbFileInfo> filteredFileList;
+	filteredFileList.reserve(fileList.size());
+
+	if (schema()->isLogicSchema() == true)
+	{
+		for (const DbFileInfo& fi : fileList)
+		{
+			VFrame30::SchemaDetails details(fi.details());
+
+			if (details.m_lmDescriptionFile == schema()->toLogicSchema()->lmDescriptionFile())
+			{
+				filteredFileList.push_back(fi);
+			}
+		}
+	}
+	else
+	{
+		filteredFileList = fileList;
+	}
+
 	// Get UFBs latest version from the DB
 	//
 	std::vector<std::shared_ptr<DbFile>> files;
 
-	ok = db()->getLatestVersion(fileList, &files, this);
+	ok = db()->getLatestVersion(filteredFileList, &files, this);
 
 	if (ok == false)
 	{
@@ -6171,7 +6310,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	return;
 }
 
-void EditSchemaWidget::addFblElement()
+void EditSchemaWidget::addAfbElement()
 {
 	// Get Afb descriptions
 	//

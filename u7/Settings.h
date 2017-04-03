@@ -95,16 +95,6 @@ public:
 	//
 	QByteArray m_buildTabPageSplitterState;
 
-    // AFBL Editor options
-    //
-    QPoint m_abflEditorWindowPos;
-    QByteArray m_abflEditorWindowGeometry;
-
-    // AFBL Editor options
-    //
-    QPoint m_abflPropertiesWindowPos;
-    QByteArray m_abflPropertiesWindowGeometry;
-
     // Text Editor options
     //
     QPoint m_DialogTextEditorWindowPos;
@@ -115,7 +105,7 @@ public:
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
 
-	//Connection editor
+	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;
 	QByteArray m_connectionEditorWindowGeometry;
@@ -125,13 +115,11 @@ public:
 	Qt::SortOrder m_connectionEditorSortOrder;
 	QStringList m_connectionEditorMasks;
 
-	//Connection properties
-    //
-    QPoint m_connectionPropertiesWindowPos;
-    QByteArray m_connectionPropertiesWindowGeometry;
-    int m_connectionSplitterState = 0;
+	// CreateSchema dialog
+	//
+	QString m_lastSelectedLmDescriptionFile;
 
-	//SchemaItem properties
+	// SchemaItem properties
     //
     QPoint m_schemaItemPropertiesWindowPos;
     QByteArray m_schemaItemPropertiesWindowGeometry;

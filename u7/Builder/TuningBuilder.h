@@ -11,9 +11,9 @@ namespace Builder
 		Q_OBJECT
 	public:
 		TuningBuilder() = delete;
-		TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
-					  Tuning::TuningDataStorage *tuningDataStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
-					  QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules);
+        TuningBuilder(DbController* db, Hardware::DeviceRoot* deviceRoot, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
+                      Tuning::TuningDataStorage *tuningDataStorage, IssueLogger* log, int buildNo, int changesetId, bool debug,
+                      QString projectName, QString userName, const std::vector<Hardware::DeviceModule *> lmModules, const LmDescriptionSet *lmDescriptionSet);
 		virtual ~TuningBuilder();
 
 		bool build();
@@ -45,6 +45,7 @@ namespace Builder
 		Tuning::TuningDataStorage *m_tuningDataStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 		std::vector<Hardware::DeviceModule*> m_lmModules;
+        const LmDescriptionSet* m_lmDescriptionSet = nullptr;
 
 		int m_buildNo = 0;
 		int m_changesetId = 0;

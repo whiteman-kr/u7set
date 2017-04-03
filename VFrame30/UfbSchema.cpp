@@ -11,6 +11,7 @@ namespace VFrame30
 
 		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription)
 		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version)
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, UfbSchema::lmDescriptionFile, UfbSchema::setLmDescriptionFile)
 
 		setUnit(SchemaUnit::Inch);
 
@@ -50,6 +51,7 @@ namespace VFrame30
 
 		const_cast<UfbSchema*>(this)->m_version++;		// Incerement version
 		us->set_version(m_version);
+		us->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
 
 		return true;
 	}
@@ -82,6 +84,7 @@ namespace VFrame30
 
 		m_description = QString::fromStdString(us.description());
 		m_version = us.version();
+		m_lmDescriptionFile = QString::fromStdString(us.lmdescriptionfile());
 
 		return true;
 	}
@@ -107,5 +110,15 @@ namespace VFrame30
 	int UfbSchema::version() const
 	{
 		return m_version;
+	}
+
+	QString UfbSchema::lmDescriptionFile() const
+	{
+		return m_lmDescriptionFile;
+	}
+
+	void UfbSchema::setLmDescriptionFile(QString value)
+	{
+		m_lmDescriptionFile = value;
 	}
 }

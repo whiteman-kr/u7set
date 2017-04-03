@@ -36,7 +36,7 @@ namespace Builder
 
 		bool result = true;
 
-		switch(afb().type().toOpCode())
+		switch(static_cast<Afb::AfbType>(afb().opCode()))
 		{
 		case Afb::AfbType::LOGIC:			// opcode 1
 			result = calculate_LOGIC_paramValues();
@@ -141,7 +141,7 @@ namespace Builder
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
-			m_log->errALC5044(afb().caption(), afb().type().toOpCode(), guid());
+			m_log->errALC5044(afb().caption(), afb().opCode(), guid());
 			result = false;
 		}
 

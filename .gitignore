@@ -8,3 +8,4 @@ GetGitProjectVersion.exe
 GetGitProjectVersion
 .~lock.*#
 .svn
+.vscode

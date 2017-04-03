@@ -40,12 +40,14 @@ namespace Hardware
 		int key() const;
 		void setKey(int value);
 
+	public:
+		static const int MaxKeyValue = 63;
+
 	private:
 		int m_index;
 		int m_key;
 		QString m_subsystemId;
 		QString m_caption;
-
 	};
 
 	//
@@ -56,8 +58,8 @@ namespace Hardware
 	class SubsystemStorage : public QObject
 	{
 		Q_OBJECT
-	public:
 
+	public:
 		SubsystemStorage();
 
 		void add(std::shared_ptr<Subsystem> subsystem);
@@ -65,16 +67,16 @@ namespace Hardware
 		std::shared_ptr<Subsystem> get(int index) const;
 		void clear();
 
+		const std::vector<std::shared_ptr<Subsystem>>& subsystems();
+
 		bool load(DbController* db, QString &errorCode);
 		bool save(DbController* db, const QString &comment);
 
 		Q_INVOKABLE int ssKey(QString subsysId);
 
-
 	private:
 		std::vector<std::shared_ptr<Subsystem>> m_subsystems;
 		const QString fileName = "SubsystemsList.xml";
-
 	};
 }
 

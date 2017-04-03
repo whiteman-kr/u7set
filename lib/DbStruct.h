@@ -234,10 +234,8 @@ class DbFile;
 class DbFileInfo
 {
 public:
-
 	DbFileInfo();
 	DbFileInfo(const DbFile& file);
-
 	virtual ~DbFileInfo();
 
 	// Methods

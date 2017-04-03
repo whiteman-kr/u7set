@@ -5,102 +5,98 @@
 #include "../lib/Types.h"
 #include "../VFrame30/VFrame30Lib_global.h"
 #include <QXmlStreamReader>
-#include <QXmlStreamWriter>
+#include <QDomElement>
+
 
 namespace Afb
 {
-	class AfbType;
-}
-
-bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
-bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
-bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
-
-namespace Afb
-{
-	class VFRAME30LIBSHARED_EXPORT AfbType
+	class VFRAME30LIBSHARED_EXPORT AfbComponent
 	{
-
-		friend bool ::operator== (const Afb::AfbType& t1, const Afb::AfbType& t2);
-		friend bool ::operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2);
-		friend bool ::operator< (const Afb::AfbType& t1, const Afb::AfbType& t2);
-
 	public:
-		// This type is actual OpCode from the Application Functional Block Library documentaion
+		AfbComponent();
+
+		// Serialization
 		//
-		enum Type
-		{
-			UNKNOWN = 0,
-			LOGIC = 1,
-			NOT = 2,
-			TCT = 3,
-			FLIP_FLOP = 4,
-			CTUD = 5,
-			MAJ = 6,
-			SRSST = 7,
-			BCOD = 8,
-			BDEC = 9,
-			BCOMP = 10,
-			DAMPER = 11,
-			MEM = 12,
-			MATH = 13,
-			SCALE = 14,
-			SCALE_P = 15,
-			FUNC = 16,
-			INT = 17,
-			DPCOMP = 20,
-			MUX = 21,
-			LATCH = 22,
-			LIM = 23,
-			DEAD_ZONE = 24,
-			POL = 25,
-			DER = 26,
-			MISMATCH = 27,
-			First = LOGIC,
-			Last = MISMATCH,
-		};
+	public:
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool saveToXml(QDomElement* xmlElement) const;
 
-		AfbType();
-		AfbType(const AfbType& t);
-		AfbType(AfbType::Type t);
+		// Properties
+		//
+	public:
+		int opCode() const;
+		void setOpCode(int value);
 
-		void fromOpCode(int opCode);
-		int toOpCode() const;
+		QString caption() const;
+		void setCaption(const QString& value);
 
-		QString text() const;
-		QString toText() const;
-		static QString toText(int opCode);
+		int impVersion() const;
+		void setImpVersion(int value);
+
+        int versionOpIndex() const;
+        void setVersionOpIndex(int value);
 
 	private:
-		Type m_type;
+		int m_opCode = -1;
+		QString m_caption;
+		int m_impVersion = -1;
+        int m_versionOpIndex = -1;
 	};
-}
 
 
-namespace Afb
-{
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// DELETE IT IN FUTURE
+	//
+
+	enum class AfbType
+	{
+		UNKNOWN = 0,
+		LOGIC = 1,
+		NOT = 2,
+		TCT = 3,
+		FLIP_FLOP = 4,
+		CTUD = 5,
+		MAJ = 6,
+		SRSST = 7,
+		BCOD = 8,
+		BDEC = 9,
+		BCOMP = 10,
+		DAMPER = 11,
+		MEM = 12,
+		MATH = 13,
+		SCALE = 14,
+		SCALE_P = 15,
+		FUNC = 16,
+		INT = 17,
+		DPCOMP = 20,
+		MUX = 21,
+		LATCH = 22,
+		LIM = 23,
+		DEAD_ZONE = 24,
+		POL = 25,
+		DER = 26,
+		MISMATCH = 27,
+		First = LOGIC,
+		Last = MISMATCH,
+	};
+
 	//
 	// AfbSignal
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbSignal : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		AfbSignal(void);
-		virtual ~AfbSignal(void);
-
 		AfbSignal(const AfbSignal& that);
-
 		AfbSignal& operator=(const AfbSignal& that);
 
 		// Serialization
 		//
 	public:
-		bool SaveData(Proto::AfbSignal* message) const;
-		bool LoadData(const Proto::AfbSignal& message);
-
-		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
-		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool saveToXml(QDomElement* element) const;
 
 		// Properties
 		//
@@ -108,7 +104,7 @@ namespace Afb
 		const QString& opName() const;
 		void setOpName(const QString& value);
 
-		const QString& caption() const;
+		Q_INVOKABLE QString caption() const;
 		Q_INVOKABLE QString jsCaption();
 		void setCaption(const QString& caption);
 
@@ -133,14 +129,17 @@ namespace Afb
 		// Data
 		//
 private:
+		// Operator= is present, don't forget to add new fields to it
+		//
 		QString m_opName;
 		QString m_caption;
-		E::SignalType m_type;
-		E::DataFormat m_dataFormat;
-		int m_operandIndex;
-		int m_size;
+		E::SignalType m_type = E::SignalType::Analog;
+		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
+		int m_operandIndex = 0;
+		int m_size = 0;
+		// Operator= is present, don't forget to add new fields to it
+		//
 	};
-
 
 	//
 	// AfbParam
@@ -149,7 +148,6 @@ private:
 	{
 	public:
 		AfbParam(void);
-		virtual ~AfbParam(void);
 
 		// Methods
 		//
@@ -159,11 +157,9 @@ private:
 		// Serialization
 		//
 	public:
-		bool SaveData(Proto::AfbParam* message) const;
-		bool LoadData(const Proto::AfbParam& message);
-
-		bool loadFromXml(QXmlStreamReader* xmlReader);
-		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+		bool deprecatedLoadFromXml(QXmlStreamReader* xmlReader);
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool saveToXml(QDomElement* xmlElement) const;
 
 		// Properties
 		//
@@ -245,43 +241,38 @@ private:
 	// FblElement
 	//
 	class VFRAME30LIBSHARED_EXPORT AfbElement :
-		public QObject,
-		public Proto::ObjectSerialization<AfbElement>
+		public QObject
 	{
 		Q_OBJECT
+
 	public:
-
 		AfbElement(void);
-		virtual ~AfbElement(void);
-
 		AfbElement(const AfbElement& that);
-
 		AfbElement& operator=(const AfbElement& that);
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<AfbElement>;
-
 	public:
-		bool loadFromXml(const Proto::AfbElementXml& data, QString &errorMsg);
-		bool loadFromXml(const QByteArray& data, QString &errorMsg);
-		bool loadFromXml(QXmlStreamReader* xmlReader);
+		bool loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg);
+//		bool loadFromXml(const QByteArray& data, QString &errorMsg);
+		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
+		bool deprecatedFormatLoad(const Proto::AfbElementXml& data, QString& errorMsg);
 
 		bool saveToXml(Proto::AfbElementXml* dst) const;
-		bool saveToXml(QByteArray* dst) const;
-		bool saveToXml(QXmlStreamWriter* xmlWriter) const;
+//		bool saveToXml(QByteArray* dst) const;
+		bool saveToXml(QDomElement* xmlElement) const;
 
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
-	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+//	protected:
+//		virtual bool SaveData(Proto::Envelope* message) const override;
+//		virtual bool LoadData(const Proto::Envelope& message) override;
 
-	private:
-		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
-		//
-		static std::shared_ptr<AfbElement> CreateObject(const Proto::Envelope& message);
+//	private:
+//		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
+//		//
+//		static std::shared_ptr<AfbElement> CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//
@@ -303,24 +294,14 @@ private:
 		QString version() const;
 		void setVersion(const QString& value);
 
-		int implementationVersion() const;
-		void setImplementationVersion(int value);
-
-		int implementationOpIndex() const;
-		void setImplementationOpIndex(int value);
-
 		QString category() const;
 		void setCategory(const QString& value);
 
-		const Afb::AfbType& type() const;
-		Afb::AfbType& type();
-		void setType(const AfbType& value);
+		int opCode() const;
+		void setOpCode(int value);
 
 		bool hasRam() const;
 		void setHasRam(bool value);
-
-		bool requiredStart() const;
-		void setRequiredStart(bool value);
 
 		bool internalUse() const;
 		void setInternalUse(bool value);
@@ -343,20 +324,23 @@ private:
 		int paramsCount() const;
 		void setParams(const std::vector<AfbParam>& params);
 
+		std::shared_ptr<Afb::AfbComponent> component();
+		std::shared_ptr<Afb::AfbComponent> component() const;
+		void setComponent(std::shared_ptr<Afb::AfbComponent> value);
+
+		QString componentCaption() const;
+
 	private:
 		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
 		//
 		QString m_strID;
 		QString m_caption;
 		QString m_description;
-		QString m_version;
-		int m_implementationVersion;
-		int m_implementationOpIndex;
+		QString m_version = "0.0000";
 		QString m_category;
-		Afb::AfbType m_type;
-		bool m_hasRam;
-		bool m_requiredStart;
-		bool m_internalUse;
+		int m_opCode = -1;
+		bool m_hasRam = false;
+		bool m_internalUse = false;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;
@@ -366,8 +350,7 @@ private:
 
 		std::vector<AfbParam> m_params;
 
-		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
-		//
+		std::shared_ptr<Afb::AfbComponent> m_component;
 	};
 
 	//

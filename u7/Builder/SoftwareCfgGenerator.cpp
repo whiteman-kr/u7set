@@ -281,7 +281,7 @@ namespace Builder
 
 				Hardware::DeviceModule* module = currentDevice->toModule();
 
-				if (module->isLM() == false)
+				if (module->isLogicModule() == false)
 				{
 					return;
 				}

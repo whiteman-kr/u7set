@@ -148,6 +148,11 @@ namespace Hardware
 		m_subsystems.clear();
 	}
 
+	const std::vector<std::shared_ptr<Subsystem>>& SubsystemStorage::subsystems()
+	{
+		return m_subsystems;
+	}
+
 	bool SubsystemStorage::load(DbController *db, QString& errorCode)
 	{
 		if (db == nullptr)

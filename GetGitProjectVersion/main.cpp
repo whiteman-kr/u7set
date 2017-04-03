@@ -85,37 +85,24 @@ bool report(int error)
 
 void print_time(const char* const prefix, const git_time& intime)
 {
-	char sign, out[32];
-	int offset, hours, minutes;
+	char out[32];
 	time_t t;
 
-	offset = intime.offset;
-	if (offset < 0) {
-		sign = '-';
-		offset = -offset;
-	} else {
-		sign = '+';
-	}
-
-	hours   = offset / 60;
-	minutes = offset % 60;
-
-	t = (time_t)intime.time + (intime.offset * 60);
+	t = (time_t)intime.time + (intime.offset * 60);	// local time
 
 #ifdef __linux__
 	struct tm *intm;
     intm = gmtime(&t);
-	strftime(out, sizeof(out), "%a %b %e %T %Y", intm);
+	strftime(out, sizeof(out), "%F %T", intm);
 #elif _WIN32
 	struct tm intm;
     gmtime_s(&intm, &t);
-	strftime(out, sizeof(out), "%a %b %d %X %Y", &intm);
+	strftime(out, sizeof(out), "%F %T", &intm);
 #else
 #error Unknown operating system
 #endif
-	versionInfoText << "#define " << prefix << "_DATE \"" << out << ' '
-				<< sign << setw(2) << setfill('0') << hours
-				<< setw(2) << minutes << "\"\n";
+
+	versionInfoText << "#define " << prefix << "_DATE \"" << out << " \"\n";
 }
 
 void replaceAll(std::string& str, const std::string& oldStr, const std::string& newStr)

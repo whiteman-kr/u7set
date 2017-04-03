@@ -12,7 +12,6 @@
 #include "SchemaTabPage.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
-#include "DialogAfblEditor.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogTuningClients.h"
@@ -239,11 +238,6 @@ void MainWindow::createActions()
 	m_settingsAction->setEnabled(true);
 	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_afblEditorAction = new QAction(tr("AFB Library Editor..."), this);
-	m_afblEditorAction->setStatusTip(tr("Run AFB Editor"));
-	m_afblEditorAction->setEnabled(false);
-	connect(m_afblEditorAction, &QAction::triggered, this, &MainWindow::runAfblEditor);
-
 	m_ufbLibraryAction = new QAction(tr("UFB Library Editor..."), this);
 	m_ufbLibraryAction->setStatusTip(tr("Run UFB Library Editor"));
 	m_ufbLibraryAction->setEnabled(false);
@@ -328,7 +322,6 @@ void MainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_afblEditorAction);
 	pToolsMenu->addAction(m_ufbLibraryAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
@@ -428,17 +421,6 @@ void MainWindow::showSettings()
 
 void MainWindow::runConfigurator()
 {
-}
-
-void MainWindow::runAfblEditor()
-{
-    if (dbController()->isProjectOpened() == false)
-    {
-        return;
-    }
-
-    DialogAfblEditor d(dbController(), this);
-    d.exec();
 }
 
 void MainWindow::showUfbLibraryTabPage(bool show)
@@ -652,7 +634,6 @@ void MainWindow::projectOpened(DbProject project)
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(true);
-    m_afblEditorAction->setEnabled(true);
 	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
@@ -684,7 +665,6 @@ void MainWindow::projectClosed()
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(false);
-	m_afblEditorAction->setEnabled(false);
 	m_ufbLibraryAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);

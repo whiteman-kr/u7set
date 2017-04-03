@@ -9,7 +9,8 @@ namespace VFrame30
 	{
 		qDebug() << "LogicSchema::LogicSchema(void)";
 
-		ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDs", true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds)
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIds, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds)
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, LogicSchema::lmDescriptionFile, LogicSchema::setLmDescriptionFile)
 
 		setUnit(SchemaUnit::Inch);
 
@@ -53,6 +54,7 @@ namespace VFrame30
 		}
 
 		ls->set_counter(m_counter);
+		ls->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
 
 		return true;
 	}
@@ -116,6 +118,8 @@ namespace VFrame30
 				}
 			}
 		}
+
+		m_lmDescriptionFile = QString::fromStdString(ls.lmdescriptionfile());
 
 		return true;
 	}
@@ -240,6 +244,16 @@ namespace VFrame30
 	int LogicSchema::nextCounterValue()
 	{
 		return ++m_counter;
+	}
+
+	QString LogicSchema::lmDescriptionFile() const
+	{
+		return m_lmDescriptionFile;
+	}
+
+	void LogicSchema::setLmDescriptionFile(QString value)
+	{
+		m_lmDescriptionFile = value;
 	}
 
 }

@@ -53,6 +53,7 @@ signals:
 	void itemDoubleClicked();
 
 public slots:
+	void onCloseEditorEvent(QWidget* editor, EndEditHint hint);
 
 protected:
 	bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
@@ -63,6 +64,7 @@ private:
 	SignalSet& m_signalSet;
 	SignalsModel* m_model;
 	SignalsProxyModel* m_proxyModel;
+	mutable int signalIdForUndoOnCancelEditing = -1;
 };
 
 
@@ -104,6 +106,7 @@ public:
 	void showErrors(const QVector<ObjectState>& states) const;
 	bool checkoutSignal(int index);
 	bool checkoutSignal(int index, QString& message);
+	bool undoSignal(int id);
 	bool editSignals(QVector<int> ids);
 	void saveSignal(Signal& signal);
 	QList<int> cloneSignals(const QSet<int>& signalIDs);

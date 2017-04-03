@@ -38,8 +38,6 @@ void OutputSignal::clear()
 {
 	m_signalMutex.lock();
 
-		m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
-
 		for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
 		{
 			m_pSignal[t] = nullptr;

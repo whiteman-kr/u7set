@@ -59,7 +59,6 @@ protected slots:
 	void showSettings();
 
 	void runConfigurator();
-    void runAfblEditor();
 	void showUfbLibraryTabPage(bool show);
 	void runSubsystemListEditor();
     void runConnectionsEditor();
@@ -88,7 +87,6 @@ private:
 	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 
-	QAction* m_afblEditorAction = nullptr;
 	QAction* m_ufbLibraryAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;

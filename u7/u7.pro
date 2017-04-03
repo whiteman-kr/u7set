@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml
 
 TARGET = u7
 TEMPLATE = app
@@ -103,7 +103,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    DialogAfblEditor.cpp \
     xmlsyntaxhighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
@@ -193,7 +192,8 @@ SOURCES +=\
     ../lib/TuningObject.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/TuningModel.cpp \
-    DialogTuningClients.cpp
+    DialogTuningClients.cpp \
+    LogicModule.cpp
 
 
 HEADERS  += \
@@ -223,7 +223,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    DialogAfblEditor.h \
     xmlsyntaxhighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
@@ -318,7 +317,8 @@ HEADERS  += \
     ../lib/TuningObject.h \
     DialogTuningFiltersEditor.h \
     ../lib/TuningModel.h \
-    DialogTuningClients.h
+    DialogTuningClients.h \
+    LogicModule.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -327,7 +327,6 @@ FORMS    += \
     LoginDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
-    DialogAfblEditor.ui \
     DialogFileEditor.ui \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \

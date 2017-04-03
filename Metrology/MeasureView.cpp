@@ -71,7 +71,7 @@ int MeasureTable::columnCount(const QModelIndex&) const
 
 int MeasureTable::rowCount(const QModelIndex&) const
 {
-	return m_measureBase.measurementCount();
+	return m_measureBase.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 	}
 
 	int indexRow = index.row();
-	if (indexRow < 0 || indexRow >= m_measureBase.measurementCount())
+	if (indexRow < 0 || indexRow >= m_measureBase.count())
 	{
 		return QVariant();
 	}
@@ -175,7 +175,7 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 {
 	QColor result = MVC_CMN_COLOR_LIGHT_BLUE;
 
-	if (row < 0 || row >= m_measureBase.measurementCount())
+	if (row < 0 || row >= m_measureBase.count())
 	{
 		return result;
 	}
@@ -205,13 +205,13 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 				{
 					if (errorType == MEASURE_ERROR_TYPE_REDUCE)
 					{
-						if (pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
+						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
 						{
 							result = theOptions.measureView().colorErrorControl();
 						}
 					}
 
-					if (pLinearityMeasurement->error(VALUE_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_PHYSICAL, errorType))
+					if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_PHYSICAL, errorType))
 					{
 						result = theOptions.measureView().colorErrorLimit();
 					}
@@ -221,13 +221,13 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 				{
 					if (errorType == MEASURE_ERROR_TYPE_REDUCE)
 					{
-						if (pLinearityMeasurement->error(VALUE_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
+						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
 						{
 							result = theOptions.measureView().colorErrorControl();
 						}
 					}
 
-					if (pLinearityMeasurement->error(VALUE_TYPE_OUT_ELECTRIC, errorType) > pLinearityMeasurement->errorLimit(VALUE_TYPE_OUT_ELECTRIC, errorType))
+					if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, errorType))
 					{
 						result = theOptions.measureView().colorErrorLimit();
 					}
@@ -255,7 +255,7 @@ QString MeasureTable::text(int row, int column) const
 		return QString();
 	}
 
-	if (row < 0 || row >= m_measureBase.measurementCount())
+	if (row < 0 || row >= m_measureBase.count())
 	{
 		return QString();
 	}
@@ -282,7 +282,7 @@ QString MeasureTable::text(int row, int column) const
 
 QString MeasureTable::textLinearity(int row, int column) const
 {
-	if (row < 0 || row >= m_measureBase.measurementCount())
+	if (row < 0 || row >= m_measureBase.count())
 	{
 		return QString();
 	}
@@ -304,19 +304,19 @@ QString MeasureTable::textLinearity(int row, int column) const
 		return QString();
 	}
 
-	int detailValueType = VALUE_TYPE_IN_ELECTRIC;
+	int detailLimitType = MEASURE_LIMIT_TYPE_IN_ELECTRIC;
 
 	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_PHYSICAL)
 	{
-		detailValueType = VALUE_TYPE_PHYSICAL;
+		detailLimitType = MEASURE_LIMIT_TYPE_PHYSICAL;
 	}
 
-	int inputlimitType = VALUE_TYPE_PHYSICAL;
+	int inputlimitType = MEASURE_LIMIT_TYPE_PHYSICAL;
 
 	switch(theOptions.linearity().showInputErrorType())
 	{
-		case LO_SHOW_INPUT_ERROR_ELECTRIC:	inputlimitType = VALUE_TYPE_IN_ELECTRIC;	break;
-		case LO_SHOW_INPUT_ERROR_PHYSICAL:	inputlimitType = VALUE_TYPE_PHYSICAL;		break;
+		case LO_SHOW_INPUT_ERROR_ELECTRIC:	inputlimitType = MEASURE_LIMIT_TYPE_IN_ELECTRIC;	break;
+		case LO_SHOW_INPUT_ERROR_PHYSICAL:	inputlimitType = MEASURE_LIMIT_TYPE_PHYSICAL;		break;
 		default:							assert(0);
 	}
 
@@ -334,41 +334,41 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_MODULE:					result = m->location().moduleStr(); break;
 		case MVC_CMN_L_PLACE:					result = m->location().placeStr(); break;
 
-		case MVC_CMN_L_IN_EL_NOMINAL:			result = m->nominalStr(VALUE_TYPE_IN_ELECTRIC); break;
-		case MVC_CMN_L_PH_NOMINAL:				result = m->nominalStr(VALUE_TYPE_PHYSICAL); break;
-		case MVC_CMN_L_OUT_NOMINAL:				result = m->nominalStr(VALUE_TYPE_OUT_ELECTRIC); break;
+		case MVC_CMN_L_IN_EL_NOMINAL:			result = m->nominalStr(MEASURE_LIMIT_TYPE_IN_ELECTRIC); break;
+		case MVC_CMN_L_PH_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_OUT_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_OUT_ELECTRIC); break;
 
 		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
 
-		case MVC_CMN_L_IN_EL_MEASURE:			result = m->measureStr(VALUE_TYPE_IN_ELECTRIC); break;
-		case MVC_CMN_L_PH_MEASURE:				result = m->measureStr(VALUE_TYPE_PHYSICAL); break;
-		case MVC_CMN_L_OUT_MEASURE:				result = m->measureStr(VALUE_TYPE_OUT_ELECTRIC); break;
+		case MVC_CMN_L_IN_EL_MEASURE:			result = m->measureStr(MEASURE_LIMIT_TYPE_IN_ELECTRIC); break;
+		case MVC_CMN_L_PH_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_OUT_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_OUT_ELECTRIC); break;
 
-		case MVC_CMN_L_IN_EL_RANGE:				result = m->limitStr(VALUE_TYPE_IN_ELECTRIC); break;
-		case MVC_CMN_L_PH_RANGE:				result = m->limitStr(VALUE_TYPE_PHYSICAL); break;
-		case MVC_CMN_L_OUT_RANGE:				result = m->limitStr(VALUE_TYPE_OUT_ELECTRIC); break;
+		case MVC_CMN_L_IN_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_IN_ELECTRIC); break;
+		case MVC_CMN_L_PH_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_OUT_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_OUT_ELECTRIC); break;
 
 		case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
-		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(detailValueType, 0); break;
-		case MVC_CMN_L_VALUE_1:					result = m->measureItemStr(detailValueType, 1); break;
-		case MVC_CMN_L_VALUE_2:					result = m->measureItemStr(detailValueType, 2); break;
-		case MVC_CMN_L_VALUE_3:					result = m->measureItemStr(detailValueType, 3); break;
-		case MVC_CMN_L_VALUE_4:					result = m->measureItemStr(detailValueType, 4); break;
-		case MVC_CMN_L_VALUE_5:					result = m->measureItemStr(detailValueType, 5); break;
-		case MVC_CMN_L_VALUE_6:					result = m->measureItemStr(detailValueType, 6); break;
-		case MVC_CMN_L_VALUE_7:					result = m->measureItemStr(detailValueType, 7); break;
-		case MVC_CMN_L_VALUE_8:					result = m->measureItemStr(detailValueType, 8); break;
-		case MVC_CMN_L_VALUE_9:					result = m->measureItemStr(detailValueType, 9); break;
-		case MVC_CMN_L_VALUE_10:				result = m->measureItemStr(detailValueType, 10); break;
-		case MVC_CMN_L_VALUE_11:				result = m->measureItemStr(detailValueType, 11); break;
-		case MVC_CMN_L_VALUE_12:				result = m->measureItemStr(detailValueType, 12); break;
-		case MVC_CMN_L_VALUE_13:				result = m->measureItemStr(detailValueType, 13); break;
-		case MVC_CMN_L_VALUE_14:				result = m->measureItemStr(detailValueType, 14); break;
-		case MVC_CMN_L_VALUE_15:				result = m->measureItemStr(detailValueType, 15); break;
-		case MVC_CMN_L_VALUE_16:				result = m->measureItemStr(detailValueType, 16); break;
-		case MVC_CMN_L_VALUE_17:				result = m->measureItemStr(detailValueType, 17); break;
-		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(detailValueType, 18); break;
-		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(detailValueType, 19); break;
+		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(detailLimitType, 0); break;
+		case MVC_CMN_L_VALUE_1:					result = m->measureItemStr(detailLimitType, 1); break;
+		case MVC_CMN_L_VALUE_2:					result = m->measureItemStr(detailLimitType, 2); break;
+		case MVC_CMN_L_VALUE_3:					result = m->measureItemStr(detailLimitType, 3); break;
+		case MVC_CMN_L_VALUE_4:					result = m->measureItemStr(detailLimitType, 4); break;
+		case MVC_CMN_L_VALUE_5:					result = m->measureItemStr(detailLimitType, 5); break;
+		case MVC_CMN_L_VALUE_6:					result = m->measureItemStr(detailLimitType, 6); break;
+		case MVC_CMN_L_VALUE_7:					result = m->measureItemStr(detailLimitType, 7); break;
+		case MVC_CMN_L_VALUE_8:					result = m->measureItemStr(detailLimitType, 8); break;
+		case MVC_CMN_L_VALUE_9:					result = m->measureItemStr(detailLimitType, 9); break;
+		case MVC_CMN_L_VALUE_10:				result = m->measureItemStr(detailLimitType, 10); break;
+		case MVC_CMN_L_VALUE_11:				result = m->measureItemStr(detailLimitType, 11); break;
+		case MVC_CMN_L_VALUE_12:				result = m->measureItemStr(detailLimitType, 12); break;
+		case MVC_CMN_L_VALUE_13:				result = m->measureItemStr(detailLimitType, 13); break;
+		case MVC_CMN_L_VALUE_14:				result = m->measureItemStr(detailLimitType, 14); break;
+		case MVC_CMN_L_VALUE_15:				result = m->measureItemStr(detailLimitType, 15); break;
+		case MVC_CMN_L_VALUE_16:				result = m->measureItemStr(detailLimitType, 16); break;
+		case MVC_CMN_L_VALUE_17:				result = m->measureItemStr(detailLimitType, 17); break;
+		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(detailLimitType, 18); break;
+		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(detailLimitType, 19); break;
 
 		case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR), 10, 2); break;
 		case MVC_CMN_L_MSE:						result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_MSE), 10, 2); break;
@@ -376,8 +376,8 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 		case MVC_CMN_L_IN_ERROR:				result = m->errorStr(inputlimitType); break;
 		case MVC_CMN_L_IN_ERROR_LIMIT:			result = m->errorLimitStr(inputlimitType); break;
-		case MVC_CMN_L_OUT_ERROR:				result = m->errorStr(VALUE_TYPE_OUT_ELECTRIC); break;
-		case MVC_CMN_L_OUT_ERROR_LIMIT:			result = m->errorLimitStr(VALUE_TYPE_OUT_ELECTRIC); break;
+		case MVC_CMN_L_OUT_ERROR:				result = m->errorStr(MEASURE_LIMIT_TYPE_OUT_ELECTRIC); break;
+		case MVC_CMN_L_OUT_ERROR_LIMIT:			result = m->errorLimitStr(MEASURE_LIMIT_TYPE_OUT_ELECTRIC); break;
 
 		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString("dd-MM-yyyy hh:mm:ss"); break;
 
@@ -406,7 +406,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 QString MeasureTable::textComparator(int row, int column) const
 {
-	if (row < 0 || row >= m_measureBase.measurementCount())
+	if (row < 0 || row >= m_measureBase.count())
 	{
 		return QString();
 	}
@@ -452,6 +452,8 @@ bool MeasureTable::append(Measurement* pMeasurement)
 		return false;
 	}
 
+	// append into database
+	//
 	if (thePtrDB == nullptr)
 	{
 		return false;
@@ -463,7 +465,9 @@ bool MeasureTable::append(Measurement* pMeasurement)
 		return false;
 	}
 
-	int indexTable = m_measureBase.measurementCount();
+	// append into MeasureTable
+	//
+	int indexTable = m_measureBase.count();
 
 	beginInsertRows(QModelIndex(), indexTable, indexTable);
 
@@ -512,7 +516,7 @@ bool MeasureTable::remove(const QList<int> removeIndexList)
 		return false;
 	}
 
-	// remove from MeasureBase
+	// remove from MeasureTable
 	//
 	for(int index = count-1; index >= 0; index--)
 	{
@@ -692,8 +696,6 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 		return;
 	}
 
-	emit measureCountChanged(m_table.count());
-
 	setCurrentIndex(model()->index(model()->rowCount() - 1, MVC_CMN_L_ID));
 }
 
@@ -744,8 +746,6 @@ void MeasureView::removeMeasure()
 	{
 		return;
 	}
-
-	emit measureCountChanged(m_table.count());
 
 	QMessageBox::information(this, tr("Delete"), tr("Deleted %1 measurement(s)").arg(removeIndexList.count()));
 }

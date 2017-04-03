@@ -154,6 +154,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0136.sql", "Upgrade to version 136, Fixed caption in AIM"},
     {":/DatabaseUpgrade/Upgrade0137.sql", "Upgrade to version 137, Removed EnableSerial property from OCM and OCMN script"},
 	{":/DatabaseUpgrade/Upgrade0138.sql", "Upgrade to version 138, Updated metrology preset"},
+    {":/DatabaseUpgrade/Upgrade0139.sql", "Upgrade to version 139, Logic Module Description file has been added"},
 };
 
 
