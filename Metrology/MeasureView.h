@@ -6,7 +6,7 @@
 #include <QList>
 
 #include "MeasureViewHeader.h"
-#include "MeasurementBase.h"
+#include "MeasureBase.h"
 
 // ==============================================================================================
 
@@ -41,7 +41,7 @@ public:
 
 	MeasureViewHeader&	header() { return m_header; }
 
-	int					count() const { return m_measureBase.measurementCount(); }
+	int					count() const { return m_measureBase.count(); }
 
 	bool				columnIsVisible(int column);
 
@@ -51,7 +51,7 @@ public:
 	QColor				backgroundColor(int row, int column) const;
 	QString				text(int row, int column) const;
 
-	MeasurementBase		m_measureBase;
+	MeasureBase		m_measureBase;
 };
 
 // ==============================================================================================
@@ -83,8 +83,6 @@ public:
 	void				updateColumn();
 
 signals:
-
-	void				measureCountChanged(int);
 
 public slots:
 

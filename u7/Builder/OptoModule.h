@@ -58,7 +58,8 @@ namespace Hardware
 			ModuleRawData,
 			PortRawData,
 			Const16,
-			InSignal
+			InSignal,
+			OutSignal
 		};
 
 		struct RawDataDescriptionItem
@@ -74,7 +75,7 @@ namespace Hardware
 
 			QString portEquipmentID;				// for type - PortRawData
 
-			QString appSignalID;									// for type - InSignal
+			QString appSignalID;									// for type - InSignal, OutSignal
 			E::SignalType signalType = E::SignalType::Discrete;		//
 			E::DataFormat dataFormat = E::DataFormat::UnsignedInt;	//
 			int dataSize = 0;										//
@@ -92,6 +93,7 @@ namespace Hardware
 		static const char* PORT_RAW_DATA;
 		static const char* CONST16;
 		static const char* IN_SIGNAL;
+		static const char* OUT_SIGNAL;
 
 		QString m_equipmentID;
 		DeviceController* m_deviceController = nullptr;
@@ -240,6 +242,8 @@ namespace Hardware
 
 		bool parseRawDescriptionStr(Builder::IssueLogger* log);
 		bool parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
+		bool parseOutSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
+		bool parseSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
 
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
 
@@ -314,8 +318,6 @@ namespace Hardware
 		QVector<OptoPort*> getOptoPortsSorted();
 
 		bool calculateTxStartAddresses();
-
-		int allOptoPortsTxDataSizeW();
 
 		friend class OptoModuleStorage;
 	};

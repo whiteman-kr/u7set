@@ -1853,14 +1853,14 @@ namespace Afb
 		// Section <CommonScript>
 		//
 		{
-			QDomElement ñommonScriptXml = doc.createElement(QLatin1String("CommonScript"));
-			ñommonScriptXml = xmlElement->appendChild(ñommonScriptXml).toElement();
+			QDomElement commonScriptXml = doc.createElement(QLatin1String("CommonScript"));
+			commonScriptXml = xmlElement->appendChild(commonScriptXml).toElement();
 
 			// LibraryScript
 			//
 			{
 				QDomElement s = doc.createElement(QLatin1String("Library"));
-				s = ñommonScriptXml.appendChild(s).toElement();
+				s = commonScriptXml.appendChild(s).toElement();
 				s.appendChild(doc.createTextNode(m_libraryScript));
 			}
 
@@ -1868,7 +1868,7 @@ namespace Afb
 			//
 			{
 				QDomElement s = doc.createElement(QLatin1String("AfterCreation"));
-				s = ñommonScriptXml.appendChild(s).toElement();
+				s = commonScriptXml.appendChild(s).toElement();
 				s.appendChild(doc.createTextNode(m_afterCreationScript));
 			}
 		}

@@ -1,8 +1,7 @@
 #include "SignalBase.h"
 
-#include "Measure.h"
 #include "CalibratorBase.h"
-#include "MeasurementBase.h"
+#include "MeasureBase.h"
 #include "Database.h"
 
 // -------------------------------------------------------------------------------------------------------------------

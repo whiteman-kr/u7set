@@ -5,7 +5,7 @@
 #include <QtSql>
 #include <QMutex>
 
-#include "Measure.h"
+#include "MeasureBase.h"
 
 // ==============================================================================================
 

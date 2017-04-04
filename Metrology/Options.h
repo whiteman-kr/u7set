@@ -9,9 +9,6 @@
 #include <QColor>
 #include <QFont>
 
-//#include "../lib/SocketIO.h"
-
-#include "Measure.h"
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
 
