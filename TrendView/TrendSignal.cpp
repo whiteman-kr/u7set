@@ -1,6 +1,11 @@
 #include "TrendSignal.h"
 
-TrendSignal::TrendSignal()
+namespace TrendLib
 {
+
+	TrendSignal::TrendSignal()
+	{
+
+	}
 
 }
