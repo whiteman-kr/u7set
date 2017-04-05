@@ -3431,7 +3431,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#dec_v1"          Caption="dec"          Version="1.0002">
+		<AFB id="#dec_v1"          Caption="dec"          Version="1.0003">
 			<Properties>				
 				<Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
 				<Category>Logic</Category>
@@ -3440,7 +3440,7 @@ function(videoItemFblElement, afbElement)
 				<InternalUse>false</InternalUse>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_number" Caption="in" Type="Analog" DataFormat="UnsignedInt" OpIndex="0" Size="32"/>
+				<Pin OpName="i_number" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="0" Size="32"/>
 			</Inputs>
 			<Outputs>
 				<Pin OpName="o_1_oprd" Caption="out_1" Type="Discrete" OpIndex="3" Size="1"/>
