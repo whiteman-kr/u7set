@@ -801,6 +801,18 @@ namespace Hardware
 
 				break;
 
+			case RawDataDescriptionItemType::InSignal:
+				break;
+
+			case RawDataDescriptionItemType::OutSignal:
+
+				if (item.offsetW + item.dataSize / SIZE_16BIT > size)
+				{
+					size = item.offsetW + item.dataSize / SIZE_16BIT;
+				}
+
+				break;
+
 			default:
 				assert(false);
 				result = false;
