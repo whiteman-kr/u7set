@@ -498,9 +498,10 @@ namespace Hardware
 		//
 	public:
 		FamilyType moduleFamily() const;
+		Q_INVOKABLE int jsModuleFamily() const;
 		void setModuleFamily(FamilyType value);
 
-		int moduleVersion() const;
+		Q_INVOKABLE int moduleVersion() const;
 		void setModuleVersion(int value);
 
 		QString configurationScript() const;

@@ -2811,6 +2811,11 @@ R"DELIM({
 		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
 	}
 
+	int DeviceModule::jsModuleFamily() const
+	{
+		return static_cast<int>(m_type & 0xFF00);
+	}
+
 	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)
 	{
 		decltype(m_type) tmp = static_cast<decltype(m_type)>(value);
