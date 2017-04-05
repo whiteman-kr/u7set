@@ -1,3 +1,23 @@
+// Non-strict mode part
+//
+
+function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage)
+{
+	//var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
+	//
+	var funcStr = "(" + configScript + ")";
+	var funcVar = eval(funcStr);
+	if (funcVar(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) == false)
+	{
+		return false;
+	}
+}
+
+// Strict mode part
+//
+
+"use strict";
+  
 var RootType = 0;
 var SystemType = 1;
 var RackType = 2;
@@ -37,9 +57,8 @@ var FamilyLMID = 	0x1100;
 var configScriptVersion = 27;		// First script that supports subsystems filtering
 
 
-function(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription)
+function main(builder, root, logicModules, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription)
 {
-
 	if (logicModules.length != 0)
 	{
 		var subSysID = logicModules[0].propertyValue("SubsystemID");
@@ -276,6 +295,12 @@ function module_lm_1_statistics(builder, module, confCollection, log, subsystemS
 	return false;
 }
 
+
+function Config_SYSTEMID_RACKID_CH00_MD02(log)
+{
+	log.writeMessage("Hello world!!!");
+}
+
 // Generate configuration for module LM-1
 //
 //
@@ -502,21 +527,17 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 		
 		var ioModuleFamily = ioModule.propertyValue("ModuleFamily");
 			
-        var frame = frameIOConfig + place - 1;
+	        var frame = frameIOConfig + place - 1;
 				
 		confFirmware.writeLog("Generating configuration for " + ioModule.propertyValue("Caption") + ": " + ioEquipmentID + " Place: " + ioModule.propertyValue("Place") + " Frame: " + frame + "\r\n");
 
 		var configScript = ioModule.propertyValue("ConfigurationScript");
 		if (configScript != "")
 		{
-			//var funcStr = "(function f(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){   log.writeMessage(\"Hello\"); return true; })";
-			//
-			var funcStr = "(" + configScript + ")";
-			var funcVar = eval(funcStr);
-			if (funcVar(confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) == false)
+			if (runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) == false)
 			{
 				return false;
-			}		
+			}
 		}
 			
 		var diagWordsIoCount = ioModule.propertyValue("TxDiagDataSize");
@@ -777,7 +798,7 @@ function generate_lm_1_rev3(builder, module, root, confCollection, log, signalSe
 
 	var txRxConfigFrame = lanConfigFrame + 3;
 	
-	if (generate_lmTxRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage) == false)
+	if (generate_lmTxRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage, logicModuleDescription) == false)
 	{
 		return false;
 	}
@@ -1005,7 +1026,7 @@ function generate_LANConfiguration(confFirmware, log, frame, module, ethernetCon
 
 // function returns the amount of transmitting words
 //
-function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNumber, opticModuleStorage)
+function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNumber, opticModuleStorage, logicModuleDescription)
 {
 	if (module.propertyValue("EquipmentID") == undefined)
 	{
@@ -1013,7 +1034,7 @@ function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNu
 		return false;
 	}
 	
-	var portCount = module.OptoInterface_OptoPortCount;
+	var portCount = logicModuleDescription.OptoInterface_OptoPortCount;
 	
 	var txWordsCount = 0;
 	
@@ -1105,3 +1126,4 @@ function generate_lmTxRxOptoConfiguration(confFirmware, log, frame, module, LMNu
 	
 	return true;
 }
+

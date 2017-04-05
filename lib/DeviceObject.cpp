@@ -1397,6 +1397,44 @@ namespace Hardware
 		return v.toInt();
 	}
 
+	bool DeviceObject::jsPropertyBool(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return false;
+		}
+
+		return v.toBool();
+	}
+
+	QString DeviceObject::jsPropertyString(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return QString();
+		}
+
+		return v.toString();
+	}
+
 	quint32 DeviceObject::jsPropertyIP(QString name) const
 	{
 		const std::shared_ptr<Property> p = propertyByCaption(name);
