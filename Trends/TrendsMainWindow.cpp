@@ -1,6 +1,7 @@
 #include "TrendsMainWindow.h"
 #include "ui_TrendsMainWindow.h"
 #include "Settings.h"
+#include "TrendWidget.h"
 
 TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -11,10 +12,19 @@ TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 	setMinimumSize(500, 300);
 	restoreWindowState();
 
+	QGridLayout* layout = new QGridLayout;
+
+	centralWidget()->setLayout(layout);
+
+	TrendLib::TrendWidget* trendWidget = new TrendLib::TrendWidget;
+	layout->addWidget(trendWidget, 0, 0);
+
 	connect(ui->actionOpen, &QAction::triggered, this, &TrendsMainWindow::actionOpenTriggered);
 	connect(ui->actionSave, &QAction::triggered, this, &TrendsMainWindow::actionSaveTriggered);
 	connect(ui->actionExit, &QAction::triggered, this, &TrendsMainWindow::actionExitTriggered);
 	connect(ui->actionAbout, &QAction::triggered, this, &TrendsMainWindow::actionAboutTriggered);
+
+	return;
 }
 
 TrendsMainWindow::~TrendsMainWindow()

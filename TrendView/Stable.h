@@ -15,7 +15,22 @@
 
 // Add Qt includes here
 //
+#include <QDebug>
+
+#include <QWidget>
 #include <QPaintDevice>
+#include <QPainter>
+#include <QImage>
+#include <QPixmap>
+
+#include <QThread>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QWaitCondition>
+
+#include <QTimer>
+#include <QTime>
+#include <QElapsedTimer>
 
 // Add thirdparty and any stable includes here
 //

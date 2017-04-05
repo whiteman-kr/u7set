@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += widgets svg
+QT       += core widgets svg gui
 
 TARGET = TrendView
 TEMPLATE = lib
@@ -25,10 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += TrendView.cpp
+SOURCES += \
+    TrendWidget.cpp \
+    TrendSignal.cpp
 
-HEADERS += TrendView.h \
-    Stable.h
+HEADERS += \
+    Stable.h \
+    TrendWidget.h \
+    TrendSignal.h
 
 unix {
     target.path = /usr/lib

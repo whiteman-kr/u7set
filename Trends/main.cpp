@@ -1,11 +1,10 @@
 #include "TrendsMainWindow.h"
-#include <QApplication>
 #include "Settings.h"
 
 int main(int argc, char *argv[])
 {
-	QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
-	QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+	//QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
+	//QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 	//QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
 	QApplication a(argc, argv);

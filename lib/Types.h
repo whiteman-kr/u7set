@@ -9,7 +9,7 @@ class E : public QObject
 {
 	Q_OBJECT
 public:
-	E();
+	E() = delete;
 
 	// Horz/Vert text Align enums
 	// This enum type is used to describe alignment. It contains horizontal and vertical flags that can be

@@ -24,6 +24,9 @@
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QCloseEvent>
+#include <QLayout>
+#include <QGridLayout>
+#include <QApplication>
 
 // Add thirdparty and any stable includes here
 //
