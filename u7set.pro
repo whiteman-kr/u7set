@@ -24,4 +24,6 @@ SUBDIRS += qtservice \
     DiagDataService \
     mconf \
     TuningClient \
-    TuningIPEN
+    TuningIPEN \
+    TrendView \
+    Trends

@@ -9,3 +9,4 @@ GetGitProjectVersion
 .~lock.*#
 .svn
 .vscode
+Scripts/out
