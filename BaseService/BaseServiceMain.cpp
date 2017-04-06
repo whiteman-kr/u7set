@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER(argv[0]);			// init global CircularLogger object
+	INIT_LOGGER();			// init global CircularLogger object
 
 	logger.setLogCodeInfo(false);
 
