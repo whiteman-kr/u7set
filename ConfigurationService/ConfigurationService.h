@@ -50,8 +50,9 @@ private:
 	// settings
 	//
 	QString m_equipmentID;
-	QString m_buildPath;
+	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
+	QString m_workDirectory;
 
 	HostAddressPort m_clientIP;
 };
