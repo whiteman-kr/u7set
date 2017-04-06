@@ -39,25 +39,24 @@ private:
 
 	// Actions of main menu
 	//
-
-	// menu - Measure
-	//
+							// menu - Measure
+							//
 	QAction*				m_pStartMeasureAction = nullptr;
 	QAction*				m_pStopMeasureAction = nullptr;
 	QAction*				m_pExportMeasureAction = nullptr;
 
-	// menu - Edit
-	//
+							// menu - Edit
+							//
 	QAction*				m_pCopyMeasureAction = nullptr;
 	QAction*				m_pRemoveMeasureAction = nullptr;
 	QAction*				m_pSelectAllMeasureAction = nullptr;
 
-	// menu - View
-	//
+							// menu - View
+							//
 	QAction*				m_pShowCalculatorAction = nullptr;
 
-	// menu - Tools
-	//
+							// menu - Tools
+							//
 	QAction*				m_pCalibratorsAction = nullptr;
 	QAction*				m_pShowRackListAction = nullptr;
 	QAction*				m_pShowSignalListAction = nullptr;
@@ -66,8 +65,8 @@ private:
 	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pOptionsAction;
 
-	// menu - ?
-	//
+							// menu - ?
+							//
 	QAction*				m_pShowStatisticAction = nullptr;
 	QAction*				m_pAboutConnectionAction = nullptr;
 	QAction*				m_pAboutAppAction = nullptr;
@@ -152,7 +151,7 @@ public:
 	void					createActions();
 	void					createMenu();
 	bool					createToolBars();
-	void					createMeasurePages();
+	void					createMeasureViews();
 	void					createPanels();
 	void					createStatusBar();
 	void					createContextMenu();
@@ -230,7 +229,6 @@ private slots:
 	// Slots of tab -- page measure type
 	//
 	void					setMeasureType(int measureType);
-	void					measureCountChanged(int);
 
 	// Slots of control panels
 	//

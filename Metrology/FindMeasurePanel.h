@@ -10,7 +10,7 @@
 #include <QLineEdit>
 #include <QTableView>
 
-#include "Measure.h"
+#include "MeasureBase.h"
 
 // ==============================================================================================
 

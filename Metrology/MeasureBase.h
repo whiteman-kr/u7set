@@ -1,19 +1,15 @@
-#pragma once
-
-#include <assert.h>
-#include <QDateTime>
+#ifndef MEASUREBASE_H
+#define MEASUREBASE_H
 
 #include "../lib/Hash.h"
-
-#include "Calibrator.h"
 #include "SignalBase.h"
 
 // ==============================================================================================
 
 const char* const MeasureType[] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", "Measurements of linearity"),
-			QT_TRANSLATE_NOOP("Measure.h", "Measurements of comparators"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of linearity"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Measurements of comparators"),
 };
 
 const int	MEASURE_TYPE_COUNT = sizeof(MeasureType)/sizeof(MeasureType[0]);
@@ -26,8 +22,8 @@ const int	MEASURE_TYPE_UNKNOWN	= -1,
 
 const char* const MeasureFileName[MEASURE_TYPE_COUNT] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", "Linearity"),
-			QT_TRANSLATE_NOOP("Measure.h", "Comparators"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Linearity"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Comparators"),
 };
 
 // ==============================================================================================
@@ -44,8 +40,8 @@ const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0])
 
 const char* const	MeasureKind[] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", " in one rack"),
-			QT_TRANSLATE_NOOP("Measure.h", " in several racks"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " in one rack"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " in several racks"),
 };
 
 const int	MEASURE_KIND_COUNT = sizeof(MeasureKind)/sizeof(MeasureKind[0]);
@@ -56,26 +52,26 @@ const int	MEASURE_KIND_UNKNOWN			= -1,
 
 // ==============================================================================================
 
-const char* const ValueType[] =
+const char* const MeasureLimitType[] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", "InElectric"),
-			QT_TRANSLATE_NOOP("Measure.h", "Physical"),
-			QT_TRANSLATE_NOOP("Measure.h", "OutElectric"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "InElectric"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Physical"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "OutElectric"),
 };
 
-const int	VALUE_TYPE_COUNT		= sizeof(ValueType)/sizeof(ValueType[0]);
+const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
 
-const int	VALUE_TYPE_UNKNOWN		= -1,
-			VALUE_TYPE_IN_ELECTRIC	= 0,
-			VALUE_TYPE_PHYSICAL		= 1,
-			VALUE_TYPE_OUT_ELECTRIC	= 2;
+const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
+			MEASURE_LIMIT_TYPE_IN_ELECTRIC	= 0,
+			MEASURE_LIMIT_TYPE_PHYSICAL		= 1,
+			MEASURE_LIMIT_TYPE_OUT_ELECTRIC	= 2;
 
 // ==============================================================================================
 
 const char* const ErrorType[] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", "Absolute"),
-			QT_TRANSLATE_NOOP("Measure.h", "Reduce"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduce"),
 };
 
 const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(ErrorType)/sizeof(ErrorType[0]);
@@ -88,10 +84,10 @@ const int	MEASURE_ERROR_TYPE_UNKNOWN	= -1,
 
 const char* const MeasureAdditionalParam[] =
 {
-			QT_TRANSLATE_NOOP("Measure.h", "Measure value max"),
-			QT_TRANSLATE_NOOP("Measure.h", "System error"),
-			QT_TRANSLATE_NOOP("Measure.h", "MSE"),
-			QT_TRANSLATE_NOOP("Measure.h", "Low High border"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Measure value max"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "System error"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "MSE"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
 };
 
 const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/sizeof(MeasureAdditionalParam[0]);
@@ -108,9 +104,6 @@ const int	MEASURE_ADDITIONAL_PARAM_UNKNOWN			= -1,
 // ==============================================================================================
 
 const int	MAX_MEASUREMENT_IN_POINT	= 20;
-// ==============================================================================================
-
-const int	INVALID_VALUE				= 0xFFFF;
 
 // ==============================================================================================
 
@@ -186,22 +179,22 @@ private:
 
 	double			m_percent = 0;
 
-	double			m_nominal[VALUE_TYPE_COUNT];
-	double			m_measure[VALUE_TYPE_COUNT];
+	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
 
-	bool			m_hasLimit[VALUE_TYPE_COUNT];
-	double			m_lowLimit[VALUE_TYPE_COUNT];
-	double			m_highLimit[VALUE_TYPE_COUNT];
-	QString			m_unit[VALUE_TYPE_COUNT];
-	int				m_limitPrecision[VALUE_TYPE_COUNT];
+	bool			m_hasLimit[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
+	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
+	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
 
 	double			m_adjustment = 0;
 
-	double			m_error[VALUE_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
-	double			m_errorLimit[VALUE_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
 
 	int				m_measureCount = 0;
-	double			m_measureArray[VALUE_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
+	double			m_measureArray[MEASURE_LIMIT_TYPE_COUNT][MAX_MEASUREMENT_IN_POINT];
 
 	int				m_additionalParamCount = 0;
 	double			m_additionalParam[MEASURE_ADDITIONAL_PARAM_COUNT];
@@ -319,17 +312,41 @@ public:
 
 // ==============================================================================================
 
-#pragma pack(push, 1)
+class MeasureBase : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit MeasureBase(QObject *parent = 0);
+	virtual ~MeasureBase();
+
+private:
+
+	int							m_measureType = MEASURE_TYPE_UNKNOWN;
+
+	mutable QMutex				m_measureMutex;
+	QVector<Measurement*>		m_measureList;
+
+public:
+
+	int							count() const;
+	void						clear(bool removeData = true);
+
+	int							load(int measureType);
+
+	int							append(Measurement* pMeasurement);
+	Measurement*				measurement(int index) const;
+	bool						remove(int index, bool removeData = true);
+
+	Metrology::SignalStatistic	statistic(const Hash& signalHash);
+};
 
 // ==============================================================================================
 
-// struct
-
-// ==============================================================================================
-
-#pragma pack(pop)
+extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 
 
-
+#endif // MEASUREBASE_H

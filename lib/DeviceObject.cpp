@@ -1397,6 +1397,44 @@ namespace Hardware
 		return v.toInt();
 	}
 
+	bool DeviceObject::jsPropertyBool(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return false;
+		}
+
+		return v.toBool();
+	}
+
+	QString DeviceObject::jsPropertyString(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return QString();
+		}
+
+		return v.toString();
+	}
+
 	quint32 DeviceObject::jsPropertyIP(QString name) const
 	{
 		const std::shared_ptr<Property> p = propertyByCaption(name);
@@ -1919,7 +1957,7 @@ namespace Hardware
 		m_children.clear();
 	}
 
-	bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
+    bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
 	{
 		if (child == nullptr ||
 			errorMessage == nullptr)
@@ -2771,6 +2809,11 @@ R"DELIM({
 	DeviceModule::FamilyType DeviceModule::moduleFamily() const
 	{
 		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
+	}
+
+	int DeviceModule::jsModuleFamily() const
+	{
+		return static_cast<int>(m_type & 0xFF00);
 	}
 
 	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)

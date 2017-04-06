@@ -3730,6 +3730,27 @@ namespace Builder
 						arg(portEquipmentID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5186
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal '%1' is not found (opto port '%2' raw data description).
+	///
+	/// Parameters:
+	///		%1 Application signalID
+	///		%2 Opto port equpment ID
+	///
+	/// Description:
+	///		Signal specified in opto port raw data description is not found. Check ID of signal.
+	///
+	void IssueLogger::errALC5186(const QString& appSignalID, const QString& portEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5186,
+				  QString(tr("Signal '%1' is not found (opto port '%2' raw data description).")).
+						arg(appSignalID).arg(portEquipmentID));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//
@@ -3927,6 +3948,56 @@ namespace Builder
 				  .arg(subsystemId));
 	}
 
+    /// IssueCode: EQP6008
+    ///
+    /// IssueType: Error
+    ///
+    /// Title: Child '%1' with place '%2' is not allowed in parent '%3'.
+    ///
+    ///
+    /// Parameters:
+    ///		%1 Parent Equipment ID
+    ///		%2 Child Equipment ID
+    ///		%3 Child place
+    ///
+    /// Description:
+    ///		Child restriction is failed in an equipment object
+    ///
+    void IssueLogger::errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace)
+    {
+        LOG_ERROR(IssueType::Equipment,
+                  6008,
+                  tr("Child '%1' with place '%2' is not allowed in parent '%3'.")
+                  .arg(childEquipmentId)
+                  .arg(childPlace)
+                  .arg(equipmentId));
+    }
+
+	/// IssueCode: EQP6009
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property Place must be 0 (Equipment object '%1').
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Property Place for Logic Module must be set to 0.
+	///
+	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6009,
+				  tr("Property Place must be 0 (Equipment object '%1').")
+				  .arg(equipmemtId)
+				  );
+	}
+
+
+
 	/// IssueCode: EQP6100
 	///
 	/// IssueType: Error
@@ -3949,7 +4020,6 @@ namespace Builder
 				  .arg(softwareObjectStrId)
 				  );
 	}
-
 
 	/// IssueCode: EQP6101
 	///

@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QMessageBox>
 
-#include "Measure.h"
+#include "MeasureBase.h"
 #include "SignalBase.h"
 #include "TuningSignalBase.h"
 

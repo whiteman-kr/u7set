@@ -55,7 +55,6 @@ PRECOMPILED_HEADER = Stable.h
 
 SOURCES += \
     MainWindow.cpp \
-    Measure.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
     OptionsDialog.cpp \
@@ -92,7 +91,6 @@ SOURCES += \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
     Statistic.cpp \
-    MeasurementBase.cpp \
     ExportData.cpp \
     FindData.cpp \
     TuningSocket.cpp \
@@ -112,13 +110,13 @@ SOURCES += \
     OutputSignalList.cpp \
     ObjectProperties.cpp \
     OutputSignalBase.cpp \
-    RackBase.cpp
+    RackBase.cpp \
+    MeasureBase.cpp
 
 
 
 HEADERS  += \
     MainWindow.h \
-    Measure.h \
     Calibrator.h \
     CalibratorBase.h \
     OptionsDialog.h \
@@ -162,7 +160,6 @@ HEADERS  += \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
     Statistic.h \
-    MeasurementBase.h \
     ExportData.h \
     FindData.h \
     TuningSocket.h \
@@ -182,7 +179,8 @@ HEADERS  += \
     OutputSignalList.h \
     ObjectProperties.h \
     OutputSignalBase.h \
-    RackBase.h
+    RackBase.h \
+    MeasureBase.h
 
 
 FORMS    +=
@@ -225,22 +223,6 @@ win32 {
 }
 unix {
 		LIBS += -lprotobuf
-}
-
-# Visual Leak Detector
-#
-win32{
-	contains(QMAKE_TARGET.arch, x86_64){
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	}
-	else{
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-	}
-
-	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
 DISTFILES += \
