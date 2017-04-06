@@ -181,7 +181,8 @@ var FamilyLMID : number = 	0x1100;
 //var configScriptVersion = 25;		// buildThread has been replaced by builder, added buildNo
 //var configScriptVersion = 26;		// added UniqueID computing
 //var configScriptVersion = 27;		// First script that supports subsystems filtering
-var configScriptVersion : number = 28;		// Code is written using TypeScript
+//var configScriptVersion : number = 28;	// Code is written using TypeScript
+var configScriptVersion : number = 29;		// Added module place checking
 
 //
 
@@ -336,8 +337,8 @@ function module_lm_1(builder : Builder, root : DeviceObject, module : DeviceObje
 		log.errCFG3000("EquipmentID", "LM-1");
 		return false;
 	}
-		
-	var checkProperties : string[] = ["ModuleFamily"];
+
+	var checkProperties : string[] = ["ModuleFamily", "Place"];
 	for (var cp : number = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -349,6 +350,14 @@ function module_lm_1(builder : Builder, root : DeviceObject, module : DeviceObje
 
 	if (module.jsPropertyInt("ModuleFamily") == FamilyLMID)
 	{
+		var place : number = module.jsPropertyInt("Place");
+
+		if (place != 0)
+		{
+			log.errCFG3002("Place", place, 0, 0, module.jsPropertyString("EquipmentID"));
+			return false;
+		}
+
 		// Generate Configuration
 		//
 		return generate_lm_1_rev3(builder, module, root, confCollection, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
@@ -632,10 +641,16 @@ function generate_lm_1_rev3(builder : Builder, module : DeviceObject, root : Dev
 			continue;
 		}
 		
-		var place : number = ioModule.jsPropertyInt("Place");
-		if (place < 1 || place > ioModulesMaxCount)
+		if (ioModule.jsPropertyInt("ModuleFamily") == FamilyLMID)
 		{
 			continue;
+		}
+
+		var ioPlace : number = ioModule.jsPropertyInt("Place");
+		if (ioPlace < 1 || ioPlace > ioModulesMaxCount)
+		{
+			log.errCFG3002("Place", ioPlace, 1, ioModulesMaxCount, ioModule.jsPropertyString("EquipmentID"));
+			return false;
 		}
 
 		if (ioModule.propertyValue("EquipmentID") == undefined)
@@ -658,7 +673,7 @@ function generate_lm_1_rev3(builder : Builder, module : DeviceObject, root : Dev
 		
 		var ioModuleFamily : number = ioModule.jsPropertyInt("ModuleFamily");
 			
-		var frame : number = frameIOConfig + place - 1;
+		var frame : number = frameIOConfig + ioPlace - 1;
 				
 		confFirmware.writeLog("Generating configuration for " + ioModule.jsPropertyString("Caption") + ": " + ioEquipmentID + " Place: " + ioModule.jsPropertyInt("Place") + " Frame: " + frame + "\r\n");
 

@@ -167,6 +167,18 @@ namespace Builder
 				break;
 			}
 
+
+            //
+            // Check child restirictions
+            //
+
+            ok = checkChildRestrictions(equipmentSet.root());
+
+            if (ok == false)
+            {
+                break;
+            }
+
 			LOG_SUCCESS(m_log, tr("Ok"));
 
 			//
@@ -665,6 +677,8 @@ namespace Builder
 		return ok;
 	}
 
+
+
 	bool BuildWorkerThread::checkUuidAndStrIdWorker(Hardware::DeviceObject* device,
 									 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
 									 std::map<QString, Hardware::DeviceObject*>& strIdMap)
@@ -711,6 +725,19 @@ namespace Builder
 			strIdMap[device->equipmentIdTemplate()] = device;
 		}
 
+
+		if (device->isModule())
+		{
+			Hardware::DeviceModule* module = (Hardware::DeviceModule*)device;
+
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != 0)
+			{
+				m_log->errEQP6009(module->equipmentIdTemplate(), module->uuid());
+				ok = false;
+				return ok;
+			}
+		}
+
 		// Check property Place, must not be -1
 		//
 		if (device->place() < 0 && device->isRoot() == false)
@@ -734,7 +761,59 @@ namespace Builder
 	}
 
 
-	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet& equipment)
+    bool BuildWorkerThread::checkChildRestrictions(Hardware::DeviceObject* root)
+    {
+        if (root == nullptr)
+        {
+            assert(root);
+            return false;
+        }
+
+        // Recursive function
+        //
+
+        bool ok = checkChildRestrictionsWorker(root);
+
+        return ok;
+    }
+
+    bool BuildWorkerThread::checkChildRestrictionsWorker(Hardware::DeviceObject* device)
+    {
+        assert(device != nullptr);
+
+        QString errorMessage;
+
+        int childrenCount = device->childrenCount();
+
+        for (int i = 0; i < childrenCount; i++)
+        {
+            Hardware::DeviceObject* child = device->child(i);
+
+            if (child == nullptr)
+            {
+                assert(child);
+                return false;
+            }
+
+            bool allowed = device->checkChild(child, &errorMessage);
+
+            if (allowed == false)
+            {
+                m_log->errEQP6008(device->equipmentId(), child->equipmentId(), child->place());
+                return false;
+            }
+
+            if (checkChildRestrictionsWorker(child) == false)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet& equipment)
 	{
 		if (db == nullptr ||
 			signalSet == nullptr)

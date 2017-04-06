@@ -2053,15 +2053,6 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	assert(parentObject != nullptr);
 
-	QString errorMessage;
-	bool allowed = parentObject->checkChild(object.get(), &errorMessage);
-
-	if (allowed == false)
-	{
-		QMessageBox::critical(this, tr("Error"), tr("It is not allowed to add child, error message: %1").arg(errorMessage));
-		return QModelIndex();
-	}
-
 	//  Set presetName, parent object should contain it
 	//
 	if (isPresetMode() == true &&
