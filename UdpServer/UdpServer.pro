@@ -30,6 +30,7 @@ unix {
 ##
 #win32 {
 #        contains(QMAKE_TARGET.arch, x86_64){
+#            QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
 #            system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 #            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
 #            nmake))
@@ -37,7 +38,8 @@ unix {
 #            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/UdpServer.pro)
 #        }
 #        else{
-#            system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+#            QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+#            system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 #            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
 #            nmake))
 #            system(chdir $$PWD & \
@@ -45,6 +47,7 @@ unix {
 #        }
 #}
 #unix {
+#    QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
 #    system(cd $$PWD/../GetGitProjectVersion; \
 #        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
 #        make; \
