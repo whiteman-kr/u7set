@@ -1957,7 +1957,7 @@ namespace Hardware
 		m_children.clear();
 	}
 
-	bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
+    bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
 	{
 		if (child == nullptr ||
 			errorMessage == nullptr)

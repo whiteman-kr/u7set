@@ -281,6 +281,9 @@ namespace Builder
 		void errEQP6006(int subsystemKey);		//	Same ssKey in subsystems
 		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
 
+        void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
+		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
+
 		// Subset of EQP -- Generation Software Configuration
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);

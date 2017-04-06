@@ -1,4 +1,3 @@
-"use strict";
 ///
 /// #add_fp_v1
 ///
