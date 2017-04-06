@@ -1563,20 +1563,6 @@ void EquipmentView::addPresetRack()
 	{
 		QModelIndex parentModelIndex;		// current is root
 
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
-
 		// --
 		//
 		std::shared_ptr<Hardware::DeviceObject> rack = std::make_shared<Hardware::DeviceRack>(true);
@@ -1605,20 +1591,6 @@ void EquipmentView::addPresetChassis()
 	{
 		QModelIndex parentModelIndex;		// current is root
 
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
-
 		// --
 		//
         std::shared_ptr<Hardware::DeviceObject> chassis = std::make_shared<Hardware::DeviceChassis>(true);
@@ -1645,20 +1617,6 @@ void EquipmentView::addPresetModule()
 	if (isPresetMode() == true)
 	{
 		QModelIndex parentModelIndex;		// current is root
-
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
 
 		// --
 		//
@@ -1687,20 +1645,6 @@ void EquipmentView::addPresetController()
 	{
 		QModelIndex parentModelIndex;		// current is root
 
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
-
 		// --
 		//
 		std::shared_ptr<Hardware::DeviceObject> controller = std::make_shared<Hardware::DeviceController>(true);
@@ -1726,20 +1670,6 @@ void EquipmentView::addPresetWorkstation()
 	if (isPresetMode() == true)
 	{
 		QModelIndex parentModelIndex;		// current is root
-
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
 
 		// --
 		//
@@ -1767,20 +1697,6 @@ void EquipmentView::addPresetSoftware()
 	if (isPresetMode() == true)
 	{
 		QModelIndex parentModelIndex;		// current is root
-
-		QModelIndexList selected = selectionModel()->selectedRows();
-
-		if (selected.size() > 1)
-		{
-			// Don't know after which item insrt new object
-			//
-			return;
-		}
-
-		if (selected.empty() == false)
-		{
-			parentModelIndex = selected[0];
-		}
 
 		// --
 		//
