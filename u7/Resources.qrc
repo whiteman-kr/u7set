@@ -26,5 +26,6 @@
         <file>Images/SchemaText.svg</file>
         <file>Images/SchemaUfbElement.svg</file>
         <file>Images/SchemaTerminator.svg</file>
+        <file>Images/SchemaItemPushButton.svg</file>
     </qresource>
 </RCC>

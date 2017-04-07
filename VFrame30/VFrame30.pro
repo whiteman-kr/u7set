@@ -134,7 +134,9 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemUfb.h \
     SchemaItemTerminator.h \
     MacrosExpander.h \
-    Session.h
+    Session.h \
+    SchemaItemControl.h \
+    SchemaItemPushButton.h
 
 SOURCES += \
     Settings.cpp \
@@ -185,7 +187,9 @@ SOURCES += \
     SchemaItemUfb.cpp \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
-    Session.cpp
+    Session.cpp \
+    SchemaItemControl.cpp \
+    SchemaItemPushButton.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

@@ -402,6 +402,7 @@ public:
 
 	bool isLogicSchema() const;
 	bool isUfbSchema() const;
+	bool isMonitorSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;
@@ -538,6 +539,9 @@ private:
 		QAction* m_addTransmitter = nullptr;
 		QAction* m_addReceiver = nullptr;
 		QAction* m_addUfbAction = nullptr;
+
+		QAction* m_addPushButtonAction = nullptr;
+		QAction* m_addTextEditAction = nullptr;
 
 	// Edit
 	//

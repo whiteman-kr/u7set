@@ -15,6 +15,8 @@ namespace VFrame30
 
 	protected:
 		void init();
+
+		void updateControlWidgets();
 		
 		// Painting
 		//

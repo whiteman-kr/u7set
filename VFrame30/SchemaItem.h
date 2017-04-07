@@ -206,6 +206,8 @@ namespace VFrame30
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
 
+		bool isControl() const;
+
 		bool isLocked() const;
 		void setLocked(bool locked);
 

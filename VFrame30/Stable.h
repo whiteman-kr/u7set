@@ -23,12 +23,13 @@
 #include <map>
 #include <set>
 #include <cmath>
-#include <assert.h>
+#include <cassert>
 #include <memory>
 #include <string>
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <type_traits>
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif

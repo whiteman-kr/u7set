@@ -76,6 +76,8 @@ class SchemaItemTransmitter;
 class SchemaItemReceiver;
 class SchemaItemUfb;
 class SchemaItemTerminator;
+class SchemaItemControl;
+class SchemaItemPushButton;
 class DeviceObject;
 class DeviceRoot;
 class DeviceSystem;
@@ -2770,6 +2772,24 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemTerminator* release_terminator();
   inline void set_allocated_terminator(::Proto::SchemaItemTerminator* terminator);
 
+  // optional .Proto.SchemaItemControl control = 200;
+  inline bool has_control() const;
+  inline void clear_control();
+  static const int kControlFieldNumber = 200;
+  inline const ::Proto::SchemaItemControl& control() const;
+  inline ::Proto::SchemaItemControl* mutable_control();
+  inline ::Proto::SchemaItemControl* release_control();
+  inline void set_allocated_control(::Proto::SchemaItemControl* control);
+
+  // optional .Proto.SchemaItemPushButton pushButton = 210;
+  inline bool has_pushbutton() const;
+  inline void clear_pushbutton();
+  static const int kPushButtonFieldNumber = 210;
+  inline const ::Proto::SchemaItemPushButton& pushbutton() const;
+  inline ::Proto::SchemaItemPushButton* mutable_pushbutton();
+  inline ::Proto::SchemaItemPushButton* release_pushbutton();
+  inline void set_allocated_pushbutton(::Proto::SchemaItemPushButton* pushbutton);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItem)
  private:
   inline void set_has_uuid();
@@ -2828,6 +2848,10 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_ufb();
   inline void set_has_terminator();
   inline void clear_has_terminator();
+  inline void set_has_control();
+  inline void clear_has_control();
+  inline void set_has_pushbutton();
+  inline void clear_has_pushbutton();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2859,9 +2883,11 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemInOut* inoutsignal_;
   ::Proto::SchemaItemUfb* ufb_;
   ::Proto::SchemaItemTerminator* terminator_;
+  ::Proto::SchemaItemControl* control_;
+  ::Proto::SchemaItemPushButton* pushbutton_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(28 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(30 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5289,6 +5315,305 @@ class SchemaItemTerminator : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemTerminator* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemControl : public ::google::protobuf::Message {
+ public:
+  SchemaItemControl();
+  virtual ~SchemaItemControl();
+
+  SchemaItemControl(const SchemaItemControl& from);
+
+  inline SchemaItemControl& operator=(const SchemaItemControl& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemControl& default_instance();
+
+  void Swap(SchemaItemControl* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemControl* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemControl& from);
+  void MergeFrom(const SchemaItemControl& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemControl)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemControl* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemPushButton : public ::google::protobuf::Message {
+ public:
+  SchemaItemPushButton();
+  virtual ~SchemaItemPushButton();
+
+  SchemaItemPushButton(const SchemaItemPushButton& from);
+
+  inline SchemaItemPushButton& operator=(const SchemaItemPushButton& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemPushButton& default_instance();
+
+  void Swap(SchemaItemPushButton* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemPushButton* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemPushButton& from);
+  void MergeFrom(const SchemaItemPushButton& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string text = 1;
+  inline bool has_text() const;
+  inline void clear_text();
+  static const int kTextFieldNumber = 1;
+  inline const ::std::string& text() const;
+  inline void set_text(const ::std::string& value);
+  inline void set_text(const char* value);
+  inline void set_text(const char* value, size_t size);
+  inline ::std::string* mutable_text();
+  inline ::std::string* release_text();
+  inline void set_allocated_text(::std::string* text);
+
+  // optional bool checkable = 2;
+  inline bool has_checkable() const;
+  inline void clear_checkable();
+  static const int kCheckableFieldNumber = 2;
+  inline bool checkable() const;
+  inline void set_checkable(bool value);
+
+  // optional bool checkedDefault = 3;
+  inline bool has_checkeddefault() const;
+  inline void clear_checkeddefault();
+  static const int kCheckedDefaultFieldNumber = 3;
+  inline bool checkeddefault() const;
+  inline void set_checkeddefault(bool value);
+
+  // optional bool autoRepeat = 4;
+  inline bool has_autorepeat() const;
+  inline void clear_autorepeat();
+  static const int kAutoRepeatFieldNumber = 4;
+  inline bool autorepeat() const;
+  inline void set_autorepeat(bool value);
+
+  // optional int32 autoRepeatDelay = 5;
+  inline bool has_autorepeatdelay() const;
+  inline void clear_autorepeatdelay();
+  static const int kAutoRepeatDelayFieldNumber = 5;
+  inline ::google::protobuf::int32 autorepeatdelay() const;
+  inline void set_autorepeatdelay(::google::protobuf::int32 value);
+
+  // optional int32 autoRepeatInterval = 6;
+  inline bool has_autorepeatinterval() const;
+  inline void clear_autorepeatinterval();
+  static const int kAutoRepeatIntervalFieldNumber = 6;
+  inline ::google::protobuf::int32 autorepeatinterval() const;
+  inline void set_autorepeatinterval(::google::protobuf::int32 value);
+
+  // optional string styleSheet = 20;
+  inline bool has_stylesheet() const;
+  inline void clear_stylesheet();
+  static const int kStyleSheetFieldNumber = 20;
+  inline const ::std::string& stylesheet() const;
+  inline void set_stylesheet(const ::std::string& value);
+  inline void set_stylesheet(const char* value);
+  inline void set_stylesheet(const char* value, size_t size);
+  inline ::std::string* mutable_stylesheet();
+  inline ::std::string* release_stylesheet();
+  inline void set_allocated_stylesheet(::std::string* stylesheet);
+
+  // optional string scriptAfterCreate = 21;
+  inline bool has_scriptaftercreate() const;
+  inline void clear_scriptaftercreate();
+  static const int kScriptAfterCreateFieldNumber = 21;
+  inline const ::std::string& scriptaftercreate() const;
+  inline void set_scriptaftercreate(const ::std::string& value);
+  inline void set_scriptaftercreate(const char* value);
+  inline void set_scriptaftercreate(const char* value, size_t size);
+  inline ::std::string* mutable_scriptaftercreate();
+  inline ::std::string* release_scriptaftercreate();
+  inline void set_allocated_scriptaftercreate(::std::string* scriptaftercreate);
+
+  // optional string scriptClicked = 22;
+  inline bool has_scriptclicked() const;
+  inline void clear_scriptclicked();
+  static const int kScriptClickedFieldNumber = 22;
+  inline const ::std::string& scriptclicked() const;
+  inline void set_scriptclicked(const ::std::string& value);
+  inline void set_scriptclicked(const char* value);
+  inline void set_scriptclicked(const char* value, size_t size);
+  inline ::std::string* mutable_scriptclicked();
+  inline ::std::string* release_scriptclicked();
+  inline void set_allocated_scriptclicked(::std::string* scriptclicked);
+
+  // optional string scriptPressed = 23;
+  inline bool has_scriptpressed() const;
+  inline void clear_scriptpressed();
+  static const int kScriptPressedFieldNumber = 23;
+  inline const ::std::string& scriptpressed() const;
+  inline void set_scriptpressed(const ::std::string& value);
+  inline void set_scriptpressed(const char* value);
+  inline void set_scriptpressed(const char* value, size_t size);
+  inline ::std::string* mutable_scriptpressed();
+  inline ::std::string* release_scriptpressed();
+  inline void set_allocated_scriptpressed(::std::string* scriptpressed);
+
+  // optional string scriptReleased = 24;
+  inline bool has_scriptreleased() const;
+  inline void clear_scriptreleased();
+  static const int kScriptReleasedFieldNumber = 24;
+  inline const ::std::string& scriptreleased() const;
+  inline void set_scriptreleased(const ::std::string& value);
+  inline void set_scriptreleased(const char* value);
+  inline void set_scriptreleased(const char* value, size_t size);
+  inline ::std::string* mutable_scriptreleased();
+  inline ::std::string* release_scriptreleased();
+  inline void set_allocated_scriptreleased(::std::string* scriptreleased);
+
+  // optional string scriptToggled = 25;
+  inline bool has_scripttoggled() const;
+  inline void clear_scripttoggled();
+  static const int kScriptToggledFieldNumber = 25;
+  inline const ::std::string& scripttoggled() const;
+  inline void set_scripttoggled(const ::std::string& value);
+  inline void set_scripttoggled(const char* value);
+  inline void set_scripttoggled(const char* value, size_t size);
+  inline ::std::string* mutable_scripttoggled();
+  inline ::std::string* release_scripttoggled();
+  inline void set_allocated_scripttoggled(::std::string* scripttoggled);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemPushButton)
+ private:
+  inline void set_has_text();
+  inline void clear_has_text();
+  inline void set_has_checkable();
+  inline void clear_has_checkable();
+  inline void set_has_checkeddefault();
+  inline void clear_has_checkeddefault();
+  inline void set_has_autorepeat();
+  inline void clear_has_autorepeat();
+  inline void set_has_autorepeatdelay();
+  inline void clear_has_autorepeatdelay();
+  inline void set_has_autorepeatinterval();
+  inline void clear_has_autorepeatinterval();
+  inline void set_has_stylesheet();
+  inline void clear_has_stylesheet();
+  inline void set_has_scriptaftercreate();
+  inline void clear_has_scriptaftercreate();
+  inline void set_has_scriptclicked();
+  inline void clear_has_scriptclicked();
+  inline void set_has_scriptpressed();
+  inline void clear_has_scriptpressed();
+  inline void set_has_scriptreleased();
+  inline void clear_has_scriptreleased();
+  inline void set_has_scripttoggled();
+  inline void clear_has_scripttoggled();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* text_;
+  bool checkable_;
+  bool checkeddefault_;
+  bool autorepeat_;
+  ::google::protobuf::int32 autorepeatdelay_;
+  ::std::string* stylesheet_;
+  ::std::string* scriptaftercreate_;
+  ::std::string* scriptclicked_;
+  ::std::string* scriptpressed_;
+  ::std::string* scriptreleased_;
+  ::std::string* scripttoggled_;
+  ::google::protobuf::int32 autorepeatinterval_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemPushButton* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -11849,6 +12174,82 @@ inline void SchemaItem::set_allocated_terminator(::Proto::SchemaItemTerminator* 
   }
 }
 
+// optional .Proto.SchemaItemControl control = 200;
+inline bool SchemaItem::has_control() const {
+  return (_has_bits_[0] & 0x10000000u) != 0;
+}
+inline void SchemaItem::set_has_control() {
+  _has_bits_[0] |= 0x10000000u;
+}
+inline void SchemaItem::clear_has_control() {
+  _has_bits_[0] &= ~0x10000000u;
+}
+inline void SchemaItem::clear_control() {
+  if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
+  clear_has_control();
+}
+inline const ::Proto::SchemaItemControl& SchemaItem::control() const {
+  return control_ != NULL ? *control_ : *default_instance_->control_;
+}
+inline ::Proto::SchemaItemControl* SchemaItem::mutable_control() {
+  set_has_control();
+  if (control_ == NULL) control_ = new ::Proto::SchemaItemControl;
+  return control_;
+}
+inline ::Proto::SchemaItemControl* SchemaItem::release_control() {
+  clear_has_control();
+  ::Proto::SchemaItemControl* temp = control_;
+  control_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* control) {
+  delete control_;
+  control_ = control;
+  if (control) {
+    set_has_control();
+  } else {
+    clear_has_control();
+  }
+}
+
+// optional .Proto.SchemaItemPushButton pushButton = 210;
+inline bool SchemaItem::has_pushbutton() const {
+  return (_has_bits_[0] & 0x20000000u) != 0;
+}
+inline void SchemaItem::set_has_pushbutton() {
+  _has_bits_[0] |= 0x20000000u;
+}
+inline void SchemaItem::clear_has_pushbutton() {
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline void SchemaItem::clear_pushbutton() {
+  if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
+  clear_has_pushbutton();
+}
+inline const ::Proto::SchemaItemPushButton& SchemaItem::pushbutton() const {
+  return pushbutton_ != NULL ? *pushbutton_ : *default_instance_->pushbutton_;
+}
+inline ::Proto::SchemaItemPushButton* SchemaItem::mutable_pushbutton() {
+  set_has_pushbutton();
+  if (pushbutton_ == NULL) pushbutton_ = new ::Proto::SchemaItemPushButton;
+  return pushbutton_;
+}
+inline ::Proto::SchemaItemPushButton* SchemaItem::release_pushbutton() {
+  clear_has_pushbutton();
+  ::Proto::SchemaItemPushButton* temp = pushbutton_;
+  pushbutton_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* pushbutton) {
+  delete pushbutton_;
+  pushbutton_ = pushbutton;
+  if (pushbutton) {
+    set_has_pushbutton();
+  } else {
+    clear_has_pushbutton();
+  }
+}
+
 // -------------------------------------------------------------------
 
 // PosRectImpl
@@ -13989,6 +14390,614 @@ inline void SchemaItemUfb::set_ufbversion(::google::protobuf::int32 value) {
 // -------------------------------------------------------------------
 
 // SchemaItemTerminator
+
+// -------------------------------------------------------------------
+
+// SchemaItemControl
+
+// -------------------------------------------------------------------
+
+// SchemaItemPushButton
+
+// optional string text = 1;
+inline bool SchemaItemPushButton::has_text() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemPushButton::set_has_text() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemPushButton::clear_has_text() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemPushButton::clear_text() {
+  if (text_ != &::google::protobuf::internal::kEmptyString) {
+    text_->clear();
+  }
+  clear_has_text();
+}
+inline const ::std::string& SchemaItemPushButton::text() const {
+  return *text_;
+}
+inline void SchemaItemPushButton::set_text(const ::std::string& value) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(value);
+}
+inline void SchemaItemPushButton::set_text(const char* value) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(value);
+}
+inline void SchemaItemPushButton::set_text(const char* value, size_t size) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_text() {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  return text_;
+}
+inline ::std::string* SchemaItemPushButton::release_text() {
+  clear_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = text_;
+    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_text(::std::string* text) {
+  if (text_ != &::google::protobuf::internal::kEmptyString) {
+    delete text_;
+  }
+  if (text) {
+    set_has_text();
+    text_ = text;
+  } else {
+    clear_has_text();
+    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool checkable = 2;
+inline bool SchemaItemPushButton::has_checkable() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemPushButton::set_has_checkable() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemPushButton::clear_has_checkable() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemPushButton::clear_checkable() {
+  checkable_ = false;
+  clear_has_checkable();
+}
+inline bool SchemaItemPushButton::checkable() const {
+  return checkable_;
+}
+inline void SchemaItemPushButton::set_checkable(bool value) {
+  set_has_checkable();
+  checkable_ = value;
+}
+
+// optional bool checkedDefault = 3;
+inline bool SchemaItemPushButton::has_checkeddefault() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemPushButton::set_has_checkeddefault() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemPushButton::clear_has_checkeddefault() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemPushButton::clear_checkeddefault() {
+  checkeddefault_ = false;
+  clear_has_checkeddefault();
+}
+inline bool SchemaItemPushButton::checkeddefault() const {
+  return checkeddefault_;
+}
+inline void SchemaItemPushButton::set_checkeddefault(bool value) {
+  set_has_checkeddefault();
+  checkeddefault_ = value;
+}
+
+// optional bool autoRepeat = 4;
+inline bool SchemaItemPushButton::has_autorepeat() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemPushButton::set_has_autorepeat() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemPushButton::clear_has_autorepeat() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemPushButton::clear_autorepeat() {
+  autorepeat_ = false;
+  clear_has_autorepeat();
+}
+inline bool SchemaItemPushButton::autorepeat() const {
+  return autorepeat_;
+}
+inline void SchemaItemPushButton::set_autorepeat(bool value) {
+  set_has_autorepeat();
+  autorepeat_ = value;
+}
+
+// optional int32 autoRepeatDelay = 5;
+inline bool SchemaItemPushButton::has_autorepeatdelay() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemPushButton::set_has_autorepeatdelay() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemPushButton::clear_has_autorepeatdelay() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemPushButton::clear_autorepeatdelay() {
+  autorepeatdelay_ = 0;
+  clear_has_autorepeatdelay();
+}
+inline ::google::protobuf::int32 SchemaItemPushButton::autorepeatdelay() const {
+  return autorepeatdelay_;
+}
+inline void SchemaItemPushButton::set_autorepeatdelay(::google::protobuf::int32 value) {
+  set_has_autorepeatdelay();
+  autorepeatdelay_ = value;
+}
+
+// optional int32 autoRepeatInterval = 6;
+inline bool SchemaItemPushButton::has_autorepeatinterval() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemPushButton::set_has_autorepeatinterval() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemPushButton::clear_has_autorepeatinterval() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemPushButton::clear_autorepeatinterval() {
+  autorepeatinterval_ = 0;
+  clear_has_autorepeatinterval();
+}
+inline ::google::protobuf::int32 SchemaItemPushButton::autorepeatinterval() const {
+  return autorepeatinterval_;
+}
+inline void SchemaItemPushButton::set_autorepeatinterval(::google::protobuf::int32 value) {
+  set_has_autorepeatinterval();
+  autorepeatinterval_ = value;
+}
+
+// optional string styleSheet = 20;
+inline bool SchemaItemPushButton::has_stylesheet() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemPushButton::set_has_stylesheet() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemPushButton::clear_has_stylesheet() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemPushButton::clear_stylesheet() {
+  if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
+    stylesheet_->clear();
+  }
+  clear_has_stylesheet();
+}
+inline const ::std::string& SchemaItemPushButton::stylesheet() const {
+  return *stylesheet_;
+}
+inline void SchemaItemPushButton::set_stylesheet(const ::std::string& value) {
+  set_has_stylesheet();
+  if (stylesheet_ == &::google::protobuf::internal::kEmptyString) {
+    stylesheet_ = new ::std::string;
+  }
+  stylesheet_->assign(value);
+}
+inline void SchemaItemPushButton::set_stylesheet(const char* value) {
+  set_has_stylesheet();
+  if (stylesheet_ == &::google::protobuf::internal::kEmptyString) {
+    stylesheet_ = new ::std::string;
+  }
+  stylesheet_->assign(value);
+}
+inline void SchemaItemPushButton::set_stylesheet(const char* value, size_t size) {
+  set_has_stylesheet();
+  if (stylesheet_ == &::google::protobuf::internal::kEmptyString) {
+    stylesheet_ = new ::std::string;
+  }
+  stylesheet_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_stylesheet() {
+  set_has_stylesheet();
+  if (stylesheet_ == &::google::protobuf::internal::kEmptyString) {
+    stylesheet_ = new ::std::string;
+  }
+  return stylesheet_;
+}
+inline ::std::string* SchemaItemPushButton::release_stylesheet() {
+  clear_has_stylesheet();
+  if (stylesheet_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = stylesheet_;
+    stylesheet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_stylesheet(::std::string* stylesheet) {
+  if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
+    delete stylesheet_;
+  }
+  if (stylesheet) {
+    set_has_stylesheet();
+    stylesheet_ = stylesheet;
+  } else {
+    clear_has_stylesheet();
+    stylesheet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptAfterCreate = 21;
+inline bool SchemaItemPushButton::has_scriptaftercreate() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemPushButton::set_has_scriptaftercreate() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemPushButton::clear_has_scriptaftercreate() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemPushButton::clear_scriptaftercreate() {
+  if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
+    scriptaftercreate_->clear();
+  }
+  clear_has_scriptaftercreate();
+}
+inline const ::std::string& SchemaItemPushButton::scriptaftercreate() const {
+  return *scriptaftercreate_;
+}
+inline void SchemaItemPushButton::set_scriptaftercreate(const ::std::string& value) {
+  set_has_scriptaftercreate();
+  if (scriptaftercreate_ == &::google::protobuf::internal::kEmptyString) {
+    scriptaftercreate_ = new ::std::string;
+  }
+  scriptaftercreate_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptaftercreate(const char* value) {
+  set_has_scriptaftercreate();
+  if (scriptaftercreate_ == &::google::protobuf::internal::kEmptyString) {
+    scriptaftercreate_ = new ::std::string;
+  }
+  scriptaftercreate_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptaftercreate(const char* value, size_t size) {
+  set_has_scriptaftercreate();
+  if (scriptaftercreate_ == &::google::protobuf::internal::kEmptyString) {
+    scriptaftercreate_ = new ::std::string;
+  }
+  scriptaftercreate_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_scriptaftercreate() {
+  set_has_scriptaftercreate();
+  if (scriptaftercreate_ == &::google::protobuf::internal::kEmptyString) {
+    scriptaftercreate_ = new ::std::string;
+  }
+  return scriptaftercreate_;
+}
+inline ::std::string* SchemaItemPushButton::release_scriptaftercreate() {
+  clear_has_scriptaftercreate();
+  if (scriptaftercreate_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scriptaftercreate_;
+    scriptaftercreate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_scriptaftercreate(::std::string* scriptaftercreate) {
+  if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptaftercreate_;
+  }
+  if (scriptaftercreate) {
+    set_has_scriptaftercreate();
+    scriptaftercreate_ = scriptaftercreate;
+  } else {
+    clear_has_scriptaftercreate();
+    scriptaftercreate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptClicked = 22;
+inline bool SchemaItemPushButton::has_scriptclicked() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SchemaItemPushButton::set_has_scriptclicked() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SchemaItemPushButton::clear_has_scriptclicked() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItemPushButton::clear_scriptclicked() {
+  if (scriptclicked_ != &::google::protobuf::internal::kEmptyString) {
+    scriptclicked_->clear();
+  }
+  clear_has_scriptclicked();
+}
+inline const ::std::string& SchemaItemPushButton::scriptclicked() const {
+  return *scriptclicked_;
+}
+inline void SchemaItemPushButton::set_scriptclicked(const ::std::string& value) {
+  set_has_scriptclicked();
+  if (scriptclicked_ == &::google::protobuf::internal::kEmptyString) {
+    scriptclicked_ = new ::std::string;
+  }
+  scriptclicked_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptclicked(const char* value) {
+  set_has_scriptclicked();
+  if (scriptclicked_ == &::google::protobuf::internal::kEmptyString) {
+    scriptclicked_ = new ::std::string;
+  }
+  scriptclicked_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptclicked(const char* value, size_t size) {
+  set_has_scriptclicked();
+  if (scriptclicked_ == &::google::protobuf::internal::kEmptyString) {
+    scriptclicked_ = new ::std::string;
+  }
+  scriptclicked_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_scriptclicked() {
+  set_has_scriptclicked();
+  if (scriptclicked_ == &::google::protobuf::internal::kEmptyString) {
+    scriptclicked_ = new ::std::string;
+  }
+  return scriptclicked_;
+}
+inline ::std::string* SchemaItemPushButton::release_scriptclicked() {
+  clear_has_scriptclicked();
+  if (scriptclicked_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scriptclicked_;
+    scriptclicked_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_scriptclicked(::std::string* scriptclicked) {
+  if (scriptclicked_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptclicked_;
+  }
+  if (scriptclicked) {
+    set_has_scriptclicked();
+    scriptclicked_ = scriptclicked;
+  } else {
+    clear_has_scriptclicked();
+    scriptclicked_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptPressed = 23;
+inline bool SchemaItemPushButton::has_scriptpressed() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItemPushButton::set_has_scriptpressed() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItemPushButton::clear_has_scriptpressed() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SchemaItemPushButton::clear_scriptpressed() {
+  if (scriptpressed_ != &::google::protobuf::internal::kEmptyString) {
+    scriptpressed_->clear();
+  }
+  clear_has_scriptpressed();
+}
+inline const ::std::string& SchemaItemPushButton::scriptpressed() const {
+  return *scriptpressed_;
+}
+inline void SchemaItemPushButton::set_scriptpressed(const ::std::string& value) {
+  set_has_scriptpressed();
+  if (scriptpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptpressed_ = new ::std::string;
+  }
+  scriptpressed_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptpressed(const char* value) {
+  set_has_scriptpressed();
+  if (scriptpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptpressed_ = new ::std::string;
+  }
+  scriptpressed_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptpressed(const char* value, size_t size) {
+  set_has_scriptpressed();
+  if (scriptpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptpressed_ = new ::std::string;
+  }
+  scriptpressed_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_scriptpressed() {
+  set_has_scriptpressed();
+  if (scriptpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptpressed_ = new ::std::string;
+  }
+  return scriptpressed_;
+}
+inline ::std::string* SchemaItemPushButton::release_scriptpressed() {
+  clear_has_scriptpressed();
+  if (scriptpressed_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scriptpressed_;
+    scriptpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_scriptpressed(::std::string* scriptpressed) {
+  if (scriptpressed_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptpressed_;
+  }
+  if (scriptpressed) {
+    set_has_scriptpressed();
+    scriptpressed_ = scriptpressed;
+  } else {
+    clear_has_scriptpressed();
+    scriptpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptReleased = 24;
+inline bool SchemaItemPushButton::has_scriptreleased() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItemPushButton::set_has_scriptreleased() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItemPushButton::clear_has_scriptreleased() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void SchemaItemPushButton::clear_scriptreleased() {
+  if (scriptreleased_ != &::google::protobuf::internal::kEmptyString) {
+    scriptreleased_->clear();
+  }
+  clear_has_scriptreleased();
+}
+inline const ::std::string& SchemaItemPushButton::scriptreleased() const {
+  return *scriptreleased_;
+}
+inline void SchemaItemPushButton::set_scriptreleased(const ::std::string& value) {
+  set_has_scriptreleased();
+  if (scriptreleased_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreleased_ = new ::std::string;
+  }
+  scriptreleased_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptreleased(const char* value) {
+  set_has_scriptreleased();
+  if (scriptreleased_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreleased_ = new ::std::string;
+  }
+  scriptreleased_->assign(value);
+}
+inline void SchemaItemPushButton::set_scriptreleased(const char* value, size_t size) {
+  set_has_scriptreleased();
+  if (scriptreleased_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreleased_ = new ::std::string;
+  }
+  scriptreleased_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_scriptreleased() {
+  set_has_scriptreleased();
+  if (scriptreleased_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreleased_ = new ::std::string;
+  }
+  return scriptreleased_;
+}
+inline ::std::string* SchemaItemPushButton::release_scriptreleased() {
+  clear_has_scriptreleased();
+  if (scriptreleased_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scriptreleased_;
+    scriptreleased_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_scriptreleased(::std::string* scriptreleased) {
+  if (scriptreleased_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptreleased_;
+  }
+  if (scriptreleased) {
+    set_has_scriptreleased();
+    scriptreleased_ = scriptreleased;
+  } else {
+    clear_has_scriptreleased();
+    scriptreleased_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptToggled = 25;
+inline bool SchemaItemPushButton::has_scripttoggled() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void SchemaItemPushButton::set_has_scripttoggled() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void SchemaItemPushButton::clear_has_scripttoggled() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void SchemaItemPushButton::clear_scripttoggled() {
+  if (scripttoggled_ != &::google::protobuf::internal::kEmptyString) {
+    scripttoggled_->clear();
+  }
+  clear_has_scripttoggled();
+}
+inline const ::std::string& SchemaItemPushButton::scripttoggled() const {
+  return *scripttoggled_;
+}
+inline void SchemaItemPushButton::set_scripttoggled(const ::std::string& value) {
+  set_has_scripttoggled();
+  if (scripttoggled_ == &::google::protobuf::internal::kEmptyString) {
+    scripttoggled_ = new ::std::string;
+  }
+  scripttoggled_->assign(value);
+}
+inline void SchemaItemPushButton::set_scripttoggled(const char* value) {
+  set_has_scripttoggled();
+  if (scripttoggled_ == &::google::protobuf::internal::kEmptyString) {
+    scripttoggled_ = new ::std::string;
+  }
+  scripttoggled_->assign(value);
+}
+inline void SchemaItemPushButton::set_scripttoggled(const char* value, size_t size) {
+  set_has_scripttoggled();
+  if (scripttoggled_ == &::google::protobuf::internal::kEmptyString) {
+    scripttoggled_ = new ::std::string;
+  }
+  scripttoggled_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemPushButton::mutable_scripttoggled() {
+  set_has_scripttoggled();
+  if (scripttoggled_ == &::google::protobuf::internal::kEmptyString) {
+    scripttoggled_ = new ::std::string;
+  }
+  return scripttoggled_;
+}
+inline ::std::string* SchemaItemPushButton::release_scripttoggled() {
+  clear_has_scripttoggled();
+  if (scripttoggled_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scripttoggled_;
+    scripttoggled_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemPushButton::set_allocated_scripttoggled(::std::string* scripttoggled) {
+  if (scripttoggled_ != &::google::protobuf::internal::kEmptyString) {
+    delete scripttoggled_;
+  }
+  if (scripttoggled) {
+    set_has_scripttoggled();
+    scripttoggled_ = scripttoggled;
+  } else {
+    clear_has_scripttoggled();
+    scripttoggled_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
 
 // -------------------------------------------------------------------
 

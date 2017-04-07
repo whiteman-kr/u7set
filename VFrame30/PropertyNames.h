@@ -52,6 +52,19 @@ namespace VFrame30
 		static const QString height;
 		static const QString locked;
 
+		static const QString checkable;
+		static const QString checkedDefault;
+		static const QString autoRepeat;
+		static const QString autoRepeatDelay;
+		static const QString autoRepeatInterval;
+		static const QString styleSheet;
+
+		static const QString afterCreate;
+		static const QString clicked;
+		static const QString pressed;
+		static const QString released;
+		static const QString toggled;
+
 		static const QString alignHorz;
 		static const QString alignVert;
 
@@ -67,6 +80,13 @@ namespace VFrame30
 		static const QString textCategory;
 		static const QString monitorCategory;
 		static const QString parametersCategory;
+		static const QString controlCategory;
+		static const QString scriptsCategory;
+
+		static const QString defaultPushButtonStyleSheet;
+
+		static const QString defaultPushButtonAfterCreateScript;
+		static const QString defaultPushButtonEventScript;
 	};
 
 }
