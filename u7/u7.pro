@@ -187,7 +187,8 @@ SOURCES +=\
     DialogTuningFiltersEditor.cpp \
     ../lib/TuningModel.cpp \
     DialogTuningClients.cpp \
-    LogicModule.cpp
+    LogicModule.cpp \
+    Builder/ComparatorStorage.cpp
 
 
 HEADERS  += \
@@ -312,7 +313,8 @@ HEADERS  += \
     DialogTuningFiltersEditor.h \
     ../lib/TuningModel.h \
     DialogTuningClients.h \
-    LogicModule.h
+    LogicModule.h \
+    Builder/ComparatorStorage.h
 
 FORMS    += \
     CreateProjectDialog.ui \

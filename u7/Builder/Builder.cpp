@@ -167,7 +167,6 @@ namespace Builder
 				break;
 			}
 
-
             //
             // Check child restirictions
             //
