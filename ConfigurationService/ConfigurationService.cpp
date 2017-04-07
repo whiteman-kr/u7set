@@ -57,8 +57,9 @@ void ConfigurationServiceWorker::initCmdLineParser()
 	CommandLineParser& cp = cmdLineParser();
 
 	cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("b", "Path to RPCT project build.", "PathToBuild");
+	cp.addSingleValueOption("b", "Path to RPCT project's build  for auto load.", "PathToBuild");
 	cp.addSingleValueOption("ip", "Client request IP.", "IPv4");
+	cp.addSingleValueOption("w", "Work directory of Configuration Service.", "Path");
 }
 
 
@@ -73,12 +74,17 @@ void ConfigurationServiceWorker::processCmdLineSettings()
 
 	if (cp.optionIsSet("b") == true)
 	{
-		setStrSetting("BuildPath", cp.optionValue("b"));
+		setStrSetting("AutoloadBuildPath", cp.optionValue("b"));
 	}
 
 	if (cp.optionIsSet("ip") == true)
 	{
 		setStrSetting("ClientRequestIP", cp.optionValue("ip"));
+	}
+
+	if (cp.optionIsSet("w") == true)
+	{
+		setStrSetting("WorkDirectory", cp.optionValue("w"));
 	}
 }
 
@@ -86,15 +92,17 @@ void ConfigurationServiceWorker::processCmdLineSettings()
 void ConfigurationServiceWorker::loadSettings()
 {
 	m_equipmentID = getStrSetting("EquipmentID");
-	m_buildPath = getStrSetting("BuildPath");
+	m_autoloadBuildPath = getStrSetting("AutoloadBuildPath");
 	m_clientIPStr = getStrSetting("ClientRequestIP");
+	m_workDirectory = getStrSetting("WorkDirectory");
 
 	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	DEBUG_LOG_MSG(QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("ClientRequestIP").arg(m_clientIPStr).arg(m_clientIP.addressPortStr()));
+	DEBUG_LOG_MSG(QString("Load settings:"));
+	DEBUG_LOG_MSG(QString("EquipmentID = %1").arg(m_equipmentID));
+	DEBUG_LOG_MSG(QString("AutoloadBuildPath = %1").arg(m_autoloadBuildPath));
+	DEBUG_LOG_MSG(QString("ClientRequestIP = %1 (%2)").arg(m_clientIPStr).arg(m_clientIP.addressPortStr()));
+	DEBUG_LOG_MSG(QString("WorkDirectory = %1").arg(m_workDirectory));
 }
 
 
@@ -116,7 +124,7 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread()
 {
-	CfgServerWithLog* cfgServer = new CfgServerWithLog(m_buildPath);
+	CfgServerWithLog* cfgServer = new CfgServerWithLog(m_autoloadBuildPath);
 
 	ListenerWithLog* listener = new ListenerWithLog(m_clientIP, cfgServer);
 

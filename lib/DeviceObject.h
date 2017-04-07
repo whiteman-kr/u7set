@@ -252,7 +252,7 @@ namespace Hardware
 		void deleteChild(DeviceObject* child);
 		void deleteAllChildren();
 
-		bool checkChild(DeviceObject* child, QString* errorMessage);
+        bool checkChild(DeviceObject *child, QString* errorMessage);
 
 		void sortByPlace(Qt::SortOrder order);
 		void sortByEquipmentId(Qt::SortOrder order);

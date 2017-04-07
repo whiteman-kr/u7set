@@ -125,7 +125,7 @@ private:
 #define DEBUG_LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
 #define DEBUG_LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
 
-#define INIT_LOGGER(appPath)		logger.init(10, 10);
+#define INIT_LOGGER()				logger.init(10, 10);
 #define SHUTDOWN_LOGGER				logger.shutdown();
 
 

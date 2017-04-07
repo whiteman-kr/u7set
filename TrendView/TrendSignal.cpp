@@ -86,4 +86,5 @@ namespace TrendLib
 	{
 		m_unit = value;
 	}
+
 }

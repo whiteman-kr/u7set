@@ -60,6 +60,20 @@ inline bool fileExists(const string& fileName)
 	}
 }
 
+inline double fileAge(const string& fileName)
+{
+	struct stat info;
+
+	if(stat(fileName.c_str(), &info) != 0)
+	{
+		return -1;
+	}
+	else
+	{
+		return difftime(time(0), info.st_mtime);
+	}
+}
+
 bool report(int error)
 {
 	if (error != 0)
@@ -92,11 +106,11 @@ void print_time(const char* const prefix, const git_time& intime)
 
 #ifdef __linux__
 	struct tm *intm;
-    intm = gmtime(&t);
+	intm = gmtime(&t);
 	strftime(out, sizeof(out), "%F %T", intm);
 #elif _WIN32
 	struct tm intm;
-    gmtime_s(&intm, &t);
+	gmtime_s(&intm, &t);
 	strftime(out, sizeof(out), "%F %T", &intm);
 #else
 #error Unknown operating system
@@ -194,6 +208,14 @@ int main(int argc, char *argv[])
 	}
 
 	string versionFileName = projectDir + "/version.h";
+
+	double versionFileAge = fileAge(versionFileName);
+
+	if (versionFileAge != -1 && versionFileAge < 5)
+	{
+		cout << versionFileName.c_str() << " checked less than 5 seconds ago, skipping\n";
+		return 0;
+	}
 
 	versionInfoText << "// Automatically generated file\n"
 				<< "// Parameters:\n"
@@ -323,16 +345,18 @@ int main(int argc, char *argv[])
 		previousVersionInfoText += line + "\n";
 	}
 	versionFile.close();
+
+	versionFile.open(versionFileName, std::ofstream::out | std::ofstream::trunc);
+	versionFile << versionInfoText.rdbuf();
+	versionFile.close();
+
 	if (previousVersionInfoText == versionInfoText.str())
 	{
 		cout << versionFileName.c_str() << " is same\n";
 	}
 	else
 	{
-		versionFile.open(versionFileName, std::ofstream::out | std::ofstream::trunc);
-		versionFile << versionInfoText.rdbuf();
-		versionFile.close();
-		cout << versionFileName.c_str() << " was generated\n";
+		cout << versionFileName.c_str() << " has been changed\n";
 	}
 
 	return 0;
