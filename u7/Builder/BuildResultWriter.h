@@ -32,7 +32,7 @@ namespace Builder
 
 		QFile m_file;
 
-		void getFileInfo();
+		bool getFileInfo(IssueLogger* log);
 
 		static QString removeHeadTailSeparator(const QString& str);
 

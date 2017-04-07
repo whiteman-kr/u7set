@@ -112,16 +112,14 @@ namespace Builder
 
 		m_file.setFileName(fullPathFileName);
 
-		bool result = false;
+		QIODevice::OpenMode mode =  QIODevice::ReadWrite;
 
-		if (textMode)
+		if (textMode == true)
 		{
-			result = m_file.open(QIODevice::ReadWrite | QIODevice::Text);
+			mode |= QIODevice::Text;
 		}
-		else
-		{
-			result = m_file.open(QIODevice::ReadWrite);
-		}
+
+		bool result = m_file.open(mode);
 
 		if (result == false)
 		{
@@ -138,20 +136,44 @@ namespace Builder
 	}
 
 
-	void BuildFile::getFileInfo()
+	bool BuildFile::getFileInfo(IssueLogger* log)
 	{
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_info.size = 0;
+		m_info.md5.clear();
+
+		if (m_file.isOpen() == true)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool result = m_file.open(QIODevice::ReadOnly);		// open in binary mode
+
+		if (result == false)
+		{
+			log->errCMN0017(m_file.fileName());
+			return false;
+		}
+
 		QFileInfo fi(m_file);
 
 		m_info.size = fi.size();
 
 		QCryptographicHash md5Generator(QCryptographicHash::Md5);
 
-		m_file.seek(0);
-
 		md5Generator.addData(&m_file);
 
 		m_info.md5 = QString(md5Generator.result().toHex());
 
+		m_file.close();
+
+		return true;
 	}
 
 
@@ -162,23 +184,19 @@ namespace Builder
 			return false;
 		}
 
-		bool result = true;
-
 		qint64 written = m_file.write(data);
 
 		if (written == -1)
 		{
 			log->errCMN0013(m_info.pathFileName);
-			result = false;
+			return false;
 		}
 
 		m_file.flush();
 
-		getFileInfo();
-
 		m_file.close();
 
-		return result;
+		return getFileInfo(log);
 	}
 
 
@@ -195,11 +213,9 @@ namespace Builder
 
 		textStream.flush();
 
-		getFileInfo();
-
 		m_file.close();
 
-		return true;
+		return getFileInfo(log);
 	}
 
 
@@ -219,11 +235,9 @@ namespace Builder
 
 		textStream.flush();
 
-		getFileInfo();
-
 		m_file.close();
 
-		return true;
+		return getFileInfo(log);
 	}
 
 

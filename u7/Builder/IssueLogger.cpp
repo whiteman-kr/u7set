@@ -231,6 +231,26 @@ namespace Builder
 				  tr("The build was cancelled."));
 	}
 
+	/// IssueCode: CMN0017
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't open file '%1'.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't open file. Check path accessibility.
+	///
+	void IssueLogger::errCMN0017(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  17,
+				  tr("Can't open file '%1'.")
+				  .arg(fileName));
+	}
+
 
 	// INT			Internal issues							1000-1999
 	//

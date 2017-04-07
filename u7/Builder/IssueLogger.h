@@ -76,6 +76,7 @@ namespace Builder
 		void errCMN0014(QString fileName);						// File '%1' already exists.
 		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// '%1' and '%2' files have the same ID = '%3'.
 		void errCMN0016();										// The build was cancelled.
+		void errCMN0017(QString fileName);						// Can't open file '%1'.
 
 
 		// INT			Internal issues							1000-1999
