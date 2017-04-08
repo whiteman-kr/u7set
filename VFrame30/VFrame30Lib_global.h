@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtCore/qglobal.h>
-
 #ifdef VFRAME30LIB_LIBRARY
     #define VFRAME30LIBSHARED_EXPORT Q_DECL_EXPORT
 #else

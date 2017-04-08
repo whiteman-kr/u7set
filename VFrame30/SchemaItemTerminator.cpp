@@ -1,4 +1,5 @@
 #include "SchemaItemTerminator.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {

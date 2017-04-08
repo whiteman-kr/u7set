@@ -1,5 +1,5 @@
-#include "Stable.h"
 #include "HorzVertLinks.h"
+#include "SchemaPoint.h"
 
 namespace VFrame30
 {

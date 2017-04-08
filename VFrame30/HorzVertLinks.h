@@ -1,10 +1,11 @@
 #pragma once
 
 #include <limits>
-#include "SchemaItem.h"
 
 namespace VFrame30
 {
+	struct SchemaPoint;
+
 	// Используется для сохранения декомпозированных Link'ов, в BuildFblConnectionMap
 	//
 	class VFRAME30LIBSHARED_EXPORT CHorzVertLinks

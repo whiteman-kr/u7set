@@ -1,20 +1,23 @@
 #pragma once
 
 #include "SchemaLayer.h"
-#include "Afb.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TypesAndEnums.h"
 
+namespace Afb
+{
+	class AfbElement;
+}
+
 namespace VFrame30
 {
+	class SchemaLayer;
 	class CDrawParam;
 	class VideoFrameWidgetAgent;
-	class SchemaLayer;
 	class SchemaItem;
 	class LogicSchema;
 	class UfbSchema;
 	class SchemaDetails;
-
 	
 	class VFRAME30LIBSHARED_EXPORT Schema :
 		public PropertyObject,

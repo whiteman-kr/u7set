@@ -20,6 +20,7 @@
 #include "../../VFrame30/SchemaItemUfb.h"
 #include "../../VFrame30/SchemaItemTerminator.h"
 #include "../../VFrame30/HorzVertLinks.h"
+#include "../../VFrame30/PropertyNames.h"
 
 
 namespace Builder

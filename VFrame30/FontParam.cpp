@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "FontParam.h"
 #include "../lib/ProtoSerialization.h"
 

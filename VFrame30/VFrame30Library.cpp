@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "VFrame30Library.h"
 #include "Schema.h"
 #include "DiagSchema.h"

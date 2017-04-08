@@ -1,4 +1,5 @@
 #include "SchemaItemControl.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {

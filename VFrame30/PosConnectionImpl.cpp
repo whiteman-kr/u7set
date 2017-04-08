@@ -1,5 +1,5 @@
-#include "Stable.h"
 #include "PosConnectionImpl.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {

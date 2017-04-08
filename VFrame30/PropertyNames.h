@@ -1,6 +1,5 @@
 #ifndef PROPERTYNAMES_H
 #define PROPERTYNAMES_H
-#include <QString>
 
 namespace VFrame30
 {

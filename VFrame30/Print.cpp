@@ -1,6 +1,5 @@
-#include "Stable.h"
-#include <QtWidgets/qwidget.h>
 #include "Print.h"
+#include "Schema.h"
 
 
 namespace VFrame30

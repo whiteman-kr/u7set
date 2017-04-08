@@ -25,6 +25,7 @@
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/Session.h"
+#include "../VFrame30/DrawParam.h"
 #include "LogicModule.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"

@@ -1,7 +1,7 @@
-#include "Stable.h"
 #include "SchemaView.h"
+#include "Schema.h"
 #include "SchemaItemControl.h"
-#include <QPdfWriter>
+#include "DrawParam.h"
 
 namespace VFrame30
 {

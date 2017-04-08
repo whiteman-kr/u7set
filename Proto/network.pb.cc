@@ -4,6 +4,11 @@
 #define INTERNAL_SUPPRESS_PROTOBUF_FIELD_DEPRECATION
 #include "network.pb.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#endif
+
 #include <algorithm>
 
 #include <google/protobuf/stubs/common.h>
@@ -1897,7 +1902,7 @@ bool GetSignalListNextReply::MergePartialFromCodedStream(
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
-        break;
+		break;
       }
     }
   }
@@ -12207,3 +12212,7 @@ void TuningSignalsApplyReply::Swap(TuningSignalsApplyReply* other) {
 }  // namespace Network
 
 // @@protoc_insertion_point(global_scope)
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

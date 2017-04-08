@@ -1,5 +1,6 @@
-#include "Stable.h"
 #include "SchemaItemPath.h"
+#include "PropertyNames.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {

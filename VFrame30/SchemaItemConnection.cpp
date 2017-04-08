@@ -1,5 +1,7 @@
 #include "SchemaItemConnection.h"
 #include "SchemaItemSignal.h"
+#include "PropertyNames.h"
+#include "DrawParam.h"
 #include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
 

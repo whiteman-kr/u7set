@@ -1,6 +1,7 @@
 #include "MonitorSchemaView.h"
 #include "SchemaManager.h"
 #include "../lib/AppSignalManager.h"
+#include "../VFrame30/DrawParam.h"
 
 MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *parent)
 	: SchemaView(parent),

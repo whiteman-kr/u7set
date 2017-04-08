@@ -4,6 +4,10 @@
 #ifndef PROTOBUF_serialization_2eproto__INCLUDED
 #define PROTOBUF_serialization_2eproto__INCLUDED
 
+#ifdef __MSVCRT__
+#pragma warning(disable: 4244, 4267, 4996)
+#endif
+
 #include <string>
 
 #include <google/protobuf/stubs/common.h>

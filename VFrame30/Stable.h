@@ -21,10 +21,12 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <cmath>
 #include <cassert>
 #include <memory>
+#include <utility>
 #include <string>
 #include <algorithm>
 #include <functional>
@@ -43,6 +45,7 @@
 	#pragma warning(disable : 6011)
 	#pragma warning(disable : 4512)
 #endif
+#include <qglobal.h>
 #include <QApplication>
 #include <QMainWindow>
 #include <QScrollArea>
@@ -50,9 +53,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QtConcurrent/QtConcurrent>
-#include <QtGui/QPainter>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWheelEvent>
+#include <QPainter>
+#include <QMouseEvent>
+#include <QWheelEvent>
 #include <QStaticText>
 #include <QScreen>
 #include <QUuid>
@@ -63,6 +66,9 @@
 #include <QQmlEngine>
 #include <QAction>
 #include <QPdfWriter>
+
+#include <QXmlStreamReader>
+#include <QDomElement>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -76,7 +82,10 @@
 #include "VFrame30Lib_global.h"
 #include "../lib/Factory.h"
 #include "../lib/TypesAndEnums.h"
+#include "../lib/Types.h"
 #include "../lib/CUtils.h"
+#include "../lib/ProtoSerialization.h"
+#include "../lib/DebugInstCounter.h"
 
 #ifdef _MSC_VER
 	#pragma warning(disable : 4482)

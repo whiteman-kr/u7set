@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Schema.h"
 #include "Session.h"
 
 namespace VFrame30
 {
+	class Schema;
+	class CDrawParam;
+
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{
 		Q_OBJECT
