@@ -85,7 +85,6 @@ namespace VFrame30
 
 		static const QString defaultPushButtonStyleSheet;
 
-		static const QString defaultPushButtonAfterCreateScript;
 		static const QString defaultPushButtonEventScript;
 	};
 

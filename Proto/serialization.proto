@@ -688,6 +688,7 @@ message SchemaItemTerminator
 //
 message SchemaItemControl
 {
+    optional string styleSheet = 1;
 }
 
 //
@@ -704,8 +705,6 @@ message SchemaItemPushButton
     optional bool autoRepeat = 4;
 	optional int32 autoRepeatDelay = 5;
 	optional int32 autoRepeatInterval = 6;
-
-    optional string styleSheet = 20;
 
     optional string scriptAfterCreate = 21;
 	optional string scriptClicked = 22;

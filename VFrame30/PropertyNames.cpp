@@ -102,12 +102,6 @@ QPushButton:default {
 }
 )_");
 
-	const QString PropertyNames::defaultPushButtonAfterCreateScript(
-R"_(function(schemaItem, schemaView, pushButtonWidget)
-{
-}
-)_");
-
 	const QString PropertyNames::defaultPushButtonEventScript(
 R"_(function(schemaItem, schemaView, pushButtonWidget, checked)
 {

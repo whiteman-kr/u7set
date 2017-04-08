@@ -993,6 +993,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       sizeof(SchemaItemTerminator));
   SchemaItemControl_descriptor_ = file->message_type(42);
   static const int SchemaItemControl_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemControl, stylesheet_),
   };
   SchemaItemControl_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1006,14 +1007,13 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemControl));
   SchemaItemPushButton_descriptor_ = file->message_type(43);
-  static const int SchemaItemPushButton_offsets_[12] = {
+  static const int SchemaItemPushButton_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, checkable_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, checkeddefault_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, autorepeat_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, autorepeatdelay_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, autorepeatinterval_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, stylesheet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, scriptaftercreate_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, scriptclicked_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, scriptpressed_),
@@ -1831,12 +1831,12 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\031\n\014analogFormat"
     "\030\005 \001(\005:\003102\"P\n\rSchemaItemUfb\022\023\n\013ufbSchem"
     "aId\030\001 \001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVers"
-    "ion\030\003 \001(\005:\002-1\"\026\n\024SchemaItemTerminator\"\023\n"
-    "\021SchemaItemControl\"\244\002\n\024SchemaItemPushBut"
-    "ton\022\014\n\004text\030\001 \001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016"
-    "checkedDefault\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010"
-    "\022\027\n\017autoRepeatDelay\030\005 \001(\005\022\032\n\022autoRepeatI"
-    "nterval\030\006 \001(\005\022\022\n\nstyleSheet\030\024 \001(\t\022\031\n\021scr"
+    "ion\030\003 \001(\005:\002-1\"\026\n\024SchemaItemTerminator\"\'\n"
+    "\021SchemaItemControl\022\022\n\nstyleSheet\030\001 \001(\t\"\220"
+    "\002\n\024SchemaItemPushButton\022\014\n\004text\030\001 \001(\t\022\021\n"
+    "\tcheckable\030\002 \001(\010\022\026\n\016checkedDefault\030\003 \001(\010"
+    "\022\022\n\nautoRepeat\030\004 \001(\010\022\027\n\017autoRepeatDelay\030"
+    "\005 \001(\005\022\032\n\022autoRepeatInterval\030\006 \001(\005\022\031\n\021scr"
     "iptAfterCreate\030\025 \001(\t\022\025\n\rscriptClicked\030\026 "
     "\001(\t\022\025\n\rscriptPressed\030\027 \001(\t\022\026\n\016scriptRele"
     "ased\030\030 \001(\t\022\025\n\rscriptToggled\030\031 \001(\t\"\201\006\n\014De"
@@ -17340,6 +17340,7 @@ void SchemaItemTerminator::Swap(SchemaItemTerminator* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int SchemaItemControl::kStyleSheetFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemControl::SchemaItemControl()
@@ -17358,6 +17359,7 @@ SchemaItemControl::SchemaItemControl(const SchemaItemControl& from)
 
 void SchemaItemControl::SharedCtor() {
   _cached_size_ = 0;
+  stylesheet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -17366,6 +17368,9 @@ SchemaItemControl::~SchemaItemControl() {
 }
 
 void SchemaItemControl::SharedDtor() {
+  if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
+    delete stylesheet_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -17392,6 +17397,13 @@ SchemaItemControl* SchemaItemControl::New() const {
 }
 
 void SchemaItemControl::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_stylesheet()) {
+      if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
+        stylesheet_->clear();
+      }
+    }
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -17401,12 +17413,34 @@ bool SchemaItemControl::MergePartialFromCodedStream(
 #define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string styleSheet = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_stylesheet()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->stylesheet().data(), this->stylesheet().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
     }
-    DO_(::google::protobuf::internal::WireFormat::SkipField(
-          input, tag, mutable_unknown_fields()));
   }
   return true;
 #undef DO_
@@ -17414,6 +17448,15 @@ bool SchemaItemControl::MergePartialFromCodedStream(
 
 void SchemaItemControl::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string styleSheet = 1;
+  if (has_stylesheet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->stylesheet().data(), this->stylesheet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->stylesheet(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -17422,6 +17465,16 @@ void SchemaItemControl::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* SchemaItemControl::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // optional string styleSheet = 1;
+  if (has_stylesheet()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->stylesheet().data(), this->stylesheet().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->stylesheet(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -17432,6 +17485,15 @@ void SchemaItemControl::SerializeWithCachedSizes(
 int SchemaItemControl::ByteSize() const {
   int total_size = 0;
 
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string styleSheet = 1;
+    if (has_stylesheet()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->stylesheet());
+    }
+
+  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -17457,6 +17519,11 @@ void SchemaItemControl::MergeFrom(const ::google::protobuf::Message& from) {
 
 void SchemaItemControl::MergeFrom(const SchemaItemControl& from) {
   GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_stylesheet()) {
+      set_stylesheet(from.stylesheet());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -17479,6 +17546,8 @@ bool SchemaItemControl::IsInitialized() const {
 
 void SchemaItemControl::Swap(SchemaItemControl* other) {
   if (other != this) {
+    std::swap(stylesheet_, other->stylesheet_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -17502,7 +17571,6 @@ const int SchemaItemPushButton::kCheckedDefaultFieldNumber;
 const int SchemaItemPushButton::kAutoRepeatFieldNumber;
 const int SchemaItemPushButton::kAutoRepeatDelayFieldNumber;
 const int SchemaItemPushButton::kAutoRepeatIntervalFieldNumber;
-const int SchemaItemPushButton::kStyleSheetFieldNumber;
 const int SchemaItemPushButton::kScriptAfterCreateFieldNumber;
 const int SchemaItemPushButton::kScriptClickedFieldNumber;
 const int SchemaItemPushButton::kScriptPressedFieldNumber;
@@ -17532,7 +17600,6 @@ void SchemaItemPushButton::SharedCtor() {
   autorepeat_ = false;
   autorepeatdelay_ = 0;
   autorepeatinterval_ = 0;
-  stylesheet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   scriptaftercreate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   scriptclicked_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   scriptpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
@@ -17548,9 +17615,6 @@ SchemaItemPushButton::~SchemaItemPushButton() {
 void SchemaItemPushButton::SharedDtor() {
   if (text_ != &::google::protobuf::internal::kEmptyString) {
     delete text_;
-  }
-  if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
-    delete stylesheet_;
   }
   if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
     delete scriptaftercreate_;
@@ -17604,23 +17668,18 @@ void SchemaItemPushButton::Clear() {
     autorepeat_ = false;
     autorepeatdelay_ = 0;
     autorepeatinterval_ = 0;
-    if (has_stylesheet()) {
-      if (stylesheet_ != &::google::protobuf::internal::kEmptyString) {
-        stylesheet_->clear();
-      }
-    }
     if (has_scriptaftercreate()) {
       if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
         scriptaftercreate_->clear();
       }
     }
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_scriptclicked()) {
       if (scriptclicked_ != &::google::protobuf::internal::kEmptyString) {
         scriptclicked_->clear();
       }
     }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (has_scriptpressed()) {
       if (scriptpressed_ != &::google::protobuf::internal::kEmptyString) {
         scriptpressed_->clear();
@@ -17736,23 +17795,6 @@ bool SchemaItemPushButton::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &autorepeatinterval_)));
           set_has_autorepeatinterval();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(162)) goto parse_styleSheet;
-        break;
-      }
-
-      // optional string styleSheet = 20;
-      case 20: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_styleSheet:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_stylesheet()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->stylesheet().data(), this->stylesheet().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
@@ -17897,15 +17939,6 @@ void SchemaItemPushButton::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->autorepeatinterval(), output);
   }
 
-  // optional string styleSheet = 20;
-  if (has_stylesheet()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->stylesheet().data(), this->stylesheet().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      20, this->stylesheet(), output);
-  }
-
   // optional string scriptAfterCreate = 21;
   if (has_scriptaftercreate()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
@@ -17992,16 +18025,6 @@ void SchemaItemPushButton::SerializeWithCachedSizes(
   // optional int32 autoRepeatInterval = 6;
   if (has_autorepeatinterval()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->autorepeatinterval(), target);
-  }
-
-  // optional string styleSheet = 20;
-  if (has_stylesheet()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->stylesheet().data(), this->stylesheet().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        20, this->stylesheet(), target);
   }
 
   // optional string scriptAfterCreate = 21;
@@ -18101,13 +18124,6 @@ int SchemaItemPushButton::ByteSize() const {
           this->autorepeatinterval());
     }
 
-    // optional string styleSheet = 20;
-    if (has_stylesheet()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->stylesheet());
-    }
-
     // optional string scriptAfterCreate = 21;
     if (has_scriptaftercreate()) {
       total_size += 2 +
@@ -18115,8 +18131,6 @@ int SchemaItemPushButton::ByteSize() const {
           this->scriptaftercreate());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional string scriptClicked = 22;
     if (has_scriptclicked()) {
       total_size += 2 +
@@ -18124,6 +18138,8 @@ int SchemaItemPushButton::ByteSize() const {
           this->scriptclicked());
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional string scriptPressed = 23;
     if (has_scriptpressed()) {
       total_size += 2 +
@@ -18190,17 +18206,14 @@ void SchemaItemPushButton::MergeFrom(const SchemaItemPushButton& from) {
     if (from.has_autorepeatinterval()) {
       set_autorepeatinterval(from.autorepeatinterval());
     }
-    if (from.has_stylesheet()) {
-      set_stylesheet(from.stylesheet());
-    }
     if (from.has_scriptaftercreate()) {
       set_scriptaftercreate(from.scriptaftercreate());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_scriptclicked()) {
       set_scriptclicked(from.scriptclicked());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_scriptpressed()) {
       set_scriptpressed(from.scriptpressed());
     }
@@ -18239,7 +18252,6 @@ void SchemaItemPushButton::Swap(SchemaItemPushButton* other) {
     std::swap(autorepeat_, other->autorepeat_);
     std::swap(autorepeatdelay_, other->autorepeatdelay_);
     std::swap(autorepeatinterval_, other->autorepeatinterval_);
-    std::swap(stylesheet_, other->stylesheet_);
     std::swap(scriptaftercreate_, other->scriptaftercreate_);
     std::swap(scriptclicked_, other->scriptclicked_);
     std::swap(scriptpressed_, other->scriptpressed_);

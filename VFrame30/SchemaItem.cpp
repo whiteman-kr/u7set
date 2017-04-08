@@ -39,7 +39,6 @@ namespace VFrame30
 	
 	// Serialization
 	//
-
 	bool SchemaItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();

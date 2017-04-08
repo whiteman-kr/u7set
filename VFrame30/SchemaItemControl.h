@@ -2,8 +2,6 @@
 
 #include "PosRectImpl.h"
 
-class QWidget;
-
 namespace VFrame30
 {
 	class VFRAME30LIBSHARED_EXPORT SchemaItemControl : public PosRectImpl
@@ -23,20 +21,18 @@ namespace VFrame30
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, double zoom) const;
-		virtual void updateWidgetProperties(QWidget* widget, double zoom) const;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) const;
+		virtual void updateWidgetProperties(QWidget* widget) const;
+
+		void updateWdgetPosAndSize(QWidget* widget, double zoom);
 
 		// Properties and Data
 		//
 	public:
-//		double weight() const;
-//		void setWeight(double weight);
-
-//		QColor lineColor() const;
-//		void setLineColor(QColor color);
+		const QString& styleSheet() const;
+		virtual void setStyleSheet(QString value);
 
 	private:
-//		double m_weight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
-//		QColor m_lineColor;
+		QString m_styleSheet;
 	};
 }

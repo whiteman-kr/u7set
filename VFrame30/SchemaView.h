@@ -16,7 +16,7 @@ namespace VFrame30
 	protected:
 		void init();
 
-		void updateControlWidgets();
+		void updateControlWidgets(bool editMode);
 		
 		// Painting
 		//

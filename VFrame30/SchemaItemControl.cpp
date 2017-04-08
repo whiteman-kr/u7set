@@ -1,20 +1,17 @@
-#include "Stable.h"
 #include "SchemaItemControl.h"
-#include "MacrosExpander.h"
 
 namespace VFrame30
 {
 	SchemaItemControl::SchemaItemControl(void) :
 		SchemaItemControl(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This contructor can be call in case of loading this object
 		//
 	}
 
 	SchemaItemControl::SchemaItemControl(SchemaUnit unit)
 	{
-//		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemControl::weight, SchemaItemControl::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
 
 		m_static = false;
 		setItemUnit(unit);
@@ -39,9 +36,8 @@ namespace VFrame30
 		// --
 		//
 		Proto::SchemaItemControl* controlMessage = message->mutable_schemaitem()->mutable_control();
-		Q_UNUSED(controlMessage);
 
-		//rectMessage->set_linecolor(m_lineColor.rgba());
+		controlMessage->set_stylesheet(m_styleSheet.toStdString());
 
 		return true;
 	}
@@ -71,14 +67,13 @@ namespace VFrame30
 		}
 
 		const Proto::SchemaItemControl& controlMessage = message.schemaitem().control();
-		Q_UNUSED(controlMessage);
 
-		//m_weight = rectMessage.weight();
+		setStyleSheet(QString::fromStdString(controlMessage.stylesheet()));		// Text setters can have some string optimization for default values
 
 		return true;
 	}
 
-	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, double /*zoom*/) const
+	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/) const
 	{
 		// Implement in derived class
 		//
@@ -86,7 +81,7 @@ namespace VFrame30
 		return nullptr;
 	}
 
-	void SchemaItemControl::updateWidgetProperties(QWidget* widget, double /*zoom*/) const
+	void SchemaItemControl::updateWidgetProperties(QWidget* widget) const
 	{
 		if (widget == nullptr)
 		{
@@ -99,24 +94,54 @@ namespace VFrame30
 			widget->setDisabled(isCommented());
 		}
 
+		if (widget->styleSheet() != styleSheet())
+		{
+			widget->setStyleSheet(styleSheet());
+		}
+
 		return;
 	}
 
+	void SchemaItemControl::updateWdgetPosAndSize(QWidget* widget, double zoom)
+	{
+		if (widget == nullptr)
+		{
+			assert(widget);
+			return;
+		}
+
+		widget->setUpdatesEnabled(false);
+
+		QPoint pos = {static_cast<int>(leftDocPt() * zoom / 100.0),
+					  static_cast<int>(topDocPt() * zoom / 100.0)};
+
+		if (widget->pos() != pos)
+		{
+			 widget->move(pos);
+		}
+
+		QSize size = {static_cast<int>(widthDocPt() * zoom / 100.0),
+					  static_cast<int>(heightDocPt() * zoom / 100.0)};
+
+		if (widget->size() != size)
+		{
+			widget->resize(size);
+		}
+
+		widget->setUpdatesEnabled(true);
+	}
 
 	// Properties and Data
 	//
+	const QString& SchemaItemControl::styleSheet() const
+	{
+		return m_styleSheet;
+	}
 
-	//	// LineColor property
-//	//
-//	QColor SchemaItemControl::lineColor() const
-//	{
-//		return m_lineColor;
-//	}
-
-//	void SchemaItemControl::setLineColor(QColor color)
-//	{
-//		m_lineColor = color;
-//	}
+	void SchemaItemControl::setStyleSheet(QString value)
+	{
+		m_styleSheet = value;
+	}
 
 }
 

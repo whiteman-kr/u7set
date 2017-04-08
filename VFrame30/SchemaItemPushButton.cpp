@@ -1,20 +1,20 @@
-#include "Stable.h"
 #include "SchemaItemPushButton.h"
-#include "MacrosExpander.h"
-#include <QPushButton>
+#include "SchemaView.h"
 
 namespace VFrame30
 {
 	SchemaItemPushButton::SchemaItemPushButton(void) :
 		SchemaItemPushButton(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This contructor can be call in case of loading this object
 		//
 	}
 
-	SchemaItemPushButton::SchemaItemPushButton(SchemaUnit unit)
+	SchemaItemPushButton::SchemaItemPushButton(SchemaUnit unit) :
+		SchemaItemControl(unit)
 	{
+		setStyleSheet(PropertyNames::defaultPushButtonStyleSheet);
+
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::controlCategory, true, SchemaItemPushButton::text, SchemaItemPushButton::setText);
 
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkable, PropertyNames::controlCategory, true, SchemaItemPushButton::isCheckable, SchemaItemPushButton::setCheckable);
@@ -24,18 +24,13 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatDelay, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatDelay, SchemaItemPushButton::setAutoRepeatDelay);
 		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatInterval, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatInterval, SchemaItemPushButton::setAutoRepeatInterval);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemPushButton::styleSheet, SchemaItemPushButton::setStyleSheet);
-
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptAfterCreate, SchemaItemPushButton::setScriptAfterCreate);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptClicked, SchemaItemPushButton::setScriptClicked);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptPressed, SchemaItemPushButton::setScriptPressed);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptReleased, SchemaItemPushButton::setScriptReleased);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptToggled, SchemaItemPushButton::setScriptToggled);
 
-		// --
-		//
-		m_static = false;
-		setItemUnit(unit);
+		return;
 	}
 
 	SchemaItemPushButton::~SchemaItemPushButton(void)
@@ -69,8 +64,6 @@ namespace VFrame30
 		pushButtonMessage->set_autorepeat(m_autoRepeat);
 		pushButtonMessage->set_autorepeatdelay(m_autoRepeatDelay);
 		pushButtonMessage->set_autorepeatinterval(m_autoRepeatInterval);
-
-		pushButtonMessage->set_stylesheet(m_styleSheet.toStdString());
 
 		pushButtonMessage->set_scriptaftercreate(m_scriptAfterCreate.toStdString());
 		pushButtonMessage->set_scriptclicked(m_scriptClicked.toStdString());
@@ -109,8 +102,6 @@ namespace VFrame30
 		m_autoRepeatDelay = pushButtonMessagemessage.autorepeatdelay();
 		m_autoRepeatInterval = pushButtonMessagemessage.autorepeatinterval();
 
-		setStyleSheet(QString::fromStdString(pushButtonMessagemessage.stylesheet()));				// Text setters can have some string optimization for default values
-
 		setScriptAfterCreate(QString::fromStdString(pushButtonMessagemessage.scriptaftercreate()));	// Text setters can have some string optimization for default values
 		setScriptClicked(QString::fromStdString(pushButtonMessagemessage.scriptclicked()));			// Text setters can have some string optimization for default values
 		setScriptPressed(QString::fromStdString(pushButtonMessagemessage.scriptpressed()));			// Text setters can have some string optimization for default values
@@ -120,7 +111,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, double zoom) const
+	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode) const
 	{
 		if (parent == nullptr)
 		{
@@ -131,23 +122,50 @@ namespace VFrame30
 		QPushButton* control = new QPushButton(m_text, parent);
 		control->setObjectName(guid().toString());
 
-		updateWidgetProperties(control, zoom);
+		updateWidgetProperties(control);
 
 		control->setChecked(checkedDefault());
 
-		connect(control, &QPushButton::clicked, this, &SchemaItemPushButton::clicked);
-		connect(control, &QPushButton::pressed, this, &SchemaItemPushButton::pressed);
-		connect(control, &QPushButton::released, this, &SchemaItemPushButton::released);
-		connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
+		if (editMode == false)
+		{
+			afterCreate(control);
+
+			// Connect slots only if it has any sense
+			//
+			if (scriptClicked().isEmpty() == false &&
+				scriptClicked() != PropertyNames::defaultPushButtonEventScript)
+			{
+				connect(control, &QPushButton::clicked, this, &SchemaItemPushButton::clicked);
+			}
+
+			if (scriptPressed().isEmpty() == false &&
+				scriptPressed() != PropertyNames::defaultPushButtonEventScript)
+			{
+				connect(control, &QPushButton::pressed, this, &SchemaItemPushButton::pressed);
+			}
+
+			if (scriptReleased().isEmpty() == false &&
+				scriptReleased() != PropertyNames::defaultPushButtonEventScript)
+			{
+				connect(control, &QPushButton::released, this, &SchemaItemPushButton::released);
+			}
+
+			if (scriptToggled().isEmpty() == false &&
+				scriptToggled() != PropertyNames::defaultPushButtonEventScript)
+			{
+				connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
+			}
+		}
 
 		control->setVisible(true);
+		control->update();
 
 		return control;
 	}
 
 	// Update widget properties
 	//
-	void SchemaItemPushButton::updateWidgetProperties(QWidget* widget, double zoom) const
+	void SchemaItemPushButton::updateWidgetProperties(QWidget* widget) const
 	{
 		QPushButton* control = dynamic_cast<QPushButton*>(widget);
 
@@ -159,7 +177,7 @@ namespace VFrame30
 
 		control->setUpdatesEnabled(false);
 
-		SchemaItemControl::updateWidgetProperties(widget, zoom);
+		SchemaItemControl::updateWidgetProperties(widget);
 
 		control->setText(text());
 		control->setCheckable(isCheckable());
@@ -167,66 +185,196 @@ namespace VFrame30
 		control->setAutoRepeatDelay(autoRepeatDelay());
 		control->setAutoRepeatInterval(autoRepeatInterval());
 
-		QPoint pos = {static_cast<int>(leftDocPt() * zoom / 100.0),
-					  static_cast<int>(topDocPt() * zoom / 100.0)};
-
-		if (control->pos() != pos)
-		{
-			 control->move(pos);
-		}
-
-		QSize size = {static_cast<int>(widthDocPt() * zoom / 100.0),
-					  static_cast<int>(heightDocPt() * zoom / 100.0)};
-
-		if (control->size() != size)
-		{
-			control->resize(size);
-		}
-
-		if (control->styleSheet() != styleSheet())
-		{
-			control->setStyleSheet(styleSheet());
-		}
-
 		control->setUpdatesEnabled(true);
+
+		return;
+	}
+
+
+	void SchemaItemPushButton::afterCreate(QPushButton* control) const
+	{
+		if (control == nullptr)
+		{
+			assert(control);
+			return;
+		}
+
+		if (m_scriptAfterCreate == PropertyNames::defaultPushButtonEventScript)	// Suppose Default script does nothing, just return
+		{
+			return;
+		}
+
+		// Shit happens
+		//
+		const_cast<SchemaItemPushButton*>(this)->runEventScript(m_scriptAfterCreate, control);
 
 		return;
 	}
 
 	void SchemaItemPushButton::clicked(bool /*checked*/)
 	{
-		qDebug() << Q_FUNC_INFO;
+		if (m_scriptClicked.isEmpty() == true ||
+			m_scriptClicked == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
 
-		// Suppose Default script does nothing, just return
-		//
+		QPushButton* senderWidget = dynamic_cast<QPushButton*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
+
+		runEventScript(m_scriptClicked, senderWidget);
+
+		return;
 	}
 
 	void SchemaItemPushButton::pressed()
 	{
-		qDebug() << Q_FUNC_INFO;
+		if (m_scriptPressed.isEmpty() == true ||
+			m_scriptPressed == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
+
+		QPushButton* senderWidget = dynamic_cast<QPushButton*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
+
+		runEventScript(m_scriptPressed, senderWidget);
+
+		return;
 	}
 
 	void SchemaItemPushButton::released()
 	{
-		qDebug() << Q_FUNC_INFO;
+		if (m_scriptReleased.isEmpty() == true ||
+			m_scriptReleased == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
+
+		QPushButton* senderWidget = dynamic_cast<QPushButton*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
+
+		runEventScript(m_scriptReleased, senderWidget);
+
+		return;
 	}
 
 	void SchemaItemPushButton::toggled(bool /*checked*/)
 	{
-		qDebug() << Q_FUNC_INFO;
+		if (m_scriptToggled.isEmpty() == true ||
+			m_scriptToggled == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
+
+		QPushButton* senderWidget = dynamic_cast<QPushButton*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
+
+		runEventScript(m_scriptToggled, senderWidget);
+
+		return;
 	}
 
-//	bool SchemaItemPushButton::searchText(const QString& text) const
-//	{
-//		return SchemaItem::searchText(text) ||
-//				m_text.contains(text, Qt::CaseInsensitive);
-//	}
+	void SchemaItemPushButton::runEventScript(const QString& script, QPushButton* buttonWidget)
+	{
+		if (script.trimmed().isEmpty() == true)
+		{
+			return;
+		}
+
+		// Suppose that parent of sender is SchemaView
+		//
+		QWidget* parentWidget = buttonWidget->parentWidget();
+		if (parentWidget == nullptr)
+		{
+			assert(parentWidget);
+			return;
+		}
+
+		SchemaView* schemaView = dynamic_cast<SchemaView*>(parentWidget);
+		if (schemaView == nullptr)
+		{
+			assert(schemaView);
+			return;
+		}
+
+		QJSValue jsEval = m_jsEngine.evaluate(script);
+		if (jsEval.isError() == true)
+		{
+			QMessageBox::critical(schemaView, qAppName(), "Script evaluating error: " + jsEval.toString());
+			return;
+		}
+
+		// Create JS params
+		//
+		QJSValue jsSchemaItem = m_jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
+		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
+
+		QJSValue jsWidget = m_jsEngine.newQObject(buttonWidget);
+		QQmlEngine::setObjectOwnership(buttonWidget, QQmlEngine::CppOwnership);
+
+		//QJSValue jsChecked = {buttonWidget->isChecked()};
+
+		// Set argument list
+		//
+		QJSValueList args;
+
+		args << jsSchemaItem;
+		args << jsSchemaView;
+		args << jsWidget;
+		args << buttonWidget->isChecked();
+
+		// Run script
+		//
+		QJSValue jsResult = jsEval.call(args);
+		if (jsResult.isError() == true)
+		{
+			qDebug() << "Uncaught exception at line"
+					 << jsResult.property("lineNumber").toInt()
+					 << ":" << jsResult.toString();
+
+			QMessageBox::critical(schemaView, qAppName(), "Script uncaught exception: " + jsEval.toString());
+			return;
+		}
+
+		qDebug() << "runScript result:" <<  jsResult.toString();
+
+		m_jsEngine.collectGarbage();
+	}
+
+	bool SchemaItemPushButton::searchText(const QString& text) const
+	{
+		return	SchemaItem::searchText(text) ||
+				m_text.contains(text, Qt::CaseInsensitive) ||
+				m_scriptAfterCreate.contains(text, Qt::CaseInsensitive) ||
+				m_scriptClicked.contains(text, Qt::CaseInsensitive) ||
+				m_scriptPressed.contains(text, Qt::CaseInsensitive) ||
+				m_scriptReleased.contains(text, Qt::CaseInsensitive) ||
+				m_scriptToggled.contains(text, Qt::CaseInsensitive);
+	}
 
 	// Properties and Data
 	//
 
-	// Text property
-	//
 	const QString& SchemaItemPushButton::text() const
 	{
 		return m_text;
@@ -286,20 +434,15 @@ namespace VFrame30
 		m_autoRepeatInterval = value;
 	}
 
-	const QString& SchemaItemPushButton::styleSheet() const
-	{
-		return m_styleSheet;
-	}
-
 	void SchemaItemPushButton::setStyleSheet(QString value)
 	{
 		if (value == PropertyNames::defaultPushButtonStyleSheet)
 		{
-			m_styleSheet = PropertyNames::defaultPushButtonStyleSheet;
+			SchemaItemControl::setStyleSheet(PropertyNames::defaultPushButtonStyleSheet);
 		}
 		else
 		{
-			m_styleSheet = value;
+			SchemaItemControl::setStyleSheet(value);
 		}
 	}
 

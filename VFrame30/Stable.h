@@ -43,11 +43,12 @@
 	#pragma warning(disable : 6011)
 	#pragma warning(disable : 4512)
 #endif
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QScrollArea>
-#include <QtWidgets/QScrollBar>
-#include <QtWidgets/QMessageBox>
+#include <QApplication>
+#include <QMainWindow>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QtConcurrent/QtConcurrent>
 #include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>

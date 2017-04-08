@@ -21,19 +21,22 @@ namespace VFrame30
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, double zoom) const override;
-		virtual void updateWidgetProperties(QWidget* widget, double zoom) const override;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) const override;
+		virtual void updateWidgetProperties(QWidget* widget) const override;
 
 	protected slots:
+		void afterCreate(QPushButton* control) const;
 		void clicked(bool checked);
 		void pressed();
 		void released();
 		void toggled(bool checked);
 
+		void runEventScript(const QString& script, QPushButton* buttonWidget);
+
 		// Text search
 		//
 	public:
-		//virtual bool searchText(const QString& text) const override;
+		virtual bool searchText(const QString& text) const override;
 
 		// Properties and Data
 		//
@@ -56,8 +59,7 @@ namespace VFrame30
 		int autoRepeatInterval() const;
 		void setAutoRepeatInterval(int value);
 
-		const QString& styleSheet() const;
-		void setStyleSheet(QString value);
+		virtual void setStyleSheet(QString value) override;
 
 		QString scriptAfterCreate() const;
 		void setScriptAfterCreate(const QString& value);
@@ -75,6 +77,8 @@ namespace VFrame30
 		void setScriptToggled(const QString& value);
 
 	private:
+		QJSEngine m_jsEngine;
+
 		QString m_text = {"Button"};
 
 		bool m_checkable = false;
@@ -84,9 +88,7 @@ namespace VFrame30
 		int m_autoRepeatDelay = 300;
 		int m_autoRepeatInterval = 100;
 
-		QString m_styleSheet = PropertyNames::defaultPushButtonStyleSheet;
-
-		QString m_scriptAfterCreate = PropertyNames::defaultPushButtonAfterCreateScript;
+		QString m_scriptAfterCreate = PropertyNames::defaultPushButtonEventScript;
 		QString m_scriptClicked = PropertyNames::defaultPushButtonEventScript;
 		QString m_scriptPressed = PropertyNames::defaultPushButtonEventScript;
 		QString m_scriptReleased = PropertyNames::defaultPushButtonEventScript;

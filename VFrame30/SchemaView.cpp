@@ -23,7 +23,7 @@ namespace VFrame30
 		setMouseTracking(true);
 	}
 
-	void SchemaView::updateControlWidgets()
+	void SchemaView::updateControlWidgets(bool editMode)
 	{
 		// Find all SchemaItemControl
 		//
@@ -41,7 +41,6 @@ namespace VFrame30
 				}
 
 				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
-
 				if (controlItem == nullptr)
 				{
 					assert(controlItem);
@@ -66,8 +65,6 @@ namespace VFrame30
 				continue;
 			}
 
-
-
 			QString objectName = childWidget->objectName();
 			QUuid widgetUuid = QUuid(objectName);
 
@@ -87,7 +84,13 @@ namespace VFrame30
 			}
 
 			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
-			controlItem->updateWidgetProperties(childWidget, zoom());
+
+			controlItem->updateWdgetPosAndSize(childWidget, zoom());
+
+			if (editMode == true)
+			{
+				controlItem->updateWidgetProperties(childWidget);
+			}
 
 			controlItems.erase(widgetUuid);
 		}
@@ -98,7 +101,7 @@ namespace VFrame30
 		{
 			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
 
-			QWidget* childWidget = controlItem->createWidget(this, zoom());
+			QWidget* childWidget = controlItem->createWidget(this, editMode);
 			assert(childWidget);
 		}
 	}
@@ -208,7 +211,7 @@ namespace VFrame30
 			return;
 		}
 
-		updateControlWidgets();
+		updateControlWidgets(drawParam.isEditMode());
 
 		// --
 		//
@@ -362,7 +365,6 @@ namespace VFrame30
 
 	// Properties
 	//
-
 	double SchemaView::zoom() const
 	{
 		return m_zoom;
@@ -411,6 +413,4 @@ namespace VFrame30
 	{
 		return m_session;
 	}
-
-
 }
