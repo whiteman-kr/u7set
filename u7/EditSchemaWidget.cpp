@@ -23,7 +23,9 @@
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/Session.h"
+#include "../VFrame30/DrawParam.h"
 #include "LogicModule.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
@@ -2166,6 +2168,26 @@ void EditSchemaWidget::createActions()
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
+	m_addPushButtonAction = new QAction(tr("PushButton"), this);
+	m_addPushButtonAction->setEnabled(true);
+	m_addPushButtonAction->setIcon(QIcon(":/Images/Images/SchemaItemPushButton.svg"));
+	connect(m_addPushButtonAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemPushButton>(schema()->unit());
+				addItem(item);
+			});
+
+	m_addTextEditAction = new QAction(tr("TextEdit"), this);
+	m_addTextEditAction->setEnabled(true);
+	m_addTextEditAction->setIcon(QIcon(":/Images/Images/TextEdit.svg"));
+//	connect(m_addTextEditAction, &QAction::triggered,
+//			[this](bool)
+//			{
+//				auto item = std::make_shared<VFrame30::SchemaItemPushButton>(schema()->unit());
+//				addItem(item);
+//			});
+
 	//
 	// Edit
 	//
@@ -2507,6 +2529,11 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addAfbAction);
+		}
+
+		if (isMonitorSchema() == true)
+		{
+			m_addMenu->addAction(m_addTextEditAction);
 		}
 
 	m_editMenu = new QMenu(this);
@@ -4367,6 +4394,11 @@ bool EditSchemaWidget::isLogicSchema() const
 bool EditSchemaWidget::isUfbSchema() const
 {
 	return schema()->isUfbSchema();
+}
+
+bool EditSchemaWidget::isMonitorSchema() const
+{
+	return schema()->isMonitorSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()

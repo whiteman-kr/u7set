@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
+#include "FontParam.h"
 
 class QPen;
 class QBrush;

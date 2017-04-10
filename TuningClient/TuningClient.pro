@@ -118,10 +118,10 @@ SOURCES +=\
     TuningClientFilterEditor.cpp \
     DialogPassword.cpp \
     Main.cpp \
-    ../lib/TuningFilter.cpp \
-    ../lib/TuningFilterEditor.cpp \
-    ../lib/TuningModel.cpp \
-    ../lib/TuningObject.cpp
+    ../lib/Tuning/TuningFilter.cpp \
+    ../lib/Tuning/TuningFilterEditor.cpp \
+    ../lib/Tuning/TuningModel.cpp \
+    ../lib/Tuning/TuningObject.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -156,10 +156,10 @@ HEADERS  += MainWindow.h \
     TuningClientFilterEditor.h \
     DialogPassword.h \
     Main.h \
-    ../lib/TuningFilter.h \
-    ../lib/TuningFilterEditor.h \
-    ../lib/TuningModel.h \
-    ../lib/TuningObject.h
+    ../lib/Tuning/TuningFilter.h \
+    ../lib/Tuning/TuningFilterEditor.h \
+    ../lib/Tuning/TuningModel.h \
+    ../lib/Tuning/TuningObject.h
 
 FORMS    += \
     DialogSettings.ui \

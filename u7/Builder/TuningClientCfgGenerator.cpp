@@ -48,6 +48,7 @@ bool TuningClientCfgGenerator::generateConfiguration()
 	result &= writeObjectFilters();
 	result &= writeSchemasDetails();
 	result &= writeTuningSignals();
+	result &= writeSchemas();
 
 	return result;
 }
@@ -136,6 +137,16 @@ bool TuningClientCfgGenerator::writeSettings()
             tunsSettings2.readFromDevice(tunsObject2, m_log);
         }
 
+		//
+		// AutoApply
+		//
+		bool autoApply = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "AutoApply", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+
 		// Get ip addresses and ports, write them to configurations
 		//
 		{
@@ -154,10 +165,51 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("port1", QString::number(tunsSettings1.clientRequestIP.port()));
 			xmlWriter.writeAttribute("ip2", tunsSettings2.clientRequestIP.address().toString());
 			xmlWriter.writeAttribute("port2", QString::number(tunsSettings2.clientRequestIP.port()));
+			xmlWriter.writeAttribute("autoApply", (autoApply ? "true" : "false"));
+
+
 		}	// TuningService
 
-		return true;
 	}
+
+
+	{
+		xmlWriter.writeStartElement("Schemas");
+		std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
+		{
+			xmlWriter.writeEndElement();
+		});
+
+		// --
+		//
+		bool ok = true;
+
+		//
+		// Schemas
+		//
+		QString schemas = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Schemas", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		QStringList schemasList;
+		if (schemas.isEmpty() == false)
+		{
+			schemas.replace('\n', ';');
+			schemasList = schemas.split(';');
+		}
+
+
+		for (auto s : schemasList)
+		{
+			xmlWriter.writeStartElement("Schema");
+			xmlWriter.writeCharacters(s);
+			xmlWriter.writeEndElement();
+		}
+	}
+
+	return true;
 }
 
 bool TuningClientCfgGenerator::writeObjectFilters()
@@ -193,6 +245,54 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 
 }
 
+bool TuningClientCfgGenerator::writeSchemas()
+{
+	bool ok = true;
+	//
+	// Schemas
+	//
+	QString schemas = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Schemas", &ok);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	QStringList schemasList;
+	if (schemas.isEmpty() == false)
+	{
+		schemas.replace('\n', ';');
+		schemasList = schemas.split(';');
+	}
+
+
+	for (const QString& s : schemasList)
+	{
+		bool found = false;
+
+		// Check if schema with specified ID exists
+		//
+		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+		{
+			if (schemaFile.id == s)
+			{
+				m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
+
+				found = true;
+				break;
+			}
+		}
+
+		if (found == false)
+		{
+			m_log->errEQP6106(s, m_software->equipmentId());
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 bool TuningClientCfgGenerator::writeSchemasDetails()
 {
 	QByteArray data;
@@ -217,7 +317,7 @@ bool TuningClientCfgGenerator::writeSchemasDetails()
 
 	xmlWriter.writeEndDocument();
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.xml", CFG_FILE_ID_SCHEMAS_DETAILS, "", data);
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.xml", CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, "", data);
 
 	if (buildFile == nullptr)
 	{

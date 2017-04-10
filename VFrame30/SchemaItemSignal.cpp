@@ -1,7 +1,7 @@
-#include "Stable.h"
 #include "SchemaItemSignal.h"
 #include "LogicSchema.h"
-
+#include "PropertyNames.h"
+#include "DrawParam.h"
 #include "../lib/AppSignalManager.h"
 
 namespace VFrame30

@@ -1,6 +1,4 @@
-#include "Stable.h"
 #include "DrawParam.h"
-#include <qstring.h>
 
 namespace VFrame30
 {

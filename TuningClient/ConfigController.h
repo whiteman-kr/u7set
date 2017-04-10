@@ -35,9 +35,9 @@ struct ConfigSettings
 	ConfigConnection tuns1;				// Tuning Service connection params
 	ConfigConnection tuns2;				// Tuning Service connection params
 
-	bool updateFilters = false;
-	bool updateSchemas = false;
-	bool updateSignals = false;
+	bool autoApply = true;
+
+	QStringList schemasID;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
@@ -55,17 +55,15 @@ public:
 	// Methods
 	//
 public:
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
-	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
-	bool getFileById(const QString& id, QByteArray* fileData);
+	bool requestObjectFilters();
+	bool requestSchemasDetails();
+	bool requestTuningSignals();
+	bool requestSchema(const QString& schemaID);
 
 	Tcp::ConnectionState getConnectionState() const;
+	QString getStateToolTip();
 
-	bool getObjectFilters();
-	bool getSchemasDetails();
-	bool getTuningSignals();
 	// signals
 	//
 signals:
@@ -80,8 +78,14 @@ private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
+	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
+
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
+	bool xmlReadSchemasNode(const QDomNode& schemasNode, ConfigSettings* outSetting);
+
+	void addEventMessage(const QString& text);
 
 	// Public properties
 public:
@@ -93,13 +97,14 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	mutable QMutex m_mutex;
-
 	QWidget* m_parent = nullptr;
 
-	QString m_md5Filters;
-	QString m_md5Schemas;
-	QString m_md5Signals;
+	std::map<QString, QString> m_filesMD5Map;
+
+	HostAddressPort m_address1;
+	HostAddressPort m_address2;
+
+	QStringList m_eventLog;
 };
 
 

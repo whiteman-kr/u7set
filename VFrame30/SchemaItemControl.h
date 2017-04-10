@@ -1,0 +1,42 @@
+#pragma once
+
+#include "PosRectImpl.h"
+
+namespace VFrame30
+{
+	class VFRAME30LIBSHARED_EXPORT SchemaItemControl : public PosRectImpl
+	{
+		Q_OBJECT
+
+	public:
+		SchemaItemControl(void);
+		explicit SchemaItemControl(SchemaUnit unit);
+		virtual ~SchemaItemControl(void);
+
+		// Serialization
+		//
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+		// Methods
+	public:
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) const;
+		virtual void updateWidgetProperties(QWidget* widget) const;
+
+		void updateWdgetPosAndSize(QWidget* widget, double zoom);
+
+		// Properties and Data
+		//
+	public:
+		const QString& styleSheet() const;
+		virtual void setStyleSheet(QString value);
+
+		const QString& toolTip() const;
+		virtual void setToolTip(QString value);
+
+	private:
+		QString m_styleSheet;
+		QString m_toolTip;
+	};
+}

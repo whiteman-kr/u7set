@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "Afb.h"
 
 namespace VFrame30
 {

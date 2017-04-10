@@ -975,7 +975,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3020,
-				  tr("Property '%1.%2'is not found.").arg(objectID).arg(propertyName));
+				  tr("Property '%1.%2' is not found.").arg(objectID).arg(propertyName));
 	}
 
     /// IssueCode: CFG3021
@@ -4160,7 +4160,28 @@ namespace Builder
 				  );
 	}
 
-
+	/// IssueCode: EQP6106
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema %1 specified in Tuning Client %2 does not exist.
+	///
+	/// Parameters:
+	///		%1 Schema ID
+	///		%2 TuningClient Equipment ID
+	///
+	/// Description:
+	///		Schema that is specified in Schemas property of the Tuning Client does not exist.
+	///
+	void IssueLogger::errEQP6106(QString schemaId, QString tuningClientEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6106,
+				  tr("Schema %1 specified in Tuning Client %2 does not exist.")
+				  .arg(schemaId)
+				  .arg(tuningClientEquipmentId)
+				  );
+	}
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

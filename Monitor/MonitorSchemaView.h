@@ -4,7 +4,11 @@
 #include "../VFrame30/SchemaView.h"
 
 class SchemaManager;
-//struct SchemaHistoryItem;
+
+namespace VFrame30
+{
+	class SchemaItem;
+}
 
 class MonitorSchemaView : public VFrame30::SchemaView
 {

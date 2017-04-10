@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "SchemaLayer.h"
 #include "FblItemRect.h"
 

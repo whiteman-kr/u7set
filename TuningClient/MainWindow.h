@@ -40,7 +40,7 @@ private:
     int m_mainWindowTimerId = -1;
 
 signals:
-	void signalsUpdated();
+	void configurationUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
@@ -72,8 +72,8 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarConnectionState = nullptr;
+	QLabel* m_statusBarConfigConnection = nullptr;
+	QLabel* m_statusBarTuningConnection = nullptr;
 
 
 

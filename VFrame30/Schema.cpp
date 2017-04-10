@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "Schema.h"
 #include "LogicSchema.h"
 #include "UfbSchema.h"
@@ -10,6 +9,8 @@
 #include "SchemaItemLink.h"
 #include "SchemaItemConnection.h"
 #include "HorzVertLinks.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
 #include "../lib/ProtoSerialization.h"
 
 

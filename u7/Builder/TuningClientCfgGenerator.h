@@ -22,6 +22,7 @@ private:
 
 	bool writeSettings();
 	bool writeObjectFilters();
+	bool writeSchemas();
 	bool writeSchemasDetails();
 	bool writeTuningSignals();
 
@@ -59,9 +60,10 @@ TYPE TuningClientCfgGenerator::getObjectProperty(QString strId, QString property
 	bool exists = object->propertyExists(property);
 	if (exists == false)
 	{
+		m_log->errCFG3020(strId, property);
+
 		QString errorStr = tr("Object %1 does not have property %2").arg(strId).arg(property);
 
-		m_log->writeError(errorStr);
 		writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
 		*ok = false;

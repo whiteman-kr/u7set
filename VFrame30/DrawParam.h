@@ -1,17 +1,15 @@
 #pragma once
 
-#ifdef Q_OS_WIN
-#ifndef NOMINMAX		// To resolve min/max conflic "windows.h macros vs std::min/max"
-	#define NOMINMAX
-#endif
-	#include <windows.h>
-#endif
-
-#include <memory>
+//#ifdef Q_OS_WIN
+//#ifndef NOMINMAX		// To resolve min/max conflic "windows.h macros vs std::min/max"
+//	#define NOMINMAX
+//#endif
+//	#include <windows.h>
+//#endif
 
 #include "FontParam.h"
 #include "Session.h"
-#include "../lib/TypesAndEnums.h"
+
 
 class QPainter;
 class QPaintDevice;
@@ -21,11 +19,7 @@ class AppSignalManager;
 namespace VFrame30
 {
 	class Schema;
-}
 
-
-namespace VFrame30
-{
 	class VFRAME30LIBSHARED_EXPORT CDrawParam
 	{
 	public:

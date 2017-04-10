@@ -1,7 +1,7 @@
-#include "Stable.h"
 #include "FblItemRect.h"
 #include "SchemaLayer.h"
-
+#include "PropertyNames.h"
+#include "DrawParam.h"
 #include "SchemaItemSignal.h"
 #include "SchemaItemConst.h"
 #include "SchemaItemAfb.h"

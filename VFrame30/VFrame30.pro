@@ -38,36 +38,6 @@ CONFIG(release, debug|release) {
 }
 
 
-# Force prebuild version control info
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64){
-		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/VFrame30.pro)
-	}
-	else{
-		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/VFrame30.pro)
-	}
-}
-unix {
-	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-	system(cd $$PWD/../GetGitProjectVersion; \
-		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make;)
-	system(cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/VFrame30.pro)
-}
-
-
 OTHER_FILES += \
     ../Proto/proto_compile.bat \
     ../Proto/serialization.proto \
@@ -94,7 +64,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
 	MonitorSchema.h \
-    version.h \
     ../lib/DbStruct.h \
     Afb.h \
     ../lib/DebugInstCounter.h \
@@ -129,7 +98,9 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemUfb.h \
     SchemaItemTerminator.h \
     MacrosExpander.h \
-    Session.h
+    Session.h \
+    SchemaItemControl.h \
+    SchemaItemPushButton.h
 
 SOURCES += \
     Settings.cpp \
@@ -180,7 +151,9 @@ SOURCES += \
     SchemaItemUfb.cpp \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
-    Session.cpp
+    Session.cpp \
+    SchemaItemControl.cpp \
+    SchemaItemPushButton.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

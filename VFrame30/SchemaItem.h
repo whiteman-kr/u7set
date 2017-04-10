@@ -1,13 +1,9 @@
 #pragma once
 
 #include "SchemaPoint.h"
-#include "DrawParam.h"
-#include "PropertyNames.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
-#include "../lib/Types.h"
-#include "../lib/TypesAndEnums.h"
 
 namespace VFrame30
 {
@@ -18,8 +14,9 @@ namespace VFrame30
 
 	class FblItemRect;
 	class FblItem;
-}
 
+	class CDrawParam;
+}
 
 namespace VFrame30
 {
@@ -205,6 +202,8 @@ namespace VFrame30
 		{
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
+
+		bool isControl() const;
 
 		bool isLocked() const;
 		void setLocked(bool locked);

@@ -1,7 +1,8 @@
-#include "Stable.h"
 #include "SchemaItemUfb.h"
 #include "UfbSchema.h"
 #include "SchemaItemSignal.h"
+#include "PropertyNames.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {

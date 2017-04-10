@@ -1,7 +1,7 @@
 #ifndef TUNINGCLIENTFILTEREDITOR_H
 #define TUNINGCLIENTFILTEREDITOR_H
 
-#include "../lib/TuningFilterEditor.h"
+#include "../lib/Tuning/TuningFilterEditor.h"
 
 class TuningClientFilterEditor : public TuningFilterEditor
 {

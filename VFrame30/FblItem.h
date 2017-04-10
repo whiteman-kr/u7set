@@ -1,12 +1,19 @@
 #pragma once
 
-#include "SchemaItem.h"
-#include "Afb.h"
+#include "SchemaPoint.h"
 
 class QPainter;
 
+namespace Afb
+{
+	class AfbPin;
+	class AfbSignal;
+}
+
 namespace VFrame30
 {
+	struct SchemaPoint;
+
 	enum ConnectionDirrection
 	{
 		Input,

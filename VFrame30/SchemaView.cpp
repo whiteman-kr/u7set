@@ -1,6 +1,7 @@
-#include "Stable.h"
 #include "SchemaView.h"
-#include <QPdfWriter>
+#include "Schema.h"
+#include "SchemaItemControl.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {
@@ -20,6 +21,89 @@ namespace VFrame30
 	void SchemaView::init()
 	{
 		setMouseTracking(true);
+	}
+
+	void SchemaView::updateControlWidgets(bool editMode)
+	{
+		// Find all SchemaItemControl
+		//
+		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		{
+			// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
+			//
+			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+			{
+				if (item->isControl() == false)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+				if (controlItem == nullptr)
+				{
+					assert(controlItem);
+					continue;
+				}
+
+				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
+			}
+		}
+
+		// Update all children
+		//
+		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+
+		for (QObject* childObject : childWidgets)
+		{
+			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+
+			if (childWidget == nullptr)
+			{
+				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+				continue;
+			}
+
+			QString objectName = childWidget->objectName();
+			QUuid widgetUuid = QUuid(objectName);
+
+			if (widgetUuid.isNull() == true)
+			{
+				continue;
+			}
+
+			auto foundIt = controlItems.find(widgetUuid);
+
+			if (foundIt == controlItems.end())
+			{
+				// Apparently SchemaItemControl was deleted
+				//
+				delete childWidget;
+				continue;
+			}
+
+			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
+
+			controlItem->updateWdgetPosAndSize(childWidget, zoom());
+
+			if (editMode == true)
+			{
+				controlItem->updateWidgetProperties(childWidget);
+			}
+
+			controlItems.erase(widgetUuid);
+		}
+
+		// Create new items
+		//
+		for (auto controlItemPair : controlItems)
+		{
+			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
+
+			QWidget* childWidget = controlItem->createWidget(this, editMode);
+			assert(childWidget);
+		}
 	}
 
 	std::shared_ptr<Schema>& SchemaView::schema()
@@ -122,11 +206,15 @@ namespace VFrame30
 
 	void SchemaView::draw(CDrawParam& drawParam)
 	{
-		if (schema().get() == nullptr)
+		if (schema() == nullptr)
 		{
 			return;
 		}
 
+		updateControlWidgets(drawParam.isEditMode());
+
+		// --
+		//
 		QPainter* p = drawParam.painter();
 
 		// Calc size
@@ -277,7 +365,6 @@ namespace VFrame30
 
 	// Properties
 	//
-
 	double SchemaView::zoom() const
 	{
 		return m_zoom;
@@ -326,6 +413,4 @@ namespace VFrame30
 	{
 		return m_session;
 	}
-
-
 }

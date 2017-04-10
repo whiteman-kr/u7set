@@ -1,7 +1,8 @@
-#include "Stable.h"
 #include "SchemaItem.h"
-#include "SchemaItemRect.h"
 #include "SchemaItemAfb.h"
+#include "SchemaItemControl.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
@@ -39,7 +40,6 @@ namespace VFrame30
 	
 	// Serialization
 	//
-
 	bool SchemaItem::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
@@ -416,6 +416,11 @@ namespace VFrame30
 	const SchemaItemAfb* SchemaItem::toSchemaItemAfb() const
 	{
 		return dynamic_cast<const SchemaItemAfb*>(this);
+	}
+
+	bool SchemaItem::isControl() const
+	{
+		return dynamic_cast<const SchemaItemControl*>(this) != nullptr;
 	}
 
 	bool SchemaItem::isLocked() const
