@@ -150,6 +150,7 @@ namespace Hardware
 
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::childRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		childRestrProp->setExpert(true);
+		childRestrProp->setIsScript(true);
 
 		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
@@ -2714,6 +2715,7 @@ R"DELIM({
 
 		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
 		configScriptProp->setExpert(true);
+		configScriptProp->setIsScript(true);
 
 		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
 		rawDataDescrProp->setExpert(true);
