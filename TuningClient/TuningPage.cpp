@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "TuningPage.h"
 #include <QKeyEvent>
+#include "../VFrame30/DrawParam.h"
 
 using namespace std;
 
@@ -715,12 +716,33 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage *objects, QWidget *parent) :
-	m_tuningPageIndex(tuningPageIndex),
+TuningPage::TuningPage(int tuningPageIndex, const QString& schemaID, SchemaStorage* schemaStorage, const TuningObjectStorage* objects, QWidget *parent) :
 	QWidget(parent),
-    m_tabFilter(tabFilter),
+	m_tuningPageIndex(tuningPageIndex),
+	m_schemaStorage(schemaStorage),
+	m_objects(objects)
+{
+	assert(schemaStorage);
+	assert(objects);
+
+	std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(schemaID);
+
+	m_schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
+
+	QHBoxLayout* layout = new QHBoxLayout(this);
+	layout->addWidget(m_schemaWidget);
+
+}
+
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage *objects, QWidget *parent) :
+	QWidget(parent),
+	m_tuningPageIndex(tuningPageIndex),
+	m_tabFilter(tabFilter),
     m_objects(objects)
 {
+
+	assert(objects);
+
 	std::vector<FilterButton*> buttons;
 
 	// Top buttons
@@ -843,9 +865,6 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
     m_undoButton = new QPushButton(tr("Undo"));
 	connect(m_undoButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_undo);
 
-    m_applyButton = new QPushButton(tr("Apply"));
-    m_applyButton->setEnabled(false);
-    connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
 
     m_bottomLayout = new QHBoxLayout();
 
@@ -858,7 +877,13 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 	m_bottomLayout->addStretch();
     m_bottomLayout->addWidget(m_writeButton);
 	m_bottomLayout->addWidget(m_undoButton);
-    m_bottomLayout->addWidget(m_applyButton);
+
+	if (theConfigSettings.autoApply == false)
+	{
+		m_applyButton = new QPushButton(tr("Apply"));
+		connect(m_applyButton, &QPushButton::clicked, m_model, &TuningItemModelMain::slot_Apply);
+		m_bottomLayout->addWidget(m_applyButton);
+	}
 
 	m_mainLayout = new QVBoxLayout(this);
 
@@ -926,14 +951,26 @@ TuningPage::~TuningPage()
 		return;
 	}
 
-	pageSettings->m_columnsIndexes = m_model->columnsIndexes();
-	pageSettings->m_columnCount = (int)pageSettings->m_columnsIndexes.size();
-
-	pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
-	for (int i = 0; i < pageSettings->m_columnCount; i++)
+	if (m_model != nullptr && m_objectList != nullptr)
 	{
-		pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
+		pageSettings->m_columnsIndexes = m_model->columnsIndexes();
+
+		pageSettings->m_columnCount = (int)pageSettings->m_columnsIndexes.size();
+
+		pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
+
+		for (int i = 0; i < pageSettings->m_columnCount; i++)
+		{
+			pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
+		}
 	}
+
+	if (m_schemaWidget)
+	{
+		delete m_schemaWidget;
+		m_schemaWidget = nullptr;
+	}
+
 }
 
 void TuningPage::fillObjectsList()

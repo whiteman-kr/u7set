@@ -13,6 +13,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
+	m_schemaStorage(&m_configController),
 	QMainWindow(parent)
 {
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
@@ -275,7 +276,7 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
         m_tuningWorkspace = nullptr;
     }
 
-    m_tuningWorkspace = new TuningWorkspace(objects, this);
+	m_tuningWorkspace = new TuningWorkspace(objects, &m_schemaStorage, this);
 
     setCentralWidget(m_tuningWorkspace);
 
@@ -284,6 +285,8 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 void MainWindow::slot_configurationArrived(ConfigSettings settings)
 {
 	emit configurationUpdated();
+
+	theConfigSettings = settings;
 
 	TuningObjectStorage objects = theObjectManager->objectStorage();
 

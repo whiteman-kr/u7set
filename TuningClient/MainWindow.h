@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTranslator>
+
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
@@ -9,8 +11,7 @@
 #include "LogFile.h"
 #include "UserManager.h"
 #include "TuningObjectManager.h"
-#include <QTranslator>
-
+#include "SchemaStorage.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,6 +33,8 @@ private:
 
 private:
 	ConfigController m_configController;
+
+	SchemaStorage m_schemaStorage;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 

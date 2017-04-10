@@ -9,38 +9,8 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
 
-class ConfigConnection
-{
-	ConfigConnection() {}
+#include "Settings.h"
 
-public:
-	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
-
-	QString equipmentId() const;
-	QString ip() const;
-	int port() const;
-
-	HostAddressPort address() const;
-
-protected:
-	QString m_equipmentId;
-	QString m_ip;
-	int m_port;
-
-	friend struct ConfigSettings;
-};
-
-struct ConfigSettings
-{
-	ConfigConnection tuns1;				// Tuning Service connection params
-	ConfigConnection tuns2;				// Tuning Service connection params
-
-	bool autoApply = true;
-
-	QStringList schemasID;
-
-	QString errorMessage;				// Parsing error message, empty if no errors
-};
 
 class ConfigController : public QObject
 {
@@ -59,7 +29,9 @@ public:
 	bool requestObjectFilters();
 	bool requestSchemasDetails();
 	bool requestTuningSignals();
-	bool requestSchema(const QString& schemaID);
+
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
+	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
 
 	Tcp::ConnectionState getConnectionState() const;
 	QString getStateToolTip();
@@ -77,13 +49,12 @@ public slots:
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
+
 private:
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
 
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
-	bool xmlReadSchemasNode(const QDomNode& schemasNode, ConfigSettings* outSetting);
+	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray &buildFileInfoArray, ConfigSettings* outSetting);
 
 	void addEventMessage(const QString& text);
 

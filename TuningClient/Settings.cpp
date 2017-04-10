@@ -2,6 +2,44 @@
 #include "Settings.h"
 #include "../lib/SocketIO.h"
 
+
+//
+// ConfigConnection
+//
+
+
+ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
+	m_equipmentId(EquipmentId),
+	m_ip(ipAddress),
+	m_port(port)
+{
+}
+
+QString ConfigConnection::equipmentId() const
+{
+	return m_equipmentId;
+}
+
+QString ConfigConnection::ip() const
+{
+	return m_ip;
+}
+
+int ConfigConnection::port() const
+{
+	return m_port;
+}
+
+HostAddressPort ConfigConnection::address() const
+{
+	HostAddressPort h(m_ip, m_port);
+	return h;
+}
+
+//
+// Settings
+//
+
 Settings::Settings():
 	m_instanceStrId("SYSTEMID_WS00_TUN"),
 	m_configuratorIpAddress1("127.0.0.1"),
@@ -330,3 +368,5 @@ QString Settings::userFiltersFile()
 }
 
 Settings theSettings;
+
+ConfigSettings theConfigSettings;
