@@ -2,12 +2,16 @@
 #define BUILDER_H
 
 #include "../lib/Signal.h"
+#include "../TuningService/TuningDataStorage.h"
+
+#include "../LogicModule.h"
+
 #include "Subsystem.h"
 #include "Connection.h"
-#include "../Builder/BuildResultWriter.h"
-#include "../TuningService/TuningDataStorage.h"
-#include "../Builder/IssueLogger.h"
-#include "../LogicModule.h"
+#include "BuildResultWriter.h"
+#include "IssueLogger.h"
+#include "ComparatorStorage.h"
+
 
 // Forware declarations
 //
@@ -100,7 +104,7 @@ namespace Builder
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
 										Hardware::EquipmentSet*equipmentSet,
 										Hardware::OptoModuleStorage* optoModuleStorage,
 										Hardware::ConnectionStorage* connections,
@@ -108,6 +112,7 @@ namespace Builder
 										LmDescriptionSet* lmDescriptions,
 										AppLogicData* appLogicData,
 										Tuning::TuningDataStorage* tuningDataStorage,
+										ComparatorStorage* comparatorStorage,
 										BuildResultWriter* buildResultWriter);
 
 		// Generate SCADA software configurations
