@@ -39,6 +39,7 @@ namespace Builder
 		m_connections = appLogicCompiler.m_connections;
 		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
 		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
+		m_cmpStorage = appLogicCompiler.m_cmpStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");

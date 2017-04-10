@@ -6,12 +6,14 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/ModuleConfiguration.h"
 
-#include "../Builder/Parser.h"
-#include "../Builder/BuildResultWriter.h"
-#include "../Builder/ApplicationLogicCode.h"
-#include "../Builder/OptoModule.h"
-#include "../Builder/LmMemoryMap.h"
 #include "../TuningService/TuningDataStorage.h"
+
+#include "Parser.h"
+#include "BuildResultWriter.h"
+#include "ApplicationLogicCode.h"
+#include "OptoModule.h"
+#include "LmMemoryMap.h"
+#include "ComparatorStorage.h"
 
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -482,6 +484,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+		ComparatorStorage* m_cmpStorage = nullptr;
 
 		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 
