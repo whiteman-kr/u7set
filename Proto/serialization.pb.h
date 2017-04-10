@@ -4,10 +4,6 @@
 #ifndef PROTOBUF_serialization_2eproto__INCLUDED
 #define PROTOBUF_serialization_2eproto__INCLUDED
 
-#ifdef __MSVCRT__
-#pragma warning(disable: 4244, 4267, 4996)
-#endif
-
 #include <string>
 
 #include <google/protobuf/stubs/common.h>
@@ -5388,17 +5384,32 @@ class SchemaItemControl : public ::google::protobuf::Message {
   inline ::std::string* release_stylesheet();
   inline void set_allocated_stylesheet(::std::string* stylesheet);
 
+  // optional string toolTip = 2;
+  inline bool has_tooltip() const;
+  inline void clear_tooltip();
+  static const int kToolTipFieldNumber = 2;
+  inline const ::std::string& tooltip() const;
+  inline void set_tooltip(const ::std::string& value);
+  inline void set_tooltip(const char* value);
+  inline void set_tooltip(const char* value, size_t size);
+  inline ::std::string* mutable_tooltip();
+  inline ::std::string* release_tooltip();
+  inline void set_allocated_tooltip(::std::string* tooltip);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemControl)
  private:
   inline void set_has_stylesheet();
   inline void clear_has_stylesheet();
+  inline void set_has_tooltip();
+  inline void clear_has_tooltip();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* stylesheet_;
+  ::std::string* tooltip_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -14466,6 +14477,76 @@ inline void SchemaItemControl::set_allocated_stylesheet(::std::string* styleshee
   } else {
     clear_has_stylesheet();
     stylesheet_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string toolTip = 2;
+inline bool SchemaItemControl::has_tooltip() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemControl::set_has_tooltip() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemControl::clear_has_tooltip() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemControl::clear_tooltip() {
+  if (tooltip_ != &::google::protobuf::internal::kEmptyString) {
+    tooltip_->clear();
+  }
+  clear_has_tooltip();
+}
+inline const ::std::string& SchemaItemControl::tooltip() const {
+  return *tooltip_;
+}
+inline void SchemaItemControl::set_tooltip(const ::std::string& value) {
+  set_has_tooltip();
+  if (tooltip_ == &::google::protobuf::internal::kEmptyString) {
+    tooltip_ = new ::std::string;
+  }
+  tooltip_->assign(value);
+}
+inline void SchemaItemControl::set_tooltip(const char* value) {
+  set_has_tooltip();
+  if (tooltip_ == &::google::protobuf::internal::kEmptyString) {
+    tooltip_ = new ::std::string;
+  }
+  tooltip_->assign(value);
+}
+inline void SchemaItemControl::set_tooltip(const char* value, size_t size) {
+  set_has_tooltip();
+  if (tooltip_ == &::google::protobuf::internal::kEmptyString) {
+    tooltip_ = new ::std::string;
+  }
+  tooltip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemControl::mutable_tooltip() {
+  set_has_tooltip();
+  if (tooltip_ == &::google::protobuf::internal::kEmptyString) {
+    tooltip_ = new ::std::string;
+  }
+  return tooltip_;
+}
+inline ::std::string* SchemaItemControl::release_tooltip() {
+  clear_has_tooltip();
+  if (tooltip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tooltip_;
+    tooltip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemControl::set_allocated_tooltip(::std::string* tooltip) {
+  if (tooltip_ != &::google::protobuf::internal::kEmptyString) {
+    delete tooltip_;
+  }
+  if (tooltip) {
+    set_has_tooltip();
+    tooltip_ = tooltip;
+  } else {
+    clear_has_tooltip();
+    tooltip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

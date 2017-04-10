@@ -57,6 +57,7 @@ namespace VFrame30
 		static const QString autoRepeatDelay;
 		static const QString autoRepeatInterval;
 		static const QString styleSheet;
+		static const QString toolTip;
 
 		static const QString afterCreate;
 		static const QString clicked;
@@ -82,9 +83,22 @@ namespace VFrame30
 		static const QString controlCategory;
 		static const QString scriptsCategory;
 
-		static const QString defaultPushButtonStyleSheet;
+		static const QString widgetPropStyleSheet;
+		static const QString widgetPropToolTip;
+		static const QString widgetPropAfterCreate;
 
-		static const QString defaultPushButtonEventScript;
+		static const QString pushButtonPropText;
+		static const QString pushButtonDefaultStyleSheet;
+		static const QString pushButtonDefaultEventScript;
+		static const QString pushButtonPropCheckable;
+		static const QString pushButtonPropCheckedDefault;
+		static const QString pushButtonPropAutoRepeat;
+		static const QString pushButtonPropAutoRepeatDelay;
+		static const QString pushButtonPropAutoRepeatInterval;
+		static const QString pushButtonPropClicked;
+		static const QString pushButtonPropPressed;
+		static const QString pushButtonPropReleased;
+		static const QString pushButtonPropToggled;
 	};
 
 }

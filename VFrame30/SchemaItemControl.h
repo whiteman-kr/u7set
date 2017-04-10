@@ -32,7 +32,11 @@ namespace VFrame30
 		const QString& styleSheet() const;
 		virtual void setStyleSheet(QString value);
 
+		const QString& toolTip() const;
+		virtual void setToolTip(QString value);
+
 	private:
 		QString m_styleSheet;
+		QString m_toolTip;
 	};
 }

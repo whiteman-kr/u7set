@@ -13,22 +13,36 @@ namespace VFrame30
 	SchemaItemPushButton::SchemaItemPushButton(SchemaUnit unit) :
 		SchemaItemControl(unit)
 	{
-		setStyleSheet(PropertyNames::defaultPushButtonStyleSheet);
+		setStyleSheet(PropertyNames::pushButtonDefaultStyleSheet);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::controlCategory, true, SchemaItemPushButton::text, SchemaItemPushButton::setText);
+		Property* p = nullptr;
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkable, PropertyNames::controlCategory, true, SchemaItemPushButton::isCheckable, SchemaItemPushButton::setCheckable);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkedDefault, PropertyNames::controlCategory, true, SchemaItemPushButton::checkedDefault, SchemaItemPushButton::setCheckedDefault);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::controlCategory, true, SchemaItemPushButton::text, SchemaItemPushButton::setText);
+		p->setDescription(PropertyNames::pushButtonPropText);
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::autoRepeat, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeat, SchemaItemPushButton::setAutoRepeat);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatDelay, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatDelay, SchemaItemPushButton::setAutoRepeatDelay);
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatInterval, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatInterval, SchemaItemPushButton::setAutoRepeatInterval);
+		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkable, PropertyNames::controlCategory, true, SchemaItemPushButton::isCheckable, SchemaItemPushButton::setCheckable);
+		p->setDescription(PropertyNames::pushButtonPropCheckable);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptAfterCreate, SchemaItemPushButton::setScriptAfterCreate);
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptClicked, SchemaItemPushButton::setScriptClicked);
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptPressed, SchemaItemPushButton::setScriptPressed);
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptReleased, SchemaItemPushButton::setScriptReleased);
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptToggled, SchemaItemPushButton::setScriptToggled);
+		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkedDefault, PropertyNames::controlCategory, true, SchemaItemPushButton::checkedDefault, SchemaItemPushButton::setCheckedDefault);
+		p->setDescription(PropertyNames::pushButtonPropCheckedDefault);
+
+		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::autoRepeat, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeat, SchemaItemPushButton::setAutoRepeat);
+		p->setDescription(PropertyNames::pushButtonPropAutoRepeat);
+		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatDelay, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatDelay, SchemaItemPushButton::setAutoRepeatDelay);
+		p->setDescription(PropertyNames::pushButtonPropAutoRepeatDelay);
+		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatInterval, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatInterval, SchemaItemPushButton::setAutoRepeatInterval);
+		p->setDescription(PropertyNames::pushButtonPropAutoRepeatInterval);
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptAfterCreate, SchemaItemPushButton::setScriptAfterCreate);
+		p->setDescription(PropertyNames::widgetPropAfterCreate);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptClicked, SchemaItemPushButton::setScriptClicked);
+		p->setDescription(PropertyNames::pushButtonPropClicked);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptPressed, SchemaItemPushButton::setScriptPressed);
+		p->setDescription(PropertyNames::pushButtonPropPressed);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptReleased, SchemaItemPushButton::setScriptReleased);
+		p->setDescription(PropertyNames::pushButtonPropReleased);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptToggled, SchemaItemPushButton::setScriptToggled);
+		p->setDescription(PropertyNames::pushButtonPropToggled);
 
 		return;
 	}
@@ -133,25 +147,25 @@ namespace VFrame30
 			// Connect slots only if it has any sense
 			//
 			if (scriptClicked().isEmpty() == false &&
-				scriptClicked() != PropertyNames::defaultPushButtonEventScript)
+				scriptClicked() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::clicked, this, &SchemaItemPushButton::clicked);
 			}
 
 			if (scriptPressed().isEmpty() == false &&
-				scriptPressed() != PropertyNames::defaultPushButtonEventScript)
+				scriptPressed() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::pressed, this, &SchemaItemPushButton::pressed);
 			}
 
 			if (scriptReleased().isEmpty() == false &&
-				scriptReleased() != PropertyNames::defaultPushButtonEventScript)
+				scriptReleased() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::released, this, &SchemaItemPushButton::released);
 			}
 
 			if (scriptToggled().isEmpty() == false &&
-				scriptToggled() != PropertyNames::defaultPushButtonEventScript)
+				scriptToggled() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
 			}
@@ -212,7 +226,7 @@ namespace VFrame30
 			return;
 		}
 
-		if (m_scriptAfterCreate == PropertyNames::defaultPushButtonEventScript)	// Suppose Default script does nothing, just return
+		if (m_scriptAfterCreate == PropertyNames::pushButtonDefaultEventScript)	// Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -227,7 +241,7 @@ namespace VFrame30
 	void SchemaItemPushButton::clicked(bool /*checked*/)
 	{
 		if (m_scriptClicked.isEmpty() == true ||
-			m_scriptClicked == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+			m_scriptClicked == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -247,7 +261,7 @@ namespace VFrame30
 	void SchemaItemPushButton::pressed()
 	{
 		if (m_scriptPressed.isEmpty() == true ||
-			m_scriptPressed == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+			m_scriptPressed == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -267,7 +281,7 @@ namespace VFrame30
 	void SchemaItemPushButton::released()
 	{
 		if (m_scriptReleased.isEmpty() == true ||
-			m_scriptReleased == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+			m_scriptReleased == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -287,7 +301,7 @@ namespace VFrame30
 	void SchemaItemPushButton::toggled(bool /*checked*/)
 	{
 		if (m_scriptToggled.isEmpty() == true ||
-			m_scriptToggled == PropertyNames::defaultPushButtonEventScript)		// Suppose Default script does nothing, just return
+			m_scriptToggled == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -449,9 +463,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setStyleSheet(QString value)
 	{
-		if (value == PropertyNames::defaultPushButtonStyleSheet)
+		if (value == PropertyNames::pushButtonDefaultStyleSheet)
 		{
-			SchemaItemControl::setStyleSheet(PropertyNames::defaultPushButtonStyleSheet);
+			SchemaItemControl::setStyleSheet(PropertyNames::pushButtonDefaultStyleSheet);
 		}
 		else
 		{
@@ -466,9 +480,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setScriptAfterCreate(const QString& value)
 	{
-		if (value == PropertyNames::defaultPushButtonEventScript)
+		if (value == PropertyNames::pushButtonDefaultEventScript)
 		{
-			m_scriptAfterCreate = PropertyNames::defaultPushButtonEventScript;
+			m_scriptAfterCreate = PropertyNames::pushButtonDefaultEventScript;
 		}
 		else
 		{
@@ -483,9 +497,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setScriptClicked(const QString& value)
 	{
-		if (value == PropertyNames::defaultPushButtonEventScript)
+		if (value == PropertyNames::pushButtonDefaultEventScript)
 		{
-			m_scriptClicked = PropertyNames::defaultPushButtonEventScript;
+			m_scriptClicked = PropertyNames::pushButtonDefaultEventScript;
 		}
 		else
 		{
@@ -500,9 +514,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setScriptPressed(const QString& value)
 	{
-		if (value == PropertyNames::defaultPushButtonEventScript)
+		if (value == PropertyNames::pushButtonDefaultEventScript)
 		{
-			m_scriptPressed = PropertyNames::defaultPushButtonEventScript;
+			m_scriptPressed = PropertyNames::pushButtonDefaultEventScript;
 		}
 		else
 		{
@@ -517,9 +531,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setScriptReleased(const QString& value)
 	{
-		if (value == PropertyNames::defaultPushButtonEventScript)
+		if (value == PropertyNames::pushButtonDefaultEventScript)
 		{
-			m_scriptReleased = PropertyNames::defaultPushButtonEventScript;
+			m_scriptReleased = PropertyNames::pushButtonDefaultEventScript;
 		}
 		else
 		{
@@ -534,9 +548,9 @@ namespace VFrame30
 
 	void SchemaItemPushButton::setScriptToggled(const QString& value)
 	{
-		if (value == PropertyNames::defaultPushButtonEventScript)
+		if (value == PropertyNames::pushButtonDefaultEventScript)
 		{
-			m_scriptToggled = PropertyNames::defaultPushButtonEventScript;
+			m_scriptToggled = PropertyNames::pushButtonDefaultEventScript;
 		}
 		else
 		{

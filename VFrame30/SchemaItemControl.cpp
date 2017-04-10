@@ -12,7 +12,13 @@ namespace VFrame30
 
 	SchemaItemControl::SchemaItemControl(SchemaUnit unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		Property* p = nullptr;
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		p->setDescription(PropertyNames::widgetPropStyleSheet);
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::controlCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
+		p->setDescription(PropertyNames::widgetPropToolTip);
 
 		m_static = false;
 		setItemUnit(unit);
@@ -39,6 +45,7 @@ namespace VFrame30
 		Proto::SchemaItemControl* controlMessage = message->mutable_schemaitem()->mutable_control();
 
 		controlMessage->set_stylesheet(m_styleSheet.toStdString());
+		controlMessage->set_tooltip(m_toolTip.toStdString());
 
 		return true;
 	}
@@ -70,6 +77,7 @@ namespace VFrame30
 		const Proto::SchemaItemControl& controlMessage = message.schemaitem().control();
 
 		setStyleSheet(QString::fromStdString(controlMessage.stylesheet()));		// Text setters can have some string optimization for default values
+		setToolTip(QString::fromStdString(controlMessage.tooltip()));			// Text setters can have some string optimization for default values
 
 		return true;
 	}
@@ -93,7 +101,8 @@ namespace VFrame30
 		bool updateRequired = false;
 
 		if (widget->isEnabled() == isCommented() ||
-			widget->styleSheet() != styleSheet())
+			widget->styleSheet() != styleSheet() ||
+			widget->toolTip() != toolTip())
 		{
 			updateRequired = true;
 		}
@@ -104,6 +113,7 @@ namespace VFrame30
 
 			widget->setDisabled(isCommented());
 			widget->setStyleSheet(styleSheet());
+			widget->setToolTip(toolTip());
 
 			widget->setUpdatesEnabled(true);
 		}
@@ -161,6 +171,16 @@ namespace VFrame30
 	void SchemaItemControl::setStyleSheet(QString value)
 	{
 		m_styleSheet = value;
+	}
+
+	const QString& SchemaItemControl::toolTip() const
+	{
+		return m_toolTip;
+	}
+
+	void SchemaItemControl::setToolTip(QString value)
+	{
+		m_toolTip = value;
 	}
 
 }

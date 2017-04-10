@@ -50,6 +50,7 @@ namespace VFrame30
 	const QString PropertyNames::autoRepeatDelay("AutoRepeatDelay");
 	const QString PropertyNames::autoRepeatInterval("AutoRepeatInterval");
 	const QString PropertyNames::styleSheet("StyleSheet");
+	const QString PropertyNames::toolTip("ToolTip");
 
 	const QString PropertyNames::afterCreate("AfterCreate");
 	const QString PropertyNames::clicked("Clicked");
@@ -75,7 +76,11 @@ namespace VFrame30
 	const QString PropertyNames::controlCategory("Control");
 	const QString PropertyNames::scriptsCategory("Scripts");
 
-	const QString PropertyNames::defaultPushButtonStyleSheet(
+	const QString PropertyNames::widgetPropStyleSheet("Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style.");
+	const QString PropertyNames::widgetPropToolTip("Property holds the widget's tooltip.");
+	const QString PropertyNames::widgetPropAfterCreate("Script code to run after the control is created.");
+
+	const QString PropertyNames::pushButtonDefaultStyleSheet(
 R"_(QPushButton {
 	border: 1px outset #8f8f91;
 	border-radius: 4px;
@@ -102,10 +107,20 @@ QPushButton:default {
 }
 )_");
 
-	const QString PropertyNames::defaultPushButtonEventScript(
+	const QString PropertyNames::pushButtonDefaultEventScript(
 R"_(function(schemaItem, schemaView, pushButtonWidget, checked)
 {
 }
 )_");
 
+	const QString PropertyNames::pushButtonPropText("Property holds the text shown on the button.");
+	const QString PropertyNames::pushButtonPropCheckable("Property holds whether the button is checkable.");
+	const QString PropertyNames::pushButtonPropCheckedDefault("If Checkable is set this property holds whether the button is checked by default.");
+	const QString PropertyNames::pushButtonPropAutoRepeat("Property holds whether AutoRepeat is enabled.\nIf AutoRepeat is enabled, then the Pressed(), Released(), and Clicked() are emitted at regular intervals when the button is down.\nThe initial delay and the repetition interval are defined in milliseconds by AutoRepeatDelay and AutoRepeatInterval.");
+	const QString PropertyNames::pushButtonPropAutoRepeatDelay("Property holds the initial delay of auto-repetition.\nIf AutoRepeat is enabled, then AutoRepeatDelay defines the initial delay in milliseconds before auto-repetition kicks in.");
+	const QString PropertyNames::pushButtonPropAutoRepeatInterval("Property holds the interval of auto-repetition.\nIf AutoRepeat is enabled, then AutoRepeatInterval defines the length of the auto-repetition interval in millisecons.");
+	const QString PropertyNames::pushButtonPropClicked("Script code for signal Clicked().\nThis signal is emitted when the button is activated (i.e., pressed down then released while the mouse cursor is inside the button).\nIf the button is checkable, checked is true if the button is checked, or false if the button is unchecked.");
+	const QString PropertyNames::pushButtonPropPressed("Script code for signal Pressed().\nThis signal is emitted when the button is pressed down.");
+	const QString PropertyNames::pushButtonPropReleased("Script code for signal Released().\nThis signal is emitted when the button is pressed released.");
+	const QString PropertyNames::pushButtonPropToggled("Script code for signal Toggled().\nThis signal is emitted whenever a checkable button changes its state.\nChecked is true if the button is checked, or false if the button is unchecked. This may be the result of a user action, Click() slot activation, or because setChecked() is called.");
 }
