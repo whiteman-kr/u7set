@@ -90,14 +90,22 @@ namespace VFrame30
 			return;
 		}
 
-		if (widget->isEnabled() == isCommented())
+		bool updateRequired = false;
+
+		if (widget->isEnabled() == isCommented() ||
+			widget->styleSheet() != styleSheet())
 		{
-			widget->setDisabled(isCommented());
+			updateRequired = true;
 		}
 
-		if (widget->styleSheet() != styleSheet())
+		if (updateRequired == true)
 		{
+			widget->setUpdatesEnabled(false);
+
+			widget->setDisabled(isCommented());
 			widget->setStyleSheet(styleSheet());
+
+			widget->setUpdatesEnabled(true);
 		}
 
 		return;
@@ -111,25 +119,36 @@ namespace VFrame30
 			return;
 		}
 
-		widget->setUpdatesEnabled(false);
+		bool updateRequired = false;
 
 		QPoint pos = {static_cast<int>(leftDocPt() * zoom / 100.0),
 					  static_cast<int>(topDocPt() * zoom / 100.0)};
 
-		if (widget->pos() != pos)
-		{
-			 widget->move(pos);
-		}
-
 		QSize size = {static_cast<int>(widthDocPt() * zoom / 100.0),
 					  static_cast<int>(heightDocPt() * zoom / 100.0)};
 
-		if (widget->size() != size)
+		if (widget->pos() != pos ||
+			widget->size() != size)
 		{
-			widget->resize(size);
+			 updateRequired = true;
 		}
 
-		widget->setUpdatesEnabled(true);
+		if (updateRequired == true)
+		{
+			widget->setUpdatesEnabled(false);
+
+			if (widget->pos() != pos)
+			{
+				widget->move(pos);
+			}
+
+			if (widget->size() != size)
+			{
+				widget->resize(size);
+			}
+
+			widget->setUpdatesEnabled(true);
+		}
 	}
 
 	// Properties and Data

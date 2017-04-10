@@ -175,17 +175,30 @@ namespace VFrame30
 			return;
 		}
 
-		control->setUpdatesEnabled(false);
-
 		SchemaItemControl::updateWidgetProperties(widget);
 
-		control->setText(text());
-		control->setCheckable(isCheckable());
-		control->setAutoRepeat(autoRepeat());
-		control->setAutoRepeatDelay(autoRepeatDelay());
-		control->setAutoRepeatInterval(autoRepeatInterval());
+		bool updateRequired = false;
 
-		control->setUpdatesEnabled(true);
+		if (control->text() != text() ||
+			control->isCheckable() != isCheckable() ||
+			control->autoRepeat() != autoRepeat() ||
+			control->autoRepeatDelay() != autoRepeatDelay() ||
+			control->autoRepeatInterval() != autoRepeatInterval())
+		{
+			updateRequired = true;
+		}
+
+		if (updateRequired == true)
+		{
+			control->setUpdatesEnabled(false);
+			control->setUpdatesEnabled(true);
+
+			control->setText(text());
+			control->setCheckable(isCheckable());
+			control->setAutoRepeat(autoRepeat());
+			control->setAutoRepeatDelay(autoRepeatDelay());
+			control->setAutoRepeatInterval(autoRepeatInterval());
+		}
 
 		return;
 	}
