@@ -119,6 +119,17 @@ namespace Builder
 		QHash<QString, int> m_opNameToIndexMap;
 
 	public:
+		enum Type
+		{
+			Unknown,
+			Signal,
+			Fb,
+			Const,
+			Transmitter,
+			Receiver,
+			Terminator
+		};
+
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
 		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
@@ -136,6 +147,8 @@ namespace Builder
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
 		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
 
+		Type type() const;
+
 		bool hasRam() const { return afb().hasRam(); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
@@ -147,6 +160,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+
+		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
 		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
 
