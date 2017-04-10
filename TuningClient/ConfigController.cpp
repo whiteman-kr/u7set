@@ -1,39 +1,9 @@
 #include "Stable.h"
-#include "Settings.h"
 #include "ConfigController.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningObjectManager.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
-
-
-ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
-	m_equipmentId(EquipmentId),
-	m_ip(ipAddress),
-	m_port(port)
-{
-}
-
-QString ConfigConnection::equipmentId() const
-{
-	return m_equipmentId;
-}
-
-QString ConfigConnection::ip() const
-{
-	return m_ip;
-}
-
-int ConfigConnection::port() const
-{
-	return m_port;
-}
-
-HostAddressPort ConfigConnection::address() const
-{
-	HostAddressPort h(m_ip, m_port);
-	return h;
-}
 
 //
 // ConfigController
@@ -259,7 +229,7 @@ bool ConfigController::requestTuningSignals()
 	return true;
 }
 
-bool ConfigController::requestSchema(const QString &schemaID)
+/*bool ConfigController::requestSchema(const QString &schemaID)
 {
 	QByteArray data;
 	QString errorStr;
@@ -277,7 +247,7 @@ bool ConfigController::requestSchema(const QString &schemaID)
 		addEventMessage(message);
 	}
 	return true;
-}
+}*/
 
 Tcp::ConnectionState ConfigController::getConnectionState() const
 {
@@ -384,7 +354,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		QDomNodeList schemasNodes = configElement.elementsByTagName("Schemas");
 		if (schemasNodes.size()  > 0)
 		{
-			result &= xmlReadSchemasNode(schemasNodes.item(0), &readSettings);
+			result &= xmlReadSchemasNode(schemasNodes.item(0), buildFileInfoArray, &readSettings);
 		}
 	}
 
@@ -453,15 +423,17 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				requestTuningSignals();
 			}
 
+			/*
 			// Schemas
 
-			for (auto schemaID : readSettings.schemasID)
+			for (auto schemaID : readSettings.schemaFiles)
 			{
 				if (f.ID == schemaID)
 				{
 					requestSchema(f.ID);
 				}
 			}
+			*/
 		}
 	}
 
@@ -621,7 +593,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 	return outSetting->errorMessage.isEmpty();
 }
 
-bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, ConfigSettings* outSetting)
+bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
 		schemasNode.nodeName() != "Schemas")
@@ -657,8 +629,13 @@ bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, ConfigSet
 
 			QString schemaId = dasXmlElement.text();
 
-			outSetting->schemasID.push_back(schemaId);
-
+			for (const Builder::BuildFileInfo& f: buildFileInfoArray)
+			{
+				if (f.ID == schemaId)
+				{
+					outSetting->schemasID.push_back(f.ID);
+				}
+			}
 		}
 	}
 

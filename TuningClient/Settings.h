@@ -3,6 +3,52 @@
 
 #include "../lib/HostAddressPort.h"
 
+//
+// ConfigConnection
+//
+
+class ConfigConnection
+{
+	ConfigConnection() {}
+
+public:
+	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
+
+	QString equipmentId() const;
+	QString ip() const;
+	int port() const;
+
+	HostAddressPort address() const;
+
+protected:
+	QString m_equipmentId;
+	QString m_ip;
+	int m_port;
+
+	friend struct ConfigSettings;
+};
+
+//
+// ConfigSettings
+//
+
+struct ConfigSettings
+{
+	ConfigConnection tuns1;				// Tuning Service connection params
+	ConfigConnection tuns2;				// Tuning Service connection params
+
+	bool autoApply = true;
+
+	QStringList schemasID;
+
+	QString errorMessage;				// Parsing error message, empty if no errors
+};
+
+//
+// TuningPageSettings
+//
+
+
 class TuningPageSettings
 {
 public:
@@ -10,6 +56,10 @@ public:
 	std::vector<int> m_columnsIndexes;
 	std::vector<int> m_columnsWidth;
 };
+
+//
+// Settings
+//
 
 class Settings
 {
@@ -113,5 +163,7 @@ private:
 };
 
 extern Settings theSettings;
+
+extern ConfigSettings theConfigSettings;
 
 #endif // SETTINGS_H
