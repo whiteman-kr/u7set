@@ -233,6 +233,9 @@ namespace Builder
 
 	class ModuleLogicCompiler;
 
+	const quint16 BCOMP_OPCODE = 10;
+	const quint16 DCOMP_OPCODE = 20;
+
 	class AppFb : public AppItem
 	{
 	private:
@@ -299,6 +302,8 @@ namespace Builder
 		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
+
+		bool isComparator() const;
 
 		QString instantiatorID();
 
@@ -638,6 +643,7 @@ namespace Builder
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool startFb(const AppFb* appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
+		bool addToComapratorStorage(const AppFb *appFb);
 
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
