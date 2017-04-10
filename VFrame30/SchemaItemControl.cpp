@@ -12,7 +12,13 @@ namespace VFrame30
 
 	SchemaItemControl::SchemaItemControl(SchemaUnit unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		Property* p = nullptr;
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		p->setDescription(PropertyNames::widgetPropStyleSheet);
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::controlCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
+		p->setDescription(PropertyNames::widgetPropToolTip);
 
 		m_static = false;
 		setItemUnit(unit);
@@ -39,6 +45,7 @@ namespace VFrame30
 		Proto::SchemaItemControl* controlMessage = message->mutable_schemaitem()->mutable_control();
 
 		controlMessage->set_stylesheet(m_styleSheet.toStdString());
+		controlMessage->set_tooltip(m_toolTip.toStdString());
 
 		return true;
 	}
@@ -70,6 +77,7 @@ namespace VFrame30
 		const Proto::SchemaItemControl& controlMessage = message.schemaitem().control();
 
 		setStyleSheet(QString::fromStdString(controlMessage.stylesheet()));		// Text setters can have some string optimization for default values
+		setToolTip(QString::fromStdString(controlMessage.tooltip()));			// Text setters can have some string optimization for default values
 
 		return true;
 	}
@@ -90,14 +98,24 @@ namespace VFrame30
 			return;
 		}
 
-		if (widget->isEnabled() == isCommented())
+		bool updateRequired = false;
+
+		if (widget->isEnabled() == isCommented() ||
+			widget->styleSheet() != styleSheet() ||
+			widget->toolTip() != toolTip())
 		{
-			widget->setDisabled(isCommented());
+			updateRequired = true;
 		}
 
-		if (widget->styleSheet() != styleSheet())
+		if (updateRequired == true)
 		{
+			widget->setUpdatesEnabled(false);
+
+			widget->setDisabled(isCommented());
 			widget->setStyleSheet(styleSheet());
+			widget->setToolTip(toolTip());
+
+			widget->setUpdatesEnabled(true);
 		}
 
 		return;
@@ -111,25 +129,36 @@ namespace VFrame30
 			return;
 		}
 
-		widget->setUpdatesEnabled(false);
+		bool updateRequired = false;
 
 		QPoint pos = {static_cast<int>(leftDocPt() * zoom / 100.0),
 					  static_cast<int>(topDocPt() * zoom / 100.0)};
 
-		if (widget->pos() != pos)
-		{
-			 widget->move(pos);
-		}
-
 		QSize size = {static_cast<int>(widthDocPt() * zoom / 100.0),
 					  static_cast<int>(heightDocPt() * zoom / 100.0)};
 
-		if (widget->size() != size)
+		if (widget->pos() != pos ||
+			widget->size() != size)
 		{
-			widget->resize(size);
+			 updateRequired = true;
 		}
 
-		widget->setUpdatesEnabled(true);
+		if (updateRequired == true)
+		{
+			widget->setUpdatesEnabled(false);
+
+			if (widget->pos() != pos)
+			{
+				widget->move(pos);
+			}
+
+			if (widget->size() != size)
+			{
+				widget->resize(size);
+			}
+
+			widget->setUpdatesEnabled(true);
+		}
 	}
 
 	// Properties and Data
@@ -142,6 +171,16 @@ namespace VFrame30
 	void SchemaItemControl::setStyleSheet(QString value)
 	{
 		m_styleSheet = value;
+	}
+
+	const QString& SchemaItemControl::toolTip() const
+	{
+		return m_toolTip;
+	}
+
+	void SchemaItemControl::setToolTip(QString value)
+	{
+		m_toolTip = value;
 	}
 
 }

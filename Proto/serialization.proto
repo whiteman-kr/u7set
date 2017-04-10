@@ -689,6 +689,7 @@ message SchemaItemTerminator
 message SchemaItemControl
 {
     optional string styleSheet = 1;
+	optional string toolTip = 2;
 }
 
 //

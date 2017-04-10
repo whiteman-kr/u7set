@@ -88,10 +88,10 @@ namespace VFrame30
 		int m_autoRepeatDelay = 300;
 		int m_autoRepeatInterval = 100;
 
-		QString m_scriptAfterCreate = PropertyNames::defaultPushButtonEventScript;
-		QString m_scriptClicked = PropertyNames::defaultPushButtonEventScript;
-		QString m_scriptPressed = PropertyNames::defaultPushButtonEventScript;
-		QString m_scriptReleased = PropertyNames::defaultPushButtonEventScript;
-		QString m_scriptToggled = PropertyNames::defaultPushButtonEventScript;
+		QString m_scriptAfterCreate = PropertyNames::pushButtonDefaultEventScript;
+		QString m_scriptClicked = PropertyNames::pushButtonDefaultEventScript;
+		QString m_scriptPressed = PropertyNames::pushButtonDefaultEventScript;
+		QString m_scriptReleased = PropertyNames::pushButtonDefaultEventScript;
+		QString m_scriptToggled = PropertyNames::pushButtonDefaultEventScript;
 	};
 }
