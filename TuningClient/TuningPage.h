@@ -2,9 +2,9 @@
 #define TUNINGPAGE_H
 
 #include "Stable.h"
-#include "../lib/TuningModel.h"
-#include "../lib/TuningObject.h"
-#include "../lib/TuningFilter.h"
+#include "../lib/Tuning/TuningModel.h"
+#include "../lib/Tuning/TuningObject.h"
+#include "../lib/Tuning/TuningFilter.h"
 
 class TuningItemModelMain : public TuningItemModel
 {

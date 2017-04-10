@@ -1,7 +1,7 @@
 #ifndef DIALOGTUNINGFILTERSEDITOR_H
 #define DIALOGTUNINGFILTERSEDITOR_H
 
-#include "../lib/TuningFilterEditor.h"
+#include "../lib/Tuning/TuningFilterEditor.h"
 
 class DialogTuningFiltersEditor : public TuningFilterEditor
 {

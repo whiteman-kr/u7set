@@ -181,11 +181,11 @@ SOURCES +=\
     DialogConnections.cpp \
     Builder/MetrologyCfgGenerator.cpp \
     ../lib/MetrologySignal.cpp \
-    ../lib/TuningFilter.cpp \
-    ../lib/TuningFilterEditor.cpp \
-    ../lib/TuningObject.cpp \
+    ../lib/Tuning/TuningFilter.cpp \
+    ../lib/Tuning/TuningFilterEditor.cpp \
+    ../lib/Tuning/TuningObject.cpp \
     DialogTuningFiltersEditor.cpp \
-    ../lib/TuningModel.cpp \
+    ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
     LogicModule.cpp
 
@@ -306,11 +306,11 @@ HEADERS  += \
     DialogConnections.h \
     Builder/MetrologyCfgGenerator.h \
     ../lib/MetrologySignal.h \
-    ../lib/TuningFilter.h \
-    ../lib/TuningFilterEditor.h \
-    ../lib/TuningObject.h \
+    ../lib/Tuning/TuningFilter.h \
+    ../lib/Tuning/TuningFilterEditor.h \
+    ../lib/Tuning/TuningObject.h \
     DialogTuningFiltersEditor.h \
-    ../lib/TuningModel.h \
+    ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \
     LogicModule.h
 
