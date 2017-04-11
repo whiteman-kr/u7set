@@ -233,9 +233,6 @@ namespace Builder
 
 	class ModuleLogicCompiler;
 
-	const quint16 BCOMP_OPCODE = 10;
-	const quint16 DCOMP_OPCODE = 20;
-
 	class AppFb : public AppItem
 	{
 	private:
@@ -249,6 +246,9 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 
 		int m_runTime = 0;
+
+		const quint16 CONST_COMPARATOR_OPCODE = 10;
+		const quint16 DYNAMIC_COMPARATOR_OPCODE = 20;
 
 		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
@@ -303,6 +303,8 @@ namespace Builder
 		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
 
+		bool isConstComaparator() const;
+		bool isDynamicComaparator() const;
 		bool isComparator() const;
 
 		QString instantiatorID();
@@ -612,6 +614,8 @@ namespace Builder
 		bool buildRS232SignalLists();
 		bool buildOptoPortsSignalLists();
 
+		bool setOptoRawInSignalsAsComputed();
+
 		// pass #2 compilation functions
 		//
 
@@ -644,6 +648,8 @@ namespace Builder
 		bool startFb(const AppFb* appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool addToComparatorStorage(const AppFb *appFb);
+
+		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);
 
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 

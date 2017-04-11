@@ -77,16 +77,24 @@ Remote:	       	????
 	
 	4. Delete current Release Build if exists!
 
+
 	5. Make new Release Build of project
 
+
 	6. Run u7.exe and call About dialog to show program version (v0.0.0000)
+
 
 	7. Give a version tag to current commit
 
 	$ git tag v0.7.1798
 
+
+	8. Push tag to remote server
 	
-	8. Switch back to develop
+	$ git push --tags
+	
+
+	9. Switch back to develop
 
 	$ git checkout develop
 
