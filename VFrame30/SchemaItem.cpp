@@ -32,6 +32,7 @@ namespace VFrame30
 
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
 		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
+		clickScriptProp->setIsScript(true);
 	}
 
 	SchemaItem::~SchemaItem()

@@ -189,6 +189,15 @@ public:
         m_password = value;
     }
 
+	bool isScript() const
+	{
+		return m_isScript;
+	}
+	void setIsScript(bool value)
+	{
+		m_isScript = value;
+	}
+
     int precision() const
 	{
 		return m_precision;
@@ -257,6 +266,7 @@ private:
 			bool m_visible : 1;
 			bool m_expert : 1;
             bool m_password : 1;
+			bool m_isScript : 1;
 		};
 		uint32_t m_flags;
 	};
