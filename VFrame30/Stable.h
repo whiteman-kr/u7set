@@ -52,6 +52,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QLineEdit>
 #include <QtConcurrent/QtConcurrent>
 #include <QPainter>
 #include <QMouseEvent>

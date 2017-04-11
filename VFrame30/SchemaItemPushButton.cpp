@@ -214,13 +214,14 @@ namespace VFrame30
 		if (updateRequired == true)
 		{
 			control->setUpdatesEnabled(false);
-			control->setUpdatesEnabled(true);
 
 			control->setText(text());
 			control->setCheckable(isCheckable());
 			control->setAutoRepeat(autoRepeat());
 			control->setAutoRepeatDelay(autoRepeatDelay());
 			control->setAutoRepeatInterval(autoRepeatInterval());
+
+			control->setUpdatesEnabled(true);
 		}
 
 		return;

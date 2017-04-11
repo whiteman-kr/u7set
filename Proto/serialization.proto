@@ -393,6 +393,7 @@ message SchemaItem
 
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
+	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
 }
 
 //
@@ -712,6 +713,23 @@ message SchemaItemPushButton
 	optional string scriptPressed = 23;
 	optional string scriptReleased = 24;
 	optional string scriptToggled = 25;
+}
+
+//
+//
+// SchemaItemLineEdit
+//
+//
+message SchemaItemLineEdit
+{
+    optional string text = 1;
+	optional int32 horzAlign = 2;
+	optional int32 vertAlign = 3;
+	optional int32 maxLength = 4;
+	optional string placeholderText = 5;
+	optional bool readOnly = 6;
+
+    optional string scriptAfterCreate = 21;
 }
 
 

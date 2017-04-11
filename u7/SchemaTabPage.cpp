@@ -2007,7 +2007,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
-		m_toolBar->addAction(m_schemaWidget->m_addTextEditAction);
+		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
 	}
 
 	m_toolBar->addSeparator();

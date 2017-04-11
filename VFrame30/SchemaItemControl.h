@@ -20,7 +20,11 @@ namespace VFrame30
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Methods
+		//
 	public:
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
 		virtual QWidget* createWidget(QWidget* parent, bool editMode) const;
 		virtual void updateWidgetProperties(QWidget* widget) const;
 

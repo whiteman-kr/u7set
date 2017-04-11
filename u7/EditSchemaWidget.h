@@ -541,7 +541,7 @@ private:
 		QAction* m_addUfbAction = nullptr;
 
 		QAction* m_addPushButtonAction = nullptr;
-		QAction* m_addTextEditAction = nullptr;
+		QAction* m_addLineEditAction = nullptr;
 
 	// Edit
 	//

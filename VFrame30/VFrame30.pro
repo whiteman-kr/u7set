@@ -100,7 +100,8 @@ HEADERS += VFrame30Lib_global.h \
     MacrosExpander.h \
     Session.h \
     SchemaItemControl.h \
-    SchemaItemPushButton.h
+    SchemaItemPushButton.h \
+    SchemaItemLineEdit.h
 
 SOURCES += \
     Settings.cpp \
@@ -113,7 +114,6 @@ SOURCES += \
     FblItem.cpp \
     DrawParam.cpp \
     Print.cpp \
-    Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
 	Configuration.cpp \
@@ -153,7 +153,8 @@ SOURCES += \
     MacrosExpander.cpp \
     Session.cpp \
     SchemaItemControl.cpp \
-    SchemaItemPushButton.cpp
+    SchemaItemPushButton.cpp \
+    SchemaItemLineEdit.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

@@ -82,6 +82,16 @@ namespace VFrame30
 		return true;
 	}
 
+	double SchemaItemControl::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
+	{
+		return gridSize;
+	}
+
+	double SchemaItemControl::minimumPossibleWidthDocPt(double gridSize, int /*pinGridStep*/) const
+	{
+		return gridSize;
+	}
+
 	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/) const
 	{
 		// Implement in derived class
