@@ -140,7 +140,8 @@ SOURCES +=\
     SchemaStorage.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
-    ../lib/Tuning/TuningController.cpp
+    ../lib/Tuning/TuningController.cpp \
+    SchemasWorkspace.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -182,7 +183,8 @@ HEADERS  += MainWindow.h \
     SchemaStorage.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
-    ../lib/Tuning/TuningController.h
+    ../lib/Tuning/TuningController.h \
+    SchemasWorkspace.h
 
 FORMS    += \
     DialogSettings.ui \

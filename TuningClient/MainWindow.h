@@ -7,6 +7,7 @@
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
+#include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
@@ -37,6 +38,8 @@ private:
 	SchemaStorage m_schemaStorage;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
+
+	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
 

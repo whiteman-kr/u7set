@@ -146,6 +146,50 @@ bool TuningClientCfgGenerator::writeSettings()
 			return false;
 		}
 
+		//
+		// showTuningWorkspace
+		//
+		bool showTuningWorkspace = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowTuningWorkspace", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// showSchemasWorkspace
+		//
+		bool showSchemasWorkspace = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemasWorkspace", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// showSchemasList
+		//
+		bool showSchemasList = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemasList", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// filterByEquipment
+		//
+		bool filterByEquipment = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "FilterByEquipment", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		//
+		// filterBySchema
+		//
+		bool filterBySchema = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "FilterBySchema", &ok);
+		if (ok == false)
+		{
+			return false;
+		}
 
 		// Get ip addresses and ports, write them to configurations
 		//
@@ -165,7 +209,13 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("port1", QString::number(tunsSettings1.clientRequestIP.port()));
 			xmlWriter.writeAttribute("ip2", tunsSettings2.clientRequestIP.address().toString());
 			xmlWriter.writeAttribute("port2", QString::number(tunsSettings2.clientRequestIP.port()));
+
 			xmlWriter.writeAttribute("autoApply", (autoApply ? "true" : "false"));
+			xmlWriter.writeAttribute("showTuningWorkspace", (showTuningWorkspace ? "true" : "false"));
+			xmlWriter.writeAttribute("showSchemasWorkspace", (showSchemasWorkspace ? "true" : "false"));
+			xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
+			xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
+			xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 
 
 		}	// TuningService
@@ -217,21 +267,21 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 	bool ok = true;
 
 	//
-	// ObjectFilters
+	// Filters
 	//
-	QString objectFilters = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ObjectFilters", &ok).trimmed();
+	QString filters = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Filters", &ok).trimmed();
 	if (ok == false)
 	{
 		return false;
 	}
 
-	if (objectFilters.isEmpty() == true)
+	if (filters.isEmpty() == true)
 	{
-        m_log->errCFG3022(m_software->equipmentId(), "ObjectFilters");
+		m_log->errCFG3022(m_software->equipmentId(), "Filters");
 		return false;
 	}
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "", objectFilters);
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "", filters);
 
 	if (buildFile == nullptr)
 	{
