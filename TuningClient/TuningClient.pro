@@ -28,6 +28,21 @@ unix {
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
 #protobuf
 #
 win32 {
@@ -118,10 +133,13 @@ SOURCES +=\
     TuningClientFilterEditor.cpp \
     DialogPassword.cpp \
     Main.cpp \
-    ../lib/TuningFilter.cpp \
-    ../lib/TuningFilterEditor.cpp \
-    ../lib/TuningModel.cpp \
-    ../lib/TuningObject.cpp
+    ../lib/Tuning/TuningFilter.cpp \
+    ../lib/Tuning/TuningFilterEditor.cpp \
+    ../lib/Tuning/TuningModel.cpp \
+    ../lib/Tuning/TuningObject.cpp \
+    SchemaStorage.cpp \
+    TuningSchemaView.cpp \
+    TuningSchemaWidget.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -156,10 +174,13 @@ HEADERS  += MainWindow.h \
     TuningClientFilterEditor.h \
     DialogPassword.h \
     Main.h \
-    ../lib/TuningFilter.h \
-    ../lib/TuningFilterEditor.h \
-    ../lib/TuningModel.h \
-    ../lib/TuningObject.h
+    ../lib/Tuning/TuningFilter.h \
+    ../lib/Tuning/TuningFilterEditor.h \
+    ../lib/Tuning/TuningModel.h \
+    ../lib/Tuning/TuningObject.h \
+    SchemaStorage.h \
+    TuningSchemaView.h \
+    TuningSchemaWidget.h
 
 FORMS    += \
     DialogSettings.ui \

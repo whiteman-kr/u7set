@@ -39,6 +39,7 @@ namespace Builder
 		m_connections = appLogicCompiler.m_connections;
 		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
 		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
+		m_cmpStorage = appLogicCompiler.m_cmpStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -2749,9 +2750,9 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			int connectedSignals = 0;
-
+			bool connectedToSignal = false;
 			bool connectedToTerminator = false;
+			bool connectedToFb = false;
 
 			for(QUuid connectedPinGuid : outPin.associatedIOs())
 			{
@@ -2767,37 +2768,69 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				if (connectedPinParent->isFb() ||
-					connectedPinParent->isTransmitter())
-				{
-					continue;
-				}
+				AppItem::Type t = connectedPinParent->type();
 
-				if (connectedPinParent->isTerminator())
+				switch(t)
 				{
+				case AppItem::Type::Fb:
+					connectedToFb = true;
+					break;
+
+				case AppItem::Type::Transmitter:
+					break;
+
+				case AppItem::Type::Terminator:
 					connectedToTerminator = true;
-					continue;
+					break;
+
+				case AppItem::Type::Signal:
+					{
+						QUuid signalGuid;
+
+						// output connected to real signal
+						//
+						connectedToSignal = true;
+
+						signalGuid = connectedPinParent->guid();
+
+						result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
+						break;
+					}
+
+				default:
+					{
+						std::shared_ptr<VFrame30::FblItemRect> item = connectedPinParent->itemRect();
+						QString q = item->metaObject()->className();
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+					}
 				}
 
-				assert(connectedPinParent->isSignal());
-
-				QUuid signalGuid;
-
-				// output connected to real signal
-				//
-				signalGuid = connectedPinParent->guid();
-
-				connectedSignals++;
-
-				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
+				if (result == false)
+				{
+					break;
+				}
 			}
 
-			if (connectedSignals == 0 && connectedToTerminator == false)
+			if (connectedToSignal == false && connectedToTerminator == false)
 			{
-				// output pin is not connected to signal or terminator
-				// save FB output value to shadow signal with GUID == outPin.guid()
+				// output pin is not connected to any signal or terminator
 				//
-				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
+				// may be it directly connected to FB
+				//
+				if (connectedToFb == true)
+				{
+					// yes, save FB output value to shadow signal with GUID == outPin.guid()
+					//
+					result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
+				}
+				else
+				{
+					// output pin is not connected?
+					//
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+				}
 			}
 
 			if (result == false)
@@ -6862,6 +6895,42 @@ namespace Builder
 		{
 			m_appLogicItem.m_fblItem->toAfbElement()->setAfbParamByOpName(param.opName(), param.value());
 		}
+	}
+
+
+	AppItem::Type AppItem::type() const
+	{
+		if (isSignal() == true)
+		{
+			return Type::Signal;
+		}
+
+		if (isFb() == true)
+		{
+			return Type::Fb;
+		}
+
+		if (isConst() == true)
+		{
+			return Type::Const;
+		}
+
+		if (isTransmitter() == true)
+		{
+			return Type::Transmitter;
+		}
+
+		if (isReceiver() == true)
+		{
+			return Type::Receiver;
+		}
+
+		if (isTerminator() == true)
+		{
+			return Type::Terminator;
+		}
+
+		return Type::Unknown;
 	}
 
 

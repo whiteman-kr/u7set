@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTranslator>
+
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
@@ -9,8 +11,7 @@
 #include "LogFile.h"
 #include "UserManager.h"
 #include "TuningObjectManager.h"
-#include <QTranslator>
-
+#include "SchemaStorage.h"
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +34,8 @@ private:
 private:
 	ConfigController m_configController;
 
+	SchemaStorage m_schemaStorage;
+
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
@@ -40,7 +43,7 @@ private:
     int m_mainWindowTimerId = -1;
 
 signals:
-	void signalsUpdated();
+	void configurationUpdated();
 
 private slots:
 	void slot_configurationArrived(ConfigSettings settings);
@@ -72,8 +75,8 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarConnectionState = nullptr;
+	QLabel* m_statusBarConfigConnection = nullptr;
+	QLabel* m_statusBarTuningConnection = nullptr;
 
 
 

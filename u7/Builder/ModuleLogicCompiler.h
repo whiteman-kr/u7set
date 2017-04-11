@@ -6,12 +6,14 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/ModuleConfiguration.h"
 
-#include "../Builder/Parser.h"
-#include "../Builder/BuildResultWriter.h"
-#include "../Builder/ApplicationLogicCode.h"
-#include "../Builder/OptoModule.h"
-#include "../Builder/LmMemoryMap.h"
 #include "../TuningService/TuningDataStorage.h"
+
+#include "Parser.h"
+#include "BuildResultWriter.h"
+#include "ApplicationLogicCode.h"
+#include "OptoModule.h"
+#include "LmMemoryMap.h"
+#include "ComparatorStorage.h"
 
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -117,6 +119,17 @@ namespace Builder
 		QHash<QString, int> m_opNameToIndexMap;
 
 	public:
+		enum Type
+		{
+			Unknown,
+			Signal,
+			Fb,
+			Const,
+			Transmitter,
+			Receiver,
+			Terminator
+		};
+
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
 		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
@@ -134,6 +147,8 @@ namespace Builder
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
 		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
 
+		Type type() const;
+
 		bool hasRam() const { return afb().hasRam(); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
@@ -145,6 +160,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+
+		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
 		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
 
@@ -482,6 +499,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+		ComparatorStorage* m_cmpStorage = nullptr;
 
 		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 

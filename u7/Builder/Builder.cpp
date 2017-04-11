@@ -167,7 +167,6 @@ namespace Builder
 				break;
 			}
 
-
             //
             // Check child restirictions
             //
@@ -274,8 +273,9 @@ namespace Builder
 			// Compile application logic
 			//
 			Tuning::TuningDataStorage tuningDataStorage;
+			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &lmDescriptions, &appLogicData, &tuningDataStorage, &buildWriter);
+			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &lmDescriptions, &appLogicData, &tuningDataStorage, &comparatorStorage, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1124,12 +1124,23 @@ namespace Builder
 													LmDescriptionSet* lmDescriptions,
 													AppLogicData* appLogicData,
 													Tuning::TuningDataStorage* tuningDataStorage,
+													ComparatorStorage* comparatorStorage,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(subsystems, equipmentSet, optoModuleStorage, connections, signalSet, lmDescriptions, appLogicData, tuningDataStorage, buildResultWriter, m_log);
+		ApplicationLogicCompiler appLogicCompiler(subsystems,
+												  equipmentSet,
+												  optoModuleStorage,
+												  connections,
+												  signalSet,
+												  lmDescriptions,
+												  appLogicData,
+												  tuningDataStorage,
+												  comparatorStorage,
+												  buildResultWriter,
+												  m_log);
 
 		bool result = appLogicCompiler.run();
 

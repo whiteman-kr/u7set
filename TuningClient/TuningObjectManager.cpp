@@ -9,13 +9,10 @@ TuningObjectManager::TuningObjectManager(ConfigController* configController, con
       m_cfgController(configController)
 {
     assert(m_cfgController);
-
-    qDebug() << "TuningObjectManager::TuningObjectManager(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)";
 }
 
 TuningObjectManager::~TuningObjectManager()
 {
-    qDebug() << "TuningObjectManager::~TuningObjectManager()";
 }
 
 bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCode)
@@ -83,13 +80,13 @@ QStringList TuningObjectManager::tuningSourcesEquipmentIds()
 
 void TuningObjectManager::onClientThreadStarted()
 {
-    qDebug() << "TuningObjectManager::onClientThreadStarted()";
+	//qDebug() << "TuningObjectManager::onClientThreadStarted()";
 
     connect(m_cfgController, &ConfigController::configurationArrived,
             this, &TuningObjectManager::slot_configurationArrived,
             Qt::QueuedConnection);
 
-    connect(theMainWindow, &MainWindow::signalsUpdated, this, &TuningObjectManager::slot_signalsUpdated);
+    connect(theMainWindow, &MainWindow::configurationUpdated, this, &TuningObjectManager::slot_signalsUpdated);
 
 
     return;
@@ -97,7 +94,7 @@ void TuningObjectManager::onClientThreadStarted()
 
 void TuningObjectManager::onClientThreadFinished()
 {
-    qDebug() << "TuningObjectManager::onClientThreadFinished()";
+	//qDebug() << "TuningObjectManager::onClientThreadFinished()";
 
     //theSignals.reset();
 }
@@ -718,6 +715,18 @@ void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& 
     }
 
     l.unlock();
+}
+
+QString TuningObjectManager::getStateToolTip()
+{
+	Tcp::ConnectionState connectionState = getConnectionState();
+
+	QString result = tr("Tuning Service connection\r\n\r\n");
+	result += tr("IP address (primary): %1\r\n").arg(serverAddressPort(0).addressPortStr());
+	result += tr("IP address (secondary): %1\r\n").arg(serverAddressPort(1).addressPortStr());
+	result += tr("Connection: ") + (connectionState.isConnected ? tr("established\r\n") : tr("no connection\r\n"));
+
+	return result;
 }
 
 QString TuningObjectManager::networkErrorStr(NetworkError error)

@@ -7,7 +7,7 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-    TuningWorkspace(const TuningObjectStorage* objects, QWidget* parent);
+	TuningWorkspace(const TuningObjectStorage* objects, SchemaStorage *schemaStorage, QWidget* parent);
 	~TuningWorkspace();
 
 private:
@@ -19,6 +19,7 @@ private:
 private:
 
     TuningObjectStorage m_objects;
+	SchemaStorage* m_schemaStorage = nullptr;
 
 	QTreeWidget* m_filterTree = nullptr;
     QLineEdit* m_treeMask = nullptr;

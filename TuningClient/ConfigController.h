@@ -9,38 +9,8 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
 
-class ConfigConnection
-{
-	ConfigConnection() {}
+#include "Settings.h"
 
-public:
-	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
-
-	QString equipmentId() const;
-	QString ip() const;
-	int port() const;
-
-	HostAddressPort address() const;
-
-protected:
-	QString m_equipmentId;
-	QString m_ip;
-	int m_port;
-
-	friend struct ConfigSettings;
-};
-
-struct ConfigSettings
-{
-	ConfigConnection tuns1;				// Tuning Service connection params
-	ConfigConnection tuns2;				// Tuning Service connection params
-
-	bool updateFilters = false;
-	bool updateSchemas = false;
-	bool updateSignals = false;
-
-	QString errorMessage;				// Parsing error message, empty if no errors
-};
 
 class ConfigController : public QObject
 {
@@ -55,17 +25,17 @@ public:
 	// Methods
 	//
 public:
-	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFile(const QString& pathFileName, QByteArray* fileData);
 
+	bool requestObjectFilters();
+	bool requestSchemasDetails();
+	bool requestTuningSignals();
+
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
-	bool getFileById(const QString& id, QByteArray* fileData);
 
 	Tcp::ConnectionState getConnectionState() const;
+	QString getStateToolTip();
 
-	bool getObjectFilters();
-	bool getSchemasDetails();
-	bool getTuningSignals();
 	// signals
 	//
 signals:
@@ -79,9 +49,14 @@ public slots:
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
+
 private:
+
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
+	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray &buildFileInfoArray, ConfigSettings* outSetting);
+
+	void addEventMessage(const QString& text);
 
 	// Public properties
 public:
@@ -93,13 +68,14 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	mutable QMutex m_mutex;
-
 	QWidget* m_parent = nullptr;
 
-	QString m_md5Filters;
-	QString m_md5Schemas;
-	QString m_md5Signals;
+	std::map<QString, QString> m_filesMD5Map;
+
+	HostAddressPort m_address1;
+	HostAddressPort m_address2;
+
+	QStringList m_eventLog;
 };
 
 

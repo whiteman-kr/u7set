@@ -915,11 +915,29 @@ namespace Hardware
 		m_equipmentID = module->equipmentIdTemplate();
 		m_place = module->place();
 
-		m_optoInterfaceDataOffset = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
-		m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
-		m_optoPortAppDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
-		m_optoPortAppDataSize = m_lmDescription->optoInterface().m_optoPortAppDataSize;
-		m_optoPortCount = m_lmDescription->optoInterface().m_optoPortCount;
+		if (module->isLogicModule() == true)
+		{
+			m_optoInterfaceDataOffset = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
+			m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
+			m_optoPortAppDataOffset = m_lmDescription->optoInterface().m_optoPortAppDataOffset;
+			m_optoPortAppDataSize = m_lmDescription->optoInterface().m_optoPortAppDataSize;
+			m_optoPortCount = m_lmDescription->optoInterface().m_optoPortCount;
+		}
+		else
+		{
+			bool result = true;
+
+			result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "OptoPortDataSize", &m_optoPortDataSize, log);
+			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataOffset", &m_optoPortAppDataOffset, log);
+			result &= DeviceHelper::getIntProperty(module, "OptoPortAppDataSize", &m_optoPortAppDataSize, log);
+			result &= DeviceHelper::getIntProperty(module, "OptoPortCount", &m_optoPortCount, log);
+
+			if (result == false)
+			{
+				return;
+			}
+		}
 
 		// set actual OptoInterfaceDataOffset for OCM module according to place of module
 		//

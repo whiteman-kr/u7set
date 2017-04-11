@@ -2,7 +2,7 @@
 #define OBJECTFILTER_H
 
 #include "Stable.h"
-#include "../lib/TuningObject.h"
+#include "../lib/Tuning/TuningObject.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Hash.h"
 

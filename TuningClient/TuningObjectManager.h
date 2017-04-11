@@ -2,7 +2,7 @@
 #define OBJECTMANAGER_H
 
 #include "Stable.h"
-#include "../lib/TuningObject.h"
+#include "../lib/Tuning/TuningObject.h"
 #include "TuningObjectManager.h"
 
 #include "../Proto/network.pb.h"
@@ -61,6 +61,8 @@ public:
     void writeTuningSignal(Hash hash, float value);
 
     void writeModifiedTuningObjects(std::vector<TuningObject>& objects);
+
+	QString getStateToolTip();
 
 private:
 
@@ -147,6 +149,7 @@ private:
 
     int m_readTuningSignalIndex = 0;
     int m_readTuningSignalCount = 0;
+
 };
 
 
