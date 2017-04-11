@@ -2053,11 +2053,13 @@ namespace Builder
 
 		do
 		{
-			if (!writeFbInputSignals(appFb)) break;
+			if (writeFbInputSignals(appFb) == false) break;
 
-			if (!startFb(appFb)) break;
+			if (startFb(appFb) == false) break;
 
-			if (!readFbOutputSignals(appFb)) break;
+			if (readFbOutputSignals(appFb) == false) break;
+
+			if (addToComparatorStorage(appFb) == false) break;
 
 			result = true;
 		}
@@ -2736,9 +2738,6 @@ namespace Builder
 		return false;
 	}
 
-
-
-
 	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
 	{
 		bool result = true;
@@ -2800,7 +2799,7 @@ namespace Builder
 				default:
 					{
 						std::shared_ptr<VFrame30::FblItemRect> item = connectedPinParent->itemRect();
-						QString q = item->metaObject()->className();
+						qDebug() << item->metaObject()->className();
 						LOG_INTERNAL_ERROR(m_log);
 						result = false;
 					}
@@ -2816,7 +2815,7 @@ namespace Builder
 			{
 				// output pin is not connected to any signal or terminator
 				//
-				// may be it directly connected to FB
+				// may be it directly connected to FB?
 				//
 				if (connectedToFb == true)
 				{
@@ -2840,6 +2839,25 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+
+	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
+	{
+		if (appFb == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (appFb->isComparator() == false)
+		{
+			return true;
+		}
+
+
+		return true;
 	}
 
 
@@ -7011,6 +7029,12 @@ namespace Builder
 		}
 	}
 
+	bool AppFb::isComparator() const
+	{
+		quint16 oc = opcode();
+
+		return oc ==  BCOMP_OPCODE || oc == DCOMP_OPCODE;
+	}
 
 	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
