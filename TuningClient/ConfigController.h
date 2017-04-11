@@ -39,7 +39,9 @@ public:
 	// signals
 	//
 signals:
-	void configurationArrived(ConfigSettings settings);
+	void configurationArrived();
+	void signalsArrived();
+	void serversArrived(HostAddressPort address1, HostAddressPort address2);
 
 	// slots
 	//

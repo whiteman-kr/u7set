@@ -1,7 +1,7 @@
 #include "DialogTuningSourceInfo.h"
 #include "ui_DialogTuningSourceInfo.h"
 #include "MainWindow.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 
 DialogTuningSourceInfo::DialogTuningSourceInfo(QWidget *parent, quint64 tuningSourceId) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),

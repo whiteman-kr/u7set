@@ -1,7 +1,7 @@
 #include "DialogTuningSources.h"
 #include "ui_DialogTuningSources.h"
 #include "MainWindow.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 #include "DialogTuningSourceInfo.h"
 
 DialogTuningSources::DialogTuningSources(QWidget *parent) :

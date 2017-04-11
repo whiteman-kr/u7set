@@ -129,7 +129,7 @@ SOURCES +=\
     DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
-    TuningObjectManager.cpp \
+    ../lib/Tuning/TuningObjectManager.cpp \
     TuningClientFilterEditor.cpp \
     DialogPassword.cpp \
     Main.cpp \
@@ -139,7 +139,8 @@ SOURCES +=\
     ../lib/Tuning/TuningObject.cpp \
     SchemaStorage.cpp \
     TuningSchemaView.cpp \
-    TuningSchemaWidget.cpp
+    TuningSchemaWidget.cpp \
+    ../lib/Tuning/TuningController.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -170,7 +171,7 @@ HEADERS  += MainWindow.h \
     DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
-    TuningObjectManager.h \
+    ../lib/Tuning/TuningObjectManager.h \
     TuningClientFilterEditor.h \
     DialogPassword.h \
     Main.h \
@@ -180,7 +181,8 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningObject.h \
     SchemaStorage.h \
     TuningSchemaView.h \
-    TuningSchemaWidget.h
+    TuningSchemaWidget.h \
+    ../lib/Tuning/TuningController.h
 
 FORMS    += \
     DialogSettings.ui \
