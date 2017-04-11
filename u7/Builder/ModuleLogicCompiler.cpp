@@ -2842,7 +2842,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::addToComapratorStorage(const AppFb* appFb)
+	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -2856,13 +2856,6 @@ namespace Builder
 			return true;
 		}
 
-
-		////////////////////////////////////////////////////
-
-		sd/fls;dflm,s;ldf
-
-
-		////////////////////////////////////////////////////
 
 		return true;
 	}

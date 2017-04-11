@@ -643,7 +643,7 @@ namespace Builder
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool startFb(const AppFb* appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
-		bool addToComapratorStorage(const AppFb *appFb);
+		bool addToComparatorStorage(const AppFb *appFb);
 
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
