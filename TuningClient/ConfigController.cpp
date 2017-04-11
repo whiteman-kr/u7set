@@ -15,6 +15,7 @@ ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, Ho
 	  m_address2(address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
+	qRegisterMetaType<HostAddressPort>("HostAddressPort");
 
 	// Communication instance no
 	//
