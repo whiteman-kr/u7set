@@ -76,7 +76,7 @@ std::shared_ptr<VFrame30::Schema> SchemaStorage::loadSchema(QString schemaId)
 
 }
 
-void SchemaStorage::slot_configurationArrived(ConfigSettings configuration)
+void SchemaStorage::slot_configurationArrived()
 {
 	m_schemas.clear();
 }

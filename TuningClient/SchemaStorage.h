@@ -16,7 +16,7 @@ protected:
 	std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId);
 
 protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived();
 
 private:
 	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;		// map by SchemaID

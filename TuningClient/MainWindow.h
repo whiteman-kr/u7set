@@ -10,7 +10,7 @@
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 #include "SchemaStorage.h"
 
 namespace Ui {
@@ -42,17 +42,11 @@ private:
 
     int m_mainWindowTimerId = -1;
 
-signals:
-	void configurationUpdated();
-
 private slots:
-	void slot_configurationArrived(ConfigSettings settings);
-	void slot_tuningSourcesArrived();
-	void slot_tuningConnectionFailed();
+	void slot_configurationArrived();
     void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
 public slots:
-
 	void exit();
     void runPresetEditor();
 	void runUsersEditor();

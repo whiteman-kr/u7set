@@ -1,7 +1,7 @@
 #include "Stable.h"
 #include "ConfigController.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
 
@@ -379,6 +379,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool someFilesUpdated = false;
 
+	bool signalsUpdated = false;
+
 
 	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
@@ -420,29 +422,47 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
 			{
-				requestTuningSignals();
-			}
-
-			/*
-			// Schemas
-
-			for (auto schemaID : readSettings.schemaFiles)
-			{
-				if (f.ID == schemaID)
+				if (requestTuningSignals() == true)
 				{
-					requestSchema(f.ID);
+					signalsUpdated = true;
 				}
 			}
-			*/
 		}
 	}
 
-	if (someFilesUpdated == true)
-	{
-		// Emit signal to inform everybody about new configuration
-		//
 
-		emit configurationArrived(readSettings);
+	bool apperanceUpdated = false;
+
+	if (theConfigSettings.autoApply != readSettings.autoApply)
+	{
+		apperanceUpdated = true;
+	}
+
+	bool serversUpdated = true;
+
+	if (theConfigSettings.tuns1.address().address() == readSettings.tuns1.address().address() && theConfigSettings.tuns2.address().address() == readSettings.tuns2.address().address())
+	{
+		serversUpdated = false;
+	}
+
+	theConfigSettings = readSettings;
+
+	// Emit signals to inform everybody about new configuration
+	//
+
+	if (serversUpdated == true)
+	{
+		emit serversArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address());
+	}
+
+	if (signalsUpdated == true)
+	{
+		emit signalsArrived();
+	}
+
+	if (someFilesUpdated == true || apperanceUpdated == true)
+	{
+		emit configurationArrived();
 	}
 
 	return;

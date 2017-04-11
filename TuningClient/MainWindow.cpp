@@ -45,13 +45,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	// TcpSignalClient
 	//
 	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-    theObjectManager = new TuningObjectManager(&m_configController, fakeAddress, fakeAddress);
+	theObjectManager = new TuningObjectManager(fakeAddress, fakeAddress, theSettings.instanceStrId(), theSettings.m_requestInterval);
 
     m_tcpClientThread = new SimpleThread(theObjectManager);
 	m_tcpClientThread->start();
 
-    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
-    connect(theObjectManager, &TuningObjectManager::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+
+	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+	connect(&m_configController, &ConfigController::signalsArrived, theObjectManager, &TuningObjectManager::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::serversArrived, theObjectManager, &TuningObjectManager::slot_serversArrived,
+			Qt::QueuedConnection);
 
 	QString errorCode;
 
@@ -67,7 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_mainWindowTimerId = startTimer(100);
 
-	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+
+
 	m_configController.start();
 }
 
@@ -282,12 +286,8 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 }
 
-void MainWindow::slot_configurationArrived(ConfigSettings settings)
+void MainWindow::slot_configurationArrived()
 {
-	emit configurationUpdated();
-
-	theConfigSettings = settings;
-
 	TuningObjectStorage objects = theObjectManager->objectStorage();
 
 	theFilters.removeAutomaticFilters();
@@ -319,16 +319,6 @@ void MainWindow::slot_configurationArrived(ConfigSettings settings)
     createWorkspace(&objects);
 
     return;
-}
-
-void MainWindow::slot_tuningSourcesArrived()
-{
-
-}
-
-void MainWindow::slot_tuningConnectionFailed()
-{
-
 }
 
 void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
@@ -365,7 +355,7 @@ void MainWindow::runPresetEditor()
                          this);
 
     connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
-	connect(this, &MainWindow::configurationUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
 
     if (d.exec() == QDialog::Accepted)
     {
