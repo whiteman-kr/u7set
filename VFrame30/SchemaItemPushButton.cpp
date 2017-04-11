@@ -35,14 +35,23 @@ namespace VFrame30
 
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptAfterCreate, SchemaItemPushButton::setScriptAfterCreate);
 		p->setDescription(PropertyNames::widgetPropAfterCreate);
+		p->setIsScript(true);
+
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptClicked, SchemaItemPushButton::setScriptClicked);
 		p->setDescription(PropertyNames::pushButtonPropClicked);
+		p->setIsScript(true);
+
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptPressed, SchemaItemPushButton::setScriptPressed);
 		p->setDescription(PropertyNames::pushButtonPropPressed);
+		p->setIsScript(true);
+
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptReleased, SchemaItemPushButton::setScriptReleased);
 		p->setDescription(PropertyNames::pushButtonPropReleased);
+		p->setIsScript(true);
+
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptToggled, SchemaItemPushButton::setScriptToggled);
 		p->setDescription(PropertyNames::pushButtonPropToggled);
+		p->setIsScript(true);
 
 		return;
 	}
