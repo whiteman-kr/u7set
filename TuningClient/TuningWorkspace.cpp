@@ -3,23 +3,13 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, SchemaStorage* schemaStorage, QWidget *parent) :
-	m_schemaStorage(schemaStorage),
+TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *parent) :
+	m_objects(*objects),
 	QWidget(parent)
 {
 
-    if (objects == nullptr)
-    {
-        assert(objects);
-    }
-    else
-    {
-        m_objects = *objects;
-    }
-
     QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
-
 
     // Fill tree
     //
@@ -33,22 +23,7 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, SchemaStora
 
 	int tuningPageIndex = 0;
 
-	// Tabs by schemas
-
-	int TabsSchemasCount = 0;
-
-	for (auto schema : theConfigSettings.schemasID)
-	{
-		TuningPage* tp = new TuningPage(tuningPageIndex++, schema, m_schemaStorage, &m_objects);
-
-		tuningPages.push_back(std::make_pair(tp, schema));
-
-		TabsSchemasCount++;
-	}
-
 	// Tabs by filters
-
-	int TabsFiltersCount = 0;
 
 	int count = theFilters.m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
@@ -70,22 +45,8 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, SchemaStora
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
 		tuningPages.push_back(std::make_pair(tp, f->caption()));
-
-		TabsFiltersCount++;
 	}
 
-	if (TabsFiltersCount == 0 && TabsSchemasCount > 0)
-	{
-		// Create a tab in addition to schemas
-
-		std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
-
-		TuningPage* tp = new TuningPage(tuningPageIndex, emptyTabFilter, &m_objects);
-
-		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
-
-		tuningPages.push_back(std::make_pair(tp, tr("Tuning Signals")));
-	}
 
 
 	if (tuningPages.empty() == true)

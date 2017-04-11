@@ -15,6 +15,7 @@ ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, Ho
 	  m_address2(address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
+	qRegisterMetaType<HostAddressPort>("HostAddressPort");
 
 	// Communication instance no
 	//
@@ -603,6 +604,11 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			int tunsPort2 = dasXmlElement.attribute("port2").toInt();
 
 			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
+			outSetting->showTuningWorkspace = dasXmlElement.attribute("showTuningWorkspace") == "true" ? true : false;
+			outSetting->showSchemasWorkspace = dasXmlElement.attribute("showSchemasWorkspace") == "true" ? true : false;
+			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
+			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
+			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 
 			outSetting->tuns1 = ConfigConnection(tunsId1, tunsIp1, tunsPort1);
 			outSetting->tuns2= ConfigConnection(tunsId2, tunsIp2, tunsPort2);
