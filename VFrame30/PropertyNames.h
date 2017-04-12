@@ -35,8 +35,10 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
+		static const QString placeholderText;
 		static const QString label;
 		static const QString caption;
+		static const QString maxLength;
 
 		static const QString userText;
 		static const QString userTextPos;
@@ -58,12 +60,16 @@ namespace VFrame30
 		static const QString autoRepeatInterval;
 		static const QString styleSheet;
 		static const QString toolTip;
+		static const QString readOnly;
 
 		static const QString afterCreate;
 		static const QString clicked;
 		static const QString pressed;
 		static const QString released;
 		static const QString toggled;
+		static const QString editingFinished;
+		static const QString returnPressed;
+		static const QString textChanged;
 
 		static const QString alignHorz;
 		static const QString alignVert;
@@ -99,6 +105,19 @@ namespace VFrame30
 		static const QString pushButtonPropPressed;
 		static const QString pushButtonPropReleased;
 		static const QString pushButtonPropToggled;
+
+		static const QString lineEditDefaultStyleSheet;
+		static const QString lineEditDefaultEventScript;
+		static const QString lineEditPropText;
+		static const QString lineEditPropPlaceholderText;
+		static const QString lineEditPropMaxLength;
+		static const QString lineEditPropReadOnly;
+		static const QString lineEditPropEditingFinished;
+		static const QString lineEditPropReturnPressed;
+		static const QString lineEditPropTextChanged;
+
+		static const QString scriptGlobalVariableView;
+		static const QString scriptGlobalVariableTuning;
 	};
 
 }

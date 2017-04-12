@@ -28,8 +28,10 @@ namespace VFrame30
 	const QString PropertyNames::drawRect("DrawRect");
 	const QString PropertyNames::textColor("TextColor");
 	const QString PropertyNames::text("Text");
+	const QString PropertyNames::placeholderText("PlaceholderText");
 	const QString PropertyNames::label("Label");
 	const QString PropertyNames::caption("Caption");
+	const QString PropertyNames::maxLength("MaxLength");
 
 	const QString PropertyNames::userText("UserText");
 	const QString PropertyNames::userTextPos("UserTextPos");
@@ -51,12 +53,16 @@ namespace VFrame30
 	const QString PropertyNames::autoRepeatInterval("AutoRepeatInterval");
 	const QString PropertyNames::styleSheet("StyleSheet");
 	const QString PropertyNames::toolTip("ToolTip");
+	const QString PropertyNames::readOnly("ReadOnly");
 
 	const QString PropertyNames::afterCreate("AfterCreate");
 	const QString PropertyNames::clicked("Clicked");
 	const QString PropertyNames::pressed("Pressed");
 	const QString PropertyNames::released("Released");
 	const QString PropertyNames::toggled("Toggled");
+	const QString PropertyNames::editingFinished("EditingFinished");
+	const QString PropertyNames::returnPressed("ReturnPressed");
+	const QString PropertyNames::textChanged("TextChanged");
 
 	const QString PropertyNames::alignHorz("AlignHorz");
 	const QString PropertyNames::alignVert("AlignVert");
@@ -85,6 +91,10 @@ R"_(QPushButton {
 	border: 1px outset #8f8f91;
 	border-radius: 4px;
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #dadbde);
+	font-family: "Arial";
+	font-size: 14pt;		/* px: pixels, pt: the size of one point (i.e., 1/72 of an inch) */
+	font-style: Normal;	/* Normal, Italic, Oblique */
+	font-weight: Normal; 	/* Normal, Bold, 100, 200 ... 900 */
 }
 QPushButton:pressed {
 	border: 1px inset #8f8f91;
@@ -108,7 +118,7 @@ QPushButton:default {
 )_");
 
 	const QString PropertyNames::pushButtonDefaultEventScript(
-R"_(function(schemaItem, schemaView, pushButtonWidget, checked)
+R"_(function(schemaItem, pushButtonWidget, checked)
 {
 }
 )_");
@@ -123,4 +133,46 @@ R"_(function(schemaItem, schemaView, pushButtonWidget, checked)
 	const QString PropertyNames::pushButtonPropPressed("Script code for signal Pressed().\nThis signal is emitted when the button is pressed down.");
 	const QString PropertyNames::pushButtonPropReleased("Script code for signal Released().\nThis signal is emitted when the button is pressed released.");
 	const QString PropertyNames::pushButtonPropToggled("Script code for signal Toggled().\nThis signal is emitted whenever a checkable button changes its state.\nChecked is true if the button is checked, or false if the button is unchecked. This may be the result of a user action, Click() slot activation, or because setChecked() is called.");
+
+	const QString PropertyNames::lineEditDefaultStyleSheet = {
+R"_(QLineEdit {
+	border-width: 1px;
+	border-style: solid;
+	border-color: #404040;
+	background-color: white;
+
+	font-family: "Consolas";
+	font-size: 14pt;		/* px: pixels, pt: the size of one point (i.e., 1/72 of an inch) */
+	font-style: Normal;		/* Normal, Italic, Oblique */
+	font-weight: Normal;	/* Normal, Bold, 100, 200 ... 900 */
+}
+QLineEdit:focus {
+	border-width: 2px
+}
+QLineEdit:hover {
+	border-width: 2px
+})_"};
+
+	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, lineEditWidget, text)\n{\n}"};
+	const QString PropertyNames::lineEditPropText("Property holds the line edit's text.");
+	const QString PropertyNames::lineEditPropPlaceholderText("Property holds the line edit's placeholder text.\n"
+															 "Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty.\n"
+															 "Normally, an empty line edit shows the placeholder text even when it has focus.\n"
+															 "However, if the content is horizontally centered, the placeholder text is not displayed under the cursor when the line edit has focus.\n"
+															 "By default, this property contains an empty string.");
+	const QString PropertyNames::lineEditPropMaxLength("Property holds the maximum permitted length of the text.\n"
+													   "If the text is too long, it is truncated at the limit.\n"
+													   "If truncation occurs any selected text will be unselected, the cursor position is set to 0 and the first part of the string is shown.");
+
+   const QString PropertyNames::lineEditPropReadOnly("This property holds whether the line edit is read only.\n"
+													 "In read-only mode, the user can still copy the text to the clipboard, or drag and drop the text, but cannot edit it.\n"
+													 "LineEdit does not show a cursor in read-only mode.\n"
+													 "By default, this property is false.");
+
+   const QString PropertyNames::lineEditPropEditingFinished("This signal is emitted when the Return or Enter key is pressed or the line edit loses focus.");
+   const QString PropertyNames::lineEditPropReturnPressed("This signal is emitted when the Return or Enter key is pressed.");
+   const QString PropertyNames::lineEditPropTextChanged("This signal is emitted whenever the text changes.\nThis signal is also emitted when the text is changed programmatically.");
+
+   const QString PropertyNames::scriptGlobalVariableView = {"view"};
+   const QString PropertyNames::scriptGlobalVariableTuning = {"tuning"};
 }

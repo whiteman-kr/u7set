@@ -24,6 +24,7 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemPushButton.h"
+#include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
 #include "LogicModule.h"
@@ -2178,15 +2179,15 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
-	m_addTextEditAction = new QAction(tr("TextEdit"), this);
-	m_addTextEditAction->setEnabled(true);
-	m_addTextEditAction->setIcon(QIcon(":/Images/Images/TextEdit.svg"));
-//	connect(m_addTextEditAction, &QAction::triggered,
-//			[this](bool)
-//			{
-//				auto item = std::make_shared<VFrame30::SchemaItemPushButton>(schema()->unit());
-//				addItem(item);
-//			});
+	m_addLineEditAction = new QAction(tr("LineEdit"), this);
+	m_addLineEditAction->setEnabled(true);
+	m_addLineEditAction->setIcon(QIcon(":/Images/Images/SchemaItemLineEdit.svg"));
+	connect(m_addLineEditAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemLineEdit>(schema()->unit());
+				addItem(item);
+			});
 
 	//
 	// Edit
@@ -2533,7 +2534,7 @@ void EditSchemaWidget::createActions()
 
 		if (isMonitorSchema() == true)
 		{
-			m_addMenu->addAction(m_addTextEditAction);
+			m_addMenu->addAction(m_addLineEditAction);
 		}
 
 	m_editMenu = new QMenu(this);
