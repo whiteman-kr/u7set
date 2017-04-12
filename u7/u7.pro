@@ -188,7 +188,8 @@ SOURCES +=\
     ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
     LogicModule.cpp \
-    Builder/ComparatorStorage.cpp
+    Builder/ComparatorStorage.cpp \
+    ../lib/CodeEditor.cpp
 
 
 HEADERS  += \
@@ -314,7 +315,8 @@ HEADERS  += \
     ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \
     LogicModule.h \
-    Builder/ComparatorStorage.h
+    Builder/ComparatorStorage.h \
+    ../lib/CodeEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -323,7 +325,6 @@ FORMS    += \
     LoginDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
-    DialogFileEditor.ui \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \

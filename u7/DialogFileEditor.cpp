@@ -1,30 +1,46 @@
 #include "DialogFileEditor.h"
-#include "ui_DialogFileEditor.h"
 #include "xmlsyntaxhighlighter.h"
 #include "Settings.h"
 #include "../VFrame30/Afb.h"
 
 DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-    ui(new Ui::DialogFileEditor),
     m_pData(pData),
     m_pDbController(pDbController),
     m_readOnly(readOnly)
 {
-    ui->setupUi(this);
-    setWindowTitle(fileName);
+
+	setWindowTitle(fileName);
+
+	// Create Text Editor
+	//
 
     QString ext = QFileInfo(fileName).suffix();
-    if (ext == tr("descr"))
+	if (ext == tr("js"))
     {
-        new CppSyntaxHighlighter(ui->m_text->document());
-    }
-    if (ext == tr("afb") || ext == tr("xml") || ext == tr("xsd"))
-    {
-        new XmlSyntaxHighlighter(ui->m_text->document());
-    }
+		m_textEditor = new ExtWidgets::CodeEditor();
+		new CppSyntaxHighlighter(m_textEditor->document());
+	}
+	else
+	{
+		if (ext == tr("afb") || ext == tr("xml") || ext == tr("xsd"))
+		{
+			m_textEditor = new ExtWidgets::CodeEditor();
+			new XmlSyntaxHighlighter(m_textEditor->document());
+		}
+		else
+		{
+			m_textEditor = new QPlainTextEdit();
+		}
+	}
 
-    if (pData == nullptr)
+	if (m_textEditor == nullptr)
+	{
+		Q_ASSERT(m_textEditor);
+		return;
+	}
+
+	if (pData == nullptr)
     {
         Q_ASSERT(pData);
         return;
@@ -32,29 +48,61 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
     QString s(*pData);
 
-	ui->m_text->blockSignals(true);
+	// Set font and tab space
 
-    ui->m_text->setPlainText(s);
-    ui->m_text->setFont(QFont("Courier", font().pointSize() + 2));
+	m_textEditor->setFont(QFont("Courier", font().pointSize() + 2));
 
-	ui->m_text->blockSignals(false);
+	const int tabStop = 4;  // 4 characters
+	QString spaces;
+	for (int i = 0; i < tabStop; ++i)
+	{
+		spaces += " ";
+	}
+
+	QFontMetrics metrics(m_textEditor->font());
+	m_textEditor->setTabStopWidth(metrics.width(spaces));
+
+	m_textEditor->setPlainText(s);
+
+	// Buttons
 
 	if (fileName.right(4) == ".afb")
 	{
-		ui->btnValidate->setVisible(true);
-		ui->btnLoadFbl->setVisible(true);
+		m_buttonValidate = new QPushButton("Validate...");
+		connect(m_buttonValidate, &QPushButton::clicked, this, &DialogFileEditor::on_validate_clicked);
 	}
-	else
+
+	m_buttonOK = new QPushButton(tr("OK"));
+	m_buttonCancel = new QPushButton(tr("Cancel"));
+
+	connect(m_buttonOK, &QPushButton::clicked, this, &DialogFileEditor::on_ok_clicked);
+	connect(m_buttonCancel, &QPushButton::clicked, this, &DialogFileEditor::on_cancel_clicked);
+
+	connect (m_textEditor, &QPlainTextEdit::textChanged, this, &DialogFileEditor::on_text_changed);
+
+	// Layouts
+
+	QHBoxLayout* buttonLayout = new QHBoxLayout();
+
+	if (m_buttonValidate != nullptr)
 	{
-		ui->btnValidate->setVisible(false);
-		ui->btnLoadFbl->setVisible(false);
+		buttonLayout->addWidget(m_buttonValidate);
 	}
+
+	buttonLayout->addStretch();
+	buttonLayout->addWidget(m_buttonOK);
+	buttonLayout->addWidget(m_buttonCancel);
+
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+
+	mainLayout->addWidget(m_textEditor);
+	mainLayout->addLayout(buttonLayout);
 
 	if (readOnly == true)
     {
-		ui->btnOk->setEnabled(false);
+		m_buttonOK->setEnabled(false);
         setWindowTitle(windowTitle() + tr(" [View Only]"));
-        ui->m_text->setReadOnly(true);
+		m_textEditor->setReadOnly(true);
     }
 
     if (theSettings.m_DialogTextEditorWindowPos.x() != -1 && theSettings.m_DialogTextEditorWindowPos.y() != -1)
@@ -66,7 +114,6 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
 DialogFileEditor::~DialogFileEditor()
 {
-    delete ui;
 }
 
 void DialogFileEditor::on_DialogFileEditor_finished(int result)
@@ -83,7 +130,7 @@ bool DialogFileEditor::saveChanges()
 
 	if (m_readOnly == false)
 	{
-		QString s = ui->m_text->toPlainText();
+		QString s = m_textEditor->toPlainText();
 		*m_pData = s.toUtf8();
 	}
 
@@ -145,7 +192,7 @@ void DialogFileEditor::reject()
     return;
 }
 
-void DialogFileEditor::on_btnOk_clicked()
+void DialogFileEditor::on_ok_clicked()
 {
 	if (m_modified == true)
 	{
@@ -159,18 +206,18 @@ void DialogFileEditor::on_btnOk_clicked()
 	return;
 }
 
-void DialogFileEditor::on_btnCancel_clicked()
+void DialogFileEditor::on_cancel_clicked()
 {
     reject();
 	return;
 }
 
-void DialogFileEditor::on_m_text_textChanged()
+void DialogFileEditor::on_text_changed()
 {
 	m_modified = true;
 }
 
-void DialogFileEditor::on_btnValidate_clicked()
+void DialogFileEditor::on_validate_clicked()
 {
 	if (m_pDbController->getFileList(&m_validateFiles, m_pDbController->afblFileId(), "xsd", true, this) == false)
 	{
@@ -224,7 +271,7 @@ bool DialogFileEditor::validate(int schemaFileId)
 	f->swapData(schemaData);
 
 	// Load text
-	QString s = ui->m_text->toPlainText();
+	QString s = m_textEditor->toPlainText();
 	QByteArray textData = s.toUtf8();
 
 	// Validate
@@ -266,31 +313,3 @@ bool DialogFileEditor::validate(int schemaFileId)
 	return true;
 }
 
-void DialogFileEditor::on_btnLoadFbl_clicked()
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	assert(false);
-
-//	if (m_pData == nullptr)
-//	{
-//		Q_ASSERT(m_pData);
-//		return;
-//	}
-
-//	Afb::AfbElement afb;
-
-//	QString s = ui->m_text->toPlainText();
-//	QByteArray textData = s.toUtf8();
-
-//	QXmlStreamReader xmlReader(textData);
-
-//	if (afb.loadFromXml(&xmlReader) == true)
-//	{
-//        QMessageBox::information(this, "XML Read", "XML debug read finished!");
-//	}
-//	else
-//	{
-//		QMessageBox::critical(this, "XML Read Error", xmlReader.errorString());
-//	}
-
-}

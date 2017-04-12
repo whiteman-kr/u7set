@@ -41,7 +41,7 @@
 #include "xmlsyntaxhighlighter.h"
 
 XmlSyntaxHighlighter::XmlSyntaxHighlighter(QTextDocument *parent)
-    : QSyntaxHighlighter(parent)
+	: QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
 
@@ -106,12 +106,12 @@ void XmlSyntaxHighlighter::highlightBlock(const QString &text)
 
 
 CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
-    : QSyntaxHighlighter(parent)
+	: QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
 
-    keywordFormat.setForeground(Qt::darkBlue);
-    keywordFormat.setFontWeight(QFont::Bold);
+	keywordFormat.setForeground(QBrush(QColor("#808000")));
+	//keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b"
                     << "\\bdouble\\b" << "\\benum\\b" << "\\bexplicit\\b"
@@ -122,7 +122,10 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
                     << "\\bslots\\b" << "\\bstatic\\b" << "\\bstruct\\b"
                     << "\\btemplate\\b" << "\\btypedef\\b" << "\\btypename\\b"
                     << "\\bunion\\b" << "\\bunsigned\\b" << "\\bvirtual\\b"
-                    << "\\bvoid\\b" << "\\bvolatile\\b";
+					<< "\\bvoid\\b" << "\\bvolatile\\b"<< "\\bvar\\b"
+					<< "\\bfunction\\b" << "\\breturn\\b"<< "\\bif\\b"
+					<< "\\btrue\\b" << "\\bfalse\\b";
+
     foreach (QString pattern, keywordPatterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = keywordFormat;
@@ -135,7 +138,7 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    quotationFormat.setForeground(Qt::darkGreen);
+	quotationFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegExp("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
@@ -146,12 +149,12 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
     rule.format = functionFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::red);
+	singleLineCommentFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegExp("//[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::red);
+	multiLineCommentFormat.setForeground(Qt::darkGreen);
 
     commentStartExpression = QRegExp("/\\*");
     commentEndExpression = QRegExp("\\*/");

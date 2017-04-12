@@ -2,28 +2,25 @@
 #define DIALOGFILEEDITOR_H
 
 #include <QDialog>
+#include "../lib/CodeEditor.h"
 #include "../lib/DbController.h"
-
-namespace Ui {
-class DialogFileEditor;
-}
 
 class DialogFileEditor : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent);
+	explicit DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent);
     ~DialogFileEditor();
-
 
 private slots:
 	void on_DialogFileEditor_finished(int result);
-	void on_btnOk_clicked();
-	void on_btnCancel_clicked();
-	void on_m_text_textChanged();
-	void on_btnValidate_clicked();
-	void on_btnLoadFbl_clicked();
+
+	void on_ok_clicked();
+	void on_cancel_clicked();
+	void on_text_changed();
+	void on_validate_clicked();
+
 	void on_validate(QAction* pAction);
 
 private:
@@ -34,7 +31,6 @@ private:
 
 	bool validate(int schemaFileId);
 private:
-    Ui::DialogFileEditor *ui;
 
     QByteArray* m_pData;
 
@@ -42,6 +38,11 @@ private:
 	std::vector<DbFileInfo> m_validateFiles;
 	bool m_readOnly;
 	bool m_modified = false;
+
+	QPlainTextEdit* m_textEditor = nullptr;
+	QPushButton* m_buttonValidate = nullptr;
+	QPushButton* m_buttonOK = nullptr;
+	QPushButton* m_buttonCancel = nullptr;
 };
 
 #endif // DIALOGFILEEDITOR_H
