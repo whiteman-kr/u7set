@@ -413,4 +413,14 @@ namespace VFrame30
 	{
 		return m_session;
 	}
+
+	const TuningController& SchemaView::tuningController() const
+	{
+		return m_tuningController;
+	}
+
+	TuningController& SchemaView::tuningController()
+	{
+		return m_tuningController;
+	}
 }

@@ -1,5 +1,6 @@
 #include "SchemaItemPushButton.h"
 #include "SchemaView.h"
+#include "../lib/Tuning/TuningController.h"
 
 namespace VFrame30
 {
@@ -363,20 +364,34 @@ namespace VFrame30
 		QJSValue jsSchemaItem = m_jsEngine.newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
-		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
-
 		QJSValue jsWidget = m_jsEngine.newQObject(buttonWidget);
 		QQmlEngine::setObjectOwnership(buttonWidget, QQmlEngine::CppOwnership);
 
-		//QJSValue jsChecked = {buttonWidget->isChecked()};
+		// Global Objects
+		//
+		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
+		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
+		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+		TuningController* tuningController = &schemaView->tuningController();
+
+		if (tuningController == nullptr)
+		{
+			assert(tuningController);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
+		}
+		else
+		{
+			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+		}
 
 		// Set argument list
 		//
 		QJSValueList args;
 
 		args << jsSchemaItem;
-		args << jsSchemaView;
 		args << jsWidget;
 		args << buttonWidget->isChecked();
 
@@ -392,8 +407,6 @@ namespace VFrame30
 			QMessageBox::critical(schemaView, qAppName(), "Script uncaught exception: " + jsEval.toString());
 			return;
 		}
-
-		qDebug() << "runScript result:" <<  jsResult.toString();
 
 		m_jsEngine.collectGarbage();
 	}
