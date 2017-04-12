@@ -730,6 +730,9 @@ message SchemaItemLineEdit
 	optional bool readOnly = 6;
 
     optional string scriptAfterCreate = 21;
+	optional string scriptEditingFinished = 22;
+	optional string scriptReturnPressed = 23;
+	optional string scriptTextChanged = 24;
 }
 
 

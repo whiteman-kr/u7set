@@ -67,6 +67,9 @@ namespace VFrame30
 		static const QString pressed;
 		static const QString released;
 		static const QString toggled;
+		static const QString editingFinished;
+		static const QString returnPressed;
+		static const QString textChanged;
 
 		static const QString alignHorz;
 		static const QString alignVert;
@@ -109,6 +112,9 @@ namespace VFrame30
 		static const QString lineEditPropPlaceholderText;
 		static const QString lineEditPropMaxLength;
 		static const QString lineEditPropReadOnly;
+		static const QString lineEditPropEditingFinished;
+		static const QString lineEditPropReturnPressed;
+		static const QString lineEditPropTextChanged;
 	};
 
 }

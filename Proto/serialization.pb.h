@@ -5763,6 +5763,42 @@ class SchemaItemLineEdit : public ::google::protobuf::Message {
   inline ::std::string* release_scriptaftercreate();
   inline void set_allocated_scriptaftercreate(::std::string* scriptaftercreate);
 
+  // optional string scriptEditingFinished = 22;
+  inline bool has_scripteditingfinished() const;
+  inline void clear_scripteditingfinished();
+  static const int kScriptEditingFinishedFieldNumber = 22;
+  inline const ::std::string& scripteditingfinished() const;
+  inline void set_scripteditingfinished(const ::std::string& value);
+  inline void set_scripteditingfinished(const char* value);
+  inline void set_scripteditingfinished(const char* value, size_t size);
+  inline ::std::string* mutable_scripteditingfinished();
+  inline ::std::string* release_scripteditingfinished();
+  inline void set_allocated_scripteditingfinished(::std::string* scripteditingfinished);
+
+  // optional string scriptReturnPressed = 23;
+  inline bool has_scriptreturnpressed() const;
+  inline void clear_scriptreturnpressed();
+  static const int kScriptReturnPressedFieldNumber = 23;
+  inline const ::std::string& scriptreturnpressed() const;
+  inline void set_scriptreturnpressed(const ::std::string& value);
+  inline void set_scriptreturnpressed(const char* value);
+  inline void set_scriptreturnpressed(const char* value, size_t size);
+  inline ::std::string* mutable_scriptreturnpressed();
+  inline ::std::string* release_scriptreturnpressed();
+  inline void set_allocated_scriptreturnpressed(::std::string* scriptreturnpressed);
+
+  // optional string scriptTextChanged = 24;
+  inline bool has_scripttextchanged() const;
+  inline void clear_scripttextchanged();
+  static const int kScriptTextChangedFieldNumber = 24;
+  inline const ::std::string& scripttextchanged() const;
+  inline void set_scripttextchanged(const ::std::string& value);
+  inline void set_scripttextchanged(const char* value);
+  inline void set_scripttextchanged(const char* value, size_t size);
+  inline ::std::string* mutable_scripttextchanged();
+  inline ::std::string* release_scripttextchanged();
+  inline void set_allocated_scripttextchanged(::std::string* scripttextchanged);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemLineEdit)
  private:
   inline void set_has_text();
@@ -5779,6 +5815,12 @@ class SchemaItemLineEdit : public ::google::protobuf::Message {
   inline void clear_has_readonly();
   inline void set_has_scriptaftercreate();
   inline void clear_has_scriptaftercreate();
+  inline void set_has_scripteditingfinished();
+  inline void clear_has_scripteditingfinished();
+  inline void set_has_scriptreturnpressed();
+  inline void clear_has_scriptreturnpressed();
+  inline void set_has_scripttextchanged();
+  inline void clear_has_scripttextchanged();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -5789,9 +5831,12 @@ class SchemaItemLineEdit : public ::google::protobuf::Message {
   ::google::protobuf::int32 maxlength_;
   bool readonly_;
   ::std::string* scriptaftercreate_;
+  ::std::string* scripteditingfinished_;
+  ::std::string* scriptreturnpressed_;
+  ::std::string* scripttextchanged_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15591,6 +15636,216 @@ inline void SchemaItemLineEdit::set_allocated_scriptaftercreate(::std::string* s
   } else {
     clear_has_scriptaftercreate();
     scriptaftercreate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptEditingFinished = 22;
+inline bool SchemaItemLineEdit::has_scripteditingfinished() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemLineEdit::set_has_scripteditingfinished() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemLineEdit::clear_has_scripteditingfinished() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemLineEdit::clear_scripteditingfinished() {
+  if (scripteditingfinished_ != &::google::protobuf::internal::kEmptyString) {
+    scripteditingfinished_->clear();
+  }
+  clear_has_scripteditingfinished();
+}
+inline const ::std::string& SchemaItemLineEdit::scripteditingfinished() const {
+  return *scripteditingfinished_;
+}
+inline void SchemaItemLineEdit::set_scripteditingfinished(const ::std::string& value) {
+  set_has_scripteditingfinished();
+  if (scripteditingfinished_ == &::google::protobuf::internal::kEmptyString) {
+    scripteditingfinished_ = new ::std::string;
+  }
+  scripteditingfinished_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scripteditingfinished(const char* value) {
+  set_has_scripteditingfinished();
+  if (scripteditingfinished_ == &::google::protobuf::internal::kEmptyString) {
+    scripteditingfinished_ = new ::std::string;
+  }
+  scripteditingfinished_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scripteditingfinished(const char* value, size_t size) {
+  set_has_scripteditingfinished();
+  if (scripteditingfinished_ == &::google::protobuf::internal::kEmptyString) {
+    scripteditingfinished_ = new ::std::string;
+  }
+  scripteditingfinished_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemLineEdit::mutable_scripteditingfinished() {
+  set_has_scripteditingfinished();
+  if (scripteditingfinished_ == &::google::protobuf::internal::kEmptyString) {
+    scripteditingfinished_ = new ::std::string;
+  }
+  return scripteditingfinished_;
+}
+inline ::std::string* SchemaItemLineEdit::release_scripteditingfinished() {
+  clear_has_scripteditingfinished();
+  if (scripteditingfinished_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scripteditingfinished_;
+    scripteditingfinished_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemLineEdit::set_allocated_scripteditingfinished(::std::string* scripteditingfinished) {
+  if (scripteditingfinished_ != &::google::protobuf::internal::kEmptyString) {
+    delete scripteditingfinished_;
+  }
+  if (scripteditingfinished) {
+    set_has_scripteditingfinished();
+    scripteditingfinished_ = scripteditingfinished;
+  } else {
+    clear_has_scripteditingfinished();
+    scripteditingfinished_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptReturnPressed = 23;
+inline bool SchemaItemLineEdit::has_scriptreturnpressed() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SchemaItemLineEdit::set_has_scriptreturnpressed() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SchemaItemLineEdit::clear_has_scriptreturnpressed() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItemLineEdit::clear_scriptreturnpressed() {
+  if (scriptreturnpressed_ != &::google::protobuf::internal::kEmptyString) {
+    scriptreturnpressed_->clear();
+  }
+  clear_has_scriptreturnpressed();
+}
+inline const ::std::string& SchemaItemLineEdit::scriptreturnpressed() const {
+  return *scriptreturnpressed_;
+}
+inline void SchemaItemLineEdit::set_scriptreturnpressed(const ::std::string& value) {
+  set_has_scriptreturnpressed();
+  if (scriptreturnpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreturnpressed_ = new ::std::string;
+  }
+  scriptreturnpressed_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scriptreturnpressed(const char* value) {
+  set_has_scriptreturnpressed();
+  if (scriptreturnpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreturnpressed_ = new ::std::string;
+  }
+  scriptreturnpressed_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scriptreturnpressed(const char* value, size_t size) {
+  set_has_scriptreturnpressed();
+  if (scriptreturnpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreturnpressed_ = new ::std::string;
+  }
+  scriptreturnpressed_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemLineEdit::mutable_scriptreturnpressed() {
+  set_has_scriptreturnpressed();
+  if (scriptreturnpressed_ == &::google::protobuf::internal::kEmptyString) {
+    scriptreturnpressed_ = new ::std::string;
+  }
+  return scriptreturnpressed_;
+}
+inline ::std::string* SchemaItemLineEdit::release_scriptreturnpressed() {
+  clear_has_scriptreturnpressed();
+  if (scriptreturnpressed_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scriptreturnpressed_;
+    scriptreturnpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemLineEdit::set_allocated_scriptreturnpressed(::std::string* scriptreturnpressed) {
+  if (scriptreturnpressed_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptreturnpressed_;
+  }
+  if (scriptreturnpressed) {
+    set_has_scriptreturnpressed();
+    scriptreturnpressed_ = scriptreturnpressed;
+  } else {
+    clear_has_scriptreturnpressed();
+    scriptreturnpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string scriptTextChanged = 24;
+inline bool SchemaItemLineEdit::has_scripttextchanged() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItemLineEdit::set_has_scripttextchanged() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItemLineEdit::clear_has_scripttextchanged() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SchemaItemLineEdit::clear_scripttextchanged() {
+  if (scripttextchanged_ != &::google::protobuf::internal::kEmptyString) {
+    scripttextchanged_->clear();
+  }
+  clear_has_scripttextchanged();
+}
+inline const ::std::string& SchemaItemLineEdit::scripttextchanged() const {
+  return *scripttextchanged_;
+}
+inline void SchemaItemLineEdit::set_scripttextchanged(const ::std::string& value) {
+  set_has_scripttextchanged();
+  if (scripttextchanged_ == &::google::protobuf::internal::kEmptyString) {
+    scripttextchanged_ = new ::std::string;
+  }
+  scripttextchanged_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scripttextchanged(const char* value) {
+  set_has_scripttextchanged();
+  if (scripttextchanged_ == &::google::protobuf::internal::kEmptyString) {
+    scripttextchanged_ = new ::std::string;
+  }
+  scripttextchanged_->assign(value);
+}
+inline void SchemaItemLineEdit::set_scripttextchanged(const char* value, size_t size) {
+  set_has_scripttextchanged();
+  if (scripttextchanged_ == &::google::protobuf::internal::kEmptyString) {
+    scripttextchanged_ = new ::std::string;
+  }
+  scripttextchanged_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemLineEdit::mutable_scripttextchanged() {
+  set_has_scripttextchanged();
+  if (scripttextchanged_ == &::google::protobuf::internal::kEmptyString) {
+    scripttextchanged_ = new ::std::string;
+  }
+  return scripttextchanged_;
+}
+inline ::std::string* SchemaItemLineEdit::release_scripttextchanged() {
+  clear_has_scripttextchanged();
+  if (scripttextchanged_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = scripttextchanged_;
+    scripttextchanged_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemLineEdit::set_allocated_scripttextchanged(::std::string* scripttextchanged) {
+  if (scripttextchanged_ != &::google::protobuf::internal::kEmptyString) {
+    delete scripttextchanged_;
+  }
+  if (scripttextchanged) {
+    set_has_scripttextchanged();
+    scripttextchanged_ = scripttextchanged;
+  } else {
+    clear_has_scripttextchanged();
+    scripttextchanged_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

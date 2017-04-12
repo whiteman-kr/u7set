@@ -33,25 +33,21 @@ namespace VFrame30
 		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::readOnly, PropertyNames::controlCategory, true, SchemaItemLineEdit::readOnly, SchemaItemLineEdit::setReadOnly);
 		p->setDescription(PropertyNames::lineEditPropReadOnly);
 
-//		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptAfterCreate, SchemaItemLineEdit::setScriptAfterCreate);
-//		p->setDescription(PropertyNames::widgetPropAfterCreate);
-//		p->setIsScript(true);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptAfterCreate, SchemaItemLineEdit::setScriptAfterCreate);
+		p->setDescription(PropertyNames::widgetPropAfterCreate);
+		p->setIsScript(true);
 
-//		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptClicked, SchemaItemLineEdit::setScriptClicked);
-//		p->setDescription(PropertyNames::LineEditPropClicked);
-//		p->setIsScript(true);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::editingFinished, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptEditingFinished, SchemaItemLineEdit::setScriptEditingFinished);
+		p->setDescription(PropertyNames::lineEditPropEditingFinished);
+		p->setIsScript(true);
 
-//		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptPressed, SchemaItemLineEdit::setScriptPressed);
-//		p->setDescription(PropertyNames::LineEditPropPressed);
-//		p->setIsScript(true);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::returnPressed, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptReturnPressed, SchemaItemLineEdit::setScriptReturnPressed);
+		p->setDescription(PropertyNames::lineEditPropReturnPressed);
+		p->setIsScript(true);
 
-//		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptReleased, SchemaItemLineEdit::setScriptReleased);
-//		p->setDescription(PropertyNames::LineEditPropReleased);
-//		p->setIsScript(true);
-
-//		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptToggled, SchemaItemLineEdit::setScriptToggled);
-//		p->setDescription(PropertyNames::LineEditPropToggled);
-//		p->setIsScript(true);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textChanged, PropertyNames::scriptsCategory, true, SchemaItemLineEdit::scriptTextChanged, SchemaItemLineEdit::setScriptTextChanged);
+		p->setDescription(PropertyNames::lineEditPropTextChanged);
+		p->setIsScript(true);
 
 		return;
 	}
@@ -89,11 +85,10 @@ namespace VFrame30
 
 		lineEditMessage->set_readonly(m_readOnly);
 
-//		LineEditMessage->set_scriptaftercreate(m_scriptAfterCreate.toStdString());
-//		LineEditMessage->set_scriptclicked(m_scriptClicked.toStdString());
-//		LineEditMessage->set_scriptpressed(m_scriptPressed.toStdString());
-//		LineEditMessage->set_scriptreleased(m_scriptReleased.toStdString());
-//		LineEditMessage->set_scripttoggled(m_scriptToggled.toStdString());
+		lineEditMessage->set_scriptaftercreate(m_scriptAfterCreate.toStdString());
+		lineEditMessage->set_scripteditingfinished(m_scriptEditingFinished.toStdString());
+		lineEditMessage->set_scriptreturnpressed(m_scriptReturnPressed.toStdString());
+		lineEditMessage->set_scripttextchanged(m_scriptTextChanged.toStdString());
 
 		return true;
 	}
@@ -127,11 +122,10 @@ namespace VFrame30
 
 		m_readOnly = lineEditMessagemessage.readonly();
 
-//		setScriptAfterCreate(QString::fromStdString(LineEditMessagemessage.scriptaftercreate()));	// Text setters can have some string optimization for default values
-//		setScriptClicked(QString::fromStdString(LineEditMessagemessage.scriptclicked()));			// Text setters can have some string optimization for default values
-//		setScriptPressed(QString::fromStdString(LineEditMessagemessage.scriptpressed()));			// Text setters can have some string optimization for default values
-//		setScriptReleased(QString::fromStdString(LineEditMessagemessage.scriptreleased()));		// Text setters can have some string optimization for default values
-//		setScriptToggled(QString::fromStdString(LineEditMessagemessage.scripttoggled()));			// Text setters can have some string optimization for default values
+		setScriptAfterCreate(QString::fromStdString(lineEditMessagemessage.scriptaftercreate()));			// Text setters can have some string optimization for default values
+		setScriptEditingFinished(QString::fromStdString(lineEditMessagemessage.scripteditingfinished()));	// Text setters can have some string optimization for default values
+		setScriptReturnPressed(QString::fromStdString(lineEditMessagemessage.scriptreturnpressed()));		// Text setters can have some string optimization for default values
+		setScriptTextChanged(QString::fromStdString(lineEditMessagemessage.scripttextchanged()));			// Text setters can have some string optimization for default values
 
 		return true;
 	}
@@ -153,33 +147,27 @@ namespace VFrame30
 
 		if (editMode == false)
 		{
-//			afterCreate(control);
+			afterCreate(control);
 
-//			// Connect slots only if it has any sense
-//			//
-//			if (scriptClicked().isEmpty() == false &&
-//				scriptClicked() != PropertyNames::LineEditDefaultEventScript)
-//			{
-//				connect(control, &QLineEdit::clicked, this, &SchemaItemLineEdit::clicked);
-//			}
+			// Connect slots only if it has any sense
+			//
+			if (scriptEditingFinished().isEmpty() == false &&
+				scriptEditingFinished() != PropertyNames::lineEditDefaultEventScript)
+			{
+				connect(control, &QLineEdit::editingFinished, this, &SchemaItemLineEdit::editingFinished);
+			}
 
-//			if (scriptPressed().isEmpty() == false &&
-//				scriptPressed() != PropertyNames::LineEditDefaultEventScript)
-//			{
-//				connect(control, &QLineEdit::pressed, this, &SchemaItemLineEdit::pressed);
-//			}
+			if (scriptReturnPressed().isEmpty() == false &&
+				scriptReturnPressed() != PropertyNames::lineEditDefaultEventScript)
+			{
+				connect(control, &QLineEdit::returnPressed, this, &SchemaItemLineEdit::returnPressed);
+			}
 
-//			if (scriptReleased().isEmpty() == false &&
-//				scriptReleased() != PropertyNames::LineEditDefaultEventScript)
-//			{
-//				connect(control, &QLineEdit::released, this, &SchemaItemLineEdit::released);
-//			}
-
-//			if (scriptToggled().isEmpty() == false &&
-//				scriptToggled() != PropertyNames::LineEditDefaultEventScript)
-//			{
-//				connect(control, &QLineEdit::toggled, this, &SchemaItemLineEdit::toggled);
-//			}
+			if (scriptTextChanged().isEmpty() == false &&
+				scriptTextChanged() != PropertyNames::lineEditDefaultEventScript)
+			{
+				connect(control, &QLineEdit::textChanged, this, &SchemaItemLineEdit::textChanged);
+			}
 		}
 
 		control->setVisible(true);
@@ -250,85 +238,71 @@ namespace VFrame30
 		return;
 	}
 
-//	void SchemaItemLineEdit::clicked(bool)
-//	{
-//		if (m_scriptClicked.isEmpty() == true ||
-//			m_scriptClicked == PropertyNames::LineEditDefaultEventScript)		// Suppose Default script does nothing, just return
-//		{
-//			return;
-//		}
+	void SchemaItemLineEdit::editingFinished()
+	{
+		qDebug() << Q_FUNC_INFO;
 
-//		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
-//		if (senderWidget == nullptr)
-//		{
-//			assert(senderWidget);
-//			return;
-//		}
+		if (m_scriptEditingFinished.isEmpty() == true ||
+			m_scriptEditingFinished == PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
 
-//		runEventScript(m_scriptClicked, senderWidget);
+		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
 
-//		return;
-//	}
+		runEventScript(m_scriptEditingFinished, senderWidget);
 
-//	void SchemaItemLineEdit::pressed()
-//	{
-//		if (m_scriptPressed.isEmpty() == true ||
-//			m_scriptPressed == PropertyNames::LineEditDefaultEventScript)		// Suppose Default script does nothing, just return
-//		{
-//			return;
-//		}
+		return;
+	}
 
-//		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
-//		if (senderWidget == nullptr)
-//		{
-//			assert(senderWidget);
-//			return;
-//		}
+	void SchemaItemLineEdit::returnPressed()
+	{
+		qDebug() << Q_FUNC_INFO;
 
-//		runEventScript(m_scriptPressed, senderWidget);
+		if (m_scriptReturnPressed.isEmpty() == true ||
+			m_scriptReturnPressed == PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
 
-//		return;
-//	}
+		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
 
-//	void SchemaItemLineEdit::released()
-//	{
-//		if (m_scriptReleased.isEmpty() == true ||
-//			m_scriptReleased == PropertyNames::LineEditDefaultEventScript)		// Suppose Default script does nothing, just return
-//		{
-//			return;
-//		}
+		runEventScript(m_scriptReturnPressed, senderWidget);
 
-//		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
-//		if (senderWidget == nullptr)
-//		{
-//			assert(senderWidget);
-//			return;
-//		}
+		return;
+	}
 
-//		runEventScript(m_scriptReleased, senderWidget);
+	void SchemaItemLineEdit::textChanged(const QString& /*text*/)
+	{
+		qDebug() << Q_FUNC_INFO;
 
-//		return;
-//	}
+		if (m_scriptTextChanged.isEmpty() == true ||
+			m_scriptTextChanged== PropertyNames::lineEditDefaultEventScript)		// Suppose Default script does nothing, just return
+		{
+			return;
+		}
 
-//	void SchemaItemLineEdit::toggled(bool /*checked*/)
-//	{
-//		if (m_scriptToggled.isEmpty() == true ||
-//			m_scriptToggled == PropertyNames::LineEditDefaultEventScript)		// Suppose Default script does nothing, just return
-//		{
-//			return;
-//		}
+		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
+		if (senderWidget == nullptr)
+		{
+			assert(senderWidget);
+			return;
+		}
 
-//		QLineEdit* senderWidget = dynamic_cast<QLineEdit*>(sender());
-//		if (senderWidget == nullptr)
-//		{
-//			assert(senderWidget);
-//			return;
-//		}
+		runEventScript(m_scriptTextChanged, senderWidget);
 
-//		runEventScript(m_scriptToggled, senderWidget);
-
-//		return;
-//	}
+		return;
+	}
 
 	void SchemaItemLineEdit::runEventScript(const QString& script, QLineEdit* widget)
 	{
@@ -371,7 +345,7 @@ namespace VFrame30
 		QJSValue jsWidget = m_jsEngine.newQObject(widget);
 		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
 
-		//QJSValue jsChecked = {buttonWidget->isChecked()};
+		QJSValue jsWidgetText = {widget->text()};
 
 		// Set argument list
 		//
@@ -380,7 +354,7 @@ namespace VFrame30
 		args << jsSchemaItem;
 		args << jsSchemaView;
 		args << jsWidget;
-		args << widget->text();
+		args << jsWidgetText;
 
 		// Run script
 		//
@@ -403,12 +377,11 @@ namespace VFrame30
 	bool SchemaItemLineEdit::searchText(const QString& text) const
 	{
 		return	SchemaItem::searchText(text) ||
-				m_text.contains(text, Qt::CaseInsensitive/*) ||
+				m_text.contains(text, Qt::CaseInsensitive) ||
 				m_scriptAfterCreate.contains(text, Qt::CaseInsensitive) ||
-				m_scriptClicked.contains(text, Qt::CaseInsensitive) ||
-				m_scriptPressed.contains(text, Qt::CaseInsensitive) ||
-				m_scriptReleased.contains(text, Qt::CaseInsensitive) ||
-				m_scriptToggled.contains(text, Qt::CaseInsensitive*/);
+				m_scriptEditingFinished.contains(text, Qt::CaseInsensitive) ||
+				m_scriptReturnPressed.contains(text, Qt::CaseInsensitive) ||
+				m_scriptTextChanged.contains(text, Qt::CaseInsensitive);
 	}
 
 	// Properties and Data
@@ -502,72 +475,56 @@ namespace VFrame30
 		}
 	}
 
-//	QString SchemaItemLineEdit::scriptClicked() const
-//	{
-//		return m_scriptClicked;
-//	}
+	QString SchemaItemLineEdit::scriptEditingFinished() const
+	{
+		return m_scriptEditingFinished;
+	}
 
-//	void SchemaItemLineEdit::setScriptClicked(const QString& value)
-//	{
-//		if (value == PropertyNames::LineEditDefaultEventScript)
-//		{
-//			m_scriptClicked = PropertyNames::LineEditDefaultEventScript;
-//		}
-//		else
-//		{
-//			m_scriptClicked = value;
-//		}
-//	}
+	void SchemaItemLineEdit::setScriptEditingFinished(const QString& value)
+	{
+		if (value == PropertyNames::lineEditDefaultEventScript)
+		{
+			m_scriptEditingFinished = PropertyNames::lineEditDefaultEventScript;
+		}
+		else
+		{
+			m_scriptEditingFinished = value;
+		}
+	}
 
-//	QString SchemaItemLineEdit::scriptPressed() const
-//	{
-//		return m_scriptPressed;
-//	}
+	QString SchemaItemLineEdit::scriptReturnPressed() const
+	{
+		return m_scriptReturnPressed;
+	}
 
-//	void SchemaItemLineEdit::setScriptPressed(const QString& value)
-//	{
-//		if (value == PropertyNames::LineEditDefaultEventScript)
-//		{
-//			m_scriptPressed = PropertyNames::LineEditDefaultEventScript;
-//		}
-//		else
-//		{
-//			m_scriptPressed = value;
-//		}
-//	}
+	void SchemaItemLineEdit::setScriptReturnPressed(const QString& value)
+	{
+		if (value == PropertyNames::lineEditDefaultEventScript)
+		{
+			m_scriptReturnPressed = PropertyNames::lineEditDefaultEventScript;
+		}
+		else
+		{
+			m_scriptReturnPressed = value;
+		}
+	}
 
-//	QString SchemaItemLineEdit::scriptReleased() const
-//	{
-//		return m_scriptReleased;
-//	}
+	QString SchemaItemLineEdit::scriptTextChanged() const
+	{
+		return m_scriptTextChanged;
+	}
 
-//	void SchemaItemLineEdit::setScriptReleased(const QString& value)
-//	{
-//		if (value == PropertyNames::LineEditDefaultEventScript)
-//		{
-//			m_scriptReleased = PropertyNames::LineEditDefaultEventScript;
-//		}
-//		else
-//		{
-//			m_scriptReleased = value;
-//		}
-//	}
+	void SchemaItemLineEdit::setScriptTextChanged(const QString& value)
+	{
+		if (value == PropertyNames::lineEditDefaultEventScript)
+		{
+			m_scriptTextChanged = PropertyNames::lineEditDefaultEventScript;
+		}
+		else
+		{
+			m_scriptTextChanged = value;
+		}
+	}
 
-//	QString SchemaItemLineEdit::scriptToggled() const
-//	{
-//		return m_scriptToggled;
-//	}
-
-//	void SchemaItemLineEdit::setScriptToggled(const QString& value)
-//	{
-//		if (value == PropertyNames::LineEditDefaultEventScript)
-//		{
-//			m_scriptToggled = PropertyNames::LineEditDefaultEventScript;
-//		}
-//		else
-//		{
-//			m_scriptToggled = value;
-//		}
-//	}
 }
 

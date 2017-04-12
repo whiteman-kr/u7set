@@ -60,6 +60,9 @@ namespace VFrame30
 	const QString PropertyNames::pressed("Pressed");
 	const QString PropertyNames::released("Released");
 	const QString PropertyNames::toggled("Toggled");
+	const QString PropertyNames::editingFinished("EditingFinished");
+	const QString PropertyNames::returnPressed("ReturnPressed");
+	const QString PropertyNames::textChanged("TextChanged");
 
 	const QString PropertyNames::alignHorz("AlignHorz");
 	const QString PropertyNames::alignVert("AlignVert");
@@ -150,7 +153,7 @@ QLineEdit:hover {
 	border-width: 2px
 })_"};
 
-	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, schemaView, lineEditWidget, text)"};
+	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, schemaView, lineEditWidget, text)\n{\n}"};
 	const QString PropertyNames::lineEditPropText("Property holds the line edit's text.");
 	const QString PropertyNames::lineEditPropPlaceholderText("Property holds the line edit's placeholder text.\n"
 															 "Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty.\n"
@@ -165,4 +168,8 @@ QLineEdit:hover {
 													 "In read-only mode, the user can still copy the text to the clipboard, or drag and drop the text, but cannot edit it.\n"
 													 "LineEdit does not show a cursor in read-only mode.\n"
 													 "By default, this property is false.");
+
+   const QString PropertyNames::lineEditPropEditingFinished("This signal is emitted when the Return or Enter key is pressed or the line edit loses focus.");
+   const QString PropertyNames::lineEditPropReturnPressed("This signal is emitted when the Return or Enter key is pressed.");
+   const QString PropertyNames::lineEditPropTextChanged("This signal is emitted whenever the text changes.\nThis signal is also emitted when the text is changed programmatically.");
 }

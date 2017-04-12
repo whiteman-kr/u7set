@@ -1037,7 +1037,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemPushButton));
   SchemaItemLineEdit_descriptor_ = file->message_type(44);
-  static const int SchemaItemLineEdit_offsets_[7] = {
+  static const int SchemaItemLineEdit_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, horzalign_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, vertalign_),
@@ -1045,6 +1045,9 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, placeholdertext_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, readonly_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, scriptaftercreate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, scripteditingfinished_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, scriptreturnpressed_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, scripttextchanged_),
   };
   SchemaItemLineEdit_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1871,108 +1874,110 @@ void protobuf_AddDesc_serialization_2eproto() {
     "atInterval\030\006 \001(\005\022\031\n\021scriptAfterCreate\030\025 "
     "\001(\t\022\025\n\rscriptClicked\030\026 \001(\t\022\025\n\rscriptPres"
     "sed\030\027 \001(\t\022\026\n\016scriptReleased\030\030 \001(\t\022\025\n\rscr"
-    "iptToggled\030\031 \001(\t\"\241\001\n\022SchemaItemLineEdit\022"
+    "iptToggled\030\031 \001(\t\"\370\001\n\022SchemaItemLineEdit\022"
     "\014\n\004text\030\001 \001(\t\022\021\n\thorzAlign\030\002 \001(\005\022\021\n\tvert"
     "Align\030\003 \001(\005\022\021\n\tmaxLength\030\004 \001(\005\022\027\n\017placeh"
     "olderText\030\005 \001(\t\022\020\n\010readOnly\030\006 \001(\010\022\031\n\021scr"
-    "iptAfterCreate\030\025 \001(\t\"\201\006\n\014DeviceObject\022\031\n"
-    "\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013equipmentId\030"
-    "\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016"
-    ".Proto.wstring\022(\n\020childRestriction\030\004 \001(\013"
-    "2\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032sp"
-    "ecific_properties_struct\030\006 \001(\t\022#\n\nproper"
-    "ties\030\007 \003(\0132\017.Proto.Property\022\025\n\006preset\030  "
-    "\001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n"
-    "\npresetName\030\" \001(\0132\016.Proto.wstring\022%\n\020pre"
-    "setObjectUuid\030# \001(\0132\013.Proto.Uuid\022\031\n\016chil"
-    "dCountHint\030$ \001(\005:\0010\022\037\n\004Root\030d \001(\0132\021.Prot"
-    "o.DeviceRoot\022#\n\006System\030e \001(\0132\023.Proto.Dev"
-    "iceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRa"
-    "ck\022%\n\007Chassis\030g \001(\0132\024.Proto.DeviceChassi"
-    "s\022#\n\006Module\030h \001(\0132\023.Proto.DeviceModule\022+"
-    "\n\nController\030i \001(\0132\027.Proto.DeviceControl"
-    "ler\022#\n\006Signal\030j \001(\0132\023.Proto.DeviceSignal"
-    "\022\'\n\013Workstation\030k \001(\0132\022.Proto.Workstatio"
-    "n\022!\n\010Software\030l \001(\0132\017.Proto.Software\022\"\n\010"
-    "children\030\310\001 \003(\0132\017.Proto.Envelope\"\014\n\nDevi"
-    "ceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceRack\" \n\r"
-    "DeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"t\n\014Device"
-    "Module\022\027\n\014typeObsolete\030\001 \001(\005:\0010\022\033\n\023confi"
-    "gurationScript\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001(\005"
-    "\022\032\n\022rawDataDescription\030\004 \001(\t\"\022\n\020DeviceCo"
-    "ntroller\"\240\003\n\014DeviceSignal\022\027\n\014obsoletetyp"
-    "e\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006form"
-    "at\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016validity"
-    "Offset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 \001(\005:\0010\022"
-    "\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001("
-    "\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:"
-    "\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017appSignalLo"
-    "wAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHighAdc\030\r \001(\005:"
-    "\00565535\022\037\n\024appSignalLowEngUnits\030\016 \001(\001:\0010\022"
-    "\"\n\025appSignalHighEngUnits\030\017 \001(\001:\003100\022\036\n\023a"
-    "ppSignalDataFormat\030\020 \001(\005:\0012\"\036\n\013Workstati"
-    "on\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017\n\004type\030"
-    "\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032\n\022struc"
-    "t_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Pr"
-    "oto.ModuleConfigurationValue\022\016\n\004name\030\003 \001"
-    "(\t:\000\"7\n\030ModuleConfigurationValue\022\014\n\004name"
-    "\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004nam"
-    "e\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddress16\022\022\n\006o"
-    "ffset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"\336\t\n\tApp"
-    "Signal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsignalGroupID\030\002 \001("
-    "\005\022\030\n\020signalInstanceID\030\003 \001(\005\022\023\n\013changeset"
-    "ID\030\004 \001(\005\022\022\n\ncheckedOut\030\005 \001(\010\022\016\n\006userID\030\006"
-    " \001(\005\022\030\n\020subsystemChannel\030\007 \001(\005\022\014\n\004type\030\010"
-    " \001(\005\022\017\n\007created\030\t \001(\003\022\017\n\007deleted\030\n \001(\010\022\027"
-    "\n\017instanceCreated\030\013 \001(\003\022\026\n\016instanceActio"
-    "n\030\014 \001(\005\022\023\n\013appSignalID\030\r \001(\t\022\031\n\021customAp"
-    "pSignalID\030\016 \001(\t\022\017\n\007caption\030\017 \001(\t\022\022\n\ndata"
-    "Format\030\020 \001(\005\022\020\n\010dataSize\030\021 \001(\005\022\016\n\006lowADC"
-    "\030\022 \001(\005\022\017\n\007highADC\030\023 \001(\005\022\033\n\023lowEngeneerin"
-    "gUnits\030\024 \001(\001\022\034\n\024highEngeneeringUnits\030\025 \001"
-    "(\001\022\016\n\006unitID\030\026 \001(\005\022\022\n\nadjustment\030\027 \001(\001\022\025"
-    "\n\rlowValidRange\030\030 \001(\001\022\026\n\016highValidRange\030"
-    "\031 \001(\001\022\026\n\016unbalanceLimit\030\032 \001(\001\022\025\n\rinputLo"
-    "wLimit\030\033 \001(\001\022\026\n\016inputHighLimit\030\034 \001(\001\022\023\n\013"
-    "inputUnitID\030\035 \001(\005\022\025\n\rinputSensorID\030\036 \001(\005"
-    "\022\026\n\016outputLowLimit\030\037 \001(\001\022\027\n\017outputHighLi"
-    "mit\030  \001(\001\022\024\n\014outputUnitID\030! \001(\005\022\022\n\noutpu"
-    "tMode\030\" \001(\005\022\026\n\016outputSensorID\030# \001(\005\022\017\n\007a"
-    "cquire\030$ \001(\010\022\022\n\ncalculated\030% \001(\010\022\023\n\013norm"
-    "alState\030& \001(\005\022\025\n\rdecimalPlaces\030\' \001(\005\022\020\n\010"
-    "aperture\030( \001(\001\022\021\n\tinOutType\030) \001(\005\022\023\n\013equ"
-    "ipmentID\030* \001(\t\022\025\n\rfilteringTime\030+ \001(\001\022\027\n"
-    "\017spreadTolerance\030, \001(\001\022\021\n\tbyteOrder\030- \001("
-    "\005\022\024\n\014enableTuning\030. \001(\010\022\032\n\022tuningDefault"
-    "Value\030/ \001(\001\022\014\n\004hash\0300 \001(\004\022\033\n\022regValueAdd"
-    "rOffset\030\310\001 \001(\005\022\030\n\017regValueAddrBit\030\311\001 \001(\005"
-    "\022\036\n\025regValidityAddrOffset\030\312\001 \001(\005\022\033\n\022regV"
-    "alidityAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrOff"
-    "set\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026\n\r"
-    "ramAddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001("
-    "\005\"\210\001\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n"
-    "\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsys"
-    "temTime\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001(\022:\0010\022\024"
-    "\n\tplantTime\030\006 \001(\022:\0010\"\253\004\n\nConnection\022\026\n\014C"
-    "onnectionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030"
-    "\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027P"
-    "ort1RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2R"
-    "awDataDescription\030\006 \001(\t:\000\022\025\n\nSerialMode\030"
-    "\007 \001(\005:\0010\022\017\n\004Mode\030\010 \001(\005:\0010\022\033\n\014EnableDuple"
-    "x\030\n \001(\010:\005false\022\035\n\016ManualSettings\030\013 \001(\010:\005"
-    "false\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017G"
-    "enerateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1TxSt"
-    "artAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuant"
-    "ity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuantity\030\020"
-    " \001(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\001"
-    "0\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024"
-    "Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030"
-    "\024 \001(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Disp"
-    "lay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conne"
-    "ctionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)"
-    "\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020"
-    "\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tS"
-    "ignedInt\020\001\022\t\n\005Float\020\002", 10541);
+    "iptAfterCreate\030\025 \001(\t\022\035\n\025scriptEditingFin"
+    "ished\030\026 \001(\t\022\033\n\023scriptReturnPressed\030\027 \001(\t"
+    "\022\031\n\021scriptTextChanged\030\030 \001(\t\"\201\006\n\014DeviceOb"
+    "ject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n\013equip"
+    "mentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030"
+    "\003 \002(\0132\016.Proto.wstring\022(\n\020childRestrictio"
+    "n\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005 \001(\005:\001"
+    "0\022\"\n\032specific_properties_struct\030\006 \001(\t\022#\n"
+    "\nproperties\030\007 \003(\0132\017.Proto.Property\022\025\n\006pr"
+    "eset\030  \001(\010:\005false\022\031\n\npresetRoot\030! \001(\010:\005f"
+    "alse\022\"\n\npresetName\030\" \001(\0132\016.Proto.wstring"
+    "\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto.Uuid\022"
+    "\031\n\016childCountHint\030$ \001(\005:\0010\022\037\n\004Root\030d \001(\013"
+    "2\021.Proto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Pr"
+    "oto.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.D"
+    "eviceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.Devic"
+    "eChassis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceM"
+    "odule\022+\n\nController\030i \001(\0132\027.Proto.Device"
+    "Controller\022#\n\006Signal\030j \001(\0132\023.Proto.Devic"
+    "eSignal\022\'\n\013Workstation\030k \001(\0132\022.Proto.Wor"
+    "kstation\022!\n\010Software\030l \001(\0132\017.Proto.Softw"
+    "are\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Envelope\""
+    "\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDeviceR"
+    "ack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:\0010\"t\n"
+    "\014DeviceModule\022\027\n\014typeObsolete\030\001 \001(\005:\0010\022\033"
+    "\n\023configurationScript\030\002 \001(\t\022\022\n\nmoduleTyp"
+    "e\030\003 \001(\005\022\032\n\022rawDataDescription\030\004 \001(\t\"\022\n\020D"
+    "eviceController\"\240\003\n\014DeviceSignal\022\027\n\014obso"
+    "letetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022"
+    "\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\031\n\016v"
+    "alidityOffset\030\005 \001(\005:\0010\022\026\n\013validityBit\030\006 "
+    "\001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010valueB"
+    "it\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function"
+    "\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017appS"
+    "ignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHighAdc"
+    "\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnits\030\016 "
+    "\001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001(\001:\0031"
+    "00\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\"\036\n\013Wo"
+    "rkstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Software\022\017"
+    "\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguration\022\032"
+    "\n\022struct_description\030\001 \001(\t\022/\n\006values\030\002 \003"
+    "(\0132\037.Proto.ModuleConfigurationValue\022\016\n\004n"
+    "ame\030\003 \001(\t:\000\"7\n\030ModuleConfigurationValue\022"
+    "\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property"
+    "\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"0\n\tAddress"
+    "16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\""
+    "\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005\022\025\n\rsignalGroup"
+    "ID\030\002 \001(\005\022\030\n\020signalInstanceID\030\003 \001(\005\022\023\n\013ch"
+    "angesetID\030\004 \001(\005\022\022\n\ncheckedOut\030\005 \001(\010\022\016\n\006u"
+    "serID\030\006 \001(\005\022\030\n\020subsystemChannel\030\007 \001(\005\022\014\n"
+    "\004type\030\010 \001(\005\022\017\n\007created\030\t \001(\003\022\017\n\007deleted\030"
+    "\n \001(\010\022\027\n\017instanceCreated\030\013 \001(\003\022\026\n\016instan"
+    "ceAction\030\014 \001(\005\022\023\n\013appSignalID\030\r \001(\t\022\031\n\021c"
+    "ustomAppSignalID\030\016 \001(\t\022\017\n\007caption\030\017 \001(\t\022"
+    "\022\n\ndataFormat\030\020 \001(\005\022\020\n\010dataSize\030\021 \001(\005\022\016\n"
+    "\006lowADC\030\022 \001(\005\022\017\n\007highADC\030\023 \001(\005\022\033\n\023lowEng"
+    "eneeringUnits\030\024 \001(\001\022\034\n\024highEngeneeringUn"
+    "its\030\025 \001(\001\022\016\n\006unitID\030\026 \001(\005\022\022\n\nadjustment\030"
+    "\027 \001(\001\022\025\n\rlowValidRange\030\030 \001(\001\022\026\n\016highVali"
+    "dRange\030\031 \001(\001\022\026\n\016unbalanceLimit\030\032 \001(\001\022\025\n\r"
+    "inputLowLimit\030\033 \001(\001\022\026\n\016inputHighLimit\030\034 "
+    "\001(\001\022\023\n\013inputUnitID\030\035 \001(\005\022\025\n\rinputSensorI"
+    "D\030\036 \001(\005\022\026\n\016outputLowLimit\030\037 \001(\001\022\027\n\017outpu"
+    "tHighLimit\030  \001(\001\022\024\n\014outputUnitID\030! \001(\005\022\022"
+    "\n\noutputMode\030\" \001(\005\022\026\n\016outputSensorID\030# \001"
+    "(\005\022\017\n\007acquire\030$ \001(\010\022\022\n\ncalculated\030% \001(\010\022"
+    "\023\n\013normalState\030& \001(\005\022\025\n\rdecimalPlaces\030\' "
+    "\001(\005\022\020\n\010aperture\030( \001(\001\022\021\n\tinOutType\030) \001(\005"
+    "\022\023\n\013equipmentID\030* \001(\t\022\025\n\rfilteringTime\030+"
+    " \001(\001\022\027\n\017spreadTolerance\030, \001(\001\022\021\n\tbyteOrd"
+    "er\030- \001(\005\022\024\n\014enableTuning\030. \001(\010\022\032\n\022tuning"
+    "DefaultValue\030/ \001(\001\022\014\n\004hash\0300 \001(\004\022\033\n\022regV"
+    "alueAddrOffset\030\310\001 \001(\005\022\030\n\017regValueAddrBit"
+    "\030\311\001 \001(\005\022\036\n\025regValidityAddrOffset\030\312\001 \001(\005\022"
+    "\033\n\022regValidityAddrBit\030\313\001 \001(\005\022\033\n\022ioBuffer"
+    "AddrOffset\030\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 "
+    "\001(\005\022\026\n\rramAddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBi"
+    "t\030\317\001 \001(\005\"\210\001\n\016AppSignalState\022\017\n\004hash\030\001 \001("
+    "\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010"
+    "\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001"
+    "(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:\0010\"\253\004\n\nConnecti"
+    "on\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1Equip"
+    "mentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t"
+    ":\000\022!\n\027Port1RawDataDescription\030\005 \001(\t:\000\022!\n"
+    "\027Port2RawDataDescription\030\006 \001(\t:\000\022\025\n\nSeri"
+    "alMode\030\007 \001(\005:\0010\022\017\n\004Mode\030\010 \001(\005:\0010\022\033\n\014Enab"
+    "leDuplex\030\n \001(\010:\005false\022\035\n\016ManualSettings\030"
+    "\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005fal"
+    "se\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023Po"
+    "rt1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWor"
+    "dsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQua"
+    "ntity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress\030"
+    "\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003"
+    "479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031"
+    "\n\004uuid\030\024 \001(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022"
+    "\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-"
+    "\n\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Out"
+    "put\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Di"
+    "screte\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt"
+    "\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 10628);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -18422,6 +18427,9 @@ const int SchemaItemLineEdit::kMaxLengthFieldNumber;
 const int SchemaItemLineEdit::kPlaceholderTextFieldNumber;
 const int SchemaItemLineEdit::kReadOnlyFieldNumber;
 const int SchemaItemLineEdit::kScriptAfterCreateFieldNumber;
+const int SchemaItemLineEdit::kScriptEditingFinishedFieldNumber;
+const int SchemaItemLineEdit::kScriptReturnPressedFieldNumber;
+const int SchemaItemLineEdit::kScriptTextChangedFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemLineEdit::SchemaItemLineEdit()
@@ -18447,6 +18455,9 @@ void SchemaItemLineEdit::SharedCtor() {
   placeholdertext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   readonly_ = false;
   scriptaftercreate_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  scripteditingfinished_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  scriptreturnpressed_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  scripttextchanged_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -18463,6 +18474,15 @@ void SchemaItemLineEdit::SharedDtor() {
   }
   if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
     delete scriptaftercreate_;
+  }
+  if (scripteditingfinished_ != &::google::protobuf::internal::kEmptyString) {
+    delete scripteditingfinished_;
+  }
+  if (scriptreturnpressed_ != &::google::protobuf::internal::kEmptyString) {
+    delete scriptreturnpressed_;
+  }
+  if (scripttextchanged_ != &::google::protobuf::internal::kEmptyString) {
+    delete scripttextchanged_;
   }
   if (this != default_instance_) {
   }
@@ -18508,6 +18528,23 @@ void SchemaItemLineEdit::Clear() {
     if (has_scriptaftercreate()) {
       if (scriptaftercreate_ != &::google::protobuf::internal::kEmptyString) {
         scriptaftercreate_->clear();
+      }
+    }
+    if (has_scripteditingfinished()) {
+      if (scripteditingfinished_ != &::google::protobuf::internal::kEmptyString) {
+        scripteditingfinished_->clear();
+      }
+    }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (has_scriptreturnpressed()) {
+      if (scriptreturnpressed_ != &::google::protobuf::internal::kEmptyString) {
+        scriptreturnpressed_->clear();
+      }
+    }
+    if (has_scripttextchanged()) {
+      if (scripttextchanged_ != &::google::protobuf::internal::kEmptyString) {
+        scripttextchanged_->clear();
       }
     }
   }
@@ -18631,6 +18668,57 @@ bool SchemaItemLineEdit::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(178)) goto parse_scriptEditingFinished;
+        break;
+      }
+
+      // optional string scriptEditingFinished = 22;
+      case 22: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_scriptEditingFinished:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_scripteditingfinished()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->scripteditingfinished().data(), this->scripteditingfinished().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(186)) goto parse_scriptReturnPressed;
+        break;
+      }
+
+      // optional string scriptReturnPressed = 23;
+      case 23: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_scriptReturnPressed:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_scriptreturnpressed()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->scriptreturnpressed().data(), this->scriptreturnpressed().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(194)) goto parse_scriptTextChanged;
+        break;
+      }
+
+      // optional string scriptTextChanged = 24;
+      case 24: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_scriptTextChanged:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_scripttextchanged()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->scripttextchanged().data(), this->scripttextchanged().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -18700,6 +18788,33 @@ void SchemaItemLineEdit::SerializeWithCachedSizes(
       21, this->scriptaftercreate(), output);
   }
 
+  // optional string scriptEditingFinished = 22;
+  if (has_scripteditingfinished()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scripteditingfinished().data(), this->scripteditingfinished().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      22, this->scripteditingfinished(), output);
+  }
+
+  // optional string scriptReturnPressed = 23;
+  if (has_scriptreturnpressed()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scriptreturnpressed().data(), this->scriptreturnpressed().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      23, this->scriptreturnpressed(), output);
+  }
+
+  // optional string scriptTextChanged = 24;
+  if (has_scripttextchanged()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scripttextchanged().data(), this->scripttextchanged().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      24, this->scripttextchanged(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -18756,6 +18871,36 @@ void SchemaItemLineEdit::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         21, this->scriptaftercreate(), target);
+  }
+
+  // optional string scriptEditingFinished = 22;
+  if (has_scripteditingfinished()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scripteditingfinished().data(), this->scripteditingfinished().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        22, this->scripteditingfinished(), target);
+  }
+
+  // optional string scriptReturnPressed = 23;
+  if (has_scriptreturnpressed()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scriptreturnpressed().data(), this->scriptreturnpressed().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        23, this->scriptreturnpressed(), target);
+  }
+
+  // optional string scriptTextChanged = 24;
+  if (has_scripttextchanged()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->scripttextchanged().data(), this->scripttextchanged().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        24, this->scripttextchanged(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -18816,6 +18961,29 @@ int SchemaItemLineEdit::ByteSize() const {
           this->scriptaftercreate());
     }
 
+    // optional string scriptEditingFinished = 22;
+    if (has_scripteditingfinished()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->scripteditingfinished());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional string scriptReturnPressed = 23;
+    if (has_scriptreturnpressed()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->scriptreturnpressed());
+    }
+
+    // optional string scriptTextChanged = 24;
+    if (has_scripttextchanged()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->scripttextchanged());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -18864,6 +19032,17 @@ void SchemaItemLineEdit::MergeFrom(const SchemaItemLineEdit& from) {
     if (from.has_scriptaftercreate()) {
       set_scriptaftercreate(from.scriptaftercreate());
     }
+    if (from.has_scripteditingfinished()) {
+      set_scripteditingfinished(from.scripteditingfinished());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_scriptreturnpressed()) {
+      set_scriptreturnpressed(from.scriptreturnpressed());
+    }
+    if (from.has_scripttextchanged()) {
+      set_scripttextchanged(from.scripttextchanged());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -18894,6 +19073,9 @@ void SchemaItemLineEdit::Swap(SchemaItemLineEdit* other) {
     std::swap(placeholdertext_, other->placeholdertext_);
     std::swap(readonly_, other->readonly_);
     std::swap(scriptaftercreate_, other->scriptaftercreate_);
+    std::swap(scripteditingfinished_, other->scripteditingfinished_);
+    std::swap(scriptreturnpressed_, other->scriptreturnpressed_);
+    std::swap(scripttextchanged_, other->scripttextchanged_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

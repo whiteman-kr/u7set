@@ -2181,7 +2181,7 @@ void EditSchemaWidget::createActions()
 
 	m_addLineEditAction = new QAction(tr("LineEdit"), this);
 	m_addLineEditAction->setEnabled(true);
-	m_addLineEditAction->setIcon(QIcon(":/Images/Images/LineEdit.svg"));
+	m_addLineEditAction->setIcon(QIcon(":/Images/Images/SchemaItemLineEdit.svg"));
 	connect(m_addLineEditAction, &QAction::triggered,
 			[this](bool)
 			{

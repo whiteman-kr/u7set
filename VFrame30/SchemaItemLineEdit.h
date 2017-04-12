@@ -28,9 +28,9 @@ namespace VFrame30
 
 	protected slots:
 		void afterCreate(QLineEdit* control) const;
-//		void editingFinished();
-//		void returnPressed();
-//		void textChanged(const QString& text);
+		void editingFinished();
+		void returnPressed();
+		void textChanged(const QString& text);
 
 		void runEventScript(const QString& script, QLineEdit* widget);
 
@@ -65,17 +65,14 @@ namespace VFrame30
 		QString scriptAfterCreate() const;
 		void setScriptAfterCreate(const QString& value);
 
-//		QString scriptClicked() const;
-//		void setScriptClicked(const QString& value);
+		QString scriptEditingFinished() const;
+		void setScriptEditingFinished(const QString& value);
 
-//		QString scriptPressed() const;
-//		void setScriptPressed(const QString& value);
+		QString scriptReturnPressed() const;
+		void setScriptReturnPressed(const QString& value);
 
-//		QString scriptReleased() const;
-//		void setScriptReleased(const QString& value);
-
-//		QString scriptToggled() const;
-//		void setScriptToggled(const QString& value);
+		QString scriptTextChanged() const;
+		void setScriptTextChanged(const QString& value);
 
 	private:
 		QJSEngine m_jsEngine;
@@ -90,9 +87,8 @@ namespace VFrame30
 		bool m_readOnly = false;
 
 		QString m_scriptAfterCreate = PropertyNames::lineEditDefaultEventScript;
-//		QString m_scriptClicked = PropertyNames::LineEditDefaultEventScript;
-//		QString m_scriptPressed = PropertyNames::LineEditDefaultEventScript;
-//		QString m_scriptReleased = PropertyNames::LineEditDefaultEventScript;
-//		QString m_scriptToggled = PropertyNames::LineEditDefaultEventScript;
+		QString m_scriptEditingFinished = PropertyNames::lineEditDefaultEventScript;
+		QString m_scriptReturnPressed = PropertyNames::lineEditDefaultEventScript;
+		QString m_scriptTextChanged = PropertyNames::lineEditDefaultEventScript;
 	};
 }
