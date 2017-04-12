@@ -1,7 +1,7 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "Settings.h"
-#include "xmlsyntaxhighlighter.h"
+#include "../lib/CodeSyntaxHighlighter.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>

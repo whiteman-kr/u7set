@@ -141,7 +141,9 @@ SOURCES +=\
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     ../lib/Tuning/TuningController.cpp \
-    SchemasWorkspace.cpp
+    SchemasWorkspace.cpp \
+    ../lib/CodeEditor.cpp \
+    ../lib/CodeSyntaxHighlighter.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -184,7 +186,9 @@ HEADERS  += MainWindow.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     ../lib/Tuning/TuningController.h \
-    SchemasWorkspace.h
+    SchemasWorkspace.h \
+    ../lib/CodeEditor.h \
+    ../lib/CodeSyntaxHighlighter.h
 
 FORMS    += \
     DialogSettings.ui \

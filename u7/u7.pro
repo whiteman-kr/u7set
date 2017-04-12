@@ -97,7 +97,7 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    xmlsyntaxhighlighter.cpp \
+    ../lib/CodeSyntaxHighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
@@ -219,7 +219,7 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    xmlsyntaxhighlighter.h \
+    ../lib/CodeSyntaxHighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
     EditEngine/EditEngine.h \

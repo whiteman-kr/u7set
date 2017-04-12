@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-#include "xmlsyntaxhighlighter.h"
+#include "../lib/CodeSyntaxHighlighter.h"
 
 XmlSyntaxHighlighter::XmlSyntaxHighlighter(QTextDocument *parent)
 	: QSyntaxHighlighter(parent)

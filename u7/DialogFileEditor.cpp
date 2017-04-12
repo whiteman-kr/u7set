@@ -1,5 +1,5 @@
 #include "DialogFileEditor.h"
-#include "xmlsyntaxhighlighter.h"
+#include "../lib/CodeSyntaxHighlighter.h"
 #include "Settings.h"
 #include "../VFrame30/Afb.h"
 
