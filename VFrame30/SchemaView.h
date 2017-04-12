@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QJSEngine>
 #include "Session.h"
 #include "../lib/Tuning/TuningController.h"
 
@@ -7,6 +8,7 @@
 namespace VFrame30
 {
 	class Schema;
+	class SchemaItem;
 	class CDrawParam;
 
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
@@ -15,10 +17,10 @@ namespace VFrame30
 
 	public:
 		explicit SchemaView(QWidget *parent = 0);
-		explicit SchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget *parent = 0);
+		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget *parent = 0);
 
 	protected:
-		void init();
+		void runScript(const QString& script, VFrame30::SchemaItem* schemaItem);
 
 		void updateControlWidgets(bool editMode);
 		
@@ -64,6 +66,8 @@ namespace VFrame30
 		const TuningController& tuningController() const;
 		TuningController& tuningController();
 
+		QJSEngine* jsEngine();
+
 		// Data
 		//
 	private:
@@ -72,6 +76,8 @@ namespace VFrame30
 
 		Session m_session;
 		TuningController m_tuningController;
+
+		QJSEngine m_jsEngine;
 	};
 }
 

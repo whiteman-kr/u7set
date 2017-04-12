@@ -77,8 +77,6 @@ namespace VFrame30
 		void setScriptToggled(const QString& value);
 
 	private:
-		QJSEngine m_jsEngine;
-
 		QString m_text = {"Button"};
 
 		bool m_checkable = false;

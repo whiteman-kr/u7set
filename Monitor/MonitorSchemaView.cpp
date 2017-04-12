@@ -20,96 +20,12 @@ MonitorSchemaView::~MonitorSchemaView()
 	qDebug() << Q_FUNC_INFO;
 }
 
-void MonitorSchemaView::runScript(const QString& script, VFrame30::SchemaItem* schemaItem)
-{
-	qDebug() << "MonitorSchemaView::runScript";
-
-	if (script.isEmpty() == true ||
-		schemaItem == nullptr)
-	{
-		assert(schemaItem);
-		return;
-	}
-
-	// Evaluate script
-	//
-	QJSValue jsEval = m_jsEngine.evaluate(script, "VFrame30::SchemaItem::ClickScript");
-	if (jsEval.isError() == true)
-	{
-		QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script error: %1").arg(jsEval.toString()));
-		return;
-	}
-
-	// Create JS params
-	//
-	QJSValue jsSchemaItem = m_jsEngine.newQObject(schemaItem);;
-	QQmlEngine::setObjectOwnership(schemaItem, QQmlEngine::CppOwnership);
-
-	QJSValue jsSchemaView = m_jsEngine.newQObject(this);
-	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
-	// Set argument list
-	//
-	QJSValueList args;
-
-	args << jsSchemaItem;
-	args << jsSchemaView;
-
-	// Run script
-	//
-	QJSValue jsResult = jsEval.call(args);
-	if (jsResult.isError() == true)
-	{
-		qDebug() << "Uncaught exception at line"
-				 << jsResult.property("lineNumber").toInt()
-				 << ":" << jsResult.toString();
-
-		QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script uncaught exception: %1").arg(jsEval.toString()));
-		return;
-	}
-
-	qDebug() << "runScript result:" <<  jsResult.toInt();
-
-	m_jsEngine.collectGarbage();
-
-	update();		// Repaint screen
-	return;
-}
-
 bool MonitorSchemaView::setSchema(QString schemaId)
 {
 	// We can't change schema here, because we need to save history, so emit signal and change schema
 	// in MonitorSchemaWidget
 	//
 	emit signal_setSchema(schemaId);
-
-//	assert(m_schemaManager);
-
-//	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaId);
-
-//	if (schema == nullptr)
-//	{
-//		return false;
-//	}
-
-//	// --
-//	//
-////	if (m_historyIterator != m_history.end())
-////	{
-////		m_history.erase(m_historyIterator, m_history.end());
-////	}
-
-////	SchemaHistoryItem hi;
-////	hi.schemaId = schemaId;
-////	hi.zoom = 100.0;
-
-////	m_history.push_back(hi);
-////	m_historyIterator = m_history.end();
-
-//	// --
-//	//
-//	SchemaView::setSchema(schema, false);
-//	setZoom(100.0, true);
 
 	return true;
 }

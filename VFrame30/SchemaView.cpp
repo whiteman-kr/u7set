@@ -2,25 +2,94 @@
 #include "Schema.h"
 #include "SchemaItemControl.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
-	SchemaView::SchemaView(QWidget *parent) :
-		QWidget(parent)
+	SchemaView::SchemaView(QWidget* parent) :
+		SchemaView(std::shared_ptr<Schema>(), parent)
 	{
-		init();
 	}
 
-	SchemaView::SchemaView(std::shared_ptr<Schema>& schema, QWidget* parent /*= 0*/) :
+	SchemaView::SchemaView(std::shared_ptr<Schema> schema, QWidget* parent /*= 0*/) :
 		QWidget(parent),
 		m_schema(schema)
 	{
-		init();
+		setMouseTracking(true);
+		return;
 	}
 
-	void SchemaView::init()
+	void SchemaView::runScript(const QString& script, VFrame30::SchemaItem* schemaItem)
 	{
-		setMouseTracking(true);
+		qDebug() << "SchemaView::runScript";
+
+		if (script.isEmpty() == true ||
+			schemaItem == nullptr)
+		{
+			assert(schemaItem);
+			return;
+		}
+
+		// Evaluate script
+		//
+		QJSValue jsEval = m_jsEngine.evaluate(script, "VFrame30::SchemaItem::ClickScript");
+		if (jsEval.isError() == true)
+		{
+			QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script error: %1").arg(jsEval.toString()));
+			return;
+		}
+
+		// Global Objects
+		//
+		QJSValue jsSchemaView = m_jsEngine.newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+		TuningController* tuningController = &this->tuningController();
+
+		if (tuningController == nullptr)
+		{
+			assert(tuningController);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
+		}
+		else
+		{
+			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+		}
+
+		// Create JS params
+		//
+		QJSValue jsSchemaItem = m_jsEngine.newQObject(schemaItem);
+		QQmlEngine::setObjectOwnership(schemaItem, QQmlEngine::CppOwnership);
+
+		// Set argument list
+		//
+		QJSValueList args;
+
+		args << jsSchemaItem;
+		args << jsSchemaView;
+
+		// Run script
+		//
+		QJSValue jsResult = jsEval.call(args);
+		if (jsResult.isError() == true)
+		{
+			qDebug() << "Uncaught exception at line"
+					 << jsResult.property("lineNumber").toInt()
+					 << ":" << jsResult.toString();
+
+			QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script uncaught exception: %1").arg(jsEval.toString()));
+			return;
+		}
+
+		qDebug() << "runScript result:" <<  jsResult.toInt();
+
+		m_jsEngine.collectGarbage();
+
+		update();		// Repaint screen
+		return;
 	}
 
 	void SchemaView::updateControlWidgets(bool editMode)
@@ -422,5 +491,10 @@ namespace VFrame30
 	TuningController& SchemaView::tuningController()
 	{
 		return m_tuningController;
+	}
+
+	QJSEngine* SchemaView::jsEngine()
+	{
+		return &m_jsEngine;
 	}
 }

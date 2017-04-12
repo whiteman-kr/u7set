@@ -328,7 +328,10 @@ namespace VFrame30
 			return;
 		}
 
-		QJSValue jsEval = m_jsEngine.evaluate(script);
+		QJSEngine* engine = schemaView->jsEngine();
+		assert(engine);
+
+		QJSValue jsEval = engine->evaluate(script);
 		if (jsEval.isError() == true)
 		{
 			QMessageBox::critical(schemaView, qAppName(), "Script evaluating error: " + jsEval.toString());
@@ -337,10 +340,10 @@ namespace VFrame30
 
 		// Create JS params
 		//
-		QJSValue jsSchemaItem = m_jsEngine.newQObject(this);
+		QJSValue jsSchemaItem = engine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsWidget = m_jsEngine.newQObject(widget);
+		QJSValue jsWidget = engine->newQObject(widget);
 		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
 
 		QJSValue jsWidgetText = {widget->text()};
@@ -355,22 +358,22 @@ namespace VFrame30
 
 		// Global Objects
 		//
-		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
+		QJSValue jsSchemaView = engine->newQObject(schemaView);
 		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
-		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+		engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
 
 		TuningController* tuningController = &schemaView->tuningController();
 
 		if (tuningController != nullptr)
 		{
 			assert(tuningController);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
+			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
 		}
 		else
 		{
-			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QJSValue jsTuning = engine->newQObject(tuningController);
 			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
 		}
 
 		// Run script
@@ -386,7 +389,9 @@ namespace VFrame30
 			return;
 		}
 
-		m_jsEngine.collectGarbage();
+		engine->collectGarbage();
+
+		return;
 	}
 
 	bool SchemaItemLineEdit::searchText(const QString& text) const

@@ -23,8 +23,6 @@ public:
 public:
 
 protected:
-	void runScript(const QString& script, VFrame30::SchemaItem* schemaItem);
-
 	Q_INVOKABLE bool setSchema(QString schemaId);
 
 	// Painting
@@ -52,8 +50,6 @@ private:
 	SchemaManager* m_schemaManager = nullptr;
 
 	std::shared_ptr<VFrame30::SchemaItem> m_leftClickOverItem;
-
-	QJSEngine m_jsEngine;
 };
 
 

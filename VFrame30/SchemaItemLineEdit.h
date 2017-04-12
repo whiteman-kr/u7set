@@ -75,8 +75,6 @@ namespace VFrame30
 		void setScriptTextChanged(const QString& value);
 
 	private:
-		QJSEngine m_jsEngine;
-
 		QString m_text = {"0.0"};
 		QString m_placeholderText;
 		int m_maxLength = 32;
