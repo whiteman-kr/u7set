@@ -3,7 +3,7 @@
 #include <QHash>
 #include <memory>
 
-#include "..\lib\Types.h"
+#include "../lib/Types.h"
 
 namespace Builder
 {
