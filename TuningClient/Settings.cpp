@@ -163,9 +163,6 @@ void Settings::StoreUser()
 		}
 	}
 
-	s.setValue("Filters/filterByEquipment", m_filterByEquipment);
-	s.setValue("Filters/filterBySchema", m_filterBySchema);
-
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 
@@ -222,9 +219,6 @@ void Settings::RestoreUser()
 			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
 		}
 	}
-
-	m_filterByEquipment = s.value("Filters/filterByEquipment", m_filterByEquipment).toBool();
-	m_filterBySchema = s.value("Filters/filterBySchema", m_filterBySchema).toBool();
 
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
@@ -293,25 +287,6 @@ void Settings::setConfiguratorAddress2(const QString& address, int port)
 	m_configuratorPort2 = port;
 }
 
-bool Settings::filterByEquipment() const
-{
-	return m_filterByEquipment;
-}
-
-void Settings::setFilterByEquipment(bool value)
-{
-	m_filterByEquipment = value;
-}
-
-bool Settings::filterBySchema() const
-{
-	return m_filterBySchema;
-}
-
-void Settings::setFilterBySchema(bool value)
-{
-	m_filterBySchema = value;
-}
 
 QString Settings::language() const
 {

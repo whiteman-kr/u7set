@@ -716,23 +716,6 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 // TuningPage
 //
 
-TuningPage::TuningPage(int tuningPageIndex, const QString& schemaID, SchemaStorage* schemaStorage, const TuningObjectStorage* objects, QWidget *parent) :
-	QWidget(parent),
-	m_tuningPageIndex(tuningPageIndex),
-	m_schemaStorage(schemaStorage),
-	m_objects(objects)
-{
-	assert(schemaStorage);
-	assert(objects);
-
-	std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(schemaID);
-
-	m_schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
-
-	QHBoxLayout* layout = new QHBoxLayout(this);
-	layout->addWidget(m_schemaWidget);
-
-}
 
 TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage *objects, QWidget *parent) :
 	QWidget(parent),
@@ -964,13 +947,6 @@ TuningPage::~TuningPage()
 			pageSettings->m_columnsWidth[i] = m_objectList->columnWidth(i);
 		}
 	}
-
-	if (m_schemaWidget)
-	{
-		delete m_schemaWidget;
-		m_schemaWidget = nullptr;
-	}
-
 }
 
 void TuningPage::fillObjectsList()

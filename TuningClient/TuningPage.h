@@ -2,11 +2,10 @@
 #define TUNINGPAGE_H
 
 #include "Stable.h"
-#include "SchemaStorage.h"
+
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningObject.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "TuningSchemaWidget.h"
 
 class TuningItemModelMain : public TuningItemModel
 {
@@ -86,8 +85,6 @@ class TuningPage : public QWidget
 	Q_OBJECT
 public:
 	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage* objects, QWidget *parent = 0);
-
-	explicit TuningPage(int tuningPageIndex, const QString& schemaFile, SchemaStorage *schemaStorage, const TuningObjectStorage* objects, QWidget *parent = 0);
 
 	~TuningPage();
 
@@ -176,9 +173,6 @@ private:
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
-	SchemaStorage *m_schemaStorage = nullptr;
-
-	TuningSchemaWidget* m_schemaWidget = nullptr;
 
 };
 

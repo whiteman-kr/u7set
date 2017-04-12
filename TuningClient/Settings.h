@@ -39,6 +39,16 @@ struct ConfigSettings
 
 	bool autoApply = true;
 
+	bool showTuningWorkspace = true;
+
+	bool showSchemasWorkspace = true;
+
+	bool showSchemasList = true;
+
+	bool filterByEquipment = true;
+
+	bool filterBySchema = true;
+
 	QStringList schemasID;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
@@ -80,12 +90,6 @@ public:
 
 	void setConfiguratorAddress2(const QString& address, int port);
 	HostAddressPort configuratorAddress2();
-
-	bool filterByEquipment() const;
-	void setFilterByEquipment(bool value);
-
-	bool filterBySchema() const;
-	void setFilterBySchema(bool value);
 
     QString language() const;
     void setLanguage(const QString& value);
@@ -147,9 +151,6 @@ private:
 
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
-
-	bool m_filterByEquipment = true;
-	bool m_filterBySchema = true;
 
     QString m_language = "en";
 

@@ -280,9 +280,60 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
         m_tuningWorkspace = nullptr;
     }
 
-	m_tuningWorkspace = new TuningWorkspace(objects, &m_schemaStorage, this);
+	if (m_schemasWorkspace != nullptr)
+	{
+		delete m_schemasWorkspace;
+		m_schemasWorkspace = nullptr;
+	}
 
-    setCentralWidget(m_tuningWorkspace);
+
+	if (theConfigSettings.showSchemasWorkspace == true && theConfigSettings.schemasID.empty() == false)
+	{
+		m_schemasWorkspace = new SchemasWorkspace(objects, &m_schemaStorage, this);
+	}
+
+	if (theConfigSettings.showTuningWorkspace == true)
+	{
+		m_tuningWorkspace = new TuningWorkspace(objects, this);
+	}
+
+	// Now choose, what workspace to display. If both exists, create a tab page.
+
+	if (m_schemasWorkspace == nullptr && m_tuningWorkspace != nullptr)
+	{
+		// Show Tuning Workspace
+		//
+		setCentralWidget(m_tuningWorkspace);
+	}
+	else
+	{
+		if (m_schemasWorkspace != nullptr && m_tuningWorkspace == nullptr)
+		{
+			// Show Schemas Workspace
+			//
+			setCentralWidget(m_schemasWorkspace);
+		}
+		else
+		{
+			if (m_schemasWorkspace != nullptr && m_tuningWorkspace != nullptr)
+			{
+				// Show both Workspaces
+				//
+
+				QTabWidget* tab = new QTabWidget();
+				tab->addTab(m_schemasWorkspace, tr("Schemas View"));
+				tab->addTab(m_tuningWorkspace, tr("Signals View"));
+
+				tab->setStyleSheet("QTabWidget::tab-bar{alignment:center; }");
+
+				setCentralWidget(tab);
+			}
+			else
+			{
+				setCentralWidget(new QLabel("No workspaces exist, configuration error."));
+			}
+		}
+	}
 
 }
 
@@ -292,7 +343,7 @@ void MainWindow::slot_configurationArrived()
 
 	theFilters.removeAutomaticFilters();
 
-	theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+	theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theObjectManager->tuningSourcesEquipmentIds());
 
 	// Find and possibly remove non-existing signals from the list
 
@@ -311,7 +362,7 @@ void MainWindow::slot_configurationArrived()
 		}
 	}
 
-    if (m_tuningWorkspace != nullptr)
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
     {
         QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
     }
@@ -405,7 +456,7 @@ void MainWindow::showSettings()
 
         theFilters.removeAutomaticFilters();
 
-        theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
+		theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theObjectManager->tuningSourcesEquipmentIds());
 
         createWorkspace(&objects);
     }
