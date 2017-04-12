@@ -118,7 +118,7 @@ QPushButton:default {
 )_");
 
 	const QString PropertyNames::pushButtonDefaultEventScript(
-R"_(function(schemaItem, schemaView, pushButtonWidget, checked)
+R"_(function(schemaItem, pushButtonWidget, checked)
 {
 }
 )_");
@@ -153,7 +153,7 @@ QLineEdit:hover {
 	border-width: 2px
 })_"};
 
-	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, schemaView, lineEditWidget, text)\n{\n}"};
+	const QString PropertyNames::lineEditDefaultEventScript = {"function(schemaItem, lineEditWidget, text)\n{\n}"};
 	const QString PropertyNames::lineEditPropText("Property holds the line edit's text.");
 	const QString PropertyNames::lineEditPropPlaceholderText("Property holds the line edit's placeholder text.\n"
 															 "Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty.\n"
@@ -172,4 +172,7 @@ QLineEdit:hover {
    const QString PropertyNames::lineEditPropEditingFinished("This signal is emitted when the Return or Enter key is pressed or the line edit loses focus.");
    const QString PropertyNames::lineEditPropReturnPressed("This signal is emitted when the Return or Enter key is pressed.");
    const QString PropertyNames::lineEditPropTextChanged("This signal is emitted whenever the text changes.\nThis signal is also emitted when the text is changed programmatically.");
+
+   const QString PropertyNames::scriptGlobalVariableView = {"view"};
+   const QString PropertyNames::scriptGlobalVariableTuning = {"tuning"};
 }

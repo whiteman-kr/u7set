@@ -115,6 +115,9 @@ namespace VFrame30
 		static const QString lineEditPropEditingFinished;
 		static const QString lineEditPropReturnPressed;
 		static const QString lineEditPropTextChanged;
+
+		static const QString scriptGlobalVariableView;
+		static const QString scriptGlobalVariableTuning;
 	};
 
 }

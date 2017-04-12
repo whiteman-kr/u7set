@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Session.h"
+#include "../lib/Tuning/TuningController.h"
+
 
 namespace VFrame30
 {
@@ -59,6 +61,9 @@ namespace VFrame30
 		const Session& session() const;
 		Session& session();
 
+		const TuningController& tuningController() const;
+		TuningController& tuningController();
+
 		// Data
 		//
 	private:
@@ -66,6 +71,7 @@ namespace VFrame30
 		double m_zoom = 100.0;
 
 		Session m_session;
+		TuningController m_tuningController;
 	};
 }
 
