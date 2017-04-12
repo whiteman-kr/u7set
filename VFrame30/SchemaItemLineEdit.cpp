@@ -1,5 +1,6 @@
 #include "SchemaItemLineEdit.h"
 #include "SchemaView.h"
+#include "../lib/Tuning/TuningController.h"
 #include <QLineEdit>
 
 namespace VFrame30
@@ -339,9 +340,6 @@ namespace VFrame30
 		QJSValue jsSchemaItem = m_jsEngine.newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
-		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
-
 		QJSValue jsWidget = m_jsEngine.newQObject(widget);
 		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
 
@@ -352,9 +350,28 @@ namespace VFrame30
 		QJSValueList args;
 
 		args << jsSchemaItem;
-		args << jsSchemaView;
 		args << jsWidget;
 		args << jsWidgetText;
+
+		// Global Objects
+		//
+		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
+		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
+		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+		TuningController* tuningController = &schemaView->tuningController();
+
+		if (tuningController != nullptr)
+		{
+			assert(tuningController);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
+		}
+		else
+		{
+			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+		}
 
 		// Run script
 		//
@@ -368,8 +385,6 @@ namespace VFrame30
 			QMessageBox::critical(schemaView, qAppName(), "Script uncaught exception: " + jsEval.toString());
 			return;
 		}
-
-		qDebug() << "runScript result:" <<  jsResult.toString();
 
 		m_jsEngine.collectGarbage();
 	}
