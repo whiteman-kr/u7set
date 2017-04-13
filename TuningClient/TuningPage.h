@@ -89,7 +89,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningObjectManager* tuningObjectManager, const TuningObjectStorage* objects, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage* objects, QWidget *parent = 0);
 
 	~TuningPage();
 
@@ -123,7 +123,9 @@ private:
 
 	TuningObjectManager* m_tuningObjectManager = nullptr;
 
-    enum class FilterType
+	TuningFilterStorage* m_filterStorage = nullptr;
+
+	enum class FilterType
     {
         All = 0,
         AppSignalID,

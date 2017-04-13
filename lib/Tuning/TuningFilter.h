@@ -219,11 +219,21 @@ private:
 
 };
 
-class TuningFilterStorage
+class TuningFilterStorage : public QObject
 {
+	Q_OBJECT
 public:
 	TuningFilterStorage();
 	TuningFilterStorage(const TuningFilterStorage& That);
+
+	TuningFilterStorage& operator = (const TuningFilterStorage& That)
+	{
+		m_root = std::make_shared<TuningFilter>(*That.m_root.get());
+		m_schemasDetails = That.m_schemasDetails;
+
+		return *this;
+
+	}
 
     // Serialization
 
@@ -248,6 +258,17 @@ public:
     void removeAutomaticFilters();
 
     void checkSignals(const TuningObjectStorage *objects, bool &removedNotFound, QWidget* parentWidget);
+
+protected:
+
+	virtual void writeLogError(const QString& message);
+	virtual void writeLogWarning(const QString& message);
+	virtual void writeLogMessage(const QString& message);
+
+public slots:
+	void slot_filtersUpdated(QByteArray data);
+	void slot_schemasDetailsUpdated(QByteArray data);
+
 
 public:
 

@@ -18,6 +18,10 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 	{
 		m_schemasList = new QTreeWidget();
 
+		m_schemasList->setRootIsDecorated(false);
+
+		m_schemasList->setHeaderHidden(true);
+
 		connect(m_schemasList, &QTreeWidget::currentItemChanged, this, &SchemasWorkspace::slot_schemaListSelectionChanged);
 
 		QString firstSchemaID;

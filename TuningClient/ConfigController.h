@@ -26,9 +26,6 @@ public:
 	//
 public:
 
-	bool requestObjectFilters();
-	bool requestSchemasDetails();
-
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
 
@@ -38,9 +35,14 @@ public:
 	// signals
 	//
 signals:
-	void configurationArrived();
-	void signalsArrived(QByteArray data);
 	void serversArrived(HostAddressPort address1, HostAddressPort address2);
+
+	void signalsArrived(QByteArray data);
+	void filtersArrived(QByteArray data);
+	void schemasDetailsArrived(QByteArray data);
+
+
+	void configurationArrived();
 
 	// slots
 	//
@@ -49,7 +51,6 @@ public slots:
 
 private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-
 
 private:
 

@@ -65,11 +65,6 @@ DialogSettings::~DialogSettings()
 	delete ui;
 }
 
-bool DialogSettings::filterSettingsChanged()
-{
-    return m_filterSettingsChanged;
-}
-
 void DialogSettings::on_DialogSettings_accepted()
 {
     // ID
