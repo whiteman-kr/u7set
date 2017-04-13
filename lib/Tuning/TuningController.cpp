@@ -102,9 +102,9 @@ QVariant TuningController::lowLimit(QString appSignalID)
 	return result;
 }
 
-int TuningController::showMessageBox(QString title, QString text, QMessageBox::Icon icon, QMessageBox::StandardButton buttons)
+int TuningController::showMessageBox(QString title, QString text, int icon, int buttons)
 {
-	QMessageBox mb(icon, title, text, buttons);
+	QMessageBox mb((QMessageBox::Icon)icon, title, text, (QMessageBox::StandardButton)buttons);
 	return mb.exec();
 }
 
