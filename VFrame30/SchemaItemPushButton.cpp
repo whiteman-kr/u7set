@@ -284,7 +284,7 @@ namespace VFrame30
 		//
 		if (m_jsClicked.isUndefined() == true)
 		{
-			m_jsClicked = evaluateScript(senderWidget, m_clickScript);
+			m_jsClicked = evaluateScript(senderWidget, m_scriptClicked);
 
 			if (m_jsClicked.isError() == true ||
 				m_jsClicked.isNull() == true)

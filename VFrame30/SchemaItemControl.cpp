@@ -192,7 +192,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue result = engine->evaluate(script);
+		QJSValue result = engine->evaluate(script + schemaView->globalScript());
 		if (result.isError() == true)
 		{
 			QMessageBox::critical(schemaView, qAppName(),

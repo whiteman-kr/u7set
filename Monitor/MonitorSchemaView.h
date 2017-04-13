@@ -44,6 +44,11 @@ signals:
 
 public slots:
 
+	// Properties
+	//
+public:
+	virtual QString globalScript() const override;
+
 	// Data
 	//
 private:

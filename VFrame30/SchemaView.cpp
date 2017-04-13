@@ -443,4 +443,14 @@ namespace VFrame30
 	{
 		return &m_jsEngine;
 	}
+
+	QString SchemaView::globalScript() const
+	{
+		return m_globasScript;
+	}
+
+	void SchemaView::setGlobalScript(QString value)
+	{
+		m_globasScript = value;
+	}
 }

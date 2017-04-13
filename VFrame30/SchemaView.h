@@ -68,6 +68,9 @@ namespace VFrame30
 
 		QJSEngine* jsEngine();
 
+		virtual QString globalScript() const;
+		void setGlobalScript(QString value);
+
 		// Data
 		//
 	private:
@@ -78,6 +81,7 @@ namespace VFrame30
 		TuningController m_tuningController;
 
 		QJSEngine m_jsEngine;
+		QString m_globasScript;
 	};
 }
 

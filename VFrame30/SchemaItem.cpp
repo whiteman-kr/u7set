@@ -185,7 +185,7 @@ namespace VFrame30
 
 		if (m_jsClickScript.isUndefined() == true)
 		{
-			m_jsClickScript = engine->evaluate(m_clickScript);
+			m_jsClickScript = engine->evaluate(m_clickScript + schemaView->globalScript());
 
 			if (m_jsClickScript.isError() == true)
 			{

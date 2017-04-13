@@ -219,3 +219,14 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	return;
 }
 
+QString MonitorSchemaView::globalScript() const
+{
+	if (m_schemaManager == nullptr)
+	{
+		assert(m_schemaManager);
+		return QString();
+	}
+
+	return m_schemaManager->globalScript();
+}
+

@@ -38,6 +38,7 @@ protected slots:
 	// Properties
 	//
 public:
+	const QString& globalScript() const;
 
 	// Data
 	//
@@ -45,6 +46,8 @@ private:
 	std::map<QString, std::shared_ptr<VFrame30::Schema>> m_schemas;		// map by SchemaID
 
 	MonitorConfigController* const m_configController = nullptr;
+
+	ConfigSettings m_configuration;
 };
 
 #endif // SCHEMAMANAGER_H
