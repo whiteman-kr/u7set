@@ -1,8 +1,12 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
+
 #include "../lib/DeviceObject.h"
+#include "../lib/CfgLoaderWithLog.h"
+
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -92,11 +96,14 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2);
+	CfgLoaderWithLog* cfgLoader = new CfgLoaderWithLog(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false);
+
+	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 
 	m_cfgLoaderThread->start();
+
 	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 

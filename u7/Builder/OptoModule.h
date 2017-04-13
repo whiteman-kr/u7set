@@ -7,6 +7,8 @@
 #include "../lib/Address16.h"
 #include "../lib/Signal.h"
 
+#include "RawDataDescription.h"
+
 class LogicModule;
 class OutputLog;
 
@@ -44,109 +46,13 @@ namespace Hardware
 		};
 		Q_ENUM(SerialMode)
 
-		struct TxSignal
+		struct TxRxSignal
 		{
 			QString appSignalID;
-			Address16 address;        // offset from beginning of txBuffer
+			Address16 offset;				// offset from beginning of txBuffer (rxBuffer)
+			Address16 absAddress;			// absoulte signal address in LM's memory
 			int sizeBit = 0;
 		};
-
-		enum class RawDataDescriptionItemType
-		{
-			RawDataSize,
-			AllNativeRawData,
-			ModuleRawData,
-			PortRawData,
-			Const16,
-			InSignal,
-			OutSignal
-		};
-
-		struct RawDataDescriptionItem
-		{
-			RawDataDescriptionItemType type = RawDataDescriptionItemType::RawDataSize;
-
-			bool rawDataSizeIsAuto = false;			// for type - RawDataSize
-			int rawDataSize = 0;					//
-
-			int modulePlace = 0;					// for type - ModuleNativePrimaryData
-
-			int const16Value = 0;					// for type - Const16
-
-			QString portEquipmentID;				// for type - PortRawData
-
-			QString appSignalID;									// for type - InSignal, OutSignal
-			E::SignalType signalType = E::SignalType::Discrete;		//
-			E::DataFormat dataFormat = E::DataFormat::UnsignedInt;	//
-			int dataSize = 0;										//
-			E::ByteOrder byteOrder = E::ByteOrder::BigEndian;		//
-			int offsetW = 0;										//
-			int bitNo = 0;											//
-		};
-
-		const int RAW_DATA_SIZE_INDEX = 0;
-
-	private:
-		static const char* RAW_DATA_SIZE;
-		static const char* ALL_NATIVE_RAW_DATA;
-		static const char* MODULE_RAW_DATA;
-		static const char* PORT_RAW_DATA;
-		static const char* CONST16;
-		static const char* IN_SIGNAL;
-		static const char* OUT_SIGNAL;
-
-		QString m_equipmentID;
-		DeviceController* m_deviceController = nullptr;
-
-		QString m_optoModuleID;
-
-		QString m_linkedPortID;
-
-		QString m_connectionID;
-
-		QString m_rawDataDescriptionStr;
-
-		QVector<RawDataDescriptionItem> m_rawDataDescription;
-
-		QHash<QString, Address16> m_txSignalsIDs;		// appSignalID => txAddress
-
-		QVector<TxSignal> m_txAnalogSignals;
-		QVector<TxSignal> m_txDiscreteSignals;
-
-		int m_txRawDataSizeW = 0;			// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
-		int m_txAnalogSignalsSizeW = 0;		//
-		int m_txDiscreteSignalsSizeW = 0;   //
-		int m_txDataSizeW = 0;              //
-		quint32 m_txDataID = 0;             // range 0..0xFFFFFFFF
-
-		bool m_txRawDataSizeWIsCalculated = false;
-		bool m_txRawDataSizeWCalculationStarted = false;
-		int m_port = 0;
-
-		Mode m_mode = Mode::Optical;
-		SerialMode m_serialMode = SerialMode::RS232;
-
-		int m_rxStartAddress = 0;
-		int m_rxDataSizeW = 0;
-
-		int m_txStartAddress = 0;				// address of port's tx data relative from opto module appDataOffset
-		int m_absTxStartAddress = 0;		// absoulte address of port tx data in LM memory
-
-		quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
-
-		// serial RS323/485 mode properies only
-		//
-		bool m_enableDuplex = false;    // serial mode and OCMN only
-
-		bool m_manualSettings = false;
-		int m_manualTxStartAddressW = 0;
-		int m_manualTxSizeW = 0;
-		int m_manualRxSizeW = 0;
-
-		void sortTxSignals();
-		void sortTxSignals(QVector<TxSignal> &array);
-
-		DeviceModule* getLM();
 
 	public:
 		OptoPort(const QString& optoModuleID, DeviceController* optoPortController, int port);
@@ -191,18 +97,18 @@ namespace Hardware
 
 		QString optoModuleID() const { return m_optoModuleID; }
 
-		QVector<TxSignal> getTxSignals();
+		QVector<TxRxSignal> getTxSignals();
 
 		void addTxSignal(Signal* txSignal);
 		bool calculateTxSignalsAddresses(Builder::IssueLogger* log);
 
-		QVector<TxSignal> txAnalogSignals() const { return m_txAnalogSignals; }
-		QVector<TxSignal> txDiscreteSignals() const { return m_txDiscreteSignals; }
+		QVector<TxRxSignal> txAnalogSignals() const { return m_txAnalogSignals; }
+		QVector<TxRxSignal> txDiscreteSignals() const { return m_txDiscreteSignals; }
 
 		QString rawDataDescriptionStr() const { return m_rawDataDescriptionStr; }
 		void setRawDataDescriptionStr(const QString& description) { m_rawDataDescriptionStr = description; }
 
-		const QVector<RawDataDescriptionItem>& rawDataDescription() const { return m_rawDataDescription; }
+		const RawDataDescription& rawDataDescription() const { return m_rawDataDescription; }
 
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
@@ -240,11 +146,7 @@ namespace Hardware
 
 		Address16 getTxSignalAddress(const QString& appSignalID) const;
 
-		bool parseRawDescriptionStr(Builder::IssueLogger* log);
-		bool parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
-		bool parseOutSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
-		bool parseSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem& item, Builder::IssueLogger* log);
-
+		bool parseRawDescription(Builder::IssueLogger* log);
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
 
 		bool getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
@@ -252,6 +154,66 @@ namespace Hardware
 										QUuid receiverUuid,
 										SignalAddress16 &addr,
 										Builder::IssueLogger* log);
+	private:
+		bool buildTxRawSignalList(Builder::IssueLogger* log);
+		bool buildRxRawSignalList(Builder::IssueLogger* log);
+
+		void sortByOffsetBitNoAscending(QVector<TxRxSignal>& signalList);
+		bool checkSignalsOffsets(const QVector<TxRxSignal>& signalList, bool overlapIsError, Builder::IssueLogger* log);
+
+		Mode m_mode = Mode::Optical;
+		SerialMode m_serialMode = SerialMode::RS232;
+
+		bool m_enableDuplex = false;    // serial mode and OCMN only
+
+		bool m_manualSettings = false;
+		int m_manualTxStartAddressW = 0;
+		int m_manualTxSizeW = 0;
+		int m_manualRxSizeW = 0;
+
+		QString m_equipmentID;
+		DeviceController* m_deviceController = nullptr;
+
+		QString m_optoModuleID;
+		QString m_linkedPortID;
+		QString m_connectionID;
+
+		QString m_rawDataDescriptionStr;
+		RawDataDescription m_rawDataDescription;
+
+		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
+
+		QVector<TxRxSignal> m_txRawSignals;				// sorted by ascending of Offset:BitNo
+		QVector<TxRxSignal> m_txAnalogSignals;			// sorted by ascending of AppSignalID
+		QVector<TxRxSignal> m_txDiscreteSignals;		// sorted by ascending of AppSignalID
+
+		QHash<QString, Address16> m_txSignalsIDs;		// appSignalID => txAddress
+
+		int m_txRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
+		int m_txAnalogSignalsSizeW = 0;					//
+		int m_txDiscreteSignalsSizeW = 0;				//
+
+		int m_txDataSizeW = 0;
+
+		bool m_txRawDataSizeWIsCalculated = false;
+		bool m_txRawDataSizeWCalculationStarted = false;
+		int m_port = 0;
+
+		QVector<TxRxSignal> m_rxRawSignals;				// sorted by ascending of Offset:BitNo
+
+		int m_rxStartAddress = 0;
+		int m_rxDataSizeW = 0;
+
+		int m_txStartAddress = 0;				// address of port's tx data relative from opto module appDataOffset
+		int m_absTxStartAddress = 0;		// absoulte address of port tx data in LM memory
+
+		quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
+
+
+		void sortTxSignals();
+		void sortTxSignals(QVector<TxRxSignal> &array);
+
+		DeviceModule* getLM();
 	};
 
 

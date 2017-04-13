@@ -14,15 +14,6 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	const char* OptoPort::RAW_DATA_SIZE = "RAW_DATA_SIZE";
-	const char* OptoPort::ALL_NATIVE_RAW_DATA = "ALL_NATIVE_RAW_DATA";
-	const char* OptoPort::MODULE_RAW_DATA = "MODULE_RAW_DATA";
-	const char* OptoPort::PORT_RAW_DATA = "PORT_RAW_DATA";
-	const char* OptoPort::CONST16 = "CONST16";
-	const char* OptoPort::IN_SIGNAL = "IN_SIGNAL";
-	const char* OptoPort::OUT_SIGNAL = "OUT_SIGNAL";
-
-
 	OptoPort::OptoPort(const QString& optoModuleStrID, DeviceController* optoPortController, int port) :
 		m_deviceController(optoPortController),
 		m_optoModuleID(optoModuleStrID)
@@ -55,7 +46,7 @@ namespace Hardware
 		{
 			m_txSignalsIDs.insert(txSignal->appSignalID(), Address16());
 
-			TxSignal txs;
+			TxRxSignal txs;
 
 			txs.appSignalID = txSignal->appSignalID();
 			txs.sizeBit = txSignal->dataSize();
@@ -79,9 +70,9 @@ namespace Hardware
 	}
 
 
-	QVector<OptoPort::TxSignal> OptoPort::getTxSignals()
+	QVector<OptoPort::TxRxSignal> OptoPort::getTxSignals()
 	{
-		QVector<TxSignal> txSignals;
+		QVector<TxRxSignal> txSignals;
 
 		txSignals.append(m_txAnalogSignals);
 		txSignals.append(m_txDiscreteSignals);
@@ -125,9 +116,9 @@ namespace Hardware
 
 		int startAddr = address.offset();
 
-		for(TxSignal& txAnalogSignal : m_txAnalogSignals)
+		for(TxRxSignal& txAnalogSignal : m_txAnalogSignals)
 		{
-			txAnalogSignal.address = address;
+			txAnalogSignal.offset = address;
 
 			if (m_txSignalsIDs.contains(txAnalogSignal.appSignalID))
 			{
@@ -150,9 +141,9 @@ namespace Hardware
 
 		startAddr = address.offset();
 
-		for(TxSignal& txDiscreteSignal : m_txDiscreteSignals)
+		for(TxRxSignal& txDiscreteSignal : m_txDiscreteSignals)
 		{
-			txDiscreteSignal.address = address;
+			txDiscreteSignal.offset = address;
 
 			if (m_txSignalsIDs.contains(txDiscreteSignal.appSignalID))
 			{
@@ -243,6 +234,20 @@ namespace Hardware
 		return Address16();
 	}
 
+	bool OptoPort::parseRawDescription(Builder::IssueLogger* log)
+	{
+		bool result = m_rawDataDescription.parse(*this, log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		result &= buildTxRawSignalList(log);
+		result &= buildRxRawSignalList(log);
+
+		return result;
+	}
 
 	void OptoPort::sortTxSignals()
 	{
@@ -253,7 +258,7 @@ namespace Hardware
 	}
 
 
-	void OptoPort::sortTxSignals(QVector<TxSignal>& array)
+	void OptoPort::sortTxSignals(QVector<TxRxSignal>& array)
 	{
 		int count = array.count();
 
@@ -263,7 +268,7 @@ namespace Hardware
 			{
 				if (array[i].appSignalID > array[k].appSignalID)
 				{
-					TxSignal temp = array[i];
+					TxRxSignal temp = array[i];
 					array[i] = array[k];
 					array[k] = temp;
 				}
@@ -271,386 +276,6 @@ namespace Hardware
 		}
 	}
 
-
-	bool OptoPort::parseRawDescriptionStr(Builder::IssueLogger* log)
-	{
-		if (log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		m_rawDataDescription.clear();
-
-		m_rawDataDescriptionStr = m_rawDataDescriptionStr.trimmed().toUpper();
-
-		if (m_rawDataDescriptionStr.isEmpty() == true)
-		{
-			return true;
-		}
-
-		bool result = true;
-
-		// split string
-
-		QStringList list = m_rawDataDescriptionStr.split("\n", QString::SkipEmptyParts);
-
-		bool rawDataSizeFound = false;
-		bool needRawDataSize = false;
-
-		QString msg;
-
-		for(QString str : list)
-		{
-			RawDataDescriptionItem item;
-			bool res = true;
-
-			str = str.trimmed();
-
-			QString itemTypeStr = str.section("=", 0, 0).trimmed();
-
-			if (itemTypeStr == RAW_DATA_SIZE)
-			{
-				if (rawDataSizeFound == true)
-				{
-					msg = QString("Duplicate RAW_DATA_SIZE section in opto-port '%1' raw data description.").arg(equipmentID());
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-					result = false;
-					continue;
-				}
-
-				rawDataSizeFound = true;
-
-				QString sizeStr = str.section("=", 1, 1).trimmed();
-
-				if (sizeStr != "AUTO" )
-				{
-					int size = sizeStr.toInt(&res);
-
-					if (res == false)
-					{
-						msg = QString("Invalid RAW_DATA_SIZE value in opto-port '%1' raw data description.").arg(equipmentID());
-						LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-						result = false;
-						continue;
-					}
-
-					item.rawDataSize = size;
-					item.rawDataSizeIsAuto = false;
-				}
-				else
-				{
-					item.rawDataSizeIsAuto = true;
-				}
-
-				item.type = RawDataDescriptionItemType::RawDataSize;
-				m_rawDataDescription.insert(RAW_DATA_SIZE_INDEX, item);		// RAW_DATA_SIZE always first item
-				continue;
-			}
-
-			if (itemTypeStr == ALL_NATIVE_RAW_DATA)
-			{
-				needRawDataSize = true;
-
-				item.type = RawDataDescriptionItemType::AllNativeRawData;
-				m_rawDataDescription.append(item);
-
-				continue;
-			}
-
-			if (itemTypeStr == MODULE_RAW_DATA)
-			{
-				needRawDataSize = true;
-
-				QString placeStr = str.section("=", 1, 1).trimmed();
-
-				int place = placeStr.toInt(&res);
-
-				if (res == false)
-				{
-					msg = QString("Invalid MODULE_RAW_DATA value in opto-port '%1' raw data description.").arg(equipmentID());
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-					result = false;
-					continue;
-				}
-				else
-				{
-					item.type = RawDataDescriptionItemType::ModuleRawData;
-					item.modulePlace = place;
-					m_rawDataDescription.append(item);
-				}
-
-				continue;
-			}
-
-			if (itemTypeStr == PORT_RAW_DATA)
-			{
-				needRawDataSize = true;
-
-				QString portEquipmentID = str.section("=", 1, 1).trimmed();
-
-				item.type = RawDataDescriptionItemType::PortRawData;
-				item.portEquipmentID = portEquipmentID;
-				m_rawDataDescription.append(item);
-				continue;
-			}
-
-			if (itemTypeStr == CONST16)
-			{
-				needRawDataSize = true;
-
-				QString constStr = str.section("=", 1, 1).trimmed();
-
-				int const16 = constStr.toInt(&res);
-
-				if (res == false)
-				{
-					msg = QString("Invalid CONST16 value in opto-port '%1' raw data description.").arg(equipmentID());
-					LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-					result = false;
-					continue;
-				}
-				else
-				{
-					item.type = RawDataDescriptionItemType::Const16;
-					item.const16Value = const16;
-					m_rawDataDescription.append(item);
-				}
-
-				continue;
-			}
-
-			if (itemTypeStr == OUT_SIGNAL)
-			{
-				needRawDataSize = true;
-
-				bool parseResult = parseOutSignalRawDescriptionStr(str, item, log);
-
-				if (parseResult == true)
-				{
-					m_rawDataDescription.append(item);
-				}
-
-				result &= parseResult;
-
-				continue;
-			}
-
-
-			if (itemTypeStr == IN_SIGNAL)
-			{
-				//	needRawDataSize = true;		- not need!
-
-				bool parseResult = parseInSignalRawDescriptionStr(str, item, log);
-
-				if (parseResult == true)
-				{
-					m_rawDataDescription.append(item);
-				}
-
-				result &= parseResult;
-
-				continue;
-			}
-
-			msg = QString("Unknown item %1 in opto-port '%2' raw data description.").arg(itemTypeStr).arg(equipmentID());
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			result = false;
-
-			break;
-		}
-
-		if (needRawDataSize == true && rawDataSizeFound == false)
-		{
-			msg = QString("RAW_DATA_SIZE value is not found in opto-port '%1' raw data description.").arg(equipmentID());
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			result = false;
-		}
-
-		return result;
-	}
-
-
-	bool OptoPort::parseInSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
-	{
-		item.type = RawDataDescriptionItemType::InSignal;
-
-		return parseSignalRawDescriptionStr(str, item, log);
-	}
-
-
-	bool OptoPort::parseOutSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
-	{
-		item.type = RawDataDescriptionItemType::OutSignal;
-
-		return parseSignalRawDescriptionStr(str, item, log);
-	}
-
-
-	bool OptoPort::parseSignalRawDescriptionStr(const QString& str, RawDataDescriptionItem &item, Builder::IssueLogger* log)
-	{
-		QString keywordStr;
-
-		// item.type must be already filled !
-		//
-		switch(item.type)
-		{
-		case RawDataDescriptionItemType::InSignal:
-			keywordStr = IN_SIGNAL;
-			break;
-
-		case RawDataDescriptionItemType::OutSignal:
-			keywordStr = OUT_SIGNAL;
-			break;
-
-		default:
-			assert(false);
-			LOG_INTERNAL_ERROR(log);
-			return false;
-		}
-
-		QString msg;
-
-		bool res = true;
-
-		// InSignal description examples:
-		//
-		// IN_SIGNAL=#EXT_DISCRETE1,D,UINT,1,BE,3,4
-		// IN_SIGNAL=#EXT_ANALOG1,A,FLOAT,32,LE,6,0
-
-		QString inSignalDescription = str.section("=", 1).trimmed();
-
-		QStringList descItemsList = inSignalDescription.split(",", QString::SkipEmptyParts);
-
-		if (descItemsList.size() != 7)			// must be 7 parameters!
-		{
-			msg = QString("Invalid %1 description parameters count, must be 7. (Port '%2')").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		// 1) AppSignalID
-
-		item.appSignalID = descItemsList.at(0).trimmed();
-
-		// 2) Signal type
-
-		QString signalTypeStr = descItemsList.at(1).trimmed();
-
-		if (signalTypeStr != "A" && signalTypeStr != "D")
-		{
-			msg = QString("Invalid %1 value of parameter SignalType in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		if (signalTypeStr == "A")
-		{
-			item.signalType = E::SignalType::Analog;
-		}
-		else
-		{
-			item.signalType = E::SignalType::Discrete;
-		}
-
-		// 3) DataFormat
-
-		QString dataFormatStr = descItemsList.at(2).trimmed();
-
-		if (dataFormatStr != "FLOAT" &&
-			dataFormatStr != "SINT" &&
-			dataFormatStr != "UINT")
-		{
-			msg = QString("Invalid %1 value of parameter DataFormat in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		if (dataFormatStr == "FLOAT")
-		{
-			item.dataFormat = E::DataFormat::Float;
-		}
-		else
-		{
-			if (dataFormatStr == "SINT")
-			{
-				item.dataFormat = E::DataFormat::SignedInt;
-			}
-			else
-			{
-				item.dataFormat = E::DataFormat::UnsignedInt;
-			}
-		}
-
-		// 4) DataSize
-
-		item.dataSize = descItemsList.at(3).trimmed().toInt(&res);
-
-		if (res == false)
-		{
-			msg = QString("Invalid %1 value of parameter DataSize in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		// 5) ByteOrder
-
-		QString byteOrderStr = descItemsList.at(4).trimmed();
-
-		if (byteOrderStr != "BE" && byteOrderStr != "LE")
-		{
-			msg = QString("Invalid %1 value of parameter ByteOrder in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		if (byteOrderStr == "BE")
-		{
-			item.byteOrder = E::ByteOrder::BigEndian;
-		}
-		else
-		{
-			item.byteOrder = E::ByteOrder::LittleEndian;
-		}
-
-		// 6) OffsetW
-
-		item.offsetW = descItemsList.at(5).trimmed().toInt(&res);
-
-		if (res == false)
-		{
-			msg = QString("Invalid %1 value of parameter OffsetW in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		// 7) BitNo
-
-		item.bitNo = descItemsList.at(6).trimmed().toInt(&res);
-
-		if (res == false)
-		{
-			msg = QString("Invalid %1 value of parameter BitNo in opto-port '%2' raw data description.").
-					arg(keywordStr).arg(m_equipmentID);
-
-			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
-
-		return true;
-	}
 
 
 	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log)
@@ -685,28 +310,23 @@ namespace Hardware
 			return true;
 		}
 
-		const RawDataDescriptionItem& rawDataSizeItem = m_rawDataDescription[RAW_DATA_SIZE_INDEX];
-
-		if (rawDataSizeItem.type != Hardware::OptoPort::RawDataDescriptionItemType::RawDataSize)
+		if (m_rawDataDescription.txRawDataSizeIsValid() == false)
 		{
-			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. RAW_DATA_SIZE item not found.").arg(equipmentID());
+			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. TX_RAW_DATA_SIZE item not found.").arg(equipmentID());
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
 			return false;
 		}
 
 		m_txRawDataSizeWCalculationStarted = true;		// to prevent cyclic calculatePortRawDataSize()
 
-		if (rawDataSizeItem.rawDataSizeIsAuto == false)
+		if (m_rawDataDescription.txRawDataSizeIsAuto() == false)
 		{
 			// txRawDataSizeW set manually
 			//
-			setTxRawDataSizeW(rawDataSizeItem.rawDataSize);
+			setTxRawDataSizeW(m_rawDataDescription.txRawDataSize());
 
-			// LOG_MESSAGE(log, QString(tr("Port %1 manual rawDataSizeW = %2")).arg(m_equipmentID).arg(m_txRawDataSizeW));
 			return true;
 		}
-
-		//LOG_MESSAGE(log, QString(tr("Port %1 rawDataSizeW calculation...")).arg(m_equipmentID));
 
 		// automatic txRawDataSizeW calculation
 		//
@@ -719,27 +339,24 @@ namespace Hardware
 		{
 			switch(item.type)
 			{
-			case RawDataDescriptionItemType::RawDataSize:
+			case RawDataDescriptionItem::Type::TxRawDataSize:
 				break;
 
-			case RawDataDescriptionItemType::AllNativeRawData:
+			case RawDataDescriptionItem::Type::TxAllModulesRawData:
 
 				partSizeW = DeviceHelper::getAllNativeRawDataSize(lm, log);;
 
 				size += partSizeW;
 
-				// LOG_MESSAGE(log, QString(tr("ALL_NATIVE_RAW_DATA sizeW = %1")).arg(partSizeW));
 				break;
 
-			case RawDataDescriptionItemType::ModuleRawData:
+			case RawDataDescriptionItem::Type::TxModuleRawData:
 				{
 					bool moduleIsFound = false;
 
 					partSizeW = DeviceHelper::getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, log);
 
 					size += partSizeW;
-
-					// LOG_MESSAGE(log, QString(tr("MODULE_RAW_DATA=%1 sizeW = %2")).arg(item.modulePlace).arg(partSizeW));
 
 					if (moduleIsFound == false)
 					{
@@ -751,7 +368,7 @@ namespace Hardware
 
 				break;
 
-			case RawDataDescriptionItemType::PortRawData:
+			case RawDataDescriptionItem::Type::TxPortRawData:
 				{
 					OptoPort* portRxRawData = optoStorage->getOptoPort(item.portEquipmentID);
 
@@ -793,24 +410,23 @@ namespace Hardware
 				}
 				break;
 
-			case RawDataDescriptionItemType::Const16:
+			case RawDataDescriptionItem::Type::TxConst16:
 
 				size++;
 
-				// LOG_MESSAGE(log, QString(tr("CONST16=%1 sizeW = 1")).arg(item.const16Value));
-
 				break;
 
-			case RawDataDescriptionItemType::InSignal:
-				break;
-
-			case RawDataDescriptionItemType::OutSignal:
+			case RawDataDescriptionItem::Type::TxSignal:
 
 				if (item.offsetW + item.dataSize / SIZE_16BIT > size)
 				{
 					size = item.offsetW + item.dataSize / SIZE_16BIT;
 				}
 
+				break;
+
+			case RawDataDescriptionItem::Type::RxRawDataSize:
+			case RawDataDescriptionItem::Type::RxSignal:
 				break;
 
 			default:
@@ -855,7 +471,7 @@ namespace Hardware
 
 		for(const RawDataDescriptionItem& rdi : m_rawDataDescription)
 		{
-			if (rdi.type != RawDataDescriptionItemType::InSignal)
+			if (rdi.type != RawDataDescriptionItem::Type::RxSignal)
 			{
 				continue;
 			}
@@ -893,6 +509,118 @@ namespace Hardware
 		return false;
 	}
 
+
+	bool OptoPort::buildTxRawSignalList(Builder::IssueLogger* log)
+	{
+		m_txRawSignals.clear();
+
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			if (item.type == RawDataDescriptionItem::Type::TxSignal)
+			{
+				TxRxSignal txSignal;
+
+				txSignal.appSignalID = item.appSignalID;
+				txSignal.offset.set(item.offsetW, item.bitNo);
+				txSignal.absAddress.reset();
+				txSignal.sizeBit = item.dataSize;
+
+				m_txRawSignals.append(txSignal);
+			}
+		}
+
+		sortByOffsetBitNoAscending(m_txRawSignals);
+
+		bool result = checkSignalsOffsets(m_txRawSignals, true, log);
+
+		return result;
+	}
+
+
+	bool OptoPort::buildRxRawSignalList(Builder::IssueLogger* log)
+	{
+		m_rxRawSignals.clear();
+
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			if (item.type == RawDataDescriptionItem::Type::RxSignal)
+			{
+				TxRxSignal rxSignal;
+
+				rxSignal.appSignalID = item.appSignalID;
+				rxSignal.offset.set(item.offsetW, item.bitNo);
+				rxSignal.absAddress.reset();
+				rxSignal.sizeBit = item.dataSize;
+
+				m_rxRawSignals.append(rxSignal);
+			}
+		}
+
+		sortByOffsetBitNoAscending(m_rxRawSignals);
+
+		bool result = checkSignalsOffsets(m_rxRawSignals, false, log);
+
+		return result;
+	}
+
+
+	void OptoPort::sortByOffsetBitNoAscending(QVector<TxRxSignal>& signalList)
+	{
+		int count = signalList.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if (signalList[i].offset.bitAddress() > signalList[k].offset.bitAddress())
+				{
+					TxRxSignal temp = signalList[i];
+					signalList[i] = signalList[k];
+					signalList[k] = temp;
+				}
+			}
+		}
+	}
+
+
+	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignal>& signalList, bool overlapIsError, Builder::IssueLogger* log)
+	{
+		bool result = true;
+
+		int count = signalList.count();
+
+		for(int i = 0; i < count - 1; i++)
+		{
+			const TxRxSignal& s1 = signalList[i];
+			const TxRxSignal& s2 = signalList[i + 1];
+
+			int s1StartBitAddress = s1.offset.bitAddress();
+			int s1EndBitAddress = s1.offset.bitAddress() + s1.sizeBit - 1;
+
+			int s2StartBitAddress = s2.offset.bitAddress();
+			int s2EndBitAddress = s2.offset.bitAddress() + s1.sizeBit - 1;
+
+			if ((s1StartBitAddress >= s2StartBitAddress && s1StartBitAddress <= s2EndBitAddress) ||
+				(s2StartBitAddress >= s1StartBitAddress && s2StartBitAddress <= s1EndBitAddress))
+			{
+				if (overlapIsError == true)
+				{
+					LOG_ERROR_OBSOLETE(log, Builder::IssueType::NotDefined,
+									   QString("Raw signals '%1' and '%2' is overlapped (port '%3').").
+									   arg(s1.appSignalID).arg(s2.appSignalID).arg(equipmentID()));
+					result = false;
+				}
+				else
+				{
+					LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined,
+										 QString("Raw signals '%1' and '%2' is overlapped (port '%3').").
+										 arg(s1.appSignalID).arg(s2.appSignalID).arg(equipmentID()));
+				}
+			}
+		}
+
+		return result;
+	}
 
 
 	// ------------------------------------------------------------------

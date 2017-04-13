@@ -402,7 +402,7 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
-				result &= optoPort1->parseRawDescriptionStr(m_log);
+				result &= optoPort1->parseRawDescription(m_log);
 
 				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 				{
@@ -414,7 +414,7 @@ namespace Builder
 
 				if (result == true)
 				{
-					LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1' ID = %2... Ok")).
+					LOG_MESSAGE(m_log, QString(tr("Serial RS232/485 connection '%1' ID = %2... Ok")).
 								arg(connection->connectionID()).arg(portID));
 				}
 			}
@@ -452,6 +452,8 @@ namespace Builder
 				else
 				{
 					assert(false);
+					result = false;
+					continue;
 				}
 
 				if (optoPort2->connectionID().isEmpty() == true)
@@ -475,7 +477,7 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
-				result &= optoPort1->parseRawDescriptionStr(m_log);
+				result &= optoPort1->parseRawDescription(m_log);
 
 				optoPort2->setPortID(portID);
 				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
@@ -485,7 +487,7 @@ namespace Builder
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 				optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
 
-				result &= optoPort2->parseRawDescriptionStr(m_log);
+				result &= optoPort2->parseRawDescription(m_log);
 
 				optoPort1->setLinkedPortID(optoPort2->equipmentID());
 				optoPort2->setLinkedPortID(optoPort1->equipmentID());
@@ -970,8 +972,8 @@ namespace Builder
 
 		quint32 dataID = outPort->txDataID();
 
-		QVector<Hardware::OptoPort::TxSignal> txAnalogs = outPort->txAnalogSignals();
-		QVector<Hardware::OptoPort::TxSignal> txDiscretes = outPort->txDiscreteSignals();
+		QVector<Hardware::OptoPort::TxRxSignal> txAnalogs = outPort->txAnalogSignals();
+		QVector<Hardware::OptoPort::TxRxSignal> txDiscretes = outPort->txDiscreteSignals();
 
 		list.append("--");
 		list.append("-- This file has been generated automatically by RPCT software");
@@ -1034,7 +1036,7 @@ namespace Builder
 
 		if (txAnalogs.count() > 0)
 		{
-			for(Hardware::OptoPort::TxSignal& txAnalog :  txAnalogs)
+			for(Hardware::OptoPort::TxRxSignal& txAnalog :  txAnalogs)
 			{
 				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
 						arg(txAnalog.appSignalID.remove("#")).
@@ -1050,7 +1052,7 @@ namespace Builder
 
 		if (txDiscretes.count() > 0)
 		{
-			for(Hardware::OptoPort::TxSignal& txDiscrete :  txDiscretes)
+			for(Hardware::OptoPort::TxRxSignal& txDiscrete :  txDiscretes)
 			{
 				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete.appSignalID.remove("#"));
 				list.append(str);
@@ -1088,12 +1090,12 @@ namespace Builder
 
 		if (txAnalogs.count() > 0)
 		{
-			for(Hardware::OptoPort::TxSignal& txAnalog :  txAnalogs)
+			for(Hardware::OptoPort::TxRxSignal& txAnalog :  txAnalogs)
 			{
 				str = QString("\t%1 <= in_data(%2-1 downto %3);").
 						arg(txAnalog.appSignalID.remove("#")).
-						arg(txAnalog.address.offset() * 16 + txAnalog.sizeBit).
-						arg(txAnalog.address.offset() * 16);
+						arg(txAnalog.offset.offset() * 16 + txAnalog.sizeBit).
+						arg(txAnalog.offset.offset() * 16);
 
 				list.append(str);
 			}
@@ -1103,11 +1105,11 @@ namespace Builder
 
 		if (txDiscretes.count() > 0)
 		{
-			for(Hardware::OptoPort::TxSignal& txDiscrete :  txDiscretes)
+			for(Hardware::OptoPort::TxRxSignal& txDiscrete :  txDiscretes)
 			{
 				str = QString("\t%1 <= in_data(%2);").
 						arg(txDiscrete.appSignalID.remove("#")).
-						arg(txDiscrete.address.offset() * 16 + txDiscrete.address.bit());
+						arg(txDiscrete.offset.offset() * 16 + txDiscrete.offset.bit());
 				list.append(str);
 			}
 
@@ -1177,13 +1179,13 @@ namespace Builder
 		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)", port->txStartAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
 		list.append(str);
 
-		QVector<Hardware::OptoPort::TxSignal> txSignals = port->getTxSignals();
+		QVector<Hardware::OptoPort::TxRxSignal> txSignals = port->getTxSignals();
 
-		for(const Hardware::OptoPort::TxSignal& tx : txSignals)
+		for(const Hardware::OptoPort::TxRxSignal& tx : txSignals)
 		{
 			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->txStartAddress() + tx.address.offset(), tx.address.bit(),
-						tx.address.offset(), tx.address.bit(),
+						port->txStartAddress() + tx.offset.offset(), tx.offset.bit(),
+						tx.offset.offset(), tx.offset.bit(),
 						C_STR(tx.appSignalID));
 			list.append(str);
 		}

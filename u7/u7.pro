@@ -189,7 +189,8 @@ SOURCES +=\
     DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
-    ../lib/CodeEditor.cpp
+    ../lib/CodeEditor.cpp \
+    Builder/RawDataDescription.cpp
 
 
 HEADERS  += \
@@ -316,7 +317,8 @@ HEADERS  += \
     DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
-    ../lib/CodeEditor.h
+    ../lib/CodeEditor.h \
+    Builder/RawDataDescription.h
 
 FORMS    += \
     CreateProjectDialog.ui \

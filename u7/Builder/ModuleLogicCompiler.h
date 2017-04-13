@@ -685,14 +685,14 @@ namespace Builder
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
 		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
 		bool copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset);
-		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem &item, int portDataOffset);
-		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem& item, int portDataOffset);
+		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem &item, int portDataOffset);
+		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem& item, int portDataOffset);
 
 		bool copyRS232Signals();
 		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);
 		bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
 		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
-		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QVector<Hardware::OptoPort::TxSignal> &txSignals);
+		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QVector<Hardware::OptoPort::TxRxSignal> &txSignals);
 
 		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
 
