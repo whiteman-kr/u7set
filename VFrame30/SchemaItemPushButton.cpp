@@ -135,7 +135,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode) const
+	QWidget* SchemaItemPushButton::createWidget(QWidget* parent, bool editMode)
 	{
 		if (parent == nullptr)
 		{
@@ -152,8 +152,6 @@ namespace VFrame30
 
 		if (editMode == false)
 		{
-			afterCreate(control);
-
 			// Connect slots only if it has any sense
 			//
 			if (scriptClicked().isEmpty() == false &&
@@ -179,6 +177,10 @@ namespace VFrame30
 			{
 				connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
 			}
+
+			// Run script after create
+			//
+			afterCreate(control);
 		}
 
 		control->setVisible(true);
@@ -229,7 +231,7 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemPushButton::afterCreate(QPushButton* control) const
+	void SchemaItemPushButton::afterCreate(QPushButton* control)
 	{
 		if (control == nullptr)
 		{
@@ -237,14 +239,28 @@ namespace VFrame30
 			return;
 		}
 
-		if (m_scriptAfterCreate == PropertyNames::pushButtonDefaultEventScript)	// Suppose Default script does nothing, just return
+		if (m_scriptAfterCreate.trimmed().isEmpty() == true ||
+			m_scriptAfterCreate == PropertyNames::pushButtonDefaultEventScript)	// Suppose Default script does nothing, just return
 		{
 			return;
 		}
 
-		// Shit happens
+		// Evaluate script
 		//
-		const_cast<SchemaItemPushButton*>(this)->runEventScript(m_scriptAfterCreate, control);
+		if (m_jsAfterCreate.isUndefined() == true)
+		{
+			m_jsAfterCreate = evaluateScript(control, m_scriptAfterCreate);
+
+			if (m_jsAfterCreate.isError() == true ||
+				m_jsAfterCreate.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsAfterCreate, control);
 
 		return;
 	}
@@ -264,7 +280,22 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptClicked, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsClicked.isUndefined() == true)
+		{
+			m_jsClicked = evaluateScript(senderWidget, m_clickScript);
+
+			if (m_jsClicked.isError() == true ||
+				m_jsClicked.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsClicked, senderWidget);
 
 		return;
 	}
@@ -284,7 +315,22 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptPressed, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsPressed.isUndefined() == true)
+		{
+			m_jsPressed = evaluateScript(senderWidget, m_scriptPressed);
+
+			if (m_jsPressed.isError() == true ||
+				m_jsPressed.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsPressed, senderWidget);
 
 		return;
 	}
@@ -304,7 +350,22 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptReleased, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsReleased.isUndefined() == true)
+		{
+			m_jsReleased = evaluateScript(senderWidget, m_scriptReleased);
+
+			if (m_jsReleased.isError() == true ||
+				m_jsReleased.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsReleased, senderWidget);
 
 		return;
 	}
@@ -324,28 +385,37 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptToggled, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsToggled.isUndefined() == true)
+		{
+			m_jsToggled = evaluateScript(senderWidget, m_scriptToggled);
+
+			if (m_jsToggled.isError() == true ||
+				m_jsToggled.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsToggled, senderWidget);
 
 		return;
 	}
 
-	void SchemaItemPushButton::runEventScript(const QString& script, QPushButton* buttonWidget)
+	void SchemaItemPushButton::runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget)
 	{
-		if (script.trimmed().isEmpty() == true)
+		if (evaluatedJs.isError() == true ||
+			evaluatedJs.isNull() == true)
 		{
 			return;
 		}
 
 		// Suppose that parent of sender is SchemaView
 		//
-		QWidget* parentWidget = buttonWidget->parentWidget();
-		if (parentWidget == nullptr)
-		{
-			assert(parentWidget);
-			return;
-		}
-
-		SchemaView* schemaView = dynamic_cast<SchemaView*>(parentWidget);
+		SchemaView* schemaView = dynamic_cast<SchemaView*>(buttonWidget->parentWidget());
 		if (schemaView == nullptr)
 		{
 			assert(schemaView);
@@ -355,14 +425,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue jsEval = engine->evaluate(script);
-		if (jsEval.isError() == true)
-		{
-			QMessageBox::critical(schemaView, qAppName(), "Script evaluating error: " + jsEval.toString());
-			return;
-		}
-
-		// Create JS params
+		// Set argument list
 		//
 		QJSValue jsSchemaItem = engine->newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
@@ -370,28 +433,6 @@ namespace VFrame30
 		QJSValue jsWidget = engine->newQObject(buttonWidget);
 		QQmlEngine::setObjectOwnership(buttonWidget, QQmlEngine::CppOwnership);
 
-		// Global Objects
-		//
-		QJSValue jsSchemaView = engine->newQObject(schemaView);
-		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
-		engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-
-		TuningController* tuningController = &schemaView->tuningController();
-
-		if (tuningController == nullptr)
-		{
-			assert(tuningController);
-			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
-		}
-		else
-		{
-			QJSValue jsTuning = engine->newQObject(tuningController);
-			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
-			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-		}
-
-		// Set argument list
-		//
 		QJSValueList args;
 
 		args << jsSchemaItem;
@@ -400,19 +441,15 @@ namespace VFrame30
 
 		// Run script
 		//
-		QJSValue jsResult = jsEval.call(args);
+		QJSValue jsResult = evaluatedJs.call(args);
+
 		if (jsResult.isError() == true)
 		{
-			qDebug() << "Uncaught exception at line"
-					 << jsResult.property("lineNumber").toInt()
-					 << ":" << jsResult.toString();
-
-			QMessageBox::critical(schemaView, qAppName(), "Script uncaught exception: " + jsEval.toString());
+			reportSqriptError(jsResult, schemaView);
 			return;
 		}
 
 		engine->collectGarbage();
-
 		return;
 	}
 

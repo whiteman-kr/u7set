@@ -2,6 +2,7 @@
 #include "SchemaManager.h"
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/DrawParam.h"
+#include "../VFrame30/PropertyNames.h"
 
 MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *parent)
 	: SchemaView(parent),
@@ -11,6 +12,12 @@ MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *pare
 	assert(m_schemaManager);
 
 	startTimer(250);
+
+	// Add golbal to script engine
+	//
+	QJSValue jsSchemaView = jsEngine()->newQObject(this);
+	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+	jsEngine()->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableView, jsSchemaView);
 
 	return;
 }
@@ -183,15 +190,17 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 
 				if (item == m_leftClickOverItem &&
 					item->acceptClick() == true &&
+					item->clickScript().trimmed().isEmpty() == false &&
 					item->IsIntersectPoint(x, y) == true &&
 					item->clickScript().isEmpty() == false)
 				{
 					// Run script
 					//
-					runScript(item->clickScript(), item.get());
+					item->runScript(jsEngine(), this);
 
 					// --
 					//
+					update();		// Repaint screen
 					unsetCursor();
 					m_leftClickOverItem.reset();
 					event->accept();

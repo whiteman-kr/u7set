@@ -1,5 +1,6 @@
 #include "SchemaItemControl.h"
 #include "PropertyNames.h"
+#include "SchemaView.h"
 
 namespace VFrame30
 {
@@ -92,7 +93,7 @@ namespace VFrame30
 		return gridSize;
 	}
 
-	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/) const
+	QWidget* SchemaItemControl::createWidget(QWidget* /*parent*/, bool /*editMode*/)
 	{
 		// Implement in derived class
 		//
@@ -169,6 +170,39 @@ namespace VFrame30
 
 			widget->setUpdatesEnabled(true);
 		}
+	}
+
+	QJSValue SchemaItemControl::evaluateScript(QWidget* controlWidget, QString script)
+	{
+		if (controlWidget == nullptr)
+		{
+			assert(controlWidget);
+			return false;
+		}
+
+		// Suppose that parent of sender is SchemaView
+		//
+		SchemaView* schemaView = dynamic_cast<SchemaView*>(controlWidget->parentWidget());
+		if (schemaView == nullptr)
+		{
+			assert(schemaView);
+			return QJSValue();
+		}
+
+		QJSEngine* engine = schemaView->jsEngine();
+		assert(engine);
+
+		QJSValue result = engine->evaluate(script);
+		if (result.isError() == true)
+		{
+			QMessageBox::critical(schemaView, qAppName(),
+								  QString("Script evaluating error at line %1\nObject: %2\nMessage: %3")
+									.arg(result.property("lineNumber").toInt())
+									.arg(metaObject()->className())
+									.arg(result.toString()));
+		}
+
+		return result;
 	}
 
 	// Properties and Data

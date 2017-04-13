@@ -21,17 +21,17 @@ namespace VFrame30
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode) const override;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) override;
 		virtual void updateWidgetProperties(QWidget* widget) const override;
 
 	protected slots:
-		void afterCreate(QPushButton* control) const;
+		void afterCreate(QPushButton* control);
 		void clicked(bool checked);
 		void pressed();
 		void released();
 		void toggled(bool checked);
 
-		void runEventScript(const QString& script, QPushButton* buttonWidget);
+		void runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget);
 
 		// Text search
 		//
@@ -91,5 +91,13 @@ namespace VFrame30
 		QString m_scriptPressed = PropertyNames::pushButtonDefaultEventScript;
 		QString m_scriptReleased = PropertyNames::pushButtonDefaultEventScript;
 		QString m_scriptToggled = PropertyNames::pushButtonDefaultEventScript;
+
+		// Evaluated scripts
+		//
+		QJSValue m_jsAfterCreate;
+		QJSValue m_jsClicked;
+		QJSValue m_jsPressed;
+		QJSValue m_jsReleased;
+		QJSValue m_jsToggled;
 	};
 }

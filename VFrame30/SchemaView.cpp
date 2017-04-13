@@ -16,79 +16,20 @@ namespace VFrame30
 		m_schema(schema)
 	{
 		setMouseTracking(true);
-		return;
-	}
-
-	void SchemaView::runScript(const QString& script, VFrame30::SchemaItem* schemaItem)
-	{
-		qDebug() << "SchemaView::runScript";
-
-		if (script.isEmpty() == true ||
-			schemaItem == nullptr)
-		{
-			assert(schemaItem);
-			return;
-		}
-
-		// Evaluate script
-		//
-		QJSValue jsEval = m_jsEngine.evaluate(script, "VFrame30::SchemaItem::ClickScript");
-		if (jsEval.isError() == true)
-		{
-			QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script error: %1").arg(jsEval.toString()));
-			return;
-		}
 
 		// Global Objects
+		// WARNING !!!!schemaView global must be added in derived class, if do it here, derived class methods will not be accissible
 		//
-		QJSValue jsSchemaView = m_jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+//		QJSValue jsSchemaView = m_jsEngine.newQObject(this);
+//		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+//		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
 
-		TuningController* tuningController = &this->tuningController();
+		TuningController* tuningController = &m_tuningController;
 
-		if (tuningController == nullptr)
-		{
-			assert(tuningController);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
-		}
-		else
-		{
-			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
-			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-		}
+		QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+		QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
 
-		// Create JS params
-		//
-		QJSValue jsSchemaItem = m_jsEngine.newQObject(schemaItem);
-		QQmlEngine::setObjectOwnership(schemaItem, QQmlEngine::CppOwnership);
-
-		// Set argument list
-		//
-		QJSValueList args;
-
-		args << jsSchemaItem;
-		args << jsSchemaView;
-
-		// Run script
-		//
-		QJSValue jsResult = jsEval.call(args);
-		if (jsResult.isError() == true)
-		{
-			qDebug() << "Uncaught exception at line"
-					 << jsResult.property("lineNumber").toInt()
-					 << ":" << jsResult.toString();
-
-			QMessageBox::critical(this, QApplication::applicationDisplayName(), tr("Script uncaught exception: %1").arg(jsEval.toString()));
-			return;
-		}
-
-		qDebug() << "runScript result:" <<  jsResult.toInt();
-
-		m_jsEngine.collectGarbage();
-
-		update();		// Repaint screen
 		return;
 	}
 
@@ -193,6 +134,11 @@ namespace VFrame30
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
 
 		emit signal_schemaChanged(schema.get());
+	}
+
+	void SchemaView::jsDebugOutput(QString str)
+	{
+		qDebug() << str;
 	}
 
 	void SchemaView::mouseMoveEvent(QMouseEvent* event)

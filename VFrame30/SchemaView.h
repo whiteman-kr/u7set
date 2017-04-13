@@ -20,8 +20,6 @@ namespace VFrame30
 		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget *parent = 0);
 
 	protected:
-		void runScript(const QString& script, VFrame30::SchemaItem* schemaItem);
-
 		void updateControlWidgets(bool editMode);
 		
 		// Painting
@@ -43,6 +41,8 @@ namespace VFrame30
 		std::shared_ptr<Schema> schema() const;
 
 		void setSchema(std::shared_ptr<Schema>& schema, bool repaint);
+
+		Q_INVOKABLE void jsDebugOutput(QString str);
 		
 		// Events
 		//
