@@ -7,7 +7,7 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(const TuningObjectStorage* objects, QWidget* parent);
+	explicit TuningWorkspace(TuningObjectManager *tuningObjectManager, const TuningObjectStorage* objects, QWidget* parent);
 	virtual ~TuningWorkspace();
 
 private:

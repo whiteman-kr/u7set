@@ -1,19 +1,17 @@
-#include "TuningSchemaView.h"
-#include "TuningSchemaWidget.h"
+#include "SchemaView.h"
+#include "SchemaWidget.h"
+#include "MainWindow.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/MonitorSchema.h"
 
 TuningSchemaView::TuningSchemaView(SchemaStorage *schemaStorage, QWidget *parent)
-	: SchemaView(parent),
+	:  SchemaView(parent),
 	  m_schemaStorage(schemaStorage)
 {
-
-
 }
 
 TuningSchemaView::~TuningSchemaView()
 {
-
 }
 
 void TuningSchemaView::setSchema(QString schemaId)
@@ -34,8 +32,6 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setEditMode(false);
-	//drawParam.setAppSignalManager(&theSignals);
-	//drawParam.setInfoMode(theSettings.showItemsLabels());
 
 	// Draw schema
 	//
@@ -53,15 +49,6 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	//
 	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
-	// Items are being moved drawing
-	//
-	//drawMovingItems(&drawParam);
-
-	// --
-	//
-	//drawRectSizing(&drawParam);
-	//drawMovingLinePoint(&drawParam);
-	//drawMovingEdgesOrVertexConnectionLine(&drawParam);
 
 	p.restore();
 

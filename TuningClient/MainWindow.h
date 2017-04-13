@@ -11,7 +11,7 @@
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "ClientObjectManager.h"
 #include "SchemaStorage.h"
 
 namespace Ui {
@@ -33,9 +33,9 @@ private:
 
 
 private:
-	ConfigController m_configController;
+	TuningClientObjectManager *m_objectManager = nullptr;
 
-	SchemaStorage m_schemaStorage;
+	ConfigController m_configController;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
@@ -82,8 +82,6 @@ private:
 
 extern MainWindow* theMainWindow;
 extern LogFile* theLogFile;
-
-extern TuningObjectManager* theObjectManager;
 
 extern TuningFilterStorage theFilters;
 
