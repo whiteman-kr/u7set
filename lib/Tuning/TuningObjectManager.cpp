@@ -696,6 +696,8 @@ void TuningObjectManager::slot_value(QString appSignalID, float* result, bool* o
 		return;
 	}
 
+	//qDebug()<<Q_FUNC_INFO<<appSignalID<<object->value();
+
 	*result = object->value();
 }
 
@@ -706,6 +708,8 @@ void TuningObjectManager::slot_setValue(QString appSignalID, float value, bool* 
 		assert(ok);
 		return;
 	}
+
+	//qDebug()<<Q_FUNC_INFO<<appSignalID<<value;
 
 	Hash hash = ::calcHash(appSignalID);
 

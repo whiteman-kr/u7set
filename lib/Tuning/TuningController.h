@@ -23,7 +23,7 @@ public:
 	Q_INVOKABLE QVariant highLimit(QString appSignalID);
 	Q_INVOKABLE QVariant lowLimit(QString appSignalID);
 
-	Q_INVOKABLE int showMessageBox(QString title, QString text, QMessageBox::Icon icon, QMessageBox::StandardButton buttons);
+	Q_INVOKABLE int showMessageBox(QString title, QString text, int icon, int buttons);
 
 	Q_INVOKABLE int showWarningMessageBox(QString text);
 	Q_INVOKABLE int showErrorMessageBox(QString text);

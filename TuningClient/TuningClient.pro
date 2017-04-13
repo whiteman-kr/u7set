@@ -144,7 +144,8 @@ SOURCES +=\
     SchemaWidget.cpp \
     SchemaView.cpp \
     ClientObjectManager.cpp \
-    ClientFilterEditor.cpp
+    ClientFilterEditor.cpp \
+    ClientFilterStorage.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -190,7 +191,8 @@ HEADERS  += MainWindow.h \
     SchemaView.h \
     SchemaWidget.h \
     ClientFilterEditor.h \
-    ClientObjectManager.h
+    ClientObjectManager.h \
+    ClientFilterStorage.h
 
 FORMS    += \
     DialogSettings.ui \

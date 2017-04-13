@@ -106,7 +106,7 @@ public:
 
 public:
 
-    int m_requestInterval = 100;
+	int m_requestInterval = 10;
 
 	//
 

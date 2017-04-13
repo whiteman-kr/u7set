@@ -3,12 +3,14 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, const TuningObjectStorage* objects, QWidget *parent) :
+TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage* objects, QWidget *parent) :
+	m_filterStorage(filterStorage),
 	m_objects(*objects),
 	QWidget(parent)
 {
 
 	assert(tuningObjectManager);
+	assert(m_filterStorage),
 	assert(objects);
 
     QVBoxLayout* pLayout = new QVBoxLayout();
@@ -28,10 +30,10 @@ TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, const
 
 	// Tabs by filters
 
-	int count = theFilters.m_root->childFiltersCount();
+	int count = m_filterStorage->m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<TuningFilter> f = theFilters.m_root->childFilter(i);
+		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -43,7 +45,7 @@ TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, const
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(tuningPageIndex++, f, tuningObjectManager, &m_objects);
+		TuningPage* tp = new TuningPage(tuningPageIndex++, f, tuningObjectManager, filterStorage, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
@@ -58,7 +60,7 @@ TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, const
 		//
 		std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
 
-		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningObjectManager, &m_objects);
+		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningObjectManager, filterStorage, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
 
@@ -119,7 +121,7 @@ void TuningWorkspace::fillFiltersTree()
 {
     // Fill the filter tree
     //
-    std::shared_ptr<TuningFilter> rootFilter = theFilters.m_root;
+	std::shared_ptr<TuningFilter> rootFilter = m_filterStorage->m_root;
     if (rootFilter == nullptr)
     {
         assert(rootFilter);

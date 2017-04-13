@@ -44,23 +44,28 @@ MainWindow::MainWindow(QWidget *parent) :
 	// TcpSignalClient
 	//
 	m_objectManager = new TuningClientObjectManager();
-
 	m_objectManager->setInstanceId(theSettings.instanceStrId());
-
 	m_objectManager->setRequestInterval(theSettings.m_requestInterval);
 
 	m_tcpClientThread = new SimpleThread(m_objectManager);
 	m_tcpClientThread->start();
 
+	// Global connections
 
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningObjectManager::slot_signalsUpdated);
 	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningObjectManager::slot_serversArrived,
 			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::filtersArrived, &m_filterStorage, &TuningFilterStorage::slot_filtersUpdated,
+			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::schemasDetailsArrived, &m_filterStorage, &TuningFilterStorage::slot_schemasDetailsUpdated,
+			Qt::QueuedConnection);
+
+	// Load user filters
 
 	QString errorCode;
 
-    if (theFilters.load(theSettings.userFiltersFile(), &errorCode, false) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, false) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -274,7 +279,37 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
-    if (m_tuningWorkspace != nullptr)
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
+	}
+
+	// Update automatic filters
+
+	m_filterStorage.removeAutomaticFilters();
+
+	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
+
+	// Find and possibly remove non-existing signals from the list
+
+	bool removedNotFound = false;
+
+	m_filterStorage.checkSignals(objects, removedNotFound, this);
+
+	if (removedNotFound == true)
+	{
+		QString errorMsg;
+
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		{
+			theLogFile->writeError(errorMsg);
+			QMessageBox::critical(this, tr("Error"), errorMsg);
+		}
+	}
+
+	// Create workspaces
+
+	if (m_tuningWorkspace != nullptr)
     {
         delete m_tuningWorkspace;
         m_tuningWorkspace = nullptr;
@@ -286,7 +321,6 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 		m_schemasWorkspace = nullptr;
 	}
 
-
 	if (theConfigSettings.showSchemasWorkspace == true && theConfigSettings.schemasID.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, this);
@@ -294,7 +328,7 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 	if (theConfigSettings.showTuningWorkspace == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(m_objectManager, objects, this);
+		m_tuningWorkspace = new TuningWorkspace(m_objectManager, &m_filterStorage, objects, this);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
@@ -341,32 +375,6 @@ void MainWindow::slot_configurationArrived()
 {
 	TuningObjectStorage objects = m_objectManager->objectStorage();
 
-	theFilters.removeAutomaticFilters();
-
-	theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
-
-	// Find and possibly remove non-existing signals from the list
-
-	bool removedNotFound = false;
-
-	theFilters.checkSignals(&objects, removedNotFound, this);
-
-	if (removedNotFound == true)
-	{
-		QString errorMsg;
-
-		if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
-		{
-			theLogFile->writeError(errorMsg);
-			QMessageBox::critical(this, tr("Error"), errorMsg);
-		}
-	}
-
-	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
-    {
-        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
-    }
-
     createWorkspace(&objects);
 
     return;
@@ -392,13 +400,13 @@ void MainWindow::runPresetEditor()
         return;
     }
 
-    TuningFilterStorage editStorage = theFilters;
+	ClientFilterStorage editFilters = m_filterStorage;
 
     bool editAutomatic = false;
 
 	TuningObjectStorage objects = m_objectManager->objectStorage();
 
-	TuningClientFilterEditor d(m_objectManager, &editStorage, &objects, editAutomatic,
+	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,
                          theSettings.m_presetEditorPresetsTreeColumnWidth,
                          theSettings.m_presetEditorPos,
@@ -410,11 +418,11 @@ void MainWindow::runPresetEditor()
 
     if (d.exec() == QDialog::Accepted)
     {
-        theFilters = editStorage;
+		m_filterStorage = editFilters;
 
         QString errorMsg;
 
-        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
         {
             theLogFile->writeError(errorMsg);
             QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -449,17 +457,6 @@ void MainWindow::showSettings()
     DialogSettings* d = new DialogSettings(this);
 
     d->exec();
-
-    if (d->filterSettingsChanged() == true)
-    {
-		TuningObjectStorage objects = m_objectManager->objectStorage();
-
-        theFilters.removeAutomaticFilters();
-
-		theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
-
-        createWorkspace(&objects);
-    }
 
     delete d;
 }
@@ -531,7 +528,5 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 LogFile* theLogFile = nullptr;
-
-TuningFilterStorage theFilters;
 
 UserManager theUserManager;
