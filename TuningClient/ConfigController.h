@@ -28,7 +28,6 @@ public:
 
 	bool requestObjectFilters();
 	bool requestSchemasDetails();
-	bool requestTuningSignals();
 
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
@@ -40,7 +39,7 @@ public:
 	//
 signals:
 	void configurationArrived();
-	void signalsArrived();
+	void signalsArrived(QByteArray data);
 	void serversArrived(HostAddressPort address1, HostAddressPort address2);
 
 	// slots

@@ -3,10 +3,13 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *parent) :
+TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, const TuningObjectStorage* objects, QWidget *parent) :
 	m_objects(*objects),
 	QWidget(parent)
 {
+
+	assert(tuningObjectManager);
+	assert(objects);
 
     QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
@@ -40,7 +43,7 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 			continue;
 		}
 
-		TuningPage* tp = new TuningPage(tuningPageIndex++, f, &m_objects);
+		TuningPage* tp = new TuningPage(tuningPageIndex++, f, tuningObjectManager, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
@@ -55,7 +58,7 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 		//
 		std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
 
-		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, &m_objects);
+		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningObjectManager, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
 

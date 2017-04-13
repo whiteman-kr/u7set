@@ -198,58 +198,6 @@ bool ConfigController::requestSchemasDetails()
 	return true;
 }
 
-bool ConfigController::requestTuningSignals()
-{
-	QByteArray data;
-	QString errorStr;
-	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
-	{
-		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-		addEventMessage(completeErrorMessage);
-		return false;
-	}
-	else
-	{
-		if (theObjectManager->loadDatabase(data, &errorStr) == false)
-		{
-			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-			theLogFile->writeError(completeErrorMessage);
-			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-			addEventMessage(completeErrorMessage);
-			return false;
-		}
-		else
-		{
-			QString message = tr("Received file: TuningSignals.xml");
-			addEventMessage(message);
-		}
-	}
-
-	return true;
-}
-
-/*bool ConfigController::requestSchema(const QString &schemaID)
-{
-	QByteArray data;
-	QString errorStr;
-	if (getFileBlockedById(schemaID, &data, &errorStr) == false)
-	{
-		QString completeErrorMessage = tr("getFileBlockedById: Get %1 file error: %2").arg(schemaID).arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-		addEventMessage(completeErrorMessage);
-		return false;
-	}
-	else
-	{
-		QString message = tr("Received schema: %1").arg(schemaID);
-		addEventMessage(message);
-	}
-	return true;
-}*/
-
 Tcp::ConnectionState ConfigController::getConnectionState() const
 {
 	Tcp::ConnectionState result;
@@ -380,8 +328,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	bool someFilesUpdated = false;
 
-	bool signalsUpdated = false;
-
 
 	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
@@ -423,9 +369,21 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
 			{
-				if (requestTuningSignals() == true)
+				QByteArray data;
+				QString errorStr;
+				if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
 				{
-					signalsUpdated = true;
+					QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					QString message = tr("Received file: TuningSignals.xml");
+					addEventMessage(message);
+
+					emit signalsArrived(data);
 				}
 			}
 		}
@@ -454,11 +412,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	if (serversUpdated == true)
 	{
 		emit serversArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address());
-	}
-
-	if (signalsUpdated == true)
-	{
-		emit signalsArrived();
 	}
 
 	if (someFilesUpdated == true || apperanceUpdated == true)

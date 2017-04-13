@@ -4,12 +4,14 @@
 
 #include "SchemasWorkspace.h"
 
-SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaStorage *schemaStorage, QWidget *parent):
-	m_schemaStorage(schemaStorage),
+SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage *objects, QWidget *parent):
+	m_tuningObjectManager(tuningObjectManager),
 	m_objects(*objects),
 	QWidget(parent)
 {
-	assert(schemaStorage);
+	m_schemaStorage = new SchemaStorage(configController);
+
+	assert(m_tuningObjectManager);
 	assert(objects);
 
 	if (theConfigSettings.showSchemasList == true)
@@ -30,9 +32,9 @@ SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaSto
 			}
 		}
 
-		std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(firstSchemaID);
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(firstSchemaID);
 
-		m_schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
+		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage);
 
 		m_hSplitter = new QSplitter(this);
 
@@ -51,9 +53,9 @@ SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaSto
 
 		for (auto schemaID : theConfigSettings.schemasID)
 		{
-			std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(schemaID);
+			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID);
 
-			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
+			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage);
 
 			tab->addTab(schemaWidget, schemaID);
 		}
@@ -66,7 +68,7 @@ SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaSto
 
 SchemasWorkspace::~SchemasWorkspace()
 {
-
+	delete m_schemaStorage;
 }
 
 void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem *current, QTreeWidgetItem* /*previous*/)
@@ -84,6 +86,6 @@ void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem *current,
 
 	QString schemaId = current->text(0);
 
-	m_schemaWidget->setSchema(m_schemaStorage->schema(schemaId), true);
+	m_schemaWidget->tuningSchemaView()->setSchema(schemaId);
 
 }

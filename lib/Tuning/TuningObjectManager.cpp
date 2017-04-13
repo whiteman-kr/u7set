@@ -1,23 +1,23 @@
 #include "../lib/Tuning/TuningObjectManager.h"
 
 
-TuningObjectManager::TuningObjectManager(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, const QString& instanceId, int requestInterval)
-	:Tcp::Client(serverAddressPort1, serverAddressPort2),
-	  m_instanceId(instanceId),
-	  m_requestInterval(requestInterval)
+TuningObjectManager::TuningObjectManager()
+	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0))
 {
-	connect(&m_tuningController, &TuningController::signal_exists, this, &TuningObjectManager::slot_exists, Qt::DirectConnection);
-	connect(&m_tuningController, &TuningController::signal_valid, this, &TuningObjectManager::slot_valid, Qt::DirectConnection);
-
-	connect(&m_tuningController, &TuningController::signal_value, this, &TuningObjectManager::slot_value, Qt::DirectConnection);
-	connect(&m_tuningController, &TuningController::signal_setValue, this, &TuningObjectManager::slot_setValue, Qt::DirectConnection);
-
-	connect(&m_tuningController, &TuningController::signal_highLimit, this, &TuningObjectManager::slot_highLimit, Qt::DirectConnection);
-	connect(&m_tuningController, &TuningController::signal_lowLimit, this, &TuningObjectManager::slot_lowLimit, Qt::DirectConnection);
 }
 
 TuningObjectManager::~TuningObjectManager()
 {
+}
+
+void TuningObjectManager::setInstanceId(const QString& instanceId)
+{
+	m_instanceId = instanceId;
+}
+
+void TuningObjectManager::setRequestInterval(int requestInterval)
+{
+	m_requestInterval = requestInterval;
 }
 
 bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCode)
@@ -601,16 +601,25 @@ void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
 
 void TuningObjectManager::slot_serversArrived(HostAddressPort address1, HostAddressPort address2)
 {
-	writeLogError(tr("TcpTuningClient::slot_configurationArrived"));
+	writeLogMessage(tr("TcpTuningClient::slot_configurationArrived"));
 
 	setServers(address1, address2, true);
 
     return;
 }
 
-void TuningObjectManager::slot_signalsUpdated()
+void TuningObjectManager::slot_signalsUpdated(QByteArray data)
 {
-	writeLogError(tr("TcpTuningClient::slot_signalsUpdated"));
+	QString errorStr;
+	if (loadDatabase(data, &errorStr) == false)
+	{
+		QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
+		writeLogMessage(completeErrorMessage);
+
+		return;
+	}
+
+	writeLogMessage(tr("TcpTuningClient::slot_signalsUpdated"));
 
     QMutexLocker l(&m_mutex);
 
@@ -706,6 +715,12 @@ void TuningObjectManager::slot_setValue(QString appSignalID, float value, bool* 
 
 	TuningObject* baseObject = m_objects.objectPtrByHash(hash);
 	if (baseObject == nullptr)
+	{
+		*ok = false;
+		return;
+	}
+
+	if (value < baseObject->lowLimit() || value > baseObject->highLimit())
 	{
 		*ok = false;
 		return;
@@ -861,9 +876,33 @@ QString TuningObjectManager::getStateToolTip()
 	return result;
 }
 
-TuningController* TuningObjectManager::tuningController()
+void TuningObjectManager::connectTuningController(TuningController* controller)
 {
-	return &m_tuningController;
+	if (controller == nullptr)
+	{
+		assert(controller);
+		return;
+	}
+
+	if (m_tuningControllersMap.find(controller) != m_tuningControllersMap.end())
+	{
+		assert(false);
+		return; // This controller is already attached
+	}
+
+	qDebug()<<"TuningObjectManager::connectTuningController : connected";
+
+	m_tuningControllersMap[controller] = true;
+
+	connect(controller, &TuningController::signal_exists, this, &TuningObjectManager::slot_exists, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_valid, this, &TuningObjectManager::slot_valid, Qt::DirectConnection);
+
+	connect(controller, &TuningController::signal_value, this, &TuningObjectManager::slot_value, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_setValue, this, &TuningObjectManager::slot_setValue, Qt::DirectConnection);
+
+	connect(controller, &TuningController::signal_highLimit, this, &TuningObjectManager::slot_highLimit, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_lowLimit, this, &TuningObjectManager::slot_lowLimit, Qt::DirectConnection);
+
 }
 
 QString TuningObjectManager::networkErrorStr(NetworkError error)

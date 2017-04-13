@@ -3,7 +3,7 @@
 
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/SchemaView.h"
-#include "TuningSchemaView.h"
+#include "SchemaView.h"
 #include "SchemaStorage.h"
 
 class TuningSchemaWidget : public VFrame30::BaseSchemaWidget
@@ -13,11 +13,11 @@ class TuningSchemaWidget : public VFrame30::BaseSchemaWidget
 	TuningSchemaWidget() = delete;
 public:
 
-	TuningSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage);
+	TuningSchemaWidget(TuningObjectManager *tuningObjectManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage);
+	~TuningSchemaWidget();
 
 	bool slot_setSchema(QString schemaId);
 
-private:
 	TuningSchemaView* tuningSchemaView();
 
 private:

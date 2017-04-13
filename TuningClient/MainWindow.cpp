@@ -8,12 +8,11 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
-#include "TuningClientFilterEditor.h"
+#include "ClientFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
-	m_schemaStorage(&m_configController),
 	QMainWindow(parent)
 {
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
@@ -44,16 +43,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// TcpSignalClient
 	//
-	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-	theObjectManager = new TuningObjectManager(fakeAddress, fakeAddress, theSettings.instanceStrId(), theSettings.m_requestInterval);
+	m_objectManager = new TuningClientObjectManager();
 
-    m_tcpClientThread = new SimpleThread(theObjectManager);
+	m_objectManager->setInstanceId(theSettings.instanceStrId());
+
+	m_objectManager->setRequestInterval(theSettings.m_requestInterval);
+
+	m_tcpClientThread = new SimpleThread(m_objectManager);
 	m_tcpClientThread->start();
 
 
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
-	connect(&m_configController, &ConfigController::signalsArrived, theObjectManager, &TuningObjectManager::slot_signalsUpdated);
-	connect(&m_configController, &ConfigController::serversArrived, theObjectManager, &TuningObjectManager::slot_serversArrived,
+	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningObjectManager::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningObjectManager::slot_serversArrived,
 			Qt::QueuedConnection);
 
 	QString errorCode;
@@ -226,46 +228,44 @@ void MainWindow::timerEvent(QTimerEvent* event)
         }
 
 
-        if (theObjectManager != nullptr)
-        {
-			assert(m_statusBarConfigConnection);
-			assert(m_statusBarTuningConnection);
+		// Status bar
+		//
+		assert(m_statusBarConfigConnection);
+		assert(m_statusBarTuningConnection);
 
-			Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-			Tcp::ConnectionState tuningConnState =  theObjectManager->getConnectionState();
+		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+		Tcp::ConnectionState tuningConnState =  m_objectManager->getConnectionState();
 
 
-			// ConfigService
-			//
-			QString text = tr(" ConfigService: ");
-			if (confiConnState.isConnected == false)
-			{
-				text += tr(" no connection");
-			}
-			else
-			{
-				text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
-			}
+		// ConfigService
+		//
+		QString text = tr(" ConfigService: ");
+		if (confiConnState.isConnected == false)
+		{
+			text += tr(" no connection");
+		}
+		else
+		{
+			text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
+		}
 
-			m_statusBarConfigConnection->setText(text);
-			m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
+		m_statusBarConfigConnection->setText(text);
+		m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
 
-			// TuningService
-			//
-			text = tr(" TuningService: ");
-			if (tuningConnState.isConnected == false)
-			{
-				text += tr(" no connection");
-			}
-			else
-			{
-				text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
-			}
+		// TuningService
+		//
+		text = tr(" TuningService: ");
+		if (tuningConnState.isConnected == false)
+		{
+			text += tr(" no connection");
+		}
+		else
+		{
+			text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
+		}
 
-			m_statusBarTuningConnection->setText(text);
-			m_statusBarTuningConnection->setToolTip(theObjectManager->getStateToolTip());
-        }
-
+		m_statusBarTuningConnection->setText(text);
+		m_statusBarTuningConnection->setToolTip(m_objectManager->getStateToolTip());
 		return;
 	}
 
@@ -289,12 +289,12 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 	if (theConfigSettings.showSchemasWorkspace == true && theConfigSettings.schemasID.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(objects, &m_schemaStorage, this);
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, this);
 	}
 
 	if (theConfigSettings.showTuningWorkspace == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(objects, this);
+		m_tuningWorkspace = new TuningWorkspace(m_objectManager, objects, this);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
@@ -321,10 +321,10 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 				//
 
 				QTabWidget* tab = new QTabWidget();
-				tab->addTab(m_schemasWorkspace, tr("Schemas View"));
-				tab->addTab(m_tuningWorkspace, tr("Signals View"));
+				tab->addTab(m_schemasWorkspace, tr("Schemas"));
+				tab->addTab(m_tuningWorkspace, tr("Signals"));
 
-				tab->setStyleSheet("QTabWidget::tab-bar{alignment:center; }");
+				//tab->setStyleSheet("QTabWidget::tab-bar{alignment:center; }");
 
 				setCentralWidget(tab);
 			}
@@ -339,11 +339,11 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 void MainWindow::slot_configurationArrived()
 {
-	TuningObjectStorage objects = theObjectManager->objectStorage();
+	TuningObjectStorage objects = m_objectManager->objectStorage();
 
 	theFilters.removeAutomaticFilters();
 
-	theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theObjectManager->tuningSourcesEquipmentIds());
+	theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
 
 	// Find and possibly remove non-existing signals from the list
 
@@ -396,9 +396,9 @@ void MainWindow::runPresetEditor()
 
     bool editAutomatic = false;
 
-    TuningObjectStorage objects = theObjectManager->objectStorage();
+	TuningObjectStorage objects = m_objectManager->objectStorage();
 
-    TuningClientFilterEditor d(&editStorage, &objects, editAutomatic,
+	TuningClientFilterEditor d(m_objectManager, &editStorage, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,
                          theSettings.m_presetEditorPresetsTreeColumnWidth,
                          theSettings.m_presetEditorPos,
@@ -452,11 +452,11 @@ void MainWindow::showSettings()
 
     if (d->filterSettingsChanged() == true)
     {
-        TuningObjectStorage objects = theObjectManager->objectStorage();
+		TuningObjectStorage objects = m_objectManager->objectStorage();
 
         theFilters.removeAutomaticFilters();
 
-		theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, theObjectManager->tuningSourcesEquipmentIds());
+		theFilters.createAutomaticFilters(&objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
 
         createWorkspace(&objects);
     }
@@ -469,7 +469,7 @@ void MainWindow::showTuningSources()
 {
 	if (theDialogTuningSources == nullptr)
 	{
-		theDialogTuningSources = new DialogTuningSources(this);
+		theDialogTuningSources = new DialogTuningSources(m_objectManager, this);
 		theDialogTuningSources->show();
 	}
 	else
@@ -531,8 +531,6 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 LogFile* theLogFile = nullptr;
-
-TuningObjectManager* theObjectManager = nullptr;
 
 TuningFilterStorage theFilters;
 
