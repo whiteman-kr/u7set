@@ -182,7 +182,7 @@ private:
     int m_readTuningSignalCount = 0;
 
 	QString m_instanceId;
-	int m_requestInterval = 100;
+	int m_requestInterval = 10;
 
 	std::map<TuningController*, bool> m_tuningControllersMap;
 };

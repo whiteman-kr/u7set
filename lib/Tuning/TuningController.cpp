@@ -14,6 +14,7 @@ void TuningController::unlock()
 
 bool TuningController::exists(QString appSignalID)
 {
+
 	bool result = false;
 	bool ok = true;
 
