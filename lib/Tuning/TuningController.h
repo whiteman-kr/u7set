@@ -2,6 +2,7 @@
 #define TUNINGCONTROLLER_H
 
 #include <QObject>
+#include <QMessageBox>
 
 class TuningController : public QObject
 {
@@ -12,7 +13,7 @@ public:
 
 	void unlock();
 
-	Q_INVOKABLE QVariant exists(QString appSignalID);
+	Q_INVOKABLE bool exists(QString appSignalID);
 
 	Q_INVOKABLE QVariant valid(QString appSignalID);
 
@@ -21,6 +22,12 @@ public:
 
 	Q_INVOKABLE QVariant highLimit(QString appSignalID);
 	Q_INVOKABLE QVariant lowLimit(QString appSignalID);
+
+	Q_INVOKABLE int showMessageBox(QString title, QString text, int icon, int buttons);
+
+	Q_INVOKABLE int showWarningMessageBox(QString text);
+	Q_INVOKABLE int showErrorMessageBox(QString text);
+	Q_INVOKABLE int showInfoMessageBox(QString text);
 
 signals:
 

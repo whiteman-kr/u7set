@@ -53,10 +53,10 @@ namespace ExtWidgets
 	{
 		setWindowTitle(caption);
 
+		setAttribute(Qt::WA_DeleteOnClose);
+
 		move(parent->pos().x() + parent->size().width(), parent->pos().y());
 		resize(parent->size().width() / 2, parent->size().height());
-
-		setAttribute(Qt::WA_DeleteOnClose);
 
 		QPlainTextEdit* textEdit = new QPlainTextEdit();
 
@@ -406,8 +406,6 @@ namespace ExtWidgets
 	{
 		setWindowTitle(p->caption());
 
-		setAttribute(Qt::WA_DeleteOnClose);
-
 		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
 			move(theSettings.m_multiLinePropertyEditorWindowPos);
@@ -476,6 +474,14 @@ namespace ExtWidgets
 					{
 						m_propertyEditorHelp = nullptr;
 					});
+				}
+			});
+
+			connect(this, &QDialog::finished, [this] (int)
+			{
+				if (m_propertyEditorHelp != nullptr)
+				{
+					m_propertyEditorHelp->accept();
 				}
 			});
 		}

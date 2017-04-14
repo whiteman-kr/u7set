@@ -25,6 +25,7 @@ private:
 	bool writeSchemas();
 	bool writeSchemasDetails();
 	bool writeTuningSignals();
+	bool writeGlobalScript();
 
 	void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
 

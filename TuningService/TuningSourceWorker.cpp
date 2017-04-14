@@ -910,6 +910,7 @@ namespace Tuning
 			msg = QString(tr("Reply is received from %1 (%2) on RupFotipV2 WRITE request")).
 							arg(sourceEquipmentID()).
 							arg(m_sourceIP.addressStr());
+			break;
 
 		default:
 			assert(false);

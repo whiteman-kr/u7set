@@ -11,9 +11,13 @@ using namespace std;
 //
 
 
-TuningItemModelMain::TuningItemModelMain(int tuningPageIndex, QWidget* parent)
-	:TuningItemModel(parent)
+TuningItemModelMain::TuningItemModelMain(TuningObjectManager *tuningObjectManager, int tuningPageIndex, QWidget* parent):
+	m_tuningObjectManager(tuningObjectManager),
+	TuningItemModel(parent)
 {
+
+	assert(m_tuningObjectManager);
+
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
 	{
@@ -169,7 +173,7 @@ void TuningItemModelMain::updateStates()
 		return;
 	}
 
-    QMutexLocker l(&theObjectManager->m_mutex);
+	QMutexLocker l(&m_tuningObjectManager->m_mutex);
 
     int count = (int)m_objects.size();
 
@@ -177,7 +181,7 @@ void TuningItemModelMain::updateStates()
 	{
         TuningObject& pageObject = m_objects[i];
 
-        TuningObject* baseObject = theObjectManager->objectPtrByHash(pageObject.appSignalHash());
+		TuningObject* baseObject = m_tuningObjectManager->objectPtrByHash(pageObject.appSignalHash());
 
         if (baseObject == nullptr)
         {
@@ -622,7 +626,7 @@ void TuningItemModelMain::slot_Write()
 		return;
 	}
 
-    theObjectManager->writeModifiedTuningObjects(m_objects);
+	m_tuningObjectManager->writeModifiedTuningObjects(m_objects);
 }
 
 void TuningItemModelMain::slot_Apply()
@@ -717,23 +721,27 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 //
 
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage *objects, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, QWidget *parent) :
 	QWidget(parent),
 	m_tuningPageIndex(tuningPageIndex),
 	m_tabFilter(tabFilter),
-    m_objects(objects)
+	m_tuningObjectManager(tuningObjectManager),
+	m_filterStorage(filterStorage),
+	m_objects(objects)
 {
 
-	assert(objects);
+	assert(m_tuningObjectManager);
+	assert(m_filterStorage);
+	assert(m_objects);
 
 	std::vector<FilterButton*> buttons;
 
 	// Top buttons
 	//
-	int count = theFilters.m_root->childFiltersCount();
+	int count = m_filterStorage->m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<TuningFilter> f = theFilters.m_root->childFilter(i);
+		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -810,7 +818,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
     // Models and data
     //
-    m_model = new TuningItemModelMain(m_tuningPageIndex, this);
+	m_model = new TuningItemModelMain(m_tuningObjectManager, m_tuningPageIndex, this);
     m_model->setFont(f.family(), f.pointSize(), false);
     m_model->setImportantFont(f.family(), f.pointSize(), true);
 

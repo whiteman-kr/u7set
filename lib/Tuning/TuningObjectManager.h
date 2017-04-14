@@ -41,8 +41,12 @@ class TuningObjectManager : public Tcp::Client
     Q_OBJECT
 
 public:
-	TuningObjectManager(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, const QString& instanceId, int requestInterval);
+	TuningObjectManager();
     virtual ~TuningObjectManager();
+
+	void setInstanceId(const QString& instanceId);
+
+	void setRequestInterval(int requestInterval);
 
     bool loadDatabase(const QByteArray& data, QString *errorCode);
 
@@ -72,7 +76,7 @@ public:
 
 	// Controller
 
-	TuningController* tuningController();
+	void connectTuningController(TuningController* controller);
 
 private:
 
@@ -110,7 +114,7 @@ protected:
 
 
 public slots:
-    void slot_signalsUpdated();
+	void slot_signalsUpdated(QByteArray data);
 	void slot_serversArrived(HostAddressPort address1, HostAddressPort address2);
 
 
@@ -128,6 +132,8 @@ signals:
 
 	void tuningSourcesArrived();
 	void connectionFailed();
+
+
 
 private:
 
@@ -160,8 +166,6 @@ private:
 
     TuningObjectStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
 
-	TuningController m_tuningController;
-
 	// Tuning sources
     //
 
@@ -178,9 +182,9 @@ private:
     int m_readTuningSignalCount = 0;
 
 	QString m_instanceId;
-	int m_requestInterval = 100;
+	int m_requestInterval = 10;
 
-
+	std::map<TuningController*, bool> m_tuningControllersMap;
 };
 
 

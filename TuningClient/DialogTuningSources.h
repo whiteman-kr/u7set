@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "../lib/Tuning/TuningObjectManager.h"
+
 namespace Ui {
 class DialogTuningSources;
 }
@@ -12,7 +14,7 @@ class DialogTuningSources : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogTuningSources(QWidget *parent = 0);
+	explicit DialogTuningSources(TuningObjectManager *tuningObjectManager, QWidget *parent = 0);
 	~DialogTuningSources();
 
 protected:
@@ -57,6 +59,8 @@ private:
 	Ui::DialogTuningSources *ui;
 
 	int m_updateStateTimerId = -1;
+
+	TuningObjectManager* m_tuningObjectManager = nullptr;
 };
 
 extern DialogTuningSources* theDialogTuningSources;

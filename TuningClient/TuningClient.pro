@@ -130,20 +130,22 @@ SOURCES +=\
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
     ../lib/Tuning/TuningObjectManager.cpp \
-    TuningClientFilterEditor.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     ../lib/Tuning/TuningObject.cpp \
-    SchemaStorage.cpp \
-    TuningSchemaView.cpp \
-    TuningSchemaWidget.cpp \
     ../lib/Tuning/TuningController.cpp \
-    SchemasWorkspace.cpp \
     ../lib/CodeEditor.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp
+    ../lib/CodeSyntaxHighlighter.cpp \
+    TuningClientFilterEditor.cpp \
+    TuningClientFilterStorage.cpp \
+    TuningClientObjectManager.cpp \
+    SchemaStorage.cpp \
+    SchemasWorkspace.cpp \
+    TuningSchemaView.cpp \
+    TuningSchemaWidget.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -175,20 +177,22 @@ HEADERS  += MainWindow.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
     ../lib/Tuning/TuningObjectManager.h \
-    TuningClientFilterEditor.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     ../lib/Tuning/TuningObject.h \
-    SchemaStorage.h \
+    ../lib/Tuning/TuningController.h \
+    ../lib/CodeEditor.h \
+    ../lib/CodeSyntaxHighlighter.h \
+    TuningClientFilterEditor.h \
+    TuningClientFilterStorage.h \
+    TuningClientObjectManager.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
-    ../lib/Tuning/TuningController.h \
     SchemasWorkspace.h \
-    ../lib/CodeEditor.h \
-    ../lib/CodeSyntaxHighlighter.h
+    SchemaStorage.h
 
 FORMS    += \
     DialogSettings.ui \

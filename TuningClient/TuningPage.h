@@ -5,13 +5,14 @@
 
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningObject.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 
 class TuningItemModelMain : public TuningItemModel
 {
 	Q_OBJECT
 public:
-	TuningItemModelMain(int tuningPageIndex, QWidget *parent);
+	TuningItemModelMain(TuningObjectManager* tuningObjectManager, int tuningPageIndex, QWidget *parent);
 
 	void setValue(const std::vector<int>& selectedRows);
 	void invertValue(const std::vector<int>& selectedRows);
@@ -34,6 +35,10 @@ public slots:
 	void slot_undo();
     void slot_Write();
     void slot_Apply();
+
+
+private:
+	TuningObjectManager* m_tuningObjectManager = nullptr;
 
 
 };
@@ -84,7 +89,7 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, const TuningObjectStorage* objects, QWidget *parent = 0);
+	explicit TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage* objects, QWidget *parent = 0);
 
 	~TuningPage();
 
@@ -116,7 +121,11 @@ private:
 
     const TuningObjectStorage* m_objects = nullptr;
 
-    enum class FilterType
+	TuningObjectManager* m_tuningObjectManager = nullptr;
+
+	TuningFilterStorage* m_filterStorage = nullptr;
+
+	enum class FilterType
     {
         All = 0,
         AppSignalID,

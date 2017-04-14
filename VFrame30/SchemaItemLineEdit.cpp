@@ -131,7 +131,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QWidget* SchemaItemLineEdit::createWidget(QWidget* parent, bool editMode) const
+	QWidget* SchemaItemLineEdit::createWidget(QWidget* parent, bool editMode)
 	{
 		if (parent == nullptr)
 		{
@@ -148,8 +148,6 @@ namespace VFrame30
 
 		if (editMode == false)
 		{
-			afterCreate(control);
-
 			// Connect slots only if it has any sense
 			//
 			if (scriptEditingFinished().isEmpty() == false &&
@@ -169,6 +167,10 @@ namespace VFrame30
 			{
 				connect(control, &QLineEdit::textChanged, this, &SchemaItemLineEdit::textChanged);
 			}
+
+			// Run script after create
+			//
+			afterCreate(control);
 		}
 
 		control->setVisible(true);
@@ -218,8 +220,7 @@ namespace VFrame30
 		return;
 	}
 
-
-	void SchemaItemLineEdit::afterCreate(QLineEdit* control) const
+	void SchemaItemLineEdit::afterCreate(QLineEdit* control)
 	{
 		if (control == nullptr)
 		{
@@ -227,14 +228,28 @@ namespace VFrame30
 			return;
 		}
 
-		if (m_scriptAfterCreate == PropertyNames::lineEditDefaultEventScript)	// Suppose Default script does nothing, just return
+		if (m_scriptAfterCreate.trimmed().isEmpty() == true ||
+			m_scriptAfterCreate == PropertyNames::lineEditDefaultEventScript)	// Suppose Default script does nothing, just return
 		{
 			return;
 		}
 
-		// Shit happens
+		// Evaluate script
 		//
-		const_cast<SchemaItemLineEdit*>(this)->runEventScript(m_scriptAfterCreate, control);
+		if (m_jsAfterCreate.isUndefined() == true)
+		{
+			m_jsAfterCreate = evaluateScript(control, m_scriptAfterCreate);
+
+			if (m_jsAfterCreate.isError() == true ||
+				m_jsAfterCreate.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsAfterCreate, control);
 
 		return;
 	}
@@ -256,7 +271,22 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptEditingFinished, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsEditingFinished.isUndefined() == true)
+		{
+			m_jsEditingFinished = evaluateScript(senderWidget, m_scriptEditingFinished);
+
+			if (m_jsEditingFinished.isError() == true ||
+				m_jsEditingFinished.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsEditingFinished, senderWidget);
 
 		return;
 	}
@@ -278,7 +308,22 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptReturnPressed, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsReturnPressed.isUndefined() == true)
+		{
+			m_jsReturnPressed = evaluateScript(senderWidget, m_scriptReturnPressed);
+
+			if (m_jsReturnPressed.isError() == true ||
+				m_jsReturnPressed.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsReturnPressed, senderWidget);
 
 		return;
 	}
@@ -300,93 +345,72 @@ namespace VFrame30
 			return;
 		}
 
-		runEventScript(m_scriptTextChanged, senderWidget);
+		// Evaluate script
+		//
+		if (m_jsTextChanged.isUndefined() == true)
+		{
+			m_jsTextChanged = evaluateScript(senderWidget, m_scriptTextChanged);
+
+			if (m_jsTextChanged.isError() == true ||
+				m_jsTextChanged.isNull() == true)
+			{
+				return;
+			}
+		}
+
+		// Run script
+		//
+		runEventScript(m_jsTextChanged, senderWidget);
 
 		return;
 	}
 
-	void SchemaItemLineEdit::runEventScript(const QString& script, QLineEdit* widget)
+	void SchemaItemLineEdit::runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget)
 	{
-		if (script.trimmed().isEmpty() == true)
+		if (evaluatedJs.isError() == true ||
+			evaluatedJs.isNull() == true)
 		{
 			return;
 		}
 
 		// Suppose that parent of sender is SchemaView
 		//
-		QWidget* parentWidget = widget->parentWidget();
-		if (parentWidget == nullptr)
-		{
-			assert(parentWidget);
-			return;
-		}
-
-		SchemaView* schemaView = dynamic_cast<SchemaView*>(parentWidget);
+		SchemaView* schemaView = dynamic_cast<SchemaView*>(controlWidget->parentWidget());
 		if (schemaView == nullptr)
 		{
 			assert(schemaView);
 			return;
 		}
 
-		QJSValue jsEval = m_jsEngine.evaluate(script);
-		if (jsEval.isError() == true)
-		{
-			QMessageBox::critical(schemaView, qAppName(), "Script evaluating error: " + jsEval.toString());
-			return;
-		}
-
-		// Create JS params
-		//
-		QJSValue jsSchemaItem = m_jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
-		QJSValue jsWidget = m_jsEngine.newQObject(widget);
-		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
-
-		QJSValue jsWidgetText = {widget->text()};
+		QJSEngine* engine = schemaView->jsEngine();
+		assert(engine);
 
 		// Set argument list
 		//
+		QJSValue jsSchemaItem = engine->newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsWidget = engine->newQObject(controlWidget);
+		QQmlEngine::setObjectOwnership(controlWidget, QQmlEngine::CppOwnership);
+
 		QJSValueList args;
 
 		args << jsSchemaItem;
 		args << jsWidget;
-		args << jsWidgetText;
-
-		// Global Objects
-		//
-		QJSValue jsSchemaView = m_jsEngine.newQObject(schemaView);
-		QQmlEngine::setObjectOwnership(schemaView, QQmlEngine::CppOwnership);
-		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-
-		TuningController* tuningController = &schemaView->tuningController();
-
-		if (tuningController != nullptr)
-		{
-			assert(tuningController);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, QJSValue());
-		}
-		else
-		{
-			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
-			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
-			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-		}
+		args << controlWidget->text();
 
 		// Run script
 		//
-		QJSValue jsResult = jsEval.call(args);
+		QJSValue jsResult = evaluatedJs.call(args);
+
 		if (jsResult.isError() == true)
 		{
-			qDebug() << "Uncaught exception at line"
-					 << jsResult.property("lineNumber").toInt()
-					 << ":" << jsResult.toString();
-
-			QMessageBox::critical(schemaView, qAppName(), "Script uncaught exception: " + jsEval.toString());
+			reportSqriptError(jsResult, schemaView);
 			return;
 		}
 
-		m_jsEngine.collectGarbage();
+		engine->collectGarbage();
+		return;
 	}
 
 	bool SchemaItemLineEdit::searchText(const QString& text) const

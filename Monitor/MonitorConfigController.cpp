@@ -282,10 +282,25 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	ConfigSettings readSettings;
 
+	// Get GlobalScript.js file
+	//
+	QString parsingError;
+
+	QByteArray ba;
+	QString globalScriptFileName = "/" + theSettings.instanceStrId() + "/GlobalScript.js";
+	bool ok = m_cfgLoaderThread->getFileBlocked(globalScriptFileName, &ba, &parsingError);
+	if (ok == true)
+	{
+		readSettings.globalScript = QString(ba);
+	}
+	else
+	{
+		qDebug() << "ERROR: Cannot get GlobalScript.js, " << parsingError;
+	}
+
 	// Parse XML
 	//
 	QDomDocument xml;
-	QString parsingError;
 
 	bool result = xml.setContent(configurationXmlData, false, &parsingError);
 

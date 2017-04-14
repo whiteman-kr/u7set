@@ -1,5 +1,6 @@
 #include "TuningClientCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
+#include "../VFrame30/Schema.h"
 
 namespace Builder
 {
@@ -49,6 +50,7 @@ bool TuningClientCfgGenerator::generateConfiguration()
 	result &= writeSchemasDetails();
 	result &= writeTuningSignals();
 	result &= writeSchemas();
+	result &= writeGlobalScript();
 
 	return result;
 }
@@ -147,18 +149,18 @@ bool TuningClientCfgGenerator::writeSettings()
 		}
 
 		//
-		// showTuningWorkspace
+		// showSignals
 		//
-		bool showTuningWorkspace = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowTuningWorkspace", &ok);
+		bool showSignals = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSignals", &ok);
 		if (ok == false)
 		{
 			return false;
 		}
 
 		//
-		// showSchemasWorkspace
+		// showSchemas
 		//
-		bool showSchemasWorkspace = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemasWorkspace", &ok);
+		bool showSchemas = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemas", &ok);
 		if (ok == false)
 		{
 			return false;
@@ -211,8 +213,8 @@ bool TuningClientCfgGenerator::writeSettings()
 			xmlWriter.writeAttribute("port2", QString::number(tunsSettings2.clientRequestIP.port()));
 
 			xmlWriter.writeAttribute("autoApply", (autoApply ? "true" : "false"));
-			xmlWriter.writeAttribute("showTuningWorkspace", (showTuningWorkspace ? "true" : "false"));
-			xmlWriter.writeAttribute("showSchemasWorkspace", (showSchemasWorkspace ? "true" : "false"));
+			xmlWriter.writeAttribute("showSignals", (showSignals ? "true" : "false"));
+			xmlWriter.writeAttribute("showSchemas", (showSchemas? "true" : "false"));
 			xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
 			xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 			xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
@@ -253,8 +255,38 @@ bool TuningClientCfgGenerator::writeSettings()
 
 		for (auto s : schemasList)
 		{
+			// Check if schema with specified ID exists
+			//
+
+			QString caption;
+
+			bool found = false;
+
+			for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+			{
+				if (schemaFile.id == s)
+				{
+
+					VFrame30::SchemaDetails details;
+					bool parsed = details.parseDetails(schemaFile.details);
+					if (parsed)
+					{
+						caption = details.m_caption;
+					}
+					found = true;
+					break;
+				}
+			}
+
+			if (found == false)
+			{
+				m_log->errEQP6106(s, m_software->equipmentId());
+				return false;
+			}
+
 			xmlWriter.writeStartElement("Schema");
-			xmlWriter.writeCharacters(s);
+			xmlWriter.writeAttribute("Id", s);
+			xmlWriter.writeAttribute("Caption", caption);
 			xmlWriter.writeEndElement();
 		}
 	}
@@ -479,6 +511,28 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	m_cfgXml->addLinkToFile(buildFile);
 
 	return true;
+}
+
+bool TuningClientCfgGenerator::writeGlobalScript()
+{
+	// Writing GlobalScript
+	//
+	bool result = true;
+
+	if (m_software->propertyExists("GlobalScript") == false)
+	{
+		m_log->errCFG3000("GlobalScript", m_software->equipmentIdTemplate());
+		result = false;
+	}
+	else
+	{
+		QString globalScript = m_software->propertyValue("GlobalScript").toString();
+		BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CFG_FILE_ID_TUNING_GLOBALSCRIPT, "", globalScript);
+
+		m_cfgXml->addLinkToFile(globalScriptBuildFile);
+	}
+
+	return result;
 }
 
 void TuningClientCfgGenerator::writeErrorSection(QXmlStreamWriter& xmlWriter, QString error)
