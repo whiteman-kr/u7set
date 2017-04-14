@@ -11,7 +11,7 @@ class TuningSchemaView : public VFrame30::SchemaView
 	Q_OBJECT
 
 public:
-	explicit TuningSchemaView(SchemaStorage* schemaStorage, QWidget* parent = nullptr);
+	explicit TuningSchemaView(SchemaStorage* schemaStorage, const QString &globalScript, QWidget* parent = nullptr);
 	virtual ~TuningSchemaView();
 
 protected:

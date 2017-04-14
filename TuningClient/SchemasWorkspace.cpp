@@ -4,7 +4,7 @@
 
 #include "SchemasWorkspace.h"
 
-SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage *objects, QWidget *parent):
+SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage *objects, const QString& globalScript, QWidget *parent):
 	m_tuningObjectManager(tuningObjectManager),
 	m_objects(*objects),
 	QWidget(parent)
@@ -60,7 +60,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage);
+		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage, globalScript);
 
 		m_hSplitter = new QSplitter(this);
 
@@ -83,7 +83,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 		{
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID.m_id);
 
-			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage);
+			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage, globalScript);
 
 			tab->addTab(schemaWidget, schemaID.m_caption);
 		}

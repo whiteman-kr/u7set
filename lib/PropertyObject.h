@@ -191,6 +191,11 @@ public:
 
 	bool isScript() const
 	{
+		if (m_isScript == false && caption().contains("Script") == true)
+		{
+			return true;
+		}
+
 		return m_isScript;
 	}
 	void setIsScript(bool value)

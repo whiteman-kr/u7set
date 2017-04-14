@@ -52,6 +52,8 @@ private slots:
 	void slot_configurationArrived();
     void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
+	void slot_schemasGlobalScriptArrived(QByteArray data);
+
 public slots:
 	void exit();
     void runPresetEditor();
@@ -77,6 +79,8 @@ private:
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
+
+	QString m_globalScript;
 };
 
 // Global definitions

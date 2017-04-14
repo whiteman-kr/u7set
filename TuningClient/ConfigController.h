@@ -40,6 +40,7 @@ signals:
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
 	void schemasDetailsArrived(QByteArray data);
+	void globalScriptArrived(QByteArray data);
 
 
 	void configurationArrived();

@@ -4,10 +4,11 @@
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/MonitorSchema.h"
 
-TuningSchemaView::TuningSchemaView(SchemaStorage *schemaStorage, QWidget *parent)
+TuningSchemaView::TuningSchemaView(SchemaStorage *schemaStorage, const QString& globalScript, QWidget *parent)
 	:  SchemaView(parent),
 	  m_schemaStorage(schemaStorage)
 {
+	setGlobalScript(globalScript);
 }
 
 TuningSchemaView::~TuningSchemaView()

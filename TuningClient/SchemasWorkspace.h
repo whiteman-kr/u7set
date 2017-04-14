@@ -13,7 +13,7 @@ class SchemasWorkspace : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage* objects, QWidget* parent);
+	explicit SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage* objects, const QString& globalScript, QWidget* parent);
 	virtual ~SchemasWorkspace();
 
 private slots:

@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
 			Qt::QueuedConnection);
 	connect(&m_configController, &ConfigController::schemasDetailsArrived, &m_filterStorage, &TuningFilterStorage::slot_schemasDetailsUpdated,
 			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
+			Qt::QueuedConnection);
 
 	// Load user filters
 
@@ -323,7 +325,7 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
-		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, this);
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, m_globalScript, this);
 	}
 
 	if (theConfigSettings.showSignals == true)
@@ -386,6 +388,11 @@ void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumn
     theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
     theSettings.m_presetEditorPos = pos;
     theSettings.m_presetEditorGeometry = geometry;
+}
+
+void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
+{
+	m_globalScript = data.toStdString().c_str();
 }
 
 void MainWindow::exit()

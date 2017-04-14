@@ -527,7 +527,7 @@ bool TuningClientCfgGenerator::writeGlobalScript()
 	else
 	{
 		QString globalScript = m_software->propertyValue("GlobalScript").toString();
-		BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", globalScript);
+		BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CFG_FILE_ID_TUNING_GLOBALSCRIPT, "", globalScript);
 
 		m_cfgXml->addLinkToFile(globalScriptBuildFile);
 	}

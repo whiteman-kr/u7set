@@ -272,6 +272,11 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		// Add MD5 record to a map, if it does not exist
 		//
 
+		if (f.ID.isEmpty())
+		{
+			continue;
+		}
+
 		if (m_filesMD5Map.find(f.ID) == m_filesMD5Map.end())
 		{
 			m_filesMD5Map[f.ID] = "";
@@ -292,7 +297,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
 			{
-				if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
 				{
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
@@ -312,7 +317,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_SCHEMAS_DETAILS)
 			{
-				if (getFileBlockedById(CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, &data, &errorStr) == false)
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
 				{
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
@@ -331,7 +336,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
 			{
-				if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
 				{
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
@@ -343,6 +348,23 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
 
 					emit signalsArrived(data);
+				}
+			}
+
+			if (f.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			{
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
+
+					emit globalScriptArrived(data);
 				}
 			}
 		}

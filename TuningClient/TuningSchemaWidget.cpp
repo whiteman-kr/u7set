@@ -4,8 +4,8 @@
 
 
 
-TuningSchemaWidget::TuningSchemaWidget(TuningObjectManager *tuningObjectManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage) :
-	BaseSchemaWidget(schema, new TuningSchemaView(schemaStorage)),
+TuningSchemaWidget::TuningSchemaWidget(TuningObjectManager *tuningObjectManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString& globalScript) :
+	BaseSchemaWidget(schema, new TuningSchemaView(schemaStorage, globalScript)),
 	m_schemaStorage(schemaStorage)
 {
 	assert(tuningObjectManager);
