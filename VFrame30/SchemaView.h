@@ -59,6 +59,9 @@ namespace VFrame30
 	public slots:
 		virtual void setSchema(QString schemaId);
 
+		QObject* findSchemaItem(QString objectName);
+		QObject* findWidget(QString objectName);
+
 		// Properties
 		//
 	public:

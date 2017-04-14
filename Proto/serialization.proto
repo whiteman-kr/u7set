@@ -359,6 +359,7 @@ message SchemaItem
 	//optional wstring clickScript = 6;
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
+	optional string objectName = 9;
 
 	// Inherited from SchmeItem
 	//
