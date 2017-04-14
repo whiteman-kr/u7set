@@ -805,6 +805,8 @@ namespace Tcp
 
 		startListening();
 
+		qDebug() << "Start listening: " << C_STR(m_listenAddressPort.addressPortStr());
+
 		onListenerThreadStarted();
 	}
 
