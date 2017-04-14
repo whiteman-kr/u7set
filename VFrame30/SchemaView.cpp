@@ -373,6 +373,46 @@ namespace VFrame30
 		return;
 	}
 
+	QObject* SchemaView::findSchemaItem(QString objectName)
+	{
+		for (auto layer : schema()->Layers)
+		{
+			for (auto item : layer->Items)
+			{
+				if (item->objectName() == objectName)
+				{
+					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::ObjectOwnership::CppOwnership);
+					return item.get();
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	QObject* SchemaView::findWidget(QString objectName)
+	{
+		QObject* itemObject = findSchemaItem(objectName);
+		if (itemObject == nullptr)
+		{
+			return nullptr;
+		}
+
+		SchemaItem* schemaItem = dynamic_cast<SchemaItem*>(itemObject);
+		if (schemaItem == nullptr)
+		{
+			assert(schemaItem);
+			return nullptr;
+		}
+
+		QWidget* widget = findChild<QWidget*>(schemaItem->guid().toString());
+		assert(widget);
+
+		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
+
+		return widget;
+	}
+
 	// Properties
 	//
 	double SchemaView::zoom() const

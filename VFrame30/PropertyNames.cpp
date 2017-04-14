@@ -6,6 +6,7 @@ namespace VFrame30
 	const QString PropertyNames::acceptClick("AcceptClick");
 	const QString PropertyNames::clickScript("ClickScript");
 	const QString PropertyNames::commented("Commented");
+	const QString PropertyNames::objectName("ObjectName");
 
 	const QString PropertyNames::fontName("FontName");
 	const QString PropertyNames::fontSize("FontSize");

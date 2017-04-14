@@ -34,6 +34,11 @@ namespace VFrame30
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
 		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
 		clickScriptProp->setIsScript(true);
+
+		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
+		objectNameProp->setCategory(PropertyNames::scriptsCategory);
+
+		return;
 	}
 
 	SchemaItem::~SchemaItem()
@@ -64,6 +69,8 @@ namespace VFrame30
 			schemaItem->set_clickscript(m_clickScript.toStdString());
 		}
 
+		schemaItem->set_objectname(objectName().toStdString());
+
 		return true;
 	}
 
@@ -93,6 +100,8 @@ namespace VFrame30
 		{
 			m_clickScript.clear();
 		}
+
+		setObjectName(QString::fromStdString(schemaitem.objectname()));
 
 		return true;
 	}
