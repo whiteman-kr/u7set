@@ -54,6 +54,11 @@ namespace VFrame30
 	signals:
 		void signal_schemaChanged(Schema* schema);
 
+		// Public slots which are part of Script API
+		//
+	public slots:
+		virtual void setSchema(QString schemaId);
+
 		// Properties
 		//
 	public:
@@ -80,7 +85,9 @@ namespace VFrame30
 		Session m_session;
 		TuningController m_tuningController;
 
+		bool m_jsEngineGlobalsWereCreated = false;
 		QJSEngine m_jsEngine;
+
 		QString m_globasScript;
 	};
 }

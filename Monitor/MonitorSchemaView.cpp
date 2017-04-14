@@ -13,28 +13,12 @@ MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *pare
 
 	startTimer(250);
 
-	// Add golbal to script engine
-	//
-	QJSValue jsSchemaView = jsEngine()->newQObject(this);
-	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-	jsEngine()->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableView, jsSchemaView);
-
 	return;
 }
 
 MonitorSchemaView::~MonitorSchemaView()
 {
 	qDebug() << Q_FUNC_INFO;
-}
-
-bool MonitorSchemaView::setSchema(QString schemaId)
-{
-	// We can't change schema here, because we need to save history, so emit signal and change schema
-	// in MonitorSchemaWidget
-	//
-	emit signal_setSchema(schemaId);
-
-	return true;
 }
 
 void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
@@ -216,6 +200,16 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	//
 	unsetCursor();
 	event->ignore();
+	return;
+}
+
+void MonitorSchemaView::setSchema(QString schemaId)
+{
+	// We can't change schema here, because we need to save history, so emit signal and change schema
+	// in MonitorSchemaWidget
+	//
+	emit signal_setSchema(schemaId);
+
 	return;
 }
 

@@ -22,9 +22,6 @@ public:
 	//
 public:
 
-protected:
-	Q_INVOKABLE bool setSchema(QString schemaId);
-
 	// Painting
 	//
 protected:
@@ -42,7 +39,10 @@ protected:
 signals:
 	void signal_setSchema(QString schemaId);
 
+	// Public slots which are part of Script API
+	//
 public slots:
+	virtual void setSchema(QString schemaId) override;
 
 	// Properties
 	//

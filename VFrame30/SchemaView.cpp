@@ -16,20 +16,6 @@ namespace VFrame30
 		m_schema(schema)
 	{
 		setMouseTracking(true);
-
-		// Global Objects
-		// WARNING !!!!schemaView global must be added in derived class, if do it here, derived class methods will not be accissible
-		//
-//		QJSValue jsSchemaView = m_jsEngine.newQObject(this);
-//		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-//		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-
-		TuningController* tuningController = &m_tuningController;
-
-		QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
-		QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
-		m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
-
 		return;
 	}
 
@@ -378,6 +364,15 @@ namespace VFrame30
 		return true;
 	}
 
+	void SchemaView::setSchema(QString schemaId)
+	{
+		Q_UNUSED(schemaId);
+		// Implement id derived class
+		//
+		assert(false);
+		return;
+	}
+
 	// Properties
 	//
 	double SchemaView::zoom() const
@@ -441,6 +436,21 @@ namespace VFrame30
 
 	QJSEngine* SchemaView::jsEngine()
 	{
+		if (m_jsEngineGlobalsWereCreated == false)
+		{
+			QJSValue jsSchemaView = m_jsEngine.newQObject(this);
+			QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+			TuningController* tuningController = &m_tuningController;
+
+			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+
+			m_jsEngineGlobalsWereCreated = true;
+		}
+
 		return &m_jsEngine;
 	}
 
