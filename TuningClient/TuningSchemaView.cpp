@@ -1,5 +1,5 @@
-#include "SchemaView.h"
-#include "SchemaWidget.h"
+#include "TuningSchemaView.h"
+#include "TuningSchemaWidget.h"
 #include "MainWindow.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/MonitorSchema.h"

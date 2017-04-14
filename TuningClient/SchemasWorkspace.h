@@ -6,7 +6,7 @@
 #include "../lib/Tuning/TuningObject.h"
 #include "../lib/Tuning/TuningObjectManager.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "SchemaWidget.h"
+#include "TuningSchemaWidget.h"
 
 class SchemasWorkspace : public QWidget
 {

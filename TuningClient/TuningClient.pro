@@ -136,16 +136,16 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     ../lib/Tuning/TuningObject.cpp \
-    SchemaStorage.cpp \
     ../lib/Tuning/TuningController.cpp \
-    SchemasWorkspace.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/CodeSyntaxHighlighter.cpp \
-    SchemaWidget.cpp \
-    SchemaView.cpp \
-    ClientObjectManager.cpp \
-    ClientFilterEditor.cpp \
-    ClientFilterStorage.cpp
+    TuningClientFilterEditor.cpp \
+    TuningClientFilterStorage.cpp \
+    TuningClientObjectManager.cpp \
+    SchemaStorage.cpp \
+    SchemasWorkspace.cpp \
+    TuningSchemaView.cpp \
+    TuningSchemaWidget.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -183,16 +183,16 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     ../lib/Tuning/TuningObject.h \
-    SchemaStorage.h \
     ../lib/Tuning/TuningController.h \
-    SchemasWorkspace.h \
     ../lib/CodeEditor.h \
     ../lib/CodeSyntaxHighlighter.h \
-    SchemaView.h \
-    SchemaWidget.h \
-    ClientFilterEditor.h \
-    ClientObjectManager.h \
-    ClientFilterStorage.h
+    TuningClientFilterEditor.h \
+    TuningClientFilterStorage.h \
+    TuningClientObjectManager.h \
+    TuningSchemaView.h \
+    TuningSchemaWidget.h \
+    SchemasWorkspace.h \
+    SchemaStorage.h
 
 FORMS    += \
     DialogSettings.ui \

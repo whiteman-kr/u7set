@@ -355,8 +355,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.filterByEquipment != readSettings.filterByEquipment ||
 			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
 			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
-			theConfigSettings.showSchemasWorkspace != readSettings.showSchemasWorkspace ||
-			theConfigSettings.showTuningWorkspace != readSettings.showTuningWorkspace)
+			theConfigSettings.showSchemas != readSettings.showSchemas ||
+			theConfigSettings.showSignals != readSettings.showSignals)
 	{
 		apperanceUpdated = true;
 	}
@@ -521,8 +521,8 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			int tunsPort2 = dasXmlElement.attribute("port2").toInt();
 
 			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
-			outSetting->showTuningWorkspace = dasXmlElement.attribute("showTuningWorkspace") == "true" ? true : false;
-			outSetting->showSchemasWorkspace = dasXmlElement.attribute("showSchemasWorkspace") == "true" ? true : false;
+			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
+			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
@@ -570,19 +570,27 @@ bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const Bui
 		{
 			QDomElement dasXmlElement = dasNodes.at(i).toElement();
 
-			QString schemaId = dasXmlElement.text();
+			QString schemaId = dasXmlElement.attribute("Id");
+			QString schemaCaption = dasXmlElement.attribute("Caption");
+
+			if (schemaId.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
 
 			for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 			{
 				if (f.ID == schemaId)
 				{
-					outSetting->schemasID.push_back(f.ID);
+					SchemaSettings s(schemaId, schemaCaption);
+					outSetting->schemas.push_back(s);
 				}
 			}
 		}
 	}
 
-	QString message = tr("Schemas count: %1").arg(outSetting->schemasID.size());
+	QString message = tr("Schemas count: %1").arg(outSetting->schemas.size());
 	addEventMessage(message);
 
 	return outSetting->errorMessage.isEmpty();

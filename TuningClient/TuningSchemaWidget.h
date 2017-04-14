@@ -3,7 +3,7 @@
 
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/SchemaView.h"
-#include "SchemaView.h"
+#include "TuningSchemaView.h"
 #include "SchemaStorage.h"
 
 class TuningSchemaWidget : public VFrame30::BaseSchemaWidget

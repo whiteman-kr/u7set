@@ -17,6 +17,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 	if (theConfigSettings.showSchemasList == true)
 	{
 		m_schemasList = new QTreeWidget();
+		m_schemasList->setColumnCount(2);
 
 		m_schemasList->setRootIsDecorated(false);
 
@@ -26,17 +27,38 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 
 		QString firstSchemaID;
 
-		for (auto schemaID : theConfigSettings.schemasID)
+		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 		{
-			m_schemasList->addTopLevelItem(new QTreeWidgetItem(QStringList()<<schemaID));
+			if (schemaID.m_id.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			m_schemasList->addTopLevelItem(new QTreeWidgetItem(QStringList()<<schemaID.m_id<<schemaID.m_caption));
 
 			if (firstSchemaID.isEmpty() == true)
 			{
-				firstSchemaID = schemaID;
+				firstSchemaID = schemaID.m_id;
 			}
 		}
 
+		m_schemasList->resizeColumnToContents(0);
+		m_schemasList->resizeColumnToContents(1);
+
+		if (firstSchemaID == "")
+		{
+			assert(false);
+			return;
+		}
+
 		std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(firstSchemaID);
+
+		if (schema == nullptr)
+		{
+			assert(schema);
+			return;
+		}
 
 		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage);
 
@@ -49,19 +71,21 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 		QHBoxLayout* layout = new QHBoxLayout(this);
 
 		layout->addWidget(m_hSplitter);
+
+		m_hSplitter->restoreState(theSettings.m_schemasWorkspaceSplitterState);
 	}
 	else
 	{
 
 		QTabWidget* tab = new QTabWidget();
 
-		for (auto schemaID : theConfigSettings.schemasID)
+		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 		{
-			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID);
+			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID.m_id);
 
 			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage);
 
-			tab->addTab(schemaWidget, schemaID);
+			tab->addTab(schemaWidget, schemaID.m_caption);
 		}
 		QHBoxLayout* layout = new QHBoxLayout(this);
 
@@ -72,6 +96,11 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 
 SchemasWorkspace::~SchemasWorkspace()
 {
+	if (m_hSplitter != nullptr)
+	{
+		theSettings.m_schemasWorkspaceSplitterState = m_hSplitter->saveState();
+	}
+
 	delete m_schemaStorage;
 }
 

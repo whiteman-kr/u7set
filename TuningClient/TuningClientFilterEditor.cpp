@@ -1,4 +1,4 @@
-#include "ClientFilterEditor.h"
+#include "TuningClientFilterEditor.h"
 #include "MainWindow.h"
 
 

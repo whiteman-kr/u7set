@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "SchemaWidget.h"
+#include "TuningSchemaWidget.h"
 #include "../VFrame30/MonitorSchema.h"
 
 

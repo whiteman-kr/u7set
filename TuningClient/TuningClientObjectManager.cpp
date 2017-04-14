@@ -1,6 +1,6 @@
 #include "Stable.h"
 #include "MainWindow.h"
-#include "ClientObjectManager.h"
+#include "TuningClientObjectManager.h"
 
 TuningClientObjectManager::TuningClientObjectManager()
 	:TuningObjectManager()

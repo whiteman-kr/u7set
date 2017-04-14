@@ -8,7 +8,7 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
-#include "ClientFilterEditor.h"
+#include "TuningClientFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -321,12 +321,12 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 		m_schemasWorkspace = nullptr;
 	}
 
-	if (theConfigSettings.showSchemasWorkspace == true && theConfigSettings.schemasID.empty() == false)
+	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, this);
 	}
 
-	if (theConfigSettings.showTuningWorkspace == true)
+	if (theConfigSettings.showSignals == true)
 	{
 		m_tuningWorkspace = new TuningWorkspace(m_objectManager, &m_filterStorage, objects, this);
 	}
@@ -400,7 +400,7 @@ void MainWindow::runPresetEditor()
         return;
     }
 
-	ClientFilterStorage editFilters = m_filterStorage;
+	TuningClientFilterStorage editFilters = m_filterStorage;
 
     bool editAutomatic = false;
 

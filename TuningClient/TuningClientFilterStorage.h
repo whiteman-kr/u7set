@@ -3,10 +3,10 @@
 
 #include "../lib/Tuning/TuningFilter.h"
 
-class ClientFilterStorage : public TuningFilterStorage
+class TuningClientFilterStorage : public TuningFilterStorage
 {
 public:
-	ClientFilterStorage();
+	TuningClientFilterStorage();
 
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);

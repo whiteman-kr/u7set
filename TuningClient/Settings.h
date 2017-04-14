@@ -29,6 +29,22 @@ protected:
 };
 
 //
+// SchemaSettings
+//
+
+struct SchemaSettings
+{
+	SchemaSettings(const QString& id, const QString& caption)
+	{
+		m_id = id;
+		m_caption = caption;
+	}
+
+	QString m_id;
+	QString m_caption;
+};
+
+//
 // ConfigSettings
 //
 
@@ -39,9 +55,9 @@ struct ConfigSettings
 
 	bool autoApply = true;
 
-	bool showTuningWorkspace = true;
+	bool showSignals = true;
 
-	bool showSchemasWorkspace = true;
+	bool showSchemas = true;
 
 	bool showSchemasList = true;
 
@@ -49,7 +65,7 @@ struct ConfigSettings
 
 	bool filterBySchema = true;
 
-	QStringList schemasID;
+	std::vector<SchemaSettings> schemas;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
@@ -114,7 +130,8 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
-	QByteArray m_mainWindowSplitterState;
+	QByteArray m_tuningWorkspaceSplitterState;
+	QByteArray m_schemasWorkspaceSplitterState;
 
 
 	// Property Editor Options

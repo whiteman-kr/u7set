@@ -11,8 +11,8 @@
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "ClientObjectManager.h"
-#include "ClientFilterStorage.h"
+#include "TuningClientObjectManager.h"
+#include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
 
 namespace Ui {
@@ -38,7 +38,7 @@ private:
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
-	ClientFilterStorage m_filterStorage;
+	TuningClientFilterStorage m_filterStorage;
 
 	ConfigController m_configController;
 

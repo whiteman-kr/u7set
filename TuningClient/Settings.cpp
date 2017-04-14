@@ -150,7 +150,8 @@ void Settings::StoreUser()
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
 
-	s.setValue("MainWindow/Splitter/state", m_mainWindowSplitterState);
+	s.setValue("TuningWorkspace/Splitter/state", m_tuningWorkspaceSplitterState);
+	s.setValue("SchemasWorkspace/Splitter/state", m_schemasWorkspaceSplitterState);
 
 	s.setValue("TuningPage/Count", static_cast<uint>(m_tuningPageSettings.size()));
 	for (int i = 0; i < m_tuningPageSettings.size(); i++)
@@ -203,7 +204,8 @@ void Settings::RestoreUser()
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
-	m_mainWindowSplitterState = s.value("MainWindow/Splitter/state").toByteArray();
+	m_tuningWorkspaceSplitterState = s.value("TuningWorkspace/Splitter/state").toByteArray();
+	m_schemasWorkspaceSplitterState = s.value("SchemasWorkspace/Splitter/state").toByteArray();
 
 	int tuningPageSettingsCount = s.value("TuningPage/Count", 0).toInt();
 	m_tuningPageSettings.resize(tuningPageSettingsCount);

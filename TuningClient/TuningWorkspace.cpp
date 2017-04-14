@@ -105,7 +105,7 @@ TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, Tunin
 	if (m_hSplitter != nullptr)
 	{
 		pLayout->addWidget(m_hSplitter);
-		m_hSplitter->restoreState(theSettings.m_mainWindowSplitterState);
+		m_hSplitter->restoreState(theSettings.m_tuningWorkspaceSplitterState);
 	}
 }
 
@@ -113,7 +113,7 @@ TuningWorkspace::~TuningWorkspace()
 {
     if (m_hSplitter != nullptr)
     {
-        theSettings.m_mainWindowSplitterState = m_hSplitter->saveState();
+		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
     }
 }
 
