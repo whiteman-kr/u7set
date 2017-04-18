@@ -23,16 +23,16 @@ namespace VFrame30
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode) const override;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) override;
 		virtual void updateWidgetProperties(QWidget* widget) const override;
 
 	protected slots:
-		void afterCreate(QLineEdit* control) const;
+		void afterCreate(QLineEdit* control);
 		void editingFinished();
 		void returnPressed();
 		void textChanged(const QString& text);
 
-		void runEventScript(const QString& script, QLineEdit* widget);
+		void runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget);
 
 		// Text search
 		//
@@ -75,8 +75,6 @@ namespace VFrame30
 		void setScriptTextChanged(const QString& value);
 
 	private:
-		QJSEngine m_jsEngine;
-
 		QString m_text = {"0.0"};
 		QString m_placeholderText;
 		int m_maxLength = 32;
@@ -90,5 +88,12 @@ namespace VFrame30
 		QString m_scriptEditingFinished = PropertyNames::lineEditDefaultEventScript;
 		QString m_scriptReturnPressed = PropertyNames::lineEditDefaultEventScript;
 		QString m_scriptTextChanged = PropertyNames::lineEditDefaultEventScript;
+
+		// Evaluated scripts
+		//
+		QJSValue m_jsAfterCreate;
+		QJSValue m_jsEditingFinished;
+		QJSValue m_jsReturnPressed;
+		QJSValue m_jsTextChanged;
 	};
 }

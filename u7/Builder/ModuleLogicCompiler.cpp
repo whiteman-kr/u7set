@@ -96,6 +96,8 @@ namespace Builder
 
 			if (!buildOptoPortsSignalLists()) break;
 
+			if (!setOptoRawInSignalsAsComputed()) break;
+
 			result = true;
 		}
 
@@ -2856,10 +2858,31 @@ namespace Builder
 			return true;
 		}
 
+		std::shared_ptr<Comparator> cmp = std::make_shared<Comparator>();
 
-		return true;
+		bool result = initComparator(cmp, appFb);
+
+		if (result == true)
+		{
+			m_cmpStorage->insert(m_lm->equipmentIdTemplate(), cmp);
+		}
+
+		return result;
 	}
 
+	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb)
+	{
+		bool result = true;
+
+		if (appFb->isConstComaparator() == true)
+		{
+
+		}
+
+		///////
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid)
 	{
@@ -3382,6 +3405,63 @@ namespace Builder
 		return result;
 	}
 
+
+	bool ModuleLogicCompiler::setOptoRawInSignalsAsComputed()
+	{
+		if (m_optoModuleStorage == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+
+		if (optoModules.isEmpty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		for(Hardware::OptoModule* optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QList<Hardware::OptoPort*> optoPorts = optoModule->getOptoPorts();
+
+			if (optoPorts.isEmpty())
+			{
+				continue;
+			}
+
+			for(Hardware::OptoPort* port : optoPorts)
+			{
+
+				const QVector<Hardware::OptoPort::RawDataDescriptionItem>& rd = port->rawDataDescription();
+
+				for(const Hardware::OptoPort::RawDataDescriptionItem& item : rd)
+				{
+					if (item.type == Hardware::OptoPort::RawDataDescriptionItemType::InSignal)
+					{
+						AppSignal* appSignal = m_appSignals.getByStrID(item.appSignalID);
+
+						if (appSignal != nullptr)
+						{
+							appSignal->setComputed();
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
@@ -7029,11 +7109,21 @@ namespace Builder
 		}
 	}
 
+	bool AppFb::isConstComaparator() const
+	{
+		return opcode() == CONST_COMPARATOR_OPCODE;
+	}
+
+	bool AppFb::isDynamicComaparator() const
+	{
+		return opcode() == DYNAMIC_COMPARATOR_OPCODE;
+	}
+
 	bool AppFb::isComparator() const
 	{
 		quint16 oc = opcode();
 
-		return oc ==  BCOMP_OPCODE || oc == DCOMP_OPCODE;
+		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
 	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
@@ -7285,8 +7375,6 @@ namespace Builder
 			assert(false);
 			return;
 		}
-
-		//*dynamic_cast<Signal*>(this) = *signal;
 
 		// believe that all input and tuning signals have already been computed
 		//
@@ -7577,12 +7665,7 @@ namespace Builder
 
 	AppSignal* AppSignalMap::getByStrID(const QString& strID)
 	{
-		if (m_signalStrIdMap.contains(strID))
-		{
-			return m_signalStrIdMap[strID];
-		}
-
-		return nullptr;
+		return m_signalStrIdMap.value(strID, nullptr);
 	}
 
 

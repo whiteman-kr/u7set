@@ -3,6 +3,7 @@
 #include "SchemaItemControl.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
+#include "SchemaView.h"
 
 namespace VFrame30
 {
@@ -33,6 +34,11 @@ namespace VFrame30
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
 		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
 		clickScriptProp->setIsScript(true);
+
+		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
+		objectNameProp->setCategory(PropertyNames::scriptsCategory);
+
+		return;
 	}
 
 	SchemaItem::~SchemaItem()
@@ -63,6 +69,8 @@ namespace VFrame30
 			schemaItem->set_clickscript(m_clickScript.toStdString());
 		}
 
+		schemaItem->set_objectname(objectName().toStdString());
+
 		return true;
 	}
 
@@ -92,6 +100,8 @@ namespace VFrame30
 		{
 			m_clickScript.clear();
 		}
+
+		setObjectName(QString::fromStdString(schemaitem.objectname()));
 
 		return true;
 	}
@@ -170,6 +180,67 @@ namespace VFrame30
 	{
 		qDebug() << "Item: " << metaObject()->className();
 		qDebug() << "\tguid:" << guid();
+	}
+
+	void SchemaItem::runScript(QJSEngine* engine, SchemaView* schemaView)
+	{
+		if (engine == nullptr ||
+			schemaView == nullptr)
+		{
+			assert(engine);
+			assert(schemaView);
+			return;
+		}
+
+		if (m_jsClickScript.isUndefined() == true)
+		{
+			m_jsClickScript = engine->evaluate(m_clickScript + schemaView->globalScript());
+
+			if (m_jsClickScript.isError() == true)
+			{
+				QMessageBox::critical(schemaView, qAppName(),
+									  QString("Script evaluating error at line %1: %2")
+										.arg(m_jsClickScript.property("lineNumber").toInt())
+										.arg(m_jsClickScript.toString()));
+				return;
+			}
+		}
+
+		// Set argument list
+		//
+		QJSValue jsSchemaItem = engine->newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValueList args;
+		args << jsSchemaItem;
+
+		// Run script
+		//
+		QJSValue jsResult = m_jsClickScript.call(args);
+		if (jsResult.isError() == true)
+		{
+			reportSqriptError(jsResult, schemaView);
+			return;
+		}
+
+		engine->collectGarbage();
+
+		return;
+	}
+
+	void SchemaItem::reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QMessageBox::critical(parent, QApplication::applicationDisplayName(),
+							  tr("Script uncaught exception at line %1:\n%2")
+								  .arg(scriptValue.property("lineNumber").toInt())
+								  .arg(scriptValue.toString()));
+
+		return;
 	}
 
 	bool SchemaItem::searchText(const QString& text) const

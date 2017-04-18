@@ -4,8 +4,6 @@ SchemaStorage::SchemaStorage(ConfigController* configController)
 	:m_configController(configController)
 {
 	assert(m_configController);
-
-	connect(m_configController, &ConfigController::configurationArrived, this, &SchemaStorage::slot_configurationArrived);
 }
 
 
@@ -20,6 +18,7 @@ std::shared_ptr<VFrame30::Schema> SchemaStorage::schema(QString schemaId)
 		// Schema is not read yet
 		//
 		std::shared_ptr<VFrame30::Schema> schema = loadSchema(schemaId);
+
 		return schema;
 	}
 	else
@@ -74,10 +73,5 @@ std::shared_ptr<VFrame30::Schema> SchemaStorage::loadSchema(QString schemaId)
 
 	return schema;
 
-}
-
-void SchemaStorage::slot_configurationArrived()
-{
-	m_schemas.clear();
 }
 

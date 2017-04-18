@@ -4,35 +4,63 @@
 
 #include "SchemasWorkspace.h"
 
-SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaStorage *schemaStorage, QWidget *parent):
-	m_schemaStorage(schemaStorage),
+SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage *objects, const QString& globalScript, QWidget *parent):
+	m_tuningObjectManager(tuningObjectManager),
 	m_objects(*objects),
 	QWidget(parent)
 {
-	assert(schemaStorage);
+	m_schemaStorage = new SchemaStorage(configController);
+
+	assert(m_tuningObjectManager);
 	assert(objects);
 
 	if (theConfigSettings.showSchemasList == true)
 	{
 		m_schemasList = new QTreeWidget();
+		m_schemasList->setColumnCount(2);
+
+		m_schemasList->setRootIsDecorated(false);
+
+		m_schemasList->setHeaderHidden(true);
 
 		connect(m_schemasList, &QTreeWidget::currentItemChanged, this, &SchemasWorkspace::slot_schemaListSelectionChanged);
 
 		QString firstSchemaID;
 
-		for (auto schemaID : theConfigSettings.schemasID)
+		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 		{
-			m_schemasList->addTopLevelItem(new QTreeWidgetItem(QStringList()<<schemaID));
+			if (schemaID.m_id.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			m_schemasList->addTopLevelItem(new QTreeWidgetItem(QStringList()<<schemaID.m_id<<schemaID.m_caption));
 
 			if (firstSchemaID.isEmpty() == true)
 			{
-				firstSchemaID = schemaID;
+				firstSchemaID = schemaID.m_id;
 			}
 		}
 
-		std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(firstSchemaID);
+		m_schemasList->resizeColumnToContents(0);
+		m_schemasList->resizeColumnToContents(1);
 
-		m_schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
+		if (firstSchemaID == "")
+		{
+			assert(false);
+			return;
+		}
+
+		std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(firstSchemaID);
+
+		if (schema == nullptr)
+		{
+			assert(schema);
+			return;
+		}
+
+		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage, globalScript);
 
 		m_hSplitter = new QSplitter(this);
 
@@ -43,19 +71,21 @@ SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaSto
 		QHBoxLayout* layout = new QHBoxLayout(this);
 
 		layout->addWidget(m_hSplitter);
+
+		m_hSplitter->restoreState(theSettings.m_schemasWorkspaceSplitterState);
 	}
 	else
 	{
 
 		QTabWidget* tab = new QTabWidget();
 
-		for (auto schemaID : theConfigSettings.schemasID)
+		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
 		{
-			std::shared_ptr<VFrame30::Schema> schema = schemaStorage->schema(schemaID);
+			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID.m_id);
 
-			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(schema, schemaStorage);
+			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage, globalScript);
 
-			tab->addTab(schemaWidget, schemaID);
+			tab->addTab(schemaWidget, schemaID.m_caption);
 		}
 		QHBoxLayout* layout = new QHBoxLayout(this);
 
@@ -66,7 +96,12 @@ SchemasWorkspace::SchemasWorkspace(const TuningObjectStorage *objects, SchemaSto
 
 SchemasWorkspace::~SchemasWorkspace()
 {
+	if (m_hSplitter != nullptr)
+	{
+		theSettings.m_schemasWorkspaceSplitterState = m_hSplitter->saveState();
+	}
 
+	delete m_schemaStorage;
 }
 
 void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem *current, QTreeWidgetItem* /*previous*/)
@@ -84,6 +119,6 @@ void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem *current,
 
 	QString schemaId = current->text(0);
 
-	m_schemaWidget->setSchema(m_schemaStorage->schema(schemaId), true);
+	m_schemaWidget->tuningSchemaView()->setSchema(schemaId);
 
 }

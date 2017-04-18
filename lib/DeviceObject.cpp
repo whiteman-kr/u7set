@@ -566,7 +566,11 @@ namespace Hardware
 		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
 		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description
+		2;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;
+
 		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible
+
 		3;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true
 
 		version:            record version
@@ -584,7 +588,12 @@ namespace Hardware
 		default:            can be any value of the specified type
 		precision:          property precision
 		updateFromPreset:   property will be updated from preset
-		*/
+
+		expert:				[Added in version 2] expert property
+		description:		[Added in version 2] property description
+
+		visible:			[Added in version 3] property is visible
+*/
 
 		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
 

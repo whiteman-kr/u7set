@@ -15,8 +15,6 @@ public:
 	explicit DialogSettings(QWidget *parent = 0);
 	~DialogSettings();
 
-    bool filterSettingsChanged();
-
 private slots:
 	void on_DialogSettings_accepted();
 
@@ -25,8 +23,6 @@ private:
 
 private:
 	Ui::DialogSettings *ui;
-
-    bool m_filterSettingsChanged = false;
 };
 
 #endif // DIALOGSETTINGS_H

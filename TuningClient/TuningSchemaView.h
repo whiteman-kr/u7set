@@ -4,13 +4,14 @@
 #include "Stable.h"
 #include "SchemaStorage.h"
 #include "../VFrame30/SchemaView.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 
 class TuningSchemaView : public VFrame30::SchemaView
 {
 	Q_OBJECT
 
 public:
-	explicit TuningSchemaView(SchemaStorage* schemaStorage, QWidget* parent = nullptr);
+	explicit TuningSchemaView(SchemaStorage* schemaStorage, const QString &globalScript, QWidget* parent = nullptr);
 	virtual ~TuningSchemaView();
 
 protected:
@@ -22,9 +23,10 @@ protected:
 	//
 	void timerEvent(QTimerEvent* event);
 
-public:
-
-	void setSchema(QString schemaId);
+	// Public slots which are part of Script API
+	//
+public slots:
+	virtual void setSchema(QString schemaId) override;
 
 signals:
 	void signal_setSchema(QString schemaId);
@@ -32,7 +34,6 @@ signals:
 
 private:
 	SchemaStorage* m_schemaStorage = nullptr;
-
 
 };
 

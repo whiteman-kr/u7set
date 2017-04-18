@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
+#include <QJSEngine>
 
 namespace VFrame30
 {
@@ -25,10 +26,13 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		virtual QWidget* createWidget(QWidget* parent, bool editMode) const;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode);
 		virtual void updateWidgetProperties(QWidget* widget) const;
 
 		void updateWdgetPosAndSize(QWidget* widget, double zoom);
+
+	protected:
+		QJSValue evaluateScript(QWidget* controlWidget, QString script);
 
 		// Properties and Data
 		//

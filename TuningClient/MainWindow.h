@@ -11,7 +11,8 @@
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "TuningClientObjectManager.h"
+#include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
 
 namespace Ui {
@@ -33,21 +34,25 @@ private:
 
 
 private:
-	ConfigController m_configController;
+	TuningClientObjectManager *m_objectManager = nullptr;
 
-	SchemaStorage m_schemaStorage;
+	SimpleThread* m_tcpClientThread = nullptr;
+
+	TuningClientFilterStorage m_filterStorage;
+
+	ConfigController m_configController;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
-	SimpleThread* m_tcpClientThread = nullptr;
-
-    int m_mainWindowTimerId = -1;
+	int m_mainWindowTimerId = -1;
 
 private slots:
 	void slot_configurationArrived();
     void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
+
+	void slot_schemasGlobalScriptArrived(QByteArray data);
 
 public slots:
 	void exit();
@@ -61,7 +66,7 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-    void createWorkspace(const TuningObjectStorage *objects);
+	void createWorkspace(const TuningObjectStorage *objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
@@ -75,17 +80,14 @@ private:
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 
-
-
-
+	QString m_globalScript;
 };
 
+// Global definitions
+
 extern MainWindow* theMainWindow;
+
 extern LogFile* theLogFile;
-
-extern TuningObjectManager* theObjectManager;
-
-extern TuningFilterStorage theFilters;
 
 extern UserManager theUserManager;
 

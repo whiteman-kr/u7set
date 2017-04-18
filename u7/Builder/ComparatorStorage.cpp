@@ -10,6 +10,10 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------------------------------
 
+	Comparator::Comparator()
+	{
+	}
+
 	QString	Comparator::inSignalID() const
 	{
 		return m_inSignalID;
@@ -161,7 +165,7 @@ namespace Builder
 	{
 		if (comparator->inSignalID().isEmpty() == true)
 		{
-			assert(false);
+//			assert(false);
 			return;
 		}
 
