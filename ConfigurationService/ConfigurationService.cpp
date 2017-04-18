@@ -542,7 +542,7 @@ void CfgCheckerWorker::updateBuildXml()
 		}
 	}
 
-	emit buildPathChanged(newCheckDirectoryPath);
+	emit buildPathChanged(newWorkDirectoryPath);
 }
 
 
