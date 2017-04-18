@@ -32,7 +32,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
 	drawParam.setInfoMode(theSettings.showItemsLabels());
@@ -180,7 +180,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 				{
 					// Run script
 					//
-					item->runScript(jsEngine(), this);
+					item->clickEvent(globalScript(), jsEngine(), this);
 
 					// --
 					//

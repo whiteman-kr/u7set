@@ -12,6 +12,7 @@ namespace VFrame30
 	public:
 		static const QString acceptClick;
 		static const QString clickScript;
+		static const QString preDrawScript;
 		static const QString commented;
 		static const QString objectName;
 

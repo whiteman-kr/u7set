@@ -10,7 +10,6 @@
 #include "FontParam.h"
 #include "Session.h"
 
-
 class QPainter;
 class QPaintDevice;
 class QPixmap;
@@ -19,12 +18,13 @@ class AppSignalManager;
 namespace VFrame30
 {
 	class Schema;
+	class SchemaView;
 
 	class VFRAME30LIBSHARED_EXPORT CDrawParam
 	{
 	public:
 		CDrawParam(void) = delete;
-		CDrawParam(QPainter* painter, Schema* schema, double gridSize, int pinGridStep);
+		CDrawParam(QPainter* painter, Schema* schema, const SchemaView* view, double gridSize, int pinGridStep);
 		virtual ~CDrawParam(void);
 
 	public:
@@ -33,7 +33,8 @@ namespace VFrame30
 
 		const Schema* schema() const;
 
-		void Save() const;
+		const SchemaView* schemaView() const;
+		SchemaView* schemaView();
 
 		// Params for drawing
 		//
@@ -73,6 +74,7 @@ namespace VFrame30
 	private:
 		QPainter* m_painter = nullptr;
 		Schema* m_schema = nullptr;
+		const SchemaView* m_schemaView = nullptr;
 		AppSignalManager* m_appSignalmanager = nullptr;
 
 		Session m_session;

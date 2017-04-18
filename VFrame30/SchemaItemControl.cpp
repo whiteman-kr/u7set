@@ -192,16 +192,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue result = engine->evaluate(script + schemaView->globalScript());
-		if (result.isError() == true)
-		{
-			QMessageBox::critical(schemaView, qAppName(),
-								  QString("Script evaluating error at line %1\nObject: %2\nMessage: %3")
-									.arg(result.property("lineNumber").toInt())
-									.arg(metaObject()->className())
-									.arg(result.toString()));
-		}
-
+		QJSValue result = SchemaItem::evaluateScript(script, schemaView->globalScript(), engine, schemaView);
 		return result;
 	}
 

@@ -99,9 +99,12 @@ namespace VFrame30
 		static void dump(std::shared_ptr<SchemaItem> item);
 		virtual void dump() const;
 
-		void runScript(QJSEngine* engine, SchemaView* schemaView);
+		virtual void clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget);
+		virtual void preDrawEvent(QString globalScript, QJSEngine* engine, QWidget* parentWidget);
 
 	protected:
+		void runScript(QJSValue& evaluatedJs, QJSEngine* engine, QWidget* parentWidget);
+		QJSValue evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
 		// Text search
@@ -115,8 +118,9 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* pDrawParam, const Schema* pFrame, const SchemaLayer* pLayer) const;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
 
+	public:
 		// Draw item outline, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
@@ -236,6 +240,9 @@ namespace VFrame30
 		const QString& clickScript() const;
 		void setClickScript(const QString& value);
 
+		QString preDrawScript() const;
+		void setPreDrawScript(const QString& value);
+
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;		
@@ -251,8 +258,10 @@ namespace VFrame30
 
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
+		QString m_preDrawScript;
 
-		QJSValue m_jsClickScript;	// Evaluated m_clickScript
+		mutable QJSValue m_jsClickScript;		// Evaluated m_clickScript
+		mutable QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript
 
 	public:
 		static const QColor errorColor;

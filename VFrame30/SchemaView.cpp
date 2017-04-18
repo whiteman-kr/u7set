@@ -198,7 +198,7 @@ namespace VFrame30
 		}
 
 		QPainter p(this);
-		CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+		CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
 		draw(drawParam);
 
@@ -307,7 +307,7 @@ namespace VFrame30
 		// --
 		//
 		QPainter p(&pdfWriter);
-		CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+		CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
 		// Calc size
 		//

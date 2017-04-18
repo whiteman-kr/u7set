@@ -76,6 +76,7 @@ class SchemaItemTransmitter;
 class SchemaItemReceiver;
 class SchemaItemUfb;
 class SchemaItemTerminator;
+class SchemaItemValue;
 class SchemaItemControl;
 class SchemaItemPushButton;
 class SchemaItemLineEdit;
@@ -527,14 +528,14 @@ class FontParam : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .Proto.wstring name = 1;
-  inline bool has_name() const;
-  inline void clear_name();
-  static const int kNameFieldNumber = 1;
-  inline const ::Proto::wstring& name() const;
-  inline ::Proto::wstring* mutable_name();
-  inline ::Proto::wstring* release_name();
-  inline void set_allocated_name(::Proto::wstring* name);
+  // required .Proto.wstring name_obsolete = 1;
+  inline bool has_name_obsolete() const;
+  inline void clear_name_obsolete();
+  static const int kNameObsoleteFieldNumber = 1;
+  inline const ::Proto::wstring& name_obsolete() const;
+  inline ::Proto::wstring* mutable_name_obsolete();
+  inline ::Proto::wstring* release_name_obsolete();
+  inline void set_allocated_name_obsolete(::Proto::wstring* name_obsolete);
 
   // required double size = 2;
   inline bool has_size() const;
@@ -557,26 +558,41 @@ class FontParam : public ::google::protobuf::Message {
   inline bool italic() const;
   inline void set_italic(bool value);
 
+  // optional string name = 5;
+  inline bool has_name() const;
+  inline void clear_name();
+  static const int kNameFieldNumber = 5;
+  inline const ::std::string& name() const;
+  inline void set_name(const ::std::string& value);
+  inline void set_name(const char* value);
+  inline void set_name(const char* value, size_t size);
+  inline ::std::string* mutable_name();
+  inline ::std::string* release_name();
+  inline void set_allocated_name(::std::string* name);
+
   // @@protoc_insertion_point(class_scope:Proto.FontParam)
  private:
-  inline void set_has_name();
-  inline void clear_has_name();
+  inline void set_has_name_obsolete();
+  inline void clear_has_name_obsolete();
   inline void set_has_size();
   inline void clear_has_size();
   inline void set_has_bold();
   inline void clear_has_bold();
   inline void set_has_italic();
   inline void clear_has_italic();
+  inline void set_has_name();
+  inline void clear_has_name();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::Proto::wstring* name_;
+  ::Proto::wstring* name_obsolete_;
   double size_;
+  ::std::string* name_;
   bool bold_;
   bool italic_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -2596,6 +2612,18 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::std::string* release_objectname();
   inline void set_allocated_objectname(::std::string* objectname);
 
+  // optional string preDrawScript = 30;
+  inline bool has_predrawscript() const;
+  inline void clear_predrawscript();
+  static const int kPreDrawScriptFieldNumber = 30;
+  inline const ::std::string& predrawscript() const;
+  inline void set_predrawscript(const ::std::string& value);
+  inline void set_predrawscript(const char* value);
+  inline void set_predrawscript(const char* value, size_t size);
+  inline ::std::string* mutable_predrawscript();
+  inline ::std::string* release_predrawscript();
+  inline void set_allocated_predrawscript(::std::string* predrawscript);
+
   // optional .Proto.PosRectImpl PosRectImpl = 10;
   inline bool has_posrectimpl() const;
   inline void clear_posrectimpl();
@@ -2785,6 +2813,15 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemTerminator* release_terminator();
   inline void set_allocated_terminator(::Proto::SchemaItemTerminator* terminator);
 
+  // optional .Proto.SchemaItemValue Value = 136;
+  inline bool has_value() const;
+  inline void clear_value();
+  static const int kValueFieldNumber = 136;
+  inline const ::Proto::SchemaItemValue& value() const;
+  inline ::Proto::SchemaItemValue* mutable_value();
+  inline ::Proto::SchemaItemValue* release_value();
+  inline void set_allocated_value(::Proto::SchemaItemValue* value);
+
   // optional .Proto.SchemaItemControl control = 200;
   inline bool has_control() const;
   inline void clear_control();
@@ -2830,6 +2867,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_iscommented();
   inline void set_has_objectname();
   inline void clear_has_objectname();
+  inline void set_has_predrawscript();
+  inline void clear_has_predrawscript();
   inline void set_has_posrectimpl();
   inline void clear_has_posrectimpl();
   inline void set_has_poslineimpl();
@@ -2872,6 +2911,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_ufb();
   inline void set_has_terminator();
   inline void clear_has_terminator();
+  inline void set_has_value();
+  inline void clear_has_value();
   inline void set_has_control();
   inline void clear_has_control();
   inline void set_has_pushbutton();
@@ -2889,6 +2930,7 @@ class SchemaItem : public ::google::protobuf::Message {
   bool iscommented_;
   ::std::string* clickscript_;
   ::std::string* objectname_;
+  ::std::string* predrawscript_;
   ::Proto::PosRectImpl* posrectimpl_;
   ::Proto::PosLineImpl* poslineimpl_;
   ::Proto::PosConnectionImpl* posconnectionimpl_;
@@ -2910,12 +2952,13 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemInOut* inoutsignal_;
   ::Proto::SchemaItemUfb* ufb_;
   ::Proto::SchemaItemTerminator* terminator_;
+  ::Proto::SchemaItemValue* value_;
   ::Proto::SchemaItemControl* control_;
   ::Proto::SchemaItemPushButton* pushbutton_;
   ::Proto::SchemaItemLineEdit* lineedit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(32 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(34 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5343,6 +5386,185 @@ class SchemaItemTerminator : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemTerminator* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemValue : public ::google::protobuf::Message {
+ public:
+  SchemaItemValue();
+  virtual ~SchemaItemValue();
+
+  SchemaItemValue(const SchemaItemValue& from);
+
+  inline SchemaItemValue& operator=(const SchemaItemValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemValue& default_instance();
+
+  void Swap(SchemaItemValue* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemValue& from);
+  void MergeFrom(const SchemaItemValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional double weight = 1;
+  inline bool has_weight() const;
+  inline void clear_weight();
+  static const int kWeightFieldNumber = 1;
+  inline double weight() const;
+  inline void set_weight(double value);
+
+  // optional uint32 lineColor = 2;
+  inline bool has_linecolor() const;
+  inline void clear_linecolor();
+  static const int kLineColorFieldNumber = 2;
+  inline ::google::protobuf::uint32 linecolor() const;
+  inline void set_linecolor(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColor = 3;
+  inline bool has_fillcolor() const;
+  inline void clear_fillcolor();
+  static const int kFillColorFieldNumber = 3;
+  inline ::google::protobuf::uint32 fillcolor() const;
+  inline void set_fillcolor(::google::protobuf::uint32 value);
+
+  // optional string text = 4;
+  inline bool has_text() const;
+  inline void clear_text();
+  static const int kTextFieldNumber = 4;
+  inline const ::std::string& text() const;
+  inline void set_text(const ::std::string& value);
+  inline void set_text(const char* value);
+  inline void set_text(const char* value, size_t size);
+  inline ::std::string* mutable_text();
+  inline ::std::string* release_text();
+  inline void set_allocated_text(::std::string* text);
+
+  // optional uint32 textColor = 5;
+  inline bool has_textcolor() const;
+  inline void clear_textcolor();
+  static const int kTextColorFieldNumber = 5;
+  inline ::google::protobuf::uint32 textcolor() const;
+  inline void set_textcolor(::google::protobuf::uint32 value);
+
+  // optional .Proto.FontParam font = 6;
+  inline bool has_font() const;
+  inline void clear_font();
+  static const int kFontFieldNumber = 6;
+  inline const ::Proto::FontParam& font() const;
+  inline ::Proto::FontParam* mutable_font();
+  inline ::Proto::FontParam* release_font();
+  inline void set_allocated_font(::Proto::FontParam* font);
+
+  // optional bool fill = 7;
+  inline bool has_fill() const;
+  inline void clear_fill();
+  static const int kFillFieldNumber = 7;
+  inline bool fill() const;
+  inline void set_fill(bool value);
+
+  // optional bool drawrect = 8 [default = true];
+  inline bool has_drawrect() const;
+  inline void clear_drawrect();
+  static const int kDrawrectFieldNumber = 8;
+  inline bool drawrect() const;
+  inline void set_drawrect(bool value);
+
+  // optional int32 horzAlign = 9 [default = 4];
+  inline bool has_horzalign() const;
+  inline void clear_horzalign();
+  static const int kHorzAlignFieldNumber = 9;
+  inline ::google::protobuf::int32 horzalign() const;
+  inline void set_horzalign(::google::protobuf::int32 value);
+
+  // optional int32 vertAlign = 10 [default = 128];
+  inline bool has_vertalign() const;
+  inline void clear_vertalign();
+  static const int kVertAlignFieldNumber = 10;
+  inline ::google::protobuf::int32 vertalign() const;
+  inline void set_vertalign(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemValue)
+ private:
+  inline void set_has_weight();
+  inline void clear_has_weight();
+  inline void set_has_linecolor();
+  inline void clear_has_linecolor();
+  inline void set_has_fillcolor();
+  inline void clear_has_fillcolor();
+  inline void set_has_text();
+  inline void clear_has_text();
+  inline void set_has_textcolor();
+  inline void clear_has_textcolor();
+  inline void set_has_font();
+  inline void clear_has_font();
+  inline void set_has_fill();
+  inline void clear_has_fill();
+  inline void set_has_drawrect();
+  inline void clear_has_drawrect();
+  inline void set_has_horzalign();
+  inline void clear_has_horzalign();
+  inline void set_has_vertalign();
+  inline void clear_has_vertalign();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double weight_;
+  ::google::protobuf::uint32 linecolor_;
+  ::google::protobuf::uint32 fillcolor_;
+  ::std::string* text_;
+  ::Proto::FontParam* font_;
+  ::google::protobuf::uint32 textcolor_;
+  bool fill_;
+  bool drawrect_;
+  ::google::protobuf::int32 horzalign_;
+  ::google::protobuf::int32 vertalign_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemValue* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -8824,41 +9046,41 @@ inline void wstring::set_allocated_text(::std::string* text) {
 
 // FontParam
 
-// required .Proto.wstring name = 1;
-inline bool FontParam::has_name() const {
+// required .Proto.wstring name_obsolete = 1;
+inline bool FontParam::has_name_obsolete() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void FontParam::set_has_name() {
+inline void FontParam::set_has_name_obsolete() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void FontParam::clear_has_name() {
+inline void FontParam::clear_has_name_obsolete() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void FontParam::clear_name() {
-  if (name_ != NULL) name_->::Proto::wstring::Clear();
-  clear_has_name();
+inline void FontParam::clear_name_obsolete() {
+  if (name_obsolete_ != NULL) name_obsolete_->::Proto::wstring::Clear();
+  clear_has_name_obsolete();
 }
-inline const ::Proto::wstring& FontParam::name() const {
-  return name_ != NULL ? *name_ : *default_instance_->name_;
+inline const ::Proto::wstring& FontParam::name_obsolete() const {
+  return name_obsolete_ != NULL ? *name_obsolete_ : *default_instance_->name_obsolete_;
 }
-inline ::Proto::wstring* FontParam::mutable_name() {
-  set_has_name();
-  if (name_ == NULL) name_ = new ::Proto::wstring;
-  return name_;
+inline ::Proto::wstring* FontParam::mutable_name_obsolete() {
+  set_has_name_obsolete();
+  if (name_obsolete_ == NULL) name_obsolete_ = new ::Proto::wstring;
+  return name_obsolete_;
 }
-inline ::Proto::wstring* FontParam::release_name() {
-  clear_has_name();
-  ::Proto::wstring* temp = name_;
-  name_ = NULL;
+inline ::Proto::wstring* FontParam::release_name_obsolete() {
+  clear_has_name_obsolete();
+  ::Proto::wstring* temp = name_obsolete_;
+  name_obsolete_ = NULL;
   return temp;
 }
-inline void FontParam::set_allocated_name(::Proto::wstring* name) {
-  delete name_;
-  name_ = name;
-  if (name) {
-    set_has_name();
+inline void FontParam::set_allocated_name_obsolete(::Proto::wstring* name_obsolete) {
+  delete name_obsolete_;
+  name_obsolete_ = name_obsolete;
+  if (name_obsolete) {
+    set_has_name_obsolete();
   } else {
-    clear_has_name();
+    clear_has_name_obsolete();
   }
 }
 
@@ -8926,6 +9148,76 @@ inline bool FontParam::italic() const {
 inline void FontParam::set_italic(bool value) {
   set_has_italic();
   italic_ = value;
+}
+
+// optional string name = 5;
+inline bool FontParam::has_name() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void FontParam::set_has_name() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void FontParam::clear_has_name() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void FontParam::clear_name() {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    name_->clear();
+  }
+  clear_has_name();
+}
+inline const ::std::string& FontParam::name() const {
+  return *name_;
+}
+inline void FontParam::set_name(const ::std::string& value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void FontParam::set_name(const char* value) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(value);
+}
+inline void FontParam::set_name(const char* value, size_t size) {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* FontParam::mutable_name() {
+  set_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    name_ = new ::std::string;
+  }
+  return name_;
+}
+inline ::std::string* FontParam::release_name() {
+  clear_has_name();
+  if (name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = name_;
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void FontParam::set_allocated_name(::std::string* name) {
+  if (name_ != &::google::protobuf::internal::kEmptyString) {
+    delete name_;
+  }
+  if (name) {
+    set_has_name();
+    name_ = name;
+  } else {
+    clear_has_name();
+    name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
@@ -11691,15 +11983,85 @@ inline void SchemaItem::set_allocated_objectname(::std::string* objectname) {
   }
 }
 
-// optional .Proto.PosRectImpl PosRectImpl = 10;
-inline bool SchemaItem::has_posrectimpl() const {
+// optional string preDrawScript = 30;
+inline bool SchemaItem::has_predrawscript() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void SchemaItem::set_has_posrectimpl() {
+inline void SchemaItem::set_has_predrawscript() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void SchemaItem::clear_has_posrectimpl() {
+inline void SchemaItem::clear_has_predrawscript() {
   _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItem::clear_predrawscript() {
+  if (predrawscript_ != &::google::protobuf::internal::kEmptyString) {
+    predrawscript_->clear();
+  }
+  clear_has_predrawscript();
+}
+inline const ::std::string& SchemaItem::predrawscript() const {
+  return *predrawscript_;
+}
+inline void SchemaItem::set_predrawscript(const ::std::string& value) {
+  set_has_predrawscript();
+  if (predrawscript_ == &::google::protobuf::internal::kEmptyString) {
+    predrawscript_ = new ::std::string;
+  }
+  predrawscript_->assign(value);
+}
+inline void SchemaItem::set_predrawscript(const char* value) {
+  set_has_predrawscript();
+  if (predrawscript_ == &::google::protobuf::internal::kEmptyString) {
+    predrawscript_ = new ::std::string;
+  }
+  predrawscript_->assign(value);
+}
+inline void SchemaItem::set_predrawscript(const char* value, size_t size) {
+  set_has_predrawscript();
+  if (predrawscript_ == &::google::protobuf::internal::kEmptyString) {
+    predrawscript_ = new ::std::string;
+  }
+  predrawscript_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItem::mutable_predrawscript() {
+  set_has_predrawscript();
+  if (predrawscript_ == &::google::protobuf::internal::kEmptyString) {
+    predrawscript_ = new ::std::string;
+  }
+  return predrawscript_;
+}
+inline ::std::string* SchemaItem::release_predrawscript() {
+  clear_has_predrawscript();
+  if (predrawscript_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = predrawscript_;
+    predrawscript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItem::set_allocated_predrawscript(::std::string* predrawscript) {
+  if (predrawscript_ != &::google::protobuf::internal::kEmptyString) {
+    delete predrawscript_;
+  }
+  if (predrawscript) {
+    set_has_predrawscript();
+    predrawscript_ = predrawscript;
+  } else {
+    clear_has_predrawscript();
+    predrawscript_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.PosRectImpl PosRectImpl = 10;
+inline bool SchemaItem::has_posrectimpl() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItem::set_has_posrectimpl() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItem::clear_has_posrectimpl() {
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void SchemaItem::clear_posrectimpl() {
   if (posrectimpl_ != NULL) posrectimpl_->::Proto::PosRectImpl::Clear();
@@ -11731,13 +12093,13 @@ inline void SchemaItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrecti
 
 // optional .Proto.PosLineImpl PosLineImpl = 11;
 inline bool SchemaItem::has_poslineimpl() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void SchemaItem::set_has_poslineimpl() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void SchemaItem::clear_has_poslineimpl() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void SchemaItem::clear_poslineimpl() {
   if (poslineimpl_ != NULL) poslineimpl_->::Proto::PosLineImpl::Clear();
@@ -11769,13 +12131,13 @@ inline void SchemaItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslinei
 
 // optional .Proto.PosConnectionImpl PosConnectionImpl = 12;
 inline bool SchemaItem::has_posconnectionimpl() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void SchemaItem::set_has_posconnectionimpl() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void SchemaItem::clear_has_posconnectionimpl() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void SchemaItem::clear_posconnectionimpl() {
   if (posconnectionimpl_ != NULL) posconnectionimpl_->::Proto::PosConnectionImpl::Clear();
@@ -11807,13 +12169,13 @@ inline void SchemaItem::set_allocated_posconnectionimpl(::Proto::PosConnectionIm
 
 // optional .Proto.FblItem FblItem = 106;
 inline bool SchemaItem::has_fblitem() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void SchemaItem::set_has_fblitem() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void SchemaItem::clear_has_fblitem() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void SchemaItem::clear_fblitem() {
   if (fblitem_ != NULL) fblitem_->::Proto::FblItem::Clear();
@@ -11845,13 +12207,13 @@ inline void SchemaItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
 
 // optional .Proto.FblItemRect FblItemRect = 107;
 inline bool SchemaItem::has_fblitemrect() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void SchemaItem::set_has_fblitemrect() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void SchemaItem::clear_has_fblitemrect() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void SchemaItem::clear_fblitemrect() {
   if (fblitemrect_ != NULL) fblitemrect_->::Proto::FblItemRect::Clear();
@@ -11883,13 +12245,13 @@ inline void SchemaItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemr
 
 // optional .Proto.FblItemLine FblItemLine = 108;
 inline bool SchemaItem::has_fblitemline() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void SchemaItem::set_has_fblitemline() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void SchemaItem::clear_has_fblitemline() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void SchemaItem::clear_fblitemline() {
   if (fblitemline_ != NULL) fblitemline_->::Proto::FblItemLine::Clear();
@@ -11921,13 +12283,13 @@ inline void SchemaItem::set_allocated_fblitemline(::Proto::FblItemLine* fbliteml
 
 // optional .Proto.SchemaItemRect Rect = 116;
 inline bool SchemaItem::has_rect() const {
-  return (_has_bits_[0] & 0x00004000u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void SchemaItem::set_has_rect() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void SchemaItem::clear_has_rect() {
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void SchemaItem::clear_rect() {
   if (rect_ != NULL) rect_->::Proto::SchemaItemRect::Clear();
@@ -11959,13 +12321,13 @@ inline void SchemaItem::set_allocated_rect(::Proto::SchemaItemRect* rect) {
 
 // optional .Proto.SchemaItemLine Line = 117;
 inline bool SchemaItem::has_line() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void SchemaItem::set_has_line() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void SchemaItem::clear_has_line() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void SchemaItem::clear_line() {
   if (line_ != NULL) line_->::Proto::SchemaItemLine::Clear();
@@ -11997,13 +12359,13 @@ inline void SchemaItem::set_allocated_line(::Proto::SchemaItemLine* line) {
 
 // optional .Proto.SchemaItemPath Path = 118;
 inline bool SchemaItem::has_path() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void SchemaItem::set_has_path() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void SchemaItem::clear_has_path() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void SchemaItem::clear_path() {
   if (path_ != NULL) path_->::Proto::SchemaItemPath::Clear();
@@ -12035,13 +12397,13 @@ inline void SchemaItem::set_allocated_path(::Proto::SchemaItemPath* path) {
 
 // optional .Proto.SchemaItemSignal Signal = 124;
 inline bool SchemaItem::has_signal() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void SchemaItem::set_has_signal() {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void SchemaItem::clear_has_signal() {
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void SchemaItem::clear_signal() {
   if (signal_ != NULL) signal_->::Proto::SchemaItemSignal::Clear();
@@ -12073,13 +12435,13 @@ inline void SchemaItem::set_allocated_signal(::Proto::SchemaItemSignal* signal) 
 
 // optional .Proto.SchemaItemInput InputSignal = 125;
 inline bool SchemaItem::has_inputsignal() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void SchemaItem::set_has_inputsignal() {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void SchemaItem::clear_has_inputsignal() {
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void SchemaItem::clear_inputsignal() {
   if (inputsignal_ != NULL) inputsignal_->::Proto::SchemaItemInput::Clear();
@@ -12111,13 +12473,13 @@ inline void SchemaItem::set_allocated_inputsignal(::Proto::SchemaItemInput* inpu
 
 // optional .Proto.SchemaItemOutput OutputSignal = 126;
 inline bool SchemaItem::has_outputsignal() const {
-  return (_has_bits_[0] & 0x00080000u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void SchemaItem::set_has_outputsignal() {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void SchemaItem::clear_has_outputsignal() {
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void SchemaItem::clear_outputsignal() {
   if (outputsignal_ != NULL) outputsignal_->::Proto::SchemaItemOutput::Clear();
@@ -12149,13 +12511,13 @@ inline void SchemaItem::set_allocated_outputsignal(::Proto::SchemaItemOutput* ou
 
 // optional .Proto.SchemaItemLink Link = 127;
 inline bool SchemaItem::has_link() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
 inline void SchemaItem::set_has_link() {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
 }
 inline void SchemaItem::clear_has_link() {
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline void SchemaItem::clear_link() {
   if (link_ != NULL) link_->::Proto::SchemaItemLink::Clear();
@@ -12187,13 +12549,13 @@ inline void SchemaItem::set_allocated_link(::Proto::SchemaItemLink* link) {
 
 // optional .Proto.SchemaItemAfb Afb = 128;
 inline bool SchemaItem::has_afb() const {
-  return (_has_bits_[0] & 0x00200000u) != 0;
+  return (_has_bits_[0] & 0x00400000u) != 0;
 }
 inline void SchemaItem::set_has_afb() {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
 }
 inline void SchemaItem::clear_has_afb() {
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void SchemaItem::clear_afb() {
   if (afb_ != NULL) afb_->::Proto::SchemaItemAfb::Clear();
@@ -12225,13 +12587,13 @@ inline void SchemaItem::set_allocated_afb(::Proto::SchemaItemAfb* afb) {
 
 // optional .Proto.SchemaItemConst ConstItem = 129;
 inline bool SchemaItem::has_constitem() const {
-  return (_has_bits_[0] & 0x00400000u) != 0;
+  return (_has_bits_[0] & 0x00800000u) != 0;
 }
 inline void SchemaItem::set_has_constitem() {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x00800000u;
 }
 inline void SchemaItem::clear_has_constitem() {
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void SchemaItem::clear_constitem() {
   if (constitem_ != NULL) constitem_->::Proto::SchemaItemConst::Clear();
@@ -12263,13 +12625,13 @@ inline void SchemaItem::set_allocated_constitem(::Proto::SchemaItemConst* consti
 
 // optional .Proto.SchemaItemConnection ConnectionItem = 130;
 inline bool SchemaItem::has_connectionitem() const {
-  return (_has_bits_[0] & 0x00800000u) != 0;
+  return (_has_bits_[0] & 0x01000000u) != 0;
 }
 inline void SchemaItem::set_has_connectionitem() {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x01000000u;
 }
 inline void SchemaItem::clear_has_connectionitem() {
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline void SchemaItem::clear_connectionitem() {
   if (connectionitem_ != NULL) connectionitem_->::Proto::SchemaItemConnection::Clear();
@@ -12301,13 +12663,13 @@ inline void SchemaItem::set_allocated_connectionitem(::Proto::SchemaItemConnecti
 
 // optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
 inline bool SchemaItem::has_transmitteritem() const {
-  return (_has_bits_[0] & 0x01000000u) != 0;
+  return (_has_bits_[0] & 0x02000000u) != 0;
 }
 inline void SchemaItem::set_has_transmitteritem() {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x02000000u;
 }
 inline void SchemaItem::clear_has_transmitteritem() {
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline void SchemaItem::clear_transmitteritem() {
   if (transmitteritem_ != NULL) transmitteritem_->::Proto::SchemaItemTransmitter::Clear();
@@ -12339,13 +12701,13 @@ inline void SchemaItem::set_allocated_transmitteritem(::Proto::SchemaItemTransmi
 
 // optional .Proto.SchemaItemReceiver ReceiverItem = 132;
 inline bool SchemaItem::has_receiveritem() const {
-  return (_has_bits_[0] & 0x02000000u) != 0;
+  return (_has_bits_[0] & 0x04000000u) != 0;
 }
 inline void SchemaItem::set_has_receiveritem() {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x04000000u;
 }
 inline void SchemaItem::clear_has_receiveritem() {
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline void SchemaItem::clear_receiveritem() {
   if (receiveritem_ != NULL) receiveritem_->::Proto::SchemaItemReceiver::Clear();
@@ -12377,13 +12739,13 @@ inline void SchemaItem::set_allocated_receiveritem(::Proto::SchemaItemReceiver* 
 
 // optional .Proto.SchemaItemInOut InOutSignal = 133;
 inline bool SchemaItem::has_inoutsignal() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void SchemaItem::set_has_inoutsignal() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void SchemaItem::clear_has_inoutsignal() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void SchemaItem::clear_inoutsignal() {
   if (inoutsignal_ != NULL) inoutsignal_->::Proto::SchemaItemInOut::Clear();
@@ -12415,13 +12777,13 @@ inline void SchemaItem::set_allocated_inoutsignal(::Proto::SchemaItemInOut* inou
 
 // optional .Proto.SchemaItemUfb ufb = 134;
 inline bool SchemaItem::has_ufb() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void SchemaItem::set_has_ufb() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void SchemaItem::clear_has_ufb() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void SchemaItem::clear_ufb() {
   if (ufb_ != NULL) ufb_->::Proto::SchemaItemUfb::Clear();
@@ -12453,13 +12815,13 @@ inline void SchemaItem::set_allocated_ufb(::Proto::SchemaItemUfb* ufb) {
 
 // optional .Proto.SchemaItemTerminator terminator = 135;
 inline bool SchemaItem::has_terminator() const {
-  return (_has_bits_[0] & 0x10000000u) != 0;
+  return (_has_bits_[0] & 0x20000000u) != 0;
 }
 inline void SchemaItem::set_has_terminator() {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x20000000u;
 }
 inline void SchemaItem::clear_has_terminator() {
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x20000000u;
 }
 inline void SchemaItem::clear_terminator() {
   if (terminator_ != NULL) terminator_->::Proto::SchemaItemTerminator::Clear();
@@ -12489,15 +12851,53 @@ inline void SchemaItem::set_allocated_terminator(::Proto::SchemaItemTerminator* 
   }
 }
 
+// optional .Proto.SchemaItemValue Value = 136;
+inline bool SchemaItem::has_value() const {
+  return (_has_bits_[0] & 0x40000000u) != 0;
+}
+inline void SchemaItem::set_has_value() {
+  _has_bits_[0] |= 0x40000000u;
+}
+inline void SchemaItem::clear_has_value() {
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline void SchemaItem::clear_value() {
+  if (value_ != NULL) value_->::Proto::SchemaItemValue::Clear();
+  clear_has_value();
+}
+inline const ::Proto::SchemaItemValue& SchemaItem::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Proto::SchemaItemValue* SchemaItem::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Proto::SchemaItemValue;
+  return value_;
+}
+inline ::Proto::SchemaItemValue* SchemaItem::release_value() {
+  clear_has_value();
+  ::Proto::SchemaItemValue* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_value(::Proto::SchemaItemValue* value) {
+  delete value_;
+  value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
+}
+
 // optional .Proto.SchemaItemControl control = 200;
 inline bool SchemaItem::has_control() const {
-  return (_has_bits_[0] & 0x20000000u) != 0;
+  return (_has_bits_[0] & 0x80000000u) != 0;
 }
 inline void SchemaItem::set_has_control() {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x80000000u;
 }
 inline void SchemaItem::clear_has_control() {
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline void SchemaItem::clear_control() {
   if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
@@ -12529,13 +12929,13 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::has_pushbutton() const {
-  return (_has_bits_[0] & 0x40000000u) != 0;
+  return (_has_bits_[1] & 0x00000001u) != 0;
 }
 inline void SchemaItem::set_has_pushbutton() {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[1] |= 0x00000001u;
 }
 inline void SchemaItem::clear_has_pushbutton() {
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
@@ -12567,13 +12967,13 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::has_lineedit() const {
-  return (_has_bits_[0] & 0x80000000u) != 0;
+  return (_has_bits_[1] & 0x00000002u) != 0;
 }
 inline void SchemaItem::set_has_lineedit() {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000002u;
 }
 inline void SchemaItem::clear_has_lineedit() {
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
@@ -14743,6 +15143,294 @@ inline void SchemaItemUfb::set_ufbversion(::google::protobuf::int32 value) {
 // -------------------------------------------------------------------
 
 // SchemaItemTerminator
+
+// -------------------------------------------------------------------
+
+// SchemaItemValue
+
+// optional double weight = 1;
+inline bool SchemaItemValue::has_weight() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemValue::set_has_weight() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemValue::clear_has_weight() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemValue::clear_weight() {
+  weight_ = 0;
+  clear_has_weight();
+}
+inline double SchemaItemValue::weight() const {
+  return weight_;
+}
+inline void SchemaItemValue::set_weight(double value) {
+  set_has_weight();
+  weight_ = value;
+}
+
+// optional uint32 lineColor = 2;
+inline bool SchemaItemValue::has_linecolor() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemValue::set_has_linecolor() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemValue::clear_has_linecolor() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemValue::clear_linecolor() {
+  linecolor_ = 0u;
+  clear_has_linecolor();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::linecolor() const {
+  return linecolor_;
+}
+inline void SchemaItemValue::set_linecolor(::google::protobuf::uint32 value) {
+  set_has_linecolor();
+  linecolor_ = value;
+}
+
+// optional uint32 fillColor = 3;
+inline bool SchemaItemValue::has_fillcolor() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolor() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemValue::clear_has_fillcolor() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemValue::clear_fillcolor() {
+  fillcolor_ = 0u;
+  clear_has_fillcolor();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolor() const {
+  return fillcolor_;
+}
+inline void SchemaItemValue::set_fillcolor(::google::protobuf::uint32 value) {
+  set_has_fillcolor();
+  fillcolor_ = value;
+}
+
+// optional string text = 4;
+inline bool SchemaItemValue::has_text() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemValue::set_has_text() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemValue::clear_has_text() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemValue::clear_text() {
+  if (text_ != &::google::protobuf::internal::kEmptyString) {
+    text_->clear();
+  }
+  clear_has_text();
+}
+inline const ::std::string& SchemaItemValue::text() const {
+  return *text_;
+}
+inline void SchemaItemValue::set_text(const ::std::string& value) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(value);
+}
+inline void SchemaItemValue::set_text(const char* value) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(value);
+}
+inline void SchemaItemValue::set_text(const char* value, size_t size) {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  text_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemValue::mutable_text() {
+  set_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    text_ = new ::std::string;
+  }
+  return text_;
+}
+inline ::std::string* SchemaItemValue::release_text() {
+  clear_has_text();
+  if (text_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = text_;
+    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemValue::set_allocated_text(::std::string* text) {
+  if (text_ != &::google::protobuf::internal::kEmptyString) {
+    delete text_;
+  }
+  if (text) {
+    set_has_text();
+    text_ = text;
+  } else {
+    clear_has_text();
+    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional uint32 textColor = 5;
+inline bool SchemaItemValue::has_textcolor() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolor() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemValue::clear_has_textcolor() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemValue::clear_textcolor() {
+  textcolor_ = 0u;
+  clear_has_textcolor();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolor() const {
+  return textcolor_;
+}
+inline void SchemaItemValue::set_textcolor(::google::protobuf::uint32 value) {
+  set_has_textcolor();
+  textcolor_ = value;
+}
+
+// optional .Proto.FontParam font = 6;
+inline bool SchemaItemValue::has_font() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemValue::set_has_font() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemValue::clear_has_font() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemValue::clear_font() {
+  if (font_ != NULL) font_->::Proto::FontParam::Clear();
+  clear_has_font();
+}
+inline const ::Proto::FontParam& SchemaItemValue::font() const {
+  return font_ != NULL ? *font_ : *default_instance_->font_;
+}
+inline ::Proto::FontParam* SchemaItemValue::mutable_font() {
+  set_has_font();
+  if (font_ == NULL) font_ = new ::Proto::FontParam;
+  return font_;
+}
+inline ::Proto::FontParam* SchemaItemValue::release_font() {
+  clear_has_font();
+  ::Proto::FontParam* temp = font_;
+  font_ = NULL;
+  return temp;
+}
+inline void SchemaItemValue::set_allocated_font(::Proto::FontParam* font) {
+  delete font_;
+  font_ = font;
+  if (font) {
+    set_has_font();
+  } else {
+    clear_has_font();
+  }
+}
+
+// optional bool fill = 7;
+inline bool SchemaItemValue::has_fill() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemValue::set_has_fill() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemValue::clear_has_fill() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemValue::clear_fill() {
+  fill_ = false;
+  clear_has_fill();
+}
+inline bool SchemaItemValue::fill() const {
+  return fill_;
+}
+inline void SchemaItemValue::set_fill(bool value) {
+  set_has_fill();
+  fill_ = value;
+}
+
+// optional bool drawrect = 8 [default = true];
+inline bool SchemaItemValue::has_drawrect() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemValue::set_has_drawrect() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemValue::clear_has_drawrect() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemValue::clear_drawrect() {
+  drawrect_ = true;
+  clear_has_drawrect();
+}
+inline bool SchemaItemValue::drawrect() const {
+  return drawrect_;
+}
+inline void SchemaItemValue::set_drawrect(bool value) {
+  set_has_drawrect();
+  drawrect_ = value;
+}
+
+// optional int32 horzAlign = 9 [default = 4];
+inline bool SchemaItemValue::has_horzalign() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SchemaItemValue::set_has_horzalign() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SchemaItemValue::clear_has_horzalign() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItemValue::clear_horzalign() {
+  horzalign_ = 4;
+  clear_has_horzalign();
+}
+inline ::google::protobuf::int32 SchemaItemValue::horzalign() const {
+  return horzalign_;
+}
+inline void SchemaItemValue::set_horzalign(::google::protobuf::int32 value) {
+  set_has_horzalign();
+  horzalign_ = value;
+}
+
+// optional int32 vertAlign = 10 [default = 128];
+inline bool SchemaItemValue::has_vertalign() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItemValue::set_has_vertalign() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItemValue::clear_has_vertalign() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SchemaItemValue::clear_vertalign() {
+  vertalign_ = 128;
+  clear_has_vertalign();
+}
+inline ::google::protobuf::int32 SchemaItemValue::vertalign() const {
+  return vertalign_;
+}
+inline void SchemaItemValue::set_vertalign(::google::protobuf::int32 value) {
+  set_has_vertalign();
+  vertalign_ = value;
+}
 
 // -------------------------------------------------------------------
 
