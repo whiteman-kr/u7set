@@ -1,5 +1,5 @@
-#include "Stable.h"
 #include "DiagSchema.h"
+#include "Settings.h"
 
 namespace VFrame30
 {

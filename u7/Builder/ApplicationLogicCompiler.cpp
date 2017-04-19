@@ -26,6 +26,7 @@ namespace Builder
 													   LmDescriptionSet* lmDescriptions,
 													   AppLogicData* appLogicData,
 													   Tuning::TuningDataStorage* tuningDataStorage,
+													   ComparatorStorage* comparatorStorage,
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),
@@ -35,6 +36,7 @@ namespace Builder
 		m_lmDescriptions(lmDescriptions),
 		m_appLogicData(appLogicData),
 		m_tuningDataStorage(tuningDataStorage),
+		m_cmpStorage(comparatorStorage),
 		m_resultWriter(buildResultWriter),
 		m_connections(connections)
 	{
@@ -89,6 +91,7 @@ namespace Builder
 			m_lmDescriptions == nullptr ||
 			m_appLogicData == nullptr ||
 			m_tuningDataStorage == nullptr ||
+			m_cmpStorage == nullptr ||
 			m_resultWriter == nullptr ||
 			m_connections == nullptr)
 		{

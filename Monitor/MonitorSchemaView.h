@@ -4,7 +4,11 @@
 #include "../VFrame30/SchemaView.h"
 
 class SchemaManager;
-//struct SchemaHistoryItem;
+
+namespace VFrame30
+{
+	class SchemaItem;
+}
 
 class MonitorSchemaView : public VFrame30::SchemaView
 {
@@ -17,11 +21,6 @@ public:
 	// Methods
 	//
 public:
-
-protected:
-	void runScript(const QString& script, VFrame30::SchemaItem* schemaItem);
-
-	Q_INVOKABLE bool setSchema(QString schemaId);
 
 	// Painting
 	//
@@ -40,7 +39,15 @@ protected:
 signals:
 	void signal_setSchema(QString schemaId);
 
+	// Public slots which are part of Script API
+	//
 public slots:
+	virtual void setSchema(QString schemaId) override;
+
+	// Properties
+	//
+public:
+	virtual QString globalScript() const override;
 
 	// Data
 	//
@@ -48,8 +55,6 @@ private:
 	SchemaManager* m_schemaManager = nullptr;
 
 	std::shared_ptr<VFrame30::SchemaItem> m_leftClickOverItem;
-
-	QJSEngine m_jsEngine;
 };
 
 

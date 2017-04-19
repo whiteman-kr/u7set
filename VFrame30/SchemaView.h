@@ -1,20 +1,26 @@
 #pragma once
 
-#include "Schema.h"
+#include <QJSEngine>
 #include "Session.h"
+#include "../lib/Tuning/TuningController.h"
+
 
 namespace VFrame30
 {
+	class Schema;
+	class SchemaItem;
+	class CDrawParam;
+
 	class VFRAME30LIBSHARED_EXPORT SchemaView : public QWidget
 	{
 		Q_OBJECT
 
 	public:
 		explicit SchemaView(QWidget *parent = 0);
-		explicit SchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget *parent = 0);
+		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget *parent = 0);
 
 	protected:
-		void init();
+		void updateControlWidgets(bool editMode);
 		
 		// Painting
 		//
@@ -35,6 +41,8 @@ namespace VFrame30
 		std::shared_ptr<Schema> schema() const;
 
 		void setSchema(std::shared_ptr<Schema>& schema, bool repaint);
+
+		Q_INVOKABLE void jsDebugOutput(QString str);
 		
 		// Events
 		//
@@ -46,6 +54,14 @@ namespace VFrame30
 	signals:
 		void signal_schemaChanged(Schema* schema);
 
+		// Public slots which are part of Script API
+		//
+	public slots:
+		virtual void setSchema(QString schemaId);
+
+		QObject* findSchemaItem(QString objectName);
+		QObject* findWidget(QString objectName);
+
 		// Properties
 		//
 	public:
@@ -55,6 +71,14 @@ namespace VFrame30
 		const Session& session() const;
 		Session& session();
 
+		const TuningController& tuningController() const;
+		TuningController& tuningController();
+
+		QJSEngine* jsEngine();
+
+		virtual QString globalScript() const;
+		void setGlobalScript(QString value);
+
 		// Data
 		//
 	private:
@@ -62,6 +86,12 @@ namespace VFrame30
 		double m_zoom = 100.0;
 
 		Session m_session;
+		TuningController m_tuningController;
+
+		bool m_jsEngineGlobalsWereCreated = false;
+		QJSEngine m_jsEngine;
+
+		QString m_globasScript;
 	};
 }
 

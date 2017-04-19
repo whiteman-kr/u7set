@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "UserManager.h"
 #include <QCommandLineParser>
+#include "../VFrame30/VFrame30Library.h"
 #include "version.h"
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
@@ -121,6 +122,8 @@ int main(int argc, char *argv[])
 
     a.setApplicationVersion(QString("0.1.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
 
+	VFrame30::VFrame30Library::Init();
+
     theSettings.RestoreUser();
     theSettings.RestoreSystem();
     theUserManager.Restore();
@@ -220,7 +223,8 @@ int main(int argc, char *argv[])
     delete theSharedMemorySingleApp;
     theSharedMemorySingleApp = nullptr;
 
-    google::protobuf::ShutdownProtobufLibrary();
+	VFrame30::VFrame30Library::Shutdown();
+	google::protobuf::ShutdownProtobufLibrary();
 
     return result;
 }

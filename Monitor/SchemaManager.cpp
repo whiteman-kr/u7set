@@ -81,7 +81,14 @@ std::shared_ptr<VFrame30::Schema>  SchemaManager::loadSchema(QString schemaId)
 
 void SchemaManager::slot_configurationArrived(ConfigSettings configuration)
 {
+	m_configuration = configuration;
+
 	m_schemas.clear();
 	emit resetSchema(configuration.startSchemaId);
 	return;
+}
+
+const QString& SchemaManager::globalScript() const
+{
+	return m_configuration.globalScript;
 }

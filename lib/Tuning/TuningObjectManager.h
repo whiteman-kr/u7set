@@ -1,16 +1,20 @@
 #ifndef OBJECTMANAGER_H
 #define OBJECTMANAGER_H
 
+#include <queue>
+
 #include "Stable.h"
-#include "../lib/TuningObject.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObject.h"
+#include "../lib/Tuning/TuningController.h"
 
 #include "../Proto/network.pb.h"
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
-#include "ConfigController.h"
 
-#include <queue>
+//#include "ConfigController.h"
+//#include "Settings.h"
+//#include "MainWindow.h"
+
 
 struct TuningSource
 {
@@ -37,8 +41,12 @@ class TuningObjectManager : public Tcp::Client
     Q_OBJECT
 
 public:
-    TuningObjectManager(ConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	TuningObjectManager();
     virtual ~TuningObjectManager();
+
+	void setInstanceId(const QString& instanceId);
+
+	void setRequestInterval(int requestInterval);
 
     bool loadDatabase(const QByteArray& data, QString *errorCode);
 
@@ -58,9 +66,17 @@ public:
 
     // Writing states
 
-    void writeTuningSignal(Hash hash, float value);
+	void writeTuningSignal(Hash hash, float value);
 
     void writeModifiedTuningObjects(std::vector<TuningObject>& objects);
+
+	// Information
+
+	QString getStateToolTip();
+
+	// Controller
+
+	void connectTuningController(TuningController* controller);
 
 private:
 
@@ -92,15 +108,32 @@ protected:
     void requestWriteTuningSignals();
     void processWriteTuningSignals(const QByteArray& data);
 
-protected slots:
+	virtual void writeLogError(const QString& message);
+	virtual void writeLogWarning(const QString& message);
+	virtual void writeLogMessage(const QString& message);
 
-    void slot_configurationArrived(ConfigSettings configuration);
-    void slot_signalsUpdated();
+
+public slots:
+	void slot_signalsUpdated(QByteArray data);
+	void slot_serversArrived(HostAddressPort address1, HostAddressPort address2);
+
+
+private slots:
+	void slot_exists(QString appSignalID, bool* result, bool* ok);
+	void slot_valid(QString appSignalID, bool* result, bool* ok);
+
+	void slot_value(QString appSignalID, float *result, bool* ok);
+	void slot_setValue(QString appSignalID, float value, bool* ok);
+
+	void slot_highLimit(QString appSignalID, float* result, bool* ok);
+	void slot_lowLimit(QString appSignalID, float* result, bool* ok);
 
 signals:
 
-    void tuningSourcesArrived();
-    void connectionFailed();
+	void tuningSourcesArrived();
+	void connectionFailed();
+
+
 
 private:
 
@@ -112,7 +145,7 @@ public:
 
 private:
 
-    ConfigController* m_cfgController = nullptr;
+	//ConfigController* m_cfgController = nullptr;
 
     // Cache protobug messages
     //
@@ -133,7 +166,7 @@ private:
 
     TuningObjectStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
 
-    // Tuning sources
+	// Tuning sources
     //
 
     QStringList m_tuningSourcesList;
@@ -147,6 +180,11 @@ private:
 
     int m_readTuningSignalIndex = 0;
     int m_readTuningSignalCount = 0;
+
+	QString m_instanceId;
+	int m_requestInterval = 10;
+
+	std::map<TuningController*, bool> m_tuningControllersMap;
 };
 
 

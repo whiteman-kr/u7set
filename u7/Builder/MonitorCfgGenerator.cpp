@@ -29,7 +29,22 @@ namespace Builder
 			return false;
 		}
 
+		// Writing GlobalScript
+		//
 		bool result = true;
+
+		if (m_software->propertyExists("GlobalScript") == false)
+		{
+			m_log->errCFG3000("GlobalScript", m_software->equipmentIdTemplate());
+			result = false;
+		}
+		else
+		{
+			QString globalScript = m_software->propertyValue("GlobalScript").toString();
+			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", globalScript);
+
+			m_cfgXml->addLinkToFile(globalScriptBuildFile);
+		}
 
 		// write XML via m_cfgXml->xmlWriter()
 		//

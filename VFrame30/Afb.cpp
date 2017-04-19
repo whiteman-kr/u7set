@@ -1,22 +1,5 @@
-#include "Stable.h"
 #include "Afb.h"
 #include <QDomElement>
-
-//bool operator== (const Afb::AfbType& t1, const Afb::AfbType& t2)
-//{
-//	return t1.m_type == t2.m_type;
-//}
-
-//bool operator!= (const Afb::AfbType& t1, const Afb::AfbType& t2)
-//{
-//	return t1.m_type != t2.m_type;
-//}
-
-
-//bool operator< (const Afb::AfbType& t1, const Afb::AfbType& t2)
-//{
-//	return t1.m_type < t2.m_type;
-//}
 
 namespace Afb
 {

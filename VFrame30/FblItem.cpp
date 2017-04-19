@@ -1,5 +1,5 @@
-#include "Stable.h"
 #include "FblItem.h"
+#include "Afb.h"
 
 namespace VFrame30
 {

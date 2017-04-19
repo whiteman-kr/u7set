@@ -6,12 +6,14 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/ModuleConfiguration.h"
 
-#include "../Builder/Parser.h"
-#include "../Builder/BuildResultWriter.h"
-#include "../Builder/ApplicationLogicCode.h"
-#include "../Builder/OptoModule.h"
-#include "../Builder/LmMemoryMap.h"
 #include "../TuningService/TuningDataStorage.h"
+
+#include "Parser.h"
+#include "BuildResultWriter.h"
+#include "ApplicationLogicCode.h"
+#include "OptoModule.h"
+#include "LmMemoryMap.h"
+#include "ComparatorStorage.h"
 
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -117,6 +119,17 @@ namespace Builder
 		QHash<QString, int> m_opNameToIndexMap;
 
 	public:
+		enum Type
+		{
+			Unknown,
+			Signal,
+			Fb,
+			Const,
+			Transmitter,
+			Receiver,
+			Terminator
+		};
+
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
 		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
@@ -134,6 +147,8 @@ namespace Builder
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
 		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
 
+		Type type() const;
+
 		bool hasRam() const { return afb().hasRam(); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
@@ -145,6 +160,8 @@ namespace Builder
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
+
+		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
 		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
 
@@ -230,6 +247,9 @@ namespace Builder
 
 		int m_runTime = 0;
 
+		const quint16 CONST_COMPARATOR_OPCODE = 10;
+		const quint16 DYNAMIC_COMPARATOR_OPCODE = 20;
+
 		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
 		//
@@ -282,6 +302,10 @@ namespace Builder
 		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
+
+		bool isConstComaparator() const;
+		bool isDynamicComaparator() const;
+		bool isComparator() const;
 
 		QString instantiatorID();
 
@@ -482,6 +506,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+		ComparatorStorage* m_cmpStorage = nullptr;
 
 		HashedVector<QString, Signal*> m_lmAssociatedSignals;
 
@@ -589,6 +614,8 @@ namespace Builder
 		bool buildRS232SignalLists();
 		bool buildOptoPortsSignalLists();
 
+		bool setOptoRawInSignalsAsComputed();
+
 		// pass #2 compilation functions
 		//
 
@@ -620,6 +647,9 @@ namespace Builder
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool startFb(const AppFb* appFb);
 		bool readFbOutputSignals(const AppFb *appFb);
+		bool addToComparatorStorage(const AppFb *appFb);
+
+		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);
 
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
@@ -640,13 +670,13 @@ namespace Builder
 		bool setLmAppLANDataSize();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
 
-		bool generateRS232ConectionCode();
-		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);
+		/*bool generateRS232ConectionCode();
+		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);*/
 
 		bool copyOptoConnectionsTxData();
 		bool copyOptoPortTxData(Hardware::OptoPort* port);
 
-		bool copyOptoPortTxRawDataData(Hardware::OptoPort* port);
+		bool copyOptoPortTxRawData(Hardware::OptoPort* port);
 		bool copyOptoPortTxAnalogSignals(Hardware::OptoPort* port);
 		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port);
 
@@ -655,6 +685,8 @@ namespace Builder
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
 		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
 		bool copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset);
+		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem &item, int portDataOffset);
+		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem& item, int portDataOffset);
 
 		bool copyRS232Signals();
 		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);

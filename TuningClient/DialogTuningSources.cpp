@@ -1,13 +1,16 @@
 #include "DialogTuningSources.h"
 #include "ui_DialogTuningSources.h"
 #include "MainWindow.h"
-#include "TuningObjectManager.h"
+#include "../lib/Tuning/TuningObjectManager.h"
 #include "DialogTuningSourceInfo.h"
 
-DialogTuningSources::DialogTuningSources(QWidget *parent) :
+DialogTuningSources::DialogTuningSources(TuningObjectManager* tuningObjectManager, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogTuningSources)
+	ui(new Ui::DialogTuningSources),
+	m_tuningObjectManager(tuningObjectManager)
 {
+	assert(tuningObjectManager);
+
 	setAttribute(Qt::WA_DeleteOnClose);
 	ui->setupUi(this);
 
@@ -35,7 +38,7 @@ DialogTuningSources::DialogTuningSources(QWidget *parent) :
     ui->treeWidget->setSortingEnabled(true);
     ui->treeWidget->sortByColumn(1, Qt::AscendingOrder);// sort by EquipmentID
 
-    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+	connect(m_tuningObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
@@ -63,7 +66,7 @@ void DialogTuningSources::slot_tuningSourcesArrived()
 
 void DialogTuningSources::update(bool refreshOnly)
 {
-    std::vector<TuningSource> tsi = theObjectManager->tuningSourcesInfo();
+	std::vector<TuningSource> tsi = m_tuningObjectManager->tuningSourcesInfo();
 	int count = static_cast<int>(tsi.size());
 
     if (ui->treeWidget->topLevelItemCount() != count)
@@ -123,7 +126,7 @@ void DialogTuningSources::update(bool refreshOnly)
 
         TuningSource ts;
 
-        if (theObjectManager->tuningSourceInfo(id, ts) == true)
+		if (m_tuningObjectManager->tuningSourceInfo(id, ts) == true)
         {
             int col = dynamicColumn;
 
@@ -159,7 +162,7 @@ void DialogTuningSources::on_btnDetails_clicked()
 
     quint64 id = item->data(0, Qt::UserRole).value<quint64>();
 
-    DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(this, id);
+	DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningObjectManager, this, id);
     dlg->exec();
 }
 

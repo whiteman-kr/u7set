@@ -1047,8 +1047,7 @@ TuningFilterStorage::TuningFilterStorage()
 
 TuningFilterStorage::TuningFilterStorage(const TuningFilterStorage& That)
 {
-	m_root = std::make_shared<TuningFilter>(*That.m_root.get());
-	m_schemasDetails = That.m_schemasDetails;
+	*this = That;
 }
 
 bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, bool automatic)
@@ -1483,4 +1482,43 @@ void TuningFilterStorage::checkSignals(const TuningObjectStorage *objects, bool&
     }
 
 }
+
+void TuningFilterStorage::slot_filtersUpdated(QByteArray data)
+{
+	QString errorStr;
+
+	if (load(data, &errorStr, true) == false)
+	{
+		QString completeErrorMessage = QObject::tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
+		writeLogError(completeErrorMessage);
+	}
+
+}
+
+void TuningFilterStorage::slot_schemasDetailsUpdated(QByteArray data)
+{
+	QString errorStr;
+
+	if (loadSchemasDetails(data, &errorStr) == false)
+	{
+		QString completeErrorMessage = QObject::tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
+		writeLogError(completeErrorMessage);
+	}
+}
+
+void TuningFilterStorage::writeLogError(const QString& message)
+{
+	Q_UNUSED(message);
+}
+
+void TuningFilterStorage::writeLogWarning(const QString& message)
+{
+	Q_UNUSED(message);
+}
+
+void TuningFilterStorage::writeLogMessage(const QString& message)
+{
+	Q_UNUSED(message);
+}
+
 

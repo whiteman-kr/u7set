@@ -3,22 +3,18 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *parent)
-    :QWidget(parent)
+TuningWorkspace::TuningWorkspace(TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage* objects, QWidget *parent) :
+	m_filterStorage(filterStorage),
+	m_objects(*objects),
+	QWidget(parent)
 {
 
-    if (objects == nullptr)
-    {
-        assert(objects);
-    }
-    else
-    {
-        m_objects = *objects;
-    }
+	assert(tuningObjectManager);
+	assert(m_filterStorage),
+	assert(objects);
 
     QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
-
 
     // Fill tree
     //
@@ -32,10 +28,12 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 
 	int tuningPageIndex = 0;
 
-	int count = theFilters.m_root->childFiltersCount();
+	// Tabs by filters
+
+	int count = m_filterStorage->m_root->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<TuningFilter> f = theFilters.m_root->childFilter(i);
+		std::shared_ptr<TuningFilter> f = m_filterStorage->m_root->childFilter(i);
 		if (f == nullptr)
 		{
 			assert(f);
@@ -47,18 +45,22 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 			continue;
 		}
 
-        TuningPage* tp = new TuningPage(tuningPageIndex++, f, &m_objects);
+		TuningPage* tp = new TuningPage(tuningPageIndex++, f, tuningObjectManager, filterStorage, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, tp, &TuningPage::slot_filterTreeChanged);
 
 		tuningPages.push_back(std::make_pair(tp, f->caption()));
 	}
 
+
+
 	if (tuningPages.empty() == true)
 	{
 		// No tab pages, create only one page
 		//
-        m_tuningPage = new TuningPage(tuningPageIndex, nullptr, &m_objects);
+		std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
+
+		m_tuningPage = new TuningPage(tuningPageIndex, emptyTabFilter, tuningObjectManager, filterStorage, &m_objects);
 
 		connect(this, &TuningWorkspace::filterSelectionChanged, m_tuningPage, &TuningPage::slot_filterTreeChanged);
 
@@ -103,7 +105,7 @@ TuningWorkspace::TuningWorkspace(const TuningObjectStorage* objects, QWidget *pa
 	if (m_hSplitter != nullptr)
 	{
 		pLayout->addWidget(m_hSplitter);
-		m_hSplitter->restoreState(theSettings.m_mainWindowSplitterState);
+		m_hSplitter->restoreState(theSettings.m_tuningWorkspaceSplitterState);
 	}
 }
 
@@ -111,7 +113,7 @@ TuningWorkspace::~TuningWorkspace()
 {
     if (m_hSplitter != nullptr)
     {
-        theSettings.m_mainWindowSplitterState = m_hSplitter->saveState();
+		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
     }
 }
 
@@ -119,7 +121,7 @@ void TuningWorkspace::fillFiltersTree()
 {
     // Fill the filter tree
     //
-    std::shared_ptr<TuningFilter> rootFilter = theFilters.m_root;
+	std::shared_ptr<TuningFilter> rootFilter = m_filterStorage->m_root;
     if (rootFilter == nullptr)
     {
         assert(rootFilter);

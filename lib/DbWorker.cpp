@@ -155,6 +155,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
     {":/DatabaseUpgrade/Upgrade0137.sql", "Upgrade to version 137, Removed EnableSerial property from OCM and OCMN script"},
 	{":/DatabaseUpgrade/Upgrade0138.sql", "Upgrade to version 138, Updated metrology preset"},
     {":/DatabaseUpgrade/Upgrade0139.sql", "Upgrade to version 139, Logic Module Description file has been added"},
+	{":/DatabaseUpgrade/Upgrade0140.sql", "Upgrade to version 140, New Logic Module Configuration script based on TypeScript"},
+	{":/DatabaseUpgrade/Upgrade0141.sql", "Upgrade to version 141, Add FSC Chassis preset and Place checking"},
+	{":/DatabaseUpgrade/Upgrade0142.sql", "Upgrade to version 142, Changed in TuningClient preset properties"},
+	{":/DatabaseUpgrade/Upgrade0143.sql", "Upgrade to version 143, Changes in TuningClient and Monitor presets"},
 };
 
 

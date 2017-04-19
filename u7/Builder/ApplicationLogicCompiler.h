@@ -4,7 +4,8 @@
 #include <QTranslator>
 #include <QUuid>
 
-#include "../Builder/ModuleLogicCompiler.h"
+#include "ModuleLogicCompiler.h"
+#include "ComparatorStorage.h"
 
 #include "Subsystem.h"
 
@@ -29,6 +30,7 @@ namespace Builder
 								 LmDescriptionSet* lmDescriptions,
 								 AppLogicData* appLogicData,
 								 Tuning::TuningDataStorage* tuningDataStorage,
+								 ComparatorStorage* comparatorStorage,
 								 BuildResultWriter* buildResultWriter,
 								 IssueLogger* log);
 
@@ -71,6 +73,7 @@ namespace Builder
 		LmDescriptionSet* m_lmDescriptions = nullptr;
 		AppLogicData* m_appLogicData = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
+		ComparatorStorage* m_cmpStorage = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
 

@@ -1,25 +1,105 @@
-#include "Stable.h"
 #include "SchemaView.h"
-#include <QPdfWriter>
+#include "Schema.h"
+#include "SchemaItemControl.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
-	SchemaView::SchemaView(QWidget *parent) :
-		QWidget(parent)
+	SchemaView::SchemaView(QWidget* parent) :
+		SchemaView(std::shared_ptr<Schema>(), parent)
 	{
-		init();
 	}
 
-	SchemaView::SchemaView(std::shared_ptr<Schema>& schema, QWidget* parent /*= 0*/) :
+	SchemaView::SchemaView(std::shared_ptr<Schema> schema, QWidget* parent /*= 0*/) :
 		QWidget(parent),
 		m_schema(schema)
 	{
-		init();
+		setMouseTracking(true);
+		return;
 	}
 
-	void SchemaView::init()
+	void SchemaView::updateControlWidgets(bool editMode)
 	{
-		setMouseTracking(true);
+		// Find all SchemaItemControl
+		//
+		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		{
+			// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
+			//
+			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+			{
+				if (item->isControl() == false)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+				if (controlItem == nullptr)
+				{
+					assert(controlItem);
+					continue;
+				}
+
+				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
+			}
+		}
+
+		// Update all children
+		//
+		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+
+		for (QObject* childObject : childWidgets)
+		{
+			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+
+			if (childWidget == nullptr)
+			{
+				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+				continue;
+			}
+
+			QString objectName = childWidget->objectName();
+			QUuid widgetUuid = QUuid(objectName);
+
+			if (widgetUuid.isNull() == true)
+			{
+				continue;
+			}
+
+			auto foundIt = controlItems.find(widgetUuid);
+
+			if (foundIt == controlItems.end())
+			{
+				// Apparently SchemaItemControl was deleted
+				//
+				delete childWidget;
+				continue;
+			}
+
+			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = foundIt->second;
+
+			controlItem->updateWdgetPosAndSize(childWidget, zoom());
+
+			if (editMode == true)
+			{
+				controlItem->updateWidgetProperties(childWidget);
+			}
+
+			controlItems.erase(widgetUuid);
+		}
+
+		// Create new items
+		//
+		for (auto controlItemPair : controlItems)
+		{
+			std::shared_ptr<VFrame30::SchemaItemControl> controlItem = controlItemPair.second;
+
+			QWidget* childWidget = controlItem->createWidget(this, editMode);
+			assert(childWidget);
+		}
 	}
 
 	std::shared_ptr<Schema>& SchemaView::schema()
@@ -40,6 +120,11 @@ namespace VFrame30
 		setZoom(zoom(), repaint);		// Adhust sliders, widget etc.
 
 		emit signal_schemaChanged(schema.get());
+	}
+
+	void SchemaView::jsDebugOutput(QString str)
+	{
+		qDebug() << str;
 	}
 
 	void SchemaView::mouseMoveEvent(QMouseEvent* event)
@@ -122,11 +207,15 @@ namespace VFrame30
 
 	void SchemaView::draw(CDrawParam& drawParam)
 	{
-		if (schema().get() == nullptr)
+		if (schema() == nullptr)
 		{
 			return;
 		}
 
+		updateControlWidgets(drawParam.isEditMode());
+
+		// --
+		//
 		QPainter* p = drawParam.painter();
 
 		// Calc size
@@ -275,9 +364,57 @@ namespace VFrame30
 		return true;
 	}
 
+	void SchemaView::setSchema(QString schemaId)
+	{
+		Q_UNUSED(schemaId);
+		// Implement id derived class
+		//
+		assert(false);
+		return;
+	}
+
+	QObject* SchemaView::findSchemaItem(QString objectName)
+	{
+		for (auto layer : schema()->Layers)
+		{
+			for (auto item : layer->Items)
+			{
+				if (item->objectName() == objectName)
+				{
+					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::ObjectOwnership::CppOwnership);
+					return item.get();
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	QObject* SchemaView::findWidget(QString objectName)
+	{
+		QObject* itemObject = findSchemaItem(objectName);
+		if (itemObject == nullptr)
+		{
+			return nullptr;
+		}
+
+		SchemaItem* schemaItem = dynamic_cast<SchemaItem*>(itemObject);
+		if (schemaItem == nullptr)
+		{
+			assert(schemaItem);
+			return nullptr;
+		}
+
+		QWidget* widget = findChild<QWidget*>(schemaItem->guid().toString());
+		assert(widget);
+
+		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
+
+		return widget;
+	}
+
 	// Properties
 	//
-
 	double SchemaView::zoom() const
 	{
 		return m_zoom;
@@ -327,5 +464,43 @@ namespace VFrame30
 		return m_session;
 	}
 
+	const TuningController& SchemaView::tuningController() const
+	{
+		return m_tuningController;
+	}
 
+	TuningController& SchemaView::tuningController()
+	{
+		return m_tuningController;
+	}
+
+	QJSEngine* SchemaView::jsEngine()
+	{
+		if (m_jsEngineGlobalsWereCreated == false)
+		{
+			QJSValue jsSchemaView = m_jsEngine.newQObject(this);
+			QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+			TuningController* tuningController = &m_tuningController;
+
+			QJSValue jsTuning = m_jsEngine.newQObject(tuningController);
+			QQmlEngine::setObjectOwnership(tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+
+			m_jsEngineGlobalsWereCreated = true;
+		}
+
+		return &m_jsEngine;
+	}
+
+	QString SchemaView::globalScript() const
+	{
+		return m_globasScript;
+	}
+
+	void SchemaView::setGlobalScript(QString value)
+	{
+		m_globasScript = value;
+	}
 }

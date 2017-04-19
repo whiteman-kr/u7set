@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "Settings.h"
 #include "../lib/CUtils.h"
 

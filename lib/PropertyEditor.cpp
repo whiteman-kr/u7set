@@ -1,7 +1,7 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "Settings.h"
-//#include "PropertyEditor.h"
+#include "../lib/CodeSyntaxHighlighter.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -32,12 +32,49 @@
 #include <QColorDialog>
 #include <QFileDialog>
 
+
 namespace ExtWidgets
 {
+	//
+	// ------------ FilePathPropertyType ------------
+	//
 
 	int FilePathPropertyType::filePathTypeId()
 	{
 		return qMetaTypeId<FilePathPropertyType>();
+	}
+
+	//
+	// ------------ PropertyEditorHelp ------------
+	//
+
+	PropertyEditorHelp::PropertyEditorHelp(const QString& caption, const QString& text, QWidget *parent):
+		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+	{
+		setWindowTitle(caption);
+
+		setAttribute(Qt::WA_DeleteOnClose);
+
+		move(parent->pos().x() + parent->size().width(), parent->pos().y());
+		resize(parent->size().width() / 2, parent->size().height());
+
+		QPlainTextEdit* textEdit = new QPlainTextEdit();
+
+		textEdit->appendHtml(text);
+
+		textEdit->setReadOnly(true);
+
+		textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+
+		QHBoxLayout* l = new QHBoxLayout(this);
+
+		l->addWidget(textEdit);
+
+	}
+
+	PropertyEditorHelp::~PropertyEditorHelp()
+	{
+
 	}
 
 	//
@@ -362,10 +399,12 @@ namespace ExtWidgets
 	//
 	// ---------MultiLineEdit----------
 	//
-    MultiLineEdit::MultiLineEdit(QWidget *parent, const QString &text, const QString &caption):
-		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint)
+	MultiLineEdit::MultiLineEdit(QWidget *parent, PropertyEditor *propertyEditor, const QString &text, std::shared_ptr<Property> p):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
+		m_propertyEditor(propertyEditor),
+		m_property(p)
 	{
-		setWindowTitle(caption);
+		setWindowTitle(p->caption());
 
 		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
@@ -377,17 +416,37 @@ namespace ExtWidgets
 
 		QVBoxLayout* vl = new QVBoxLayout();
 
-		m_textEdit = new QTextEdit(this);
+		// Create Editor
+
+		if (m_property->isScript() == true)
+		{
+			m_textEdit = new CodeEditor(this);
+			new CppSyntaxHighlighter(m_textEdit->document());
+		}
+		else
+		{
+			m_textEdit = new QPlainTextEdit(this);
+		}
 		m_textEdit->setTabChangesFocus(false);
+
+		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+
+		const int tabStop = 4;  // 4 characters
+		QString spaces;
+		for (int i = 0; i < tabStop; ++i)
+		{
+			spaces += " ";
+		}
+
+		QFontMetrics metrics(m_textEdit->font());
+		m_textEdit->setTabStopWidth(metrics.width(spaces));
+
 		m_textEdit->setPlainText(value);
 
-        m_textEdit->blockSignals(true);
-		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
-		m_textEdit->blockSignals(false);
+		// Buttons
 
-
-		QPushButton* okButton = new QPushButton("OK", this);
-		QPushButton* cancelButton = new QPushButton("Cancel", this);
+		QPushButton* okButton = new QPushButton(tr("OK"), this);
+		QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 
 		okButton->setDefault(true);
 
@@ -397,6 +456,36 @@ namespace ExtWidgets
 		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
 		QHBoxLayout *hl = new QHBoxLayout();
+
+		if (p->isScript() && m_propertyEditor->scriptHelp().isEmpty() == false)
+		{
+			QPushButton* helpButton = new QPushButton("?", this);
+
+			hl->addWidget(helpButton);
+
+			connect(helpButton, &QPushButton::clicked, [this] ()
+			{
+				if (m_propertyEditorHelp == nullptr)
+				{
+					m_propertyEditorHelp = new PropertyEditorHelp(tr("Script Help"), m_propertyEditor->scriptHelp(), this);
+					m_propertyEditorHelp->show();
+
+					connect(m_propertyEditorHelp, &PropertyEditorHelp::destroyed, [this] (QObject*)
+					{
+						m_propertyEditorHelp = nullptr;
+					});
+				}
+			});
+
+			connect(this, &QDialog::finished, [this] (int)
+			{
+				if (m_propertyEditorHelp != nullptr)
+				{
+					m_propertyEditorHelp->accept();
+				}
+			});
+		}
+
 		hl->addStretch();
 		hl->addWidget(okButton);
 		hl->addWidget(cancelButton);
@@ -439,17 +528,28 @@ namespace ExtWidgets
 	// ---------QtMultiTextEdit----------
 	//
 
-    QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, int userType, const QString &caption, const QString& validator, bool password):
+	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, PropertyEditor *propertyEditor, std::shared_ptr<Property> p):
 		QWidget(parent),
-		m_userType(userType),
-        m_caption(caption),
-        m_validator(validator)
-
+		m_propertyEditor(propertyEditor),
+		m_property(p),
+		m_userType(p->value().userType())
 	{
+
+		if (p == nullptr || propertyEditor == nullptr)
+		{
+			assert(p);
+			assert(propertyEditor);
+		}
+
+		if (m_userType == QVariant::Uuid)
+		{
+			m_userType = QVariant::String;
+		}
+
 		m_lineEdit = new QLineEdit(parent);
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 
-        if (userType == QVariant::String && m_validator.isEmpty() == true && password == false)
+		if (m_userType == QVariant::String && p->validator().isEmpty() == true && p->password() == false)
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -470,14 +570,14 @@ namespace ExtWidgets
 
 		m_lineEdit->installEventFilter(this);
 
-        if (validator.isEmpty() == false)
+		if (p->validator().isEmpty() == false)
         {
-            QRegExp regexp(m_validator);
+			QRegExp regexp(p->validator());
             QRegExpValidator *v = new QRegExpValidator(regexp, this);
             m_lineEdit->setValidator(v);
         }
 
-        if (password == true)
+		if (p->password() == true)
         {
             m_lineEdit->setEchoMode(QLineEdit::Password);
         }
@@ -508,7 +608,7 @@ namespace ExtWidgets
 
 	void QtMultiTextEdit::onButtonPressed()
 	{
-        MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_lineEdit->text(), m_caption);
+		MultiLineEdit* multlLineEdit = new MultiLineEdit(this, m_propertyEditor, m_lineEdit->text(), m_property);
 		if (multlLineEdit->exec() == QDialog::Accepted)
 		{
             m_lineEdit->blockSignals(true);
@@ -563,7 +663,6 @@ namespace ExtWidgets
 			assert(false);
 			return;
 		}
-
 
 		m_lineEdit->setReadOnly(readOnly);
 
@@ -785,8 +884,9 @@ namespace ExtWidgets
 	// ---------QtMultiVariantFactory----------
 	//
 
-	QtMultiVariantFactory::QtMultiVariantFactory(QObject* parent):
-		QtAbstractEditorFactory<QtMultiVariantPropertyManager>(parent)
+	QtMultiVariantFactory::QtMultiVariantFactory(PropertyEditor* propertyEditor):
+		QtAbstractEditorFactory<QtMultiVariantPropertyManager>(propertyEditor),
+		m_propertyEditor(propertyEditor)
 	{
 	}
 
@@ -910,7 +1010,8 @@ namespace ExtWidgets
 					case QVariant::UInt:
 					case QVariant::Double:
 						{
-                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, p->value().userType(), p->caption(), p->validator(), p->password());
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
+
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
@@ -932,7 +1033,7 @@ namespace ExtWidgets
 
 					case QVariant::Uuid:
 						{
-                            QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, QVariant::String, p->caption(), p->validator(), p->password());
+							QtMultiTextEdit* m_editor = new QtMultiTextEdit(parent, m_propertyEditor, p);
 							editor = m_editor;
 							m_editor->setValue(p, m_property->isEnabled() == false);
 
@@ -1427,6 +1528,8 @@ namespace ExtWidgets
 
 		connect(this, &QtTreePropertyBrowser::currentItemChanged, this, &PropertyEditor::onCurrentItemChanged);
 
+		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
+
 		return;
 	}
 
@@ -1781,6 +1884,16 @@ namespace ExtWidgets
 	void PropertyEditor::setReadOnly(bool readOnly)
 	{
 		m_readOnly = readOnly;
+	}
+
+	void PropertyEditor::setScriptHelp(const QString& text)
+	{
+		m_scriptHelp = text;
+	}
+
+	QString PropertyEditor::scriptHelp() const
+	{
+		return m_scriptHelp;
 	}
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)

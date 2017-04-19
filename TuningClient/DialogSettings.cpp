@@ -29,9 +29,6 @@ DialogSettings::DialogSettings(QWidget *parent) :
 
 	}
 
-	ui->m_filterByEquipment->setChecked(theSettings.filterByEquipment());
-	ui->m_filterBySchema->setChecked(theSettings.filterBySchema());
-
     createLanguagesList();
 }
 
@@ -68,11 +65,6 @@ DialogSettings::~DialogSettings()
 	delete ui;
 }
 
-bool DialogSettings::filterSettingsChanged()
-{
-    return m_filterSettingsChanged;
-}
-
 void DialogSettings::on_DialogSettings_accepted()
 {
     // ID
@@ -97,20 +89,7 @@ void DialogSettings::on_DialogSettings_accepted()
         QMessageBox::warning(this, tr("TuningClient"), tr("Configurator address has been changed, please restart the application."));
     }
 
-    // Filters
-
-    bool filterByEquipment = ui->m_filterByEquipment->checkState() == Qt::Checked;
-    bool filterBySchema = ui->m_filterBySchema->checkState() == Qt::Checked;
-
-    if (filterByEquipment != theSettings.filterByEquipment() || filterBySchema != theSettings.filterBySchema())
-    {
-        m_filterSettingsChanged = true;
-
-        theSettings.setFilterByEquipment(filterByEquipment);
-        theSettings.setFilterBySchema(filterBySchema);
-    }
-
-    // Language
+	// Language
 
     QVariant data = ui->m_languageCombo->currentData();
 

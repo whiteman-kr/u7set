@@ -359,6 +359,7 @@ message SchemaItem
 	//optional wstring clickScript = 6;
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
+	optional string objectName = 9;
 
 	// Inherited from SchmeItem
 	//
@@ -389,7 +390,11 @@ message SchemaItem
 	optional SchemaItemReceiver ReceiverItem = 132;			// +ConnectionItem, FblItemRect
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
-	optional SchemaItemTerminator terminator = 135;				// +FblItemRect
+	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
+
+    optional SchemaItemControl control = 200;				// +FblItemRect
+	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
+	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
 }
 
 //
@@ -676,6 +681,59 @@ message SchemaItemUfb
 //
 message SchemaItemTerminator
 {
+}
+
+//
+//
+// SchemaItemControl
+//
+//
+message SchemaItemControl
+{
+    optional string styleSheet = 1;
+	optional string toolTip = 2;
+}
+
+//
+//
+// SchemaItemPushButton
+//
+//
+message SchemaItemPushButton
+{
+    optional string text = 1;
+	optional bool checkable = 2;
+	optional bool checkedDefault = 3;
+
+    optional bool autoRepeat = 4;
+	optional int32 autoRepeatDelay = 5;
+	optional int32 autoRepeatInterval = 6;
+
+    optional string scriptAfterCreate = 21;
+	optional string scriptClicked = 22;
+	optional string scriptPressed = 23;
+	optional string scriptReleased = 24;
+	optional string scriptToggled = 25;
+}
+
+//
+//
+// SchemaItemLineEdit
+//
+//
+message SchemaItemLineEdit
+{
+    optional string text = 1;
+	optional int32 horzAlign = 2;
+	optional int32 vertAlign = 3;
+	optional int32 maxLength = 4;
+	optional string placeholderText = 5;
+	optional bool readOnly = 6;
+
+    optional string scriptAfterCreate = 21;
+	optional string scriptEditingFinished = 22;
+	optional string scriptReturnPressed = 23;
+	optional string scriptTextChanged = 24;
 }
 
 

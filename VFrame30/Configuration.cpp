@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "Configuration.h"
 #include "Schema.h"
 

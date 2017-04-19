@@ -1,13 +1,12 @@
 #pragma once
 
 #include "SchemaPoint.h"
-#include "DrawParam.h"
-#include "PropertyNames.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
-#include "../lib/Types.h"
-#include "../lib/TypesAndEnums.h"
+#include <QJSValue>
+
+class QJSEngine;
 
 namespace VFrame30
 {
@@ -15,11 +14,13 @@ namespace VFrame30
 	class SchemaLayer;
 	class SchemaItemAfb;
 	class SchemaItemSignal;
+	class SchemaView;
 
 	class FblItemRect;
 	class FblItem;
-}
 
+	class CDrawParam;
+}
 
 namespace VFrame30
 {
@@ -98,11 +99,16 @@ namespace VFrame30
 		static void dump(std::shared_ptr<SchemaItem> item);
 		virtual void dump() const;
 
+		void runScript(QJSEngine* engine, SchemaView* schemaView);
+
+	protected:
+		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
+
 		// Text search
 		//
 	public:
 		virtual bool searchText(const QString& text) const;
-		
+
 		// Draw Functions
 		//
 	public:
@@ -206,6 +212,8 @@ namespace VFrame30
 			return dynamic_cast<const SCHEMAITEMTYPE*>(this);
 		}
 
+		bool isControl() const;
+
 		bool isLocked() const;
 		void setLocked(bool locked);
 
@@ -243,6 +251,8 @@ namespace VFrame30
 
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
+
+		QJSValue m_jsClickScript;	// Evaluated m_clickScript
 
 	public:
 		static const QColor errorColor;

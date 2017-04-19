@@ -28,6 +28,21 @@ unix {
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
+# VFrame30 library
+# $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
+#
+win32 {
+	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+}
+unix {
+	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+}
+
+INCLUDEPATH += ../VFrame30
+DEPENDPATH += ../VFrame30
+
 #protobuf
 #
 win32 {
@@ -54,39 +69,35 @@ CONFIG(release, debug|release) {
         UI_DIR = release/ui
 }
 
+
 # Force prebuild version control info
 #
-# for creating version.h at first build
-win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-unix:system([ -e ./version.h ] || touch ./version.h)
-# for any build
-versionTarget.target = version.h
-versionTarget.depends = FORCE
 win32 {
-		contains(QMAKE_TARGET.arch, x86_64){
-			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	contains(QMAKE_TARGET.arch, x86_64){
+		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake & \
-			chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/TuningClient.pro
-		}
-		else{
-			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+			nmake))
+		system(chdir $$PWD & \
+			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/TuningClient.pro)
+	}
+	else{
+		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake & \
-			chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/TuningClient.pro
-		}
+			nmake))
+		system(chdir $$PWD & \
+			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/TuningClient.pro)
+	}
 }
 unix {
-	versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+	system(cd $$PWD/../GetGitProjectVersion; \
 		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make; \
-		cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/TuningClient.pro
+		make;)
+	system(cd $$PWD; \
+		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/TuningClient.pro)
 }
-PRE_TARGETDEPS += version.h
-QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES +=\
@@ -118,14 +129,23 @@ SOURCES +=\
     DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
-    TuningObjectManager.cpp \
-    TuningClientFilterEditor.cpp \
+    ../lib/Tuning/TuningObjectManager.cpp \
     DialogPassword.cpp \
     Main.cpp \
-    ../lib/TuningFilter.cpp \
-    ../lib/TuningFilterEditor.cpp \
-    ../lib/TuningModel.cpp \
-    ../lib/TuningObject.cpp
+    ../lib/Tuning/TuningFilter.cpp \
+    ../lib/Tuning/TuningFilterEditor.cpp \
+    ../lib/Tuning/TuningModel.cpp \
+    ../lib/Tuning/TuningObject.cpp \
+    ../lib/Tuning/TuningController.cpp \
+    ../lib/CodeEditor.cpp \
+    ../lib/CodeSyntaxHighlighter.cpp \
+    TuningClientFilterEditor.cpp \
+    TuningClientFilterStorage.cpp \
+    TuningClientObjectManager.cpp \
+    SchemaStorage.cpp \
+    SchemasWorkspace.cpp \
+    TuningSchemaView.cpp \
+    TuningSchemaWidget.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -156,14 +176,23 @@ HEADERS  += MainWindow.h \
     DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
-    TuningObjectManager.h \
-    TuningClientFilterEditor.h \
+    ../lib/Tuning/TuningObjectManager.h \
     DialogPassword.h \
     Main.h \
-    ../lib/TuningFilter.h \
-    ../lib/TuningFilterEditor.h \
-    ../lib/TuningModel.h \
-    ../lib/TuningObject.h
+    ../lib/Tuning/TuningFilter.h \
+    ../lib/Tuning/TuningFilterEditor.h \
+    ../lib/Tuning/TuningModel.h \
+    ../lib/Tuning/TuningObject.h \
+    ../lib/Tuning/TuningController.h \
+    ../lib/CodeEditor.h \
+    ../lib/CodeSyntaxHighlighter.h \
+    TuningClientFilterEditor.h \
+    TuningClientFilterStorage.h \
+    TuningClientObjectManager.h \
+    TuningSchemaView.h \
+    TuningSchemaWidget.h \
+    SchemasWorkspace.h \
+    SchemaStorage.h
 
 FORMS    += \
     DialogSettings.ui \

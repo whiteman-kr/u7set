@@ -1,5 +1,5 @@
-#include "Stable.h"
 #include "PosLineImpl.h"
+#include "DrawParam.h"
 
 namespace VFrame30
 {

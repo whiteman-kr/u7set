@@ -1,6 +1,5 @@
 #ifndef PROPERTYNAMES_H
 #define PROPERTYNAMES_H
-#include <QString>
 
 namespace VFrame30
 {
@@ -14,6 +13,7 @@ namespace VFrame30
 		static const QString acceptClick;
 		static const QString clickScript;
 		static const QString commented;
+		static const QString objectName;
 
 		static const QString fontName;
 		static const QString fontSize;
@@ -36,8 +36,10 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
+		static const QString placeholderText;
 		static const QString label;
 		static const QString caption;
+		static const QString maxLength;
 
 		static const QString userText;
 		static const QString userTextPos;
@@ -51,6 +53,24 @@ namespace VFrame30
 		static const QString width;
 		static const QString height;
 		static const QString locked;
+
+		static const QString checkable;
+		static const QString checkedDefault;
+		static const QString autoRepeat;
+		static const QString autoRepeatDelay;
+		static const QString autoRepeatInterval;
+		static const QString styleSheet;
+		static const QString toolTip;
+		static const QString readOnly;
+
+		static const QString afterCreate;
+		static const QString clicked;
+		static const QString pressed;
+		static const QString released;
+		static const QString toggled;
+		static const QString editingFinished;
+		static const QString returnPressed;
+		static const QString textChanged;
 
 		static const QString alignHorz;
 		static const QString alignVert;
@@ -67,6 +87,38 @@ namespace VFrame30
 		static const QString textCategory;
 		static const QString monitorCategory;
 		static const QString parametersCategory;
+		static const QString controlCategory;
+		static const QString scriptsCategory;
+
+		static const QString widgetPropStyleSheet;
+		static const QString widgetPropToolTip;
+		static const QString widgetPropAfterCreate;
+
+		static const QString pushButtonPropText;
+		static const QString pushButtonDefaultStyleSheet;
+		static const QString pushButtonDefaultEventScript;
+		static const QString pushButtonPropCheckable;
+		static const QString pushButtonPropCheckedDefault;
+		static const QString pushButtonPropAutoRepeat;
+		static const QString pushButtonPropAutoRepeatDelay;
+		static const QString pushButtonPropAutoRepeatInterval;
+		static const QString pushButtonPropClicked;
+		static const QString pushButtonPropPressed;
+		static const QString pushButtonPropReleased;
+		static const QString pushButtonPropToggled;
+
+		static const QString lineEditDefaultStyleSheet;
+		static const QString lineEditDefaultEventScript;
+		static const QString lineEditPropText;
+		static const QString lineEditPropPlaceholderText;
+		static const QString lineEditPropMaxLength;
+		static const QString lineEditPropReadOnly;
+		static const QString lineEditPropEditingFinished;
+		static const QString lineEditPropReturnPressed;
+		static const QString lineEditPropTextChanged;
+
+		static const QString scriptGlobalVariableView;
+		static const QString scriptGlobalVariableTuning;
 	};
 
 }

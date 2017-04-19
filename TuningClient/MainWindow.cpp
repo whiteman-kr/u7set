@@ -5,7 +5,7 @@
 #include <QDesktopWidget>
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "../lib/TuningFilter.h"
+#include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
 #include "TuningClientFilterEditor.h"
@@ -43,18 +43,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// TcpSignalClient
 	//
-	HostAddressPort fakeAddress(QLatin1String("0.0.0.0"), 0);
-    theObjectManager = new TuningObjectManager(&m_configController, fakeAddress, fakeAddress);
+	m_objectManager = new TuningClientObjectManager();
+	m_objectManager->setInstanceId(theSettings.instanceStrId());
+	m_objectManager->setRequestInterval(theSettings.m_requestInterval);
 
-    m_tcpClientThread = new SimpleThread(theObjectManager);
+	m_tcpClientThread = new SimpleThread(m_objectManager);
 	m_tcpClientThread->start();
 
-    connect(theObjectManager, &TuningObjectManager::tuningSourcesArrived, this, &MainWindow::slot_tuningSourcesArrived);
-    connect(theObjectManager, &TuningObjectManager::connectionFailed, this, &MainWindow::slot_tuningConnectionFailed);
+	// Global connections
+
+	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningObjectManager::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningObjectManager::slot_serversArrived,
+			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::filtersArrived, &m_filterStorage, &TuningFilterStorage::slot_filtersUpdated,
+			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::schemasDetailsArrived, &m_filterStorage, &TuningFilterStorage::slot_schemasDetailsUpdated,
+			Qt::QueuedConnection);
+	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
+			Qt::QueuedConnection);
+
+	// Load user filters
 
 	QString errorCode;
 
-    if (theFilters.load(theSettings.userFiltersFile(), &errorCode, false) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, false) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -66,7 +79,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_mainWindowTimerId = startTimer(100);
 
-	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
+
+
 	m_configController.start();
 }
 
@@ -166,19 +180,19 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
-	m_statusBarConnectionStatistics = new QLabel();
-	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_statusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarConfigConnection = new QLabel();
+	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarConfigConnection->setMinimumWidth(100);
 
-	m_statusBarConnectionState = new QLabel();
-	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
-	m_statusBarConnectionState->setMinimumWidth(100);
+	m_statusBarTuningConnection = new QLabel();
+	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
-	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
-	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
+	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
+	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
@@ -221,31 +235,44 @@ void MainWindow::timerEvent(QTimerEvent* event)
         }
 
 
-        if (theObjectManager != nullptr)
-        {
-            assert(m_statusBarConnectionState);
-            assert(m_statusBarConnectionStatistics);
+		// Status bar
+		//
+		assert(m_statusBarConfigConnection);
+		assert(m_statusBarTuningConnection);
 
-            Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-            Tcp::ConnectionState tuningClientState =  theObjectManager->getConnectionState();
+		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+		Tcp::ConnectionState tuningConnState =  m_objectManager->getConnectionState();
 
-            // State
-            //
-            QString text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-					.arg(confiConnState.isConnected ? confiConnState.peerAddr.addressStr() :tr("NoConnection"))
-					.arg(tuningClientState.isConnected ? tuningClientState.peerAddr.addressStr() : tr("NoConnection"));
 
-            m_statusBarConnectionState->setText(text);
+		// ConfigService
+		//
+		QString text = tr(" ConfigService: ");
+		if (confiConnState.isConnected == false)
+		{
+			text += tr(" no connection");
+		}
+		else
+		{
+			text += tr(" connected, packets: %1").arg(QString::number(confiConnState.replyCount));
+		}
 
-            // Statistics
-            //
-            text = tr(" ConfigSrv: %1   TuningSrv: %2 ")
-                    .arg(QString::number(confiConnState.replyCount))
-                    .arg(QString::number(tuningClientState.replyCount));
+		m_statusBarConfigConnection->setText(text);
+		m_statusBarConfigConnection->setToolTip(m_configController.getStateToolTip());
 
-            m_statusBarConnectionStatistics->setText(text);
-        }
+		// TuningService
+		//
+		text = tr(" TuningService: ");
+		if (tuningConnState.isConnected == false)
+		{
+			text += tr(" no connection");
+		}
+		else
+		{
+			text += tr(" connected, packets: %1").arg(QString::number(tuningConnState.replyCount));
+		}
 
+		m_statusBarTuningConnection->setText(text);
+		m_statusBarTuningConnection->setToolTip(m_objectManager->getStateToolTip());
 		return;
 	}
 
@@ -254,95 +281,105 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 {
-    if (m_tuningWorkspace != nullptr)
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
+	}
+
+	// Update automatic filters
+
+	m_filterStorage.removeAutomaticFilters();
+
+	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
+
+	// Find and possibly remove non-existing signals from the list
+
+	bool removedNotFound = false;
+
+	m_filterStorage.checkSignals(objects, removedNotFound, this);
+
+	if (removedNotFound == true)
+	{
+		QString errorMsg;
+
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		{
+			theLogFile->writeError(errorMsg);
+			QMessageBox::critical(this, tr("Error"), errorMsg);
+		}
+	}
+
+	// Create workspaces
+
+	if (m_tuningWorkspace != nullptr)
     {
         delete m_tuningWorkspace;
         m_tuningWorkspace = nullptr;
     }
 
-    m_tuningWorkspace = new TuningWorkspace(objects, this);
+	if (m_schemasWorkspace != nullptr)
+	{
+		delete m_schemasWorkspace;
+		m_schemasWorkspace = nullptr;
+	}
 
-    setCentralWidget(m_tuningWorkspace);
+	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
+	{
+		m_schemasWorkspace = new SchemasWorkspace(&m_configController, m_objectManager, objects, m_globalScript, this);
+	}
+
+	if (theConfigSettings.showSignals == true)
+	{
+		m_tuningWorkspace = new TuningWorkspace(m_objectManager, &m_filterStorage, objects, this);
+	}
+
+	// Now choose, what workspace to display. If both exists, create a tab page.
+
+	if (m_schemasWorkspace == nullptr && m_tuningWorkspace != nullptr)
+	{
+		// Show Tuning Workspace
+		//
+		setCentralWidget(m_tuningWorkspace);
+	}
+	else
+	{
+		if (m_schemasWorkspace != nullptr && m_tuningWorkspace == nullptr)
+		{
+			// Show Schemas Workspace
+			//
+			setCentralWidget(m_schemasWorkspace);
+		}
+		else
+		{
+			if (m_schemasWorkspace != nullptr && m_tuningWorkspace != nullptr)
+			{
+				// Show both Workspaces
+				//
+
+				QTabWidget* tab = new QTabWidget();
+				tab->addTab(m_schemasWorkspace, tr("Schemas"));
+				tab->addTab(m_tuningWorkspace, tr("Signals"));
+
+				//tab->setStyleSheet("QTabWidget::tab-bar{alignment:center; }");
+
+				setCentralWidget(tab);
+			}
+			else
+			{
+				setCentralWidget(new QLabel("No workspaces exist, configuration error."));
+			}
+		}
+	}
 
 }
 
-void MainWindow::slot_configurationArrived(ConfigSettings settings)
+void MainWindow::slot_configurationArrived()
 {
-	if (settings.updateFilters == false && settings.updateSignals == false && settings.updateSchemas == false)
-	{
-		return;
-	}
-
-	if (settings.updateFilters == true)
-	{
-        theFilters.removeAutomaticFilters();
-
-        if (m_configController.getObjectFilters() == false)
-        {
-
-        }
-    }
-
-	if (settings.updateSchemas == true)
-	{
-		if (m_configController.getSchemasDetails() == false)
-		{
-
-		}
-    }
-
-    if (settings.updateSignals == true)
-    {
-        if (m_configController.getTuningSignals() == false)
-        {
-
-        }
-        emit signalsUpdated();
-    }
-
-    TuningObjectStorage objects = theObjectManager->objectStorage();
-
-    theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
-
-    // Find and possibly remove non-existing signals from the list
-
-    if (settings.updateFilters == true || settings.updateSignals == true)
-    {
-
-        bool removedNotFound = false;
-
-        theFilters.checkSignals(&objects, removedNotFound, this);
-
-        if (removedNotFound == true)
-        {
-            QString errorMsg;
-
-            if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
-            {
-                theLogFile->writeError(errorMsg);
-                QMessageBox::critical(this, tr("Error"), errorMsg);
-            }
-        }
-    }
-
-    if (m_tuningWorkspace != nullptr)
-    {
-        QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
-    }
+	TuningObjectStorage objects = m_objectManager->objectStorage();
 
     createWorkspace(&objects);
 
     return;
-}
-
-void MainWindow::slot_tuningSourcesArrived()
-{
-
-}
-
-void MainWindow::slot_tuningConnectionFailed()
-{
-
 }
 
 void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
@@ -351,6 +388,11 @@ void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumn
     theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
     theSettings.m_presetEditorPos = pos;
     theSettings.m_presetEditorGeometry = geometry;
+}
+
+void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
+{
+	m_globalScript = data.toStdString().c_str();
 }
 
 void MainWindow::exit()
@@ -365,13 +407,13 @@ void MainWindow::runPresetEditor()
         return;
     }
 
-    TuningFilterStorage editStorage = theFilters;
+	TuningClientFilterStorage editFilters = m_filterStorage;
 
     bool editAutomatic = false;
 
-    TuningObjectStorage objects = theObjectManager->objectStorage();
+	TuningObjectStorage objects = m_objectManager->objectStorage();
 
-    TuningClientFilterEditor d(&editStorage, &objects, editAutomatic,
+	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,
                          theSettings.m_presetEditorPresetsTreeColumnWidth,
                          theSettings.m_presetEditorPos,
@@ -379,15 +421,15 @@ void MainWindow::runPresetEditor()
                          this);
 
     connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
-    connect(this, &MainWindow::signalsUpdated, &d, &TuningFilterEditor::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
 
     if (d.exec() == QDialog::Accepted)
     {
-        theFilters = editStorage;
+		m_filterStorage = editFilters;
 
         QString errorMsg;
 
-        if (theFilters.save(theSettings.userFiltersFile(), &errorMsg) == false)
+		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
         {
             theLogFile->writeError(errorMsg);
             QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -423,17 +465,6 @@ void MainWindow::showSettings()
 
     d->exec();
 
-    if (d->filterSettingsChanged() == true)
-    {
-        TuningObjectStorage objects = theObjectManager->objectStorage();
-
-        theFilters.removeAutomaticFilters();
-
-        theFilters.createAutomaticFilters(&objects, theSettings.filterBySchema(), theSettings.filterByEquipment(), theObjectManager->tuningSourcesEquipmentIds());
-
-        createWorkspace(&objects);
-    }
-
     delete d;
 }
 
@@ -442,7 +473,7 @@ void MainWindow::showTuningSources()
 {
 	if (theDialogTuningSources == nullptr)
 	{
-		theDialogTuningSources = new DialogTuningSources(this);
+		theDialogTuningSources = new DialogTuningSources(m_objectManager, this);
 		theDialogTuningSources->show();
 	}
 	else
@@ -504,9 +535,5 @@ void MainWindow::showAbout()
 
 MainWindow* theMainWindow = nullptr;
 LogFile* theLogFile = nullptr;
-
-TuningObjectManager* theObjectManager = nullptr;
-
-TuningFilterStorage theFilters;
 
 UserManager theUserManager;

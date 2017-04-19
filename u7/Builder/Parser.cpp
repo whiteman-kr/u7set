@@ -20,6 +20,7 @@
 #include "../../VFrame30/SchemaItemUfb.h"
 #include "../../VFrame30/SchemaItemTerminator.h"
 #include "../../VFrame30/HorzVertLinks.h"
+#include "../../VFrame30/PropertyNames.h"
 
 
 namespace Builder
@@ -2171,15 +2172,8 @@ namespace Builder
 
 				// Remove expanded VFrame30::SchemaItemUfb, and set new value to the iterator
 				//
-				if (ufbItemsCopy.empty() == false)
-				{
-					itemIt = module->items().erase(itemIt);		// itemIt is the first injected item
-				}
-				else
-				{
-					module->items().erase(itemIt);
-					itemIt = module->items().begin();			// Dumb way, but it works :) should be set to prev but is prev exist?
-				}
+				module->items().erase(itemIt);
+				itemIt = module->items().begin();			// Dumb way, but it works :)
 			}
 
 			// Remove Fake Items
@@ -2195,6 +2189,20 @@ namespace Builder
 			if (checkResult == false)
 			{
 				return false;
+			}
+
+			// Check if any UFB left
+			//
+			for (auto itemIt = module->items().begin(); itemIt != module->items().end(); ++itemIt)
+			{
+				const AppLogicItem& item = *itemIt;
+
+				if (item.m_fblItem->isType<VFrame30::SchemaItemUfb>() == true)
+				{
+					log->errINT1001(QString("After expanding UFB items, there is SchemaItemUfb left %1").arg(item.m_fblItem->label()), item.m_schema->schemaId(), item.m_fblItem->guid());
+					result = false;
+					continue;
+				}
 			}
 		}
 

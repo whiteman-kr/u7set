@@ -2,6 +2,44 @@
 #include "Settings.h"
 #include "../lib/SocketIO.h"
 
+
+//
+// ConfigConnection
+//
+
+
+ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
+	m_equipmentId(EquipmentId),
+	m_ip(ipAddress),
+	m_port(port)
+{
+}
+
+QString ConfigConnection::equipmentId() const
+{
+	return m_equipmentId;
+}
+
+QString ConfigConnection::ip() const
+{
+	return m_ip;
+}
+
+int ConfigConnection::port() const
+{
+	return m_port;
+}
+
+HostAddressPort ConfigConnection::address() const
+{
+	HostAddressPort h(m_ip, m_port);
+	return h;
+}
+
+//
+// Settings
+//
+
 Settings::Settings():
 	m_instanceStrId("SYSTEMID_WS00_TUN"),
 	m_configuratorIpAddress1("127.0.0.1"),
@@ -112,7 +150,8 @@ void Settings::StoreUser()
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
 
-	s.setValue("MainWindow/Splitter/state", m_mainWindowSplitterState);
+	s.setValue("TuningWorkspace/Splitter/state", m_tuningWorkspaceSplitterState);
+	s.setValue("SchemasWorkspace/Splitter/state", m_schemasWorkspaceSplitterState);
 
 	s.setValue("TuningPage/Count", static_cast<uint>(m_tuningPageSettings.size()));
 	for (int i = 0; i < m_tuningPageSettings.size(); i++)
@@ -124,9 +163,6 @@ void Settings::StoreUser()
 			s.setValue(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), m_tuningPageSettings[i].m_columnsIndexes[c]);
 		}
 	}
-
-	s.setValue("Filters/filterByEquipment", m_filterByEquipment);
-	s.setValue("Filters/filterBySchema", m_filterBySchema);
 
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
@@ -168,7 +204,8 @@ void Settings::RestoreUser()
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
 
-	m_mainWindowSplitterState = s.value("MainWindow/Splitter/state").toByteArray();
+	m_tuningWorkspaceSplitterState = s.value("TuningWorkspace/Splitter/state").toByteArray();
+	m_schemasWorkspaceSplitterState = s.value("SchemasWorkspace/Splitter/state").toByteArray();
 
 	int tuningPageSettingsCount = s.value("TuningPage/Count", 0).toInt();
 	m_tuningPageSettings.resize(tuningPageSettingsCount);
@@ -184,9 +221,6 @@ void Settings::RestoreUser()
 			m_tuningPageSettings[i].m_columnsIndexes[c] = s.value(QString("TuningPage/Settings%1/columnIndex/%2").arg(i).arg(c), 0).toInt();
 		}
 	}
-
-	m_filterByEquipment = s.value("Filters/filterByEquipment", m_filterByEquipment).toBool();
-	m_filterBySchema = s.value("Filters/filterBySchema", m_filterBySchema).toBool();
 
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
@@ -255,25 +289,6 @@ void Settings::setConfiguratorAddress2(const QString& address, int port)
 	m_configuratorPort2 = port;
 }
 
-bool Settings::filterByEquipment() const
-{
-	return m_filterByEquipment;
-}
-
-void Settings::setFilterByEquipment(bool value)
-{
-	m_filterByEquipment = value;
-}
-
-bool Settings::filterBySchema() const
-{
-	return m_filterBySchema;
-}
-
-void Settings::setFilterBySchema(bool value)
-{
-	m_filterBySchema = value;
-}
 
 QString Settings::language() const
 {
@@ -330,3 +345,5 @@ QString Settings::userFiltersFile()
 }
 
 Settings theSettings;
+
+ConfigSettings theConfigSettings;

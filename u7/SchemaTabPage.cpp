@@ -2003,6 +2003,13 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
 	}
 
+	if (schema->isMonitorSchema())
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
+		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+	}
+
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_schemaWidget->m_orderAction);
 	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);

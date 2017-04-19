@@ -1,48 +1,19 @@
 #include "Stable.h"
-#include "Settings.h"
 #include "ConfigController.h"
-#include "../lib/TuningFilter.h"
-#include "TuningObjectManager.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
-
-
-ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
-	m_equipmentId(EquipmentId),
-	m_ip(ipAddress),
-	m_port(port)
-{
-}
-
-QString ConfigConnection::equipmentId() const
-{
-	return m_equipmentId;
-}
-
-QString ConfigConnection::ip() const
-{
-	return m_ip;
-}
-
-int ConfigConnection::port() const
-{
-	return m_port;
-}
-
-HostAddressPort ConfigConnection::address() const
-{
-	HostAddressPort h(m_ip, m_port);
-	return h;
-}
 
 //
 // ConfigController
 //
 
 ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, HostAddressPort address2)
-	:m_parent(parent)
+	:m_parent(parent),
+	  m_address1(address1),
+	  m_address2(address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
+	qRegisterMetaType<HostAddressPort>("HostAddressPort");
 
 	// Communication instance no
 	//
@@ -128,7 +99,7 @@ ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, Ho
 		}
 	}
 
-	qDebug() << "TuningClientInstanceNo: " << m_appInstanceNo;
+	//qDebug() << "TuningClientInstanceNo: " << m_appInstanceNo;
 
 	// --
 	//
@@ -161,64 +132,6 @@ ConfigController::~ConfigController()
 	delete m_cfgLoaderThread;
 }
 
-bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		assert(m_cfgLoaderThread != nullptr);
-		return false;
-	}
-
-	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
-
-	if (result == false)
-	{
-		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file ") + pathFileName);
-	}
-
-	return result;
-}
-
-bool ConfigController::getFile(const QString& pathFileName, QByteArray* fileData)
-{
-	Q_UNUSED(pathFileName);
-	Q_UNUSED(fileData);
-
-	// To do
-	//
-	assert(false);
-	return false;
-}
-
-bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr)
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		assert(m_cfgLoaderThread != nullptr);
-		return false;
-	}
-
-	bool result = m_cfgLoaderThread->getFileBlockedByID(id, fileData, errorStr);
-
-	if (result == false)
-	{
-		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file with ID ") + id);
-	}
-
-	return result;
-}
-
-bool ConfigController::getFileById(const QString& id, QByteArray* fileData)
-{
-	Q_UNUSED(id);
-	Q_UNUSED(fileData);
-
-	// To do
-	//
-	assert(false);
-	return false;
-}
-
 Tcp::ConnectionState ConfigController::getConnectionState() const
 {
 	Tcp::ConnectionState result;
@@ -236,78 +149,25 @@ Tcp::ConnectionState ConfigController::getConnectionState() const
 	return result;
 }
 
-bool ConfigController::getObjectFilters()
+QString ConfigController::getStateToolTip()
 {
-	QByteArray data;
-	QString errorStr;
-	if (getFileBlockedById(CFG_FILE_ID_TUNING_FILTERS, &data, &errorStr) == false)
+	Tcp::ConnectionState connectionState = getConnectionState();
+
+	QString result = tr("Configuration Service connection\r\n\r\n");
+	result += tr("IP address (primary): %1\r\n").arg(m_address1.addressPortStr());
+	result += tr("IP address (secondary): %1\r\n").arg(m_address2.addressPortStr());
+	result += tr("Connection: ") + (connectionState.isConnected ? tr("established\r\n") : tr("no connection\r\n"));
+
+	if (m_eventLog.empty() == false)
 	{
-		QString completeErrorMessage = tr("getFileBlockedById: Get ObjectFilters.xml file error: %1").arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-		return false;
-	}
-	else
-	{
-        if (theFilters.load(data, &errorStr, true) == false)
+		result += tr("\r\n");
+		for (auto s : m_eventLog)
 		{
-			QString completeErrorMessage = tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
-			theLogFile->writeError(completeErrorMessage);
-			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-			return false;
+			result += s + "\r\n";
 		}
 	}
 
-	return true;
-}
-
-bool ConfigController::getSchemasDetails()
-{
-	QByteArray data;
-	QString errorStr;
-	if (getFileBlockedById(CFG_FILE_ID_SCHEMAS_DETAILS, &data, &errorStr) == false)
-	{
-		QString completeErrorMessage = tr("getFileBlockedById: Get SchemasDetails.xml file error: %1").arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-		return false;
-	}
-	else
-	{
-		if (theFilters.loadSchemasDetails(data, &errorStr) == false)
-		{
-			QString completeErrorMessage = tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
-			theLogFile->writeError(completeErrorMessage);
-			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-			return false;
-		}
-	}
-
-	return true;}
-
-bool ConfigController::getTuningSignals()
-{
-	QByteArray data;
-	QString errorStr;
-	if (getFileBlockedById(CFG_FILE_ID_TUNING_SIGNALS, &data, &errorStr) == false)
-	{
-		QString completeErrorMessage = tr("getFileBlockedById: Get TuningSignals.xml file error: %1").arg(errorStr);
-		theLogFile->writeError(completeErrorMessage);
-		QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-		return false;
-	}
-	else
-	{
-        if (theObjectManager->loadDatabase(data, &errorStr) == false)
-		{
-			QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
-			theLogFile->writeError(completeErrorMessage);
-			QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
-			return false;
-		}
-	}
-
-	return true;
+	return result;
 }
 
 void ConfigController::start()
@@ -327,6 +187,9 @@ void ConfigController::start()
 void ConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	ConfigSettings readSettings;
+
+	QString message = tr("New configuration arrived");
+	addEventMessage(message);
 
 	// Parse XML
 	//
@@ -368,6 +231,14 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
 		}
+
+		// Schemas node
+		//
+		QDomNodeList schemasNodes = configElement.elementsByTagName("Schemas");
+		if (schemasNodes.size()  > 0)
+		{
+			result &= xmlReadSchemasNode(schemasNodes.item(0), buildFileInfoArray, &readSettings);
+		}
 	}
 
 	// Error handling
@@ -379,6 +250,8 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 		qDebug() << completeErrorMessage;
 		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
+		addEventMessage(completeErrorMessage);
+
 	}
 
 	// Trace received params
@@ -387,45 +260,200 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	theLogFile->writeMessage(tr("TUNS1 (id, ip, port): %1, %2, %3").arg(readSettings.tuns1.equipmentId()).arg(readSettings.tuns1.ip()).arg(readSettings.tuns1.port()));
 	theLogFile->writeMessage(tr("TUNS2 (id, ip, port): %1, %2, %3").arg(readSettings.tuns2.equipmentId()).arg(readSettings.tuns2.ip()).arg(readSettings.tuns2.port()));
 
-	readSettings.updateFilters = false;
-	readSettings.updateSchemas = false;
-	readSettings.updateSignals = false;
+	bool someFilesUpdated = false;
 
-	QMutexLocker locker(&m_mutex);
+
+	QByteArray data;
+	QString errorStr;
 
 	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
-		if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
+
+		// Add MD5 record to a map, if it does not exist
+		//
+
+		if (f.ID.isEmpty())
 		{
-			if (m_md5Filters != f.md5)
-			{
-				readSettings.updateFilters = true;
-				m_md5Filters = f.md5;
-			}
+			continue;
 		}
-		if (f.ID == CFG_FILE_ID_SCHEMAS_DETAILS)
+
+		if (m_filesMD5Map.find(f.ID) == m_filesMD5Map.end())
 		{
-			if (m_md5Schemas != f.md5)
-			{
-				readSettings.updateSchemas = true;
-				m_md5Schemas = f.md5;
-			}
+			m_filesMD5Map[f.ID] = "";
 		}
-		if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
+
+		// Get previous MD5
+		//
+
+		const QString& md5 = m_filesMD5Map[f.ID];
+
+		if (md5 != f.md5)
 		{
-			if (m_md5Signals != f.md5)
+			m_filesMD5Map[f.ID] = f.md5;
+
+			someFilesUpdated = true;
+
+			// Filters
+
+			if (f.ID == CFG_FILE_ID_TUNING_FILTERS)
 			{
-				readSettings.updateSignals = true;
-				m_md5Signals = f.md5;
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+				}
+				else
+				{
+					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
+
+					emit filtersArrived(data);
+				}
+
+			}
+
+			// Details
+
+			if (f.ID == CFG_FILE_ID_TUNING_SCHEMAS_DETAILS)
+			{
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+				}
+				else
+				{
+					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
+
+					emit schemasDetailsArrived(data);
+				}
+			}
+
+			// Signals
+
+			if (f.ID == CFG_FILE_ID_TUNING_SIGNALS)
+			{
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
+
+					emit signalsArrived(data);
+				}
+			}
+
+			if (f.ID == CFG_FILE_ID_TUNING_GLOBALSCRIPT)
+			{
+				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
+				{
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					theLogFile->writeError(completeErrorMessage);
+					addEventMessage(completeErrorMessage);
+					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+				else
+				{
+					addEventMessage(tr("Received file: %1").arg(f.pathFileName));
+
+					emit globalScriptArrived(data);
+				}
 			}
 		}
 	}
 
-	// Emit signal to inform everybody about new configuration
+
+	bool apperanceUpdated = false;
+
+	if (theConfigSettings.autoApply != readSettings.autoApply ||
+			theConfigSettings.filterByEquipment != readSettings.filterByEquipment ||
+			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
+			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
+			theConfigSettings.showSchemas != readSettings.showSchemas ||
+			theConfigSettings.showSignals != readSettings.showSignals)
+	{
+		apperanceUpdated = true;
+	}
+
+	bool serversUpdated = true;
+
+	if (theConfigSettings.tuns1.address().address() == readSettings.tuns1.address().address() && theConfigSettings.tuns2.address().address() == readSettings.tuns2.address().address())
+	{
+		serversUpdated = false;
+	}
+
+	theConfigSettings = readSettings;
+
+	// Emit signals to inform everybody about new configuration
 	//
-	emit configurationArrived(readSettings);
+
+	if (serversUpdated == true)
+	{
+		emit serversArrived(theConfigSettings.tuns1.address(), theConfigSettings.tuns2.address());
+	}
+
+	if (someFilesUpdated == true || apperanceUpdated == true)
+	{
+		emit configurationArrived();
+	}
 
 	return;
+}
+
+bool ConfigController::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread != nullptr);
+		return false;
+	}
+
+	bool result = m_cfgLoaderThread->getFileBlocked(pathFileName, fileData, errorStr);
+
+	if (result == false)
+	{
+		QString message = tr("ConfigController::getFileBlocked: Can't get file ") + pathFileName;
+		theLogFile->writeError(message);
+
+		message = tr("Can't receive file: ") + pathFileName;
+		addEventMessage(message);
+	}
+	else
+	{
+		QString message = tr("Received file: ") + pathFileName;
+		addEventMessage(message);
+	}
+
+	return result;
+}
+
+bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr)
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		assert(m_cfgLoaderThread != nullptr);
+		return false;
+	}
+
+	bool result = m_cfgLoaderThread->getFileBlockedByID(id, fileData, errorStr);
+
+	if (result == false)
+	{
+		theLogFile->writeError(tr("ConfigController::getFileBlocked: Can't get file with ID ") + id);
+
+		QString message = tr("Can't receive file by ID: ") + id;
+		addEventMessage(message);
+	}
+
+	return result;
 }
 
 bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
@@ -514,10 +542,88 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			QString tunsIp2 = dasXmlElement.attribute("ip2");
 			int tunsPort2 = dasXmlElement.attribute("port2").toInt();
 
+			outSetting->autoApply = dasXmlElement.attribute("autoApply") == "true" ? true : false;
+			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
+			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
+			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
+			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
+			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
+
 			outSetting->tuns1 = ConfigConnection(tunsId1, tunsIp1, tunsPort1);
 			outSetting->tuns2= ConfigConnection(tunsId2, tunsIp2, tunsPort2);
+
 		}
 	}
 
 	return outSetting->errorMessage.isEmpty();
+}
+
+bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr ||
+		schemasNode.nodeName() != "Schemas")
+	{
+		assert(outSetting);
+		assert(schemasNode.nodeName() == "Schemas");
+		return false;
+	}
+
+	QDomElement schemasElement = schemasNode.toElement();
+
+	// Check if XML contains Error tag
+	//
+	QDomNodeList errorNodes = schemasElement.elementsByTagName("Error");
+
+	if (errorNodes.isEmpty() == false)
+	{
+		for (int i = 0; i < errorNodes.count();  i++)
+		{
+			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
+		}
+		return false;
+	}
+
+	// Get Schemas
+	//
+	{
+		QDomNodeList dasNodes = schemasElement.elementsByTagName("Schema");
+
+		for (int i = 0; i <dasNodes.size(); i++)
+		{
+			QDomElement dasXmlElement = dasNodes.at(i).toElement();
+
+			QString schemaId = dasXmlElement.attribute("Id");
+			QString schemaCaption = dasXmlElement.attribute("Caption");
+
+			if (schemaId.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			for (const Builder::BuildFileInfo& f: buildFileInfoArray)
+			{
+				if (f.ID == schemaId)
+				{
+					SchemaSettings s(schemaId, schemaCaption);
+					outSetting->schemas.push_back(s);
+				}
+			}
+		}
+	}
+
+	QString message = tr("Schemas count: %1").arg(outSetting->schemas.size());
+	addEventMessage(message);
+
+	return outSetting->errorMessage.isEmpty();
+}
+
+void ConfigController::addEventMessage(const QString& text)
+{
+	m_eventLog.push_back(text);
+
+	while (m_eventLog.size() > 10)
+	{
+		m_eventLog.removeFirst();
+	}
 }

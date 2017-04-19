@@ -38,41 +38,6 @@ CONFIG(release, debug|release) {
 }
 
 
-# Force prebuild version control info
-#
-# for creating version.h at first build
-win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-unix:system([ -e ./version.h ] || touch ./version.h)
-# for any build
-versionTarget.target = version.h
-versionTarget.depends = FORCE
-win32 {
-        contains(QMAKE_TARGET.arch, x86_64){
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/VFrame30.pro
-        }
-        else{
-            versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake & \
-            chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/VFrame30.pro
-        }
-}
-unix {
-    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/VFrame30.pro
-}
-PRE_TARGETDEPS += version.h
-QMAKE_EXTRA_TARGETS += versionTarget
-
-
 OTHER_FILES += \
     ../Proto/proto_compile.bat \
     ../Proto/serialization.proto \
@@ -99,7 +64,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
 	MonitorSchema.h \
-    version.h \
     ../lib/DbStruct.h \
     Afb.h \
     ../lib/DebugInstCounter.h \
@@ -134,7 +98,11 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemUfb.h \
     SchemaItemTerminator.h \
     MacrosExpander.h \
-    Session.h
+    Session.h \
+    SchemaItemControl.h \
+    SchemaItemPushButton.h \
+    SchemaItemLineEdit.h \
+    ../lib/Tuning/TuningController.h
 
 SOURCES += \
     Settings.cpp \
@@ -147,7 +115,6 @@ SOURCES += \
     FblItem.cpp \
     DrawParam.cpp \
     Print.cpp \
-    Stable.cpp \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
 	Configuration.cpp \
@@ -185,7 +152,11 @@ SOURCES += \
     SchemaItemUfb.cpp \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
-    Session.cpp
+    Session.cpp \
+    SchemaItemControl.cpp \
+    SchemaItemPushButton.cpp \
+    SchemaItemLineEdit.cpp \
+    ../lib/Tuning/TuningController.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

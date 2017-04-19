@@ -2,6 +2,7 @@
 
 #include "PosRectImpl.h"
 #include "FblItem.h"
+#include "FontParam.h"
 
 namespace VFrame30
 {

@@ -28,37 +28,32 @@ PRECOMPILED_HEADER = Stable.h
 
 ## Force prebuild version control info
 ##
-## for creating version.h at first build
-#win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-#unix:system([ -e ./version.h ] || touch ./version.h)
-## for any build
-#versionTarget.target = version.h
-#versionTarget.depends = FORCE
 #win32 {
 #	contains(QMAKE_TARGET.arch, x86_64){
-#	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+#	    QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+#	    system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 #	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-#	    nmake & \
-#	    chdir $$PWD & \
-#	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Metrology.pro
+#	    nmake))
+#	    system(chdir $$PWD & \
+#	    $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Metrology.pro)
 #	}
 #	else{
-#	    versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+#	    QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+#	    system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 #	    qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-#	    nmake & \
-#	    chdir $$PWD & \
-#	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro
+#	    nmake))
+#	    system(chdir $$PWD & \
+#	    $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro)
 #	}
 #}
 #unix {
-#    versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+#	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+#    system(cd $$PWD/../GetGitProjectVersion; \
 #	qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
 #	make; \
 #	cd $$PWD; \
-#	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro
+#	$$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro)
 #}
-#PRE_TARGETDEPS += version.h
-#QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES += \
@@ -233,22 +228,6 @@ win32 {
 }
 unix {
 		LIBS += -lprotobuf
-}
-
-# Visual Leak Detector
-#
-win32{
-	contains(QMAKE_TARGET.arch, x86_64){
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win64"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win64"
-	}
-	else{
-		LIBS += -L"C:/Program Files/Visual Leak Detector/lib/Win32"
-		LIBS += -L"C:/Program Files (x86)/Visual Leak Detector/lib/Win32"
-	}
-
-	INCLUDEPATH += "C:/Program Files/Visual Leak Detector/include"
-	INCLUDEPATH += "C:/Program Files (x86)/Visual Leak Detector/include"
 }
 
 DISTFILES += \

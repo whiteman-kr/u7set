@@ -43,40 +43,34 @@ CONFIG(release, debug|release) {
 }
 
 
-
 # Force prebuild version control info
 #
-# for creating version.h at first build
-win32:system(IF NOT EXIST version.h (echo int VERSION_H = 0; > version.h))
-unix:system([ -e ./version.h ] || touch ./version.h)
-# for any build
-versionTarget.target = version.h
-versionTarget.depends = FORCE
 win32 {
-		contains(QMAKE_TARGET.arch, x86_64){
-			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+	contains(QMAKE_TARGET.arch, x86_64){
+		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake & \
-			chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro
-		}
-		else{
-			versionTarget.commands = chdir $$PWD/../GetGitProjectVersion & \
+			nmake))
+		system(chdir $$PWD & \
+			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro)
+	}
+	else{
+		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
 			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake & \
-			chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro
-		}
+			nmake))
+		system(chdir $$PWD & \
+			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro)
+	}
 }
 unix {
-	versionTarget.commands = cd $$PWD/../GetGitProjectVersion; \
+	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+	system(cd $$PWD/../GetGitProjectVersion; \
 		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make; \
-		cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro
+		make;)
+	system(cd $$PWD; \
+		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro)
 }
-PRE_TARGETDEPS += version.h
-QMAKE_EXTRA_TARGETS += versionTarget
 
 
 SOURCES +=\
@@ -103,7 +97,7 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    xmlsyntaxhighlighter.cpp \
+    ../lib/CodeSyntaxHighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
@@ -187,13 +181,15 @@ SOURCES +=\
     DialogConnections.cpp \
     Builder/MetrologyCfgGenerator.cpp \
     ../lib/MetrologySignal.cpp \
-    ../lib/TuningFilter.cpp \
-    ../lib/TuningFilterEditor.cpp \
-    ../lib/TuningObject.cpp \
+    ../lib/Tuning/TuningFilter.cpp \
+    ../lib/Tuning/TuningFilterEditor.cpp \
+    ../lib/Tuning/TuningObject.cpp \
     DialogTuningFiltersEditor.cpp \
-    ../lib/TuningModel.cpp \
+    ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
-    LogicModule.cpp
+    LogicModule.cpp \
+    Builder/ComparatorStorage.cpp \
+    ../lib/CodeEditor.cpp
 
 
 HEADERS  += \
@@ -223,7 +219,7 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    xmlsyntaxhighlighter.h \
+    ../lib/CodeSyntaxHighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
     EditEngine/EditEngine.h \
@@ -312,13 +308,15 @@ HEADERS  += \
     DialogConnections.h \
     Builder/MetrologyCfgGenerator.h \
     ../lib/MetrologySignal.h \
-    ../lib/TuningFilter.h \
-    ../lib/TuningFilterEditor.h \
-    ../lib/TuningObject.h \
+    ../lib/Tuning/TuningFilter.h \
+    ../lib/Tuning/TuningFilterEditor.h \
+    ../lib/Tuning/TuningObject.h \
     DialogTuningFiltersEditor.h \
-    ../lib/TuningModel.h \
+    ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \
-    LogicModule.h
+    LogicModule.h \
+    Builder/ComparatorStorage.h \
+    ../lib/CodeEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -327,7 +325,6 @@ FORMS    += \
     LoginDialog.ui \
     UserManagementDialog.ui \
     CheckInDialog.ui \
-    DialogFileEditor.ui \
     DialogSubsystemListEditor.ui \
     ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \

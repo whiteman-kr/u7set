@@ -1,6 +1,6 @@
 #include "BaseSchemaWidget.h"
-#include "Schema.h"
 #include "SchemaView.h"
+#include "Schema.h"
 
 namespace VFrame30
 {

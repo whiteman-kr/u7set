@@ -4,7 +4,7 @@
         "target": "es2016",
         "noImplicitAny": true,
         "sourceMap": false,
-        "alwaysStrict" : true,
+        "alwaysStrict" : false,
         "noImplicitThis": true,
         "noImplicitReturns" : true,
         "outDir": "./out"

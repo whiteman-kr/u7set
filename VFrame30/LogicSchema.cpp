@@ -1,7 +1,7 @@
-#include "Stable.h"
 #include "LogicSchema.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemSignal.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {

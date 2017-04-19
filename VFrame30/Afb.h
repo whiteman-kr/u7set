@@ -1,12 +1,14 @@
 #pragma once
-
-#include "../lib/ProtoSerialization.h"
-#include "../lib/DebugInstCounter.h"
+#include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
-#include "../VFrame30/VFrame30Lib_global.h"
-#include <QXmlStreamReader>
-#include <QDomElement>
 
+class QDomElement;
+
+namespace Proto
+{
+	class AfbElementXml;
+	class AfbElementCollection;
+}
 
 namespace Afb
 {

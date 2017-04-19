@@ -39,6 +39,7 @@ namespace Builder
 		m_connections = appLogicCompiler.m_connections;
 		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
 		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
+		m_cmpStorage = appLogicCompiler.m_cmpStorage;
 
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
@@ -94,6 +95,8 @@ namespace Builder
 			if (!buildRS232SignalLists()) break;
 
 			if (!buildOptoPortsSignalLists()) break;
+
+			if (!setOptoRawInSignalsAsComputed()) break;
 
 			result = true;
 		}
@@ -1878,7 +1881,6 @@ namespace Builder
 
 		if (cmd.isValidCommand())
 		{
-			m_code.newLine();
 			m_code.append(cmd);
 		}
 
@@ -2053,11 +2055,13 @@ namespace Builder
 
 		do
 		{
-			if (!writeFbInputSignals(appFb)) break;
+			if (writeFbInputSignals(appFb) == false) break;
 
-			if (!startFb(appFb)) break;
+			if (startFb(appFb) == false) break;
 
-			if (!readFbOutputSignals(appFb)) break;
+			if (readFbOutputSignals(appFb) == false) break;
+
+			if (addToComparatorStorage(appFb) == false) break;
 
 			result = true;
 		}
@@ -2736,9 +2740,6 @@ namespace Builder
 		return false;
 	}
 
-
-
-
 	bool ModuleLogicCompiler::readFbOutputSignals(const AppFb* appFb)
 	{
 		bool result = true;
@@ -2750,9 +2751,9 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			int connectedSignals = 0;
-
+			bool connectedToSignal = false;
 			bool connectedToTerminator = false;
+			bool connectedToFb = false;
 
 			for(QUuid connectedPinGuid : outPin.associatedIOs())
 			{
@@ -2768,37 +2769,69 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				if (connectedPinParent->isFb() ||
-					connectedPinParent->isTransmitter())
-				{
-					continue;
-				}
+				AppItem::Type t = connectedPinParent->type();
 
-				if (connectedPinParent->isTerminator())
+				switch(t)
 				{
+				case AppItem::Type::Fb:
+					connectedToFb = true;
+					break;
+
+				case AppItem::Type::Transmitter:
+					break;
+
+				case AppItem::Type::Terminator:
 					connectedToTerminator = true;
-					continue;
+					break;
+
+				case AppItem::Type::Signal:
+					{
+						QUuid signalGuid;
+
+						// output connected to real signal
+						//
+						connectedToSignal = true;
+
+						signalGuid = connectedPinParent->guid();
+
+						result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
+						break;
+					}
+
+				default:
+					{
+						std::shared_ptr<VFrame30::FblItemRect> item = connectedPinParent->itemRect();
+						qDebug() << item->metaObject()->className();
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+					}
 				}
 
-				assert(connectedPinParent->isSignal());
-
-				QUuid signalGuid;
-
-				// output connected to real signal
-				//
-				signalGuid = connectedPinParent->guid();
-
-				connectedSignals++;
-
-				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, signalGuid);
+				if (result == false)
+				{
+					break;
+				}
 			}
 
-			if (connectedSignals == 0 && connectedToTerminator == false)
+			if (connectedToSignal == false && connectedToTerminator == false)
 			{
-				// output pin is not connected to signal or terminator
-				// save FB output value to shadow signal with GUID == outPin.guid()
+				// output pin is not connected to any signal or terminator
 				//
-				result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
+				// may be it directly connected to FB?
+				//
+				if (connectedToFb == true)
+				{
+					// yes, save FB output value to shadow signal with GUID == outPin.guid()
+					//
+					result &= generateReadFuncBlockToSignalCode(*appFb, outPin, outPin.guid());
+				}
+				else
+				{
+					// output pin is not connected?
+					//
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+				}
 			}
 
 			if (result == false)
@@ -2810,6 +2843,46 @@ namespace Builder
 		return result;
 	}
 
+
+	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
+	{
+		if (appFb == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (appFb->isComparator() == false)
+		{
+			return true;
+		}
+
+		std::shared_ptr<Comparator> cmp = std::make_shared<Comparator>();
+
+		bool result = initComparator(cmp, appFb);
+
+		if (result == true)
+		{
+			m_cmpStorage->insert(m_lm->equipmentIdTemplate(), cmp);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb)
+	{
+		bool result = true;
+
+		if (appFb->isConstComaparator() == true)
+		{
+
+		}
+
+		///////
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid)
 	{
@@ -3289,13 +3362,6 @@ namespace Builder
 
 			for(Hardware::OptoPort* port : optoPorts)
 			{
-				if (port->isLinked() == false)
-				{
-					continue;
-				}
-
-				QString idStr;
-
 				bool res = false;
 
 				do
@@ -3339,6 +3405,63 @@ namespace Builder
 		return result;
 	}
 
+
+	bool ModuleLogicCompiler::setOptoRawInSignalsAsComputed()
+	{
+		if (m_optoModuleStorage == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+
+		if (optoModules.isEmpty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		for(Hardware::OptoModule* optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			QList<Hardware::OptoPort*> optoPorts = optoModule->getOptoPorts();
+
+			if (optoPorts.isEmpty())
+			{
+				continue;
+			}
+
+			for(Hardware::OptoPort* port : optoPorts)
+			{
+
+				const QVector<Hardware::OptoPort::RawDataDescriptionItem>& rd = port->rawDataDescription();
+
+				for(const Hardware::OptoPort::RawDataDescriptionItem& item : rd)
+				{
+					if (item.type == Hardware::OptoPort::RawDataDescriptionItemType::InSignal)
+					{
+						AppSignal* appSignal = m_appSignals.getByStrID(item.appSignalID);
+
+						if (appSignal != nullptr)
+						{
+							appSignal->setComputed();
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
@@ -3420,7 +3543,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::generateRS232ConectionCode()
+/*	bool ModuleLogicCompiler::generateRS232ConectionCode()
 	{
 		if (m_lm == nullptr || m_optoModuleStorage == nullptr)
 		{
@@ -3477,10 +3600,10 @@ namespace Builder
 		}
 
 		return result;
-	}
+	}*/
 
 
-	bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection,
+/*	bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection,
 														 Hardware::OptoModule* optoModule,
 														 Hardware::OptoPort* optoPort)
 	{
@@ -3494,8 +3617,6 @@ namespace Builder
 		assert(false);			// need reimplement !!!! WhiteMan 28.12.2016
 
         return true;
-
-        /*
 
 
 		// build analog and discrete signals list
@@ -3552,9 +3673,10 @@ namespace Builder
 		int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
 		Q_UNUSED(discreteSignalsSizeW)
 
-        return result;*/
+		return result;
 	}
 
+*/
 
 	bool ModuleLogicCompiler::copyOptoConnectionsTxData()
 	{
@@ -3576,17 +3698,12 @@ namespace Builder
 				continue;
 			}
 
-			if (module->lmID() != m_lm->equipmentIdTemplate() ||
-				module->allOptoPortsTxDataSizeW() == 0)
+			if (module->lmID() != m_lm->equipmentIdTemplate())
 			{
 				continue;
 			}
 
-			Comment comment;
-
-			comment.setComment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
-			m_code.append(comment);
-			m_code.newLine();
+			bool initialCommentPrinted = false;
 
 			QVector<Hardware::OptoPort*> ports = module->getOptoPortsSorted();
 
@@ -3597,6 +3714,22 @@ namespace Builder
 					LOG_INTERNAL_ERROR(m_log);
 					result = false;
 					continue;
+				}
+
+				if (port->txDataSizeW() == 0)
+				{
+					continue;
+				}
+
+				if (initialCommentPrinted == false)
+				{
+					Comment comment;
+
+					comment.setComment(QString(tr("Copying txData of opto-module %1")).arg(module->equipmentID()));
+					m_code.append(comment);
+					m_code.newLine();
+
+					initialCommentPrinted = true;
 				}
 
 				result &= copyOptoPortTxData(port);
@@ -3644,7 +3777,7 @@ namespace Builder
 		m_code.append(cmd);
 		m_code.newLine();
 
-		result &= copyOptoPortTxRawDataData(port);
+		result &= copyOptoPortTxRawData(port);
 
 		result &= copyOptoPortTxAnalogSignals(port);
 
@@ -3654,7 +3787,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxRawDataData(Hardware::OptoPort* port)
+	bool ModuleLogicCompiler::copyOptoPortTxRawData(Hardware::OptoPort* port)
 	{
 		if (port == nullptr)
 		{
@@ -3677,6 +3810,8 @@ namespace Builder
 		m_code.newLine();
 
 		int offset = Hardware::TX_DATA_ID_SIZE_W;		// txDataID
+
+		int portDataOffset = offset;
 
 		const QVector<Hardware::OptoPort::RawDataDescriptionItem>& rawDataDescription = port->rawDataDescription();
 
@@ -3703,6 +3838,14 @@ namespace Builder
 
 			case Hardware::OptoPort::RawDataDescriptionItemType::Const16:
 				result &= copyOptoPortTxConst16RawData(port, item.const16Value, offset);
+				break;
+
+			case Hardware::OptoPort::RawDataDescriptionItemType::InSignal:
+				// no copying for in signals
+				break;
+
+			case Hardware::OptoPort::RawDataDescriptionItemType::OutSignal:
+				result &= copyOptoPortTxOutSignalRawData(port, item, portDataOffset);
 				break;
 
 			default:
@@ -4114,6 +4257,87 @@ namespace Builder
 
 		return true;
 
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem& item, int portDataOffset)
+	{
+		if (port == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		assert(item.type == Hardware::OptoPort::RawDataDescriptionItemType::OutSignal);
+
+		switch(item.signalType)
+		{
+		case E::SignalType::Analog:
+			return copyOptoPortTxOutAnalogSignalRawData(port, item, portDataOffset);
+
+		case E::SignalType::Discrete:
+			LOG_INTERNAL_ERROR(m_log);			// out duscrete signals is not supported now
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+		}
+
+		return false;
+	}
+
+
+	bool ModuleLogicCompiler::copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::OptoPort::RawDataDescriptionItem& item, int portDataOffset)
+	{
+		if (port == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		if (item.dataFormat != E::DataFormat::Float &&
+			item.dataFormat != E::DataFormat::SignedInt &&
+			item.dataFormat != E::DataFormat::UnsignedInt)
+		{
+			assert(false);		// unknown format
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (item.dataSize != SIZE_32BIT)
+		{
+			assert(false);		// other sizes is not supported now
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (item.byteOrder != E::ByteOrder::BigEndian)
+		{
+			assert(false);		// other byte orders is not supported now
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Signal* s = m_signals->getSignal(item.appSignalID);
+
+		if (s == nullptr)
+		{
+			// Signal '%1' is not found (opto port '%2' raw data description).
+			//
+			m_log->errALC5186(item.appSignalID, port->equipmentID());
+			return false;
+		}
+
+		Command cmd;
+
+		cmd.mov32(port->absTxStartAddress() + portDataOffset + item.offsetW, s->ramAddr().offset());
+
+		cmd.setComment(QString("copying out signal %1 raw data").arg(item.appSignalID));
+
+		m_code.append(cmd);
+		m_code.newLine();
+
+		return true;
 	}
 
 
@@ -6772,6 +6996,42 @@ namespace Builder
 	}
 
 
+	AppItem::Type AppItem::type() const
+	{
+		if (isSignal() == true)
+		{
+			return Type::Signal;
+		}
+
+		if (isFb() == true)
+		{
+			return Type::Fb;
+		}
+
+		if (isConst() == true)
+		{
+			return Type::Const;
+		}
+
+		if (isTransmitter() == true)
+		{
+			return Type::Transmitter;
+		}
+
+		if (isReceiver() == true)
+		{
+			return Type::Receiver;
+		}
+
+		if (isTerminator() == true)
+		{
+			return Type::Terminator;
+		}
+
+		return Type::Unknown;
+	}
+
+
 	QString AppItem::strID() const
 	{
 		if (m_appLogicItem.m_fblItem->isSignalElement())
@@ -6849,6 +7109,22 @@ namespace Builder
 		}
 	}
 
+	bool AppFb::isConstComaparator() const
+	{
+		return opcode() == CONST_COMPARATOR_OPCODE;
+	}
+
+	bool AppFb::isDynamicComaparator() const
+	{
+		return opcode() == DYNAMIC_COMPARATOR_OPCODE;
+	}
+
+	bool AppFb::isComparator() const
+	{
+		quint16 oc = opcode();
+
+		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
+	}
 
 	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
@@ -7099,8 +7375,6 @@ namespace Builder
 			assert(false);
 			return;
 		}
-
-		//*dynamic_cast<Signal*>(this) = *signal;
 
 		// believe that all input and tuning signals have already been computed
 		//
@@ -7391,12 +7665,7 @@ namespace Builder
 
 	AppSignal* AppSignalMap::getByStrID(const QString& strID)
 	{
-		if (m_signalStrIdMap.contains(strID))
-		{
-			return m_signalStrIdMap[strID];
-		}
-
-		return nullptr;
+		return m_signalStrIdMap.value(strID, nullptr);
 	}
 
 

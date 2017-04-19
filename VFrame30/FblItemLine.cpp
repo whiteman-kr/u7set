@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "FblItemLine.h"
 
 namespace VFrame30

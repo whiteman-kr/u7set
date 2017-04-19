@@ -182,6 +182,8 @@ namespace Hardware
 		Q_INVOKABLE QObject* jsParent() const;
 
 		Q_INVOKABLE int jsPropertyInt(QString name) const;
+		Q_INVOKABLE bool jsPropertyBool(QString name) const;
+		Q_INVOKABLE QString jsPropertyString(QString name) const;
 		Q_INVOKABLE quint32 jsPropertyIP(QString name) const;
 
 		virtual DeviceType deviceType() const;
@@ -250,7 +252,7 @@ namespace Hardware
 		void deleteChild(DeviceObject* child);
 		void deleteAllChildren();
 
-		bool checkChild(DeviceObject* child, QString* errorMessage);
+        bool checkChild(DeviceObject *child, QString* errorMessage);
 
 		void sortByPlace(Qt::SortOrder order);
 		void sortByEquipmentId(Qt::SortOrder order);
@@ -496,9 +498,10 @@ namespace Hardware
 		//
 	public:
 		FamilyType moduleFamily() const;
+		Q_INVOKABLE int jsModuleFamily() const;
 		void setModuleFamily(FamilyType value);
 
-		int moduleVersion() const;
+		Q_INVOKABLE int moduleVersion() const;
 		void setModuleVersion(int value);
 
 		QString configurationScript() const;

@@ -150,6 +150,7 @@ namespace Hardware
 
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::childRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
 		childRestrProp->setExpert(true);
+		childRestrProp->setIsScript(true);
 
 		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
@@ -565,7 +566,11 @@ namespace Hardware
 		1;          IP;		Server;		string;		0;			0;			192.168.75.254;     0           false
 		1;          Port;	Server;		uint32_t;	1;			65535;		2345;               0           false
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description
+		2;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;
+
 		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible
+
 		3;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true
 
 		version:            record version
@@ -583,7 +588,12 @@ namespace Hardware
 		default:            can be any value of the specified type
 		precision:          property precision
 		updateFromPreset:   property will be updated from preset
-		*/
+
+		expert:				[Added in version 2] expert property
+		description:		[Added in version 2] property description
+
+		visible:			[Added in version 3] property is visible
+*/
 
 		QStringList rows = m_specificPropertiesStruct.split(QChar::LineFeed, QString::SkipEmptyParts);
 
@@ -1397,6 +1407,44 @@ namespace Hardware
 		return v.toInt();
 	}
 
+	bool DeviceObject::jsPropertyBool(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return false;
+		}
+
+		return v.toBool();
+	}
+
+	QString DeviceObject::jsPropertyString(QString name) const
+	{
+		const std::shared_ptr<Property> p = propertyByCaption(name);
+		if (p == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		QVariant v = p->value();
+		if (v.isValid() == false)
+		{
+			assert(v.isValid());
+			return QString();
+		}
+
+		return v.toString();
+	}
+
 	quint32 DeviceObject::jsPropertyIP(QString name) const
 	{
 		const std::shared_ptr<Property> p = propertyByCaption(name);
@@ -1919,7 +1967,7 @@ namespace Hardware
 		m_children.clear();
 	}
 
-	bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
+    bool DeviceObject::checkChild(DeviceObject* child, QString* errorMessage)
 	{
 		if (child == nullptr ||
 			errorMessage == nullptr)
@@ -2676,6 +2724,7 @@ R"DELIM({
 
 		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
 		configScriptProp->setExpert(true);
+		configScriptProp->setIsScript(true);
 
 		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
 		rawDataDescrProp->setExpert(true);
@@ -2771,6 +2820,11 @@ R"DELIM({
 	DeviceModule::FamilyType DeviceModule::moduleFamily() const
 	{
 		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
+	}
+
+	int DeviceModule::jsModuleFamily() const
+	{
+		return static_cast<int>(m_type & 0xFF00);
 	}
 
 	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)

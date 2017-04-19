@@ -36,6 +36,9 @@ private:
 	void startCfgServerThread();
 	void stopCfgServerThread();
 
+	void startCfgCheckerThread();
+	void stopCfgCheckerThread();
+
 	void startUdpThreads();
 	void stopUdpThreads();
 
@@ -47,11 +50,14 @@ private:
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
+	SimpleThread* m_cfgCheckerThread = nullptr;
+
 	// settings
 	//
 	QString m_equipmentID;
-	QString m_buildPath;
+	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
+	QString m_workDirectory;
 
 	HostAddressPort m_clientIP;
 };
@@ -89,6 +95,42 @@ public:
 	virtual void onDisconnection() override;
 
 	virtual void onFileSent(const QString& fileName) override;
+};
+
+
+// ------------------------------------------------------------------------------------
+//
+// CfgSrvStorage class declaration
+//
+// ------------------------------------------------------------------------------------
+
+class CfgCheckerWorker : public SimpleThreadWorker
+{
+	Q_OBJECT
+
+public:
+	CfgCheckerWorker(const QString& workFolder, const QString& autoloadBuildFolder, int checkNewBuildInterval = 0);
+
+	static QString getFileHash(const QString& filePath);
+	static bool copyPath(const QString& src, const QString& dst);
+	static bool checkBuild(const QString& buildDirectoryPath);
+
+signals:
+	void buildPathChanged(const QString& newBuildPath);
+
+public slots:
+	void updateBuildXml();
+
+protected:
+	void onThreadStarted();
+	//void onThreadFinished();
+
+private:
+	QString m_workFolder;
+	QString m_autoloadBuildFolder;
+	QDateTime m_lastBuildXmlModifyTime;
+	QString m_lastBuildXmlHash;
+	int m_checkNewBuildInterval;
 };
 
 

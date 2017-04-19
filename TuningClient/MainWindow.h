@@ -2,15 +2,18 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTranslator>
+
 #include "Stable.h"
 
 #include "TuningWorkspace.h"
+#include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "TuningObjectManager.h"
-#include <QTranslator>
-
+#include "TuningClientObjectManager.h"
+#include "TuningClientFilterStorage.h"
+#include "SchemaStorage.h"
 
 namespace Ui {
 class MainWindow;
@@ -31,25 +34,27 @@ private:
 
 
 private:
+	TuningClientObjectManager *m_objectManager = nullptr;
+
+	SimpleThread* m_tcpClientThread = nullptr;
+
+	TuningClientFilterStorage m_filterStorage;
+
 	ConfigController m_configController;
 
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 
-	SimpleThread* m_tcpClientThread = nullptr;
+	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
-    int m_mainWindowTimerId = -1;
-
-signals:
-	void signalsUpdated();
+	int m_mainWindowTimerId = -1;
 
 private slots:
-	void slot_configurationArrived(ConfigSettings settings);
-	void slot_tuningSourcesArrived();
-	void slot_tuningConnectionFailed();
+	void slot_configurationArrived();
     void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
-public slots:
+	void slot_schemasGlobalScriptArrived(QByteArray data);
 
+public slots:
 	void exit();
     void runPresetEditor();
 	void runUsersEditor();
@@ -61,7 +66,7 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-    void createWorkspace(const TuningObjectStorage *objects);
+	void createWorkspace(const TuningObjectStorage *objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
@@ -72,20 +77,17 @@ private:
 	QAction* m_pAboutAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarConnectionState = nullptr;
+	QLabel* m_statusBarConfigConnection = nullptr;
+	QLabel* m_statusBarTuningConnection = nullptr;
 
-
-
-
+	QString m_globalScript;
 };
 
+// Global definitions
+
 extern MainWindow* theMainWindow;
+
 extern LogFile* theLogFile;
-
-extern TuningObjectManager* theObjectManager;
-
-extern TuningFilterStorage theFilters;
 
 extern UserManager theUserManager;
 

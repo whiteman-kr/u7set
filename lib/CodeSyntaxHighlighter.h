@@ -49,7 +49,7 @@ class CppSyntaxHighlighter : public QSyntaxHighlighter
      Q_OBJECT
 
  public:
-     CppSyntaxHighlighter(QTextDocument *parent = 0);
+	 CppSyntaxHighlighter(QTextDocument *parent = 0);
 
  protected:
      void highlightBlock(const QString &text);
@@ -76,7 +76,7 @@ class CppSyntaxHighlighter : public QSyntaxHighlighter
 class XmlSyntaxHighlighter : public QSyntaxHighlighter
 {
     public:
-        XmlSyntaxHighlighter(QTextDocument *parent = 0);
+		XmlSyntaxHighlighter(QTextDocument *parent = 0);
 
     protected:
         virtual void highlightBlock(const QString &text);

@@ -76,6 +76,7 @@ namespace Builder
 		void errCMN0014(QString fileName);						// File '%1' already exists.
 		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// '%1' and '%2' files have the same ID = '%3'.
 		void errCMN0016();										// The build was cancelled.
+		void errCMN0017(QString fileName);						// Can't open file '%1'.
 
 
 		// INT			Internal issues							1000-1999
@@ -266,6 +267,8 @@ namespace Builder
 		void errALC5084(const QString& appSignalID, const QString& connectionID, QUuid receiverUuid);							// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 
+		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
+
 
 		// EQP			Equipment issues						6000-6999
 		//
@@ -279,6 +282,9 @@ namespace Builder
 		void errEQP6006(int subsystemKey);		//	Same ssKey in subsystems
 		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
 
+        void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
+		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
+
 		// Subset of EQP -- Generation Software Configuration
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
@@ -287,6 +293,8 @@ namespace Builder
 		void errEQP6103(QString appSignalID, int outputMode);		// Signal %1 has wrong type of output range mode: %2.
 		void errEQP6104(QString appSignalID, int inOutType);		// Signal %1 has wrong input/output type: %2.
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.
+
+		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
 
 
 	public:

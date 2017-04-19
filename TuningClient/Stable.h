@@ -48,5 +48,11 @@
 #include <QClipboard>
 #include <QSharedMemory>
 #include <QCryptographicHash>
+#include <QPainter>
+#include <QScrollArea>
+
+#include "../VFrame30/VFrame30Lib_global.h"
+#include "../lib/TypesAndEnums.h"
+
 
 #endif // STABLE_H
