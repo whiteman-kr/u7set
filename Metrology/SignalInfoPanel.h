@@ -13,8 +13,9 @@
 const char* const			SignalInfoColumn[] =
 {
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Rack"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "ID"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "AppSignalID"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "CustomSignalID"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Sate"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Chassis"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Module"),
@@ -29,22 +30,24 @@ const char* const			SignalInfoColumn[] =
 const int					SIGNAL_INFO_COLUMN_COUNT		= sizeof(SignalInfoColumn)/sizeof(SignalInfoColumn[0]);
 
 const int					SIGNAL_INFO_COLUMN_RACK			= 0,
-							SIGNAL_INFO_COLUMN_ID			= 1,
-							SIGNAL_INFO_COLUMN_EQUIPMENT_ID	= 2,
-							SIGNAL_INFO_COLUMN_STATE		= 3,
-							SIGNAL_INFO_COLUMN_CHASSIS		= 4,
-							SIGNAL_INFO_COLUMN_MODULE		= 5,
-							SIGNAL_INFO_COLUMN_PLACE		= 6,
-							SIGNAL_INFO_COLUMN_CAPTION		= 7,
-							SIGNAL_INFO_COLUMN_PH_RANGE		= 8,
-							SIGNAL_INFO_COLUMN_EL_RANGE		= 9,
-							SIGNAL_INFO_COLUMN_EL_SENSOR	= 10,
-							SIGNAL_INFO_COLUMN_CALIBRATOR	= 11;
+							SIGNAL_INFO_COLUMN_APP_ID		= 1,
+							SIGNAL_INFO_COLUMN_CUSTOM_ID	= 2,
+							SIGNAL_INFO_COLUMN_EQUIPMENT_ID	= 3,
+							SIGNAL_INFO_COLUMN_STATE		= 4,
+							SIGNAL_INFO_COLUMN_CHASSIS		= 5,
+							SIGNAL_INFO_COLUMN_MODULE		= 6,
+							SIGNAL_INFO_COLUMN_PLACE		= 7,
+							SIGNAL_INFO_COLUMN_CAPTION		= 8,
+							SIGNAL_INFO_COLUMN_PH_RANGE		= 9,
+							SIGNAL_INFO_COLUMN_EL_RANGE		= 10,
+							SIGNAL_INFO_COLUMN_EL_SENSOR	= 11,
+							SIGNAL_INFO_COLUMN_CALIBRATOR	= 12;
 
 const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 {
 							100,	// SIGNAL_INFO_COLUMN_RACK
-							270,	// SIGNAL_INFO_COLUMN_ID
+							250,	// SIGNAL_INFO_COLUMN_APP_ID
+							250,	// SIGNAL_INFO_COLUMN_CUSTOM_ID
 							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_INFO_COLUMN_STATE
 							 60,	// SIGNAL_INFO_COLUMN_CHASSIS
@@ -122,7 +125,6 @@ private:
 	QMenu*					m_pShowMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 	QAction*				m_pCopyAction = nullptr;
-	QAction*				m_pShowCustomIDAction = nullptr;
 	QAction*				m_pShowElectricValueAction = nullptr;
 	QAction*				m_pShowAdcValueAction = nullptr;
 	QAction*				m_pShowAdcHexValueAction = nullptr;
@@ -164,7 +166,6 @@ private slots:
 	// slots of menu
 	//
 	void					copy();
-	void					showCustomID();
 	void					showElectricValue();
 	void					showAdcValue();
 	void					showAdcHexValue();

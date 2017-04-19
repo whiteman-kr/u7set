@@ -17,7 +17,7 @@
 const char* const			RackListColumn[] =
 {
 							QT_TRANSLATE_NOOP("RackListDialog.h", "Caption"),
-							QT_TRANSLATE_NOOP("RackListDialog.h", "ID"),
+							QT_TRANSLATE_NOOP("RackListDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("RackListDialog.h", "Group"),
 							QT_TRANSLATE_NOOP("RackListDialog.h", "Channel"),
 };

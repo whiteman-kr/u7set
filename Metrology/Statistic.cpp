@@ -13,7 +13,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool StatisticTable::m_showCustomID = true;
 bool StatisticTable::m_showADCInHex = true;
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -108,7 +107,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case STATISTIC_COLUMN_RACK:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_ID:				result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
 			case STATISTIC_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
@@ -199,7 +199,8 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 	switch (column)
 	{
 		case STATISTIC_COLUMN_RACK:				result = param.location().rack().caption();			break;
-		case STATISTIC_COLUMN_ID:				result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();	break;
+		case STATISTIC_COLUMN_APP_ID:			result = param.appSignalID();						break;
+		case STATISTIC_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();					break;
 		case STATISTIC_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();			break;
 		case STATISTIC_COLUMN_CAPTION:			result = param.caption();							break;
 		case STATISTIC_COLUMN_CHASSIS:			result = param.location().chassisStr();				break;
@@ -372,10 +373,6 @@ void StatisticDialog::createInterface()
 	m_pTypeComparatorsAction->setChecked(m_measureType == MEASURE_TYPE_COMPARATOR);
 
 	m_pViewShowMenu = new QMenu(tr("Show"), this);
-	m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
-	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
-	m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 
 	m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
 	m_pShowADCInHexAction->setCheckable(true);
@@ -405,7 +402,6 @@ void StatisticDialog::createInterface()
 
 	connect(m_pTypeLinearityAction, &QAction::triggered, this, &StatisticDialog::showTypeLinearity);
 	connect(m_pTypeComparatorsAction, &QAction::triggered, this, &StatisticDialog::showTypeComparators);
-	connect(m_pShowCustomIDAction, &QAction::triggered, this, &StatisticDialog::showCustomID);
 	connect(m_pShowADCInHexAction, &QAction::triggered, this, &StatisticDialog::showADCInHex);
 	connect(m_pGotoNextNotMeasuredAction, &QAction::triggered, this, &StatisticDialog::gotoNextNotMeasured);
 	connect(m_pGotoNextInvalidAction, &QAction::triggered, this, &StatisticDialog::gotoNextInvalid);
@@ -604,6 +600,7 @@ void StatisticDialog::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(STATISTIC_COLUMN_CUSTOM_ID, true);
 	hideColumn(STATISTIC_COLUMN_EQUIPMENT_ID, true);
 	hideColumn(STATISTIC_COLUMN_ADC, true);
 	hideColumn(STATISTIC_COLUMN_IN_PH_RANGE, true);
@@ -830,15 +827,6 @@ void StatisticDialog::showTypeComparators()
 
 	m_pTypeLinearityAction->setChecked(false);
 	m_pTypeComparatorsAction->setChecked(true);
-
-	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void StatisticDialog::showCustomID()
-{
-	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateList();
 }

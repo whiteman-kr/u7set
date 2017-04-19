@@ -21,7 +21,8 @@
 const char* const			StatisticColumn[] =
 {
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "ID"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "AppSignalID"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Caption"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
@@ -41,25 +42,27 @@ const char* const			StatisticColumn[] =
 const int					STATISTIC_COLUMN_COUNT			= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
 
 const int					STATISTIC_COLUMN_RACK			= 0,
-							STATISTIC_COLUMN_ID				= 1,
-							STATISTIC_COLUMN_EQUIPMENT_ID	= 2,
-							STATISTIC_COLUMN_CAPTION		= 3,
-							STATISTIC_COLUMN_CHASSIS		= 4,
-							STATISTIC_COLUMN_MODULE			= 5,
-							STATISTIC_COLUMN_PLACE			= 6,
-							STATISTIC_COLUMN_ADC			= 7,
-							STATISTIC_COLUMN_IN_PH_RANGE	= 8,
-							STATISTIC_COLUMN_IN_EL_RANGE	= 9,
-							STATISTIC_COLUMN_OUTPUT_TYPE	= 10,
-							STATISTIC_COLUMN_OUT_PH_RANGE	= 11,
-							STATISTIC_COLUMN_OUT_EL_RANGE	= 12,
-							STATISTIC_COLUMN_MEASURE_COUNT	= 13,
-							STATISTIC_COLUMN_STATE			= 14;
+							STATISTIC_COLUMN_APP_ID			= 1,
+							STATISTIC_COLUMN_CUSTOM_ID		= 2,
+							STATISTIC_COLUMN_EQUIPMENT_ID	= 3,
+							STATISTIC_COLUMN_CAPTION		= 4,
+							STATISTIC_COLUMN_CHASSIS		= 5,
+							STATISTIC_COLUMN_MODULE			= 6,
+							STATISTIC_COLUMN_PLACE			= 7,
+							STATISTIC_COLUMN_ADC			= 8,
+							STATISTIC_COLUMN_IN_PH_RANGE	= 9,
+							STATISTIC_COLUMN_IN_EL_RANGE	= 10,
+							STATISTIC_COLUMN_OUTPUT_TYPE	= 11,
+							STATISTIC_COLUMN_OUT_PH_RANGE	= 12,
+							STATISTIC_COLUMN_OUT_EL_RANGE	= 13,
+							STATISTIC_COLUMN_MEASURE_COUNT	= 14,
+							STATISTIC_COLUMN_STATE			= 15;
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
 							100,	// STATISTIC_COLUMN_RACK
-							250,	// STATISTIC_COLUMN_ID
+							250,	// STATISTIC_COLUMN_APP_ID
+							250,	// STATISTIC_COLUMN_CUSTOM_ID
 							250,	// STATISTIC_COLUMN_EQUIPMENT_ID
 							150,	// STATISTIC_COLUMN_CAPTION
 							 60,	// STATISTIC_COLUMN_CHASSIS
@@ -91,7 +94,6 @@ private:
 	mutable QMutex			m_signalMutex;
 	QList<Metrology::Signal*> m_signalList;
 
-	static bool				m_showCustomID;
 	static bool				m_showADCInHex;
 
 	int						columnCount(const QModelIndex &parent) const;
@@ -108,9 +110,6 @@ public:
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
-
-	bool					showCustomID() const { return m_showCustomID; }
-	void					setShowCustomID(bool show) { m_showCustomID = show; }
 
 	bool					showADCInHex() const { return m_showADCInHex; }
 	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
@@ -149,7 +148,6 @@ private:
 
 	QAction*				m_pTypeLinearityAction = nullptr;
 	QAction*				m_pTypeComparatorsAction = nullptr;
-	QAction*				m_pShowCustomIDAction = nullptr;
 	QAction*				m_pShowADCInHexAction = nullptr;
 	QAction*				m_pGotoNextNotMeasuredAction = nullptr;
 	QAction*				m_pGotoNextInvalidAction = nullptr;
@@ -205,7 +203,6 @@ private slots:
 							//
 	void					showTypeLinearity();
 	void					showTypeComparators();
-	void					showCustomID();
 	void					showADCInHex();
 	void					gotoNextNotMeasured();
 	void					gotoNextInvalid();

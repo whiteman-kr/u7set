@@ -76,7 +76,7 @@ const int						OPTION_PAGE_UNKNOWN				= -1,
 
 const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 {
-								QT_TRANSLATE_NOOP("OptionsDialog.h", "ConfigService"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "ConfigurationService"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "AppDataService"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "TuningService"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),

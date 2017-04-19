@@ -141,7 +141,9 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::FontRole)
 	{
-		if (indexColumn == MVC_CMN_L_ID || indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
+//		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_CUSTOM_ID || indexColumn == MVC_CMN_L_EQUIPMENT_ID ||
+//				indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
+		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
 		{
 			return theOptions.measureView().fontBold();
 		}
@@ -203,14 +205,6 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 
 				if (column == MVC_CMN_L_IN_ERROR)
 				{
-					if (errorType == MEASURE_ERROR_TYPE_REDUCE)
-					{
-						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
-						{
-							result = theOptions.measureView().colorErrorControl();
-						}
-					}
-
 					if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_PHYSICAL, errorType))
 					{
 						result = theOptions.measureView().colorErrorLimit();
@@ -219,14 +213,6 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 
 				if (column == MVC_CMN_L_OUT_ERROR)
 				{
-					if (errorType == MEASURE_ERROR_TYPE_REDUCE)
-					{
-						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE) > theOptions.linearity().errorCtrl())
-						{
-							result = theOptions.measureView().colorErrorControl();
-						}
-					}
-
 					if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_OUT_ELECTRIC, errorType))
 					{
 						result = theOptions.measureView().colorErrorLimit();
@@ -327,7 +313,9 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
-		case MVC_CMN_L_ID:						result = m->signalID(theOptions.measureView().signalIdType()); break;
+		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
+		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
+		case MVC_CMN_L_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
 		case MVC_CMN_L_NAME:					result = m->caption(); break;
 
 		case MVC_CMN_L_CHASSIS:					result = m->location().chassisStr(); break;
@@ -696,7 +684,7 @@ void MeasureView::appendMeasure(Measurement* pMeasurement)
 		return;
 	}
 
-	setCurrentIndex(model()->index(model()->rowCount() - 1, MVC_CMN_L_ID));
+	setCurrentIndex(model()->index(model()->rowCount() - 1, MVC_CMN_L_APP_ID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

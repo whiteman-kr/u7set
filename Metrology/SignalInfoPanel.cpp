@@ -101,7 +101,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case SIGNAL_INFO_COLUMN_RACK:			result = Qt::AlignCenter;	break;
-			case SIGNAL_INFO_COLUMN_ID:				result = Qt::AlignLeft;		break;
+			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
+			case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_STATE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CHASSIS:		result = Qt::AlignCenter;	break;
@@ -197,8 +198,6 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 		return QString();
 	}
 
-	bool showCustomID = theOptions.signalInfo().showCustomID();
-
 	QString stateStr;
 
 	if (column == SIGNAL_INFO_COLUMN_STATE)
@@ -226,7 +225,8 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 	switch (column)
 	{
 		case SIGNAL_INFO_COLUMN_RACK:			result = measureParam.rackCaption();			break;
-		case SIGNAL_INFO_COLUMN_ID:				result = measureParam.signalID(showCustomID);	break;
+		case SIGNAL_INFO_COLUMN_APP_ID:			result = measureParam.appSignalID();			break;
+		case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = measureParam.customSignalID();			break;
 		case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = measureParam.equipmentID();			break;
 		case SIGNAL_INFO_COLUMN_STATE:			result = stateStr;								break;
 		case SIGNAL_INFO_COLUMN_CHASSIS:		result = measureParam.chassisStr();				break;
@@ -307,8 +307,10 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	//
 	if (theOptions.signalInfo().showAdcHexState() == true)
 	{
+		QString adcHexValue;
 		int adc = (state.value() - param.inputPhysicalLowLimit())* (param.highADC() - param.lowADC())/ (param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.lowADC();
-		stateStr.append(" = 0x" + QString::number(adc, 16));
+		adcHexValue.sprintf(" = 0x%04X", adc);
+		stateStr.append(adcHexValue);
 	}
 
 	// check flags
@@ -465,8 +467,9 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &SignalInfoPanel::activeSignalChanged, Qt::QueuedConnection);
 
-	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
+	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
+	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
 	hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
@@ -500,6 +503,8 @@ void SignalInfoPanel::createInterface()
 	{
 		m_pView->setColumnWidth(column, SignalInfoColumnWidth[column]);
 	}
+
+	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalInfoPanel::onListDoubleClicked);
 
@@ -545,22 +550,16 @@ void SignalInfoPanel::createContextMenu()
 
 	m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
 
-	m_pShowCustomIDAction = m_pShowMenu->addAction(tr("Custom ID"));
-	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(theOptions.signalInfo().showCustomID());
-
-	m_pShowMenu->addSeparator();
-
-	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical"));
+	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical state"));
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
 
 
-	m_pShowAdcValueAction = m_pShowMenu->addAction(tr("ADC"));
+	m_pShowAdcValueAction = m_pShowMenu->addAction(tr("ADC state"));
 	m_pShowAdcValueAction->setCheckable(true);
 	m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
 
-	m_pShowAdcHexValueAction = m_pShowMenu->addAction(tr("ADC (hex)"));
+	m_pShowAdcHexValueAction = m_pShowMenu->addAction(tr("ADC (hex) state"));
 	m_pShowAdcHexValueAction->setCheckable(true);
 	m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
 
@@ -572,7 +571,6 @@ void SignalInfoPanel::createContextMenu()
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
-	connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalInfoPanel::showCustomID);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
 	connect(m_pShowAdcValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcValue);
 	connect(m_pShowAdcHexValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcHexValue);
@@ -633,7 +631,6 @@ void SignalInfoPanel::stopSignalStateTimer()
 
 void SignalInfoPanel::onContextMenu(QPoint)
 {
-	m_pShowCustomIDAction->setChecked(theOptions.signalInfo().showCustomID());
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
 	m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
 	m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
@@ -692,14 +689,6 @@ void SignalInfoPanel::updateSignalState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::showCustomID()
-{
-	theOptions.signalInfo().setShowCustomID(m_pShowCustomIDAction->isChecked());
-	m_signalParamTable.updateColumn(SIGNAL_INFO_COLUMN_ID);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void SignalInfoPanel::showElectricValue()
 {
 	theOptions.signalInfo().setShowElectricState(m_pShowElectricValueAction->isChecked());
@@ -731,9 +720,14 @@ void SignalInfoPanel::copy()
 
 	for(int row = 0; row < rowCount; row++)
 	{
+		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
+		{
+			continue;
+		}
+
 		for(int column = 0; column < columnCount; column++)
 		{
-			if (m_pView->selectionModel()->isSelected(m_pView->model()->index(row, column)) == false)
+			if (m_pView->isColumnHidden(column) == true)
 			{
 				continue;
 			}
