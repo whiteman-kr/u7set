@@ -370,18 +370,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
-					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR]);
+					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR_LIMIT]);
 					item->setValue(m_options.linearity().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, LO_PARAM_ERROR);
-					errorGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Double, LinearityParamName[LO_PARAM_ERROR_CTRL]);
-					item->setValue(m_options.linearity().errorCtrl());
-					item->setAttribute(QLatin1String("singleStep"), 0.1);
-					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, LO_PARAM_ERROR_CTRL);
+					appendProperty(item, page, LO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_ERROR_TYPE]);
@@ -480,7 +473,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					pointGroup->addSubProperty(item);
 
 
-				QtProperty *outputrangeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("The list of measurements"));
+				QtProperty *outputrangeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_LIST_TYPE]);
 					QStringList listTypeList;
@@ -516,18 +509,11 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 			{
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
-					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR]);
+					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR_LIMIT]);
 					item->setValue(m_options.comparator().m_errorValue);
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, CO_PARAM_ERROR);
-					errorGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR_CTRL]);
-					item->setValue(m_options.comparator().m_errorCtrl);
-					item->setAttribute(QLatin1String("singleStep"), 0.1);
-					item->setAttribute(QLatin1String("decimals"), 3);
-					appendProperty(item, page, CO_PARAM_ERROR_CTRL);
+					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_START_VALUE]);
@@ -582,19 +568,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, MWO_PARAM_FONT);
 					fontGroup->addSubProperty(item);
 
-				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying measurements"));
-
-					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), MeasureViewParam[MWO_PARAM_ID]);
-					QStringList valueTypeIDList;
-					for(int t = 0; t < SIGNAL_ID_TYPE_COUNT; t++)
-					{
-						valueTypeIDList.append(TypeSignalID[t]);
-					}
-					item->setAttribute(QLatin1String("enumNames"), valueTypeIDList);
-					item->setValue(m_options.measureView().signalIdType());
-					appendProperty(item, page, MWO_PARAM_ID);
-					measureGroup->addSubProperty(item);
-
 				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
 
 					item = manager->addProperty(QVariant::Color, MeasureViewParam[MWO_PARAM_COLOR_NOT_ERROR]);
@@ -615,7 +588,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(fontGroup);
-				editor->addProperty(measureGroup);
 				editor->addProperty(colorGroup);
 
 				expandProperty(editor, OPTION_PAGE_MEASURE_VIEW_TEXT, MWO_PARAM_FONT, false);
@@ -635,11 +607,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					fontGroup->addSubProperty(item);
 
 				QtProperty *measureGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying signal state"));
-
-					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ID]);
-					item->setValue(m_options.signalInfo().showCustomID());
-					appendProperty(item, page, SIO_PARAM_ID);
-					measureGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]);
 					item->setValue(m_options.signalInfo().showElectricState());
@@ -1049,8 +1016,7 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case LO_PARAM_ERROR:					m_options.linearity().setErrorLimit(value.toDouble());			break;
-					case LO_PARAM_ERROR_CTRL:				m_options.linearity().setErrorCtrl(value.toDouble());			break;
+					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());			break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
 					case LO_PARAM_SHOW_INPUT_ERROR:			m_options.linearity().setShowInputErrorType(value.toInt());
@@ -1085,8 +1051,7 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR:				m_options.comparator().m_errorValue = value.toDouble();				break;
-					case CO_PARAM_ERROR_CTRL:			m_options.comparator().m_errorCtrl = value.toDouble();				break;
+					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().m_errorValue = value.toDouble();				break;
 					case CO_PARAM_START_VALUE:			m_options.comparator().m_startValue = value.toDouble();				break;
 					case CO_PARAM_ERROR_TYPE:			m_options.comparator().m_errorType = value.toInt();					break;
 					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().m_enableMeasureHysteresis = value.toBool();	break;
@@ -1102,7 +1067,6 @@ void OptionsDialog::applyProperty()
 				switch(param)
 				{
 					case MWO_PARAM_FONT:				m_options.measureView().font().fromString(value.toString());			break;
-					case MWO_PARAM_ID:					m_options.measureView().setSignalIdType(value.toInt());					break;
 					case MWO_PARAM_COLOR_NOT_ERROR:		m_options.measureView().setColorNotError(QColor(value.toString()));		break;
 					case MWO_PARAM_COLOR_LIMIT_ERROR:	m_options.measureView().setColorErrorLimit(QColor(value.toString()));	break;
 					case MWO_PARAM_COLOR_CONTROL_ERROR:	m_options.measureView().setColorErrorControl(QColor(value.toString()));	break;
@@ -1125,7 +1089,6 @@ void OptionsDialog::applyProperty()
 			switch(param)
 			{
 				case SIO_PARAM_FONT:					m_options.signalInfo().font().fromString(value.toString());				break;
-				case SIO_PARAM_ID:						m_options.signalInfo().setShowCustomID(value.toBool());					break;
 				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());			break;
 				case SIO_PARAM_ADC_STATE:				m_options.signalInfo().setShowAdcState(value.toBool());					break;
 				case SIO_PARAM_ADC_HEX_STATE:			m_options.signalInfo().setShowAdcHexState(value.toBool());				break;

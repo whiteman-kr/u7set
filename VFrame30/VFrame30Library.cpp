@@ -20,6 +20,7 @@
 #include "SchemaItemTerminator.h"
 #include "SchemaItemPushButton.h"
 #include "SchemaItemLineEdit.h"
+#include "SchemaItemValue.h"
 #include "../lib/Types.h"
 
 namespace VFrame30
@@ -64,6 +65,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemTerminator>();
 		SchemaItemFactory.Register<SchemaItemPushButton>();
 		SchemaItemFactory.Register<SchemaItemLineEdit>();
+		SchemaItemFactory.Register<SchemaItemValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

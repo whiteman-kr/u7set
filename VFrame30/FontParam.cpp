@@ -17,7 +17,8 @@ namespace VFrame30
 
 	bool FontParam::SaveData(Proto::FontParam* message) const
 	{
-		Proto::Write(message->mutable_name(), m_name);
+		message->mutable_name_obsolete()->set_text("");				// This field is marked as REQUIRED in proto file, so it must be written in any case
+		message->set_name(m_name.toStdString());
 		message->set_size(m_size);
 		message->set_bold(m_bold);
 		message->set_italic(m_italic);
@@ -26,7 +27,15 @@ namespace VFrame30
 
 	bool FontParam::LoadData(const Proto::FontParam& message)
 	{
-		Proto::Read(message.name(), &m_name);
+		if (message.has_name() == true)
+		{
+			m_name = QString::fromStdString(message.name());
+		}
+		else
+		{
+			Proto::Read(message.name_obsolete(), &m_name);
+		}
+
 		m_size = message.size();
 		m_bold = message.bold();
 		m_italic = message.italic();

@@ -12,7 +12,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalListTable::m_showCustomID = true;
 bool SignalListTable::m_showADCInHex = true;
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -107,7 +106,8 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
-			case SIGNAL_LIST_COLUMN_ID:					result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
@@ -171,7 +171,8 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 	switch (column)
 	{
 		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
-		case SIGNAL_LIST_COLUMN_ID:					result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();	break;
+		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();				break;
+		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();			break;
 		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();	break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
@@ -355,10 +356,6 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pTypeOutputAction->setChecked(m_typeIO == E::SignalInOutType::Output);
 
 	m_pViewShowMenu = new QMenu(tr("Show"), this);
-	m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
-	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
-	m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 	m_pShowADCInHexAction = m_pViewShowMenu->addAction(tr("ADC in Hex"));
 	m_pShowADCInHexAction->setCheckable(true);
 	m_pShowADCInHexAction->setChecked(m_signalTable.showADCInHex());
@@ -384,7 +381,6 @@ void SignalListDialog::createInterface(bool hasButtons)
 	connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
 	connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
 	connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
-	connect(m_pShowCustomIDAction, &QAction::triggered, this, &SignalListDialog::showCustomID);
 	connect(m_pShowADCInHexAction, &QAction::triggered, this, &SignalListDialog::showADCInHex);
 
 
@@ -521,8 +517,8 @@ void SignalListDialog::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
-
 
 	switch (m_typeAD)
 	{
@@ -746,15 +742,6 @@ void SignalListDialog::showTypeInternal()
 void SignalListDialog::showTypeOutput()
 {
 	m_typeIO = E::SignalInOutType::Output;
-
-	updateList();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalListDialog::showCustomID()
-{
-	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateList();
 }

@@ -23,6 +23,7 @@
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/Session.h"
@@ -123,7 +124,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	{
 		QPainter p(this);
 
-		VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 		drawParam.setControlBarSize(
 			schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
@@ -141,7 +142,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setInfoMode(theSettings.infoMode());
 
 	// Calc size
@@ -2168,6 +2169,16 @@ void EditSchemaWidget::createActions()
 	m_addUfbAction->setEnabled(true);
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+
+	m_addValueAction = new QAction(tr("Value"), this);
+	m_addValueAction->setEnabled(true);
+	m_addValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
+	connect(m_addValueAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemValue>(schema()->unit());
+				addItem(item);
+			});
 
 	m_addPushButtonAction = new QAction(tr("PushButton"), this);
 	m_addPushButtonAction->setEnabled(true);

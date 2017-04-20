@@ -31,7 +31,7 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setEditMode(false);
 
 	// Draw schema

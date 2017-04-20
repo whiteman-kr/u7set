@@ -16,7 +16,9 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 	{
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Rack"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "ID"), 150, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "AppSignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "CustomAppSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "EquipmentID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Caption"), 200, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Chassis"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
@@ -56,12 +58,10 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 19"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 20"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of input"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit error (in)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error (in)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error of output"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit error (out)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error (out)"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -333,16 +333,16 @@ void MeasureViewHeader::updateColumnState()
 				if (theOptions.linearity().errorType() == MEASURE_ERROR_TYPE_ABSOLUTE)
 				{
 					setColumnTitle(MVC_CMN_L_IN_ERROR, visibleOutput == false ? "Error" : "Error of input");
-					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, visibleOutput == false ? "Limit error" : "Limit error (in)");
+					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, visibleOutput == false ? "Limit of error" : "Limit of error (in)");
 					setColumnTitle(MVC_CMN_L_OUT_ERROR, visibleInput == false ? "Error" : "Error of output");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, visibleInput == false ? "Limit error" : "Limit error (out)");
+					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, visibleInput == false ? "Limit of error" : "Limit of error (out)");
 				}
 				else
 				{
 					setColumnTitle(MVC_CMN_L_IN_ERROR, visibleOutput == false ? "Error" : "Error of input");
-					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, "Limit error");
+					setColumnTitle(MVC_CMN_L_IN_ERROR_LIMIT, "Limit of error");
 					setColumnTitle(MVC_CMN_L_OUT_ERROR, visibleInput == false ? "Error" : "Error of output");
-					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, "Limit error");
+					setColumnTitle(MVC_CMN_L_OUT_ERROR_LIMIT, "Limit of error");
 
 					if (visibleOutput == true)
 					{

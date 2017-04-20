@@ -49,6 +49,8 @@ public slots:
 public:
 	virtual QString globalScript() const override;
 
+	virtual QJSEngine* jsEngine() override;
+
 	// Data
 	//
 private:
