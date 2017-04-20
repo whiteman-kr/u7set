@@ -11,12 +11,12 @@ using namespace std;
 //
 
 
-TuningItemModelMain::TuningItemModelMain(TuningObjectManager *tuningObjectManager, int tuningPageIndex, QWidget* parent):
-	m_tuningObjectManager(tuningObjectManager),
+TuningItemModelMain::TuningItemModelMain(TuningSignalManager *tuningSignalManager, int tuningPageIndex, QWidget* parent):
+	m_tuningSignalManager(tuningSignalManager),
 	TuningItemModel(parent)
 {
 
-	assert(m_tuningObjectManager);
+	assert(m_tuningSignalManager);
 
 	TuningPageSettings* pageSettings = theSettings.tuningPageSettings(tuningPageIndex);
 	if (pageSettings == nullptr)
@@ -63,9 +63,9 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 
 	for (int i : selectedRows)
 	{
-		const TuningObject& o = m_objects[i];
+		const TuningSignal& o = m_objects[i];
 
-        if (o.valid() == false)
+		if (o.state.valid() == false)
         {
             return;
         }
@@ -127,7 +127,7 @@ void TuningItemModelMain::setValue(const std::vector<int>& selectedRows)
 
 	for (int i : selectedRows)
 	{
-		TuningObject& o = m_objects[i];
+		TuningSignal& o = m_objects[i];
         o.onEditValue(newValue);
 	}
 }
@@ -136,9 +136,9 @@ void TuningItemModelMain::invertValue(const std::vector<int>& selectedRows)
 {
 	for (int i : selectedRows)
 	{
-		TuningObject& o = m_objects[i];
+		TuningSignal& o = m_objects[i];
 
-        if (o.valid() == false)
+		if (o.state.valid() == false)
         {
             return;
         }
@@ -173,15 +173,15 @@ void TuningItemModelMain::updateStates()
 		return;
 	}
 
-	QMutexLocker l(&m_tuningObjectManager->m_mutex);
+	QMutexLocker l(&m_tuningSignalManager->m_mutex);
 
-    int count = (int)m_objects.size();
+    int count = static_cast<int>(m_objects.size());
 
     for (int i = 0; i < count; i++)
 	{
-        TuningObject& pageObject = m_objects[i];
+        TuningSignal& pageObject = m_objects[i];
 
-		TuningObject* baseObject = m_tuningObjectManager->objectPtrByHash(pageObject.appSignalHash());
+		TuningSignal* baseObject = m_tuningSignalManager->objectPtrByHash(pageObject.appSignalHash());
 
         if (baseObject == nullptr)
         {
@@ -192,8 +192,8 @@ void TuningItemModelMain::updateStates()
         pageObject.setReadLowLimit(baseObject->readLowLimit());
         pageObject.setReadHighLimit(baseObject->readHighLimit());
         pageObject.setValue(baseObject->value());
-        pageObject.setValid(baseObject->valid());
-        pageObject.setWriting(baseObject->writing());
+		pageObject.state.setValid(baseObject->state.valid());
+		pageObject.state.setWriting(baseObject->state.writing());
 	}
 
     l.unlock();
@@ -215,15 +215,15 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningObject& o = m_objects[row];
+		const TuningSignal& o = m_objects[row];
 
-        if (m_blink == true && o.userModified() == true)
+		if (m_blink == true && o.state.userModified() == true)
 		{
 			QColor color = QColor(Qt::yellow);
 			return QBrush(color);
 		}
 
-        if (o.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false || o.limitsUnbalance() == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -232,9 +232,9 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Valid))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.valid() == false)
+		if (o.state.valid() == false)
         {
             QColor color = QColor(Qt::red);
             return QBrush(color);
@@ -243,7 +243,7 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
         if (o.limitsUnbalance() == true)
         {
@@ -254,9 +254,9 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Underflow))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.underflow() == true)
+		if (o.state.underflow() == true)
         {
             QColor color = QColor(Qt::red);
             return QBrush(color);
@@ -265,9 +265,9 @@ QBrush TuningItemModelMain::backColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Overflow))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.overflow() == true)
+		if (o.state.overflow() == true)
         {
             QColor color = QColor(Qt::red);
             return QBrush(color);
@@ -297,9 +297,9 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Valid))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.valid() == false)
+		if (o.state.valid() == false)
         {
             QColor color = QColor(Qt::white);
             return QBrush(color);
@@ -308,15 +308,15 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningObject& o = m_objects[row];
+		const TuningSignal& o = m_objects[row];
 
-        if (m_blink == true && o.userModified() == true)
+		if (m_blink == true && o.state.userModified() == true)
 		{
 			QColor color = QColor(Qt::black);
 			return QBrush(color);
 		}
 
-        if (o.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false || o.limitsUnbalance() == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -325,7 +325,7 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
         if (o.limitsUnbalance() == true)
         {
@@ -336,9 +336,9 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns::Underflow))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.underflow() == true)
+		if (o.state.underflow() == true)
         {
             QColor color = QColor(Qt::white);
             return QBrush(color);
@@ -347,9 +347,9 @@ QBrush TuningItemModelMain::foregroundColor(const QModelIndex& index) const
 
     if (displayIndex == static_cast<int>(Columns:: Overflow))
     {
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
-        if (o.overflow() == true)
+		if (o.state.overflow() == true)
         {
             QColor color = QColor(Qt::white);
             return QBrush(color);
@@ -384,10 +384,10 @@ Qt::ItemFlags TuningItemModelMain::flags(const QModelIndex &index) const
 
     if (displayIndex == static_cast<int>(Columns::Value))
 	{
-		const TuningObject& o = m_objects[row];
+		const TuningSignal& o = m_objects[row];
 
 
-        if (o.valid() == true)
+		if (o.state.valid() == true)
         {
             if (o.analog() == false)
             {
@@ -416,9 +416,9 @@ QVariant TuningItemModelMain::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const TuningObject& o = m_objects[row];
+	const TuningSignal& o = m_objects[row];
 
-    if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && o.analog() == false && o.valid() == true)
+	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && o.analog() == false && o.state.valid() == true)
 	{
 		return (o.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
@@ -445,7 +445,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 
     if (role == Qt::EditRole && displayIndex == static_cast<int>(TuningItemModel::Columns::Value))
 	{
-		TuningObject& o = m_objects[row];
+		TuningSignal& o = m_objects[row];
 
 		bool ok = false;
         float v = value.toFloat(&ok);
@@ -460,7 +460,7 @@ bool TuningItemModelMain::setData(const QModelIndex &index, const QVariant &valu
 
     if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(TuningItemModel::Columns::Value))
 	{
-		TuningObject& o = m_objects[row];
+		TuningSignal& o = m_objects[row];
 
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
@@ -485,9 +485,9 @@ void TuningItemModelMain::slot_setAll()
 
     auto fAllToOn = [this]() -> void
              {
-                for (TuningObject& o : m_objects)
+                for (TuningSignal& o : m_objects)
                 {
-                    if (o.valid() == false)
+					if (o.state.valid() == false)
                     {
                         continue;
                     }
@@ -505,9 +505,9 @@ void TuningItemModelMain::slot_setAll()
 
     auto fAllToOff = [this]() -> void
              {
-                for (TuningObject& o : m_objects)
+                for (TuningSignal& o : m_objects)
                 {
-                    if (o.valid() == false)
+					if (o.state.valid() == false)
                     {
                         continue;
                     }
@@ -526,9 +526,9 @@ void TuningItemModelMain::slot_setAll()
 
     auto fAllToDefault = [this]() -> void
              {
-                for (TuningObject& o : m_objects)
+                for (TuningSignal& o : m_objects)
                 {
-                    if (o.valid() == false)
+					if (o.state.valid() == false)
                     {
                         continue;
                     }
@@ -552,7 +552,7 @@ void TuningItemModelMain::slot_setAll()
 
 void TuningItemModelMain::slot_undo()
 {
-	for (TuningObject& o : m_objects)
+	for (TuningSignal& o : m_objects)
 	{
         o.onEditValue(o.value());
 	}
@@ -571,9 +571,9 @@ void TuningItemModelMain::slot_Write()
 	bool modifiedFound = false;
 	int modifiedCount = 0;
 
-	for (TuningObject& o : m_objects)
+	for (TuningSignal& o : m_objects)
 	{
-        if (o.userModified() == false)
+		if (o.state.userModified() == false)
 		{
 			continue;
 		}
@@ -589,9 +589,9 @@ void TuningItemModelMain::slot_Write()
 
 	int listCount = 0;
 
-	for (TuningObject& o : m_objects)
+	for (TuningSignal& o : m_objects)
 	{
-        if (o.userModified() == false)
+		if (o.state.userModified() == false)
 		{
 			continue;
 		}
@@ -626,7 +626,7 @@ void TuningItemModelMain::slot_Write()
 		return;
 	}
 
-	m_tuningObjectManager->writeModifiedTuningObjects(m_objects);
+	m_tuningSignalManager->writeModifiedTuningSignals(m_objects);
 }
 
 void TuningItemModelMain::slot_Apply()
@@ -688,7 +688,7 @@ bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEven
 
         if (row >= 0)
         {
-            TuningObject* object = m_model->object(row);
+            TuningSignal* object = m_model->object(row);
             if (object == nullptr)
             {
                 assert(object);
@@ -697,7 +697,6 @@ bool TuningTableView::edit(const QModelIndex & index, EditTrigger trigger, QEven
 
             if (object->analog() == true)
             {
-                //qDebug()<<"edit "<<(int)trigger;
                 m_editorActive = true;
             }
         }
@@ -721,16 +720,16 @@ void TuningTableView::closeEditor(QWidget * editor, QAbstractItemDelegate::EndEd
 //
 
 
-TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningObjectManager* tuningObjectManager, TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, QWidget *parent) :
+TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningFilterStorage *filterStorage, const TuningSignalStorage *objects, QWidget *parent) :
 	QWidget(parent),
 	m_tuningPageIndex(tuningPageIndex),
 	m_tabFilter(tabFilter),
-	m_tuningObjectManager(tuningObjectManager),
+	m_tuningSignalManager(tuningSignalManager),
 	m_filterStorage(filterStorage),
 	m_objects(objects)
 {
 
-	assert(m_tuningObjectManager);
+	assert(m_tuningSignalManager);
 	assert(m_filterStorage);
 	assert(m_objects);
 
@@ -818,7 +817,7 @@ TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFil
 
     // Models and data
     //
-	m_model = new TuningItemModelMain(m_tuningObjectManager, m_tuningPageIndex, this);
+	m_model = new TuningItemModelMain(m_tuningSignalManager, m_tuningPageIndex, this);
     m_model->setFont(f.family(), f.pointSize(), false);
     m_model->setImportantFont(f.family(), f.pointSize(), true);
 
@@ -946,7 +945,7 @@ TuningPage::~TuningPage()
 	{
 		pageSettings->m_columnsIndexes = m_model->columnsIndexes();
 
-		pageSettings->m_columnCount = (int)pageSettings->m_columnsIndexes.size();
+		pageSettings->m_columnCount = static_cast<int>(pageSettings->m_columnsIndexes.size());
 
 		pageSettings->m_columnsWidth.resize(pageSettings->m_columnCount);
 
@@ -959,7 +958,7 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
-    std::vector<TuningObject> filteredObjects;
+    std::vector<TuningSignal> filteredObjects;
 
     QString filter = m_filterEdit->text();
 
@@ -972,7 +971,7 @@ void TuningPage::fillObjectsList()
 
     for (int i = 0; i < m_objects->objectCount(); i++)
 	{
-        const TuningObject* o = m_objects->objectPtr(i);
+        const TuningSignal* o = m_objects->objectPtr(i);
         if (o == nullptr)
         {
             assert(o);
@@ -1263,7 +1262,7 @@ void TuningPage::timerEvent(QTimerEvent* event)
         //
         for (int row = from; row <= to; row++)
         {
-            TuningObject* o = m_model->object(row);
+            TuningSignal* o = m_model->object(row);
 
             if (o == nullptr)
             {
@@ -1271,7 +1270,7 @@ void TuningPage::timerEvent(QTimerEvent* event)
                 continue;
             }
 
-            if (o->redraw() == true || o->userModified() == true)
+			if (o->state.needRedraw() == true || o->state.userModified() == true)
             {
                 for (int col = 0; col < m_model->columnCount(); col++)
                 {

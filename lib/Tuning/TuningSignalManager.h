@@ -4,17 +4,12 @@
 #include <queue>
 
 #include "Stable.h"
-#include "../lib/Tuning/TuningObject.h"
+#include "../lib/Tuning/TuningSignal.h"
 #include "../lib/Tuning/TuningController.h"
 
 #include "../Proto/network.pb.h"
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
-
-//#include "ConfigController.h"
-//#include "Settings.h"
-//#include "MainWindow.h"
-
 
 struct TuningSource
 {
@@ -34,15 +29,15 @@ struct WriteCommand
     }
 };
 
-class TuningObjectManager : public Tcp::Client
+class TuningSignalManager : public Tcp::Client
 {
     Q_ENUM(NetworkError)
 
     Q_OBJECT
 
 public:
-	TuningObjectManager();
-    virtual ~TuningObjectManager();
+	TuningSignalManager();
+    virtual ~TuningSignalManager();
 
 	void setInstanceId(const QString& instanceId);
 
@@ -50,11 +45,11 @@ public:
 
     bool loadDatabase(const QByteArray& data, QString *errorCode);
 
-    TuningObjectStorage objectStorage();
+    TuningSignalStorage objectStorage();
 
     bool objectExists(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
 
-    TuningObject* objectPtrByHash(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
+    TuningSignal* objectPtrByHash(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
 
     // Tuning sources
 
@@ -68,7 +63,7 @@ public:
 
 	void writeTuningSignal(Hash hash, float value);
 
-    void writeModifiedTuningObjects(std::vector<TuningObject>& objects);
+    void writeModifiedTuningSignals(std::vector<TuningSignal>& objects);
 
 	// Information
 
@@ -164,7 +159,7 @@ private:
     // Objects storage
     //
 
-    TuningObjectStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
+    TuningSignalStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
 
 	// Tuning sources
     //

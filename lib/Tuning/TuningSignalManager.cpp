@@ -1,26 +1,26 @@
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
 
-TuningObjectManager::TuningObjectManager()
+TuningSignalManager::TuningSignalManager()
 	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0))
 {
 }
 
-TuningObjectManager::~TuningObjectManager()
+TuningSignalManager::~TuningSignalManager()
 {
 }
 
-void TuningObjectManager::setInstanceId(const QString& instanceId)
+void TuningSignalManager::setInstanceId(const QString& instanceId)
 {
 	m_instanceId = instanceId;
 }
 
-void TuningObjectManager::setRequestInterval(int requestInterval)
+void TuningSignalManager::setRequestInterval(int requestInterval)
 {
 	m_requestInterval = requestInterval;
 }
 
-bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCode)
+bool TuningSignalManager::loadDatabase(const QByteArray& data, QString *errorCode)
 {
     if (errorCode == nullptr)
     {
@@ -41,7 +41,7 @@ bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCod
     int count = m_objects.objectCount();
     for (int i = 0; i < count; i++)
     {
-        const TuningObject* o = m_objects.objectPtr(i);
+        const TuningSignal* o = m_objects.objectPtr(i);
         if (o == nullptr)
         {
             assert(o);
@@ -57,7 +57,7 @@ bool TuningObjectManager::loadDatabase(const QByteArray& data, QString *errorCod
     return result;
 }
 
-TuningObjectStorage TuningObjectManager::objectStorage()
+TuningSignalStorage TuningSignalManager::objectStorage()
 {
     QMutexLocker l(&m_mutex);
     return m_objects;
@@ -65,41 +65,37 @@ TuningObjectStorage TuningObjectManager::objectStorage()
 
 // WARNING!!! Lock the mutex before calling this function!!!
 //
-bool TuningObjectManager::objectExists(Hash hash) const
+bool TuningSignalManager::objectExists(Hash hash) const
 {
     return m_objects.objectExists(hash);
 }
 
 // WARNING!!! Lock the mutex before calling this function!!!
 //
-TuningObject* TuningObjectManager::objectPtrByHash(Hash hash) const
+TuningSignal* TuningSignalManager::objectPtrByHash(Hash hash) const
 {
     return m_objects.objectPtrByHash(hash);
 }
 
-QStringList TuningObjectManager::tuningSourcesEquipmentIds()
+QStringList TuningSignalManager::tuningSourcesEquipmentIds()
 {
     QMutexLocker l(&m_mutex);
     return m_tuningSourcesList;
 }
 
-void TuningObjectManager::onClientThreadStarted()
+void TuningSignalManager::onClientThreadStarted()
 {
-	//qDebug() << "TuningObjectManager::onClientThreadStarted()";
 
     return;
 }
 
-void TuningObjectManager::onClientThreadFinished()
+void TuningSignalManager::onClientThreadFinished()
 {
-	//qDebug() << "TuningObjectManager::onClientThreadFinished()";
-
-    //theSignals.reset();
 }
 
-void TuningObjectManager::onConnection()
+void TuningSignalManager::onConnection()
 {
-	writeLogMessage(tr("TuningObjectManager: connection established."));
+	writeLogMessage(tr("TuningSignalManager: connection established."));
 
     assert(isClearToSendRequest() == true);
 
@@ -115,9 +111,9 @@ void TuningObjectManager::onConnection()
     return;
 }
 
-void TuningObjectManager::onDisconnection()
+void TuningSignalManager::onDisconnection()
 {
-	writeLogMessage(tr("TuningObjectManager: connection failed."));
+	writeLogMessage(tr("TuningSignalManager: connection failed."));
 
     QMutexLocker l(&m_mutex);
 
@@ -126,12 +122,12 @@ void TuningObjectManager::onDisconnection()
     emit connectionFailed();
 }
 
-void TuningObjectManager::onReplyTimeout()
+void TuningSignalManager::onReplyTimeout()
 {
-	writeLogMessage(tr("TuningObjectManager: reply timeout."));
+	writeLogMessage(tr("TuningSignalManager: reply timeout."));
 }
 
-void TuningObjectManager::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+void TuningSignalManager::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
     if (replyData == nullptr)
     {
@@ -169,7 +165,7 @@ void TuningObjectManager::processReply(quint32 requestID, const char* replyData,
     return;
 }
 
-void TuningObjectManager::resetToGetTuningSources()
+void TuningSignalManager::resetToGetTuningSources()
 {
 	QThread::msleep(m_requestInterval);
 
@@ -177,7 +173,7 @@ void TuningObjectManager::resetToGetTuningSources()
     return;
 }
 
-void TuningObjectManager::resetToGetTuningSourcesState()
+void TuningSignalManager::resetToGetTuningSourcesState()
 {
 	QThread::msleep(m_requestInterval);
 
@@ -185,7 +181,7 @@ void TuningObjectManager::resetToGetTuningSourcesState()
     return;
 }
 
-void TuningObjectManager::requestTuningSourcesInfo()
+void TuningSignalManager::requestTuningSourcesInfo()
 {
     assert(isClearToSendRequest());
 
@@ -194,7 +190,7 @@ void TuningObjectManager::requestTuningSourcesInfo()
     sendRequest(TDS_GET_TUNING_SOURCES_INFO, m_getTuningSourcesInfo);
 }
 
-void TuningObjectManager::requestTuningSourcesState()
+void TuningSignalManager::requestTuningSourcesState()
 {
     assert(isClearToSendRequest());
 
@@ -203,7 +199,7 @@ void TuningObjectManager::requestTuningSourcesState()
     sendRequest(TDS_GET_TUNING_SOURCES_STATES, m_getTuningSourcesStates);
 }
 
-void TuningObjectManager::processTuningSignals()
+void TuningSignalManager::processTuningSignals()
 {
     // if there is a queued data to write something, write it.
     //
@@ -227,7 +223,7 @@ void TuningObjectManager::processTuningSignals()
 
 }
 
-void TuningObjectManager::requestReadTuningSignals()
+void TuningSignalManager::requestReadTuningSignals()
 {
     QMutexLocker l(&m_mutex);
 
@@ -275,7 +271,7 @@ void TuningObjectManager::requestReadTuningSignals()
 
     for (int i = 0; i < m_readTuningSignalCount; i++)
     {
-        const TuningObject* object = m_objects.objectPtr(m_readTuningSignalIndex + i);
+        const TuningSignal* object = m_objects.objectPtr(m_readTuningSignalIndex + i);
         if (object == nullptr)
         {
             assert(object);
@@ -299,7 +295,7 @@ void TuningObjectManager::requestReadTuningSignals()
 
 }
 
-void TuningObjectManager::requestWriteTuningSignals()
+void TuningSignalManager::requestWriteTuningSignals()
 {
     QMutexLocker l(&m_mutex);
 
@@ -312,7 +308,7 @@ void TuningObjectManager::requestWriteTuningSignals()
 
     if (writeTuningSignalCount >= m_writeQueue.size())
     {
-        writeTuningSignalCount = (int)m_writeQueue.size();
+        writeTuningSignalCount = static_cast<int>(m_writeQueue.size());
     }
 
     // create the request
@@ -358,7 +354,7 @@ void TuningObjectManager::requestWriteTuningSignals()
     sendRequest(TDS_TUNING_SIGNALS_WRITE, m_writeTuningSignals);
 }
 
-void TuningObjectManager::processTuningSourcesInfo(const QByteArray& data)
+void TuningSignalManager::processTuningSourcesInfo(const QByteArray& data)
 {
 
     bool ok = m_tuningDataSourcesInfoReply.ParseFromArray(data.constData(), data.size());
@@ -417,7 +413,7 @@ void TuningObjectManager::processTuningSourcesInfo(const QByteArray& data)
     return;
 }
 
-void TuningObjectManager::processTuningSourcesState(const QByteArray& data)
+void TuningSignalManager::processTuningSourcesState(const QByteArray& data)
 {
 
     bool ok = m_tuningDataSourcesStatesReply.ParseFromArray(data.constData(), data.size());
@@ -468,7 +464,7 @@ void TuningObjectManager::processTuningSourcesState(const QByteArray& data)
 
 
 
-void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
+void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 {
     bool ok = m_readTuningSignalsReply.ParseFromArray(data.constData(), data.size());
 
@@ -504,7 +500,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
             continue;
         }
 
-        TuningObject* object = m_objects.objectPtrByHash(tss.signalhash());
+        TuningSignal* object = m_objects.objectPtrByHash(tss.signalhash());
         if (object == nullptr)
         {
 			writeLogError(tr("TcpTuningClient::processReadTuningSignals, object not found by hash: %1")
@@ -517,7 +513,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 
         object->setReadLowLimit(tss.readlowbound());
         object->setReadHighLimit(tss.readhighbound());
-        object->setValid(tss.valid());
+		object->state.setValid(tss.valid());
 
         bool writingFailed = false;
         object->onReceiveValue(tss.value(), writingFailed);
@@ -560,7 +556,7 @@ void TuningObjectManager::processReadTuningSignals(const QByteArray& data)
 }
 
 
-void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
+void TuningSignalManager::processWriteTuningSignals(const QByteArray& data)
 {
     bool ok = m_writeTuningSignalsReply.ParseFromArray(data.constData(), data.size());
 
@@ -599,7 +595,7 @@ void TuningObjectManager::processWriteTuningSignals(const QByteArray& data)
     processTuningSignals();
 }
 
-void TuningObjectManager::slot_serversArrived(HostAddressPort address1, HostAddressPort address2)
+void TuningSignalManager::slot_serversArrived(HostAddressPort address1, HostAddressPort address2)
 {
 	writeLogMessage(tr("TcpTuningClient::slot_configurationArrived"));
 
@@ -608,7 +604,7 @@ void TuningObjectManager::slot_serversArrived(HostAddressPort address1, HostAddr
     return;
 }
 
-void TuningObjectManager::slot_signalsUpdated(QByteArray data)
+void TuningSignalManager::slot_signalsUpdated(QByteArray data)
 {
 	QString errorStr;
 	if (loadDatabase(data, &errorStr) == false)
@@ -635,7 +631,7 @@ void TuningObjectManager::slot_signalsUpdated(QByteArray data)
 
 }
 
-void TuningObjectManager::slot_exists(QString appSignalID, bool* result, bool* ok)
+void TuningSignalManager::slot_exists(QString appSignalID, bool* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -652,7 +648,7 @@ void TuningObjectManager::slot_exists(QString appSignalID, bool* result, bool* o
 	*ok = true;
 }
 
-void TuningObjectManager::slot_valid(QString appSignalID, bool* result, bool* ok)
+void TuningSignalManager::slot_valid(QString appSignalID, bool* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -665,18 +661,18 @@ void TuningObjectManager::slot_valid(QString appSignalID, bool* result, bool* ok
 
 	QMutexLocker l(&m_mutex);
 
-	TuningObject* object = objectPtrByHash(hash);
+	TuningSignal* object = objectPtrByHash(hash);
 	if (object == nullptr)
 	{
 		*ok = false;
 		return;
 	}
 
-	*result = object->valid();
+	*result = object->state.valid();
 
 }
 
-void TuningObjectManager::slot_value(QString appSignalID, float* result, bool* ok)
+void TuningSignalManager::slot_value(QString appSignalID, float* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -689,7 +685,7 @@ void TuningObjectManager::slot_value(QString appSignalID, float* result, bool* o
 
 	QMutexLocker l(&m_mutex);
 
-	TuningObject* object = objectPtrByHash(hash);
+	TuningSignal* object = objectPtrByHash(hash);
 	if (object == nullptr)
 	{
 		*ok = false;
@@ -701,7 +697,7 @@ void TuningObjectManager::slot_value(QString appSignalID, float* result, bool* o
 	*result = object->value();
 }
 
-void TuningObjectManager::slot_setValue(QString appSignalID, float value, bool* ok)
+void TuningSignalManager::slot_setValue(QString appSignalID, float value, bool* ok)
 {
 	if (ok == nullptr)
 	{
@@ -717,7 +713,7 @@ void TuningObjectManager::slot_setValue(QString appSignalID, float value, bool* 
 
 	QMutexLocker l(&m_mutex);
 
-	TuningObject* baseObject = m_objects.objectPtrByHash(hash);
+	TuningSignal* baseObject = m_objects.objectPtrByHash(hash);
 	if (baseObject == nullptr)
 	{
 		*ok = false;
@@ -731,11 +727,11 @@ void TuningObjectManager::slot_setValue(QString appSignalID, float value, bool* 
 	}
 
 	baseObject->onSendValue(value);
-	baseObject->setWriting(true);
+	baseObject->state.setWriting(true);
 
 }
 
-void TuningObjectManager::slot_highLimit(QString appSignalID, float *result, bool* ok)
+void TuningSignalManager::slot_highLimit(QString appSignalID, float *result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -748,7 +744,7 @@ void TuningObjectManager::slot_highLimit(QString appSignalID, float *result, boo
 
 	QMutexLocker l(&m_mutex);
 
-	TuningObject* object = objectPtrByHash(hash);
+	TuningSignal* object = objectPtrByHash(hash);
 	if (object == nullptr)
 	{
 		*ok = false;
@@ -758,7 +754,7 @@ void TuningObjectManager::slot_highLimit(QString appSignalID, float *result, boo
 	*result = object->highLimit();
 }
 
-void TuningObjectManager::slot_lowLimit(QString appSignalID, float *result, bool* ok)
+void TuningSignalManager::slot_lowLimit(QString appSignalID, float *result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -771,7 +767,7 @@ void TuningObjectManager::slot_lowLimit(QString appSignalID, float *result, bool
 
 	QMutexLocker l(&m_mutex);
 
-	TuningObject* object = objectPtrByHash(hash);
+	TuningSignal* object = objectPtrByHash(hash);
 	if (object == nullptr)
 	{
 		*ok = false;
@@ -782,7 +778,7 @@ void TuningObjectManager::slot_lowLimit(QString appSignalID, float *result, bool
 }
 
 
-std::vector<TuningSource> TuningObjectManager::tuningSourcesInfo()
+std::vector<TuningSource> TuningSignalManager::tuningSourcesInfo()
 {
     std::vector<TuningSource> result;
 
@@ -798,7 +794,7 @@ std::vector<TuningSource> TuningObjectManager::tuningSourcesInfo()
     return result;
 }
 
-bool TuningObjectManager::tuningSourceInfo(quint64 id, TuningSource& result)
+bool TuningSignalManager::tuningSourceInfo(quint64 id, TuningSource& result)
 {
     QMutexLocker l(&m_mutex);
 
@@ -816,7 +812,7 @@ bool TuningObjectManager::tuningSourceInfo(quint64 id, TuningSource& result)
     return true;
 }
 
-void TuningObjectManager::writeTuningSignal(Hash hash, float value)
+void TuningSignalManager::writeTuningSignal(Hash hash, float value)
 {
     QMutexLocker l(&m_mutex);
 
@@ -827,13 +823,13 @@ void TuningObjectManager::writeTuningSignal(Hash hash, float value)
     l.unlock();
 }
 
-void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& objects)
+void TuningSignalManager::writeModifiedTuningSignals(std::vector<TuningSignal>& objects)
 {
     QMutexLocker l(&m_mutex);
 
-    for (TuningObject& editObject : objects)
+    for (TuningSignal& editObject : objects)
     {
-        if (editObject.userModified() == false)
+		if (editObject.state.userModified() == false)
         {
             continue;
 		}
@@ -847,13 +843,13 @@ void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& 
 		// set edit value and writing flags to edit object
 		//
 
-		editObject.clearUserModified();
-		editObject.setWriting(true);
+		editObject.state.clearUserModified();
+		editObject.state.setWriting(true);
 
 		// set edit value and writing flags to base object
 		//
 
-		TuningObject* baseObject = m_objects.objectPtrByHash(cmd.m_hash);
+		TuningSignal* baseObject = m_objects.objectPtrByHash(cmd.m_hash);
 		if (baseObject == nullptr)
 		{
 			assert(baseObject);
@@ -861,14 +857,14 @@ void TuningObjectManager::writeModifiedTuningObjects(std::vector<TuningObject>& 
 		}
 
 		baseObject->onSendValue(cmd.m_value);
-		baseObject->setWriting(true);
+		baseObject->state.setWriting(true);
 
 	}
 
     l.unlock();
 }
 
-QString TuningObjectManager::getStateToolTip()
+QString TuningSignalManager::getStateToolTip()
 {
 	Tcp::ConnectionState connectionState = getConnectionState();
 
@@ -880,7 +876,7 @@ QString TuningObjectManager::getStateToolTip()
 	return result;
 }
 
-void TuningObjectManager::connectTuningController(TuningController* controller)
+void TuningSignalManager::connectTuningController(TuningController* controller)
 {
 	if (controller == nullptr)
 	{
@@ -894,22 +890,22 @@ void TuningObjectManager::connectTuningController(TuningController* controller)
 		return; // This controller is already attached
 	}
 
-	qDebug()<<"TuningObjectManager::connectTuningController : connected";
+	qDebug()<<"TuningSignalManager::connectTuningController : connected";
 
 	m_tuningControllersMap[controller] = true;
 
-	connect(controller, &TuningController::signal_exists, this, &TuningObjectManager::slot_exists, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_valid, this, &TuningObjectManager::slot_valid, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_exists, this, &TuningSignalManager::slot_exists, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_valid, this, &TuningSignalManager::slot_valid, Qt::DirectConnection);
 
-	connect(controller, &TuningController::signal_value, this, &TuningObjectManager::slot_value, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_setValue, this, &TuningObjectManager::slot_setValue, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_value, this, &TuningSignalManager::slot_value, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_setValue, this, &TuningSignalManager::slot_setValue, Qt::DirectConnection);
 
-	connect(controller, &TuningController::signal_highLimit, this, &TuningObjectManager::slot_highLimit, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_lowLimit, this, &TuningObjectManager::slot_lowLimit, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_highLimit, this, &TuningSignalManager::slot_highLimit, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_lowLimit, this, &TuningSignalManager::slot_lowLimit, Qt::DirectConnection);
 
 }
 
-QString TuningObjectManager::networkErrorStr(NetworkError error)
+QString TuningSignalManager::networkErrorStr(NetworkError error)
 {
     switch (error)
     {
@@ -931,17 +927,17 @@ QString TuningObjectManager::networkErrorStr(NetworkError error)
 }
 
 
-void TuningObjectManager::writeLogError(const QString& message)
+void TuningSignalManager::writeLogError(const QString& message)
 {
 	Q_UNUSED(message);
 }
 
-void TuningObjectManager::writeLogWarning(const QString& message)
+void TuningSignalManager::writeLogWarning(const QString& message)
 {
 	Q_UNUSED(message);
 }
 
-void TuningObjectManager::writeLogMessage(const QString& message)
+void TuningSignalManager::writeLogMessage(const QString& message)
 {
 	Q_UNUSED(message);
 }

@@ -1,14 +1,67 @@
-#ifndef TUNINGOBJECT_H
-#define TUNINGOBJECT_H
+#ifndef TUNINGSIGNAL_H
+#define TUNINGSIGNAL_H
 
 #include "Stable.h"
 #include "../lib/Hash.h"
 
-class TuningObject
+union TuningSignalStateFlags
+{
+	struct
+	{
+		quint32	m_valid : 1;
+		quint32	m_overflow : 1;
+		quint32	m_underflow : 1;
+		quint32	m_userModified : 1;
+		quint32	m_writing : 1;
+		quint32	m_needRedraw : 1;
+	};
+
+	quint32 all;
+
+};
+
+struct TuningSignalState
+{
+
+	friend class TuningSignal;
+
+private:
+
+	TuningSignalStateFlags m_flags;
+
+	float m_value = 0;
+	float m_editValue = 0;
+
+	int m_writingCounter = 0;
+
+public:
+
+	//
+
+	bool valid() const;
+	void setValid(bool value);
+
+	bool underflow() const;
+
+	bool overflow() const;
+
+	bool needRedraw();
+
+	bool userModified() const;
+	void clearUserModified();
+
+	bool writing() const;
+	void setWriting(bool value);
+};
+
+
+class TuningSignal
 {
 public:
 
-	TuningObject();
+	TuningSignal();
+
+	// Properties
 
 	QString customAppSignalID() const;
 	void setCustomAppSignalID(const QString& value);
@@ -28,16 +81,6 @@ public:
 	bool analog() const;
 	void setAnalog(bool value);
 
-    float value() const;
-    void setValue(float value);
-
-    void onReceiveValue(float value, bool &writingFailed);
-
-    float editValue() const;
-    void onEditValue(float value);
-
-    void onSendValue(float value);
-
     float defaultValue() const;
     void setDefaultValue(float value);
 
@@ -56,26 +99,29 @@ public:
     int decimalPlaces() const;
 	void setDecimalPlaces(int value);
 
-	bool valid() const;
-	void setValid(bool value);
-
-    bool underflow() const;
-
-	bool overflow() const;
-
     Hash appSignalHash() const;
 
-    bool redraw();
+	// Change state methods
 
-    bool userModified() const;
-    void clearUserModified();
+	float value() const;
+	void setValue(float value);
 
-    bool writing() const;
-    void setWriting(bool value);
+	void onReceiveValue(float value, bool &writingFailed);
 
-    bool limitsUnbalance() const;
+	float editValue() const;
+	void onEditValue(float value);
+
+	void onSendValue(float value);
+
+	bool limitsUnbalance() const;
+
+public:
+
+	TuningSignalState state;
 
 private:
+
+	// Params
 
 	QString m_customAppSignalID;
 	QString m_equipmentID;
@@ -86,8 +132,6 @@ private:
 	bool m_analog = false;
 
     float m_defaultValue = 0;
-    float m_value = 0;
-    float m_editValue = 0;
 
     float m_lowLimit = 0;
     float m_highLimit = 0;
@@ -97,27 +141,16 @@ private:
 
     int m_decimalPlaces = 0;
 
-    bool m_valid = false;
-    bool m_underflow = false;
-    bool m_overflow = false;
-
 	Hash m_appSignalHash = 0;
-
-    bool m_redraw = false;
-    bool m_userModified = false;
-
-    bool m_writing = false;
-    int m_writingCounter = 0;
-
 };
 
 
-class TuningObjectStorage
+class TuningSignalStorage
 {
 
 public:
 
-    TuningObjectStorage();
+	TuningSignalStorage();
 
     bool loadSignals(const QByteArray& data, QString *errorCode);
 
@@ -130,9 +163,9 @@ public:
 
     bool objectExists(Hash hash) const;
 
-    TuningObject *objectPtr(int index) const;
+	TuningSignal *objectPtr(int index) const;
 
-    TuningObject *objectPtrByHash(Hash hash) const;
+	TuningSignal *objectPtrByHash(Hash hash) const;
 
 private:
 
@@ -141,8 +174,8 @@ private:
 
     std::map<Hash, int> m_objectsMap;
 
-    std::vector<std::shared_ptr<TuningObject>> m_objects;
+	std::vector<std::shared_ptr<TuningSignal>> m_objects;
 
 };
 
-#endif // TUNINGOBJECT_H
+#endif // TUNINGSIGNAL_H

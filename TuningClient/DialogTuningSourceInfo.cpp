@@ -1,21 +1,21 @@
 #include "DialogTuningSourceInfo.h"
 #include "ui_DialogTuningSourceInfo.h"
 #include "MainWindow.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
-DialogTuningSourceInfo::DialogTuningSourceInfo(TuningObjectManager *tuningObjectManager, QWidget *parent, quint64 tuningSourceId) :
+DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager *tuningSignalManager, QWidget *parent, quint64 tuningSourceId) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
     ui(new Ui::DialogTuningSourceInfo),
 	m_tuningSourceId(tuningSourceId),
-	m_tuningObjectManager(tuningObjectManager)
+	m_tuningSignalManager(tuningSignalManager)
 {
-	assert(tuningObjectManager);
+	assert(tuningSignalManager);
 
 	ui->setupUi(this);
 
     TuningSource ts;
 
-	if (m_tuningObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == true)
+	if (m_tuningSignalManager->tuningSourceInfo(m_tuningSourceId, ts) == true)
     {
         setWindowTitle(ts.m_info.equipmentid().c_str());
     }
@@ -148,7 +148,7 @@ void DialogTuningSourceInfo::updateData()
 {
     TuningSource ts;
 
-	if (m_tuningObjectManager->tuningSourceInfo(m_tuningSourceId, ts) == false)
+	if (m_tuningSignalManager->tuningSourceInfo(m_tuningSourceId, ts) == false)
     {
         return;
     }

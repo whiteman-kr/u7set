@@ -4,7 +4,7 @@
 #include "Stable.h"
 #include "SchemaStorage.h"
 #include "../VFrame30/SchemaView.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
 class TuningSchemaView : public VFrame30::SchemaView
 {

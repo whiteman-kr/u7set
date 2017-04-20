@@ -66,7 +66,7 @@ private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createWorkspace(const TuningObjectStorage *objects);
+	void createWorkspace(const TuningSignalStorage *objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;

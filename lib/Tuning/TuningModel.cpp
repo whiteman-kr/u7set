@@ -16,7 +16,7 @@ TuningItemSorter::TuningItemSorter(int column, Qt::SortOrder order):
 {
 }
 
-bool TuningItemSorter::sortFunction(const TuningObject& o1, const TuningObject& o2, int column, Qt::SortOrder order) const
+bool TuningItemSorter::sortFunction(const TuningSignal& o1, const TuningSignal& o2, int column, Qt::SortOrder order) const
 {
 
 	QVariant v1;
@@ -119,20 +119,20 @@ bool TuningItemSorter::sortFunction(const TuningObject& o1, const TuningObject& 
         break;
     case TuningItemModel::Columns::Valid:
 		{
-			v1 = o1.valid();
-			v2 = o2.valid();
+			v1 = o1.state.valid();
+			v2 = o2.state.valid();
 		}
 		break;
 	case TuningItemModel::Columns::Underflow:
 		{
-			v1 = o1.underflow();
-			v2 = o2.underflow();
+			v1 = o1.state.underflow();
+			v2 = o2.state.underflow();
 		}
 		break;
 	case TuningItemModel::Columns::Overflow:
 		{
-			v1 = o1.overflow();
-			v2 = o2.overflow();
+			v1 = o1.state.overflow();
+			v2 = o2.state.overflow();
 		}
 		break;
 	default:
@@ -192,7 +192,7 @@ TuningItemModel::~TuningItemModel()
     }
 }
 
-void TuningItemModel::setObjects(std::vector<TuningObject>& objects)
+void TuningItemModel::setObjects(std::vector<TuningSignal>& objects)
 {
 	if (rowCount() > 0)
 	{
@@ -208,11 +208,11 @@ void TuningItemModel::setObjects(std::vector<TuningObject>& objects)
 	//
     if (objects.empty() == false)
 	{
-        beginInsertRows(QModelIndex(), 0, (int)objects.size() - 1);
+        beginInsertRows(QModelIndex(), 0, static_cast<int>(objects.size()) - 1);
 
         m_objects.swap(objects);
 
-        insertRows(0, (int)objects.size());
+        insertRows(0, static_cast<int>(objects.size()));
 
 		endInsertRows();
 	}
@@ -238,11 +238,11 @@ void TuningItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 		endRemoveColumns();
 	}
 
-	beginInsertColumns(QModelIndex(), 0, (int)columnsIndexes.size() - 1);
+	beginInsertColumns(QModelIndex(), 0, static_cast<int>(columnsIndexes.size()) - 1);
 
 	m_columnsIndexes = columnsIndexes;
 
-	insertColumns(0, (int)m_columnsIndexes.size());
+	insertColumns(0, static_cast<int>(m_columnsIndexes.size()));
 
 	endInsertColumns();
 
@@ -260,7 +260,7 @@ int TuningItemModel::columnIndex(int index) const
 }
 
 
-TuningObject* TuningItemModel::object(int index)
+TuningSignal* TuningItemModel::object(int index)
 {
 	if (index < 0 || index >= m_objects.size())
 	{
@@ -344,14 +344,14 @@ QModelIndex TuningItemModel::parent(const QModelIndex &index) const
 int TuningItemModel::columnCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return (int)m_columnsIndexes.size();
+	return static_cast<int>(m_columnsIndexes.size());
 
 }
 
 int TuningItemModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return (int)m_objects.size();
+	return static_cast<int>(m_objects.size());
 
 }
 
@@ -417,7 +417,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
         //QString str = QString("%1:%2").arg(row).arg(col);
         //qDebug()<<str;
 
-        const TuningObject& o = m_objects[row];
+        const TuningSignal& o = m_objects[row];
 
 		int displayIndex = m_columnsIndexes[col];
 
@@ -457,19 +457,19 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::Value))
 		{
-			if (o.valid() == true)
+			if (o.state.valid() == true)
 			{
 				if (o.analog() == false)
 				{
                     QString valueString = o.value() == 0 ? tr("0") : tr("1");
 
-                    if (o.userModified() == true)
+					if (o.state.userModified() == true)
                     {
                         QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
                         return tr("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
-                    if (o.writing() == true)
+					if (o.state.writing() == true)
                     {
                         QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
                         return tr("Writing %1").arg(editValueString);
@@ -481,24 +481,24 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				{
 					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
 
-                    if (o.userModified() == true)
+					if (o.state.userModified() == true)
                     {
                         QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
                         return QString("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
-                    if (o.writing() == true)
+					if (o.state.writing() == true)
                     {
                         QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
                         return tr("Writing %1").arg(editValueString);
                     }
 
-                    if (o.underflow() == true)
+					if (o.state.underflow() == true)
                     {
                         return tr("UNDRFLW");
                     }
 
-                    if (o.overflow() == true)
+					if (o.state.overflow() == true)
                     {
                         return tr("OVERFLW");
                     }
@@ -564,23 +564,23 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 			}
 			else
 			{
-                return ((int)o.defaultValue() == 0 ? tr("0") : tr("1"));
+                return (static_cast<int>(o.defaultValue()) == 0 ? tr("0") : tr("1"));
 			}
 		}
 
         if (displayIndex == static_cast<int>(Columns::Valid))
 		{
-            return (o.valid() == true) ? tr("") : tr("VALID");
+			return (o.state.valid() == true) ? tr("") : tr("VALID");
 		}
 
         if (displayIndex == static_cast<int>(Columns::Underflow))
 		{
-            return (o.underflow() == true) ? tr("UNDRFLW") : tr("");
+			return (o.state.underflow() == true) ? tr("UNDRFLW") : tr("");
 		}
 
         if (displayIndex == static_cast<int>(Columns::Overflow))
 		{
-            return (o.overflow() == true) ? tr("OVRFLW") : tr("");
+			return (o.state.overflow() == true) ? tr("OVRFLW") : tr("");
 		}
 	}
 	return QVariant();

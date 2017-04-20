@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
 namespace Ui {
 class DialogTuningSourceInfo;
@@ -14,7 +14,7 @@ class DialogTuningSourceInfo : public QDialog
     Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(TuningObjectManager *tuningObjectManager, QWidget *parent, quint64 tuningSourceId);
+	explicit DialogTuningSourceInfo(TuningSignalManager *tuningSignalManager, QWidget *parent, quint64 tuningSourceId);
     ~DialogTuningSourceInfo();
 
 protected:
@@ -31,7 +31,7 @@ private:
 private:
     Ui::DialogTuningSourceInfo *ui;
 
-	TuningObjectManager* m_tuningObjectManager = nullptr;
+	TuningSignalManager* m_tuningSignalManager = nullptr;
 };
 
 #endif // DIALOGTUNINGSOURCEINFO_H

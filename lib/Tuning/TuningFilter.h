@@ -2,7 +2,7 @@
 #define OBJECTFILTER_H
 
 #include "Stable.h"
-#include "../lib/Tuning/TuningObject.h"
+#include "../lib/Tuning/TuningSignal.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Hash.h"
 
@@ -95,11 +95,11 @@ public:
     bool load(QXmlStreamReader& reader, bool automatic);
 	bool save(QXmlStreamWriter& writer) const;
 
-    bool match(const TuningObject &object, bool checkValues) const;
+    bool match(const TuningSignal &object, bool checkValues) const;
 
-    void checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter);
+    void checkSignals(const TuningSignalStorage *objects, QStringList& errorLog, int &notFoundCounter);
 
-    void removeNotExistingSignals(const TuningObjectStorage *objects, int &removedCounter);
+    void removeNotExistingSignals(const TuningSignalStorage *objects, int &removedCounter);
 
 public:
 	// Properties
@@ -253,11 +253,11 @@ public:
 
     // Operations
 
-    void createAutomaticFilters(const TuningObjectStorage *objects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
+    void createAutomaticFilters(const TuningSignalStorage *objects, bool bySchemas, bool byEquipment, const QStringList &tuningSourcesEquipmentIds);
 
     void removeAutomaticFilters();
 
-    void checkSignals(const TuningObjectStorage *objects, bool &removedNotFound, QWidget* parentWidget);
+    void checkSignals(const TuningSignalStorage *objects, bool &removedNotFound, QWidget* parentWidget);
 
 protected:
 
@@ -276,7 +276,7 @@ public:
 
 private:
 
-    void checkFilterSignals(TuningFilter* filter, const std::vector<TuningObject> &tuningObjects, QStringList& errorLog, int &notFoundCounter);
+	//void checkFilterSignals(TuningFilter* filter, const std::vector<TuningSignal> &tuningSignals, QStringList& errorLog, int &notFoundCounter);
 
 private:
 

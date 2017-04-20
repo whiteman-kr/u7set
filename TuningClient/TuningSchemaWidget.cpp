@@ -4,18 +4,18 @@
 
 
 
-TuningSchemaWidget::TuningSchemaWidget(TuningObjectManager *tuningObjectManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString& globalScript) :
+TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager *tuningSignalManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString& globalScript) :
 	BaseSchemaWidget(schema, new TuningSchemaView(schemaStorage, globalScript)),
 	m_schemaStorage(schemaStorage)
 {
-	assert(tuningObjectManager);
+	assert(tuningSignalManager);
 	assert(m_schemaStorage);
 
 	// --
 	//
 	connect(tuningSchemaView(), &TuningSchemaView::signal_setSchema, this, &TuningSchemaWidget::slot_setSchema);
 
-	tuningObjectManager->connectTuningController(&tuningSchemaView()->tuningController());
+	tuningSignalManager->connectTuningController(&tuningSchemaView()->tuningController());
 
 }
 

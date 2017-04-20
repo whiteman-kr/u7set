@@ -3,7 +3,7 @@
 #include "TuningClientObjectManager.h"
 
 TuningClientObjectManager::TuningClientObjectManager()
-	:TuningObjectManager()
+	:TuningSignalManager()
 {
 
 }

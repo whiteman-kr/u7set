@@ -427,7 +427,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
 
-	writer.writeAttribute("SignalType", E::valueToString<SignalType>((int)signalType()));
+	writer.writeAttribute("SignalType", E::valueToString<SignalType>(static_cast<int>(signalType())));
 
 	writer.writeStartElement("Values");
 
@@ -624,7 +624,7 @@ void TuningFilter::addValue(const TuningFilterValue& value)
 
 int TuningFilter::valuesCount() const
 {
-    return (int)m_signalValuesVec.size();
+    return static_cast<int>(m_signalValuesVec.size());
 }
 
 void TuningFilter::removeValue(Hash hash)
@@ -835,7 +835,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 }
 
 
-bool TuningFilter::match(const TuningObject& object, bool checkValues) const
+bool TuningFilter::match(const TuningSignal& object, bool checkValues) const
 {
 	if (isEmpty() == true)
 	{
@@ -952,7 +952,7 @@ bool TuningFilter::match(const TuningObject& object, bool checkValues) const
 	return true;
 }
 
-void TuningFilter::checkSignals(const TuningObjectStorage *objects, QStringList& errorLog, int &notFoundCounter)
+void TuningFilter::checkSignals(const TuningSignalStorage *objects, QStringList& errorLog, int &notFoundCounter)
 {
     if (objects == nullptr)
     {
@@ -973,14 +973,14 @@ void TuningFilter::checkSignals(const TuningObjectStorage *objects, QStringList&
         }
     }
 
-    int childCount = (int)m_childFilters.size();
+    int childCount = static_cast<int>(m_childFilters.size());
     for (int i = 0; i < childCount; i++)
     {
         m_childFilters[i]->checkSignals(objects, errorLog, notFoundCounter);
     }
 }
 
-void TuningFilter::removeNotExistingSignals(const TuningObjectStorage *objects, int &removedCounter)
+void TuningFilter::removeNotExistingSignals(const TuningSignalStorage *objects, int &removedCounter)
 {
     if (objects == nullptr)
     {
@@ -1025,7 +1025,7 @@ void TuningFilter::removeNotExistingSignals(const TuningObjectStorage *objects, 
 
     }
 
-    int childCount = (int)m_childFilters.size();
+    int childCount = static_cast<int>(m_childFilters.size());
     for (int i = 0; i < childCount; i++)
     {
         m_childFilters[i]->removeNotExistingSignals(objects, removedCounter);
@@ -1359,7 +1359,7 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString *er
 
 }
 
-void TuningFilterStorage::createAutomaticFilters(const TuningObjectStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
+void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds)
 {
     if (objects == nullptr)
     {
@@ -1448,7 +1448,7 @@ void TuningFilterStorage::removeAutomaticFilters()
 
 }
 
-void TuningFilterStorage::checkSignals(const TuningObjectStorage *objects, bool& removedNotFound, QWidget* parentWidget)
+void TuningFilterStorage::checkSignals(const TuningSignalStorage *objects, bool& removedNotFound, QWidget* parentWidget)
 {
     if (objects == nullptr)
     {
