@@ -63,6 +63,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QString ObjectName READ objectName)
+
 	protected:
 		SchemaItem();
 
