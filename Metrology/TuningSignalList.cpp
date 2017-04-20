@@ -298,10 +298,6 @@ void TuningSourceTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool TuningSignalTable::m_showCustomID = true;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 TuningSignalTable::TuningSignalTable(QObject*)
 {
 }
@@ -392,7 +388,8 @@ QVariant TuningSignalTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case TUN_SIGNAL_LIST_COLUMN_RACK:			result = Qt::AlignCenter;	break;
-			case TUN_SIGNAL_LIST_COLUMN_ID:				result = Qt::AlignLeft;		break;
+			case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
+			case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case TUN_SIGNAL_LIST_COLUMN_STATE:			result = Qt::AlignCenter;	break;
@@ -471,7 +468,8 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 	switch (column)
 	{
 		case TUN_SIGNAL_LIST_COLUMN_RACK:			result = param.location().rack().caption();	break;
-		case TUN_SIGNAL_LIST_COLUMN_ID:				result = m_showCustomID == true ? param.customAppSignalID() : param.appSignalID();	break;
+		case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = param.appSignalID();				break;
+		case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();			break;
 		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.location().equipmentID();	break;
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
@@ -719,12 +717,6 @@ void TuningSignalListDialog::createInterface()
 	m_pShowSoucreAction->setCheckable(true);
 	m_pShowSoucreAction->setChecked(m_showSource);
 
-	m_pShowCustomIDAction = m_pViewShowMenu->addAction(tr("Custom ID"));
-	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(m_signalTable.showCustomID());
-	m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
-
-
 	m_pViewMenu->addMenu(m_pViewTypeADMenu);
 	m_pViewMenu->addSeparator();
 	m_pViewMenu->addMenu(m_pViewShowMenu);
@@ -742,7 +734,6 @@ void TuningSignalListDialog::createInterface()
 	connect(m_pTypeAnalogAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeAnalog);
 	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeDiscrete);
 	connect(m_pShowSoucreAction, &QAction::triggered, this, &TuningSignalListDialog::showSources);
-	connect(m_pShowCustomIDAction, &QAction::triggered, this, &TuningSignalListDialog::showCustomID);
 
 
 	m_pSourceView = new QTableView(this);
@@ -836,7 +827,7 @@ void TuningSignalListDialog::createContextMenu()
 void TuningSignalListDialog::updateSourceList()
 {
 	// update source list
-
+	//
 	m_sourceTable.clear();
 
 	QList<TuningSource> sourceList;
@@ -920,6 +911,7 @@ void TuningSignalListDialog::updateVisibleColunm()
 		hideColumn(c, false);
 	}
 
+	hideColumn(TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID, true);
 	hideColumn(TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID, true);
 
 	if (m_typeAD == E::SignalType::Discrete)
@@ -1070,15 +1062,6 @@ void TuningSignalListDialog::showSources()
 	{
 		m_pSourceView->hide();
 	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void TuningSignalListDialog::showCustomID()
-{
-	m_signalTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
-
-	updateSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

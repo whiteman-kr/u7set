@@ -304,7 +304,7 @@ QString MeasureMultiParam::rackCaption() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureMultiParam::signalID(bool showCustomID) const
+QString MeasureMultiParam::appSignalID() const
 {
 	QString result;
 
@@ -315,7 +315,7 @@ QString MeasureMultiParam::signalID(bool showCustomID) const
 			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (param.isValid() == true)
 			{
-				result = showCustomID == true ? param.customAppSignalID() : param.appSignalID();
+				result = param.appSignalID();
 			}
 		}
 		else
@@ -323,13 +323,49 @@ QString MeasureMultiParam::signalID(bool showCustomID) const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = (showCustomID == true ? inParam.customAppSignalID() : inParam.appSignalID()) + MultiTextDivider;
+				result = inParam.appSignalID() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 			if (outParam.isValid() == true)
 			{
-				result += (showCustomID == true ? outParam.customAppSignalID() : outParam.appSignalID());
+				result += outParam.appSignalID();
+			}
+		}
+
+	m_mutex.unlock();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureMultiParam::customSignalID() const
+{
+	QString result;
+
+	m_mutex.lock();
+
+		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		{
+			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (param.isValid() == true)
+			{
+				result = param.customAppSignalID();
+			}
+		}
+		else
+		{
+			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (inParam.isValid() == true)
+			{
+				result = inParam.customAppSignalID() + MultiTextDivider;
+			}
+
+			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+			if (outParam.isValid() == true)
+			{
+				result += outParam.customAppSignalID();
 			}
 		}
 
@@ -1003,8 +1039,6 @@ SignalBase::SignalBase(QObject *parent) :
 
 void SignalBase::clear()
 {
-	m_tuningBase.clear();
-
 	clearActiveSignal();
 
 	clearSignalListForMeasure();

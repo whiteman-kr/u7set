@@ -71,7 +71,7 @@ const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 const char* const ErrorType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduce"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduced"),
 };
 
 const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(ErrorType)/sizeof(ErrorType[0]);

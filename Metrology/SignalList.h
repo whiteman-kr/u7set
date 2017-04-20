@@ -19,7 +19,8 @@
 const char* const			SignalListColumn[] =
 {
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "ID"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Caption"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Chassis"),
@@ -39,26 +40,28 @@ const char* const			SignalListColumn[] =
 const int					SIGNAL_LIST_COLUMN_COUNT			= sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
 const int					SIGNAL_LIST_COLUMN_RACK				= 0,
-							SIGNAL_LIST_COLUMN_ID				= 1,
-							SIGNAL_LIST_COLUMN_EQUIPMENT_ID		= 2,
-							SIGNAL_LIST_COLUMN_CAPTION			= 3,
-							SIGNAL_LIST_COLUMN_CHASSIS			= 4,
-							SIGNAL_LIST_COLUMN_MODULE			= 5,
-							SIGNAL_LIST_COLUMN_PLACE			= 6,
-							SIGNAL_LIST_COLUMN_ADC				= 7,
-							SIGNAL_LIST_COLUMN_IN_PH_RANGE		= 8,
-							SIGNAL_LIST_COLUMN_IN_EL_RANGE		= 9,
-							SIGNAL_LIST_COLUMN_IN_EL_SENSOR		= 10,
-							SIGNAL_LIST_COLUMN_OUT_PH_RANGE		= 11,
-							SIGNAL_LIST_COLUMN_OUT_EL_RANGE		= 12,
-							SIGNAL_LIST_COLUMN_OUT_EL_SENSOR	= 13,
-							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 14,
-							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 15;
+							SIGNAL_LIST_COLUMN_APP_ID			= 1,
+							SIGNAL_LIST_COLUMN_CUSTOM_ID		= 2,
+							SIGNAL_LIST_COLUMN_EQUIPMENT_ID		= 3,
+							SIGNAL_LIST_COLUMN_CAPTION			= 4,
+							SIGNAL_LIST_COLUMN_CHASSIS			= 5,
+							SIGNAL_LIST_COLUMN_MODULE			= 6,
+							SIGNAL_LIST_COLUMN_PLACE			= 7,
+							SIGNAL_LIST_COLUMN_ADC				= 8,
+							SIGNAL_LIST_COLUMN_IN_PH_RANGE		= 9,
+							SIGNAL_LIST_COLUMN_IN_EL_RANGE		= 10,
+							SIGNAL_LIST_COLUMN_IN_EL_SENSOR		= 11,
+							SIGNAL_LIST_COLUMN_OUT_PH_RANGE		= 12,
+							SIGNAL_LIST_COLUMN_OUT_EL_RANGE		= 13,
+							SIGNAL_LIST_COLUMN_OUT_EL_SENSOR	= 14,
+							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 15,
+							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 16;
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
 							100,	// SIGNAL_LIST_COLUMN_RACK
-							250,	// SIGNAL_LIST_COLUMN_ID
+							250,	// SIGNAL_LIST_COLUMN_APP_ID
+							250,	// SIGNAL_LIST_COLUMN_CUSTOM_ID
 							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_LIST_COLUMN_CAPTION
 							 60,	// SIGNAL_LIST_COLUMN_CHASSIS
@@ -91,7 +94,6 @@ private:
 	mutable QMutex			m_signalMutex;
 	QList<Metrology::Signal*> m_signalList;
 
-	static bool				m_showCustomID;
 	static bool				m_showADCInHex;
 
 	int						columnCount(const QModelIndex &parent) const;
@@ -108,9 +110,6 @@ public:
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
-
-	bool					showCustomID() const { return m_showCustomID; }
-	void					setShowCustomID(bool show) { m_showCustomID = show; }
 
 	bool					showADCInHex() const { return m_showADCInHex; }
 	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
@@ -150,7 +149,6 @@ private:
 	QAction*				m_pTypeInputAction = nullptr;
 	QAction*				m_pTypeInternalAction = nullptr;
 	QAction*				m_pTypeOutputAction = nullptr;
-	QAction*				m_pShowCustomIDAction = nullptr;
 	QAction*				m_pShowADCInHexAction = nullptr;
 
 	QTableView*				m_pView = nullptr;
@@ -213,7 +211,6 @@ private slots:
 	void					showTypeInternal();
 	void					showTypeOutput();
 
-	void					showCustomID();
 	void					showADCInHex();
 
 	void					onContextMenu(QPoint);

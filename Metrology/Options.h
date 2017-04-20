@@ -284,7 +284,6 @@ public:
 const char* const		MeasureViewParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Displaing type of signal ID"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement that has not error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over limit error"),
 						QT_TRANSLATE_NOOP("Options.h", "Color measurement over control error"),
@@ -293,10 +292,9 @@ const char* const		MeasureViewParam[] =
 const int				MWO_PARAM_COUNT					= sizeof(MeasureViewParam)/sizeof(MeasureViewParam[0]);
 
 const int				MWO_PARAM_FONT					= 0,
-						MWO_PARAM_ID					= 1,
-						MWO_PARAM_COLOR_NOT_ERROR		= 2,
-						MWO_PARAM_COLOR_LIMIT_ERROR		= 3,
-						MWO_PARAM_COLOR_CONTROL_ERROR	= 4;
+						MWO_PARAM_COLOR_NOT_ERROR		= 1,
+						MWO_PARAM_COLOR_LIMIT_ERROR		= 2,
+						MWO_PARAM_COLOR_CONTROL_ERROR	= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -317,7 +315,7 @@ const int				SIGNAL_ID_TYPE_APP			= 0,
 
 #define					COLOR_NOT_ERROR				QColor(0xA0, 0xFF, 0xA0)
 #define					COLOR_OVER_LIMIT_ERROR		QColor(0xFF, 0xA0, 0xA0)
-#define					COLOR_OVER_CONTROL_ERROR	QColor(0xFF, 0xA0, 0x00)
+#define					COLOR_OVER_CONTROL_ERROR	QColor(0xFF, 0xD0, 0xA0)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -342,8 +340,6 @@ private:
 	QFont				m_font;
 	QFont				m_fontBold;
 
-	int					m_signalIdType = SIGNAL_ID_TYPE_CUSTOM;
-
 	QColor				m_colorNotError = COLOR_NOT_ERROR;
 	QColor				m_colorErrorLimit = COLOR_OVER_LIMIT_ERROR;
 	QColor				m_colorErrorControl = COLOR_OVER_CONTROL_ERROR;
@@ -358,9 +354,6 @@ public:
 
 	QFont				fontBold() const { return m_fontBold; }
 	void				setFontBold(QFont font) { m_fontBold = font; }
-
-	int					signalIdType() const { return m_signalIdType; }
-	void				setSignalIdType(int type) { m_signalIdType = type; }
 
 	QColor				colorNotError() const { return m_colorNotError; }
 	void				setColorNotError(QColor color) { m_colorNotError = color; }
@@ -388,8 +381,7 @@ public:
 const char* const		SignalInfoParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show Custom ID"),
-						QT_TRANSLATE_NOOP("Options.h", "Show Electric state"),
+						QT_TRANSLATE_NOOP("Options.h", "Show electric state"),
 						QT_TRANSLATE_NOOP("Options.h", "Show ADC state"),
 						QT_TRANSLATE_NOOP("Options.h", "Show ADC (hex) state"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
@@ -400,19 +392,18 @@ const char* const		SignalInfoParam[] =
 const int				SIO_PARAM_COUNT					= sizeof(SignalInfoParam)/sizeof(SignalInfoParam[0]);
 
 const int				SIO_PARAM_FONT					= 0,
-						SIO_PARAM_ID					= 1,
-						SIO_PARAM_ELECTRIC_STATE		= 2,
-						SIO_PARAM_ADC_STATE				= 3,
-						SIO_PARAM_ADC_HEX_STATE			= 4,
-						SIO_PARAM_COLOR_FLAG_VALID		= 5,
-						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 6,
-						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 7;
+						SIO_PARAM_ELECTRIC_STATE		= 1,
+						SIO_PARAM_ADC_STATE				= 2,
+						SIO_PARAM_ADC_HEX_STATE			= 3,
+						SIO_PARAM_COLOR_FLAG_VALID		= 4,
+						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 5,
+						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 6;
 
 // ----------------------------------------------------------------------------------------------
 
 #define					COLOR_FLAG_VALID		QColor(0xFF, 0xA0, 0xA0)
-#define					COLOR_FLAG_OVERFLOW		QColor(0xFF, 0xA0, 0x00)
-#define					COLOR_FLAG_OVERBREAK	QColor(0xFF, 0xA0, 0x00)
+#define					COLOR_FLAG_OVERFLOW		QColor(0xFF, 0xD0, 0xA0)
+#define					COLOR_FLAG_OVERBREAK	QColor(0xFF, 0xD0, 0xA0)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -430,7 +421,6 @@ private:
 
 	QFont				m_font;
 
-	bool				m_showCustomID = true;
 	bool				m_showElectricState = false;
 	bool				m_showAdcState = false;
 	bool				m_showAdcHexState = false;
@@ -443,9 +433,6 @@ public:
 
 	QFont&				font() { return m_font; }
 	void				setFont(QFont font) { m_font = font; }
-
-	bool				showCustomID() const { return m_showCustomID; }
-	void				setShowCustomID(bool show) { m_showCustomID = show; }
 
 	bool				showElectricState() const { return m_showElectricState; }
 	void				setShowElectricState(bool show) { m_showElectricState = show; }
@@ -613,9 +600,8 @@ public:
 
 const char* const		LinearityParamName[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Limit error"),
-						QT_TRANSLATE_NOOP("Options.h", "Control error"),
-						QT_TRANSLATE_NOOP("Options.h", "Error type"),
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
+						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
 						QT_TRANSLATE_NOOP("Options.h", "Show absolute error of input as ..."),
 						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
@@ -631,20 +617,19 @@ const char* const		LinearityParamName[] =
 
 const int				LO_PARAM_COUNT				= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
 
-const int				LO_PARAM_ERROR				= 0,
-						LO_PARAM_ERROR_CTRL			= 1,
-						LO_PARAM_ERROR_TYPE			= 2,
-						LO_PARAM_SHOW_INPUT_ERROR	= 3,
-						LO_PARAM_MEASURE_TIME		= 4,
-						LO_PARAM_MEASURE_IN_POINT	= 5,
-						LO_PARAM_RANGE_TYPE			= 6,
-						LO_PARAM_POINT_COUNT		= 7,
-						LO_PARAM_LOW_RANGE			= 8,
-						LO_PARAM_HIGH_RANGE			= 9,
-						LO_PARAM_VALUE_POINTS		= 10,
-						LO_PARAM_LIST_TYPE			= 11,
-						LO_PARAM_SHOW_INPUT_RANGE	= 12,
-						LO_PARAM_SHOW_OUTPUT_RANGE	= 13;
+const int				LO_PARAM_ERROR_LIMIT		= 0,
+						LO_PARAM_ERROR_TYPE			= 1,
+						LO_PARAM_SHOW_INPUT_ERROR	= 2,
+						LO_PARAM_MEASURE_TIME		= 3,
+						LO_PARAM_MEASURE_IN_POINT	= 4,
+						LO_PARAM_RANGE_TYPE			= 5,
+						LO_PARAM_POINT_COUNT		= 6,
+						LO_PARAM_LOW_RANGE			= 7,
+						LO_PARAM_HIGH_RANGE			= 8,
+						LO_PARAM_VALUE_POINTS		= 9,
+						LO_PARAM_LIST_TYPE			= 10,
+						LO_PARAM_SHOW_INPUT_RANGE	= 11,
+						LO_PARAM_SHOW_OUTPUT_RANGE	= 12;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -707,7 +692,6 @@ private:
 	LinearityPointBase	m_pointBase;												// list of measurement points
 
 	double				m_errorLimit = 0.2;											// permissible error is given by specified documents
-	double				m_errorCtrl = 0.1;											// control error is given by metrologists
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;					// type of error absolute or reduced
 	int					m_showInputErrorType = LO_SHOW_INPUT_ERROR_ELECTRIC;		// type of displaing input error
 
@@ -728,9 +712,6 @@ public:
 
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
-
-	double				errorCtrl() const { return m_errorCtrl; }
-	void				setErrorCtrl(double errorCtrl) { m_errorCtrl = errorCtrl; }
 
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
@@ -753,8 +734,8 @@ public:
 	double				highLimitRange() const { return m_highLimitRange; }
 	void				setHighLimitRange(double highLimit) { m_highLimitRange = highLimit; }
 
-	int					viewType() const { return m_rangeType; }
-	void				setViewType(int type) { m_rangeType = type; }
+	int					viewType() const { return m_viewType; }
+	void				setViewType(int type) { m_viewType = type; }
 
 	bool				showInputRangeColumn() const { return m_showInputRangeColumn; }
 	void				setShowInputRangeColumn(bool show) { m_showInputRangeColumn = show; }
@@ -780,8 +761,7 @@ public:
 
 const char* const		ComparatorParamName[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Limit error"),
-						QT_TRANSLATE_NOOP("Options.h", "Control error"),
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
 						QT_TRANSLATE_NOOP("Options.h", "Start value"),
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
 						QT_TRANSLATE_NOOP("Options.h", "Enable measure hysteresis"),
@@ -791,13 +771,12 @@ const char* const		ComparatorParamName[] =
 
 const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
 
-const int				CO_PARAM_ERROR				= 0,
-						CO_PARAM_ERROR_CTRL			= 1,
-						CO_PARAM_START_VALUE		= 2,
-						CO_PARAM_ERROR_TYPE			= 3,
-						CO_PARAM_ENABLE_HYSTERESIS	= 4,
-						CO_PARAM_COMPARATOR_INDEX	= 5,
-						CO_PARAM_ADDITIONAL_CHECK	= 6;
+const int				CO_PARAM_ERROR_LIMIT		= 0,
+						CO_PARAM_START_VALUE		= 1,
+						CO_PARAM_ERROR_TYPE			= 2,
+						CO_PARAM_ENABLE_HYSTERESIS	= 3,
+						CO_PARAM_COMPARATOR_INDEX	= 4,
+						CO_PARAM_ADDITIONAL_CHECK	= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -815,7 +794,6 @@ public:
 public:
 
 	double				m_errorValue = 0.2;								// permissible error is given by specified documents
-	double				m_errorCtrl = 0.1;								// control error is given by metrologists
 	double				m_startValue = 0.1;								// start value is given by metrologists
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;		// type of error absolute or reduced
 

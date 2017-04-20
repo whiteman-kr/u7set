@@ -77,7 +77,8 @@ public:
 	void					setOutputSignalType(int type) { m_outputSignalType = type; }
 
 	QString					rackCaption() const;
-	QString					signalID(bool showCustomID) const;
+	QString					appSignalID() const;
+	QString					customSignalID() const;
 	QString					equipmentID() const;
 	QString					chassisStr() const;
 	QString					moduleStr() const;
