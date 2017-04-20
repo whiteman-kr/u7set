@@ -37,6 +37,7 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
+		static const QString analogText;
 		static const QString placeholderText;
 		static const QString label;
 		static const QString caption;
@@ -81,6 +82,7 @@ namespace VFrame30
 		static const QString appSignalIDs;
 		static const QString appSignalId;
 		static const QString connectionId;
+		static const QString signalSource;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;
@@ -120,6 +122,7 @@ namespace VFrame30
 
 		static const QString scriptGlobalVariableView;
 		static const QString scriptGlobalVariableTuning;
+		static const QString scriptGlobalVariableSignals;
 	};
 
 }

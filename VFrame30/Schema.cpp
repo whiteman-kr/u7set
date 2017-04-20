@@ -221,7 +221,7 @@ namespace VFrame30
 						SchemaView* view = drawParam->schemaView();
 						assert(view);
 
-						item->preDrawEvent(view->globalScript(), view->jsEngine(), view);
+						item->preDrawEvent(view->globalScript(), view->jsEngine());
 					}
 
 					item->Draw(drawParam, this, pLayer);
@@ -229,6 +229,13 @@ namespace VFrame30
 					if (item->isCommented() == true)
 					{
 						item->drawCommentDim(drawParam);
+					}
+
+					// Draw lastScriptError after drawing item
+					//
+					if (item->lastScriptError().isEmpty() == false)
+					{
+						item->DrawScriptError(drawParam);
 					}
 				}
 			}

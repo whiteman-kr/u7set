@@ -224,3 +224,24 @@ QString MonitorSchemaView::globalScript() const
 	return m_schemaManager->globalScript();
 }
 
+QJSEngine* MonitorSchemaView::jsEngine()
+{
+	bool addSignalManager = false;
+	if (m_jsEngineGlobalsWereCreated == false)
+	{
+		addSignalManager = true;
+	}
+
+	QJSEngine* result = VFrame30::SchemaView::jsEngine();
+
+	if (addSignalManager == true)
+	{
+		ScriptSignalManager* signalManager = new ScriptSignalManager(result, &theSignals);
+		QJSValue jsValue = m_jsEngine.newQObject(signalManager);
+
+		result->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsValue);
+	}
+
+	return result;
+}
+

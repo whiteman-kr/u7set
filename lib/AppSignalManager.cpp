@@ -1,4 +1,36 @@
 #include "../lib/AppSignalManager.h"
+#include <QJSEngine>
+
+ScriptSignalManager::ScriptSignalManager(QJSEngine* engine, const AppSignalManager* signalManager)	:
+	m_engine(engine),
+	m_signalManager(signalManager)
+{
+	assert(m_engine);
+	assert(m_signalManager);
+}
+
+QObject* ScriptSignalManager::signal(QString signalId) const
+{
+	return m_signalManager->signal(signalId);
+}
+
+QObject* ScriptSignalManager::signal(Hash signalHash) const
+{
+	return m_signalManager->signal(signalHash);
+}
+
+QObject* ScriptSignalManager::signalState(QString signalId) const
+{
+	assert(false);
+	return nullptr;
+}
+
+QObject* ScriptSignalManager::signalState(Hash /*signalHash*/) const
+{
+	assert(false);
+	return nullptr;
+}
+
 
 AppSignalManager::AppSignalManager()
 {
@@ -185,7 +217,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 	return;
 }
 
-AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found)
+AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 {
 	if (signalHash == 0)
 	{
@@ -213,13 +245,13 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found)
 	return result;
 }
 
-AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found)
+AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
 {
 	Hash h = ::calcHash(appSignalId);
 	return signalState(h, found);
 }
 
-int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result)
+int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result) const
 {
 	if (result == nullptr)
 	{
@@ -255,7 +287,7 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 	return found;
 }
 
-int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result)
+int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result) const
 {
 	std::vector<Hash> appSignalHashes;
 	appSignalHashes.reserve(appSignalIds.size());
@@ -270,3 +302,46 @@ int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std:
 
 	return signalState(appSignalHashes, result);
 }
+
+QObject* AppSignalManager::signal(QString signalId) const
+{
+	Hash signalHash = ::calcHash(signalId);
+	return signal(signalHash);
+}
+
+QObject* AppSignalManager::signal(Hash signalHash) const
+{
+	Signal* s = new Signal();
+	bool ok = signal(signalHash, s);
+
+	if (ok == false)
+	{
+		delete s;
+		return nullptr;
+	}
+
+	return s;
+}
+
+//QObject* AppSignalManager::signalState(QString signalId) const
+//{
+//	Hash signalHash = ::calcHash(signalId);
+//	return signalState(signalHash);
+//}
+
+//QObject* AppSignalManager::signalState(Hash signalHash) const
+//{
+//	AppSignalState* state = new AppSignalState();
+//	bool found = false;
+//	*state = signalState(signalHash, &found);
+
+//	if (found == false)
+//	{
+//		delete state;
+//		return nullptr;
+//	}
+
+//	return state;
+//}
+
+

@@ -30,6 +30,7 @@ namespace VFrame30
 	const QString PropertyNames::drawRect("DrawRect");
 	const QString PropertyNames::textColor("TextColor");
 	const QString PropertyNames::text("Text");
+	const QString PropertyNames::analogText("AnalogText");
 	const QString PropertyNames::placeholderText("PlaceholderText");
 	const QString PropertyNames::label("Label");
 	const QString PropertyNames::caption("Caption");
@@ -74,6 +75,8 @@ namespace VFrame30
 	const QString PropertyNames::appSignalIDs("AppSignalIDs");
 	const QString PropertyNames::appSignalId("AppSignalID");
 	const QString PropertyNames::connectionId("ConnectionID");
+	const QString PropertyNames::signalSource("SignalSource");
+
 
 	const QString PropertyNames::behaviourCategory("Behaviour");
 	const QString PropertyNames::appearanceCategory("Appearance");
@@ -177,4 +180,5 @@ QLineEdit:hover {
 
    const QString PropertyNames::scriptGlobalVariableView = {"view"};
    const QString PropertyNames::scriptGlobalVariableTuning = {"tuning"};
+   const QString PropertyNames::scriptGlobalVariableSignals = {"signals"};
 }

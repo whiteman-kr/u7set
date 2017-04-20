@@ -16,19 +16,16 @@ namespace VFrame30
 
 	SchemaItemValue::SchemaItemValue(SchemaUnit unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemValue::weight, SchemaItemValue::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemValue::lineWeight, SchemaItemValue::setLineWeight);
 
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemValue::lineColor, SchemaItemValue::setLineColor);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemValue::fillColor, SchemaItemValue::setFillColor)
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemValue::fill, SchemaItemValue::setFill);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemValue::drawRect, SchemaItemValue::setDrawRect);
 
 		// Text Category Properties
 		//
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemValue::textColor, SchemaItemValue::setTextColor);
-
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemValue::text, SchemaItemValue::setText);
 
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemValue::horzAlign, SchemaItemValue::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemValue::vertAlign, SchemaItemValue::setVertAlign);
@@ -37,6 +34,13 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemValue::getFontSize, SchemaItemValue::setFontSize);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
+
+		// Funtional
+		//
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalId, PropertyNames::functionalCategory, true, SchemaItemValue::signalId, SchemaItemValue::setSignalId);
+		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
+
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::analogText, PropertyNames::functionalCategory, true, SchemaItemValue::analogText, SchemaItemValue::setAnalogText);
 
 		// --
 		//
@@ -82,18 +86,20 @@ namespace VFrame30
 		//
 		Proto::SchemaItemValue* valueMessage = message->mutable_schemaitem()->mutable_value();
 
-		valueMessage->set_weight(m_weight);
+		valueMessage->set_weight(m_lineWeight);
 		valueMessage->set_linecolor(m_lineColor.rgba());
 		valueMessage->set_fillcolor(m_fillColor.rgba());
-		valueMessage->set_fill(m_fill);
 		valueMessage->set_drawrect(m_drawRect);
 
 		valueMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		valueMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
 
-		valueMessage->set_text(m_text.toStdString());
+		valueMessage->set_analogtext(m_analogText.toStdString());
 		valueMessage->set_textcolor(m_textColor.rgba());
 		m_font.SaveData(valueMessage->mutable_font());
+
+		valueMessage->set_signalid(m_signalId.toStdString());
+		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 
 		return true;
 	}
@@ -124,11 +130,10 @@ namespace VFrame30
 
 		const Proto::SchemaItemValue& valueMessage = message.schemaitem().value();
 
-		m_weight = valueMessage.weight();
+		m_lineWeight = valueMessage.weight();
 		m_lineColor = QColor::fromRgba(valueMessage.linecolor());
 		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
-		m_fill = valueMessage.fill();
-		m_text = QString::fromStdString(valueMessage.text());
+		m_analogText = QString::fromStdString(valueMessage.analogtext());
 		m_textColor = QColor::fromRgba(valueMessage.textcolor());
 		m_drawRect = valueMessage.drawrect();
 
@@ -136,6 +141,9 @@ namespace VFrame30
 		m_vertAlign = static_cast<E::VertAlign>(valueMessage.vertalign());
 
 		m_font.LoadData(valueMessage.font());
+
+		m_signalId = QString::fromStdString(valueMessage.signalid());
+		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
 
 		return true;
 	}
@@ -184,14 +192,11 @@ namespace VFrame30
 
 		// Filling rect 
 		//
-		if (fill() == true)
 		{
 			QPainter::RenderHints oldrenderhints = p->renderHints();
 			p->setRenderHint(QPainter::Antialiasing, false);
 
-			QColor qfillcolor(fillColor());
-
-			m_fillBrush->setColor(qfillcolor);
+			m_fillBrush->setColor(fillColor());
 			p->fillRect(r, *m_fillBrush);		// 22% если использовать Qcolor и намного меньше если использовать готовый Brush
 
 			p->setRenderHints(oldrenderhints);
@@ -201,7 +206,7 @@ namespace VFrame30
 		//
 		if (drawRect() == true)
 		{
-			m_rectPen->setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
+			m_rectPen->setWidthF(m_lineWeight == 0.0 ? drawParam->cosmeticPenWidth() : m_lineWeight);
 
 			p->setPen(*m_rectPen);
 			p->drawRect(r);
@@ -210,9 +215,9 @@ namespace VFrame30
 		// Drawing Text
 		//
 		MacrosExpander me;
-		QString text = me.parse(m_text, drawParam->session(), schema, this);
+		QString text = me.parse(m_analogText, drawParam->session(), schema, this);
 
-		if (m_text.isEmpty() == false)
+		if (m_analogText.isEmpty() == false)
 		{
 			p->setPen(textColor());
 			DrawHelper::drawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
@@ -224,7 +229,7 @@ namespace VFrame30
 	bool SchemaItemValue::searchText(const QString& text) const
 	{
 		return SchemaItem::searchText(text) ||
-				m_text.contains(text, Qt::CaseInsensitive);
+				m_analogText.contains(text, Qt::CaseInsensitive);
 	}
 
 	double SchemaItemValue::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
@@ -243,30 +248,30 @@ namespace VFrame30
 
 	// Weight property
 	//
-	double SchemaItemValue::weight() const
+	double SchemaItemValue::lineWeight() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return CUtils::RoundDisplayPoint(m_weight);
+			return CUtils::RoundDisplayPoint(m_lineWeight);
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(m_weight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			double pt = CUtils::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
 			return pt;
 		}
 	}
 
-	void SchemaItemValue::setWeight(double weight)
+	void SchemaItemValue::setLineWeight(double weight)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			m_weight = CUtils::RoundDisplayPoint(weight);
+			m_lineWeight = CUtils::RoundDisplayPoint(weight);
 		}
 		else
 		{
 			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
-			m_weight = pt;
+			m_lineWeight = pt;
 		}
 	}
 
@@ -303,17 +308,6 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	// Text property
-	//
-	const QString& SchemaItemValue::text() const
-	{
-		return m_text;
-	}
-	void SchemaItemValue::setText(QString value)
-	{
-		m_text = value;
-	}
-
 	// Align propertis
 	//
 	E::HorzAlign SchemaItemValue::horzAlign() const
@@ -335,18 +329,6 @@ namespace VFrame30
 		m_vertAlign = align;
 	}
 
-	// Fill property
-	//
-	bool SchemaItemValue::fill() const
-	{
-		return m_fill;
-	}
-	void SchemaItemValue::setFill(bool fill)
-	{
-		m_fill = fill;
-	}
-
-
 	bool SchemaItemValue::drawRect() const
 	{
 		return m_drawRect;
@@ -355,6 +337,35 @@ namespace VFrame30
 	void SchemaItemValue::setDrawRect(bool value)
 	{
 		m_drawRect = value;
+	}
+
+	QString SchemaItemValue::signalId() const
+	{
+		return m_signalId;
+	}
+
+	void SchemaItemValue::setSignalId(const QString& value)
+	{
+		m_signalId = value.trimmed();
+	}
+
+	E::SignalSource SchemaItemValue::signalSource() const
+	{
+		return m_signalSource;
+	}
+
+	void SchemaItemValue::setSignalSource(E::SignalSource value)
+	{
+		m_signalSource = value;
+	}
+
+	const QString& SchemaItemValue::analogText() const
+	{
+		return m_analogText;
+	}
+	void SchemaItemValue::setAnalogText(QString value)
+	{
+		m_analogText = value;
 	}
 }
 

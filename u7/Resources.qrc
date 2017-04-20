@@ -1,5 +1,4 @@
 <RCC>
-    <qresource prefix="/"/>
     <qresource prefix="/Images">
         <file>Images/cross.png</file>
         <file>Images/lock.png</file>
@@ -28,5 +27,8 @@
         <file>Images/SchemaTerminator.svg</file>
         <file>Images/SchemaItemPushButton.svg</file>
         <file>Images/SchemaItemLineEdit.svg</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>ScriptHelp/scripthelp.html</file>
     </qresource>
 </RCC>

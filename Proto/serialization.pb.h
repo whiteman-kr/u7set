@@ -5464,17 +5464,17 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 fillcolor() const;
   inline void set_fillcolor(::google::protobuf::uint32 value);
 
-  // optional string text = 4;
-  inline bool has_text() const;
-  inline void clear_text();
-  static const int kTextFieldNumber = 4;
-  inline const ::std::string& text() const;
-  inline void set_text(const ::std::string& value);
-  inline void set_text(const char* value);
-  inline void set_text(const char* value, size_t size);
-  inline ::std::string* mutable_text();
-  inline ::std::string* release_text();
-  inline void set_allocated_text(::std::string* text);
+  // optional string analogText = 4;
+  inline bool has_analogtext() const;
+  inline void clear_analogtext();
+  static const int kAnalogTextFieldNumber = 4;
+  inline const ::std::string& analogtext() const;
+  inline void set_analogtext(const ::std::string& value);
+  inline void set_analogtext(const char* value);
+  inline void set_analogtext(const char* value, size_t size);
+  inline ::std::string* mutable_analogtext();
+  inline ::std::string* release_analogtext();
+  inline void set_allocated_analogtext(::std::string* analogtext);
 
   // optional uint32 textColor = 5;
   inline bool has_textcolor() const;
@@ -5520,6 +5520,25 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 vertalign() const;
   inline void set_vertalign(::google::protobuf::int32 value);
 
+  // optional string signalId = 11;
+  inline bool has_signalid() const;
+  inline void clear_signalid();
+  static const int kSignalIdFieldNumber = 11;
+  inline const ::std::string& signalid() const;
+  inline void set_signalid(const ::std::string& value);
+  inline void set_signalid(const char* value);
+  inline void set_signalid(const char* value, size_t size);
+  inline ::std::string* mutable_signalid();
+  inline ::std::string* release_signalid();
+  inline void set_allocated_signalid(::std::string* signalid);
+
+  // optional int32 signalSource = 12 [default = 0];
+  inline bool has_signalsource() const;
+  inline void clear_signalsource();
+  static const int kSignalSourceFieldNumber = 12;
+  inline ::google::protobuf::int32 signalsource() const;
+  inline void set_signalsource(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemValue)
  private:
   inline void set_has_weight();
@@ -5528,8 +5547,8 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline void clear_has_linecolor();
   inline void set_has_fillcolor();
   inline void clear_has_fillcolor();
-  inline void set_has_text();
-  inline void clear_has_text();
+  inline void set_has_analogtext();
+  inline void clear_has_analogtext();
   inline void set_has_textcolor();
   inline void clear_has_textcolor();
   inline void set_has_font();
@@ -5542,22 +5561,28 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline void clear_has_horzalign();
   inline void set_has_vertalign();
   inline void clear_has_vertalign();
+  inline void set_has_signalid();
+  inline void clear_has_signalid();
+  inline void set_has_signalsource();
+  inline void clear_has_signalsource();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   double weight_;
   ::google::protobuf::uint32 linecolor_;
   ::google::protobuf::uint32 fillcolor_;
-  ::std::string* text_;
+  ::std::string* analogtext_;
   ::Proto::FontParam* font_;
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
   bool drawrect_;
   ::google::protobuf::int32 horzalign_;
   ::google::protobuf::int32 vertalign_;
+  ::std::string* signalid_;
+  ::google::protobuf::int32 signalsource_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15214,73 +15239,73 @@ inline void SchemaItemValue::set_fillcolor(::google::protobuf::uint32 value) {
   fillcolor_ = value;
 }
 
-// optional string text = 4;
-inline bool SchemaItemValue::has_text() const {
+// optional string analogText = 4;
+inline bool SchemaItemValue::has_analogtext() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void SchemaItemValue::set_has_text() {
+inline void SchemaItemValue::set_has_analogtext() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void SchemaItemValue::clear_has_text() {
+inline void SchemaItemValue::clear_has_analogtext() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void SchemaItemValue::clear_text() {
-  if (text_ != &::google::protobuf::internal::kEmptyString) {
-    text_->clear();
+inline void SchemaItemValue::clear_analogtext() {
+  if (analogtext_ != &::google::protobuf::internal::kEmptyString) {
+    analogtext_->clear();
   }
-  clear_has_text();
+  clear_has_analogtext();
 }
-inline const ::std::string& SchemaItemValue::text() const {
-  return *text_;
+inline const ::std::string& SchemaItemValue::analogtext() const {
+  return *analogtext_;
 }
-inline void SchemaItemValue::set_text(const ::std::string& value) {
-  set_has_text();
-  if (text_ == &::google::protobuf::internal::kEmptyString) {
-    text_ = new ::std::string;
+inline void SchemaItemValue::set_analogtext(const ::std::string& value) {
+  set_has_analogtext();
+  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
+    analogtext_ = new ::std::string;
   }
-  text_->assign(value);
+  analogtext_->assign(value);
 }
-inline void SchemaItemValue::set_text(const char* value) {
-  set_has_text();
-  if (text_ == &::google::protobuf::internal::kEmptyString) {
-    text_ = new ::std::string;
+inline void SchemaItemValue::set_analogtext(const char* value) {
+  set_has_analogtext();
+  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
+    analogtext_ = new ::std::string;
   }
-  text_->assign(value);
+  analogtext_->assign(value);
 }
-inline void SchemaItemValue::set_text(const char* value, size_t size) {
-  set_has_text();
-  if (text_ == &::google::protobuf::internal::kEmptyString) {
-    text_ = new ::std::string;
+inline void SchemaItemValue::set_analogtext(const char* value, size_t size) {
+  set_has_analogtext();
+  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
+    analogtext_ = new ::std::string;
   }
-  text_->assign(reinterpret_cast<const char*>(value), size);
+  analogtext_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* SchemaItemValue::mutable_text() {
-  set_has_text();
-  if (text_ == &::google::protobuf::internal::kEmptyString) {
-    text_ = new ::std::string;
+inline ::std::string* SchemaItemValue::mutable_analogtext() {
+  set_has_analogtext();
+  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
+    analogtext_ = new ::std::string;
   }
-  return text_;
+  return analogtext_;
 }
-inline ::std::string* SchemaItemValue::release_text() {
-  clear_has_text();
-  if (text_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SchemaItemValue::release_analogtext() {
+  clear_has_analogtext();
+  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = text_;
-    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = analogtext_;
+    analogtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void SchemaItemValue::set_allocated_text(::std::string* text) {
-  if (text_ != &::google::protobuf::internal::kEmptyString) {
-    delete text_;
+inline void SchemaItemValue::set_allocated_analogtext(::std::string* analogtext) {
+  if (analogtext_ != &::google::protobuf::internal::kEmptyString) {
+    delete analogtext_;
   }
-  if (text) {
-    set_has_text();
-    text_ = text;
+  if (analogtext) {
+    set_has_analogtext();
+    analogtext_ = analogtext;
   } else {
-    clear_has_text();
-    text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_analogtext();
+    analogtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -15430,6 +15455,98 @@ inline ::google::protobuf::int32 SchemaItemValue::vertalign() const {
 inline void SchemaItemValue::set_vertalign(::google::protobuf::int32 value) {
   set_has_vertalign();
   vertalign_ = value;
+}
+
+// optional string signalId = 11;
+inline bool SchemaItemValue::has_signalid() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItemValue::set_has_signalid() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItemValue::clear_has_signalid() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void SchemaItemValue::clear_signalid() {
+  if (signalid_ != &::google::protobuf::internal::kEmptyString) {
+    signalid_->clear();
+  }
+  clear_has_signalid();
+}
+inline const ::std::string& SchemaItemValue::signalid() const {
+  return *signalid_;
+}
+inline void SchemaItemValue::set_signalid(const ::std::string& value) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(value);
+}
+inline void SchemaItemValue::set_signalid(const char* value) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(value);
+}
+inline void SchemaItemValue::set_signalid(const char* value, size_t size) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemValue::mutable_signalid() {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  return signalid_;
+}
+inline ::std::string* SchemaItemValue::release_signalid() {
+  clear_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = signalid_;
+    signalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemValue::set_allocated_signalid(::std::string* signalid) {
+  if (signalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalid_;
+  }
+  if (signalid) {
+    set_has_signalid();
+    signalid_ = signalid;
+  } else {
+    clear_has_signalid();
+    signalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 signalSource = 12 [default = 0];
+inline bool SchemaItemValue::has_signalsource() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void SchemaItemValue::set_has_signalsource() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void SchemaItemValue::clear_has_signalsource() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void SchemaItemValue::clear_signalsource() {
+  signalsource_ = 0;
+  clear_has_signalsource();
+}
+inline ::google::protobuf::int32 SchemaItemValue::signalsource() const {
+  return signalsource_;
+}
+inline void SchemaItemValue::set_signalsource(::google::protobuf::int32 value) {
+  set_has_signalsource();
+  signalsource_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -100,11 +100,12 @@ namespace VFrame30
 		virtual void dump() const;
 
 		virtual void clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget);
-		virtual void preDrawEvent(QString globalScript, QJSEngine* engine, QWidget* parentWidget);
+		virtual bool preDrawEvent(QString globalScript, QJSEngine* engine);
 
 	protected:
-		void runScript(QJSValue& evaluatedJs, QJSEngine* engine, QWidget* parentWidget);
+		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
 		QJSValue evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const;
+		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
 		// Text search
@@ -133,6 +134,7 @@ namespace VFrame30
 		// Draw debug info
 		//
 		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
+		virtual void DrawScriptError(CDrawParam* drawParam) const;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
@@ -245,7 +247,9 @@ namespace VFrame30
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt() const;		
+		virtual QRectF boundingRectInDocPt() const;
+
+		QString lastScriptError() const;
 
 		// Data
 		//
@@ -260,8 +264,10 @@ namespace VFrame30
 		QString m_clickScript;		// Qt script on mouse left button click
 		QString m_preDrawScript;
 
-		mutable QJSValue m_jsClickScript;		// Evaluated m_clickScript
-		mutable QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript
+		QJSValue m_jsClickScript;		// Evaluated m_clickScript
+		QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript
+
+		mutable QString m_lastScriptError;
 
 	public:
 		static const QColor errorColor;

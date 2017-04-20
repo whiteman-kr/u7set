@@ -12,8 +12,20 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString Text READ text WRITE setText)
-		Q_PROPERTY(QString text READ text WRITE setText)
+		Q_PROPERTY(QString Text READ analogText WRITE setAnalogText)
+		Q_PROPERTY(QString analogText READ analogText WRITE setAnalogText)
+
+		Q_PROPERTY(double lineWeight READ lineWeight WRITE setLineWeight)
+		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
+
+		Q_PROPERTY(QColor lineColor READ lineColor WRITE setLineColor)
+		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+
+		Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor)
+		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
+
+		Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor)
+		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
 
 	public:
 		SchemaItemValue(void);
@@ -38,7 +50,7 @@ namespace VFrame30
 		// Text search
 		//
 	public:
-		virtual bool searchText(const QString& text) const override;
+		virtual bool searchText(const QString& analogText) const override;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -47,8 +59,8 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		double weight() const;
-		void setWeight(double weight);
+		double lineWeight() const;
+		void setLineWeight(double lineWeight);
 
 		QColor lineColor() const;
 		void setLineColor(QColor color);
@@ -59,9 +71,6 @@ namespace VFrame30
 		QColor textColor() const;
 		void setTextColor(QColor color);
 
-		const QString& text() const;
-		void setText(QString value);
-
 		E::HorzAlign horzAlign() const;
 		void setHorzAlign(E::HorzAlign align);
 
@@ -70,23 +79,39 @@ namespace VFrame30
 
 		DECLARE_FONT_PROPERTIES(Font);
 
-		bool fill() const;
-		void setFill(bool fill);
-
 		bool drawRect() const;
 		void setDrawRect(bool value);
 
+		QString signalId() const;
+		void setSignalId(const QString& value);
+
+		E::SignalSource signalSource() const;
+		void setSignalSource(E::SignalSource value);
+
+		const QString& analogText() const;
+		void setAnalogText(QString value);
+
 	private:
-		double m_weight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
+		double m_lineWeight = 0.0;
 		QColor m_lineColor = {qRgb(0x00, 0x00, 0x00)};
 		QColor m_fillColor = {qRgb(0xE0, 0xE0, 0xE0)};
 		QColor m_textColor = {qRgb(0x00, 0x00, 0x00)};
-		QString m_text = {"VALUE"};
+
+		QString m_analogText = {"%v"};
+
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 		FontParam m_font;
-		bool m_fill = true;
 		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
+
+		QString m_signalId;
+
+		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
+
+		// FillColor 1/2
+		// TextColor 1/2
+		// DiscreteText 0/1
+		//
 
 		// Drawing resources
 		//

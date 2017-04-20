@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "SchemaView.h"
+#include <QPainter>
 
 namespace VFrame30
 {
@@ -202,54 +203,50 @@ namespace VFrame30
 			return;
 		}
 
-		runScript(m_jsClickScript, engine, parentWidget);
+		runScript(m_jsClickScript, engine);
 
 		return;
 	}
 
-	void SchemaItem::preDrawEvent(QString globalScript, QJSEngine* engine, QWidget* parentWidget)
+	bool SchemaItem::preDrawEvent(QString globalScript, QJSEngine* engine)
 	{
-		if (engine == nullptr ||
-			parentWidget == nullptr)
+		if (engine == nullptr)
 		{
 			assert(engine);
-			assert(parentWidget);
-			return;
+			return false;
 		}
 
 		if (m_preDrawScript.trimmed().isEmpty() == true)
 		{
-			return;
+			return true;
 		}
 
 		// Evaluate script
 		//
 		if (m_jsPreDrawScript.isUndefined() == true)
 		{
-			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, parentWidget);
+			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, nullptr);
 		}
 
 		if (m_jsPreDrawScript.isError() == true ||
 			m_jsPreDrawScript.isNull() == true)
 		{
-			return;
+			return false;
 		}
 
-		runScript(m_jsPreDrawScript, engine, parentWidget);
+		bool result = runScript(m_jsPreDrawScript, engine);
 
-		return;
+		return result;
 	}
 
-	void SchemaItem::runScript(QJSValue& evaluatedJs, QJSEngine* engine, QWidget* parentWidget)
+	bool SchemaItem::runScript(QJSValue& evaluatedJs, QJSEngine* engine)
 	{
 		if (evaluatedJs.isUndefined() == true ||
 			evaluatedJs.isError() == true ||
-			engine == nullptr ||
-			parentWidget == nullptr)
+			engine == nullptr)
 		{
 			assert(engine);
-			assert(parentWidget);
-			return;
+			return false;
 		}
 
 		// Set argument list
@@ -265,17 +262,16 @@ namespace VFrame30
 		QJSValue jsResult = evaluatedJs.call(args);
 		if (jsResult.isError() == true)
 		{
-			reportSqriptError(jsResult, parentWidget);
-			return;
+			m_lastScriptError = formatSqriptError(jsResult);
+			return false;
 		}
 
-		return;
+		return true;
 	}
 
 	QJSValue SchemaItem::evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const
 	{
-		if (engine == nullptr ||
-			parentWidget == nullptr)
+		if (engine == nullptr)
 		{
 			assert(engine);
 			assert(parentWidget);
@@ -287,14 +283,34 @@ namespace VFrame30
 
 		if (result.isError() == true)
 		{
-			QMessageBox::critical(parentWidget, qAppName(),
-								  QString("Script evaluating error at line %1\nObject: %2\nMessage: %3")
-									.arg(result.property("lineNumber").toInt())
-									.arg(metaObject()->className())
-									.arg(result.toString()));
+			m_lastScriptError = formatSqriptError(result);
+
+			if (parentWidget != nullptr)
+			{
+				QMessageBox::critical(parentWidget, qAppName(), m_lastScriptError);
+			}
 		}
 
 		return result;
+	}
+
+	QString SchemaItem::formatSqriptError(const QJSValue& scriptValue) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QString str = QString("Script running uncaught exception at line %1\n"
+							  "\tItem: %2 %3\n"
+							  "\tStack: %4\n"
+							  "\tMessage: %5")
+					  .arg(scriptValue.property("lineNumber").toInt())
+					  .arg(guid().toString()).arg(metaObject()->className())
+					  .arg(scriptValue.property("stack").toString())
+					  .arg(scriptValue.toString());
+
+		return str;
 	}
 
 	void SchemaItem::reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const
@@ -374,8 +390,33 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, const QString& /*runOrderIndex*/) const
+	void SchemaItem::DrawDebugInfo(CDrawParam*, const QString&) const
 	{
+	}
+
+	void SchemaItem::DrawScriptError(CDrawParam* drawParam) const
+	{
+		if (m_lastScriptError.isEmpty() == true)
+		{
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		std::vector<SchemaPoint> points = getPointList();
+		QRectF r = {points[0].X, points[0].Y, 2000, 2000};
+
+		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		p->setPen(Qt::red);
+
+		DrawHelper::drawText(p,
+							 font,
+							 itemUnit(),
+							 m_lastScriptError,
+							 r,
+							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
+
+		return;
 	}
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
@@ -670,6 +711,11 @@ namespace VFrame30
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();
+	}
+
+	QString SchemaItem::lastScriptError() const
+	{
+		return m_lastScriptError;
 	}
 
 }
