@@ -9,10 +9,15 @@ TuningSchemaView::TuningSchemaView(SchemaStorage *schemaStorage, const QString& 
 	  m_schemaStorage(schemaStorage)
 {
 	setGlobalScript(globalScript);
+
+	m_timer = new QTimer();
+	connect(m_timer, &QTimer::timeout, this, &TuningSchemaView::onTimer);
+	m_timer->start(250);
 }
 
 TuningSchemaView::~TuningSchemaView()
 {
+	delete m_timer;
 }
 
 void TuningSchemaView::setSchema(QString schemaId)
@@ -25,6 +30,8 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	// Draw Schema
 	//
 	//VFrame30::SchemaView::paintEvent(pe);
+
+	//qDebug()<<"paintEvent";
 
 	QPainter p;
 	p.begin(this);
@@ -60,8 +67,15 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	return;
 }
 
-
-void TuningSchemaView::timerEvent(QTimerEvent* /*event*/)
+void TuningSchemaView::timerEvent(QTimerEvent*)
 {
+
 }
+
+
+void TuningSchemaView::onTimer()
+{
+	update();
+}
+
 
