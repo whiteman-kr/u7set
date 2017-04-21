@@ -13,6 +13,7 @@
 
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
+#include "../lib/CircularLogger.h"
 #include "../Proto/network.pb.h"
 
 
@@ -297,6 +298,7 @@ class UdpServerSocket : public UdpSocket
 private:
 	QHostAddress m_bindToAddress;
 	qint16 m_port;
+	std::shared_ptr<CircularLogger> m_logger;
 
 	QMutex m_clientMapMutex;
 
@@ -308,7 +310,7 @@ private:
 	virtual void onThreadFinished() final;
 
 public:
-	UdpServerSocket(const QHostAddress& bindToAddress, quint16 port);
+	UdpServerSocket(const QHostAddress& bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger);
 	virtual ~UdpServerSocket();
 
 	virtual void onSocketThreadStarted();

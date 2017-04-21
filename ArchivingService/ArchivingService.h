@@ -11,7 +11,11 @@ class ArchivingServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ArchivingServiceWorker(const QString &serviceName, int &argc, char **argv, const VersionInfo &versionInfo);
+	ArchivingServiceWorker(const QString &serviceName,
+						   int &argc,
+						   char **argv,
+						   const VersionInfo &versionInfo,
+						   std::shared_ptr<CircularLogger> logger);
 	~ArchivingServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -44,6 +48,8 @@ private:
 
 	HostAddressPort m_cfgServiceIP1;
 	HostAddressPort m_cfgServiceIP2;
+
+	std::shared_ptr<CircularLogger> m_logger;
 
 	QSettings m_settings;
 

@@ -19,7 +19,7 @@ namespace Tuning
 	class TcpTuningServer  : public Tcp::Server
 	{
 	public:
-		TcpTuningServer(TuningServiceWorker& service);
+		TcpTuningServer(TuningServiceWorker& service, std::shared_ptr<CircularLogger> logger);
 
 //		void setThread(TcpTuningServerThread* thread);
 
@@ -44,6 +44,8 @@ namespace Tuning
 		static const char* SCM_CLIENT_ID;
 
 		TuningServiceWorker& m_service;
+
+		std::shared_ptr<CircularLogger> m_logger;
 
 		Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
 		Network::GetTuningSourcesInfoReply m_getTuningSourcesInfoReply;
@@ -72,7 +74,7 @@ namespace Tuning
 	{
 	public:
 		TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server);
+								TcpTuningServer* server, std::shared_ptr<CircularLogger> logger);
 	};
 
 }

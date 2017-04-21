@@ -347,7 +347,7 @@ namespace Tuning
 
 	void TuningClientContext::readSignalState(Network::TuningSignalState& tss) const
 	{
-		// tss->signalHash is allready filled!
+		// tss->signalHash is already filled!
 		//
 		Hash signalHash = tss.signalhash();
 

@@ -11,21 +11,23 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER();			// init global CircularLogger object
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	logger.setLogCodeInfo(false);
+	LOGGER_INIT(logger);
+
+	logger->setLogCodeInfo(false);
 
 	VersionInfo vi = VERSION_INFO(1, 0);
 
-	DiagDataServiceWorker diagDataServiceWorker("RPCT Diag Data Service", argc, argv, vi);
+	DiagDataServiceWorker diagDataServiceWorker("RPCT Diag Data Service", argc, argv, vi, logger);
 
-	ServiceStarter serviceStarter(app, diagDataServiceWorker);
+	ServiceStarter serviceStarter(app, diagDataServiceWorker, logger);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	SHUTDOWN_LOGGER
+	LOGGER_SHUTDOWN(logger);
 
 	return result;
 }

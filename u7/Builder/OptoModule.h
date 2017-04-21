@@ -360,7 +360,7 @@ namespace Hardware
 						 QUuid transmitterUuid,
 						 const QString& lmID,
 						 Signal* appSignal,
-						 bool* signalAllreadyInList);
+						 bool* signalAlreadyInList);
 
 		QVector<OptoModule*> getOptoModulesSorted();
 

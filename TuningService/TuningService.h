@@ -2,7 +2,7 @@
 
 #include "../lib/Service.h"
 #include "../lib/ServiceSettings.h"
-#include "../lib/CfgLoaderWithLog.h"
+#include "../lib/CfgServerLoader.h"
 #include "../AppDataService/AppSignalStateEx.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
@@ -19,7 +19,11 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningServiceWorker(const QString &serviceName, int &argc, char **argv, const VersionInfo &versionInfo);
+		TuningServiceWorker(const QString &serviceName,
+							int &argc,
+							char **argv,
+							const VersionInfo &versionInfo,
+							std::shared_ptr<CircularLogger> logger);
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
@@ -78,6 +82,8 @@ namespace Tuning
 
 		HostAddressPort m_cfgServiceIP1;
 		HostAddressPort m_cfgServiceIP2;
+
+		std::shared_ptr<CircularLogger> m_logger;
 
 		TuningServiceSettings m_cfgSettings;
 

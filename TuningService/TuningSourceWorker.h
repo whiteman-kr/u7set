@@ -4,6 +4,7 @@
 
 #include "../lib/SimpleThread.h"
 #include "../lib/ServiceSettings.h"
+#include "../lib/CircularLogger.h"
 
 #include "TuningSource.h"
 #include "TuningMemory.h"
@@ -158,7 +159,8 @@ namespace Tuning
 
 	public:
 		TuningSourceWorker(const TuningServiceSettings& settings,
-						   const TuningSource& source);
+						   const TuningSource& source,
+						   std::shared_ptr<CircularLogger> logger);
 		~TuningSourceWorker();
 
 		quint32 sourceIP() const;
@@ -211,6 +213,7 @@ namespace Tuning
 		void onReplyReady();
 
 	private:
+		std::shared_ptr<CircularLogger> m_logger;
 
 		// data from tuning source
 		//
@@ -277,7 +280,10 @@ namespace Tuning
 	class TuningSourceWorkerThread : public SimpleThread
 	{
 	public:
-		TuningSourceWorkerThread(const TuningServiceSettings& settings, const TuningSource& source);
+		TuningSourceWorkerThread(const TuningServiceSettings& settings,
+								 const TuningSource& source,
+								 std::shared_ptr<CircularLogger> logger);
+
 		~TuningSourceWorkerThread();
 
 		quint32 sourceIP();
@@ -306,7 +312,9 @@ namespace Tuning
 		Q_OBJECT
 
 	public:
-		TuningSocketListener(const HostAddressPort& listenIP, TuningSourceWorkerThreadMap& sourceWorkerMap);
+		TuningSocketListener(const HostAddressPort& listenIP,
+							 TuningSourceWorkerThreadMap& sourceWorkerMap,
+							 std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListener();
 
 	signals:
@@ -332,6 +340,8 @@ namespace Tuning
 		HostAddressPort m_listenIP;
 		TuningSourceWorkerThreadMap& m_sourceWorkerMap;
 
+		std::shared_ptr<CircularLogger> m_logger;
+
 		QTimer m_timer;
 
 		QUdpSocket* m_socket = nullptr;
@@ -353,7 +363,9 @@ namespace Tuning
 	class TuningSocketListenerThread : public SimpleThread
 	{
 	public:
-		TuningSocketListenerThread(const HostAddressPort& listenIP, TuningSourceWorkerThreadMap& sourceWorkerMap);
+		TuningSocketListenerThread(const HostAddressPort& listenIP,
+								   TuningSourceWorkerThreadMap& sourceWorkerMap,
+								   std::shared_ptr<CircularLogger> logger);
 		~TuningSocketListenerThread();
 
 	private:

@@ -752,10 +752,11 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server) :
+	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger) :
 		m_listenAddressPort(listenAddressPort),
 		m_periodicTimer(this),
-		m_serverInstance(server)
+		m_serverInstance(server),
+		m_logger(logger)
 	{
 		assert(m_serverInstance != nullptr);
 
@@ -779,7 +780,6 @@ namespace Tcp
 		delete m_serverInstance;
 	}
 
-
 	void Listener::onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo)
 	{
 		Q_UNUSED(peerAddr)
@@ -789,9 +789,14 @@ namespace Tcp
 
 	void Listener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
 	{
-		Q_UNUSED(startOk)
-		Q_UNUSED(addr)
-		Q_UNUSED(errStr)
+		if (startOk == true)
+		{
+			DEBUG_LOG_MSG(m_logger, QString("CfgServer start listening %1 OK").arg(addr.addressPortStr()));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(m_logger, QString("CfgServer error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+		}
 	}
 
 
@@ -895,8 +900,10 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(const HostAddressPort &listenAddressPort, Server* server) :
-		SimpleThread(new Listener(listenAddressPort, server))
+	ServerThread::ServerThread(const HostAddressPort &listenAddressPort,
+							   Server* server,
+							   std::shared_ptr<CircularLogger> logger) :
+		SimpleThread(new Listener(listenAddressPort, server, logger))
 	{
 	}
 

@@ -43,18 +43,23 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(const QString& buildFolder);
+	CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgServer* getNewInstance() override;
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
 
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
+
 private:
 	void onRootFolderChange();
 	void readBuildXml();
 
 private:
+	std::shared_ptr<CircularLogger> m_logger;
+
 	QString m_buildXmlPathFileName;
 
 	Builder::BuildInfo m_buildInfo;
@@ -123,6 +128,8 @@ private:
 	QString m_configurationXmlPathFileName;
 	QString m_configurationXmlMd5;
 
+	std::shared_ptr<CircularLogger> m_logger;
+
 	QList<FileDownloadRequest> m_downloadQueue;
 	FileDownloadRequest m_currentDownloadRequest;
 
@@ -147,8 +154,6 @@ private:
 	void shutdown();
 
 	void onTimer();
-
-	virtual void onConnection() override;
 
 	void startDownload();
 	void resetStatuses();
@@ -187,7 +192,8 @@ public:
 				int appInstance,
 				const HostAddressPort& serverAddressPort1,
 				const HostAddressPort& serverAddressPort2,
-				bool enableDownloadCfg);
+				bool enableDownloadCfg,
+				std::shared_ptr<CircularLogger> logger);
 
 	virtual void onClientThreadStarted() override;
 
@@ -204,6 +210,9 @@ public:
 
 	bool isFileReady();
 
+	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
 	virtual void onStartDownload(const QString& fileName);
 	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
@@ -233,7 +242,8 @@ public:
 					int appInstance,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
-					bool enableDownloadCfg = false);
+					bool enableDownloadCfg,
+					std::shared_ptr<CircularLogger> logger);
 
 	CfgLoaderThread(CfgLoader* cfgLoader);
 

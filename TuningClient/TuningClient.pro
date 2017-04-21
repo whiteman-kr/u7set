@@ -145,7 +145,8 @@ SOURCES +=\
     SchemaStorage.cpp \
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
-    TuningSchemaWidget.cpp
+    TuningSchemaWidget.cpp \
+    ../lib/CircularLogger.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -192,7 +193,8 @@ HEADERS  += MainWindow.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
-    SchemaStorage.h
+    SchemaStorage.h \
+    ../lib/CircularLogger.h
 
 FORMS    += \
     DialogSettings.ui \

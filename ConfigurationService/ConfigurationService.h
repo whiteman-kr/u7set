@@ -14,7 +14,11 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	ConfigurationServiceWorker(const QString& serviceName,
+							   int& argc,
+							   char** argv,
+							   const VersionInfo& versionInfo,
+							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
@@ -44,6 +48,7 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 private:
+	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
@@ -56,40 +61,4 @@ private:
 
 	HostAddressPort m_clientIP;
 };
-
-
-// ------------------------------------------------------------------------------------
-//
-// ListenerWithLog class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class ListenerWithLog : public Tcp::Listener
-{
-public:
-	ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server);
-
-	virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr) override;
-};
-
-
-// ------------------------------------------------------------------------------------
-//
-// CfgServerWithLog class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class CfgServerWithLog : public CfgServer
-{
-public:
-	CfgServerWithLog(const QString& buildFolder);
-
-	virtual CfgServer* getNewInstance() override;
-
-	virtual void onConnection() override;
-	virtual void onDisconnection() override;
-
-	virtual void onFileSent(const QString& fileName) override;
-};
-
 

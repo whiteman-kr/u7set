@@ -39,7 +39,8 @@ SOURCES +=\
     ../lib/Queue.cpp \
     ../lib/WUtils.cpp \
     ../lib/DataProtocols.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    ../lib/CircularLogger.cpp
 
 HEADERS  += TcpClientMainWindow.h \
     ../lib/SimpleThread.h \
@@ -66,7 +67,8 @@ HEADERS  += TcpClientMainWindow.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
     ../lib/DataProtocols.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    ../lib/CircularLogger.h
 
 FORMS    += TcpClientMainWindow.ui
 

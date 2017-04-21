@@ -338,7 +338,7 @@ namespace Tcp
 			break;
 
 		case AlreadyDownloadFile:
-			str = QString(tr("Allready download file now"));
+			str = QString(tr("Already download file now"));
 			break;
 
 		case CantSendRequest:
@@ -384,7 +384,8 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileServer::FileServer(const QString& rootFolder) :
+	FileServer::FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger) :
+		m_logger(logger),
 		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData))
 	{
 		m_rootFolder = QDir::fromNativeSeparators(rootFolder);
@@ -397,7 +398,7 @@ namespace Tcp
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder);
+		return new FileServer(m_rootFolder, m_logger);
 	}
 
 
@@ -412,9 +413,9 @@ namespace Tcp
 	}
 
 
-	void FileServer::onFileSent(const QString& fileName)
+	void FileServer::onFileSent(const QString& fileName, const QString &ip)
 	{
-		qDebug() << C_STR(QString(tr("File has been sent: %1")).arg(fileName));
+		DEBUG_LOG_MSG(m_logger,  QString(tr("File '%1' has been sent to %2")).arg(fileName).arg(ip));
 	}
 
 
@@ -494,22 +495,31 @@ namespace Tcp
 	{
 		if (m_file.isOpen() == false)
 		{
-			assert(false);
 			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
 			sendReply(m_reply, sizeof(m_reply));
 			init();
+
+			DEBUG_LOG_ERR(m_logger, QString("File '%1' is not open.").arg(m_file.fileName()));
 			return;
 		}
 
 		int readed = m_file.read(m_fileData, FILE_PART_SIZE);
 
-		if (readed == 0 || readed == -1)
+		if (readed == -1)
 		{
-			assert(false);
 			m_reply.errorCode = FileTransferResult::CantReadRemoteFile;
 			sendReply(m_reply, sizeof(m_reply));
 			init();
+
+			DEBUG_LOG_ERR(m_logger, QString("Read file '%1' error.").arg(m_file.fileName()));
 			return;
+		}
+
+		if (readed == 0)
+		{
+			int a = 0;
+
+			a++;
 		}
 
 		m_reply.currentPart++;
@@ -525,13 +535,10 @@ namespace Tcp
 			// all parts of file are sent
 			//
 
-			onFileSent(m_file.fileName());
-
+			onFileSent(m_file.fileName(), peerAddr().addressStr());
 
 			init();
 		}
 	}
-
-
 
 }

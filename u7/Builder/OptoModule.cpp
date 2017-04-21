@@ -1681,16 +1681,16 @@ namespace Hardware
 										QUuid transmitterUuid,
 										const QString& lmID,
 										Signal* appSignal,
-										bool* signalAllreadyInList)
+										bool* signalAlreadyInList)
 	{
 		if (appSignal == nullptr ||
-			signalAllreadyInList == nullptr)
+			signalAlreadyInList == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		*signalAllreadyInList = false;
+		*signalAlreadyInList = false;
 
 		std::shared_ptr<Connection> cn = getConnection(connectionID);
 
@@ -1724,7 +1724,7 @@ namespace Hardware
 		{
 			if (p1->isTxSignalIDExists(appSignal->appSignalID()))
 			{
-				*signalAllreadyInList = true;
+				*signalAlreadyInList = true;
 			}
 			else
 			{
@@ -1737,7 +1737,7 @@ namespace Hardware
 		{
 			if (p2->isTxSignalIDExists(appSignal->appSignalID()))
 			{
-				*signalAllreadyInList = true;
+				*signalAlreadyInList = true;
 			}
 			else
 			{

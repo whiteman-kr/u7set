@@ -1,6 +1,8 @@
 #include "ServerMainWindow.h"
 #include "ui_ServerMainWindow.h"
 
+#include "../lib/CircularLogger.h"
+
 namespace Tcp
 {
 
@@ -39,9 +41,13 @@ ServerMainWindow::ServerMainWindow(QWidget *parent) :
 
 	//m_cfgServer = new CfgServer("d:/temp/build");
 
-	m_cfgServer = new CfgServer("/home/serhiy/temp/udpserver");
+	m_logger = std::make_shared<CircularLogger>();
 
-	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), m_cfgServer);
+	LOGGER_INIT(m_logger);
+
+	m_cfgServer = new CfgServer("/home/serhiy/temp/udpserver", m_logger);
+
+	m_tcpServerThread = new Tcp::ServerThread(HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), m_cfgServer, m_logger);
 
 	m_tcpServerThread->start();
 }
@@ -59,6 +65,8 @@ ServerMainWindow::~ServerMainWindow()
 	delete m_protoUdpServerThread;*/
 
 	delete ui;
+
+	LOGGER_SHUTDOWN(m_logger);
 
 	//delete m_ServiceController;
 }

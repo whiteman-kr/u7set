@@ -6616,13 +6616,13 @@ namespace Builder
 						RESULT_FALSE_BREAK
 					}
 
-					bool signalAllreadyInTxList = false;
+					bool signalAlreadyInTxList = false;
 
 					result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 															   m_lm->equipmentIdTemplate(),
 															   appSignal->signal(),
-															   &signalAllreadyInTxList);
-					if (signalAllreadyInTxList == true)
+															   &signalAlreadyInTxList);
+					if (signalAlreadyInTxList == true)
 					{
 						// The signal '%1' is repeatedly connected to the transmitter '%2'
 						//

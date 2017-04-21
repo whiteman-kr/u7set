@@ -362,8 +362,9 @@ TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddr
 												const AppDataSourcesIP& appDataSources,
 												const AppSignals& appSignals,
 												const AppSignalStates& appSignalStates,
-												const UnitList& units) :
-	Tcp::ServerThread(listenAddressPort, server),
+												const UnitList& units,
+												std::shared_ptr<CircularLogger> logger) :
+	Tcp::ServerThread(listenAddressPort, server, logger),
 	m_appDataSources(appDataSources),
 	m_appSignals(appSignals),
 	m_appSignalStates(appSignalStates),

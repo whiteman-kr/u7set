@@ -94,8 +94,7 @@ SOURCES += \
     ../lib/AppDataSource.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
-    AppDataServiceMain.cpp \
-    ../lib/CfgLoaderWithLog.cpp
+    AppDataServiceMain.cpp
 
 HEADERS += \
 	Stable.h \

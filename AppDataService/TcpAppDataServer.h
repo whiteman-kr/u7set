@@ -110,7 +110,8 @@ public:
 							const AppDataSourcesIP& appDataSources,
 							const AppSignals& appSignals,
 							const AppSignalStates& appSignalStates,
-							const UnitList& units);
+							const UnitList& units,
+							std::shared_ptr<CircularLogger> logger);
 
 	const QVector<QString>& appSignalIDs() const { return m_appSignalIDs; }
 	int appSignalIDsCount() const { return m_appSignalIDs.count(); }

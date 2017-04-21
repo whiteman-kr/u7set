@@ -8,8 +8,13 @@
 //
 // -------------------------------------------------------------------------------
 
-ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo)
+ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
+											   int& argc,
+											   char** argv,
+											   const VersionInfo& versionInfo,
+											   std::shared_ptr<CircularLogger> logger) :
+	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
+	m_logger(logger)
 {
 }
 
@@ -21,7 +26,7 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 
 ServiceWorker* ArchivingServiceWorker::createInstance() const
 {
-	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(serviceName(), argc(), argv(), versionInfo());
+	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 
 	return archServiceWorker;
 }
@@ -77,10 +82,10 @@ void ArchivingServiceWorker::loadSettings()
 
 	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	DEBUG_LOG_MSG(QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 }
 
 
@@ -90,7 +95,7 @@ void ArchivingServiceWorker::initialize()
 	//
 	runCfgLoaderThread();
 
-	DEBUG_LOG_MSG(QString(tr("ArchivingServiceWorker initialized")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker initialized")));
 }
 
 
@@ -102,13 +107,13 @@ void ArchivingServiceWorker::shutdown()
 
 	stopCfgLoaderThread();
 
-	DEBUG_LOG_MSG(QString(tr("ArchivingServiceWorker stoped")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker stoped")));
 }
 
 
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2);
+	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2, false, nullptr);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingServiceWorker::onConfigurationReady);
 

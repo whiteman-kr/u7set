@@ -10,8 +10,13 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningServiceWorker::TuningServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
-		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo),
+	TuningServiceWorker::TuningServiceWorker(const QString& serviceName,
+											 int& argc,
+											 char** argv,
+											 const VersionInfo& versionInfo,
+											 std::shared_ptr<CircularLogger> logger) :
+		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo, logger),
+		m_logger(logger),
 		m_timer(this)
 	{
 	}
@@ -24,7 +29,7 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		ServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo());
+		ServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 		return newInstance;
 	}
 
@@ -86,11 +91,11 @@ namespace Tuning
 
 		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-		DEBUG_LOG_MSG(QString(tr("Load settings:")));
-		DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-		DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
-		DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-		DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 	}
 
 
@@ -158,7 +163,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		CfgLoaderWithLog* cfgLoader = new CfgLoaderWithLog(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false);
+		CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
 
 		m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
@@ -184,7 +189,7 @@ namespace Tuning
 
 	void TuningServiceWorker::clearConfiguration()
 	{
-		DEBUG_LOG_MSG(QString("Clear current configuration"));
+		DEBUG_LOG_MSG(m_logger, QString("Clear current configuration"));
 
 		stopTcpTuningServerThread();
 		stopTuningSourceWorkers();
@@ -194,7 +199,7 @@ namespace Tuning
 
 	void TuningServiceWorker::applyNewConfiguration()
 	{
-		DEBUG_LOG_MSG(QString("Apply new configuration"));
+		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
 
 		buildServiceMaps();
 		runTuningSourceWorkers();
@@ -216,10 +221,11 @@ namespace Tuning
 
 	void TuningServiceWorker::runTcpTuningServerThread()
 	{
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this);
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_logger);
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_cfgSettings.clientRequestIP,
-															tcpTuningSever);
+															tcpTuningSever,
+															m_logger);
 		m_tcpTuningServerThread->start();
 	}
 
@@ -411,7 +417,7 @@ namespace Tuning
 				continue;
 			}
 
-			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource);
+			TuningSourceWorkerThread* sourceWorkerThread = new TuningSourceWorkerThread(m_cfgSettings, *tuningSource, m_logger);
 
 			if (sourceWorkerThread == nullptr)
 			{
@@ -430,7 +436,7 @@ namespace Tuning
 		//
 		assert(m_socketListenerThread == nullptr);
 
-		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceWorkerThreadMap);
+		m_socketListenerThread = new TuningSocketListenerThread(m_cfgSettings.tuningDataIP, m_sourceWorkerThreadMap, m_logger);
 		m_socketListenerThread->start();
 
 		// run TuningSourceWorkerThreads
@@ -498,7 +504,7 @@ namespace Tuning
 			return;
 		}
 
-		DEBUG_LOG_MSG(QString("Configuration is ready"));
+		DEBUG_LOG_MSG(m_logger, QString("Configuration is ready"));
 
 		bool result = true;
 
@@ -506,11 +512,11 @@ namespace Tuning
 
 		if (result == false)
 		{
-			DEBUG_LOG_ERR(QString("Configuration reading error"));
+			DEBUG_LOG_ERR(m_logger, QString("Configuration reading error"));
 			return;
 		}
 
-		DEBUG_LOG_MSG(QString("Configuration reading success"));
+		DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
 
 		clearConfiguration();
 

@@ -2,7 +2,7 @@
 #include <QMetaProperty>
 
 #include "../lib/DeviceObject.h"
-#include "../lib/CfgLoaderWithLog.h"
+#include "../lib/CfgServerLoader.h"
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
@@ -14,8 +14,13 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo &versionInfo) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo),
+AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
+										   int& argc,
+										   char** argv,
+										   const VersionInfo &versionInfo,
+										   std::shared_ptr<CircularLogger> logger) :
+	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
+	m_logger(logger),
 	m_timer(this)
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
@@ -32,7 +37,7 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo());
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 	return newInstance;
 }
 
@@ -87,16 +92,16 @@ void AppDataServiceWorker::loadSettings()
 
 	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	DEBUG_LOG_MSG(QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 }
 
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoaderWithLog* cfgLoader = new CfgLoaderWithLog(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false);
+	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
 
 	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 
@@ -133,7 +138,8 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
-															m_unitInfo);
+															m_unitInfo,
+															m_logger);
 	m_tcpAppDataServerThread->start();
 }
 

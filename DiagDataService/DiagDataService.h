@@ -13,7 +13,11 @@ class DiagDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	DiagDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	DiagDataServiceWorker(const QString& serviceName,
+						  int& argc,
+						  char** argv,
+						  const VersionInfo& versionInfo,
+						  std::shared_ptr<CircularLogger> logger);
 	virtual ~DiagDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -34,5 +38,7 @@ private:
 
 	HostAddressPort m_cfgServiceIP1;
 	HostAddressPort m_cfgServiceIP2;
+
+	std::shared_ptr<CircularLogger> m_logger;
 };
 
