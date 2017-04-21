@@ -6,14 +6,18 @@
 class QPen;
 class QBrush;
 
+struct AppSignalState;
+class Signal;
+
 namespace VFrame30
 {
 	class VFRAME30LIBSHARED_EXPORT SchemaItemValue : public PosRectImpl
 	{
 		Q_OBJECT
 
-		Q_PROPERTY(QString Text READ analogText WRITE setAnalogText)
-		Q_PROPERTY(QString analogText READ analogText WRITE setAnalogText)
+		Q_PROPERTY(QString Text READ textAnalog WRITE setTextAnalog)
+		Q_PROPERTY(QString textAnalog READ textAnalog WRITE setTextAnalog)
+		Q_PROPERTY(QString TextAnalog READ textAnalog WRITE setTextAnalog)
 
 		Q_PROPERTY(double lineWeight READ lineWeight WRITE setLineWeight)
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
@@ -41,16 +45,20 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-
-		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
-		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+
+	protected:
+		void initDrawingResources() const;
+		void drawBackground(QPainter* painter, const QRectF& rect, const Signal& signal, const AppSignalState& signalState) const;
+		void drawText(CDrawParam* drawParam, const QRectF& rect, const Signal& signal, const AppSignalState& signalState) const;
+
+		QString parseText(QString text, const Signal& signal, const AppSignalState& signalState) const;
+		QString formatNumber(double value, const Signal& signal) const;
 
 		// Text search
 		//
 	public:
-		virtual bool searchText(const QString& analogText) const override;
+		virtual bool searchText(const QString& textAnalog) const override;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -88,8 +96,20 @@ namespace VFrame30
 		E::SignalSource signalSource() const;
 		void setSignalSource(E::SignalSource value);
 
-		const QString& analogText() const;
-		void setAnalogText(QString value);
+		const QString& textAnalog() const;
+		void setTextAnalog(QString value);
+
+		const QString& textDiscrete0() const;
+		void setTextDiscrete0(QString value);
+
+		const QString& textDiscrete1() const;
+		void setTextDiscrete1(QString value);
+
+		const QString& textNonValid() const;
+		void setTextNonValid(QString value);
+
+		int precision() const;
+		void setPrecision(int value);
 
 	private:
 		double m_lineWeight = 0.0;
@@ -97,16 +117,23 @@ namespace VFrame30
 		QColor m_fillColor = {qRgb(0xE0, 0xE0, 0xE0)};
 		QColor m_textColor = {qRgb(0x00, 0x00, 0x00)};
 
-		QString m_analogText = {"%v"};
-
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 		FontParam m_font;
 		bool m_drawRect = true;				// Rect is visible, thikness 0 is possible
 
-		QString m_signalId;
-
+		QString m_signalId = {"#APPSIGNALID"};
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
+
+		QString m_textAnalog = {"$(value)"};		// $(value)			: signal value
+		QString m_textDiscrete0 = {"$(value)"};		// $(caption)		: caption
+		QString m_textDiscrete1 = {"$(value)"};		// $(signalid)		: SignalID (CustomSignalID)
+		QString m_textNonValid = {"?"};				// $(appsignalid)	: AppSignalID (#APPSIGANLID)
+													// $(equipmentid)	: Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)
+													// $(highlimit)		: High limit
+													// $(lowlimit)		: Low limit
+
+		int m_precision = -1;		// decimal places after period, -1 means take value from signal
 
 		// FillColor 1/2
 		// TextColor 1/2

@@ -12,12 +12,8 @@ namespace VFrame30
 	{
 	public:
 		MacrosExpander();
-		//MacrosExpander(std::shared_ptr<Schema> schema);
 
-		QString parse(const QString& str, const Session& session,  const VFrame30::Schema* schema, const PropertyObject* schemaItem) const;
-
-	private:
-		//std::shared_ptr<Schema> m_schema;
+		static QString parse(const QString& str, const Session& session,  const VFrame30::Schema* schema, const PropertyObject* schemaItem);
 	};
 
 }

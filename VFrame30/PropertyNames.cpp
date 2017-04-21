@@ -18,6 +18,7 @@ namespace VFrame30
 	const QString PropertyNames::valueInteger("ValueInteger");
 	const QString PropertyNames::valueFloat("ValueFloat");
 	const QString PropertyNames::precision("Precision");
+	const QString PropertyNames::precisionPropText("Number of decimals after period, -1: take value from the signal description");
 	const QString PropertyNames::analogFormat("AnalogFormat");
 	const QString PropertyNames::columnCount("ColumnCount");
 	const QString PropertyNames::pinCount("PinCount");
@@ -30,11 +31,22 @@ namespace VFrame30
 	const QString PropertyNames::drawRect("DrawRect");
 	const QString PropertyNames::textColor("TextColor");
 	const QString PropertyNames::text("Text");
-	const QString PropertyNames::analogText("AnalogText");
 	const QString PropertyNames::placeholderText("PlaceholderText");
 	const QString PropertyNames::label("Label");
 	const QString PropertyNames::caption("Caption");
 	const QString PropertyNames::maxLength("MaxLength");
+
+	const QString PropertyNames::textAnalog("TextAnalog");
+	const QString PropertyNames::textDiscrete0("TextDiscrete0");
+	const QString PropertyNames::textDiscrete1("TextDiscrete1");
+	const QString PropertyNames::textNonValid("TextNonValid");
+	const QString PropertyNames::textValuePropDescription("$(value) Signal value\n"
+														  "$(caption) Signal caption\n"
+														  "$(signalid) SignalID (CustomSignalID)\n"
+														  "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
+														  "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
+														  "$(highlimit) High limit\n"
+														  "$(lowlimit) Low limit");
 
 	const QString PropertyNames::userText("UserText");
 	const QString PropertyNames::userTextPos("UserTextPos");

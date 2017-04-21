@@ -25,6 +25,7 @@ namespace VFrame30
 		static const QString valueInteger;
 		static const QString valueFloat;
 		static const QString precision;
+		static const QString precisionPropText;
 		static const QString analogFormat;
 		static const QString columnCount;
 		static const QString pinCount;
@@ -37,11 +38,16 @@ namespace VFrame30
 		static const QString drawRect;
 		static const QString textColor;
 		static const QString text;
-		static const QString analogText;
 		static const QString placeholderText;
 		static const QString label;
 		static const QString caption;
 		static const QString maxLength;
+
+		static const QString textAnalog;
+		static const QString textDiscrete0;
+		static const QString textDiscrete1;
+		static const QString textNonValid;
+		static const QString textValuePropDescription;
 
 		static const QString userText;
 		static const QString userTextPos;

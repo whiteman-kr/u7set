@@ -5464,17 +5464,17 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 fillcolor() const;
   inline void set_fillcolor(::google::protobuf::uint32 value);
 
-  // optional string analogText = 4;
-  inline bool has_analogtext() const;
-  inline void clear_analogtext();
-  static const int kAnalogTextFieldNumber = 4;
-  inline const ::std::string& analogtext() const;
-  inline void set_analogtext(const ::std::string& value);
-  inline void set_analogtext(const char* value);
-  inline void set_analogtext(const char* value, size_t size);
-  inline ::std::string* mutable_analogtext();
-  inline ::std::string* release_analogtext();
-  inline void set_allocated_analogtext(::std::string* analogtext);
+  // optional string textAnalog = 4;
+  inline bool has_textanalog() const;
+  inline void clear_textanalog();
+  static const int kTextAnalogFieldNumber = 4;
+  inline const ::std::string& textanalog() const;
+  inline void set_textanalog(const ::std::string& value);
+  inline void set_textanalog(const char* value);
+  inline void set_textanalog(const char* value, size_t size);
+  inline ::std::string* mutable_textanalog();
+  inline ::std::string* release_textanalog();
+  inline void set_allocated_textanalog(::std::string* textanalog);
 
   // optional uint32 textColor = 5;
   inline bool has_textcolor() const;
@@ -5539,6 +5539,49 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 signalsource() const;
   inline void set_signalsource(::google::protobuf::int32 value);
 
+  // optional int32 precision = 13 [default = -1];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 13;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional string textDiscrete0 = 14;
+  inline bool has_textdiscrete0() const;
+  inline void clear_textdiscrete0();
+  static const int kTextDiscrete0FieldNumber = 14;
+  inline const ::std::string& textdiscrete0() const;
+  inline void set_textdiscrete0(const ::std::string& value);
+  inline void set_textdiscrete0(const char* value);
+  inline void set_textdiscrete0(const char* value, size_t size);
+  inline ::std::string* mutable_textdiscrete0();
+  inline ::std::string* release_textdiscrete0();
+  inline void set_allocated_textdiscrete0(::std::string* textdiscrete0);
+
+  // optional string textDiscrete1 = 15;
+  inline bool has_textdiscrete1() const;
+  inline void clear_textdiscrete1();
+  static const int kTextDiscrete1FieldNumber = 15;
+  inline const ::std::string& textdiscrete1() const;
+  inline void set_textdiscrete1(const ::std::string& value);
+  inline void set_textdiscrete1(const char* value);
+  inline void set_textdiscrete1(const char* value, size_t size);
+  inline ::std::string* mutable_textdiscrete1();
+  inline ::std::string* release_textdiscrete1();
+  inline void set_allocated_textdiscrete1(::std::string* textdiscrete1);
+
+  // optional string textNonValid = 16;
+  inline bool has_textnonvalid() const;
+  inline void clear_textnonvalid();
+  static const int kTextNonValidFieldNumber = 16;
+  inline const ::std::string& textnonvalid() const;
+  inline void set_textnonvalid(const ::std::string& value);
+  inline void set_textnonvalid(const char* value);
+  inline void set_textnonvalid(const char* value, size_t size);
+  inline ::std::string* mutable_textnonvalid();
+  inline ::std::string* release_textnonvalid();
+  inline void set_allocated_textnonvalid(::std::string* textnonvalid);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemValue)
  private:
   inline void set_has_weight();
@@ -5547,8 +5590,8 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline void clear_has_linecolor();
   inline void set_has_fillcolor();
   inline void clear_has_fillcolor();
-  inline void set_has_analogtext();
-  inline void clear_has_analogtext();
+  inline void set_has_textanalog();
+  inline void clear_has_textanalog();
   inline void set_has_textcolor();
   inline void clear_has_textcolor();
   inline void set_has_font();
@@ -5565,13 +5608,21 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline void clear_has_signalid();
   inline void set_has_signalsource();
   inline void clear_has_signalsource();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_textdiscrete0();
+  inline void clear_has_textdiscrete0();
+  inline void set_has_textdiscrete1();
+  inline void clear_has_textdiscrete1();
+  inline void set_has_textnonvalid();
+  inline void clear_has_textnonvalid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   double weight_;
   ::google::protobuf::uint32 linecolor_;
   ::google::protobuf::uint32 fillcolor_;
-  ::std::string* analogtext_;
+  ::std::string* textanalog_;
   ::Proto::FontParam* font_;
   ::google::protobuf::uint32 textcolor_;
   bool fill_;
@@ -5580,9 +5631,13 @@ class SchemaItemValue : public ::google::protobuf::Message {
   ::google::protobuf::int32 vertalign_;
   ::std::string* signalid_;
   ::google::protobuf::int32 signalsource_;
+  ::google::protobuf::int32 precision_;
+  ::std::string* textdiscrete0_;
+  ::std::string* textdiscrete1_;
+  ::std::string* textnonvalid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15239,73 +15294,73 @@ inline void SchemaItemValue::set_fillcolor(::google::protobuf::uint32 value) {
   fillcolor_ = value;
 }
 
-// optional string analogText = 4;
-inline bool SchemaItemValue::has_analogtext() const {
+// optional string textAnalog = 4;
+inline bool SchemaItemValue::has_textanalog() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void SchemaItemValue::set_has_analogtext() {
+inline void SchemaItemValue::set_has_textanalog() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void SchemaItemValue::clear_has_analogtext() {
+inline void SchemaItemValue::clear_has_textanalog() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void SchemaItemValue::clear_analogtext() {
-  if (analogtext_ != &::google::protobuf::internal::kEmptyString) {
-    analogtext_->clear();
+inline void SchemaItemValue::clear_textanalog() {
+  if (textanalog_ != &::google::protobuf::internal::kEmptyString) {
+    textanalog_->clear();
   }
-  clear_has_analogtext();
+  clear_has_textanalog();
 }
-inline const ::std::string& SchemaItemValue::analogtext() const {
-  return *analogtext_;
+inline const ::std::string& SchemaItemValue::textanalog() const {
+  return *textanalog_;
 }
-inline void SchemaItemValue::set_analogtext(const ::std::string& value) {
-  set_has_analogtext();
-  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
-    analogtext_ = new ::std::string;
+inline void SchemaItemValue::set_textanalog(const ::std::string& value) {
+  set_has_textanalog();
+  if (textanalog_ == &::google::protobuf::internal::kEmptyString) {
+    textanalog_ = new ::std::string;
   }
-  analogtext_->assign(value);
+  textanalog_->assign(value);
 }
-inline void SchemaItemValue::set_analogtext(const char* value) {
-  set_has_analogtext();
-  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
-    analogtext_ = new ::std::string;
+inline void SchemaItemValue::set_textanalog(const char* value) {
+  set_has_textanalog();
+  if (textanalog_ == &::google::protobuf::internal::kEmptyString) {
+    textanalog_ = new ::std::string;
   }
-  analogtext_->assign(value);
+  textanalog_->assign(value);
 }
-inline void SchemaItemValue::set_analogtext(const char* value, size_t size) {
-  set_has_analogtext();
-  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
-    analogtext_ = new ::std::string;
+inline void SchemaItemValue::set_textanalog(const char* value, size_t size) {
+  set_has_textanalog();
+  if (textanalog_ == &::google::protobuf::internal::kEmptyString) {
+    textanalog_ = new ::std::string;
   }
-  analogtext_->assign(reinterpret_cast<const char*>(value), size);
+  textanalog_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* SchemaItemValue::mutable_analogtext() {
-  set_has_analogtext();
-  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
-    analogtext_ = new ::std::string;
+inline ::std::string* SchemaItemValue::mutable_textanalog() {
+  set_has_textanalog();
+  if (textanalog_ == &::google::protobuf::internal::kEmptyString) {
+    textanalog_ = new ::std::string;
   }
-  return analogtext_;
+  return textanalog_;
 }
-inline ::std::string* SchemaItemValue::release_analogtext() {
-  clear_has_analogtext();
-  if (analogtext_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SchemaItemValue::release_textanalog() {
+  clear_has_textanalog();
+  if (textanalog_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = analogtext_;
-    analogtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = textanalog_;
+    textanalog_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void SchemaItemValue::set_allocated_analogtext(::std::string* analogtext) {
-  if (analogtext_ != &::google::protobuf::internal::kEmptyString) {
-    delete analogtext_;
+inline void SchemaItemValue::set_allocated_textanalog(::std::string* textanalog) {
+  if (textanalog_ != &::google::protobuf::internal::kEmptyString) {
+    delete textanalog_;
   }
-  if (analogtext) {
-    set_has_analogtext();
-    analogtext_ = analogtext;
+  if (textanalog) {
+    set_has_textanalog();
+    textanalog_ = textanalog;
   } else {
-    clear_has_analogtext();
-    analogtext_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_textanalog();
+    textanalog_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -15547,6 +15602,238 @@ inline ::google::protobuf::int32 SchemaItemValue::signalsource() const {
 inline void SchemaItemValue::set_signalsource(::google::protobuf::int32 value) {
   set_has_signalsource();
   signalsource_ = value;
+}
+
+// optional int32 precision = 13 [default = -1];
+inline bool SchemaItemValue::has_precision() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void SchemaItemValue::set_has_precision() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void SchemaItemValue::clear_has_precision() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void SchemaItemValue::clear_precision() {
+  precision_ = -1;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemaItemValue::precision() const {
+  return precision_;
+}
+inline void SchemaItemValue::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional string textDiscrete0 = 14;
+inline bool SchemaItemValue::has_textdiscrete0() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void SchemaItemValue::set_has_textdiscrete0() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void SchemaItemValue::clear_has_textdiscrete0() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void SchemaItemValue::clear_textdiscrete0() {
+  if (textdiscrete0_ != &::google::protobuf::internal::kEmptyString) {
+    textdiscrete0_->clear();
+  }
+  clear_has_textdiscrete0();
+}
+inline const ::std::string& SchemaItemValue::textdiscrete0() const {
+  return *textdiscrete0_;
+}
+inline void SchemaItemValue::set_textdiscrete0(const ::std::string& value) {
+  set_has_textdiscrete0();
+  if (textdiscrete0_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete0_ = new ::std::string;
+  }
+  textdiscrete0_->assign(value);
+}
+inline void SchemaItemValue::set_textdiscrete0(const char* value) {
+  set_has_textdiscrete0();
+  if (textdiscrete0_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete0_ = new ::std::string;
+  }
+  textdiscrete0_->assign(value);
+}
+inline void SchemaItemValue::set_textdiscrete0(const char* value, size_t size) {
+  set_has_textdiscrete0();
+  if (textdiscrete0_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete0_ = new ::std::string;
+  }
+  textdiscrete0_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemValue::mutable_textdiscrete0() {
+  set_has_textdiscrete0();
+  if (textdiscrete0_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete0_ = new ::std::string;
+  }
+  return textdiscrete0_;
+}
+inline ::std::string* SchemaItemValue::release_textdiscrete0() {
+  clear_has_textdiscrete0();
+  if (textdiscrete0_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = textdiscrete0_;
+    textdiscrete0_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemValue::set_allocated_textdiscrete0(::std::string* textdiscrete0) {
+  if (textdiscrete0_ != &::google::protobuf::internal::kEmptyString) {
+    delete textdiscrete0_;
+  }
+  if (textdiscrete0) {
+    set_has_textdiscrete0();
+    textdiscrete0_ = textdiscrete0;
+  } else {
+    clear_has_textdiscrete0();
+    textdiscrete0_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string textDiscrete1 = 15;
+inline bool SchemaItemValue::has_textdiscrete1() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void SchemaItemValue::set_has_textdiscrete1() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void SchemaItemValue::clear_has_textdiscrete1() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void SchemaItemValue::clear_textdiscrete1() {
+  if (textdiscrete1_ != &::google::protobuf::internal::kEmptyString) {
+    textdiscrete1_->clear();
+  }
+  clear_has_textdiscrete1();
+}
+inline const ::std::string& SchemaItemValue::textdiscrete1() const {
+  return *textdiscrete1_;
+}
+inline void SchemaItemValue::set_textdiscrete1(const ::std::string& value) {
+  set_has_textdiscrete1();
+  if (textdiscrete1_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete1_ = new ::std::string;
+  }
+  textdiscrete1_->assign(value);
+}
+inline void SchemaItemValue::set_textdiscrete1(const char* value) {
+  set_has_textdiscrete1();
+  if (textdiscrete1_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete1_ = new ::std::string;
+  }
+  textdiscrete1_->assign(value);
+}
+inline void SchemaItemValue::set_textdiscrete1(const char* value, size_t size) {
+  set_has_textdiscrete1();
+  if (textdiscrete1_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete1_ = new ::std::string;
+  }
+  textdiscrete1_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemValue::mutable_textdiscrete1() {
+  set_has_textdiscrete1();
+  if (textdiscrete1_ == &::google::protobuf::internal::kEmptyString) {
+    textdiscrete1_ = new ::std::string;
+  }
+  return textdiscrete1_;
+}
+inline ::std::string* SchemaItemValue::release_textdiscrete1() {
+  clear_has_textdiscrete1();
+  if (textdiscrete1_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = textdiscrete1_;
+    textdiscrete1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemValue::set_allocated_textdiscrete1(::std::string* textdiscrete1) {
+  if (textdiscrete1_ != &::google::protobuf::internal::kEmptyString) {
+    delete textdiscrete1_;
+  }
+  if (textdiscrete1) {
+    set_has_textdiscrete1();
+    textdiscrete1_ = textdiscrete1;
+  } else {
+    clear_has_textdiscrete1();
+    textdiscrete1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string textNonValid = 16;
+inline bool SchemaItemValue::has_textnonvalid() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void SchemaItemValue::set_has_textnonvalid() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void SchemaItemValue::clear_has_textnonvalid() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void SchemaItemValue::clear_textnonvalid() {
+  if (textnonvalid_ != &::google::protobuf::internal::kEmptyString) {
+    textnonvalid_->clear();
+  }
+  clear_has_textnonvalid();
+}
+inline const ::std::string& SchemaItemValue::textnonvalid() const {
+  return *textnonvalid_;
+}
+inline void SchemaItemValue::set_textnonvalid(const ::std::string& value) {
+  set_has_textnonvalid();
+  if (textnonvalid_ == &::google::protobuf::internal::kEmptyString) {
+    textnonvalid_ = new ::std::string;
+  }
+  textnonvalid_->assign(value);
+}
+inline void SchemaItemValue::set_textnonvalid(const char* value) {
+  set_has_textnonvalid();
+  if (textnonvalid_ == &::google::protobuf::internal::kEmptyString) {
+    textnonvalid_ = new ::std::string;
+  }
+  textnonvalid_->assign(value);
+}
+inline void SchemaItemValue::set_textnonvalid(const char* value, size_t size) {
+  set_has_textnonvalid();
+  if (textnonvalid_ == &::google::protobuf::internal::kEmptyString) {
+    textnonvalid_ = new ::std::string;
+  }
+  textnonvalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemValue::mutable_textnonvalid() {
+  set_has_textnonvalid();
+  if (textnonvalid_ == &::google::protobuf::internal::kEmptyString) {
+    textnonvalid_ = new ::std::string;
+  }
+  return textnonvalid_;
+}
+inline ::std::string* SchemaItemValue::release_textnonvalid() {
+  clear_has_textnonvalid();
+  if (textnonvalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = textnonvalid_;
+    textnonvalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemValue::set_allocated_textnonvalid(::std::string* textnonvalid) {
+  if (textnonvalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete textnonvalid_;
+  }
+  if (textnonvalid) {
+    set_has_textnonvalid();
+    textnonvalid_ = textnonvalid;
+  } else {
+    clear_has_textnonvalid();
+    textnonvalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
