@@ -4,7 +4,7 @@
 #include "Stable.h"
 #include "SchemaStorage.h"
 #include "../VFrame30/SchemaView.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
 class TuningSchemaView : public VFrame30::SchemaView
 {
@@ -19,9 +19,7 @@ protected:
 	//
 	virtual void paintEvent(QPaintEvent*) override;
 
-	// Events
-	//
-	void timerEvent(QTimerEvent* event);
+	virtual void timerEvent(QTimerEvent*) override;
 
 	// Public slots which are part of Script API
 	//
@@ -31,9 +29,13 @@ public slots:
 signals:
 	void signal_setSchema(QString schemaId);
 
+private slots:
+	void onTimer();
 
 private:
 	SchemaStorage* m_schemaStorage = nullptr;
+
+	QTimer* m_timer = nullptr;
 
 };
 

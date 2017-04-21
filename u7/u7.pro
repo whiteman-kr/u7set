@@ -183,7 +183,7 @@ SOURCES +=\
     ../lib/MetrologySignal.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
-    ../lib/Tuning/TuningObject.cpp \
+    ../lib/Tuning/TuningSignal.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
@@ -311,7 +311,7 @@ HEADERS  += \
     ../lib/MetrologySignal.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
-    ../lib/Tuning/TuningObject.h \
+    ../lib/Tuning/TuningSignal.h \
     DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \

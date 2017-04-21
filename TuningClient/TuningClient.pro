@@ -129,13 +129,11 @@ SOURCES +=\
     DialogUsers.cpp \
     DialogProperties.cpp \
     DialogTuningSourceInfo.cpp \
-    ../lib/Tuning/TuningObjectManager.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    ../lib/Tuning/TuningObject.cpp \
     ../lib/Tuning/TuningController.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/CodeSyntaxHighlighter.cpp \
@@ -147,6 +145,8 @@ SOURCES +=\
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     ../lib/CircularLogger.cpp
+    ../lib/Tuning/TuningSignal.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -177,13 +177,11 @@ HEADERS  += MainWindow.h \
     DialogUsers.h \
     DialogProperties.h \
     DialogTuningSourceInfo.h \
-    ../lib/Tuning/TuningObjectManager.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
-    ../lib/Tuning/TuningObject.h \
     ../lib/Tuning/TuningController.h \
     ../lib/CodeEditor.h \
     ../lib/CodeSyntaxHighlighter.h \
@@ -195,6 +193,8 @@ HEADERS  += MainWindow.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
     ../lib/CircularLogger.h
+    ../lib/Tuning/TuningSignal.h \
+    ../lib/Tuning/TuningSignalManager.h
 
 FORMS    += \
     DialogSettings.ui \

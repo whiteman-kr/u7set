@@ -63,6 +63,8 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(QString ObjectName READ objectName)
+
 	protected:
 		SchemaItem();
 
@@ -99,9 +101,13 @@ namespace VFrame30
 		static void dump(std::shared_ptr<SchemaItem> item);
 		virtual void dump() const;
 
-		void runScript(QJSEngine* engine, SchemaView* schemaView);
+		virtual void clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget);
+		virtual bool preDrawEvent(QString globalScript, QJSEngine* engine);
 
 	protected:
+		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
+		QJSValue evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const;
+		QString formatSqriptError(const QJSValue& scriptValue) const;
 		void reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const;
 
 		// Text search
@@ -115,8 +121,9 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* pDrawParam, const Schema* pFrame, const SchemaLayer* pLayer) const;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
 
+	public:
 		// Draw item outline, while creation or changing
 		//
 		virtual void DrawOutline(CDrawParam* pDrawParam) const;
@@ -129,6 +136,7 @@ namespace VFrame30
 		// Draw debug info
 		//
 		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
+		virtual void DrawScriptError(CDrawParam* drawParam) const;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
@@ -236,9 +244,14 @@ namespace VFrame30
 		const QString& clickScript() const;
 		void setClickScript(const QString& value);
 
+		QString preDrawScript() const;
+		void setPreDrawScript(const QString& value);
+
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt() const;		
+		virtual QRectF boundingRectInDocPt() const;
+
+		QString lastScriptError() const;
 
 		// Data
 		//
@@ -251,8 +264,12 @@ namespace VFrame30
 
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
+		QString m_preDrawScript;
 
-		QJSValue m_jsClickScript;	// Evaluated m_clickScript
+		QJSValue m_jsClickScript;		// Evaluated m_clickScript
+		QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript
+
+		mutable QString m_lastScriptError;
 
 	public:
 		static const QColor errorColor;

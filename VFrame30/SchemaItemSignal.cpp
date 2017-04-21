@@ -338,7 +338,8 @@ namespace VFrame30
 
 			if (drawParam->isMonitorMode() == true)
 			{
-				AppSignalState signalState = drawParam->appSignalManager()->signalState(text);
+				bool stateOk;
+				AppSignalState signalState = drawParam->appSignalManager()->signalState(text, &stateOk);
 
 				if (signalState.flags.valid == false)
 				{
@@ -399,7 +400,7 @@ namespace VFrame30
 
 				// Get signal state
 				//
-				appSignalStates[signalIndex] = drawParam->appSignalManager()->signalState(id);
+				appSignalStates[signalIndex] = drawParam->appSignalManager()->signalState(id, nullptr);
 			}
 
 			signalIndex ++;
@@ -551,7 +552,7 @@ namespace VFrame30
 		if (drawParam->isMonitorMode() == true)
 		{
 			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
-			signalState = drawParam->appSignalManager()->signalState(appSignalId);
+			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
 		}
 
 		for (size_t i = 0; i < m_columns.size(); i++)
@@ -720,9 +721,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	void SchemaItemSignal::setAppSignalIds(const QString& s)
 	{
 		m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
-
 		adjustHeight();
-
 		return;
 	}
 

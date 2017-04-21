@@ -4,14 +4,14 @@
 
 #include "SchemasWorkspace.h"
 
-SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage *objects, const QString& globalScript, QWidget *parent):
-	m_tuningObjectManager(tuningObjectManager),
+SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSignalManager *tuningSignalManager, const TuningSignalStorage *objects, const QString& globalScript, QWidget *parent):
+	m_tuningSignalManager(tuningSignalManager),
 	m_objects(*objects),
 	QWidget(parent)
 {
 	m_schemaStorage = new SchemaStorage(configController);
 
-	assert(m_tuningObjectManager);
+	assert(m_tuningSignalManager);
 	assert(objects);
 
 	if (theConfigSettings.showSchemasList == true)
@@ -60,7 +60,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 			return;
 		}
 
-		m_schemaWidget = new TuningSchemaWidget(m_tuningObjectManager, schema, m_schemaStorage, globalScript);
+		m_schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, schema, m_schemaStorage, globalScript);
 
 		m_hSplitter = new QSplitter(this);
 
@@ -83,7 +83,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningObj
 		{
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaStorage->schema(schemaID.m_id);
 
-			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningObjectManager,schema, m_schemaStorage, globalScript);
+			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager,schema, m_schemaStorage, globalScript);
 
 			tab->addTab(schemaWidget, schemaID.m_caption);
 		}

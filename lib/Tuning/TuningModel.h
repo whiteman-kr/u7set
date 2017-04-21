@@ -1,7 +1,7 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
-#include "TuningObject.h"
+#include "TuningSignal.h"
 #include "TuningFilter.h"
 
 
@@ -12,12 +12,12 @@ class TuningItemSorter
 public:
 	  TuningItemSorter(int column, Qt::SortOrder order);
 
-	  bool operator()(const TuningObject& o1, const TuningObject& o2) const
+	  bool operator()(const TuningSignal& o1, const TuningSignal& o2) const
 	  {
 		  return sortFunction(o1, o2, m_column, m_order);
 	  }
 
-	  bool sortFunction(const TuningObject& o1, const TuningObject& o2, int column, Qt::SortOrder order) const;
+	  bool sortFunction(const TuningSignal& o1, const TuningSignal& o2, int column, Qt::SortOrder order) const;
 
 private:
 	  int m_column = -1;
@@ -55,9 +55,9 @@ public:
 
 
 public:
-    void setObjects(std::vector<TuningObject>& objects);
+    void setObjects(std::vector<TuningSignal>& objects);
 
-    TuningObject* object(int index);
+    TuningSignal* object(int index);
 
 	void addColumn(Columns column);
     void removeColumn(Columns column);
@@ -92,7 +92,7 @@ private:
 protected:
 	std::vector<int> m_columnsIndexes;
 
-	std::vector<TuningObject> m_objects;
+	std::vector<TuningSignal> m_objects;
 
 	bool m_blink = false;
 

@@ -2,9 +2,12 @@
 #define EXPORTDATADIALOG_H
 
 #include <QDialog>
+#include <QTableView>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QMessageBox>
+
+#include "../lib/ExcelHelper.h"
 
 // ==============================================================================================
 
@@ -34,7 +37,9 @@ private:
 
 	void			createProgressDialog(QTableView *pView);
 	static void		startExportThread(ExportData* pThis, const QString& fileName);
-	bool			saveFile(QString fileName);
+
+	bool			saveExcelFile(const QString& fileName);
+	bool			saveCsvFile(const QString& fileName);
 
 public:
 

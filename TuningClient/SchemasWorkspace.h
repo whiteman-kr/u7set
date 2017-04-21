@@ -3,8 +3,8 @@
 
 #include "SchemaStorage.h"
 #include "../lib/Tuning/TuningModel.h"
-#include "../lib/Tuning/TuningObject.h"
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignal.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningSchemaWidget.h"
 
@@ -13,7 +13,7 @@ class SchemasWorkspace : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SchemasWorkspace(ConfigController* configController, TuningObjectManager *tuningObjectManager, const TuningObjectStorage* objects, const QString& globalScript, QWidget* parent);
+	explicit SchemasWorkspace(ConfigController* configController, TuningSignalManager *tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent);
 	virtual ~SchemasWorkspace();
 
 private slots:
@@ -21,9 +21,9 @@ private slots:
 
 private:
 
-	TuningObjectManager *m_tuningObjectManager = nullptr;
+	TuningSignalManager *m_tuningSignalManager = nullptr;
 
-	TuningObjectStorage m_objects;
+	TuningSignalStorage m_objects;
 
 	SchemaStorage *m_schemaStorage = nullptr;
 

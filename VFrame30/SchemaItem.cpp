@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "SchemaView.h"
+#include <QPainter>
 
 namespace VFrame30
 {
@@ -22,21 +23,23 @@ namespace VFrame30
 	{	
 		m_guid = QUuid::createUuid();
 
-		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
-		acceptClickProp->setCategory(PropertyNames::behaviourCategory);
-
 		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
 		commentedProp->setCategory(PropertyNames::functionalCategory);
 
 		auto lockedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::locked, true, SchemaItem::isLocked, SchemaItem::setLocked);
 		lockedProp->setCategory(PropertyNames::appearanceCategory);
 
+		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
+		acceptClickProp->setCategory(PropertyNames::scriptsCategory);
+
 		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
-		clickScriptProp->setCategory(PropertyNames::behaviourCategory);
+		clickScriptProp->setCategory(PropertyNames::scriptsCategory);
 		clickScriptProp->setIsScript(true);
 
 		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
 		objectNameProp->setCategory(PropertyNames::scriptsCategory);
+
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true, SchemaItem::preDrawScript, SchemaItem::setPreDrawScript);
 
 		return;
 	}
@@ -63,11 +66,8 @@ namespace VFrame30
 		schemaItem->set_itemunit(static_cast<Proto::SchemaUnit>(m_itemUnit));
 
 		schemaItem->set_acceptclick(m_acceptClick);
-
-		if (m_clickScript.isEmpty() == false)
-		{
-			schemaItem->set_clickscript(m_clickScript.toStdString());
-		}
+		schemaItem->set_clickscript(m_clickScript.toStdString());
+		schemaItem->set_predrawscript(m_preDrawScript.toStdString());
 
 		schemaItem->set_objectname(objectName().toStdString());
 
@@ -91,15 +91,8 @@ namespace VFrame30
 		m_itemUnit = static_cast<SchemaUnit>(schemaitem.itemunit());
 
 		m_acceptClick = schemaitem.acceptclick();
-
-		if (schemaitem.has_clickscript() == true)
-		{
-			m_clickScript = QString::fromStdString(schemaitem.clickscript());
-		}
-		else
-		{
-			m_clickScript.clear();
-		}
+		m_clickScript = QString::fromStdString(schemaitem.clickscript());
+		m_preDrawScript = QString::fromStdString(schemaitem.predrawscript());
 
 		setObjectName(QString::fromStdString(schemaitem.objectname()));
 
@@ -182,28 +175,78 @@ namespace VFrame30
 		qDebug() << "\tguid:" << guid();
 	}
 
-	void SchemaItem::runScript(QJSEngine* engine, SchemaView* schemaView)
+	void SchemaItem::clickEvent(QString globalScript, QJSEngine* engine,  QWidget* parentWidget)
 	{
 		if (engine == nullptr ||
-			schemaView == nullptr)
+			parentWidget == nullptr)
 		{
 			assert(engine);
-			assert(schemaView);
+			assert(parentWidget);
 			return;
 		}
 
+		if (m_clickScript.trimmed().isEmpty() == true)
+		{
+			return;
+		}
+
+		// Evaluate script
+		//
 		if (m_jsClickScript.isUndefined() == true)
 		{
-			m_jsClickScript = engine->evaluate(m_clickScript + schemaView->globalScript());
+			m_jsClickScript = evaluateScript(m_clickScript, globalScript, engine, parentWidget);
+		}
 
-			if (m_jsClickScript.isError() == true)
-			{
-				QMessageBox::critical(schemaView, qAppName(),
-									  QString("Script evaluating error at line %1: %2")
-										.arg(m_jsClickScript.property("lineNumber").toInt())
-										.arg(m_jsClickScript.toString()));
-				return;
-			}
+		if (m_jsClickScript .isError() == true ||
+			m_jsClickScript .isNull() == true)
+		{
+			return;
+		}
+
+		runScript(m_jsClickScript, engine);
+
+		return;
+	}
+
+	bool SchemaItem::preDrawEvent(QString globalScript, QJSEngine* engine)
+	{
+		if (engine == nullptr)
+		{
+			assert(engine);
+			return false;
+		}
+
+		if (m_preDrawScript.trimmed().isEmpty() == true)
+		{
+			return true;
+		}
+
+		// Evaluate script
+		//
+		if (m_jsPreDrawScript.isUndefined() == true)
+		{
+			m_jsPreDrawScript = evaluateScript(m_preDrawScript, globalScript, engine, nullptr);
+		}
+
+		if (m_jsPreDrawScript.isError() == true ||
+			m_jsPreDrawScript.isNull() == true)
+		{
+			return false;
+		}
+
+		bool result = runScript(m_jsPreDrawScript, engine);
+
+		return result;
+	}
+
+	bool SchemaItem::runScript(QJSValue& evaluatedJs, QJSEngine* engine)
+	{
+		if (evaluatedJs.isUndefined() == true ||
+			evaluatedJs.isError() == true ||
+			engine == nullptr)
+		{
+			assert(engine);
+			return false;
 		}
 
 		// Set argument list
@@ -216,16 +259,58 @@ namespace VFrame30
 
 		// Run script
 		//
-		QJSValue jsResult = m_jsClickScript.call(args);
+		QJSValue jsResult = evaluatedJs.call(args);
 		if (jsResult.isError() == true)
 		{
-			reportSqriptError(jsResult, schemaView);
-			return;
+			m_lastScriptError = formatSqriptError(jsResult);
+			return false;
 		}
 
-		engine->collectGarbage();
+		return true;
+	}
 
-		return;
+	QJSValue SchemaItem::evaluateScript(QString script, QString globalScript, QJSEngine* engine, QWidget* parentWidget) const
+	{
+		if (engine == nullptr)
+		{
+			assert(engine);
+			assert(parentWidget);
+			return QJSValue();
+		}
+
+
+		QJSValue result = engine->evaluate(script + globalScript);
+
+		if (result.isError() == true)
+		{
+			m_lastScriptError = formatSqriptError(result);
+
+			if (parentWidget != nullptr)
+			{
+				QMessageBox::critical(parentWidget, qAppName(), m_lastScriptError);
+			}
+		}
+
+		return result;
+	}
+
+	QString SchemaItem::formatSqriptError(const QJSValue& scriptValue) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QString str = QString("Script running uncaught exception at line %1\n"
+							  "\tItem: %2 %3\n"
+							  "\tStack: %4\n"
+							  "\tMessage: %5")
+					  .arg(scriptValue.property("lineNumber").toInt())
+					  .arg(guid().toString()).arg(metaObject()->className())
+					  .arg(scriptValue.property("stack").toString())
+					  .arg(scriptValue.toString());
+
+		return str;
 	}
 
 	void SchemaItem::reportSqriptError(const QJSValue& scriptValue, QWidget* parent) const
@@ -273,8 +358,11 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItem::Draw(CDrawParam*, const Schema*, const SchemaLayer*) const
+	void SchemaItem::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
+		Q_UNUSED(drawParam)
+		Q_UNUSED(schema)
+		Q_UNUSED(layer)
 	}
 
 	// Рисование элемента при его создании изменении
@@ -302,8 +390,33 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam* /*drawParam*/, const QString& /*runOrderIndex*/) const
+	void SchemaItem::DrawDebugInfo(CDrawParam*, const QString&) const
 	{
+	}
+
+	void SchemaItem::DrawScriptError(CDrawParam* drawParam) const
+	{
+		if (m_lastScriptError.isEmpty() == true)
+		{
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		std::vector<SchemaPoint> points = getPointList();
+		QRectF r = {points[0].X, points[0].Y, 2000, 2000};
+
+		static FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		p->setPen(Qt::red);
+
+		DrawHelper::drawText(p,
+							 font,
+							 itemUnit(),
+							 m_lastScriptError,
+							 r,
+							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
+
+		return;
 	}
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
@@ -584,10 +697,25 @@ namespace VFrame30
 		m_clickScript = value;
 	}
 
+	QString SchemaItem::preDrawScript() const
+	{
+		return m_preDrawScript;
+	}
+
+	void SchemaItem::setPreDrawScript(const QString& value)
+	{
+		m_preDrawScript = value;
+	}
+
 	QRectF SchemaItem::boundingRectInDocPt() const
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();
+	}
+
+	QString SchemaItem::lastScriptError() const
+	{
+		return m_lastScriptError;
 	}
 
 }

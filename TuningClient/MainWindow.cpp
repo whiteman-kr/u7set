@@ -53,8 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	// Global connections
 
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
-	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningObjectManager::slot_signalsUpdated);
-	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningObjectManager::slot_serversArrived,
+	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningSignalManager::slot_signalsUpdated);
+	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningSignalManager::slot_serversArrived,
 			Qt::QueuedConnection);
 	connect(&m_configController, &ConfigController::filtersArrived, &m_filterStorage, &TuningFilterStorage::slot_filtersUpdated,
 			Qt::QueuedConnection);
@@ -279,7 +279,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::createWorkspace(const TuningObjectStorage *objects)
+void MainWindow::createWorkspace(const TuningSignalStorage *objects)
 {
 	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
 	{
@@ -375,7 +375,7 @@ void MainWindow::createWorkspace(const TuningObjectStorage *objects)
 
 void MainWindow::slot_configurationArrived()
 {
-	TuningObjectStorage objects = m_objectManager->objectStorage();
+	TuningSignalStorage objects = m_objectManager->objectStorage();
 
     createWorkspace(&objects);
 
@@ -411,7 +411,7 @@ void MainWindow::runPresetEditor()
 
     bool editAutomatic = false;
 
-	TuningObjectStorage objects = m_objectManager->objectStorage();
+	TuningSignalStorage objects = m_objectManager->objectStorage();
 
 	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,

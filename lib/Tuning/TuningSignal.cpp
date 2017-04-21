@@ -1,123 +1,182 @@
-#include "TuningObject.h"
+#include "TuningSignal.h"
 
 #include<memory>
 
-TuningObject::TuningObject()
-	:
-	  m_value(0.0),
-	  m_editValue(0.0),
-	  m_defaultValue(0.0),
-	  m_lowLimit(0.0),
-	  m_highLimit(0.0),
-	  m_decimalPlaces(0),
-	  m_valid(false),
-	  m_underflow(false),
-	  m_overflow(false),
-	  m_analog(false),
-	  m_appSignalHash(0)
-{
+//
+// TuningSignalState
+//
 
+bool TuningSignalState::valid() const
+{
+	//return true;
+	return m_flags.m_valid;
+}
+
+void TuningSignalState::setValid(bool value)
+{
+	if (m_flags.m_valid != value)
+	{
+		m_flags.m_needRedraw = true;
+
+		m_flags.m_valid = value;
+	}
 
 }
 
-QString TuningObject::customAppSignalID() const
+bool TuningSignalState::underflow() const
+{
+	return m_flags.m_underflow;
+}
+
+bool TuningSignalState::overflow() const
+{
+	return m_flags.m_overflow;
+}
+
+bool TuningSignalState::needRedraw()
+{
+	bool result = m_flags.m_needRedraw;
+
+	m_flags.m_needRedraw = false;
+
+	return result;
+}
+
+
+bool TuningSignalState::userModified() const
+{
+	return m_flags.m_userModified;
+}
+
+void TuningSignalState::clearUserModified()
+{
+	m_flags.m_userModified = false;
+}
+
+bool TuningSignalState::writing() const
+{
+	return m_flags.m_writing;
+}
+
+void TuningSignalState::setWriting(bool value)
+{
+	if (m_flags.m_writing != value)
+	{
+		m_flags.m_needRedraw = true;
+
+		m_flags.m_writing = value;
+
+		m_writingCounter = 0;
+	}
+}
+
+//
+// TuningSignal
+//
+
+
+TuningSignal::TuningSignal()
+{
+}
+
+QString TuningSignal::customAppSignalID() const
 {
 	return m_customAppSignalID;
 }
 
-void TuningObject::setCustomAppSignalID(const QString& value)
+void TuningSignal::setCustomAppSignalID(const QString& value)
 {
 	m_customAppSignalID = value;
 }
 
-QString TuningObject::equipmentID() const
+QString TuningSignal::equipmentID() const
 {
 	return m_equipmentID;
 }
 
-void TuningObject::setEquipmentID(const QString& value)
+void TuningSignal::setEquipmentID(const QString& value)
 {
 	m_equipmentID = value;
 }
 
-QString TuningObject::appSignalID() const
+QString TuningSignal::appSignalID() const
 {
 	return m_appSignalID;
 }
 
-void TuningObject::setAppSignalID(const QString& value)
+void TuningSignal::setAppSignalID(const QString& value)
 {
 	m_appSignalID = value;
 	m_appSignalHash = ::calcHash(value);
 }
 
-QString TuningObject::caption() const
+QString TuningSignal::caption() const
 {
 	return m_caption;
 }
 
-void TuningObject::setCaption(const QString& value)
+void TuningSignal::setCaption(const QString& value)
 {
 	m_caption = value;
 }
 
-QString TuningObject::units() const
+QString TuningSignal::units() const
 {
 	return m_units;
 }
 
-void TuningObject::setUnits(const QString& value)
+void TuningSignal::setUnits(const QString& value)
 {
 	m_units = value;
 }
 
-bool TuningObject::analog() const
+bool TuningSignal::analog() const
 {
 	return m_analog;
 }
 
-void TuningObject::setAnalog(bool value)
+void TuningSignal::setAnalog(bool value)
 {
 	m_analog = value;
 }
 
-float TuningObject::value() const
+float TuningSignal::value() const
 {
-	return m_value;
+	return state.m_value;
 
 }
 
-void TuningObject::setValue(float value)
+void TuningSignal::setValue(float value)
 {
-    if (m_value != value)
-    {
-        m_redraw = true;
+	if (state.m_value != value)
+	{
+		state.m_flags.m_needRedraw = true;
 
-        m_value = value;
+		state.m_value = value;
 
-        m_underflow = m_value < m_lowLimit;
+		state.m_flags.m_underflow = state.m_value < m_lowLimit;
 
-        m_overflow = m_value > m_highLimit;
-    }
+		state.m_flags.m_overflow = state.m_value > m_highLimit;
+	}
 }
 
-void TuningObject::onReceiveValue(float value, bool& writingFailed)
+void TuningSignal::onReceiveValue(float value, bool& writingFailed)
 {
     setValue(value);
 
     writingFailed = false;
 
-    if (m_writing == true)
+	if (state.m_flags.m_writing == true)
     {
-        if (value == m_editValue)
+		if (value == state.m_editValue)
         {
             // Reset the writing flag
             //
-            m_writing = false;
+			state.m_flags.m_writing = false;
 
-            m_writingCounter = 0;
+			state.m_writingCounter = 0;
 
-            m_redraw = true;
+			state.m_flags.m_needRedraw = true;
         }
         else
         {
@@ -125,15 +184,15 @@ void TuningObject::onReceiveValue(float value, bool& writingFailed)
 
             // Increase the writing counter and reset it if value is wrong in MAX_TRY_WRITE_COUNT tries
             //
-            m_writingCounter++;
+			state.m_writingCounter++;
 
-            if (m_writingCounter > MAX_TRY_WRITE_COUNT)
+			if (state.m_writingCounter > MAX_TRY_WRITE_COUNT)
             {
-                m_redraw = true;
+				state.m_flags.m_needRedraw = true;
 
-                m_writing = false;
+				state.m_flags.m_writing = false;
 
-                m_writingCounter = 0;
+				state.m_writingCounter = 0;
 
                 writingFailed = true;
             }
@@ -141,174 +200,111 @@ void TuningObject::onReceiveValue(float value, bool& writingFailed)
     }
 }
 
-float TuningObject::editValue() const
+float TuningSignal::editValue() const
 {
-	return m_editValue;
+	return state.m_editValue;
 }
 
-void TuningObject::onEditValue(float value)
+void TuningSignal::onEditValue(float value)
 {
-    m_editValue = value;
+	state.m_editValue = value;
 
-    if (m_value == m_editValue)
+	if (state.m_value == state.m_editValue)
     {
-        m_userModified = false;
+		state.m_flags.m_userModified = false;
     }
     else
     {
-        m_userModified = true;
+		state.m_flags.m_userModified = true;
     }
 
-    m_redraw = true;
+	state.m_flags.m_needRedraw = true;
 }
 
-void TuningObject::onSendValue(float value)
+void TuningSignal::onSendValue(float value)
 {
-    m_editValue = value;
+	state.m_editValue = value;
 }
 
-float TuningObject::defaultValue() const
+float TuningSignal::defaultValue() const
 {
 	return m_defaultValue;
 }
 
-void TuningObject::setDefaultValue(float value)
+void TuningSignal::setDefaultValue(float value)
 {
 	m_defaultValue = value;
 }
 
-float TuningObject::lowLimit() const
+float TuningSignal::lowLimit() const
 {
 	return m_lowLimit;
 }
 
-void TuningObject::setLowLimit(float value)
+void TuningSignal::setLowLimit(float value)
 {
 	m_lowLimit = value;
 }
 
-float TuningObject::highLimit() const
+float TuningSignal::highLimit() const
 {
 	return m_highLimit;
 }
 
-void TuningObject::setHighLimit(float value)
+void TuningSignal::setHighLimit(float value)
 {
 	m_highLimit = value;
 }
 
-float TuningObject::readLowLimit() const
+float TuningSignal::readLowLimit() const
 {
     return m_readLowLimit;
 }
 
-void TuningObject::setReadLowLimit(float value)
+void TuningSignal::setReadLowLimit(float value)
 {
     if (m_readLowLimit != value)
     {
-        m_redraw = true;
+		state.m_flags.m_needRedraw = true;
 
         m_readLowLimit = value;
     }
 }
 
-float TuningObject::readHighLimit() const
+float TuningSignal::readHighLimit() const
 {
     return m_readHighLimit;
 }
 
-void TuningObject::setReadHighLimit(float value)
+void TuningSignal::setReadHighLimit(float value)
 {
     if (m_readHighLimit != value)
     {
-        m_redraw = true;
+		state.m_flags.m_needRedraw = true;
 
         m_readHighLimit = value;
     }
 }
 
-int TuningObject::decimalPlaces() const
+int TuningSignal::decimalPlaces() const
 {
 	return m_decimalPlaces;
 }
 
-void TuningObject::setDecimalPlaces(int value)
+void TuningSignal::setDecimalPlaces(int value)
 {
 	m_decimalPlaces = value;
 }
 
-bool TuningObject::valid() const
-{
-    //return true;
-    return m_valid;
-}
-
-void TuningObject::setValid(bool value)
-{
-    if (m_valid != value)
-    {
-        m_redraw = true;
-
-        m_valid = value;
-    }
-
-}
-
-bool TuningObject::underflow() const
-{
-	return m_underflow;
-}
-
-bool TuningObject::overflow() const
-{
-	return m_overflow;
-}
-
-Hash TuningObject::appSignalHash() const
+Hash TuningSignal::appSignalHash() const
 {
 	return m_appSignalHash;
 }
 
-bool TuningObject::redraw()
+
+bool TuningSignal::limitsUnbalance() const
 {
-    bool result = m_redraw;
-
-    m_redraw = false;
-
-    return result;
-}
-
-
-bool TuningObject::userModified() const
-{
-    return m_userModified;
-}
-
-void TuningObject::clearUserModified()
-{
-    m_userModified = false;
-}
-
-bool TuningObject::writing() const
-{
-    return m_writing;
-}
-
-void TuningObject::setWriting(bool value)
-{
-    if (m_writing != value)
-    {
-        m_redraw = true;
-
-        m_writing = value;
-
-        m_writingCounter = 0;
-    }
-}
-
-bool TuningObject::limitsUnbalance() const
-{
-    if (m_analog == true && m_valid == true)
+	if (m_analog == true && state.m_flags.m_valid == true)
     {
         return m_lowLimit != m_readLowLimit || m_highLimit != m_readHighLimit;
     }
@@ -318,16 +314,16 @@ bool TuningObject::limitsUnbalance() const
 }
 
 //
-// TuningObjectStorage
+// TuningSignalStorage
 //
 
-TuningObjectStorage::TuningObjectStorage()
+TuningSignalStorage::TuningSignalStorage()
 {
 
 }
 
 
-bool TuningObjectStorage::loadSignals(const QByteArray& data, QString *errorCode)
+bool TuningSignalStorage::loadSignals(const QByteArray& data, QString *errorCode)
 {
     if (errorCode == nullptr)
     {
@@ -373,7 +369,7 @@ bool TuningObjectStorage::loadSignals(const QByteArray& data, QString *errorCode
 
         if (reader.name() == "TuningSignal")
         {
-            std::shared_ptr<TuningObject> object = std::make_shared<TuningObject>();
+            std::shared_ptr<TuningSignal> object = std::make_shared<TuningSignal>();
 
             if (reader.attributes().hasAttribute("AppSignalID"))
             {
@@ -427,7 +423,7 @@ bool TuningObjectStorage::loadSignals(const QByteArray& data, QString *errorCode
 
             m_objects.push_back(object);
 
-            m_objectsMap[object->appSignalHash()] = (int)m_objects.size() - 1;
+            m_objectsMap[object->appSignalHash()] = static_cast<int>(m_objects.size()) - 1;
 
             continue;
         }
@@ -440,31 +436,27 @@ bool TuningObjectStorage::loadSignals(const QByteArray& data, QString *errorCode
     return !reader.hasError();
 }
 
-void TuningObjectStorage::invalidateSignals()
+void TuningSignalStorage::invalidateSignals()
 {
-    int count = (int)m_objects.size();
-    for (int i = 0; i < count; i++)
-    {
-        std::shared_ptr<TuningObject> object = m_objects[i];
-
-        object->setValid(false);
-    }
-
+	for (std::shared_ptr<TuningSignal>& object : m_objects)
+	{
+		object->state.setValid(false);
+	}
 }
 
 
-int TuningObjectStorage::objectCount() const
+int TuningSignalStorage::objectCount() const
 {
-    return (int)m_objects.size();
+    return static_cast<int>(m_objects.size());
 
 }
 
-bool TuningObjectStorage::objectExists(Hash hash) const
+bool TuningSignalStorage::objectExists(Hash hash) const
 {
     return (m_objectsMap.find(hash) != m_objectsMap.end());
 }
 
-TuningObject* TuningObjectStorage::objectPtr(int index) const
+TuningSignal* TuningSignalStorage::objectPtr(int index) const
 {
     if (index < 0 || index >= m_objects.size())
     {
@@ -475,7 +467,7 @@ TuningObject* TuningObjectStorage::objectPtr(int index) const
     return m_objects[index].get();
 }
 
-TuningObject* TuningObjectStorage::objectPtrByHash(Hash hash) const
+TuningSignal* TuningSignalStorage::objectPtrByHash(Hash hash) const
 {
     const auto it = m_objectsMap.find(hash);
 
@@ -489,13 +481,3 @@ TuningObject* TuningObjectStorage::objectPtrByHash(Hash hash) const
 
 }
 
-/*std::vector<std::shared_ptr<> TuningObjectStorage::objects()
-{
-    return m_objects;
-}
-
-std::map<Hash, int> TuningObjectStorage::objectsMap()
-{
-    return m_objectsMap;
-}
-*/

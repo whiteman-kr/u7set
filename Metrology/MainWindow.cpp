@@ -702,7 +702,7 @@ void MainWindow::createStatusBar()
 
 	m_statusEmpty->setText(QString());
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigService: offline "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: offline "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 
@@ -1602,7 +1602,7 @@ void MainWindow::showRackList()
 
 void MainWindow::options()
 {
-	OptionsDialog dialog;
+	OptionsDialog dialog(this);
 	dialog.exec();
 
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
@@ -1868,7 +1868,7 @@ void MainWindow::configSocketConnected()
 
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigService: on "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip(tr("Connected: %1 : %2\nLoaded files: 0").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port()));
 }
@@ -1877,7 +1877,7 @@ void MainWindow::configSocketConnected()
 
 void MainWindow::configSocketDisconnected()
 {
-	m_statusConnectToConfigServer->setText(tr(" ConfigService: off "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: off "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(255, 160, 160);");
 	m_statusConnectToConfigServer->setToolTip(tr("Please, connect to server\nclick menu \"Tool\" - \"Options...\" - \"Connect to server\""));
 }
@@ -1906,7 +1906,7 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
-	m_statusConnectToConfigServer->setText(tr(" ConfigService: on "));
+	m_statusConnectToConfigServer->setText(tr(" ConfigurationService: on "));
 	m_statusConnectToConfigServer->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
 	m_statusConnectToConfigServer->setToolTip(connectedState);
 

@@ -3,6 +3,7 @@
 #include "UfbSchema.h"
 #include "MonitorSchema.h"
 #include "DiagSchema.h"
+#include "SchemaView.h"
 #include "FblItem.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
@@ -215,11 +216,26 @@ namespace VFrame30
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
+					if (drawParam->isMonitorMode() == true)
+					{
+						SchemaView* view = drawParam->schemaView();
+						assert(view);
+
+						item->preDrawEvent(view->globalScript(), view->jsEngine());
+					}
+
 					item->Draw(drawParam, this, pLayer);
 
 					if (item->isCommented() == true)
 					{
 						item->drawCommentDim(drawParam);
+					}
+
+					// Draw lastScriptError after drawing item
+					//
+					if (item->lastScriptError().isEmpty() == false)
+					{
+						item->DrawScriptError(drawParam);
 					}
 				}
 			}

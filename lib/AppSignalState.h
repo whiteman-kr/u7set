@@ -49,3 +49,4 @@ struct AppSignalState
 	Hash getProtoAppSignalState(const Proto::AppSignalState* protoState);
 };
 
+

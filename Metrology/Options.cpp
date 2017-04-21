@@ -557,8 +557,6 @@ void MeasureViewOption::load()
 	m_fontBold = m_font;
 	m_fontBold.setBold(true);
 
-	m_signalIdType = s.value(QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), SIGNAL_ID_TYPE_CUSTOM).toInt();
-
 	m_colorNotError = s.value(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toInt();
 	m_colorErrorLimit = s.value(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toInt();
 	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toInt();
@@ -586,8 +584,6 @@ void MeasureViewOption::save()
 
 	s.setValue(QString("%1Font").arg(MEASURE_VIEW_OPTIONS_KEY), m_font.toString());
 
-	s.setValue(QString("%1ShowCustomID").arg(MEASURE_VIEW_OPTIONS_KEY), m_signalIdType);
-
 	s.setValue(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorNotError.rgb());
 	s.setValue(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorLimit.rgb());
 	s.setValue(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), m_colorErrorControl.rgb());
@@ -608,8 +604,6 @@ MeasureViewOption& MeasureViewOption::operator=(const MeasureViewOption& from)
 	m_font.fromString(from.m_font.toString());
 	m_fontBold = m_font;
 	m_fontBold.setBold(true);
-
-	m_signalIdType = from.m_signalIdType;
 
 	m_colorNotError = from.m_colorNotError;
 	m_colorErrorLimit = from.m_colorErrorLimit;
@@ -651,7 +645,6 @@ void SignalInfoOption::load()
 
 	m_font.fromString(s.value(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
 
-	m_showCustomID = s.value(QString("%1ShowExternalID").arg(SIGNAL_INFO_OPTIONS_KEY), true).toBool();
 	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
 	m_showAdcState = s.value(QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
 	m_showAdcHexState = s.value(QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
@@ -669,7 +662,6 @@ void SignalInfoOption::save()
 
 	s.setValue(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), m_font.toString());
 
-	s.setValue(QString("%1ShowExternalID").arg(SIGNAL_INFO_OPTIONS_KEY), m_showCustomID);
 	s.setValue(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
 	s.setValue(QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcState);
 	s.setValue(QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcHexState);
@@ -686,7 +678,6 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 {
 	m_font.fromString(from.m_font.toString());
 
-	m_showCustomID = from.m_showCustomID;
 	m_showElectricState = from.m_showElectricState;
 	m_showAdcState = from.m_showAdcState;
 	m_showAdcHexState = from.m_showAdcHexState;
@@ -984,7 +975,6 @@ void LinearityOption::load()
 	m_pointBase.loadData(SQL_TABLE_LINEARITY_POINT);
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), 0.2).toDouble();
-	m_errorCtrl = s.value(QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 	m_showInputErrorType = s.value(QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), LO_SHOW_INPUT_ERROR_PHYSICAL).toInt();
 
@@ -1007,7 +997,6 @@ void LinearityOption::save()
 	QSettings s;
 
 	s.setValue(QString("%1ErrorLimit").arg(LINEARITY_OPTIONS_KEY), m_errorLimit);
-	s.setValue(QString("%1ErrorCtrl").arg(LINEARITY_OPTIONS_KEY), m_errorCtrl);
 	s.setValue(QString("%1ErrorType").arg(LINEARITY_OPTIONS_KEY), m_errorType);
 	s.setValue(QString("%1ShowInputErrorType").arg(LINEARITY_OPTIONS_KEY), m_showInputErrorType);
 
@@ -1032,7 +1021,6 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_pointBase = from.m_pointBase;
 
 	m_errorLimit = from.m_errorLimit;
-	m_errorCtrl = from.m_errorCtrl;
 	m_errorType = from.m_errorType;
 	m_showInputErrorType = from.m_showInputErrorType;
 
@@ -1081,7 +1069,6 @@ void ComparatorOption::load()
 	QSettings s;
 
 	m_errorValue = s.value(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
-	m_errorCtrl = s.value(QString("%1ErrorCtrl").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_startValue = s.value(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 
@@ -1097,7 +1084,6 @@ void ComparatorOption::save()
 	QSettings s;
 
 	s.setValue(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), m_errorValue);
-	s.setValue(QString("%1ErrorCtrl").arg(COMPARATOR_OPTIONS_KEY), m_errorCtrl);
 	s.setValue(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), m_startValue);
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 
@@ -1111,7 +1097,6 @@ void ComparatorOption::save()
 ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 {
 	m_errorValue = from.m_errorValue;
-	m_errorCtrl = from.m_errorCtrl;
 	m_startValue = from.m_startValue;
 	m_errorType = from.m_errorType;
 

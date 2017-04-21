@@ -96,7 +96,8 @@ public:
 const char* const			TuningSignalColumn[] =
 {
 							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Rack"),
-							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "ID"),
+							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "AppSignalID"),
+							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "Caption"),
 							QT_TRANSLATE_NOOP("TuningSignalListDialog.h", "State"),
@@ -107,17 +108,19 @@ const char* const			TuningSignalColumn[] =
 const int					TUN_SIGNAL_LIST_COLUMN_COUNT		= sizeof(TuningSignalColumn)/sizeof(TuningSignalColumn[0]);
 
 const int					TUN_SIGNAL_LIST_COLUMN_RACK			= 0,
-							TUN_SIGNAL_LIST_COLUMN_ID			= 1,
-							TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID	= 2,
-							TUN_SIGNAL_LIST_COLUMN_CAPTION		= 3,
-							TUN_SIGNAL_LIST_COLUMN_STATE		= 4,
-							TUN_SIGNAL_LIST_COLUMN_DEFAULT		= 5,
-							TUN_SIGNAL_LIST_COLUMN_RANGE		= 6;
+							TUN_SIGNAL_LIST_COLUMN_APP_ID		= 1,
+							TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID	= 2,
+							TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID	= 3,
+							TUN_SIGNAL_LIST_COLUMN_CAPTION		= 4,
+							TUN_SIGNAL_LIST_COLUMN_STATE		= 5,
+							TUN_SIGNAL_LIST_COLUMN_DEFAULT		= 6,
+							TUN_SIGNAL_LIST_COLUMN_RANGE		= 7;
 
 const int					TuningSignalColumnWidth[TUN_SIGNAL_LIST_COLUMN_COUNT] =
 {
 							100,	 // TUN_SIGNAL_LIST_COLUMN_RACK
-							250,	 // TUN_SIGNAL_LIST_COLUMN_ID
+							250,	 // TUN_SIGNAL_LIST_COLUMN_APP_ID
+							250,	 // TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID
 							250,	 // TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	 // TUN_SIGNAL_LIST_COLUMN_CAPTION
 							100,	 // TUN_SIGNAL_LIST_COLUMN_VALUE
@@ -142,8 +145,6 @@ private:
 	mutable QMutex			m_signalMutex;
 	QList<Metrology::Signal*>	m_signalList;
 
-	static bool				m_showCustomID;
-
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -161,9 +162,6 @@ public:
 	QString					signalStateStr(Metrology::Signal* pSignal) const;
 
 	void					updateColumn(int column);
-
-	bool					showCustomID() const { return m_showCustomID; }
-	void					setShowCustomID(bool show) { m_showCustomID = show; }
 };
 
 // ==============================================================================================
@@ -196,7 +194,6 @@ private:
 	QAction*				m_pTypeAnalogAction = nullptr;
 	QAction*				m_pTypeDiscreteAction = nullptr;
 	QAction*				m_pShowSoucreAction = nullptr;
-	QAction*				m_pShowCustomIDAction = nullptr;
 
 	QTableView*				m_pSourceView = nullptr;
 	TuningSourceTable		m_sourceTable;
@@ -261,7 +258,6 @@ private slots:
 	void					showTypeAnalog();
 	void					showTypeDiscrete();
 	void					showSources();
-	void					showCustomID();
 
 	void					onContextMenu(QPoint);
 

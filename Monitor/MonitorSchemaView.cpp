@@ -32,7 +32,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
 	drawParam.setInfoMode(theSettings.showItemsLabels());
@@ -180,7 +180,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 				{
 					// Run script
 					//
-					item->runScript(jsEngine(), this);
+					item->clickEvent(globalScript(), jsEngine(), this);
 
 					// --
 					//
@@ -222,5 +222,26 @@ QString MonitorSchemaView::globalScript() const
 	}
 
 	return m_schemaManager->globalScript();
+}
+
+QJSEngine* MonitorSchemaView::jsEngine()
+{
+	bool addSignalManager = false;
+	if (m_jsEngineGlobalsWereCreated == false)
+	{
+		addSignalManager = true;
+	}
+
+	QJSEngine* result = VFrame30::SchemaView::jsEngine();
+
+	if (addSignalManager == true)
+	{
+		ScriptSignalManager* signalManager = new ScriptSignalManager(result, &theSignals);
+		QJSValue jsValue = m_jsEngine.newQObject(signalManager);
+
+		result->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsValue);
+	}
+
+	return result;
 }
 
