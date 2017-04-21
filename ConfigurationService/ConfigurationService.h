@@ -78,11 +78,14 @@ class CfgCheckerWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	CfgCheckerWorker(const QString& workFolder, const QString& autoloadBuildFolder, int checkNewBuildInterval = 0);
+	CfgCheckerWorker(const QString& workFolder,
+					 const QString& autoloadBuildFolder,
+					 int checkNewBuildInterval,
+					 std::shared_ptr<CircularLogger> logger);
 
-	static QString getFileHash(const QString& filePath);
-	static bool copyPath(const QString& src, const QString& dst);
-	static bool checkBuild(const QString& buildDirectoryPath);
+	QString getFileHash(const QString& filePath);
+	bool copyPath(const QString& src, const QString& dst);
+	bool checkBuild(const QString& buildDirectoryPath);
 
 signals:
 	void buildPathChanged(const QString& newBuildPath);
@@ -100,5 +103,7 @@ private:
 	QDateTime m_lastBuildXmlModifyTime;
 	QString m_lastBuildXmlHash;
 	int m_checkNewBuildInterval;
+
+	std::shared_ptr<CircularLogger> m_logger;
 };
 

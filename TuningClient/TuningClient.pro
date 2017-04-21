@@ -144,7 +144,7 @@ SOURCES +=\
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
     ../lib/Tuning/TuningSignal.cpp \
     ../lib/Tuning/TuningSignalManager.cpp
 
@@ -192,7 +192,7 @@ HEADERS  += MainWindow.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
-    ../lib/CircularLogger.h
+    ../lib/CircularLogger.h \
     ../lib/Tuning/TuningSignal.h \
     ../lib/Tuning/TuningSignalManager.h
 

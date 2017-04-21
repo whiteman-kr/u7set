@@ -152,7 +152,7 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
-	CfgCheckerWorker* cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 30);
+	CfgCheckerWorker* cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 30, m_logger);
 	m_cfgCheckerThread = new SimpleThread(cfgCheckerWorker);
 
 	m_cfgCheckerThread->start();
@@ -217,79 +217,20 @@ void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
 }
 
 
-<<<<<<< HEAD
-=======
 // ------------------------------------------------------------------------------------
 //
-// ListenerWithLog class implementation
+// CfgCheckerWorker class implementation
 //
 // ------------------------------------------------------------------------------------
 
-ListenerWithLog::ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server) :
-	Tcp::Listener(listenAddressPort, server)
-{
-}
-
-
-void ListenerWithLog::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
-{
-	if (startOk)
-	{
-		DEBUG_LOG_MSG(QString("CfgServer start listening %1 OK").arg(addr.addressPortStr()));
-	}
-	else
-	{
-		DEBUG_LOG_ERR(QString("CfgServer error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
-	}
-}
-
-
-// ------------------------------------------------------------------------------------
-//
-// CfgServerWithLog class implementation
-//
-// ------------------------------------------------------------------------------------
-
-CfgServerWithLog::CfgServerWithLog(const QString& buildFolder) :
-	CfgServer(buildFolder)
-{
-}
-
-
-CfgServer* CfgServerWithLog::getNewInstance()
-{
-	return new CfgServerWithLog(rootFolder());
-}
-
-
-void CfgServerWithLog::onConnection()
-{
-	DEBUG_LOG_MSG(QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
-}
-
-
-void CfgServerWithLog::onDisconnection()
-{
-	DEBUG_LOG_MSG(QString(tr("CfgServer connection #%1 closed")).arg(id()));
-}
-
-
-void CfgServerWithLog::onFileSent(const QString& fileName)
-{
-	DEBUG_LOG_MSG(QString(tr("File has been sent: %1")).arg(fileName));
-}
-
-
-// ------------------------------------------------------------------------------------
-//
-// CfgSrvStorage class implementation
-//
-// ------------------------------------------------------------------------------------
-
-CfgCheckerWorker::CfgCheckerWorker(const QString& workFolder, const QString& autoloadBuildFolder, int checkNewBuildInterval) :
+CfgCheckerWorker::CfgCheckerWorker(const QString& workFolder,
+								   const QString& autoloadBuildFolder,
+								   int checkNewBuildInterval,
+								   std::shared_ptr<CircularLogger> logger) :
 	m_workFolder(workFolder),
 	m_autoloadBuildFolder(autoloadBuildFolder),
-	m_checkNewBuildInterval(checkNewBuildInterval)
+	m_checkNewBuildInterval(checkNewBuildInterval),
+	m_logger(logger)
 {
 }
 
@@ -350,9 +291,10 @@ bool CfgCheckerWorker::copyPath(const QString& src, const QString& dst)
 bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 {
 	QFile buildXmlFile(buildDirectoryPath + "/build.xml");
+
 	if (!buildXmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
-		DEBUG_LOG_MSG("Could not open " + buildDirectoryPath + "/build.xml has been changed");
+		DEBUG_LOG_MSG(m_logger, "Could not open " + buildDirectoryPath + "/build.xml has been changed");
 		return false;
 	}
 
@@ -402,7 +344,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 		QFileInfo fileInfo(buildDirectoryPath + fileName);
 		if (fileInfo.size() != fileSize)
 		{
-			DEBUG_LOG_MSG("File " + fileName + " has size " + QString::number(fileInfo.size()) + " expected " + QString::number(fileSize));
+			DEBUG_LOG_MSG(m_logger, "File " + fileName + " has size " + QString::number(fileInfo.size()) + " expected " + QString::number(fileSize));
 			result = false;
 		}
 
@@ -415,7 +357,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 
 		if (realFileMd5Hash != fileMd5Hash)
 		{
-			DEBUG_LOG_MSG("File " + fileName + " has MD5 hash " + realFileMd5Hash + " expected " + fileMd5Hash);
+			DEBUG_LOG_MSG(m_logger, "File " + fileName + " has MD5 hash " + realFileMd5Hash + " expected " + fileMd5Hash);
 			result = false;
 		}
 	}
@@ -434,7 +376,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 
 	if (errors != 0)
 	{
-		DEBUG_LOG_MSG("Build has " + QString::number(errors) + " errors");
+		DEBUG_LOG_MSG(m_logger, "Build has " + QString::number(errors) + " errors");
 		return false;
 	}
 
@@ -469,7 +411,7 @@ void CfgCheckerWorker::updateBuildXml()
 		return;
 	}
 
-	DEBUG_LOG_MSG("build.xml has been changed");
+	DEBUG_LOG_MSG(m_logger, "build.xml has been changed");
 
 	m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
 	m_lastBuildXmlHash = newBuildXmlHash;
@@ -481,13 +423,13 @@ void CfgCheckerWorker::updateBuildXml()
 	QString newCheckDirectoryPath = m_workFolder + "/CfgSrvStorage/" + newCheckDirectoryName;
 	if (!workDirectory.mkpath(newCheckDirectoryPath))
 	{
-		DEBUG_LOG_ERR("Could not create directory " + newCheckDirectoryPath);
+		DEBUG_LOG_ERR(m_logger, "Could not create directory " + newCheckDirectoryPath);
 		return;
 	}
 
 	if (!copyPath(m_autoloadBuildFolder, newCheckDirectoryPath))
 	{
-		DEBUG_LOG_ERR("Could not copy content from " + m_autoloadBuildFolder + " to " + newCheckDirectoryPath);
+		DEBUG_LOG_ERR(m_logger, "Could not copy content from " + m_autoloadBuildFolder + " to " + newCheckDirectoryPath);
 
 		QDir newCheckDirectory(newCheckDirectoryPath);
 		newCheckDirectory.removeRecursively();
@@ -499,7 +441,7 @@ void CfgCheckerWorker::updateBuildXml()
 	//
 	if (!checkBuild(newCheckDirectoryPath))
 	{
-		DEBUG_LOG_ERR("Build in " + newCheckDirectoryPath + " is not consistent");
+		DEBUG_LOG_ERR(m_logger, "Build in " + newCheckDirectoryPath + " is not consistent");
 
 		QDir newCheckDirectory(newCheckDirectoryPath);
 		newCheckDirectory.removeRecursively();
@@ -507,7 +449,7 @@ void CfgCheckerWorker::updateBuildXml()
 		return;
 	}
 
-	DEBUG_LOG_MSG("Build in " + newCheckDirectoryPath + " is correct");
+	DEBUG_LOG_MSG(m_logger, "Build in " + newCheckDirectoryPath + " is correct");
 
 	// Renaming to workDirectory/work-date
 	QString date = newCheckDirectoryPath.right(19);
@@ -515,12 +457,12 @@ void CfgCheckerWorker::updateBuildXml()
 
 	if (workDirectory.rename(newCheckDirectoryPath, newWorkDirectoryPath) == false)
 	{
-		DEBUG_LOG_MSG("Could not rename " + newCheckDirectoryPath + " to " + newWorkDirectoryPath);
+		DEBUG_LOG_MSG(m_logger, "Could not rename " + newCheckDirectoryPath + " to " + newWorkDirectoryPath);
 
 		return;
 	}
 
-	DEBUG_LOG_MSG(newCheckDirectoryPath + " renamed to " + newWorkDirectoryPath);
+	DEBUG_LOG_MSG(m_logger, newCheckDirectoryPath + " renamed to " + newWorkDirectoryPath);
 
 	// Renaming previous work-date directory to backup-date
 	//
@@ -538,7 +480,7 @@ void CfgCheckerWorker::updateBuildXml()
 
 				if (workDirectory.rename(fullPath, backupName) == false)
 				{
-					DEBUG_LOG_MSG("Could not rename " + fullPath + " to " + backupName);
+					DEBUG_LOG_MSG(m_logger, "Could not rename " + fullPath + " to " + backupName);
 
 					return;
 				}
@@ -565,12 +507,12 @@ void CfgCheckerWorker::onThreadStarted()
 
 	if (m_workFolder.isEmpty() || m_autoloadBuildFolder.isEmpty())
 	{
-		DEBUG_LOG_WRN("Work directory is empty, autoupdating is off")
+		DEBUG_LOG_WRN(m_logger, "Work directory is empty, autoupdating is off")
 		return;
 	}
 	else
 	{
-		DEBUG_LOG_MSG("Autoupdate is working at " + m_workFolder + "/CfgSrvStorage");
+		DEBUG_LOG_MSG(m_logger, "Autoupdate is working at " + m_workFolder + "/CfgSrvStorage");
 	}
 
 	QDir storageDirectory(m_workFolder + "/CfgSrvStorage");
@@ -596,4 +538,3 @@ void CfgCheckerWorker::onThreadStarted()
 		checkBuildXmlTimer->start(m_checkNewBuildInterval);
 	}
 }
->>>>>>> develop
