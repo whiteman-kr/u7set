@@ -36,6 +36,38 @@ namespace VFrame30
 	const QString PropertyNames::caption("Caption");
 	const QString PropertyNames::maxLength("MaxLength");
 
+	// SchemaItemValue Colors
+	//
+	const QString PropertyNames::fillColorNonValid0("ColorNonValidFill0");
+	const QString PropertyNames::fillColorNonValid1("ColorNonValidFill1");
+	const QString PropertyNames::textColorNonValid0("ColorNonValidText0");
+	const QString PropertyNames::textColorNonValid1("ColorNonValidText1");
+
+	const QString PropertyNames::fillColorOverflow0("ColorOverflowFill0");
+	const QString PropertyNames::fillColorOverflow1("ColorOverflowFill1");
+	const QString PropertyNames::textColorOverflow0("ColorOverflowText0");
+	const QString PropertyNames::textColorOverflow1("ColorOverflowText1");
+
+	const QString PropertyNames::fillColorUnderflow0("ColorUnderflowFill0");
+	const QString PropertyNames::fillColorUnderflow1("ColorUnderflowFill1");
+	const QString PropertyNames::textColorUnderflow0("ColorUnderflowText0");
+	const QString PropertyNames::textColorUnderflow1("ColorUnderflowText1");
+
+	const QString PropertyNames::fillColorAnalog0("ColorAnalogFill0");
+	const QString PropertyNames::fillColorAnalog1("ColorAnalogFill1");
+	const QString PropertyNames::textColorAnalog0("ColorAnalogText0");
+	const QString PropertyNames::textColorAnalog1("ColorAnalogText1");
+
+	const QString PropertyNames::fillColorDiscrYes0("ColorDiscrYesFill0");
+	const QString PropertyNames::fillColorDiscrYes1("ColorDiscrYesFill1");
+	const QString PropertyNames::textColorDiscrYes0("ColorDiscrYesText0");
+	const QString PropertyNames::textColorDiscrYes1("ColorDiscrYesText1");
+
+	const QString PropertyNames::fillColorDiscrNo0("ColorDiscrNoFill0");
+	const QString PropertyNames::fillColorDiscrNo1("ColorDiscrNoFill1");
+	const QString PropertyNames::textColorDiscrNo0("ColorDiscrNoText0");
+	const QString PropertyNames::textColorDiscrNo1("ColorDiscrNoText1");
+
 	const QString PropertyNames::textAnalog("TextAnalog");
 	const QString PropertyNames::textDiscrete0("TextDiscrete0");
 	const QString PropertyNames::textDiscrete1("TextDiscrete1");
@@ -94,6 +126,7 @@ namespace VFrame30
 	const QString PropertyNames::appearanceCategory("Appearance");
 	const QString PropertyNames::functionalCategory("Functional");
 	const QString PropertyNames::textCategory("Text");
+	const QString PropertyNames::colorCategory("Color");
 	const QString PropertyNames::monitorCategory("Monitor");
 	const QString PropertyNames::parametersCategory("Parameters");
 	const QString PropertyNames::controlCategory("Control");

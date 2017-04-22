@@ -4884,6 +4884,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 	// Check points before return
 	//
 
+#ifdef _DEBUG
 	for (currentPointIndex = 1; currentPointIndex < result.size(); currentPointIndex++)
 	{
 		const VFrame30::SchemaPoint& curPoint = result.at(currentPointIndex);
@@ -4895,6 +4896,7 @@ std::vector<VFrame30::SchemaPoint> EditSchemaWidget::removeUnwantedPoints(const 
 		assert((std::abs(curPoint.X - prevPoint.X) < 0.0000001) ||
 				(std::abs(curPoint.Y - prevPoint.Y) < 0.0000001));
 	}
+#endif
 
 	return result;
 }

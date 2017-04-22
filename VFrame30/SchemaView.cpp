@@ -99,6 +99,8 @@ namespace VFrame30
 
 			QWidget* childWidget = controlItem->createWidget(this, editMode);
 			assert(childWidget);
+
+			Q_UNUSED(childWidget);
 		}
 	}
 

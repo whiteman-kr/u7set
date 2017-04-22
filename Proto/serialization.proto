@@ -709,6 +709,36 @@ message SchemaItemValue
 	optional string textDiscrete0 = 14;
 	optional string textDiscrete1 = 15;
 	optional string textNonValid = 16;
+
+    optional uint32 fillColorNonValid0 = 30;
+	optional uint32 fillColorNonValid1 = 31;
+	optional uint32 textColorNonValid0 = 32;
+	optional uint32 textColorNonValid1 = 33;
+
+    optional uint32 fillColorOverflow0 = 34;
+	optional uint32 fillColorOverflow1 = 35;
+	optional uint32 textColorOverflow0 = 36;
+	optional uint32 textColorOverflow1 = 37;
+
+    optional uint32 fillColorUnderflow0 = 38;
+	optional uint32 fillColorUnderflow1 = 39;
+	optional uint32 textColorUnderflow0 = 40;
+	optional uint32 textColorUnderflow1 = 41;
+
+    optional uint32 fillColorAnalog0 = 42;
+	optional uint32 fillColorAnalog1 = 43;
+	optional uint32 textColorAnalog0 = 44;
+	optional uint32 textColorAnalog1 = 45;
+
+    optional uint32 fillColorDiscrYes0 = 46;
+	optional uint32 fillColorDiscrYes1 = 47;
+	optional uint32 textColorDiscrYes0 = 48;
+	optional uint32 textColorDiscrYes1 = 49;
+
+    optional uint32 fillColorDiscrNo0 = 50;
+	optional uint32 fillColorDiscrNo1 = 51;
+	optional uint32 textColorDiscrNo0 = 52;
+	optional uint32 textColorDiscrNo1 = 53;
 }
 
 //

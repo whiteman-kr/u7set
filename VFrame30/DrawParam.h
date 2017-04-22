@@ -65,6 +65,9 @@ namespace VFrame30
 		bool infoMode() const;
 		void setInfoMode(bool value);
 
+		bool blinkPhase() const;
+		void setBlinkPhase(bool value);
+
 		AppSignalManager* appSignalManager();
 		void setAppSignalManager(AppSignalManager* value);
 
@@ -84,6 +87,7 @@ namespace VFrame30
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
+		bool m_blinkPhase = false;
 
 		int m_dpiX = -1;
 		int m_dpiY = -1;

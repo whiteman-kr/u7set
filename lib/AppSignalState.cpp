@@ -16,6 +16,21 @@ QDateTime Times::plantToDateTime() const
 	return QDateTime::fromMSecsSinceEpoch(plant);
 }
 
+bool AppSignalState::isValid() const
+{
+	return flags.valid;
+}
+
+bool AppSignalState::isOverflow() const
+{
+	return flags.overflow;
+}
+
+bool AppSignalState::isUnderflow() const
+{
+	return flags.underflow;
+}
+
 void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)

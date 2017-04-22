@@ -5582,6 +5582,174 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline ::std::string* release_textnonvalid();
   inline void set_allocated_textnonvalid(::std::string* textnonvalid);
 
+  // optional uint32 fillColorNonValid0 = 30;
+  inline bool has_fillcolornonvalid0() const;
+  inline void clear_fillcolornonvalid0();
+  static const int kFillColorNonValid0FieldNumber = 30;
+  inline ::google::protobuf::uint32 fillcolornonvalid0() const;
+  inline void set_fillcolornonvalid0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorNonValid1 = 31;
+  inline bool has_fillcolornonvalid1() const;
+  inline void clear_fillcolornonvalid1();
+  static const int kFillColorNonValid1FieldNumber = 31;
+  inline ::google::protobuf::uint32 fillcolornonvalid1() const;
+  inline void set_fillcolornonvalid1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorNonValid0 = 32;
+  inline bool has_textcolornonvalid0() const;
+  inline void clear_textcolornonvalid0();
+  static const int kTextColorNonValid0FieldNumber = 32;
+  inline ::google::protobuf::uint32 textcolornonvalid0() const;
+  inline void set_textcolornonvalid0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorNonValid1 = 33;
+  inline bool has_textcolornonvalid1() const;
+  inline void clear_textcolornonvalid1();
+  static const int kTextColorNonValid1FieldNumber = 33;
+  inline ::google::protobuf::uint32 textcolornonvalid1() const;
+  inline void set_textcolornonvalid1(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorOverflow0 = 34;
+  inline bool has_fillcoloroverflow0() const;
+  inline void clear_fillcoloroverflow0();
+  static const int kFillColorOverflow0FieldNumber = 34;
+  inline ::google::protobuf::uint32 fillcoloroverflow0() const;
+  inline void set_fillcoloroverflow0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorOverflow1 = 35;
+  inline bool has_fillcoloroverflow1() const;
+  inline void clear_fillcoloroverflow1();
+  static const int kFillColorOverflow1FieldNumber = 35;
+  inline ::google::protobuf::uint32 fillcoloroverflow1() const;
+  inline void set_fillcoloroverflow1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorOverflow0 = 36;
+  inline bool has_textcoloroverflow0() const;
+  inline void clear_textcoloroverflow0();
+  static const int kTextColorOverflow0FieldNumber = 36;
+  inline ::google::protobuf::uint32 textcoloroverflow0() const;
+  inline void set_textcoloroverflow0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorOverflow1 = 37;
+  inline bool has_textcoloroverflow1() const;
+  inline void clear_textcoloroverflow1();
+  static const int kTextColorOverflow1FieldNumber = 37;
+  inline ::google::protobuf::uint32 textcoloroverflow1() const;
+  inline void set_textcoloroverflow1(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorUnderflow0 = 38;
+  inline bool has_fillcolorunderflow0() const;
+  inline void clear_fillcolorunderflow0();
+  static const int kFillColorUnderflow0FieldNumber = 38;
+  inline ::google::protobuf::uint32 fillcolorunderflow0() const;
+  inline void set_fillcolorunderflow0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorUnderflow1 = 39;
+  inline bool has_fillcolorunderflow1() const;
+  inline void clear_fillcolorunderflow1();
+  static const int kFillColorUnderflow1FieldNumber = 39;
+  inline ::google::protobuf::uint32 fillcolorunderflow1() const;
+  inline void set_fillcolorunderflow1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorUnderflow0 = 40;
+  inline bool has_textcolorunderflow0() const;
+  inline void clear_textcolorunderflow0();
+  static const int kTextColorUnderflow0FieldNumber = 40;
+  inline ::google::protobuf::uint32 textcolorunderflow0() const;
+  inline void set_textcolorunderflow0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorUnderflow1 = 41;
+  inline bool has_textcolorunderflow1() const;
+  inline void clear_textcolorunderflow1();
+  static const int kTextColorUnderflow1FieldNumber = 41;
+  inline ::google::protobuf::uint32 textcolorunderflow1() const;
+  inline void set_textcolorunderflow1(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorAnalog0 = 42;
+  inline bool has_fillcoloranalog0() const;
+  inline void clear_fillcoloranalog0();
+  static const int kFillColorAnalog0FieldNumber = 42;
+  inline ::google::protobuf::uint32 fillcoloranalog0() const;
+  inline void set_fillcoloranalog0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorAnalog1 = 43;
+  inline bool has_fillcoloranalog1() const;
+  inline void clear_fillcoloranalog1();
+  static const int kFillColorAnalog1FieldNumber = 43;
+  inline ::google::protobuf::uint32 fillcoloranalog1() const;
+  inline void set_fillcoloranalog1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorAnalog0 = 44;
+  inline bool has_textcoloranalog0() const;
+  inline void clear_textcoloranalog0();
+  static const int kTextColorAnalog0FieldNumber = 44;
+  inline ::google::protobuf::uint32 textcoloranalog0() const;
+  inline void set_textcoloranalog0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorAnalog1 = 45;
+  inline bool has_textcoloranalog1() const;
+  inline void clear_textcoloranalog1();
+  static const int kTextColorAnalog1FieldNumber = 45;
+  inline ::google::protobuf::uint32 textcoloranalog1() const;
+  inline void set_textcoloranalog1(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorDiscrYes0 = 46;
+  inline bool has_fillcolordiscryes0() const;
+  inline void clear_fillcolordiscryes0();
+  static const int kFillColorDiscrYes0FieldNumber = 46;
+  inline ::google::protobuf::uint32 fillcolordiscryes0() const;
+  inline void set_fillcolordiscryes0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorDiscrYes1 = 47;
+  inline bool has_fillcolordiscryes1() const;
+  inline void clear_fillcolordiscryes1();
+  static const int kFillColorDiscrYes1FieldNumber = 47;
+  inline ::google::protobuf::uint32 fillcolordiscryes1() const;
+  inline void set_fillcolordiscryes1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorDiscrYes0 = 48;
+  inline bool has_textcolordiscryes0() const;
+  inline void clear_textcolordiscryes0();
+  static const int kTextColorDiscrYes0FieldNumber = 48;
+  inline ::google::protobuf::uint32 textcolordiscryes0() const;
+  inline void set_textcolordiscryes0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorDiscrYes1 = 49;
+  inline bool has_textcolordiscryes1() const;
+  inline void clear_textcolordiscryes1();
+  static const int kTextColorDiscrYes1FieldNumber = 49;
+  inline ::google::protobuf::uint32 textcolordiscryes1() const;
+  inline void set_textcolordiscryes1(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorDiscrNo0 = 50;
+  inline bool has_fillcolordiscrno0() const;
+  inline void clear_fillcolordiscrno0();
+  static const int kFillColorDiscrNo0FieldNumber = 50;
+  inline ::google::protobuf::uint32 fillcolordiscrno0() const;
+  inline void set_fillcolordiscrno0(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColorDiscrNo1 = 51;
+  inline bool has_fillcolordiscrno1() const;
+  inline void clear_fillcolordiscrno1();
+  static const int kFillColorDiscrNo1FieldNumber = 51;
+  inline ::google::protobuf::uint32 fillcolordiscrno1() const;
+  inline void set_fillcolordiscrno1(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorDiscrNo0 = 52;
+  inline bool has_textcolordiscrno0() const;
+  inline void clear_textcolordiscrno0();
+  static const int kTextColorDiscrNo0FieldNumber = 52;
+  inline ::google::protobuf::uint32 textcolordiscrno0() const;
+  inline void set_textcolordiscrno0(::google::protobuf::uint32 value);
+
+  // optional uint32 textColorDiscrNo1 = 53;
+  inline bool has_textcolordiscrno1() const;
+  inline void clear_textcolordiscrno1();
+  static const int kTextColorDiscrNo1FieldNumber = 53;
+  inline ::google::protobuf::uint32 textcolordiscrno1() const;
+  inline void set_textcolordiscrno1(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemValue)
  private:
   inline void set_has_weight();
@@ -5616,6 +5784,54 @@ class SchemaItemValue : public ::google::protobuf::Message {
   inline void clear_has_textdiscrete1();
   inline void set_has_textnonvalid();
   inline void clear_has_textnonvalid();
+  inline void set_has_fillcolornonvalid0();
+  inline void clear_has_fillcolornonvalid0();
+  inline void set_has_fillcolornonvalid1();
+  inline void clear_has_fillcolornonvalid1();
+  inline void set_has_textcolornonvalid0();
+  inline void clear_has_textcolornonvalid0();
+  inline void set_has_textcolornonvalid1();
+  inline void clear_has_textcolornonvalid1();
+  inline void set_has_fillcoloroverflow0();
+  inline void clear_has_fillcoloroverflow0();
+  inline void set_has_fillcoloroverflow1();
+  inline void clear_has_fillcoloroverflow1();
+  inline void set_has_textcoloroverflow0();
+  inline void clear_has_textcoloroverflow0();
+  inline void set_has_textcoloroverflow1();
+  inline void clear_has_textcoloroverflow1();
+  inline void set_has_fillcolorunderflow0();
+  inline void clear_has_fillcolorunderflow0();
+  inline void set_has_fillcolorunderflow1();
+  inline void clear_has_fillcolorunderflow1();
+  inline void set_has_textcolorunderflow0();
+  inline void clear_has_textcolorunderflow0();
+  inline void set_has_textcolorunderflow1();
+  inline void clear_has_textcolorunderflow1();
+  inline void set_has_fillcoloranalog0();
+  inline void clear_has_fillcoloranalog0();
+  inline void set_has_fillcoloranalog1();
+  inline void clear_has_fillcoloranalog1();
+  inline void set_has_textcoloranalog0();
+  inline void clear_has_textcoloranalog0();
+  inline void set_has_textcoloranalog1();
+  inline void clear_has_textcoloranalog1();
+  inline void set_has_fillcolordiscryes0();
+  inline void clear_has_fillcolordiscryes0();
+  inline void set_has_fillcolordiscryes1();
+  inline void clear_has_fillcolordiscryes1();
+  inline void set_has_textcolordiscryes0();
+  inline void clear_has_textcolordiscryes0();
+  inline void set_has_textcolordiscryes1();
+  inline void clear_has_textcolordiscryes1();
+  inline void set_has_fillcolordiscrno0();
+  inline void clear_has_fillcolordiscrno0();
+  inline void set_has_fillcolordiscrno1();
+  inline void clear_has_fillcolordiscrno1();
+  inline void set_has_textcolordiscrno0();
+  inline void clear_has_textcolordiscrno0();
+  inline void set_has_textcolordiscrno1();
+  inline void clear_has_textcolordiscrno1();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -5635,9 +5851,33 @@ class SchemaItemValue : public ::google::protobuf::Message {
   ::std::string* textdiscrete0_;
   ::std::string* textdiscrete1_;
   ::std::string* textnonvalid_;
+  ::google::protobuf::uint32 fillcolornonvalid0_;
+  ::google::protobuf::uint32 fillcolornonvalid1_;
+  ::google::protobuf::uint32 textcolornonvalid0_;
+  ::google::protobuf::uint32 textcolornonvalid1_;
+  ::google::protobuf::uint32 fillcoloroverflow0_;
+  ::google::protobuf::uint32 fillcoloroverflow1_;
+  ::google::protobuf::uint32 textcoloroverflow0_;
+  ::google::protobuf::uint32 textcoloroverflow1_;
+  ::google::protobuf::uint32 fillcolorunderflow0_;
+  ::google::protobuf::uint32 fillcolorunderflow1_;
+  ::google::protobuf::uint32 textcolorunderflow0_;
+  ::google::protobuf::uint32 textcolorunderflow1_;
+  ::google::protobuf::uint32 fillcoloranalog0_;
+  ::google::protobuf::uint32 fillcoloranalog1_;
+  ::google::protobuf::uint32 textcoloranalog0_;
+  ::google::protobuf::uint32 textcoloranalog1_;
+  ::google::protobuf::uint32 fillcolordiscryes0_;
+  ::google::protobuf::uint32 fillcolordiscryes1_;
+  ::google::protobuf::uint32 textcolordiscryes0_;
+  ::google::protobuf::uint32 textcolordiscryes1_;
+  ::google::protobuf::uint32 fillcolordiscrno0_;
+  ::google::protobuf::uint32 fillcolordiscrno1_;
+  ::google::protobuf::uint32 textcolordiscrno0_;
+  ::google::protobuf::uint32 textcolordiscrno1_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(40 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15834,6 +16074,534 @@ inline void SchemaItemValue::set_allocated_textnonvalid(::std::string* textnonva
     clear_has_textnonvalid();
     textnonvalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional uint32 fillColorNonValid0 = 30;
+inline bool SchemaItemValue::has_fillcolornonvalid0() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolornonvalid0() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void SchemaItemValue::clear_has_fillcolornonvalid0() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void SchemaItemValue::clear_fillcolornonvalid0() {
+  fillcolornonvalid0_ = 0u;
+  clear_has_fillcolornonvalid0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolornonvalid0() const {
+  return fillcolornonvalid0_;
+}
+inline void SchemaItemValue::set_fillcolornonvalid0(::google::protobuf::uint32 value) {
+  set_has_fillcolornonvalid0();
+  fillcolornonvalid0_ = value;
+}
+
+// optional uint32 fillColorNonValid1 = 31;
+inline bool SchemaItemValue::has_fillcolornonvalid1() const {
+  return (_has_bits_[0] & 0x00020000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolornonvalid1() {
+  _has_bits_[0] |= 0x00020000u;
+}
+inline void SchemaItemValue::clear_has_fillcolornonvalid1() {
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline void SchemaItemValue::clear_fillcolornonvalid1() {
+  fillcolornonvalid1_ = 0u;
+  clear_has_fillcolornonvalid1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolornonvalid1() const {
+  return fillcolornonvalid1_;
+}
+inline void SchemaItemValue::set_fillcolornonvalid1(::google::protobuf::uint32 value) {
+  set_has_fillcolornonvalid1();
+  fillcolornonvalid1_ = value;
+}
+
+// optional uint32 textColorNonValid0 = 32;
+inline bool SchemaItemValue::has_textcolornonvalid0() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolornonvalid0() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void SchemaItemValue::clear_has_textcolornonvalid0() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void SchemaItemValue::clear_textcolornonvalid0() {
+  textcolornonvalid0_ = 0u;
+  clear_has_textcolornonvalid0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolornonvalid0() const {
+  return textcolornonvalid0_;
+}
+inline void SchemaItemValue::set_textcolornonvalid0(::google::protobuf::uint32 value) {
+  set_has_textcolornonvalid0();
+  textcolornonvalid0_ = value;
+}
+
+// optional uint32 textColorNonValid1 = 33;
+inline bool SchemaItemValue::has_textcolornonvalid1() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolornonvalid1() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void SchemaItemValue::clear_has_textcolornonvalid1() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void SchemaItemValue::clear_textcolornonvalid1() {
+  textcolornonvalid1_ = 0u;
+  clear_has_textcolornonvalid1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolornonvalid1() const {
+  return textcolornonvalid1_;
+}
+inline void SchemaItemValue::set_textcolornonvalid1(::google::protobuf::uint32 value) {
+  set_has_textcolornonvalid1();
+  textcolornonvalid1_ = value;
+}
+
+// optional uint32 fillColorOverflow0 = 34;
+inline bool SchemaItemValue::has_fillcoloroverflow0() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcoloroverflow0() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void SchemaItemValue::clear_has_fillcoloroverflow0() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void SchemaItemValue::clear_fillcoloroverflow0() {
+  fillcoloroverflow0_ = 0u;
+  clear_has_fillcoloroverflow0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcoloroverflow0() const {
+  return fillcoloroverflow0_;
+}
+inline void SchemaItemValue::set_fillcoloroverflow0(::google::protobuf::uint32 value) {
+  set_has_fillcoloroverflow0();
+  fillcoloroverflow0_ = value;
+}
+
+// optional uint32 fillColorOverflow1 = 35;
+inline bool SchemaItemValue::has_fillcoloroverflow1() const {
+  return (_has_bits_[0] & 0x00200000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcoloroverflow1() {
+  _has_bits_[0] |= 0x00200000u;
+}
+inline void SchemaItemValue::clear_has_fillcoloroverflow1() {
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline void SchemaItemValue::clear_fillcoloroverflow1() {
+  fillcoloroverflow1_ = 0u;
+  clear_has_fillcoloroverflow1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcoloroverflow1() const {
+  return fillcoloroverflow1_;
+}
+inline void SchemaItemValue::set_fillcoloroverflow1(::google::protobuf::uint32 value) {
+  set_has_fillcoloroverflow1();
+  fillcoloroverflow1_ = value;
+}
+
+// optional uint32 textColorOverflow0 = 36;
+inline bool SchemaItemValue::has_textcoloroverflow0() const {
+  return (_has_bits_[0] & 0x00400000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcoloroverflow0() {
+  _has_bits_[0] |= 0x00400000u;
+}
+inline void SchemaItemValue::clear_has_textcoloroverflow0() {
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline void SchemaItemValue::clear_textcoloroverflow0() {
+  textcoloroverflow0_ = 0u;
+  clear_has_textcoloroverflow0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcoloroverflow0() const {
+  return textcoloroverflow0_;
+}
+inline void SchemaItemValue::set_textcoloroverflow0(::google::protobuf::uint32 value) {
+  set_has_textcoloroverflow0();
+  textcoloroverflow0_ = value;
+}
+
+// optional uint32 textColorOverflow1 = 37;
+inline bool SchemaItemValue::has_textcoloroverflow1() const {
+  return (_has_bits_[0] & 0x00800000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcoloroverflow1() {
+  _has_bits_[0] |= 0x00800000u;
+}
+inline void SchemaItemValue::clear_has_textcoloroverflow1() {
+  _has_bits_[0] &= ~0x00800000u;
+}
+inline void SchemaItemValue::clear_textcoloroverflow1() {
+  textcoloroverflow1_ = 0u;
+  clear_has_textcoloroverflow1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcoloroverflow1() const {
+  return textcoloroverflow1_;
+}
+inline void SchemaItemValue::set_textcoloroverflow1(::google::protobuf::uint32 value) {
+  set_has_textcoloroverflow1();
+  textcoloroverflow1_ = value;
+}
+
+// optional uint32 fillColorUnderflow0 = 38;
+inline bool SchemaItemValue::has_fillcolorunderflow0() const {
+  return (_has_bits_[0] & 0x01000000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolorunderflow0() {
+  _has_bits_[0] |= 0x01000000u;
+}
+inline void SchemaItemValue::clear_has_fillcolorunderflow0() {
+  _has_bits_[0] &= ~0x01000000u;
+}
+inline void SchemaItemValue::clear_fillcolorunderflow0() {
+  fillcolorunderflow0_ = 0u;
+  clear_has_fillcolorunderflow0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolorunderflow0() const {
+  return fillcolorunderflow0_;
+}
+inline void SchemaItemValue::set_fillcolorunderflow0(::google::protobuf::uint32 value) {
+  set_has_fillcolorunderflow0();
+  fillcolorunderflow0_ = value;
+}
+
+// optional uint32 fillColorUnderflow1 = 39;
+inline bool SchemaItemValue::has_fillcolorunderflow1() const {
+  return (_has_bits_[0] & 0x02000000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolorunderflow1() {
+  _has_bits_[0] |= 0x02000000u;
+}
+inline void SchemaItemValue::clear_has_fillcolorunderflow1() {
+  _has_bits_[0] &= ~0x02000000u;
+}
+inline void SchemaItemValue::clear_fillcolorunderflow1() {
+  fillcolorunderflow1_ = 0u;
+  clear_has_fillcolorunderflow1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolorunderflow1() const {
+  return fillcolorunderflow1_;
+}
+inline void SchemaItemValue::set_fillcolorunderflow1(::google::protobuf::uint32 value) {
+  set_has_fillcolorunderflow1();
+  fillcolorunderflow1_ = value;
+}
+
+// optional uint32 textColorUnderflow0 = 40;
+inline bool SchemaItemValue::has_textcolorunderflow0() const {
+  return (_has_bits_[0] & 0x04000000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolorunderflow0() {
+  _has_bits_[0] |= 0x04000000u;
+}
+inline void SchemaItemValue::clear_has_textcolorunderflow0() {
+  _has_bits_[0] &= ~0x04000000u;
+}
+inline void SchemaItemValue::clear_textcolorunderflow0() {
+  textcolorunderflow0_ = 0u;
+  clear_has_textcolorunderflow0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolorunderflow0() const {
+  return textcolorunderflow0_;
+}
+inline void SchemaItemValue::set_textcolorunderflow0(::google::protobuf::uint32 value) {
+  set_has_textcolorunderflow0();
+  textcolorunderflow0_ = value;
+}
+
+// optional uint32 textColorUnderflow1 = 41;
+inline bool SchemaItemValue::has_textcolorunderflow1() const {
+  return (_has_bits_[0] & 0x08000000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolorunderflow1() {
+  _has_bits_[0] |= 0x08000000u;
+}
+inline void SchemaItemValue::clear_has_textcolorunderflow1() {
+  _has_bits_[0] &= ~0x08000000u;
+}
+inline void SchemaItemValue::clear_textcolorunderflow1() {
+  textcolorunderflow1_ = 0u;
+  clear_has_textcolorunderflow1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolorunderflow1() const {
+  return textcolorunderflow1_;
+}
+inline void SchemaItemValue::set_textcolorunderflow1(::google::protobuf::uint32 value) {
+  set_has_textcolorunderflow1();
+  textcolorunderflow1_ = value;
+}
+
+// optional uint32 fillColorAnalog0 = 42;
+inline bool SchemaItemValue::has_fillcoloranalog0() const {
+  return (_has_bits_[0] & 0x10000000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcoloranalog0() {
+  _has_bits_[0] |= 0x10000000u;
+}
+inline void SchemaItemValue::clear_has_fillcoloranalog0() {
+  _has_bits_[0] &= ~0x10000000u;
+}
+inline void SchemaItemValue::clear_fillcoloranalog0() {
+  fillcoloranalog0_ = 0u;
+  clear_has_fillcoloranalog0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcoloranalog0() const {
+  return fillcoloranalog0_;
+}
+inline void SchemaItemValue::set_fillcoloranalog0(::google::protobuf::uint32 value) {
+  set_has_fillcoloranalog0();
+  fillcoloranalog0_ = value;
+}
+
+// optional uint32 fillColorAnalog1 = 43;
+inline bool SchemaItemValue::has_fillcoloranalog1() const {
+  return (_has_bits_[0] & 0x20000000u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcoloranalog1() {
+  _has_bits_[0] |= 0x20000000u;
+}
+inline void SchemaItemValue::clear_has_fillcoloranalog1() {
+  _has_bits_[0] &= ~0x20000000u;
+}
+inline void SchemaItemValue::clear_fillcoloranalog1() {
+  fillcoloranalog1_ = 0u;
+  clear_has_fillcoloranalog1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcoloranalog1() const {
+  return fillcoloranalog1_;
+}
+inline void SchemaItemValue::set_fillcoloranalog1(::google::protobuf::uint32 value) {
+  set_has_fillcoloranalog1();
+  fillcoloranalog1_ = value;
+}
+
+// optional uint32 textColorAnalog0 = 44;
+inline bool SchemaItemValue::has_textcoloranalog0() const {
+  return (_has_bits_[0] & 0x40000000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcoloranalog0() {
+  _has_bits_[0] |= 0x40000000u;
+}
+inline void SchemaItemValue::clear_has_textcoloranalog0() {
+  _has_bits_[0] &= ~0x40000000u;
+}
+inline void SchemaItemValue::clear_textcoloranalog0() {
+  textcoloranalog0_ = 0u;
+  clear_has_textcoloranalog0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcoloranalog0() const {
+  return textcoloranalog0_;
+}
+inline void SchemaItemValue::set_textcoloranalog0(::google::protobuf::uint32 value) {
+  set_has_textcoloranalog0();
+  textcoloranalog0_ = value;
+}
+
+// optional uint32 textColorAnalog1 = 45;
+inline bool SchemaItemValue::has_textcoloranalog1() const {
+  return (_has_bits_[0] & 0x80000000u) != 0;
+}
+inline void SchemaItemValue::set_has_textcoloranalog1() {
+  _has_bits_[0] |= 0x80000000u;
+}
+inline void SchemaItemValue::clear_has_textcoloranalog1() {
+  _has_bits_[0] &= ~0x80000000u;
+}
+inline void SchemaItemValue::clear_textcoloranalog1() {
+  textcoloranalog1_ = 0u;
+  clear_has_textcoloranalog1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcoloranalog1() const {
+  return textcoloranalog1_;
+}
+inline void SchemaItemValue::set_textcoloranalog1(::google::protobuf::uint32 value) {
+  set_has_textcoloranalog1();
+  textcoloranalog1_ = value;
+}
+
+// optional uint32 fillColorDiscrYes0 = 46;
+inline bool SchemaItemValue::has_fillcolordiscryes0() const {
+  return (_has_bits_[1] & 0x00000001u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolordiscryes0() {
+  _has_bits_[1] |= 0x00000001u;
+}
+inline void SchemaItemValue::clear_has_fillcolordiscryes0() {
+  _has_bits_[1] &= ~0x00000001u;
+}
+inline void SchemaItemValue::clear_fillcolordiscryes0() {
+  fillcolordiscryes0_ = 0u;
+  clear_has_fillcolordiscryes0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolordiscryes0() const {
+  return fillcolordiscryes0_;
+}
+inline void SchemaItemValue::set_fillcolordiscryes0(::google::protobuf::uint32 value) {
+  set_has_fillcolordiscryes0();
+  fillcolordiscryes0_ = value;
+}
+
+// optional uint32 fillColorDiscrYes1 = 47;
+inline bool SchemaItemValue::has_fillcolordiscryes1() const {
+  return (_has_bits_[1] & 0x00000002u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolordiscryes1() {
+  _has_bits_[1] |= 0x00000002u;
+}
+inline void SchemaItemValue::clear_has_fillcolordiscryes1() {
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline void SchemaItemValue::clear_fillcolordiscryes1() {
+  fillcolordiscryes1_ = 0u;
+  clear_has_fillcolordiscryes1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolordiscryes1() const {
+  return fillcolordiscryes1_;
+}
+inline void SchemaItemValue::set_fillcolordiscryes1(::google::protobuf::uint32 value) {
+  set_has_fillcolordiscryes1();
+  fillcolordiscryes1_ = value;
+}
+
+// optional uint32 textColorDiscrYes0 = 48;
+inline bool SchemaItemValue::has_textcolordiscryes0() const {
+  return (_has_bits_[1] & 0x00000004u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolordiscryes0() {
+  _has_bits_[1] |= 0x00000004u;
+}
+inline void SchemaItemValue::clear_has_textcolordiscryes0() {
+  _has_bits_[1] &= ~0x00000004u;
+}
+inline void SchemaItemValue::clear_textcolordiscryes0() {
+  textcolordiscryes0_ = 0u;
+  clear_has_textcolordiscryes0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolordiscryes0() const {
+  return textcolordiscryes0_;
+}
+inline void SchemaItemValue::set_textcolordiscryes0(::google::protobuf::uint32 value) {
+  set_has_textcolordiscryes0();
+  textcolordiscryes0_ = value;
+}
+
+// optional uint32 textColorDiscrYes1 = 49;
+inline bool SchemaItemValue::has_textcolordiscryes1() const {
+  return (_has_bits_[1] & 0x00000008u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolordiscryes1() {
+  _has_bits_[1] |= 0x00000008u;
+}
+inline void SchemaItemValue::clear_has_textcolordiscryes1() {
+  _has_bits_[1] &= ~0x00000008u;
+}
+inline void SchemaItemValue::clear_textcolordiscryes1() {
+  textcolordiscryes1_ = 0u;
+  clear_has_textcolordiscryes1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolordiscryes1() const {
+  return textcolordiscryes1_;
+}
+inline void SchemaItemValue::set_textcolordiscryes1(::google::protobuf::uint32 value) {
+  set_has_textcolordiscryes1();
+  textcolordiscryes1_ = value;
+}
+
+// optional uint32 fillColorDiscrNo0 = 50;
+inline bool SchemaItemValue::has_fillcolordiscrno0() const {
+  return (_has_bits_[1] & 0x00000010u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolordiscrno0() {
+  _has_bits_[1] |= 0x00000010u;
+}
+inline void SchemaItemValue::clear_has_fillcolordiscrno0() {
+  _has_bits_[1] &= ~0x00000010u;
+}
+inline void SchemaItemValue::clear_fillcolordiscrno0() {
+  fillcolordiscrno0_ = 0u;
+  clear_has_fillcolordiscrno0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolordiscrno0() const {
+  return fillcolordiscrno0_;
+}
+inline void SchemaItemValue::set_fillcolordiscrno0(::google::protobuf::uint32 value) {
+  set_has_fillcolordiscrno0();
+  fillcolordiscrno0_ = value;
+}
+
+// optional uint32 fillColorDiscrNo1 = 51;
+inline bool SchemaItemValue::has_fillcolordiscrno1() const {
+  return (_has_bits_[1] & 0x00000020u) != 0;
+}
+inline void SchemaItemValue::set_has_fillcolordiscrno1() {
+  _has_bits_[1] |= 0x00000020u;
+}
+inline void SchemaItemValue::clear_has_fillcolordiscrno1() {
+  _has_bits_[1] &= ~0x00000020u;
+}
+inline void SchemaItemValue::clear_fillcolordiscrno1() {
+  fillcolordiscrno1_ = 0u;
+  clear_has_fillcolordiscrno1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::fillcolordiscrno1() const {
+  return fillcolordiscrno1_;
+}
+inline void SchemaItemValue::set_fillcolordiscrno1(::google::protobuf::uint32 value) {
+  set_has_fillcolordiscrno1();
+  fillcolordiscrno1_ = value;
+}
+
+// optional uint32 textColorDiscrNo0 = 52;
+inline bool SchemaItemValue::has_textcolordiscrno0() const {
+  return (_has_bits_[1] & 0x00000040u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolordiscrno0() {
+  _has_bits_[1] |= 0x00000040u;
+}
+inline void SchemaItemValue::clear_has_textcolordiscrno0() {
+  _has_bits_[1] &= ~0x00000040u;
+}
+inline void SchemaItemValue::clear_textcolordiscrno0() {
+  textcolordiscrno0_ = 0u;
+  clear_has_textcolordiscrno0();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolordiscrno0() const {
+  return textcolordiscrno0_;
+}
+inline void SchemaItemValue::set_textcolordiscrno0(::google::protobuf::uint32 value) {
+  set_has_textcolordiscrno0();
+  textcolordiscrno0_ = value;
+}
+
+// optional uint32 textColorDiscrNo1 = 53;
+inline bool SchemaItemValue::has_textcolordiscrno1() const {
+  return (_has_bits_[1] & 0x00000080u) != 0;
+}
+inline void SchemaItemValue::set_has_textcolordiscrno1() {
+  _has_bits_[1] |= 0x00000080u;
+}
+inline void SchemaItemValue::clear_has_textcolordiscrno1() {
+  _has_bits_[1] &= ~0x00000080u;
+}
+inline void SchemaItemValue::clear_textcolordiscrno1() {
+  textcolordiscrno1_ = 0u;
+  clear_has_textcolordiscrno1();
+}
+inline ::google::protobuf::uint32 SchemaItemValue::textcolordiscrno1() const {
+  return textcolordiscrno1_;
+}
+inline void SchemaItemValue::set_textcolordiscrno1(::google::protobuf::uint32 value) {
+  set_has_textcolordiscrno1();
+  textcolordiscrno1_ = value;
 }
 
 // -------------------------------------------------------------------

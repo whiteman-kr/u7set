@@ -1,4 +1,5 @@
 #include "DrawParam.h"
+#include <QFont>
 
 namespace VFrame30
 {
@@ -159,6 +160,16 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
+	bool CDrawParam::blinkPhase() const
+	{
+		return m_blinkPhase;
+	}
+
+	void CDrawParam::setBlinkPhase(bool value)
+	{
+		m_blinkPhase = value;
+	}
+
 	AppSignalManager* CDrawParam::appSignalManager()
 	{
 		return m_appSignalmanager;
@@ -212,6 +223,7 @@ namespace VFrame30
 
 		f.setBold(font.bold());
 		f.setItalic(font.italic());
+		//f.setStyleStrategy(QFont::StyleStrategy::NoAntialias);
 		//f.setStyleStrategy(QFont::PreferDevice);
 
 		QRectF rc;
@@ -243,5 +255,5 @@ namespace VFrame30
 		painter->restore();
 		return;
 	}
-	
+
 }
