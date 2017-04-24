@@ -30,13 +30,12 @@ signals:
 	void signal_setSchema(QString schemaId);
 
 private slots:
-	void onTimer();
+	void startRepaintTimer();
 
 private:
 	SchemaStorage* m_schemaStorage = nullptr;
 
-	QTimer* m_timer = nullptr;
-
+	QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
 };
 
 #endif // TUNINGSCHEMAVIEW_H

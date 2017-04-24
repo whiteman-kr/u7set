@@ -180,6 +180,16 @@ namespace VFrame30
 		m_appSignalmanager = value;
 	}
 
+	TuningController* CDrawParam::tuningController()
+	{
+		return m_tuningController;
+	}
+
+	void CDrawParam::setTuningController(TuningController* value)
+	{
+		m_tuningController = value;
+	}
+
 	const Session& CDrawParam::session() const
 	{
 		return m_session;

@@ -300,13 +300,17 @@ namespace VFrame30
 			switch (signalSource())
 			{
 			case E::SignalSource::AppDataService:
-				assert(drawParam->appSignalManager());
-				signal = drawParam->appSignalManager()->signal(signalId(), &ok);
-				signalState = drawParam->appSignalManager()->signalState(signalId(), nullptr);
+				if (drawParam->appSignalManager() == nullptr)
+				{
+				}
+				else
+				{
+					signal = drawParam->appSignalManager()->signal(signalId(), &ok);
+					signalState = drawParam->appSignalManager()->signalState(signalId(), nullptr);
+				}
 				break;
 
 			case E::SignalSource::TuningService:
-				assert(false);
 				break;
 
 			default:
