@@ -865,7 +865,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MAX_VALUE, query.value(field++).toDouble());
 					measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR, query.value(field++).toDouble());
-					measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MSE, query.value(field++).toDouble());
+					measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SD, query.value(field++).toDouble());
 					measure->setAdditionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER, query.value(field++).toDouble());
 				}
 				break;
@@ -1198,7 +1198,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_MAX_VALUE));
 					query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR));
-					query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_MSE));
+					query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_SD));
 					query.bindValue(field++, measure->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER));
 					query.bindValue(field++, 0);
 					query.bindValue(field++, 0);
