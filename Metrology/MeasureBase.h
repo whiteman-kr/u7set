@@ -86,7 +86,7 @@ const char* const MeasureAdditionalParam[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Measure value max"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "System error"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "MSE"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Standard deviation"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Low High border"),
 };
 
@@ -95,7 +95,7 @@ const int	MEASURE_ADDITIONAL_PARAM_COUNT				= sizeof(MeasureAdditionalParam)/siz
 const int	MEASURE_ADDITIONAL_PARAM_UNKNOWN			= -1,
 			MEASURE_ADDITIONAL_PARAM_MAX_VALUE			= 0,
 			MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR		= 1,
-			MEASURE_ADDITIONAL_PARAM_MSE				= 2,
+			MEASURE_ADDITIONAL_PARAM_SD					= 2,
 			MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER	= 3;
 
 			// maximum 16 items (0 .. 15)

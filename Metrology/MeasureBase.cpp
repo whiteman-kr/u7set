@@ -627,7 +627,7 @@ void LinearityMeasurement::calcAdditionalParam(int limitType)
 	sumDeviation /= (double) measureCount() - 1;												// 2. divide on (count of measure - 1)
 	double sco = sqrt(sumDeviation);															// 3. sqrt
 
-	setAdditionalParam(MEASURE_ADDITIONAL_PARAM_MSE, sco);
+	setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SD, sco);
 
 		// according to GOST 8.207-76 paragraph 2.4
 		//
