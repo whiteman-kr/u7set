@@ -280,65 +280,64 @@ namespace Builder
 
 		// Attach objects
 		//
-		QJSEngine jsEngine;
-		jsEngine.installExtensions(QJSEngine::ConsoleExtension);
+		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
 
 		JsSignalSet jsSignalSet(m_signalSet);
 
 		m_confCollection.init(m_projectName, m_userName, buildNo(), debug(), changesetId());
 
-		QJSValue jsBuilder = jsEngine.newQObject(this);
+		QJSValue jsBuilder = m_jsEngine.newQObject(this);
 		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 
-		QJSValue jsRoot = jsEngine.newQObject(m_deviceRoot);
+		QJSValue jsRoot = m_jsEngine.newQObject(m_deviceRoot);
 		QQmlEngine::setObjectOwnership(m_deviceRoot, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModules = jsEngine.newArray((int)subsystemModules.size());
+		QJSValue jsLogicModules = m_jsEngine.newArray((int)subsystemModules.size());
 		for (int i = 0; i < subsystemModules.size(); i++)
 		{
 			assert(jsLogicModules.isArray());
 
-			QJSValue module = jsEngine.newQObject(subsystemModules[i]);
+			QJSValue module = m_jsEngine.newQObject(subsystemModules[i]);
 			QQmlEngine::setObjectOwnership(subsystemModules[i], QQmlEngine::CppOwnership);
 
 			jsLogicModules.setProperty(i, module);
 		}
 
-		QJSValue jsConfCollection = jsEngine.newQObject(&m_confCollection);
+		QJSValue jsConfCollection = m_jsEngine.newQObject(&m_confCollection);
 		QQmlEngine::setObjectOwnership(&m_confCollection, QQmlEngine::CppOwnership);
 
-		QJSValue jsLog = jsEngine.newQObject(m_log);
+		QJSValue jsLog = m_jsEngine.newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
 
-		QJSValue jsSignalSetObject = jsEngine.newQObject(&jsSignalSet);
+		QJSValue jsSignalSetObject = m_jsEngine.newQObject(&jsSignalSet);
 		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
 
-		QJSValue jsSubsystems = jsEngine.newQObject(m_subsystems);
+		QJSValue jsSubsystems = m_jsEngine.newQObject(m_subsystems);
 		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
 
-		QJSValue jsOpticModuleStorage = jsEngine.newQObject(m_opticModuleStorage);
+		QJSValue jsOpticModuleStorage = m_jsEngine.newQObject(m_opticModuleStorage);
 		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
 
-		QJSValue jsLogicModuleDescription = jsEngine.newQObject(logicModuleDescription);
+		QJSValue jsLogicModuleDescription = m_jsEngine.newQObject(logicModuleDescription);
 		QQmlEngine::setObjectOwnership(logicModuleDescription, QQmlEngine::CppOwnership);
 
 		// Run script
 		//
 
-		QJSValue jsEval = jsEngine.evaluate(contents);
+		QJSValue jsEval = m_jsEngine.evaluate(contents);
 		if (jsEval.isError() == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(logicModuleDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
 			return false;
 		}
 
-		if (!jsEngine.globalObject().hasProperty("main"))
+		if (!m_jsEngine.globalObject().hasProperty("main"))
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Script has no \"main\" function"));
 			return false;
 		}
 
-		if (!jsEngine.globalObject().property("main").isCallable())
+		if (!m_jsEngine.globalObject().property("main").isCallable())
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("\"main\" property of script is not callable"));
 			return false;
@@ -356,7 +355,7 @@ namespace Builder
 		args << jsOpticModuleStorage;
 		args << jsLogicModuleDescription;
 
-		QJSValue jsResult = jsEngine.globalObject().property("main").call(args);
+		QJSValue jsResult = m_jsEngine.globalObject().property("main").call(args);
 
 		if (jsResult.isError() == true)
 		{
