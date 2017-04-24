@@ -672,6 +672,30 @@ void TuningSignalManager::slot_valid(QString appSignalID, bool* result, bool* ok
 
 }
 
+void TuningSignalManager::slot_analog(QString appSignalID, bool* result, bool* ok)
+{
+	if (result == nullptr || ok == nullptr)
+	{
+		assert(result);
+		assert(ok);
+		return;
+	}
+
+	Hash hash = ::calcHash(appSignalID);
+
+	QMutexLocker l(&m_mutex);
+
+	TuningSignal* object = objectPtrByHash(hash);
+	if (object == nullptr)
+	{
+		*ok = false;
+		return;
+	}
+
+	*result = object->analog();
+
+}
+
 void TuningSignalManager::slot_value(QString appSignalID, float* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
@@ -775,6 +799,29 @@ void TuningSignalManager::slot_lowLimit(QString appSignalID, float *result, bool
 	}
 
 	*result = object->lowLimit();
+}
+
+void TuningSignalManager::slot_decimalPlaces(QString appSignalID, float *result, bool* ok)
+{
+	if (result == nullptr || ok == nullptr)
+	{
+		assert(result);
+		assert(ok);
+		return;
+	}
+
+	Hash hash = ::calcHash(appSignalID);
+
+	QMutexLocker l(&m_mutex);
+
+	TuningSignal* object = objectPtrByHash(hash);
+	if (object == nullptr)
+	{
+		*ok = false;
+		return;
+	}
+
+	*result = object->decimalPlaces();
 }
 
 
@@ -896,13 +943,14 @@ void TuningSignalManager::connectTuningController(TuningController* controller)
 
 	connect(controller, &TuningController::signal_exists, this, &TuningSignalManager::slot_exists, Qt::DirectConnection);
 	connect(controller, &TuningController::signal_valid, this, &TuningSignalManager::slot_valid, Qt::DirectConnection);
-
-	connect(controller, &TuningController::signal_value, this, &TuningSignalManager::slot_value, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_setValue, this, &TuningSignalManager::slot_setValue, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_analog, this, &TuningSignalManager::slot_analog, Qt::DirectConnection);
 
 	connect(controller, &TuningController::signal_highLimit, this, &TuningSignalManager::slot_highLimit, Qt::DirectConnection);
 	connect(controller, &TuningController::signal_lowLimit, this, &TuningSignalManager::slot_lowLimit, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_decimalPlaces, this, &TuningSignalManager::slot_decimalPlaces, Qt::DirectConnection);
 
+	connect(controller, &TuningController::signal_value, this, &TuningSignalManager::slot_value, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_setValue, this, &TuningSignalManager::slot_setValue, Qt::DirectConnection);
 }
 
 QString TuningSignalManager::networkErrorStr(NetworkError error)

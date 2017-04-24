@@ -394,6 +394,11 @@ namespace VFrame30
 
 	QObject* SchemaView::findWidget(QString objectName)
 	{
+		if (objectName.trimmed().isEmpty() == true)
+		{
+			return nullptr;
+		}
+
 		QObject* itemObject = findSchemaItem(objectName);
 		if (itemObject == nullptr)
 		{

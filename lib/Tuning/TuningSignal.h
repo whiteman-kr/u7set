@@ -16,7 +16,7 @@ union TuningSignalStateFlags
 		quint32	m_needRedraw : 1;
 	};
 
-	quint32 all;
+	quint32 all = 0;
 
 };
 
