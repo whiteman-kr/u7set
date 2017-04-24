@@ -38,14 +38,16 @@ const quint32 INVALID_STATE = 0;
 struct AppSignalState
 {
 	Hash hash = 0;					// == calcHash(AppSignalID)
-
 	Times time;
-
 	AppSignalStateFlags flags;
-
 	double value = 0;
+
+	bool isValid() const;
+	bool isOverflow() const;
+	bool isUnderflow() const;
 
 	void setProtoAppSignalState(Proto::AppSignalState* protoState);
 	Hash getProtoAppSignalState(const Proto::AppSignalState* protoState);
 };
+
 

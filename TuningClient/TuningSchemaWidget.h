@@ -13,7 +13,7 @@ class TuningSchemaWidget : public VFrame30::BaseSchemaWidget
 	TuningSchemaWidget() = delete;
 public:
 
-	TuningSchemaWidget(TuningObjectManager *tuningObjectManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString &globalScript);
+	TuningSchemaWidget(TuningSignalManager *tuningSignalManager, std::shared_ptr<VFrame30::Schema> schema, SchemaStorage* schemaStorage, const QString &globalScript);
 	~TuningSchemaWidget();
 
 	bool slot_setSchema(QString schemaId);

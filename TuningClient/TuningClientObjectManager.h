@@ -1,9 +1,9 @@
 #ifndef TUNINGCLIENTOBJECTMANAGER_H
 #define TUNINGCLIENTOBJECTMANAGER_H
 
-#include "../lib/Tuning/TuningObjectManager.h"
+#include "../lib/Tuning/TuningSignalManager.h"
 
-class TuningClientObjectManager : public TuningObjectManager
+class TuningClientObjectManager : public TuningSignalManager
 {
 public:
 	TuningClientObjectManager();

@@ -52,10 +52,11 @@ message wstring
 //
 message FontParam
 {
-	required wstring name = 1;
+    required wstring name_obsolete = 1;
 	required double size = 2;
 	required bool bold = 3;
 	required bool italic = 4;
+	optional string name = 5;
 }
 
 //
@@ -76,9 +77,9 @@ message SchemaPoint
 //
 enum SchemaUnit
 {
-		Display = 0;			// Display pixels
-		Millimeter = 1;			// Millimeters
-		Inch = 2;			// Inches
+    Display = 0;		// Display pixels
+	Millimeter = 1;		// Millimeters
+	Inch = 2;			// Inches
 }
 
 
@@ -360,6 +361,7 @@ message SchemaItem
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
 	optional string objectName = 9;
+	optional string preDrawScript = 30;
 
 	// Inherited from SchmeItem
 	//
@@ -391,6 +393,7 @@ message SchemaItem
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
+	optional SchemaItemValue Value = 136;					// +PosRectImpl
 
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
@@ -681,6 +684,61 @@ message SchemaItemUfb
 //
 message SchemaItemTerminator
 {
+}
+
+//
+//
+// SchemaItemValue
+//
+//
+message SchemaItemValue
+{
+    optional double weight = 1;
+	optional uint32 lineColor = 2;
+	optional uint32 fillColor = 3;
+	optional string textAnalog = 4;
+	optional uint32 textColor = 5;
+	optional FontParam font = 6;
+	optional bool fill = 7;
+	optional bool drawrect = 8 [default = true];
+	optional int32 horzAlign = 9  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 10  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+	optional string signalId = 11;
+	optional int32 signalSource = 12 [default = 0];
+	optional int32 precision = 13 [default = -1];	// -1: Take precision value from signal description
+	optional string textDiscrete0 = 14;
+	optional string textDiscrete1 = 15;
+	optional string textNonValid = 16;
+
+    optional uint32 fillColorNonValid0 = 30;
+	optional uint32 fillColorNonValid1 = 31;
+	optional uint32 textColorNonValid0 = 32;
+	optional uint32 textColorNonValid1 = 33;
+
+    optional uint32 fillColorOverflow0 = 34;
+	optional uint32 fillColorOverflow1 = 35;
+	optional uint32 textColorOverflow0 = 36;
+	optional uint32 textColorOverflow1 = 37;
+
+    optional uint32 fillColorUnderflow0 = 38;
+	optional uint32 fillColorUnderflow1 = 39;
+	optional uint32 textColorUnderflow0 = 40;
+	optional uint32 textColorUnderflow1 = 41;
+
+    optional uint32 fillColorAnalog0 = 42;
+	optional uint32 fillColorAnalog1 = 43;
+	optional uint32 textColorAnalog0 = 44;
+	optional uint32 textColorAnalog1 = 45;
+
+    optional uint32 fillColorDiscrYes0 = 46;
+	optional uint32 fillColorDiscrYes1 = 47;
+	optional uint32 textColorDiscrYes0 = 48;
+	optional uint32 textColorDiscrYes1 = 49;
+
+    optional uint32 fillColorDiscrNo0 = 50;
+	optional uint32 fillColorDiscrNo1 = 51;
+	optional uint32 textColorDiscrNo0 = 52;
+	optional uint32 textColorDiscrNo1 = 53;
 }
 
 //

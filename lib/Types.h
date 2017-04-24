@@ -60,6 +60,15 @@ public:
 	};
 	Q_ENUM(AnalogFormat)
 
+	// Signal Source
+	//
+	enum class SignalSource
+	{
+		AppDataService,
+		TuningService
+	};
+	Q_ENUM(SignalSource)
+
 	// Column Data
 	//
 	enum class ColumnData

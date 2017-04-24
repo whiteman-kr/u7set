@@ -1,10 +1,12 @@
 #include "DrawParam.h"
+#include <QFont>
 
 namespace VFrame30
 {
-	CDrawParam::CDrawParam(QPainter* painter, Schema* schema, double gridSize, int pinGridStep) :
+	CDrawParam::CDrawParam(QPainter* painter, Schema* schema, const SchemaView* view, double gridSize, int pinGridStep) :
 		m_painter(painter),
 		m_schema(schema),
+		m_schemaView(view),
 		m_gridSize(gridSize),
 		m_pinGridStep(pinGridStep)
 	{
@@ -45,6 +47,16 @@ namespace VFrame30
 	const Schema* CDrawParam::schema() const
 	{
 		return m_schema;
+	}
+
+	const SchemaView* CDrawParam::schemaView() const
+	{
+		return m_schemaView;
+	}
+
+	SchemaView* CDrawParam::schemaView()
+	{
+		return const_cast<SchemaView*>(m_schemaView);
 	}
 
 	double CDrawParam::controlBarSize() const
@@ -148,6 +160,16 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
+	bool CDrawParam::blinkPhase() const
+	{
+		return m_blinkPhase;
+	}
+
+	void CDrawParam::setBlinkPhase(bool value)
+	{
+		m_blinkPhase = value;
+	}
+
 	AppSignalManager* CDrawParam::appSignalManager()
 	{
 		return m_appSignalmanager;
@@ -156,6 +178,16 @@ namespace VFrame30
 	void CDrawParam::setAppSignalManager(AppSignalManager* value)
 	{
 		m_appSignalmanager = value;
+	}
+
+	TuningController* CDrawParam::tuningController()
+	{
+		return m_tuningController;
+	}
+
+	void CDrawParam::setTuningController(TuningController* value)
+	{
+		m_tuningController = value;
 	}
 
 	const Session& CDrawParam::session() const
@@ -201,6 +233,7 @@ namespace VFrame30
 
 		f.setBold(font.bold());
 		f.setItalic(font.italic());
+		//f.setStyleStrategy(QFont::StyleStrategy::NoAntialias);
 		//f.setStyleStrategy(QFont::PreferDevice);
 
 		QRectF rc;
@@ -232,5 +265,5 @@ namespace VFrame30
 		painter->restore();
 		return;
 	}
-	
+
 }

@@ -74,7 +74,7 @@ namespace VFrame30
 		const TuningController& tuningController() const;
 		TuningController& tuningController();
 
-		QJSEngine* jsEngine();
+		virtual QJSEngine* jsEngine();
 
 		virtual QString globalScript() const;
 		void setGlobalScript(QString value);
@@ -88,6 +88,7 @@ namespace VFrame30
 		Session m_session;
 		TuningController m_tuningController;
 
+	protected:
 		bool m_jsEngineGlobalsWereCreated = false;
 		QJSEngine m_jsEngine;
 

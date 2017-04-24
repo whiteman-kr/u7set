@@ -43,12 +43,12 @@ QVariant TuningController::valid(QString appSignalID)
 	return result;
 }
 
-QVariant TuningController::value(QString appSignalID)
+QVariant TuningController::analog(QString appSignalID)
 {
-	float result = false;
+	bool result = false;
 	bool ok = true;
 
-	emit signal_value(appSignalID, &result, &ok);
+	emit signal_analog(appSignalID, &result, &ok);
 
 	if (ok == false)
 	{
@@ -56,20 +56,6 @@ QVariant TuningController::value(QString appSignalID)
 	}
 
 	return result;
-}
-
-bool TuningController::setValue(QString appSignalID, float value)
-{
-	bool ok = true;
-
-	emit signal_setValue(appSignalID, value, &ok);
-
-	if (ok == false)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 QVariant TuningController::highLimit(QString appSignalID)
@@ -100,6 +86,50 @@ QVariant TuningController::lowLimit(QString appSignalID)
 	}
 
 	return result;
+}
+
+QVariant TuningController::decimalPlaces(QString appSignalID)
+{
+	float result = false;
+	bool ok = true;
+
+	emit signal_decimalPlaces(appSignalID, &result, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return result;
+}
+
+QVariant TuningController::value(QString appSignalID)
+{
+	float result = false;
+	bool ok = true;
+
+	emit signal_value(appSignalID, &result, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return result;
+}
+
+bool TuningController::setValue(QString appSignalID, float value)
+{
+	bool ok = true;
+
+	emit signal_setValue(appSignalID, value, &ok);
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 int TuningController::showMessageBox(QString title, QString text, int icon, int buttons)

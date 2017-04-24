@@ -441,7 +441,7 @@ namespace VFrame30
 		if (drawParam->isMonitorMode() == true)
 		{
 			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
-			signalState = drawParam->appSignalManager()->signalState(appSignalId);
+			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
 		}
 
 		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);

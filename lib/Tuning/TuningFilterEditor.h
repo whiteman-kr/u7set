@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "TuningObject.h"
+#include "TuningSignal.h"
 #include "TuningModel.h"
 
 
@@ -13,7 +13,7 @@ class TuningFilterEditor : public QDialog
 
 public:
 
-    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningObjectStorage* objects, bool showAutomatic,
+    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
 				std::vector<int> &signalsTableColumnWidth, std::vector<int> &presetsTreeColumnWidth,
 				QPoint pos,
 				QByteArray geometry,
@@ -181,7 +181,7 @@ private:
 
     TuningFilterStorage* m_filterStorage = nullptr;
 
-    const TuningObjectStorage *m_objects = nullptr;
+    const TuningSignalStorage *m_objects = nullptr;
 
     int m_sortColumn = 0;
 

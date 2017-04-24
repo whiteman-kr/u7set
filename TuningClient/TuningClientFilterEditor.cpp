@@ -2,15 +2,15 @@
 #include "MainWindow.h"
 
 
-TuningClientFilterEditor::TuningClientFilterEditor(TuningObjectManager *tuningObjectManager, TuningFilterStorage* filterStorage, const TuningObjectStorage* objects, bool showAutomatic,
+TuningClientFilterEditor::TuningClientFilterEditor(TuningSignalManager *tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
 							std::vector<int> &signalsTableColumnWidth, std::vector<int> &presetsTreeColumnWidth,
 							QPoint pos,
 							QByteArray geometry,
 							QWidget *parent):
 	TuningFilterEditor(filterStorage, objects, showAutomatic, signalsTableColumnWidth, presetsTreeColumnWidth, pos, geometry, parent),
-	m_tuningObjectManager(tuningObjectManager)
+	m_tuningSignalManager(tuningSignalManager)
 {
-	assert(tuningObjectManager);
+	assert(tuningSignalManager);
 	assert(filterStorage);
 	assert(objects);
 }
@@ -19,15 +19,15 @@ double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool 
 {
     ok = true;
 
-	QMutexLocker l(&m_tuningObjectManager->m_mutex);
+	QMutexLocker l(&m_tuningSignalManager->m_mutex);
 
-	if (m_tuningObjectManager->objectExists(appSignalHash) == false)
+	if (m_tuningSignalManager->objectExists(appSignalHash) == false)
     {
         ok = false;
         return 0;
     }
 
-	TuningObject* baseObject = m_tuningObjectManager->objectPtrByHash(appSignalHash);
+	TuningSignal* baseObject = m_tuningSignalManager->objectPtrByHash(appSignalHash);
 
     if (baseObject == nullptr)
     {
@@ -35,7 +35,7 @@ double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool 
         return 0;
     }
 
-    if (baseObject->valid() == false)
+	if (baseObject->state.valid() == false)
     {
         ok = false;
         return 0;

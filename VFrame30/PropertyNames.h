@@ -12,6 +12,7 @@ namespace VFrame30
 	public:
 		static const QString acceptClick;
 		static const QString clickScript;
+		static const QString preDrawScript;
 		static const QString commented;
 		static const QString objectName;
 
@@ -24,6 +25,7 @@ namespace VFrame30
 		static const QString valueInteger;
 		static const QString valueFloat;
 		static const QString precision;
+		static const QString precisionPropText;
 		static const QString analogFormat;
 		static const QString columnCount;
 		static const QString pinCount;
@@ -40,6 +42,46 @@ namespace VFrame30
 		static const QString label;
 		static const QString caption;
 		static const QString maxLength;
+
+		// SchemaItemValue Colors
+		//
+		static const QString fillColorNonValid0;
+		static const QString fillColorNonValid1;
+		static const QString textColorNonValid0;
+		static const QString textColorNonValid1;
+
+		static const QString fillColorOverflow0;
+		static const QString fillColorOverflow1;
+		static const QString textColorOverflow0;
+		static const QString textColorOverflow1;
+
+		static const QString fillColorUnderflow0;
+		static const QString fillColorUnderflow1;
+		static const QString textColorUnderflow0;
+		static const QString textColorUnderflow1;
+
+		static const QString fillColorAnalog0;
+		static const QString fillColorAnalog1;
+		static const QString textColorAnalog0;
+		static const QString textColorAnalog1;
+
+		static const QString fillColorDiscrYes0;
+		static const QString fillColorDiscrYes1;
+		static const QString textColorDiscrYes0;
+		static const QString textColorDiscrYes1;
+
+		static const QString fillColorDiscrNo0;
+		static const QString fillColorDiscrNo1;
+		static const QString textColorDiscrNo0;
+		static const QString textColorDiscrNo1;
+
+		// --
+		//
+		static const QString textAnalog;
+		static const QString textDiscrete0;
+		static const QString textDiscrete1;
+		static const QString textNonValid;
+		static const QString textValuePropDescription;
 
 		static const QString userText;
 		static const QString userTextPos;
@@ -80,11 +122,13 @@ namespace VFrame30
 		static const QString appSignalIDs;
 		static const QString appSignalId;
 		static const QString connectionId;
+		static const QString signalSource;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;
 		static const QString functionalCategory;
 		static const QString textCategory;
+		static const QString colorCategory;
 		static const QString monitorCategory;
 		static const QString parametersCategory;
 		static const QString controlCategory;
@@ -119,6 +163,7 @@ namespace VFrame30
 
 		static const QString scriptGlobalVariableView;
 		static const QString scriptGlobalVariableTuning;
+		static const QString scriptGlobalVariableSignals;
 	};
 
 }

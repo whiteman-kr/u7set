@@ -1,7 +1,7 @@
 #include <QMessageBox>
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
-#include "MonitorSchemaView.h"
+#include "MonitorView.h"
 #include "SchemaManager.h"
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -15,7 +15,7 @@
 //
 
 MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, SchemaManager* schemaManager) :
-	BaseSchemaWidget(schema, new MonitorSchemaView(schemaManager)),
+	BaseSchemaWidget(schema, new MonitorView(schemaManager)),
 	m_schemaManager(schemaManager)
 {
 	assert(m_schemaManager);
@@ -34,7 +34,7 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 	// --
 	//
-	connect(monitorSchemaView(), &MonitorSchemaView::signal_setSchema, this, &MonitorSchemaWidget::slot_setSchema);
+	connect(monitorSchemaView(), &MonitorView::signal_setSchema, this, &MonitorSchemaWidget::slot_setSchema);
 
 	// Init history
 	//
@@ -427,16 +427,16 @@ QString MonitorSchemaWidget::caption() const
 	return schema()->caption();
 }
 
-MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView()
+MonitorView* MonitorSchemaWidget::monitorSchemaView()
 {
-	MonitorSchemaView* result = dynamic_cast<MonitorSchemaView*>(schemaView());
+	MonitorView* result = dynamic_cast<MonitorView*>(schemaView());
 	assert(result);
 	return result;
 }
 
-const MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView() const
+const MonitorView* MonitorSchemaWidget::monitorSchemaView() const
 {
-	const MonitorSchemaView* result = dynamic_cast<const MonitorSchemaView*>(schemaView());
+	const MonitorView* result = dynamic_cast<const MonitorView*>(schemaView());
 	assert(result);
 	return result;
 }

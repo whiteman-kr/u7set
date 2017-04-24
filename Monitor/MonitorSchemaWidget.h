@@ -2,7 +2,7 @@
 
 #include "../VFrame30/BaseSchemaWidget.h"
 
-class MonitorSchemaView;
+class MonitorView;
 class SchemaManager;
 struct SchemaHistoryItem;
 
@@ -85,8 +85,8 @@ public:
 	QString schemaId() const;
 	QString caption() const;
 
-	MonitorSchemaView* monitorSchemaView();
-	const MonitorSchemaView* monitorSchemaView() const;
+	MonitorView* monitorSchemaView();
+	const MonitorView* monitorSchemaView() const;
 
 	// Data
 	//

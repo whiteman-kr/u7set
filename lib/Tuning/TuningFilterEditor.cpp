@@ -5,7 +5,7 @@
 //
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const TuningObjectStorage *objects, bool showAutomatic,
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const TuningSignalStorage *objects, bool showAutomatic,
                                        std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth,
                                        QPoint pos,
                                        QByteArray geometry,
@@ -385,11 +385,11 @@ void TuningFilterEditor::fillObjectsList()
 
     QString filterText = m_filterText->text().trimmed();
 
-    std::vector<TuningObject> objects;
+    std::vector<TuningSignal> objects;
 
     for (int i = 0; i < m_objects->objectCount(); i++)
 	{
-        const TuningObject* o = m_objects->objectPtr(i);
+        const TuningSignal* o = m_objects->objectPtr(i);
 
         if (signalType == SignalType::Analog && o->analog() == false)
 		{
@@ -667,7 +667,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
         return;
     }
 
-    TuningObject* object = m_objects->objectPtrByHash(value.appSignalHash());
+    TuningSignal* object = m_objects->objectPtrByHash(value.appSignalHash());
     if (object == nullptr)
     {
         assert(object);
@@ -984,7 +984,7 @@ void TuningFilterEditor::on_m_add_clicked()
 
     for (const QModelIndex& i : m_signalsTable->selectionModel()->selectedRows())
 	{
-        TuningObject* o = m_model->object(i.row());
+        TuningSignal* o = m_model->object(i.row());
 
         if (o == nullptr)
         {
@@ -999,7 +999,7 @@ void TuningFilterEditor::on_m_add_clicked()
 
 		TuningFilterValue ofv;
         ofv.setAppSignalId(o->appSignalID());
-        if (o->valid() == true)
+		if (o->state.valid() == true)
 		{
             ofv.setValue(o->value());
 		}
@@ -1140,7 +1140,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
             continue;
         }
 
-        TuningObject* object = m_objects->objectPtrByHash(ov.appSignalHash());
+        TuningSignal* object = m_objects->objectPtrByHash(ov.appSignalHash());
         if (object == nullptr)
         {
             assert(object);

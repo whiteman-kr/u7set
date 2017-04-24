@@ -1,27 +1,38 @@
-#include "MonitorSchemaView.h"
+#include "MonitorView.h"
 #include "SchemaManager.h"
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
 
-MonitorSchemaView::MonitorSchemaView(SchemaManager* schemaManager, QWidget *parent)
+// Literals
+//
+constexpr int64_t operator "" _ms(unsigned long long int value)
+{
+	return value;
+}
+
+
+// MonitorView
+//
+MonitorView::MonitorView(SchemaManager* schemaManager, QWidget *parent)
 	: SchemaView(parent),
 	  m_schemaManager(schemaManager)
 {
 	qDebug() << Q_FUNC_INFO;
 	assert(m_schemaManager);
 
-	startTimer(250);
+	startRepaintTimer();	// This is a main repaint timer, it firse on the edge of 250ms
+	startTimer(1000);		// This is a guard timer
 
 	return;
 }
 
-MonitorSchemaView::~MonitorSchemaView()
+MonitorView::~MonitorView()
 {
 	qDebug() << Q_FUNC_INFO;
 }
 
-void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
+void MonitorView::paintEvent(QPaintEvent* /*pe*/)
 {
 	// Draw Schema
 	//
@@ -32,7 +43,9 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	p.save();
 
-	VFrame30::CDrawParam drawParam(&p, schema().get(), schema()->gridSize(), schema()->pinGridStep());
+	VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+
+	drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 	drawParam.setEditMode(false);
 	drawParam.setAppSignalManager(&theSignals);
 	drawParam.setInfoMode(theSettings.showItemsLabels());
@@ -51,7 +64,7 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 
 	// Draw Schema
 	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+	//QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
 	// Items are being moved drawing
 	//
@@ -72,12 +85,21 @@ void MonitorSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	return;
 }
 
-void MonitorSchemaView::timerEvent(QTimerEvent* /*event*/)
+void MonitorView::timerEvent(QTimerEvent* /*event*/)
 {
-	update();
+	// Guard timer in case if the main repaint timer has stopped
+	//
+	if (QDateTime::currentMSecsSinceEpoch() - m_lastRepaintEventFired.toMSecsSinceEpoch()  > 500_ms)
+	{
+		// Something wrong with timer, start it again
+		//
+		startRepaintTimer();
+	}
+
+	return;
 }
 
-void MonitorSchemaView::mousePressEvent(QMouseEvent* event)
+void MonitorView::mousePressEvent(QMouseEvent* event)
 {
 	if (event->buttons().testFlag(Qt::MidButton) == true)
 	{
@@ -133,7 +155,7 @@ void MonitorSchemaView::mousePressEvent(QMouseEvent* event)
 	return;
 }
 
-void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
+void MonitorView::mouseReleaseEvent(QMouseEvent* event)
 {
 	if (event->buttons().testFlag(Qt::MidButton) == true)
 	{
@@ -180,7 +202,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 				{
 					// Run script
 					//
-					item->runScript(jsEngine(), this);
+					item->clickEvent(globalScript(), jsEngine(), this);
 
 					// --
 					//
@@ -203,7 +225,7 @@ void MonitorSchemaView::mouseReleaseEvent(QMouseEvent* event)
 	return;
 }
 
-void MonitorSchemaView::setSchema(QString schemaId)
+void MonitorView::setSchema(QString schemaId)
 {
 	// We can't change schema here, because we need to save history, so emit signal and change schema
 	// in MonitorSchemaWidget
@@ -213,7 +235,22 @@ void MonitorSchemaView::setSchema(QString schemaId)
 	return;
 }
 
-QString MonitorSchemaView::globalScript() const
+void MonitorView::startRepaintTimer()
+{
+	update();
+
+	// Set this timer in the edge of 250ms
+	//
+	int64_t currentMs = QTime::currentTime().msec();
+	int64_t ms = (currentMs / 250 + 1) * 250 - currentMs;
+
+	QTimer::singleShot(ms, this, &MonitorView::startRepaintTimer);
+	m_lastRepaintEventFired = QDateTime::currentDateTime();
+
+	return;
+}
+
+QString MonitorView::globalScript() const
 {
 	if (m_schemaManager == nullptr)
 	{
@@ -222,5 +259,26 @@ QString MonitorSchemaView::globalScript() const
 	}
 
 	return m_schemaManager->globalScript();
+}
+
+QJSEngine* MonitorView::jsEngine()
+{
+	bool addSignalManager = false;
+	if (m_jsEngineGlobalsWereCreated == false)
+	{
+		addSignalManager = true;
+	}
+
+	QJSEngine* result = VFrame30::SchemaView::jsEngine();
+
+	if (addSignalManager == true)
+	{
+		ScriptSignalManager* signalManager = new ScriptSignalManager(result, &theSignals);
+		QJSValue jsValue = m_jsEngine.newQObject(signalManager);
+
+		result->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsValue);
+	}
+
+	return result;
 }
 
