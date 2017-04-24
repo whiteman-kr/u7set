@@ -51,7 +51,6 @@ SOURCES += main.cpp \
     ../lib/Tcp.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    MonitorSchemaView.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
@@ -72,7 +71,8 @@ SOURCES += main.cpp \
     DialogSignalSearch.cpp \
     DialogSignalSnapshot.cpp \
     DialogColumns.cpp \
-    ../lib/HostAddressPort.cpp
+    ../lib/HostAddressPort.cpp \
+    MonitorView.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -86,7 +86,6 @@ HEADERS  += \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    MonitorSchemaView.h \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
@@ -109,7 +108,8 @@ HEADERS  += \
     DialogSignalSearch.h \
     DialogSignalSnapshot.h \
     DialogColumns.h \
-    ../lib/HostAddressPort.h
+    ../lib/HostAddressPort.h \
+    MonitorView.h
 
 FORMS    += \
     DialogSettings.ui \

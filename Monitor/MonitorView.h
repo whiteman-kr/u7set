@@ -10,13 +10,13 @@ namespace VFrame30
 	class SchemaItem;
 }
 
-class MonitorSchemaView : public VFrame30::SchemaView
+class MonitorView : public VFrame30::SchemaView
 {
 	Q_OBJECT
 
 public:
-	explicit MonitorSchemaView(SchemaManager* schemaManager, QWidget* parent = nullptr);
-	virtual ~MonitorSchemaView();
+	explicit MonitorView(SchemaManager* schemaManager, QWidget* parent = nullptr);
+	virtual ~MonitorView();
 
 	// Methods
 	//
@@ -44,11 +44,13 @@ signals:
 public slots:
 	virtual void setSchema(QString schemaId) override;
 
+protected slots:
+	void startRepaintTimer();
+
 	// Properties
 	//
 public:
 	virtual QString globalScript() const override;
-
 	virtual QJSEngine* jsEngine() override;
 
 	// Data
@@ -57,6 +59,8 @@ private:
 	SchemaManager* m_schemaManager = nullptr;
 
 	std::shared_ptr<VFrame30::SchemaItem> m_leftClickOverItem;
+
+	QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
 };
 
 
