@@ -25,6 +25,7 @@ public:
 
 public slots:
 	void onInformationRequest(UdpRequest request);
+	void onBuildPathChanged(const QString& newBuildPath);
 
 signals:
 	void ackInformationRequest(UdpRequest request);
@@ -37,7 +38,7 @@ private:
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	void startCfgServerThread();
+	void startCfgServerThread(const QString& buildPath);
 	void stopCfgServerThread();
 
 	void startCfgCheckerThread();
@@ -69,7 +70,7 @@ private:
 
 // ------------------------------------------------------------------------------------
 //
-// CfgSrvStorage class declaration
+// CfgCheckerWorker class declaration
 //
 // ------------------------------------------------------------------------------------
 

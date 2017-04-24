@@ -54,7 +54,6 @@ public:
 	virtual void onDisconnection() override;
 
 private:
-	void onRootFolderChange();
 	void readBuildXml();
 
 private:

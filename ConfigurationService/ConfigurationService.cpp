@@ -57,6 +57,15 @@ void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
 }
 
 
+void ConfigurationServiceWorker::onBuildPathChanged(const QString& newBuildPath)
+{
+	stopCfgServerThread();
+
+	startCfgServerThread(newBuildPath);
+}
+
+
+
 void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
@@ -113,7 +122,7 @@ void ConfigurationServiceWorker::loadSettings()
 
 void ConfigurationServiceWorker::initialize()
 {
-	startCfgServerThread();
+	// startCfgServerThread();
 
 	startCfgCheckerThread();
 
@@ -131,9 +140,9 @@ void ConfigurationServiceWorker::shutdown()
 }
 
 
-void ConfigurationServiceWorker::startCfgServerThread()
+void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgServer* cfgServer = new CfgServer(m_autoloadBuildPath, m_logger);
+	CfgServer* cfgServer = new CfgServer(buildPath, m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgServer, m_logger);
 
@@ -145,8 +154,14 @@ void ConfigurationServiceWorker::startCfgServerThread()
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
-	m_cfgServerThread->quit();
-	delete m_cfgServerThread;
+	if (m_cfgServerThread != nullptr)
+	{
+		m_cfgServerThread->quit();
+
+		delete m_cfgServerThread;
+
+		m_cfgServerThread = nullptr;
+	}
 }
 
 
@@ -156,11 +171,15 @@ void ConfigurationServiceWorker::startCfgCheckerThread()
 	m_cfgCheckerThread = new SimpleThread(cfgCheckerWorker);
 
 	m_cfgCheckerThread->start();
+
+	connect(cfgCheckerWorker, &CfgCheckerWorker::buildPathChanged, this, &ConfigurationServiceWorker::onBuildPathChanged);
 }
 
 
 void ConfigurationServiceWorker::stopCfgCheckerThread()
 {
+	assert(m_cfgCheckerThread != nullptr);
+
 	m_cfgCheckerThread->quit();
 	delete m_cfgCheckerThread;
 }
@@ -342,6 +361,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 		}
 
 		QFileInfo fileInfo(buildDirectoryPath + fileName);
+
 		if (fileInfo.size() != fileSize)
 		{
 			DEBUG_LOG_MSG(m_logger, "File " + fileName + " has size " + QString::number(fileInfo.size()) + " expected " + QString::number(fileSize));
@@ -399,6 +419,7 @@ void CfgCheckerWorker::updateBuildXml()
 	// Has build.xml been changed?
 	//
 	QFileInfo buildXmlInfo(m_autoloadBuildFolder + "/build.xml");
+
 	if (buildXmlInfo.lastModified() == m_lastBuildXmlModifyTime)
 	{
 		return;
@@ -421,6 +442,7 @@ void CfgCheckerWorker::updateBuildXml()
 	QDir workDirectory(m_workFolder + "/CfgSrvStorage");
 	QString newCheckDirectoryName = "check-" + QDateTime::currentDateTime().toString("yyyy-MM-dd-HH-mm-ss");
 	QString newCheckDirectoryPath = m_workFolder + "/CfgSrvStorage/" + newCheckDirectoryName;
+
 	if (!workDirectory.mkpath(newCheckDirectoryPath))
 	{
 		DEBUG_LOG_ERR(m_logger, "Could not create directory " + newCheckDirectoryPath);
@@ -500,6 +522,7 @@ void CfgCheckerWorker::onThreadStarted()
 	}
 
 	QDir workDirectory(m_workFolder);
+
 	if (!workDirectory.exists("CfgSrvStorage") && !workDirectory.mkpath(m_workFolder + "/CfgSrvStorage"))
 	{
 		m_workFolder.clear();

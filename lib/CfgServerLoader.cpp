@@ -45,7 +45,9 @@ CfgServer* CfgServer::getNewInstance()
 
 void CfgServer::onServerThreadStarted()
 {
-	onRootFolderChange();
+	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
+
+	readBuildXml();
 }
 
 
@@ -63,14 +65,6 @@ void CfgServer::onConnection()
 void CfgServer::onDisconnection()
 {
 	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer connection #%1 closed")).arg(id()));
-}
-
-
-void CfgServer::onRootFolderChange()
-{
-	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
-
-	readBuildXml();
 }
 
 
