@@ -1268,28 +1268,35 @@ namespace Hardware
 
 		for(Hardware::OptoPort* port : portsList)
 		{
+			if (port->isUsedInConnection == false)
+			{
+				// optical port is not used in connection
+				//
+				port->setRxDataSizeW(0);
+				continue;
+			}
+
 			if (port->mode() == Hardware::OptoPort::Mode::Serial)
 			{
 				// RS232/485 port has no linked ports
 				//
 				if (port->manualSettings() == true)
 				{
+					// set manual rx data size
+					//
 					port->setRxDataSizeW(port->manualRxSizeW());
 				}
 				else
 				{
-					m_log->errALC5085(port->equipmentID(), port->connectionID());
+					//
+					asserf(false);
+					//m_log->errALC5085(port->equipmentID(), port->connectionID());
 				}
 
 				continue;
 			}
 
-			if (port->isLinked() == false)
-			{
-				// optical port is not linked (used in connection)
-				//
-				continue;
-			}
+			assert(port->mode() == Hardware::OptoPort::Mode::Optical);
 
 			if (port->txDataSizeW() > 0)
 			{
