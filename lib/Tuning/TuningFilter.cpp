@@ -835,18 +835,18 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 }
 
 
-bool TuningFilter::match(const TuningSignal& object, bool checkValues) const
+bool TuningFilter::match(const Signal& object, bool checkValues) const
 {
 	if (isEmpty() == true)
 	{
         return true;
 	}
 
-	if (signalType() == TuningFilter::SignalType::Analog && object.analog() == false)
+	if (signalType() == TuningFilter::SignalType::Analog && object.isAnalog() == false)
 	{
 		return false;
 	}
-	if (signalType() == TuningFilter::SignalType::Discrete && object.analog() == true)
+	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
 	{
 		return false;
 	}
@@ -855,7 +855,7 @@ bool TuningFilter::match(const TuningSignal& object, bool checkValues) const
 	//
     if (checkValues == true && m_signalValuesVec.empty() == false)
 	{
-		if (valueExists(object.appSignalHash()) == false)
+		if (valueExists(object.hash()) == false)
 		{
 			return false;
 		}
@@ -965,7 +965,7 @@ void TuningFilter::checkSignals(const TuningSignalStorage *objects, QStringList&
         const Hash& hash = it->first;
         const TuningFilterValue& value = it->second;
 
-        if (objects->objectExists(hash) == false)
+		if (objects->signalExists(hash) == false)
         {
             notFoundCounter++;
 
@@ -994,7 +994,7 @@ void TuningFilter::removeNotExistingSignals(const TuningSignalStorage *objects, 
     {
         const Hash& hash = it->first;
 
-        if (objects->objectExists(hash) == false)
+		if (objects->signalExists(hash) == false)
         {
             removedCounter++;
             valuesToDelete.push_back(hash);
@@ -1387,7 +1387,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
                 //
                 Hash hash = ::calcHash(appSignalID);
 
-                if (objects->objectExists(hash) == false)
+				if (objects->signalExists(hash) == false)
                 {
                     continue;
                 }

@@ -4,7 +4,7 @@
 #include <queue>
 
 #include "Stable.h"
-#include "../lib/Tuning/TuningSignal.h"
+#include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningController.h"
 
 #include "../Proto/network.pb.h"
@@ -29,6 +29,7 @@ struct WriteCommand
     }
 };
 
+
 class TuningSignalManager : public Tcp::Client
 {
     Q_ENUM(NetworkError)
@@ -45,11 +46,13 @@ public:
 
     bool loadDatabase(const QByteArray& data, QString *errorCode);
 
-    TuningSignalStorage objectStorage();
+	TuningSignalStorage signalsStorage();
 
-    bool objectExists(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
+	// Reading signals and states
 
-    TuningSignal* objectPtrByHash(Hash hash) const; // WARNING!!! Lock the mutex before calling this function!!!
+	bool signalExists(Hash hash) const; // WARNING!!! Lock the m_signalsMutex before calling this function!!!
+
+	TuningSignalState stateByHash(Hash hash) const; // WARNING!!! Lock the m_statesMutex before calling this function!!!
 
     // Tuning sources
 
@@ -61,9 +64,7 @@ public:
 
     // Writing states
 
-	void writeTuningSignal(Hash hash, float value);
-
-    void writeModifiedTuningSignals(std::vector<TuningSignal>& objects);
+	void writeTuningSignals(std::vector<std::pair<Hash, float>> &data);
 
 	// Information
 
@@ -84,6 +85,10 @@ private:
     virtual void onReplyTimeout() override;
 
     virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+
+	void invalidateSignals();
+
+	TuningSignalState* statePtrByHash(Hash hash); // WARNING!!! Lock the m_statesMutex before calling this function!!!
 
 protected:
     void resetToGetTuningSources();
@@ -115,7 +120,6 @@ public slots:
 
 private slots:
 	void slot_exists(QString appSignalID, bool* result, bool* ok);
-	void slot_valid(QString appSignalID, bool* result, bool* ok);
 	void slot_analog(QString appSignalID, bool* result, bool* ok);
 
 	void slot_highLimit(QString appSignalID, float* result, bool* ok);
@@ -123,8 +127,14 @@ private slots:
 
 	void slot_decimalPlaces(QString appSignalID, float* result, bool* ok);
 
+	void slot_valid(QString appSignalID, bool* result, bool* ok);
 	void slot_value(QString appSignalID, float *result, bool* ok);
+
 	void slot_setValue(QString appSignalID, float value, bool* ok);
+
+	void slot_getParam(QString appSignalID, Signal& result, bool* ok);
+	void slot_getState(QString appSignalID, TuningSignalState& result, bool* ok);
+
 signals:
 
 	void tuningSourcesArrived();
@@ -136,14 +146,7 @@ private:
 
     QString networkErrorStr(NetworkError error);
 
-public:
-
-    QMutex m_mutex;
-
 private:
-
-	//ConfigController* m_cfgController = nullptr;
-
     // Cache protobug messages
     //
     ::Network::GetTuningSourcesStates m_getTuningSourcesStates;
@@ -161,7 +164,12 @@ private:
     // Objects storage
     //
 
-    TuningSignalStorage m_objects;  // WARNING!!! Use this object only with m_mutex locked!!!
+	TuningSignalStorage m_signals;  // WARNING!!! Use this object only with m_mutex locked!!!
+
+	// States storage
+
+	std::map<Hash, int> m_statesMap;
+	std::vector<TuningSignalState> m_states;
 
 	// Tuning sources
     //
@@ -182,6 +190,14 @@ private:
 	int m_requestInterval = 10;
 
 	std::map<TuningController*, bool> m_tuningControllersMap;
+
+	QMutex m_tuningSourcesMutex;
+
+public:
+	QMutex m_signalsMutex;
+	QMutex m_statesMutex;
+
+
 };
 
 

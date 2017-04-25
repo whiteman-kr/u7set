@@ -13,13 +13,13 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
     m_showAutomatic(showAutomatic),
 	m_filterStorage(filterStorage),
-    m_objects(objects),
+	m_signals(objects),
     m_signalsTableColumnWidth(signalsTableColumnWidth),
     m_presetsTreeColumnWidth(presetsTreeColumnWidth)
 {
 
     assert(filterStorage);
-    assert(m_objects);
+	assert(m_signals);
 
     initUserInterface();
 
@@ -363,9 +363,9 @@ void TuningFilterEditor::initUserInterface()
 
 void TuningFilterEditor::fillObjectsList()
 {
-    if (m_objects == nullptr)
+	if (m_signals == nullptr)
     {
-        assert(m_objects);
+		assert(m_signals);
         return;
     }
 
@@ -385,18 +385,18 @@ void TuningFilterEditor::fillObjectsList()
 
     QString filterText = m_filterText->text().trimmed();
 
-    std::vector<TuningSignal> objects;
+	std::vector<TuningModelItem> objects;
 
-    for (int i = 0; i < m_objects->objectCount(); i++)
+	for (int i = 0; i < m_signals->signalsCount(); i++)
 	{
-        const TuningSignal* o = m_objects->objectPtr(i);
+		const Signal* o = m_signals->signalPtrByIndex(i);
 
-        if (signalType == SignalType::Analog && o->analog() == false)
+		if (signalType == SignalType::Analog && o->isAnalog() == false)
 		{
 			continue;
 		}
 
-        if (signalType == SignalType::Discrete && o->analog() == true)
+		if (signalType == SignalType::Discrete && o->isAnalog() == true)
 		{
 			continue;
 		}
@@ -458,10 +458,13 @@ void TuningFilterEditor::fillObjectsList()
             }
 		}
 
-        objects.push_back(*o);
+		TuningModelItem m;
+		m.param = *o;
+
+		objects.push_back(m);
 	}
 
-    m_model->setObjects(objects);
+	m_model->setSignals(objects);
     m_signalsTable->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
@@ -641,7 +644,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
 		return;
 	}
 
-    if (m_objects->objectExists(value.appSignalHash()) == false)
+	if (m_signals->signalExists(value.appSignalHash()) == false)
     {
         QStringList l;
         l.push_back("-");
@@ -667,7 +670,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
         return;
     }
 
-    TuningSignal* object = m_objects->objectPtrByHash(value.appSignalHash());
+	Signal* object = m_signals->signalPtrByHash(value.appSignalHash());
     if (object == nullptr)
     {
         assert(object);
@@ -682,7 +685,7 @@ void TuningFilterEditor::setSignalItemText(QTreeWidgetItem* item, const TuningFi
     l.push_back(object->caption());
     if (value.useValue() == true)
 	{
-        if (object->analog() == false)
+		if (object->isAnalog() == false)
 		{
             l.push_back(value.value() == 0 ? tr("0") : tr("1"));
 		}
@@ -984,24 +987,26 @@ void TuningFilterEditor::on_m_add_clicked()
 
     for (const QModelIndex& i : m_signalsTable->selectionModel()->selectedRows())
 	{
-        TuningSignal* o = m_model->object(i.row());
+		Signal* o = m_model->param(i.row());
+		TuningSignalState* s = m_model->state(i.row());
 
-        if (o == nullptr)
+		if (o == nullptr || s == nullptr)
         {
             assert(o);
+			assert(s);
             continue;
         }
 
-        if (filter->valueExists(o->appSignalHash()) == true)
+		if (filter->valueExists(o->hash()) == true)
 		{
 			continue;
 		}
 
 		TuningFilterValue ofv;
         ofv.setAppSignalId(o->appSignalID());
-		if (o->state.valid() == true)
+		if (s->valid() == true)
 		{
-            ofv.setValue(o->value());
+			ofv.setValue(s->value());
 		}
 
 		QTreeWidgetItem* childItem = new QTreeWidgetItem();
@@ -1135,12 +1140,12 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
 
-        if (m_objects->objectExists(ov.appSignalHash()) == false)
+		if (m_signals->signalExists(ov.appSignalHash()) == false)
         {
             continue;
         }
 
-        TuningSignal* object = m_objects->objectPtrByHash(ov.appSignalHash());
+		Signal* object = m_signals->signalPtrByHash(ov.appSignalHash());
         if (object == nullptr)
         {
             assert(object);
@@ -1149,17 +1154,17 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
         if (first == true)
 		{
-            analog = object->analog();
-            lowLimit = object->lowLimit();
-            highLimit = object->highLimit();
+			analog = object->isAnalog();
+			lowLimit = object->lowEngeneeringUnits();
+			highLimit = object->highEngeneeringUnits();
             decimalPlaces = object->decimalPlaces();
             value = ov.value();
-            defaultValue = object->defaultValue();
+			defaultValue = object->tuningDefaultValue();
             first = false;
 		}
 		else
 		{
-            if (analog != object->analog())
+			if (analog != object->isAnalog())
 			{
                 QMessageBox::warning(this, tr("Preset Editor"), tr("Please select signals of same type (analog or discrete)."));
 				return;
@@ -1167,14 +1172,14 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
             if (analog == true)
             {
-                if (lowLimit != object->lowLimit() || highLimit != object->highLimit())
+				if (lowLimit != object->lowEngeneeringUnits() || highLimit != object->highEngeneeringUnits())
                 {
                     QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
                     return;
                 }
             }
 
-            if (object->defaultValue() != defaultValue)
+			if (object->tuningDefaultValue() != defaultValue)
             {
                 QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different default value."));
                 return;

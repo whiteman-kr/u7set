@@ -144,8 +144,19 @@ SOURCES +=\
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
-    ../lib/Tuning/TuningSignal.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/Types.cpp \
+    ../lib/DbWorker.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtobufHelper.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/DbProgress.cpp \
+    ../lib/DbProgressDialog.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/Tuning/TuningSignalStorage.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -191,8 +202,19 @@ HEADERS  += MainWindow.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
-    ../lib/Tuning/TuningSignal.h \
-    ../lib/Tuning/TuningSignalManager.h
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/DeviceObject.h \
+    ../lib/Signal.h \
+    ../lib/XmlHelper.h \
+    ../lib/Types.h \
+    ../lib/DbWorker.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtobufHelper.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/DbProgress.h \
+    ../lib/DbProgressDialog.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/Tuning/TuningSignalStorage.h
 
 FORMS    += \
     DialogSettings.ui \

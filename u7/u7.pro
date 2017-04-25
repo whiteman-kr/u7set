@@ -183,13 +183,14 @@ SOURCES +=\
     ../lib/MetrologySignal.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
-    ../lib/Tuning/TuningSignal.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
-    ../lib/CodeEditor.cpp
+    ../lib/CodeEditor.cpp \
+    ../lib/Tuning/TuningSignalStorage.cpp
 
 
 HEADERS  += \
@@ -310,13 +311,14 @@ HEADERS  += \
     ../lib/MetrologySignal.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
-    ../lib/Tuning/TuningSignal.h \
+    ../lib/Tuning/TuningSignalState.h \
     DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
-    ../lib/CodeEditor.h
+    ../lib/CodeEditor.h \
+    ../lib/Tuning/TuningSignalStorage.h
 
 FORMS    += \
     CreateProjectDialog.ui \

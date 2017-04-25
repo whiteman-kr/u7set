@@ -375,7 +375,7 @@ void MainWindow::createWorkspace(const TuningSignalStorage *objects)
 
 void MainWindow::slot_configurationArrived()
 {
-	TuningSignalStorage objects = m_objectManager->objectStorage();
+	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
     createWorkspace(&objects);
 
@@ -411,7 +411,7 @@ void MainWindow::runPresetEditor()
 
     bool editAutomatic = false;
 
-	TuningSignalStorage objects = m_objectManager->objectStorage();
+	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
 	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
                          theSettings.m_presetEditorSignalsTableColumnWidth,

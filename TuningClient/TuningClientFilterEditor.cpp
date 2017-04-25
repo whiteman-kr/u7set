@@ -19,27 +19,25 @@ double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool 
 {
     ok = true;
 
-	QMutexLocker l(&m_tuningSignalManager->m_mutex);
+	QMutexLocker lsignal(&m_tuningSignalManager->m_signalsMutex);
 
-	if (m_tuningSignalManager->objectExists(appSignalHash) == false)
+	if (m_tuningSignalManager->signalExists(appSignalHash) == false)
     {
         ok = false;
         return 0;
     }
 
-	TuningSignal* baseObject = m_tuningSignalManager->objectPtrByHash(appSignalHash);
+	lsignal.unlock();
 
-    if (baseObject == nullptr)
+	QMutexLocker lstate(&m_tuningSignalManager->m_statesMutex);
+
+	TuningSignalState& state = m_tuningSignalManager->stateByHash(appSignalHash);
+
+	if (state.valid() == false)
     {
         ok = false;
         return 0;
     }
 
-	if (baseObject->state.valid() == false)
-    {
-        ok = false;
-        return 0;
-    }
-
-    return baseObject->value();
+	return state.value();
 }

@@ -2,7 +2,8 @@
 #define OBJECTFILTER_H
 
 #include "Stable.h"
-#include "../lib/Tuning/TuningSignal.h"
+#include "../lib/Tuning/TuningSignalManager.h"
+#include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Hash.h"
 
@@ -95,7 +96,7 @@ public:
     bool load(QXmlStreamReader& reader, bool automatic);
 	bool save(QXmlStreamWriter& writer) const;
 
-    bool match(const TuningSignal &object, bool checkValues) const;
+	bool match(const Signal &object, bool checkValues) const;
 
     void checkSignals(const TuningSignalStorage *objects, QStringList& errorLog, int &notFoundCounter);
 

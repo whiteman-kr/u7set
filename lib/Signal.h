@@ -278,6 +278,7 @@ public:
 	const Address16& tuningAddr() const { return m_tuningAddr; }
 
 	Hash hash() const { return m_hash; }
+	void setHash(Hash hash) { m_hash = hash; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));

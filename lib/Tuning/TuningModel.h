@@ -1,23 +1,39 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
-#include "TuningSignal.h"
+#include "TuningSignalState.h"
 #include "TuningFilter.h"
 
 
 class TuningItemModel;
+
+struct TuningModelItem
+{
+	Signal param;
+	TuningSignalState state;
+
+	bool limitsUnbalance() const
+	{
+		if (state.valid() == true && (param.lowEngeneeringUnits() != state.readLowLimit() || param.highEngeneeringUnits() != state.readHighLimit()))
+		{
+			return true;
+		}
+		return false;
+
+	}
+};
 
 class TuningItemSorter
 {
 public:
 	  TuningItemSorter(int column, Qt::SortOrder order);
 
-	  bool operator()(const TuningSignal& o1, const TuningSignal& o2) const
+	  bool operator()(const TuningModelItem& o1, const TuningModelItem& o2) const
 	  {
 		  return sortFunction(o1, o2, m_column, m_order);
 	  }
 
-	  bool sortFunction(const TuningSignal& o1, const TuningSignal& o2, int column, Qt::SortOrder order) const;
+	  bool sortFunction(const TuningModelItem& o1, const TuningModelItem& o2, int column, Qt::SortOrder order) const;
 
 private:
 	  int m_column = -1;
@@ -55,9 +71,10 @@ public:
 
 
 public:
-    void setObjects(std::vector<TuningSignal>& objects);
+	void setSignals(std::vector<TuningModelItem> &signalsList);
 
-    TuningSignal* object(int index);
+	Signal* param(int index);
+	TuningSignalState* state(int index);
 
 	void addColumn(Columns column);
     void removeColumn(Columns column);
@@ -92,7 +109,7 @@ private:
 protected:
 	std::vector<int> m_columnsIndexes;
 
-	std::vector<TuningSignal> m_objects;
+	std::vector<TuningModelItem> m_items;
 
 	bool m_blink = false;
 
