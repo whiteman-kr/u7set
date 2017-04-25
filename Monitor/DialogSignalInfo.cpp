@@ -30,8 +30,8 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 	static const char* const flagNameStr[] =
 	{
 		"VAL",
-		"OVRFLW",
-		"UNDRFLW",
+//		"OVRFLW",
+//		"UNDRFLW",
 	};
 
 	const int FLAG_NAME_COUNT = sizeof(flagNameStr) / sizeof(flagNameStr[0]);

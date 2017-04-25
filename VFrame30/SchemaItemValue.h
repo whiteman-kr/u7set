@@ -41,6 +41,9 @@ namespace VFrame30
 		Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor)
 		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
 
+		Q_PROPERTY(QString signalId READ signalId WRITE setSignalId)
+		Q_PROPERTY(QString SignalID READ signalId WRITE setSignalId)
+
 	public:
 		SchemaItemValue(void);
 		explicit SchemaItemValue(SchemaUnit unit);

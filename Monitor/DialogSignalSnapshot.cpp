@@ -192,8 +192,8 @@ SnapshotItemModel::SnapshotItemModel(QObject* parent)
 	m_columnsNames << tr("Plant Time");
 	m_columnsNames << tr("Value");
 	m_columnsNames << tr("Valid");
-	m_columnsNames << tr("Underflow");
-	m_columnsNames << tr("Overflow");
+//	m_columnsNames << tr("Underflow");
+//	m_columnsNames << tr("Overflow");
 
 
 	if (theSettings.m_signalSnapshotColumns.isEmpty() == true)

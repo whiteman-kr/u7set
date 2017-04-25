@@ -1164,7 +1164,7 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 		return;
 	}
 
-	message->set_hash(m_hash);
+	message->set_hash(calcHash(m_appSignalID));
 	message->set_appsignalid(m_appSignalID.toStdString());
 	message->set_customsignalid(m_customAppSignalID.toStdString());
 	message->set_caption(m_caption.toStdString());
