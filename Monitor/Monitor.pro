@@ -64,7 +64,7 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     DialogSignalInfo.cpp \
@@ -101,7 +101,7 @@ HEADERS  += \
     ../lib/DbStruct.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
     DialogSignalInfo.h \

@@ -89,7 +89,7 @@ SOURCES += \
     SignalBase.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
@@ -159,7 +159,7 @@ HEADERS  += \
     SignalBase.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \

@@ -76,9 +76,9 @@ namespace VFrame30
 														  "$(caption) Signal caption\n"
 														  "$(signalid) SignalID (CustomSignalID)\n"
 														  "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
-														  "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
-														  "$(highlimit) High limit\n"
-														  "$(lowlimit) Low limit");
+														  "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n");
+														  //"$(highlimit) High limit\n"
+														  //"$(lowlimit) Low limit");
 
 	const QString PropertyNames::userText("UserText");
 	const QString PropertyNames::userTextPos("UserTextPos");

@@ -6,7 +6,7 @@
 #include "../lib/XmlHelper.h"
 #include "../lib/DataProtocols.h"
 #include "../lib/DeviceObject.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 #include "../Proto/network.pb.h"
 
 

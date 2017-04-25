@@ -31,7 +31,10 @@ private:
 	//
 	void onGetAppSignalListStartRequest();
 	void onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize);
-	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);
+
+	void onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize);		// returns class AppSignalParam
+	void onGetAppSignalRequest(const char* requestData, quint32 requestDataSize);			// returns class Signal
+
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetDataSourcesInfoRequest();
@@ -48,6 +51,9 @@ private:
 
 	Network::GetAppSignalParamRequest m_getAppSignalParamRequest;
 	Network::GetAppSignalParamReply m_getAppSignalParamReply;
+
+	Network::GetAppSignalRequest m_getAppSignalRequest;
+	Network::GetAppSignalReply m_getAppSignalReply;
 
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;

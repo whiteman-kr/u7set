@@ -3,8 +3,7 @@
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "../lib/Signal.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 #include "../lib/AppSignalManager.h"
 
 namespace VFrame30
@@ -35,15 +34,15 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorNonValid0, PropertyNames::colorCategory, true, SchemaItemValue::textColorNonValid0, SchemaItemValue::setTextColorNonValid0);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorNonValid1, PropertyNames::colorCategory, true, SchemaItemValue::textColorNonValid1, SchemaItemValue::setTextColorNonValid1);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow0, SchemaItemValue::setFillColorOverflow0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow1, SchemaItemValue::setFillColorOverflow1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow0, SchemaItemValue::setTextColorOverflow0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow1, SchemaItemValue::setTextColorOverflow1);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow0, SchemaItemValue::setFillColorOverflow0);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow1, SchemaItemValue::setFillColorOverflow1);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow0, SchemaItemValue::setTextColorOverflow0);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow1, SchemaItemValue::setTextColorOverflow1);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow0, SchemaItemValue::setFillColorUnderflow0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow1, SchemaItemValue::setFillColorUnderflow1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow0, SchemaItemValue::setTextColorUnderflow0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow1, SchemaItemValue::setTextColorUnderflow1);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow0, SchemaItemValue::setFillColorUnderflow0);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow1, SchemaItemValue::setFillColorUnderflow1);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow0, SchemaItemValue::setTextColorUnderflow0);
+//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow1, SchemaItemValue::setTextColorUnderflow1);
 
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorAnalog0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorAnalog0, SchemaItemValue::setFillColorAnalog0);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorAnalog1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorAnalog1, SchemaItemValue::setFillColorAnalog1);
@@ -160,15 +159,15 @@ namespace VFrame30
 		valueMessage->set_textcolornonvalid0(m_textColorNonValid0.rgba());
 		valueMessage->set_textcolornonvalid1(m_textColorNonValid1.rgba());
 
-		valueMessage->set_fillcoloroverflow0(m_fillColorOverflow0.rgba());
-		valueMessage->set_fillcoloroverflow1(m_fillColorOverflow1.rgba());
-		valueMessage->set_textcoloroverflow0(m_textColorOverflow0.rgba());
-		valueMessage->set_textcoloroverflow1(m_textColorOverflow1.rgba());
+//		valueMessage->set_fillcoloroverflow0(m_fillColorOverflow0.rgba());
+//		valueMessage->set_fillcoloroverflow1(m_fillColorOverflow1.rgba());
+//		valueMessage->set_textcoloroverflow0(m_textColorOverflow0.rgba());
+//		valueMessage->set_textcoloroverflow1(m_textColorOverflow1.rgba());
 
-		valueMessage->set_fillcolorunderflow0(m_fillColorUnderflow0.rgba());
-		valueMessage->set_fillcolorunderflow1(m_fillColorUnderflow1.rgba());
-		valueMessage->set_textcolorunderflow0(m_textColorUnderflow0.rgba());
-		valueMessage->set_textcolorunderflow1(m_textColorUnderflow1.rgba());
+//		valueMessage->set_fillcolorunderflow0(m_fillColorUnderflow0.rgba());
+//		valueMessage->set_fillcolorunderflow1(m_fillColorUnderflow1.rgba());
+//		valueMessage->set_textcolorunderflow0(m_textColorUnderflow0.rgba());
+//		valueMessage->set_textcolorunderflow1(m_textColorUnderflow1.rgba());
 
 		valueMessage->set_fillcoloranalog0(m_fillColorAnalog0.rgba());
 		valueMessage->set_fillcoloranalog1(m_fillColorAnalog1.rgba());
@@ -239,15 +238,15 @@ namespace VFrame30
 		m_textColorNonValid0 = valueMessage.textcolornonvalid0();
 		m_textColorNonValid1 = valueMessage.textcolornonvalid1();
 
-		m_fillColorOverflow0 = valueMessage.fillcoloroverflow0();
-		m_fillColorOverflow1 = valueMessage.fillcoloroverflow1();
-		m_textColorOverflow0 = valueMessage.textcoloroverflow0();
-		m_textColorOverflow1 = valueMessage.textcoloroverflow1();
+//		m_fillColorOverflow0 = valueMessage.fillcoloroverflow0();
+//		m_fillColorOverflow1 = valueMessage.fillcoloroverflow1();
+//		m_textColorOverflow0 = valueMessage.textcoloroverflow0();
+//		m_textColorOverflow1 = valueMessage.textcoloroverflow1();
 
-		m_fillColorUnderflow0 = valueMessage.fillcolorunderflow0();
-		m_fillColorUnderflow1 =	valueMessage.fillcolorunderflow1();
-		m_textColorUnderflow0 =	valueMessage.textcolorunderflow0();
-		m_textColorUnderflow1 =	valueMessage.textcolorunderflow1();
+//		m_fillColorUnderflow0 = valueMessage.fillcolorunderflow0();
+//		m_fillColorUnderflow1 =	valueMessage.fillcolorunderflow1();
+//		m_textColorUnderflow0 =	valueMessage.textcolorunderflow0();
+//		m_textColorUnderflow1 =	valueMessage.textcolorunderflow1();
 
 		m_fillColorAnalog0 = valueMessage.fillcoloranalog0();
 		m_fillColorAnalog1 = valueMessage.fillcoloranalog1();
@@ -288,10 +287,10 @@ namespace VFrame30
 		// Get signal description and state
 		//
 		AppSignalState signalState;
-		Signal signal;
+		AppSignalParam signal;
 
-		signal.setAppSignalID(signalId());
-		signal.setCustomAppSignalID(signalId());
+		signal.setAppSignalId(signalId());
+		signal.setCustomSignalId(signalId());
 
 		bool ok = false;
 
@@ -356,7 +355,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemValue::drawLogic(CDrawParam* drawParam, const QRectF& rect, const Signal& signal, const AppSignalState& signalState) const
+	void SchemaItemValue::drawLogic(CDrawParam* drawParam, const QRectF& rect, const AppSignalParam& signal, const AppSignalState& signalState) const
 	{
 		QPainter* painter = drawParam->painter();
 		QColor text_color = textColor();
@@ -384,24 +383,27 @@ namespace VFrame30
 				{
 					text = parseText(m_textAnalog, signal, signalState);
 
-					if (signalState.isOverflow() == true)
-					{
-						back_color = blinkPhase ? fillColorOverflow0() : fillColorOverflow1();
-						text_color = blinkPhase ? textColorOverflow0() : textColorOverflow1();
-					}
-					else
-					{
-						if (signalState.isUnderflow() == true)
-						{
-							back_color = blinkPhase ? fillColorUnderflow0() : fillColorUnderflow1();
-							text_color = blinkPhase ? textColorUnderflow0() : textColorUnderflow1();
-						}
-						else
-						{
-							back_color = blinkPhase ? fillColorAnalog0() : fillColorAnalog1();
-							text_color = blinkPhase ? textColorAnalog0() : textColorAnalog1();
-						}
-					}
+					back_color = blinkPhase ? fillColorAnalog0() : fillColorAnalog1();
+					text_color = blinkPhase ? textColorAnalog0() : textColorAnalog1();
+
+//					if (signalState.isOverflow() == true)
+//					{
+//						back_color = blinkPhase ? fillColorOverflow0() : fillColorOverflow1();
+//						text_color = blinkPhase ? textColorOverflow0() : textColorOverflow1();
+//					}
+//					else
+//					{
+//						if (signalState.isUnderflow() == true)
+//						{
+//							back_color = blinkPhase ? fillColorUnderflow0() : fillColorUnderflow1();
+//							text_color = blinkPhase ? textColorUnderflow0() : textColorUnderflow1();
+//						}
+//						else
+//						{
+//							back_color = blinkPhase ? fillColorAnalog0() : fillColorAnalog1();
+//							text_color = blinkPhase ? textColorAnalog0() : textColorAnalog1();
+//						}
+//					}
 				}
 				else
 				{
@@ -433,7 +435,7 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemValue::parseText(QString text, const Signal& signal, const AppSignalState& signalState) const
+	QString SchemaItemValue::parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const
 	{
 		QString result = text;
 
@@ -479,33 +481,33 @@ namespace VFrame30
 
 				if (macro.compare(QLatin1String("signalid"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = signal.customAppSignalID();
+					replaceText = signal.customSignalId();
 					break;
 				}
 
 				if (macro.compare(QLatin1String("appsignalid"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = signal.appSignalID();
+					replaceText = signal.appSignalId();
 					break;
 				}
 
 				if (macro.compare(QLatin1String("equipmentid"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = signal.equipmentID();
+					replaceText = signal.equipmentId();
 					break;
 				}
 
-				if (macro.compare(QLatin1String("highlimit"), Qt::CaseInsensitive) == 0)
-				{
-					replaceText = formatNumber(signal.highValidRange(), signal);
-					break;
-				}
+//				if (macro.compare(QLatin1String("highlimit"), Qt::CaseInsensitive) == 0)
+//				{
+//					replaceText = formatNumber(signal.highValidRange(), signal);
+//					break;
+//				}
 
-				if (macro.compare(QLatin1String("lowlimit"), Qt::CaseInsensitive) == 0)
-				{
-					replaceText = formatNumber(signal.lowValidRange(), signal);
-					break;
-				}
+//				if (macro.compare(QLatin1String("lowlimit"), Qt::CaseInsensitive) == 0)
+//				{
+//					replaceText = formatNumber(signal.lowValidRange(), signal);
+//					break;
+//				}
 
 				// Unknown macro
 				//
@@ -525,7 +527,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QString SchemaItemValue::formatNumber(double value, const Signal& signal) const
+	QString SchemaItemValue::formatNumber(double value, const AppSignalParam& signal) const
 	{
 		if (signal.isDiscrete() == true)
 		{
@@ -535,7 +537,7 @@ namespace VFrame30
 		int p = m_precision;
 		if (m_precision == -1)
 		{
-			p = signal.decimalPlaces();
+			p = signal.precision();
 		}
 
 		return QString::number(value, 'f', p);

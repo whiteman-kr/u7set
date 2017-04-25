@@ -26,7 +26,7 @@ SOURCES +=\
     ../AppDataService/TcpAppDataClient.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/Signal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
@@ -53,7 +53,7 @@ HEADERS  += TcpClientMainWindow.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../lib/PropertyObject.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../lib/Signal.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \

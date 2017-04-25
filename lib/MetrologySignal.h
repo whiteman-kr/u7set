@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 

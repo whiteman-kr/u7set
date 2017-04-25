@@ -2,7 +2,7 @@
 
 #include "../lib/Hash.h"
 #include "../lib/Signal.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 
 
 struct AppSignalStateEx

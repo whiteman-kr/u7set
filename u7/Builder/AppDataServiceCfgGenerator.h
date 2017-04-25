@@ -4,6 +4,8 @@
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
 
+class DataSource;
+
 namespace Builder
 {
 	class AppDataServiceCfgGenerator : public SoftwareCfgGenerator

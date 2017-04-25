@@ -7,7 +7,7 @@ class QPen;
 class QBrush;
 
 struct AppSignalState;
-class Signal;
+class AppSignalParam;
 
 namespace VFrame30
 {
@@ -59,10 +59,10 @@ namespace VFrame30
 
 	protected:
 		void initDrawingResources() const;
-		void drawLogic(CDrawParam* drawParam, const QRectF& rect, const Signal& signal, const AppSignalState& signalState) const;
+		void drawLogic(CDrawParam* drawParam, const QRectF& rect, const AppSignalParam& signal, const AppSignalState& signalState) const;
 
-		QString parseText(QString text, const Signal& signal, const AppSignalState& signalState) const;
-		QString formatNumber(double value, const Signal& signal) const;
+		QString parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const;
+		QString formatNumber(double value, const AppSignalParam& signal) const;
 
 		// Text search
 		//
@@ -100,29 +100,29 @@ namespace VFrame30
 		const QColor& textColorNonValid1() const			{	return m_textColorNonValid1;	}
 		void setTextColorNonValid1(const QColor& value)		{	m_textColorNonValid1 = value;	}
 
-		const QColor& fillColorOverflow0() const			{	return m_fillColorOverflow0;	}
-		void setFillColorOverflow0(const QColor& value)		{	m_fillColorOverflow0 = value;	}
+//		const QColor& fillColorOverflow0() const			{	return m_fillColorOverflow0;	}
+//		void setFillColorOverflow0(const QColor& value)		{	m_fillColorOverflow0 = value;	}
 
-		const QColor& fillColorOverflow1() const			{	return m_fillColorOverflow1;	}
-		void setFillColorOverflow1(const QColor& value)		{	m_fillColorOverflow1 = value;	}
+//		const QColor& fillColorOverflow1() const			{	return m_fillColorOverflow1;	}
+//		void setFillColorOverflow1(const QColor& value)		{	m_fillColorOverflow1 = value;	}
 
-		const QColor& textColorOverflow0() const			{	return m_textColorOverflow0;	}
-		void setTextColorOverflow0(const QColor& value)		{	m_textColorOverflow0 = value;	}
+//		const QColor& textColorOverflow0() const			{	return m_textColorOverflow0;	}
+//		void setTextColorOverflow0(const QColor& value)		{	m_textColorOverflow0 = value;	}
 
-		const QColor& textColorOverflow1() const			{	return m_textColorOverflow1;	}
-		void setTextColorOverflow1(const QColor& value)		{	m_textColorOverflow1 = value;	}
+//		const QColor& textColorOverflow1() const			{	return m_textColorOverflow1;	}
+//		void setTextColorOverflow1(const QColor& value)		{	m_textColorOverflow1 = value;	}
 
-		const QColor& fillColorUnderflow0() const			{	return m_fillColorUnderflow0;	}
-		void setFillColorUnderflow0(const QColor& value)	{	m_fillColorUnderflow0 = value;	}
+//		const QColor& fillColorUnderflow0() const			{	return m_fillColorUnderflow0;	}
+//		void setFillColorUnderflow0(const QColor& value)	{	m_fillColorUnderflow0 = value;	}
 
-		const QColor& fillColorUnderflow1() const			{	return m_fillColorUnderflow1;	}
-		void setFillColorUnderflow1(const QColor& value)	{	m_fillColorUnderflow1 = value;	}
+//		const QColor& fillColorUnderflow1() const			{	return m_fillColorUnderflow1;	}
+//		void setFillColorUnderflow1(const QColor& value)	{	m_fillColorUnderflow1 = value;	}
 
-		const QColor& textColorUnderflow0() const			{	return m_textColorUnderflow0;	}
-		void setTextColorUnderflow0(const QColor& value)	{	m_textColorUnderflow0 = value;	}
+//		const QColor& textColorUnderflow0() const			{	return m_textColorUnderflow0;	}
+//		void setTextColorUnderflow0(const QColor& value)	{	m_textColorUnderflow0 = value;	}
 
-		const QColor& textColorUnderflow1() const			{	return m_textColorUnderflow1;	}
-		void setTextColorUnderflow1(const QColor& value)	{	m_textColorUnderflow1 = value;	}
+//		const QColor& textColorUnderflow1() const			{	return m_textColorUnderflow1;	}
+//		void setTextColorUnderflow1(const QColor& value)	{	m_textColorUnderflow1 = value;	}
 
 		const QColor& fillColorAnalog0() const				{	return m_fillColorAnalog0;		}
 		void setFillColorAnalog0(const QColor& value)		{	m_fillColorAnalog0 = value;		}
@@ -218,15 +218,15 @@ namespace VFrame30
 		QColor m_textColorNonValid0 = {qRgb(0xFF, 0xFF, 0xFF)};
 		QColor m_textColorNonValid1 = {qRgb(0xFF, 0xFF, 0xFF)};
 
-		QColor m_fillColorOverflow0 = {qRgb(0xC0, 0x00, 0x00)};		// Back red, text white
-		QColor m_fillColorOverflow1 = {qRgb(0xC0, 0x00, 0x00)};
-		QColor m_textColorOverflow0 = {qRgb(0xFF, 0xFF, 0xFF)};
-		QColor m_textColorOverflow1 = {qRgb(0xFF, 0xFF, 0xFF)};
+//		QColor m_fillColorOverflow0 = {qRgb(0xC0, 0x00, 0x00)};		// Back red, text white
+//		QColor m_fillColorOverflow1 = {qRgb(0xC0, 0x00, 0x00)};
+//		QColor m_textColorOverflow0 = {qRgb(0xFF, 0xFF, 0xFF)};
+//		QColor m_textColorOverflow1 = {qRgb(0xFF, 0xFF, 0xFF)};
 
-		QColor m_fillColorUnderflow0 = {qRgb(0xC0, 0x00, 0x00)};	// Back red, text white
-		QColor m_fillColorUnderflow1 = {qRgb(0xC0, 0x00, 0x00)};
-		QColor m_textColorUnderflow0 = {qRgb(0xFF, 0xFF, 0xFF)};
-		QColor m_textColorUnderflow1 = {qRgb(0xFF, 0xFF, 0xFF)};
+//		QColor m_fillColorUnderflow0 = {qRgb(0xC0, 0x00, 0x00)};	// Back red, text white
+//		QColor m_fillColorUnderflow1 = {qRgb(0xC0, 0x00, 0x00)};
+//		QColor m_textColorUnderflow0 = {qRgb(0xFF, 0xFF, 0xFF)};
+//		QColor m_textColorUnderflow1 = {qRgb(0xFF, 0xFF, 0xFF)};
 
 		QColor m_fillColorAnalog0 = {qRgb(0x00, 0x00, 0xC0)};		// Back dark blue, text white
 		QColor m_fillColorAnalog1 = {qRgb(0x00, 0x00, 0xC0)};

@@ -6,7 +6,7 @@
 #include "Settings.h"
 
 
-QString DialogSignalSearch::m_signalID = "";
+QString DialogSignalSearch::m_signalId = "";
 
 DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -43,7 +43,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 	ui->signalsTree->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->signalsTree, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSearch::prepareContextMenu);
 
-	ui->editSignalID->setText(m_signalID);
+	ui->editSignalID->setText(m_signalId);
 	ui->editSignalID->setPlaceholderText(tr("Enter SignalID here"));
 
 	m_signals = theSignals.signalList();
@@ -58,7 +58,7 @@ DialogSignalSearch::~DialogSignalSearch()
 
 void DialogSignalSearch::on_editSignalID_textEdited(const QString &arg1)
 {
-	m_signalID = arg1;
+	m_signalId = arg1;
 	search();
 
 }
@@ -66,15 +66,18 @@ void DialogSignalSearch::search()
 {
 	ui->signalsTree->clear();
 
-	for (const Signal& s : m_signals)
+	for (const AppSignalParam& s : m_signals)
 	{
-		if (s.customAppSignalID().startsWith(m_signalID, Qt::CaseInsensitive) == false)
+		if (s.customSignalId().startsWith(m_signalId, Qt::CaseInsensitive) == false)
 		{
 			continue;
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<s.customAppSignalID()<<s.caption());
-		item->setData(0, Qt::UserRole, qVariantFromValue((Signal*)&s));
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << s.customSignalId() << s.caption());
+		//item->setData(0, Qt::UserRole, qVariantFromValue((AppSignalParam*)&s));
+
+		item->setData(0, Qt::UserRole, QVariant::fromValue<AppSignalParam>(s));
+
 		ui->signalsTree->addTopLevelItem(item);
 	}
 
@@ -127,14 +130,10 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 		return;
 	}
 
-	Signal* signal = (Signal*)(item->data(0, Qt::UserRole).value<Signal*>());
-	if (signal == nullptr)
-	{
-		assert(signal);
-		return;
-	}
+	AppSignalParam signal = item->data(0, Qt::UserRole).value<AppSignalParam>();
+	cw->currentTab()->signalContextMenu(QStringList() << signal.appSignalId());
 
-	cw->currentTab()->signalContextMenu(QStringList()<<signal->appSignalID());
+	return;
 }
 
 
@@ -162,13 +161,8 @@ void DialogSignalSearch::on_signalsTree_doubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	Signal* signal = (Signal*)(item->data(0, Qt::UserRole).value<Signal*>());
-	if (signal == nullptr)
-	{
-		assert(signal);
-		return;
-	}
+	AppSignalParam signal = item->data(0, Qt::UserRole).value<AppSignalParam>();
+	cw->currentTab()->signalInfo(signal.appSignalId());
 
-	cw->currentTab()->signalInfo(signal->appSignalID());
-
+	return;
 }

@@ -1,5 +1,5 @@
 #include "AppDataChannel.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
 
 

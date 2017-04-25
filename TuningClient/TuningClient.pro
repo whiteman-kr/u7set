@@ -117,7 +117,7 @@ SOURCES +=\
     DialogSettings.cpp \
     DialogTuningSources.cpp \
     ../Proto/network.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../Proto/serialization.pb.cc \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
@@ -145,7 +145,8 @@ SOURCES +=\
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     ../lib/Tuning/TuningSignal.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/Types.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -164,7 +165,7 @@ HEADERS  += MainWindow.h \
     DialogSettings.h \
     DialogTuningSources.h \
     ../Proto/network.pb.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../Proto/serialization.pb.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
@@ -192,7 +193,8 @@ HEADERS  += MainWindow.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
     ../lib/Tuning/TuningSignal.h \
-    ../lib/Tuning/TuningSignalManager.h
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/Types.h
 
 FORMS    += \
     DialogSettings.ui \

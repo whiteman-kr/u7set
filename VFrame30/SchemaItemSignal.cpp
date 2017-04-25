@@ -189,7 +189,7 @@ namespace VFrame30
 
 	QString SchemaItemSignal::getCoulumnText(CDrawParam* drawParam,
 											 const E::ColumnData& data,
-											 const Signal& signal,
+											 const AppSignalParam& signal,
 											 const AppSignalState& signalState,
 											 E::AnalogFormat analogFormat,
 											 int precision)
@@ -199,13 +199,13 @@ namespace VFrame30
 		switch (data)
 		{
 		case E::ColumnData::AppSignalID:
-			text = signal.appSignalID();
+			text = signal.appSignalId();
 			break;
 
 		case E::ColumnData::CustomSignalID:
 			if (drawParam->isMonitorMode() == true)
 			{
-				text = signal.customAppSignalID();
+				text = signal.customSignalId();
 
 				if (text.isEmpty() == true)
 				{
@@ -214,7 +214,7 @@ namespace VFrame30
 			}
 			else
 			{
-				text = signal.appSignalID();
+				text = signal.appSignalId();
 			}
 			break;
 
@@ -231,7 +231,7 @@ namespace VFrame30
 			else
 			{
 				//text = QLatin1String("Caption");
-				text = signal.appSignalID();			// Good to see AppSignalID while editing
+				text = signal.appSignalId();			// Good to see AppSignalID while editing
 			}
 			break;
 
@@ -376,7 +376,7 @@ namespace VFrame30
 			return;
 		}
 
-		std::vector<Signal> appSignals;
+		std::vector<AppSignalParam> appSignals;
 		appSignals.resize(signalIds.size());
 
 		std::vector<AppSignalState> appSignalStates;
@@ -387,7 +387,7 @@ namespace VFrame30
 		int signalIndex = 0;
 		for (const QString& id : signalIds)
 		{
-			appSignals[signalIndex].setAppSignalID(id);
+			appSignals[signalIndex].setAppSignalId(id);
 			appSignalStates[signalIndex].flags.valid = false;
 
 			bool signalFound = false;
@@ -541,8 +541,8 @@ namespace VFrame30
 
 		QString appSignalId = appSignalIds();
 
-		Signal signal;
-		signal.setAppSignalID(appSignalId);
+		AppSignalParam signal;
+		signal.setAppSignalId(appSignalId);
 
 		AppSignalState signalState;
 		signalState.flags.valid = false;

@@ -309,15 +309,15 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 
 	for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
 	{
-		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignalparams(i);
+		const ::Proto::AppSignalParam& protoSignal = m_getSignalParamReply.appsignalparams(i);
 
-		Signal s;
-		s.serializeFromProtoAppSignal(&protoSignal);
+		AppSignalParam s;
+		s.load(protoSignal);
 
 		assert(s.hash() != 0);
-		assert(s.appSignalID().isEmpty() == false);
+		assert(s.appSignalId().isEmpty() == false);
 
-		if (s.hash() != 0 && s.appSignalID().isEmpty() == false)
+		if (s.hash() != 0 && s.appSignalId().isEmpty() == false)
 		{
 			theSignals.addSignal(s);
 		}

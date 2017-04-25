@@ -5,7 +5,10 @@
 #include "../lib/Hash.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include "../Proto/network.pb.h"
+
+class DataSource;
 
 class TcpAppDataClient : public Tcp::Client
 {
@@ -26,8 +29,8 @@ private:
 	Network::GetSignalListNextRequest m_getSignalListNextRequest;
 	Network::GetSignalListNextReply m_getSignalListNextReply;
 
-	Network::GetAppSignalParamRequest m_getSignalParamRequest;
-	Network::GetAppSignalParamReply m_getSignalParamReply;
+	Network::GetAppSignalRequest m_getSignalRequest;
+	Network::GetAppSignalReply m_getSignalReply;
 
 	Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	Network::GetAppSignalStateReply m_getSignalStateReply;

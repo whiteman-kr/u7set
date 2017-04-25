@@ -22,6 +22,7 @@
 #include <QtDoublePropertyManager>
 #include <QtBoolPropertyManager>
 #include <QtSpinBoxFactory>
+#include <QMimeData>
 
 //
 //

@@ -3,6 +3,7 @@
 #include "../lib/Types.h"
 
 class QDomElement;
+class QXmlStreamReader;
 
 namespace Proto
 {

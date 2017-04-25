@@ -98,7 +98,7 @@ QString AppSignalManager::units(int id) const
 	}
 }
 
-void AppSignalManager::addSignal(const Signal& signal)
+void AppSignalManager::addSignal(const AppSignalParam& signal)
 {
 	QMutexLocker l(&m_paramsMutex);
 
@@ -107,11 +107,11 @@ void AppSignalManager::addSignal(const Signal& signal)
 	return;
 }
 
-std::vector<Signal> AppSignalManager::signalList() const
+std::vector<AppSignalParam> AppSignalManager::signalList() const
 {
 	QMutexLocker l(&m_paramsMutex);
 
-	std::vector<Signal> result;
+	std::vector<AppSignalParam> result;
 	result.reserve(m_signals.size());
 
 	for (auto& s : m_signals)
@@ -137,13 +137,13 @@ std::vector<Hash> AppSignalManager::signalHashes() const
 	return result;
 }
 
-bool AppSignalManager::signal(const QString& appSignalId, Signal* out) const
+bool AppSignalManager::signal(const QString& appSignalId, AppSignalParam* out) const
 {
 	Hash h = ::calcHash(appSignalId);
 	return signal(h, out);
 }
 
-bool AppSignalManager::signal(Hash signalHash, Signal* out) const
+bool AppSignalManager::signal(Hash signalHash, AppSignalParam* out) const
 {
 	if (out == nullptr)
 	{
@@ -166,11 +166,11 @@ bool AppSignalManager::signal(Hash signalHash, Signal* out) const
 	}
 }
 
-Signal AppSignalManager::signal(const QString& appSignalId, bool* found) const
+AppSignalParam AppSignalManager::signal(const QString& appSignalId, bool* found) const
 {
 	Hash signalHash = ::calcHash(appSignalId);
 
-	Signal resultSignal;
+	AppSignalParam resultSignal;
 
 	bool ok = signal(signalHash, &resultSignal);
 
@@ -182,9 +182,9 @@ Signal AppSignalManager::signal(const QString& appSignalId, bool* found) const
 	return resultSignal;
 }
 
-Signal AppSignalManager::signal(Hash signalHash, bool* found) const
+AppSignalParam AppSignalManager::signal(Hash signalHash, bool* found) const
 {
-	Signal resultSignal;
+	AppSignalParam resultSignal;
 
 	bool ok = signal(signalHash, &resultSignal);
 
@@ -311,16 +311,18 @@ QObject* AppSignalManager::signal(QString signalId) const
 
 QObject* AppSignalManager::signal(Hash signalHash) const
 {
-	Signal* s = new Signal();
-	bool ok = signal(signalHash, s);
+	assert(false);
+	return nullptr;
+//	AppSignalParam* s = new AppSignalParam();
+//	bool ok = signal(signalHash, s);
 
-	if (ok == false)
-	{
-		delete s;
-		return nullptr;
-	}
+//	if (ok == false)
+//	{
+//		delete s;
+//		return nullptr;
+//	}
 
-	return s;
+//	return s;
 }
 
 //QObject* AppSignalManager::signalState(QString signalId) const

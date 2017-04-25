@@ -309,10 +309,10 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
 
 	for (const QString& s : signalList)
 	{
-		Signal signal;
+		AppSignalParam signal;
 		bool ok = theSignals.signal(s, &signal);
 
-		QString signalId = ok ? QString("%1 %2").arg(signal.customAppSignalID()).arg(signal.caption()) : s;
+		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
 		QAction* a = new QAction(signalId, &menu);
 
@@ -338,7 +338,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 		return;
 	}
 
-	Signal signal;
+	AppSignalParam signal;
 	bool ok = theSignals.signal(appSignalId, &signal);
 	if (ok == true)
 	{

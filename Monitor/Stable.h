@@ -50,6 +50,7 @@
 // Qt Widgets
 //
 #include <QMainWindow>
+#include <QDesktopWidget>
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -84,6 +85,7 @@
 
 #include <QAbstractItemModel>
 #include <QAbstractTableModel>
+#include <QStringListModel>
 
 #include <QCloseEvent>
 

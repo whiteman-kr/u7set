@@ -71,6 +71,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalParamRequest(requestData, requestDataSize);
 		break;
 
+	case ADS_GET_APP_SIGNAL:
+		onGetAppSignalParamRequest(requestData, requestDataSize);
+		break;
+
 	case ADS_GET_APP_SIGNAL_STATE:
 		onGetAppSignalStateRequest(requestData, requestDataSize);
 		break;
@@ -187,12 +191,53 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 			continue;
 		}
 
-		Proto::AppSignal* appSignal = m_getAppSignalParamReply.add_appsignalparams();
+		Proto::AppSignalParam* appSignalParam = m_getAppSignalParamReply.add_appsignalparams();
+
+		signal->serializeToProtoAppSignalParam(appSignalParam);
+	}
+
+	sendReply(m_getAppSignalParamReply);
+}
+
+void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 requestDataSize)
+{
+	bool result = m_getAppSignalRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+
+	m_getAppSignalReply.Clear();
+
+	if (result == false)
+	{
+		m_getAppSignalReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_getAppSignalReply);
+		return;
+	}
+
+	int hashesCount = m_getAppSignalRequest.signalhashes_size();
+
+	if (hashesCount > ADS_GET_APP_SIGNAL_PARAM_MAX)
+	{
+		m_getAppSignalReply.set_error(TO_INT(NetworkError::RequestParamExceed));
+		sendReply(m_getAppSignalReply);
+		return;
+	}
+
+	for(int i = 0; i < hashesCount; i++)
+	{
+		Hash hash = m_getAppSignalRequest.signalhashes(i);
+
+		const Signal* signal = appSignals().getSignal(hash);
+
+		if (signal == nullptr)
+		{
+			continue;
+		}
+
+		Proto::AppSignal* appSignal = m_getAppSignalReply.add_appsignals();
 
 		signal->serializeToProtoAppSignal(appSignal);
 	}
 
-	sendReply(m_getAppSignalParamReply);
+	sendReply(m_getAppSignalReply);
 }
 
 

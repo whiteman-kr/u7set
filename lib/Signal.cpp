@@ -1,6 +1,7 @@
 #include <QXmlStreamAttributes>
 #include <QFile>
 #include "../lib/Signal.h"
+#include "../lib/DataSource.h"
 
 
 DataFormatList::DataFormatList()
@@ -1153,6 +1154,55 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 	{
 		m_ramAddr.setBit(s->ramaddrbit());
 	}
+}
+
+void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const
+{
+	if (message == nullptr)
+	{
+		assert(message);
+		return;
+	}
+
+	message->set_hash(m_hash);
+	message->set_appsignalid(m_appSignalID.toStdString());
+	message->set_customsignalid(m_customAppSignalID.toStdString());
+	message->set_caption(m_caption.toStdString());
+	message->set_equipmentid(m_equipmentID.toStdString());
+
+	message->set_channel(static_cast<int>(m_channel));
+	message->set_inouttype(static_cast<int>(m_inOutType));
+	message->set_signaltype(m_signalType);
+	message->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
+	message->set_byteorder(m_byteOrder);
+
+	message->set_unitid(m_unitID);
+	message->set_unit("");
+
+	message->set_lowvalidrange(m_lowValidRange);
+	message->set_highvalidrange(m_highValidRange);
+	message->set_lowengeneeringunits(m_lowEngeneeringUnits);
+	message->set_highengeneeringunits(m_highEngeneeringUnits);
+
+	message->set_inputlowlimit(m_inputLowLimit);
+	message->set_inputhighlimit(m_inputHighLimit);
+	message->set_inputunitid(m_inputUnitID);
+	message->set_inputsensortype(m_inputSensorType);
+
+	message->set_outputlowlimit(m_outputLowLimit);
+	message->set_outputhighlimit(m_outputHighLimit);
+	message->set_outputunitid(m_outputUnitID);
+	message->set_outputmode(m_outputMode);
+	message->set_outputsensortype(m_outputSensorType);
+
+	message->set_precision(m_decimalPlaces);
+	message->set_aperture(m_aperture);
+	message->set_filteringtime(m_filteringTime);
+	message->set_spreadtolerance(m_spreadTolerance);
+	message->set_enabletuning(m_enableTuning);
+	message->set_tuningdefaultvalue(m_tuningDefaultValue);
+
+	return;
 }
 
 

@@ -76,15 +76,15 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 				updateStoredState = true;
 			}
 
-			if (value > m_highLimit)
-			{
-				m_current.flags.overflow = 1;
-			}
+//			if (value > m_highLimit)
+//			{
+//				m_current.flags.overflow = 1;
+//			}
 
-			if (value < m_lowLimit)
-			{
-				m_current.flags.underflow = 1;
-			}
+//			if (value < m_lowLimit)
+//			{
+//				m_current.flags.underflow = 1;
+//			}
 		}
 	}
 

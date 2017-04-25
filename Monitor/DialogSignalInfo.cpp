@@ -110,7 +110,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 //
 //
 
-DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
+DialogSignalInfo::DialogSignalInfo(QWidget *parent, const AppSignalParam& signal) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_signal(signal),
 	ui(new Ui::DialogSignalInfo)
@@ -122,13 +122,13 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	QString str;
 
-	m_precision = signal.decimalPlaces();
+	m_precision = signal.precision();
 
 	// Fill main signal information
 	//
 	if (m_signal.isAnalog())
 	{
-		ui->labelStrUnit->setText(theSignals.units(m_signal.unitID()));
+		ui->labelStrUnit->setText(m_signal.unit());
 	}
 	else
 	{
@@ -140,20 +140,20 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	font.setPixelSize(m_currentFontSize);
 	ui->labelValue->setFont(font);
 
-	ui->editCustomAppID->setText(m_signal.customAppSignalID());
+	ui->editCustomAppID->setText(m_signal.customSignalId());
 	ui->editCaption->setText(m_signal.caption());
 
-	str = E::valueToString<E::SignalType>(m_signal.signalType());
+	str = E::valueToString<E::SignalType>(m_signal.type());
 	if (m_signal.isAnalog())
 	{
 		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
 	}
 
-	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutTypeInt()));
+	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutType()));
 
 	ui->editSignalType->setText(str);
 
-	ui->editChannel->setText(E::valueToString<E::Channel>(m_signal.channelInt()));
+	ui->editChannel->setText(E::valueToString<E::Channel>(m_signal.channel()));
 
 	// Fill properties list
 	//
@@ -165,45 +165,36 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
 
-	itemGroup1->addChild(new QTreeWidgetItem(QStringList()<<tr("AppSignalID")<<m_signal.appSignalID()));
-	itemGroup1->addChild(new QTreeWidgetItem(QStringList()<<tr("EquipmentID")<<m_signal.equipmentID()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
+	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
+
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 - %2").arg(m_signal.unitID()).arg(theSignals.units(m_signal.unitID()));
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList()<<tr("UnitID")<<str));
+		str = QString("%1 - %2").arg(m_signal.unitId()).arg(m_signal.unit());
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("UnitID") << str));
 	}
 
 	ui->treeProperties->addTopLevelItem(itemGroup1);
 	itemGroup1->setExpanded(true);
 
-	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList()<<tr("Format"));
+	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList() << tr("Format"));
 
-	itemGroup2->addChild(new QTreeWidgetItem(QStringList()<<tr("DataSize")<<QString::number(m_signal.dataSize())));
 	//if (m_signal.isAnalog())
 	//{
-		itemGroup2->addChild(new QTreeWidgetItem(QStringList()<<tr("ByteOrder")<<E::valueToString<E::ByteOrder>(m_signal.byteOrderInt())));
+		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("ByteOrder") << E::valueToString<E::ByteOrder>(m_signal.byteOrder())));
 	//}
 	ui->treeProperties->addTopLevelItem(itemGroup2);
 	itemGroup2->setExpanded(true);
 
 
-	QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList()<<tr("Parameters"));
-
-	itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("Calculated")<<(m_signal.calculated() ? tr("Yes") : tr("No"))));
-	itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("Acquire")<<(m_signal.acquire() ? tr("Yes") : tr("No"))));
-
-	if (m_signal.isDiscrete())
-	{
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("NormalState")<<QString::number(m_signal.normalState())));
-	}
+	QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
 	if (m_signal.isAnalog())
 	{
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("DecimalPlaces")<<QString::number(m_signal.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("UnbalanceLimit")<<QString::number(m_signal.unbalanceLimit(), 'f', m_signal.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("Aperture")<<QString::number(m_signal.aperture(), 'f', m_signal.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("FilteringTime")<<QString::number(m_signal.filteringTime(), 'f', m_signal.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList()<<tr("SpreadTolerance")<<QString::number(m_signal.spreadTolerance(), 'f', m_signal.decimalPlaces())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Aperture") << QString::number(m_signal.aperture(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
 	}
 
 	ui->treeProperties->addTopLevelItem(itemGroup3);
@@ -211,15 +202,12 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	if (m_signal.isAnalog())
 	{
-		QTreeWidgetItem* itemGroup4 = new QTreeWidgetItem(QStringList()<<tr("Limits"));
+		QTreeWidgetItem* itemGroup4 = new QTreeWidgetItem(QStringList() << tr("Limits"));
 
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("LowADC")<<QString::number(m_signal.lowADC())));
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("HighADC")<<QString::number(m_signal.highADC())));
-
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("LowEngineeringUnits")<<QString::number(m_signal.lowEngeneeringUnits(), 'f', m_signal.decimalPlaces())));
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("HighEngineeringUnits")<<QString::number(m_signal.highEngeneeringUnits(), 'f', m_signal.decimalPlaces())));
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("LowValidRange")<<QString::number(m_signal.lowValidRange(), 'f', m_signal.decimalPlaces())));
-		itemGroup4->addChild(new QTreeWidgetItem(QStringList()<<tr("HighValidRange")<<QString::number(m_signal.highValidRange(), 'f', m_signal.decimalPlaces())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowEngineeringUnits") << QString::number(m_signal.lowEngeneeringUnits(), 'f', m_signal.precision())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighEngineeringUnits")<<QString::number(m_signal.highEngeneeringUnits(), 'f', m_signal.precision())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("LowValidRange")<<QString::number(m_signal.lowValidRange(), 'f', m_signal.precision())));
+		itemGroup4->addChild(new QTreeWidgetItem(QStringList() << tr("HighValidRange")<<QString::number(m_signal.highValidRange(), 'f', m_signal.precision())));
 
 		ui->treeProperties->addTopLevelItem(itemGroup4);
 		itemGroup4->setExpanded(true);
@@ -227,23 +215,12 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 
 	if (m_signal.isInput() && m_signal.isAnalog())
 	{
-		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList()<<tr("Input"));
+		QTreeWidgetItem* itemGroup5 = new QTreeWidgetItem(QStringList() << tr("Input"));
 
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputLowLimit")<<QString::number(m_signal.inputLowLimit(), 'f', m_signal.decimalPlaces())));
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputHighLimit")<<QString::number(m_signal.inputHighLimit(), 'f', m_signal.decimalPlaces())));
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputUnitID")<<QString::number(m_signal.inputUnitID())));
-
-
-		if (m_signal.inputSensorType() >= 0 && m_signal.inputSensorType() < SENSOR_TYPE_COUNT)
-		{
-			str = QString("%1 - %2").arg(m_signal.inputSensorType()).arg(SensorTypeStr[m_signal.inputSensorType()]);
-		}
-		else
-		{
-			str = QString("%1 - ???").arg(m_signal.inputSensorType());
-		}
-
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList()<<tr("InputSensorID")<<str));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputLowLimit") << QString::number(m_signal.inputLowLimit(), 'f', m_signal.precision())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputHighLimit") << QString::number(m_signal.inputHighLimit(), 'f', m_signal.precision())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputUnitID") << QString::number(m_signal.inputUnitId())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputSensorID") << E::valueToString<E::SensorType>(m_signal.inputSensorType())));
 
 		ui->treeProperties->addTopLevelItem(itemGroup5);
 		itemGroup5->setExpanded(true);
@@ -253,20 +230,11 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	{
 		QTreeWidgetItem* itemGroup6 = new QTreeWidgetItem(QStringList()<<tr("Output"));
 
-		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputLowLimit")<<QString::number(m_signal.outputLowLimit(), 'f', m_signal.decimalPlaces())));
-		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputHighLimit")<<QString::number(m_signal.outputHighLimit(), 'f', m_signal.decimalPlaces())));
-		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputUnitID")<<QString::number(m_signal.outputUnitID())));
-
-		if (m_signal.outputSensorType() >= 0 && m_signal.outputSensorType() < SENSOR_TYPE_COUNT)
-		{
-			str = QString("%1 - %2").arg(m_signal.outputSensorType()).arg(SensorTypeStr[m_signal.outputSensorType()]);
-		}
-		else
-		{
-			str = QString("%1 - ???").arg(m_signal.outputSensorType());
-		}
-		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputSensorID")<<str));
-		itemGroup6->addChild(new QTreeWidgetItem(QStringList()<<tr("OutputMode")<<E::valueToString<E::OutputMode>(m_signal.outputModeInt())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputLowLimit") << QString::number(m_signal.outputLowLimit(), 'f', m_signal.precision())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputHighLimit") << QString::number(m_signal.outputHighLimit(), 'f', m_signal.precision())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputUnitID") << QString::number(m_signal.outputUnitId())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputSensorID") << E::valueToString<E::SensorType>(m_signal.outputSensorType())));
+		itemGroup6->addChild(new QTreeWidgetItem(QStringList() << tr("OutputMode") << E::valueToString<E::OutputMode>(m_signal.outputMode())));
 
 		ui->treeProperties->addTopLevelItem(itemGroup6);
 		itemGroup6->setExpanded(true);
@@ -287,7 +255,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareContextMenu);
 
 
-	setWindowTitle(m_signal.customAppSignalID() + tr(" - ") + m_signal.caption());
+	setWindowTitle(m_signal.customSignalId() + tr(" - ") + m_signal.caption());
 
 	ui->tabWidget->setCurrentIndex(0);
 
@@ -298,7 +266,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const Signal& signal) :
 	m_signalFlags->resize(ui->widgetFlags->size());
 
 	//
-	m_hash = ::calcHash(m_signal.appSignalID());
+	m_hash = ::calcHash(m_signal.appSignalId());
 
 	updateData();
 
@@ -380,16 +348,7 @@ void DialogSignalInfo::updateData()
 
 		if (m_signal.isDiscrete())
 		{
-			if ((int)state.value == m_signal.normalState())
-			{
-				strValue = QString("No (%1)").arg(state.value);
-			}
-			else
-			{
-
-				strValue = QString("Yes (%1)").arg(state.value);
-			}
-
+			strValue = QString("%1").arg(state.value);
 		}
 
 		if (m_signal.isAnalog())

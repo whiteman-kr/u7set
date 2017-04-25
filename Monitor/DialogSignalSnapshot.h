@@ -53,7 +53,7 @@ public:
 
 	Hash signalHash(int index) const;
 
-	Signal signalParam(Hash hash, bool* found) const;
+	AppSignalParam signalParam(Hash hash, bool* found) const;
 
 	void setSignals(std::vector<SnapshotItem>* signalsTable);
 
@@ -83,8 +83,8 @@ public:
 		PlantTime,
 		Value,
 		Valid,
-		Underflow,
-		Overflow,
+		//Underflow,
+		//Overflow,
 	};
 
 	enum class TypeFilter

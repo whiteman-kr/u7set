@@ -7,14 +7,14 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
-#include "../lib/DataSource.h"
 #include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
 
 
 class QXmlStreamAttributes;
-
+class XmlWriteHelper;
+class XmlReadHelper;
 
 const char* const InOutTypeStr[] =
 {
@@ -419,6 +419,8 @@ public:
 
 	void serializeToProtoAppSignal(Proto::AppSignal* s) const;
 	void serializeFromProtoAppSignal(const Proto::AppSignal* s);
+
+	void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
 
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }

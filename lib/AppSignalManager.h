@@ -4,7 +4,7 @@
 #include <QMutex>
 #include <unordered_map>
 #include "../lib/Hash.h"
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 
 typedef quint64 SignalHash;
 
@@ -57,16 +57,16 @@ public:
 
 	// Signal Params
 	//
-	void addSignal(const Signal& signal);
+	void addSignal(const AppSignalParam& signal);
 
-	std::vector<Signal> signalList() const;
+	std::vector<AppSignalParam> signalList() const;
 	std::vector<Hash> signalHashes() const;
 
-	bool signal(const QString& appSignalId, Signal* out) const;
-	bool signal(Hash signalHash, Signal* out) const;
+	bool signal(const QString& appSignalId, AppSignalParam* out) const;
+	bool signal(Hash signalHash, AppSignalParam* out) const;
 
-	Signal signal(const QString& appSignalId, bool* found) const;
-	Signal signal(Hash signalHash, bool* found) const;
+	AppSignalParam signal(const QString& appSignalId, bool* found) const;
+	AppSignalParam signal(Hash signalHash, bool* found) const;
 
 	// Signal States
 	//
@@ -82,8 +82,8 @@ public:
 	// Script Interface
 	//
 //public:
-	virtual QObject* signal(QString signalId) const;		// Returns Signal*
-	virtual QObject* signal(Hash signalHash) const;			// Returns Signal*
+	virtual QObject* signal(QString signalId) const;		// Returns AppSignalParam*
+	virtual QObject* signal(Hash signalHash) const;			// Returns AppSignalParam*
 
 //	virtual QObject* signalState(QString signalId) const override;	// Returns AppSignalState*
 //	virtual QObject* signalState(Hash signalHash) const override;	// Returns AppSignalState*
@@ -93,7 +93,7 @@ private:
 	std::map<int, QString> m_units;
 
 	mutable QMutex m_paramsMutex;
-	std::unordered_map<Hash, Signal> m_signals;
+	std::unordered_map<Hash, AppSignalParam> m_signals;
 
 	mutable QMutex m_statesMutex;
 	std::unordered_map<Hash, AppSignalState> m_states;

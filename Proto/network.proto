@@ -30,7 +30,7 @@ message GetSignalListNextReply
 	repeated string appSignalIds = 3;
 }
 
-// Geetting application signal params
+// Geetting class AppSignalParam
 //
 message GetAppSignalParamRequest
 {
@@ -40,9 +40,21 @@ message GetAppSignalParamRequest
 message GetAppSignalParamReply
 {
 	optional int32 error = 1 [default = 0];
-	repeated Proto.AppSignal appSignalParams = 2;			// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+	repeated Proto.AppSignalParam appSignalParams = 2;			// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
 }
 
+// Get class Signal
+//
+message GetAppSignalRequest									// Get Sig
+{
+    repeated uint64 signalHashes = 1;						// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+}
+
+message GetAppSignalReply
+{
+    optional int32 error = 1 [default = 0];
+	repeated Proto.AppSignal appSignals = 2;					// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+}
 
 // Geetting application signal states
 //
