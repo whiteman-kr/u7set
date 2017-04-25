@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QMessageBox>
 
+#include "../lib/AppSignal.h"
+#include "../lib/Tuning/TuningSignalState.h"
+
 class TuningController : public QObject
 {
 	Q_OBJECT
@@ -31,6 +34,9 @@ public:
 	Q_INVOKABLE int showErrorMessageBox(QString text);
 	Q_INVOKABLE int showInfoMessageBox(QString text);
 
+	AppSignalParam signalParam(const QString &appSignalID, bool *ok);
+	TuningSignalState signalState(const QString &appSignalID, bool *ok);
+
 signals:
 
 	void signal_exists(QString appSignalID, bool* result, bool* ok);
@@ -44,6 +50,9 @@ signals:
 
 	void signal_value(QString appSignalID, float* result, bool* ok);
 	void signal_setValue(QString appSignalID, float value, bool* ok);
+
+	void signal_getParam(QString appSignalID, AppSignalParam& result, bool* ok);
+	void signal_getState(QString appSignalID, TuningSignalState& result, bool* ok);
 };
 
 

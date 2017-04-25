@@ -101,7 +101,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Factory.h \
     ../lib/Tuning/TuningController.h \
     ../lib/AppSignal.h \
-    ../lib/DbStruct.h
+    ../lib/DbStruct.h \
+    ../lib/Tuning/TuningSignalState.h
 
 SOURCES += \
     Settings.cpp \
@@ -154,7 +155,9 @@ SOURCES += \
     ../lib/HostAddressPort.cpp \
     ../lib/Tuning/TuningController.cpp \
     ../lib/AppSignal.cpp \
-    ../lib/DbStruct.cpp
+    ../lib/DbStruct.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
+
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

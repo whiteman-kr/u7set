@@ -4,7 +4,7 @@
 #include "Stable.h"
 
 #include "../lib/Tuning/TuningModel.h"
-#include "../lib/Tuning/TuningSignal.h"
+#include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 

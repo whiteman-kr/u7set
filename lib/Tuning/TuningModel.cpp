@@ -16,7 +16,7 @@ TuningItemSorter::TuningItemSorter(int column, Qt::SortOrder order):
 {
 }
 
-bool TuningItemSorter::sortFunction(const TuningSignal& o1, const TuningSignal& o2, int column, Qt::SortOrder order) const
+bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModelItem &o2, int column, Qt::SortOrder order) const
 {
 
 	QVariant v1;
@@ -26,98 +26,98 @@ bool TuningItemSorter::sortFunction(const TuningSignal& o1, const TuningSignal& 
 	{
 	case TuningItemModel::Columns::CustomAppSignalID:
 		{
-			v1 = o1.customAppSignalID();
-			v2 = o2.customAppSignalID();
+			v1 = o1.param.customSignalId();
+			v2 = o2.param.customSignalId();
 		}
 		break;
 	case TuningItemModel::Columns::EquipmentID:
 		{
-			v1 = o1.equipmentID();
-			v2 = o2.equipmentID();
+			v1 = o1.param.equipmentId();
+			v2 = o2.param.equipmentId();
 		}
 		break;
 	case TuningItemModel::Columns::AppSignalID:
 		{
-			v1 = o1.appSignalID();
-			v2 = o2.appSignalID();
+			v1 = o1.param.appSignalId();
+			v2 = o2.param.appSignalId();
 		}
 		break;
 	case TuningItemModel::Columns::Caption:
 		{
-			v1 = o1.caption();
-			v2 = o2.caption();
+			v1 = o1.param.caption();
+			v2 = o2.param.caption();
 		}
 		break;
 	case TuningItemModel::Columns::Units:
 		{
-			v1 = o1.units();
-			v2 = o2.units();
+			v1 = o1.param.unitId();
+			v2 = o2.param.unitId();
 		}
 		break;
 	case TuningItemModel::Columns::Type:
 		{
-			v1 = o1.analog();
-			v2 = o2.analog();
+			v1 = o1.param.isAnalog();
+			v2 = o2.param.isAnalog();
 		}
 		break;
 
 	case TuningItemModel::Columns::Default:
 		{
-			if (o1.analog() == o2.analog())
+			if (o1.param.isAnalog() == o2.param.isAnalog())
 			{
-				v1 = o1.defaultValue();
-				v2 = o2.defaultValue();
+				v1 = o1.param.tuningDefaultValue();
+				v2 = o2.param.tuningDefaultValue();
 			}
 			else
 			{
-				v1 = o1.analog();
-				v2 = o2.analog();
+				v1 = o1.param.isAnalog();
+				v2 = o2.param.isAnalog();
 			}
 		}
 		break;
 	case TuningItemModel::Columns::Value:
 		{
-			if (o1.analog() == o2.analog())
+			if (o1.param.isAnalog() == o2.param.isAnalog())
 			{
-				v1 = o1.value();
-				v2 = o2.value();
+				v1 = o1.state.value();
+				v2 = o2.state.value();
 			}
 			else
 			{
-				v1 = o1.analog();
-				v2 = o2.analog();
+				v1 = o1.param.isAnalog();
+				v2 = o2.param.isAnalog();
 			}
 		}
 		break;
     case TuningItemModel::Columns::LowLimit:
         {
-            if (o1.analog() == true && o2.analog() == true)
+			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
-                v1 = o1.lowLimit();
-                v2 = o2.lowLimit();
+				v1 = o1.param.lowEngeneeringUnits();
+				v2 = o2.param.lowEngeneeringUnits();
             }
             else
             {
-                v1 = o1.analog();
-                v2 = o2.analog();
+				v1 = o1.param.isAnalog();
+				v2 = o2.param.isAnalog();
             }
         }
         break;
     case TuningItemModel::Columns::HighLimit:
         {
-            if (o1.analog() == true && o2.analog() == true)
+			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
-                v1 = o1.highLimit();
-                v2 = o2.highLimit();
+				v1 = o1.param.highEngeneeringUnits();
+				v2 = o2.param.highEngeneeringUnits();
             }
             else
             {
-                v1 = o1.analog();
-                v2 = o2.analog();
+				v1 = o1.param.isAnalog();
+				v2 = o2.param.isAnalog();
             }
         }
         break;
-    case TuningItemModel::Columns::Valid:
+	case TuningItemModel::Columns::Valid:
 		{
 			v1 = o1.state.valid();
 			v2 = o2.state.valid();
@@ -142,7 +142,7 @@ bool TuningItemSorter::sortFunction(const TuningSignal& o1, const TuningSignal& 
 
 	if (v1 == v2)
 	{
-		return o1.customAppSignalID() < o2.customAppSignalID();
+		return o1.param.customSignalId() < o2.param.customSignalId();
 	}
 
 	if (order == Qt::AscendingOrder)
@@ -192,7 +192,7 @@ TuningItemModel::~TuningItemModel()
     }
 }
 
-void TuningItemModel::setObjects(std::vector<TuningSignal>& objects)
+void TuningItemModel::setSignals(std::vector<TuningModelItem>& signalsList)
 {
 	if (rowCount() > 0)
 	{
@@ -200,19 +200,21 @@ void TuningItemModel::setObjects(std::vector<TuningSignal>& objects)
 
 		removeRows(0, rowCount());
 
-		m_objects.clear();
+		m_items.clear();
 
 		endRemoveRows();
 	}
 
 	//
-    if (objects.empty() == false)
+	if (signalsList.empty() == false)
 	{
-        beginInsertRows(QModelIndex(), 0, static_cast<int>(objects.size()) - 1);
+		int count = static_cast<int>(signalsList.size());
 
-        m_objects.swap(objects);
+		beginInsertRows(QModelIndex(), 0, count - 1);
 
-        insertRows(0, static_cast<int>(objects.size()));
+		m_items.swap(signalsList);
+
+		insertRows(0, static_cast<int>(count));
 
 		endInsertRows();
 	}
@@ -260,14 +262,24 @@ int TuningItemModel::columnIndex(int index) const
 }
 
 
-TuningSignal* TuningItemModel::object(int index)
+AppSignalParam* TuningItemModel::param(int index)
 {
-	if (index < 0 || index >= m_objects.size())
+	if (index < 0 || index >= m_items.size())
 	{
 		assert(false);
         return nullptr;
 	}
-    return &m_objects[index];
+	return &m_items[index].param;
+}
+
+TuningSignalState* TuningItemModel::state(int index)
+{
+	if (index < 0 || index >= m_items.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	return &m_items[index].state;
 }
 
 void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBold)
@@ -324,9 +336,9 @@ void TuningItemModel::sort(int column, Qt::SortOrder order)
 
 	int sortColumnIndex = m_columnsIndexes[column];
 
-	std::sort(m_objects.begin(), m_objects.end(), TuningItemSorter(sortColumnIndex, order));
+	std::sort(m_items.begin(), m_items.end(), TuningItemSorter(sortColumnIndex, order));
 
-	if (m_objects.empty() == false)
+	if (m_items.empty() == false)
 	{
 		emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 	}
@@ -351,7 +363,7 @@ int TuningItemModel::columnCount(const QModelIndex &parent) const
 int TuningItemModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return static_cast<int>(m_objects.size());
+	return static_cast<int>(m_items.size());
 
 }
 
@@ -408,7 +420,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 		}
 
 		int row = index.row();
-		if (row >= m_objects.size())
+		if (row >= m_items.size())
 		{
 			assert(false);
 			return QVariant();
@@ -417,38 +429,38 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
         //QString str = QString("%1:%2").arg(row).arg(col);
         //qDebug()<<str;
 
-        const TuningSignal& o = m_objects[row];
+		const TuningModelItem& item = m_items[row];
 
 		int displayIndex = m_columnsIndexes[col];
 
         if (displayIndex == static_cast<int>(Columns::CustomAppSignalID))
 		{
-			return o.customAppSignalID();
+			return item.param.customSignalId();
 		}
 
         if (displayIndex == static_cast<int>(Columns::EquipmentID))
 		{
-			return o.equipmentID();
+			return item.param.equipmentId();
 		}
 
         if (displayIndex == static_cast<int>(Columns::AppSignalID))
 		{
-			return o.appSignalID();
+			return item.param.appSignalId();
 		}
 
         if (displayIndex == static_cast<int>(Columns::Caption))
 		{
-			return o.caption();
+			return item.param.caption();
 		}
 
         if (displayIndex == static_cast<int>(Columns::Units))
 		{
-			return o.units();
+			return item.param.unit();
 		}
 
         if (displayIndex == static_cast<int>(Columns::Type))
 		{
-            return o.analog() ? tr("A") : tr("D");
+			return item.param.isAnalog() ? tr("A") : tr("D");
 		}
 
 		//
@@ -457,21 +469,21 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::Value))
 		{
-			if (o.state.valid() == true)
+			if (item.state.valid() == true)
 			{
-				if (o.analog() == false)
+				if (item.param.isAnalog() == false)
 				{
-                    QString valueString = o.value() == 0 ? tr("0") : tr("1");
+					QString valueString = item.state.value() == 0 ? tr("0") : tr("1");
 
-					if (o.state.userModified() == true)
+					if (item.state.userModified() == true)
                     {
-                        QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
+						QString editValueString = item.state.editValue() == 0 ? tr("0") : tr("1");
                         return tr("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
-					if (o.state.writing() == true)
+					if (item.state.writing() == true)
                     {
-                        QString editValueString = o.editValue() == 0 ? tr("0") : tr("1");
+						QString editValueString = item.state.editValue() == 0 ? tr("0") : tr("1");
                         return tr("Writing %1").arg(editValueString);
                     }
 
@@ -479,26 +491,26 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 				}
 				else
 				{
-					QString valueString = QString::number(o.value(), 'f', o.decimalPlaces());
+					QString valueString = QString::number(item.state.value(), 'f', item.param.precision());
 
-					if (o.state.userModified() == true)
+					if (item.state.userModified() == true)
                     {
-                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+						QString editValueString = QString::number(item.state.editValue(), 'f', item.param.precision());
                         return QString("%1 => %2").arg(valueString).arg(editValueString);
                     }
 
-					if (o.state.writing() == true)
+					if (item.state.writing() == true)
                     {
-                        QString editValueString = QString::number(o.editValue(), 'f', o.decimalPlaces());
+						QString editValueString = QString::number(item.state.editValue(), 'f', item.param.precision());
                         return tr("Writing %1").arg(editValueString);
                     }
 
-					if (o.state.underflow() == true)
+					if (item.state.underflow() == true)
                     {
                         return tr("UNDRFLW");
                     }
 
-					if (o.state.overflow() == true)
+					if (item.state.overflow() == true)
                     {
                         return tr("OVERFLW");
                     }
@@ -514,18 +526,18 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::LowLimit))
         {
-            if (o.analog())
+			if (item.param.isAnalog())
             {
-                if (o.limitsUnbalance())
+				if (item.limitsUnbalance())
                 {
-                    QString s = tr("Base %1, read %2")
-                            .arg(QString::number(o.lowLimit(), 'f', o.decimalPlaces()))
-                            .arg(QString::number(o.readLowLimit(), 'f', o.decimalPlaces()));
-                    return s;
+					QString str = tr("Base %1, read %2")
+							.arg(QString::number(item.param.lowEngeneeringUnits(), 'f', item.param.precision()))
+							.arg(QString::number(item.state.readLowLimit(), 'f', item.param.precision()));
+					return str;
                 }
                 else
                 {
-                    return QString::number(o.lowLimit(), 'f', o.decimalPlaces());
+					return QString::number(item.param.lowEngeneeringUnits(), 'f', item.param.precision());
                 }
             }
             else
@@ -536,18 +548,18 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::HighLimit))
         {
-            if (o.analog())
+			if (item.param.isAnalog())
             {
-                if (o.limitsUnbalance())
-                {
-                    QString s = tr("Base %1, read %2")
-                            .arg(QString::number(o.highLimit(), 'f', o.decimalPlaces()))
-                            .arg(QString::number(o.readHighLimit(), 'f', o.decimalPlaces()));
-                    return s;
+				if (item.limitsUnbalance())
+				{
+					QString str = tr("Base %1, read %2")
+							.arg(QString::number(item.param.highEngeneeringUnits(), 'f', item.param.precision()))
+							.arg(QString::number(item.state.readHighLimit(), 'f', item.param.precision()));
+					return str;
                 }
                 else
                 {
-                    return QString::number(o.highLimit(), 'f', o.decimalPlaces());
+					return QString::number(item.param.highEngeneeringUnits(), 'f', item.param.precision());
                 }
             }
             else
@@ -558,29 +570,29 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 
         if (displayIndex == static_cast<int>(Columns::Default))
 		{
-			if (o.analog())
+			if (item.param.isAnalog())
 			{
-				return QString::number(o.defaultValue(), 'f', o.decimalPlaces());
+				return QString::number(item.param.tuningDefaultValue(), 'f', item.param.precision());
 			}
 			else
 			{
-                return (static_cast<int>(o.defaultValue()) == 0 ? tr("0") : tr("1"));
+				return (static_cast<int>(item.param.tuningDefaultValue()) == 0 ? tr("0") : tr("1"));
 			}
 		}
 
         if (displayIndex == static_cast<int>(Columns::Valid))
 		{
-			return (o.state.valid() == true) ? tr("") : tr("VALID");
+			return (item.state.valid() == true) ? tr("") : tr("VALID");
 		}
 
         if (displayIndex == static_cast<int>(Columns::Underflow))
 		{
-			return (o.state.underflow() == true) ? tr("UNDRFLW") : tr("");
+			return (item.state.underflow() == true) ? tr("UNDRFLW") : tr("");
 		}
 
         if (displayIndex == static_cast<int>(Columns::Overflow))
 		{
-			return (o.state.overflow() == true) ? tr("OVRFLW") : tr("");
+			return (item.state.overflow() == true) ? tr("OVRFLW") : tr("");
 		}
 	}
 	return QVariant();

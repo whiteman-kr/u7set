@@ -159,6 +159,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0141.sql", "Upgrade to version 141, Add FSC Chassis preset and Place checking"},
 	{":/DatabaseUpgrade/Upgrade0142.sql", "Upgrade to version 142, Changed in TuningClient preset properties"},
 	{":/DatabaseUpgrade/Upgrade0143.sql", "Upgrade to version 143, Changes in TuningClient and Monitor presets"},
+	{":/DatabaseUpgrade/Upgrade0144.sql", "Upgrade to version 144, Add new properties to LM preset"},
 };
 
 

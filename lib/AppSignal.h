@@ -121,8 +121,12 @@ public:
 
 	double lowValidRange() const;
 	double highValidRange() const;
+
 	double lowEngeneeringUnits() const;
+	void setLowEngeneeringUnits(double value);
+
 	double highEngeneeringUnits() const;
+	void setHighEngeneeringUnits(double value);
 
 	double inputLowLimit() const;
 	double inputHighLimit() const;
@@ -150,7 +154,7 @@ public:
 	bool enableTuning();
 	void setEnableTuning(bool value);
 
-	double tuningDefaultValue();
+	double tuningDefaultValue() const;
 	void setTuningDefaultValue(double value);
 
 public:

@@ -287,10 +287,11 @@ namespace VFrame30
 		// Get signal description and state
 		//
 		AppSignalState signalState;
-		AppSignalParam signal;
+		AppSignalParam signalParam;
+		TuningSignalState tuningSignalState;
 
-		signal.setAppSignalId(signalId());
-		signal.setCustomSignalId(signalId());
+		signalParam.setAppSignalId(signalId());
+		signalParam.setCustomSignalId(signalId());
 
 		bool ok = false;
 
@@ -304,12 +305,27 @@ namespace VFrame30
 				}
 				else
 				{
-					signal = drawParam->appSignalManager()->signal(signalId(), &ok);
+					signalParam = drawParam->appSignalManager()->signal(signalId(), &ok);
 					signalState = drawParam->appSignalManager()->signalState(signalId(), nullptr);
 				}
 				break;
 
 			case E::SignalSource::TuningService:
+				if (drawParam->tuningController() == nullptr)
+				{
+
+				}
+				else
+				{
+					signalParam = drawParam->tuningController()->signalParam(signalId(), &ok);
+					tuningSignalState = drawParam->tuningController()->signalState(signalId(), nullptr);
+
+					// This is for temporary debugging
+					signalState.hash = signalParam.hash();
+					signalState.flags.valid = tuningSignalState.valid();
+					signalState.value = tuningSignalState.value();
+					//
+				}
 				break;
 
 			default:
@@ -319,7 +335,7 @@ namespace VFrame30
 
 		// Drawing background and text
 		//
-		drawLogic(drawParam, r, signal, signalState);
+		drawLogic(drawParam, r, signalParam, signalState);
 
 		// Drawing frame rect
 		//

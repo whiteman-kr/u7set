@@ -93,6 +93,7 @@ namespace Builder
 		QString m_projectName;
 		QString m_userName;
 
+		QJSEngine m_jsEngine;
 	};
 
 }

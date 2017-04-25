@@ -327,9 +327,19 @@ double AppSignalParam::lowEngeneeringUnits() const
 	return m_lowEngeneeringUnits;
 }
 
+void AppSignalParam::setLowEngeneeringUnits(double value)
+{
+	m_lowEngeneeringUnits = value;
+}
+
 double AppSignalParam::highEngeneeringUnits() const
 {
 	return m_highEngeneeringUnits;
+}
+
+void AppSignalParam::setHighEngeneeringUnits(double value)
+{
+	m_highEngeneeringUnits = value;
 }
 
 double AppSignalParam::inputLowLimit() const
@@ -427,7 +437,7 @@ void AppSignalParam::setEnableTuning(bool value)
 	m_enableTuning = value;
 }
 
-double AppSignalParam::tuningDefaultValue()
+double AppSignalParam::tuningDefaultValue() const
 {
 	return m_tuningDefaultValue;
 }

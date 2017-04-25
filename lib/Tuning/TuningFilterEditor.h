@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "TuningFilter.h"
-#include "TuningSignal.h"
+#include "TuningSignalState.h"
 #include "TuningModel.h"
 
 
@@ -181,7 +181,7 @@ private:
 
     TuningFilterStorage* m_filterStorage = nullptr;
 
-    const TuningSignalStorage *m_objects = nullptr;
+	const TuningSignalStorage* m_signals = nullptr;
 
     int m_sortColumn = 0;
 
