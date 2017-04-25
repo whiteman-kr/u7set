@@ -54,6 +54,8 @@ namespace Hardware
 			int sizeBit = 0;
 		};
 
+		const quint16 NOT_USED_PORT_ID = 0;
+
 	public:
 		OptoPort(const QString& optoModuleID, DeviceController* optoPortController, int port);
 
@@ -204,11 +206,10 @@ namespace Hardware
 		int m_rxStartAddress = 0;
 		int m_rxDataSizeW = 0;
 
-		int m_txStartAddress = 0;				// address of port's tx data relative from opto module appDataOffset
-		int m_absTxStartAddress = 0;		// absoulte address of port tx data in LM memory
+		int m_txStartAddress = 0;						// address of port's tx data relative from opto module appDataOffset
+		int m_absTxStartAddress = 0;					// absoulte address of port tx data in LM memory
 
-		quint16 m_portID = 0;           // range 0..999, 0 - not linked port ID, 1..999 - linked port ID
-
+		quint16 m_portID = NOT_USED_PORT_ID;			// range 0..999, 0 - not used port ID, 1..999 - linked port ID
 
 		void sortTxSignals();
 		void sortTxSignals(QVector<TxRxSignal> &array);
@@ -350,6 +351,7 @@ namespace Hardware
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsAbsoulteTxStartAddresses();
+		bool checkPortsAddressesOverlapping(OptoModule* module);
 		bool calculatePortsRxStartAddresses();
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);

@@ -91,6 +91,12 @@ namespace Hardware
 			return false;
 		}
 
+		if (isUsedInConnection() == false)
+		{
+			m_txDataSizeW = 0;
+			return true;
+		}
+
 		sortTxSignals();
 
 		bool result = true;
@@ -1388,6 +1394,8 @@ namespace Hardware
 					portNo++;
 				}
 
+				result &= checkPortsAddressesOverlapping(module);
+
 				continue;
 			}
 
@@ -1449,6 +1457,8 @@ namespace Hardware
 					}
 				}
 
+				result &= checkPortsAddressesOverlapping(module);
+
 				continue;
 			}
 
@@ -1459,6 +1469,73 @@ namespace Hardware
 		}
 
 		return result;
+	}
+
+
+	// checking ports addresses overlapping
+	// usefull for manual settings of ports
+	//
+	bool OptoModuleStorage::checkPortsAddressesOverlapping(OptoModule* module)
+	{
+		if (module == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			assert(false);
+			return false;
+		}
+
+		QList<OptoPort*> portsList = module->ports();
+
+		int portsCount = portsList.count();
+
+		for(int i = 0; i < portsCount - 1; i++)
+		{
+			OptoPort* port1 = portsList.at(i);
+
+			if (port1 == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				assert(false);
+				return false;
+			}
+
+			if (port1->isUsedInConnection() == false)
+			{
+				continue;
+			}
+
+			for(int k = i + 1; k < portsCount; k++)
+			{
+				OptoPort* port2 = portsList.at(k);
+
+				if (port2 == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+
+				if (port2->isUsedInConnection() == false)
+				{
+					continue;
+				}
+
+				if (	(port1->absTxStartAddress() >= port2->absTxStartAddress() &&
+						port1->absTxStartAddress() < port2->absTxStartAddress() + port2->txDataSizeW()) ||
+
+						(port2->absTxStartAddress() >= port1->absTxStartAddress() &&
+						port2->absTxStartAddress() < port1->absTxStartAddress() + port1->txDataSizeW())	)
+				{
+					// Tx data memory areas of ports '%1' and '%2' are overlapped.
+					//
+					m_log->errALC5187(port1->equipmentID(), port2->equipmentID());
+
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 

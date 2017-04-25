@@ -3772,6 +3772,28 @@ namespace Builder
 	}
 
 
+	/// IssueCode: ALC5187
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx data memory areas of opto ports '%1' and '%2' are overlapped.
+	///
+	/// Parameters:
+	///		%1 Opto port 1 ID
+	///		%1 Opto port 2 ID
+	///
+	/// Description:
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports/
+	///
+	void IssueLogger::errALC5187(const QString& port1ID, const QString &port2ID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5187,
+				  QString(tr("Tx data memory areas of opto ports '%1' and '%2' are overlapped.")).
+						arg(port1ID).arg(port2ID));
+	}
+
+
 	// EQP			Equipment issues						6000-6999
 	//
 
