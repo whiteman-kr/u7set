@@ -288,6 +288,7 @@ namespace VFrame30
 		// Get signal description and state
 		//
 		AppSignalState signalState;
+		TuningSignalState tuningSignalState;
 		Signal signal;
 
 		signal.setAppSignalID(signalId());
@@ -311,6 +312,21 @@ namespace VFrame30
 				break;
 
 			case E::SignalSource::TuningService:
+				if (drawParam->tuningController() == nullptr)
+				{
+
+				}
+				else
+				{
+					signal = drawParam->tuningController()->signalParam(signalId(), &ok);
+					tuningSignalState = drawParam->tuningController()->signalState(signalId(), nullptr);
+
+					// This is for temporary debugging
+					signalState.hash = signal.hash();
+					signalState.flags.valid = tuningSignalState.valid();
+					signalState.value = tuningSignalState.value();
+					//
+				}
 				break;
 
 			default:

@@ -30,45 +30,36 @@ public:
 	// State methods
 
 	float value() const;
-	void setValue(float value);
-
-	float editValue() const;
-	void onEditValue(float value);
-
-	bool valid() const;
-	void setValid(bool value);
 
 	float readLowLimit() const;
-	void setReadLowLimit(float value);
-
 	float readHighLimit() const;
-	void setReadHighLimit(float value);
 
 	bool underflow() const;
 	bool overflow() const;
+
+	bool valid() const;
+	bool writing() const;
+
+	float editValue() const;
+
+	// Functions used by model
+
+	void onEditValue(float value);
 
 	bool needRedraw();
 
 	bool userModified() const;
 	void clearUserModified();
 
-	bool writing() const;
-	void setWriting(bool value);
+	void copy(const TuningSignalState& source);
+
+	// Functions used by signal manager
 
 	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool &writingFailed);
+
 	void onSendValue(float value);
 
-	TuningSignalState& operator = (const TuningSignalState& That)
-	{
-		setReadLowLimit(That.readLowLimit());
-		setReadHighLimit(That.readHighLimit());
-		setValue(That.value());
-
-		setValid(That.valid());
-		setWriting(That.writing());
-
-		return *this;
-	}
+	void invalidate();
 
 public:
 

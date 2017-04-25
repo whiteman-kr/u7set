@@ -153,30 +153,44 @@ int TuningController::showInfoMessageBox(QString text)
 	return showMessageBox(tr("Info"), text, QMessageBox::Information, QMessageBox::Ok);
 }
 
-bool TuningController::signalParam(const QString& appSignalID, Signal& result)
+Signal TuningController::signalParam(const QString& appSignalID, bool* ok)
 {
-	bool ok = true;
+	bool result = true;
 
-	emit signal_getParam(appSignalID, result, &ok);
+	Signal signal;
 
-	if (ok == false)
+	emit signal_getParam(appSignalID, signal, &result);
+
+	if (ok != nullptr)
 	{
-		return false;
+		*ok = result;
 	}
 
-	return true;
+	if (result == false)
+	{
+		return Signal();
+	}
+
+	return signal;
 }
 
-bool TuningController::signalState(const QString& appSignalID, TuningSignalState& result)
+TuningSignalState TuningController::signalState(const QString& appSignalID, bool* ok)
 {
-	bool ok = true;
+	bool result = true;
 
-	emit signal_getState(appSignalID, result, &ok);
+	TuningSignalState state;
 
-	if (ok == false)
+	emit signal_getState(appSignalID, state, &result);
+
+	if (ok != nullptr)
 	{
-		return false;
+		*ok = result;
 	}
 
-	return true;
+	if (result == false)
+	{
+		return TuningSignalState();
+	}
+
+	return state;
 }

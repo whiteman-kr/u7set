@@ -183,7 +183,7 @@ void TuningItemModelMain::updateStates()
 
 		TuningSignalState& state = m_tuningSignalManager->stateByHash(item.param.hash());
 
-		item.state = state;
+		item.state.copy(state);
 	}
 
     l.unlock();

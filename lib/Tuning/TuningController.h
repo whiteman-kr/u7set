@@ -34,8 +34,8 @@ public:
 	Q_INVOKABLE int showErrorMessageBox(QString text);
 	Q_INVOKABLE int showInfoMessageBox(QString text);
 
-	bool signalParam(const QString &appSignalID, Signal &result);
-	bool signalState(const QString &appSignalID, TuningSignalState &result);
+	Signal signalParam(const QString &appSignalID, bool *ok);
+	TuningSignalState signalState(const QString &appSignalID, bool *ok);
 
 signals:
 

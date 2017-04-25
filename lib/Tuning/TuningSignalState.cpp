@@ -13,18 +13,35 @@ float TuningSignalState::value() const
 
 }
 
-void TuningSignalState::setValue(float value)
+float TuningSignalState::readLowLimit() const
 {
-	if (m_value != value)
-	{
-		m_flags.m_needRedraw = true;
+	return m_readLowLimit;
+}
 
-		m_value = value;
+float TuningSignalState::readHighLimit() const
+{
+	return m_readHighLimit;
+}
 
-		m_flags.m_underflow = m_value < m_readLowLimit;
+bool TuningSignalState::underflow() const
+{
+	return m_flags.m_underflow;
+}
 
-		m_flags.m_overflow = m_value > m_readHighLimit;
-	}
+bool TuningSignalState::overflow() const
+{
+	return m_flags.m_overflow;
+}
+
+bool TuningSignalState::valid() const
+{
+	//return true;
+	return m_flags.m_valid;
+}
+
+bool TuningSignalState::writing() const
+{
+	return m_flags.m_writing;
 }
 
 float TuningSignalState::editValue() const
@@ -48,63 +65,6 @@ void TuningSignalState::onEditValue(float value)
 	m_flags.m_needRedraw = true;
 }
 
-bool TuningSignalState::valid() const
-{
-	//return true;
-	return m_flags.m_valid;
-}
-
-void TuningSignalState::setValid(bool value)
-{
-	if (m_flags.m_valid != value)
-	{
-		m_flags.m_needRedraw = true;
-
-		m_flags.m_valid = value;
-	}
-
-}
-
-float TuningSignalState::readLowLimit() const
-{
-	return m_readLowLimit;
-}
-
-void TuningSignalState::setReadLowLimit(float value)
-{
-	if (m_readLowLimit != value)
-	{
-		m_flags.m_needRedraw = true;
-
-		m_readLowLimit = value;
-	}
-}
-
-float TuningSignalState::readHighLimit() const
-{
-	return m_readHighLimit;
-}
-
-void TuningSignalState::setReadHighLimit(float value)
-{
-	if (m_readHighLimit != value)
-	{
-		m_flags.m_needRedraw = true;
-
-		m_readHighLimit = value;
-	}
-}
-
-bool TuningSignalState::underflow() const
-{
-	return m_flags.m_underflow;
-}
-
-bool TuningSignalState::overflow() const
-{
-	return m_flags.m_overflow;
-}
-
 bool TuningSignalState::needRedraw()
 {
 	bool result = m_flags.m_needRedraw;
@@ -124,19 +84,42 @@ void TuningSignalState::clearUserModified()
 	m_flags.m_userModified = false;
 }
 
-bool TuningSignalState::writing() const
+// Copy function that updates the redraw flag
+//
+void TuningSignalState::copy(const TuningSignalState& source)
 {
-	return m_flags.m_writing;
-}
+	if (m_readHighLimit != source.readHighLimit())
+	{
+		m_flags.m_needRedraw = true;
+		m_readHighLimit = source.readHighLimit();
+	}
 
-void TuningSignalState::setWriting(bool value)
-{
-	if (m_flags.m_writing != value)
+	if (m_readLowLimit != source.readLowLimit())
+	{
+		m_flags.m_needRedraw = true;
+		m_readLowLimit = source.readLowLimit();
+	}
+
+	if (m_value != source.value())
 	{
 		m_flags.m_needRedraw = true;
 
-		m_flags.m_writing = value;
+		m_value = source.value();
+	}
 
+	m_flags.m_underflow = m_value < m_readLowLimit;
+	m_flags.m_overflow = m_value > m_readHighLimit;
+
+	if (m_flags.m_valid != source.valid())
+	{
+		m_flags.m_needRedraw = true;
+		m_flags.m_valid = source.valid();
+	}
+
+	if (m_flags.m_writing != source.writing())
+	{
+		m_flags.m_needRedraw = true;
+		m_flags.m_writing = source.writing();
 		m_writingCounter = 0;
 	}
 }
@@ -191,4 +174,11 @@ void TuningSignalState::onReceiveValue(float readLowLimit, float readHighLimit, 
 void TuningSignalState::onSendValue(float value)
 {
 	m_editValue = value;
+
+	m_flags.m_writing = true;
+}
+
+void TuningSignalState::invalidate()
+{
+	m_flags.m_valid = false;
 }

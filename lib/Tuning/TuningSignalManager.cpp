@@ -235,7 +235,7 @@ void TuningSignalManager::invalidateSignals()
 
 	for (TuningSignalState& state : m_states)
 	{
-		state.setValid(false);
+		state.invalidate();
 	}
 }
 
@@ -981,7 +981,6 @@ void TuningSignalManager::writeTuningSignals(std::vector<std::pair<Hash, float>>
 		//
 
 		state->onSendValue(value);
-		state->setWriting(true);
 
 		// push command to the queue
 		//

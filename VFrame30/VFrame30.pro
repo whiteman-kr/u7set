@@ -103,7 +103,8 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemPushButton.h \
     SchemaItemLineEdit.h \
     ../lib/Tuning/TuningController.h \
-    SchemaItemValue.h
+    SchemaItemValue.h \
+    ../lib/Tuning/TuningSignalState.h
 
 SOURCES += \
     Settings.cpp \
@@ -158,7 +159,8 @@ SOURCES += \
     SchemaItemPushButton.cpp \
     SchemaItemLineEdit.cpp \
     ../lib/Tuning/TuningController.cpp \
-    SchemaItemValue.cpp
+    SchemaItemValue.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
