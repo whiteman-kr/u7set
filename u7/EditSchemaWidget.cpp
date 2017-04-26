@@ -5500,6 +5500,7 @@ void EditSchemaWidget::f2Key()
 	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 	VFrame30::SchemaItemTransmitter* itemTransmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
 	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
+	VFrame30::SchemaItemValue* itemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
 
 	if (itemRect != nullptr)
 	{
@@ -5607,6 +5608,35 @@ void EditSchemaWidget::f2Key()
 			//
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
 
+			editSchemaView()->update();
+		}
+
+		return;
+	}
+
+	if (itemValue != nullptr)
+	{
+		QString text = itemValue->signalId();
+
+		// Show input dialog
+		//
+		QInputDialog inputDialog(this);
+
+		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+		inputDialog.setWindowTitle("Set AppSignalID");
+		inputDialog.setLabelText(tr("AppSignalID:"));
+		inputDialog.setTextEchoMode(QLineEdit::Normal);
+		inputDialog.resize(400, inputDialog.height());
+		inputDialog.setTextValue(text);
+
+		int inputDialogRecult = inputDialog.exec();
+		QString newValue = inputDialog.textValue();
+
+		if (inputDialogRecult == QDialog::Accepted &&
+			newValue.isNull() == false &&
+			text != newValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
 			editSchemaView()->update();
 		}
 
