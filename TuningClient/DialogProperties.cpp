@@ -7,8 +7,8 @@
 //
 //
 
-DialogProperties::DialogProperties(std::shared_ptr<PropertyObject> object, QWidget *parent, bool readOnly)
-    :PropertyEditorDialog(object, parent, readOnly)
+DialogProperties::DialogProperties(std::shared_ptr<PropertyObject> object, QWidget* parent, bool readOnly)
+	:PropertyEditorDialog(object, parent, readOnly)
 {
 	setWindowTitle(tr("Properties"));
 
@@ -24,7 +24,7 @@ DialogProperties::~DialogProperties()
 {
 }
 
-void DialogProperties::closeEvent(QCloseEvent * e)
+void DialogProperties::closeEvent(QCloseEvent* e)
 {
 	Q_UNUSED(e);
 	saveSettings();

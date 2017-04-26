@@ -11,7 +11,7 @@
 #include "TuningClientFilterEditor.h"
 #include "version.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
 	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
 	QMainWindow(parent)
 {
@@ -26,20 +26,20 @@ MainWindow::MainWindow(QWidget *parent) :
 		resize(1024, 768);
 	}
 
-    theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
+	theLogFile = new LogFile("TuningClient", QDir::toNativeSeparators(theSettings.localAppDataPath()));
 
-    theLogFile->write("--");
-    theLogFile->write("-----------------------");
-    theLogFile->write("--");
-    theLogFile->writeMessage(tr("Application started."));
+	theLogFile->write("--");
+	theLogFile->write("-----------------------");
+	theLogFile->write("--");
+	theLogFile->writeMessage(tr("Application started."));
 
 	createActions();
 	createMenu();
 	createStatusBar();
 
-    setWindowTitle(QString("TuningClient - ") + theSettings.instanceStrId());
+	setWindowTitle(QString("TuningClient - ") + theSettings.instanceStrId());
 
-    setCentralWidget(new QLabel(tr("Waiting for configuration...")));
+	setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
 	// TcpSignalClient
 	//
@@ -71,13 +71,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
-        theLogFile->writeError(msg);
-        QMessageBox::critical(this, tr("Error"), msg);
+		theLogFile->writeError(msg);
+		QMessageBox::critical(this, tr("Error"), msg);
 	}
 
 	//
 
-    m_mainWindowTimerId = startTimer(100);
+	m_mainWindowTimerId = startTimer(100);
 
 
 
@@ -94,9 +94,9 @@ MainWindow::~MainWindow()
 	theSettings.m_mainWindowGeometry = saveGeometry();
 	theSettings.m_mainWindowState = saveState();
 
-    theLogFile->writeMessage(tr("Application finished."));
+	theLogFile->writeMessage(tr("Application finished."));
 
-    delete theLogFile;
+	delete theLogFile;
 }
 
 
@@ -115,7 +115,7 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setStatusTip(tr("Edit user presets"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pPresetEditorAction->setEnabled(true);
-    connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
+	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
 	m_pUsersAction = new QAction(tr("Users..."), this);
 	m_pUsersAction->setStatusTip(tr("Edit users"));
@@ -144,7 +144,7 @@ void MainWindow::createActions()
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
 	//m_pAboutAction->setEnabled(true);
-    connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
+	connect(m_pAboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 void MainWindow::createMenu()
@@ -161,10 +161,10 @@ void MainWindow::createMenu()
 
 	pToolsMenu->addAction(m_pPresetEditorAction);
 
-    QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-    pServiceMenu->addAction(m_pTuningSourcesAction);
-    pServiceMenu->addAction(m_pUsersAction);
-    pServiceMenu->addAction(m_pSettingsAction);
+	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
+	pServiceMenu->addAction(m_pTuningSourcesAction);
+	pServiceMenu->addAction(m_pUsersAction);
+	pServiceMenu->addAction(m_pSettingsAction);
 
 	// Help
 	//
@@ -201,38 +201,38 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	// Update status bar
 	//
-    if  (event->timerId() == m_mainWindowTimerId)
+	if  (event->timerId() == m_mainWindowTimerId)
 	{
-        if (theSharedMemorySingleApp != nullptr)
-        {
-            bool ok = theSharedMemorySingleApp->lock();
-            if (ok == true)
-            {
-                TuningClientSharedData* data = (TuningClientSharedData*)theSharedMemorySingleApp->data();
+		if (theSharedMemorySingleApp != nullptr)
+		{
+			bool ok = theSharedMemorySingleApp->lock();
+			if (ok == true)
+			{
+				TuningClientSharedData* data = (TuningClientSharedData*)theSharedMemorySingleApp->data();
 
-                if (data->showCommand == true)
-                {
-                    data->showCommand = false;
+				if (data->showCommand == true)
+				{
+					data->showCommand = false;
 
-                    showMinimized(); // This is to bring up the window if not minimized but beneath some other window
-                    setWindowState(Qt::WindowActive);
-                    showNormal();
-                }
+					showMinimized(); // This is to bring up the window if not minimized but beneath some other window
+					setWindowState(Qt::WindowActive);
+					showNormal();
+				}
 
 
-                ok = theSharedMemorySingleApp->unlock();
-                if (ok == false)
-                {
-                    qDebug()<<"Failed to unlock QSharedMemory object!";
-                    assert(false);
-                }
-            }
-            else
-            {
-                qDebug()<<"Failed to lock QSharedMemory object!";
-                assert(false);
-            }
-        }
+				ok = theSharedMemorySingleApp->unlock();
+				if (ok == false)
+				{
+					qDebug() << "Failed to unlock QSharedMemory object!";
+					assert(false);
+				}
+			}
+			else
+			{
+				qDebug() << "Failed to lock QSharedMemory object!";
+				assert(false);
+			}
+		}
 
 
 		// Status bar
@@ -279,7 +279,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::createWorkspace(const TuningSignalStorage *objects)
+void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 {
 	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
 	{
@@ -312,10 +312,10 @@ void MainWindow::createWorkspace(const TuningSignalStorage *objects)
 	// Create workspaces
 
 	if (m_tuningWorkspace != nullptr)
-    {
-        delete m_tuningWorkspace;
-        m_tuningWorkspace = nullptr;
-    }
+	{
+		delete m_tuningWorkspace;
+		m_tuningWorkspace = nullptr;
+	}
 
 	if (m_schemasWorkspace != nullptr)
 	{
@@ -377,17 +377,17 @@ void MainWindow::slot_configurationArrived()
 {
 	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
-    createWorkspace(&objects);
+	createWorkspace(&objects);
 
-    return;
+	return;
 }
 
 void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
 {
-    theSettings.m_presetEditorSignalsTableColumnWidth = signalsTableColumnWidth;
-    theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
-    theSettings.m_presetEditorPos = pos;
-    theSettings.m_presetEditorGeometry = geometry;
+	theSettings.m_presetEditorSignalsTableColumnWidth = signalsTableColumnWidth;
+	theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
+	theSettings.m_presetEditorPos = pos;
+	theSettings.m_presetEditorGeometry = geometry;
 }
 
 void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
@@ -402,49 +402,49 @@ void MainWindow::exit()
 
 void MainWindow::runPresetEditor()
 {
-    if (theUserManager.requestPassword(this, false) == false)
-    {
-        return;
-    }
+	if (theUserManager.requestPassword(this, false) == false)
+	{
+		return;
+	}
 
 	TuningClientFilterStorage editFilters = m_filterStorage;
 
-    bool editAutomatic = false;
+	bool editAutomatic = false;
 
 	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
 	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
-                         theSettings.m_presetEditorSignalsTableColumnWidth,
-                         theSettings.m_presetEditorPresetsTreeColumnWidth,
-                         theSettings.m_presetEditorPos,
-                         theSettings.m_presetEditorGeometry,
-                         this);
+							   theSettings.m_presetEditorSignalsTableColumnWidth,
+							   theSettings.m_presetEditorPresetsTreeColumnWidth,
+							   theSettings.m_presetEditorPos,
+							   theSettings.m_presetEditorGeometry,
+							   this);
 
-    connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
+	connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
 	connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
 
-    if (d.exec() == QDialog::Accepted)
-    {
+	if (d.exec() == QDialog::Accepted)
+	{
 		m_filterStorage = editFilters;
 
-        QString errorMsg;
+		QString errorMsg;
 
 		if (m_filterStorage.save(theSettings.userFiltersFile(), &errorMsg) == false)
-        {
-            theLogFile->writeError(errorMsg);
-            QMessageBox::critical(this, tr("Error"), errorMsg);
-        }
+		{
+			theLogFile->writeError(errorMsg);
+			QMessageBox::critical(this, tr("Error"), errorMsg);
+		}
 
-        createWorkspace(&objects);
-    }
+		createWorkspace(&objects);
+	}
 }
 
 void MainWindow::runUsersEditor()
 {
-    if (theUserManager.requestPassword(this, true) == false)
-    {
-        return;
-    }
+	if (theUserManager.requestPassword(this, true) == false)
+	{
+		return;
+	}
 
 	DialogUsers d(theUserManager, this);
 	if (d.exec() == QDialog::Accepted && theSettings.admin() == true)
@@ -456,16 +456,16 @@ void MainWindow::runUsersEditor()
 
 void MainWindow::showSettings()
 {
-    if (theUserManager.requestPassword(this, true) == false)
-    {
-        return;
-    }
+	if (theUserManager.requestPassword(this, true) == false)
+	{
+		return;
+	}
 
-    DialogSettings* d = new DialogSettings(this);
+	DialogSettings* d = new DialogSettings(this);
 
-    d->exec();
+	d->exec();
 
-    delete d;
+	delete d;
 }
 
 
@@ -484,53 +484,53 @@ void MainWindow::showTuningSources()
 
 void MainWindow::showAbout()
 {
-    QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+	QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
-    QHBoxLayout* hl = new QHBoxLayout;
+	QHBoxLayout* hl = new QHBoxLayout;
 
-    /*QLabel* logo = new QLabel(&aboutDialog);
-    logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+	/*QLabel* logo = new QLabel(&aboutDialog);
+	logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
 
-    hl->addWidget(logo);*/
+	hl->addWidget(logo);*/
 
-    QVBoxLayout* vl = new QVBoxLayout;
-    hl->addLayout(vl);
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
 
-    QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
 #ifndef Q_DEBUG
-    text += "Build: Release";
+	text += "Build: Release";
 #else
-    text += "Build: Debug";
+	text += "Build: Debug";
 #endif
-    text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
 
-    QLabel* label = new QLabel(text, &aboutDialog);
-    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-    vl->addWidget(label);
+	QLabel* label = new QLabel(text, &aboutDialog);
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	vl->addWidget(label);
 
-    label = new QLabel(&aboutDialog);
-    label->setText(qApp->applicationName() + " allows user to modify tuning values.");
-    label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-    label->setWordWrap(true);
-    vl->addWidget(label);
+	label = new QLabel(&aboutDialog);
+	label->setText(qApp->applicationName() + " allows user to modify tuning values.");
+	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+	label->setWordWrap(true);
+	vl->addWidget(label);
 
-    QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
-    connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
-        qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
-    });
+	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
+		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+	});
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
-    buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(QDialogButtonBox::Ok);
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
+	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
+	buttonBox->addButton(QDialogButtonBox::Ok);
 
-    QVBoxLayout* mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(hl);
-    mainLayout->addWidget(buttonBox);
-    aboutDialog.setLayout(mainLayout);
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(hl);
+	mainLayout->addWidget(buttonBox);
+	aboutDialog.setLayout(mainLayout);
 
-    connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
 
-    aboutDialog.exec();
+	aboutDialog.exec();
 }
 
 MainWindow* theMainWindow = nullptr;

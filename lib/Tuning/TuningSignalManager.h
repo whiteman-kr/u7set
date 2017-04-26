@@ -12,38 +12,38 @@
 
 struct TuningSource
 {
-    ::Network::DataSourceInfo m_info;
-    ::Network::TuningSourceState m_state;
+	::Network::DataSourceInfo m_info;
+	::Network::TuningSourceState m_state;
 };
 
 struct WriteCommand
 {
-    Hash m_hash = 0;
-    float m_value = 0;
+	Hash m_hash = 0;
+	float m_value = 0;
 
-    WriteCommand(Hash hash, float value)
-    {
-        m_hash = hash;
-        m_value = value;
-    }
+	WriteCommand(Hash hash, float value)
+	{
+		m_hash = hash;
+		m_value = value;
+	}
 };
 
 
 class TuningSignalManager : public Tcp::Client
 {
-    Q_ENUM(NetworkError)
+	Q_ENUM(NetworkError)
 
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	TuningSignalManager();
-    virtual ~TuningSignalManager();
+	virtual ~TuningSignalManager();
 
 	void setInstanceId(const QString& instanceId);
 
 	void setRequestInterval(int requestInterval);
 
-    bool loadDatabase(const QByteArray& data, QString *errorCode);
+	bool loadDatabase(const QByteArray& data, QString* errorCode);
 
 	TuningSignalStorage signalsStorage();
 
@@ -53,17 +53,17 @@ public:
 
 	TuningSignalState stateByHash(Hash hash) const; // WARNING!!! Lock the m_statesMutex before calling this function!!!
 
-    // Tuning sources
+	// Tuning sources
 
-    QStringList tuningSourcesEquipmentIds();
+	QStringList tuningSourcesEquipmentIds();
 
-    std::vector<TuningSource> tuningSourcesInfo();
+	std::vector<TuningSource> tuningSourcesInfo();
 
-    bool tuningSourceInfo(quint64 id, TuningSource& result);
+	bool tuningSourceInfo(quint64 id, TuningSource* result);
 
-    // Writing states
+	// Writing states
 
-	void writeTuningSignals(std::vector<std::pair<Hash, float>> &data);
+	void writeTuningSignals(std::vector<std::pair<Hash, float>>& data);
 
 	// Information
 
@@ -75,37 +75,37 @@ public:
 
 private:
 
-    virtual void onClientThreadStarted() override;
-    virtual void onClientThreadFinished() override;
+	virtual void onClientThreadStarted() override;
+	virtual void onClientThreadFinished() override;
 
-    virtual void onConnection() override;
-    virtual void onDisconnection() override;
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
 
-    virtual void onReplyTimeout() override;
+	virtual void onReplyTimeout() override;
 
-    virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
+	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 	void invalidateSignals();
 
 	TuningSignalState* statePtrByHash(Hash hash); // WARNING!!! Lock the m_statesMutex before calling this function!!!
 
 protected:
-    void resetToGetTuningSources();
-    void resetToGetTuningSourcesState();
+	void resetToGetTuningSources();
+	void resetToGetTuningSourcesState();
 
-    void requestTuningSourcesInfo();
-    void processTuningSourcesInfo(const QByteArray& data);
+	void requestTuningSourcesInfo();
+	void processTuningSourcesInfo(const QByteArray& data);
 
-    void requestTuningSourcesState();
-    void processTuningSourcesState(const QByteArray& data);
+	void requestTuningSourcesState();
+	void processTuningSourcesState(const QByteArray& data);
 
-    void processTuningSignals();
+	void processTuningSignals();
 
-    void requestReadTuningSignals();
-    void processReadTuningSignals(const QByteArray& data);
+	void requestReadTuningSignals();
+	void processReadTuningSignals(const QByteArray& data);
 
-    void requestWriteTuningSignals();
-    void processWriteTuningSignals(const QByteArray& data);
+	void requestWriteTuningSignals();
+	void processWriteTuningSignals(const QByteArray& data);
 
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
@@ -132,25 +132,25 @@ signals:
 
 private:
 
-    QString networkErrorStr(NetworkError error);
+	QString networkErrorStr(NetworkError error);
 
 private:
-    // Cache protobug messages
-    //
-    ::Network::GetTuningSourcesStates m_getTuningSourcesStates;
-    ::Network::GetDataSourcesInfoReply m_tuningDataSourcesInfoReply;
+	// Cache protobug messages
+	//
+	::Network::GetTuningSourcesStates m_getTuningSourcesStates;
+	::Network::GetDataSourcesInfoReply m_tuningDataSourcesInfoReply;
 
-    ::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
-    ::Network::GetTuningSourcesStatesReply m_tuningDataSourcesStatesReply;
+	::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
+	::Network::GetTuningSourcesStatesReply m_tuningDataSourcesStatesReply;
 
-    ::Network::TuningSignalsRead m_readTuningSignals;
-    ::Network::TuningSignalsReadReply m_readTuningSignalsReply;
+	::Network::TuningSignalsRead m_readTuningSignals;
+	::Network::TuningSignalsReadReply m_readTuningSignalsReply;
 
-    ::Network::TuningSignalsWrite m_writeTuningSignals;
-    ::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
+	::Network::TuningSignalsWrite m_writeTuningSignals;
+	::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
 
-    // Objects storage
-    //
+	// Objects storage
+	//
 
 	TuningSignalStorage m_signals;  // WARNING!!! Use this object only with m_mutex locked!!!
 
@@ -160,19 +160,19 @@ private:
 	std::vector<TuningSignalState> m_states;
 
 	// Tuning sources
-    //
+	//
 
-    QStringList m_tuningSourcesList;
+	QStringList m_tuningSourcesList;
 
-    std::map<quint64, TuningSource> m_tuningSources;
+	std::map<quint64, TuningSource> m_tuningSources;
 
-    // Processing
-    //
+	// Processing
+	//
 
-    std::queue<WriteCommand> m_writeQueue;
+	std::queue<WriteCommand> m_writeQueue;
 
-    int m_readTuningSignalIndex = 0;
-    int m_readTuningSignalCount = 0;
+	int m_readTuningSignalIndex = 0;
+	int m_readTuningSignalCount = 0;
 
 	QString m_instanceId;
 	int m_requestInterval = 10;

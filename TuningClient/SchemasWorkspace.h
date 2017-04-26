@@ -13,19 +13,19 @@ class SchemasWorkspace : public QWidget
 	Q_OBJECT
 
 public:
-	explicit SchemasWorkspace(ConfigController* configController, TuningSignalManager *tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent);
+	explicit SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent);
 	virtual ~SchemasWorkspace();
 
 private slots:
-	void slot_schemaListSelectionChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void slot_schemaListSelectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 
 private:
 
-	TuningSignalManager *m_tuningSignalManager = nullptr;
+	TuningSignalManager* m_tuningSignalManager = nullptr;
 
 	TuningSignalStorage m_objects;
 
-	SchemaStorage *m_schemaStorage = nullptr;
+	SchemaStorage* m_schemaStorage = nullptr;
 
 	QSplitter* m_hSplitter = nullptr;				// This is used only with LIST mode!
 

@@ -7,27 +7,27 @@
 #include "UserManager.h"
 
 namespace Ui {
-class DialogPassword;
+	class DialogPassword;
 }
 
 class DialogPassword : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit DialogPassword(const UserManager *userManager, bool adminNeeded, QWidget *parent);
-    ~DialogPassword();
+	explicit DialogPassword(const UserManager* userManager, bool adminNeeded, QWidget* parent);
+	~DialogPassword();
 
 private:
 
-    virtual void accept();
+	virtual void accept();
 
 private:
-    Ui::DialogPassword *ui;
+	Ui::DialogPassword* ui;
 
-    static QString m_lastUser;
+	static QString m_lastUser;
 
-    const UserManager* m_userManager = nullptr;
+	const UserManager* m_userManager = nullptr;
 };
 
 #endif // DIALOGPASSWORD_H

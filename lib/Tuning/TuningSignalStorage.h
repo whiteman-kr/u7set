@@ -12,7 +12,7 @@ public:
 
 	TuningSignalStorage();
 
-	bool loadSignals(const QByteArray& data, QString *errorCode);
+	bool loadSignals(const QByteArray& data, QString* errorCode);
 
 	// Object accessing
 

@@ -29,7 +29,7 @@ void TuningSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	//
 	//VFrame30::SchemaView::paintEvent(pe);
 
-	//qDebug()<<"paintEvent";
+	//qDebug() << "paintEvent";
 
 	QPainter p;
 	p.begin(this);
