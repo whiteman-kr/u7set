@@ -265,6 +265,10 @@ namespace VFrame30
 			m_lastScriptError = formatSqriptError(jsResult);
 			return false;
 		}
+		else
+		{
+			m_lastScriptError.clear();
+		}
 
 		return true;
 	}

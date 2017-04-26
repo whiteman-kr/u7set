@@ -440,7 +440,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		}
 
 		AppSignalState state;
-		state.getProtoAppSignalState(&protoState);
+		state.load(protoState);
 
 		theSignals.setState(protoState.hash(), state);
 	}

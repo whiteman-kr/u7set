@@ -339,7 +339,7 @@ namespace Metrology
 	public:
 
 		SignalState()  {}
-		SignalState(const AppSignalState& state) : m_value(state.value), m_flags(state.flags)  {}
+		SignalState(const AppSignalState& state) : m_value(state.m_value), m_flags(state.m_flags)  {}
 		SignalState(double value, const AppSignalStateFlags& flags) : m_value(value), m_flags(flags)  {}
 		virtual ~SignalState() {}
 
@@ -351,7 +351,7 @@ namespace Metrology
 
 	public:
 
-		void					setState(const AppSignalState& state) { m_value = state.value; m_flags = state.flags; }
+		void					setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
 
 		double					value() const { return m_value; }
 		void					setValue(double value) { m_value = value; }

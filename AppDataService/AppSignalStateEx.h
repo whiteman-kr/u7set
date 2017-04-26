@@ -29,7 +29,7 @@ public:
 	void setSignalParams(int index, Signal* signal);
 	void setState(Times time, quint32 validity, double value);
 
-	void invalidate() { m_current.flags.all = 0; }
+	void invalidate() { m_current.m_flags.all = 0; }
 
 	Hash hash() const;
 

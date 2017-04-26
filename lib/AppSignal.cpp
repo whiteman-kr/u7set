@@ -16,9 +16,25 @@ QDateTime Times::plantToDateTime() const
 	return QDateTime::fromMSecsSinceEpoch(plant);
 }
 
+
+Hash AppSignalState::hash() const
+{
+	return m_hash;
+}
+
+const Times& AppSignalState::time() const
+{
+	return m_time;
+}
+
+double AppSignalState::value() const
+{
+	return m_value;
+}
+
 bool AppSignalState::isValid() const
 {
-	return flags.valid;
+	return m_flags.valid;
 }
 
 //bool AppSignalState::isOverflow() const
@@ -31,7 +47,7 @@ bool AppSignalState::isValid() const
 //	return flags.underflow;
 //}
 
-void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
+void AppSignalState::save(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)
 	{
@@ -39,37 +55,31 @@ void AppSignalState::setProtoAppSignalState(Proto::AppSignalState* protoState)
 		return;
 	}
 
-	assert(hash != 0);
+	assert(m_hash != 0);
 
-	protoState->set_hash(hash);
-	protoState->set_value(value);
-	protoState->set_flags(flags.all);
+	protoState->set_hash(m_hash);
+	protoState->set_value(m_value);
+	protoState->set_flags(m_flags.all);
 
-	protoState->set_systemtime(time.system);
-	protoState->set_localtime(time.local);
-	protoState->set_planttime(time.plant);
+	protoState->set_systemtime(m_time.system);
+	protoState->set_localtime(m_time.local);
+	protoState->set_planttime(m_time.plant);
 }
 
-Hash AppSignalState::getProtoAppSignalState(const Proto::AppSignalState* protoState)
+Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 {
-	if (protoState == nullptr)
-	{
-		assert(false);
-		return 0 ;
-	}
+	m_hash = protoState.hash();
 
-	hash = protoState->hash();
+	assert(m_hash != 0);
 
-	assert(hash != 0);
+	m_value = protoState.value();
+	m_flags.all = protoState.flags();
 
-	value = protoState->value();
-	flags.all = protoState->flags();
+	m_time.system = protoState.systemtime();
+	m_time.local = protoState.localtime();
+	m_time.plant = protoState.planttime();
 
-	time.system = protoState->systemtime();
-	time.local = protoState->localtime();
-	time.plant = protoState->planttime();
-
-	return hash;
+	return m_hash;
 }
 
 AppSignalParam::AppSignalParam()

@@ -279,7 +279,7 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 		Proto::AppSignalState* protoAppSignalState = m_getAppSignalStateReply.add_appsignalstates();
 
-		appSignalState.setProtoAppSignalState(protoAppSignalState);
+		appSignalState.save(protoAppSignalState);
 	}
 
 	sendReply(m_getAppSignalStateReply);

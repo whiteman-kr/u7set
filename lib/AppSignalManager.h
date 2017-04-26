@@ -1,14 +1,13 @@
 #ifndef SIGNALSET_H
 #define SIGNALSET_H
 
-#include <QMutex>
 #include <unordered_map>
+#include <QMutex>
 #include "../lib/Hash.h"
 #include "../lib/AppSignal.h"
 
 typedef quint64 SignalHash;
 
-class QJSEngine;
 class AppSignalManager;
 
 
@@ -17,19 +16,18 @@ class ScriptSignalManager : public QObject
 	Q_OBJECT
 
 public:
-	 ScriptSignalManager(QJSEngine* engine, const AppSignalManager* signalManager);
+	 explicit ScriptSignalManager(const AppSignalManager* signalManager);
 
 	// Script Interface
 	//
 public slots:
-	virtual QObject* signal(QString signalId) const;		// Returns Signal*
-	virtual QObject* signal(Hash signalHash) const;			// Returns Signal*
+	QVariant signalParam(QString signalId) const;		// Returns AppSignalParam
+	QVariant signalParam(Hash signalHash) const;		// Returns AppSignalParam
 
-	virtual QObject* signalState(QString signalId) const;	// Returns AppSignalState*
-	virtual QObject* signalState(Hash signalHash) const;	// Returns AppSignalState*
+	QVariant signalState(QString signalId) const;		// Returns AppSignalState
+	QVariant signalState(Hash signalHash) const;		// Returns AppSignalState
 
 private:
-	 QJSEngine* m_engine = nullptr;
 	 const AppSignalManager* m_signalManager = nullptr;
 };
 
@@ -62,11 +60,8 @@ public:
 	std::vector<AppSignalParam> signalList() const;
 	std::vector<Hash> signalHashes() const;
 
-	bool signal(const QString& appSignalId, AppSignalParam* out) const;
-	bool signal(Hash signalHash, AppSignalParam* out) const;
-
-	AppSignalParam signal(const QString& appSignalId, bool* found) const;
-	AppSignalParam signal(Hash signalHash, bool* found) const;
+	AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
+	AppSignalParam signalParam(Hash signalHash, bool* found) const;
 
 	// Signal States
 	//
@@ -79,24 +74,15 @@ public:
 	int signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result) const;
 	int signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result) const;
 
-	// Script Interface
-	//
-//public:
-	virtual QObject* signal(QString signalId) const;		// Returns AppSignalParam*
-	virtual QObject* signal(Hash signalHash) const;			// Returns AppSignalParam*
-
-//	virtual QObject* signalState(QString signalId) const override;	// Returns AppSignalState*
-//	virtual QObject* signalState(Hash signalHash) const override;	// Returns AppSignalState*
-
 private:
 	mutable QMutex m_unitsMutex;
 	std::map<int, QString> m_units;
 
 	mutable QMutex m_paramsMutex;
-	std::unordered_map<Hash, AppSignalParam> m_signals;
+	std::unordered_map<Hash, AppSignalParam> m_signalParams;
 
 	mutable QMutex m_statesMutex;
-	std::unordered_map<Hash, AppSignalState> m_states;
+	std::unordered_map<Hash, AppSignalState> m_signalStates;
 };
 
 

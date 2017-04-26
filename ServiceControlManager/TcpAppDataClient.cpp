@@ -423,7 +423,7 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 		int index = m_hash2Index[hash];
 
-		m_states[index].getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+		m_states[index].load(m_getSignalStateReply.appsignalstates(i));
 	}
 
 	m_getParamsCurrentPart++;

@@ -35,20 +35,35 @@ const quint32 VALID_STATE = 1;
 const quint32 INVALID_STATE = 0;
 
 
-struct AppSignalState
+class AppSignalState
 {
-	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
-	double value = 0;
+	Q_GADGET
 
-	bool isValid() const;
+	Q_PROPERTY(Hash Hash READ hash)
+	Q_PROPERTY(double Value READ value)
+
+public:
+
+	Q_INVOKABLE Hash hash() const;
+	const Times& time() const;
+	Q_INVOKABLE double value() const;
+
+	Q_INVOKABLE bool isValid() const;
 	//bool isOverflow() const;
 	//bool isUnderflow() const;
 
-	void setProtoAppSignalState(Proto::AppSignalState* protoState);
-	Hash getProtoAppSignalState(const Proto::AppSignalState* protoState);
+	void save(Proto::AppSignalState* protoState);
+	Hash load(const Proto::AppSignalState& protoState);
+
+public:
+	Hash m_hash = 0;					// == calcHash(AppSignalID)
+	Times m_time;
+	AppSignalStateFlags m_flags;
+	double m_value = 0;
 };
+
+Q_DECLARE_METATYPE(AppSignalState)
+
 
 class AppSignalParam
 {

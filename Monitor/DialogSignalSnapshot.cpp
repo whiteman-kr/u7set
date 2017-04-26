@@ -107,28 +107,28 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	case SnapshotItemModel::Columns::SystemTime:
 		{
-			v1 = st1.time.system;
-			v2 = st2.time.system;
+			v1 = st1.m_time.system;
+			v2 = st2.m_time.system;
 		}
 		break;
 	case SnapshotItemModel::Columns::LocalTime:
 		{
-			v1 = st1.time.local;
-			v2 = st2.time.local;
+			v1 = st1.m_time.local;
+			v2 = st2.m_time.local;
 		}
 		break;
 	case SnapshotItemModel::Columns::PlantTime:
 		{
-			v1 = st1.time.plant;
-			v2 = st2.time.plant;
+			v1 = st1.m_time.plant;
+			v2 = st2.m_time.plant;
 		}
 		break;
 	case SnapshotItemModel::Columns::Value:
 		{
 			if (s1.isAnalog() == s2.isAnalog())
 			{
-				v1 = st1.value;
-				v2 = st2.value;
+				v1 = st1.m_value;
+				v2 = st2.m_value;
 			}
 			else
 			{
@@ -139,8 +139,8 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 		break;
 	case SnapshotItemModel::Columns::Valid:
 		{
-			v1 = st1.flags.valid;
-			v2 = st2.flags.valid;
+			v1 = st1.m_flags.valid;
+			v2 = st2.m_flags.valid;
 		}
 		break;
 //	case SnapshotItemModel::Columns::Underflow:
@@ -419,22 +419,22 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		{
 		case Columns::SystemTime:
 			{
-				QDateTime time = state.time.systemToDateTime();
+				QDateTime time = state.m_time.systemToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::LocalTime:
 			{
-				QDateTime time = state.time.localToDateTime();
+				QDateTime time = state.m_time.localToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::PlantTime:
 			{
-				QDateTime time = state.time.plantToDateTime();
+				QDateTime time = state.m_time.plantToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::Valid:
 			{
-				return (state.flags.valid == true) ? tr("") : tr("no");
+				return (state.m_flags.valid == true) ? tr("") : tr("no");
 			}
 //		case Columns::Underflow:
 //			{
@@ -463,16 +463,16 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		{
 		case Columns::Value:
 			{
-				if (state.flags.valid == true)
+				if (state.m_flags.valid == true)
 				{
 					if (s.isDiscrete() == true)
 					{
-						return static_cast<int>(state.value) == 0 ? "0" : "1";
+						return static_cast<int>(state.m_value) == 0 ? "0" : "1";
 					}
 
 					if (s.isAnalog() == true)
 					{
-						QString str = QString::number(state.value, 'f', s.precision());
+						QString str = QString::number(state.m_value, 'f', s.precision());
 
 //						if (state.flags.underflow == true)
 //						{
@@ -569,7 +569,7 @@ AppSignalParam SnapshotItemModel::signalParam(Hash hash, bool* found) const
 
 	*found = false;
 
-	AppSignalParam s1 = theSignals.signal(hash, found);
+	AppSignalParam s1 = theSignals.signalParam(hash, found);
 	if (*found == false)
 	{
 		return AppSignalParam();
@@ -690,7 +690,7 @@ void DialogSignalSnapshot::fillSignals()
 	for (const Hash& hash : m_signalsHashes)
 	{
 		bool found = false;
-		const AppSignalParam& s = theSignals.signal(hash, &found);
+		const AppSignalParam& s = theSignals.signalParam(hash, &found);
 		if (found == false)
 		{
 			continue;

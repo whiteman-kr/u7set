@@ -433,13 +433,13 @@ namespace VFrame30
 		signal.setAppSignalId(appSignalId);
 
 		AppSignalState signalState;
-		signalState.flags.valid = false;
+		signalState.m_flags.valid = false;
 
 		bool signalFound = false;
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
 			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
 		}
 

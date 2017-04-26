@@ -157,7 +157,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		}
 
 		AppSignalState appState;
-		appState.getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+		appState.load(m_getSignalStateReply.appsignalstates(i));
 
 		//appState.flags.valid = 1;
 		//appState.value = rand();

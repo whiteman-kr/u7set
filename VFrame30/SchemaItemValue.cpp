@@ -307,7 +307,7 @@ namespace VFrame30
 				}
 				else
 				{
-					signalParam = drawParam->appSignalManager()->signal(signalId(), &ok);
+					signalParam = drawParam->appSignalManager()->signalParam(signalId(), &ok);
 					signalState = drawParam->appSignalManager()->signalState(signalId(), nullptr);
 				}
 				break;
@@ -323,9 +323,9 @@ namespace VFrame30
 					tuningSignalState = drawParam->tuningController()->signalState(signalId(), nullptr);
 
 					// This is for temporary debugging
-					signalState.hash = signalParam.hash();
-					signalState.flags.valid = tuningSignalState.valid();
-					signalState.value = tuningSignalState.value();
+					signalState.m_hash = signalParam.hash();
+					signalState.m_flags.valid = tuningSignalState.valid();
+					signalState.m_value = tuningSignalState.value();
 					//
 				}
 				break;
@@ -425,7 +425,7 @@ namespace VFrame30
 				}
 				else
 				{
-					if (signalState.value == 0)
+					if (signalState.m_value == 0)
 					{
 						text = parseText(m_textDiscreteNo, signal, signalState);
 						back_color = blinkPhase ? fillColorDiscrNo0() : fillColorDiscrNo1();
@@ -487,7 +487,7 @@ namespace VFrame30
 			{
 				if (macro.compare(QLatin1String("value"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = formatNumber(signalState.value, signal);
+					replaceText = formatNumber(signalState.m_value, signal);
 					break;
 				}
 

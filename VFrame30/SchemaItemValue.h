@@ -6,7 +6,7 @@
 class QPen;
 class QBrush;
 
-struct AppSignalState;
+class AppSignalState;
 class AppSignalParam;
 
 namespace VFrame30

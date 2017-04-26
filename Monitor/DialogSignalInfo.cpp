@@ -342,13 +342,13 @@ void DialogSignalInfo::updateData()
 		return;
 	}
 
-	if (state.flags.valid)
+	if (state.m_flags.valid)
 	{
 		QString strValue;
 
 		if (m_signal.isDiscrete())
 		{
-			strValue = QString("%1").arg(state.value);
+			strValue = QString("%1").arg(state.m_value);
 		}
 
 		if (m_signal.isAnalog())
@@ -358,17 +358,17 @@ void DialogSignalInfo::updateData()
 			switch (m_viewType)
 			{
 			case ViewType::Dec:
-				strValue = QString::number(state.value, 'f', m_precision);
+				strValue = QString::number(state.m_value, 'f', m_precision);
 				break;
 			case ViewType::Hex:
-				strValue = /*tr("HEX:") + */QString::number((long)state.value, 16) + tr("h");
+				strValue = /*tr("HEX:") + */QString::number((long)state.m_value, 16) + tr("h");
 				break;
 			case ViewType::Exp:
-				strValue = /*tr("EXP:") + */QString::number(state.value, 'e', m_precision);
+				strValue = /*tr("EXP:") + */QString::number(state.m_value, 'e', m_precision);
 				break;
 			case ViewType::Bin16:
 				{
-					strValue = QString::number((quint16)state.value, 2);
+					strValue = QString::number((quint16)state.m_value, 2);
 					strValue = strValue.rightJustified(16, '0');
 					for (int q = 0; q < 3; q++, p += 5)
 					{
@@ -378,7 +378,7 @@ void DialogSignalInfo::updateData()
 				//strValue = tr("BIN16: ") + strValue;
 				break;
 			case ViewType::Bin32:
-				strValue = QString::number((quint32)state.value, 2);
+				strValue = QString::number((quint32)state.m_value, 2);
 				strValue = strValue.rightJustified(32, '0');
 				for (int q = 0; q < 7; q++, p += 5)
 				{
@@ -387,7 +387,7 @@ void DialogSignalInfo::updateData()
 				//strValue = tr("BIN32: ") + strValue;
 				break;
 			case ViewType::Bin64:
-				strValue = QString::number((quint64)state.value, 2);
+				strValue = QString::number((quint64)state.m_value, 2);
 				strValue = strValue.rightJustified(64, '0');
 				for (int q = 0; q < 15; q++, p += 5)
 				{
@@ -430,8 +430,8 @@ void DialogSignalInfo::updateData()
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
-	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(state.time.local);
-	QDateTime plaitTime = QDateTime::fromMSecsSinceEpoch(state.time.plant);
+	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(state.m_time.local);
+	QDateTime plaitTime = QDateTime::fromMSecsSinceEpoch(state.m_time.plant);
 
 
 	//ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
@@ -440,7 +440,7 @@ void DialogSignalInfo::updateData()
 
 	if (m_signalFlags)
 	{
-		m_signalFlags->updateControl(state.flags);
+		m_signalFlags->updateControl(state.m_flags);
 
 	}
 }

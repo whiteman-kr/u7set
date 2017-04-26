@@ -309,8 +309,8 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
 
 	for (const QString& s : signalList)
 	{
-		AppSignalParam signal;
-		bool ok = theSignals.signal(s, &signal);
+		bool ok = false;
+		AppSignalParam signal =	theSignals.signalParam(s, &ok);
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
@@ -338,8 +338,9 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 		return;
 	}
 
-	AppSignalParam signal;
-	bool ok = theSignals.signal(appSignalId, &signal);
+	bool ok = false;
+	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
 	if (ok == true)
 	{
 		DialogSignalInfo* dsi = new DialogSignalInfo(theMonitorMainWindow, signal);

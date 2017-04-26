@@ -240,7 +240,7 @@ namespace VFrame30
 			{
 				if (drawParam->isMonitorMode() == true)
 				{
-					if (signalState.flags.valid == false)
+					if (signalState.m_flags.valid == false)
 					{
 						const static QString nonValidStr = "?";
 						text = nonValidStr;
@@ -249,11 +249,11 @@ namespace VFrame30
 					{
 						if (signal.isAnalog())
 						{
-							text = QString::number(signalState.value, static_cast<char>(analogFormat), precision);
+							text = QString::number(signalState.m_value, static_cast<char>(analogFormat), precision);
 						}
 						else
 						{
-							text = QString::number(signalState.value);
+							text = QString::number(signalState.m_value);
 						}
 					}
 				}
@@ -341,13 +341,13 @@ namespace VFrame30
 				bool stateOk;
 				AppSignalState signalState = drawParam->appSignalManager()->signalState(text, &stateOk);
 
-				if (signalState.flags.valid == false)
+				if (signalState.m_flags.valid == false)
 				{
 					text += QString("    ?");
 				}
 				else
 				{
-					text += QString("    %1").arg(QString::number(signalState.value));
+					text += QString("    %1").arg(QString::number(signalState.m_value));
 				}
 			}
 		}
@@ -388,7 +388,7 @@ namespace VFrame30
 		for (const QString& id : signalIds)
 		{
 			appSignals[signalIndex].setAppSignalId(id);
-			appSignalStates[signalIndex].flags.valid = false;
+			appSignalStates[signalIndex].m_flags.valid = false;
 
 			bool signalFound = false;
 
@@ -396,7 +396,7 @@ namespace VFrame30
 			{
 				// Get signal description
 				//
-				signalFound = drawParam->appSignalManager()->signal(id, &appSignals[signalIndex]);
+				appSignals[signalIndex] = drawParam->appSignalManager()->signalParam(id, &signalFound);
 
 				// Get signal state
 				//
@@ -545,13 +545,13 @@ namespace VFrame30
 		signal.setAppSignalId(appSignalId);
 
 		AppSignalState signalState;
-		signalState.flags.valid = false;
+		signalState.m_flags.valid = false;
 
 		bool signalFound = false;
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
 			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
 		}
 

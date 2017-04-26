@@ -273,7 +273,7 @@ QJSEngine* MonitorView::jsEngine()
 
 	if (addSignalManager == true)
 	{
-		ScriptSignalManager* signalManager = new ScriptSignalManager(result, &theSignals);
+		ScriptSignalManager* signalManager = new ScriptSignalManager(&theSignals);
 		QJSValue jsValue = m_jsEngine.newQObject(signalManager);
 
 		result->globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsValue);
