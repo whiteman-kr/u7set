@@ -420,25 +420,25 @@ namespace VFrame30
 		return widget;
 	}
 
-	int SchemaView::warningMessageBox(QString text)
+	void SchemaView::warningMessageBox(QString text)
 	{
-		return QMessageBox::warning(this, qAppName(), text);
+		QMessageBox::warning(this, qAppName(), text);
 	}
 
-	int SchemaView::errorMessageBox(QString text)
+	void SchemaView::errorMessageBox(QString text)
 	{
-		return QMessageBox::critical(this, qAppName(), text);
+		QMessageBox::critical(this, qAppName(), text);
 
 	}
 
-	int SchemaView::infoMessageBox(QString text)
+	void SchemaView::infoMessageBox(QString text)
 	{
-		return QMessageBox::information(this, qAppName(), text);
+		QMessageBox::information(this, qAppName(), text);
 	}
 
-	int SchemaView::questionMessageBox(QString text, int buttons)
+	bool SchemaView::questionMessageBox(QString text)
 	{
-		return QMessageBox::question(this, qAppName(), text, buttons);
+		return QMessageBox::question(this, qAppName(), text) == QMessageBox::Yes;
 	}
 
 	// Properties

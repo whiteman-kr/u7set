@@ -322,22 +322,22 @@ double AppSignalParam::highValidRange() const
 	return m_highValidRange;
 }
 
-double AppSignalParam::lowEngeneeringUnits() const
+double AppSignalParam::lowEngineeringUnits() const
 {
 	return m_lowEngeneeringUnits;
 }
 
-void AppSignalParam::setLowEngeneeringUnits(double value)
+void AppSignalParam::setLowEngineeringUnits(double value)
 {
 	m_lowEngeneeringUnits = value;
 }
 
-double AppSignalParam::highEngeneeringUnits() const
+double AppSignalParam::highEngineeringUnits() const
 {
 	return m_highEngeneeringUnits;
 }
 
-void AppSignalParam::setHighEngeneeringUnits(double value)
+void AppSignalParam::setHighEngineeringUnits(double value)
 {
 	m_highEngeneeringUnits = value;
 }

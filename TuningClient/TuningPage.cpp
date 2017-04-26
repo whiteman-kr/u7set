@@ -83,8 +83,8 @@ void TuningModelClient::setValue(const std::vector<int>& selectedRows)
 			analog = o.param.isAnalog();
 			value = o.state.value();
 			defaultValue = o.param.tuningDefaultValue();
-			lowLimit = o.param.lowEngeneeringUnits();
-			highLimit = o.param.highEngeneeringUnits();
+			lowLimit = o.param.lowEngineeringUnits();
+			highLimit = o.param.highEngineeringUnits();
             first = false;
 		}
 		else
@@ -97,7 +97,7 @@ void TuningModelClient::setValue(const std::vector<int>& selectedRows)
 
             if (analog == true)
             {
-				if (lowLimit != o.param.lowEngeneeringUnits() || highLimit != o.param.highEngeneeringUnits())
+				if (lowLimit != o.param.lowEngineeringUnits() || highLimit != o.param.highEngineeringUnits())
                 {
                     QMessageBox::warning(m_parent, tr("Set Value"), tr("Selected objects have different input range."));
                     return;

@@ -64,10 +64,10 @@ namespace VFrame30
 
 		// Message Box functions
 
-		Q_INVOKABLE int warningMessageBox(QString text);
-		Q_INVOKABLE int errorMessageBox(QString text);
-		Q_INVOKABLE int infoMessageBox(QString text);
-		Q_INVOKABLE int questionMessageBox(QString text, int buttons);
+		Q_INVOKABLE void warningMessageBox(QString text);
+		Q_INVOKABLE void errorMessageBox(QString text);
+		Q_INVOKABLE void infoMessageBox(QString text);
+		Q_INVOKABLE bool questionMessageBox(QString text);
 
 		// Properties
 		//

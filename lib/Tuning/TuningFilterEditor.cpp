@@ -1155,8 +1155,8 @@ void TuningFilterEditor::on_m_setValue_clicked()
         if (first == true)
 		{
 			analog = object->isAnalog();
-			lowLimit = object->lowEngeneeringUnits();
-			highLimit = object->highEngeneeringUnits();
+			lowLimit = object->lowEngineeringUnits();
+			highLimit = object->highEngineeringUnits();
 			precision = object->precision();
             value = ov.value();
 			defaultValue = object->tuningDefaultValue();
@@ -1172,7 +1172,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
             if (analog == true)
             {
-				if (lowLimit != object->lowEngeneeringUnits() || highLimit != object->highEngeneeringUnits())
+				if (lowLimit != object->lowEngineeringUnits() || highLimit != object->highEngineeringUnits())
                 {
                     QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
                     return;

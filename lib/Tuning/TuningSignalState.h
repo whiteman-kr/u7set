@@ -30,16 +30,16 @@ class TuningSignalState
 public:
 	// State methods
 
-	float value() const;
+	Q_INVOKABLE float value() const;
 
-	float readLowLimit() const;
-	float readHighLimit() const;
+	Q_INVOKABLE float readLowLimit() const;
+	Q_INVOKABLE float readHighLimit() const;
 
-	bool underflow() const;
-	bool overflow() const;
+	Q_INVOKABLE bool underflow() const;
+	Q_INVOKABLE bool overflow() const;
 
-	bool valid() const;
-	bool writing() const;
+	Q_INVOKABLE bool valid() const;
+	Q_INVOKABLE bool writing() const;
 
 	float editValue() const;
 

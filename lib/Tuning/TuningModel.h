@@ -14,7 +14,7 @@ struct TuningModelRecord
 
 	bool limitsUnbalance() const
 	{
-		if (state.valid() == true && (param.lowEngeneeringUnits() != state.readLowLimit() || param.highEngeneeringUnits() != state.readHighLimit()))
+		if (state.valid() == true && (param.lowEngineeringUnits() != state.readLowLimit() || param.highEngineeringUnits() != state.readHighLimit()))
 		{
 			return true;
 		}

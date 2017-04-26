@@ -802,7 +802,7 @@ void TuningSignalManager::slot_writeValue(QString appSignalID, float value, bool
 		return;
 	}
 
-	if (value < signal->lowEngeneeringUnits() || value > signal->highEngeneeringUnits())
+	if (value < signal->lowEngineeringUnits() || value > signal->highEngineeringUnits())
 	{
 		*ok = false;
 		return;

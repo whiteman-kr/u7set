@@ -93,8 +93,8 @@ bool TuningModelRecordSorter::sortFunction(const TuningModelRecord &o1, const Tu
         {
 			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
-				v1 = o1.param.lowEngeneeringUnits();
-				v2 = o2.param.lowEngeneeringUnits();
+				v1 = o1.param.lowEngineeringUnits();
+				v2 = o2.param.lowEngineeringUnits();
             }
             else
             {
@@ -107,8 +107,8 @@ bool TuningModelRecordSorter::sortFunction(const TuningModelRecord &o1, const Tu
         {
 			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
-				v1 = o1.param.highEngeneeringUnits();
-				v2 = o2.param.highEngeneeringUnits();
+				v1 = o1.param.highEngineeringUnits();
+				v2 = o2.param.highEngineeringUnits();
             }
             else
             {
@@ -531,13 +531,13 @@ QVariant TuningModel::data(const QModelIndex &index, int role) const
 				if (item.limitsUnbalance())
                 {
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(item.param.lowEngeneeringUnits(), 'f', item.param.precision()))
+							.arg(QString::number(item.param.lowEngineeringUnits(), 'f', item.param.precision()))
 							.arg(QString::number(item.state.readLowLimit(), 'f', item.param.precision()));
 					return str;
                 }
                 else
                 {
-					return QString::number(item.param.lowEngeneeringUnits(), 'f', item.param.precision());
+					return QString::number(item.param.lowEngineeringUnits(), 'f', item.param.precision());
                 }
             }
             else
@@ -553,13 +553,13 @@ QVariant TuningModel::data(const QModelIndex &index, int role) const
 				if (item.limitsUnbalance())
 				{
 					QString str = tr("Base %1, read %2")
-							.arg(QString::number(item.param.highEngeneeringUnits(), 'f', item.param.precision()))
+							.arg(QString::number(item.param.highEngineeringUnits(), 'f', item.param.precision()))
 							.arg(QString::number(item.state.readHighLimit(), 'f', item.param.precision()));
 					return str;
                 }
                 else
                 {
-					return QString::number(item.param.highEngeneeringUnits(), 'f', item.param.precision());
+					return QString::number(item.param.highEngineeringUnits(), 'f', item.param.precision());
                 }
             }
             else
