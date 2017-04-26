@@ -115,6 +115,9 @@ namespace VFrame30
 		bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool value);
 
+		QColor backgroundColor() const;
+		void setBackgroundColor(const QColor& value);
+
 		bool isLogicSchema() const;
 		bool isUfbSchema() const;
 		bool isMonitorSchema() const;
@@ -128,7 +131,7 @@ namespace VFrame30
 
 		int changeset() const;
 		void setChangeset(int value);
-		
+
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;
 
@@ -146,6 +149,8 @@ namespace VFrame30
 		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 
 		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
+
+		QColor m_backgroundColor = {qRgb(0xFF, 0xFF, 0xFF)};
 
 		int m_changeset = -1;					// Changeset, this field is not stored in file
 	};

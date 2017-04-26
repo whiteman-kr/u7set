@@ -288,6 +288,7 @@ message Schema
 	required double height = 5;
 	required SchemaUnit unit = 6;
 	optional bool excludeFromBuild = 7 [default = false];
+	optional uint32 backgroundColor = 8;
 
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability

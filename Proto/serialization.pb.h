@@ -2040,6 +2040,13 @@ class Schema : public ::google::protobuf::Message {
   inline bool excludefrombuild() const;
   inline void set_excludefrombuild(bool value);
 
+  // optional uint32 backgroundColor = 8;
+  inline bool has_backgroundcolor() const;
+  inline void clear_backgroundcolor();
+  static const int kBackgroundColorFieldNumber = 8;
+  inline ::google::protobuf::uint32 backgroundcolor() const;
+  inline void set_backgroundcolor(::google::protobuf::uint32 value);
+
   // repeated .Proto.Envelope layers = 100;
   inline int layers_size() const;
   inline void clear_layers();
@@ -2095,6 +2102,8 @@ class Schema : public ::google::protobuf::Message {
   inline void clear_has_unit();
   inline void set_has_excludefrombuild();
   inline void clear_has_excludefrombuild();
+  inline void set_has_backgroundcolor();
+  inline void clear_has_backgroundcolor();
   inline void set_has_afbs();
   inline void clear_has_afbs();
   inline void set_has_logic_schema();
@@ -2115,9 +2124,10 @@ class Schema : public ::google::protobuf::Message {
   ::Proto::AfbElementCollection* afbs_;
   ::Proto::LogicSchema* logic_schema_;
   ::Proto::UfbSchema* ufb_schema_;
+  ::google::protobuf::uint32 backgroundcolor_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11741,6 +11751,28 @@ inline void Schema::set_excludefrombuild(bool value) {
   excludefrombuild_ = value;
 }
 
+// optional uint32 backgroundColor = 8;
+inline bool Schema::has_backgroundcolor() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Schema::set_has_backgroundcolor() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Schema::clear_has_backgroundcolor() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Schema::clear_backgroundcolor() {
+  backgroundcolor_ = 0u;
+  clear_has_backgroundcolor();
+}
+inline ::google::protobuf::uint32 Schema::backgroundcolor() const {
+  return backgroundcolor_;
+}
+inline void Schema::set_backgroundcolor(::google::protobuf::uint32 value) {
+  set_has_backgroundcolor();
+  backgroundcolor_ = value;
+}
+
 // repeated .Proto.Envelope layers = 100;
 inline int Schema::layers_size() const {
   return layers_.size();
@@ -11768,13 +11800,13 @@ Schema::mutable_layers() {
 
 // required .Proto.AfbElementCollection afbs = 101;
 inline bool Schema::has_afbs() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void Schema::set_has_afbs() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void Schema::clear_has_afbs() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void Schema::clear_afbs() {
   if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
@@ -11806,13 +11838,13 @@ inline void Schema::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
 
 // optional .Proto.LogicSchema logic_schema = 200;
 inline bool Schema::has_logic_schema() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void Schema::set_has_logic_schema() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void Schema::clear_has_logic_schema() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void Schema::clear_logic_schema() {
   if (logic_schema_ != NULL) logic_schema_->::Proto::LogicSchema::Clear();
@@ -11844,13 +11876,13 @@ inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schem
 
 // optional .Proto.UfbSchema ufb_schema = 201;
 inline bool Schema::has_ufb_schema() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void Schema::set_has_ufb_schema() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void Schema::clear_has_ufb_schema() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void Schema::clear_ufb_schema() {
   if (ufb_schema_ != NULL) ufb_schema_->::Proto::UfbSchema::Clear();
