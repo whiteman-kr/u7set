@@ -36,6 +36,7 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaHeight", true, Schema::docHeightRegional, Schema::setDocHeightRegional);
+		ADD_PROPERTY_GETTER_SETTER(QColor, "BackgroundColor", true, Schema::backgroundColor, Schema::setBackgroundColor);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -84,6 +85,7 @@ namespace VFrame30
 		mutableSchema->set_height(m_height);
 		mutableSchema->set_unit(static_cast<Proto::SchemaUnit>(m_unit));
 		mutableSchema->set_excludefrombuild(m_excludeFromBuild);
+		mutableSchema->set_backgroundcolor(m_backgroundColor.rgba());
 
 		// Save Layers
 		//
@@ -120,6 +122,11 @@ namespace VFrame30
 		m_height = schema.height();
 		m_unit = static_cast<SchemaUnit>(schema.unit());
 		m_excludeFromBuild = schema.excludefrombuild();
+
+		if (schema.has_backgroundcolor() == true)
+		{
+			m_backgroundColor = schema.backgroundcolor();
+		}
 
 		// Прочитать Layers
 		//
@@ -192,7 +199,7 @@ namespace VFrame30
 		// Нарисовать лист
 		//
 		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
-		p->fillRect(pageRect, Qt::white);
+		p->fillRect(pageRect, backgroundColor());
 
 		// Draw items by layers which has Show flag
 		//
@@ -922,6 +929,16 @@ namespace VFrame30
 	void Schema::setExcludeFromBuild(bool value)
 	{
 		m_excludeFromBuild = value;
+	}
+
+	QColor Schema::backgroundColor() const
+	{
+		return m_backgroundColor;
+	}
+
+	void Schema::setBackgroundColor(const QColor& value)
+	{
+		m_backgroundColor = value;
 	}
 
 	bool Schema::isLogicSchema() const

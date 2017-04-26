@@ -1,8 +1,7 @@
 #include "TuningController.h"
+#include "../lib/AppSignal.h"
+#include "../lib/Tuning/TuningSignalState.h"
 
-#include <QMessageBox>
-
-Q_DECLARE_METATYPE(TuningSignalState)
 
 AppSignalParam TuningController::signalParam(const QString& appSignalID, bool* ok)
 {
@@ -58,12 +57,10 @@ QVariant TuningController::param(const QString& appSignalID)
 	}
 
 	return result;
-
 }
 
 QVariant TuningController::state(const QString& appSignalID)
 {
-
 	bool ok = true;
 
 	QVariant result = QVariant::fromValue(signalState(appSignalID, &ok));

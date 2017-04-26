@@ -307,7 +307,7 @@ QString AppSignalParam::unit() const
 	return m_unit;
 }
 
-void AppSignalParam::setUnit(int value)
+void AppSignalParam::setUnit(QString value)
 {
 	m_unit = value;
 }

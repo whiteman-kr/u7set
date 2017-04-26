@@ -3,8 +3,7 @@
 
 #include "Stable.h"
 #include "../lib/Hash.h"
-#include "../lib/Signal.h"
-#include "../lib/Tuning./TuningSignalStorage.h"
+#include "../lib/Tuning/TuningSignalStorage.h"
 
 union TuningSignalStateFlags
 {
@@ -20,7 +19,6 @@ union TuningSignalStateFlags
 	};
 
 	quint32 all = 0;
-
 };
 
 class TuningSignalState
@@ -29,7 +27,7 @@ class TuningSignalState
 
 public:
 	// State methods
-
+	//
 	Q_INVOKABLE float value() const;
 
 	Q_INVOKABLE float readLowLimit() const;
@@ -44,7 +42,7 @@ public:
 	float editValue() const;
 
 	// Functions used by model
-
+	//
 	void onEditValue(float value);
 
 	bool needRedraw();
@@ -55,15 +53,13 @@ public:
 	void copy(const TuningSignalState& source);
 
 	// Functions used by signal manager
-
+	//
 	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed);
-
 	void onSendValue(float value);
 
 	void invalidate();
 
 public:
-
 	TuningSignalStateFlags m_flags;
 
 	float m_value = 0;
@@ -75,5 +71,6 @@ public:
 	int m_writingCounter = 0;
 };
 
+Q_DECLARE_METATYPE(TuningSignalState)
 
 #endif // TUNINGSIGNAL_H

@@ -1,6 +1,6 @@
 #include "TuningSignalState.h"
 
-#include<memory>
+#include <memory>
 
 //
 // TuningSignalState
@@ -9,7 +9,6 @@
 float TuningSignalState::value() const
 {
 	return m_value;
-
 }
 
 float TuningSignalState::readLowLimit() const
@@ -125,12 +124,6 @@ void TuningSignalState::copy(const TuningSignalState& source)
 
 void TuningSignalState::onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed)
 {
-	if (writingFailed == nullptr)
-	{
-		assert(writingFailed);
-		return;
-	}
-
 	m_readLowLimit = readLowLimit;
 	m_readHighLimit = readHighLimit;
 	m_value = value;
@@ -139,7 +132,10 @@ void TuningSignalState::onReceiveValue(float readLowLimit, float readHighLimit, 
 	m_flags.m_underflow = m_value < m_readLowLimit;
 	m_flags.m_overflow = m_value > m_readHighLimit;
 
-	*writingFailed = false;
+	if (writingFailed != nullptr)
+	{
+		*writingFailed = false;
+	}
 
 	if (m_flags.m_writing == true)
 	{
@@ -169,7 +165,10 @@ void TuningSignalState::onReceiveValue(float readLowLimit, float readHighLimit, 
 
 				m_writingCounter = 0;
 
-				*writingFailed = true;
+				if (writingFailed != nullptr)
+				{
+					*writingFailed = true;
+				}
 			}
 		}
 	}

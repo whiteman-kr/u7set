@@ -5,6 +5,8 @@
 #include "DrawParam.h"
 #include "../lib/AppSignal.h"
 #include "../lib/AppSignalManager.h"
+#include "../lib/Tuning/TuningSignalState.h"
+
 
 namespace VFrame30
 {
