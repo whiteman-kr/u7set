@@ -28,11 +28,11 @@ namespace VFrame30
 		double weight() const;
 		void setWeight(double weight);
 
-		QRgb lineColor() const;
-		void setLineColor(QRgb color);
+		QColor lineColor() const;
+		void setLineColor(QColor color);
 
 	protected:
 		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt
-		QRgb m_lineColor;
+		QColor m_lineColor;
 	};
 }

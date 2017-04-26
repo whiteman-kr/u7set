@@ -29,6 +29,7 @@ namespace VFrame30
 		virtual void Draw(CDrawParam* drawParam, const Schema* pFrame, const SchemaLayer* pLayer) const override;
 
 		// Properties and Data
+		//
 	public:
 		double weight() const;
 		void setWeight(double weight);
