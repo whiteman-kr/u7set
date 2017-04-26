@@ -117,7 +117,7 @@ public:
 	void setUnitId(int value);
 
 	QString unit() const;
-	void setUnit(int value);
+	void setUnit(QString value);
 
 	double lowValidRange() const;
 	double highValidRange() const;
@@ -173,7 +173,7 @@ private:
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-	int m_unitId;
+	int m_unitId = NO_UNIT_ID;
 	QString m_unit;
 
 	double m_lowValidRange = 0;
