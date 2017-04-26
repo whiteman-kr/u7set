@@ -6,7 +6,7 @@
 // ConfigController
 //
 
-ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, HostAddressPort address2)
+ConfigController::ConfigController(QWidget* parent, HostAddressPort address1, HostAddressPort address2)
 	:m_parent(parent),
 	  m_address1(address1),
 	  m_address2(address2)
@@ -50,7 +50,7 @@ ConfigController::ConfigController(QWidget *parent, HostAddressPort address1, Ho
 		{
 			QMessageBox::critical(nullptr,
 								  qApp->applicationName(),
-                                  tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
+								  tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
 								  .arg(m_appInstanceSharedMemory.errorString()));
 
 			// Set "Some" Application Instance No
@@ -243,7 +243,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	// Error handling
 	//
 	if (result == false ||
-		readSettings.errorMessage.isEmpty() == false)
+			readSettings.errorMessage.isEmpty() == false)
 	{
 		QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
 
@@ -458,7 +458,7 @@ bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileDat
 bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
-		softwareNode.nodeName() != "Software")
+			softwareNode.nodeName() != "Software")
 	{
 		assert(outSetting);
 		assert(softwareNode.nodeName() == "Software");
@@ -475,7 +475,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	{
 		// The received file has different StrID then expected
 		//
-        outSetting->errorMessage += tr("The received file has different EquipmentID then expected.\n");
+		outSetting->errorMessage += tr("The received file has different EquipmentID then expected.\n");
 		return false;
 	}
 
@@ -487,7 +487,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 	{
 		// The received file has different type then expected,
 		//
-        outSetting->errorMessage += tr("The received file has different software type then expected.\n");
+		outSetting->errorMessage += tr("The received file has different software type then expected.\n");
 		return false;
 	}
 
@@ -497,7 +497,7 @@ bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigS
 bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
-		settingsNode.nodeName() != "Settings")
+			settingsNode.nodeName() != "Settings")
 	{
 		assert(outSetting);
 		assert(settingsNode.nodeName() == "Settings");
@@ -560,7 +560,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting)
 {
 	if (outSetting == nullptr ||
-		schemasNode.nodeName() != "Schemas")
+			schemasNode.nodeName() != "Schemas")
 	{
 		assert(outSetting);
 		assert(schemasNode.nodeName() == "Schemas");

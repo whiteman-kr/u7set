@@ -12,11 +12,11 @@ class TuningController : public QObject
 	Q_OBJECT
 public:
 
-	AppSignalParam signalParam(const QString &appSignalID, bool *ok);
-	TuningSignalState signalState(const QString &appSignalID, bool *ok);
+	AppSignalParam signalParam(const QString& appSignalID, bool* ok);
+	TuningSignalState signalState(const QString& appSignalID, bool* ok);
 
-	Q_INVOKABLE QVariant param(const QString &appSignalID); // If no signal with specified appSignalID found, QVariant is null
-	Q_INVOKABLE QVariant state(const QString &appSignalID);	// If no signal with specified appSignalID found, QVariant is null
+	Q_INVOKABLE QVariant param(const QString& appSignalID); // If no signal with specified appSignalID found, QVariant is null
+	Q_INVOKABLE QVariant state(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is null
 
 	Q_INVOKABLE bool writeValue(QString appSignalID, float value);
 

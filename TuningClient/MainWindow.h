@@ -14,7 +14,7 @@
 #include "SchemaStorage.h"
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow(QWidget* parent = 0);
 	~MainWindow();
 
 private:
@@ -32,7 +32,7 @@ private:
 
 
 private:
-	TuningClientSignalManager *m_objectManager = nullptr;
+	TuningClientSignalManager* m_objectManager = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
 
@@ -48,23 +48,23 @@ private:
 
 private slots:
 	void slot_configurationArrived();
-    void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
+	void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
 	void slot_schemasGlobalScriptArrived(QByteArray data);
 
 public slots:
 	void exit();
-    void runPresetEditor();
+	void runPresetEditor();
 	void runUsersEditor();
 	void showSettings();
 	void showTuningSources();
-    void showAbout();
+	void showAbout();
 
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
 
-	void createWorkspace(const TuningSignalStorage *objects);
+	void createWorkspace(const TuningSignalStorage* objects);
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;

@@ -6,30 +6,30 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 
 namespace Ui {
-class DialogTuningSourceInfo;
+	class DialogTuningSourceInfo;
 }
 
 class DialogTuningSourceInfo : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-	explicit DialogTuningSourceInfo(TuningSignalManager *tuningSignalManager, QWidget *parent, quint64 tuningSourceId);
-    ~DialogTuningSourceInfo();
+	explicit DialogTuningSourceInfo(TuningSignalManager* tuningSignalManager, QWidget* parent, quint64 tuningSourceId);
+	~DialogTuningSourceInfo();
 
 protected:
-    void timerEvent(QTimerEvent* event);
+	void timerEvent(QTimerEvent* event);
 
 private:
-    void updateData();
+	void updateData();
 
 private:
-    int m_updateStateTimerId = -1;
+	int m_updateStateTimerId = -1;
 
-    quint64 m_tuningSourceId = -1;
+	quint64 m_tuningSourceId = -1;
 
 private:
-    Ui::DialogTuningSourceInfo *ui;
+	Ui::DialogTuningSourceInfo* ui;
 
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 };

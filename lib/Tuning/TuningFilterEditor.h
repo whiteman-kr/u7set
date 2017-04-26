@@ -9,186 +9,186 @@
 
 class TuningFilterEditor : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
-				std::vector<int> &signalsTableColumnWidth, std::vector<int> &presetsTreeColumnWidth,
-				QPoint pos,
-				QByteArray geometry,
-				QWidget *parent);
+	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
+								std::vector<int>& signalsTableColumnWidth, std::vector<int>& presetsTreeColumnWidth,
+								QPoint pos,
+								QByteArray geometry,
+								QWidget* parent);
 
-    ~TuningFilterEditor();
+	~TuningFilterEditor();
 
 
 signals:
 
-    void editorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
+	void editorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
 
 public slots:
 
-    void slot_signalsUpdated();
+	void slot_signalsUpdated();
 
 protected:
 
-    virtual double getCurrentSignalValue(Hash appSignalHash, bool &ok);
+	virtual double getCurrentSignalValue(Hash appSignalHash, bool& ok);
 
 private slots:
 
-    void on_m_addPreset_clicked();
+	void on_m_addPreset_clicked();
 
-    void on_m_editPreset_clicked();
+	void on_m_editPreset_clicked();
 
-    void on_m_removePreset_clicked();
+	void on_m_removePreset_clicked();
 
-    void on_m_copyPreset_clicked();
+	void on_m_copyPreset_clicked();
 
-    void on_m_pastePreset_clicked();
+	void on_m_pastePreset_clicked();
 
-    void on_m_moveUp_clicked();
+	void on_m_moveUp_clicked();
 
-    void on_m_moveDown_clicked();
+	void on_m_moveDown_clicked();
 
-    void on_m_add_clicked();
+	void on_m_add_clicked();
 
-    void on_m_remove_clicked();
+	void on_m_remove_clicked();
 
-    void on_m_presetsTree_doubleClicked(const QModelIndex &index);
+	void on_m_presetsTree_doubleClicked(const QModelIndex& index);
 
-    void on_m_signalTypeCombo_currentIndexChanged(int index);
+	void on_m_signalTypeCombo_currentIndexChanged(int index);
 
-    void on_m_presetsTree_itemSelectionChanged();
+	void on_m_presetsTree_itemSelectionChanged();
 
-    void on_m_setValue_clicked();
+	void on_m_setValue_clicked();
 
-    void on_m_setCurrent_clicked();
+	void on_m_setCurrent_clicked();
 
-    void on_m_applyFilter_clicked();
+	void on_m_applyFilter_clicked();
 
-    void on_m_signalsTable_doubleClicked(const QModelIndex &index);
+	void on_m_signalsTable_doubleClicked(const QModelIndex& index);
 
-    void sortIndicatorChanged(int column, Qt::SortOrder order);
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
 
-    void on_m_filterTypeCombo_currentIndexChanged(int index);
+	void on_m_filterTypeCombo_currentIndexChanged(int index);
 
-    void on_m_filterText_returnPressed();
+	void on_m_filterText_returnPressed();
 
-    void on_m_presetsTree_contextMenu(const QPoint &pos);
-
-private:
-
-    enum class TreeItemType
-    {
-	Filter,
-	Signal
-    };
-
-    enum class FilterType
-    {
-	All,
-	AppSignalID,
-	CustomAppSignalID,
-	EquipmentID,
-	Caption
-    };
-
-    enum class SignalType
-    {
-	All,
-	Analog,
-	Discrete
-    };
-
-    void initUserInterface();
-
-    bool isFilter(QTreeWidgetItem* item);
-    bool isSignal(QTreeWidgetItem* item);
-
-    void addChildTreeObjects(const std::shared_ptr<TuningFilter> &filter, QTreeWidgetItem* parent);
-
-    void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
-    void setSignalItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
-
-    void fillObjectsList();
-
-    std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
-
-    void getSelectedCount(int& selectedPresets, int& selectedSignals);
-
+	void on_m_presetsTree_contextMenu(const QPoint& pos);
 
 private:
 
-    // User interface
-    //
+	enum class TreeItemType
+	{
+		Filter,
+		Signal
+	};
 
-    QTableView* m_signalsTable = nullptr;
-    QComboBox* m_signalTypeCombo = nullptr;
-    QComboBox* m_filterTypeCombo = nullptr;
-    QLineEdit* m_filterText = nullptr;
-    QPushButton* m_applyFilter = nullptr;
+	enum class FilterType
+	{
+		All,
+		AppSignalID,
+		CustomAppSignalID,
+		EquipmentID,
+		Caption
+	};
 
-    //
+	enum class SignalType
+	{
+		All,
+		Analog,
+		Discrete
+	};
 
-    QPushButton* m_add = nullptr;
-    QPushButton* m_remove = nullptr;
+	void initUserInterface();
 
-    QTreeWidget* m_presetsTree = nullptr;
+	bool isFilter(QTreeWidgetItem* item);
+	bool isSignal(QTreeWidgetItem* item);
 
-    //
+	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
 
-    QPushButton* m_addPreset = nullptr;
-    QPushButton* m_editPreset = nullptr;
-    QPushButton* m_removePreset = nullptr;
+	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
+	void setSignalItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
 
-    QPushButton* m_copyPreset = nullptr;
-    QPushButton* m_pastePreset = nullptr;
+	void fillObjectsList();
 
-    QPushButton* m_moveUp = nullptr;
-    QPushButton* m_moveDown = nullptr;
+	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
 
-    QPushButton* m_setValue = nullptr;
-    QPushButton* m_setCurrent = nullptr;
-
-    QAction* m_addPresetAction = nullptr;
-    QAction* m_editPresetAction = nullptr;
-    QAction* m_removePresetAction = nullptr;
-
-    QAction* m_copyPresetAction = nullptr;
-    QAction* m_pastePresetAction = nullptr;
-
-    QAction* m_moveUpAction = nullptr;
-    QAction* m_moveDownAction = nullptr;
-
-    QAction* m_setValueAction = nullptr;
-    QAction* m_setCurrentAction = nullptr;
-
-    QMenu* m_presetsTreeContextMenu = nullptr;
+	void getSelectedCount(int& selectedPresets, int& selectedSignals);
 
 
-    //QDialogButtonBox* m_okCancelButtonBox = nullptr;
-    QPushButton* m_saveButton = nullptr;
-    QPushButton* m_cancelButton = nullptr;
+private:
 
-    // Dialog Data
-    //
+	// User interface
+	//
 
-    TuningModel *m_model = nullptr;
+	QTableView* m_signalsTable = nullptr;
+	QComboBox* m_signalTypeCombo = nullptr;
+	QComboBox* m_filterTypeCombo = nullptr;
+	QLineEdit* m_filterText = nullptr;
+	QPushButton* m_applyFilter = nullptr;
 
-    bool m_modified = false;
+	//
 
-    bool m_showAutomatic = false;
+	QPushButton* m_add = nullptr;
+	QPushButton* m_remove = nullptr;
 
-    TuningFilterStorage* m_filterStorage = nullptr;
+	QTreeWidget* m_presetsTree = nullptr;
+
+	//
+
+	QPushButton* m_addPreset = nullptr;
+	QPushButton* m_editPreset = nullptr;
+	QPushButton* m_removePreset = nullptr;
+
+	QPushButton* m_copyPreset = nullptr;
+	QPushButton* m_pastePreset = nullptr;
+
+	QPushButton* m_moveUp = nullptr;
+	QPushButton* m_moveDown = nullptr;
+
+	QPushButton* m_setValue = nullptr;
+	QPushButton* m_setCurrent = nullptr;
+
+	QAction* m_addPresetAction = nullptr;
+	QAction* m_editPresetAction = nullptr;
+	QAction* m_removePresetAction = nullptr;
+
+	QAction* m_copyPresetAction = nullptr;
+	QAction* m_pastePresetAction = nullptr;
+
+	QAction* m_moveUpAction = nullptr;
+	QAction* m_moveDownAction = nullptr;
+
+	QAction* m_setValueAction = nullptr;
+	QAction* m_setCurrentAction = nullptr;
+
+	QMenu* m_presetsTreeContextMenu = nullptr;
+
+
+	//QDialogButtonBox* m_okCancelButtonBox = nullptr;
+	QPushButton* m_saveButton = nullptr;
+	QPushButton* m_cancelButton = nullptr;
+
+	// Dialog Data
+	//
+
+	TuningModel* m_model = nullptr;
+
+	bool m_modified = false;
+
+	bool m_showAutomatic = false;
+
+	TuningFilterStorage* m_filterStorage = nullptr;
 
 	const TuningSignalStorage* m_signals = nullptr;
 
-    int m_sortColumn = 0;
+	int m_sortColumn = 0;
 
-    Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
-    std::vector <int> m_signalsTableColumnWidth;
-    std::vector <int> m_presetsTreeColumnWidth;
+	std::vector <int> m_signalsTableColumnWidth;
+	std::vector <int> m_presetsTreeColumnWidth;
 };
 
 #endif // DIALOGPRESETEDITOR_H

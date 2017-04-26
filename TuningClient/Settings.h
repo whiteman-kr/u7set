@@ -107,18 +107,18 @@ public:
 	void setConfiguratorAddress2(const QString& address, int port);
 	HostAddressPort configuratorAddress2();
 
-    QString language() const;
-    void setLanguage(const QString& value);
+	QString language() const;
+	void setLanguage(const QString& value);
 
 	bool admin() const;
 
-	TuningPageSettings *tuningPageSettings(int index);
+	TuningPageSettings* tuningPageSettings(int index);
 
-    QString globalAppDataPath();
+	QString globalAppDataPath();
 
-    QString localAppDataPath();
+	QString localAppDataPath();
 
-    QString userFiltersFile();
+	QString userFiltersFile();
 
 public:
 
@@ -143,13 +143,13 @@ public:
 	QPoint m_presetPropertiesWindowPos;
 	QByteArray m_presetPropertiesWindowGeometry;
 
-    // Preset Editor options
+	// Preset Editor options
 
-    QPoint m_presetEditorPos;
-    QByteArray m_presetEditorGeometry;
+	QPoint m_presetEditorPos;
+	QByteArray m_presetEditorGeometry;
 
-    std::vector<int> m_presetEditorSignalsTableColumnWidth;
-    std::vector<int> m_presetEditorPresetsTreeColumnWidth;
+	std::vector<int> m_presetEditorSignalsTableColumnWidth;
+	std::vector<int> m_presetEditorPresetsTreeColumnWidth;
 
 
 
@@ -169,12 +169,12 @@ private:
 	QString m_configuratorIpAddress2;
 	int m_configuratorPort2;
 
-    QString m_language = "en";
+	QString m_language = "en";
 
-    QString m_globalAppDataPath;
-    QString m_localAppDataPath;
+	QString m_globalAppDataPath;
+	QString m_localAppDataPath;
 
-    QString m_userFiltersFile;
+	QString m_userFiltersFile;
 
 	QMutex m;
 

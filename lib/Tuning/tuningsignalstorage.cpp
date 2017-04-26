@@ -12,7 +12,7 @@ TuningSignalStorage::TuningSignalStorage()
 }
 
 
-bool TuningSignalStorage::loadSignals(const QByteArray& data, QString *errorCode)
+bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{

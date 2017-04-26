@@ -7,7 +7,7 @@
 #include "DialogProperties.h"
 
 namespace Ui {
-class DialogUsers;
+	class DialogUsers;
 }
 
 
@@ -16,7 +16,7 @@ class DialogUsers : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogUsers(const UserManager& userManager, QWidget *parent = 0);
+	explicit DialogUsers(const UserManager& userManager, QWidget* parent = 0);
 	~DialogUsers();
 
 public:
@@ -29,15 +29,15 @@ private slots:
 
 	void on_m_remove_clicked();
 
-	void on_m_tree_doubleClicked(const QModelIndex &index);
+	void on_m_tree_doubleClicked(const QModelIndex& index);
 
 	void on_DialogUsers_accepted();
 
 private:
-	void showUserData(QTreeWidgetItem *item, const User& user);
+	void showUserData(QTreeWidgetItem* item, const User& user);
 
 private:
-	Ui::DialogUsers *ui;
+	Ui::DialogUsers* ui;
 
 };
 

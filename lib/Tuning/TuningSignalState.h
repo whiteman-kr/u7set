@@ -56,7 +56,7 @@ public:
 
 	// Functions used by signal manager
 
-	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool &writingFailed);
+	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed);
 
 	void onSendValue(float value);
 

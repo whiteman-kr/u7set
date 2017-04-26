@@ -4,8 +4,8 @@
 #pragma pack(1)
 struct TuningClientSharedData
 {
-    int version = 1;
-    bool showCommand = 0;
+	int version = 1;
+	bool showCommand = 0;
 };
 #pragma pack()
 

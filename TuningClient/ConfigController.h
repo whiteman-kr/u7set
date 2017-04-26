@@ -56,7 +56,7 @@ private:
 
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
-	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray &buildFileInfoArray, ConfigSettings* outSetting);
+	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting);
 
 	void addEventMessage(const QString& text);
 
