@@ -4,14 +4,12 @@
 #include <QMainWindow>
 #include <QTranslator>
 
-#include "Stable.h"
-
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "LogFile.h"
 #include "UserManager.h"
-#include "TuningClientObjectManager.h"
+#include "TuningClientSignalManager.h"
 #include "TuningClientFilterStorage.h"
 #include "SchemaStorage.h"
 
@@ -34,7 +32,7 @@ private:
 
 
 private:
-	TuningClientObjectManager *m_objectManager = nullptr;
+	TuningClientSignalManager *m_objectManager = nullptr;
 
 	SimpleThread* m_tcpClientThread = nullptr;
 

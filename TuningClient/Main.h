@@ -1,8 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "Stable.h"
-
 #pragma pack(1)
 struct TuningClientSharedData
 {

@@ -5,9 +5,9 @@
 #include "TuningFilter.h"
 
 
-class TuningItemModel;
+class TuningModel;
 
-struct TuningModelItem
+struct TuningModelRecord
 {
 	AppSignalParam param;
 	TuningSignalState state;
@@ -23,17 +23,17 @@ struct TuningModelItem
 	}
 };
 
-class TuningItemSorter
+class TuningModelRecordSorter
 {
 public:
-	  TuningItemSorter(int column, Qt::SortOrder order);
+	  TuningModelRecordSorter(int column, Qt::SortOrder order);
 
-	  bool operator()(const TuningModelItem& o1, const TuningModelItem& o2) const
+	  bool operator()(const TuningModelRecord& o1, const TuningModelRecord& o2) const
 	  {
 		  return sortFunction(o1, o2, m_column, m_order);
 	  }
 
-	  bool sortFunction(const TuningModelItem& o1, const TuningModelItem& o2, int column, Qt::SortOrder order) const;
+	  bool sortFunction(const TuningModelRecord& o1, const TuningModelRecord& o2, int column, Qt::SortOrder order) const;
 
 private:
 	  int m_column = -1;
@@ -41,13 +41,13 @@ private:
 	  Qt::SortOrder m_order = Qt::AscendingOrder;
 };
 
-class TuningItemModel : public QAbstractItemModel
+class TuningModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	TuningItemModel(QWidget *parent);
-	~TuningItemModel();
+	TuningModel(QWidget *parent);
+	~TuningModel();
 
 public:
 
@@ -71,7 +71,7 @@ public:
 
 
 public:
-	void setSignals(std::vector<TuningModelItem> &signalsList);
+	void setSignals(std::vector<TuningModelRecord> &signalsList);
 
 	AppSignalParam* param(int index);
 	TuningSignalState* state(int index);
@@ -109,7 +109,7 @@ private:
 protected:
 	std::vector<int> m_columnsIndexes;
 
-	std::vector<TuningModelItem> m_items;
+	std::vector<TuningModelRecord> m_items;
 
 	bool m_blink = false;
 

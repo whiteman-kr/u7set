@@ -10,58 +10,58 @@ using namespace std;
 // TuningItemSorter
 //
 
-TuningItemSorter::TuningItemSorter(int column, Qt::SortOrder order):
+TuningModelRecordSorter::TuningModelRecordSorter(int column, Qt::SortOrder order):
 	m_column(column),
 	m_order(order)
 {
 }
 
-bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModelItem &o2, int column, Qt::SortOrder order) const
+bool TuningModelRecordSorter::sortFunction(const TuningModelRecord &o1, const TuningModelRecord &o2, int column, Qt::SortOrder order) const
 {
 
 	QVariant v1;
 	QVariant v2;
 
-	switch (static_cast<TuningItemModel::Columns>(column))
+	switch (static_cast<TuningModel::Columns>(column))
 	{
-	case TuningItemModel::Columns::CustomAppSignalID:
+	case TuningModel::Columns::CustomAppSignalID:
 		{
 			v1 = o1.param.customSignalId();
 			v2 = o2.param.customSignalId();
 		}
 		break;
-	case TuningItemModel::Columns::EquipmentID:
+	case TuningModel::Columns::EquipmentID:
 		{
 			v1 = o1.param.equipmentId();
 			v2 = o2.param.equipmentId();
 		}
 		break;
-	case TuningItemModel::Columns::AppSignalID:
+	case TuningModel::Columns::AppSignalID:
 		{
 			v1 = o1.param.appSignalId();
 			v2 = o2.param.appSignalId();
 		}
 		break;
-	case TuningItemModel::Columns::Caption:
+	case TuningModel::Columns::Caption:
 		{
 			v1 = o1.param.caption();
 			v2 = o2.param.caption();
 		}
 		break;
-	case TuningItemModel::Columns::Units:
+	case TuningModel::Columns::Units:
 		{
 			v1 = o1.param.unitId();
 			v2 = o2.param.unitId();
 		}
 		break;
-	case TuningItemModel::Columns::Type:
+	case TuningModel::Columns::Type:
 		{
 			v1 = o1.param.isAnalog();
 			v2 = o2.param.isAnalog();
 		}
 		break;
 
-	case TuningItemModel::Columns::Default:
+	case TuningModel::Columns::Default:
 		{
 			if (o1.param.isAnalog() == o2.param.isAnalog())
 			{
@@ -75,7 +75,7 @@ bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModel
 			}
 		}
 		break;
-	case TuningItemModel::Columns::Value:
+	case TuningModel::Columns::Value:
 		{
 			if (o1.param.isAnalog() == o2.param.isAnalog())
 			{
@@ -89,7 +89,7 @@ bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModel
 			}
 		}
 		break;
-    case TuningItemModel::Columns::LowLimit:
+    case TuningModel::Columns::LowLimit:
         {
 			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
@@ -103,7 +103,7 @@ bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModel
             }
         }
         break;
-    case TuningItemModel::Columns::HighLimit:
+    case TuningModel::Columns::HighLimit:
         {
 			if (o1.param.isAnalog() == true && o2.param.isAnalog() == true)
             {
@@ -117,19 +117,19 @@ bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModel
             }
         }
         break;
-	case TuningItemModel::Columns::Valid:
+	case TuningModel::Columns::Valid:
 		{
 			v1 = o1.state.valid();
 			v2 = o2.state.valid();
 		}
 		break;
-	case TuningItemModel::Columns::Underflow:
+	case TuningModel::Columns::Underflow:
 		{
 			v1 = o1.state.underflow();
 			v2 = o2.state.underflow();
 		}
 		break;
-	case TuningItemModel::Columns::Overflow:
+	case TuningModel::Columns::Overflow:
 		{
 			v1 = o1.state.overflow();
 			v2 = o2.state.overflow();
@@ -155,7 +155,7 @@ bool TuningItemSorter::sortFunction(const TuningModelItem &o1, const TuningModel
 // TuningItemModel
 //
 
-TuningItemModel::TuningItemModel(QWidget *parent)
+TuningModel::TuningModel(QWidget *parent)
 	:QAbstractItemModel(parent),
 	m_parent(parent)
 {
@@ -177,7 +177,7 @@ TuningItemModel::TuningItemModel(QWidget *parent)
 	m_columnsNames<<tr("Overflow");
 }
 
-TuningItemModel::~TuningItemModel()
+TuningModel::~TuningModel()
 {
 	if (m_font != nullptr)
 	{
@@ -192,7 +192,7 @@ TuningItemModel::~TuningItemModel()
     }
 }
 
-void TuningItemModel::setSignals(std::vector<TuningModelItem>& signalsList)
+void TuningModel::setSignals(std::vector<TuningModelRecord>& signalsList)
 {
 	if (rowCount() > 0)
 	{
@@ -221,13 +221,13 @@ void TuningItemModel::setSignals(std::vector<TuningModelItem>& signalsList)
 
 }
 
-std::vector<int> TuningItemModel::columnsIndexes()
+std::vector<int> TuningModel::columnsIndexes()
 {
 	return m_columnsIndexes;
 
 }
 
-void TuningItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
+void TuningModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 {
 	if (columnCount() > 0)
 	{
@@ -250,7 +250,7 @@ void TuningItemModel::setColumnsIndexes(std::vector<int> columnsIndexes)
 
 }
 
-int TuningItemModel::columnIndex(int index) const
+int TuningModel::columnIndex(int index) const
 {
 	if (index <0 || index >= m_columnsIndexes.size())
 	{
@@ -262,7 +262,7 @@ int TuningItemModel::columnIndex(int index) const
 }
 
 
-AppSignalParam* TuningItemModel::param(int index)
+AppSignalParam* TuningModel::param(int index)
 {
 	if (index < 0 || index >= m_items.size())
 	{
@@ -272,7 +272,7 @@ AppSignalParam* TuningItemModel::param(int index)
 	return &m_items[index].param;
 }
 
-TuningSignalState* TuningItemModel::state(int index)
+TuningSignalState* TuningModel::state(int index)
 {
 	if (index < 0 || index >= m_items.size())
 	{
@@ -282,7 +282,7 @@ TuningSignalState* TuningItemModel::state(int index)
 	return &m_items[index].state;
 }
 
-void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBold)
+void TuningModel::setFont(const QString& fontName, int fontSize, bool fontBold)
 {
 	if (m_font != nullptr)
 	{
@@ -292,7 +292,7 @@ void TuningItemModel::setFont(const QString& fontName, int fontSize, bool fontBo
     m_font->setBold(fontBold);
 }
 
-void TuningItemModel::setImportantFont(const QString& fontName, int fontSize, bool fontBold)
+void TuningModel::setImportantFont(const QString& fontName, int fontSize, bool fontBold)
 {
     if (m_importantFont != nullptr)
     {
@@ -303,12 +303,12 @@ void TuningItemModel::setImportantFont(const QString& fontName, int fontSize, bo
 
 }
 
-void TuningItemModel::addColumn(Columns column)
+void TuningModel::addColumn(Columns column)
 {
     m_columnsIndexes.push_back(static_cast<int>(column));
 }
 
-void TuningItemModel::removeColumn(Columns column)
+void TuningModel::removeColumn(Columns column)
 {
     for (auto it = m_columnsIndexes.begin(); it != m_columnsIndexes.end(); it++)
     {
@@ -320,13 +320,13 @@ void TuningItemModel::removeColumn(Columns column)
     }
 }
 
-QModelIndex TuningItemModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex TuningModel::index(int row, int column, const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
 	return createIndex(row, column);
 }
 
-void TuningItemModel::sort(int column, Qt::SortOrder order)
+void TuningModel::sort(int column, Qt::SortOrder order)
 {
 	if (column < 0 || column >= m_columnsIndexes.size())
 	{
@@ -336,7 +336,7 @@ void TuningItemModel::sort(int column, Qt::SortOrder order)
 
 	int sortColumnIndex = m_columnsIndexes[column];
 
-	std::sort(m_items.begin(), m_items.end(), TuningItemSorter(sortColumnIndex, order));
+	std::sort(m_items.begin(), m_items.end(), TuningModelRecordSorter(sortColumnIndex, order));
 
 	if (m_items.empty() == false)
 	{
@@ -346,28 +346,28 @@ void TuningItemModel::sort(int column, Qt::SortOrder order)
 	return;
 }
 
-QModelIndex TuningItemModel::parent(const QModelIndex &index) const
+QModelIndex TuningModel::parent(const QModelIndex &index) const
 {
 	Q_UNUSED(index);
 	return QModelIndex();
 
 }
 
-int TuningItemModel::columnCount(const QModelIndex &parent) const
+int TuningModel::columnCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(m_columnsIndexes.size());
 
 }
 
-int TuningItemModel::rowCount(const QModelIndex &parent) const
+int TuningModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(m_items.size());
 
 }
 
-QVariant TuningItemModel::data(const QModelIndex &index, int role) const
+QVariant TuningModel::data(const QModelIndex &index, int role) const
 {
 	if (role == Qt::BackgroundRole)
 	{
@@ -429,7 +429,7 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
         //QString str = QString("%1:%2").arg(row).arg(col);
         //qDebug()<<str;
 
-		const TuningModelItem& item = m_items[row];
+		const TuningModelRecord& item = m_items[row];
 
 		int displayIndex = m_columnsIndexes[col];
 
@@ -598,20 +598,20 @@ QVariant TuningItemModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-QBrush TuningItemModel::backColor(const QModelIndex& index) const
+QBrush TuningModel::backColor(const QModelIndex& index) const
 {
 	Q_UNUSED(index);
 	return QBrush();
 }
 
-QBrush TuningItemModel::foregroundColor(const QModelIndex& index) const
+QBrush TuningModel::foregroundColor(const QModelIndex& index) const
 {
 	Q_UNUSED(index);
 	return QBrush();
 }
 
 
-QVariant TuningItemModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 	{

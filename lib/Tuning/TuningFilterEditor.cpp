@@ -25,11 +25,11 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
 
     // Objects and model
     //
-    m_model = new TuningItemModel(this);
-    m_model->addColumn(TuningItemModel::Columns::CustomAppSignalID);
-    m_model->addColumn(TuningItemModel::Columns::AppSignalID);
-    m_model->addColumn(TuningItemModel::Columns::Type);
-    m_model->addColumn(TuningItemModel::Columns::Caption);
+    m_model = new TuningModel(this);
+    m_model->addColumn(TuningModel::Columns::CustomAppSignalID);
+    m_model->addColumn(TuningModel::Columns::AppSignalID);
+    m_model->addColumn(TuningModel::Columns::Type);
+    m_model->addColumn(TuningModel::Columns::Caption);
 
     m_signalsTable->setModel(m_model);
 
@@ -385,7 +385,7 @@ void TuningFilterEditor::fillObjectsList()
 
     QString filterText = m_filterText->text().trimmed();
 
-	std::vector<TuningModelItem> objects;
+	std::vector<TuningModelRecord> objects;
 
 	for (int i = 0; i < m_signals->signalsCount(); i++)
 	{
@@ -458,7 +458,7 @@ void TuningFilterEditor::fillObjectsList()
             }
 		}
 
-		TuningModelItem m;
+		TuningModelRecord m;
 		m.param = *o;
 
 		objects.push_back(m);

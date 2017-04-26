@@ -701,7 +701,7 @@ void TuningSignalManager::slot_signalsUpdated(QByteArray data)
     l.unlock();
 
 }
-
+/*
 void TuningSignalManager::slot_exists(QString appSignalID, bool* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
@@ -779,9 +779,9 @@ void TuningSignalManager::slot_value(QString appSignalID, float* result, bool* o
 	TuningSignalState& state = stateByHash(hash);
 
 	*result = state.value();
-}
+}*/
 
-void TuningSignalManager::slot_setValue(QString appSignalID, float value, bool* ok)
+void TuningSignalManager::slot_writeValue(QString appSignalID, float value, bool* ok)
 {
 	if (ok == nullptr)
 	{
@@ -825,7 +825,7 @@ void TuningSignalManager::slot_setValue(QString appSignalID, float value, bool* 
 	return;
 }
 
-void TuningSignalManager::slot_highLimit(QString appSignalID, float *result, bool* ok)
+void TuningSignalManager::slot_signalParam(QString appSignalID, AppSignalParam* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -845,10 +845,10 @@ void TuningSignalManager::slot_highLimit(QString appSignalID, float *result, boo
 		return;
 	}
 
-	*result = object->highEngeneeringUnits();
+	*result = *object;
 }
 
-void TuningSignalManager::slot_lowLimit(QString appSignalID, float *result, bool* ok)
+void TuningSignalManager::slot_signalState(QString appSignalID, TuningSignalState* result, bool* ok)
 {
 	if (result == nullptr || ok == nullptr)
 	{
@@ -857,61 +857,6 @@ void TuningSignalManager::slot_lowLimit(QString appSignalID, float *result, bool
 		return;
 	}
 
-	Hash hash = ::calcHash(appSignalID);
-
-	QMutexLocker l(&m_signalsMutex);
-
-	AppSignalParam* object = m_signals.signalPtrByHash(hash);
-	if (object == nullptr)
-	{
-		*ok = false;
-		return;
-	}
-
-	*result = object->lowEngeneeringUnits();
-}
-
-void TuningSignalManager::slot_decimalPlaces(QString appSignalID, float *result, bool* ok)
-{
-	if (result == nullptr || ok == nullptr)
-	{
-		assert(result);
-		assert(ok);
-		return;
-	}
-
-	Hash hash = ::calcHash(appSignalID);
-
-	QMutexLocker l(&m_signalsMutex);
-
-	AppSignalParam* object = m_signals.signalPtrByHash(hash);
-	if (object == nullptr)
-	{
-		*ok = false;
-		return;
-	}
-
-	*result = object->precision();
-}
-
-void TuningSignalManager::slot_getParam(QString appSignalID, AppSignalParam& result, bool* ok)
-{
-	Hash hash = ::calcHash(appSignalID);
-
-	QMutexLocker l(&m_signalsMutex);
-
-	AppSignalParam* object = m_signals.signalPtrByHash(hash);
-	if (object == nullptr)
-	{
-		*ok = false;
-		return;
-	}
-
-	result = *object;
-}
-
-void TuningSignalManager::slot_getState(QString appSignalID, TuningSignalState& result, bool* ok)
-{
 	Hash hash = ::calcHash(appSignalID);
 
 	QMutexLocker l(&m_statesMutex);
@@ -923,7 +868,7 @@ void TuningSignalManager::slot_getState(QString appSignalID, TuningSignalState& 
 		return;
 	}
 
-	result = *state;
+	*result = *state;
 }
 
 std::vector<TuningSource> TuningSignalManager::tuningSourcesInfo()
@@ -1021,19 +966,10 @@ void TuningSignalManager::connectTuningController(TuningController* controller)
 
 	m_tuningControllersMap[controller] = true;
 
-	connect(controller, &TuningController::signal_exists, this, &TuningSignalManager::slot_exists, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_valid, this, &TuningSignalManager::slot_valid, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_analog, this, &TuningSignalManager::slot_analog, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_writeValue, this, &TuningSignalManager::slot_writeValue, Qt::DirectConnection);
 
-	connect(controller, &TuningController::signal_highLimit, this, &TuningSignalManager::slot_highLimit, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_lowLimit, this, &TuningSignalManager::slot_lowLimit, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_decimalPlaces, this, &TuningSignalManager::slot_decimalPlaces, Qt::DirectConnection);
-
-	connect(controller, &TuningController::signal_value, this, &TuningSignalManager::slot_value, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_setValue, this, &TuningSignalManager::slot_setValue, Qt::DirectConnection);
-
-	connect(controller, &TuningController::signal_getParam, this, &TuningSignalManager::slot_getParam, Qt::DirectConnection);
-	connect(controller, &TuningController::signal_getState, this, &TuningSignalManager::slot_getState, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_getParam, this, &TuningSignalManager::slot_signalParam, Qt::DirectConnection);
+	connect(controller, &TuningController::signal_getState, this, &TuningSignalManager::slot_signalState, Qt::DirectConnection);
 }
 
 QString TuningSignalManager::networkErrorStr(NetworkError error)

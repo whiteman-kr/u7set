@@ -420,6 +420,27 @@ namespace VFrame30
 		return widget;
 	}
 
+	int SchemaView::warningMessageBox(QString text)
+	{
+		return QMessageBox::warning(this, qAppName(), text);
+	}
+
+	int SchemaView::errorMessageBox(QString text)
+	{
+		return QMessageBox::critical(this, qAppName(), text);
+
+	}
+
+	int SchemaView::infoMessageBox(QString text)
+	{
+		return QMessageBox::information(this, qAppName(), text);
+	}
+
+	int SchemaView::questionMessageBox(QString text, int buttons)
+	{
+		return QMessageBox::question(this, qAppName(), text, buttons);
+	}
+
 	// Properties
 	//
 	double SchemaView::zoom() const

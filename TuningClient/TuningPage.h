@@ -1,18 +1,16 @@
 #ifndef TUNINGPAGE_H
 #define TUNINGPAGE_H
 
-#include "Stable.h"
-
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 
-class TuningItemModelMain : public TuningItemModel
+class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningItemModelMain(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget *parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget *parent);
 
 	void setValue(const std::vector<int>& selectedRows);
 	void invertValue(const std::vector<int>& selectedRows);
@@ -166,7 +164,7 @@ private:
 
     QComboBox* m_filterTypeCombo = nullptr;
 
-	TuningItemModelMain *m_model = nullptr;
+	TuningModelClient *m_model = nullptr;
 
 	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
 

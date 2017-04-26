@@ -3,10 +3,10 @@
 
 #include "../lib/Tuning/TuningSignalManager.h"
 
-class TuningClientObjectManager : public TuningSignalManager
+class TuningClientSignalManager : public TuningSignalManager
 {
 public:
-	TuningClientObjectManager();
+	TuningClientSignalManager();
 
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);

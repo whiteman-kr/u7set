@@ -25,6 +25,7 @@ union TuningSignalStateFlags
 
 class TuningSignalState
 {
+	Q_GADGET
 
 public:
 	// State methods

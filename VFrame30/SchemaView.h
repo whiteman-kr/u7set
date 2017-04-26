@@ -62,6 +62,13 @@ namespace VFrame30
 		QObject* findSchemaItem(QString objectName);
 		QObject* findWidget(QString objectName);
 
+		// Message Box functions
+
+		Q_INVOKABLE int warningMessageBox(QString text);
+		Q_INVOKABLE int errorMessageBox(QString text);
+		Q_INVOKABLE int infoMessageBox(QString text);
+		Q_INVOKABLE int questionMessageBox(QString text, int buttons);
+
 		// Properties
 		//
 	public:

@@ -173,7 +173,7 @@ private:
     // Dialog Data
     //
 
-    TuningItemModel *m_model = nullptr;
+    TuningModel *m_model = nullptr;
 
     bool m_modified = false;
 
