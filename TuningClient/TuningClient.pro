@@ -139,7 +139,6 @@ SOURCES +=\
     ../lib/CodeSyntaxHighlighter.cpp \
     TuningClientFilterEditor.cpp \
     TuningClientFilterStorage.cpp \
-    TuningClientObjectManager.cpp \
     SchemaStorage.cpp \
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
@@ -152,7 +151,8 @@ SOURCES +=\
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/Tuning/TuningSignalStorage.cpp
+    ../lib/Tuning/TuningSignalStorage.cpp \
+    TuningClientSignalManager.cpp
 
 
 HEADERS  += MainWindow.h \
@@ -194,7 +194,6 @@ HEADERS  += MainWindow.h \
     ../lib/CodeSyntaxHighlighter.h \
     TuningClientFilterEditor.h \
     TuningClientFilterStorage.h \
-    TuningClientObjectManager.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
@@ -207,7 +206,8 @@ HEADERS  += MainWindow.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/Tuning/TuningSignalStorage.h
+    ../lib/Tuning/TuningSignalStorage.h \
+    TuningClientSignalManager.h
 
 FORMS    += \
     DialogSettings.ui \

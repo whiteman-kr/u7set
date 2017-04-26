@@ -3,8 +3,7 @@
 
 #include "Stable.h"
 #include "../lib/Hash.h"
-#include "../lib/Signal.h"
-#include "../lib/Tuning./TuningSignalStorage.h"
+#include "../lib/Tuning/TuningSignalStorage.h"
 
 union TuningSignalStateFlags
 {
@@ -20,30 +19,30 @@ union TuningSignalStateFlags
 	};
 
 	quint32 all = 0;
-
 };
 
 class TuningSignalState
 {
+	Q_GADGET
 
 public:
 	// State methods
+	//
+	Q_INVOKABLE float value() const;
 
-	float value() const;
+	Q_INVOKABLE float readLowLimit() const;
+	Q_INVOKABLE float readHighLimit() const;
 
-	float readLowLimit() const;
-	float readHighLimit() const;
+	Q_INVOKABLE bool underflow() const;
+	Q_INVOKABLE bool overflow() const;
 
-	bool underflow() const;
-	bool overflow() const;
-
-	bool valid() const;
-	bool writing() const;
+	Q_INVOKABLE bool valid() const;
+	Q_INVOKABLE bool writing() const;
 
 	float editValue() const;
 
 	// Functions used by model
-
+	//
 	void onEditValue(float value);
 
 	bool needRedraw();
@@ -54,15 +53,13 @@ public:
 	void copy(const TuningSignalState& source);
 
 	// Functions used by signal manager
-
-	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool &writingFailed);
-
+	//
+	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed);
 	void onSendValue(float value);
 
 	void invalidate();
 
 public:
-
 	TuningSignalStateFlags m_flags;
 
 	float m_value = 0;
@@ -74,5 +71,6 @@ public:
 	int m_writingCounter = 0;
 };
 
+Q_DECLARE_METATYPE(TuningSignalState)
 
 #endif // TUNINGSIGNAL_H

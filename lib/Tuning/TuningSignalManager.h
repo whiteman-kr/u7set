@@ -118,21 +118,10 @@ public slots:
 
 
 private slots:
-	void slot_exists(QString appSignalID, bool* result, bool* ok);
-	void slot_analog(QString appSignalID, bool* result, bool* ok);
+	void slot_writeValue(QString appSignalID, float value, bool* ok);
 
-	void slot_highLimit(QString appSignalID, float* result, bool* ok);
-	void slot_lowLimit(QString appSignalID, float* result, bool* ok);
-
-	void slot_decimalPlaces(QString appSignalID, float* result, bool* ok);
-
-	void slot_valid(QString appSignalID, bool* result, bool* ok);
-	void slot_value(QString appSignalID, float *result, bool* ok);
-
-	void slot_setValue(QString appSignalID, float value, bool* ok);
-
-	void slot_getParam(QString appSignalID, AppSignalParam& result, bool* ok);
-	void slot_getState(QString appSignalID, TuningSignalState& result, bool* ok);
+	void slot_signalParam(QString appSignalID, AppSignalParam* result, bool* ok);
+	void slot_signalState(QString appSignalID, TuningSignalState* result, bool* ok);
 
 signals:
 

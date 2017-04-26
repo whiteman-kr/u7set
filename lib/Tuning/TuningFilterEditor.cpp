@@ -25,11 +25,11 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage *filterStorage, const
 
     // Objects and model
     //
-    m_model = new TuningItemModel(this);
-    m_model->addColumn(TuningItemModel::Columns::CustomAppSignalID);
-    m_model->addColumn(TuningItemModel::Columns::AppSignalID);
-    m_model->addColumn(TuningItemModel::Columns::Type);
-    m_model->addColumn(TuningItemModel::Columns::Caption);
+    m_model = new TuningModel(this);
+    m_model->addColumn(TuningModel::Columns::CustomAppSignalID);
+    m_model->addColumn(TuningModel::Columns::AppSignalID);
+    m_model->addColumn(TuningModel::Columns::Type);
+    m_model->addColumn(TuningModel::Columns::Caption);
 
     m_signalsTable->setModel(m_model);
 
@@ -385,7 +385,7 @@ void TuningFilterEditor::fillObjectsList()
 
     QString filterText = m_filterText->text().trimmed();
 
-	std::vector<TuningModelItem> objects;
+	std::vector<TuningModelRecord> objects;
 
 	for (int i = 0; i < m_signals->signalsCount(); i++)
 	{
@@ -458,7 +458,7 @@ void TuningFilterEditor::fillObjectsList()
             }
 		}
 
-		TuningModelItem m;
+		TuningModelRecord m;
 		m.param = *o;
 
 		objects.push_back(m);
@@ -1155,8 +1155,8 @@ void TuningFilterEditor::on_m_setValue_clicked()
         if (first == true)
 		{
 			analog = object->isAnalog();
-			lowLimit = object->lowEngeneeringUnits();
-			highLimit = object->highEngeneeringUnits();
+			lowLimit = object->lowEngineeringUnits();
+			highLimit = object->highEngineeringUnits();
 			precision = object->precision();
             value = ov.value();
 			defaultValue = object->tuningDefaultValue();
@@ -1172,7 +1172,7 @@ void TuningFilterEditor::on_m_setValue_clicked()
 
             if (analog == true)
             {
-				if (lowLimit != object->lowEngeneeringUnits() || highLimit != object->highEngeneeringUnits())
+				if (lowLimit != object->lowEngineeringUnits() || highLimit != object->highEngineeringUnits())
                 {
                     QMessageBox::warning(this, tr("Preset Editor"), tr("Selected signals have different input range."));
                     return;

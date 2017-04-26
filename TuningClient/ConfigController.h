@@ -1,7 +1,6 @@
 #ifndef CONFIGCONTROLLER_H
 #define CONFIGCONTROLLER_H
 
-#include "Stable.h"
 #include <vector>
 #include <set>
 #include <QThread>

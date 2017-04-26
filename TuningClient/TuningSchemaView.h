@@ -1,7 +1,6 @@
 #ifndef TUNINGSCHEMAVIEW_H
 #define TUNINGSCHEMAVIEW_H
 
-#include "Stable.h"
 #include "SchemaStorage.h"
 #include "../VFrame30/SchemaView.h"
 #include "../lib/Tuning/TuningSignalManager.h"

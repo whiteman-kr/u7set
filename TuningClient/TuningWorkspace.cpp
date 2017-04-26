@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"

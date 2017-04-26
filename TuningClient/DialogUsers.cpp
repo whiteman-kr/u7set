@@ -1,6 +1,5 @@
 #include "DialogUsers.h"
 #include "ui_DialogUsers.h"
-#include "Stable.h"
 #include "Settings.h"
 
 //

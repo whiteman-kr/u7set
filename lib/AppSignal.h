@@ -81,16 +81,16 @@ public:
 	Hash hash() const;
 	void setHash(Hash value);
 
-	QString appSignalId() const;
+	Q_INVOKABLE QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	QString customSignalId() const;
+	Q_INVOKABLE QString customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	QString caption() const;
+	Q_INVOKABLE QString caption() const;
 	void setCaption(const QString& value);
 
-	QString equipmentId() const;
+	Q_INVOKABLE QString equipmentId() const;
 	void setEquipmentId(const QString& value);
 
 	E::Channel channel() const;
@@ -102,8 +102,8 @@ public:
 	E::SignalInOutType inOutType() const;
 	void setInOutType(E::SignalInOutType value);
 
-	bool isAnalog() const;
-	bool isDiscrete() const;
+	Q_INVOKABLE bool isAnalog() const;
+	Q_INVOKABLE bool isDiscrete() const;
 	E::SignalType type() const;
 	void setType(E::SignalType value);
 
@@ -116,17 +116,17 @@ public:
 	int unitId() const;
 	void setUnitId(int value);
 
-	QString unit() const;
+	Q_INVOKABLE QString unit() const;
 	void setUnit(QString value);
 
-	double lowValidRange() const;
-	double highValidRange() const;
+	Q_INVOKABLE double lowValidRange() const;
+	Q_INVOKABLE double highValidRange() const;
 
-	double lowEngeneeringUnits() const;
-	void setLowEngeneeringUnits(double value);
+	Q_INVOKABLE double lowEngineeringUnits() const;
+	void setLowEngineeringUnits(double value);
 
-	double highEngeneeringUnits() const;
-	void setHighEngeneeringUnits(double value);
+	Q_INVOKABLE double highEngineeringUnits() const;
+	void setHighEngineeringUnits(double value);
 
 	double inputLowLimit() const;
 	double inputHighLimit() const;
@@ -139,7 +139,7 @@ public:
 	E::OutputMode outputMode() const;
 	E::SensorType outputSensorType() const;
 
-	int precision() const;
+	Q_INVOKABLE int precision() const;
 	void setPrecision(int value);
 
 	double aperture();
@@ -151,10 +151,10 @@ public:
 	double spreadTolerance();
 	void setSpreadTolerance(double value);
 
-	bool enableTuning();
+	Q_INVOKABLE bool enableTuning();
 	void setEnableTuning(bool value);
 
-	double tuningDefaultValue() const;
+	Q_INVOKABLE double tuningDefaultValue() const;
 	void setTuningDefaultValue(double value);
 
 public:

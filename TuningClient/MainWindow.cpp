@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// TcpSignalClient
 	//
-	m_objectManager = new TuningClientObjectManager();
+	m_objectManager = new TuningClientSignalManager();
 	m_objectManager->setInstanceId(theSettings.instanceStrId());
 	m_objectManager->setRequestInterval(theSettings.m_requestInterval);
 

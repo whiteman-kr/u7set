@@ -100,13 +100,13 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString *errorCode
 			if (reader.attributes().hasAttribute("LowLimit"))
 			{
 				QString v = reader.attributes().value("LowLimit").toString();
-				object->setLowEngeneeringUnits(v.toFloat());
+				object->setLowEngineeringUnits(v.toFloat());
 			}
 
 			if (reader.attributes().hasAttribute("HighLimit"))
 			{
 				QString v = reader.attributes().value("HighLimit").toString();
-				object->setHighEngeneeringUnits(v.toFloat());
+				object->setHighEngineeringUnits(v.toFloat());
 			}
 
 			object->setHash(::calcHash(object->appSignalId()));
