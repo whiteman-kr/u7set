@@ -161,6 +161,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0143.sql", "Upgrade to version 143, Changes in TuningClient and Monitor presets"},
 	{":/DatabaseUpgrade/Upgrade0144.sql", "Upgrade to version 144, Add new properties to LM preset"},
 	{":/DatabaseUpgrade/Upgrade0145.sql", "Upgrade to version 145, Changes in the LM description file"},
+	{":/DatabaseUpgrade/Upgrade0146.sql", "Upgrade to version 146, Added project database test functions"},
 };
 
 
