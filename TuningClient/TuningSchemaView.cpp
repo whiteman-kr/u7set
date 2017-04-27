@@ -80,6 +80,134 @@ void TuningSchemaView::timerEvent(QTimerEvent*)
 	}
 }
 
+
+void TuningSchemaView::mousePressEvent(QMouseEvent* event)
+{
+	if (event->buttons().testFlag(Qt::MidButton) == true)
+	{
+		// It is scrolling by midbutton, let scroll view process it
+		//
+		VFrame30::SchemaView::mousePressEvent(event);
+		return;
+	}
+
+	// Find is there any item under the cursor with AcceptClick
+	//
+	m_leftClickOverItem.reset();
+
+	QPointF docPoint;
+
+	bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
+	if (convertResult == false)
+	{
+		event->ignore();
+		return;
+	}
+
+	double x = docPoint.x();
+	double y = docPoint.y();
+
+	for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+	{
+		const VFrame30::SchemaLayer* pLayer = layer->get();
+
+		if (pLayer->show() == false)
+		{
+			continue;
+		}
+
+		for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+
+			if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
+			{
+				// Remember this item
+				//
+				m_leftClickOverItem = item;
+				event->accept();
+				return;
+			}
+		}
+	}
+
+	// Ignore event
+	//
+	event->ignore();
+	return;
+}
+
+void TuningSchemaView::mouseReleaseEvent(QMouseEvent* event)
+{
+	if (event->buttons().testFlag(Qt::MidButton) == true)
+	{
+		// It is scrolling by midbutton, let scroll view process it
+		//
+		VFrame30::SchemaView::mouseReleaseEvent(event);
+		return;
+	}
+
+	// Find is there any item under the cursor with AcceptClick
+	//
+	if (m_leftClickOverItem != nullptr)
+	{
+		QPointF docPoint;
+
+		bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
+		if (convertResult == false)
+		{
+			event->ignore();
+			return;
+		}
+
+		double x = docPoint.x();
+		double y = docPoint.y();
+
+		for (auto layer = schema()->Layers.crbegin(); layer != schema()->Layers.crend(); layer++)
+		{
+			const VFrame30::SchemaLayer* pLayer = layer->get();
+
+			if (pLayer->show() == false)
+			{
+				continue;
+			}
+
+			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
+			{
+				const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+
+				if (item == m_leftClickOverItem &&
+					item->acceptClick() == true &&
+					item->clickScript().trimmed().isEmpty() == false &&
+					item->IsIntersectPoint(x, y) == true &&
+					item->clickScript().isEmpty() == false)
+				{
+					// Run script
+					//
+					item->clickEvent(globalScript(), jsEngine(), this);
+
+					// --
+					//
+					update();		// Repaint screen
+					unsetCursor();
+					m_leftClickOverItem.reset();
+					event->accept();
+					return;
+				}
+			}
+		}
+
+		m_leftClickOverItem.reset();
+	}
+
+	// Ignore event
+	//
+	unsetCursor();
+	event->ignore();
+	return;
+}
+
+
 void TuningSchemaView::startRepaintTimer()
 {
 	update();

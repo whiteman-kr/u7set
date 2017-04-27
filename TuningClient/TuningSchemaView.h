@@ -20,6 +20,10 @@ protected:
 
 	virtual void timerEvent(QTimerEvent*) override;
 
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+
+
 	// Public slots which are part of Script API
 	//
 public slots:
@@ -33,6 +37,8 @@ private slots:
 
 private:
 	SchemaStorage* m_schemaStorage = nullptr;
+
+	std::shared_ptr<VFrame30::SchemaItem> m_leftClickOverItem;
 
 	QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
 };

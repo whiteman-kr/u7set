@@ -1,4 +1,175 @@
-<body>
-Hello world<br>
-<b>bold</b>
-</body>
+Contents
+
+General Information
+
+Schema Items
+
+	SchemaItem
+
+	SchemaItemPushButton
+
+	SchemaItemLineEdit
+
+Global variables
+
+	signals
+
+	tuning
+
+	view
+
+Signals parameters and states
+
+	AppSignalParam
+	
+	AppSignalState
+	
+	TuningSignalState
+
+-----------------------------------------------------------------------------------------------------------------
+	
+General Information
+
+
+
+Schema Items	
+
+SchemaItem
+
+SchemaItem is a base class for all items that are displayed on schemas.
+	
+Properties:
+
+		ObjectName
+		AcceptClick
+		
+Scripts:
+
+		ClickScript			function(schemaItem) { view.setSchema("SCHEMA002"); }
+		PreDrawScript		function(schemaItem){	enableControlBySignal(schemaItem.ObjectName, "#ANALOG_001");}
+
+	
+Edit
+		
+Properties:		
+		StyleSheet
+		Text
+		Tooltip
+		
+		AfterCreate			function(schemaItem, lineEditWidget, text)
+		EditingFinished		function(schemaItem, lineEditWidget, text)
+		ReturnPressed		function(schemaItem, lineEditWidget, text)
+		TextChanged			function(schemaItem, lineEditWidget, text)
+		
+Button
+		
+
+Properties:		
+		AutoRepeat
+		AutoRepeatDelay
+		AutoRepeatInterval
+		Checkable
+		CheckedDefault
+		StyleSheet
+		Text
+		Tooltip
+		
+Scripts:
+		AfterCreate			function(schemaItem, pushButtonWidget, checked)
+		Clicked				function(schemaItem, pushButtonWidget, checked)
+		Pressed				function(schemaItem, pushButtonWidget, checked)
+		Released			function(schemaItem, pushButtonWidget, checked)
+		Toggled				function(schemaItem, pushButtonWidget, checked)
+
+		
+Global variables
+
+signals ScriptSignalManager
+
+	QVariant signalParam(QString signalId) const;		// Returns AppSignalParam
+	QVariant signalParam(Hash signalHash) const;		// Returns AppSignalParam
+
+	QVariant signalState(QString signalId) const;		// Returns AppSignalState
+	QVariant signalState(Hash signalHash) const;		// Returns AppSignalState
+
+view SchemaView
+
+
+		Q_INVOKABLE void jsDebugOutput(QString str);
+		virtual void setSchema(QString schemaId);
+		QObject* findSchemaItem(QString objectName);
+		QObject* findWidget(QString objectName);
+		Q_INVOKABLE void warningMessageBox(QString text);
+		Q_INVOKABLE void errorMessageBox(QString text);
+		Q_INVOKABLE void infoMessageBox(QString text);
+		Q_INVOKABLE bool questionMessageBox(QString text);
+		
+		
+		
+		
+tuning TuningController
+		Q_INVOKABLE QVariant signalParam(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is undefined
+		Q_INVOKABLE QVariant signalState(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is undefined
+		Q_INVOKABLE bool writeValue(QString appSignalID, float value);
+
+
+Signals parameters and states
+		
+class AppSignalParam
+	Q_PROPERTY(Hash Hash READ hash)
+	Q_PROPERTY(QString AppSignalID READ appSignalId)
+	Q_PROPERTY(QString CustimSignalID READ customSignalId)
+	Q_PROPERTY(QString Caption READ caption)
+	Q_PROPERTY(QString EquipmentID READ equipmentId)
+
+	Q_PROPERTY(E::Channel Channel READ channel)
+
+	Q_PROPERTY(bool IsInput READ isInput)
+	Q_PROPERTY(bool IsOutput READ isOutput)
+	Q_PROPERTY(bool IsInternal READ isInternal)
+
+	Q_PROPERTY(bool IsAnalog READ isAnalog)
+	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
+
+	
+	Q_INVOKABLE QString appSignalId() const;
+	Q_INVOKABLE QString customSignalId() const;
+	Q_INVOKABLE QString caption() const;
+	Q_INVOKABLE QString equipmentId() const;
+	Q_INVOKABLE bool isAnalog() const;
+	Q_INVOKABLE bool isDiscrete() const;
+	Q_INVOKABLE QString unit() const;
+
+	Q_INVOKABLE double lowValidRange() const;
+	Q_INVOKABLE double highValidRange() const;
+
+	Q_INVOKABLE double lowEngineeringUnits() const;
+	Q_INVOKABLE double highEngineeringUnits() const;
+	Q_INVOKABLE int precision() const;
+	Q_INVOKABLE bool enableTuning();
+	Q_INVOKABLE double tuningDefaultValue() const;
+	
+class AppSignalState
+	Q_PROPERTY(Hash Hash READ hash)
+	Q_PROPERTY(double Value READ value)
+
+	Q_INVOKABLE Hash hash() const;
+	Q_INVOKABLE double value() const;
+	Q_INVOKABLE bool isValid() const;
+
+
+	
+class TuningSignalState
+	Q_INVOKABLE float value() const;
+
+	Q_INVOKABLE float readLowLimit() const;
+	Q_INVOKABLE float readHighLimit() const;
+
+	Q_INVOKABLE bool underflow() const;
+	Q_INVOKABLE bool overflow() const;
+
+	Q_INVOKABLE bool valid() const;
+	Q_INVOKABLE bool writing() const;
+
+	
+
