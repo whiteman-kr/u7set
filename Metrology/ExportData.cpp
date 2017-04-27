@@ -144,62 +144,62 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	if (m_pView == nullptr)
-	{
-		return false;
-	}
+//	if (m_pView == nullptr)
+//	{
+//		return false;
+//	}
 
-	if (fileName.isEmpty() == true)
-	{
-		return false;
-	}
+//	if (fileName.isEmpty() == true)
+//	{
+//		return false;
+//	}
 
-	m_exportCancel = false;
+//	m_exportCancel = false;
 
-	ExcelExportHelper helper;
+//	ExcelExportHelper helper;
 
-	int columnCount = m_pView->model()->columnCount();
-	for(int column = 0; column < columnCount; column++)
-	{
-		if (m_pView->isColumnHidden(column) == true)
-		{
-			continue;
-		}
+//	int columnCount = m_pView->model()->columnCount();
+//	for(int column = 0; column < columnCount; column++)
+//	{
+//		if (m_pView->isColumnHidden(column) == true)
+//		{
+//			continue;
+//		}
 
-		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
-	}
+//		helper.setCellValue(1, column, m_pView->model()->headerData(column, Qt::Horizontal).toString().toLocal8Bit());
+//	}
 
-	int rowCount = m_pView->model()->rowCount();
-	rowCount = 10;
+//	int rowCount = m_pView->model()->rowCount();
+//	rowCount = 10;
 
-	setRange(0, rowCount);
+//	setRange(0, rowCount);
 
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_exportCancel == true)
-		{
-			break;
-		}
+//	for(int row = 0; row < rowCount; row++)
+//	{
+//		if (m_exportCancel == true)
+//		{
+//			break;
+//		}
 
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
+//		for(int column = 0; column < columnCount; column++)
+//		{
+//			if (m_pView->isColumnHidden(column) == true)
+//			{
+//				continue;
+//			}
 
-			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
-		}
+//			helper.setCellValue(row + 2, column, m_pView->model()->data(m_pView->model()->index(row, column)).toString().toLocal8Bit());
+//		}
 
-		setValue(row);
-	}
+//		setValue(row);
+//	}
 
-	if (m_exportCancel == true)
-	{
-		return false;
-	}
+//	if (m_exportCancel == true)
+//	{
+//		return false;
+//	}
 
-	helper.saveAs(fileName);
+//	helper.saveAs(fileName);
 
 	return true;
 }

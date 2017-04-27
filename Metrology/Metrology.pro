@@ -4,7 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets concurrent serialport network sql qml xml axcontainer
+QT       += core gui widgets concurrent serialport network sql qml xml
+win32 {
+QT       += axcontainer
+}
 
 TARGET = Metrology
 TEMPLATE = app
@@ -115,8 +118,7 @@ SOURCES += \
     OutputSignalBase.cpp \
     RackBase.cpp \
     MeasureBase.cpp \
-    ../lib/CircularLogger.cpp \
-    ../lib/ExcelHelper.cpp
+    ../lib/CircularLogger.cpp
 
 
 HEADERS  += \
@@ -185,8 +187,7 @@ HEADERS  += \
     OutputSignalBase.h \
     RackBase.h \
     MeasureBase.h \
-    ../lib/CircularLogger.h \
-    ../lib/ExcelHelper.h
+    ../lib/CircularLogger.h
 
 
 FORMS    +=
