@@ -29,15 +29,23 @@ namespace Hardware
 	class TxRxSignal
 	{
 	public:
+		enum Type
+		{
+			RegularTx,				// regular transmitted signal
+			RegularRx,				// regular received signal
+			RawTx,					// raw transmitted signal
+			RawRx					// raw received signal
+		};
+
 		TxRxSignal();
 
-		bool init(const Signal* s, bool isRaw, int offset, int bitNo, int sizeB);
+		bool init(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType);
 
 		QString appSignalID() const { return m_appSignalID; }
 
-		bool isRaw() const { return m_isRaw; }
-		bool isAnalog() const { return m_type == E::SignalType::Analog; }
-		bool isDiscrete() const { return m_type == E::SignalType::Discrete; }
+		bool isRaw() const { return m_type == Type::RawRx || m_type == Type::RawTx; }
+		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
+		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
 
 		Address16 addrInBuf() const { return m_addrInBuf; }
 		void setAddrInBuf(Address16& addr);
@@ -45,10 +53,11 @@ namespace Hardware
 		int sizeB() const { return m_sizeB; }
 
 	private:
+		Type m_type = Type::RegularTx;
+
 		QString m_appSignalID;
-		E::SignalType m_type = E::SignalType::Analog;
+		E::SignalType m_signalType = E::SignalType::Analog;
 		int m_sizeB = 0;					// signal size in tx(rx)Buffer in bits
-		bool m_isRaw = false;
 
 		Address16 m_addrInBuf;				// signal address from beginning of txBuffer (rxBuffer)
 	};
@@ -82,8 +91,7 @@ namespace Hardware
 	public:
 		OptoPort(const DeviceController* controller, int portNo);
 
-		bool appendNonRawTxSignal(const Signal* s);
-		bool appendRawTxSignal(const Signal* txSignal, int offset, int bitNo, int sizeB);
+		bool appendRegularTxSignal(const Signal* s, Builder::IssueLogger *log);
 
 		Q_INVOKABLE quint16 portID() const { return m_portID; }
 		void setPortID(quint16 portID) { m_portID = portID; }
@@ -125,12 +133,12 @@ namespace Hardware
 
 		QString optoModuleID() const { return m_optoModuleID; }
 
-		void getTxSignals(QVector<const TxRxSignalShared>& txSignals) const;
+		void getTxSignals(QVector<TxRxSignalShared> &txSignals) const;
 
 		bool addTxSignal(const Signal* txSignal);
 
-		QVector<const TxRxSignalShared> txAnalogSignals() const;
-		QVector<const TxRxSignalShared> txDiscreteSignals() const;
+		QVector<TxRxSignalShared> txAnalogSignals() const;
+		QVector<TxRxSignalShared> txDiscreteSignals() const;
 
 		bool calculateTxSignalsAddresses(Builder::IssueLogger* log);
 
@@ -185,13 +193,16 @@ namespace Hardware
 										SignalAddress16 &addr,
 										Builder::IssueLogger* log);
 	private:
-		bool appendTxSignal(const Signal* txSignal, bool isRaw, int offset, int bitNo, int sizeB);
-
-		bool buildTxRawSignalList(Builder::IssueLogger* log);
-		bool buildRxRawSignalList(Builder::IssueLogger* log);
+		bool appendTxRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType, Builder::IssueLogger* log);
+		bool appendRawTxRxSignals(Builder::IssueLogger* log);
 
 		void sortByOffsetBitNoAscending(QVector<TxRxSignal>& signalList);
 		bool checkSignalsOffsets(const QVector<TxRxSignal>& signalList, bool overlapIsError, Builder::IssueLogger* log);
+
+		void sortTxRxSignals();
+		void sortTxRxSignals(HashedVector<QString, TxRxSignalShared>& array, int startIndex, int count);
+
+		DeviceModule* getLM();
 
 	private:
 		QString m_equipmentID;
@@ -235,7 +246,7 @@ namespace Hardware
 
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
 
-		HashedVector<QString, TxRxSignalShared> m_txSignals;
+		HashedVector<QString, TxRxSignalShared> m_txRxSignals;
 		int m_txAnalogSignalsCount = 0;					// non-raw! tx analog signals count
 		int m_txDiscreteSignalsCount = 0;				// non-raw! tx discrete signals count
 
@@ -258,11 +269,6 @@ namespace Hardware
 
 
 		HashedVector<QString, TxRxSignalShared> m_rxSignals;
-
-		void sortTxSignals();
-		void sortTxSignals(QVector<TxRxSignal> &array);
-
-		DeviceModule* getLM();
 	};
 
 	typedef std::shared_ptr<OptoPort> OptoPortShared;

@@ -269,6 +269,7 @@ namespace Builder
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
+		void errALC5188(const QString& appSignalID, const QString & portID);			// Duplicate signal ID '%1' in opto port '%2'.
 
 
 		// EQP			Equipment issues						6000-6999

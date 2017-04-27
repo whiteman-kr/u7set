@@ -3780,10 +3780,10 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
-	///		%1 Opto port 2 ID
+	///		%2 Opto port 2 ID
 	///
 	/// Description:
-	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports/
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
 	///
 	void IssueLogger::errALC5187(const QString& port1ID, const QString &port2ID)
 	{
@@ -3791,6 +3791,27 @@ namespace Builder
 				  5187,
 				  QString(tr("Tx data memory areas of opto ports '%1' and '%2' are overlapped.")).
 						arg(port1ID).arg(port2ID));
+	}
+
+	/// IssueCode: ALC5188
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate signal ID '%1' in opto port '%2'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///
+	/// Description:
+	///		Duplicate signal ID in specified opto port.
+	///
+	void IssueLogger::errALC5188(const QString& appSignalID, const QString &portID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5188,
+				  QString(tr("Signal ID '%1' is duplicate in opto port '%2'.")).
+						arg(appSignalID).arg(portID));
 	}
 
 
