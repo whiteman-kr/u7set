@@ -32,6 +32,7 @@
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QDesktopWidget>
+#include <QTextBrowser>
 
 
 namespace ExtWidgets
@@ -56,7 +57,7 @@ namespace ExtWidgets
 
 		setAttribute(Qt::WA_DeleteOnClose);
 
-		QTextEdit* textEdit = new QTextEdit();
+		QTextBrowser* textEdit = new QTextBrowser();
 
 		textEdit->setHtml(text);
 
