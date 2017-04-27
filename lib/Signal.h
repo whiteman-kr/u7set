@@ -156,7 +156,7 @@ private:
 	//
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 
-	int m_dataSize = 32;
+	int m_dataSize = 32;											// signal data size in bits
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
     double m_lowEngeneeringUnits = 0;                               // low physical value for input range

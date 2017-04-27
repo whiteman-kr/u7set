@@ -3465,7 +3465,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::buildRS232SignalLists()
 	{
-		if (m_optoModuleStorage == nullptr)
+		assert(false);		// reimplement!
+
+		return true;
+
+/*		if (m_optoModuleStorage == nullptr)
 		{
 			assert(false);
 			return false;
@@ -3539,7 +3543,7 @@ namespace Builder
 			}
 		}
 
-		return result;
+		return result; */
 	}
 
 
@@ -4459,11 +4463,13 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, QVector<Hardware::OptoPort::TxRxSignal>& txSignals)
+	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPort *rs232Port)
 	{
 		bool result = true;
 
-		for(const Hardware::OptoPort::TxRxSignal& txSignal : txSignals)
+		assert(false);		// reimplement!
+		/*
+		for(const Hardware::OptoPort::TxRxSignal& txSignal : rs232Port)
 		{
 			if (m_signalsStrID.contains(txSignal.appSignalID) == false)
 			{
@@ -4497,7 +4503,7 @@ namespace Builder
 			xmlWriter.writeAttribute("BitNo", QString::number(txSignal.offset.bit()));
 
 			xmlWriter.writeEndElement();
-		}
+		}*/
 
 		return result;
 	}
