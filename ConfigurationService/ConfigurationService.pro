@@ -73,7 +73,8 @@ SOURCES += \
     ../Proto/serialization.pb.cc \
     ../lib/CommandLineParser.cpp \
     CfgServiceMain.cpp \
-    ../lib/XmlHelper.cpp
+    ../lib/XmlHelper.cpp \
+    CfgChecker.cpp
 
 HEADERS += \
     version.h \
@@ -92,7 +93,8 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     ../lib/CommandLineParser.h \
-    ../lib/XmlHelper.h
+    ../lib/XmlHelper.h \
+    CfgChecker.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -25,10 +25,11 @@ public:
 
 public slots:
 	void onInformationRequest(UdpRequest request);
-	void onBuildPathChanged(const QString& newBuildPath);
+	void onBuildPathChanged(QString newBuildPath);
 
 signals:
 	void ackInformationRequest(UdpRequest request);
+	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
 	virtual void initCmdLineParser() override;
@@ -67,44 +68,3 @@ private:
 
 	HostAddressPort m_clientIP;
 };
-
-// ------------------------------------------------------------------------------------
-//
-// CfgCheckerWorker class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class CfgCheckerWorker : public SimpleThreadWorker
-{
-	Q_OBJECT
-
-public:
-	CfgCheckerWorker(const QString& workFolder,
-					 const QString& autoloadBuildFolder,
-					 int checkNewBuildInterval,
-					 std::shared_ptr<CircularLogger> logger);
-
-	QString getFileHash(const QString& filePath);
-	bool copyPath(const QString& src, const QString& dst);
-	bool checkBuild(const QString& buildDirectoryPath);
-
-signals:
-	void buildPathChanged(const QString& newBuildPath);
-
-public slots:
-	void updateBuildXml();
-
-protected:
-	void onThreadStarted();
-	//void onThreadFinished();
-
-private:
-	QString m_workFolder;
-	QString m_autoloadBuildFolder;
-	QDateTime m_lastBuildXmlModifyTime;
-	QString m_lastBuildXmlHash;
-	int m_checkNewBuildInterval;
-
-	std::shared_ptr<CircularLogger> m_logger;
-};
-
