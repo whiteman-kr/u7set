@@ -191,7 +191,8 @@ SOURCES +=\
     Builder/ComparatorStorage.cpp \
     ../lib/CodeEditor.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
-    ../lib/AppSignal.cpp
+    ../lib/AppSignal.cpp \
+    IdePropertyEditor.cpp
 
 
 HEADERS  += \
@@ -320,7 +321,8 @@ HEADERS  += \
     Builder/ComparatorStorage.h \
     ../lib/CodeEditor.h \
     ../lib/Tuning/TuningSignalStorage.h \
-    ../lib/AppSignal.h
+    ../lib/AppSignal.h \
+    IdePropertyEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \

@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
-#include "../lib/PropertyEditor.h"
+#include "IdePropertyEditor.h"
 
 class DbController;
 
@@ -323,7 +323,7 @@ private:
 	QSplitter* m_splitter = nullptr;
 	QToolBar* m_toolBar = nullptr;
 
-    ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+	IdePropertyEditor* m_propertyEditor = nullptr;
 };
 
 

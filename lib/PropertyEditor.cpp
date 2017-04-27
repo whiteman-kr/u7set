@@ -31,6 +31,7 @@
 #include <QRegExpValidator>
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QDesktopWidget>
 
 
 namespace ExtWidgets
@@ -55,12 +56,9 @@ namespace ExtWidgets
 
 		setAttribute(Qt::WA_DeleteOnClose);
 
-		move(parent->pos().x() + parent->size().width(), parent->pos().y());
-		resize(parent->size().width() / 2, parent->size().height());
+		QTextEdit* textEdit = new QTextEdit();
 
-		QPlainTextEdit* textEdit = new QPlainTextEdit();
-
-		textEdit->appendHtml(text);
+		textEdit->setHtml(text);
 
 		textEdit->setReadOnly(true);
 
@@ -470,9 +468,39 @@ namespace ExtWidgets
 					m_propertyEditorHelp = new PropertyEditorHelp(tr("Script Help"), m_propertyEditor->scriptHelp(), this);
 					m_propertyEditorHelp->show();
 
+					if (m_propertyEditor->scriptHelpWindowPos().x() != -1 && m_propertyEditor->scriptHelpWindowPos().y() != -1)
+					{
+						m_propertyEditorHelp->move(m_propertyEditor->scriptHelpWindowPos());
+						m_propertyEditorHelp->restoreGeometry(m_propertyEditor->scriptHelpWindowGeometry());
+					}
+					else
+					{
+						// put the window at the right side of the screen
+
+						QDesktopWidget* screen = QApplication::desktop();
+						QRect screenGeometry = screen->availableGeometry();
+
+						int screenHeight = screenGeometry.height();
+						int screenWidth = screenGeometry.width();
+
+						int defaultWidth = screenWidth / 4;
+
+						// height must exclude the window header size
+
+						int defaultHeight = screenHeight - (m_propertyEditorHelp->geometry().y() - m_propertyEditorHelp->y());
+
+						m_propertyEditorHelp->move(screenWidth - defaultWidth, 0);
+						m_propertyEditorHelp->resize(defaultWidth, defaultHeight);
+					}
+
 					connect(m_propertyEditorHelp, &PropertyEditorHelp::destroyed, [this] (QObject*)
 					{
+						m_propertyEditor->setScriptHelpWindowPos(m_propertyEditorHelp->pos());
+						m_propertyEditor->setScriptHelpWindowGeometry(m_propertyEditorHelp->saveGeometry());
+						m_propertyEditor->saveSettings();
+
 						m_propertyEditorHelp = nullptr;
+
 					});
 				}
 			});
@@ -1530,7 +1558,14 @@ namespace ExtWidgets
 
 		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
 
+		m_scriptHelpWindowPos = QPoint(-1, -1);
+
 		return;
+	}
+
+	void PropertyEditor::saveSettings()
+	{
+
 	}
 
 	void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
@@ -1894,6 +1929,26 @@ namespace ExtWidgets
 	QString PropertyEditor::scriptHelp() const
 	{
 		return m_scriptHelp;
+	}
+
+	QPoint PropertyEditor::scriptHelpWindowPos() const
+	{
+		return m_scriptHelpWindowPos;
+	}
+
+	void PropertyEditor::setScriptHelpWindowPos(const QPoint& value)
+	{
+		m_scriptHelpWindowPos = value;
+	}
+
+	QByteArray PropertyEditor::scriptHelpWindowGeometry() const
+	{
+		return m_scriptHelpWindowGeometry;
+
+	}
+	void PropertyEditor::setScriptHelpWindowGeometry(const QByteArray& value)
+	{
+		m_scriptHelpWindowGeometry = value;
 	}
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
