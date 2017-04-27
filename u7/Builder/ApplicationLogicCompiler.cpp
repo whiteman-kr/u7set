@@ -972,8 +972,13 @@ namespace Builder
 
 		quint32 dataID = outPort->txDataID();
 
-		QVector<Hardware::OptoPort::TxRxSignal> txAnalogs = outPort->txAnalogSignals();
-		QVector<Hardware::OptoPort::TxRxSignal> txDiscretes = outPort->txDiscreteSignals();
+		QVector<Hardware::TxRxSignalShared> txAnalogs;
+
+		outPort->getTxAnalogSignals(txAnalogs);
+
+		QVector<Hardware::TxRxSignalShared> txDiscretes;
+
+		outPort->getTxDiscreteSignals(txDiscretes);
 
 		list.append("--");
 		list.append("-- This file has been generated automatically by RPCT software");
@@ -1036,15 +1041,15 @@ namespace Builder
 
 		if (txAnalogs.count() > 0)
 		{
-			for(Hardware::OptoPort::TxRxSignal& txAnalog :  txAnalogs)
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
 			{
 				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
-						arg(txAnalog.appSignalID.remove("#")).
-						arg(txAnalog.sizeBit);
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->sizeB());
 
 				list.append(str);
 
-				bdfFile.addConnector(txAnalog.appSignalID, txAnalog.sizeBit);
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->sizeB());
 			}
 
 			list.append("");
@@ -1052,12 +1057,12 @@ namespace Builder
 
 		if (txDiscretes.count() > 0)
 		{
-			for(Hardware::OptoPort::TxRxSignal& txDiscrete :  txDiscretes)
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
 			{
-				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete.appSignalID.remove("#"));
+				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete->appSignalID().remove("#"));
 				list.append(str);
 
-				bdfFile.addConnector1(txDiscrete.appSignalID);
+				bdfFile.addConnector1(txDiscrete->appSignalID());
 			}
 
 			list.append("");
@@ -1090,12 +1095,12 @@ namespace Builder
 
 		if (txAnalogs.count() > 0)
 		{
-			for(Hardware::OptoPort::TxRxSignal& txAnalog :  txAnalogs)
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
 			{
 				str = QString("\t%1 <= in_data(%2-1 downto %3);").
-						arg(txAnalog.appSignalID.remove("#")).
-						arg(txAnalog.offset.offset() * 16 + txAnalog.sizeBit).
-						arg(txAnalog.offset.offset() * 16);
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->sizeB()).
+						arg(txAnalog->addrInBuf().offset() * 16);
 
 				list.append(str);
 			}
@@ -1105,11 +1110,11 @@ namespace Builder
 
 		if (txDiscretes.count() > 0)
 		{
-			for(Hardware::OptoPort::TxRxSignal& txDiscrete :  txDiscretes)
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
 			{
 				str = QString("\t%1 <= in_data(%2);").
-						arg(txDiscrete.appSignalID.remove("#")).
-						arg(txDiscrete.offset.offset() * 16 + txDiscrete.offset.bit());
+						arg(txDiscrete->appSignalID().remove("#")).
+						arg(txDiscrete->addrInBuf().offset() * 16 + txDiscrete->addrInBuf().bit());
 				list.append(str);
 			}
 
@@ -1179,14 +1184,33 @@ namespace Builder
 		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)", port->txStartAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
 		list.append(str);
 
-		QVector<Hardware::OptoPort::TxRxSignal> txSignals = port->getTxSignals();
+		list.append("Tx signals:\n");
 
-		for(const Hardware::OptoPort::TxRxSignal& tx : txSignals)
+		QVector<Hardware::TxRxSignalShared> txSignals;
+
+		port->getTxSignals(txSignals);
+
+		for(Hardware::TxRxSignalShared tx : txSignals)
 		{
 			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->txStartAddress() + tx.offset.offset(), tx.offset.bit(),
-						tx.offset.offset(), tx.offset.bit(),
-						C_STR(tx.appSignalID));
+						port->txStartAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+						tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+						C_STR(tx->appSignalID()));
+			list.append(str);
+		}
+
+		list.append("Rx signals:\n");
+
+		QVector<Hardware::TxRxSignalShared> rxSignals;
+
+		port->getRxSignals(rxSignals);
+
+		for(Hardware::TxRxSignalShared rx : rxSignals)
+		{
+			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+						port->rxStartAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+						rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+						C_STR(rx->appSignalID()));
 			list.append(str);
 		}
 

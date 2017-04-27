@@ -3807,13 +3807,12 @@ namespace Builder
 		bool result = true;
 
 		Comment comment;
-		Command cmd;
 
 		comment.setComment(QString(tr("Copying raw data (%1 words) of opto-port %2")).arg(port->txRawDataSizeW()).arg(port->equipmentID()));
 		m_code.append(comment);
 		m_code.newLine();
 
-		int offset = Hardware::TX_DATA_ID_SIZE_W;		// txDataID
+		int offset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
 		int portDataOffset = offset;
 
@@ -3876,26 +3875,28 @@ namespace Builder
 			return true;
 		}
 
-		QVector<Hardware::OptoPort::TxRxSignal> txAnalogSignals = port->txAnalogSignals();
+		QVector<Hardware::TxRxSignalShared> txAnalogSignals;
+
+		port->getTxAnalogSignals(txAnalogSignals);
 
 		bool result = true;
 
-		for(Hardware::OptoPort::TxRxSignal& txSignal : txAnalogSignals)
+		for(Hardware::TxRxSignalShared& txSignal : txAnalogSignals)
 		{
-			Signal* s = m_signals->getSignal(txSignal.appSignalID);
+			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
 			if (s == nullptr)
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(txSignal.appSignalID, QUuid());
+				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
 			}
 
 			Command cmd;
 
-			int txSignalAddress = port->absTxStartAddress() + txSignal.offset.offset();
+			int txSignalAddress = port->absTxStartAddress() + txSignal->addrInBuf().offset();
 
 			cmd.mov32(txSignalAddress, s->ramAddr().offset());
 			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
@@ -3924,7 +3925,9 @@ namespace Builder
 
 		// copy discrete signals
 		//
-		QVector<Hardware::OptoPort::TxRxSignal> txDiscreteSignals = port->txDiscreteSignals();
+		QVector<Hardware::TxRxSignalShared> txDiscreteSignals;
+
+		port->getTxDiscreteSignals(txDiscreteSignals);
 
 		int count = txDiscreteSignals.count();
 
@@ -3938,14 +3941,15 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			Hardware::OptoPort::TxRxSignal& txSignal = txDiscreteSignals[i];
-			Signal* s = m_signals->getSignal(txSignal.appSignalID);
+			Hardware::TxRxSignalShared& txSignal = txDiscreteSignals[i];
+
+			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
 			if (s == nullptr)
 			{
 				// Signal identifier '%1' is not found.
 				//
-				m_log->errALC5000(txSignal.appSignalID, QUuid());
+				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
 			}
@@ -3968,7 +3972,7 @@ namespace Builder
 
 			int bit = i % WORD_SIZE;
 
-			assert(txSignal.offset.bit() == bit);
+			assert(txSignal->addrInBuf().bit() == bit);
 
 			// copy discrete signal value to bit accumulator
 			//
@@ -3982,7 +3986,7 @@ namespace Builder
 			{
 				// txSignal.address.offset() the same for all signals in one word
 
-				int txSignalAddress = port->absTxStartAddress() + txSignal.offset.offset();
+				int txSignalAddress = port->absTxStartAddress() + txSignal->addrInBuf().offset();
 
 				// copy bit accumulator to opto interface buffer
 				//
@@ -4228,7 +4232,7 @@ namespace Builder
 		Command cmd;
 
 		cmd.movMem(port->absTxStartAddress() + offset,
-				   portWithRxRawData->rxStartAddress() + Hardware::TX_DATA_ID_SIZE_W,
+				   portWithRxRawData->rxStartAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W,
 				   portTxRawDataSizeW);
 
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
@@ -4511,14 +4515,14 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
 	{
-		QVector<Hardware::OptoPort::TxRxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
+		bool result = true;
+
+		/*QVector<Hardware::OptoPort::TxRxSignal> txAnalogSignals = rs232Port->txAnalogSignals();
 
 		if (txAnalogSignals.count() == 0)
 		{
 			return true;
 		}
-
-		bool result = true;
 
 		m_code.newLine();
 
@@ -4591,7 +4595,7 @@ namespace Builder
 		if (result == true)
 		{
 			result &= writeSignalsToSerialXml(xmlWriter, txAnalogSignals);
-		}
+		}*/
 
 		return result;
 	}
@@ -4599,7 +4603,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
 	{
-		portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
+		bool result = true;
+
+/*		portDataAddress += sizeof(quint32) / sizeof(quint16) + rs232Port->txAnalogSignalsSizeW();
 
 		QVector<Hardware::OptoPort::TxRxSignal> txDiscreteSignals = rs232Port->txDiscreteSignals();
 
@@ -4610,7 +4616,6 @@ namespace Builder
 			return true;
 		}
 
-		bool result = true;
 
 		m_code.newLine();
 
@@ -4709,7 +4714,7 @@ namespace Builder
 		if (result == true)
 		{
 			result &= writeSignalsToSerialXml(xmlWriter, txDiscreteSignals);
-		}
+		}*/
 
 		return result;
 	}

@@ -191,35 +191,43 @@ namespace Hardware
 	}
 
 
-	QVector<TxRxSignalShared> OptoPort::txAnalogSignals() const
+	void OptoPort::getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const
 	{
-		QVector<TxRxSignalShared> txAnalogSignals;
+		txSignals.clear();
 
 		for(TxRxSignalShared txSignal : m_txRxSignals)
 		{
-			if (txSignal->isRaw() == false && txSignal->isAnalog() == true)
+			if (txSignal == nullptr)
 			{
-				txAnalogSignals.append(txSignal);
+				assert(false);
+				continue;
+			}
+
+			if (txSignal->isAnalog() == true)
+			{
+				txSignals.append(txSignal);
 			}
 		}
-
-		return txAnalogSignals;
 	}
 
 
-	QVector<TxRxSignalShared> OptoPort::txDiscreteSignals() const
+	void OptoPort::getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const
 	{
-		QVector<TxRxSignalShared> txDiscreteSignals;
+		txSignals.clear();
 
 		for(TxRxSignalShared txSignal : m_txRxSignals)
 		{
-			if (txSignal->isRaw() == false && txSignal->isDiscrete() == true)
+			if (txSignal == nullptr)
 			{
-				txDiscreteSignals.append(txSignal);
+				assert(false);
+				continue;
+			}
+
+			if (txSignal->isDiscrete() == true)
+			{
+				txSignals.append(txSignal);
 			}
 		}
-
-		return txDiscreteSignals;
 	}
 
 
@@ -227,11 +235,40 @@ namespace Hardware
 	{
 		txSignals.clear();
 
-		for(TxRxSignalShared txSignal : m_txRxSignals)
+		for(TxRxSignalShared s : m_txRxSignals)
 		{
-			txSignals.append(txSignal);
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isTx())
+			{
+				txSignals.append(s);
+			}
 		}
 	}
+
+	void OptoPort::getRxSignals(QVector<TxRxSignalShared>& rxSignals) const
+	{
+		rxSignals.clear();
+
+		for(TxRxSignalShared s : m_txRxSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isRx())
+			{
+				rxSignals.append(s);
+			}
+		}
+	}
+
 
 	// initial txSignals addresses calculcation
 	// zero-offset from port txStartAddress
@@ -2009,7 +2046,7 @@ namespace Hardware
 			}
 			else
 			{
-				p1->addTxSignal(appSignal);
+				p1->appendRegularTxSignal(appSignal, m_log);
 			}
 			return true;
 		}
@@ -2022,7 +2059,7 @@ namespace Hardware
 			}
 			else
 			{
-				p2->addTxSignal(appSignal);
+				p1->appendRegularTxSignal(appSignal, m_log);
 			}
 			return true;
 		}

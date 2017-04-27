@@ -46,6 +46,8 @@ namespace Hardware
 		bool isRaw() const { return m_type == Type::RawRx || m_type == Type::RawTx; }
 		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+		bool isTx() const { return m_type == Type::RegularTx || m_type == Type::RawTx; }
+		bool isRx() const { return m_type == Type::RegularRx || m_type == Type::RawRx; }
 
 		Address16 addrInBuf() const { return m_addrInBuf; }
 		void setAddrInBuf(Address16& addr);
@@ -86,7 +88,7 @@ namespace Hardware
 
 		const quint16 NOT_USED_PORT_ID = 0;
 
-		const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
+		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
 
 	public:
 		OptoPort(const DeviceController* controller, int portNo);
@@ -133,12 +135,13 @@ namespace Hardware
 
 		QString optoModuleID() const { return m_optoModuleID; }
 
-		void getTxSignals(QVector<TxRxSignalShared> &txSignals) const;
+		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
+		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
+
+		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const;
+		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const;
 
 		bool addTxSignal(const Signal* txSignal);
-
-		QVector<TxRxSignalShared> txAnalogSignals() const;
-		QVector<TxRxSignalShared> txDiscreteSignals() const;
 
 		bool calculateTxSignalsAddresses(Builder::IssueLogger* log);
 
