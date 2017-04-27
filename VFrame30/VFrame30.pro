@@ -165,14 +165,17 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
+#c++14 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++14
+
+#Warning level
+#
+CONFIG += warn_on
 
 #Optimization flags
 #
 win32 {
-
     QMAKE_CXXFLAGS += -wd4275
 }
 unix {
