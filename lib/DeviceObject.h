@@ -517,6 +517,7 @@ namespace Hardware
 		bool isInputModule() const;
 		bool isOutputModule() const;
 		bool isLogicModule() const;
+		bool isOptoModule() const;
 
 		// Data
 		//

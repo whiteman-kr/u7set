@@ -2911,6 +2911,11 @@ R"DELIM({
 		return moduleFamily() == FamilyType::LM;
 	}
 
+	bool DeviceModule::isOptoModule() const
+	{
+		return moduleFamily() == FamilyType::OCM;
+	}
+
 	//
 	//
 	// DeviceController

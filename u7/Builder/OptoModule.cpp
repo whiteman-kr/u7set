@@ -111,126 +111,6 @@ namespace Hardware
 		return appendTxRxSignal(s->appSignalID(), s->signalType(), -1, -1, s->dataSize(), TxRxSignal::Type::RegularTx, log);
 	}
 
-	bool OptoPort::appendTxRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType, Builder::IssueLogger* log)
-	{
-		if (log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (m_txRxSignals.contains(appSignalID))
-		{
-			// Signal ID '%1' is duplicate in opto port '%2'.
-			//
-			log->errALC5188(appSignalID, m_equipmentID);
-
-			return false;
-		}
-
-		TxRxSignalShared txRxSignal = std::make_shared<TxRxSignal>();
-
-		bool res = txRxSignal->init(appSignalID, signalType, offset, bitNo, sizeB, txRxType);
-
-		if (res == false)
-		{
-			return false;
-		}
-
-		m_txRxSignals.insert(txRxSignal->appSignalID(), txRxSignal);
-
-		if (txRxSignal->isRaw() == false)
-		{
-			if (txRxSignal->isAnalog() == true)
-			{
-				m_txAnalogSignalsCount++;
-			}
-			else
-			{
-				if (txRxSignal->isDiscrete() == true)
-				{
-					m_txDiscreteSignalsCount++;
-				}
-				else
-				{
-					assert(false);  // unknown type of signal
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-
-	bool OptoPort::appendRawTxRxSignals(Builder::IssueLogger* log)
-	{
-		TEST_PTR_RETURN_FALSE(log)
-
-		bool result = true;
-
-		// append Raw Tx and Rx  signals
-		//
-		for(const RawDataDescriptionItem& item : m_rawDataDescription)
-		{
-			if (item.type == RawDataDescriptionItem::Type::TxSignal)
-			{
-				result &= appendTxRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize,
-										   TxRxSignal::Type::RawTx, log);
-				continue;
-			}
-
-			if (item.type == RawDataDescriptionItem::Type::RxSignal)
-			{
-				result &= appendTxRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize,
-											TxRxSignal::Type::RawRx, log);
-			}
-		}
-
-		return result;
-	}
-
-
-	void OptoPort::getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const
-	{
-		txSignals.clear();
-
-		for(TxRxSignalShared txSignal : m_txRxSignals)
-		{
-			if (txSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (txSignal->isAnalog() == true)
-			{
-				txSignals.append(txSignal);
-			}
-		}
-	}
-
-
-	void OptoPort::getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const
-	{
-		txSignals.clear();
-
-		for(TxRxSignalShared txSignal : m_txRxSignals)
-		{
-			if (txSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (txSignal->isDiscrete() == true)
-			{
-				txSignals.append(txSignal);
-			}
-		}
-	}
-
-
 	void OptoPort::getTxSignals(QVector<TxRxSignalShared>& txSignals) const
 	{
 		txSignals.clear();
@@ -269,6 +149,43 @@ namespace Hardware
 		}
 	}
 
+	void OptoPort::getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const
+	{
+		txSignals.clear();
+
+		for(TxRxSignalShared txSignal : m_txRxSignals)
+		{
+			if (txSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (txSignal->isAnalog() == true)
+			{
+				txSignals.append(txSignal);
+			}
+		}
+	}
+
+	void OptoPort::getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const
+	{
+		txSignals.clear();
+
+		for(TxRxSignalShared txSignal : m_txRxSignals)
+		{
+			if (txSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (txSignal->isDiscrete() == true)
+			{
+				txSignals.append(txSignal);
+			}
+		}
+	}
 
 	// initial txSignals addresses calculcation
 	// zero-offset from port txStartAddress
@@ -387,23 +304,6 @@ namespace Hardware
 		return result;
 	}
 
-	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
-	{
-		assert(m_txRawDataSizeWIsCalculated == false);		// setTxRawDataSizeW() must be called once!
-
-		m_txRawDataSizeW = rawDataSizeW;
-
-		m_txRawDataSizeWIsCalculated = true;
-	}
-
-/*	void OptoPort::setRawDataSizeIsCalculated()
-	{
-		assert(m_rawDataSizeIsCalculated == false);		// setRawDataSizeIsCalculated() must be called once!
-
-		m_rawDataSizeIsCalculated = true;
-	}*/
-
-
 	bool OptoPort::isTxSignalExists(const QString& appSignalID)
 	{
 		TxRxSignalShared s = m_txRxSignals.value(appSignalID, nullptr);
@@ -411,12 +311,10 @@ namespace Hardware
 		return s != nullptr;
 	}
 
-
 	bool OptoPort::isUsedInConnection() const
 	{
 		return m_connectionID.isEmpty() != true;
 	}
-
 
 	Address16 OptoPort::getTxSignalAddrInBuf(const QString& appSignalID) const
 	{
@@ -431,7 +329,6 @@ namespace Hardware
 
 		return Address16();
 	}
-
 
 	Address16 OptoPort::getTxSignalAbsAddr(const QString& appSignalID) const
 	{
@@ -460,117 +357,6 @@ namespace Hardware
 
 		return result;
 	}
-
-	void OptoPort::sortTxRxSignals()
-	{
-		// txSignals sorting order:
-		//
-		// 1. All Raw Tx signals (on addrInBuf ascending)
-		// 2. All Raw Rx signals (on addrInBuf ascending)
-		// 3. All Regular Tx Analog signals (on appSignalID ascending)
-		// 4. All Regular Tx Discrete signals (on appSignalID ascending)
-		// 5. All Regular Rx Analog signals (on appSignalID ascending)
-		// 6. All Regular Rx Discrete signals (on appSignalID ascending)
-
-		HashedVector<QString, TxRxSignalShared> tempTxSignals = m_txRxSignals;
-		int count = tempTxSignals.count();
-
-		m_txRxSignals.clear();
-
-		// 1. Fetch and sort all raw signals
-		//
-		int rawSignalCount = 0;
-
-		for(int i = 0; i < count; i++)
-		{
-			TxRxSignalShared s = tempTxSignals[i];
-
-			if (s->isRaw() == false)
-			{
-				continue;
-			}
-
-			m_txRxSignals.insert(s->appSignalID(), s);
-
-			rawSignalCount++;
-		}
-
-
-		//	bool result = checkSignalsOffsets(m_txRawSignals, true, log);
-
-
-
-		// 2. Fetch and sort all non-raw analog signals
-		//
-		int analogSignalFirstIndex = m_txRxSignals.count();
-		int analogSignalCount = 0;
-
-		for(int i = 0; i < count; i++)
-		{
-			TxRxSignalShared s = tempTxSignals[i];
-
-			if (s->isRaw() == true)
-			{
-				continue;			// skip raw signals
-			}
-
-			if (s->isDiscrete() == true)
-			{
-				continue;			// skip non-raw discrete signals
-			}
-
-			m_txRxSignals.insert(s->appSignalID(), s);
-
-			analogSignalCount++;
-		}
-
-		sortTxRxSignals(m_txRxSignals, analogSignalFirstIndex, analogSignalCount);
-
-		// 3. Fetch and sort all non-raw discrete signals
-		//
-		int discreteSignalFirstIndex = m_txRxSignals.count();
-		int discreteSignalCount = 0;
-
-		for(int i = 0; i < count; i++)
-		{
-			TxRxSignalShared s = tempTxSignals[i];
-
-			if (s->isRaw() == true)
-			{
-				continue;			// skip raw signals
-			}
-
-			if (s->isAnalog() == true)
-			{
-				continue;			// skip non-raw analog signals
-			}
-
-			m_txRxSignals.insert(s->appSignalID(), s);
-
-			discreteSignalCount++;
-		}
-
-		sortTxRxSignals(m_txRxSignals, discreteSignalFirstIndex, discreteSignalCount);
-	}
-
-
-	void OptoPort::sortTxRxSignals(HashedVector<QString, TxRxSignalShared> &array, int startIndex, int count)
-	{
-		for(int i = startIndex; i < count - 1; i++)
-		{
-			for(int k = i + 1; k < count; k++)
-			{
-				if (array[i]->appSignalID() > array[k]->appSignalID())
-				{
-					TxRxSignalShared temp = array[i];
-					array[i] = array[k];
-					array[k] = temp;
-				}
-			}
-		}
-	}
-
-
 
 	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log)
 	{
@@ -745,7 +531,6 @@ namespace Hardware
 		return result;
 	}
 
-
 	bool OptoPort::getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
 												const QString& appSignalID,
 												QUuid receiverUuid,
@@ -803,6 +588,93 @@ namespace Hardware
 		return false;
 	}
 
+	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
+	{
+		assert(m_txRawDataSizeWIsCalculated == false);		// setTxRawDataSizeW() must be called once!
+
+		m_txRawDataSizeW = rawDataSizeW;
+
+		m_txRawDataSizeWIsCalculated = true;
+	}
+
+	bool OptoPort::appendTxRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType, Builder::IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (m_txRxSignals.contains(appSignalID))
+		{
+			// Signal ID '%1' is duplicate in opto port '%2'.
+			//
+			log->errALC5188(appSignalID, m_equipmentID);
+
+			return false;
+		}
+
+		TxRxSignalShared txRxSignal = std::make_shared<TxRxSignal>();
+
+		bool res = txRxSignal->init(appSignalID, signalType, offset, bitNo, sizeB, txRxType);
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		m_txRxSignals.insert(txRxSignal->appSignalID(), txRxSignal);
+
+		if (txRxSignal->isRaw() == false)
+		{
+			if (txRxSignal->isAnalog() == true)
+			{
+				m_txAnalogSignalsCount++;
+			}
+			else
+			{
+				if (txRxSignal->isDiscrete() == true)
+				{
+					m_txDiscreteSignalsCount++;
+				}
+				else
+				{
+					assert(false);  // unknown type of signal
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+
+	bool OptoPort::appendRawTxRxSignals(Builder::IssueLogger* log)
+	{
+		TEST_PTR_RETURN_FALSE(log)
+
+		bool result = true;
+
+		// append Raw Tx and Rx  signals
+		//
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			if (item.type == RawDataDescriptionItem::Type::TxSignal)
+			{
+				result &= appendTxRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize,
+										   TxRxSignal::Type::RawTx, log);
+				continue;
+			}
+
+			if (item.type == RawDataDescriptionItem::Type::RxSignal)
+			{
+				result &= appendTxRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize,
+											TxRxSignal::Type::RawRx, log);
+			}
+		}
+
+		return result;
+	}
 
 	void OptoPort::sortByOffsetBitNoAscending(QVector<TxRxSignal>& signalList)
 	{
@@ -821,7 +693,6 @@ namespace Hardware
 			}
 		}*/
 	}
-
 
 	bool OptoPort::checkSignalsOffsets(const QVector<TxRxSignal>& signalList, bool overlapIsError, Builder::IssueLogger* log)
 	{
@@ -862,6 +733,122 @@ namespace Hardware
 		return result;
 	}
 
+/*	void OptoPort::setRawDataSizeIsCalculated()
+	{
+		assert(m_rawDataSizeIsCalculated == false);		// setRawDataSizeIsCalculated() must be called once!
+
+		m_rawDataSizeIsCalculated = true;
+	}*/
+
+	void OptoPort::sortTxRxSignals()
+	{
+		// txSignals sorting order:
+		//
+		// 1. All Raw Tx signals (on addrInBuf ascending)
+		// 2. All Raw Rx signals (on addrInBuf ascending)
+		// 3. All Regular Tx Analog signals (on appSignalID ascending)
+		// 4. All Regular Tx Discrete signals (on appSignalID ascending)
+		// 5. All Regular Rx Analog signals (on appSignalID ascending)
+		// 6. All Regular Rx Discrete signals (on appSignalID ascending)
+
+		HashedVector<QString, TxRxSignalShared> tempTxSignals = m_txRxSignals;
+		int count = tempTxSignals.count();
+
+		m_txRxSignals.clear();
+
+		// 1. Fetch and sort all raw signals
+		//
+		int rawSignalCount = 0;
+
+		for(int i = 0; i < count; i++)
+		{
+			TxRxSignalShared s = tempTxSignals[i];
+
+			if (s->isRaw() == false)
+			{
+				continue;
+			}
+
+			m_txRxSignals.insert(s->appSignalID(), s);
+
+			rawSignalCount++;
+		}
+
+
+		//	bool result = checkSignalsOffsets(m_txRawSignals, true, log);
+
+
+
+		// 2. Fetch and sort all non-raw analog signals
+		//
+		int analogSignalFirstIndex = m_txRxSignals.count();
+		int analogSignalCount = 0;
+
+		for(int i = 0; i < count; i++)
+		{
+			TxRxSignalShared s = tempTxSignals[i];
+
+			if (s->isRaw() == true)
+			{
+				continue;			// skip raw signals
+			}
+
+			if (s->isDiscrete() == true)
+			{
+				continue;			// skip non-raw discrete signals
+			}
+
+			m_txRxSignals.insert(s->appSignalID(), s);
+
+			analogSignalCount++;
+		}
+
+		sortTxRxSignals(m_txRxSignals, analogSignalFirstIndex, analogSignalCount);
+
+		// 3. Fetch and sort all non-raw discrete signals
+		//
+		int discreteSignalFirstIndex = m_txRxSignals.count();
+		int discreteSignalCount = 0;
+
+		for(int i = 0; i < count; i++)
+		{
+			TxRxSignalShared s = tempTxSignals[i];
+
+			if (s->isRaw() == true)
+			{
+				continue;			// skip raw signals
+			}
+
+			if (s->isAnalog() == true)
+			{
+				continue;			// skip non-raw analog signals
+			}
+
+			m_txRxSignals.insert(s->appSignalID(), s);
+
+			discreteSignalCount++;
+		}
+
+		sortTxRxSignals(m_txRxSignals, discreteSignalFirstIndex, discreteSignalCount);
+	}
+
+	void OptoPort::sortTxRxSignals(HashedVector<QString, TxRxSignalShared> &array, int startIndex, int count)
+	{
+		for(int i = startIndex; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if (array[i]->appSignalID() > array[k]->appSignalID())
+				{
+					TxRxSignalShared temp = array[i];
+					array[i] = array[k];
+					array[k] = temp;
+				}
+			}
+		}
+	}
+
+
 
 	// ------------------------------------------------------------------
 	//
@@ -869,16 +856,25 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModule::OptoModule(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log) :
-		m_deviceModule(module),
-		m_lmDescription(lmDescription),
-		m_log(log)
+	OptoModule::OptoModule()
+	{
+	}
+
+	OptoModule::~OptoModule()
+	{
+	}
+
+	bool OptoModule::init(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log)
 	{
 		if (module == nullptr || m_lmDescription == nullptr || m_log == nullptr)
 		{
 			assert(false);
-			return;
+			return false;
 		}
+
+		m_deviceModule = module;
+		m_lmDescription = lmDescription;
+		m_log = log;
 
 		m_equipmentID = module->equipmentIdTemplate();
 		m_place = module->place();
@@ -893,6 +889,8 @@ namespace Hardware
 		}
 		else
 		{
+			assert(module->isOptoModule() == true);
+
 			bool result = true;
 
 			result &= DeviceHelper::getIntProperty(module, "OptoInterfaceDataOffset", &m_optoInterfaceDataOffset, log);
@@ -903,7 +901,7 @@ namespace Hardware
 
 			if (result == false)
 			{
-				return;
+				return false;
 			}
 		}
 
@@ -942,7 +940,7 @@ namespace Hardware
 					{
 						assert(false);
 						LOG_INTERNAL_ERROR(m_log);
-						return;
+						return false;
 					}
 
 					OptoPort* optoPort = new OptoPort(optoPortController, i + 1);
@@ -960,91 +958,33 @@ namespace Hardware
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							   QString(tr("Not all opto-port controllers found in module '%1'")).arg(module->equipmentIdTemplate()));
-			return;
+			return false;
 		}
 
 		if (isLM() == true)
 		{
-			// OCM module
-			//
 			m_lmID = module->equipmentIdTemplate();
-			m_lmDeviceModule = module;
+			m_lm = module;
 		}
 		else
 		{
-			if (isOCM() != true)
+			assert(isOCM() == true);
+
+			const DeviceModule* lm = DeviceHelper::getAssociatedLM(module);
+
+			if (lm == nullptr)
 			{
-				assert(false);      // unknown module type
-				return;
+				assert(false);
+				LOG_INTERNAL_ERROR(log);
+				return false;
 			}
 
-			// OCM module
-			//
-			const DeviceChassis* chassis = module->getParentChassis();
-
-			if (chassis == nullptr)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Not found chassis to module '%1'")).arg(module->equipmentIdTemplate()));
-				return;
-			}
-
-			int childrenCount = chassis->childrenCount();
-
-			bool lmAlreadyFound = false;
-
-			for(int i = 0; i < childrenCount; i++)
-			{
-				DeviceObject* child = chassis->child(i);
-
-				if (child == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				if (child->isModule() == false)
-				{
-					continue;
-				}
-
-				DeviceModule* childModule = child->toModule();
-
-				if (childModule == nullptr)
-				{
-					assert(false);
-					continue;
-				}
-
-				if (childModule->moduleFamily() == DeviceModule::FamilyType::LM)
-				{
-					if (lmAlreadyFound == true)
-					{
-						assert(false);          // second LM in chassis ?
-					}
-
-					m_lmID = childModule->equipmentIdTemplate();
-					m_lmDeviceModule = childModule;
-
-					lmAlreadyFound = true;
-				}
-			}
+			m_lm = lm;
+			m_lmID = lm->equipmentIdTemplate();
 		}
 
 		m_valid = true;
 	}
-
-
-	OptoModule::~OptoModule()
-	{
-		for(OptoPort* optoPort : m_ports)
-		{
-			delete optoPort;
-		}
-
-		m_ports.clear();
-	}
-
 
 	bool OptoModule::isLM()
 	{
@@ -1056,7 +996,6 @@ namespace Hardware
 
 		return m_deviceModule->moduleFamily() == DeviceModule::FamilyType::LM;
 	}
-
 
 	bool OptoModule::isOCM()
 	{
@@ -1070,11 +1009,11 @@ namespace Hardware
 	}
 
 
-	QList<OptoPort*> OptoModule::getSerialPorts()
+	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList)
 	{
-		QList<OptoPort*> serialPorts;
+		serialPortsList.clear();
 
-		for(OptoPort* port : m_ports)
+		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -1084,19 +1023,16 @@ namespace Hardware
 
 			if (port->mode() == OptoPort::Mode::Serial)
 			{
-				serialPorts.append(port);
+				serialPortsList.append(port);
 			}
 		}
-
-		return serialPorts;
 	}
 
-
-	QList<OptoPort*> OptoModule::getOptoPorts()
+	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList)
 	{
-		QList<OptoPort*> optoPorts;
+		optoPortsList.clear();
 
-		for(OptoPort* port : m_ports)
+		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -1104,18 +1040,18 @@ namespace Hardware
 				continue;
 			}
 
-			optoPorts.append(port);
+			if (port->mode() == OptoPort::Mode::Optical)
+			{
+				optoPortsList.append(port);
+			}
 		}
-
-		return optoPorts;
 	}
 
-
-	QList<OptoPort*> OptoModule::ports()
+	void OptoModule::ports(QList<OptoPortShared>& portsList)
 	{
-		QList<OptoPort*> ports;
+		portsList.clear();
 
-		for(OptoPort* port : m_ports)
+		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -1123,7 +1059,7 @@ namespace Hardware
 				continue;
 			}
 
-			ports.append(port);
+			portsList.append(port);
 		}
 
 		return ports;
