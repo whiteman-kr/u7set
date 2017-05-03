@@ -97,6 +97,7 @@ class Address16;
 class AppSignal;
 class AppSignalState;
 class AppSignalParam;
+class AppSignalParamSet;
 class Connection;
 
 enum SchemaUnit {
@@ -9155,6 +9156,91 @@ class AppSignalParam : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static AppSignalParam* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class AppSignalParamSet : public ::google::protobuf::Message {
+ public:
+  AppSignalParamSet();
+  virtual ~AppSignalParamSet();
+
+  AppSignalParamSet(const AppSignalParamSet& from);
+
+  inline AppSignalParamSet& operator=(const AppSignalParamSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AppSignalParamSet& default_instance();
+
+  void Swap(AppSignalParamSet* other);
+
+  // implements Message ----------------------------------------------
+
+  AppSignalParamSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AppSignalParamSet& from);
+  void MergeFrom(const AppSignalParamSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.AppSignalParam items = 1;
+  inline int items_size() const;
+  inline void clear_items();
+  static const int kItemsFieldNumber = 1;
+  inline const ::Proto::AppSignalParam& items(int index) const;
+  inline ::Proto::AppSignalParam* mutable_items(int index);
+  inline ::Proto::AppSignalParam* add_items();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >&
+      items() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >*
+      mutable_items();
+
+  // @@protoc_insertion_point(class_scope:Proto.AppSignalParamSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam > items_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static AppSignalParamSet* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -22391,6 +22477,35 @@ inline double AppSignalParam::tuningdefaultvalue() const {
 inline void AppSignalParam::set_tuningdefaultvalue(double value) {
   set_has_tuningdefaultvalue();
   tuningdefaultvalue_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// AppSignalParamSet
+
+// repeated .Proto.AppSignalParam items = 1;
+inline int AppSignalParamSet::items_size() const {
+  return items_.size();
+}
+inline void AppSignalParamSet::clear_items() {
+  items_.Clear();
+}
+inline const ::Proto::AppSignalParam& AppSignalParamSet::items(int index) const {
+  return items_.Get(index);
+}
+inline ::Proto::AppSignalParam* AppSignalParamSet::mutable_items(int index) {
+  return items_.Mutable(index);
+}
+inline ::Proto::AppSignalParam* AppSignalParamSet::add_items() {
+  return items_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >&
+AppSignalParamSet::items() const {
+  return items_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >*
+AppSignalParamSet::mutable_items() {
+  return &items_;
 }
 
 // -------------------------------------------------------------------

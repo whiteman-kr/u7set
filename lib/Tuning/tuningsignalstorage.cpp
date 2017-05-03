@@ -24,106 +24,42 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 
 	m_signalsMap.clear();
 
-	QXmlStreamReader reader(data);
+	::Proto::AppSignalParamSet set;
+	bool result = set.ParseFromArray(data.data(), data.size());
 
-	if (reader.readNextStartElement() == false)
+	if (result == false)
 	{
-		reader.raiseError(QObject::tr("Failed to load root element."));
-		*errorCode = reader.errorString();
-		return !reader.hasError();
-	}
-
-	if (reader.name() != "TuningSignals")
-	{
-		reader.raiseError(QObject::tr("The file is not an TuningSignals file."));
-		*errorCode = reader.errorString();
-		return !reader.hasError();
+		assert(false);
+		*errorCode = QObject::tr("Failed to load tuning signals file.");
+		return false;
 	}
 
 	// Read signals
 	//
-	while (!reader.atEnd())
+	for (int i = 0; i < set.items_size(); i++)
 	{
-		QXmlStreamReader::TokenType t = reader.readNext();
+		std::shared_ptr<AppSignalParam> asp = std::make_shared<AppSignalParam>();
 
-		if (t == QXmlStreamReader::TokenType::Characters)
+		if (asp->load(set.items(i)) == false)
 		{
-			continue;
+			assert(false);
+			*errorCode = QObject::tr("Failed to load tuning signal #%1 from file.").arg(i);
+			return false;
 		}
 
-		if (t != QXmlStreamReader::TokenType::StartElement)
+		if (m_signalsMap.find(asp->hash()) != m_signalsMap.end())
 		{
-			continue;
+			assert(false);
+			*errorCode = QObject::tr("Tuning signal #%1 has duplicate hash: %2.").arg(i).arg(asp->hash());
+			return false;
 		}
 
-		if (reader.name() == "TuningSignal")
-		{
-			std::shared_ptr<AppSignalParam> object = std::make_shared<AppSignalParam>();
+		m_signals.push_back(asp);
 
-			if (reader.attributes().hasAttribute("AppSignalID"))
-			{
-				object->setAppSignalId(reader.attributes().value("AppSignalID").toString());
-			}
-
-			if (reader.attributes().hasAttribute("CustomAppSignalID"))
-			{
-				object->setCustomSignalId(reader.attributes().value("CustomAppSignalID").toString());
-			}
-
-			if (reader.attributes().hasAttribute("EquipmentID"))
-			{
-				object->setEquipmentId(reader.attributes().value("EquipmentID").toString());
-			}
-
-			if (reader.attributes().hasAttribute("Caption"))
-			{
-				object->setCaption(reader.attributes().value("Caption").toString());
-			}
-
-			if (reader.attributes().hasAttribute("Type"))
-			{
-				QString t = reader.attributes().value("Type").toString();
-				object->setType(t == "A" ? E::SignalType::Analog : E::SignalType::Discrete);
-			}
-
-			if (reader.attributes().hasAttribute("DecimalPlaces"))
-			{
-				object->setPrecision(reader.attributes().value("DecimalPlaces").toString().toInt());
-			}
-
-			if (reader.attributes().hasAttribute("DefaultValue"))
-			{
-				QString v = reader.attributes().value("DefaultValue").toString();
-				object->setTuningDefaultValue(v.toFloat());
-			}
-
-			if (reader.attributes().hasAttribute("LowLimit"))
-			{
-				QString v = reader.attributes().value("LowLimit").toString();
-				object->setLowEngineeringUnits(v.toFloat());
-			}
-
-			if (reader.attributes().hasAttribute("HighLimit"))
-			{
-				QString v = reader.attributes().value("HighLimit").toString();
-				object->setHighEngineeringUnits(v.toFloat());
-			}
-
-			object->setHash(::calcHash(object->appSignalId()));
-
-			m_signals.push_back(object);
-
-			m_signalsMap[object->hash()] = static_cast<int>(m_signals.size()) - 1;
-
-			continue;
-		}
-
-		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-		*errorCode = reader.errorString();
-		return !reader.hasError();
+		m_signalsMap[asp->hash()] = static_cast<int>(m_signals.size()) - 1;
 	}
 
-	return !reader.hasError();
+	return true;
 }
 
 

@@ -220,6 +220,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* AppSignalParam_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AppSignalParam_reflection_ = NULL;
+const ::google::protobuf::Descriptor* AppSignalParamSet_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  AppSignalParamSet_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Connection_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Connection_reflection_ = NULL;
@@ -1513,7 +1516,22 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalParam));
-  Connection_descriptor_ = file->message_type(63);
+  AppSignalParamSet_descriptor_ = file->message_type(63);
+  static const int AppSignalParamSet_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalParamSet, items_),
+  };
+  AppSignalParamSet_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      AppSignalParamSet_descriptor_,
+      AppSignalParamSet::default_instance_,
+      AppSignalParamSet_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalParamSet, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalParamSet, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(AppSignalParamSet));
+  Connection_descriptor_ = file->message_type(64);
   static const int Connection_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
@@ -1688,6 +1706,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignalParam_descriptor_, &AppSignalParam::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    AppSignalParamSet_descriptor_, &AppSignalParamSet::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Connection_descriptor_, &Connection::default_instance());
 }
 
@@ -1822,6 +1842,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete AppSignalState_reflection_;
   delete AppSignalParam::default_instance_;
   delete AppSignalParam_reflection_;
+  delete AppSignalParamSet::default_instance_;
+  delete AppSignalParamSet_reflection_;
   delete Connection::default_instance_;
   delete Connection_reflection_;
 }
@@ -2122,26 +2144,28 @@ void protobuf_AddDesc_serialization_2eproto() {
     "ision\0302 \001(\005:\0012\022\023\n\010aperture\0303 \001(\001:\0011\022\034\n\rf"
     "ilteringTime\0304 \001(\001:\0050.005\022\032\n\017spreadToler"
     "ance\0305 \001(\001:\0012\022\033\n\014enableTuning\0306 \001(\010:\005fal"
-    "se\022\035\n\022tuningDefaultValue\0307 \001(\001:\0010\"\253\004\n\nCo"
-    "nnection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port"
-    "1EquipmentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID"
-    "\030\004 \001(\t:\000\022!\n\027Port1RawDataDescription\030\005 \001("
-    "\t:\000\022!\n\027Port2RawDataDescription\030\006 \001(\t:\000\022\025"
-    "\n\nSerialMode\030\007 \001(\005:\0010\022\017\n\004Mode\030\010 \001(\005:\0010\022\033"
-    "\n\014EnableDuplex\030\n \001(\010:\005false\022\035\n\016ManualSet"
-    "tings\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001("
-    "\010:\005false\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false"
-    "\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port"
-    "1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWo"
-    "rdsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAd"
-    "dress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022"
-    " \001(\005:\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:"
-    "\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid*3\n\nSchem"
-    "aUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
-    "ch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022"
-    "\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000"
-    "\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsig"
-    "nedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 12354);
+    "se\022\035\n\022tuningDefaultValue\0307 \001(\001:\0010\"9\n\021App"
+    "SignalParamSet\022$\n\005items\030\001 \003(\0132\025.Proto.Ap"
+    "pSignalParam\"\253\004\n\nConnection\022\026\n\014Connectio"
+    "nID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022"
+    "\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1RawD"
+    "ataDescription\030\005 \001(\t:\000\022!\n\027Port2RawDataDe"
+    "scription\030\006 \001(\t:\000\022\025\n\nSerialMode\030\007 \001(\005:\0010"
+    "\022\017\n\004Mode\030\010 \001(\005:\0010\022\033\n\014EnableDuplex\030\n \001(\010:"
+    "\005false\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n"
+    "\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017GenerateV"
+    "HDFile\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddre"
+    "ss\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001("
+    "\005:\003479\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\00347"
+    "9\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Por"
+    "t2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxW"
+    "ordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013."
+    "Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n"
+    "\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDir"
+    "rection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSig"
+    "nalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFbl"
+    "DataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt"
+    "\020\001\022\t\n\005Float\020\002", 12413);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2211,6 +2235,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   AppSignal::default_instance_ = new AppSignal();
   AppSignalState::default_instance_ = new AppSignalState();
   AppSignalParam::default_instance_ = new AppSignalParam();
+  AppSignalParamSet::default_instance_ = new AppSignalParamSet();
   Connection::default_instance_ = new Connection();
   Uuid::default_instance_->InitAsDefaultInstance();
   qvariant::default_instance_->InitAsDefaultInstance();
@@ -2275,6 +2300,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   AppSignal::default_instance_->InitAsDefaultInstance();
   AppSignalState::default_instance_->InitAsDefaultInstance();
   AppSignalParam::default_instance_->InitAsDefaultInstance();
+  AppSignalParamSet::default_instance_->InitAsDefaultInstance();
   Connection::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
@@ -30173,6 +30199,209 @@ void AppSignalParam::Swap(AppSignalParam* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = AppSignalParam_descriptor_;
   metadata.reflection = AppSignalParam_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int AppSignalParamSet::kItemsFieldNumber;
+#endif  // !_MSC_VER
+
+AppSignalParamSet::AppSignalParamSet()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void AppSignalParamSet::InitAsDefaultInstance() {
+}
+
+AppSignalParamSet::AppSignalParamSet(const AppSignalParamSet& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void AppSignalParamSet::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+AppSignalParamSet::~AppSignalParamSet() {
+  SharedDtor();
+}
+
+void AppSignalParamSet::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void AppSignalParamSet::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* AppSignalParamSet::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return AppSignalParamSet_descriptor_;
+}
+
+const AppSignalParamSet& AppSignalParamSet::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+AppSignalParamSet* AppSignalParamSet::default_instance_ = NULL;
+
+AppSignalParamSet* AppSignalParamSet::New() const {
+  return new AppSignalParamSet;
+}
+
+void AppSignalParamSet::Clear() {
+  items_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool AppSignalParamSet::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .Proto.AppSignalParam items = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_items:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_items()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_items;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void AppSignalParamSet::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .Proto.AppSignalParam items = 1;
+  for (int i = 0; i < this->items_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->items(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* AppSignalParamSet::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .Proto.AppSignalParam items = 1;
+  for (int i = 0; i < this->items_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->items(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int AppSignalParamSet::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .Proto.AppSignalParam items = 1;
+  total_size += 1 * this->items_size();
+  for (int i = 0; i < this->items_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->items(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void AppSignalParamSet::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const AppSignalParamSet* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const AppSignalParamSet*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void AppSignalParamSet::MergeFrom(const AppSignalParamSet& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  items_.MergeFrom(from.items_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void AppSignalParamSet::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void AppSignalParamSet::CopyFrom(const AppSignalParamSet& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AppSignalParamSet::IsInitialized() const {
+
+  return true;
+}
+
+void AppSignalParamSet::Swap(AppSignalParamSet* other) {
+  if (other != this) {
+    items_.Swap(&other->items_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata AppSignalParamSet::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = AppSignalParamSet_descriptor_;
+  metadata.reflection = AppSignalParamSet_reflection_;
   return metadata;
 }
 

@@ -680,7 +680,7 @@ void TuningSignalManager::slot_signalsUpdated(QByteArray data)
 	QString errorStr;
 	if (loadDatabase(data, &errorStr) == false)
 	{
-		QString completeErrorMessage = tr("TuningSignals.xml file loading error: %1").arg(errorStr);
+		QString completeErrorMessage = tr("TuningSignals file loading error: %1").arg(errorStr);
 		writeLogMessage(completeErrorMessage);
 
 		return;
