@@ -1,5 +1,7 @@
 #include "TrendWidget.h"
 #include <cstdlib>
+#include <QPaintEngine>
+#include <QPainter>
 
 namespace TrendLib
 {
@@ -18,19 +20,17 @@ namespace TrendLib
 		wait(5000);
 	}
 
-	void RenderThread::render(double centerX, double centerY, double scaleFactor, QSize resultSize)
+	void RenderThread::render(const TrendDrawParam& drawParam)
 	{
 		QMutexLocker locker(&m_mutex);
 
-		this->m_centerX = centerX;
-		this->m_centerY = centerY;
-		this->m_scaleFactor = scaleFactor;
-		this->m_resultSize = resultSize;
+		this->m_drawParam = drawParam;
 
 		if (isRunning() == false)
 		{
-			start(LowPriority);
-		} else
+			start(QThread::NormalPriority);
+		}
+		else
 		{
 			m_restart = true;
 			m_condition.wakeOne();
@@ -44,62 +44,115 @@ namespace TrendLib
 		do
 		{
 			m_mutex.lock();
-				QSize resultSize = this->m_resultSize;
-				double scaleFactor = this->m_scaleFactor;
-				//double centerX = this->m_centerX;
-				//double centerY = this->m_centerY;
+			TrendDrawParam drawParam = m_drawParam;
 			m_mutex.unlock();
 
-			QImage image(resultSize, QImage::Format_RGB32);
+			//////// All drawing are done in inches
+			///////
+			QSize pixelSize = drawParam.rect().size();
 
-			QPainter painter(&image);
+			QSizeF inchSize = drawParam.rect().size();
+			inchSize.setWidth(inchSize.width() / drawParam.dpiX());
+			inchSize.setHeight(inchSize.height() / drawParam.dpiY());
 
-			double x = 0;
-			double y = 0;
-			double width = 150;
-			double height = 50;
-
-			double dx = 20;
-			double dy = 20;
-
-			for (int i = 0; i < 1000; i++)
+			if (m_image.size() != pixelSize)
 			{
-				if (m_restart == true)
-				{
-					break;
-				}
+				qDebug() << "Create new trend image with size " << pixelSize;
+				qDebug() << "dpiX = " << drawParam.dpiX();
+				qDebug() << "dpiY = " << drawParam.dpiY();
 
-				if (m_abort == true)
-				{
-					return;
-				}
-
-				x += dx;
-				y += dy;
-
-				if (x >= resultSize.width() - width ||
-					x < 0)
-				{
-					dx *= -1;
-				}
-
-				if (y >= resultSize.height() - height ||
-					y < 0)
-				{
-					dy *= -1;
-				}
-
-				QFont f("Arial", 30);
-				f.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias | QFont::OpenGLCompatible));
-
-				painter.setPen(Qt::blue);
-				painter.setFont(f);
-				painter.drawText(QRectF(x, y, width, height), Qt::AlignCenter, "Qt");
+				m_image = QImage(pixelSize, QImage::Format_RGB32);
 			}
+
+			m_image.fill(Qt::white);
+
+			QPainter painter(&m_image);
+			painter.setRenderHint(QPainter::Antialiasing, true);
+			painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+			//painter.drawLine(0, 0, pixelSize.width(), pixelSize.height());
+			//painter.drawLine(pixelSize.width(), 0, 0, pixelSize.height());
+
+			//--
+			//
+			painter.resetTransform();
+
+			painter.translate(0.5, 0.5);
+			painter.scale(drawParam.dpiX(), drawParam.dpiY());
+
+			// --
+			//
+			double laneMargin = 1.0 / 32.0;		// 1/16 inch
+			double laneHeight = (inchSize.height() - laneMargin) / static_cast<double>(drawParam.laneCount()) - laneMargin;
+
+			for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
+			{
+				QRectF laneRect;
+
+				laneRect.setLeft(laneMargin);
+				laneRect.setRight(inchSize.width() - laneMargin * 2.0);
+
+				laneRect.setTop(laneMargin + static_cast<double>(laneIndex) * (laneHeight + laneMargin));
+				laneRect.setHeight(laneHeight);
+
+				drawLane(&painter, laneRect, drawParam);
+			}
+
+			// --
+			//
+//			painter.setBrush(Qt::red);
+//			QPen ppp(Qt::green, 0);
+//			painter.setPen(ppp);
+//			//painter.setPen(Qt::PenStyle::NoPen);
+//			painter.drawRect(QRectF(1, 1, 2, 1));
+
+//			double x = 0;
+//			double y = 0;
+//			double width = 150;
+//			double height = 50;
+
+//			double dx = 20;
+//			double dy = 20;
+
+//			for (int i = 0; i < 1000; i++)
+//			{
+//				if (m_restart == true)
+//				{
+//					//emit renderedImage(m_image);
+//					break;
+//				}
+
+//				if (m_abort == true)
+//				{
+//					return;
+//				}
+
+//				x += dx;
+//				y += dy;
+
+//				if (x >= size.width() - width ||
+//					x < 0)
+//				{
+//					dx *= -1;
+//				}
+
+//				if (y >= size.height() - height ||
+//					y < 0)
+//				{
+//					dy *= -1;
+//				}
+
+//				QFont f("Arial", 30);
+//				f.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias | QFont::OpenGLCompatible));
+
+//				painter.setPen(Qt::blue);
+//				painter.setFont(f);
+//				painter.drawText(QRectF(x, y, width, height), Qt::AlignCenter, "Qt");
+//			}
 
 			if (m_restart != true)
 			{
-				emit renderedImage(image, scaleFactor);
+				emit renderedImage(m_image);
 			}
 
 			m_mutex.lock();
@@ -110,14 +163,25 @@ namespace TrendLib
 			m_restart = false;
 			m_mutex.unlock();
 		}
-		while (true);
+		while (m_abort == false);
 
 		return;
 	}
 
-	TrendWidget::TrendWidget(QWidget* parent) :
-		QWidget(parent)
+	void RenderThread::drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam)
 	{
+		painter->setBrush(drawParam.backgroundColor());
+		painter->setPen(Qt::PenStyle::NoPen);
+		painter->drawRect(rect);
+
+		return;
+	}
+
+	TrendWidget::TrendWidget(TrendSignalSet* signalSet, QWidget* parent) :
+		QWidget(parent),
+		m_signalSet(signalSet)
+	{
+		assert(m_signalSet);
 
 		connect(&m_thread, &RenderThread::renderedImage, this, &TrendWidget::updatePixmap);
 	}
@@ -128,7 +192,10 @@ namespace TrendLib
 
 	void TrendWidget::updateWidget()
 	{
-		m_thread.render(0, 0, 0, rect().size());
+		m_drawParam.setRect(rect());
+		m_drawParam.setDpi(physicalDpiX(), physicalDpiY());
+
+		m_thread.render(m_drawParam);
 	}
 
 	void TrendWidget::paintEvent(QPaintEvent*)
@@ -143,11 +210,11 @@ namespace TrendLib
 			return;
 		}
 
-		if (m_pixmap.size() !=  rect().size())
+		if (m_pixmap.size() != rect().size())
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
-			painter.drawPixmap(rect(), m_pixmap);
+			painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
 
@@ -161,15 +228,33 @@ namespace TrendLib
 		updateWidget();
 	}
 
-	void TrendWidget::updatePixmap(const QImage& image, double /*scaleFactor*/)
+	void TrendWidget::updatePixmap(const QImage& image)
 	{
-		static int updatePixmapCounter = 0;
-		qDebug() << "updatePixmapCounter " << updatePixmapCounter++;
-
 		m_pixmap = QPixmap::fromImage(image);
 
 		update();
 		return;
+	}
+
+	TrendView TrendWidget::view() const
+	{
+		return m_drawParam.view();
+	}
+
+	void TrendWidget::setView(TrendView value)
+	{
+		m_drawParam.setView(value);
+		return;
+	}
+
+	int TrendWidget::laneCount() const
+	{
+		return m_drawParam.laneCount();
+	}
+
+	void TrendWidget::setLaneCount(int value)
+	{
+		m_drawParam.setLaneCount(value);
 	}
 
 }

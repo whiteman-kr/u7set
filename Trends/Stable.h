@@ -8,6 +8,7 @@
 //
 #include <cassert>
 #include <vector>
+#include <array>
 #include <map>
 #include <list>
 #include <memory>
@@ -27,6 +28,11 @@
 #include <QLayout>
 #include <QGridLayout>
 #include <QApplication>
+
+#include <QLabel>
+#include <QComboBox>
+#include <QPushButton>
+#include <QToolBar>
 
 // Add thirdparty and any stable includes here
 //

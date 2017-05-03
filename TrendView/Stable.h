@@ -8,6 +8,7 @@
 //
 #include <cassert>
 #include <vector>
+#include <array>
 #include <map>
 #include <list>
 #include <memory>

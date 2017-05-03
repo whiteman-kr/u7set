@@ -75,7 +75,7 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	m_instanceTimer = new QTimer(this);
 	m_instanceTimer->start(100);
 
-	connect (m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
+	connect(m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
 
 	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
 	m_appInstanceSharedMemory.attach();

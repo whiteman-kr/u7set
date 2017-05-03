@@ -87,4 +87,40 @@ namespace TrendLib
 		m_unit = value;
 	}
 
+	TrendSignalSet::TrendSignalSet()
+	{
+	}
+
+	bool TrendSignalSet::addSignal(const TrendSignal& signal)
+	{
+		QMutexLocker locker(&m_mutex);
+
+		auto foundIt = std::find_if(m_signals.begin(), m_signals.end(),
+			[&signal](const TrendSignal& s)
+			{
+				return s.signalId() == signal.signalId();
+			});
+
+		if (foundIt != m_signals.end())
+		{
+			return false;
+		}
+
+		m_signals.push_back(signal);
+
+		return true;
+	}
+
+	void TrendSignalSet::removeSignal(QString signalId)
+	{
+		QMutexLocker locker(&m_mutex);
+
+		m_signals.remove_if(
+			[&signalId](const TrendSignal& s)
+			{
+				return s.signalId() == signalId;
+			});
+
+		return;
+	}
 }

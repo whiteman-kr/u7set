@@ -5,6 +5,19 @@
 
 namespace TrendLib
 {
+	struct TrendStateIten
+	{
+		qint64	system;
+		qint64 local;
+		qint64 lant;
+		qint32 flags;
+		double value;
+	};
+
+	struct TrendStateRecord
+	{
+		std::array<TrendStateIten, 512>  m_states;
+	};
 
 	class TrendSignal
 	{
@@ -50,6 +63,21 @@ namespace TrendLib
 		double m_highLimit = 1.0;
 
 		QString m_unit;
+
+		std::vector<std::shared_ptr<TrendStateRecord>> m_records;
+	};
+
+	class TrendSignalSet
+	{
+	public:
+		TrendSignalSet();
+
+		bool addSignal(const TrendSignal& signal);
+		void removeSignal(QString signalId);
+
+	private:
+		QMutex m_mutex;
+		std::list<TrendSignal> m_signals;
 	};
 
 }

@@ -8,9 +8,9 @@
 
 struct Times
 {
-	qint64	system = 0;
-	qint64	local = 0;
-	qint64	plant = 0;
+	qint64 system = 0;
+	qint64 local = 0;
+	qint64 plant = 0;
 
 	QDateTime systemToDateTime() const;
 	QDateTime localToDateTime() const;
