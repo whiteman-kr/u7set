@@ -92,12 +92,6 @@ namespace Builder
 
 			if (!buildTuningData()) break;
 
-			if (!buildRS232SignalLists()) break;
-
-			if (!buildOptoPortsSignalLists()) break;
-
-			if (!setOptoRawInSignalsAsComputed()) break;
-
 			result = true;
 		}
 
@@ -596,6 +590,12 @@ namespace Builder
 			if (!setOutputSignalsAsComputed()) break;
 
 			if (!createOptoExchangeLists()) break;
+
+/*			if (!buildRS232SignalLists()) break;
+
+			if (!buildOptoPortsSignalLists()) break; */
+
+			if (!setOptoRawInSignalsAsComputed()) break;
 
 			result = true;
 		}
@@ -3334,7 +3334,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
 
 		if (optoModules.isEmpty())
 		{
@@ -3343,7 +3343,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::OptoModule* optoModule : optoModules)
+		for(Hardware::OptoModuleShared& optoModule : optoModules)
 		{
 			if (optoModule == nullptr)
 			{
@@ -3353,22 +3353,24 @@ namespace Builder
 				continue;
 			}
 
-			QList<Hardware::OptoPort*> optoPorts = optoModule->getOptoPorts();
+			QList<Hardware::OptoPortShared> optoPorts;
+
+			optoModule->getOptoPorts(optoPorts);
 
 			if (optoPorts.isEmpty())
 			{
 				continue;
 			}
 
-			for(Hardware::OptoPort* port : optoPorts)
+			for(Hardware::OptoPortShared& port : optoPorts)
 			{
 				bool res = false;
 
 				do
 				{
-					if (port->calculatePortRawDataSize(m_optoModuleStorage, m_log) == false) break;
+					if (port->calculatePortRawDataSize(m_optoModuleStorage) == false) break;
 
-					if (port->calculateTxSignalsAddresses(m_log) == false) break;
+					if (port->calculateTxSignalsAddresses() == false) break;
 
 					res = true;
 					break;
@@ -3396,7 +3398,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			for(Hardware::OptoModule* optoModule : optoModules)
+			for(Hardware::OptoModuleShared& optoModule : optoModules)
 			{
 				optoModule->calculateTxStartAddresses();
 			}
@@ -3414,7 +3416,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
 
 		if (optoModules.isEmpty())
 		{
@@ -3423,7 +3425,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::OptoModule* optoModule : optoModules)
+		for(Hardware::OptoModuleShared& optoModule : optoModules)
 		{
 			if (optoModule == nullptr)
 			{
@@ -3433,14 +3435,16 @@ namespace Builder
 				continue;
 			}
 
-			QList<Hardware::OptoPort*> optoPorts = optoModule->getOptoPorts();
+			QList<Hardware::OptoPortShared> optoPorts;
+
+			optoModule->getOptoPorts(optoPorts);
 
 			if (optoPorts.isEmpty())
 			{
 				continue;
 			}
 
-			for(Hardware::OptoPort* port : optoPorts)
+			for(Hardware::OptoPortShared& port : optoPorts)
 			{
 
 				const Hardware::RawDataDescription& rd = port->rawDataDescription();
@@ -3686,14 +3690,16 @@ namespace Builder
 	{
 		bool result = true;
 
-		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+		QVector<Hardware::OptoModuleShared> modules;
+
+		m_optoModuleStorage->getOptoModulesSorted(modules);
 
 		if (modules.count() == 0)
 		{
 			return true;
 		}
 
-		for(Hardware::OptoModule* module : modules)
+		for(Hardware::OptoModuleShared& module : modules)
 		{
 			if (module == nullptr)
 			{
@@ -3709,9 +3715,11 @@ namespace Builder
 
 			bool initialCommentPrinted = false;
 
-			QVector<Hardware::OptoPort*> ports = module->getOptoPortsSorted();
+			QList<Hardware::OptoPortShared> ports;
 
-			for(Hardware::OptoPort* port : ports)
+			module->getPorts(ports);
+
+			for(Hardware::OptoPortShared& port : ports)
 			{
 				if (port == nullptr)
 				{
@@ -3744,7 +3752,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxData(Hardware::OptoPort* port)
+	bool ModuleLogicCompiler::copyOptoPortTxData(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
@@ -3791,7 +3799,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxRawData(Hardware::OptoPort* port)
+	bool ModuleLogicCompiler::copyOptoPortTxRawData(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
@@ -3862,7 +3870,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxAnalogSignals(Hardware::OptoPort* port)
+	bool ModuleLogicCompiler::copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
@@ -3910,7 +3918,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port)
+	bool ModuleLogicCompiler::copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
@@ -4003,7 +4011,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(Hardware::OptoPort* port, int& offset)
+	bool ModuleLogicCompiler::copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset)
 	{
 		if (port == nullptr)
 		{
@@ -4029,7 +4037,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int place)
+	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int place)
 	{
 		if (port == nullptr)
 		{
@@ -4051,7 +4059,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module)
+	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module)
 	{
 		if (port == nullptr || module == nullptr)
 		{
@@ -4179,7 +4187,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID)
+	bool ModuleLogicCompiler::copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID)
 	{
 		if (port == nullptr)
 		{
@@ -4189,7 +4197,7 @@ namespace Builder
 
 		// get opto port received raw data
 		//
-		Hardware::OptoPort* portWithRxRawData = m_optoModuleStorage->getOptoPort(portEquipmentID);
+		Hardware::OptoPortShared portWithRxRawData = m_optoModuleStorage->getOptoPort(portEquipmentID);
 
 		if (portWithRxRawData == nullptr)
 		{
@@ -4201,7 +4209,7 @@ namespace Builder
 
 		// get opto port linkerd to portWithRxRawData, that send raw data
 		//
-		Hardware::OptoPort* portWithTxRawData = m_optoModuleStorage->getOptoPort(portWithRxRawData->linkedPortID());
+		Hardware::OptoPortShared portWithTxRawData = m_optoModuleStorage->getOptoPort(portWithRxRawData->linkedPortID());
 
 		if (portWithTxRawData == nullptr)
 		{
@@ -4246,7 +4254,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset)
+	bool ModuleLogicCompiler::copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset)
 	{
 		if (port == nullptr)
 		{
@@ -4270,7 +4278,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
+	bool ModuleLogicCompiler::copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
 	{
 		if (port == nullptr)
 		{
@@ -4298,7 +4306,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
+	bool ModuleLogicCompiler::copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
 	{
 		if (port == nullptr)
 		{
@@ -4361,7 +4369,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
 
 		if (optoModules.isEmpty() == true)
 		{
@@ -4370,16 +4378,18 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::OptoModule* optoModule : optoModules)
+		for(Hardware::OptoModuleShared& optoModule : optoModules)
 		{
-			QList<Hardware::OptoPort*> rs232Ports = optoModule->getSerialPorts();
+			QList<Hardware::OptoPortShared> rs232Ports;
+
+			optoModule->getSerialPorts(rs232Ports);
 
 			if (rs232Ports.isEmpty() == true)
 			{
 				continue;
 			}
 
-			for(Hardware::OptoPort* rs232Port : rs232Ports)
+			for(Hardware::OptoPortShared& rs232Port : rs232Ports)
 			{
 				result &= copyPortRS232Signals(optoModule, rs232Port);
 			}
@@ -4389,7 +4399,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyPortRS232Signals(Hardware::OptoModule* optoModule, Hardware::OptoPort* rs232Port)
+	bool ModuleLogicCompiler::copyPortRS232Signals(Hardware::OptoModuleShared optoModule, Hardware::OptoPortShared rs232Port)
 	{
 		if (optoModule == nullptr ||
 			rs232Port == nullptr)
@@ -4467,7 +4477,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPort *rs232Port)
+	bool ModuleLogicCompiler::writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPortShared rs232Port)
 	{
 		bool result = true;
 
@@ -4513,7 +4523,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
+	bool ModuleLogicCompiler::copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter)
 	{
 		bool result = true;
 
@@ -4601,7 +4611,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter)
+	bool ModuleLogicCompiler::copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter)
 	{
 		bool result = true;
 

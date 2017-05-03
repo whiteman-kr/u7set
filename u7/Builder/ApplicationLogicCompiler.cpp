@@ -352,9 +352,7 @@ namespace Builder
 
 			quint16 portID = connection->getID();
 
-			Hardware::OptoPort* optoPort1 = nullptr;
-
-			optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
+			Hardware::OptoPortShared optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
 
 			// check port 1
 			//
@@ -380,7 +378,7 @@ namespace Builder
 				continue;
 			}
 
-			Hardware::OptoModule* optoModule = m_optoModuleStorage->getOptoModule(optoPort1);
+			Hardware::OptoModuleShared optoModule = m_optoModuleStorage->getOptoModule(optoPort1);
 
 			if (optoModule == nullptr)
 			{
@@ -402,7 +400,7 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
-				result &= optoPort1->parseRawDescription(m_log);
+				result &= optoPort1->parseRawDescription();
 
 				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
 				{
@@ -424,7 +422,7 @@ namespace Builder
 
 				// check port 2
 				//
-				Hardware::OptoPort* optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
+				Hardware::OptoPortShared optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
 
 				if (optoPort2 == nullptr)
 				{
@@ -435,8 +433,8 @@ namespace Builder
 					continue;
 				}
 
-				Hardware::OptoModule* m1 = m_optoModuleStorage->getOptoModule(optoPort1);
-				Hardware::OptoModule* m2 = m_optoModuleStorage->getOptoModule(optoPort2);
+				Hardware::OptoModuleShared m1 = m_optoModuleStorage->getOptoModule(optoPort1);
+				Hardware::OptoModuleShared m2 = m_optoModuleStorage->getOptoModule(optoPort2);
 
 				if (m1 != nullptr && m2 != nullptr)
 				{
@@ -477,7 +475,7 @@ namespace Builder
 				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
 				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
 
-				result &= optoPort1->parseRawDescription(m_log);
+				result &= optoPort1->parseRawDescription();
 
 				optoPort2->setPortID(portID);
 				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
@@ -487,7 +485,7 @@ namespace Builder
 				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
 				optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
 
-				result &= optoPort2->parseRawDescription(m_log);
+				result &= optoPort2->parseRawDescription();
 
 				optoPort1->setLinkedPortID(optoPort2->equipmentID());
 				optoPort2->setLinkedPortID(optoPort1->equipmentID());
@@ -806,11 +804,11 @@ namespace Builder
 				list.append(delim);
 				list.append("");
 
-				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
 				writeOptoPortInfo(p1, list);
 
-				Hardware::OptoPort* p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
 
 				writeOptoPortInfo(p2, list);
 			}
@@ -832,7 +830,9 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeOptoModulesReport()
 	{
-		QVector<Hardware::OptoModule*> modules = m_optoModuleStorage->getOptoModulesSorted();
+		QVector<Hardware::OptoModuleShared> modules;
+
+		m_optoModuleStorage->getOptoModulesSorted(modules);
 
 		int count = modules.count();
 
@@ -849,7 +849,7 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			Hardware::OptoModule* module = modules[i];
+			Hardware::OptoModuleShared module = modules[i];
 
 			if (module == nullptr)
 			{
@@ -881,9 +881,11 @@ namespace Builder
 
 			// write module's opto ports information
 			//
-			QVector<Hardware::OptoPort*> ports = module->getPortsSorted();
+			QList<Hardware::OptoPortShared> ports;
 
-			for(Hardware::OptoPort* port : ports)
+			module->getPorts(ports);
+
+			for(Hardware::OptoPortShared& port : ports)
 			{
 				writeOptoPortInfo(port, list);
 			}
@@ -927,8 +929,8 @@ namespace Builder
 
 			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
 			{
-				Hardware::OptoPort* p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
-				Hardware::OptoPort* p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
 
 				writeOptoVhdFile(cn->connectionID(), p1, p2);
 				writeOptoVhdFile(cn->connectionID(), p2, p1);
@@ -944,7 +946,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::writeOptoVhdFile(const QString& connectionID, Hardware::OptoPort* outPort, Hardware::OptoPort* inPort)
+	bool ApplicationLogicCompiler::writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort)
 	{
 		if (outPort == nullptr || inPort == nullptr)
 		{
@@ -1131,7 +1133,7 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCompiler::writeOptoPortInfo(Hardware::OptoPort* port, QStringList& list)
+	void ApplicationLogicCompiler::writeOptoPortInfo(Hardware::OptoPortShared port, QStringList& list)
 	{
 		if (port == nullptr)
 		{

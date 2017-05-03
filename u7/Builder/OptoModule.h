@@ -31,10 +31,8 @@ namespace Hardware
 	public:
 		enum Type
 		{
-			RegularTx,				// regular transmitted signal
-			RegularRx,				// regular received signal
-			RawTx,					// raw transmitted signal
-			RawRx					// raw received signal
+			Raw,				// raw tx/rx signal
+			Regular				// regular tx/rx signal
 		};
 
 	public:
@@ -44,11 +42,11 @@ namespace Hardware
 
 		QString appSignalID() const { return m_appSignalID; }
 
-		bool isRaw() const { return m_type == Type::RawRx || m_type == Type::RawTx; }
 		bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
-		bool isTx() const { return m_type == Type::RegularTx || m_type == Type::RawTx; }
-		bool isRx() const { return m_type == Type::RegularRx || m_type == Type::RawRx; }
+
+		bool isRaw() const { return m_type == Type::Raw; }
+		bool isRegular() const { return m_type == Type::Regular; }
 
 		Address16 addrInBuf() const { return m_addrInBuf; }
 		void setAddrInBuf(Address16& addr);
@@ -56,7 +54,7 @@ namespace Hardware
 		int sizeB() const { return m_sizeB; }
 
 	private:
-		Type m_type = Type::RegularTx;
+		Type m_type = Type::Regular;
 
 		QString m_appSignalID;
 		E::SignalType m_signalType = E::SignalType::Analog;
@@ -92,9 +90,9 @@ namespace Hardware
 		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
 
 	public:
-		OptoPort(const DeviceController* controller, int portNo);
+		OptoPort(const DeviceController* controller, int portNo, Builder::IssueLogger *log);
 
-		bool appendRegularTxSignal(const Signal* s, Builder::IssueLogger *log);
+		bool appendRegularTxSignal(const Signal* s);
 
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
@@ -102,22 +100,24 @@ namespace Hardware
 		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const;
 
-		bool calculateTxSignalsAddresses(Builder::IssueLogger* log);
+		bool calculateTxSignalsAddresses();
 
 		bool isTxSignalExists(const QString& appSignalID);
 		bool isUsedInConnection() const;
 
+		bool isOptical() const { return m_mode ==  Mode::Optical; }
+		bool isSerial() const { return m_mode ==  Mode::Serial; }
+
 		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
 		Address16 getTxSignalAbsAddr(const QString& appSignalID) const;
 
-		bool parseRawDescription(Builder::IssueLogger* log);
-		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage, Builder::IssueLogger* log);
+		bool parseRawDescription();
+		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage);
 
 		bool getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
 										const QString& appSignalID,
 										QUuid receiverUuid,
-										SignalAddress16 &addr,
-										Builder::IssueLogger* log);
+										SignalAddress16 &addr);
 
 		Q_INVOKABLE quint16 portID() const { return m_portID; }
 		void setPortID(quint16 portID) { m_portID = portID; }
@@ -133,9 +133,6 @@ namespace Hardware
 
 		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
 		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
-
-		//int port() const { return m_port; }					// is need ??
-		//void setPort(int port) { m_port = port; }			//
 
 		Q_INVOKABLE Mode mode() const { return m_mode; }
 		void setMode(Mode mode) { m_mode = mode; }
@@ -195,14 +192,17 @@ namespace Hardware
 		void setManualRxSizeW(int manualRxSizeW) { m_manualRxSizeW = manualRxSizeW; }
 
 	private:
-		bool appendTxRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType, Builder::IssueLogger* log);
-		bool appendRawTxRxSignals(Builder::IssueLogger* log);
+		bool appendTxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type);
+		bool appendRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type);
 
-		void sortByOffsetBitNoAscending(QVector<TxRxSignal>& signalList);
-		bool checkSignalsOffsets(const QVector<TxRxSignal>& signalList, bool overlapIsError, Builder::IssueLogger* log);
+		bool appendRawTxRxSignals();
 
-		void sortTxRxSignals();
-		void sortTxRxSignals(HashedVector<QString, TxRxSignalShared>& array, int startIndex, int count);
+		void sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
+		void sortByAppSignalIdAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
+
+		bool checkSignalsOffsets(const HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
+
+		bool sortTxRxSignals(HashedVector<QString, TxRxSignalShared>& signalList);
 
 	private:
 		QString m_equipmentID;
@@ -220,6 +220,8 @@ namespace Hardware
 
 		QString m_rawDataDescriptionStr;
 		RawDataDescription m_rawDataDescription;
+
+		Builder::IssueLogger* m_log = nullptr;
 
 		//
 
@@ -239,7 +241,8 @@ namespace Hardware
 
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
 
-		HashedVector<QString, TxRxSignalShared> m_txRxSignals;
+		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
+
 		int m_txAnalogSignalsCount = 0;					// non-raw! tx analog signals count
 		int m_txDiscreteSignalsCount = 0;				// non-raw! tx discrete signals count
 
@@ -258,7 +261,7 @@ namespace Hardware
 		int m_rxAnalogSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
 
-		HashedVector<QString, TxRxSignalShared> m_rxSignals;
+		HashedVector<QString, TxRxSignalShared> m_rxSignals;			// signals received via port
 	};
 
 	typedef std::shared_ptr<OptoPort> OptoPortShared;
@@ -279,7 +282,7 @@ namespace Hardware
 		bool isLM();
 		bool isOCM();
 
-		bool isValid() const { return m_valid; }
+//		bool isValid() const { return m_valid; }
 
 		QString equipmentID() const { return m_equipmentID; }
 		const DeviceModule* deviceModule() const { return m_deviceModule; }
@@ -296,17 +299,17 @@ namespace Hardware
 		void getSerialPorts(QList<OptoPortShared>& serialPortsList);
 		void getOptoPorts(QList<OptoPortShared>& optoPortsList);
 
-		void ports(QList<OptoPortShared>& portsList);
+		void getPorts(QList<OptoPortShared>& portsList);
 
-		QVector<OptoPort*> getPortsSorted();
-		QVector<OptoPort*> getOptoPortsSorted();
+//		QVector<OptoPort*> getPortsSorted();
+//		QVector<OptoPort*> getOptoPortsSorted();
 
 		bool calculateTxStartAddresses();
 
 		friend class OptoModuleStorage;
 
 	private:
-		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports);
+		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
 
 	private:
 		// device properties
@@ -326,7 +329,7 @@ namespace Hardware
 		//
 
 		QString m_lmID;
-		DeviceModule* m_lm = nullptr;
+		const DeviceModule* m_lm = nullptr;
 
 		HashedVector<QString, OptoPortShared> m_ports;
 		OutputLog* m_log = nullptr;
@@ -351,20 +354,61 @@ namespace Hardware
 			std::shared_ptr<Connection> connection;
 		};
 
+	public:
+		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger* log);
+		~OptoModuleStorage();
+
+		bool build();
+
+		OptoModuleShared getOptoModule(const QString& optoModuleID);
+		OptoModuleShared getOptoModule(const OptoPortShared optoPort);
+
+		OptoPortShared getOptoPort(const QString& optoPortID);
+
+		QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
+
+		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
+
+		bool isCompatiblePorts(OptoPortShared optoPort1, OptoPortShared optoPort2);
+
+		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmStrID);
+
+		bool setPortsRxDataSizes();
+		bool calculatePortsAbsoulteTxStartAddresses();
+		bool checkPortsAddressesOverlapping(OptoModuleShared module);
+		bool calculatePortsRxStartAddresses();
+
+		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
+		std::shared_ptr<Connection> getConnection(const QString& connectionID);
+
+		bool addTxSignal(const QString& schemaID,
+						 const QString& connectionID,
+						 QUuid transmitterUuid,
+						 const QString& lmID,
+						 Signal* appSignal,
+						 bool* signalAlreadyInList);
+
+		void getOptoModulesSorted(QVector<OptoModuleShared>& modules);
+
+		bool getSignalRxAddress(const QString& connectionID,
+								const QString& appSignalID,
+								const QString& receiverLM,
+								QUuid receiverUuid,
+								SignalAddress16& addr);
 	private:
 		EquipmentSet* m_equipmentSet = nullptr;
 		Builder::LmDescriptionSet* m_lmDescriptionSet = nullptr;
 		Builder::IssueLogger* m_log = nullptr;
 
-		HashedVector<QString, OptoModule*> m_modules;
-		HashedVector<QString, OptoPort*> m_ports;
+		HashedVector<QString, OptoModuleShared> m_modules;
+		HashedVector<QString, OptoPortShared> m_ports;
 
-		QHash<QString, OptoModule*> m_lmAssociatedModules;
+		QHash<QString, OptoModuleShared> m_lmAssociatedModules;
 
 		QHash<QString, std::shared_ptr<Connection>> m_connections;		// connectionID -> connection
 
-		QList<OptoModule*> modules();
-		QList<OptoPort*> ports();
+		QList<OptoModuleShared> modules();
+		QList<OptoPortShared> ports();
 
 		bool addModule(DeviceModule* module);
 
@@ -381,47 +425,5 @@ namespace Hardware
 										const QString& receiverLM,
 										QUuid receiverUuid,
 										SignalAddress16 &addr);
-
-	public:
-		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger* log);
-		~OptoModuleStorage();
-
-		bool build();
-
-		OptoModule* getOptoModule(const QString& optoModuleID);
-		OptoModule* getOptoModule(const OptoPort* optoPort);
-
-		OptoPort* getOptoPort(const QString& optoPortID);
-
-		QString getOptoPortAssociatedLmID(const OptoPort* optoPort);
-
-		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
-
-		bool isCompatiblePorts(const OptoPort* optoPort1, const OptoPort* optoPort2);
-
-		QList<OptoModule*> getLmAssociatedOptoModules(const QString& lmStrID);
-
-		bool setPortsRxDataSizes();
-		bool calculatePortsAbsoulteTxStartAddresses();
-		bool checkPortsAddressesOverlapping(OptoModule* module);
-		bool calculatePortsRxStartAddresses();
-
-		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
-		std::shared_ptr<Connection> getConnection(const QString& connectionID);
-
-		bool addTxSignal(const QString& schemaID,
-						 const QString& connectionID,
-						 QUuid transmitterUuid,
-						 const QString& lmID,
-						 Signal* appSignal,
-						 bool* signalAlreadyInList);
-
-		QVector<OptoModule*> getOptoModulesSorted();
-
-		bool getSignalRxAddress(const QString& connectionID,
-								const QString& appSignalID,
-								const QString& receiverLM,
-								QUuid receiverUuid,
-								SignalAddress16& addr);
 	};
 }

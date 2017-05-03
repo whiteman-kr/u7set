@@ -674,25 +674,25 @@ namespace Builder
 		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);*/
 
 		bool copyOptoConnectionsTxData();
-		bool copyOptoPortTxData(Hardware::OptoPort* port);
+		bool copyOptoPortTxData(Hardware::OptoPortShared port);
 
-		bool copyOptoPortTxRawData(Hardware::OptoPort* port);
-		bool copyOptoPortTxAnalogSignals(Hardware::OptoPort* port);
-		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPort* port);
+		bool copyOptoPortTxRawData(Hardware::OptoPortShared port);
+		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
 
-		bool copyOptoPortAllNativeRawData(Hardware::OptoPort* port, int& offset);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, int modulePlace);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPort* port, int& offset, const Hardware::DeviceModule* module);
-		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPort* port, int& offset, const QString& portEquipmentID);
-		bool copyOptoPortTxConst16RawData(Hardware::OptoPort* port, int const16value, int& offset);
-		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem &item, int portDataOffset);
-		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPort* port, const Hardware::RawDataDescriptionItem& item, int portDataOffset);
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
+		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
+		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
+		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem &item, int portDataOffset);
+		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset);
 
 		bool copyRS232Signals();
-		bool copyPortRS232Signals(Hardware::OptoModule* module, Hardware::OptoPort* rs232Port);
-		bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
-		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPort* rs232Port, QXmlStreamWriter& xmlWriter);
-		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPort* rs232Port);
+		bool copyPortRS232Signals(Hardware::OptoModuleShared module, Hardware::OptoPortShared rs232Port);
+		bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter);
+		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter);
+		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPortShared rs232Port);
 
 		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
 
