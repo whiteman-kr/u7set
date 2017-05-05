@@ -50,6 +50,7 @@
 #include <QCryptographicHash>
 #include <QPainter>
 #include <QScrollArea>
+#include <QMouseEvent>
 
 #include "../VFrame30/VFrame30Lib_global.h"
 #include "../lib/TypesAndEnums.h"

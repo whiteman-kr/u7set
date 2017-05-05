@@ -310,6 +310,8 @@ namespace ExtWidgets
 	public:
 		explicit PropertyEditor(QWidget* parent);
 
+		virtual void saveSettings();
+
 		// Public functions
 		//
 	public:
@@ -329,6 +331,12 @@ namespace ExtWidgets
 
 		void setScriptHelp(const QString& text);
 		QString scriptHelp() const;
+
+		QPoint scriptHelpWindowPos() const;
+		void setScriptHelpWindowPos(const QPoint& value);
+
+		QByteArray scriptHelpWindowGeometry() const;
+		void setScriptHelpWindowGeometry(const QByteArray& value);
 
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
@@ -357,7 +365,7 @@ namespace ExtWidgets
 		// Private Data
 		//
 	private:
-        void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty *, std::pair<QVariant, bool> > &values);
+		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
         QtProperty* createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 
 	private:
@@ -365,6 +373,10 @@ namespace ExtWidgets
 		bool m_readOnly = false;
 
 		QString m_scriptHelp;
+
+		QPoint m_scriptHelpWindowPos;
+		QByteArray m_scriptHelpWindowGeometry;
+
 	};
 
 }

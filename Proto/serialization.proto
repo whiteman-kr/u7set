@@ -1067,6 +1067,11 @@ message AppSignalParam
 	optional double tuningDefaultValue = 55 [default = 0];
 }
 
+message AppSignalParamSet
+{                       
+    repeated AppSignalParam items = 1;
+}
+
 message Connection
 {
     optional string ConnectionID = 2 [default = ""];

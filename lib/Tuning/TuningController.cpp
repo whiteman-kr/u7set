@@ -45,7 +45,7 @@ TuningSignalState TuningController::signalState(const QString& appSignalID, bool
 	return state;
 }
 
-QVariant TuningController::param(const QString& appSignalID)
+QVariant TuningController::signalParam(const QString& appSignalID)
 {
 	bool ok = true;
 
@@ -59,7 +59,7 @@ QVariant TuningController::param(const QString& appSignalID)
 	return result;
 }
 
-QVariant TuningController::state(const QString& appSignalID)
+QVariant TuningController::signalState(const QString& appSignalID)
 {
 	bool ok = true;
 

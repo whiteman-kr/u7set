@@ -60,6 +60,9 @@ void Settings::writeUserScope() const
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 
+	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
+	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
+
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
 	s.setValue("ConnectionEditor/pos", m_connectionEditorWindowPos);
@@ -116,6 +119,9 @@ void Settings::loadUserScope()
 
 	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
 	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
+
+	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
+	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
 	if (m_loginCompleter.isEmpty() == true)

@@ -105,6 +105,9 @@ public:
 	QPoint m_multiLinePropertyEditorWindowPos;
 	QByteArray m_multiLinePropertyEditorGeometry;
 
+	QPoint m_scriptHelpWindowPos;
+	QByteArray m_scriptHelpWindowGeometry;
+
 	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;

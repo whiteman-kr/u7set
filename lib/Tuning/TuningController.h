@@ -14,8 +14,8 @@ public:
 	AppSignalParam signalParam(const QString& appSignalID, bool* ok);
 	TuningSignalState signalState(const QString& appSignalID, bool* ok);
 
-	Q_INVOKABLE QVariant param(const QString& appSignalID); // If no signal with specified appSignalID found, QVariant is null
-	Q_INVOKABLE QVariant state(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is null
+	Q_INVOKABLE QVariant signalParam(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is undefined
+	Q_INVOKABLE QVariant signalState(const QString& appSignalID);	// If no signal with specified appSignalID found, QVariant is undefined
 
 	Q_INVOKABLE bool writeValue(QString appSignalID, float value);
 
