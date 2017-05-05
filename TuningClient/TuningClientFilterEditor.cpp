@@ -31,7 +31,7 @@ double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool&
 
 	QMutexLocker lstate(&m_tuningSignalManager->m_statesMutex);
 
-	TuningSignalState& state = m_tuningSignalManager->stateByHash(appSignalHash);
+    TuningSignalState state = m_tuningSignalManager->stateByHash(appSignalHash);
 
 	if (state.valid() == false)
 	{
