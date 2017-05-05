@@ -589,7 +589,10 @@ namespace Builder
 
 			if (!setOutputSignalsAsComputed()) break;
 
-			if (!createOptoExchangeLists()) break;
+			if (!processOptoTxSignals()) break;
+
+			if (!processOptoTxSignals()) break;
+
 
 /*			if (!buildRS232SignalLists()) break;
 
@@ -6523,146 +6526,190 @@ namespace Builder
 		return true;
 	}
 
-
-	bool ModuleLogicCompiler::createOptoExchangeLists()
+	bool ModuleLogicCompiler::processOptoTxSignals()
 	{
 		bool result = true;
 
+		if (m_optoModuleStorage == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString lmID = m_lm->equipmentIdTemplate();
+
+		// add raw Tx signals in txSignals lists of all opto ports associated with current LM
+		// check that added raw Tx signals exists in current LM
+		//
+		result &= m_optoModuleStorage->addRawTxSignalsToLists(lmID, m_lmAssociatedSignals);
+
+		// add regular Tx signals from transmitters in txSignal lists of all opto ports associated with current LM
+		// check that added regulat Tx signals exists in current LM
+		//
+		result &= addRegularTxSignalsToLists();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::addRegularTxSignalsToLists()
+	{
+		bool result = true;
+
+		// process transmitters and add regular tx signals to opto ports txSignals lists
+		//
 		for(const AppItem* item : m_appItems)
 		{
-			if (item->isTransmitter() == false)
+			if (item == nullptr)
 			{
-				continue;
+				result = false;
+				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			const LogicTransmitter& transmitter = item->logicTransmitter();
-
-			for(LogicPin inPin : transmitter.inputs())
-			{
-				if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Input pin %1 of %2 has wrong direction")).arg(inPin.caption()).arg(item->strID()));
-					RESULT_FALSE_BREAK
-				}
-
-				int connectedPinsCount = 1;
-
-				for(QUuid connectedPinGuid : inPin.associatedIOs())
-				{
-					if (connectedPinsCount > 1)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("More than one pin is connected to the input")));
-
-						ASSERT_RESULT_FALSE_BREAK
-					}
-
-					connectedPinsCount++;
-
-					if (!m_pinParent.contains(connectedPinGuid))
-					{
-						ASSERT_RESULT_FALSE_BREAK
-					}
-
-					AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
-
-					if (connectedPinParent == nullptr)
-					{
-						ASSERT_RESULT_FALSE_BREAK
-					}
-
-					QUuid srcSignalGuid;
-
-					if (connectedPinParent->isSignal())
-					{
-						// input connected to real signal
-						//
-						srcSignalGuid = connectedPinParent->guid();
-					}
-					else
-					{
-						// connectedPinParent is FB
-						//
-						if (!m_outPinSignal.contains(connectedPinGuid))
-						{
-							// All transmitter inputs must be directly linked to a signals.
-							//
-							m_log->errALC5027(transmitter.guid());
-							RESULT_FALSE_BREAK
-						}
-
-						QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
-
-						if (ids.count() >  1)
-						{
-							// Transmitter input can be linked to one signal only.
-							//
-							m_log->errALC5026(transmitter.guid(), ids);
-							RESULT_FALSE_BREAK
-						}
-						else
-						{
-							srcSignalGuid = ids.first();
-						}
-					}
-
-					if (!m_appSignals.contains(srcSignalGuid))
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
-						RESULT_FALSE_BREAK
-					}
-
-					AppSignal* appSignal = m_appSignals[srcSignalGuid];
-
-					if (appSignal == nullptr)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal pointer is NULL, signal GUID: %1")).arg(srcSignalGuid.toString()));
-						RESULT_FALSE_BREAK
-					}
-
-					if (!appSignal->isComputed())
-					{
-						m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
-						RESULT_FALSE_BREAK
-					}
-
-					std::shared_ptr<Hardware::Connection> cn = m_optoModuleStorage->getConnection(transmitter.connectionId());
-
-					if (cn == nullptr)
-					{
-						// Transmitter is linked to unknown opto connection '%1'.
-						//
-						m_log->errALC5024(item->schemaID(), transmitter.connectionId(), transmitter.guid());
-						RESULT_FALSE_BREAK
-					}
-
-					bool signalAlreadyInTxList = false;
-
-					result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
-															   m_lm->equipmentIdTemplate(),
-															   appSignal->signal(),
-															   &signalAlreadyInTxList);
-					if (signalAlreadyInTxList == true)
-					{
-						// The signal '%1' is repeatedly connected to the transmitter '%2'
-						//
-						m_log->errALC5029(appSignal->appSignalID(), transmitter.connectionId(), appSignal->guid(), transmitter.guid());
-						RESULT_FALSE_BREAK
-					}
-					break;
-				}
-
-				if (result == false)
-				{
-					break;
-				}
-			}
+			result &= processTransmitter(item);
 		}
 
 		return result;
 	}
 
+	bool ModuleLogicCompiler::processTransmitter(const AppItem* item)
+	{
+		TEST_PTR_RETURN_FALSE(item);
+
+		if (item->isTransmitter() == false)
+		{
+			return true;				// item is not transmitter, nothing to processing
+		}
+
+		const LogicTransmitter& transmitter = item->logicTransmitter();
+
+		bool result = true;
+
+		QString connectedSignalID;
+		QUuid connectedSignalUuid;
+
+		if (getSignalConnectedToTransmitterInputPin(transmitter, connectedSignalID, connectedSignalUuid) == false)
+		{
+			return false;
+		}
+
+		bool signalAlreadyInTxList = false;
+
+		Signal* s = m_signals->getSignal(connectedSignalID);
+
+		if (s == nullptr)
+		{
+			m_log->errALC5000(connectedSignalID, connectedSignalUuid);
+			ASSERT_RETURN_FALSE
+		}
+
+		result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
+												   m_lm->equipmentIdTemplate(),
+												   s,
+												   &signalAlreadyInTxList);
+		if (signalAlreadyInTxList == true)
+		{
+			// The signal '%1' is repeatedly connected to the transmitter '%2'
+			//
+			m_log->errALC5029(connectedSignalID, transmitter.connectionId(), connectedSignalUuid, transmitter.guid());
+			ASSERT_RETURN_FALSE
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::getSignalConnectedToTransmitterInputPin(const LogicTransmitter& transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid)
+	{
+		connectedSignalID.clear();
+
+		const std::vector<LogicPin>& inPins = transmitter.inputs();
+
+		if (inPins.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			ASSERT_RETURN_FALSE;
+		}
+		const LogicPin& inPin = inPins[0];
+
+		if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Input pin %1 has wrong direction")).arg(inPin.caption()));
+			ASSERT_RETURN_FALSE;
+		}
+
+		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
+
+		if (associatedOutPins.size() > 1)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("More than one pin is connected to the input")));
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (associatedOutPins.size() < 1)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Has no output pins is connected to the input")));
+			ASSERT_RETURN_FALSE;
+		}
+
+		QUuid connectedPinGuid = associatedOutPins[0];
+
+		AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
+
+		if (connectedPinParent == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		QUuid srcSignalGuid;
+
+		if (connectedPinParent->isSignal())
+		{
+			// input connected to real signal
+			//
+			connectedSignalUuid = connectedPinParent->guid();
+		}
+		else
+		{
+			// connectedPinParent is FB
+			//
+			if (m_outPinSignal.contains(connectedPinGuid) == false)
+			{
+				// All transmitter inputs must be directly linked to a signals.
+				//
+				m_log->errALC5027(transmitter.guid());
+				ASSERT_RETURN_FALSE
+			}
+
+			QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
+
+			if (ids.count() >  1)
+			{
+				// Transmitter input can be linked to one signal only.
+				//
+				m_log->errALC5026(transmitter.guid(), ids);
+				ASSERT_RETURN_FALSE
+			}
+			else
+			{
+				connectedSignalUuid = ids.first();
+			}
+		}
+
+		AppSignal* appSignal = m_appSignals.value(connectedSignalUuid, nullptr);
+
+		if (appSignal == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
+			ASSERT_RETURN_FALSE
+		}
+
+		connectedSignalID = appSignal->appSignalID();
+
+		return true;
+	}
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{

@@ -3797,23 +3797,44 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Duplicate signal ID '%1' in opto port '%2'.
+	/// Title: Duplicate signal ID '%1' in opto port '%2' raw data description.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///		%2 Opto port ID
 	///
 	/// Description:
-	///		Duplicate signal ID in specified opto port.
+	///		Duplicate signal ID in specified opto port raw data description. Check description.
 	///
 	void IssueLogger::errALC5188(const QString& appSignalID, const QString &portID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5188,
-				  QString(tr("Signal ID '%1' is duplicate in opto port '%2'.")).
+				  QString(tr("Signal ID '%1' is duplicate in opto port '%2' raw data description.")).
 						arg(appSignalID).arg(portID));
 	}
 
+	/// IssueCode: ALC5189
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Logic module ID
+	///
+	/// Description:
+	///		Transmitted signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
+	///
+	void IssueLogger::errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5189,
+				  QString(tr("Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.")).
+						arg(appSignalID).arg(portID).arg(lmID));
+	}
 
 	// EQP			Equipment issues						6000-6999
 	//

@@ -724,7 +724,12 @@ namespace Builder
 		bool calculateInOutSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
 		bool setOutputSignalsAsComputed();
-		bool createOptoExchangeLists();
+
+		bool processOptoTxSignals();
+		bool addRegularTxSignalsToLists();
+		bool processTransmitter(const AppItem *item);
+
+		bool getSignalConnectedToTransmitterInputPin(const LogicTransmitter &transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid);
 
 		bool buildOptoModulesStorage();
 

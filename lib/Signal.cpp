@@ -1273,10 +1273,12 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 		return nullptr;
 	}
 
-	if (m_strID2IndexMap.contains(appSignalID))
+	int index = m_strID2IndexMap.value(appSignalID, -1);
+
+	if (index == -1)
 	{
-		return &(*this)[m_strID2IndexMap[appSignalID]];
+		return nullptr;
 	}
 
-	return nullptr;
+	return &(*this)[index];
 }

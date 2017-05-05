@@ -90,8 +90,11 @@ namespace Hardware
 		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
 
 	public:
-		OptoPort(const DeviceController* controller, int portNo, Builder::IssueLogger *log);
+		OptoPort();
 
+		bool init(const DeviceController* controller, int portNo, Builder::IssueLogger* log);
+
+		bool addRawTxSignalsToList(const HashedVector<QString, Signal *>& lmAssociatedSignals);
 		bool appendRegularTxSignal(const Signal* s);
 
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
@@ -221,19 +224,18 @@ namespace Hardware
 		QString m_rawDataDescriptionStr;
 		RawDataDescription m_rawDataDescription;
 
-		Builder::IssueLogger* m_log = nullptr;
-
-		//
-
+		QString m_lmID;
 		const DeviceController* m_controller = nullptr;
 
 		QString m_optoModuleID;
 		QString m_linkedPortID;
 		QString m_connectionID;
 
-		//
-
 		quint16 m_portID = NOT_USED_PORT_ID;			// range 0..999, 0 - not used port ID, 1..999 - linked port ID
+
+		Builder::IssueLogger* m_log = nullptr;
+
+		//
 
 		int m_txStartAddress = 0;						// address of port's Tx data relative from opto module appDataOffset
 		int m_absTxStartAddress = 0;					// absoulte address of port Tx data in LM memory
@@ -252,6 +254,8 @@ namespace Hardware
 
 		bool m_txRawDataSizeWIsCalculated = false;
 		bool m_txRawDataSizeWCalculationStarted = false;
+
+		//
 
 		int m_rxAddress = 0;							// address of port's Rx data relative from opto module appDataOffset
 		int m_absRxAddress = 0;							// absoulte address of port Rx data in LM memory
@@ -305,6 +309,8 @@ namespace Hardware
 //		QVector<OptoPort*> getOptoPortsSorted();
 
 		bool calculateTxStartAddresses();
+
+		bool addRawTxSignalsToLists(const HashedVector<QString, Signal*>& lmAssociatedSignals);
 
 		friend class OptoModuleStorage;
 
@@ -371,7 +377,9 @@ namespace Hardware
 
 		bool isCompatiblePorts(OptoPortShared optoPort1, OptoPortShared optoPort2);
 
-		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmStrID);
+		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmID);
+
+		bool addRawTxSignalsToLists(const QString& lmID, const HashedVector<QString, Signal *>& lmAssociatedSignals);
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsAbsoulteTxStartAddresses();
@@ -385,7 +393,7 @@ namespace Hardware
 						 const QString& connectionID,
 						 QUuid transmitterUuid,
 						 const QString& lmID,
-						 Signal* appSignal,
+						 Signal* appSignalID,
 						 bool* signalAlreadyInList);
 
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules);
