@@ -14,6 +14,7 @@ SUBDIRS += qtservice \
     Metrology \
     ConfigurationService \
     ArchivingService \
+	QScintilla \	
 	VFrame30 \
 	u7 \
     Monitor \

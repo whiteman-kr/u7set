@@ -2,7 +2,7 @@
 #define DIALOGFILEEDITOR_H
 
 #include <QDialog>
-#include "../lib/CodeEditor.h"
+#include "IdePropertyEditor.h"
 #include "../lib/DbController.h"
 
 class DialogFileEditor : public QDialog
@@ -18,7 +18,6 @@ private slots:
 
 	void on_ok_clicked();
 	void on_cancel_clicked();
-	void on_text_changed();
 	void on_validate_clicked();
 
 	void on_validate(QAction* pAction);
@@ -37,9 +36,8 @@ private:
     DbController* m_pDbController;
 	std::vector<DbFileInfo> m_validateFiles;
 	bool m_readOnly;
-	bool m_modified = false;
 
-	QPlainTextEdit* m_textEditor = nullptr;
+	CodeEditor* m_editor = nullptr;
 	QPushButton* m_buttonValidate = nullptr;
 	QPushButton* m_buttonOK = nullptr;
 	QPushButton* m_buttonCancel = nullptr;

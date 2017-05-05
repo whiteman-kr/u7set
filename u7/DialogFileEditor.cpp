@@ -16,27 +16,26 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 	//
 
     QString ext = QFileInfo(fileName).suffix();
+
+	CodeType codeType = CodeType::Unknown;
+
 	if (ext == tr("js"))
-    {
-		m_textEditor = new ExtWidgets::CodeEditor();
-		new CppSyntaxHighlighter(m_textEditor->document());
+	{
+		codeType = CodeType::Cpp;
 	}
 	else
 	{
 		if (ext == tr("afb") || ext == tr("xml") || ext == tr("xsd"))
 		{
-			m_textEditor = new ExtWidgets::CodeEditor();
-			new XmlSyntaxHighlighter(m_textEditor->document());
-		}
-		else
-		{
-			m_textEditor = new QPlainTextEdit();
+			codeType = CodeType::Xml;
 		}
 	}
 
-	if (m_textEditor == nullptr)
+	m_editor = new CodeEditor(codeType, this);
+
+	if (m_editor == nullptr)
 	{
-		Q_ASSERT(m_textEditor);
+		Q_ASSERT(m_editor);
 		return;
 	}
 
@@ -48,21 +47,7 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
     QString s(*pData);
 
-	// Set font and tab space
-
-	m_textEditor->setFont(QFont("Courier", font().pointSize() + 2));
-
-	const int tabStop = 4;  // 4 characters
-	QString spaces;
-	for (int i = 0; i < tabStop; ++i)
-	{
-		spaces += " ";
-	}
-
-	QFontMetrics metrics(m_textEditor->font());
-	m_textEditor->setTabStopWidth(metrics.width(spaces));
-
-	m_textEditor->setPlainText(s);
+	m_editor->setText(s);
 
 	// Buttons
 
@@ -77,8 +62,6 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
 	connect(m_buttonOK, &QPushButton::clicked, this, &DialogFileEditor::on_ok_clicked);
 	connect(m_buttonCancel, &QPushButton::clicked, this, &DialogFileEditor::on_cancel_clicked);
-
-	connect (m_textEditor, &QPlainTextEdit::textChanged, this, &DialogFileEditor::on_text_changed);
 
 	// Layouts
 
@@ -95,14 +78,14 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-	mainLayout->addWidget(m_textEditor);
+	mainLayout->addWidget(m_editor);
 	mainLayout->addLayout(buttonLayout);
 
 	if (readOnly == true)
     {
 		m_buttonOK->setEnabled(false);
         setWindowTitle(windowTitle() + tr(" [View Only]"));
-		m_textEditor->setReadOnly(true);
+		m_editor->setReadOnly(true);
     }
 
     if (theSettings.m_DialogTextEditorWindowPos.x() != -1 && theSettings.m_DialogTextEditorWindowPos.y() != -1)
@@ -130,18 +113,16 @@ bool DialogFileEditor::saveChanges()
 
 	if (m_readOnly == false)
 	{
-		QString s = m_textEditor->toPlainText();
+		QString s = m_editor->text();
 		*m_pData = s.toUtf8();
 	}
-
-	m_modified = false;
 
 	return true;
 }
 
 void DialogFileEditor::closeEvent(QCloseEvent* e)
 {
-    if (m_modified == true)
+	if (m_editor->modified() == true)
     {
         QMessageBox::StandardButton result = QMessageBox::warning(this, "Subsystem List Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
@@ -169,8 +150,8 @@ void DialogFileEditor::closeEvent(QCloseEvent* e)
 
 void DialogFileEditor::reject()
 {
-    if (m_modified == true)
-    {
+	if (m_editor->modified() == true)
+	{
         QMessageBox::StandardButton result = QMessageBox::warning(this, "Subsystem List Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
         if (result == QMessageBox::Yes)
@@ -194,7 +175,7 @@ void DialogFileEditor::reject()
 
 void DialogFileEditor::on_ok_clicked()
 {
-	if (m_modified == true)
+	if (m_editor->modified() == true)
 	{
 		if (saveChanges() == false)
 		{
@@ -210,11 +191,6 @@ void DialogFileEditor::on_cancel_clicked()
 {
     reject();
 	return;
-}
-
-void DialogFileEditor::on_text_changed()
-{
-	m_modified = true;
 }
 
 void DialogFileEditor::on_validate_clicked()
@@ -271,7 +247,7 @@ bool DialogFileEditor::validate(int schemaFileId)
 	f->swapData(schemaData);
 
 	// Load text
-	QString s = m_textEditor->toPlainText();
+	QString s = m_editor->text();
 	QByteArray textData = s.toUtf8();
 
 	// Validate

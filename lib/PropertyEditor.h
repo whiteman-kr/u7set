@@ -2,7 +2,6 @@
 #define PROPERTYEDITOR_H
 
 #include "../lib/PropertyObject.h"
-#include "../lib/CodeEditor.h"
 #include "../qtpropertybrowser/src/qteditorfactory.h"
 #include <memory>
 #include <QWidget>
@@ -50,8 +49,49 @@ namespace ExtWidgets
 	{
 	public:
 
-		explicit PropertyEditorHelp(const QString &caption, const QString& text, QWidget *parent);
+		explicit PropertyEditorHelp(const QString &caption, const QString& text, QWidget* parent);
 		~PropertyEditorHelp();
+
+	};
+
+	class PropertyTextEditor : public QWidget
+	{
+		Q_OBJECT
+
+	public:
+		PropertyTextEditor(QWidget* parent);
+
+		virtual void setText(const QString& text) = 0;
+
+		virtual QString text() = 0;
+
+		virtual void setReadOnly(bool value) = 0;
+
+		bool modified();
+
+	public slots:
+		void textChanged();
+
+	protected:
+		bool m_modified = false;
+
+	};
+
+	class PropertyPlainTextEditor : public PropertyTextEditor
+	{
+		Q_OBJECT
+
+	public:
+		PropertyPlainTextEditor(QWidget* parent);
+
+		virtual void setText(const QString& text);
+
+		virtual QString text();
+
+		virtual void setReadOnly(bool value);
+
+	private:
+		QPlainTextEdit* m_textEdit = nullptr;
 
 	};
 
@@ -154,7 +194,7 @@ namespace ExtWidgets
 	private:
 		QString m_text;
 
-		QPlainTextEdit* m_textEdit = nullptr;
+		PropertyTextEditor* m_editor = nullptr;
 
 		PropertyEditor* m_propertyEditor = nullptr;
 
@@ -247,7 +287,7 @@ namespace ExtWidgets
 		void emitSetValue(QtProperty* property, const QVariant& value);
 
 	private:
-		virtual QString displayText(const QtProperty *property) const;
+		virtual QString displayText(const QtProperty* property) const;
 
 	private:
 
@@ -278,7 +318,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit QtMultiVariantFactory(PropertyEditor *propertyEditor);
+		explicit QtMultiVariantFactory(PropertyEditor* propertyEditor);
 
 		void connectPropertyManager (QtMultiVariantPropertyManager* manager);
 		QWidget* createEditor(QtMultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent);
@@ -305,6 +345,8 @@ namespace ExtWidgets
 
 	class PropertyEditor : public QtTreePropertyBrowser
 	{
+		friend class MultiLineEdit;
+
 		Q_OBJECT
 
 	public:
@@ -341,6 +383,8 @@ namespace ExtWidgets
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
+		virtual PropertyTextEditor* createCodeEditor(bool script, QWidget* parent);
+
 	protected slots:
 		void updateProperties();
 
@@ -366,7 +410,7 @@ namespace ExtWidgets
 		//
 	private:
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
-        QtProperty* createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
+		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
 
 	private:
 		bool m_expertMode = false;
