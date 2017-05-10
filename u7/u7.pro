@@ -97,7 +97,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
@@ -191,7 +190,7 @@ SOURCES +=\
     Builder/ComparatorStorage.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-    IdePropertyEditor.cpp
+    CodeEditor.cpp
 
 
 HEADERS  += \
@@ -221,7 +220,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    ../lib/CodeSyntaxHighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
     EditEngine/EditEngine.h \
@@ -320,7 +318,7 @@ HEADERS  += \
     Builder/ComparatorStorage.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    IdePropertyEditor.h
+    CodeEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \

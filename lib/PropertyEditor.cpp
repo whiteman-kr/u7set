@@ -1,7 +1,6 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "Settings.h"
-#include "../lib/CodeSyntaxHighlighter.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -141,6 +140,26 @@ namespace ExtWidgets
 	void PropertyPlainTextEditor::setReadOnly(bool value)
 	{
 		m_textEdit->setReadOnly(value);
+	}
+
+	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (obj == m_textEdit)
+		{
+			if (event->type() == QEvent::KeyPress)
+			{
+				QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+				if (keyEvent->key() == Qt::Key_Escape)
+				{
+					emit escapePressed();
+					return true;
+				}
+			}
+		}
+
+		// pass the event on to the parent class
+		return PropertyTextEditor::eventFilter(obj, event);
 	}
 
 	//
@@ -486,6 +505,8 @@ namespace ExtWidgets
 
 		m_editor->setText(text);
 
+		connect(m_editor, &PropertyTextEditor::escapePressed, this, &MultiLineEdit::reject);
+
 		// Buttons
 
 		QPushButton* okButton = new QPushButton(tr("OK"), this);
@@ -493,12 +514,14 @@ namespace ExtWidgets
 
 		okButton->setDefault(true);
 
-		connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
-		connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+		connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
+		connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
 
 		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
 		QHBoxLayout* hl = new QHBoxLayout();
+
+		// Property Editor help
 
 		if (p->isScript() && m_propertyEditor->scriptHelp().isEmpty() == false)
 		{
@@ -595,6 +618,27 @@ namespace ExtWidgets
 		m_text = m_editor->text();
 
 		QDialog::accept();
+	}
+
+	void MultiLineEdit::reject()
+	{
+		if (m_editor->modified() == true)
+		{
+			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+			if (result == QMessageBox::Yes)
+			{
+				accept();
+				return;
+			}
+
+			if (result == QMessageBox::Cancel)
+			{
+				return;
+			}
+		}
+
+		QDialog::reject();
 	}
 
 	//

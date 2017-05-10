@@ -69,6 +69,9 @@ namespace ExtWidgets
 
 		bool modified();
 
+	signals:
+		void escapePressed();
+
 	public slots:
 		void textChanged();
 
@@ -89,6 +92,9 @@ namespace ExtWidgets
 		virtual QString text();
 
 		virtual void setReadOnly(bool value);
+
+	protected:
+		bool eventFilter(QObject* obj, QEvent* event);
 
 	private:
 		QPlainTextEdit* m_textEdit = nullptr;
@@ -192,6 +198,10 @@ namespace ExtWidgets
 		void finished(int result);
 
 	private:
+		virtual void accept();
+		virtual void reject();
+
+	private:
 		QString m_text;
 
 		PropertyTextEditor* m_editor = nullptr;
@@ -201,9 +211,6 @@ namespace ExtWidgets
 		PropertyEditorHelp* m_propertyEditorHelp = nullptr;
 
 		std::shared_ptr<Property> m_property;
-
-		virtual void accept();
-
 
 	};
 
