@@ -725,8 +725,8 @@ namespace Builder
 		bool calculateInternalSignalsAddresses();
 		bool setOutputSignalsAsComputed();
 
-		bool processOptoTxSignals();
-		bool addRegularTxSignalsToLists();
+		bool processTxSignals();
+		bool addRegularTxSignals();
 		bool processTransmitter(const AppItem *item);
 
 		bool getSignalConnectedToTransmitterInputPin(const LogicTransmitter &transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid);

@@ -589,9 +589,9 @@ namespace Builder
 
 			if (!setOutputSignalsAsComputed()) break;
 
-			if (!processOptoTxSignals()) break;
+			if (!processTxSignals()) break;
 
-			if (!processOptoTxSignals()) break;
+			if (!processTxSignals()) break;
 
 
 /*			if (!buildRS232SignalLists()) break;
@@ -6526,7 +6526,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::processOptoTxSignals()
+	bool ModuleLogicCompiler::processTxSignals()
 	{
 		bool result = true;
 
@@ -6542,17 +6542,33 @@ namespace Builder
 		// add raw Tx signals in txSignals lists of all opto ports associated with current LM
 		// check that added raw Tx signals exists in current LM
 		//
-		result &= m_optoModuleStorage->addRawTxSignalsToLists(lmID, m_lmAssociatedSignals);
+		result &= m_optoModuleStorage->addRawTxSignals(lmID, m_lmAssociatedSignals);
 
 		// add regular Tx signals from transmitters in txSignal lists of all opto ports associated with current LM
 		// check that added regulat Tx signals exists in current LM
 		//
-		result &= addRegularTxSignalsToLists();
+		result &= addRegularTxSignals();
+
+		// sort Tx signals lists of LM's associated opto ports
+		//
+		result &= m_optoModuleStorage->sortTxSignals(lmID);
+
+		// calculate relative Tx signals addresses in tx buffers
+		//
+		result &= m_optoModuleStorage->calculateTxSignalsAddresses(lmID);
+
+		// calculate txDataID
+		//
+		result &= m_optoModuleStorage->calculateTxDataIDs(lmID);
+
+		// calculate tx buffers absolute addresses
+		//
+		result &= m_optoModuleStorage->calculateTxBuffersAddresses(lmID);
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::addRegularTxSignalsToLists()
+	bool ModuleLogicCompiler::addRegularTxSignals()
 	{
 		bool result = true;
 
@@ -6603,7 +6619,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		result &= m_optoModuleStorage->addTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
+		result &= m_optoModuleStorage->addRegulatTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 												   m_lm->equipmentIdTemplate(),
 												   s,
 												   &signalAlreadyInTxList);

@@ -117,6 +117,12 @@ quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc)
 }
 
 
+quint32 CRC32(quint32 initialValue, int value, bool finishCalc)
+{
+	return CRC32(CRC32_INITIAL_VALUE, reinterpret_cast<const char*>(&value), sizeof(value), finishCalc);
+}
+
+
 char* Serializable::serializeVersion(char *buffer, bool write)
 {
 	if (write)
