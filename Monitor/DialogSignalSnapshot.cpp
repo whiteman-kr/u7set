@@ -107,20 +107,20 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	case SnapshotItemModel::Columns::SystemTime:
 		{
-			v1 = st1.m_time.system;
-			v2 = st2.m_time.system;
+			v1 = st1.m_time.system.timeStamp;
+			v2 = st2.m_time.system.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::LocalTime:
 		{
-			v1 = st1.m_time.local;
-			v2 = st2.m_time.local;
+			v1 = st1.m_time.local.timeStamp;
+			v2 = st2.m_time.local.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::PlantTime:
 		{
-			v1 = st1.m_time.plant;
-			v2 = st2.m_time.plant;
+			v1 = st1.m_time.plant.timeStamp;
+			v2 = st2.m_time.plant.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::Value:

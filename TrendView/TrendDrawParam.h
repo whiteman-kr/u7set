@@ -33,6 +33,16 @@ namespace TrendLib
 		void setLaneCount(int value);
 
 		QColor backgroundColor() const;
+		void setBackgroundColor(const QColor& value);
+
+		QDateTime startTime() const;
+		void setStartTime(const QDateTime& value);
+
+		TimeStamp startTimeStamp() const;
+		void setStartTimeStamp(const TimeStamp& value);
+
+		quint64 duration() const;
+		void setDuration(qint64 value);
 
 	private:
 		QRect m_rect;
@@ -43,6 +53,9 @@ namespace TrendLib
 		int m_laneCount = 1;
 
 		QColor m_backgroundColor = {qRgb(0xE0, 0xE0, 0xE0)};
+
+		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
+		qint64 m_duration = 1_hour;
 	};
 }
 

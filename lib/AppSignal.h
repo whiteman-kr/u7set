@@ -4,13 +4,14 @@
 #include <QDateTime>
 #include "../Proto/serialization.pb.h"
 #include "../lib/Hash.h"
+#include "../lib/TimeStamp.h"
 #include "Types.h"
 
 struct Times
 {
-	qint64 system = 0;
-	qint64 local = 0;
-	qint64 plant = 0;
+	TimeStamp system;
+	TimeStamp local;
+	TimeStamp plant;
 
 	QDateTime systemToDateTime() const;
 	QDateTime localToDateTime() const;

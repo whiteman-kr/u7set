@@ -43,7 +43,8 @@ SOURCES += main.cpp\
 
 HEADERS  += TrendsMainWindow.h \
     Stable.h \
-    Settings.h
+    Settings.h \
+    ../lib/TimeStamp.h
 
 FORMS    += TrendsMainWindow.ui
 

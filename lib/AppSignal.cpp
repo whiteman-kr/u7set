@@ -3,17 +3,17 @@
 
 QDateTime Times::systemToDateTime() const
 {
-	return QDateTime::fromMSecsSinceEpoch(system);
+	return system.toDateTime();
 }
 
 QDateTime Times::localToDateTime() const
 {
-	return QDateTime::fromMSecsSinceEpoch(local);
+	return local.toDateTime();
 }
 
 QDateTime Times::plantToDateTime() const
 {
-	return QDateTime::fromMSecsSinceEpoch(plant);
+	return plant.toDateTime();
 }
 
 
@@ -61,9 +61,9 @@ void AppSignalState::save(Proto::AppSignalState* protoState)
 	protoState->set_value(m_value);
 	protoState->set_flags(m_flags.all);
 
-	protoState->set_systemtime(m_time.system);
-	protoState->set_localtime(m_time.local);
-	protoState->set_planttime(m_time.plant);
+	protoState->set_systemtime(m_time.system.timeStamp);
+	protoState->set_localtime(m_time.local.timeStamp);
+	protoState->set_planttime(m_time.plant.timeStamp);
 }
 
 Hash AppSignalState::load(const Proto::AppSignalState& protoState)
@@ -75,9 +75,9 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 	m_value = protoState.value();
 	m_flags.all = protoState.flags();
 
-	m_time.system = protoState.systemtime();
-	m_time.local = protoState.localtime();
-	m_time.plant = protoState.planttime();
+	m_time.system.timeStamp = protoState.systemtime();
+	m_time.local.timeStamp = protoState.localtime();
+	m_time.plant.timeStamp = protoState.planttime();
 
 	return m_hash;
 }

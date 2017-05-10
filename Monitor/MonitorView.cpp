@@ -4,13 +4,6 @@
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/PropertyNames.h"
 
-// Literals
-//
-constexpr int64_t operator "" _ms(unsigned long long int value)
-{
-	return value;
-}
-
 
 // MonitorView
 //

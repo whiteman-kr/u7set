@@ -30,6 +30,7 @@
 #include <QApplication>
 
 #include <QLabel>
+#include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
 #include <QToolBar>
@@ -37,6 +38,6 @@
 // Add thirdparty and any stable includes here
 //
 //#include "thirdparty/include/libmain.h"
-//#include "my_stable_class.h"
+#include "../lib/TimeStamp.h"
 
 #endif // STABLE_H

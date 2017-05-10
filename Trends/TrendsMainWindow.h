@@ -45,6 +45,7 @@ private slots:
 	void actionAboutTriggered();
 	void actionLaneCountTriggered();
 
+	void timeComboCurrentIndexChanged(int index);
 	void viewComboCurrentIndexChanged(int index);
 	void laneCountComboCurrentIndexChanged(int index);
 
@@ -52,6 +53,7 @@ private:
 	Ui::TrendsMainWindow *ui;
 
 	QToolBar* m_toolBar = nullptr;
+	QComboBox* m_timeCombo = nullptr;
 	QComboBox* m_viewCombo = nullptr;
 	QComboBox* m_lanesCombo = nullptr;
 

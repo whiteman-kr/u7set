@@ -26,6 +26,7 @@ TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 
 	createToolBar();
 
+	connect(m_timeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendsMainWindow::timeComboCurrentIndexChanged);
 	connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendsMainWindow::viewComboCurrentIndexChanged);
 	connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendsMainWindow::laneCountComboCurrentIndexChanged);
 
@@ -71,6 +72,28 @@ void TrendsMainWindow::createToolBar()
 	m_toolBar->addAction(ui->actionPrint);
 
 	m_toolBar->addSeparator();
+
+	// Time ComboBox
+	//
+	QLabel* intervalLabel = new QLabel("Interval:");
+	intervalLabel->setAlignment(Qt::AlignCenter);
+	m_toolBar->addWidget(intervalLabel);
+
+	m_timeCombo = new QComboBox(m_toolBar);
+	m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
+	m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
+	m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
+	m_timeCombo->addItem(tr("1 min"), QVariant::fromValue(1_min));
+	m_timeCombo->addItem(tr("5 min"), QVariant::fromValue(5_min));
+	m_timeCombo->addItem(tr("30 min"), QVariant::fromValue(30_min));
+	m_timeCombo->addItem(tr("1 hour"), QVariant::fromValue(1_hour));
+	m_timeCombo->addItem(tr("3 hour"), QVariant::fromValue(3_hours));
+	m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
+	m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
+	m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
+	m_timeCombo->setCurrentIndex(6);
+	m_toolBar->addWidget(m_timeCombo);
+
 
 	// Lane Count
 	//
@@ -204,6 +227,11 @@ void TrendsMainWindow::actionAboutTriggered()
 void TrendsMainWindow::actionLaneCountTriggered()
 {
 
+}
+
+void TrendsMainWindow::timeComboCurrentIndexChanged(int index)
+{
+	qDebug() << Q_FUNC_INFO << " index = " << index;
 }
 
 void TrendsMainWindow::viewComboCurrentIndexChanged(int index)

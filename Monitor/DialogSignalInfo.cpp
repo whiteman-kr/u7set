@@ -430,8 +430,8 @@ void DialogSignalInfo::updateData()
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
-	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(state.m_time.local);
-	QDateTime plaitTime = QDateTime::fromMSecsSinceEpoch(state.m_time.plant);
+	QDateTime localTime = state.m_time.local.toDateTime();
+	QDateTime plaitTime = state.m_time.plant.toDateTime();
 
 
 	//ui->editSystemTime->setText(systemTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));

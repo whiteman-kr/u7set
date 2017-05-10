@@ -36,7 +36,8 @@ HEADERS += \
     Stable.h \
     TrendWidget.h \
     TrendSignal.h \
-    TrendDrawParam.h
+    TrendDrawParam.h \
+    ../lib/TimeStamp.h
 
 unix {
     target.path = /usr/lib

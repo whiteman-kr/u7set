@@ -31,11 +31,13 @@
 
 #include <QTimer>
 #include <QTime>
+#include <QDateTime>
+#include <QDate>
 #include <QElapsedTimer>
 
 // Add thirdparty and any stable includes here
 //
 //#include "thirdparty/include/libmain.h"
-//#include "my_stable_class.h"
+#include "../lib/TimeStamp.h"
 
 #endif // STABLE_H

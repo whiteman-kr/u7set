@@ -20,6 +20,8 @@ namespace TrendLib
 	private:
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
 
+		static double timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
+		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 
 	signals:
 		void renderedImage(const QImage& image);
@@ -38,7 +40,7 @@ namespace TrendLib
 
 		// Draw cache
 		//
-		 QImage m_image;
+		QImage m_image;
 	};
 
 
