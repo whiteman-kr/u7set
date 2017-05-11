@@ -591,7 +591,7 @@ namespace Builder
 
 			if (!processTxSignals()) break;
 
-			if (!processTxSignals()) break;
+			if (!processSerialRxSignals()) break;
 
 
 /*			if (!buildRS232SignalLists()) break;
@@ -2444,7 +2444,7 @@ namespace Builder
 		{
 			// Receiver is linked to unknown opto connection '%1'.
 			//
-			m_log->errALC5025(receiver.connectionId(), receiver.guid());
+			m_log->errALC5025(receiver.connectionId(), receiver.guid(), fb.schemaID());
 			return false;
 		}
 
@@ -2552,7 +2552,7 @@ namespace Builder
 		{
 			// Receiver is linked to unknown opto connection '%1'.
 			//
-			m_log->errALC5025(receiver.connectionId(), receiver.guid());
+			m_log->errALC5025(receiver.connectionId(), receiver.guid(), appSignal.schemaID());
 			return false;
 		}
 
@@ -6539,12 +6539,12 @@ namespace Builder
 
 		QString lmID = m_lm->equipmentIdTemplate();
 
-		// add raw Tx signals in txSignals lists of all opto ports associated with current LM
+		// add raw Tx signals in txSignals lists of all Optical and Serial ports associated with current LM
 		// check that added raw Tx signals exists in current LM
 		//
 		result &= m_optoModuleStorage->addRawTxSignals(lmID, m_lmAssociatedSignals);
 
-		// add regular Tx signals from transmitters in txSignal lists of all opto ports associated with current LM
+		// add regular Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
 		// check that added regulat Tx signals exists in current LM
 		//
 		result &= addRegularTxSignals();
@@ -6563,7 +6563,38 @@ namespace Builder
 
 		// calculate tx buffers absolute addresses
 		//
-		result &= m_optoModuleStorage->calculateTxBuffersAddresses(lmID);
+		result &= m_optoModuleStorage->calculateTxBuffersAbsAddresses(lmID);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processSerialRxSignals()
+	{
+		bool result = true;
+
+		if (m_optoModuleStorage == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString lmID = m_lm->equipmentIdTemplate();
+
+		// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
+		// check that added raw Rx signals exists in current LM
+		//
+		result &= m_optoModuleStorage->addSerialRawRxSignals(lmID, m_lmAssociatedSignals);
+
+		// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
+		// check that added regulat Rx signals exists in current LM
+		//
+		result &= addRegularSerialRxSignals();
+
+		// sort Rx signals lists of LM's associated Serial ports
+		//
+		result &= m_optoModuleStorage->sortRxSignals(lmID);
+
 
 		return result;
 	}
@@ -6572,7 +6603,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		// process transmitters and add regular tx signals to opto ports txSignals lists
+		// process transmitters and add regular tx signals to Optical and Serial ports txSignals lists
 		//
 		for(const AppItem* item : m_appItems)
 		{
@@ -6619,7 +6650,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		result &= m_optoModuleStorage->addRegulatTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
+		result = m_optoModuleStorage->addRegularTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 												   m_lm->equipmentIdTemplate(),
 												   s,
 												   &signalAlreadyInTxList);
@@ -6726,6 +6757,81 @@ namespace Builder
 
 		return true;
 	}
+
+	bool ModuleLogicCompiler::addRegularSerialRxSignals()
+	{
+		bool result = true;
+
+		// process receivers and add regular tx signals to Serial (only!) ports rxSignals lists
+		//
+		for(const AppItem* item : m_appItems)
+		{
+			if (item == nullptr)
+			{
+				result = false;
+				ASSERT_RESULT_FALSE_BREAK
+			}
+
+			result &= processSerialReceiver(item);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processSerialReceiver(const AppItem* item)
+	{
+		TEST_PTR_RETURN_FALSE(item);
+
+		if (item->isReceiver() == false)
+		{
+			return true;				// item is not receiver, nothing to processing
+		}
+
+		const LogicReceiver& receiver = item->logicReceiver();
+
+		QString connectionID = receiver.connectionId();
+
+		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
+
+		if (connection == nullptr)
+		{
+			// Receiver is linked to unknown opto connection '%1'.
+			//
+			m_log->errALC5025(connectionID, item->guid(), item->schemaID());
+			return false;
+		}
+
+		if (connection->isSerial() == false)
+		{
+			return true;				// process Serial connections receivers only
+		}
+
+		QString rxSignalID = receiver.appSignalId();
+
+		Signal* rxSignal = m_signals->getSignal(rxSignalID);
+
+		if (rxSignal == nullptr)
+		{
+			m_log->errALC5000(rxSignalID, item->guid());
+			ASSERT_RETURN_FALSE
+		}
+
+		if (m_lmAssociatedSignals.contains(rxSignalID) == false)
+		{
+			// Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
+			//
+			m_log->errALC5191(rxSignalID, m_lm->equipmentIdTemplate(), item->guid(), item->schemaID());
+			return false;
+		}
+
+		bool result = m_optoModuleStorage->addSerialRegularRxSignal(item->schemaID(),
+																	connectionID,
+																	item->guid(),
+																	m_lm->equipmentIdTemplate(),
+																	rxSignal);
+		return result;
+	}
+
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{

@@ -726,10 +726,14 @@ namespace Builder
 		bool setOutputSignalsAsComputed();
 
 		bool processTxSignals();
+		bool processSerialRxSignals();
+
 		bool addRegularTxSignals();
 		bool processTransmitter(const AppItem *item);
-
 		bool getSignalConnectedToTransmitterInputPin(const LogicTransmitter &transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid);
+
+		bool addRegularSerialRxSignals();
+		bool processSerialReceiver(const AppItem* item);
 
 		bool buildOptoModulesStorage();
 

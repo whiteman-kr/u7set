@@ -588,6 +588,11 @@ namespace Hardware
         m_mode = value;
     }
 
+	bool Connection::isSerial() const
+	{
+		return m_mode == OptoPort::Mode::Serial;
+	}
+
     bool Connection::enableDuplex() const
     {
         return m_enableDuplex;

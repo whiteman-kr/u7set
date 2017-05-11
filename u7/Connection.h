@@ -129,6 +129,8 @@ namespace Hardware
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
 
+		bool isSerial() const;
+
 		bool enableDuplex() const;
 		void setEnableDuplex(bool value);
 
