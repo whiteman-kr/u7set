@@ -16,24 +16,8 @@
 
 // Add Qt includes here
 //
-#include <QDebug>
-#include <QThread>
-#include <QPaintDevice>
-#include <QMutex>
-#include <QStandardPaths>
-#include <QDir>
-#include <QSettings>
-#include <QDesktopWidget>
-#include <QCloseEvent>
-#include <QLayout>
-#include <QGridLayout>
-#include <QApplication>
-
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QPushButton>
-#include <QToolBar>
+#include <QtCore>
+#include <QtWidgets>
 
 // Add thirdparty and any stable includes here
 //

@@ -1,5 +1,6 @@
 #include "TrendsMainWindow.h"
 #include "ui_TrendsMainWindow.h"
+#include <QGridLayout>
 #include "Settings.h"
 #include "TrendWidget.h"
 
@@ -9,15 +10,31 @@ TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	QWidget* centarlWidget = new QWidget;
+	setCentralWidget(centarlWidget);
+
+	QGridLayout* layout = new QGridLayout();
+	layout->setContentsMargins(0, 0, 0, 0);
+	layout->setSpacing(0);
+	centarlWidget->setLayout(layout);
+
+	// TrendWidget
+	//
 	m_trendWidget = new TrendLib::TrendWidget(&m_signalSet);
-	setCentralWidget(m_trendWidget);
+	layout->addWidget(m_trendWidget, 0, 0);
 
 	m_trendWidget->setView(static_cast<TrendLib::TrendView>(theSettings.m_viewType));
 	m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
+	// Slider Widged
+	//
+	m_trendSlider = new TrendSlider;
+
+	layout->setRowStretch(0, 1);
+	layout->addWidget(m_trendSlider, 1, 0);
+
 	//--
 	//
-
 	connect(ui->actionOpen, &QAction::triggered, this, &TrendsMainWindow::actionOpenTriggered);
 	connect(ui->actionSave, &QAction::triggered, this, &TrendsMainWindow::actionSaveTriggered);
 	connect(ui->actionPrint, &QAction::triggered, this, &TrendsMainWindow::actionPrintTriggered);
@@ -32,6 +49,24 @@ TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 
 	setMinimumSize(500, 300);
 	restoreWindowState();
+
+	// Init Slider with some params from ToolBar
+	//
+	TimeStamp ts(QDateTime::currentMSecsSinceEpoch());
+	ts.timeStamp -= 1_hour * theSettings.m_laneCount;
+
+	m_trendSlider->setMin(ts);
+	m_trendSlider->setValue(ts);
+
+	TimeStamp max(m_trendSlider->min().timeStamp + theSettings.m_laneCount * 1_hour);
+	m_trendSlider->setMax(max);
+
+	qint64 t = m_timeCombo->currentData().value<qint64>();
+	m_trendSlider->setSingleStep(t / singleStepSliderDivider);
+	m_trendSlider->setPageStep(t);
+
+	connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendsMainWindow::sliderValueChanged);
+
 
 	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	TrendLib::TrendSignal s1;
@@ -94,7 +129,6 @@ void TrendsMainWindow::createToolBar()
 	m_timeCombo->setCurrentIndex(6);
 	m_toolBar->addWidget(m_timeCombo);
 
-
 	// Lane Count
 	//
 	QLabel* lanesLabel = new QLabel("Lanes:");
@@ -110,7 +144,6 @@ void TrendsMainWindow::createToolBar()
 	m_lanesCombo->addItem(tr("6"), QVariant::fromValue(6));
 	m_lanesCombo->setCurrentText(QString::number(theSettings.m_laneCount));
 	m_toolBar->addWidget(m_lanesCombo);
-
 
 	// View Type
 	//
@@ -224,33 +257,41 @@ void TrendsMainWindow::actionAboutTriggered()
 	assert(false);
 }
 
-void TrendsMainWindow::actionLaneCountTriggered()
-{
 
-}
-
-void TrendsMainWindow::timeComboCurrentIndexChanged(int index)
+void TrendsMainWindow::timeComboCurrentIndexChanged(int /*index*/)
 {
-	qDebug() << Q_FUNC_INFO << " index = " << index;
+	qint64 t = m_timeCombo->currentData().value<qint64>();
+
+	m_trendSlider->setSingleStep(t / singleStepSliderDivider);
+	m_trendSlider->setPageStep(t);
+
+	m_trendWidget->setDuration(t);
+	m_trendWidget->updateWidget();
+
+	return;
 }
 
 void TrendsMainWindow::viewComboCurrentIndexChanged(int index)
 {
-	qDebug() << Q_FUNC_INFO << " index = " << index;
-
 	TrendLib::TrendView view = m_viewCombo->itemData(index).value<TrendLib::TrendView>();
 	m_trendWidget->setView(view);
 
 	m_trendWidget->updateWidget();
+	return;
 }
 
 void TrendsMainWindow::laneCountComboCurrentIndexChanged(int index)
 {
-	qDebug() << Q_FUNC_INFO << " index = " << index;
-
 	int laneCount = m_lanesCombo->itemData(index).value<int>();
 	m_trendWidget->setLaneCount(laneCount);
 
 	m_trendWidget->updateWidget();
+	return;
 }
 
+void TrendsMainWindow::sliderValueChanged(TimeStamp value)
+{
+	m_trendWidget->setStartTime(value);
+	m_trendWidget->updateWidget();
+	return;
+}

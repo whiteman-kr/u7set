@@ -2,6 +2,7 @@
 #define TRENDSMAINWINDOW_H
 
 #include <QMainWindow>
+#include "TrendSlider.h"
 #include "../TrendView/TrendSignal.h"
 #include "../TrendView/TrendDrawParam.h"
 
@@ -43,11 +44,12 @@ private slots:
 	void actionPrintTriggered();
 	void actionExitTriggered();
 	void actionAboutTriggered();
-	void actionLaneCountTriggered();
 
 	void timeComboCurrentIndexChanged(int index);
 	void viewComboCurrentIndexChanged(int index);
 	void laneCountComboCurrentIndexChanged(int index);
+
+	void sliderValueChanged(TimeStamp value);
 
 private:
 	Ui::TrendsMainWindow *ui;
@@ -59,6 +61,9 @@ private:
 
 	TrendLib::TrendSignalSet m_signalSet;
 	TrendLib::TrendWidget* m_trendWidget = nullptr;
+	TrendSlider* m_trendSlider = nullptr;
+
+	static const int singleStepSliderDivider = 50;
 };
 
 #endif // TRENDSMAINWINDOW_H

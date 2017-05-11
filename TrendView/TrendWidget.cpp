@@ -101,7 +101,7 @@ namespace TrendLib
 
 				drawLane(&painter, laneRect, drawParam);
 
-				startTime.addMSecs(drawParam.duration());
+				startTime = startTime.addMSecs(drawParam.duration());
 			}
 
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -254,6 +254,13 @@ namespace TrendLib
 			}
 		}
 
+		// Align startGridPosition
+		//
+		TimeStamp startGrid = drawParam.startTimeStamp();
+
+		startGrid.timeStamp /= timeGridInterval;
+		startGrid.timeStamp *= timeGridInterval;
+
 		// calc time grid positions
 		//
 		struct PosTimePair
@@ -262,19 +269,28 @@ namespace TrendLib
 			TimeStamp timeStamp;
 		};
 
-		std::vector<PosTimePair> timeGridPos;
-
 		int timeGridCount = static_cast<int>(insideRect.width() / inchGridInterval);
+		if (timeGridCount < 0 || timeGridCount > 100)
+		{
+			return;
+		}
+
+		std::vector<PosTimePair> timeGridPos;
 		timeGridPos.reserve(timeGridCount + 1);
 
-		for (int i = 0; i < timeGridCount + 1; i++)
+		for (int i = 0; i < timeGridCount + 2; i++)
 		{
-			TimeStamp ct = TimeStamp{drawParam.startTimeStamp().timeStamp + i * timeGridInterval};
+			TimeStamp ct = TimeStamp{startGrid.timeStamp + i * timeGridInterval};
 			double x = timeToPixel(ct, insideRect, startTimeStamp, duration);
 
 			// Make sure that x is proper alligned for nice look of cosmetic pen
 			//
 			x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;
+
+			if (x < insideRect.left())
+			{
+				continue;
+			}
 
 			if (x > insideRect.right())
 			{
@@ -303,13 +319,15 @@ namespace TrendLib
 			QPointF pt2(p.x, insideRect.bottom());
 			painter->drawLine(pt1, pt2);
 
+			QTime time = p.timeStamp.toDateTime().time();
 			QDate date = p.timeStamp.toDateTime().date();
 
-			if (lastDate != date)
+			if (lastDate != date &&
+				time == QTime(0, 0, 0, 0))
 			{
 				lastDate = date;
 
-				double x = static_cast<double>(static_cast<int>(p.x * dpiX) + 1) / dpiX;
+				double x = static_cast<double>(p.x * dpiX + 1) / dpiX;
 
 				QPointF pt1(x, insideRect.top());
 				QPointF pt2(x, insideRect.bottom());
@@ -475,6 +493,16 @@ namespace TrendLib
 	void TrendWidget::setLaneCount(int value)
 	{
 		m_drawParam.setLaneCount(value);
+	}
+
+	void TrendWidget::setStartTime(const TimeStamp& startTime)
+	{
+		m_drawParam.setStartTimeStamp(startTime);
+	}
+
+	void TrendWidget::setDuration(qint64 interval)
+	{
+		m_drawParam.setDuration(interval);
 	}
 
 }

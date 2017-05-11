@@ -39,12 +39,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         TrendsMainWindow.cpp \
-    Settings.cpp
+    Settings.cpp \
+    TrendSlider.cpp
 
 HEADERS  += TrendsMainWindow.h \
     Stable.h \
     Settings.h \
-    ../lib/TimeStamp.h
+    ../lib/TimeStamp.h \
+    TrendSlider.h
 
 FORMS    += TrendsMainWindow.ui
 

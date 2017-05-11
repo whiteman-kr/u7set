@@ -69,6 +69,9 @@ namespace TrendLib
 		int laneCount() const;
 		void setLaneCount(int value);
 
+		void setStartTime(const TimeStamp& startTime);
+		void setDuration(qint64 interval);
+
 	private:
 		RenderThread m_thread;
 		QPixmap m_pixmap;
