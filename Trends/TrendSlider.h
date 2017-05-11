@@ -25,6 +25,7 @@ protected:
 public slots:
 	void lineLeftClicked();
 	void lineRightClicked();
+	void sliderRailChanged(qint64 newValue);
 
 public:
 	TimeStamp value() const;
@@ -61,7 +62,12 @@ class TrendSliderRailSubcontrol : public QWidget
 public:
 	TrendSliderRailSubcontrol(TrendSlider* threndSlider);
 
+signals:
+	void valueChanged(qint64 value);
+
 protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 	virtual void timerEvent(QTimerEvent*) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 	virtual void paintEvent(QPaintEvent* event) override;
@@ -82,6 +88,8 @@ private:
 	int m_sliderWidth = 80;
 
 	bool m_lastDrawHover = false;
+	int m_railLastMousePos = 0;
+	qint64 m_railPressMouseValue = 0;
 };
 
 #endif // TRENDSLIDER_H

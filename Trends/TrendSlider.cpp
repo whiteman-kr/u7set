@@ -9,7 +9,9 @@ TrendSlider::TrendSlider()
 	m_railSubcontrol = new TrendSliderRailSubcontrol(this);
 
 	m_lineLeftButton->setAutoRepeat(true);
+	m_lineLeftButton->setAutoRepeatInterval(50);
 	m_lineRightButton->setAutoRepeat(true);
+	m_lineRightButton->setAutoRepeatInterval(50);
 
 	QHBoxLayout* layout = new QHBoxLayout;
 	layout->setMargin(1);
@@ -27,6 +29,7 @@ TrendSlider::TrendSlider()
 
 	connect(m_lineLeftButton, &QPushButton::clicked, this, &TrendSlider::lineLeftClicked);
 	connect(m_lineRightButton, &QPushButton::clicked, this, &TrendSlider::lineRightClicked);
+	connect(m_railSubcontrol, &TrendSliderRailSubcontrol::valueChanged, this, &TrendSlider::sliderRailChanged);
 
 	return;
 }
@@ -77,6 +80,24 @@ void TrendSlider::lineRightClicked()
 	qint64 prevValue = m_value;
 	m_value += m_singleStep;
 	m_value = std::min(m_max, m_value);
+
+	if (m_value != prevValue)
+	{
+		emit paramsChanged(m_value, m_min, m_max, m_singleStep, m_pageStep);
+
+		TimeStamp ts(m_value);
+		emit valueChanged(ts);
+	}
+
+	return;
+}
+
+void TrendSlider::sliderRailChanged(qint64 newValue)
+{
+	newValue = qBound(m_min, newValue, m_max);
+
+	qint64 prevValue = m_value;
+	m_value = newValue;
 
 	if (m_value != prevValue)
 	{
@@ -167,6 +188,54 @@ TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider) 
 	return;
 }
 
+void TrendSliderRailSubcontrol::mousePressEvent(QMouseEvent* event)
+{
+	if ((event->button() & Qt::LeftButton) == true)
+	{
+		QRect sliderSubcontrolRect = sliderRect();
+
+		if (sliderSubcontrolRect.contains(event->pos()) == true)
+		{
+			// Capture mouse
+			//
+			grabMouse();
+			m_railLastMousePos = event->x();
+			m_railPressMouseValue = m_value;
+		}
+		else
+		{
+			// Move cursor to mouse position
+			//
+			if (rect().width() == 0)		// avoid div by 0
+			{
+				return;
+			}
+
+			double slideAreaWidth = rect().width() - sliderSubcontrolRect.width();
+			qint64 newValue = qRound64(m_min + static_cast<double>(event->x()) / slideAreaWidth  * (m_max - m_min));
+
+			if (newValue != m_value)
+			{
+				m_value = newValue;
+				emit valueChanged(m_value);
+			}
+			else
+			{
+				m_value = newValue;
+			}
+		}
+	}
+}
+
+void TrendSliderRailSubcontrol::mouseReleaseEvent(QMouseEvent* event)
+{
+	if ((event->button() & Qt::LeftButton) == true &&
+		QWidget::mouseGrabber() == this)
+	{
+		releaseMouse();
+	}
+}
+
 void TrendSliderRailSubcontrol::timerEvent(QTimerEvent*)
 {
 	QRect sliderRc = sliderRect();
@@ -180,8 +249,35 @@ void TrendSliderRailSubcontrol::timerEvent(QTimerEvent*)
 	return;
 }
 
-void TrendSliderRailSubcontrol::mouseMoveEvent(QMouseEvent* /*event*/)
+void TrendSliderRailSubcontrol::mouseMoveEvent(QMouseEvent* event)
 {
+	if (QWidget::mouseGrabber() == this &&
+		(m_railLastMousePos - event->x()) != 0)
+	{
+		qDebug() << event->x();
+
+		// Move cursor to mouse position
+		//
+		if (rect().width() == 0)		// avoid div by 0
+		{
+			return;
+		}
+
+		QRect sliderSubcontrolRect = sliderRect();
+
+		double slideAreaWidth = rect().width() - sliderSubcontrolRect.width();
+		qint64 newValue = qRound64(m_railPressMouseValue + static_cast<double>(event->x() - m_railLastMousePos) / slideAreaWidth  * (m_max - m_min));
+		m_value = qBound(m_min, newValue, m_max);
+
+		emit valueChanged(m_value);
+
+		//m_railLastMousePos = event->x();
+		update();
+		return;
+	}
+
+	// Code for hover over slider subcontrol
+	//
 	QRect sliderRc = sliderRect();
 	QPoint mousePos = mapFromGlobal(QCursor::pos());
 
