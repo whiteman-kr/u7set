@@ -97,7 +97,6 @@ SOURCES +=\
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
@@ -189,10 +188,9 @@ SOURCES +=\
     DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
-    ../lib/CodeEditor.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-    IdePropertyEditor.cpp
+    CodeEditor.cpp
 
 
 HEADERS  += \
@@ -222,7 +220,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    ../lib/CodeSyntaxHighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
     EditEngine/EditEngine.h \
@@ -319,10 +316,9 @@ HEADERS  += \
     DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
-    ../lib/CodeEditor.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    IdePropertyEditor.h
+    CodeEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -423,6 +419,12 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+#QScintilla
+#
+INCLUDEPATH += ./../QScintilla/include ./../QScintilla/lexlib ./../QScintilla/src ./../QScintilla/Qt4Qt5
+INCLUDEPATH += ../Qt4Qt5
+LIBS += -L$$DESTDIR -lQScintilla
 
 # Add curent dir to a list of library directory paths
 #

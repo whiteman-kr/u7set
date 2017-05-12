@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <memory>
 #include "../VFrame30/SchemaItem.h"
-#include "IdePropertyEditor.h"
+#include "CodeEditor.h"
 
 
 namespace Ui {

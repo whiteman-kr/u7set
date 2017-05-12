@@ -135,8 +135,6 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     ../lib/Tuning/TuningController.cpp \
-    ../lib/CodeEditor.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp \
     TuningClientFilterEditor.cpp \
     TuningClientFilterStorage.cpp \
     SchemaStorage.cpp \
@@ -190,8 +188,6 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     ../lib/Tuning/TuningController.h \
-    ../lib/CodeEditor.h \
-    ../lib/CodeSyntaxHighlighter.h \
     TuningClientFilterEditor.h \
     TuningClientFilterStorage.h \
     TuningSchemaView.h \

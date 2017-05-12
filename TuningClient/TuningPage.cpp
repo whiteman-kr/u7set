@@ -181,7 +181,7 @@ void TuningModelClient::updateStates()
 	{
 		TuningModelRecord& item = m_items[i];
 
-		TuningSignalState& state = m_tuningSignalManager->stateByHash(item.param.hash());
+        TuningSignalState state = m_tuningSignalManager->stateByHash(item.param.hash());
 
 		item.state.copy(state);
 	}

@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
-#include "IdePropertyEditor.h"
+#include "CodeEditor.h"
 
 class DbController;
 

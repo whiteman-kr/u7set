@@ -1,7 +1,6 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 #include "Settings.h"
-#include "../lib/CodeSyntaxHighlighter.h"
 
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
@@ -50,7 +49,7 @@ namespace ExtWidgets
 	// ------------ PropertyEditorHelp ------------
 	//
 
-	PropertyEditorHelp::PropertyEditorHelp(const QString& caption, const QString& text, QWidget *parent):
+	PropertyEditorHelp::PropertyEditorHelp(const QString& caption, const QString& text, QWidget* parent):
 		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 	{
 		setWindowTitle(caption);
@@ -74,6 +73,93 @@ namespace ExtWidgets
 	PropertyEditorHelp::~PropertyEditorHelp()
 	{
 
+	}
+
+	//
+	// ------------ PropertyTextEditor ------------
+	//
+	PropertyTextEditor::PropertyTextEditor(QWidget* parent) :
+		QWidget(parent)
+	{
+
+	}
+
+	bool PropertyTextEditor::modified()
+	{
+		return m_modified;
+	}
+
+	void PropertyTextEditor::textChanged()
+	{
+		m_modified = true;
+	}
+
+	//
+	// ------------ PropertyPlainTextEditor ------------
+	//
+	PropertyPlainTextEditor::PropertyPlainTextEditor(QWidget* parent) :
+		PropertyTextEditor(parent)
+	{
+		m_textEdit = new QPlainTextEdit();
+
+		QHBoxLayout* l = new QHBoxLayout(this);
+		l->addWidget(m_textEdit);
+
+		m_textEdit->setTabChangesFocus(false);
+		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+
+		QFontMetrics metrics(m_textEdit->font());
+
+		const int tabStop = 4;  // 4 characters
+		QString spaces;
+		for (int i = 0; i < tabStop; ++i)
+		{
+			spaces += " ";
+		}
+
+		m_textEdit->setTabStopWidth(metrics.width(spaces));
+
+		connect(m_textEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
+
+	}
+
+	void PropertyPlainTextEditor::setText(const QString& text)
+	{
+		m_textEdit->blockSignals(true);
+
+		m_textEdit->setPlainText(text);
+
+		m_textEdit->blockSignals(false);
+	}
+
+	QString PropertyPlainTextEditor::text()
+	{
+		return m_textEdit->toPlainText();
+	}
+
+	void PropertyPlainTextEditor::setReadOnly(bool value)
+	{
+		m_textEdit->setReadOnly(value);
+	}
+
+	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (obj == m_textEdit)
+		{
+			if (event->type() == QEvent::KeyPress)
+			{
+				QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+
+				if (keyEvent->key() == Qt::Key_Escape)
+				{
+					emit escapePressed();
+					return true;
+				}
+			}
+		}
+
+		// pass the event on to the parent class
+		return PropertyTextEditor::eventFilter(obj, event);
 	}
 
 	//
@@ -275,7 +361,7 @@ namespace ExtWidgets
 		m_lineEdit->installEventFilter(this);
 
 		QRegExp regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
-		QRegExpValidator *validator = new QRegExpValidator(regexp, this);
+		QRegExpValidator* validator = new QRegExpValidator(regexp, this);
 		m_lineEdit->setValidator(validator);
 
 		QTimer::singleShot(0, m_lineEdit, SLOT(setFocus()));
@@ -398,7 +484,7 @@ namespace ExtWidgets
 	//
 	// ---------MultiLineEdit----------
 	//
-	MultiLineEdit::MultiLineEdit(QWidget *parent, PropertyEditor *propertyEditor, const QString &text, std::shared_ptr<Property> p):
+	MultiLineEdit::MultiLineEdit(QWidget* parent, PropertyEditor* propertyEditor, const QString &text, std::shared_ptr<Property> p):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
 		m_propertyEditor(propertyEditor),
 		m_property(p)
@@ -411,36 +497,15 @@ namespace ExtWidgets
 			restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
 		}
 
-		QString value = text;
-
 		QVBoxLayout* vl = new QVBoxLayout();
 
 		// Create Editor
 
-		if (m_property->isScript() == true)
-		{
-			m_textEdit = new CodeEditor(this);
-			new CppSyntaxHighlighter(m_textEdit->document());
-		}
-		else
-		{
-			m_textEdit = new QPlainTextEdit(this);
-		}
-		m_textEdit->setTabChangesFocus(false);
+		m_editor = m_propertyEditor->createCodeEditor(m_property->isScript() == true, this);
 
-		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+		m_editor->setText(text);
 
-		const int tabStop = 4;  // 4 characters
-		QString spaces;
-		for (int i = 0; i < tabStop; ++i)
-		{
-			spaces += " ";
-		}
-
-		QFontMetrics metrics(m_textEdit->font());
-		m_textEdit->setTabStopWidth(metrics.width(spaces));
-
-		m_textEdit->setPlainText(value);
+		connect(m_editor, &PropertyTextEditor::escapePressed, this, &MultiLineEdit::reject);
 
 		// Buttons
 
@@ -449,12 +514,14 @@ namespace ExtWidgets
 
 		okButton->setDefault(true);
 
-		connect(okButton, &QPushButton::clicked, this, &QDialog::accept);
-		connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+		connect(okButton, &QPushButton::clicked, this, &MultiLineEdit::accept);
+		connect(cancelButton, &QPushButton::clicked, this, &MultiLineEdit::reject);
 
 		connect(this, &QDialog::finished, this, &MultiLineEdit::finished);
 
-		QHBoxLayout *hl = new QHBoxLayout();
+		QHBoxLayout* hl = new QHBoxLayout();
+
+		// Property Editor help
 
 		if (p->isScript() && m_propertyEditor->scriptHelp().isEmpty() == false)
 		{
@@ -520,7 +587,7 @@ namespace ExtWidgets
 		hl->addWidget(cancelButton);
 
 
-		vl->addWidget(m_textEdit);
+		vl->addWidget(m_editor);
 		vl->addLayout(hl);
 
 		setLayout(vl);
@@ -542,22 +609,43 @@ namespace ExtWidgets
 
 	void MultiLineEdit::accept()
 	{
-		if (m_textEdit == nullptr)
+		if (m_editor == nullptr)
 		{
-			Q_ASSERT(m_textEdit);
+			Q_ASSERT(m_editor);
 			return;
 		}
 
-		m_text = m_textEdit->toPlainText();
+		m_text = m_editor->text();
 
 		QDialog::accept();
+	}
+
+	void MultiLineEdit::reject()
+	{
+		if (m_editor->modified() == true)
+		{
+			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+			if (result == QMessageBox::Yes)
+			{
+				accept();
+				return;
+			}
+
+			if (result == QMessageBox::Cancel)
+			{
+				return;
+			}
+		}
+
+		QDialog::reject();
 	}
 
 	//
 	// ---------QtMultiTextEdit----------
 	//
 
-	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, PropertyEditor *propertyEditor, std::shared_ptr<Property> p):
+	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, PropertyEditor* propertyEditor, std::shared_ptr<Property> p):
 		QWidget(parent),
 		m_propertyEditor(propertyEditor),
 		m_property(p),
@@ -602,7 +690,7 @@ namespace ExtWidgets
 		if (p->validator().isEmpty() == false)
         {
 			QRegExp regexp(p->validator());
-            QRegExpValidator *v = new QRegExpValidator(regexp, this);
+			QRegExpValidator* v = new QRegExpValidator(regexp, this);
             m_lineEdit->setValidator(v);
         }
 
@@ -796,7 +884,7 @@ namespace ExtWidgets
             opt.state |= QStyle::State_Enabled;
         }
 
-		const QStyle *style = QApplication::style();
+		const QStyle* style = QApplication::style();
 		// Figure out size of an indicator and make sure it is not scaled down in a list view item
 		// by making the pixmap as big as a list view icon and centering the indicator in it.
 		// (if it is smaller, it can't be helped)
@@ -822,7 +910,7 @@ namespace ExtWidgets
 
 	static QIcon drawColorBox(QColor color)
 	{
-		const QStyle *style = QApplication::style();
+		const QStyle* style = QApplication::style();
 		// Figure out size of an indicator and make sure it is not scaled down in a list view item
 		// by making the pixmap as big as a list view icon and centering the indicator in it.
 		// (if it is smaller, it can't be helped)
@@ -1521,7 +1609,7 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString QtMultiVariantPropertyManager::displayText(const QtProperty *property) const
+	QString QtMultiVariantPropertyManager::displayText(const QtProperty* property) const
 	{
 		QString str = property->propertyName();
 
@@ -1767,7 +1855,7 @@ namespace ExtWidgets
 		return m_objects;
 	}
 
-    QtProperty* PropertyEditor::createProperty(QtProperty *parentProperty, const QString& caption, const QString& category, const QString& description, const std::shared_ptr<Property> value, bool sameValue)
+	QtProperty* PropertyEditor::createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString& description, const std::shared_ptr<Property> value, bool sameValue)
 	{
         if (parentProperty == nullptr)
 		{
@@ -2000,6 +2088,12 @@ namespace ExtWidgets
             emit propertiesChanged(modifiedObjects);
 		}
 		return;
+	}
+
+	PropertyTextEditor* PropertyEditor::createCodeEditor(bool script, QWidget* parent)
+	{
+		Q_UNUSED(script);
+		return new PropertyPlainTextEditor(parent);
 	}
 
 	void PropertyEditor::onShowErrorMessage(QString message)
