@@ -87,6 +87,16 @@ namespace TrendLib
 		m_unit = value;
 	}
 
+	QColor TrendSignal::color() const
+	{
+		return m_color;
+	}
+
+	void TrendSignal::setColor(const QColor& value)
+	{
+		m_color = value;
+	}
+
 	TrendSignalSet::TrendSignalSet()
 	{
 	}
@@ -122,5 +132,41 @@ namespace TrendLib
 			});
 
 		return;
+	}
+
+	std::vector<TrendSignal> TrendSignalSet::analogSignals() const
+	{
+		QMutexLocker locker(&m_mutex);
+
+		std::vector<TrendSignal> result;
+		result.reserve(m_signals.size());
+
+		for (const TrendSignal& s : m_signals)
+		{
+			if (s.isAnalog() == true)
+			{
+				result.push_back(s);
+			}
+		}
+
+		return result;
+	}
+
+	std::vector<TrendSignal> TrendSignalSet::discreteSignals() const
+	{
+		QMutexLocker locker(&m_mutex);
+
+		std::vector<TrendSignal> result;
+		result.reserve(m_signals.size());
+
+		for (const TrendSignal& s : m_signals)
+		{
+			if (s.isDiscrete() == true)
+			{
+				result.push_back(s);
+			}
+		}
+
+		return result;
 	}
 }

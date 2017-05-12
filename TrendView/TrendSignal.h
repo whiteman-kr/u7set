@@ -50,6 +50,9 @@ namespace TrendLib
 		QString unit() const;
 		void setUnit(const QString& value);
 
+		QColor color() const;
+		void setColor(const QColor& value);
+
 		// Data
 		//
 	private:
@@ -64,6 +67,8 @@ namespace TrendLib
 
 		QString m_unit;
 
+		QColor m_color = qRgb(0, 0, 0);
+
 		std::vector<std::shared_ptr<TrendStateRecord>> m_records;
 	};
 
@@ -75,8 +80,11 @@ namespace TrendLib
 		bool addSignal(const TrendSignal& signal);
 		void removeSignal(QString signalId);
 
+		std::vector<TrendSignal> analogSignals() const;
+		std::vector<TrendSignal> discreteSignals() const;
+
 	private:
-		QMutex m_mutex;
+		mutable QMutex m_mutex;
 		std::list<TrendSignal> m_signals;
 	};
 

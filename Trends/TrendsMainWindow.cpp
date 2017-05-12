@@ -69,20 +69,54 @@ TrendsMainWindow::TrendsMainWindow(QWidget *parent) :
 
 
 	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//	COLORREF StdColors[] = {	RGB(0x80, 0x00, 0x00), RGB(0x00, 0x80, 0x00), RGB(0x00, 0x00, 0x80), RGB(0x00, 0x80, 0x80), RGB(0x80, 0x00, 0x80),
+//								RGB(0xFF, 0x00, 0x00), RGB(0x00, 0x00, 0xFF), RGB(0x00, 0x00, 0x00) };
+
+
 	TrendLib::TrendSignal s1;
-	s1.setEquipmnetId("SIGNAL001");
-	s1.setCaption("Tren Signal 001");
+	s1.setSignalId("ASIGNAL001");
+	s1.setCaption("ATrend Signal 001");
 	s1.setType(E::SignalType::Analog);
 	s1.setLowLimit(10.0);
 	s1.setHighLimit(105.0);
+	s1.setColor(qRgb(0x80, 0x00, 0x00));
+
+	TrendLib::TrendSignal s11;
+	s11.setSignalId("ASIGNAL011");
+	s11.setCaption("ATren Signal 011");
+	s11.setType(E::SignalType::Analog);
+	s11.setLowLimit(400.0);
+	s11.setHighLimit(25000.0);
+	s11.setColor(qRgb(0x80, 0x00, 0x80));
 
 	TrendLib::TrendSignal s2;
-	s2.setEquipmnetId("SIGNAL002");
+	s2.setSignalId("SIGNAL002");
 	s2.setCaption("Tren Signal 002");
 	s2.setType(E::SignalType::Discrete);
+	s2.setColor(qRgb(0x00, 0x80, 0x00));
+
+	TrendLib::TrendSignal s3;
+	s3.setSignalId("SIGNAL003");
+	s3.setCaption("Tren Signal 003");
+	s3.setType(E::SignalType::Discrete);
+	s3.setColor(qRgb(0x00, 0x00, 0x80));
+
+	TrendLib::TrendSignal s4;
+	s4.setSignalId("SIGNAL004");
+	s4.setCaption("Tren Signal 004");
+	s4.setType(E::SignalType::Discrete);
+	s4.setColor(qRgb(0x00, 0x80, 0x80));
 
 	m_signalSet.addSignal(s1);
 	m_signalSet.addSignal(s2);
+	m_signalSet.addSignal(s3);
+	m_signalSet.addSignal(s4);
+	m_signalSet.addSignal(s11);
+	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	return;

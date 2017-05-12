@@ -65,6 +65,11 @@ namespace TrendLib
 		m_backgroundColor = value;
 	}
 
+	QColor TrendDrawParam::laneBackgroundColor() const
+	{
+		return m_laneBackgroundColor;
+	}
+
 	QDateTime TrendDrawParam::startTime() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(m_startTimeStamp.timeStamp);

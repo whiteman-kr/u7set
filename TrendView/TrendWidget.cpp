@@ -5,9 +5,11 @@
 
 namespace TrendLib
 {
-	RenderThread::RenderThread(QObject* parent)
-		: QThread(parent)
+	RenderThread::RenderThread(TrendSignalSet* signalSet, QObject* parent)
+		: QThread(parent),
+		m_signalSet(signalSet)
 	{
+		assert(m_signalSet);
 	}
 
 	RenderThread::~RenderThread()
@@ -49,6 +51,9 @@ namespace TrendLib
 
 			// All drawing are done in inches
 			//
+			QTime timeMeasures;
+			timeMeasures.start();
+
 			QSize pixelSize = drawParam.rect().size();
 
 			QSizeF inchSize = drawParam.rect().size();
@@ -69,9 +74,6 @@ namespace TrendLib
 			QPainter painter(&m_image);
 			painter.setRenderHint(QPainter::Antialiasing, true);
 			painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-			//painter.drawLine(0, 0, pixelSize.width(), pixelSize.height());
-			//painter.drawLine(pixelSize.width(), 0, 0, pixelSize.height());
 
 			//--
 			//
@@ -104,72 +106,9 @@ namespace TrendLib
 				startTime = startTime.addMSecs(drawParam.duration());
 			}
 
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			//
-//			painter.setBrush(Qt::red);
-//			QPen ppp(Qt::green, 0);
-//			painter.setPen(ppp);
-//			//painter.setPen(Qt::PenStyle::NoPen);
-//			painter.drawRect(QRectF(1, 1, 2, 1));
-
-//			double x = 0;
-//			double y = 0;
-//			double width = 1;
-//			double height = 2;
-
-//			double dx = 0.1;
-//			double dy = 0.1;
-
-//			QTime t;
-//			t.start();
-
-//			QPen pppp;
-//			pppp.setCosmetic(true);
-//			pppp.setColor(Qt::blue);
-//			painter.setPen(pppp);
-//			for (int i = 0; i < 10000; i++)
-//			{
-//				if (m_restart == true)
-//				{
-//					//emit renderedImage(m_image);
-//					break;
-//				}
-
-//				if (m_abort == true)
-//				{
-//					return;
-//				}
-
-//				painter.drawLine(QPointF((double)i * 0.001, 0), QPointF((double)i * 0.002, inchSize.height()));
-
-//				x += dx;
-//				y += dy;
-
-//				if (x >= inchSize.width() - width ||
-//					x < 0)
-//				{
-//					dx *= -1;
-//				}
-
-//				if (y >= inchSize.height() - height ||
-//					y < 0)
-//				{
-//					dy *= -1;
-//				}
-
-//				QFont f("Arial", 0.75);
-//				f.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias | QFont::OpenGLCompatible));
-
-//				painter.setPen(Qt::blue);
-//				painter.setFont(f);
-//				painter.drawText(QRectF(x, y, width, height), Qt::AlignCenter, "Qt");
-//			}
-//			qDebug() << "Elapsed " << t.elapsed();
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			//
-
 			if (m_restart != true)
 			{
+				qDebug() << "Trend draw time " << timeMeasures.elapsed();
 				emit renderedImage(m_image);
 			}
 
@@ -209,12 +148,75 @@ namespace TrendLib
 		insideRect.setWidth(rect.width() - insideRect.left() - 2.0/8.0);
 		insideRect.setHeight(rect.height() - (insideRect.top() - rect.top()) - 2.0/8.0);
 
-		// Ajust insede rect to dpiX, so it will look pretty while drawing it with cosmetic pen
+		// Ajust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
 		//
 		insideRect.setLeft(static_cast<double>(static_cast<int>(insideRect.left() * dpiX)) / dpiX);
 		insideRect.setTop(static_cast<double>(static_cast<int>(insideRect.top() * dpiY)) / dpiY);
 		insideRect.setWidth(static_cast<double>(static_cast<int>(insideRect.width() * dpiX)) / dpiX);
 		insideRect.setHeight(static_cast<double>(static_cast<int>(insideRect.height() * dpiY)) / dpiY);
+
+		// Draw trend in separate mode
+		//
+		assert(m_signalSet);
+
+		std::vector<TrendSignal> discreteSignals = m_signalSet->discreteSignals();
+		std::vector<TrendSignal> analogSignals = m_signalSet->analogSignals();
+
+		if (drawParam.view() == TrendView::Separated)
+		{
+			const double discreteSignalHeight = 5.0 / 8.0;		// of inch
+
+			double y = insideRect.top();
+
+			QColor signalBackColor = drawParam.backgroundColor();
+
+			for (const TrendSignal& s : discreteSignals)
+			{
+				QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
+				y += discreteSignalHeight;
+
+				if (signalRect.top() >= insideRect.bottom())
+				{
+					break;
+				}
+
+				if (signalRect.bottom() > insideRect.bottom())
+				{
+					signalRect.setBottom(insideRect.bottom());
+				}
+
+				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
+
+				drawSignal(painter, s, signalRect, drawParam, signalBackColor);
+			}
+
+			const double analogSignalsSignalHeight = qMax((insideRect.bottom() - y) / analogSignals.size(), discreteSignalHeight);
+
+			for (const TrendSignal& s : analogSignals)
+			{
+				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsSignalHeight};
+				y += analogSignalsSignalHeight;
+
+				if (signalRect.top() >= insideRect.bottom())
+				{
+					break;
+				}
+
+				if (signalRect.bottom() > insideRect.bottom())
+				{
+					signalRect.setBottom(insideRect.bottom());
+				}
+
+				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
+
+				drawSignal(painter, s, signalRect, drawParam, signalBackColor);
+			}
+		}
+
+		if (drawParam.view() == TrendView::Overlapped)
+		{
+
+		}
 
 		// Draw insideRect
 		//
@@ -222,6 +224,8 @@ namespace TrendLib
 		insideRectPen.setCosmetic(true);
 		insideRectPen.setColor(Qt::darkGray);
 		painter->setPen(insideRectPen);
+
+		painter->setBrush(Qt::BrushStyle::NoBrush);
 
 		painter->drawRect(insideRect);
 
@@ -360,6 +364,55 @@ namespace TrendLib
 		return;
 	}
 
+	void RenderThread::drawSignal(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	{
+		assert(painter);
+
+		painter->fillRect(rect, backColor);
+
+		painter->setPen(signal.color());
+
+		QString signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
+		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip);
+
+		if (signal.isDiscrete() == true)
+		{
+			drawDiscrete(painter, signal, rect, drawParam, backColor);
+		}
+		else
+		{
+			drawAnalog(painter, signal, rect, drawParam, backColor);
+		}
+
+		return;
+	}
+
+	void RenderThread::drawDiscrete(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	{
+		assert(painter);
+		assert(signal.isDiscrete() == true);
+
+		// Draw units (0, 1) on the left side of rect
+		//
+		painter->setPen(signal.color());
+
+		QRectF textBoundRect;
+		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
+		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+		// Draw trend
+		//
+
+		return;
+	}
+
+	void RenderThread::drawAnalog(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	{
+		assert(painter);
+		assert(signal.isAnalog() == true);
+		return;
+	}
+
 	double RenderThread::timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
 	{
 		if (duration == 0)
@@ -409,7 +462,13 @@ namespace TrendLib
 		rc.setRight(rect.right() * dpiX);
 		rc.setBottom(rect.bottom() * dpiY);
 
-		painter->drawText(rc, flags, str, boundingRect);
+		QRectF boundingRectIn;
+		painter->drawText(rc, flags, str, &boundingRectIn);
+
+		if (boundingRect != nullptr)
+		{
+			*boundingRect = QRectF(boundingRectIn.left() / dpiX, boundingRectIn.top() / dpiY, boundingRectIn.width() / dpiX, boundingRectIn.height() / dpiY);
+		}
 
 		painter->restore();
 		return;
@@ -417,6 +476,7 @@ namespace TrendLib
 
 	TrendWidget::TrendWidget(TrendSignalSet* signalSet, QWidget* parent) :
 		QWidget(parent),
+		m_thread(signalSet),
 		m_signalSet(signalSet)
 	{
 		assert(m_signalSet);

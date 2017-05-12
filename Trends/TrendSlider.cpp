@@ -234,6 +234,8 @@ void TrendSliderRailSubcontrol::mouseReleaseEvent(QMouseEvent* event)
 	{
 		releaseMouse();
 	}
+
+	return;
 }
 
 void TrendSliderRailSubcontrol::timerEvent(QTimerEvent*)
@@ -254,8 +256,6 @@ void TrendSliderRailSubcontrol::mouseMoveEvent(QMouseEvent* event)
 	if (QWidget::mouseGrabber() == this &&
 		(m_railLastMousePos - event->x()) != 0)
 	{
-		qDebug() << event->x();
-
 		// Move cursor to mouse position
 		//
 		if (rect().width() == 0)		// avoid div by 0
@@ -302,7 +302,7 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 	//
 	p.setPen(QPen(Qt::darkGray, 0));
 
-	QString minTimeText = TimeStamp(m_min).toDateTime().toString("hh:mm:ss [dd.MM.yyyy]");
+	QString minTimeText = TimeStamp(m_min).toDateTime().toString(" hh:mm:ss [dd.MM.yyyy] ");
 
 	QRect minTextRect = sliderRc;
 	minTextRect.moveLeft(0);
@@ -311,7 +311,7 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 
 	// Draw max text
 	//
-	QString maxTimeText = TimeStamp(m_max).toDateTime().toString("hh:mm:ss [dd.MM.yyyy]");
+	QString maxTimeText = TimeStamp(m_max).toDateTime().toString(" hh:mm:ss [dd.MM.yyyy] ");
 
 	QRect maxTextRect = sliderRc;
 	maxTextRect.moveRight(this->rect().width());

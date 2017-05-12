@@ -12,13 +12,17 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		RenderThread(QObject* parent = 0);
+		explicit RenderThread(TrendSignalSet* signalSet, QObject* parent = 0);
 		virtual ~RenderThread();
 
 		void render(const TrendDrawParam& drawParam);
 
 	private:
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
+
+		void drawSignal(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawDiscrete(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawAnalog(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
 
 		static double timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
@@ -30,6 +34,8 @@ namespace TrendLib
 		virtual void run() override;
 
 	private:
+		TrendSignalSet* m_signalSet = nullptr;
+
 		QMutex m_mutex;
 		QWaitCondition m_condition;
 
