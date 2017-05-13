@@ -1436,14 +1436,12 @@ void MainWindow::startMeasure()
 
 	QString measuredSignals;
 
-	if (signalIsMeasured(measuredSignals) == false)
+	if (signalIsMeasured(measuredSignals) == true)
 	{
-		return;
-	}
-
-	if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignals)) == QMessageBox::No)
-	{
-		return;
+		if (QMessageBox::question(this, windowTitle(), tr("Following signals were measured:\n\n%1\nDo you want to measure them again?").arg(measuredSignals)) == QMessageBox::No)
+		{
+			return;
+		}
 	}
 
 	m_measureThread.setMeasureType(m_measureType);
