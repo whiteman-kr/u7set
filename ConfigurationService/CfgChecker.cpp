@@ -302,7 +302,7 @@ void CfgCheckerWorker::updateBuildXml()
 	DEBUG_LOG_MSG(m_logger, "Build in " + newCheckDirectoryPath + " is correct");
 
 	// Renaming to workDirectory/work-date
-	QString date = newCheckDirectoryPath.right(19);
+	QString date = newCheckDirectoryPath.right(19);	// 19 symbols in date YYYY-DD-MM-hh-mm-ss
 	QString newWorkDirectoryPath = workStorage + "/work-" + date;
 
 	if (workDirectory.rename(newCheckDirectoryPath, newWorkDirectoryPath) == false)
@@ -317,8 +317,9 @@ void CfgCheckerWorker::updateBuildXml()
 	emit buildPathChanged(newWorkDirectoryPath);
 }
 
-void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryToLeave)
+void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
 {
+	QString workDirectoryNameToLeave = workDirectoryPathToLeave.right(24);	// 24 symbols in directory name work-YYYY-DD-MM-hh-mm-ss
 	QString workStorage = m_workFolder + "/CfgSrvStorage";
 	QDir workDirectory(workStorage);
 
@@ -326,13 +327,12 @@ void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryToLeave)
 
 	for (QString& workBuildDirectory : workBuildDirectoryList)
 	{
-		QString fullPath = workStorage + QDir::separator() + workBuildDirectory;
-
-		if (fullPath == workDirectoryToLeave)
+		if (workBuildDirectory == workDirectoryNameToLeave)
 		{
 			continue;
 		}
 
+		QString fullPath = workStorage + QDir::separator() + workBuildDirectory;
 		QString date = workBuildDirectory.right(19);
 		QString backupName = workStorage + "/backup-" + date;
 
@@ -342,6 +342,8 @@ void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryToLeave)
 
 			return;
 		}
+
+		DEBUG_LOG_MSG(m_logger, fullPath + " renamed to " + backupName);
 	}
 }
 
