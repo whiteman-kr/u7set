@@ -119,15 +119,15 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::appendRegularTxSignal(const Signal* s)
+	bool OptoPort::appendRegularTxSignal(const Signal* txSignal)
 	{
-		if (s == nullptr)
+		if (txSignal == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		return appendTxSignal(s->appSignalID(), s->signalType(), -1, -1, s->dataSize(), TxRxSignal::Type::Regular);
+		return appendTxSignal(txSignal->appSignalID(), txSignal->signalType(), -1, -1, txSignal->dataSize(), TxRxSignal::Type::Regular);
 	}
 
 	bool OptoPort::sortTxSignals()
@@ -218,7 +218,7 @@ namespace Hardware
 		}
 	}
 
-	bool OptoPort::addRawTxSignals(const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	bool OptoPort::appendRawTxSignals(const HashedVector<QString, Signal*>& lmAssociatedSignals)
 	{
 		bool result = true;
 
@@ -255,7 +255,7 @@ namespace Hardware
 	}
 
 
-	bool OptoPort::addSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals)
+	bool OptoPort::appendSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals)
 	{
 		if (m_mode != OptoPort::Mode::Serial)
 		{
@@ -296,7 +296,7 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::addSerialRegularRxSignal(const Signal* rxSignal)
+	bool OptoPort::appendSerialRegularRxSignal(const Signal* rxSignal)
 	{
 		TEST_PTR_RETURN_FALSE(rxSignal);
 
@@ -345,7 +345,7 @@ namespace Hardware
 
 		// then place analog signals
 		//
-		for(TxRxSignalShared txAnalogSignal : m_txSignals)
+		for(TxRxSignalShared& txAnalogSignal : m_txSignals)
 		{
 			if (txAnalogSignal->isRaw() == true)
 			{
@@ -369,7 +369,7 @@ namespace Hardware
 
 		// then place discrete signals
 		//
-		for(TxRxSignalShared txDiscreteSignal : m_txSignals)
+		for(TxRxSignalShared& txDiscreteSignal : m_txSignals)
 		{
 			if (txDiscreteSignal->isRaw() == true)
 			{
@@ -400,8 +400,8 @@ namespace Hardware
 
 			if (fullTxDataSizeW > m_txDataSizeW)
 			{
-				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = 2, txRawDataSizeW = %2, txAnalogSignalsSizeW = %3, txDiscreteSignalsSizeW = %4")).
-									arg(m_equipmentID).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
+				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = %2, txRawDataSizeW = %3, txAnalogSignalsSizeW = %4, txDiscreteSignalsSizeW = %5")).
+									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
 								   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
@@ -446,7 +446,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::calculateRxDataID()
+	bool OptoPort::calculateSerialRxDataID()
 	{
 		m_rxDataID = 0;
 
@@ -489,6 +489,127 @@ namespace Hardware
 
 		return true;
 	}
+
+	bool OptoPort::calculateSerialRxSignalsAddresses()
+	{
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Serial)
+		{
+			return true;				// process Serial ports only
+		}
+
+		m_rxDataSizeW = 0;
+		m_rxAnalogSignalsSizeW = 0;
+		m_rxDiscreteSignalsSizeW = 0;
+
+		// check raw signals addresses
+		//
+		for(TxRxSignalShared& rxSignal : m_rxSignals)
+		{
+			if (rxSignal->isRaw() == false)
+			{
+				continue;
+			}
+
+			if (rxSignal->addrInBuf().offset() < 0 || rxSignal->addrInBuf().offset() >= m_rxRawDataSizeW)
+			{
+				assert(false);			// address out of range of raw data area
+				return false;
+			}
+		}
+
+		Address16 address(0, 0);
+
+		// m_rxDataID first placed in buffer
+		//
+		address.addWord(TX_DATA_ID_SIZE_W);
+
+		// then place Raw Data
+		//
+		address.addWord(m_rxRawDataSizeW);
+
+		int startAddr = address.offset();
+
+		// then place analog rx signals
+		//
+		for(TxRxSignalShared& rxAnalogSignal : m_rxSignals)
+		{
+			if (rxAnalogSignal->isRaw() == true)
+			{
+				continue;					// exclude raw signals
+			}
+
+			if (rxAnalogSignal->isDiscrete() == true)
+			{
+				break;						// no more analog signals, exit
+			}
+
+			rxAnalogSignal->setAddrInBuf(address);
+
+			address.addBit(rxAnalogSignal->sizeB());
+			address.wordAlign();
+		}
+
+		m_rxAnalogSignalsSizeW = address.offset() - startAddr ;
+
+		startAddr = address.offset();
+
+		// then place discrete signals
+		//
+		for(TxRxSignalShared& rxDiscreteSignal : m_rxSignals)
+		{
+			if (rxDiscreteSignal->isRaw() == true)
+			{
+				continue;					// exclude raw signals
+			}
+
+			if (rxDiscreteSignal->isAnalog() == true)
+			{
+				continue;					// skip analog signals
+			}
+
+			rxDiscreteSignal->setAddrInBuf(address);
+
+			assert(rxDiscreteSignal->sizeB() == SIZE_1BIT);
+
+			address.add1Bit();
+		}
+
+		address.wordAlign();
+
+		m_rxDiscreteSignalsSizeW = address.offset() - startAddr;
+
+		int fullRxDataSizeW = TX_DATA_ID_SIZE_W + m_rxRawDataSizeW + m_rxAnalogSignalsSizeW + m_rxDiscreteSignalsSizeW;
+
+		if (manualSettings() == true)
+		{
+			m_rxDataSizeW = m_manualTxSizeW;
+
+			if (fullRxDataSizeW > m_rxDataSizeW)
+			{
+				LOG_MESSAGE(m_log, QString(tr("Port %1: rxIdSizeW = %2, rxRawDataSizeW = %3, rxAnalogSignalsSizeW = %4, rxDiscreteSignalsSizeW = %5")).
+									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Manual rxDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
+								   arg(m_manualRxSizeW).arg(fullRxDataSizeW).
+								   arg(m_equipmentID).arg(m_connectionID));
+
+				return false;
+			}
+		}
+		else
+		{
+			m_rxDataSizeW = fullRxDataSizeW;
+		}
+
+		return true;
+	}
+
+
 
 
 	bool OptoPort::isTxSignalExists(const QString& appSignalID)
@@ -1372,7 +1493,7 @@ namespace Hardware
 				return false;
 			}
 
-			result &= optoPort->addRawTxSignals(lmAssociatedSignals);
+			result &= optoPort->appendRawTxSignals(lmAssociatedSignals);
 		}
 
 		return result;
@@ -1392,7 +1513,7 @@ namespace Hardware
 
 			if (optoPort->mode() == OptoPort::Mode::Serial)
 			{
-				result &= optoPort->addSerialRawRxSignals(lmAssociatedSignals);
+				result &= optoPort->appendSerialRawRxSignals(lmAssociatedSignals);
 			}
 		}
 
@@ -1646,7 +1767,6 @@ namespace Hardware
 
 		return true;
 	}
-
 
 
 	// ------------------------------------------------------------------
@@ -2004,7 +2124,8 @@ namespace Hardware
 
 	bool OptoModuleStorage::calculateTxBuffersAbsAddresses(const QString& lmID)
 	{
-		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+		return forEachOfLmAssociatedOptoModules(lmID, &OptoModule::calculateTxSignalsAddresses);
+		/*QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
 
 		bool result = true;
 
@@ -2019,8 +2140,30 @@ namespace Hardware
 			result &= optoModule->calculateTxBuffersAbsAddresses();
 		}
 
-		return result;
+		return result; */
 	}
+
+	bool OptoModuleStorage::calculateSerialRxSignalsAddresses(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxSignalsAddresses);
+		/*QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxBuffersAbsAddresses();
+		}
+
+		return result; */
+	}
+
 
 	QList<OptoModuleShared> OptoModuleStorage::modules()
 	{
@@ -2591,7 +2734,7 @@ namespace Hardware
 			return false;
 		}
 
-		p1->addSerialRegularRxSignal(appSignal);
+		p1->appendSerialRegularRxSignal(appSignal);
 
 		return false;
 	}
@@ -2801,6 +2944,28 @@ namespace Hardware
 
 		return result;
 	}
+
+	bool OptoModuleStorage::forEachOfLmAssociatedOptoModules(const QString& lmID, OptoModuleFunc funcPtr)
+	{
+		QList<OptoModuleShared> modules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& module : modules)
+		{
+			if (module == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			OptoModule* modulePtr = module.get();
+
+			result &= (modulePtr->*funcPtr)();
+		}
+
+		return result;
+	}
+
 
 
 }

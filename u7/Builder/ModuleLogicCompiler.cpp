@@ -6593,8 +6593,15 @@ namespace Builder
 
 		// sort Rx signals lists of LM's associated Serial ports
 		//
-		result &= m_optoModuleStorage->sortRxSignals(lmID);
+		result &= m_optoModuleStorage->sortSerialRxSignals(lmID);
 
+		// sort Rx signals lists of LM's associated Serial ports
+		//
+		result &= m_optoModuleStorage->calculateSerialRxSignalsAddresses(lmID);
+
+		// calculate rxDataID for serial ports
+		//
+		result &= m_optoModuleStorage->calculateSerialRxDataIDs(lmID);
 
 		return result;
 	}

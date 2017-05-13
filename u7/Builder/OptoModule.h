@@ -94,16 +94,17 @@ namespace Hardware
 
 		bool init(const DeviceController* controller, int portNo, Builder::IssueLogger* log);
 
-		bool addRawTxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
-		bool addSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
-		bool addSerialRegularRxSignal(const Signal* appSignal);
-
-		bool appendRegularTxSignal(const Signal* s);
+		bool appendRawTxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
+		bool appendRegularTxSignal(const Signal* txSignal);
 		bool sortTxSignals();
-		bool sortSerialRxSignals();
 		bool calculateTxSignalsAddresses();
 		bool calculateTxDataID();
-		bool calculateRxDataID();
+
+		bool appendSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
+		bool appendSerialRegularRxSignal(const Signal* rxSignal);
+		bool sortSerialRxSignals();
+		bool calculateSerialRxSignalsAddresses();
+		bool calculateSerialRxDataID();
 
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
@@ -330,6 +331,7 @@ namespace Hardware
 		bool calculateTxDataIDs();
 		bool calculateTxBuffersAbsAddresses();
 		bool checkPortsAddressesOverlapping();
+		bool calculateSerialRxSignalsAddresses();
 
 		friend class OptoModuleStorage;
 
@@ -366,6 +368,8 @@ namespace Hardware
 	};
 
 	typedef std::shared_ptr<OptoModule> OptoModuleShared;
+
+	typedef bool (OptoModule::*OptoModuleFunc)();
 
 
 	// OptoModuleStorage is singleton!
@@ -411,6 +415,7 @@ namespace Hardware
 		bool calculateTxSignalsAddresses(const QString& lmID);
 		bool calculateTxDataIDs(const QString& lmID);
 		bool calculateTxBuffersAbsAddresses(const QString& lmID);
+		bool calculateSerialRxSignalsAddresses(const QString& lmID);
 
 		bool setPortsRxDataSizes();
 		bool calculatePortsAbsoulteTxStartAddresses();
@@ -460,6 +465,7 @@ namespace Hardware
 										SignalAddress16 &addr);
 
 		bool forEachPortOfLmAssociatedOptoModules(const QString& lmID, OptoPortFunc funcPtr);
+		bool forEachOfLmAssociatedOptoModules(const QString& lmID, OptoModuleFunc funcPtr);
 
 	private:
 		static EquipmentSet* m_equipmentSet;
