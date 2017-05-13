@@ -29,7 +29,7 @@ signals:
 
 public slots:
 	void updateBuildXml();
-	void renameWorkToBackup(QString workDirectoryToLeave);
+	void renameWorkToBackup(QString workDirectoryPathToLeave);
 
 protected:
 	void onThreadStarted();

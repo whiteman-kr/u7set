@@ -165,7 +165,7 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
-	CfgCheckerWorker* cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 30, m_logger);
+	CfgCheckerWorker* cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 3 * 1000, m_logger);
 
 	m_cfgCheckerThread = new SimpleThread(cfgCheckerWorker);
 
