@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 
 	QApplication a(argc, argv);
 
-	a.setApplicationName("Trends 1.0");
+	a.setApplicationName("Trends");
+	a.setApplicationVersion("1.0.1");
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 

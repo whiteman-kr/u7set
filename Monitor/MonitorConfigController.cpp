@@ -354,8 +354,8 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	qDebug() << "New configuration arrived";
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
-	qDebug() << "ADS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
-	qDebug() << "ADS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+	qDebug() << "ADS1 (id, ip, port): " << readSettings.ads1.equipmentId() << ", " << readSettings.ads1.ip() << ", " << readSettings.ads1.port();
+	qDebug() << "ADS2 (id, ip, port): " << readSettings.ads2.equipmentId() << ", " << readSettings.ads2.ip() << ", " << readSettings.ads2.port();
 
 	// Get all schema list
 	//
@@ -380,6 +380,11 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	// Emit signal to inform everybody about new configuration
 	//
 	emit configurationArrived(readSettings);
+
+	{
+		QMutexLocker locker(&m_confugurationMutex);
+		m_configuration = readSettings;
+	}
 
 	return;
 }
@@ -486,8 +491,8 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 			QString dasIp2 = dasXmlElement.attribute("ip2");
 			int dasPort2 = dasXmlElement.attribute("port2").toInt();
 
-			outSetting->das1 = ConfigConnection(dasId1, dasIp1, dasPort1);
-			outSetting->das2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+			outSetting->ads1 = ConfigConnection(dasId1, dasIp1, dasPort1);
+			outSetting->ads2 = ConfigConnection(dasId2, dasIp2, dasPort2);
 		}
 	}
 
@@ -570,4 +575,10 @@ std::vector<ConfigSchema> MonitorConfigController::schemas() const
 {
 	QMutexLocker locker(&m_mutex);
 	return m_schemas;
+}
+
+ConfigSettings MonitorConfigController::configuration() const
+{
+	QMutexLocker locker(&m_confugurationMutex);
+	return m_configuration;
 }

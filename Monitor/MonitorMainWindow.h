@@ -62,6 +62,7 @@ protected slots:
 
 	// slots
 protected:
+	void slot_trends();
 	void slot_signalSnapshot();
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
@@ -84,14 +85,12 @@ protected:
 private:
 	// Monitor instance key value
 	//
-
 	static const QString m_monitorSingleInstanceKey;
 
 	QSharedMemory m_appInstanceSharedMemory;
 
 	// Instance checker timer
 	//
-
 	QTimer* m_instanceTimer = nullptr;
 
 	MonitorConfigController m_configController;
@@ -124,6 +123,7 @@ private:
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;
 
+	QAction* m_trendsAction = nullptr;
 	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
@@ -157,7 +157,7 @@ signals:
 	void selectionChanged(QString schemaId);
 
 protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(ConfigSettings);
 	void slot_schemaChanged(QString strId);
 	void slot_indexChanged(int index);
 

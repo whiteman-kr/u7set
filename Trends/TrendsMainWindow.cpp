@@ -286,9 +286,38 @@ void TrendsMainWindow::actionExitTriggered()
 
 void TrendsMainWindow::actionAboutTriggered()
 {
-	// todo
-	//
-	assert(false);
+	QMessageBox msgBox(this);
+
+	msgBox.setWindowTitle(tr("About Trends"));
+
+	QStringList args = qApp->arguments();
+	args.pop_front();
+
+	QStringList text;
+	text << tr("JSC Radiy");
+	text << tr("Trends");
+	text << tr("Version: %1").arg(qApp->applicationVersion());
+	text << tr("");
+	text << tr("ProcessID: %1").arg(qApp->applicationPid());
+	text << tr("Executable: %1").arg(qApp->applicationFilePath());
+	text << tr("Arguments: %1").arg(args.join(' '));
+
+	msgBox.setText(text.join('\n'));
+
+	QPixmap image(":/Images/Images/RadiyLogo.png");
+	msgBox.setIconPixmap(image);
+
+	msgBox.exec();
+
+
+
+
+//	mb.setParent(this);
+//	mb.setText(tr("About"));
+
+//	mb.exec();
+
+	return;
 }
 
 

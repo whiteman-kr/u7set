@@ -5,5 +5,7 @@
         <file>Images/Open.svg</file>
         <file>Images/Save.svg</file>
         <file>Images/Print.svg</file>
+        <file>Images/Trends.svg</file>
+        <file>Images/RadiyLogo.png</file>
     </qresource>
 </RCC>

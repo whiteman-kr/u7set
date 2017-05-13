@@ -452,8 +452,8 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort h1 = configuration.das1.address();
-	HostAddressPort h2 = configuration.das2.address();
+	HostAddressPort h1 = configuration.ads1.address();
+	HostAddressPort h2 = configuration.ads2.address();
 
 	setServers(h1, h2, true);
 

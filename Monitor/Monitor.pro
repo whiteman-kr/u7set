@@ -193,4 +193,5 @@ DISTFILES += \
     Images/About.svg \
     Images/readme.txt \
     ../Proto/network.proto \
-    ../Proto/serialization.proto
+    ../Proto/serialization.proto \
+    Images/Trends.svg

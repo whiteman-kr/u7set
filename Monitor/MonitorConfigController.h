@@ -32,8 +32,8 @@ protected:
 struct ConfigSettings
 {
 	QString startSchemaId;				// Start Schema ID
-	ConfigConnection das1;				// Data Aquisition Service connection params
-	ConfigConnection das2;				// Data Aquisition Service connection params
+	ConfigConnection ads1;				// Data Aquisition Service connection params
+	ConfigConnection ads2;				// Data Aquisition Service connection params
 	QString globalScript;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
@@ -95,6 +95,8 @@ public:
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 	std::vector<ConfigSchema> schemas() const;
 
+	ConfigSettings configuration() const;
+
 	// Data section
 	//
 private:
@@ -105,6 +107,9 @@ private:
 
 	mutable QMutex m_mutex;
 	std::vector<ConfigSchema> m_schemas;
+
+	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
+	ConfigSettings m_configuration = ConfigSettings();
 };
 
 #endif // MONITORCONFIGTHREAD_H
