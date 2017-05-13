@@ -23,6 +23,8 @@ CfgCheckerWorker::CfgCheckerWorker(const QString& workFolder,
 	m_checkNewBuildInterval(checkNewBuildInterval),
 	m_logger(logger)
 {
+	m_workFolder.replace("\\", "/");
+	m_autoloadBuildFolder.replace("\\", "/");
 }
 
 
@@ -61,14 +63,14 @@ bool CfgCheckerWorker::copyPath(const QString& src, const QString& dst)
 
 	for (QString& directoryName : dirEntryList)
 	{
-		QString dst_path = dst + QDir::separator() + directoryName;
+		QString dst_path = dst + "/" + directoryName;
 
 		if (dir.mkpath(dst_path) == false)
 		{
 			return false;
 		}
 
-		if (copyPath(src+ QDir::separator() + directoryName, dst_path) == false)
+		if (copyPath(src + "/" + directoryName, dst_path) == false)
 		{
 			return false;
 		}
@@ -94,7 +96,7 @@ bool CfgCheckerWorker::copyPath(const QString& src, const QString& dst)
 			continue;
 		}
 
-		if (!QFile::copy(src + QDir::separator() + fileName, dst + QDir::separator() + fileName))
+		if (!QFile::copy(src + "/" + fileName, dst + "/" + fileName))
 		{
 			return false;
 		}
@@ -268,7 +270,7 @@ void CfgCheckerWorker::updateBuildXml()
 	QString workStorage = m_workFolder + "/CfgSrvStorage";
 	QDir workDirectory(workStorage);
 	QString newCheckDirectoryName = "check-" + QDateTime::currentDateTime().toString("yyyy-MM-dd-HH-mm-ss");
-	QString newCheckDirectoryPath = workStorage + QDir::separator() + newCheckDirectoryName;
+	QString newCheckDirectoryPath = workStorage + "/" + newCheckDirectoryName;
 
 	if (workDirectory.mkpath(newCheckDirectoryPath) == false)
 	{
@@ -332,7 +334,7 @@ void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
 			continue;
 		}
 
-		QString fullPath = workStorage + QDir::separator() + workBuildDirectory;
+		QString fullPath = workStorage + "/" + workBuildDirectory;
 		QString date = workBuildDirectory.right(19);
 		QString backupName = workStorage + "/backup-" + date;
 
@@ -356,7 +358,7 @@ void CfgCheckerWorker::onThreadStarted()
 	}
 
 	QDir workDirectory(m_workFolder);
-	QString workStorage = m_workFolder + QDir::separator() + "CfgSrvStorage";
+	QString workStorage = m_workFolder + "/CfgSrvStorage";
 
 	if (workDirectory.exists("CfgSrvStorage") == false && !workDirectory.mkpath(workStorage) == false)
 	{
@@ -379,7 +381,7 @@ void CfgCheckerWorker::onThreadStarted()
 
 	if (workBuildDirectoryList.isEmpty() == false)
 	{
-		QString workBuildFileName = workStorage + QDir::separator() + workBuildDirectoryList[0] + QDir::separator() + "build.xml";
+		QString workBuildFileName = workStorage + "/" + workBuildDirectoryList[0] + "/build.xml";
 
 		QFileInfo buildXmlInfo(workBuildFileName);
 
