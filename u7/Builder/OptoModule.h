@@ -406,8 +406,8 @@ namespace Hardware
 
 		QList<OptoModuleShared> getLmAssociatedOptoModules(const QString& lmID);
 
-		bool addRawTxSignals(const QString& lmID, const HashedVector<QString, Signal *>& lmAssociatedSignals);
-		bool addSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
+		bool appendRawTxSignals(const QString& lmID, const HashedVector<QString, Signal *>& lmAssociatedSignals);
+		bool appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);
@@ -420,6 +420,7 @@ namespace Hardware
 		bool setPortsRxDataSizes();
 		bool calculatePortsAbsoulteTxStartAddresses();
 		bool calculatePortsRxStartAddresses();
+		bool calculateSerialRxDataIDs(const QString& lmID);
 
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);

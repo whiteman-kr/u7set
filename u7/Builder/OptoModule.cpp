@@ -455,17 +455,8 @@ namespace Hardware
 			return true;
 		}
 
-		if (mode() == OptoPort::Mode::Optical)
+		if (m_mode != OptoPort::Mode::Serial)
 		{
-			OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
-
-			if (linkedPort == nullptr)
-			{
-				ASSERT_RETURN_FALSE
-			}
-
-			m_rxDataID = linkedPort->txDataID();
-
 			return true;
 		}
 
@@ -1995,7 +1986,7 @@ namespace Hardware
 		return m_lmAssociatedModules.values(lmID);
 	}
 
-	bool OptoModuleStorage::addRawTxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	bool OptoModuleStorage::appendRawTxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
 	{
 		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
 
@@ -2015,7 +2006,7 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoModuleStorage::addSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	bool OptoModuleStorage::appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
 	{
 		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
 
@@ -2577,6 +2568,29 @@ namespace Hardware
 
 		return result;
 	}
+
+	bool OptoModuleStorage::calculateSerialRxDataIDs(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxDataID);
+
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxDataIDs();
+		}
+
+		return result;*/
+	}
+
 
 
 

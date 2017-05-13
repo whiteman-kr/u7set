@@ -6542,7 +6542,7 @@ namespace Builder
 		// add raw Tx signals in txSignals lists of all Optical and Serial ports associated with current LM
 		// check that added raw Tx signals exists in current LM
 		//
-		result &= m_optoModuleStorage->addRawTxSignals(lmID, m_lmAssociatedSignals);
+		result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
 
 		// add regular Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
 		// check that added regulat Tx signals exists in current LM
@@ -6584,7 +6584,7 @@ namespace Builder
 		// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
 		// check that added raw Rx signals exists in current LM
 		//
-		result &= m_optoModuleStorage->addSerialRawRxSignals(lmID, m_lmAssociatedSignals);
+		result &= m_optoModuleStorage->appendSerialRawRxSignals(lmID, m_lmAssociatedSignals);
 
 		// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
 		// check that added regulat Rx signals exists in current LM
