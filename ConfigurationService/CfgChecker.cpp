@@ -231,11 +231,11 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 }
 
 
-void CfgCheckerWorker::updateBuildXml()
+bool CfgCheckerWorker::updateBuildXml()
 {
 	if (m_workFolder.isEmpty() || m_autoloadBuildFolder.isEmpty())
 	{
-		return;
+		return false;
 	}
 
 	// Has build.xml been changed?
@@ -245,19 +245,19 @@ void CfgCheckerWorker::updateBuildXml()
 
 	if (buildXmlInfo.lastModified() == m_lastBuildXmlModifyTime)
 	{
-		return;
+		return false;
 	}
 
 	QString newBuildXmlHash;
 
 	if (getFileHash(buildXmlPath, newBuildXmlHash) == false)
 	{
-		return;
+		return false;
 	}
 
 	if (newBuildXmlHash == m_lastBuildXmlHash)
 	{
-		return;
+		return false;
 	}
 
 	DEBUG_LOG_MSG(m_logger, buildXmlPath + " has been changed");
@@ -275,7 +275,7 @@ void CfgCheckerWorker::updateBuildXml()
 	if (workDirectory.mkpath(newCheckDirectoryPath) == false)
 	{
 		DEBUG_LOG_ERR(m_logger, "Could not create directory " + newCheckDirectoryPath);
-		return;
+		return false;
 	}
 
 	if (copyPath(m_autoloadBuildFolder, newCheckDirectoryPath) == false)
@@ -286,7 +286,7 @@ void CfgCheckerWorker::updateBuildXml()
 
 		newCheckDirectory.removeRecursively();
 
-		return;
+		return false;
 	}
 
 	// Checking copied build folder
@@ -298,7 +298,7 @@ void CfgCheckerWorker::updateBuildXml()
 		QDir newCheckDirectory(newCheckDirectoryPath);
 		newCheckDirectory.removeRecursively();
 
-		return;
+		return false;
 	}
 
 	DEBUG_LOG_MSG(m_logger, "Build in " + newCheckDirectoryPath + " is correct");
@@ -311,12 +311,13 @@ void CfgCheckerWorker::updateBuildXml()
 	{
 		DEBUG_LOG_MSG(m_logger, "Could not rename " + newCheckDirectoryPath + " to " + newWorkDirectoryPath);
 
-		return;
+		return false;
 	}
 
 	DEBUG_LOG_MSG(m_logger, newCheckDirectoryPath + " renamed to " + newWorkDirectoryPath);
 
 	emit buildPathChanged(newWorkDirectoryPath);
+	return true;
 }
 
 void CfgCheckerWorker::renameWorkToBackup(QString workDirectoryPathToLeave)
@@ -378,10 +379,12 @@ void CfgCheckerWorker::onThreadStarted()
 	QDir storageDirectory(workStorage);
 
 	QStringList workBuildDirectoryList = storageDirectory.entryList(QStringList() << "work-?\?\?\?-?\?-?\?-?\?-?\?-?\?", QDir::Dirs | QDir::NoSymLinks, QDir::Name);
+	QString workBuildPath;
 
 	if (workBuildDirectoryList.isEmpty() == false)
 	{
-		QString workBuildFileName = workStorage + "/" + workBuildDirectoryList[0] + "/build.xml";
+		workBuildPath = workStorage + "/" + workBuildDirectoryList[0];
+		QString workBuildFileName = workBuildPath + "/build.xml";
 
 		QFileInfo buildXmlInfo(workBuildFileName);
 
@@ -389,7 +392,18 @@ void CfgCheckerWorker::onThreadStarted()
 		getFileHash(workBuildFileName, m_lastBuildXmlHash);
 	}
 
-	updateBuildXml();
+	if (updateBuildXml() == false)
+	{
+		if (workBuildPath.isEmpty() == false)
+		{
+			emit buildPathChanged(workBuildPath);
+			DEBUG_LOG_MSG(m_logger, "Work build directory is " + workBuildPath);
+		}
+		else
+		{
+			DEBUG_LOG_WRN(m_logger, "There is no work build directory");
+		}
+	}
 
 	if (m_checkNewBuildInterval > 0)
 	{

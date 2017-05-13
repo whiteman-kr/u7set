@@ -28,7 +28,7 @@ signals:
 	void buildPathChanged(QString newBuildPath);
 
 public slots:
-	void updateBuildXml();
+	bool updateBuildXml();
 	void renameWorkToBackup(QString workDirectoryPathToLeave);
 
 protected:
