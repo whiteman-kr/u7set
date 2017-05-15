@@ -732,8 +732,10 @@ namespace Builder
 		bool processTransmitter(const AppItem *item);
 		bool getSignalConnectedToTransmitterInputPin(const LogicTransmitter &transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid);
 
-		bool addRegularSerialRxSignals();
+		bool appendRegularSerialRxSignals();
 		bool processSerialReceiver(const AppItem* item);
+
+		bool finalizeOptoConnectionsProcessing();
 
 		bool buildOptoModulesStorage();
 

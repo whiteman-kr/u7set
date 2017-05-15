@@ -125,6 +125,8 @@ namespace Builder
 
 		do
 		{
+			if (!finalizeOptoConnectionsProcessing()) break;
+
 			if (!generateAppStartCommand()) break;
 
 			if (!generateFbTestCode()) break;
@@ -6589,7 +6591,7 @@ namespace Builder
 		// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
 		// check that added regulat Rx signals exists in current LM
 		//
-		result &= addRegularSerialRxSignals();
+		result &= appendRegularSerialRxSignals();
 
 		// sort Rx signals lists of LM's associated Serial ports
 		//
@@ -6765,7 +6767,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::addRegularSerialRxSignals()
+	bool ModuleLogicCompiler::appendRegularSerialRxSignals()
 	{
 		bool result = true;
 
@@ -6838,6 +6840,13 @@ namespace Builder
 																	rxSignal);
 		return result;
 	}
+
+
+	bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
+	{
+		m_optoModuleStorage->copyOpticalPortsTxInRxSignals();
+	}
+
 
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
