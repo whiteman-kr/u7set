@@ -309,6 +309,8 @@ void TuningSignalManager::requestReadTuningSignals()
 
 	if (objectCount == 0)
 	{
+		l.unlock();
+
 		resetToGetTuningSourcesState();
 		return;
 	}
@@ -604,6 +606,8 @@ void TuningSignalManager::processReadTuningSignals(const QByteArray& data)
 	QMutexLocker sl(&m_signalsMutex);
 
 	int objectCount = m_signals.signalsCount();
+
+	sl.unlock();
 
 	// increase the requested signal index, wrap the request index if needed
 	//
