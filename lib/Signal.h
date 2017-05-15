@@ -241,6 +241,8 @@ public:
 	E::SignalType signalType() const { return m_signalType; }
 	void setSignalType(E::SignalType type) { m_signalType = type; }
 
+	E::DataFormat dataFormat() const;
+
 	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
 

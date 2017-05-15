@@ -19,7 +19,14 @@ namespace Hardware
 	{
 	}
 
-	bool TxRxSignal::init(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType)
+	bool TxRxSignal::init(const QString& appSignalID,
+						  E::SignalType signalType,
+						  E::DataFormat dataFormat,
+						  int dataSize,
+						  E::ByteOrder byteOrder,
+						  int offset,
+						  int bitNo,
+						  TxRxSignal::Type txRxType)
 	{
 		if (appSignalID == nullptr)
 		{
@@ -35,6 +42,8 @@ namespace Hardware
 			assert(false);		// wtf?
 			return false;
 		}
+		m_dataFormat = dataFormat;
+		m_byteOrder = byteOrder;
 
 		m_type = txRxType;
 
@@ -46,21 +55,21 @@ namespace Hardware
 			m_addrInBuf.setOffset(offset);
 			m_addrInBuf.setBit(bitNo);
 
-			assert(sizeB >= SIZE_1BIT && sizeB <= SIZE_32BIT);
+			assert(dataSize >= SIZE_1BIT && dataSize <= SIZE_32BIT);
 
-			m_sizeB = sizeB;
+			m_dataSize = dataSize;
 		}
 		else
 		{
 			m_addrInBuf.reset();
 
-			m_sizeB = sizeB;
+			m_dataSize = dataSize;
 		}
 
 #ifdef QT_DEBUG
 		if (isDiscrete() == true)
 		{
-			assert(m_sizeB == SIZE_1BIT);
+			assert(m_dataSize == SIZE_1BIT);
 		}
 #endif
 		return true;
@@ -127,7 +136,14 @@ namespace Hardware
 			return false;
 		}
 
-		return appendTxSignal(txSignal->appSignalID(), txSignal->signalType(), -1, -1, txSignal->dataSize(), TxRxSignal::Type::Regular);
+		return appendTxSignal(txSignal->appSignalID(),
+							  txSignal->signalType(),
+							  txSignal->dataFormat(),
+							  txSignal->dataSize(),
+							  txSignal->byteOrder(),
+							  -1,
+							  -1,
+							  TxRxSignal::Type::Regular);
 	}
 
 	bool OptoPort::sortTxSignals()
@@ -248,7 +264,14 @@ namespace Hardware
 				result = false;
 			}
 
-			result &= appendTxSignal(appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
+			result &= appendTxSignal(appSignalID,
+									 item.signalType,
+									 item.dataFormat,
+									 item.dataSize,
+									 item.byteOrder,
+									 item.offsetW,
+									 item.bitNo,
+									 TxRxSignal::Type::Raw);
 		}
 
 		return result;
@@ -290,7 +313,14 @@ namespace Hardware
 				result = false;
 			}
 
-			result &= appendRxSignal(appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
+			result &= appendRxSignal(appSignalID,
+									 item.signalType,
+									 item.dataFormat,
+									 item.dataSize,
+									 item.byteOrder,
+									 item.offsetW,
+									 item.bitNo,
+									 TxRxSignal::Type::Raw);
 		}
 
 		return result;
@@ -311,7 +341,14 @@ namespace Hardware
 			return true;				// signal already in list, nothing to do
 		}
 
-		bool result = appendRxSignal(rxSignal->appSignalID(), rxSignal->signalType(), -1, -1, rxSignal->dataSize(), TxRxSignal::Type::Regular);
+		bool result = appendRxSignal(rxSignal->appSignalID(),
+									 rxSignal->signalType(),
+									 rxSignal->dataFormat(),
+									 rxSignal->dataSize(),
+									 rxSignal->byteOrder(),
+									 -1,
+									 -1,
+									 TxRxSignal::Type::Regular);
 
 		return result;
 	}
@@ -359,7 +396,7 @@ namespace Hardware
 
 			txAnalogSignal->setAddrInBuf(address);
 
-			address.addBit(txAnalogSignal->sizeB());
+			address.addBit(txAnalogSignal->dataSize());
 			address.wordAlign();
 		}
 
@@ -383,7 +420,7 @@ namespace Hardware
 
 			txDiscreteSignal->setAddrInBuf(address);
 
-			assert(txDiscreteSignal->sizeB() == SIZE_1BIT);
+			assert(txDiscreteSignal->dataSize() == SIZE_1BIT);
 
 			address.add1Bit();
 		}
@@ -442,41 +479,6 @@ namespace Hardware
 		}
 
 		m_txDataID = CRC32(m_txDataID, nullptr, 0, true);       // finalize CRC32 calculation
-
-		return true;
-	}
-
-	bool OptoPort::calculateSerialRxDataID()
-	{
-		m_rxDataID = 0;
-
-		if (isUsedInConnection() == false)
-		{
-			return true;
-		}
-
-		if (m_mode != OptoPort::Mode::Serial)
-		{
-			return true;
-		}
-
-		// rxDataID should be calculate for serial ports only!
-		//
-		m_rxDataID = CRC32_INITIAL_VALUE;
-
-		// mix port EquipmentID in dataID
-		//
-		m_rxDataID = CRC32(m_rxDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
-
-		// mix rxSignals ID and bitAddress in buffer
-		//
-		for(const TxRxSignalShared& rxSignal : m_txSignals)
-		{
-			m_rxDataID = CRC32(m_rxDataID, rxSignal->appSignalID(), false);
-			m_rxDataID = CRC32(m_rxDataID, rxSignal->addrInBuf().bitAddress(), false);
-		}
-
-		m_rxDataID = CRC32(m_rxDataID, nullptr, 0, true);       // finalize CRC32 calculation
 
 		return true;
 	}
@@ -541,7 +543,7 @@ namespace Hardware
 
 			rxAnalogSignal->setAddrInBuf(address);
 
-			address.addBit(rxAnalogSignal->sizeB());
+			address.addBit(rxAnalogSignal->dataSize());
 			address.wordAlign();
 		}
 
@@ -565,7 +567,7 @@ namespace Hardware
 
 			rxDiscreteSignal->setAddrInBuf(address);
 
-			assert(rxDiscreteSignal->sizeB() == SIZE_1BIT);
+			assert(rxDiscreteSignal->dataSize() == SIZE_1BIT);
 
 			address.add1Bit();
 		}
@@ -600,14 +602,96 @@ namespace Hardware
 		return true;
 	}
 
+	bool OptoPort::calculateSerialRxDataID()
+	{
+		m_rxDataID = 0;
 
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Serial)
+		{
+			return true;
+		}
+
+		// rxDataID should be calculate for serial ports only!
+		//
+		m_rxDataID = CRC32_INITIAL_VALUE;
+
+		// mix port EquipmentID in dataID
+		//
+		m_rxDataID = CRC32(m_rxDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
+
+		// mix rxSignals ID and bitAddress in buffer
+		//
+		for(const TxRxSignalShared& rxSignal : m_txSignals)
+		{
+			m_rxDataID = CRC32(m_rxDataID, rxSignal->appSignalID(), false);
+			m_rxDataID = CRC32(m_rxDataID, rxSignal->addrInBuf().bitAddress(), false);
+		}
+
+		m_rxDataID = CRC32(m_rxDataID, nullptr, 0, true);       // finalize CRC32 calculation
+
+		return true;
+	}
+
+	bool OptoPort::copyOpticalPortsTxInRxSignals()
+	{
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Optical)
+		{
+			return true;
+		}
+
+		assert(m_rxSignals.count() == 0);				// before this m_rxSignals must be clear!
+
+		OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
+
+		if (linkedPort == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		// copying txSignals of linked port to rxSignals of current port
+		//
+		const HashedVector<QString, TxRxSignalShared>& txSignals = linkedPort->txSignals();
+
+		for(const TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			m_rxSignals.insert(txSignal->appSignalID(), txSignal);
+		}
+
+		// copying tx to rx parameters
+		//
+		m_rxDataID = linkedPort->txDataID();
+		m_rxDataSizeW = linkedPort->txDataSizeW();
+		m_rxRawDataSizeW = linkedPort->txRawDataSizeW();
+		m_rxAnalogSignalsSizeW = linkedPort->txAnalogSignalsSizeW();
+		m_rxDiscreteSignalsSizeW = linkedPort->txDiscreteSignalsSizeW();
+
+		return true;
+	}
 
 
 	bool OptoPort::isTxSignalExists(const QString& appSignalID)
 	{
-		TxRxSignalShared s = m_txSignals.value(appSignalID, nullptr);
+		return m_txSignals.contains(appSignalID);
+	}
 
-		return s != nullptr;
+	bool OptoPort::isRxSignalExists(const QString& appSignalID)
+	{
+		return m_rxSignals.contains(appSignalID);
 	}
 
 	bool OptoPort::isUsedInConnection() const
@@ -629,19 +713,59 @@ namespace Hardware
 		return Address16();
 	}
 
-	Address16 OptoPort::getTxSignalAbsAddr(const QString& appSignalID) const
+	bool OptoPort::getTxSignalAbsAddr(const QString& appSignalID, SignalAddress16& addr) const
 	{
-		Address16 addrInBuf = getTxSignalAddrInBuf(appSignalID);
+		TxRxSignalShared txSignal = m_txSignals.value(appSignalID);
 
-		if (addrInBuf.isValid() == false)
+		if (txSignal == nullptr)
 		{
-			return addrInBuf;
+			ASSERT_RETURN_FALSE;
 		}
 
-		addrInBuf.addWord(m_absTxStartAddress);
+		int absTxBufAddr = txBufAbsAddress();
 
-		return addrInBuf;
+		if (absTxBufAddr == BAD_ADDRESS)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		Address16 absAddr = txSignal->addrInBuf();
+
+		absAddr.addWord(absTxBufAddr);
+
+		addr = absAddr;
+
+		addr.setSignalType(txSignal->signalType());
+		addr.setDataFormat(txSignal->dataFormat());
+		addr.setDataSize(txSignal->dataSize());
+		addr.setByteOrder(txSignal->byteOrder());
 	}
+
+	Address16 OptoPort::getRxSignalAbsAddr(const QString& appSignalID) const
+	{
+		TxRxSignalShared rxSignal = m_rxSignals.value(appSignalID);
+
+		if (rxSignal == nullptr)
+		{
+			assert(false);
+			return Address16();
+		}
+
+		int absRxBufAddr = rxBufAbsAddress();
+
+		if (absRxBufAddr == BAD_ADDRESS)
+		{
+			assert(false);
+			return Address16();
+		}
+
+		Address16 absAddr = rxSignal->addrInBuf();
+
+		absAddr.addWord(absRxBufAddr);
+
+		return absAddr;
+	}
+
 
 	bool OptoPort::parseRawDescription()
 	{
@@ -651,8 +775,6 @@ namespace Hardware
 		{
 			return false;
 		}
-
-		result &= appendRawTxRxSignals();
 
 		return result;
 	}
@@ -830,55 +952,42 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
-												const QString& appSignalID,
-												QUuid receiverUuid,
-												SignalAddress16& addr)
+	int OptoPort::txBufAbsAddress() const
 	{
-		if (connection->mode() != OptoPort::Mode::Serial)
+		if (m_txBufAddress == BAD_ADDRESS)
 		{
 			assert(false);
-			return false;
+			return BAD_ADDRESS;
 		}
 
-		for(const RawDataDescriptionItem& rdi : m_rawDataDescription)
+		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+
+		if (module == nullptr)
 		{
-			if (rdi.type != RawDataDescriptionItem::Type::RxSignal)
-			{
-				continue;
-			}
-
-			// rdi.type == RawDataDescriptionItemType::InSignal
-
-			if (rdi.appSignalID != appSignalID)
-			{
-				continue;
-			}
-
-			addr.setSignalType(rdi.signalType);
-			addr.setDataFormat(rdi.dataFormat);
-			addr.setDataSize(rdi.dataSize);
-			addr.setByteOrder(rdi.byteOrder);
-
-			addr.setOffset(rxStartAddress() + rdi.offsetW);
-
-			if (rdi.signalType == E::SignalType::Discrete)
-			{
-				addr.setBit(rdi.bitNo);
-			}
-			else
-			{
-				addr.setBit(0);
-			}
-
-			return true;
+			assert(false);
+			return BAD_ADDRESS;
 		}
 
-		// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
-		//
-		m_log->errALC5084(appSignalID, connection->connectionID(), receiverUuid);
+		return module->optoInterfaceDataOffset() + m_txBufAddress;
+	}
 
-		return false;
+	int OptoPort::rxBufAbsAddress() const
+	{
+		if (m_rxBufAddress == BAD_ADDRESS)
+		{
+			assert(false);
+			return BAD_ADDRESS;
+		}
+
+		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+
+		if (module == nullptr)
+		{
+			assert(false);
+			return BAD_ADDRESS;
+		}
+
+		return module->optoInterfaceDataOffset() + module->optoPortAppDataOffset() + m_rxBufAddress;
 	}
 
 	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
@@ -890,7 +999,14 @@ namespace Hardware
 		m_txRawDataSizeWIsCalculated = true;
 	}
 
-	bool OptoPort::appendTxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type)
+	bool OptoPort::appendTxSignal(const QString& appSignalID,
+								  E::SignalType signalType,
+								  E::DataFormat dataFormat,
+								  int dataSize,
+								  E::ByteOrder byteOrder,
+								  int offset,
+								  int bitNo,
+								  TxRxSignal::Type type)
 	{
 		if (m_txSignals.contains(appSignalID) == true)
 		{
@@ -899,7 +1015,7 @@ namespace Hardware
 
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(appSignalID, signalType, offset, bitNo, sizeB, type);
+		bool res = txSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
 
 		if (res == false)
 		{
@@ -908,32 +1024,19 @@ namespace Hardware
 
 		m_txSignals.insert(txSignal->appSignalID(), txSignal);
 
-		if (txSignal->isRaw() == false)
-		{
-			if (txSignal->isAnalog() == true)
-			{
-				m_txAnalogSignalsCount++;
-			}
-			else
-			{
-				if (txSignal->isDiscrete() == true)
-				{
-					m_txDiscreteSignalsCount++;
-				}
-				else
-				{
-					assert(false);  // unknown type of signal
-					return false;
-				}
-			}
-		}
-
 		return true;
 	}
 
-	bool OptoPort::appendRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type)
+	bool OptoPort::appendRxSignal(const QString& appSignalID,
+								  E::SignalType signalType,
+								  E::DataFormat dataFormat,
+								  int dataSize,
+								  E::ByteOrder byteOrder,
+								  int offset,
+								  int bitNo,
+								  TxRxSignal::Type type)
 	{
-		if (m_rxSignals.contains(appSignalID))
+		if (m_rxSignals.contains(appSignalID) == true)
 		{
 			// Signal ID '%1' is duplicate in opto port '%2'.
 			//
@@ -944,7 +1047,7 @@ namespace Hardware
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(appSignalID, signalType, offset, bitNo, sizeB, type);
+		bool res = rxSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
 
 		if (res == false)
 		{
@@ -955,30 +1058,7 @@ namespace Hardware
 
 		return true;
 	}
-
-	bool OptoPort::appendRawTxRxSignals()
-	{
-		bool result = true;
-
-		// append Raw Tx and Rx  signals
-		//
-		for(const RawDataDescriptionItem& item : m_rawDataDescription)
-		{
-			if (item.type == RawDataDescriptionItem::Type::TxSignal)
-			{
-				result &= appendTxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
-				continue;
-			}
-
-			if (item.type == RawDataDescriptionItem::Type::RxSignal)
-			{
-				result &= appendRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
-			}
-		}
-
-		return result;
-	}
-
+•
 	void OptoPort::sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared> &signalList, int startIndex, int count)
 	{
 		for(int i = startIndex; i < startIndex + count - 1; i++)
@@ -1021,10 +1101,10 @@ namespace Hardware
 			const TxRxSignalShared& s2 = signalList[i + 1];
 
 			int s1StartBitAddress = s1->addrInBuf().bitAddress();
-			int s1EndBitAddress = s1->addrInBuf().bitAddress() + s1->sizeB() - 1;
+			int s1EndBitAddress = s1->addrInBuf().bitAddress() + s1->dataSize() - 1;
 
 			int s2StartBitAddress = s2->addrInBuf().bitAddress();
-			int s2EndBitAddress = s2->addrInBuf().bitAddress() + s1->sizeB() - 1;
+			int s2EndBitAddress = s2->addrInBuf().bitAddress() + s1->dataSize() - 1;
 
 			if ((s1StartBitAddress >= s2StartBitAddress && s1StartBitAddress <= s2EndBitAddress) ||
 				(s2StartBitAddress >= s1StartBitAddress && s2StartBitAddress <= s1EndBitAddress))
@@ -1445,17 +1525,17 @@ namespace Hardware
 
 			if (port->manualSettings() == true)
 			{
-				port->setTxStartAddress(port->manualTxStartAddressW());
+				port->setTxBufAddress(port->manualTxStartAddressW());
 			}
 			else
 			{
-				if (isLM())
+				if (isLM() == true)
 				{
-					port->setTxStartAddress(0);					// in LM opto ports txStartAddress always 0
+					port->setTxBufAddress((port->portNo() - 1) * optoPortAppDataSize());
 				}
 				else
 				{
-					port->setTxStartAddress(txStartAddress);
+					port->setTxBufAddress(txStartAddress);
 					txStartAddress += port->txDataSizeW();
 				}
 			}
@@ -1741,11 +1821,11 @@ namespace Hardware
 					continue;
 				}
 
-				if (	(port1->absTxStartAddress() >= port2->absTxStartAddress() &&
-						port1->absTxStartAddress() < port2->absTxStartAddress() + port2->txDataSizeW()) ||
+				if (	(port1->txBufAbsAddress() >= port2->txBufAbsAddress() &&
+						port1->txBufAbsAddress() < port2->txBufAbsAddress() + port2->txDataSizeW()) ||
 
-						(port2->absTxStartAddress() >= port1->absTxStartAddress() &&
-						port2->absTxStartAddress() < port1->absTxStartAddress() + port1->txDataSizeW())	)
+						(port2->txBufAbsAddress() >= port1->txBufAbsAddress() &&
+						port2->txBufAbsAddress() < port1->txBufAbsAddress() + port1->txDataSizeW())	)
 				{
 					// Tx data memory areas of ports '%1' and '%2' are overlapped.
 					//
@@ -1831,14 +1911,6 @@ namespace Hardware
 			}
 		);
 
-		for(OptoModuleShared& optoModule : m_modules)
-		{
-			for(OptoPortShared& optoPort : optoModule->m_ports)
-			{
-				m_ports.insert(optoPort->equipmentID(), optoPort);
-			}
-		}
-
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Opto-modules found: %1")).arg(m_modules.count()))
@@ -1899,6 +1971,11 @@ namespace Hardware
 		m_modules.insert(module->equipmentIdTemplate(), optoModule);
 
 		m_lmAssociatedModules.insertMulti(optoModule->lmID(), optoModule);
+
+		for(OptoPortShared& optoPort : optoModule->m_ports)
+		{
+			m_ports.insert(optoPort->equipmentID(), optoPort);
+		}
 
 		return true;
 	}
@@ -2592,7 +2669,10 @@ namespace Hardware
 	}
 
 
-
+	bool OptoModuleStorage::copyOpticalPortsTxInRxSignals(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::copyOpticalPortsTxInRxSignals);
+	}
 
 	bool OptoModuleStorage::addConnections(const Hardware::ConnectionStorage& connectionStorage)
 	{
@@ -2788,7 +2868,7 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::getSignalRxAddress(const QString& connectionID,
+	bool OptoModuleStorage::getRxSignalAbsAddress(const QString& connectionID,
 											   const QString& appSignalID,
 											   const QString& receiverLM,
 											   QUuid receiverUuid,
@@ -2804,19 +2884,54 @@ namespace Hardware
 			return false;
 		}
 
-		switch(connection->mode())
+		OptoPortShared p1 = getOptoPort(connection->port1EquipmentID());
+
+		if (p1 == nullptr)
 		{
-		case OptoPort::Mode::Optical:
-			return getSignalRxAddressOpto(connection, appSignalID, receiverLM, receiverUuid, addr);
-
-		case OptoPort::Mode::Serial:
-			return getSignalRxAddressSerial(connection, appSignalID, receiverLM, receiverUuid, addr);
-
-		default:
-			assert(false);
+			ASSERT_RETURN_FALSE;
 		}
 
-		return false;
+		if (p1->lmID() == receiverLM)
+		{
+			if (p1->rxSignalExists() == true)
+			{
+				return p1->getRxSignalAbsAddress(addr);
+			}
+			else
+			{
+				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p1
+			}
+		}
+
+		if (connection->mode() != OptoPort::Mode::Optical)
+		{
+			// this is Serial connection
+			// port2 is not used
+			// signal is not found
+			//
+			ASSERT_RETURN_FALSE;
+		}
+
+		OptoPortShared p2 = getOptoPort(connection->port2EquipmentID());
+
+		if (p2 == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (p2->lmID() == receiverLM)
+		{
+			if (p2->rxSignalExists() == true)
+			{
+				return p2->getRxSignalAbsAddress(addr);
+			}
+			else
+			{
+				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p2
+			}
+		}
+
+		ASSERT_RETURN_FALSE;			// signal is not found in both ports
 	}
 
 

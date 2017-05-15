@@ -954,7 +954,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outPort->txAnalogSignalsCount() + outPort->txDiscreteSignalsCount() == 0)
+		if (outPort->txSignalsCount() == 0)
 		{
 			return true;
 		}
@@ -1047,11 +1047,11 @@ namespace Builder
 			{
 				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
 						arg(txAnalog->appSignalID().remove("#")).
-						arg(txAnalog->sizeB());
+						arg(txAnalog->dataSize());
 
 				list.append(str);
 
-				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->sizeB());
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->dataSize());
 			}
 
 			list.append("");
@@ -1101,7 +1101,7 @@ namespace Builder
 			{
 				str = QString("\t%1 <= in_data(%2-1 downto %3);").
 						arg(txAnalog->appSignalID().remove("#")).
-						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->sizeB()).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->dataSize()).
 						arg(txAnalog->addrInBuf().offset() * 16);
 
 				list.append(str);
@@ -1175,7 +1175,7 @@ namespace Builder
 		str = QString(tr("Connection ID:\t\t%1")).arg(port->connectionID());
 		list.append(str);
 
-		str = QString(tr("TxData start address:\t%1")).arg(port->txStartAddress());
+		str = QString(tr("TxBuffer address:\t%1 (absolute %2)")).arg(port->txBufAddress()).arg(port->txBufAbsAddress());
 		list.append(str);
 
 		str = QString(tr("TxData size:\t\t%1\n")).arg(port->txDataSizeW());

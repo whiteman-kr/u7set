@@ -2467,7 +2467,7 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
+			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
 														receiver.appSignalId(),
 														m_lm->equipmentIdTemplate(),
 														receiver.guid(),
@@ -2582,7 +2582,7 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getSignalRxAddress(receiver.connectionId(),
+			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
 																 receiver.appSignalId(),
 																 m_lm->equipmentIdTemplate(),
 																 receiver.guid(),
@@ -3788,7 +3788,7 @@ namespace Builder
 
 		// write data port txData identifier
 		//
-		cmd.movConstUInt32(port->absTxStartAddress(), port->txDataID());
+		cmd.movConstUInt32(port->txBufAbsAddress(), port->txDataID());
 		cmd.setComment("txData ID");
 
 		m_code.append(cmd);
@@ -3909,7 +3909,7 @@ namespace Builder
 
 			Command cmd;
 
-			int txSignalAddress = port->absTxStartAddress() + txSignal->addrInBuf().offset();
+			int txSignalAddress = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
 
 			cmd.mov32(txSignalAddress, s->ramAddr().offset());
 			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
@@ -3999,7 +3999,7 @@ namespace Builder
 			{
 				// txSignal.address.offset() the same for all signals in one word
 
-				int txSignalAddress = port->absTxStartAddress() + txSignal->addrInBuf().offset();
+				int txSignalAddress = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
 
 				// copy bit accumulator to opto interface buffer
 				//
@@ -4112,7 +4112,7 @@ namespace Builder
 		{
 			Command cmd;
 
-			toAddr = port->absTxStartAddress() + offset + localOffset;
+			toAddr = port->txBufAbsAddress() + offset + localOffset;
 
 			fromAddr = m_memoryMap.getModuleDataOffset(module->place());
 
@@ -4244,7 +4244,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movMem(port->absTxStartAddress() + offset,
+		cmd.movMem(port->txBufAbsAddress() + offset,
 				   portWithRxRawData->rxStartAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W,
 				   portTxRawDataSizeW);
 
@@ -4269,7 +4269,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.movConst(port->absTxStartAddress() + offset, const16value);
+		cmd.movConst(port->txBufAbsAddress() + offset, const16value);
 
 		cmd.setComment(QString("copying raw data const16 value = %1").arg(const16value));
 
@@ -4353,7 +4353,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.mov32(port->absTxStartAddress() + portDataOffset + item.offsetW, s->ramAddr().offset());
+		cmd.mov32(port->txBufAbsAddress() + portDataOffset + item.offsetW, s->ramAddr().offset());
 
 		cmd.setComment(QString("copying out signal %1 raw data").arg(item.appSignalID));
 
@@ -6844,10 +6844,20 @@ namespace Builder
 
 	bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
 	{
-		m_optoModuleStorage->copyOpticalPortsTxInRxSignals();
+		bool result = true;
+
+		QString lmID = m_lm->equipmentIdTemplate();
+
+		// copying optical ports txSignals lists to connected ports rxSignals lists
+		//
+		result &= m_optoModuleStorage->copyOpticalPortsTxInRxSignals(lmID);
+
+		// calculate absoulute addresses of receving buffers
+		//
+		result &= m_optoModuleStorage->calculateRxBuffersAbsAddresses(lmID);
+
+		return result;
 	}
-
-
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
 	{

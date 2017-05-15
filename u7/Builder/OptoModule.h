@@ -38,7 +38,14 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType);
+		bool init(const QString& appSignalID,
+				  E::SignalType signalType,
+				  E::DataFormat dataFormat,
+				  int dataSize,
+				  E::ByteOrder byteOrder,
+				  int offset,
+				  int bitNo,
+				  TxRxSignal::Type txRxType);
 
 		QString appSignalID() const { return m_appSignalID; }
 
@@ -51,14 +58,19 @@ namespace Hardware
 		Address16 addrInBuf() const { return m_addrInBuf; }
 		void setAddrInBuf(Address16& addr);
 
-		int sizeB() const { return m_sizeB; }
+		E::SignalType signalType() const { return m_signalType; }
+		E::DataFormat dataFormat() const { return m_dataFormat; }
+		int dataSize() const { return m_dataSize; }
+		E::ByteOrder byteOrder() const { return m_byteOrder; }
 
 	private:
 		Type m_type = Type::Regular;
 
 		QString m_appSignalID;
 		E::SignalType m_signalType = E::SignalType::Analog;
-		int m_sizeB = 0;					// signal size in tx(rx)Buffer in bits
+		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+		int m_dataSize = 0;					// signal size in tx(rx)Buffer in bits
 
 		Address16 m_addrInBuf;				// relative signal address from beginning of txBuffer (rxBuffer)
 	};
@@ -106,20 +118,27 @@ namespace Hardware
 		bool calculateSerialRxSignalsAddresses();
 		bool calculateSerialRxDataID();
 
+		bool copyOpticalPortsTxInRxSignals();
+
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
+
+		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
 
 		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const;
 
 		bool isTxSignalExists(const QString& appSignalID);
+		bool isRxSignalExists(const QString& appSignalID);
+
 		bool isUsedInConnection() const;
 
 		bool isOptical() const { return m_mode ==  Mode::Optical; }
 		bool isSerial() const { return m_mode ==  Mode::Serial; }
 
 		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
-		Address16 getTxSignalAbsAddr(const QString& appSignalID) const;
+		bool getTxSignalAbsAddr(const QString& appSignalID, SignalAddress16 &addr) const;
+		Address16 getRxSignalAbsAddr(const QString& appSignalID) const;
 
 		bool parseRawDescription();
 		bool calculatePortRawDataSize(OptoModuleStorage* optoStorage);
@@ -150,14 +169,14 @@ namespace Hardware
 		Q_INVOKABLE SerialMode serialMode() const { return m_serialMode; }
 		void setSerialMode(SerialMode serialMode) { m_serialMode = serialMode; }
 
-		int rxStartAddress() const { return m_rxAddress; }
-		void setRxStartAddress(int address) { m_rxAddress = address; }
+		Q_INVOKABLE int txBufAddress() const { return m_txBufAddress; }
+		void setTxBufAddress(int address) { m_txBufAddress = address; }
 
-		Q_INVOKABLE int txStartAddress() const { return m_txStartAddress; }
-		void setTxStartAddress(int address) { m_txStartAddress = address; }
+		int rxBufAddress() const { return m_rxBufAddress; }
+		void setRxBufAddress(int address) { m_rxBufAddress = address; }
 
-		int absTxStartAddress() { return m_absTxStartAddress; }
-		void setAbsTxStartAddress(int address) { m_absTxStartAddress = address; }
+		int txBufAbsAddress() const;
+		int rxBufAbsAddress() const;
 
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
@@ -177,10 +196,9 @@ namespace Hardware
 		bool hasTxRawData() const { return m_rawDataDescriptionStr.isEmpty() == false; }
 
 		int txAnalogSignalsSizeW() const { return m_txAnalogSignalsSizeW; }
-		int txAnalogSignalsCount() const { return m_txAnalogSignalsCount; }
-
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
-		int txDiscreteSignalsCount() const { return m_txDiscreteSignalsCount; }
+
+		int txSignalsCount() const { return m_txSignals.count();}
 
 		int portNo() const { return m_portNo; }
 
@@ -203,11 +221,26 @@ namespace Hardware
 		int manualRxSizeW() const { return m_manualRxSizeW; }
 		void setManualRxSizeW(int manualRxSizeW) { m_manualRxSizeW = manualRxSizeW; }
 
-	private:
-		bool appendTxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type);
-		bool appendRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type);
+		QString lmID() const { return m_lmID; }
 
-		bool appendRawTxRxSignals();
+	private:
+		bool appendTxSignal(const QString& appSignalID,
+							E::SignalType signalType,
+							E::DataFormat dataFormat,
+							int dataSize,
+							E::ByteOrder byteOrder,
+							int offset,
+							int bitNo,
+							TxRxSignal::Type type);
+
+		bool appendRxSignal(const QString& appSignalID,
+							E::SignalType signalType,
+							E::DataFormat dataFormat,
+							int dataSize,
+							E::ByteOrder byteOrder,
+							int offset,
+							int bitNo,
+							TxRxSignal::Type type);
 
 		void sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
 		void sortByAppSignalIdAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
@@ -246,32 +279,23 @@ namespace Hardware
 
 		//
 
-		int m_txStartAddress = 0;						// address of port's Tx data relative from opto module appDataOffset
-		int m_absTxStartAddress = 0;					// absoulte address of port Tx data in LM memory
-		int m_txDataSizeW = 0;							// size of Tx data
-
+		int m_txBufAddress = BAD_ADDRESS;				// address of port's Tx buffer relative to opto module appDataOffset
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
-
-		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
-
-		int m_txAnalogSignalsCount = 0;					// non-raw! tx analog signals count
-		int m_txDiscreteSignalsCount = 0;				// non-raw! tx discrete signals count
-
-		int m_txRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
-		int m_txAnalogSignalsSizeW = 0;					//
-		int m_txDiscreteSignalsSizeW = 0;				//
+		int m_txDataSizeW = 0;							// size of port's Tx data
+		int m_txRawDataSizeW = 0;
+		int m_txAnalogSignalsSizeW = 0;
+		int m_txDiscreteSignalsSizeW = 0;
 
 		bool m_txRawDataSizeWIsCalculated = false;
 		bool m_txRawDataSizeWCalculationStarted = false;
 
+		HashedVector<QString, TxRxSignalShared> m_txSignals;			// signals transmitted via port
+
 		//
 
-		int m_rxAddress = 0;							// address of port's Rx data relative from opto module appDataOffset
-		int m_absRxAddress = 0;							// absoulte address of port Rx data in LM memory
-		int m_rxDataSizeW = 0;							// size of Rx data
-
+		int m_rxBufAddress = BAD_ADDRESS;				// address of port's Rx buffer relative to opto module appDataOffset
 		quint32 m_rxDataID = 0;							// range 0..0xFFFFFFFF
-
+		int m_rxDataSizeW = 0;							// size of Rx data
 		int m_rxRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
 		int m_rxAnalogSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
@@ -422,6 +446,8 @@ namespace Hardware
 		bool calculatePortsRxStartAddresses();
 		bool calculateSerialRxDataIDs(const QString& lmID);
 
+		bool copyOpticalPortsTxInRxSignals(const QString& lmID);
+
 		bool addConnections(const Hardware::ConnectionStorage& connectionStorage);
 		std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
@@ -440,7 +466,7 @@ namespace Hardware
 
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules);
 
-		bool getSignalRxAddress(const QString& connectionID,
+		bool getRxSignalAbsAddress(const QString& connectionID,
 								const QString& appSignalID,
 								const QString& receiverLM,
 								QUuid receiverUuid,
