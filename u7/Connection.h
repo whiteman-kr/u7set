@@ -62,6 +62,7 @@ namespace Hardware
 		void setPort2EquipmentID(const QString& value);
 
 		quint16 getID() const;
+		quint16 linkID() const { return getID(); }
 
 		//
 		//
@@ -178,7 +179,6 @@ namespace Hardware
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
     };
-
 
 	class ConnectionStorage : public QObject
 	{

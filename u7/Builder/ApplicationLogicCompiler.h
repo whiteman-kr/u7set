@@ -45,11 +45,11 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool checkAppSignals();
-		bool checkOptoConnections();
+		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
-		bool disposeOptoModulesTxRxBuffers();
+		//bool disposeOptoModulesTxRxBuffers();
 
 		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
 
@@ -82,9 +82,6 @@ namespace Builder
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 
 		QVector<Hardware::DeviceModule*> m_lm;
-
-		QString msg;
-
 
 		friend class ModuleLogicCompiler;
 	};

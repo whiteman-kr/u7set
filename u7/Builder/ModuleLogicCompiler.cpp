@@ -595,11 +595,6 @@ namespace Builder
 
 			if (!processSerialRxSignals()) break;
 
-
-/*			if (!buildRS232SignalLists()) break;
-
-			if (!buildOptoPortsSignalLists()) break; */
-
 			if (!setOptoRawInSignalsAsComputed()) break;
 
 			result = true;
@@ -3330,89 +3325,6 @@ namespace Builder
 											m_log);
 	}
 
-
-	bool ModuleLogicCompiler::buildOptoPortsSignalLists()
-	{
-		if (m_optoModuleStorage == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
-
-		if (optoModules.isEmpty())
-		{
-			return true;
-		}
-
-		bool result = true;
-
-		for(Hardware::OptoModuleShared& optoModule : optoModules)
-		{
-			if (optoModule == nullptr)
-			{
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			QList<Hardware::OptoPortShared> optoPorts;
-
-			optoModule->getOptoPorts(optoPorts);
-
-			if (optoPorts.isEmpty())
-			{
-				continue;
-			}
-
-			for(Hardware::OptoPortShared& port : optoPorts)
-			{
-				bool res = false;
-
-				do
-				{
-					if (port->calculatePortRawDataSize(m_optoModuleStorage) == false) break;
-
-					if (port->calculateTxSignalsAddresses() == false) break;
-
-					res = true;
-					break;
-				}
-				while(1);
-
-				if (res == true)
-				{
-//					idStr.sprintf("0x%X", port->txDataID());
-
-//					LOG_MESSAGE(m_log, QString(tr("Opto connection '%1', %2 settings: analog signals %3, discrete signals %4, data size %5 bytes, dataID %6")).
-//							arg(port->connectionID()).
-//							arg(port->manualSettings() == true ? "manual" : "automatic").
-//							arg(port->txAnalogSignalsCount()).
-//							arg(port->txDiscreteSignalsCount()).
-//							arg(port->txDataSizeW() * 2).
-//							arg(idStr)  );
-				}
-				else
-				{
-					result = false;
-				}
-			}
-		}
-
-		if (result == true)
-		{
-			for(Hardware::OptoModuleShared& optoModule : optoModules)
-			{
-				optoModule->calculateTxStartAddresses();
-			}
-		}
-
-		return result;
-	}
-
-
 	bool ModuleLogicCompiler::setOptoRawInSignalsAsComputed()
 	{
 		if (m_optoModuleStorage == nullptr)
@@ -3883,14 +3795,14 @@ namespace Builder
 			return false;
 		}
 
-		if (port->txAnalogSignalsCount() == 0)
-		{
-			return true;
-		}
-
 		QVector<Hardware::TxRxSignalShared> txAnalogSignals;
 
 		port->getTxAnalogSignals(txAnalogSignals);
+
+		if (txAnalogSignals.count() == 0)
+		{
+			return true;
+		}
 
 		bool result = true;
 
@@ -3931,11 +3843,6 @@ namespace Builder
 			return false;
 		}
 
-		if (port->txDiscreteSignalsCount() == 0)
-		{
-			return true;
-		}
-
 		// copy discrete signals
 		//
 		QVector<Hardware::TxRxSignalShared> txDiscreteSignals;
@@ -3943,6 +3850,11 @@ namespace Builder
 		port->getTxDiscreteSignals(txDiscreteSignals);
 
 		int count = txDiscreteSignals.count();
+
+		if (count == 0)
+		{
+			return true;
+		}
 
 		int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
 
@@ -4245,7 +4157,7 @@ namespace Builder
 		Command cmd;
 
 		cmd.movMem(port->txBufAbsAddress() + offset,
-				   portWithRxRawData->rxStartAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W,
+				   portWithRxRawData->rxBufAbsAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W,
 				   portTxRawDataSizeW);
 
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
@@ -4426,7 +4338,7 @@ namespace Builder
 		xmlWriter.writeStartElement("PortInfo");
 
 		xmlWriter.writeAttribute("StrID", rs232Port->equipmentID());
-		xmlWriter.writeAttribute("ID", QString::number(rs232Port->portID()));
+		xmlWriter.writeAttribute("ID", QString::number(rs232Port->linkID()));
 		xmlWriter.writeAttribute("DataID", QString::number(rs232Port->txDataID()));
 		xmlWriter.writeAttribute("Speed", "115200");
 		xmlWriter.writeAttribute("Bits", "8");
@@ -4438,7 +4350,7 @@ namespace Builder
 
 		xmlWriter.writeStartElement("Signals");
 
-		xmlWriter.writeAttribute("Count", QString::number(rs232Port->txAnalogSignalsCount() + rs232Port->txDiscreteSignalsCount()));
+		xmlWriter.writeAttribute("Count", QString::number(rs232Port->txSignalsCount()));
 
 		bool result = true;
 
@@ -4451,9 +4363,7 @@ namespace Builder
 
 		m_code.newLine();
 
-		int portDataAddress = optoModule->optoInterfaceDataOffset() +
-							  (optoModule->place() - 1) * optoModule->optoPortDataSize() +
-							  optoModule->optoPortAppDataOffset() + rs232Port->txStartAddress();
+		int portDataAddress = rs232Port->txBufAbsAddress();
 		// write data UID
 		//
 		Command cmd;
@@ -6544,12 +6454,12 @@ namespace Builder
 		// add raw Tx signals in txSignals lists of all Optical and Serial ports associated with current LM
 		// check that added raw Tx signals exists in current LM
 		//
-		result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
+		//result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
 
 		// add regular Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
 		// check that added regulat Tx signals exists in current LM
 		//
-		result &= addRegularTxSignals();
+		result &= processTransmitters();
 
 		// sort Tx signals lists of LM's associated opto ports
 		//
@@ -6565,7 +6475,7 @@ namespace Builder
 
 		// calculate tx buffers absolute addresses
 		//
-		result &= m_optoModuleStorage->calculateTxBuffersAbsAddresses(lmID);
+		result &= m_optoModuleStorage->calculateTxBufAddresses(lmID);
 
 		return result;
 	}
@@ -6608,11 +6518,11 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::addRegularTxSignals()
+	bool ModuleLogicCompiler::processTransmitters()
 	{
 		bool result = true;
 
-		// process transmitters and add regular tx signals to Optical and Serial ports txSignals lists
+		// process transmitters and add tx signals to Optical and Serial ports txSignals lists
 		//
 		for(const AppItem* item : m_appItems)
 		{
@@ -6622,7 +6532,10 @@ namespace Builder
 				ASSERT_RESULT_FALSE_BREAK
 			}
 
-			result &= processTransmitter(item);
+			if (item->isTransmitter() == true)
+			{
+				result &= processTransmitter(item);
+			}
 		}
 
 		return result;
@@ -6632,137 +6545,137 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(item);
 
-		if (item->isTransmitter() == false)
-		{
-			return true;				// item is not transmitter, nothing to processing
-		}
+		assert(item->isTransmitter() == true);
 
 		const LogicTransmitter& transmitter = item->logicTransmitter();
 
 		bool result = true;
 
-		QString connectedSignalID;
-		QUuid connectedSignalUuid;
+		QVector<QPair<QString, QUuid>> connectedSignals;
 
-		if (getSignalConnectedToTransmitterInputPin(transmitter, connectedSignalID, connectedSignalUuid) == false)
+		if (getSignalsConnectedToTransmitter(transmitter, connectedSignals) == false)
 		{
 			return false;
 		}
 
 		bool signalAlreadyInTxList = false;
 
-		Signal* s = m_signals->getSignal(connectedSignalID);
-
-		if (s == nullptr)
+		for(const QPair<QString, QUuid>& connectedSignal : connectedSignals)
 		{
-			m_log->errALC5000(connectedSignalID, connectedSignalUuid);
-			ASSERT_RETURN_FALSE
-		}
+			QString connectedSignalID = connectedSignal.first;
+			QUuid connectedSignalUuid = connectedSignal.second;
 
-		result = m_optoModuleStorage->addRegularTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
-												   m_lm->equipmentIdTemplate(),
-												   s,
-												   &signalAlreadyInTxList);
-		if (signalAlreadyInTxList == true)
-		{
-			// The signal '%1' is repeatedly connected to the transmitter '%2'
-			//
-			m_log->errALC5029(connectedSignalID, transmitter.connectionId(), connectedSignalUuid, transmitter.guid());
-			ASSERT_RETURN_FALSE
+			Signal* s = m_signals->getSignal(connectedSignalID);
+
+			if (s == nullptr)
+			{
+				m_log->errALC5000(connectedSignalID, connectedSignalUuid);
+				ASSERT_RETURN_FALSE
+			}
+
+			result = m_optoModuleStorage->appendTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
+													   m_lm->equipmentIdTemplate(),
+													   s,
+													   &signalAlreadyInTxList);
+			if (signalAlreadyInTxList == true)
+			{
+				// The signal '%1' is repeatedly connected to the transmitter '%2'
+				//
+				m_log->errALC5029(connectedSignalID, transmitter.connectionId(), connectedSignalUuid, transmitter.guid());
+				ASSERT_RETURN_FALSE
+			}
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getSignalConnectedToTransmitterInputPin(const LogicTransmitter& transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid)
+	bool ModuleLogicCompiler::getSignalsConnectedToTransmitter(const LogicTransmitter& transmitter, QVector<QPair<QString, QUuid>>& connectedSignals)
 	{
-		connectedSignalID.clear();
+		connectedSignals.clear();
 
 		const std::vector<LogicPin>& inPins = transmitter.inputs();
 
-		if (inPins.size() != 1)
+		for(const LogicPin& inPin : inPins)
 		{
-			LOG_INTERNAL_ERROR(m_log);
-			ASSERT_RETURN_FALSE;
-		}
-		const LogicPin& inPin = inPins[0];
-
-		if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Input pin %1 has wrong direction")).arg(inPin.caption()));
-			ASSERT_RETURN_FALSE;
-		}
-
-		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
-
-		if (associatedOutPins.size() > 1)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("More than one pin is connected to the input")));
-			ASSERT_RETURN_FALSE;
-		}
-
-		if (associatedOutPins.size() < 1)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Has no output pins is connected to the input")));
-			ASSERT_RETURN_FALSE;
-		}
-
-		QUuid connectedPinGuid = associatedOutPins[0];
-
-		AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
-
-		if (connectedPinParent == nullptr)
-		{
-			ASSERT_RETURN_FALSE
-		}
-
-		QUuid srcSignalGuid;
-
-		if (connectedPinParent->isSignal())
-		{
-			// input connected to real signal
-			//
-			connectedSignalUuid = connectedPinParent->guid();
-		}
-		else
-		{
-			// connectedPinParent is FB
-			//
-			if (m_outPinSignal.contains(connectedPinGuid) == false)
+			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
 			{
-				// All transmitter inputs must be directly linked to a signals.
-				//
-				m_log->errALC5027(transmitter.guid());
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Input pin %1 has wrong direction")).arg(inPin.caption()));
+				ASSERT_RETURN_FALSE;
+			}
+
+			const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
+
+			if (associatedOutPins.size() > 1)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("More than one pin is connected to the input")));
+				ASSERT_RETURN_FALSE;
+			}
+
+			if (associatedOutPins.size() < 1)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Has no output pins is connected to the input")));
+				ASSERT_RETURN_FALSE;
+			}
+
+			QUuid connectedPinGuid = associatedOutPins[0];
+
+			AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
+
+			if (connectedPinParent == nullptr)
+			{
 				ASSERT_RETURN_FALSE
 			}
 
-			QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
+			QUuid connectedSignalUuid;
 
-			if (ids.count() >  1)
+			if (connectedPinParent->isSignal())
 			{
-				// Transmitter input can be linked to one signal only.
+				// input connected to real signal
 				//
-				m_log->errALC5026(transmitter.guid(), ids);
-				ASSERT_RETURN_FALSE
+				connectedSignalUuid = connectedPinParent->guid();
 			}
 			else
 			{
-				connectedSignalUuid = ids.first();
+				// connectedPinParent is FB
+				//
+				if (m_outPinSignal.contains(connectedPinGuid) == false)
+				{
+					// All transmitter inputs must be directly linked to a signals.
+					//
+					m_log->errALC5027(transmitter.guid());
+					ASSERT_RETURN_FALSE
+				}
+
+				QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
+
+				if (ids.count() >  1)
+				{
+					// Transmitter input can be linked to one signal only.
+					//
+					m_log->errALC5026(transmitter.guid(), ids);
+					ASSERT_RETURN_FALSE
+				}
+				else
+				{
+					connectedSignalUuid = ids.first();
+				}
 			}
+
+			AppSignal* appSignal = m_appSignals.value(connectedSignalUuid, nullptr);
+
+			if (appSignal == nullptr)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(connectedSignalUuid.toString()));
+				ASSERT_RETURN_FALSE
+			}
+
+			QString connectedSignalID = appSignal->appSignalID();
+
+			connectedSignals.append(QPair<QString, QUuid>(connectedSignalID, connectedSignalUuid));
 		}
-
-		AppSignal* appSignal = m_appSignals.value(connectedSignalUuid, nullptr);
-
-		if (appSignal == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
-			ASSERT_RETURN_FALSE
-		}
-
-		connectedSignalID = appSignal->appSignalID();
 
 		return true;
 	}
@@ -6854,7 +6767,7 @@ namespace Builder
 
 		// calculate absoulute addresses of receving buffers
 		//
-		result &= m_optoModuleStorage->calculateRxBuffersAbsAddresses(lmID);
+		result &= m_optoModuleStorage->calculateRxBufAddresses(lmID);
 
 		return result;
 	}

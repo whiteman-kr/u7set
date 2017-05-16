@@ -612,7 +612,6 @@ namespace Builder
 		bool createAppSignalsMap();
 
 		bool buildRS232SignalLists();
-		bool buildOptoPortsSignalLists();
 
 		bool setOptoRawInSignalsAsComputed();
 
@@ -728,9 +727,9 @@ namespace Builder
 		bool processTxSignals();
 		bool processSerialRxSignals();
 
-		bool addRegularTxSignals();
+		bool processTransmitters();
 		bool processTransmitter(const AppItem *item);
-		bool getSignalConnectedToTransmitterInputPin(const LogicTransmitter &transmitter, QString& connectedSignalID, QUuid& connectedSignalUuid);
+		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
 
 		bool appendRegularSerialRxSignals();
 		bool processSerialReceiver(const AppItem* item);
