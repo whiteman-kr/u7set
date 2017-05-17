@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets concurrent serialport network sql qml xml axcontainer
+QT       += core gui widgets concurrent serialport network sql qml xml
+#axcontainer
 
 TARGET = Metrology
 TEMPLATE = app
@@ -114,10 +115,9 @@ SOURCES += \
     ObjectProperties.cpp \
     OutputSignalBase.cpp \
     RackBase.cpp \
-    MeasureBase.cpp \
-    ../lib/ExcelHelper.cpp
+    MeasureBase.cpp
 
-
+#../lib/ExcelHelper.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -184,8 +184,9 @@ HEADERS  += \
     ObjectProperties.h \
     OutputSignalBase.h \
     RackBase.h \
-    MeasureBase.h \
-    ../lib/ExcelHelper.h
+    MeasureBase.h
+
+#../lib/ExcelHelper.h
 
 
 FORMS    +=

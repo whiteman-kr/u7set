@@ -426,7 +426,7 @@ INCLUDEPATH += ./../QScintilla/Qt4Qt5
 DEPENDPATH += ./../QScintilla/Qt4Qt5
 LIBS += -L$$DESTDIR -lQScintilla
 win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
-unix:PRE_TARGETDEPS += $$DESTDIR/QScintilla.a
+unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
 
 # Add curent dir to a list of library directory paths
 #
