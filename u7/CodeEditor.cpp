@@ -1,8 +1,8 @@
 #include "CodeEditor.h"
 #include "Settings.h"
 
-#include <Qsci/qscilexercpp.h>
-#include <Qsci/qscilexerxml.h>
+#include "../QScintilla/Qt4Qt5/Qsci/qscilexercpp.h"
+#include "../QScintilla/Qt4Qt5/Qsci/qscilexerxml.h"
 
 //
 // DialogFindReplace
@@ -101,7 +101,6 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	PropertyTextEditor(parent),
 	m_parent(parent)
 {
-
 	m_textEdit = new QsciScintilla();
 
 	m_textEdit->installEventFilter(this);
@@ -109,41 +108,53 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	QHBoxLayout* l = new QHBoxLayout(this);
 	l->addWidget(m_textEdit);
 
+	// Set up default font
+
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Courier New",10);
+#elif defined(Q_OS_MAC)
+		QFont f = QFont("Courier", 12);
+#else
+		QFont f = QFont("Bitstream Vera Sans Mono",9);
+#endif
+
+	// Set up lexer
+
+	QsciLexer* lexer = nullptr;
+
 	if (codeType == CodeType::Cpp)
 	{
-		QsciLexerCPP* lexer = new QsciLexerCPP();
-		m_textEdit->setLexer(lexer);
+		lexer = new QsciLexerCPP();
 	}
 
 	if (codeType == CodeType::Xml)
 	{
-		QsciLexerXML* lexer = new QsciLexerXML();
+		lexer = new QsciLexerXML();
+	}
+
+	if (lexer != nullptr)
+	{
+		lexer->setDefaultFont(f);
 		m_textEdit->setLexer(lexer);
 	}
+
+	// Set up margins
 
 	if (codeType == CodeType::Cpp || codeType == CodeType::Xml)
 	{
 		m_textEdit->setMarginType(0, QsciScintilla::NumberMargin);
 		m_textEdit->setMarginWidth(0, 40);
-
-		//m_textEdit->setFolding(QsciScintilla::BoxedTreeFoldStyle);
 	}
 	else
 	{
 		m_textEdit->setMargins(0);
-
-		QFont font = m_textEdit->font();
-		font.setPointSize(font.pointSize() + 2);
-
-		m_textEdit->setFont(font);
+		m_textEdit->setFont(f);
 	}
 
 	m_textEdit->setTabWidth(4);
-
 	m_textEdit->setAutoIndent(true);
 
 	connect(m_textEdit, &QsciScintilla::textChanged, this, &PropertyTextEditor::textChanged);
-
 }
 
 bool CodeEditor::eventFilter(QObject* obj, QEvent* event)

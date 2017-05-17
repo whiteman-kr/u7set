@@ -1,7 +1,7 @@
 #ifndef IDEPROPERTYEDITOR_H
 #define IDEPROPERTYEDITOR_H
 
-#include <Qsci/qsciscintilla.h>
+#include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
 
 #include "../lib/PropertyEditor.h"
 

@@ -50,7 +50,7 @@ namespace ExtWidgets
 	//
 
 	PropertyEditorHelp::PropertyEditorHelp(const QString& caption, const QString& text, QWidget* parent):
-		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint)
 	{
 		setWindowTitle(caption);
 
