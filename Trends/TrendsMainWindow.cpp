@@ -289,33 +289,30 @@ void TrendsMainWindow::actionAboutTriggered()
 	QMessageBox msgBox(this);
 
 	msgBox.setWindowTitle(tr("About Trends"));
+	QPixmap image(":/Images/Images/RadiyLogo.png");
+	msgBox.setIconPixmap(image);
 
 	QStringList args = qApp->arguments();
 	args.pop_front();
 
 	QStringList text;
-	text << tr("JSC Radiy");
-	text << tr("Trends");
-	text << tr("Version: %1").arg(qApp->applicationVersion());
-	text << tr("");
-	text << tr("ProcessID: %1").arg(qApp->applicationPid());
-	text << tr("Executable: %1").arg(qApp->applicationFilePath());
-	text << tr("Arguments: %1").arg(args.join(' '));
+	text << tr("<b>JSC Radiy</b><br>");
+	text << tr("<b>Trends</b><br>");
+#ifdef _DEBUG
+	text << tr("Version: %1 (Debug)<br>").arg(qApp->applicationVersion());
+#else
+	text << tr("Version: %1 (Release)<br>").arg(qApp->applicationVersion());
+#endif
+	text << tr("Build architecture: %1<br>").arg(QSysInfo::buildCpuArchitecture());
+
+	text << tr("<br>");
+	text << tr("ProcessID: %1<br>").arg(qApp->applicationPid());
+	text << tr("Executable: %1<br>").arg(qApp->applicationFilePath());
+	text << tr("Arguments: %1<br>").arg(args.join(' '));
 
 	msgBox.setText(text.join('\n'));
 
-	QPixmap image(":/Images/Images/RadiyLogo.png");
-	msgBox.setIconPixmap(image);
-
 	msgBox.exec();
-
-
-
-
-//	mb.setParent(this);
-//	mb.setText(tr("About"));
-
-//	mb.exec();
 
 	return;
 }

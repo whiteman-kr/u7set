@@ -358,7 +358,7 @@ message SchemaItem
 	required bool isLocked = 3;
 	required SchemaUnit itemUnit = 4;
 	optional bool acceptClick = 5 [default = false];
-	//optional wstring clickScript = 6;
+	//optional wstring clickScript = 6;	DON'T REUSE IT
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
 	optional string objectName = 9;
