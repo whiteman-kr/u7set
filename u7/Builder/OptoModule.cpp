@@ -23,10 +23,7 @@ namespace Hardware
 						  E::SignalType signalType,
 						  E::DataFormat dataFormat,
 						  int dataSize,
-						  E::ByteOrder byteOrder,
-						  int offset,
-						  int bitNo,
-						  TxRxSignal::Type txRxType)
+						  E::ByteOrder byteOrder)
 	{
 		if (appSignalID.isEmpty() == true)
 		{
@@ -45,27 +42,10 @@ namespace Hardware
 
 		m_dataFormat = dataFormat;
 		m_byteOrder = byteOrder;
+		m_dataSize = dataSize;
 
-		m_type = txRxType;
+		m_type = TxRxSignal::Type::Regular;
 
-		if (isRaw() == true)
-		{
-			assert(offset >= 0 && offset < 65536);
-			assert(bitNo >= 0 && bitNo < 16);
-
-			m_addrInBuf.setOffset(offset);
-			m_addrInBuf.setBit(bitNo);
-
-			assert(dataSize >= SIZE_1BIT && dataSize <= SIZE_32BIT);
-
-			m_dataSize = dataSize;
-		}
-		else
-		{
-			m_addrInBuf.reset();
-
-			m_dataSize = dataSize;
-		}
 
 #ifdef QT_DEBUG
 		if (isDiscrete() == true)
@@ -75,6 +55,31 @@ namespace Hardware
 #endif
 		return true;
 	}
+
+	bool TxRxSignal::initRawSignal(const RawDataDescriptionItem& item)
+	{
+		if (item.type != RawDataDescriptionItem::Type::TxSignal &&
+			item.type != RawDataDescriptionItem::Type::RxSignal)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (m_appSignalID != item.appSignalID)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		m_type = TxRxSignal::Type::Raw;
+
+		m_signalType = item.signalType;
+		m_dataFormat = item.dataFormat;
+		m_byteOrder = item.byteOrder;
+		m_dataSize = item.dataSize;
+		m_addrInBuf.set(item.offsetW, item.bitNo);
+
+		return true;
+	}
+
 
 	void TxRxSignal::setAddrInBuf(Address16& addr)
 	{
@@ -141,10 +146,7 @@ namespace Hardware
 							  txSignal->signalType(),
 							  txSignal->dataFormat(),
 							  txSignal->dataSize(),
-							  txSignal->byteOrder(),
-							  -1,
-							  -1,
-							  TxRxSignal::Type::Regular);
+							  txSignal->byteOrder());
 	}
 
 	bool OptoPort::sortTxSignals()
@@ -279,6 +281,28 @@ namespace Hardware
 	}*/
 
 
+	bool OptoPort::setRawTxSignalsAddresses()
+	{
+		bool result = true;
+
+		for(const RawDataDescriptionItem& rawTxSignal : m_rawTxSignals)
+		{
+			if (m_txSignals.contains(rawTxSignal.appSignalID) == false)
+			{
+				m_log->errALC5192(rawTxSignal.appSignalID, m_equipmentID, m_connectionID);
+				result = false;
+				continue;
+			}
+
+			TxRxSignalShared& txSignal = m_txSignals[rawTxSignal.appSignalID];
+
+			txSignal->initRawSignal(rawTxSignal);
+		}
+
+		return result;
+	}
+
+
 	bool OptoPort::appendSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals)
 	{
 		if (m_mode != OptoPort::Mode::Serial)
@@ -318,10 +342,7 @@ namespace Hardware
 									 item.signalType,
 									 item.dataFormat,
 									 item.dataSize,
-									 item.byteOrder,
-									 item.offsetW,
-									 item.bitNo,
-									 TxRxSignal::Type::Raw);
+									 item.byteOrder);
 		}
 
 		return result;
@@ -346,10 +367,7 @@ namespace Hardware
 									 rxSignal->signalType(),
 									 rxSignal->dataFormat(),
 									 rxSignal->dataSize(),
-									 rxSignal->byteOrder(),
-									 -1,
-									 -1,
-									 TxRxSignal::Type::Regular);
+									 rxSignal->byteOrder());
 
 		return result;
 	}
@@ -776,7 +794,32 @@ namespace Hardware
 
 	bool OptoPort::parseRawDescription()
 	{
-		return m_rawDataDescription.parse(*this, m_log);
+		bool result = m_rawDataDescription.parse(*this, m_log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		m_rawTxSignals.clear();
+		m_rawRxSignals.clear();
+
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			if (item.type == RawDataDescriptionItem::Type::TxSignal)
+			{
+				m_rawTxSignals.insert(item.appSignalID, item);
+				continue;
+			}
+
+			if (item.type == RawDataDescriptionItem::Type::RxSignal)
+			{
+				m_rawRxSignals.insert(item.appSignalID, item);
+				continue;
+			}
+		}
+
+		return true;
 	}
 
 	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage)
@@ -1003,9 +1046,7 @@ namespace Hardware
 								  E::SignalType signalType,
 								  E::DataFormat dataFormat,
 								  int dataSize,
-								  E::ByteOrder byteOrder,
-								  int offset,
-								  int bitNo)
+								  E::ByteOrder byteOrder)
 	{
 		if (m_txSignals.contains(appSignalID) == true)
 		{
@@ -1016,7 +1057,7 @@ namespace Hardware
 
 		 //  type  ???????
 
-		bool res = txSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
+		bool res = txSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder);
 
 		if (res == false)
 		{
@@ -1032,10 +1073,7 @@ namespace Hardware
 								  E::SignalType signalType,
 								  E::DataFormat dataFormat,
 								  int dataSize,
-								  E::ByteOrder byteOrder,
-								  int offset,
-								  int bitNo,
-								  TxRxSignal::Type type)
+								  E::ByteOrder byteOrder)
 	{
 		if (m_rxSignals.contains(appSignalID) == true)
 		{
@@ -1048,7 +1086,7 @@ namespace Hardware
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
+		bool res = rxSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder);
 
 		if (res == false)
 		{
@@ -2383,6 +2421,12 @@ namespace Hardware
 
 		return result;
 	}
+
+	bool OptoModuleStorage::setRawTxSignalsAddresses(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::setRawTxSignalsAddresses);
+	}
+
 
 	bool OptoModuleStorage::sortTxSignals(const QString& lmID)
 	{

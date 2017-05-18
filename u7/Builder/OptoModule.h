@@ -43,10 +43,9 @@ namespace Hardware
 				  E::SignalType signalType,
 				  E::DataFormat dataFormat,
 				  int dataSize,
-				  E::ByteOrder byteOrder,
-				  int offset,
-				  int bitNo,
-				  TxRxSignal::Type txRxType);
+				  E::ByteOrder byteOrder);
+
+		bool initRawSignal(const RawDataDescriptionItem& item);
 
 		QString appSignalID() const { return m_appSignalID; }
 
@@ -55,6 +54,8 @@ namespace Hardware
 
 		bool isRaw() const { return m_type == Type::Raw; }
 		bool isRegular() const { return m_type == Type::Regular; }
+
+		void setType(TxRxSignal::Type t) { m_type = t; }
 
 		Address16 addrInBuf() const { return m_addrInBuf; }
 		void setAddrInBuf(Address16& addr);
@@ -108,6 +109,7 @@ namespace Hardware
 		bool init(const DeviceController* controller, int portNo, Builder::IssueLogger* log);
 
 		bool appendRawTxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
+		bool setRawTxSignalsAddresses();
 		bool appendTxSignal(const Signal* txSignal);
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
@@ -230,18 +232,13 @@ namespace Hardware
 							E::SignalType signalType,
 							E::DataFormat dataFormat,
 							int dataSize,
-							E::ByteOrder byteOrder,
-							int offset,
-							int bitNo);
+							E::ByteOrder byteOrder);
 
 		bool appendRxSignal(const QString& appSignalID,
 							E::SignalType signalType,
 							E::DataFormat dataFormat,
 							int dataSize,
-							E::ByteOrder byteOrder,
-							int offset,
-							int bitNo,
-							TxRxSignal::Type type);
+							E::ByteOrder byteOrder);
 
 		void sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
 		void sortByAppSignalIdAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
@@ -277,6 +274,9 @@ namespace Hardware
 		quint16 m_linkID = NOT_USED_PORT_ID;			// range 0..999, 0 - not used port ID, 1..999 - linked port ID
 
 		Builder::IssueLogger* m_log = nullptr;
+
+		HashedVector<QString, RawDataDescriptionItem> m_rawTxSignals;
+		HashedVector<QString, RawDataDescriptionItem> m_rawRxSignals;
 
 		//
 
@@ -422,6 +422,7 @@ namespace Hardware
 
 		bool appendRawTxSignals(const QString& lmID, const HashedVector<QString, Signal *>& lmAssociatedSignals);
 		bool appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
+		bool setRawTxSignalsAddresses(const QString& lmID);
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);

@@ -6456,10 +6456,14 @@ namespace Builder
 		//
 		//result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
 
-		// add regular Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
+		// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
 		// check that added regulat Tx signals exists in current LM
 		//
 		result &= processTransmitters();
+
+		// find raw tx signals and set it addresses
+		//
+		result &= m_optoModuleStorage->setRawTxSignalsAddresses(lmID);
 
 		// sort Tx signals lists of LM's associated opto ports
 		//

@@ -3884,6 +3884,28 @@ namespace Builder
 						arg(appSignalID).arg(lmID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5192
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Tx signal specified in port raw data description isn't connected to transmitter. Connect signal to transmitter.
+	///
+	void IssueLogger::errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5192,
+				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
+						arg(appSignalID).arg(portID).arg(connectionID));
+	}
+
 
 	// EQP			Equipment issues						6000-6999
 	//
