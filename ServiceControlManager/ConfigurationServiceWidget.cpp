@@ -14,8 +14,14 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	m_clientSocketThread.start();
 
+	addTab(new QLabel(this), "State");
+	addTab(new QLabel(this), "Clients");
+	addTab(new QLabel(this), "Build Info");
+
 	m_info = new QLabel(this);
 	addTab(m_info, "Settings");
+
+	addTab(new QLabel(this), "Log");
 
 	invalidateData();
 }

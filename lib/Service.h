@@ -40,17 +40,18 @@ struct ServiceInfo
 	ServiceType serviceType;
 	quint16 port;
 	const char* name;
+	const char* shortName;
 };
 
 
 const ServiceInfo serviceInfo[] =
 {
-	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service" },
-	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service" },
-	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service" },
-	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service" },
-	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service" },
-	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service" },
+	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
 };
 
 const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
