@@ -130,6 +130,8 @@ public:
 		return *this;
 	}
 
+	void setAddress(const Address16& addr) { (*this) = addr; }
+
 	void setSignalType(E::SignalType st) { m_signalType = st; }
 	E::SignalType signalType() const { return m_signalType; }
 

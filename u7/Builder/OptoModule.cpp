@@ -19,9 +19,16 @@ namespace Hardware
 	{
 	}
 
-	bool TxRxSignal::init(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type txRxType)
+	bool TxRxSignal::init(const QString& appSignalID,
+						  E::SignalType signalType,
+						  E::DataFormat dataFormat,
+						  int dataSize,
+						  E::ByteOrder byteOrder,
+						  int offset,
+						  int bitNo,
+						  TxRxSignal::Type txRxType)
 	{
-		if (appSignalID == nullptr)
+		if (appSignalID.isEmpty() == true)
 		{
 			assert(false);
 			return false;
@@ -36,6 +43,9 @@ namespace Hardware
 			return false;
 		}
 
+		m_dataFormat = dataFormat;
+		m_byteOrder = byteOrder;
+
 		m_type = txRxType;
 
 		if (isRaw() == true)
@@ -46,21 +56,21 @@ namespace Hardware
 			m_addrInBuf.setOffset(offset);
 			m_addrInBuf.setBit(bitNo);
 
-			assert(sizeB >= SIZE_1BIT && sizeB <= SIZE_32BIT);
+			assert(dataSize >= SIZE_1BIT && dataSize <= SIZE_32BIT);
 
-			m_sizeB = sizeB;
+			m_dataSize = dataSize;
 		}
 		else
 		{
 			m_addrInBuf.reset();
 
-			m_sizeB = sizeB;
+			m_dataSize = dataSize;
 		}
 
 #ifdef QT_DEBUG
 		if (isDiscrete() == true)
 		{
-			assert(m_sizeB == SIZE_1BIT);
+			assert(m_dataSize == SIZE_1BIT);
 		}
 #endif
 		return true;
@@ -84,7 +94,7 @@ namespace Hardware
 
 	bool OptoPort::init(const DeviceController* controller, int portNo, Builder::IssueLogger* log)
 	{
-		if (m_controller == nullptr || m_log == nullptr)
+		if (controller == nullptr || log == nullptr)
 		{
 			assert(false);
 			return false;
@@ -115,17 +125,44 @@ namespace Hardware
 		}
 
 		m_lmID = lm->equipmentIdTemplate();
+
+		return true;
 	}
 
-	bool OptoPort::appendRegularTxSignal(const Signal* s)
+	bool OptoPort::appendTxSignal(const Signal* txSignal)
 	{
-		if (s == nullptr)
+		if (txSignal == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		return appendTxSignal(s->appSignalID(), s->signalType(), -1, -1, s->dataSize(), TxRxSignal::Type::Regular);
+		return appendTxSignal(txSignal->appSignalID(),
+							  txSignal->signalType(),
+							  txSignal->dataFormat(),
+							  txSignal->dataSize(),
+							  txSignal->byteOrder(),
+							  -1,
+							  -1,
+							  TxRxSignal::Type::Regular);
+	}
+
+	bool OptoPort::sortTxSignals()
+	{
+		return sortTxRxSignalList(m_txSignals);
+	}
+
+	bool OptoPort::sortSerialRxSignals()
+	{
+		if (isSerial() == false)
+		{
+			// on this step of execution m_rxSignals of Optical ports must be empty!
+			//
+			assert(m_rxSignals.count() == 0);
+			return true;
+		}
+
+		return sortTxRxSignalList(m_rxSignals);
 	}
 
 	void OptoPort::getTxSignals(QVector<TxRxSignalShared>& txSignals) const
@@ -198,7 +235,7 @@ namespace Hardware
 		}
 	}
 
-	bool OptoPort::addRawTxSignalsToList(const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	/*bool OptoPort::appendRawTxSignals(const HashedVector<QString, Signal*>& lmAssociatedSignals)
 	{
 		bool result = true;
 
@@ -228,8 +265,91 @@ namespace Hardware
 				result = false;
 			}
 
-			result &= appendTxSignal(appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
+			result &= appendTxSignal(appSignalID,
+									 item.signalType,
+									 item.dataFormat,
+									 item.dataSize,
+									 item.byteOrder,
+									 item.offsetW,
+									 item.bitNo,
+									 TxRxSignal::Type::Raw);
 		}
+
+		return result;
+	}*/
+
+
+	bool OptoPort::appendSerialRawRxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals)
+	{
+		if (m_mode != OptoPort::Mode::Serial)
+		{
+			return true;				// add raw signals of serial ports only
+		}
+
+		bool result = true;
+
+		for(const RawDataDescriptionItem& item : m_rawDataDescription)
+		{
+			if (item.type != RawDataDescriptionItem::Type::RxSignal)
+			{
+				continue;
+			}
+
+			QString appSignalID = item.appSignalID;
+
+			if (lmAssociatedSignals.contains(appSignalID) == false)
+			{
+				// Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+				//
+				m_log->errALC5190(appSignalID, m_equipmentID, m_lmID);
+				result = false;
+				continue;
+			}
+
+			if (m_rxSignals.contains(appSignalID) == true)
+			{
+				// Signal ID '%1' is duplicate in opto port '%2' raw data description.
+				//
+				m_log->errALC5188(appSignalID, m_equipmentID);
+				result = false;
+			}
+
+			result &= appendRxSignal(appSignalID,
+									 item.signalType,
+									 item.dataFormat,
+									 item.dataSize,
+									 item.byteOrder,
+									 item.offsetW,
+									 item.bitNo,
+									 TxRxSignal::Type::Raw);
+		}
+
+		return result;
+	}
+
+	bool OptoPort::appendSerialRegularRxSignal(const Signal* rxSignal)
+	{
+		TEST_PTR_RETURN_FALSE(rxSignal);
+
+		if (isSerial() == false)
+		{
+			assert(false);				// port is not Serial!
+			return false;
+		}
+
+		if (m_rxSignals.contains(rxSignal->appSignalID()) == true)
+		{
+			return true;				// signal already in list, nothing to do
+		}
+
+		bool result = appendRxSignal(rxSignal->appSignalID(),
+									 rxSignal->signalType(),
+									 rxSignal->dataFormat(),
+									 rxSignal->dataSize(),
+									 rxSignal->byteOrder(),
+									 -1,
+									 -1,
+									 TxRxSignal::Type::Regular);
 
 		return result;
 	}
@@ -239,24 +359,14 @@ namespace Hardware
 	//
 	bool OptoPort::calculateTxSignalsAddresses()
 	{
+		m_txDataSizeW = 0;
+		m_txAnalogSignalsSizeW = 0;
+		m_txDiscreteSignalsSizeW = 0;
+
 		if (isUsedInConnection() == false)
 		{
-			m_txDataSizeW = 0;
 			return true;
 		}
-
-		bool result = sortTxRxSignals(m_txSignals);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		m_txDataID = CRC32_INITIAL_VALUE;
-
-		// mix port StrID in dataID
-		//
-		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
 
 		Address16 address(0, 0);
 
@@ -273,7 +383,7 @@ namespace Hardware
 
 		// then place analog signals
 		//
-		for(TxRxSignalShared txAnalogSignal : m_txSignals)
+		for(TxRxSignalShared& txAnalogSignal : m_txSignals)
 		{
 			if (txAnalogSignal->isRaw() == true)
 			{
@@ -287,10 +397,8 @@ namespace Hardware
 
 			txAnalogSignal->setAddrInBuf(address);
 
-			address.addBit(txAnalogSignal->sizeB());
+			address.addBit(txAnalogSignal->dataSize());
 			address.wordAlign();
-
-			m_txDataID = CRC32(m_txDataID, txAnalogSignal->appSignalID(), false);
 		}
 
 		m_txAnalogSignalsSizeW = address.offset() - startAddr ;
@@ -299,7 +407,7 @@ namespace Hardware
 
 		// then place discrete signals
 		//
-		for(TxRxSignalShared txDiscreteSignal : m_txSignals)
+		for(TxRxSignalShared& txDiscreteSignal : m_txSignals)
 		{
 			if (txDiscreteSignal->isRaw() == true)
 			{
@@ -313,14 +421,10 @@ namespace Hardware
 
 			txDiscreteSignal->setAddrInBuf(address);
 
-			assert(txDiscreteSignal->sizeB() == SIZE_1BIT);
+			assert(txDiscreteSignal->dataSize() == SIZE_1BIT);
 
 			address.add1Bit();
-
-			m_txDataID = CRC32(m_txDataID, txDiscreteSignal->appSignalID(), false);
 		}
-
-		m_txDataID = CRC32(m_txDataID, nullptr, 0, true);       // finalize CRC32 calculation
 
 		address.wordAlign();
 
@@ -328,20 +432,20 @@ namespace Hardware
 
 		int fullTxDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
 
-		if (manualSettings())
+		if (manualSettings() == true)
 		{
 			m_txDataSizeW = m_manualTxSizeW;
 
 			if (fullTxDataSizeW > m_txDataSizeW)
 			{
-				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = 2, txRawDataSizeW = %2, txAnalogSignalsSizeW = %3, txDiscreteSignalsSizeW = %4")).
-									arg(m_equipmentID).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
+				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = %2, txRawDataSizeW = %3, txAnalogSignalsSizeW = %4, txDiscreteSignalsSizeW = %5")).
+									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
 								   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
 								   arg(m_equipmentID).arg(m_connectionID));
 
-				result = false;
+				return false;
 			}
 		}
 		else
@@ -349,14 +453,246 @@ namespace Hardware
 			m_txDataSizeW = fullTxDataSizeW;
 		}
 
-		return result;
+		return true;
 	}
+
+	bool OptoPort::calculateTxDataID()
+	{
+		m_txDataID = 0;
+
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		m_txDataID = CRC32_INITIAL_VALUE;
+
+		// mix port EquipmentID in dataID
+		//
+		m_txDataID = CRC32(m_txDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
+
+		// mix txSignals ID and bitAddress in buffer
+		//
+		for(const TxRxSignalShared& txSignal : m_txSignals)
+		{
+			m_txDataID = CRC32(m_txDataID, txSignal->appSignalID(), false);
+			m_txDataID = CRC32(m_txDataID, txSignal->addrInBuf().bitAddress(), false);
+		}
+
+		m_txDataID = CRC32(m_txDataID, nullptr, 0, true);       // finalize CRC32 calculation
+
+		return true;
+	}
+
+	bool OptoPort::calculateSerialRxSignalsAddresses()
+	{
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Serial)
+		{
+			return true;				// process Serial ports only
+		}
+
+		m_rxDataSizeW = 0;
+		m_rxAnalogSignalsSizeW = 0;
+		m_rxDiscreteSignalsSizeW = 0;
+
+		// check raw signals addresses
+		//
+		for(TxRxSignalShared& rxSignal : m_rxSignals)
+		{
+			if (rxSignal->isRaw() == false)
+			{
+				continue;
+			}
+
+			if (rxSignal->addrInBuf().offset() < 0 || rxSignal->addrInBuf().offset() >= m_rxRawDataSizeW)
+			{
+				assert(false);			// address out of range of raw data area
+				return false;
+			}
+		}
+
+		Address16 address(0, 0);
+
+		// m_rxDataID first placed in buffer
+		//
+		address.addWord(TX_DATA_ID_SIZE_W);
+
+		// then place Raw Data
+		//
+		address.addWord(m_rxRawDataSizeW);
+
+		int startAddr = address.offset();
+
+		// then place analog rx signals
+		//
+		for(TxRxSignalShared& rxAnalogSignal : m_rxSignals)
+		{
+			if (rxAnalogSignal->isRaw() == true)
+			{
+				continue;					// exclude raw signals
+			}
+
+			if (rxAnalogSignal->isDiscrete() == true)
+			{
+				break;						// no more analog signals, exit
+			}
+
+			rxAnalogSignal->setAddrInBuf(address);
+
+			address.addBit(rxAnalogSignal->dataSize());
+			address.wordAlign();
+		}
+
+		m_rxAnalogSignalsSizeW = address.offset() - startAddr ;
+
+		startAddr = address.offset();
+
+		// then place discrete signals
+		//
+		for(TxRxSignalShared& rxDiscreteSignal : m_rxSignals)
+		{
+			if (rxDiscreteSignal->isRaw() == true)
+			{
+				continue;					// exclude raw signals
+			}
+
+			if (rxDiscreteSignal->isAnalog() == true)
+			{
+				continue;					// skip analog signals
+			}
+
+			rxDiscreteSignal->setAddrInBuf(address);
+
+			assert(rxDiscreteSignal->dataSize() == SIZE_1BIT);
+
+			address.add1Bit();
+		}
+
+		address.wordAlign();
+
+		m_rxDiscreteSignalsSizeW = address.offset() - startAddr;
+
+		int fullRxDataSizeW = TX_DATA_ID_SIZE_W + m_rxRawDataSizeW + m_rxAnalogSignalsSizeW + m_rxDiscreteSignalsSizeW;
+
+		if (manualSettings() == true)
+		{
+			m_rxDataSizeW = m_manualTxSizeW;
+
+			if (fullRxDataSizeW > m_rxDataSizeW)
+			{
+				LOG_MESSAGE(m_log, QString(tr("Port %1: rxIdSizeW = %2, rxRawDataSizeW = %3, rxAnalogSignalsSizeW = %4, rxDiscreteSignalsSizeW = %5")).
+									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Manual rxDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
+								   arg(m_manualRxSizeW).arg(fullRxDataSizeW).
+								   arg(m_equipmentID).arg(m_connectionID));
+
+				return false;
+			}
+		}
+		else
+		{
+			m_rxDataSizeW = fullRxDataSizeW;
+		}
+
+		return true;
+	}
+
+	bool OptoPort::calculateSerialRxDataID()
+	{
+		m_rxDataID = 0;
+
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Serial)
+		{
+			return true;
+		}
+
+		// rxDataID should be calculate for serial ports only!
+		//
+		m_rxDataID = CRC32_INITIAL_VALUE;
+
+		// mix port EquipmentID in dataID
+		//
+		m_rxDataID = CRC32(m_rxDataID, C_STR(m_equipmentID), m_equipmentID.length(), false);
+
+		// mix rxSignals ID and bitAddress in buffer
+		//
+		for(const TxRxSignalShared& rxSignal : m_txSignals)
+		{
+			m_rxDataID = CRC32(m_rxDataID, rxSignal->appSignalID(), false);
+			m_rxDataID = CRC32(m_rxDataID, rxSignal->addrInBuf().bitAddress(), false);
+		}
+
+		m_rxDataID = CRC32(m_rxDataID, nullptr, 0, true);       // finalize CRC32 calculation
+
+		return true;
+	}
+
+	bool OptoPort::copyOpticalPortsTxInRxSignals()
+	{
+		if (isUsedInConnection() == false)
+		{
+			return true;
+		}
+
+		if (m_mode != OptoPort::Mode::Optical)
+		{
+			return true;
+		}
+
+		assert(m_rxSignals.count() == 0);				// before this m_rxSignals must be clear!
+
+		OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
+
+		if (linkedPort == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		// copying txSignals of linked port to rxSignals of current port
+		//
+		const HashedVector<QString, TxRxSignalShared>& txSignals = linkedPort->txSignals();
+
+		for(const TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			m_rxSignals.insert(txSignal->appSignalID(), txSignal);
+		}
+
+		// copying tx to rx parameters
+		//
+		m_rxDataID = linkedPort->txDataID();
+		m_rxDataSizeW = linkedPort->txDataSizeW();
+		m_rxRawDataSizeW = linkedPort->txRawDataSizeW();
+		m_rxAnalogSignalsSizeW = linkedPort->txAnalogSignalsSizeW();
+		m_rxDiscreteSignalsSizeW = linkedPort->txDiscreteSignalsSizeW();
+
+		return true;
+	}
+
 
 	bool OptoPort::isTxSignalExists(const QString& appSignalID)
 	{
-		TxRxSignalShared s = m_txSignals.value(appSignalID, nullptr);
+		return m_txSignals.contains(appSignalID);
+	}
 
-		return s != nullptr;
+	bool OptoPort::isRxSignalExists(const QString& appSignalID)
+	{
+		return m_rxSignals.contains(appSignalID);
 	}
 
 	bool OptoPort::isUsedInConnection() const
@@ -378,32 +714,69 @@ namespace Hardware
 		return Address16();
 	}
 
-	Address16 OptoPort::getTxSignalAbsAddr(const QString& appSignalID) const
+	bool OptoPort::getTxSignalAbsAddress(const QString& appSignalID, SignalAddress16& addr) const
 	{
-		Address16 addrInBuf = getTxSignalAddrInBuf(appSignalID);
+		TxRxSignalShared txSignal = m_txSignals.value(appSignalID);
 
-		if (addrInBuf.isValid() == false)
+		if (txSignal == nullptr)
 		{
-			return addrInBuf;
+			ASSERT_RETURN_FALSE;
 		}
 
-		addrInBuf.addWord(m_absTxStartAddress);
+		int absTxBufAddr = txBufAbsAddress();
 
-		return addrInBuf;
+		if (absTxBufAddr == BAD_ADDRESS)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		Address16 absAddr = txSignal->addrInBuf();
+
+		absAddr.addWord(absTxBufAddr);
+
+		addr = absAddr;
+
+		addr.setSignalType(txSignal->signalType());
+		addr.setDataFormat(txSignal->dataFormat());
+		addr.setDataSize(txSignal->dataSize());
+		addr.setByteOrder(txSignal->byteOrder());
+
+		return true;
+	}
+
+	bool OptoPort::getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const
+	{
+		TxRxSignalShared rxSignal = m_rxSignals.value(appSignalID);
+
+		if (rxSignal == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		int rxBufAbsAddr = rxBufAbsAddress();
+
+		if (rxBufAbsAddr == BAD_ADDRESS)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		Address16 rxSignalAddr = rxSignal->addrInBuf();
+
+		rxSignalAddr.addWord(rxBufAbsAddr);
+
+		addr = rxSignalAddr;
+
+		addr.setSignalType(rxSignal->signalType());
+		addr.setDataFormat(rxSignal->dataFormat());
+		addr.setDataSize(rxSignal->dataSize());
+		addr.setByteOrder(rxSignal->byteOrder());
+
+		return true;
 	}
 
 	bool OptoPort::parseRawDescription()
 	{
-		bool result = m_rawDataDescription.parse(*this, m_log);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result &= appendRawTxRxSignals();
-
-		return result;
+		return m_rawDataDescription.parse(*this, m_log);
 	}
 
 	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage)
@@ -579,55 +952,42 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoPort::getSignalRxAddressSerial(std::shared_ptr<Connection> connection,
-												const QString& appSignalID,
-												QUuid receiverUuid,
-												SignalAddress16& addr)
+	int OptoPort::txBufAbsAddress() const
 	{
-		if (connection->mode() != OptoPort::Mode::Serial)
+		if (m_txBufAddress == BAD_ADDRESS)
 		{
 			assert(false);
-			return false;
+			return BAD_ADDRESS;
 		}
 
-		for(const RawDataDescriptionItem& rdi : m_rawDataDescription)
+		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+
+		if (module == nullptr)
 		{
-			if (rdi.type != RawDataDescriptionItem::Type::RxSignal)
-			{
-				continue;
-			}
-
-			// rdi.type == RawDataDescriptionItemType::InSignal
-
-			if (rdi.appSignalID != appSignalID)
-			{
-				continue;
-			}
-
-			addr.setSignalType(rdi.signalType);
-			addr.setDataFormat(rdi.dataFormat);
-			addr.setDataSize(rdi.dataSize);
-			addr.setByteOrder(rdi.byteOrder);
-
-			addr.setOffset(rxStartAddress() + rdi.offsetW);
-
-			if (rdi.signalType == E::SignalType::Discrete)
-			{
-				addr.setBit(rdi.bitNo);
-			}
-			else
-			{
-				addr.setBit(0);
-			}
-
-			return true;
+			assert(false);
+			return BAD_ADDRESS;
 		}
 
-		// Signal '%1' is not exists in serial connection '%2'. Use PortRawDataDescription to define receiving signals.
-		//
-		m_log->errALC5084(appSignalID, connection->connectionID(), receiverUuid);
+		return module->optoInterfaceDataOffset() + m_txBufAddress;
+	}
 
-		return false;
+	int OptoPort::rxBufAbsAddress() const
+	{
+		if (m_rxBufAddress == BAD_ADDRESS)
+		{
+			assert(false);
+			return BAD_ADDRESS;
+		}
+
+		OptoModuleShared module = OptoModuleStorage::getOptoModule(m_optoModuleID);
+
+		if (module == nullptr)
+		{
+			assert(false);
+			return BAD_ADDRESS;
+		}
+
+		return module->optoInterfaceDataOffset() + module->optoPortAppDataOffset() + m_rxBufAddress;
 	}
 
 	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
@@ -639,7 +999,13 @@ namespace Hardware
 		m_txRawDataSizeWIsCalculated = true;
 	}
 
-	bool OptoPort::appendTxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type)
+	bool OptoPort::appendTxSignal(const QString& appSignalID,
+								  E::SignalType signalType,
+								  E::DataFormat dataFormat,
+								  int dataSize,
+								  E::ByteOrder byteOrder,
+								  int offset,
+								  int bitNo)
 	{
 		if (m_txSignals.contains(appSignalID) == true)
 		{
@@ -648,7 +1014,9 @@ namespace Hardware
 
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(appSignalID, signalType, offset, bitNo, sizeB, type);
+		 //  type  ???????
+
+		bool res = txSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
 
 		if (res == false)
 		{
@@ -657,33 +1025,19 @@ namespace Hardware
 
 		m_txSignals.insert(txSignal->appSignalID(), txSignal);
 
-		if (txSignal->isRaw() == false)
-		{
-			if (txSignal->isAnalog() == true)
-			{
-				m_txAnalogSignalsCount++;
-			}
-			else
-			{
-				if (txSignal->isDiscrete() == true)
-				{
-					m_txDiscreteSignalsCount++;
-				}
-				else
-				{
-					assert(false);  // unknown type of signal
-					return false;
-				}
-			}
-		}
-
 		return true;
 	}
 
-
-	bool OptoPort::appendRxSignal(const QString& appSignalID, E::SignalType signalType, int offset, int bitNo, int sizeB, TxRxSignal::Type type)
+	bool OptoPort::appendRxSignal(const QString& appSignalID,
+								  E::SignalType signalType,
+								  E::DataFormat dataFormat,
+								  int dataSize,
+								  E::ByteOrder byteOrder,
+								  int offset,
+								  int bitNo,
+								  TxRxSignal::Type type)
 	{
-		if (m_rxSignals.contains(appSignalID))
+		if (m_rxSignals.contains(appSignalID) == true)
 		{
 			// Signal ID '%1' is duplicate in opto port '%2'.
 			//
@@ -694,7 +1048,7 @@ namespace Hardware
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(appSignalID, signalType, offset, bitNo, sizeB, type);
+		bool res = rxSignal->init(appSignalID, signalType, dataFormat, dataSize, byteOrder, offset, bitNo, type);
 
 		if (res == false)
 		{
@@ -704,31 +1058,6 @@ namespace Hardware
 		m_rxSignals.insert(rxSignal->appSignalID(), rxSignal);
 
 		return true;
-	}
-
-
-
-	bool OptoPort::appendRawTxRxSignals()
-	{
-		bool result = true;
-
-		// append Raw Tx and Rx  signals
-		//
-		for(const RawDataDescriptionItem& item : m_rawDataDescription)
-		{
-			if (item.type == RawDataDescriptionItem::Type::TxSignal)
-			{
-				result &= appendTxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
-				continue;
-			}
-
-			if (item.type == RawDataDescriptionItem::Type::RxSignal)
-			{
-				result &= appendRxSignal(item.appSignalID, item.signalType, item.offsetW, item.bitNo, item.dataSize, TxRxSignal::Type::Raw);
-			}
-		}
-
-		return result;
 	}
 
 	void OptoPort::sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared> &signalList, int startIndex, int count)
@@ -773,10 +1102,10 @@ namespace Hardware
 			const TxRxSignalShared& s2 = signalList[i + 1];
 
 			int s1StartBitAddress = s1->addrInBuf().bitAddress();
-			int s1EndBitAddress = s1->addrInBuf().bitAddress() + s1->sizeB() - 1;
+			int s1EndBitAddress = s1->addrInBuf().bitAddress() + s1->dataSize() - 1;
 
 			int s2StartBitAddress = s2->addrInBuf().bitAddress();
-			int s2EndBitAddress = s2->addrInBuf().bitAddress() + s1->sizeB() - 1;
+			int s2EndBitAddress = s2->addrInBuf().bitAddress() + s1->dataSize() - 1;
 
 			if ((s1StartBitAddress >= s2StartBitAddress && s1StartBitAddress <= s2EndBitAddress) ||
 				(s2StartBitAddress >= s1StartBitAddress && s2StartBitAddress <= s1EndBitAddress))
@@ -798,7 +1127,7 @@ namespace Hardware
 	}*/
 
 
-	bool OptoPort::sortTxRxSignals(HashedVector<QString, TxRxSignalShared>& signalList)
+	bool OptoPort::sortTxRxSignalList(HashedVector<QString, TxRxSignalShared>& signalList)
 	{
 		// Tx/Rx signals sorting order:
 		//
@@ -1046,8 +1375,6 @@ namespace Hardware
 
 	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList)
 	{
-		serialPortsList.clear();
-
 		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
@@ -1065,8 +1392,6 @@ namespace Hardware
 
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList)
 	{
-		optoPortsList.clear();
-
 		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
@@ -1084,8 +1409,6 @@ namespace Hardware
 
 	void OptoModule::getPorts(QList<OptoPortShared>& portsList)
 	{
-		portsList.clear();
-
 		for(OptoPortShared& port : m_ports)
 		{
 			if (port == nullptr)
@@ -1163,7 +1486,27 @@ namespace Hardware
 	}
 
 
-	bool OptoModule::calculateTxStartAddresses()
+	bool OptoModule::forEachPort(OptoPortFunc funcPtr)
+	{
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			OptoPort* optoPort = port.get();
+
+			result &= (optoPort->*funcPtr)();
+		}
+
+		return result;
+	}
+
+
+/*	bool OptoModule::calculateTxBufAddresses()
 	{
 		quint16 txStartAddress = 0;
 
@@ -1177,17 +1520,17 @@ namespace Hardware
 
 			if (port->manualSettings() == true)
 			{
-				port->setTxStartAddress(port->manualTxStartAddressW());
+				port->setTxBufAddress(port->manualTxStartAddressW());
 			}
 			else
 			{
-				if (isLM())
+				if (isLM() == true)
 				{
-					port->setTxStartAddress(0);					// in LM opto ports txStartAddress always 0
+					port->setTxBufAddress((port->portNo() - 1) * optoPortAppDataSize());
 				}
 				else
 				{
-					port->setTxStartAddress(txStartAddress);
+					port->setTxBufAddress(txStartAddress);
 					txStartAddress += port->txDataSizeW();
 				}
 			}
@@ -1202,9 +1545,9 @@ namespace Hardware
 		}
 
 		return true;
-	}
+	}*/
 
-	bool OptoModule::addRawTxSignalsToLists(const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	bool OptoModule::addSerialRawRxSignals(const HashedVector<QString, Signal*>& lmAssociatedSignals)
 	{
 		bool result = true;
 
@@ -1216,11 +1559,422 @@ namespace Hardware
 				return false;
 			}
 
-			result &= optoPort->addRawTxSignalsToList(lmAssociatedSignals);
+			if (optoPort->mode() == OptoPort::Mode::Serial)
+			{
+				result &= optoPort->appendSerialRawRxSignals(lmAssociatedSignals);
+			}
 		}
 
 		return result;
 	}
+
+	bool OptoModule::sortTxSignals()
+	{
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= port->sortTxSignals();
+		}
+
+		return result;
+	}
+
+	bool OptoModule::calculateTxSignalsAddresses()
+	{
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= port->calculateTxSignalsAddresses();
+		}
+
+		return result;
+	}
+
+	bool OptoModule::calculateTxDataIDs()
+	{
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= port->calculateTxDataID();
+		}
+
+		return result;
+	}
+
+	bool OptoModule::calculateTxBufAddresses()
+	{
+		bool result = true;
+
+		int absTxStartAddress = 0;
+
+		if (isLM() == true)
+		{
+			for(OptoPortShared& port : m_ports)
+			{
+				// calculate tx buffers absolute addresses for ports of LM module
+				//
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					ASSERT_RETURN_FALSE;
+				}
+
+				if (port->isUsedInConnection() == false)
+				{
+					continue;
+				}
+
+				absTxStartAddress =	optoInterfaceDataOffset() +	(port->portNo() - 1) * optoPortDataSize();
+
+				if (port->manualSettings() == true)
+				{
+					int manualTxStartAddr = port->manualTxStartAddressW();
+
+					if (manualTxStartAddr < 0 || manualTxStartAddr >= optoPortDataSize())
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+										   QString(tr("Manual TxStartAddress of port '%1' out of range 0..%2 (connection %3)")).
+										   arg(port->equipmentID()).arg(optoPortDataSize()).arg(port->connectionID()));
+						return false;
+					}
+
+					absTxStartAddress += manualTxStartAddr;
+
+					port->setTxBufAddress(absTxStartAddress);
+
+					if (manualTxStartAddr + port->manualTxSizeW() > optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						result = false;
+						break;
+					}
+				}
+				else
+				{
+					port->setTxBufAddress(absTxStartAddress);
+
+					if (port->txDataSizeW() > optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						result = false;
+						break;
+					}
+				}
+			}
+
+			result &= checkPortsAddressesOverlapping();
+
+			return result;
+		}
+
+		if (isOCM() == true)
+		{
+			// calculate tx addresses for ports of OCM module
+			//
+			absTxStartAddress = optoInterfaceDataOffset();
+
+			int txDataSizeW = 0;
+
+			for(OptoPortShared& port : m_ports)
+			{
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					ASSERT_RETURN_FALSE;
+				}
+
+				if (port->isUsedInConnection() == false)
+				{
+					continue;
+				}
+
+				if (port->manualSettings() == true)
+				{
+					absTxStartAddress = optoInterfaceDataOffset() + port->manualTxStartAddressW();
+
+					port->setTxBufAddress(absTxStartAddress);
+
+					if (port->manualTxStartAddressW() + port->manualTxSizeW() > optoPortAppDataSize())
+					{
+						// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						return false;
+					}
+
+					// calculate TxStartAddr for next port with auto settings (if exists)
+					//
+					absTxStartAddress += port->manualTxSizeW();
+
+					txDataSizeW = port->manualTxStartAddressW() + port->manualTxSizeW();
+				}
+				else
+				{
+					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
+					//
+					port->setTxBufAddress(absTxStartAddress);
+
+					absTxStartAddress += port->txDataSizeW();
+
+					txDataSizeW += port->txDataSizeW();
+				}
+
+				if (txDataSizeW > optoPortAppDataSize())
+				{
+					// TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+					//
+					m_log->errALC5032(port->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+					result = false;
+					break;
+				}
+
+				result &= checkPortsAddressesOverlapping();
+			}
+
+			return result;
+		}
+
+		// unknown module family
+		//
+		ASSERT_RETURN_FALSE;
+	}
+
+	// checking ports addresses overlapping
+	// usefull for manual settings of ports
+	//
+	bool OptoModule::checkPortsAddressesOverlapping()
+	{
+		int portsCount = m_ports.count();
+
+		for(int i = 0; i < portsCount - 1; i++)
+		{
+			OptoPortShared port1 = m_ports[i];
+
+			if (port1 == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				assert(false);
+				return false;
+			}
+
+			if (port1->isUsedInConnection() == false)
+			{
+				continue;
+			}
+
+			for(int k = i + 1; k < portsCount; k++)
+			{
+				OptoPortShared port2 = m_ports[k];
+
+				if (port2 == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+
+				if (port2->isUsedInConnection() == false)
+				{
+					continue;
+				}
+
+				if (	(port1->txBufAbsAddress() >= port2->txBufAbsAddress() &&
+						port1->txBufAbsAddress() < port2->txBufAbsAddress() + port2->txDataSizeW()) ||
+
+						(port2->txBufAbsAddress() >= port1->txBufAbsAddress() &&
+						port2->txBufAbsAddress() < port1->txBufAbsAddress() + port1->txDataSizeW())	)
+				{
+					// Tx data memory areas of ports '%1' and '%2' are overlapped.
+					//
+					m_log->errALC5187(port1->equipmentID(), port2->equipmentID());
+
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	bool OptoModule::calculateRxBufAddresses()
+	{
+		bool result = true;
+
+		QList<OptoPortShared> portsList;
+
+		getPorts(portsList);
+
+		if (isLM() == true)
+		{
+			// calculate rx addresses for ports of LM module
+			//
+			int i = 0;
+
+			for(OptoPortShared& port : portsList)
+			{
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+
+				if (port->isUsedInConnection() == false)
+				{
+					port->setRxBufAddress(0);
+					i++;
+					continue;
+				}
+
+				int rxStartAddress = i * optoPortDataSize();
+
+				port->setRxBufAddress(rxStartAddress);
+
+				i++;
+
+				OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(port->linkedPortID());
+
+				if (linkedPort != nullptr)
+				{
+					if (linkedPort->txDataSizeW() > optoPortAppDataSize())
+					{
+						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5035(linkedPort->txDataSizeW(), port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						result = false;
+						break;
+					}
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		if (isOCM() == true)
+		{
+			// calculate rx addresses for ports of OCM module
+			//
+			int rxStartAddress = optoInterfaceDataOffset() + optoPortAppDataOffset();
+
+			int rxDataSizeW = 0;
+
+			for(OptoPortShared& port : portsList)
+			{
+				if (port == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+
+				port->setRxBufAddress(0);
+
+				// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
+				//
+
+				if (port->isUsedInConnection() == false)
+				{
+					continue;			// port is not connected
+				}
+
+				std::shared_ptr<Connection> connection = OptoModuleStorage::getConnection(port->connectionID());
+
+				if (connection == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				if (connection->mode() == OptoPort::Mode::Serial)
+				{
+					if (connection->port1EquipmentID() != port->equipmentID() )
+					{
+						continue;
+					}
+
+					port->setRxBufAddress(rxStartAddress);
+
+					if (port->manualSettings() == true)
+					{
+						rxStartAddress += port->manualRxSizeW();
+					}
+					else
+					{
+						// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
+						//
+						m_log->errALC5085(port->equipmentID(), port->connectionID());
+					}
+
+					continue;
+				}
+
+				// connection is in OptoPort::Mode::Opto
+
+				port->setRxBufAddress(rxStartAddress);
+
+				OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(port->linkedPortID());
+
+				if (linkedPort != nullptr)
+				{
+					rxStartAddress += linkedPort->txDataSizeW();
+
+					rxDataSizeW += linkedPort->txDataSizeW();
+
+					if (rxDataSizeW > optoPortAppDataSize())
+					{
+						// RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+						//
+						m_log->errALC5035(rxDataSizeW, port->equipmentID(), equipmentID(), optoPortAppDataSize());
+						result = false;
+						break;
+					}
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					assert(false);
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		LOG_INTERNAL_ERROR(m_log);
+
+		ASSERT_RETURN_FALSE;
+	}
+
+
+
 
 	// ------------------------------------------------------------------
 	//
@@ -1228,28 +1982,35 @@ namespace Hardware
 	//
 	// ------------------------------------------------------------------
 
-	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger *log) :
-		m_equipmentSet(equipmentSet),
-		m_lmDescriptionSet(lmDescriptionSet),
-		m_log(log)
-	{
-	}
+	EquipmentSet* OptoModuleStorage::m_equipmentSet = nullptr;
+	Builder::LmDescriptionSet* OptoModuleStorage::m_lmDescriptionSet = nullptr;
+	Builder::IssueLogger* OptoModuleStorage::m_log = nullptr;
 
+	int OptoModuleStorage::m_instanceCount = 0;
+	HashedVector<QString, OptoModuleShared> OptoModuleStorage::m_modules;
+	HashedVector<QString, OptoPortShared> OptoModuleStorage::m_ports;
+	QHash<QString, OptoModuleShared> OptoModuleStorage::m_lmAssociatedModules;
+	QHash<QString, std::shared_ptr<Connection>> OptoModuleStorage::m_connections;
+
+	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger *log)
+	{
+		assert(m_instanceCount == 0);			// OptoModuleStorage is singleton!
+
+		m_instanceCount++;
+
+		m_equipmentSet = equipmentSet;
+		m_lmDescriptionSet = lmDescriptionSet;
+		m_log = log;
+	}
 
 	OptoModuleStorage::~OptoModuleStorage()
 	{
 		clear();
+
+		m_instanceCount--;
 	}
 
-
-	void OptoModuleStorage::clear()
-	{
-		m_modules.clear();
-		m_ports.clear();
-	}
-
-
-	bool OptoModuleStorage::build()
+	bool OptoModuleStorage::appendOptoModules()
 	{
 		LOG_EMPTY_LINE(m_log);
 
@@ -1279,14 +2040,6 @@ namespace Hardware
 			}
 		);
 
-		for(OptoModuleShared& optoModule : m_modules)
-		{
-			for(OptoPortShared& optoPort : optoModule->m_ports)
-			{
-				m_ports.insert(optoPort->equipmentID(), optoPort);
-			}
-		}
-
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Opto-modules found: %1")).arg(m_modules.count()))
@@ -1296,60 +2049,196 @@ namespace Hardware
 		return result;
 	}
 
-
-	bool OptoModuleStorage::addModule(DeviceModule* module)
+	bool OptoModuleStorage::appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage)
 	{
-		if (module == nullptr)
+		bool result = true;
+
+		int count = connectionStorage.count();
+
+		for(int i = 0; i < count; i++)
+		{
+			ConnectionShared connection = connectionStorage.get(i);
+
+			if (connection == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (m_connections.contains(connection->connectionID()) == false)
+			{
+				bool res = processConnection(connection);
+
+				if (res == false)
+				{
+					continue;
+				}
+
+				m_connections.insert(connection->connectionID(), connection);
+			}
+			else
+			{
+				m_log->errALC5023(connection->connectionID());
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool OptoModuleStorage::processConnection(ConnectionShared connection)
+	{
+		if (connection == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (connection->manualSettings() == true)
+		{
+			m_log->wrnALC5055(connection->connectionID());
+		}
+
+		quint16 linkID = connection->linkID();
+
+		QString connectionID = connection->connectionID();
+
+		Hardware::OptoPortShared optoPort1 = getOptoPort(connection->port1EquipmentID());
+
+		// check port 1
+		//
+		if (optoPort1 == nullptr)
+		{
+			// Undefined opto port '%1' in the connection '%2'.
+			//
+			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
+			return false;
+		}
+
+		if (optoPort1->connectionID().isEmpty() == true)
+		{
+			optoPort1->setConnectionID(connectionID);
+		}
+		else
+		{
+			// Opto port '%1' of connection '%2' is already used in connection '%3'.
+			//
+			m_log->errALC5019(optoPort1->equipmentID(), connectionID, optoPort1->connectionID());
+			return false;
+		}
+
+		Hardware::OptoModuleShared optoModule = getOptoModule(optoPort1);
+
+		if (optoModule == nullptr)
 		{
 			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		if (module->moduleFamily() != DeviceModule::FamilyType::LM &&
-			module->moduleFamily() != DeviceModule::FamilyType::OCM)
+		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
 		{
-			// this is not opto-module
+			if (optoModule->isLM() == true)
+			{
+				// LM's port '%1' can't work in RS232/485 mode (connection '%2').
+				//
+				m_log->errALC5020(connection->port1EquipmentID(), connectionID);
+				return false;
+			}
+
+			optoPort1->setLinkID(linkID);
+			optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
+			optoPort1->setSerialMode(connection->serialMode());
+			optoPort1->setEnableDuplex(connection->enableDuplex());
+
+			optoPort1->setManualSettings(connection->manualSettings());
+			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
+			optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
+			optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
+			optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
+
+			bool res = optoPort1->parseRawDescription();
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			LOG_MESSAGE(m_log, QString(tr("Serial RS232/485 connection '%1' ID = %2... Ok")).
+							arg(connectionID).arg(linkID));
+		}
+		else
+		{
+			assert(connection->mode() == Hardware::OptoPort::Mode::Optical);
+
+			// check port 2
 			//
-			return true;
+			Hardware::OptoPortShared optoPort2 = getOptoPort(connection->port2EquipmentID());
+
+			if (optoPort2 == nullptr)
+			{
+				// Undefined opto port '%1' in the connection '%2'.
+				//
+				m_log->errALC5021(connection->port2EquipmentID(), connectionID);
+				return false;
+			}
+
+			if (optoPort1->lmID() == optoPort2->lmID())
+			{
+				//  Opto ports of the same chassis is linked via connection '%1'.
+				//
+				m_log->errALC5022(connectionID);
+				return false;
+			}
+
+			if (optoPort2->connectionID().isEmpty() == true)
+			{
+				optoPort2->setConnectionID(connectionID);
+			}
+			else
+			{
+				// Opto port '%1' of connection '%2' is already used in connection '%3'.
+				//
+				m_log->errALC5019(optoPort2->equipmentID(), connectionID, optoPort2->connectionID());
+				return false;
+			}
+
+			bool res = true;
+
+			optoPort1->setLinkID(linkID);
+			optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
+			optoPort1->setManualSettings(connection->manualSettings());
+			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
+			optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
+			optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
+			optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
+			optoPort1->setLinkedPortID(optoPort2->equipmentID());
+
+			res &= optoPort1->parseRawDescription();
+
+			optoPort2->setLinkID(linkID);
+			optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
+			optoPort2->setManualSettings(connection->manualSettings());
+			optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
+			optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
+			optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
+			optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
+			optoPort2->setLinkedPortID(optoPort1->equipmentID());
+
+			res &= optoPort2->parseRawDescription();
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
+						arg(connectionID).arg(linkID));
 		}
-
-		// Get LogicModule description
-		//
-		assert(m_lmDescriptionSet);
-
-		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLM(module);
-		if (chassisLm == nullptr)
-		{
-			assert(chassisLm);
-			return false;
-		}
-
-		std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(chassisLm);
-
-		if (lmDescription == nullptr)
-		{
-			QString lmDescriptionFile = LogicModule::lmDescriptionFile(module);
-
-			m_log->errEQP6004(module->equipmentIdTemplate(), lmDescriptionFile, module->uuid());
-			return false;
-		}
-
-		// Create and add OptoModule
-		//
-		OptoModuleShared optoModule = std::make_shared<OptoModule>();
-
-		if (optoModule->init(module, lmDescription.get(), m_log) == false)
-		{
-			return false;
-		}
-
-		m_modules.insert(module->equipmentIdTemplate(), optoModule);
-
-		m_lmAssociatedModules.insertMulti(optoModule->lmID(), optoModule);
 
 		return true;
 	}
+
+
 
 
 	OptoModuleShared OptoModuleStorage::getOptoModule(const QString& optoModuleID)
@@ -1434,9 +2323,71 @@ namespace Hardware
 		return m_lmAssociatedModules.values(lmID);
 	}
 
-	bool OptoModuleStorage::addRawTxSignalsToLists(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	QList<OptoPortShared> OptoModuleStorage::getLmAssociatedOptoPorts(const QString& lmID)
 	{
-		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+		QList<OptoModuleShared> modules = m_lmAssociatedModules.values(lmID);
+
+		QList<OptoPortShared> ports;
+
+		for(OptoModuleShared& module : modules)
+		{
+			if (module == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			module->getPorts(ports);
+		}
+
+		return ports;
+	}
+
+
+/*	bool OptoModuleStorage::appendRawTxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	{
+		QList<OptoPortShared> optoPorts = getLmAssociatedOptoPorts(lmID);
+
+		bool result = true;
+
+		for(OptoPortShared& optoPort : optoPorts)
+		{
+			if (optoPort == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoPort->appendRawTxSignals(lmAssociatedSignals);
+		}
+
+		return result;
+	}*/
+
+	bool OptoModuleStorage::appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals)
+	{
+		QList<OptoPortShared> optoPorts = getLmAssociatedOptoPorts(lmID);
+
+		bool result = true;
+
+		for(OptoPortShared& optoPort : optoPorts)
+		{
+			if (optoPort == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoPort->appendSerialRawRxSignals(lmAssociatedSignals);
+		}
+
+		return result;
+	}
+
+	bool OptoModuleStorage::sortTxSignals(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::sortTxSignals);
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
 
 		bool result = true;
 
@@ -1448,36 +2399,180 @@ namespace Hardware
 				return false;
 			}
 
-			result &= optoModule->addRawTxSignalsToLists(lmAssociatedSignals);
+			result &= optoModule->sortTxSignals();
 		}
 
-		return result;
+		return result;*/
 	}
 
-	QList<OptoModuleShared> OptoModuleStorage::modules()
+	bool OptoModuleStorage::sortSerialRxSignals(const QString& lmID)
 	{
-		QList<OptoModuleShared> modules;
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::sortSerialRxSignals);
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
 
-		for(OptoModuleShared module : m_modules)
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
 		{
-			modules.append(module);
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->sortTxSignals();
 		}
 
-		return modules;
+		return result;*/
 	}
 
 
-	QList<OptoPortShared> OptoModuleStorage::ports()
+	bool OptoModuleStorage::calculateTxSignalsAddresses(const QString& lmID)
 	{
-		QList<OptoPortShared> ports;
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateTxSignalsAddresses);
 
-		for(OptoPortShared port : m_ports)
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
 		{
-			ports.append(port);
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxSignalsAddresses();
 		}
 
-		return ports;
+		return result;*/
 	}
+
+	bool OptoModuleStorage::calculateTxDataIDs(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateTxDataID);
+
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxDataIDs();
+		}
+
+		return result;*/
+	}
+
+	bool OptoModuleStorage::calculateTxBufAddresses(const QString& lmID)
+	{
+		return forEachOfLmAssociatedOptoModules(lmID, &OptoModule::calculateTxBufAddresses);
+		/*QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxBuffersAbsAddresses();
+		}
+
+		return result; */
+	}
+
+	bool OptoModuleStorage::calculateSerialRxSignalsAddresses(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxSignalsAddresses);
+		/*QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& optoModule : optoModules)
+		{
+			if (optoModule == nullptr)
+			{
+				assert(false);
+				return false;
+			}
+
+			result &= optoModule->calculateTxBuffersAbsAddresses();
+		}
+
+		return result; */
+	}
+
+
+	bool OptoModuleStorage::addModule(DeviceModule* module)
+	{
+		if (module == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (module->moduleFamily() != DeviceModule::FamilyType::LM &&
+			module->moduleFamily() != DeviceModule::FamilyType::OCM)
+		{
+			// this is not opto-module
+			//
+			return true;
+		}
+
+		// Get LogicModule description
+		//
+		assert(m_lmDescriptionSet);
+
+		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLM(module);
+		if (chassisLm == nullptr)
+		{
+			assert(chassisLm);
+			return false;
+		}
+
+		std::shared_ptr<LogicModule> lmDescription = m_lmDescriptionSet->get(chassisLm);
+
+		if (lmDescription == nullptr)
+		{
+			QString lmDescriptionFile = LogicModule::lmDescriptionFile(module);
+
+			m_log->errEQP6004(module->equipmentIdTemplate(), lmDescriptionFile, module->uuid());
+			return false;
+		}
+
+		// Create and add OptoModule
+		//
+		OptoModuleShared optoModule = std::make_shared<OptoModule>();
+
+		if (optoModule->init(module, lmDescription.get(), m_log) == false)
+		{
+			return false;
+		}
+
+		m_modules.insert(module->equipmentIdTemplate(), optoModule);
+
+		m_lmAssociatedModules.insertMulti(optoModule->lmID(), optoModule);
+
+		for(OptoPortShared& optoPort : optoModule->m_ports)
+		{
+			m_ports.insert(optoPort->equipmentID(), optoPort);
+		}
+
+		return true;
+	}
+
 
 	bool OptoModuleStorage::setPortsRxDataSizes()
 	{
@@ -1557,7 +2652,7 @@ namespace Hardware
 
 //		QList<OptoModule*> modulesList = modules();
 
-		for(OptoModuleShared& module : m_modules)
+/*		for(OptoModuleShared& module : m_modules)
 		{
 			if (module == nullptr)
 			{
@@ -1692,83 +2787,15 @@ namespace Hardware
 			assert(false);      // unknown module type
 			result = false;
 			break;
-		}
+		}*/
 
 		return result;
 	}
 
 
-	// checking ports addresses overlapping
-	// usefull for manual settings of ports
-	//
-	bool OptoModuleStorage::checkPortsAddressesOverlapping(OptoModuleShared module)
+	bool OptoModuleStorage::calculateRxBufAddresses(const QString &lmID)
 	{
-		if (module == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			assert(false);
-			return false;
-		}
-
-		QList<OptoPortShared> portsList;
-
-		module->getPorts(portsList);
-
-		int portsCount = portsList.count();
-
-		for(int i = 0; i < portsCount - 1; i++)
-		{
-			OptoPortShared port1 = portsList.at(i);
-
-			if (port1 == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				assert(false);
-				return false;
-			}
-
-			if (port1->isUsedInConnection() == false)
-			{
-				continue;
-			}
-
-			for(int k = i + 1; k < portsCount; k++)
-			{
-				OptoPortShared port2 = portsList.at(k);
-
-				if (port2 == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					assert(false);
-					return false;
-				}
-
-				if (port2->isUsedInConnection() == false)
-				{
-					continue;
-				}
-
-				if (	(port1->absTxStartAddress() >= port2->absTxStartAddress() &&
-						port1->absTxStartAddress() < port2->absTxStartAddress() + port2->txDataSizeW()) ||
-
-						(port2->absTxStartAddress() >= port1->absTxStartAddress() &&
-						port2->absTxStartAddress() < port1->absTxStartAddress() + port1->txDataSizeW())	)
-				{
-					// Tx data memory areas of ports '%1' and '%2' are overlapped.
-					//
-					m_log->errALC5187(port1->equipmentID(), port2->equipmentID());
-
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-
-	bool OptoModuleStorage::calculatePortsRxStartAddresses()
-	{
+		return forEachOfLmAssociatedOptoModules(lmID, &OptoModule::calculateRxBufAddresses);
 		bool result = true;
 
 		for(OptoModuleShared& module : m_modules)
@@ -1801,7 +2828,7 @@ namespace Hardware
 
 					if (port->isUsedInConnection() == false)
 					{
-						port->setRxStartAddress(0);
+						port->setRxBufAddress(0);
 						i++;
 						continue;
 					}
@@ -1809,7 +2836,7 @@ namespace Hardware
 					int rxStartAddress =	module->optoInterfaceDataOffset() +
 											i * module->optoPortDataSize();
 
-					port->setRxStartAddress(rxStartAddress);
+					port->setRxBufAddress(rxStartAddress);
 
 					i++;
 
@@ -1854,7 +2881,7 @@ namespace Hardware
 						return false;
 					}
 
-					port->setRxStartAddress(0);
+					port->setRxBufAddress(0);
 
 					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
@@ -1879,7 +2906,7 @@ namespace Hardware
 							continue;
 						}
 
-						port->setRxStartAddress(rxStartAddress);
+						port->setRxBufAddress(rxStartAddress);
 
 						if (port->manualSettings() == true)
 						{
@@ -1897,7 +2924,7 @@ namespace Hardware
 
 					// connection is in OptoPort::Mode::Opto
 
-					port->setRxStartAddress(rxStartAddress);
+					port->setRxBufAddress(rxStartAddress);
 
 					OptoPortShared linkedPort = getOptoPort(port->linkedPortID());
 
@@ -1936,63 +2963,51 @@ namespace Hardware
 		return result;
 	}
 
-
-
-	bool OptoModuleStorage::addConnections(const Hardware::ConnectionStorage& connectionStorage)
+	bool OptoModuleStorage::calculateSerialRxDataIDs(const QString& lmID)
 	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::calculateSerialRxDataID);
+
+/*		QList<OptoModuleShared> optoModules = getLmAssociatedOptoModules(lmID);
+
 		bool result = true;
 
-		int count = connectionStorage.count();
-
-		for(int i = 0; i < count; i++)
+		for(OptoModuleShared& optoModule : optoModules)
 		{
-			std::shared_ptr<Connection> connection = connectionStorage.get(i);
-
-			if (connection == nullptr)
+			if (optoModule == nullptr)
 			{
 				assert(false);
-				continue;
+				return false;
 			}
 
-			if (m_connections.contains(connection->connectionID()) == false)
-			{
-				m_connections.insert(connection->connectionID(), connection);
-			}
-			else
-			{
-				m_log->errALC5023(connection->connectionID());
-				result = false;
-				break;
-			}
+			result &= optoModule->calculateTxDataIDs();
 		}
 
-		return result;
+		return result;*/
+	}
+
+
+	bool OptoModuleStorage::copyOpticalPortsTxInRxSignals(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::copyOpticalPortsTxInRxSignals);
 	}
 
 
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID)
 	{
-		if (m_connections.contains(connectionID) == false)
-		{
-			return nullptr;
-		}
-
-		return m_connections[connectionID];
+		return m_connections.value(connectionID, nullptr);
 	}
 
-
-	bool OptoModuleStorage::addTxSignal(const QString& schemaID,
+	bool OptoModuleStorage::appendTxSignal(const QString& schemaID,
 										const QString& connectionID,
 										QUuid transmitterUuid,
 										const QString& lmID,
-										Signal* appSignal,
+										const Signal *appSignal,
 										bool* signalAlreadyInList)
 	{
 		if (appSignal == nullptr ||
 			signalAlreadyInList == nullptr)
 		{
-			assert(false);
-			return false;
+			ASSERT_RETURN_FALSE;
 		}
 
 		*signalAlreadyInList = false;
@@ -2001,8 +3016,8 @@ namespace Hardware
 
 		if (cn == nullptr)
 		{
-			m_log->errALC5024(schemaID, connectionID, transmitterUuid);
-			ASSERT_RETURN_FALSE;
+			m_log->errALC5024(connectionID, transmitterUuid, schemaID);
+			return false;
 		}
 
 		OptoPortShared p1 = getOptoPort(cn->port1EquipmentID());
@@ -2033,7 +3048,7 @@ namespace Hardware
 			}
 			else
 			{
-				p1->appendRegularTxSignal(appSignal);
+				p1->appendTxSignal(appSignal);
 			}
 			return true;
 		}
@@ -2046,7 +3061,7 @@ namespace Hardware
 			}
 			else
 			{
-				p1->appendRegularTxSignal(appSignal);
+				p1->appendTxSignal(appSignal);
 			}
 			return true;
 		}
@@ -2057,6 +3072,54 @@ namespace Hardware
 
 		return false;
 	}
+
+	bool OptoModuleStorage::addSerialRegularRxSignal(const QString& schemaID,
+													 const QString& connectionID,
+													 QUuid receiverUuid,
+													 const QString& lmID,
+													 const Signal *appSignal)
+	{
+		if (appSignal == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		std::shared_ptr<Hardware::Connection> cn = getConnection(connectionID);
+
+		if (cn == nullptr)
+		{
+			m_log->errALC5025(connectionID, receiverUuid, schemaID);
+			ASSERT_RETURN_FALSE;
+		}
+
+		OptoPortShared p1 = getOptoPort(cn->port1EquipmentID());
+
+		if (p1 == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		OptoModuleShared m1 = getOptoModule(p1);
+
+		if (m1 == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (m1->lmID() != lmID)
+		{
+			// Ports of connection '%1' are not accessible in LM '%2.
+			//
+			m_log->errALC5059(schemaID, connectionID, lmID, receiverUuid);
+
+			return false;
+		}
+
+		p1->appendSerialRegularRxSignal(appSignal);
+
+		return false;
+	}
+
 
 	// return all opto modules sorted by equipmentID ascending alphabetical order
 	//
@@ -2092,7 +3155,7 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::getSignalRxAddress(const QString& connectionID,
+	bool OptoModuleStorage::getRxSignalAbsAddress(const QString& connectionID,
 											   const QString& appSignalID,
 											   const QString& receiverLM,
 											   QUuid receiverUuid,
@@ -2104,144 +3167,106 @@ namespace Hardware
 
 		if (connection == nullptr)
 		{
-			m_log->errALC5040(connectionID);
+			m_log->errALC5040(connectionID, receiverUuid);
 			return false;
 		}
 
-		switch(connection->mode())
+		OptoPortShared p1 = getOptoPort(connection->port1EquipmentID());
+
+		if (p1 == nullptr)
 		{
-		case OptoPort::Mode::Optical:
-			return getSignalRxAddressOpto(connection, appSignalID, receiverLM, receiverUuid, addr);
-
-		case OptoPort::Mode::Serial:
-			return getSignalRxAddressSerial(connection, appSignalID, receiverLM, receiverUuid, addr);
-
-		default:
-			assert(false);
+			ASSERT_RETURN_FALSE;
 		}
 
-		return false;
-	}
-
-
-	bool OptoModuleStorage::getSignalRxAddressOpto(	std::shared_ptr<Connection> connection,
-													const QString& appSignalID,
-													const QString& receiverLM,
-													QUuid receiverUuid,
-													SignalAddress16& addr)
-	{
-		assert(connection->mode() == OptoPort::Mode::Optical);
-
-		OptoPortShared port1 = getOptoPort(connection->port1EquipmentID());
-
-		if (port1 == nullptr)
+		if (p1->lmID() == receiverLM)
 		{
-			assert(false);
-			return false;
-		}
-
-		OptoPortShared port2 = getOptoPort(connection->port2EquipmentID());
-
-		if (port2 == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (port1->isTxSignalExists(appSignalID))
-		{
-			OptoModuleShared module1 = getOptoModule(port1->optoModuleID());
-
-			if (module1->lmID() == receiverLM)
+			if (p1->isRxSignalExists(appSignalID) == true)
 			{
-				// Signal '%1' exists in LM '%2'. No receivers needed.
-				//
-				m_log->errALC5041(appSignalID, receiverLM, receiverUuid);
-				return false;
+				return p1->getRxSignalAbsAddress(appSignalID, addr);
 			}
-
-			OptoModuleShared module2 = getOptoModule(port2->optoModuleID());
-
-			if (module2->lmID() != receiverLM)
+			else
 			{
-				// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
-				//
-				m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
-				return false;
+				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p1
 			}
-
-			addr = port1->getTxSignalAddrInBuf(appSignalID);
-
-			addr.addWord(port2->rxStartAddress());
-
-			return true;
 		}
 
-		if (port2->isTxSignalExists(appSignalID))
+		if (connection->mode() != OptoPort::Mode::Optical)
 		{
-			OptoModuleShared module2 = getOptoModule(port2->optoModuleID());
-
-			if (module2->lmID() == receiverLM)
-			{
-				// Signal '%1' exists in LM '%2'. No receivers needed.
-				//
-				m_log->errALC5041(appSignalID, receiverLM, receiverUuid);
-				return false;
-			}
-
-			OptoModuleShared module1 = getOptoModule(port1->optoModuleID());
-
-			if (module1->lmID() != receiverLM)
-			{
-				// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
-				//
-				m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
-				return false;
-			}
-
-			addr = port2->getTxSignalAddrInBuf(appSignalID);
-
-			addr.addWord(port1->rxStartAddress());
-
-			return true;
-		}
-
-		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
-		//
-		m_log->errALC5042(appSignalID, connection->connectionID(), receiverUuid);
-		return false;
-	}
-
-
-	bool OptoModuleStorage::getSignalRxAddressSerial(	std::shared_ptr<Connection> connection,
-														const QString& appSignalID,
-														const QString& receiverLM,
-														QUuid receiverUuid,
-														SignalAddress16& addr)
-	{
-		assert(connection->mode() == OptoPort::Mode::Serial);
-
-		// only  port1 is used in serial connections
-		//
-		OptoPortShared port1 = getOptoPort(connection->port1EquipmentID());
-
-		if (port1 == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		OptoModuleShared module1 = getOptoModule(port1->optoModuleID());
-
-		if (module1->lmID() != receiverLM)
-		{
-			// Receiver of connection '%1' (port '%2') is not associated with LM '%3'
+			// this is Serial connection
+			// port2 is not used
+			// signal is not found
 			//
-			m_log->errALC5083(port1->equipmentID(), connection->connectionID(), receiverLM, receiverUuid);
-			return false;
+			ASSERT_RETURN_FALSE;
 		}
 
-		return port1->getSignalRxAddressSerial(connection, appSignalID, receiverUuid, addr);
+		OptoPortShared p2 = getOptoPort(connection->port2EquipmentID());
+
+		if (p2 == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (p2->lmID() == receiverLM)
+		{
+			if (p2->isRxSignalExists(appSignalID) == true)
+			{
+				return p2->getRxSignalAbsAddress(appSignalID, addr);
+			}
+			else
+			{
+				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p2
+			}
+		}
+
+		ASSERT_RETURN_FALSE;			// signal is not found in both ports
+	}
+
+	bool OptoModuleStorage::forEachPortOfLmAssociatedOptoModules(const QString& lmID, OptoPortFunc funcPtr)
+	{
+		QList<OptoModuleShared> modules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& module : modules)
+		{
+			if (module == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= module->forEachPort(funcPtr);
+		}
+
+		return result;
+	}
+
+	bool OptoModuleStorage::forEachOfLmAssociatedOptoModules(const QString& lmID, OptoModuleFunc funcPtr)
+	{
+		QList<OptoModuleShared> modules = getLmAssociatedOptoModules(lmID);
+
+		bool result = true;
+
+		for(OptoModuleShared& module : modules)
+		{
+			if (module == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			OptoModule* modulePtr = module.get();
+
+			result &= (modulePtr->*funcPtr)();
+		}
+
+		return result;
+	}
+
+	void OptoModuleStorage::clear()
+	{
+		m_modules.clear();
+		m_ports.clear();
+		m_lmAssociatedModules.clear();
+		m_connections.clear();
 	}
 
 }

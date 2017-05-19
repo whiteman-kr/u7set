@@ -204,8 +204,8 @@ namespace Builder
 		void errALC5021(QString port, QString connection);							// Undefined opto port '%1' in the connection '%2'.
 		void errALC5022(QString connection);									// Opto ports of the same chassis is linked via connection '%1'.
 		void errALC5023(QString connection);									// Opto connection ID '%1' is not unique.
-		void errALC5024(QString schemaID, QString connection, QUuid transmitterUuid);			// Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
-		void errALC5025(QString connection, QUuid receiverUuid);				// Receiver is linked to unknown opto connection '%1'.
+		void errALC5024(QString connection, QUuid transmitterUuid, QString schemaID);			// Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
+		void errALC5025(QString connection, QUuid receiverUuid, QString schemaID);				// Receiver is linked to unknown opto connection '%1'.
 		void errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs);	// Transmitter input can be linked to one signal only.
 		void errALC5027(QUuid transmitterUuid);									// All transmitter inputs must be directly linked to a signals.
 		void errALC5028(QString appSignalID, QUuid constUuid, QUuid signalUuid);	// Floating point constant is connected to discrete signal '%1'.
@@ -220,7 +220,7 @@ namespace Builder
 		void errALC5037(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Discrete signal '%1' is connected to analog signal '%2'.
 		void errALC5038(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data format.
 		void errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data size.
-		void errALC5040(QString connectionID);												// Connection with ID '%1' is not found.
+		void errALC5040(QString connectionID, QUuid item);									// Connection with ID '%1' is not found.
 		void errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid);				// Signal '%1' exists in LM '%2'. No receivers needed.
 		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid);		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
 		void errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid);			// Value of parameter '%1.%2' must be greater or equal to 0.
@@ -271,7 +271,8 @@ namespace Builder
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
 		void errALC5188(const QString& appSignalID, const QString& portID);				// Duplicate signal ID '%1' in opto port '%2'.
 		void errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID);		// Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
-
+		void errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID);		// Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
 
 		// EQP			Equipment issues						6000-6999
 		//

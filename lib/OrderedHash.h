@@ -628,4 +628,3 @@ const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& default
 
 	return (*this)[index];
 }
-

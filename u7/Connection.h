@@ -62,6 +62,7 @@ namespace Hardware
 		void setPort2EquipmentID(const QString& value);
 
 		quint16 getID() const;
+		quint16 linkID() const { return getID(); }
 
 		//
 		//
@@ -129,6 +130,8 @@ namespace Hardware
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
 
+		bool isSerial() const;
+
 		bool enableDuplex() const;
 		void setEnableDuplex(bool value);
 
@@ -176,7 +179,6 @@ namespace Hardware
 		bool m_disableDataID = false;
 		bool m_generateVHDFile = false;
     };
-
 
 	class ConnectionStorage : public QObject
 	{

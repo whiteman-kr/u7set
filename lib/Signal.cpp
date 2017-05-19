@@ -155,6 +155,35 @@ Signal& Signal::operator =(const Signal& signal)
 }
 
 
+E::DataFormat Signal::dataFormat() const
+{
+	switch(m_signalType)
+	{
+	case E::SignalType::Discrete:
+		return E::DataFormat::UnsignedInt;
+
+	case E::SignalType::Analog:
+
+		switch(m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			return E::DataFormat::Float;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return E::DataFormat::SignedInt;
+
+		default:
+			assert(false);
+			return E::DataFormat::UnsignedInt;
+		}
+
+	default:
+		assert(false);
+		return E::DataFormat::UnsignedInt;
+	}
+}
+
+
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
 {
 	const QStringRef& strValue = attr.value(fieldName);

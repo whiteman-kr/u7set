@@ -95,12 +95,7 @@ namespace Builder
 			m_resultWriter == nullptr ||
 			m_connections == nullptr)
 		{
-			msg = tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__);
-
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
-			qDebug() << msg;
-
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__));
 			return false;
 		}
 
@@ -112,10 +107,9 @@ namespace Builder
 		{
 			&ApplicationLogicCompiler::findLMs,
 			&ApplicationLogicCompiler::checkAppSignals,
-			&ApplicationLogicCompiler::checkOptoConnections,
+			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
-			&ApplicationLogicCompiler::disposeOptoModulesTxRxBuffers,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
@@ -307,17 +301,23 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::checkOptoConnections()
+	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
 	{
 		if (m_optoModuleStorage == nullptr ||
 			m_connections == nullptr)
 		{
-			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			ASSERT_RETURN_FALSE;
 		}
 
-		if (m_optoModuleStorage->build() == false)
+		if (m_connections->count() == 0)
+		{
+			LOG_MESSAGE(m_log, QString(tr("No opto connections found")));
+			LOG_SUCCESS(m_log, QString(tr("Ok")));
+			return true;
+		}
+
+		if (m_optoModuleStorage->appendOptoModules() == false)
 		{
 			return false;
 		}
@@ -325,185 +325,12 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking opto connections")));
 
-		if (m_optoModuleStorage->addConnections(*m_connections) == false)
+		if (m_optoModuleStorage->appendAndCheckConnections(*m_connections) == false)
 		{
 			return false;
 		}
 
-		int connectionsCount = m_connections->count();
-
-		if (connectionsCount == 0)
-		{
-			LOG_MESSAGE(m_log, QString(tr("No opto connections found")));
-			LOG_SUCCESS(m_log, QString(tr("Ok")));
-			return true;
-		}
-
-		bool result = true;
-
-		for(int i = 0; i < connectionsCount; i++)
-		{
-			std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
-
-			if (connection->manualSettings() == true)
-			{
-				m_log->wrnALC5055(connection->connectionID());
-			}
-
-			quint16 portID = connection->getID();
-
-			Hardware::OptoPortShared optoPort1 = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
-
-			// check port 1
-			//
-			if (optoPort1 == nullptr)
-			{
-				// Undefined opto port '%1' in the connection '%2'.
-				//
-				m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
-				result = false;
-				continue;
-			}
-
-			if (optoPort1->connectionID().isEmpty() == true)
-			{
-				optoPort1->setConnectionID(connection->connectionID());
-			}
-			else
-			{
-				// Opto port '%1' of connection '%2' is already used in connection '%3'.
-				//
-				m_log->errALC5019(optoPort1->equipmentID(), connection->connectionID(), optoPort1->connectionID());
-				result = false;
-				continue;
-			}
-
-			Hardware::OptoModuleShared optoModule = m_optoModuleStorage->getOptoModule(optoPort1);
-
-			if (optoModule == nullptr)
-			{
-				assert(false);
-				result = false;
-				continue;
-			}
-
-			if (connection->mode() == Hardware::OptoPort::Mode::Serial)
-			{
-				optoPort1->setPortID(portID);
-				optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
-				optoPort1->setSerialMode(connection->serialMode());
-				optoPort1->setEnableDuplex(connection->enableDuplex());
-
-				optoPort1->setManualSettings(connection->manualSettings());
-				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
-				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
-				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
-				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
-
-				result &= optoPort1->parseRawDescription();
-
-				if (optoModule->deviceModule()->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
-				{
-					// LM's port '%1' can't work in RS232/485 mode (connection '%2').
-					//
-					m_log->errALC5020(connection->port1EquipmentID(), connection->connectionID());
-					result = false;
-				}
-
-				if (result == true)
-				{
-					LOG_MESSAGE(m_log, QString(tr("Serial RS232/485 connection '%1' ID = %2... Ok")).
-								arg(connection->connectionID()).arg(portID));
-				}
-			}
-			else
-			{
-				assert(connection->mode() == Hardware::OptoPort::Mode::Optical);
-
-				// check port 2
-				//
-				Hardware::OptoPortShared optoPort2 = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
-
-				if (optoPort2 == nullptr)
-				{
-					// Undefined opto port '%1' in the connection '%2'.
-					//
-					m_log->errALC5021(connection->port2EquipmentID(), connection->connectionID());
-					result = false;
-					continue;
-				}
-
-				Hardware::OptoModuleShared m1 = m_optoModuleStorage->getOptoModule(optoPort1);
-				Hardware::OptoModuleShared m2 = m_optoModuleStorage->getOptoModule(optoPort2);
-
-				if (m1 != nullptr && m2 != nullptr)
-				{
-					if (m1->lmID() == m2->lmID())
-					{
-						//  Opto ports of the same chassis is linked via connection '%1'.
-						//
-						m_log->errALC5022(connection->connectionID());
-						result = false;
-						continue;
-					}
-				}
-				else
-				{
-					assert(false);
-					result = false;
-					continue;
-				}
-
-				if (optoPort2->connectionID().isEmpty() == true)
-				{
-					optoPort2->setConnectionID(connection->connectionID());
-				}
-				else
-				{
-					// Opto port '%1' of connection '%2' is already used in connection '%3'.
-					//
-					m_log->errALC5019(optoPort2->equipmentID(), connection->connectionID(), optoPort2->connectionID());
-					result = false;
-					continue;
-				}
-
-				optoPort1->setPortID(portID);
-				optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
-				optoPort1->setManualSettings(connection->manualSettings());
-				optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
-				optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
-				optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
-				optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
-
-				result &= optoPort1->parseRawDescription();
-
-				optoPort2->setPortID(portID);
-				optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
-				optoPort2->setManualSettings(connection->manualSettings());
-				optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
-				optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
-				optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
-				optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
-
-				result &= optoPort2->parseRawDescription();
-
-				optoPort1->setLinkedPortID(optoPort2->equipmentID());
-				optoPort2->setLinkedPortID(optoPort1->equipmentID());
-
-				if (result == true)
-				{
-					LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
-								arg(connection->connectionID()).arg(portID));
-				}
-			}
-		}
-
-		if (result == true)
-		{
-			LOG_SUCCESS(m_log, QString(tr("Ok")));
-		}
-
-		return result;
+		return true;
 	}
 
 
@@ -616,7 +443,7 @@ namespace Builder
 	}
 
 
-	bool ApplicationLogicCompiler::disposeOptoModulesTxRxBuffers()
+/*	bool ApplicationLogicCompiler::disposeOptoModulesTxRxBuffers()
 	{
 		if (m_connections->count() == 0)
 		{
@@ -648,7 +475,7 @@ namespace Builder
 			return false;
 		}
 
-		result = m_optoModuleStorage->calculatePortsRxStartAddresses();
+		result = m_optoModuleStorage->calculateRxBufAddresses();
 
 		if (result == false)
 		{
@@ -658,7 +485,7 @@ namespace Builder
 		LOG_SUCCESS(m_log, QString(tr("Ok")));
 
 		return result;
-	}
+	}*/
 
 	// find all logic modules (LMs) in project
 	// fills m_lm vector
@@ -688,12 +515,8 @@ namespace Builder
 	{
 		if (startFromDevice == nullptr)
 		{
-			assert(startFromDevice != nullptr);
-
-			msg = QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__);
-
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__));
+			assert(false);
 			return;
 		}
 
@@ -720,11 +543,7 @@ namespace Builder
 					}
 					else
 					{
-						msg = QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate());
-
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-
-						qDebug() << msg;
+						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate()));
 					}
 				}
 			}
@@ -954,7 +773,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outPort->txAnalogSignalsCount() + outPort->txDiscreteSignalsCount() == 0)
+		if (outPort->txSignalsCount() == 0)
 		{
 			return true;
 		}
@@ -1047,11 +866,11 @@ namespace Builder
 			{
 				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
 						arg(txAnalog->appSignalID().remove("#")).
-						arg(txAnalog->sizeB());
+						arg(txAnalog->dataSize());
 
 				list.append(str);
 
-				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->sizeB());
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->dataSize());
 			}
 
 			list.append("");
@@ -1101,7 +920,7 @@ namespace Builder
 			{
 				str = QString("\t%1 <= in_data(%2-1 downto %3);").
 						arg(txAnalog->appSignalID().remove("#")).
-						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->sizeB()).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->dataSize()).
 						arg(txAnalog->addrInBuf().offset() * 16);
 
 				list.append(str);
@@ -1166,7 +985,7 @@ namespace Builder
 		str = QString(tr("Associated LM ID:\t%1")).arg(m_optoModuleStorage->getOptoPortAssociatedLmID(port));
 		list.append(str);
 
-		str = QString(tr("Port ID:\t\t%1")).arg(port->portID());
+		str = QString(tr("Port ID:\t\t%1")).arg(port->linkID());
 		list.append(str);
 
 		str = QString(tr("Linked port ID:\t\t%1")).arg(port->linkedPortID());
@@ -1175,7 +994,7 @@ namespace Builder
 		str = QString(tr("Connection ID:\t\t%1")).arg(port->connectionID());
 		list.append(str);
 
-		str = QString(tr("TxData start address:\t%1")).arg(port->txStartAddress());
+		str = QString(tr("TxBuffer address:\t%1 (absolute %2)")).arg(port->txBufAddress()).arg(port->txBufAbsAddress());
 		list.append(str);
 
 		str = QString(tr("TxData size:\t\t%1\n")).arg(port->txDataSizeW());
@@ -1183,7 +1002,7 @@ namespace Builder
 
 		list.append(QString(tr("Port txData:\n")));
 
-		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)", port->txStartAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
+		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)", port->txBufAbsAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
 		list.append(str);
 
 		list.append("Tx signals:\n");
@@ -1195,7 +1014,7 @@ namespace Builder
 		for(Hardware::TxRxSignalShared tx : txSignals)
 		{
 			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->txStartAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+						port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 						tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 						C_STR(tx->appSignalID()));
 			list.append(str);
@@ -1210,7 +1029,7 @@ namespace Builder
 		for(Hardware::TxRxSignalShared rx : rxSignals)
 		{
 			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->rxStartAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+						port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
 						rx->addrInBuf().offset(), rx->addrInBuf().bit(),
 						C_STR(rx->appSignalID()));
 			list.append(str);

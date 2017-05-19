@@ -791,11 +791,11 @@ namespace Tcp
 	{
 		if (startOk == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("CfgServer start listening %1 OK").arg(addr.addressPortStr()));
+			DEBUG_LOG_MSG(m_logger, QString("Start listening %1 OK").arg(addr.addressPortStr()));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString("CfgServer error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
+			DEBUG_LOG_ERR(m_logger, QString("Error on start listening %1: %2").arg(addr.addressPortStr()).arg(errStr));
 		}
 	}
 
