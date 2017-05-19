@@ -110,10 +110,10 @@ namespace Builder
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
+			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
-			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 		};
 
 		bool result = true;
