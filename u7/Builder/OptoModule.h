@@ -16,6 +16,7 @@ namespace Builder
 {
 	class IssueLogger;
 	class LmDescriptionSet;
+	class BuildResultWriter;
 }
 
 namespace Hardware
@@ -123,10 +124,13 @@ namespace Hardware
 
 		bool copyOpticalPortsTxInRxSignals();
 
+		bool writeSerialDataXml(Builder::BuildResultWriter* resultWriter);
+
 		void getTxSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getRxSignals(QVector<TxRxSignalShared>& rxSignals) const;
 
 		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
+		const HashedVector<QString, TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
 
 		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const;
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const;
@@ -152,8 +156,10 @@ namespace Hardware
 										QUuid receiverUuid,
 										SignalAddress16 &addr);
 
-		Q_INVOKABLE quint16 linkID() const { return m_linkID; }
+		quint16 linkID() const { return m_linkID; }
 		void setLinkID(quint16 linkID) { m_linkID = linkID; }
+
+		Q_INVOKABLE quint16 portID() const { return linkID(); }					// rename in java!
 
 		Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
 
@@ -173,8 +179,10 @@ namespace Hardware
 		Q_INVOKABLE SerialMode serialMode() const { return m_serialMode; }
 		void setSerialMode(SerialMode serialMode) { m_serialMode = serialMode; }
 
-		Q_INVOKABLE int txBufAddress() const { return m_txBufAddress; }
+		int txBufAddress() const { return m_txBufAddress; }
 		void setTxBufAddress(int address) { m_txBufAddress = address; }
+
+		Q_INVOKABLE int txStartAddress() const { return txBufAddress(); }		// rename in java!
 
 		int rxBufAddress() const { return m_rxBufAddress; }
 		void setRxBufAddress(int address) { m_rxBufAddress = address; }
@@ -194,6 +202,8 @@ namespace Hardware
 
 		const RawDataDescription& rawDataDescription() const { return m_rawDataDescription; }
 
+		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
+
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
 
@@ -208,10 +218,12 @@ namespace Hardware
 
 		bool txRawDataSizeWIsCalculated() const { return m_txRawDataSizeWIsCalculated; }
 
-		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
-
 		Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
 		void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
+
+		int rxRawDataSizeW() const { return m_rxRawDataSizeW; }
+		int rxAnalogSignalsSizeW() const { return m_rxAnalogSignalsSizeW; }
+		int rxDiscreteSignalsSizeW() const { return m_rxDiscreteSignalsSizeW; }
 
 		Q_INVOKABLE bool manualSettings() const { return m_manualSettings; }
 		void setManualSettings(bool manualSettings) { m_manualSettings = manualSettings; }
@@ -439,6 +451,7 @@ namespace Hardware
 
 		bool copyOpticalPortsTxInRxSignals(const QString& lmID);
 
+		bool writeSerialDataXml(Builder::BuildResultWriter* resultWriter);
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
 

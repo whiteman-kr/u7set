@@ -6577,7 +6577,7 @@ namespace Builder
 				ASSERT_RETURN_FALSE
 			}
 
-			result = m_optoModuleStorage->appendTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
+			result &= m_optoModuleStorage->appendTxSignal(item->schemaID(), transmitter.connectionId(), transmitter.guid(),
 													   m_lm->equipmentIdTemplate(),
 													   s,
 													   &signalAlreadyInTxList);
