@@ -1,4 +1,5 @@
 #include "../Builder/ModuleFirmwareWriter.h"
+#include "../lib/CsvFile.h"
 #include <QtEndian>
 #include "version.h"
 
@@ -10,7 +11,7 @@ ModuleFirmwareWriter::ModuleFirmwareWriter()
 }
 
 
-bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
+bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 {
 	if (log == nullptr)
 	{
@@ -92,12 +93,21 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 
 	if (m_descriptionFields.empty() == false && m_descriptonData.empty() == false)
 	{
+
 		for (auto channelDescription : m_descriptonData)
 		{
 			QJsonObject jDescription;
 
 			int channel = channelDescription.first;
 			const std::vector<QVariantList>& descriptionItems = channelDescription.second;
+
+			// Description header string
+
+			QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(m_descriptionFields);
+
+			jDescription.insert("desc fields", descriptionHeaderString);
+
+			// Description strings
 
 			int diIndex = 0;
 			for (auto di : descriptionItems)
@@ -109,15 +119,9 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 					return false;
 				}
 
-				QJsonObject jDescriptionItem;
+				QString descriptionString = QString("%1;%2").arg(m_descriptionFieldsVersion).arg(CsvFile::getCsvString(di));
 
-				int l = 0;
-				for (auto v : di)
-				{
-					jDescriptionItem.insert(m_descriptionFields[l++], v.toString());
-				}
-
-				jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), jDescriptionItem);
+				jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
 			}
 
 			if (descriptionItems.empty() == false)
@@ -159,7 +163,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger *log)
 	return true;
 }
 
-bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger *log)
+bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
 {
 	if (log == nullptr)
 	{
@@ -200,7 +204,7 @@ bool ModuleFirmwareWriter::setChannelData(QString equipmentID, int channel, int 
 }
 
 
-bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger *log)
+bool ModuleFirmwareWriter::storeChannelData(Builder::IssueLogger* log)
 {
 	if (log == nullptr)
 	{
@@ -422,7 +426,7 @@ QObject* ModuleFirmwareCollection::jsGet(QString caption, QString subsysId, int 
 	if (newFirmware == true)
 	{
 		fw.init(caption, subsysId, ssKey, uartId, frameSize, frameCount, m_projectName, m_userName,
-				m_buildNo, m_debug ? "debug" : "release", m_changesetId, QStringList());
+				m_buildNo, m_debug ? "debug" : "release", m_changesetId, 0, QStringList());
 	}
 
 	QQmlEngine::setObjectOwnership(&fw, QQmlEngine::ObjectOwnership::CppOwnership);

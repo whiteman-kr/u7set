@@ -51,7 +51,7 @@ namespace Tuning
 
 		int getSignalsCount() const;
 
-		const QStringList& metadataFields();
+		void getMetadataFields(QStringList& getMetadataFields, int* metadataVersion) const;
 		const std::vector<QVariantList>& metadata() const;
 
 		void writeToXml(XmlWriteHelper& xml);
