@@ -2718,7 +2718,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	QPoint center = desktopRect.center();
 	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
 	desktopRect.moveCenter(center);
-	QRect windowRect = settings.value("UndoSignalsDalog/geometry", desktopRect).toRect();
+	QRect windowRect = settings.value("UndoSignalsDialog/geometry", desktopRect).toRect();
 	if (windowRect.height() > desktopRect.height())
 	{
 		windowRect.setHeight(desktopRect.height());
