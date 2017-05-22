@@ -89,7 +89,6 @@ HEADERS += VFrame30Lib_global.h \
     MacrosExpander.h \
     Session.h \
     ../lib/TypesAndEnums.h \
-    ../lib/StreamedData.h \
     ../lib/ProtoSerialization.h \
     ../lib/CUtils.h \
     ../lib/DebugInstCounter.h \
@@ -147,7 +146,6 @@ SOURCES += \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    ../lib/StreamedData.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \

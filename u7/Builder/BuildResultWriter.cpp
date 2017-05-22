@@ -643,7 +643,6 @@ namespace Builder
 		if (m_buildInfo.release == true)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
-			return false;
 		}
 		else
 		{

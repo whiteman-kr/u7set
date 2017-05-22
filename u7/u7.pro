@@ -91,7 +91,6 @@ SOURCES +=\
 	../lib/DbController.cpp \
 	../lib/DbWorker.cpp \
 	../lib/DbProgressDialog.cpp \
-	../lib/StreamedData.cpp \
 	../lib/ProtoSerialization.cpp \
 	../lib/Signal.cpp \
     EquipmentTabPage.cpp \
@@ -211,7 +210,6 @@ HEADERS  += \
 	../lib/DbController.h \
 	../lib/DbWorker.h \
 	../lib/DbProgressDialog.h \
-	../lib/StreamedData.h \
 	../lib/ProtoSerialization.h \
 	../lib/Factory.h \
 	../lib/CUtils.h \

@@ -24,8 +24,6 @@
 #endif // Q_OS_WIN
 
 
-#include "StreamedData.h"
-
 class Property;
 
 namespace Proto
@@ -97,18 +95,6 @@ namespace Proto
 				return false;
 			}
 		}
-		bool Save(Proto::StreamedData& data) const
-		{
-			Proto::Envelope message;
-			this->SaveData(&message);
-
-			auto mutable_data = data.mutable_data();
-			auto str = message.SerializeAsString();
-
-			mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
-
-			return true;
-		}
 		bool Save(QByteArray& data) const
 		{
 			Proto::Envelope message;
@@ -177,18 +163,6 @@ namespace Proto
 
 			return Load(message);
 		}
-		bool Load(const Proto::StreamedData& data)
-		{
-			Proto::Envelope message;
-
-			bool result = ParseFromArray(message, data.data());
-			if (result == false)
-			{
-				return false;
-			}
-
-			return Load(message);
-		}
 		bool Load(const QByteArray& data)
 		{
 			Proto::Envelope message;
@@ -237,21 +211,6 @@ namespace Proto
 			Proto::Envelope message;
 
 			bool result = ParseFromIstream(message, stream);
-			if (result == false)
-			{
-				return nullptr;
-			}
-
-			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
-			assert(newItem != nullptr);
-
-			return newItem;
-		}
-		static std::shared_ptr<VFrameType> Create(const Proto::StreamedData& data)
-		{
-			Proto::Envelope message;
-
-			bool result = ParseFromString(message, data.data());
 			if (result == false)
 			{
 				return nullptr;
