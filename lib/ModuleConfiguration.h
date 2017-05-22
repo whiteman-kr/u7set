@@ -53,7 +53,7 @@ namespace Hardware
 		//
 	public:
 		void init(QString caption, QString subsysId, int uartId, int ssKey, int frameSize, int frameCount, const QString &projectName,
-				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields);
+				  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, int descriptionFieldsVersion, const QStringList& descriptionFields);
 		bool load(QString fileName, QString &errorCode, bool readDataFrames);
 		bool isEmpty() const;
 
@@ -74,9 +74,9 @@ namespace Hardware
 
         Q_INVOKABLE void writeLog(QString logString);
 
-		Q_INVOKABLE void jsSetDescriptionFields(QString fields);
+		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
 
-		void setDescriptionFields(const QStringList& fields);
+		void setDescriptionFields(int descriptionVersion, const QStringList& fields);
 
 		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
 
@@ -134,6 +134,7 @@ namespace Hardware
 		// data description
 		//
 		QStringList m_descriptionFields;
+		int m_descriptionFieldsVersion = 0;
 		std::map<int, std::vector<QVariantList>> m_descriptonData;
 
 		// channel data

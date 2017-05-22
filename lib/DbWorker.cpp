@@ -163,6 +163,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0145.sql", "Upgrade to version 145, Changes in the LM description file"},
 	{":/DatabaseUpgrade/Upgrade0146.sql", "Upgrade to version 146, Added project database test functions"},
 	{":/DatabaseUpgrade/Upgrade0147.sql", "Upgrade to version 147, LM Description file changed"},
+	{":/DatabaseUpgrade/Upgrade0148.sql", "Upgrade to version 148, Added version in configuration script fields description"},
 };
 
 

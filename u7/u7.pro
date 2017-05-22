@@ -190,7 +190,8 @@ SOURCES +=\
     Builder/ComparatorStorage.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-	CodeEditor.cpp
+	CodeEditor.cpp \
+    ../lib/CsvFile.cpp
 
 
 HEADERS  += \
@@ -318,7 +319,8 @@ HEADERS  += \
     Builder/ComparatorStorage.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    CodeEditor.h
+    CodeEditor.h \
+    ../lib/CsvFile.h
 
 FORMS    += \
     CreateProjectDialog.ui \

@@ -62,7 +62,7 @@ interface ModuleFirmware
 
 	writeLog(message : string) : void;
 
-	jsSetDescriptionFields(description : string) : void;
+	jsSetDescriptionFields(descriptionVersion : number, description : string) : void;
 
 	calcCrc32(frameIndex : number, start : number, count : number) : number;
 	jsSetUniqueID(LMNumber : number, uniqueID : number) : void;
@@ -510,7 +510,9 @@ function generate_lm_1_rev3(builder : Builder, module : DeviceObject, root : Dev
 
 	var confFirmware : ModuleFirmware = confCollection.jsGet("LM-1", subSysID, ssKeyValue, uartId, frameSize, frameCount);
 	
-	confFirmware.jsSetDescriptionFields("EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
+	var descriptionVersion = 1;
+
+	confFirmware.jsSetDescriptionFields(descriptionVersion, "EquipmentID;Frame;Offset;BitNo;Size;Caption;Value");
 	
 	confFirmware.writeLog("---\r\n");
 	confFirmware.writeLog("Module: LM-1\r\n");
@@ -695,7 +697,7 @@ function generate_lm_1_rev3(builder : Builder, module : DeviceObject, root : Dev
 			
 		diagWordsCount += diagWordsIoCount;
 	}
-	
+		
 	var lanConfigFrame : number = frameIOConfig + ioModulesMaxCount;
 
 	// Create LANs configuration

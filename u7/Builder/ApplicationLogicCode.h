@@ -414,7 +414,7 @@ namespace Builder
 		void getBinCode(QByteArray& byteArray);
 		void getMifCode(QStringList& mifCode);
 
-		void getAsmMetadataFields(QStringList& metadataFields);
+		void getAsmMetadataFields(QStringList& metadataFields, int* metadataVersion);
 		void getAsmMetadata(std::vector<QVariantList>& metadata);
 
 		bool getRunTimes(int& idrPhaseClockCount, int& alpPhaseClockCount);
