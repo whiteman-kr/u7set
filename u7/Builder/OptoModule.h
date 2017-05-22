@@ -46,7 +46,7 @@ namespace Hardware
 				  int dataSize,
 				  E::ByteOrder byteOrder);
 
-		bool initRawSignal(const RawDataDescriptionItem& item);
+		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 
 		QString appSignalID() const { return m_appSignalID; }
 
@@ -110,7 +110,7 @@ namespace Hardware
 		bool init(const DeviceController* controller, int portNo, Builder::IssueLogger* log);
 
 		bool appendRawTxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
-		bool setRawTxSignalsAddresses();
+		bool initRawTxSignals();
 		bool appendTxSignal(const Signal* txSignal);
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
@@ -132,8 +132,8 @@ namespace Hardware
 		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
 		const HashedVector<QString, TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
 
-		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals) const;
-		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals) const;
+		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
+		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
 
 		bool isTxSignalExists(const QString& appSignalID);
 		bool isRxSignalExists(const QString& appSignalID);
@@ -252,12 +252,18 @@ namespace Hardware
 							int dataSize,
 							E::ByteOrder byteOrder);
 
-		void sortByOffsetBitNoAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
-		void sortByAppSignalIdAscending(HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
+		void sortByOffsetBitNoAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
+		void sortByAppSignalIdAscending(QVector<QPair<QString, TxRxSignalShared>>& pairs);
 
 		bool checkSignalsOffsets(const HashedVector<QString, TxRxSignalShared>& signalList, int startIndex, int count);
 
 		bool sortTxRxSignalList(HashedVector<QString, TxRxSignalShared>& signalList);
+
+		void copyHashedVectorToPairVector(const HashedVector<QString, TxRxSignalShared>& hVector,
+										  QVector<QPair<QString, TxRxSignalShared>>& pVector);
+
+		void copyPairVectorToHashedVector(const QVector<QPair<QString, TxRxSignalShared>>& pVector,
+										  HashedVector<QString, TxRxSignalShared>& hVector);
 
 	private:
 		QString m_equipmentID;
@@ -432,9 +438,7 @@ namespace Hardware
 		bool appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage);
 		bool processConnection(ConnectionShared connection);
 
-		bool appendRawTxSignals(const QString& lmID, const HashedVector<QString, Signal *>& lmAssociatedSignals);
-		bool appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
-		bool setRawTxSignalsAddresses(const QString& lmID);
+		bool initRawTxSignals(const QString& lmID);
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);
@@ -454,6 +458,8 @@ namespace Hardware
 		bool writeSerialDataXml(Builder::BuildResultWriter* resultWriter);
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
+
+		bool OptoModuleStorage::appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
 
 		bool appendTxSignal(const QString& schemaID,
 						 const QString& connectionID,

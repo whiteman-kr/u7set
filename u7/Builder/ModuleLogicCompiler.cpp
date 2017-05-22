@@ -3797,7 +3797,7 @@ namespace Builder
 
 		QVector<Hardware::TxRxSignalShared> txAnalogSignals;
 
-		port->getTxAnalogSignals(txAnalogSignals);
+		port->getTxAnalogSignals(txAnalogSignals, true);
 
 		if (txAnalogSignals.count() == 0)
 		{
@@ -3847,7 +3847,7 @@ namespace Builder
 		//
 		QVector<Hardware::TxRxSignalShared> txDiscreteSignals;
 
-		port->getTxDiscreteSignals(txDiscreteSignals);
+		port->getTxDiscreteSignals(txDiscreteSignals, true);
 
 		int count = txDiscreteSignals.count();
 
@@ -3864,9 +3864,16 @@ namespace Builder
 
 		Command cmd;
 
+		int bitCount = 0;
+
 		for(int i = 0; i < count; i++)
 		{
 			Hardware::TxRxSignalShared& txSignal = txDiscreteSignals[i];
+
+			if (txSignal->isRaw() == true)
+			{
+				continue;					// raw signals copying in raw data section code generation
+			}
 
 			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
@@ -3879,7 +3886,7 @@ namespace Builder
 				continue;
 			}
 
-			if ((i % WORD_SIZE) == 0)
+			if ((bitCount % WORD_SIZE) == 0)
 			{
 				// this is new word!
 				//
@@ -3895,7 +3902,7 @@ namespace Builder
 				}
 			}
 
-			int bit = i % WORD_SIZE;
+			int bit = bitCount % WORD_SIZE;
 
 			assert(txSignal->addrInBuf().bit() == bit);
 
@@ -3906,7 +3913,7 @@ namespace Builder
 
 			m_code.append(cmd);
 
-			if ((i % WORD_SIZE) == (WORD_SIZE -1) ||			// if this is last bit in word or
+			if ((bitCount % WORD_SIZE) == (WORD_SIZE -1) ||			// if this is last bit in word or
 				i == count -1)									// this is even the last bit
 			{
 				// txSignal.address.offset() the same for all signals in one word
@@ -3920,6 +3927,8 @@ namespace Builder
 
 				m_code.append(cmd);
 			}
+
+			bitCount++;
 		}
 
 		m_code.newLine();
@@ -4211,7 +4220,7 @@ namespace Builder
 			return copyOptoPortTxOutAnalogSignalRawData(port, item, portDataOffset);
 
 		case E::SignalType::Discrete:
-			LOG_INTERNAL_ERROR(m_log);			// out duscrete signals is not supported now
+			LOG_INTERNAL_ERROR(m_log);			// out discrete signals is not supported now
 			break;
 
 		default:
@@ -4234,22 +4243,19 @@ namespace Builder
 			item.dataFormat != E::DataFormat::SignedInt &&
 			item.dataFormat != E::DataFormat::UnsignedInt)
 		{
-			assert(false);		// unknown format
-			LOG_INTERNAL_ERROR(m_log);
+			LOG_INTERNAL_ERROR(m_log);		// unknown format
 			return false;
 		}
 
 		if (item.dataSize != SIZE_32BIT)
 		{
-			assert(false);		// other sizes is not supported now
-			LOG_INTERNAL_ERROR(m_log);
+			LOG_INTERNAL_ERROR(m_log);		// other sizes is not supported now
 			return false;
 		}
 
 		if (item.byteOrder != E::ByteOrder::BigEndian)
 		{
-			assert(false);		// other byte orders is not supported now
-			LOG_INTERNAL_ERROR(m_log);
+			LOG_INTERNAL_ERROR(m_log);		// other byte orders is not supported now
 			return false;
 		}
 
@@ -6463,7 +6469,7 @@ namespace Builder
 
 		// find raw tx signals and set it addresses
 		//
-		result &= m_optoModuleStorage->setRawTxSignalsAddresses(lmID);
+		result &= m_optoModuleStorage->initRawTxSignals(lmID);
 
 		// sort Tx signals lists of LM's associated opto ports
 		//

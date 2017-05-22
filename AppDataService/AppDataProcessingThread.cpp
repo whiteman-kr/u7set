@@ -170,11 +170,15 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		case E::DataFormat::UnsignedInt:
 			value = static_cast<double>(rawValue32);
 			break;
+
+		default:
+			assert(false);
 		}
+		break;
 
 	default:
 		qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
-		assert(false);
+//		assert(false);
 		return false;
 	}
 

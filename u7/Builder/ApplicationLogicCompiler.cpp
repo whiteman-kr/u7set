@@ -113,7 +113,7 @@ namespace Builder
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
-			&ApplicationLogicCompiler::writeOptoModulesReport,
+//			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 		};
 
@@ -674,6 +674,9 @@ namespace Builder
 						assert(false);
 					}
 
+					list.append(delim);
+					list.append("");
+
 					Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
 
 					if (p2 != nullptr)
@@ -847,11 +850,11 @@ namespace Builder
 
 		QVector<Hardware::TxRxSignalShared> txAnalogs;
 
-		outPort->getTxAnalogSignals(txAnalogs);
+		outPort->getTxAnalogSignals(txAnalogs, false);
 
 		QVector<Hardware::TxRxSignalShared> txDiscretes;
 
-		outPort->getTxDiscreteSignals(txDiscretes);
+		outPort->getTxDiscreteSignals(txDiscretes, false);
 
 		list.append("--");
 		list.append("-- This file has been generated automatically by RPCT software");
@@ -1060,6 +1063,61 @@ namespace Builder
 		str = QString(tr("Tx discrete signals size:\t%1\n")).arg(port->txDiscreteSignalsSizeW());
 		list.append(str);
 
+		list.append(QString(tr("Port Tx data:\n")));
+
+		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)\n", port->txBufAbsAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
+		list.append(str);
+
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+
+		list.append("Tx raw signals:\n");
+
+		for(const Hardware::TxRxSignalShared& tx : txSignals)
+		{
+			if (tx->isRaw() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+			}
+		}
+
+		list.append("");
+
+		list.append("Tx analog signals:\n");
+
+		for(const Hardware::TxRxSignalShared& tx : txSignals)
+		{
+			if (tx->isRegular() == true && tx->isAnalog() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+			}
+		}
+
+		list.append("");
+
+		list.append("Tx discrete signals:\n");
+
+		for(const Hardware::TxRxSignalShared& tx : txSignals)
+		{
+			if (tx->isRegular() == true && tx->isDiscrete() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+			}
+		}
+
+		list.append("\n-------------------------------\n");
+
 		str = QString(tr("Rx buffer abs address:\t\t%1")).arg(port->rxBufAbsAddress());
 		list.append(str);
 
@@ -1077,29 +1135,6 @@ namespace Builder
 
 		str = QString(tr("Rx discrete signals size:\t%1\n")).arg(port->rxDiscreteSignalsSizeW());
 		list.append(str);
-
-		list.append(QString(tr("Port Tx data:\n")));
-
-		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)\n", port->txBufAbsAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
-		list.append(str);
-
-		list.append("Tx signals:\n");
-
-		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
-
-		for(const Hardware::TxRxSignalShared& tx : txSignals)
-		{
-			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-						tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-						C_STR(tx->appSignalID()));
-			list.append(str);
-		}
-
-		if (txSignals.count() > 0)
-		{
-			list.append("");
-		}
 
 		list.append("Rx signals:\n");
 
