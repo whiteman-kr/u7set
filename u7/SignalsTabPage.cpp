@@ -2580,8 +2580,22 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	setLayout(vl1);
 
-	resize(settings.value("PendingChangesDialog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
 	m_splitter->setChildrenCollapsible(false);
+
+	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
+	QPoint center = desktopRect.center();
+	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
+	desktopRect.moveCenter(center);
+	QRect windowRect = settings.value("PendingChangesDialog/geometry", desktopRect).toRect();
+	if (windowRect.height() > desktopRect.height())
+	{
+		windowRect.setHeight(desktopRect.height());
+	}
+	if (windowRect.width() > desktopRect.width())
+	{
+		windowRect.setWidth(desktopRect.width());
+	}
+	setGeometry(windowRect);
 
 	QList<int> list = m_splitter->sizes();
 	list[0] = height();
@@ -2593,6 +2607,8 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 void CheckinSignalsDialog::checkinSelected()
 {
+	saveGeometry();
+
 	QString commentText = m_commentEdit->toPlainText();
 	if (commentText.isEmpty())
 	{
@@ -2620,13 +2636,13 @@ void CheckinSignalsDialog::checkinSelected()
 	m_sourceModel->dbController()->checkinSignals(&IDs, commentText, &states, this);
 	m_sourceModel->showErrors(states);
 
-	saveGeometry();
-
 	accept();
 }
 
 void CheckinSignalsDialog::undoSelected()
 {
+	saveGeometry();
+
 	QVector<int> IDs;
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
@@ -2658,8 +2674,6 @@ void CheckinSignalsDialog::undoSelected()
 		m_sourceModel->showErrors(states);
 	}
 
-	saveGeometry();
-
 	accept();
 }
 
@@ -2687,7 +2701,7 @@ void CheckinSignalsDialog::openUndoDialog()
 void CheckinSignalsDialog::saveGeometry()
 {
 	QSettings settings;
-	settings.setValue("PendingChangesDialog/size", size());
+	settings.setValue("PendingChangesDialog/geometry", geometry());
 	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
 }
 
@@ -2700,7 +2714,20 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 	setWindowTitle(tr("Undo signal changes"));
 
 	QSettings settings;
-	resize(settings.value("UndoSignalsDalog/size", qApp->desktop()->screenGeometry(this).size() * 3 / 4).toSize());
+	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
+	QPoint center = desktopRect.center();
+	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
+	desktopRect.moveCenter(center);
+	QRect windowRect = settings.value("UndoSignalsDalog/geometry", desktopRect).toRect();
+	if (windowRect.height() > desktopRect.height())
+	{
+		windowRect.setHeight(desktopRect.height());
+	}
+	if (windowRect.width() > desktopRect.width())
+	{
+		windowRect.setWidth(desktopRect.width());
+	}
+	setGeometry(windowRect);
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
@@ -2739,6 +2766,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &UndoSignalsDialog::undoSelected);
+	connect(buttonBox, &QDialogButtonBox::rejected, this, &UndoSignalsDialog::saveDialogGeometry);
 	connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 	vl->addWidget(buttonBox);
 
@@ -2753,8 +2781,16 @@ void UndoSignalsDialog::setCheckStates(QModelIndexList selection, bool fromSourc
 	}
 }
 
+void UndoSignalsDialog::saveDialogGeometry()
+{
+	QSettings settings;
+	settings.setValue("UndoSignalsDialog/geometry", geometry());
+}
+
 void UndoSignalsDialog::undoSelected()
 {
+	saveDialogGeometry();
+
 	QVector<int> IDs;
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
@@ -2785,9 +2821,6 @@ void UndoSignalsDialog::undoSelected()
 	{
 		m_sourceModel->showErrors(states);
 	}
-
-	QSettings settings;
-	settings.setValue("UndoSignalsDialog/size", size());
 
 	accept();
 }
