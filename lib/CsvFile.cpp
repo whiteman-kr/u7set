@@ -2,7 +2,7 @@
 
 QString CsvFile::getCsvString(const QStringList& strings)
 {
-	static const QChar semiсolon = ';';
+	static const QChar semicolon = ';';
 	static const QChar quotes = '"';
 	static const QLatin1String doubleQuotes = QLatin1String("\"\"");
 
@@ -14,7 +14,7 @@ QString CsvFile::getCsvString(const QStringList& strings)
 	{
 		bool externalQuotes = false;
 
-		if (s.contains(semiсolon) == true)
+		if (s.contains(semicolon) == true)
 		{
 			externalQuotes = true;
 		}
@@ -34,7 +34,7 @@ QString CsvFile::getCsvString(const QStringList& strings)
 
 		if (count > 1)
 		{
-			result += semiсolon;
+			result += semicolon;
 			count--;
 		}
 	}

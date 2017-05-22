@@ -223,7 +223,8 @@ class UndoSignalsDialog : public QDialog
 public:
 	UndoSignalsDialog(SignalsModel* sourceModel, QWidget *parent = 0);
 
-    void setCheckStates(QModelIndexList selection, bool fromSourceModel);
+	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
+	void saveDialogGeometry();
 
 public slots:
 	void undoSelected();
