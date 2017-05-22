@@ -302,11 +302,15 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	QDomDocument xml;
 
-	bool result = xml.setContent(configurationXmlData, false, &parsingError);
+	int errorLine = 0;
+	int errorColumn = 0;
+
+	bool result = xml.setContent(configurationXmlData, false, &parsingError, &errorLine, &errorColumn);
 
 	if (result == false)
 	{
-		readSettings.errorMessage += parsingError + "\n";
+		QString errorStr = tr("%1, line %2, column %3").arg(parsingError).arg(errorLine).arg(errorColumn);
+		readSettings.errorMessage += errorStr + "\n";
 	}
 	else
 	{

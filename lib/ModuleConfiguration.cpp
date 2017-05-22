@@ -45,7 +45,7 @@ namespace Hardware
 	}
 
 	void ModuleFirmware::init(QString caption, QString subsysId, int ssKey, int uartId, int frameSize, int frameCount, const QString &projectName,
-							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, const QStringList& descriptionFields)
+							  const QString &userName, int buildNumber, const QString& buildConfig, int changesetId, int descriptionFieldsVersion, const QStringList& descriptionFields)
 	{
 		m_caption = caption;
 		m_subsysId = subsysId;
@@ -69,6 +69,7 @@ namespace Hardware
 
 		m_channelData.clear();
 
+		m_descriptionFieldsVersion = descriptionFieldsVersion;
 		m_descriptionFields = descriptionFields;
 
 		return;
@@ -585,13 +586,15 @@ namespace Hardware
         m_log.append(logString);
     }
 
-	void ModuleFirmware::jsSetDescriptionFields(QString fields)
+	void ModuleFirmware::jsSetDescriptionFields(int descriptionVersion, QString fields)
 	{
+		m_descriptionFieldsVersion = descriptionVersion;
 		m_descriptionFields = fields.split(';');
 	}
 
-	void ModuleFirmware::setDescriptionFields(const QStringList& fields)
+	void ModuleFirmware::setDescriptionFields(int descriptionVersion, const QStringList& fields)
 	{
+		m_descriptionFieldsVersion = descriptionVersion;
 		m_descriptionFields = fields;
 	}
 

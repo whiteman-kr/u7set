@@ -144,7 +144,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
-	if (m_pView == nullptr)
+    /*if (m_pView == nullptr)
 	{
 		return false;
 	}
@@ -199,7 +199,7 @@ bool ExportData::saveExcelFile(const QString& fileName)
 		return false;
 	}
 
-	helper.saveAs(fileName);
+    helper.saveAs(fileName);*/
 
 	return true;
 }

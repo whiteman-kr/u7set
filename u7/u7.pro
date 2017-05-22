@@ -190,7 +190,8 @@ SOURCES +=\
     Builder/ComparatorStorage.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-    CodeEditor.cpp
+	CodeEditor.cpp \
+    ../lib/CsvFile.cpp
 
 
 HEADERS  += \
@@ -318,7 +319,8 @@ HEADERS  += \
     Builder/ComparatorStorage.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    CodeEditor.h
+    CodeEditor.h \
+    ../lib/CsvFile.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -422,9 +424,11 @@ unix {
 
 #QScintilla
 #
-INCLUDEPATH += ./../QScintilla/include ./../QScintilla/lexlib ./../QScintilla/src ./../QScintilla/Qt4Qt5
-INCLUDEPATH += ../Qt4Qt5
+INCLUDEPATH += ./../QScintilla/Qt4Qt5
+DEPENDPATH += ./../QScintilla/Qt4Qt5
 LIBS += -L$$DESTDIR -lQScintilla
+win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
 
 # Add curent dir to a list of library directory paths
 #
