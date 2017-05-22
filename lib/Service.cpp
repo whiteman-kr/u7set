@@ -342,7 +342,7 @@ void Service::startServiceWorkerThread()
 		return;
 	}
 
-	m_serviceStartTime = QDateTime::currentMSecsSinceEpoch();
+	m_serviceWorkerStartTime = QDateTime::currentMSecsSinceEpoch();
 
 	m_state = ServiceState::Starts;
 
@@ -424,7 +424,7 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	if (m_state != ServiceState::Stopped)
 	{
-		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
+		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
 	}
 	else
 	{
