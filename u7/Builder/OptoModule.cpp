@@ -2448,14 +2448,10 @@ namespace Hardware
 		return true;
 	}
 
-
-
-
 	OptoModuleShared OptoModuleStorage::getOptoModule(const QString& optoModuleID)
 	{
 		return m_modules.value(optoModuleID, nullptr);
 	}
-
 
 	OptoModuleShared OptoModuleStorage::getOptoModule(const OptoPortShared optoPort)
 	{

@@ -687,12 +687,6 @@ namespace Builder
 		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem &item, int portDataOffset);
 		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset);
 
-		bool copyRS232Signals();
-		bool copyPortRS232Signals(Hardware::OptoModuleShared module, Hardware::OptoPortShared rs232Port);
-		bool copyPortRS232AnalogSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter);
-		bool copyPortRS232DiscreteSignals(int portDataAddress, Hardware::OptoPortShared rs232Port, QXmlStreamWriter& xmlWriter);
-		bool writeSignalsToSerialXml(QXmlStreamWriter& xmlWriter, Hardware::OptoPortShared rs232Port);
-
 		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
 
 		bool copyDomDataToModuleMemory(const Module& module);
