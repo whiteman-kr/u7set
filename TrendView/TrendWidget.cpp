@@ -159,8 +159,8 @@ namespace TrendLib
 		//
 		assert(m_signalSet);
 
-		std::vector<TrendSignal> discreteSignals = m_signalSet->discreteSignals();
-		std::vector<TrendSignal> analogSignals = m_signalSet->analogSignals();
+		std::vector<TrendSignalParam> discreteSignals = m_signalSet->discreteSignals();
+		std::vector<TrendSignalParam> analogSignals = m_signalSet->analogSignals();
 
 		if (drawParam.view() == TrendView::Separated)
 		{
@@ -170,7 +170,7 @@ namespace TrendLib
 
 			QColor signalBackColor = drawParam.backgroundColor();
 
-			for (const TrendSignal& s : discreteSignals)
+			for (const TrendSignalParam& s : discreteSignals)
 			{
 				QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
 				y += discreteSignalHeight;
@@ -192,7 +192,7 @@ namespace TrendLib
 
 			const double analogSignalsSignalHeight = qMax((insideRect.bottom() - y) / analogSignals.size(), discreteSignalHeight);
 
-			for (const TrendSignal& s : analogSignals)
+			for (const TrendSignalParam& s : analogSignals)
 			{
 				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsSignalHeight};
 				y += analogSignalsSignalHeight;
@@ -364,7 +364,7 @@ namespace TrendLib
 		return;
 	}
 
-	void RenderThread::drawSignal(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	void RenderThread::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
 	{
 		assert(painter);
 
@@ -387,7 +387,7 @@ namespace TrendLib
 		return;
 	}
 
-	void RenderThread::drawDiscrete(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	void RenderThread::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
 	{
 		assert(painter);
 		assert(signal.isDiscrete() == true);
@@ -406,7 +406,7 @@ namespace TrendLib
 		return;
 	}
 
-	void RenderThread::drawAnalog(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
+	void RenderThread::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);

@@ -20,9 +20,9 @@ namespace TrendLib
 	private:
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
 
-		void drawSignal(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
-		void drawDiscrete(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
-		void drawAnalog(QPainter* painter, const TrendSignal& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
 
 		static double timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);

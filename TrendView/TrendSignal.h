@@ -19,10 +19,10 @@ namespace TrendLib
 		std::array<TrendStateIten, 512>  m_states;
 	};
 
-	class TrendSignal
+	class TrendSignalParam
 	{
 	public:
-		TrendSignal();
+		TrendSignalParam();
 
 		// Proprties
 		//
@@ -77,15 +77,20 @@ namespace TrendLib
 	public:
 		TrendSignalSet();
 
-		bool addSignal(const TrendSignal& signal);
+		bool addSignal(const TrendSignalParam& signal);
 		void removeSignal(QString signalId);
 
-		std::vector<TrendSignal> analogSignals() const;
-		std::vector<TrendSignal> discreteSignals() const;
+		std::vector<TrendSignalParam> analogSignals() const;
+		std::vector<TrendSignalParam> discreteSignals() const;
+
+		TrendSignalParam signalParam() const;
 
 	private:
-		mutable QMutex m_mutex;
-		std::list<TrendSignal> m_signals;
+		mutable QMutex m_paramMutex;
+		std::list<TrendSignalParam> m_signalParams;
+
+//		mutable QMutex m_stateMutex;
+//		std::map<QString, TrendSignalSates> m_signalStates;
 	};
 
 }
