@@ -90,7 +90,7 @@ namespace Hardware
 	private:
 
 		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
-		bool load_version2_3(const QJsonObject& jConfig, bool readDataFrames);
+		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
 
 		// Properties
 		//
@@ -123,7 +123,7 @@ namespace Hardware
 		int m_frameSize = 0;
 		int m_changesetId = 0;
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 3;
+		int m_maxFileVersion = 4;	//Latest version
 
 		QString m_projectName;
 		QString m_userName;

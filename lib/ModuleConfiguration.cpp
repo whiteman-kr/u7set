@@ -115,7 +115,8 @@ namespace Hardware
 			return load_version1(jConfig, readDataFrames);
 		case 2:
 		case 3:
-			return load_version2_3(jConfig, readDataFrames);
+		case 4:
+			return load_version2_3_4(jConfig, readDataFrames);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
@@ -227,7 +228,7 @@ namespace Hardware
 
     }
 
-	bool ModuleFirmware::load_version2_3(const QJsonObject& jConfig, bool readDataFrames)
+	bool ModuleFirmware::load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames)
 	{
 		if (jConfig.value("projectName").isUndefined() == true)
 		{

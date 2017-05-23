@@ -2607,7 +2607,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 void CheckinSignalsDialog::checkinSelected()
 {
-	saveGeometry();
+	saveDialogGeometry();
 
 	QString commentText = m_commentEdit->toPlainText();
 	if (commentText.isEmpty())
@@ -2641,7 +2641,7 @@ void CheckinSignalsDialog::checkinSelected()
 
 void CheckinSignalsDialog::undoSelected()
 {
-	saveGeometry();
+	saveDialogGeometry();
 
 	QVector<int> IDs;
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
@@ -2679,7 +2679,7 @@ void CheckinSignalsDialog::undoSelected()
 
 void CheckinSignalsDialog::cancel()
 {
-	saveGeometry();
+	saveDialogGeometry();
 
 	reject();
 }
@@ -2698,7 +2698,14 @@ void CheckinSignalsDialog::openUndoDialog()
 	m_sourceModel->loadSignals();
 }
 
-void CheckinSignalsDialog::saveGeometry()
+void CheckinSignalsDialog::closeEvent(QCloseEvent* event)
+{
+	saveDialogGeometry();
+
+	QDialog::closeEvent(event);
+}
+
+void CheckinSignalsDialog::saveDialogGeometry()
 {
 	QSettings settings;
 	settings.setValue("PendingChangesDialog/geometry", geometry());
@@ -2823,6 +2830,13 @@ void UndoSignalsDialog::undoSelected()
 	}
 
 	accept();
+}
+
+void UndoSignalsDialog::closeEvent(QCloseEvent* event)
+{
+	saveDialogGeometry();
+
+	QDialog::closeEvent(event);
 }
 
 

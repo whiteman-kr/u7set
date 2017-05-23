@@ -740,6 +740,7 @@ namespace ExtWidgets
 
             m_lineEdit->blockSignals(false);
         }
+		delete multlLineEdit;
 	}
 
 	void QtMultiTextEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
