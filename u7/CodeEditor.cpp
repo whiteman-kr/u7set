@@ -109,17 +109,20 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	l->addWidget(m_textEdit);
 
 	// Set up default font
-
+	//
 #if defined(Q_OS_WIN)
-		QFont f = QFont("Courier New",10);
+		QFont f = QFont("Consolas");
+		f.setPixelSize(font().pixelSize());
 #elif defined(Q_OS_MAC)
-		QFont f = QFont("Courier", 12);
+		QFont f = QFont("Courier");
+		f.setPixelSize(font().pixelSize());
 #else
-		QFont f = QFont("Bitstream Vera Sans Mono",9);
+		QFont f = QFont("Courier");
+		f.setPixelSize(font().pixelSize());
 #endif
 
 	// Set up lexer
-
+	//
 	QsciLexer* lexer = nullptr;
 
 	if (codeType == CodeType::Cpp)
@@ -135,6 +138,7 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	if (lexer != nullptr)
 	{
 		lexer->setDefaultFont(f);
+		m_textEdit->setFont(f);
 		m_textEdit->setLexer(lexer);
 	}
 
