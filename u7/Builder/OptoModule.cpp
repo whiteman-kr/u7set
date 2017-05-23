@@ -896,6 +896,12 @@ namespace Hardware
 	{
 		TxRxSignalShared rxSignal = m_rxSignals.value(appSignalID);
 
+		if (appSignalID == "#LM1_ANALOG1")
+		{
+			int s = 0;
+			s++;
+		}
+
 		if (rxSignal == nullptr)
 		{
 			ASSERT_RETURN_FALSE;
@@ -1184,12 +1190,12 @@ namespace Hardware
 			return BAD_ADDRESS;
 		}
 
-		if (module->isLM())
+		if (module->isLM() == true)
 		{
 			return module->optoInterfaceDataOffset() + (m_portNo - 1) * module->optoPortAppDataSize() + m_rxBufAddress;
 		}
 
-		return module->optoInterfaceDataOffset() + module->optoPortAppDataOffset() + m_rxBufAddress;
+		return module->optoInterfaceDataOffset() + m_rxBufAddress;
 	}
 
 	void OptoPort::setTxRawDataSizeW(int rawDataSizeW)
@@ -1839,14 +1845,12 @@ namespace Hardware
 	{
 		bool result = true;
 
-		int txBufAddress = 0;
-
 		if (isLM() == true)
 		{
+			// calculate tx buffers absolute addresses for ports of LM module
+			//
 			for(OptoPortShared& port : m_ports)
 			{
-				// calculate tx buffers absolute addresses for ports of LM module
-				//
 				if (port == nullptr)
 				{
 					LOG_INTERNAL_ERROR(m_log);
@@ -1857,8 +1861,6 @@ namespace Hardware
 				{
 					continue;
 				}
-
-				txBufAddress =	0;	//optoInterfaceDataOffset() +	(port->portNo() - 1) * optoPortDataSize();
 
 				if (port->manualSettings() == true)
 				{
@@ -1872,9 +1874,10 @@ namespace Hardware
 						return false;
 					}
 
-					txBufAddress += manualTxStartAddr;
-
-					port->setTxBufAddress(txBufAddress);
+					// exotic 'manual' settings for LMs tx buffers
+					// ok, user is always right
+					//
+					port->setTxBufAddress(manualTxStartAddr);
 
 					if (manualTxStartAddr + port->manualTxSizeW() > optoPortAppDataSize())
 					{
@@ -1887,7 +1890,10 @@ namespace Hardware
 				}
 				else
 				{
-					port->setTxBufAddress(txBufAddress);
+					// each LMs opto-port has separate memory area for tx/rx buffer
+					// so, tx buffers offset in this area always equal to 0
+					//
+					port->setTxBufAddress(0);
 
 					if (port->txDataSizeW() > optoPortAppDataSize())
 					{
@@ -1909,7 +1915,10 @@ namespace Hardware
 		{
 			// calculate tx addresses for ports of OCM module
 			//
-			txBufAddress = optoInterfaceDataOffset();
+			// all OCM's ports tx buffers is disposed in one memory area with max size - OptoPortAppDataSize
+			// tx buffers begin place from offset 0
+			//
+			int txBufAddress = 0;
 
 			int txDataSizeW = 0;
 
@@ -1928,7 +1937,7 @@ namespace Hardware
 
 				if (port->manualSettings() == true)
 				{
-					txBufAddress = optoInterfaceDataOffset() + port->manualTxStartAddressW();
+					txBufAddress = port->manualTxStartAddressW();
 
 					port->setTxBufAddress(txBufAddress);
 
@@ -1948,7 +1957,6 @@ namespace Hardware
 				}
 				else
 				{
-					// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 					//
 					port->setTxBufAddress(txBufAddress);
 
@@ -1965,9 +1973,9 @@ namespace Hardware
 					result = false;
 					break;
 				}
-
-				result &= checkPortsAddressesOverlapping();
 			}
+
+			result &= checkPortsAddressesOverlapping();
 
 			return result;
 		}
@@ -2090,7 +2098,7 @@ namespace Hardware
 		{
 			// calculate rx addresses for ports of OCM module
 			//
-			int rxStartAddress = optoInterfaceDataOffset() + optoPortAppDataOffset();
+			int rxStartAddress = optoPortAppDataOffset();				// offset on OCMs diag data size
 
 			int rxDataSizeW = 0;
 
@@ -2103,7 +2111,7 @@ namespace Hardware
 					return false;
 				}
 
-				port->setRxBufAddress(0);
+				port->setRxBufAddress(0);			// initilaize to 0
 
 				// all OCM's ports data disposed in one buffer with max size - OptoPortAppDataSize
 				//
@@ -2139,7 +2147,7 @@ namespace Hardware
 						// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 						//
 						//m_log->errALC5085(port->equipmentID(), port->connectionID());
-
+						//
 						rxStartAddress += port->rxDataSizeW();
 					}
 
@@ -2182,8 +2190,6 @@ namespace Hardware
 
 		ASSERT_RETURN_FALSE;
 	}
-
-
 
 
 	// ------------------------------------------------------------------
@@ -3272,11 +3278,12 @@ namespace Hardware
 	}
 
 
-	bool OptoModuleStorage::getRxSignalAbsAddress(const QString& connectionID,
-											   const QString& appSignalID,
-											   const QString& receiverLM,
-											   QUuid receiverUuid,
-											   SignalAddress16 &addr)
+	bool OptoModuleStorage::getRxSignalAbsAddress(const QString& schemaID,
+												  const QString& connectionID,
+												  const QString& appSignalID,
+												  const QString& receiverLM,
+												  QUuid receiverUuid,
+												  SignalAddress16 &addr)
 	{
 		addr.reset();
 
@@ -3303,7 +3310,8 @@ namespace Hardware
 			}
 			else
 			{
-				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p1
+				m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
+				return false;
 			}
 		}
 
@@ -3313,7 +3321,8 @@ namespace Hardware
 			// port2 is not used
 			// signal is not found
 			//
-			ASSERT_RETURN_FALSE;
+			m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
+			return false;
 		}
 
 		OptoPortShared p2 = getOptoPort(connection->port2EquipmentID());
@@ -3331,7 +3340,8 @@ namespace Hardware
 			}
 			else
 			{
-				ASSERT_RETURN_FALSE;			// Signal isn't exists in port p2
+				m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
+				return false;
 			}
 		}
 

@@ -476,11 +476,12 @@ namespace Hardware
 
 		void getOptoModulesSorted(QVector<OptoModuleShared>& modules);
 
-		bool getRxSignalAbsAddress(const QString& connectionID,
-								const QString& appSignalID,
-								const QString& receiverLM,
-								QUuid receiverUuid,
-								SignalAddress16& addr);
+		bool getRxSignalAbsAddress(const QString& schemaID,
+								   const QString& connectionID,
+								   const QString& appSignalID,
+								   const QString& receiverLM,
+								   QUuid receiverUuid,
+								   SignalAddress16& addr);
 
 		static OptoModuleShared getOptoModule(const QString& optoModuleID);
 		static OptoModuleShared getOptoModule(const OptoPortShared optoPort);

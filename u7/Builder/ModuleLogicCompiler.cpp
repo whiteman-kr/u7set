@@ -2460,11 +2460,12 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
-														receiver.appSignalId(),
-														m_lm->equipmentIdTemplate(),
-														receiver.guid(),
-														rxAddress) == false)
+			if (m_optoModuleStorage->getRxSignalAbsAddress(fb.schemaID(),
+														   receiver.connectionId(),
+														   receiver.appSignalId(),
+														   m_lm->equipmentIdTemplate(),
+														   receiver.guid(),
+														   rxAddress) == false)
 			{
 				return false;
 			}
@@ -2575,11 +2576,12 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
-																 receiver.appSignalId(),
-																 m_lm->equipmentIdTemplate(),
-																 receiver.guid(),
-																 rxAddress) == false)
+			if (m_optoModuleStorage->getRxSignalAbsAddress(appSignal.schemaID(),
+														   receiver.connectionId(),
+														   receiver.appSignalId(),
+														   m_lm->equipmentIdTemplate(),
+														   receiver.guid(),
+														   rxAddress) == false)
 			{
 				return false;
 			}
@@ -3802,7 +3804,7 @@ namespace Builder
 			return false;
 		}
 
-		const HashedVector<QString, TxRxSignalShared>& txSignals = port->txSignals();
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
 		bool result = true;
 
@@ -3869,12 +3871,13 @@ namespace Builder
 
 		// copy discrete signals
 		//
-		const HashedVector<QString, TxRxSignalShared>& txSignals = port->txSignals();
+		QVector<Hardware::TxRxSignalShared> txDiscreteSignals;
+
+		port->getTxDiscreteSignals(txDiscreteSignals, true);
+
+		int count = txDiscreteSignals.count();
 
 		int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
-
-
-		//////////////////QQQQQQQQQQQQQQQQQQQQQQQQQQQQ//////////////////////////////////
 
 		int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
 
@@ -3884,12 +3887,15 @@ namespace Builder
 
 		int bitCount = 0;
 
+		bool first = true;
+
 		for(int i = 0; i < count; i++)
 		{
 			Hardware::TxRxSignalShared& txSignal = txDiscreteSignals[i];
 
 			if (txSignal->isRaw() == true)
 			{
+				assert(false);				// not must be here!
 				continue;					// raw signals copying in raw data section code generation
 			}
 
@@ -3902,6 +3908,18 @@ namespace Builder
 				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
+			}
+
+			if (first == true)
+			{
+				Comment comment;
+
+				comment.setComment(QString("Copying regular tx discrete signals of opto-port %1").arg(port->equipmentID()));
+
+				m_code.append(comment);
+				m_code.newLine();
+
+				first = false;
 			}
 
 			if ((bitCount % WORD_SIZE) == 0)
@@ -4248,7 +4266,7 @@ namespace Builder
 			if (txSignal->dataSize() != SIZE_32BIT)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Raw tx signal '%1' has size different than 32 bit (port '%2').  ")).
+								   QString(tr("Raw tx signal '%1' has size different than 32 bit (port '%2').")).
 								   arg(txSignal->appSignalID()).
 								   arg(port->equipmentID()));
 				result = false;
@@ -4285,7 +4303,30 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port)
 	{
-//		assert(false);		// should be implemented
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+
+		int count = 0;
+
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal->isRaw() == false || txSignal->isDiscrete() == false)
+			{
+				// skip non-Raw and non-Discrete signals
+				//
+				continue;
+			}
+
+			count++;
+		}
+
+
+		if (count > 0)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Raw tx discrete signals isn't implement now (port %1).  ")).
+							   arg(port->equipmentID()));
+			return false;
+		}
 
 		return true;
 	}

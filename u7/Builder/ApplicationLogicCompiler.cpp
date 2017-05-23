@@ -1054,6 +1054,9 @@ namespace Builder
 		str = QString(tr("Tx data full size:\t\t%1")).arg(port->txDataSizeW());
 		list.append(str);
 
+		str = QString(tr("Tx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
+		list.append(str);
+
 		str = QString(tr("Tx raw data size:\t\t%1")).arg(port->txRawDataSizeW());
 		list.append(str);
 
@@ -1125,6 +1128,9 @@ namespace Builder
 		list.append(str);
 
 		str = QString(tr("Rx data full size:\t\t%1")).arg(port->rxDataSizeW());
+		list.append(str);
+
+		str = QString(tr("Rx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
 		list.append(str);
 
 		str = QString(tr("Rx raw data size:\t\t%1")).arg(port->rxRawDataSizeW());

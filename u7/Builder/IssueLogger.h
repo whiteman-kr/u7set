@@ -222,7 +222,7 @@ namespace Builder
 		void errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data size.
 		void errALC5040(QString connectionID, QUuid item);									// Connection with ID '%1' is not found.
 		void errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid);				// Signal '%1' exists in LM '%2'. No receivers needed.
-		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid);		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID);		// Signal '%1' is not exists in connection '%2'.
 		void errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid);			// Value of parameter '%1.%2' must be greater or equal to 0.
 		void errALC5044(QString fbCaption, int opcode, QUuid itemUuid);						// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 		void errALC5045(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Required parameter '%1' of AFB '%2' is missing.
