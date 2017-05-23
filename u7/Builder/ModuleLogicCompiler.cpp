@@ -3737,7 +3737,13 @@ namespace Builder
 
 		int offset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
-		int portDataOffset = offset;
+		Command cmd;
+
+		cmd.setMem(port->txBufAbsAddress() + offset, 0, port->txRawDataSizeW());
+		cmd.setComment("initialize tx raw data memory");
+
+		m_code.append(cmd);
+		m_code.newLine();
 
 		const Hardware::RawDataDescription& rawDataDescription = port->rawDataDescription();
 
@@ -3767,7 +3773,7 @@ namespace Builder
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxSignal:
-				result &= copyOptoPortTxOutSignalRawData(port, item, portDataOffset);
+				// code generate later
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::RxRawDataSize:
@@ -3781,9 +3787,12 @@ namespace Builder
 			}
 		}
 
-		return true;
-	}
+		result &= copyOptoPortRawTxAnalogSignals(port);
 
+		result &= copyOptoPortRawTxDiscreteSignals(port);
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port)
 	{
@@ -3793,19 +3802,21 @@ namespace Builder
 			return false;
 		}
 
-		QVector<Hardware::TxRxSignalShared> txAnalogSignals;
-
-		port->getTxAnalogSignals(txAnalogSignals, true);
-
-		if (txAnalogSignals.count() == 0)
-		{
-			return true;
-		}
+		const HashedVector<QString, TxRxSignalShared>& txSignals = port->txSignals();
 
 		bool result = true;
 
-		for(Hardware::TxRxSignalShared& txSignal : txAnalogSignals)
+		bool first = true;
+
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
 		{
+			if (txSignal->isRaw() == true || txSignal->isAnalog() == false)
+			{
+				// skip raw and non-analog signals
+				//
+				continue;
+			}
+
 			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
 			if (s == nullptr)
@@ -3815,6 +3826,18 @@ namespace Builder
 				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
+			}
+
+			if (first == true)
+			{
+				Comment comment;
+
+				comment.setComment(QString("Copying regular tx analog signals of opto-port %1").arg(port->equipmentID()));
+
+				m_code.append(comment);
+				m_code.newLine();
+
+				first = false;
 			}
 
 			Command cmd;
@@ -3827,7 +3850,10 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		m_code.newLine();
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -3843,18 +3869,12 @@ namespace Builder
 
 		// copy discrete signals
 		//
-		QVector<Hardware::TxRxSignalShared> txDiscreteSignals;
-
-		port->getTxDiscreteSignals(txDiscreteSignals, true);
-
-		int count = txDiscreteSignals.count();
-
-		if (count == 0)
-		{
-			return true;
-		}
+		const HashedVector<QString, TxRxSignalShared>& txSignals = port->txSignals();
 
 		int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
+
+
+		//////////////////QQQQQQQQQQQQQQQQQQQQQQQQQQQQ//////////////////////////////////
 
 		int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
 
@@ -4201,80 +4221,71 @@ namespace Builder
 
 	}
 
-
-	bool ModuleLogicCompiler::copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
-	{
-		if (port == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		assert(item.type == Hardware::RawDataDescriptionItem::Type::TxSignal);
-
-		switch(item.signalType)
-		{
-		case E::SignalType::Analog:
-			return copyOptoPortTxOutAnalogSignalRawData(port, item, portDataOffset);
-
-		case E::SignalType::Discrete:
-			LOG_INTERNAL_ERROR(m_log);			// out discrete signals is not supported now
-			break;
-
-		default:
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-		}
-
-		return false;
-	}
-
-
-	bool ModuleLogicCompiler::copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
+	bool ModuleLogicCompiler::copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		if (item.dataFormat != E::DataFormat::Float &&
-			item.dataFormat != E::DataFormat::SignedInt &&
-			item.dataFormat != E::DataFormat::UnsignedInt)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// unknown format
-			return false;
-		}
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
-		if (item.dataSize != SIZE_32BIT)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// other sizes is not supported now
-			return false;
-		}
-
-		if (item.byteOrder != E::ByteOrder::BigEndian)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// other byte orders is not supported now
-			return false;
-		}
-
-		Signal* s = m_signals->getSignal(item.appSignalID);
-
-		if (s == nullptr)
-		{
-			// Signal '%1' is not found (opto port '%2' raw data description).
-			//
-			m_log->errALC5186(item.appSignalID, port->equipmentID());
-			return false;
-		}
+		bool result = true;
 
 		Command cmd;
 
-		cmd.mov32(port->txBufAbsAddress() + portDataOffset + item.offsetW, s->ramAddr().offset());
+		int count = 0;
 
-		cmd.setComment(QString("copying out signal %1 raw data").arg(item.appSignalID));
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal->isRaw() == false || txSignal->isAnalog() == false)
+			{
+				// skip non-Raw and non-Analog signals
+				//
+				continue;
+			}
 
-		m_code.append(cmd);
-		m_code.newLine();
+			if (txSignal->dataSize() != SIZE_32BIT)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Raw tx signal '%1' has size different than 32 bit (port '%2').  ")).
+								   arg(txSignal->appSignalID()).
+								   arg(port->equipmentID()));
+				result = false;
+				continue;
+			}
+
+			Signal* s = m_signals->getSignal(txSignal->appSignalID());
+
+			if (s == nullptr)
+			{
+				// Signal '%1' is not found (opto port '%2' raw data description).
+				//
+				m_log->errALC5186(txSignal->appSignalID(), port->equipmentID());
+				result = false;
+				continue;
+			}
+
+			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ramAddr().offset());
+
+			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+
+			m_code.append(cmd);
+
+			count++;
+		}
+
+		if (count > 0)
+		{
+			m_code.newLine();
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port)
+	{
+//		assert(false);		// should be implemented
 
 		return true;
 	}

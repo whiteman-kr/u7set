@@ -684,8 +684,8 @@ namespace Builder
 		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
 		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
 		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
-		bool copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem &item, int portDataOffset);
-		bool copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset);
+		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
 
 		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
 
