@@ -1598,6 +1598,7 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 		return;
 	}
 
+	m_Log->writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
 	m_Log->writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
 	m_Log->writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
 	m_Log->writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
