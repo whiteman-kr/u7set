@@ -4,18 +4,29 @@
 #include <QMutex>
 #include "Types.h"
 
+#ifdef Q_CC_MSVC
+	#define SHORT_FUNC_INFO __FUNCTION__
+#else
+	#ifdef Q_CC_GNU
+		#define SHORT_FUNC_INFO __FUNCTION__
+	#else
+		#define SHORT_FUNC_INFO Q_FUNC_INFO
+	#endif
+#endif
+
+
 #define LOG_STRING(PARAM) #PARAM
 
 #define LOG_EMPTY_LINE(logObject)	logObject->writeEmptyLine();
 
-#define LOG_ERROR_OBSOLETE(logObject, prefix, message)		logObject->writeError(message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning0(message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_ERROR_OBSOLETE(logObject, prefix, message)		logObject->writeError(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning0(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
-#define LOG_OK(logObject) logObject->writeSuccess(QObject::tr("Ok"), __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_OK(logObject) logObject->writeSuccess(QObject::tr("Ok"), __FILE__, __LINE__, SHORT_FUNC_INFO);
 
-#define LOG_INTERNAL_ERROR(logObject)	logObject->writeError(QObject::tr("Internal error! File: %1 Line: %2 Function: %3").arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR(logObject)	logObject->writeError(QObject::tr("Internal error! File: %1 Line: %2 Function: %3").arg(__FILE__).arg(__LINE__).arg(Q_FUNC_INFO), __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 
 class OutputLogItem
