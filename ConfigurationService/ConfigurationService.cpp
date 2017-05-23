@@ -29,7 +29,8 @@ ServiceWorker* ConfigurationServiceWorker::createInstance() const
 
 void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	Q_UNUSED(serviceInfo)
+	serviceInfo.set_clientrequestip(m_clientIP.address32());
+	serviceInfo.set_clientrequestport(m_clientIP.port());
 }
 
 
