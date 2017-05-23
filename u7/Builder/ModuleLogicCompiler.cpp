@@ -6272,7 +6272,8 @@ namespace Builder
 				// The signal '%1' is repeatedly connected to the transmitter '%2'
 				//
 				m_log->errALC5029(connectedSignalID, transmitter.connectionId(), connectedSignalUuid, transmitter.guid());
-				ASSERT_RETURN_FALSE
+				result = false;
+				break;
 			}
 		}
 
