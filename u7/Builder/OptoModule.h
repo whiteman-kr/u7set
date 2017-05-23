@@ -459,7 +459,7 @@ namespace Hardware
 
 		static std::shared_ptr<Connection> getConnection(const QString& connectionID);
 
-		bool OptoModuleStorage::appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
+		bool appendSerialRawRxSignals(const QString& lmID, const HashedVector<QString, Signal*>& lmAssociatedSignals);
 
 		bool appendTxSignal(const QString& schemaID,
 						 const QString& connectionID,
