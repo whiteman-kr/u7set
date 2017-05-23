@@ -1697,7 +1697,10 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
+	QTime t;
+	t.start();
 	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
+	qDebug() << "Loading schema time " << t.elapsed();
 
 	if (vf == nullptr)
 	{

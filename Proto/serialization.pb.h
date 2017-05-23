@@ -758,6 +758,18 @@ class Envelope : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 classnamehash() const;
   inline void set_classnamehash(::google::protobuf::uint32 value);
 
+  // optional bytes compressedObject = 2;
+  inline bool has_compressedobject() const;
+  inline void clear_compressedobject();
+  static const int kCompressedObjectFieldNumber = 2;
+  inline const ::std::string& compressedobject() const;
+  inline void set_compressedobject(const ::std::string& value);
+  inline void set_compressedobject(const char* value);
+  inline void set_compressedobject(const void* value, size_t size);
+  inline ::std::string* mutable_compressedobject();
+  inline ::std::string* release_compressedobject();
+  inline void set_allocated_compressedobject(::std::string* compressedobject);
+
   // optional .Proto.SchemaItem schemaitem = 6;
   inline bool has_schemaitem() const;
   inline void clear_schemaitem();
@@ -825,6 +837,8 @@ class Envelope : public ::google::protobuf::Message {
  private:
   inline void set_has_classnamehash();
   inline void clear_has_classnamehash();
+  inline void set_has_compressedobject();
+  inline void clear_has_compressedobject();
   inline void set_has_schemaitem();
   inline void clear_has_schemaitem();
   inline void set_has_deviceobject();
@@ -842,6 +856,7 @@ class Envelope : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::std::string* compressedobject_;
   ::Proto::SchemaItem* schemaitem_;
   ::Proto::DeviceObject* deviceobject_;
   ::Proto::Schema* schema_;
@@ -852,7 +867,7 @@ class Envelope : public ::google::protobuf::Message {
   ::google::protobuf::uint32 classnamehash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -10038,15 +10053,85 @@ inline void Envelope::set_classnamehash(::google::protobuf::uint32 value) {
   classnamehash_ = value;
 }
 
-// optional .Proto.SchemaItem schemaitem = 6;
-inline bool Envelope::has_schemaitem() const {
+// optional bytes compressedObject = 2;
+inline bool Envelope::has_compressedobject() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Envelope::set_has_schemaitem() {
+inline void Envelope::set_has_compressedobject() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Envelope::clear_has_schemaitem() {
+inline void Envelope::clear_has_compressedobject() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void Envelope::clear_compressedobject() {
+  if (compressedobject_ != &::google::protobuf::internal::kEmptyString) {
+    compressedobject_->clear();
+  }
+  clear_has_compressedobject();
+}
+inline const ::std::string& Envelope::compressedobject() const {
+  return *compressedobject_;
+}
+inline void Envelope::set_compressedobject(const ::std::string& value) {
+  set_has_compressedobject();
+  if (compressedobject_ == &::google::protobuf::internal::kEmptyString) {
+    compressedobject_ = new ::std::string;
+  }
+  compressedobject_->assign(value);
+}
+inline void Envelope::set_compressedobject(const char* value) {
+  set_has_compressedobject();
+  if (compressedobject_ == &::google::protobuf::internal::kEmptyString) {
+    compressedobject_ = new ::std::string;
+  }
+  compressedobject_->assign(value);
+}
+inline void Envelope::set_compressedobject(const void* value, size_t size) {
+  set_has_compressedobject();
+  if (compressedobject_ == &::google::protobuf::internal::kEmptyString) {
+    compressedobject_ = new ::std::string;
+  }
+  compressedobject_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Envelope::mutable_compressedobject() {
+  set_has_compressedobject();
+  if (compressedobject_ == &::google::protobuf::internal::kEmptyString) {
+    compressedobject_ = new ::std::string;
+  }
+  return compressedobject_;
+}
+inline ::std::string* Envelope::release_compressedobject() {
+  clear_has_compressedobject();
+  if (compressedobject_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = compressedobject_;
+    compressedobject_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Envelope::set_allocated_compressedobject(::std::string* compressedobject) {
+  if (compressedobject_ != &::google::protobuf::internal::kEmptyString) {
+    delete compressedobject_;
+  }
+  if (compressedobject) {
+    set_has_compressedobject();
+    compressedobject_ = compressedobject;
+  } else {
+    clear_has_compressedobject();
+    compressedobject_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.SchemaItem schemaitem = 6;
+inline bool Envelope::has_schemaitem() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Envelope::set_has_schemaitem() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Envelope::clear_has_schemaitem() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void Envelope::clear_schemaitem() {
   if (schemaitem_ != NULL) schemaitem_->::Proto::SchemaItem::Clear();
@@ -10078,13 +10163,13 @@ inline void Envelope::set_allocated_schemaitem(::Proto::SchemaItem* schemaitem) 
 
 // optional .Proto.DeviceObject deviceobject = 7;
 inline bool Envelope::has_deviceobject() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void Envelope::set_has_deviceobject() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void Envelope::clear_has_deviceobject() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void Envelope::clear_deviceobject() {
   if (deviceobject_ != NULL) deviceobject_->::Proto::DeviceObject::Clear();
@@ -10116,13 +10201,13 @@ inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceob
 
 // optional .Proto.Schema schema = 100;
 inline bool Envelope::has_schema() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void Envelope::set_has_schema() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void Envelope::clear_has_schema() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void Envelope::clear_schema() {
   if (schema_ != NULL) schema_->::Proto::Schema::Clear();
@@ -10154,13 +10239,13 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
 
 // optional .Proto.SchemaLayer schemalayer = 101;
 inline bool Envelope::has_schemalayer() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void Envelope::set_has_schemalayer() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void Envelope::clear_has_schemalayer() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void Envelope::clear_schemalayer() {
   if (schemalayer_ != NULL) schemalayer_->::Proto::SchemaLayer::Clear();
@@ -10192,13 +10277,13 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
 
 // optional .Proto.FblElement fblelement = 102;
 inline bool Envelope::has_fblelement() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void Envelope::set_has_fblelement() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void Envelope::clear_has_fblelement() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void Envelope::clear_fblelement() {
   if (fblelement_ != NULL) fblelement_->::Proto::FblElement::Clear();
@@ -10230,13 +10315,13 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
 
 // optional .Proto.Configuration configuration = 103;
 inline bool Envelope::has_configuration() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void Envelope::set_has_configuration() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void Envelope::clear_has_configuration() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void Envelope::clear_configuration() {
   if (configuration_ != NULL) configuration_->::Proto::Configuration::Clear();
@@ -10268,13 +10353,13 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
 
 // optional .Proto.Connection connection = 104;
 inline bool Envelope::has_connection() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void Envelope::set_has_connection() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void Envelope::clear_has_connection() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void Envelope::clear_connection() {
   if (connection_ != NULL) connection_->::Proto::Connection::Clear();

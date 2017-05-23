@@ -19,6 +19,7 @@ namespace VFrame30
 	// SchemaItem
 	//
 	SchemaItem::SchemaItem() :
+		Proto::ObjectSerialization<SchemaItem>(Proto::ProtoCompress::Never),
 		m_itemUnit(SchemaUnit::Display)
 	{	
 		m_guid = QUuid::createUuid();

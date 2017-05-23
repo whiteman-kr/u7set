@@ -107,6 +107,10 @@ message Envelope
 	// C++ Class for serizalization
 	//
 	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always the same
+	optional bytes compressedObject = 2;			// Can contain Envelope iself in compressed state, after uncompression should
+	                                                // be possible to read one of possible types for storing.
+													// Compression is done by qCompress
+													// To decompress it with zlib extra actions are required, read qUncompress help
 
 	// Possible types for storing
 	//
