@@ -1,9 +1,11 @@
 #include "../lib/CsvFile.h"
 
-QString CsvFile::getCsvString(const QStringList& strings)
+QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparatorsAndQuotes)
 {
 	static const QChar semicolon = ';';
+	static const QChar comma = ',';
 	static const QChar quotes = '"';
+	static const QChar singleQuotes = '\'';
 	static const QLatin1String doubleQuotes = QLatin1String("\"\"");
 
 	QString result;
@@ -12,22 +14,34 @@ QString CsvFile::getCsvString(const QStringList& strings)
 
 	for (QString s : strings)
 	{
-		bool externalQuotes = false;
-
-		if (s.contains(semicolon) == true)
+		if (replaceSeparatorsAndQuotes == true)
 		{
-			externalQuotes = true;
+			s = s.replace(quotes, singleQuotes);
+			s = s.replace(semicolon, comma);
 		}
-
-		if (s.contains(quotes) == true)
+		else
 		{
-			s = s.replace(quotes, doubleQuotes);
-			externalQuotes = true;
-		}
+			bool externalQuotes = false;
 
-		if (externalQuotes == true)
-		{
-			s = quotes + s + quotes;
+			if (s.contains(semicolon) == true)
+			{
+				externalQuotes = true;
+			}
+
+			if (s.contains(quotes) == true)
+			{
+				// replace quotes to double quotes
+				//
+				s = s.replace(quotes, doubleQuotes);
+				externalQuotes = true;
+			}
+
+			if (externalQuotes == true)
+			{
+				// place the expression to external quotes
+				//
+				s = quotes + s + quotes;
+			}
 		}
 
 		result += s;
@@ -42,7 +56,7 @@ QString CsvFile::getCsvString(const QStringList& strings)
 	return result;
 }
 
-QString CsvFile::getCsvString(const QVariantList& strings)
+QString CsvFile::getCsvString(const QVariantList& strings, bool replaceSeparatorsAndQuotes)
 {
 	QStringList l;
 
@@ -51,5 +65,5 @@ QString CsvFile::getCsvString(const QVariantList& strings)
 		l << s.toString();
 	}
 
-	return getCsvString(l);
+	return getCsvString(l, replaceSeparatorsAndQuotes);
 }

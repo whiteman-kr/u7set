@@ -103,7 +103,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 
 			// Description header string
 
-			QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(m_descriptionFields);
+			QString descriptionHeaderString = "Version;" + CsvFile::getCsvString(m_descriptionFields, true);
 
 			jDescription.insert("desc fields", descriptionHeaderString);
 
@@ -119,7 +119,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 					return false;
 				}
 
-				QString descriptionString = QString("%1;%2").arg(m_descriptionFieldsVersion).arg(CsvFile::getCsvString(di));
+				QString descriptionString = QString("%1;%2").arg(m_descriptionFieldsVersion).arg(CsvFile::getCsvString(di, true));
 
 				jDescription.insert("desc" + QString::number(diIndex++).rightJustified(8, '0'), descriptionString);
 			}
