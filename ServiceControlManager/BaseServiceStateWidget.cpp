@@ -205,6 +205,8 @@ void BaseServiceStateWidget::updateServiceState()
 			assert(false);
 			break;
 	}
+
+	emit connectionStatisticChanged();
 }
 
 void BaseServiceStateWidget::askServiceState()
