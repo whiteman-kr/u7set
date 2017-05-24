@@ -4263,16 +4263,6 @@ namespace Builder
 				continue;
 			}
 
-			if (txSignal->dataSize() != SIZE_32BIT)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Raw tx signal '%1' has size different than 32 bit (port '%2').")).
-								   arg(txSignal->appSignalID()).
-								   arg(port->equipmentID()));
-				result = false;
-				continue;
-			}
-
 			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
 			if (s == nullptr)
@@ -4282,6 +4272,18 @@ namespace Builder
 				m_log->errALC5186(txSignal->appSignalID(), port->equipmentID());
 				result = false;
 				continue;
+			}
+
+			if (s->isCompatibleFormat(txSignal->signalType(), txSignal->dataFormat(), txSignal->dataSize(), txSignal->byteOrder()) == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log,
+								   Builder::IssueType::NotDefined,
+								   QString(tr("Format of signal '%1' isn't compatible with format in port '%2' raw data description (Connection '%3')")).
+								   arg(txSignal->appSignalID()).
+								   arg(port->equipmentID()).
+								   arg(port->connectionID()));
+
+				return false;
 			}
 
 			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ramAddr().offset());
@@ -4318,7 +4320,6 @@ namespace Builder
 
 			count++;
 		}
-
 
 		if (count > 0)
 		{
@@ -6126,8 +6127,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::processTxSignals()
 	{
-		bool result = true;
-
 		if (m_optoModuleStorage == nullptr)
 		{
 			assert(false);
@@ -6137,35 +6136,38 @@ namespace Builder
 
 		QString lmID = m_lm->equipmentIdTemplate();
 
-		// add raw Tx signals in txSignals lists of all Optical and Serial ports associated with current LM
-		// check that added raw Tx signals exists in current LM
-		//
-		//result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
+		bool result = false;
 
-		// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
-		// check that added regulat Tx signals exists in current LM
-		//
-		result &= processTransmitters();
+		do
+		{
+			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
+			// check that added regulat Tx signals exists in current LM
+			//
+			if (processTransmitters() == false) break;
 
-		// find raw tx signals and set it addresses
-		//
-		result &= m_optoModuleStorage->initRawTxSignals(lmID);
+			// find raw tx signals and set it addresses
+			//
+			if (m_optoModuleStorage->initRawTxSignals(lmID) == false) break;
 
-		// sort Tx signals lists of LM's associated opto ports
-		//
-		result &= m_optoModuleStorage->sortTxSignals(lmID);
+			// sort Tx signals lists of LM's associated opto ports
+			//
+			if (m_optoModuleStorage->sortTxSignals(lmID) == false) break;
 
-		// calculate relative Tx signals addresses in tx buffers
-		//
-		result &= m_optoModuleStorage->calculateTxSignalsAddresses(lmID);
+			// calculate relative Tx signals addresses in tx buffers
+			//
+			if (m_optoModuleStorage->calculateTxSignalsAddresses(lmID) == false) break;
 
-		// calculate txDataID
-		//
-		result &= m_optoModuleStorage->calculateTxDataIDs(lmID);
+			// calculate txDataID
+			//
+			if (m_optoModuleStorage->calculateTxDataIDs(lmID) == false) break;
 
-		// calculate tx buffers absolute addresses
-		//
-		result &= m_optoModuleStorage->calculateTxBufAddresses(lmID);
+			// calculate tx buffers absolute addresses
+			//
+			if (m_optoModuleStorage->calculateTxBufAddresses(lmID) == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}
