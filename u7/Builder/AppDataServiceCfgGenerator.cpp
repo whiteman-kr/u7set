@@ -475,9 +475,6 @@ namespace Builder
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppDataSources.xml", CFG_FILE_ID_DATA_SOURCES, "", data);
 
-		buildFile->addMetadata("Meta1", "Data1");
-		buildFile->addMetadata("Meta2", "Data2");
-
 		if (buildFile == nullptr)
 		{
 			return false;

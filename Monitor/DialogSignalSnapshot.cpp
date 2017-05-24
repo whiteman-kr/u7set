@@ -805,12 +805,14 @@ void DialogSignalSnapshot::fillSchemas()
 	ui->schemaCombo->addItem("All Schemas", "");
 
 	int index = 0;
-	std::vector<ConfigSchema> schemasParams = m_configController->schemasParams();
-	for (auto schema : schemasParams)
-	{
-		ui->schemaCombo->addItem(schema.strId + " - " + schema.caption, schema.strId);
 
-		if (currentStrId == schema.strId)
+	std::vector<VFrame30::SchemaDetails> schemasDetails = m_configController->schemasDetails();
+
+	for (const VFrame30::SchemaDetails& schema : schemasDetails )
+	{
+		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+
+		if (currentStrId == schema.m_schemaId )
 		{
 			ui->schemaCombo->setCurrentIndex(index);
 		}

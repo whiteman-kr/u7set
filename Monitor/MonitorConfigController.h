@@ -6,6 +6,7 @@
 #include <QThread>
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
+#include "../VFrame30/Schema.h"
 
 
 class ConfigConnection
@@ -38,17 +39,6 @@ struct ConfigSettings
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
-
-
-struct ConfigSchema
-{
-	QString strId;
-	QString caption;
-	std::set<QString> appSignals;
-
-	void setFromBuildFileInfo(const Builder::BuildFileInfo& f);
-};
-
 
 class MonitorConfigController : public QObject
 {
@@ -91,9 +81,8 @@ private:
 	// Public properties
 	//
 public:
-	std::vector<ConfigSchema> schemasParams() const;
+	std::vector<VFrame30::SchemaDetails> schemasDetails() const;
 	std::set<QString> schemaAppSignals(const QString& schemaId);
-	std::vector<ConfigSchema> schemas() const;
 
 	ConfigSettings configuration() const;
 
@@ -106,7 +95,7 @@ private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	mutable QMutex m_mutex;
-	std::vector<ConfigSchema> m_schemas;
+	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 
 	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
 	ConfigSettings m_configuration = ConfigSettings();

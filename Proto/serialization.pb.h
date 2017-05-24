@@ -99,6 +99,8 @@ class AppSignalState;
 class AppSignalParam;
 class AppSignalParamSet;
 class Connection;
+class SchemaDetailsSet;
+class SchemaDetails;
 
 enum SchemaUnit {
   Display = 0,
@@ -833,6 +835,15 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::Connection* release_connection();
   inline void set_allocated_connection(::Proto::Connection* connection);
 
+  // optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
+  inline bool has_schemadetailsset() const;
+  inline void clear_schemadetailsset();
+  static const int kSchemaDetailsSetFieldNumber = 105;
+  inline const ::Proto::SchemaDetailsSet& schemadetailsset() const;
+  inline ::Proto::SchemaDetailsSet* mutable_schemadetailsset();
+  inline ::Proto::SchemaDetailsSet* release_schemadetailsset();
+  inline void set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* schemadetailsset);
+
   // @@protoc_insertion_point(class_scope:Proto.Envelope)
  private:
   inline void set_has_classnamehash();
@@ -853,6 +864,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_configuration();
   inline void set_has_connection();
   inline void clear_has_connection();
+  inline void set_has_schemadetailsset();
+  inline void clear_has_schemadetailsset();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -864,10 +877,11 @@ class Envelope : public ::google::protobuf::Message {
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
   ::Proto::Connection* connection_;
+  ::Proto::SchemaDetailsSet* schemadetailsset_;
   ::google::protobuf::uint32 classnamehash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -9536,6 +9550,307 @@ class Connection : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static Connection* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class SchemaDetailsSet : public ::google::protobuf::Message {
+ public:
+  SchemaDetailsSet();
+  virtual ~SchemaDetailsSet();
+
+  SchemaDetailsSet(const SchemaDetailsSet& from);
+
+  inline SchemaDetailsSet& operator=(const SchemaDetailsSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaDetailsSet& default_instance();
+
+  void Swap(SchemaDetailsSet* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaDetailsSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaDetailsSet& from);
+  void MergeFrom(const SchemaDetailsSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.SchemaDetails schemasDetails = 2;
+  inline int schemasdetails_size() const;
+  inline void clear_schemasdetails();
+  static const int kSchemasDetailsFieldNumber = 2;
+  inline const ::Proto::SchemaDetails& schemasdetails(int index) const;
+  inline ::Proto::SchemaDetails* mutable_schemasdetails(int index);
+  inline ::Proto::SchemaDetails* add_schemasdetails();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemaDetails >&
+      schemasdetails() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaDetails >*
+      mutable_schemasdetails();
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaDetailsSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::SchemaDetails > schemasdetails_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaDetailsSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaDetails : public ::google::protobuf::Message {
+ public:
+  SchemaDetails();
+  virtual ~SchemaDetails();
+
+  SchemaDetails(const SchemaDetails& from);
+
+  inline SchemaDetails& operator=(const SchemaDetails& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaDetails& default_instance();
+
+  void Swap(SchemaDetails* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaDetails* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaDetails& from);
+  void MergeFrom(const SchemaDetails& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 version = 2;
+  inline bool has_version() const;
+  inline void clear_version();
+  static const int kVersionFieldNumber = 2;
+  inline ::google::protobuf::int32 version() const;
+  inline void set_version(::google::protobuf::int32 value);
+
+  // optional string schemaId = 4;
+  inline bool has_schemaid() const;
+  inline void clear_schemaid();
+  static const int kSchemaIdFieldNumber = 4;
+  inline const ::std::string& schemaid() const;
+  inline void set_schemaid(const ::std::string& value);
+  inline void set_schemaid(const char* value);
+  inline void set_schemaid(const char* value, size_t size);
+  inline ::std::string* mutable_schemaid();
+  inline ::std::string* release_schemaid();
+  inline void set_allocated_schemaid(::std::string* schemaid);
+
+  // optional string caption = 5;
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 5;
+  inline const ::std::string& caption() const;
+  inline void set_caption(const ::std::string& value);
+  inline void set_caption(const char* value);
+  inline void set_caption(const char* value, size_t size);
+  inline ::std::string* mutable_caption();
+  inline ::std::string* release_caption();
+  inline void set_allocated_caption(::std::string* caption);
+
+  // optional bool excludedfromBuild = 6;
+  inline bool has_excludedfrombuild() const;
+  inline void clear_excludedfrombuild();
+  static const int kExcludedfromBuildFieldNumber = 6;
+  inline bool excludedfrombuild() const;
+  inline void set_excludedfrombuild(bool value);
+
+  // optional string equipmentId = 7;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 7;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // optional string lmDescriptionFile = 8;
+  inline bool has_lmdescriptionfile() const;
+  inline void clear_lmdescriptionfile();
+  static const int kLmDescriptionFileFieldNumber = 8;
+  inline const ::std::string& lmdescriptionfile() const;
+  inline void set_lmdescriptionfile(const ::std::string& value);
+  inline void set_lmdescriptionfile(const char* value);
+  inline void set_lmdescriptionfile(const char* value, size_t size);
+  inline ::std::string* mutable_lmdescriptionfile();
+  inline ::std::string* release_lmdescriptionfile();
+  inline void set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile);
+
+  // repeated string signalIds = 20;
+  inline int signalids_size() const;
+  inline void clear_signalids();
+  static const int kSignalIdsFieldNumber = 20;
+  inline const ::std::string& signalids(int index) const;
+  inline ::std::string* mutable_signalids(int index);
+  inline void set_signalids(int index, const ::std::string& value);
+  inline void set_signalids(int index, const char* value);
+  inline void set_signalids(int index, const char* value, size_t size);
+  inline ::std::string* add_signalids();
+  inline void add_signalids(const ::std::string& value);
+  inline void add_signalids(const char* value);
+  inline void add_signalids(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& signalids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_signalids();
+
+  // repeated string labels = 21;
+  inline int labels_size() const;
+  inline void clear_labels();
+  static const int kLabelsFieldNumber = 21;
+  inline const ::std::string& labels(int index) const;
+  inline ::std::string* mutable_labels(int index);
+  inline void set_labels(int index, const ::std::string& value);
+  inline void set_labels(int index, const char* value);
+  inline void set_labels(int index, const char* value, size_t size);
+  inline ::std::string* add_labels();
+  inline void add_labels(const ::std::string& value);
+  inline void add_labels(const char* value);
+  inline void add_labels(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& labels() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_labels();
+
+  // repeated string connections = 22;
+  inline int connections_size() const;
+  inline void clear_connections();
+  static const int kConnectionsFieldNumber = 22;
+  inline const ::std::string& connections(int index) const;
+  inline ::std::string* mutable_connections(int index);
+  inline void set_connections(int index, const ::std::string& value);
+  inline void set_connections(int index, const char* value);
+  inline void set_connections(int index, const char* value, size_t size);
+  inline ::std::string* add_connections();
+  inline void add_connections(const ::std::string& value);
+  inline void add_connections(const char* value);
+  inline void add_connections(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& connections() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_connections();
+
+  // repeated .Proto.Uuid guids = 23;
+  inline int guids_size() const;
+  inline void clear_guids();
+  static const int kGuidsFieldNumber = 23;
+  inline const ::Proto::Uuid& guids(int index) const;
+  inline ::Proto::Uuid* mutable_guids(int index);
+  inline ::Proto::Uuid* add_guids();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
+      guids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
+      mutable_guids();
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaDetails)
+ private:
+  inline void set_has_version();
+  inline void clear_has_version();
+  inline void set_has_schemaid();
+  inline void clear_has_schemaid();
+  inline void set_has_caption();
+  inline void clear_has_caption();
+  inline void set_has_excludedfrombuild();
+  inline void clear_has_excludedfrombuild();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_lmdescriptionfile();
+  inline void clear_has_lmdescriptionfile();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* schemaid_;
+  ::google::protobuf::int32 version_;
+  bool excludedfrombuild_;
+  ::std::string* caption_;
+  ::std::string* equipmentid_;
+  ::std::string* lmdescriptionfile_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> signalids_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> labels_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> connections_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > guids_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaDetails* default_instance_;
+};
 // ===================================================================
 
 
@@ -10386,6 +10701,44 @@ inline void Envelope::set_allocated_connection(::Proto::Connection* connection) 
     set_has_connection();
   } else {
     clear_has_connection();
+  }
+}
+
+// optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
+inline bool Envelope::has_schemadetailsset() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Envelope::set_has_schemadetailsset() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Envelope::clear_has_schemadetailsset() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Envelope::clear_schemadetailsset() {
+  if (schemadetailsset_ != NULL) schemadetailsset_->::Proto::SchemaDetailsSet::Clear();
+  clear_has_schemadetailsset();
+}
+inline const ::Proto::SchemaDetailsSet& Envelope::schemadetailsset() const {
+  return schemadetailsset_ != NULL ? *schemadetailsset_ : *default_instance_->schemadetailsset_;
+}
+inline ::Proto::SchemaDetailsSet* Envelope::mutable_schemadetailsset() {
+  set_has_schemadetailsset();
+  if (schemadetailsset_ == NULL) schemadetailsset_ = new ::Proto::SchemaDetailsSet;
+  return schemadetailsset_;
+}
+inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
+  clear_has_schemadetailsset();
+  ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
+  schemadetailsset_ = NULL;
+  return temp;
+}
+inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* schemadetailsset) {
+  delete schemadetailsset_;
+  schemadetailsset_ = schemadetailsset;
+  if (schemadetailsset) {
+    set_has_schemadetailsset();
+  } else {
+    clear_has_schemadetailsset();
   }
 }
 
@@ -23247,6 +23600,520 @@ inline void Connection::set_allocated_uuid(::Proto::Uuid* uuid) {
   } else {
     clear_has_uuid();
   }
+}
+
+// -------------------------------------------------------------------
+
+// SchemaDetailsSet
+
+// repeated .Proto.SchemaDetails schemasDetails = 2;
+inline int SchemaDetailsSet::schemasdetails_size() const {
+  return schemasdetails_.size();
+}
+inline void SchemaDetailsSet::clear_schemasdetails() {
+  schemasdetails_.Clear();
+}
+inline const ::Proto::SchemaDetails& SchemaDetailsSet::schemasdetails(int index) const {
+  return schemasdetails_.Get(index);
+}
+inline ::Proto::SchemaDetails* SchemaDetailsSet::mutable_schemasdetails(int index) {
+  return schemasdetails_.Mutable(index);
+}
+inline ::Proto::SchemaDetails* SchemaDetailsSet::add_schemasdetails() {
+  return schemasdetails_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::SchemaDetails >&
+SchemaDetailsSet::schemasdetails() const {
+  return schemasdetails_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaDetails >*
+SchemaDetailsSet::mutable_schemasdetails() {
+  return &schemasdetails_;
+}
+
+// -------------------------------------------------------------------
+
+// SchemaDetails
+
+// optional int32 version = 2;
+inline bool SchemaDetails::has_version() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaDetails::set_has_version() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaDetails::clear_has_version() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaDetails::clear_version() {
+  version_ = 0;
+  clear_has_version();
+}
+inline ::google::protobuf::int32 SchemaDetails::version() const {
+  return version_;
+}
+inline void SchemaDetails::set_version(::google::protobuf::int32 value) {
+  set_has_version();
+  version_ = value;
+}
+
+// optional string schemaId = 4;
+inline bool SchemaDetails::has_schemaid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaDetails::set_has_schemaid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaDetails::clear_has_schemaid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaDetails::clear_schemaid() {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    schemaid_->clear();
+  }
+  clear_has_schemaid();
+}
+inline const ::std::string& SchemaDetails::schemaid() const {
+  return *schemaid_;
+}
+inline void SchemaDetails::set_schemaid(const ::std::string& value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void SchemaDetails::set_schemaid(const char* value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void SchemaDetails::set_schemaid(const char* value, size_t size) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::mutable_schemaid() {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  return schemaid_;
+}
+inline ::std::string* SchemaDetails::release_schemaid() {
+  clear_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = schemaid_;
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaDetails::set_allocated_schemaid(::std::string* schemaid) {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete schemaid_;
+  }
+  if (schemaid) {
+    set_has_schemaid();
+    schemaid_ = schemaid;
+  } else {
+    clear_has_schemaid();
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string caption = 5;
+inline bool SchemaDetails::has_caption() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaDetails::set_has_caption() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaDetails::clear_has_caption() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaDetails::clear_caption() {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    caption_->clear();
+  }
+  clear_has_caption();
+}
+inline const ::std::string& SchemaDetails::caption() const {
+  return *caption_;
+}
+inline void SchemaDetails::set_caption(const ::std::string& value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void SchemaDetails::set_caption(const char* value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void SchemaDetails::set_caption(const char* value, size_t size) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::mutable_caption() {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  return caption_;
+}
+inline ::std::string* SchemaDetails::release_caption() {
+  clear_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = caption_;
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaDetails::set_allocated_caption(::std::string* caption) {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    delete caption_;
+  }
+  if (caption) {
+    set_has_caption();
+    caption_ = caption;
+  } else {
+    clear_has_caption();
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool excludedfromBuild = 6;
+inline bool SchemaDetails::has_excludedfrombuild() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaDetails::set_has_excludedfrombuild() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaDetails::clear_has_excludedfrombuild() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaDetails::clear_excludedfrombuild() {
+  excludedfrombuild_ = false;
+  clear_has_excludedfrombuild();
+}
+inline bool SchemaDetails::excludedfrombuild() const {
+  return excludedfrombuild_;
+}
+inline void SchemaDetails::set_excludedfrombuild(bool value) {
+  set_has_excludedfrombuild();
+  excludedfrombuild_ = value;
+}
+
+// optional string equipmentId = 7;
+inline bool SchemaDetails::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaDetails::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaDetails::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaDetails::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& SchemaDetails::equipmentid() const {
+  return *equipmentid_;
+}
+inline void SchemaDetails::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SchemaDetails::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void SchemaDetails::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* SchemaDetails::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaDetails::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string lmDescriptionFile = 8;
+inline bool SchemaDetails::has_lmdescriptionfile() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaDetails::set_has_lmdescriptionfile() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaDetails::clear_has_lmdescriptionfile() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaDetails::clear_lmdescriptionfile() {
+  if (lmdescriptionfile_ != &::google::protobuf::internal::kEmptyString) {
+    lmdescriptionfile_->clear();
+  }
+  clear_has_lmdescriptionfile();
+}
+inline const ::std::string& SchemaDetails::lmdescriptionfile() const {
+  return *lmdescriptionfile_;
+}
+inline void SchemaDetails::set_lmdescriptionfile(const ::std::string& value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == &::google::protobuf::internal::kEmptyString) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void SchemaDetails::set_lmdescriptionfile(const char* value) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == &::google::protobuf::internal::kEmptyString) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(value);
+}
+inline void SchemaDetails::set_lmdescriptionfile(const char* value, size_t size) {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == &::google::protobuf::internal::kEmptyString) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  lmdescriptionfile_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::mutable_lmdescriptionfile() {
+  set_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == &::google::protobuf::internal::kEmptyString) {
+    lmdescriptionfile_ = new ::std::string;
+  }
+  return lmdescriptionfile_;
+}
+inline ::std::string* SchemaDetails::release_lmdescriptionfile() {
+  clear_has_lmdescriptionfile();
+  if (lmdescriptionfile_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmdescriptionfile_;
+    lmdescriptionfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaDetails::set_allocated_lmdescriptionfile(::std::string* lmdescriptionfile) {
+  if (lmdescriptionfile_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmdescriptionfile_;
+  }
+  if (lmdescriptionfile) {
+    set_has_lmdescriptionfile();
+    lmdescriptionfile_ = lmdescriptionfile;
+  } else {
+    clear_has_lmdescriptionfile();
+    lmdescriptionfile_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated string signalIds = 20;
+inline int SchemaDetails::signalids_size() const {
+  return signalids_.size();
+}
+inline void SchemaDetails::clear_signalids() {
+  signalids_.Clear();
+}
+inline const ::std::string& SchemaDetails::signalids(int index) const {
+  return signalids_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_signalids(int index) {
+  return signalids_.Mutable(index);
+}
+inline void SchemaDetails::set_signalids(int index, const ::std::string& value) {
+  signalids_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_signalids(int index, const char* value) {
+  signalids_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_signalids(int index, const char* value, size_t size) {
+  signalids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_signalids() {
+  return signalids_.Add();
+}
+inline void SchemaDetails::add_signalids(const ::std::string& value) {
+  signalids_.Add()->assign(value);
+}
+inline void SchemaDetails::add_signalids(const char* value) {
+  signalids_.Add()->assign(value);
+}
+inline void SchemaDetails::add_signalids(const char* value, size_t size) {
+  signalids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::signalids() const {
+  return signalids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_signalids() {
+  return &signalids_;
+}
+
+// repeated string labels = 21;
+inline int SchemaDetails::labels_size() const {
+  return labels_.size();
+}
+inline void SchemaDetails::clear_labels() {
+  labels_.Clear();
+}
+inline const ::std::string& SchemaDetails::labels(int index) const {
+  return labels_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_labels(int index) {
+  return labels_.Mutable(index);
+}
+inline void SchemaDetails::set_labels(int index, const ::std::string& value) {
+  labels_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_labels(int index, const char* value) {
+  labels_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_labels(int index, const char* value, size_t size) {
+  labels_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_labels() {
+  return labels_.Add();
+}
+inline void SchemaDetails::add_labels(const ::std::string& value) {
+  labels_.Add()->assign(value);
+}
+inline void SchemaDetails::add_labels(const char* value) {
+  labels_.Add()->assign(value);
+}
+inline void SchemaDetails::add_labels(const char* value, size_t size) {
+  labels_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::labels() const {
+  return labels_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_labels() {
+  return &labels_;
+}
+
+// repeated string connections = 22;
+inline int SchemaDetails::connections_size() const {
+  return connections_.size();
+}
+inline void SchemaDetails::clear_connections() {
+  connections_.Clear();
+}
+inline const ::std::string& SchemaDetails::connections(int index) const {
+  return connections_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_connections(int index) {
+  return connections_.Mutable(index);
+}
+inline void SchemaDetails::set_connections(int index, const ::std::string& value) {
+  connections_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_connections(int index, const char* value) {
+  connections_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_connections(int index, const char* value, size_t size) {
+  connections_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_connections() {
+  return connections_.Add();
+}
+inline void SchemaDetails::add_connections(const ::std::string& value) {
+  connections_.Add()->assign(value);
+}
+inline void SchemaDetails::add_connections(const char* value) {
+  connections_.Add()->assign(value);
+}
+inline void SchemaDetails::add_connections(const char* value, size_t size) {
+  connections_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::connections() const {
+  return connections_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_connections() {
+  return &connections_;
+}
+
+// repeated .Proto.Uuid guids = 23;
+inline int SchemaDetails::guids_size() const {
+  return guids_.size();
+}
+inline void SchemaDetails::clear_guids() {
+  guids_.Clear();
+}
+inline const ::Proto::Uuid& SchemaDetails::guids(int index) const {
+  return guids_.Get(index);
+}
+inline ::Proto::Uuid* SchemaDetails::mutable_guids(int index) {
+  return guids_.Mutable(index);
+}
+inline ::Proto::Uuid* SchemaDetails::add_guids() {
+  return guids_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >&
+SchemaDetails::guids() const {
+  return guids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
+SchemaDetails::mutable_guids() {
+  return &guids_;
 }
 
 

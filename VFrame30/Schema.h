@@ -174,6 +174,9 @@ namespace VFrame30
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
 
+		bool saveData(Proto::SchemaDetails* message) const;
+		bool loadData(const Proto::SchemaDetails& message);
+
 		bool searchForString(const QString& searchText) const;
 
 	public:
@@ -187,6 +190,35 @@ namespace VFrame30
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
 		std::set<QUuid> m_guids;
+	};
+
+	class VFRAME30LIBSHARED_EXPORT SchemaDetailsSet : public Proto::ObjectSerialization<SchemaDetailsSet>
+	{
+	public:
+		SchemaDetailsSet();
+
+		// Serializatin implementation of Proto::ObjectSerialization<>
+		//
+		friend Proto::ObjectSerialization<SchemaDetailsSet>;
+
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		static std::shared_ptr<SchemaDetailsSet> CreateObject(const Proto::Envelope& message);
+
+		// Properties and functions
+		//
+	public:
+		void clear();
+		void add(std::shared_ptr<SchemaDetails> details);
+
+		std::vector<SchemaDetails> schemasDetails() const;
+		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
+
+	private:
+		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId
 	};
 
 

@@ -121,6 +121,7 @@ message Envelope
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 	optional Connection connection = 104;			// Hardware::Connection
+	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
 }
 
 
@@ -1106,6 +1107,24 @@ message Connection
     optional int32 Port2RxWordsQuantity = 19 [default = 479];
 
     optional Uuid uuid = 20;
+}
 
+message SchemaDetailsSet
+{
+    repeated SchemaDetails schemasDetails = 2;
+}
+
+message SchemaDetails
+{
+    optional int32 version = 2;
+	optional string schemaId = 4;
+	optional string caption = 5;
+	optional bool excludedfromBuild = 6;
+	optional string equipmentId = 7;
+	optional string lmDescriptionFile = 8;
+	repeated string signalIds = 20;
+	repeated string labels = 21;
+	repeated string connections = 22;
+	repeated Uuid guids = 23;
 }
 

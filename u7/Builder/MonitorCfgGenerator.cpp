@@ -1,5 +1,6 @@
 #include "MonitorCfgGenerator.h"
 #include "../../lib/ServiceSettings.h"
+#include "../../VFrame30/Schema.h"
 
 namespace Builder
 {
@@ -52,13 +53,41 @@ namespace Builder
 
 		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
+		QString alsExt = QLatin1String(".") + ::AlFileExtension;
+		QString mvsExt = QLatin1String(".") + ::MvsFileExtension;
 
 		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 		{
-			m_cfgXml->addLinkToFile(schemaFile.subDir,
-									schemaFile.fileName,
-									QLatin1String("Details"),
-									schemaFile.details);
+			// Add Application Logic and Monitor schemas only
+			//
+			if (schemaFile.fileName.endsWith(alsExt, Qt::CaseInsensitive) == true ||
+				schemaFile.fileName.endsWith(mvsExt, Qt::CaseInsensitive) == true)
+			{
+				m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
+			}
+		}
+
+		// Generate description file for all schemas
+		//
+		VFrame30::SchemaDetailsSet detailsSet;
+
+		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+		{
+			auto details = std::make_shared<VFrame30::SchemaDetails>(schemaFile.details);
+			details->m_guids.clear();		// Do we really need SchemaItemGuids in Monitor? If yes, delete this line
+
+			detailsSet.add(details);
+		}
+
+		QByteArray schemaSetFileData;
+
+		bool saveOk = detailsSet.Save(schemaSetFileData);
+		assert(saveOk);
+
+		if (saveOk == true)
+		{
+			BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", schemaSetFileData);
+			m_cfgXml->addLinkToFile(schemaDetailsBuildFile);
 		}
 
 		return result;

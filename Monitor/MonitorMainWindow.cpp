@@ -707,18 +707,18 @@ void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*
 	//
 	m_comboBox->clear();
 
-	std::vector<ConfigSchema> schemas = m_configController->schemas();
+	std::vector<VFrame30::SchemaDetails> schemas = m_configController->schemasDetails();
 
 	std::sort(schemas.begin(), schemas.end(),
-		[](const ConfigSchema& s1, const ConfigSchema& s2) -> bool
+		[](const VFrame30::SchemaDetails& s1, const VFrame30::SchemaDetails& s2) -> bool
 		{
-			return s1.strId < s2.strId;
+			return s1.m_schemaId < s2.m_schemaId;
 		});
 
-	for (const ConfigSchema& s : schemas)
+	for (const VFrame30::SchemaDetails& s : schemas)
 	{
-		QVariant data = QVariant::fromValue(s.strId);
-		m_comboBox->addItem(s.strId + "  " + s.caption, data);
+		QVariant data = QVariant::fromValue(s.m_schemaId);
+		m_comboBox->addItem(s.m_schemaId + "  " + s.m_caption, data);
 	}
 
 	// Restore selected
