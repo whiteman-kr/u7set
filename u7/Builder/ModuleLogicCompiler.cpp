@@ -3687,8 +3687,6 @@ namespace Builder
 			return true;
 		}
 
-		//assert(port->txDataSizeW() > Hardware::TX_DATA_ID_SIZE_W;	// txDataSizeW must be > then sizeofW(port DataID)
-
 		bool result = true;
 
 		Command cmd;
@@ -3711,6 +3709,20 @@ namespace Builder
 		result &= copyOptoPortTxAnalogSignals(port);
 
 		result &= copyOptoPortTxDiscreteSignals(port);
+
+		// rest of manually configured buffer fills by 0
+		//
+		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
+		{
+			int fillSize = port->txDataSizeW() - port->txUsedDataSizeW();
+
+			cmd.setMem(port->txBufAbsAddress() + port->txUsedDataSizeW(),
+					   0, fillSize);
+			cmd.setComment("rest of manually configured buffer fills by 0");
+
+			m_code.append(cmd);
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -3967,7 +3979,10 @@ namespace Builder
 			bitCount++;
 		}
 
-		m_code.newLine();
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -4596,7 +4611,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::finishAppLogicCode()
 	{
-		m_code.newLine();
 		m_code.comment("End of application logic code");
 		m_code.newLine();
 
@@ -6174,8 +6188,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::processSerialRxSignals()
 	{
-		bool result = true;
-
 		if (m_optoModuleStorage == nullptr)
 		{
 			assert(false);
@@ -6185,27 +6197,35 @@ namespace Builder
 
 		QString lmID = m_lm->equipmentIdTemplate();
 
-		// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
-		// check that added raw Rx signals exists in current LM
-		//
-		result &= m_optoModuleStorage->appendSerialRawRxSignals(lmID, m_lmAssociatedSignals);
+		bool result = false;
 
-		// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
-		// check that added regulat Rx signals exists in current LM
-		//
-		result &= appendRegularSerialRxSignals();
+		do
+		{
+			// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
+			// check that added raw Rx signals exists in current LM
+			//
+			if (m_optoModuleStorage->appendSerialRawRxSignals(lmID, m_lmAssociatedSignals) == false) break;
 
-		// sort Rx signals lists of LM's associated Serial ports
-		//
-		result &= m_optoModuleStorage->sortSerialRxSignals(lmID);
+			// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
+			// check that added regulat Rx signals exists in current LM
+			//
+			if (appendRegularSerialRxSignals() == false) break;
 
-		// sort Rx signals lists of LM's associated Serial ports
-		//
-		result &= m_optoModuleStorage->calculateSerialRxSignalsAddresses(lmID);
+			// sort Rx signals lists of LM's associated Serial ports
+			//
+			if (m_optoModuleStorage->sortSerialRxSignals(lmID) == false) break;
 
-		// calculate rxDataID for serial ports
-		//
-		result &= m_optoModuleStorage->calculateSerialRxDataIDs(lmID);
+			// sort Rx signals lists of LM's associated Serial ports
+			//
+			if (m_optoModuleStorage->calculateSerialRxSignalsAddresses(lmID) == false) break;
+
+			// calculate rxDataID for serial ports
+			//
+			if (m_optoModuleStorage->calculateSerialRxDataIDs(lmID) == false) break;
+
+			result = true;
+		}
+		while (false);
 
 		return result;
 	}

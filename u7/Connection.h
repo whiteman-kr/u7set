@@ -127,8 +127,12 @@ namespace Hardware
 		OptoPort::SerialMode serialMode() const;
 		void setSerialMode(const OptoPort::SerialMode value);
 
+		QString serialModeStr() const;
+
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
+
+		QString modeStr() const;
 
 		bool isSerial() const;
 

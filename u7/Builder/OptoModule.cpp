@@ -487,27 +487,27 @@ namespace Hardware
 
 		m_txDiscreteSignalsSizeW = address.offset() - startAddr;
 
-		int fullTxDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
+		m_txUsedDataSizeW = TX_DATA_ID_SIZE_W + m_txRawDataSizeW + m_txAnalogSignalsSizeW + m_txDiscreteSignalsSizeW;
 
 		if (manualSettings() == true)
 		{
-			m_txDataSizeW = m_manualTxSizeW;
-
-			if (fullTxDataSizeW > m_txDataSizeW)
+			if (m_txUsedDataSizeW > m_manualTxSizeW)
 			{
 				LOG_MESSAGE(m_log, QString(tr("Port %1: txIdSizeW = %2, txRawDataSizeW = %3, txAnalogSignalsSizeW = %4, txDiscreteSignalsSizeW = %5")).
 									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual txDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
-								   arg(m_manualTxSizeW).arg(fullTxDataSizeW).
+								   arg(m_manualTxSizeW).arg(m_txUsedDataSizeW).
 								   arg(m_equipmentID).arg(m_connectionID));
 
 				return false;
 			}
+
+			m_txDataSizeW = m_manualTxSizeW;
 		}
 		else
 		{
-			m_txDataSizeW = fullTxDataSizeW;
+			m_txDataSizeW = m_txUsedDataSizeW;
 		}
 
 		return true;
@@ -639,27 +639,27 @@ namespace Hardware
 
 		m_rxDiscreteSignalsSizeW = address.offset() - startAddr;
 
-		int fullRxDataSizeW = TX_DATA_ID_SIZE_W + m_rxRawDataSizeW + m_rxAnalogSignalsSizeW + m_rxDiscreteSignalsSizeW;
+		m_rxUsedDataSizeW = TX_DATA_ID_SIZE_W + m_rxRawDataSizeW + m_rxAnalogSignalsSizeW + m_rxDiscreteSignalsSizeW;
 
 		if (manualSettings() == true)
 		{
-			m_rxDataSizeW = m_manualTxSizeW;
-
-			if (fullRxDataSizeW > m_rxDataSizeW)
+			if (m_rxUsedDataSizeW > m_manualTxSizeW)
 			{
 				LOG_MESSAGE(m_log, QString(tr("Port %1: rxIdSizeW = %2, rxRawDataSizeW = %3, rxAnalogSignalsSizeW = %4, rxDiscreteSignalsSizeW = %5")).
 									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Manual rxDataSizeW - %1 less then needed size %2 (port %3, connection %4)")).
-								   arg(m_manualRxSizeW).arg(fullRxDataSizeW).
+								   arg(m_manualRxSizeW).arg(m_rxUsedDataSizeW).
 								   arg(m_equipmentID).arg(m_connectionID));
 
 				return false;
 			}
+
+			m_rxDataSizeW = m_manualTxSizeW;
 		}
 		else
 		{
-			m_rxDataSizeW = fullRxDataSizeW;
+			m_rxDataSizeW = m_rxUsedDataSizeW;
 		}
 
 		return true;
@@ -739,6 +739,7 @@ namespace Hardware
 		//
 		m_rxDataID = linkedPort->txDataID();
 		m_rxDataSizeW = linkedPort->txDataSizeW();
+		m_rxUsedDataSizeW = linkedPort->txUsedDataSizeW();
 		m_rxRawDataSizeW = linkedPort->txRawDataSizeW();
 		m_rxAnalogSignalsSizeW = linkedPort->txAnalogSignalsSizeW();
 		m_rxDiscreteSignalsSizeW = linkedPort->txDiscreteSignalsSizeW();
@@ -2287,6 +2288,7 @@ namespace Hardware
 
 				if (res == false)
 				{
+					result = false;
 					continue;
 				}
 
@@ -2445,6 +2447,49 @@ namespace Hardware
 			if (res == false)
 			{
 				return false;
+			}
+
+			if (connection->manualSettings() == true)
+			{
+				if (optoPort1->manualRxSizeW() != optoPort2->manualTxSizeW())
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
+									   arg(optoPort1->equipmentID()).
+									   arg(optoPort2->equipmentID()).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort2->manualRxSizeW() != optoPort1->manualTxSizeW())
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
+									   arg(optoPort2->equipmentID()).
+									   arg(optoPort1->equipmentID()).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort1->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
+									   arg(optoPort1->equipmentID()).
+									   arg(OptoPort::TX_DATA_ID_SIZE_W).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort2->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
+									   arg(optoPort2->equipmentID()).
+									   arg(OptoPort::TX_DATA_ID_SIZE_W).
+									   arg(optoPort2->connectionID()));
+					return false;
+				}
 			}
 
 			LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
@@ -2806,6 +2851,12 @@ namespace Hardware
 				continue;
 			}
 
+			if (port->equipmentID() == "TEST_R01_CH01_MD14_OPTOPORT05")
+			{
+				int a = 0;
+				a++;
+			}
+
 			if (port->mode() == Hardware::OptoPort::Mode::Serial)
 			{
 				// RS232/485 port has no linked ports
@@ -2840,16 +2891,12 @@ namespace Hardware
 					break;
 				}
 
-				if (linkedPort->manualSettings())
+				if (linkedPort->manualSettings() == true)
 				{
 					linkedPort->setRxDataSizeW(linkedPort->manualRxSizeW());
 
 					if (port->txDataSizeW() > linkedPort->rxDataSizeW())
 					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString(tr("Manual rxDataSizeW of port '%1' less then txDataSizeW of linked port '%2' (connection %3)")).
-										   arg(linkedPort->equipmentID()).arg(port->equipmentID()).
-										   arg(port->connectionID()));
 						result = false;
 					}
 				}

@@ -162,6 +162,7 @@ namespace Hardware
 		Q_INVOKABLE quint16 portID() const { return linkID(); }					// rename in java!
 
 		Q_INVOKABLE quint32 txDataID() const { return m_txDataID; }
+		quint32 rxDataID() const { return m_rxDataID; }
 
 		Q_INVOKABLE QString equipmentID() const { return m_equipmentID; }
 
@@ -203,6 +204,7 @@ namespace Hardware
 		const RawDataDescription& rawDataDescription() const { return m_rawDataDescription; }
 
 		Q_INVOKABLE int txDataSizeW() const { return m_txDataSizeW; }
+		int txUsedDataSizeW() const { return m_txUsedDataSizeW; }
 
 		int txRawDataSizeW() const { return m_txRawDataSizeW; }
 		void setTxRawDataSizeW(int rawDataSizeW);
@@ -220,6 +222,8 @@ namespace Hardware
 
 		Q_INVOKABLE int rxDataSizeW() const { return m_rxDataSizeW; }
 		void setRxDataSizeW(int rxDataSizeW) { m_rxDataSizeW = rxDataSizeW; }
+
+		int rxUsedDataSizeW() const { return m_rxUsedDataSizeW; }
 
 		int rxRawDataSizeW() const { return m_rxRawDataSizeW; }
 		int rxAnalogSignalsSizeW() const { return m_rxAnalogSignalsSizeW; }
@@ -301,6 +305,7 @@ namespace Hardware
 		int m_txBufAddress = BAD_ADDRESS;				// address of port's Tx buffer relative to opto module appDataOffset
 		quint32 m_txDataID = 0;							// range 0..0xFFFFFFFF
 		int m_txDataSizeW = 0;							// size of port's Tx data
+		int m_txUsedDataSizeW = 0;						// for ports with manual settings may be m_txUsedDataSizeW < m_txDataSizeW
 		int m_txRawDataSizeW = 0;
 		int m_txAnalogSignalsSizeW = 0;
 		int m_txDiscreteSignalsSizeW = 0;
@@ -315,6 +320,7 @@ namespace Hardware
 		int m_rxBufAddress = BAD_ADDRESS;				// address of port's Rx buffer relative to opto module appDataOffset
 		quint32 m_rxDataID = 0;							// range 0..0xFFFFFFFF
 		int m_rxDataSizeW = 0;							// size of Rx data
+		int m_rxUsedDataSizeW = 0;						// for ports with manual settings may be m_rxUsedDataSizeW < m_rxDataSizeW
 		int m_rxRawDataSizeW = 0;						// variables is calculateed inside OptoPort::calculateTxSignalsAddresses()
 		int m_rxAnalogSignalsSizeW = 0;					//
 		int m_rxDiscreteSignalsSizeW = 0;				//
