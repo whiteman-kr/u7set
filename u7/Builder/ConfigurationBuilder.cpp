@@ -242,14 +242,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			ok = db()->getFileList(&fileList, db()->mcFileId(), logicModuleDescription->configurationStringFile(), true, nullptr);
-		}
+		ok = db()->getFileList(&fileList, db()->mcFileId(), logicModuleDescription->configurationStringFile(), true, nullptr);
 
 		if (ok == false || fileList.size() != 1)
 		{
@@ -259,15 +252,7 @@ namespace Builder
 		}
 
 		std::shared_ptr<DbFile> scriptFile;
-
-		if (release() == true)
-		{
-			assert(false);
-		}
-		else
-		{
-			ok = db()->getLatestVersion(fileList[0], &scriptFile, nullptr);
-		}
+		ok = db()->getLatestVersion(fileList[0], &scriptFile, nullptr);
 
 		if (ok == false || scriptFile == nullptr)
 		{
@@ -374,50 +359,41 @@ namespace Builder
 
 	bool ConfigurationBuilder::writeBinaryFiles(BuildResultWriter &buildResultWriter)
 	{
-
-
 		// Save confCollection items to binary files
 		//
-		if (release() == true)
+		for (auto i = m_confCollection.firmwares().begin(); i != m_confCollection.firmwares().end(); i++)
 		{
-			assert(false);
-		}
-		else
-		{
-			for (auto i = m_confCollection.firmwares().begin(); i != m_confCollection.firmwares().end(); i++)
+			Hardware::ModuleFirmwareWriter& f = i->second;
+
+			QByteArray data;
+
+			if (f.save(data, m_log) == false)
 			{
-				Hardware::ModuleFirmwareWriter& f = i->second;
+				return false;
+			}
 
-				QByteArray data;
+			QString path = f.subsysId();
+			QString fileName = f.caption();
 
-				if (f.save(data, m_log) == false)
-				{
-					return false;
-				}
+			if (path.isEmpty())
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
+				return false;
+			}
+			if (fileName.isEmpty())
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
+				return false;
+			}
 
-				QString path = f.subsysId();
-				QString fileName = f.caption();
+			if (buildResultWriter.addFile(path, fileName + ".mcb", data) == false)
+			{
+				return false;
+			}
 
-				if (path.isEmpty())
-				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
-					return false;
-				}
-				if (fileName.isEmpty())
-				{
-					LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
-					return false;
-				}
-
-				if (buildResultWriter.addFile(path, fileName + ".mcb", data) == false)
-				{
-					return false;
-				}
-
-				if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == false)
-				{
-					return false;
-				}
+			if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == false)
+			{
+				return false;
 			}
 		}
 

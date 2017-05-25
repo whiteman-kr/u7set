@@ -138,7 +138,7 @@ public:
 
 	// Version Control
 	//
-	bool isAnyCheckedOut(bool* result);
+	bool isAnyCheckedOut(int* checkedOutCount);
 	bool lastChangesetId(int* result);
 
 	// Next value in global counter, use for creating signals, etc with unique identifiers
@@ -230,7 +230,7 @@ signals:
 
 	// Version Control
 	//
-	void signal_isAnyCheckedOut(bool* checkedOut);
+	void signal_isAnyCheckedOut(int* checkedOutCount);
 	void signal_lastChangesetId(int* lastChangesetId);
 
 	// Next value in global counter, use for creating signals, etc with unique identifiers
