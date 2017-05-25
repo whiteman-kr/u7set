@@ -57,6 +57,10 @@ public:
 	//
 	void fireShowDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
 
+	// Schema Editor
+	//
+	void fireAddLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
+
 	// Build
 	//
 	void fireBuildStarted();
@@ -91,6 +95,8 @@ signals:
 	void buildFinished();
 
 	void showDeviceApplicationSignals(QStringList deviceStrIds, bool refreshSignalList);
+
+	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 
 	void changeCurrentTab(QWidget* tab);
 

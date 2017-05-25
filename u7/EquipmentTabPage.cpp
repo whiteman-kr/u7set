@@ -2262,6 +2262,59 @@ void EquipmentView::addAppSignal()
 	return;
 }
 
+void EquipmentView::addLogicSchemaToLm()
+{
+	qDebug() << __FUNCTION__;
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+	if (selectedIndexList.empty() == true)
+	{
+		assert(false);
+		return;
+	}
+
+	QStringList deviceStrIds;
+	QString lmDescriptioFile;
+	bool lmDescriptioFileInitialized = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		assert(device);
+
+		deviceStrIds.push_back(device->equipmentId());
+
+		if (device->isModule() == true &&
+			device->toModule()->isLogicModule() == true)
+		{
+			QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+
+			if (lmDescriptioFileInitialized == false)
+			{
+				lmDescriptioFile = thisModuleLmDescriprtionFile;
+				lmDescriptioFileInitialized = true;
+				continue;
+			}
+
+			if (lmDescriptioFile != thisModuleLmDescriprtionFile)
+			{
+				assert(false);	// How is it possible, it should be fileterd om nenu level
+				return;
+			}
+
+			continue;
+		}
+		else
+		{
+			assert(false);	// How is it possible, it should be fileterd om nenu level
+			return;
+		}
+	}
+
+	GlobalMessanger::instance()->fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
+	return;
+}
+
 void EquipmentView::copySelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3396,6 +3449,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_addAppSignal);
 
 	// -----------------
+	m_equipmentView->addAction(m_separatorSchemaLogic);
+	m_equipmentView->addAction(m_addLogicSchemaToLm);
+
+	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
 	m_equipmentView->addAction(m_copyObjectAction);
 	m_equipmentView->addAction(m_pasteObjectAction);
@@ -3620,6 +3677,16 @@ void EquipmentTabPage::CreateActions()
 	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
 
 	//-----------------------------------
+	m_separatorSchemaLogic = new QAction(tr("Application Logic"), this);
+	m_separatorSchemaLogic->setSeparator(true);
+
+	m_addLogicSchemaToLm = new QAction(tr("Add AppLogic Schema..."), this);
+	m_addLogicSchemaToLm->setStatusTip(tr("Add Application Logic Schema to selected module"));
+	m_addLogicSchemaToLm->setEnabled(false);
+	m_addLogicSchemaToLm->setVisible(false);
+	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
+
+	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
 	m_separatorAction01->setSeparator(true);
 
@@ -3792,6 +3859,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_inOutsToSignals);
 	assert(m_showAppSignals);
 	assert(m_addAppSignal);
+	assert(m_addLogicSchemaToLm);
 
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
@@ -3846,6 +3914,9 @@ void EquipmentTabPage::setActionState()
 	m_addAppSignal->setEnabled(false);
 	m_addAppSignal->setVisible(false);
 
+	m_addLogicSchemaToLm->setEnabled(false);
+	m_addLogicSchemaToLm->setVisible(false);
+
 	m_copyObjectAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -3882,6 +3953,51 @@ void EquipmentTabPage::setActionState()
 			m_addAppSignal->setVisible(true);
 		}
 	}
+
+	// Add AppLogic Schema to LM
+	//
+	if (selectedIndexList.size() >= 1)
+	{
+		bool allSelectedAreLMs = true;
+		QString lmDescriptioFile;
+		bool lmDescriptioFileInitialized = false;
+
+		for (const QModelIndex& mi : selectedIndexList)
+		{
+			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+			assert(device);
+
+			if (device->isModule() == true &&
+				device->toModule()->isLogicModule() == true)
+			{
+				QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+
+				if (lmDescriptioFileInitialized == false)
+				{
+					lmDescriptioFile = thisModuleLmDescriprtionFile;
+					lmDescriptioFileInitialized = true;
+					continue;
+				}
+
+				if (lmDescriptioFile != thisModuleLmDescriprtionFile)
+				{
+					allSelectedAreLMs = false;
+					break;
+				}
+
+				continue;
+			}
+			else
+			{
+				allSelectedAreLMs = false;
+				break;
+			}
+		}
+
+		m_addLogicSchemaToLm->setEnabled(allSelectedAreLMs);
+		m_addLogicSchemaToLm->setVisible(allSelectedAreLMs);
+	}
+
 
 	// Show Application Logic Signal for current object
 	//

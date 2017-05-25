@@ -1255,6 +1255,13 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
 
+	auto schema = createSchemaFunc();
+
+	if (schema->isLogicSchema() == true)
+	{
+		connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
+	}
+
 	return;
 }
 
@@ -1266,6 +1273,49 @@ SchemaControlTabPage::~SchemaControlTabPage()
 VFrame30::Schema* SchemaControlTabPage::createSchema() const
 {
 	return m_createSchemaFunc();
+}
+
+
+void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
+{
+	// Create new Schema and add it to the vcs
+	//
+	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
+
+	if (schema->isLogicSchema() == false)
+	{
+		assert(schema->isLogicSchema());
+		return;
+	}
+
+	// Set New Guid
+	//
+	schema->setGuid(QUuid::createUuid());
+
+	int sequenceNo = db()->nextCounterValue();
+
+	// Set default properties
+	//
+	schema->setSchemaId("APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0'));
+	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
+
+	schema->setDocWidth(420.0 / 25.4);
+	schema->setDocHeight(297.0 / 25.4);
+
+	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
+	logicSchema->setEquipmentIdList(deviceStrIds);
+
+	logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
+
+	// --
+	//
+	addSchemaFile(schema);
+
+	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
+	m_filesView->setFocus();
+
+	return;
 }
 
 void SchemaControlTabPage::addFile()
@@ -1341,6 +1391,13 @@ void SchemaControlTabPage::addFile()
 		}
 	}
 
+	addSchemaFile(schema);
+
+	return;
+}
+
+void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema)
+{
 	// Show dialog to edit schema properties
 	//
 	CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
@@ -1382,13 +1439,14 @@ void SchemaControlTabPage::addFile()
 		{
 			QModelIndex md = m_filesView->filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
 			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+			m_filesView->scrollTo(md);
 		}
 	}
 
 	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
 	return;
 }
-
 
 void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 {

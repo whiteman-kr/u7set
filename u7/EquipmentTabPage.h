@@ -162,6 +162,8 @@ public slots:
 	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
 	void addAppSignal();
 
+	void addLogicSchemaToLm();
+
 	void copySelectedDevices();
 	void pasteDevices();
 	bool canPaste() const;
@@ -246,7 +248,7 @@ public slots:
 
 	void setProperties();
 
-    void propertiesChanged(QList<std::shared_ptr<PropertyObject> > objects);
+	void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 protected slots:
 	void addObjectTriggered();
@@ -292,6 +294,10 @@ private:
 	QAction* m_inOutsToSignals = nullptr;
 	QAction* m_showAppSignals = nullptr;
 	QAction* m_addAppSignal = nullptr;
+	//----------------------------------
+	QAction* m_separatorSchemaLogic = nullptr;
+	QAction* m_addLogicSchemaToLm = nullptr;
+	//QAction* m_showLmsLogicSchemas = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;
