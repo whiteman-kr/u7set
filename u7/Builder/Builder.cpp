@@ -98,8 +98,8 @@ namespace Builder
 				break;
 			}
 
-			bool isAnyCheckedOut = false;
-			ok = db.isAnyCheckedOut(&isAnyCheckedOut);
+			int checkedOutCount = 0;
+			ok = db.isAnyCheckedOut(&checkedOutCount);
 
 			if (ok == false)
 			{
@@ -107,10 +107,10 @@ namespace Builder
 				break;
 			}
 
-			if (release() == true && isAnyCheckedOut == true)
+			if (release() == true && checkedOutCount > 0)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  tr("There are some checked out objects. Please check in all objects before building release version."));
+						  tr("There are some checked out objects (%1). Please check in all objects before building release version.").arg(checkedOutCount));
 				break;
 			}
 
@@ -422,15 +422,6 @@ namespace Builder
 			return false;
 		}
 
-		if (release() == true)
-		{
-			// filter some files, which are not checkedin?
-			assert(false);
-		}
-		else
-		{
-		}
-
 		parent->deleteAllChildren();
 
 		for (DbFileInfo& fi : files)
@@ -447,24 +438,17 @@ namespace Builder
 
 			LOG_MESSAGE(m_log, tr("Getting equipment object, fileid: %1, details: %2").arg(fi.fileId()).arg(fi.details()));
 
-			if (release() == true)
-			{
-				assert(false);
-			}
-			else
-			{
-				std::shared_ptr<Hardware::DeviceObject> device;
-				ok = db->getDeviceTreeLatestVersion(fi, &device, nullptr);
+			std::shared_ptr<Hardware::DeviceObject> device;
+			ok = db->getDeviceTreeLatestVersion(fi, &device, nullptr);
 
-				if (ok == false ||
-					device.get() == nullptr)
-				{
-					LOG_ERROR_OBSOLETE(m_log, "", tr("Failed to load equipment, fileid: %1").arg(fi.fileId()));
-					continue;
-				}
-
-				parent->addChild(device);
+			if (ok == false ||
+				device.get() == nullptr)
+			{
+				LOG_ERROR_OBSOLETE(m_log, "", tr("Failed to load equipment, fileid: %1").arg(fi.fileId()));
+				continue;
 			}
+
+			parent->addChild(device);
 		}
 
 		return true;

@@ -259,7 +259,7 @@ void ProjectsTabPage::openProject()
 
 		QString password = QInputDialog::getText(this,
 			tr("Upgrade project"),
-			tr("Please, enter Administrator's password for project %1:").arg(projectName),
+			tr("Please, enter <b>Administrator</b>'s password for project %1:").arg(projectName),
 			QLineEdit::Password,
 			QString(), &ok);
 

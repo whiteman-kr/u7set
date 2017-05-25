@@ -164,6 +164,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0146.sql", "Upgrade to version 146, Added project database test functions"},
 	{":/DatabaseUpgrade/Upgrade0147.sql", "Upgrade to version 147, LM Description file changed"},
 	{":/DatabaseUpgrade/Upgrade0148.sql", "Upgrade to version 148, Added version in configuration script fields description"},
+	{":/DatabaseUpgrade/Upgrade0149.sql", "Upgrade to version 149, Changed func is_any_checked_out according to current user"},
 };
 
 
@@ -5161,13 +5162,13 @@ void DbWorker::slot_buildFinish(int buildID, int errors, int warnings, QString b
 }
 
 
-void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
+void DbWorker::slot_isAnyCheckedOut(int* checkedOutCount)
 {
 	AUTO_COMPLETE
 
-	if (checkedOut == nullptr)
+	if (checkedOutCount == nullptr)
 	{
-		assert(checkedOut != nullptr);
+		assert(checkedOutCount != nullptr);
 		return;
 	}
 
@@ -5181,7 +5182,7 @@ void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
 		return;
 	}
 
-	QString request = "SELECT * FROM is_any_checked_out();";
+	QString request = QString("SELECT * FROM api.is_any_checked_out('%1');").arg(sessionKey());
 
 	QSqlQuery q(db);
 
@@ -5194,7 +5195,7 @@ void DbWorker::slot_isAnyCheckedOut(bool* checkedOut)
 	}
 
 	q.next();
-	*checkedOut = q.value(0).toBool();
+	*checkedOutCount = q.value(0).toInt();
 
 	return;
 }

@@ -173,7 +173,7 @@ public slots:
 
     // Version Control
     //
-    void slot_isAnyCheckedOut(bool* checkedOut);
+	void slot_isAnyCheckedOut(int* checkedOutCount);
     void slot_lastChangesetId(int* lastChangesetId);
 
 	// Next value in global counter, use for creating signals, etc with unique identifiers

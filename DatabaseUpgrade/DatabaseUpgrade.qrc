@@ -12,7 +12,7 @@
         <file>Upgrade0010.sql</file>
         <file>Upgrade0011.sql</file>
         <file>Upgrade0012.sql</file>
-        <file>Upgrade0013.sql</file>
+		<file>Upgrade0013.sql</file>
         <file>Upgrade0014.sql</file>
         <file>Upgrade0015.sql</file>
         <file>Upgrade0016.sql</file>
@@ -148,6 +148,7 @@
         <file>Upgrade0146.sql</file>
         <file>Upgrade0147.sql</file>
         <file>Upgrade0148.sql</file>
+        <file>Upgrade0149.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
