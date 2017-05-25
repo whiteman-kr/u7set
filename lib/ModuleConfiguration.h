@@ -93,8 +93,6 @@ namespace Hardware
 		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
 		bool load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
-		bool checkFrameCrc64(const std::vector<quint8>& frame);
-
 		// Properties
 		//
 	public:

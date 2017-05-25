@@ -229,8 +229,7 @@ namespace Hardware
 
 			// Count CRC
 
-			quint64 crc = Crc::crc64(frame.data(), frame.size() - sizeof(crc));
-			*reinterpret_cast<qint64*>(frame.data() + frame.size() - sizeof(crc)) = qToBigEndian(crc);
+			Crc::setDataBlockCrc(v, frame.data(), (int)frame.size());
 
             m_frames.push_back(frame);
         }
@@ -409,8 +408,7 @@ namespace Hardware
 
 			// Count CRC
 
-			quint64 crc = Crc::crc64(frameVec.data(), frameVec.size() - sizeof(crc));
-			*reinterpret_cast<qint64*>(frameVec.data() + frameVec.size() - sizeof(crc)) = qToBigEndian(crc);
+			Crc::setDataBlockCrc(v, frameVec.data(), (int)frameVec.size());
 
 			m_frames.push_back(frameVec);
 		}
@@ -593,7 +591,7 @@ namespace Hardware
 				}
 			}
 
-			if (checkFrameCrc64(frameVec) == false)
+			if (Crc::checkDataBlockCrc(v, frameVec) == false)
 			{
 				errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
 				return false;
@@ -603,22 +601,6 @@ namespace Hardware
 		}
 
 		return true;
-	}
-
-	bool ModuleFirmware::checkFrameCrc64(const std::vector<quint8>& frame)
-	{
-		quint64 crc = Crc::crc64(frame.data(), frame.size() - sizeof(crc));
-
-		crc = qToBigEndian(crc);
-
-		quint64 storedCrc = *reinterpret_cast<const qint64*>(frame.data() + frame.size() - sizeof(crc));
-
-		if (crc == storedCrc)
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	bool ModuleFirmware::isEmpty() const

@@ -34,8 +34,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 	{
 		std::vector<quint8>& frame = m_frames[i];
 
-		quint64 crc = Crc::crc64(frame.data(), frame.size() - sizeof(crc));
-		*reinterpret_cast<qint64*>(frame.data() + frame.size() - sizeof(crc)) = qToBigEndian(crc);
+		Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
 	}
 
 	// Save all frames to file
