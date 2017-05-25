@@ -163,6 +163,7 @@ public:
 
 	enum class MaskType
 	{
+		All,
 		AppSignalId,
 		CustomAppSignalId,
 		EquipmentId
