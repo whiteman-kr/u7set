@@ -222,6 +222,18 @@ AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
 	return result->second;
 }
 
+void AppSignalManager::invalidateAllSignalStates()
+{
+	QMutexLocker l(&m_statesMutex);
+
+	for (auto it = m_signalStates.begin(); it != m_signalStates.end(); ++it)
+	{
+		it->second.m_flags.valid = false;
+	}
+
+	return;
+}
+
 void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state)
 {
 	Hash signalHash = ::calcHash(appSignalId);

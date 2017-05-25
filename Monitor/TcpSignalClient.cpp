@@ -56,6 +56,8 @@ void TcpSignalClient::onDisconnection()
 {
 	qDebug() << "TcpSignalClient::onDisconnection";
 
+	theSignals.invalidateAllSignalStates();
+
 	emit connectionReset();
 }
 

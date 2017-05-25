@@ -65,6 +65,8 @@ public:
 
 	// Signal States
 	//
+	void invalidateAllSignalStates();
+
 	void setState(const QString& appSignalId, const AppSignalState& state);
 	void setState(Hash signalHash, const AppSignalState& state);
 
