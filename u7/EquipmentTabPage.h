@@ -163,6 +163,7 @@ public slots:
 	void addAppSignal();
 
 	void addLogicSchemaToLm();
+	void showLogicSchemaForLm();
 
 	void copySelectedDevices();
 	void pasteDevices();
@@ -297,7 +298,7 @@ private:
 	//----------------------------------
 	QAction* m_separatorSchemaLogic = nullptr;
 	QAction* m_addLogicSchemaToLm = nullptr;
-	//QAction* m_showLmsLogicSchemas = nullptr;
+	QAction* m_showLmsLogicSchemas = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;

@@ -2315,6 +2315,34 @@ void EquipmentView::addLogicSchemaToLm()
 	return;
 }
 
+void EquipmentView::showLogicSchemaForLm()
+{
+	qDebug() << __FUNCTION__;
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+
+	if (module == nullptr || module->isLogicModule() == false)
+	{
+		assert(module);
+		return;
+	}
+
+	GlobalMessanger::instance()->fireSearchSchemaForLm(module->equipmentId());
+
+	return;
+}
+
 void EquipmentView::copySelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3451,6 +3479,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	// -----------------
 	m_equipmentView->addAction(m_separatorSchemaLogic);
 	m_equipmentView->addAction(m_addLogicSchemaToLm);
+	m_equipmentView->addAction(m_showLmsLogicSchemas);
 
 	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
@@ -3686,6 +3715,12 @@ void EquipmentTabPage::CreateActions()
 	m_addLogicSchemaToLm->setVisible(false);
 	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
 
+	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
+	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
+	m_showLmsLogicSchemas->setEnabled(false);
+	m_showLmsLogicSchemas->setVisible(false);
+	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
+
 	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
 	m_separatorAction01->setSeparator(true);
@@ -3860,6 +3895,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_showAppSignals);
 	assert(m_addAppSignal);
 	assert(m_addLogicSchemaToLm);
+	assert(m_showLmsLogicSchemas);
 
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
@@ -3916,6 +3952,9 @@ void EquipmentTabPage::setActionState()
 
 	m_addLogicSchemaToLm->setEnabled(false);
 	m_addLogicSchemaToLm->setVisible(false);
+
+	m_showLmsLogicSchemas->setEnabled(false);
+	m_showLmsLogicSchemas->setVisible(false);
 
 	m_copyObjectAction->setEnabled(false);
 
@@ -3996,6 +4035,22 @@ void EquipmentTabPage::setActionState()
 
 		m_addLogicSchemaToLm->setEnabled(allSelectedAreLMs);
 		m_addLogicSchemaToLm->setVisible(allSelectedAreLMs);
+	}
+
+	// Show logic schemas for selected LM
+	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		assert(device);
+
+		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
+
+		if (module != nullptr && module->isLogicModule() == true)
+		{
+			m_showLmsLogicSchemas->setEnabled(true);
+			m_showLmsLogicSchemas->setVisible(true);
+		}
 	}
 
 

@@ -1260,6 +1260,7 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	if (schema->isLogicSchema() == true)
 	{
 		connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
+		connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
 	}
 
 	return;
@@ -1310,6 +1311,16 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 	// --
 	//
 	addSchemaFile(schema);
+
+	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	if (parentTabWidget == nullptr)
+	{
+		assert(parentTabWidget);
+	}
+	else
+	{
+		parentTabWidget->setCurrentWidget(this);
+	}
 
 	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
@@ -1989,6 +2000,32 @@ void SchemaControlTabPage::search()
 	}
 
 	m_filesView->setFocus();
+
+	return;
+}
+
+void SchemaControlTabPage::searchSchemaForLm(QString equipmentId)
+{
+	// Set focus to LogicSchemaTabPage and to ControlTabPage
+	//
+	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	if (parentTabWidget == nullptr)
+	{
+		assert(parentTabWidget);
+	}
+	else
+	{
+		parentTabWidget->setCurrentWidget(this);
+	}
+
+	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
+	m_filesView->setFocus();
+
+	// Set Search string and perform search
+	//
+	m_searchEdit->setText(equipmentId.trimmed());
+	search();
 
 	return;
 }

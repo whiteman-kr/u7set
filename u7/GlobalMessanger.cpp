@@ -53,6 +53,11 @@ void GlobalMessanger::fireAddLogicSchema(QStringList deviceStrIds, QString lmDes
 	emit addLogicSchema(deviceStrIds, lmDescriptionFile);
 }
 
+void GlobalMessanger::fireSearchSchemaForLm(QString equipmentId)
+{
+	emit searchSchemaForLm(equipmentId);
+}
+
 void GlobalMessanger::fireBuildStarted()
 {
 	emit buildStarted();

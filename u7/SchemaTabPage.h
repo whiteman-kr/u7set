@@ -157,6 +157,7 @@ protected slots:
 private slots:
 	void ctrlF();
 	void search();
+	void searchSchemaForLm(QString equipmentId);
 
 	// Properties
 	//
