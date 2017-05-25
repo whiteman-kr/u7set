@@ -1682,7 +1682,9 @@ void FilesTabPage::createActions()
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, m_fileView, &FileTreeView::refreshFileTree);
+	addAction(m_refreshAction);
 
 	return;
 }

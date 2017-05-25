@@ -7,13 +7,7 @@
 #include "GlobalMessanger.h"
 
 ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent),
-	m_pProjectTable(nullptr),
-	m_pNewProject(nullptr),
-	m_pOpenProject(nullptr),
-	m_pCloseProject(nullptr),
-	m_pDeleteProject(nullptr),
-	m_pRefreshProjectList(nullptr)
+	MainTabPage(dbcontroller, parent)
 {
 	//
 	// Controls
@@ -61,6 +55,14 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_pCloseProject, &QPushButton::clicked, this, &ProjectsTabPage::closeProject);
 	connect(m_pDeleteProject, &QPushButton::clicked, this, &ProjectsTabPage::deleteProject);
 	connect(m_pRefreshProjectList, &QPushButton::clicked, this, &ProjectsTabPage::refreshProjectList);
+
+	// Actions
+	//
+	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
+	connect(m_refreshAction, &QAction::triggered, this, &ProjectsTabPage::refreshProjectList);
+	addAction(m_refreshAction);
+
 
 	//
 	// Layouts

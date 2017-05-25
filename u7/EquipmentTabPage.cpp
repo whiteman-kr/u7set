@@ -3679,7 +3679,9 @@ void EquipmentTabPage::CreateActions()
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
+	addAction(m_refreshAction);
 
 	//-----------------------------------
 	m_separatorAction3 = new QAction(this);

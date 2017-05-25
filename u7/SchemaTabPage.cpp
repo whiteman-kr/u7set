@@ -1235,6 +1235,13 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 
 	this->addAction(m_searchAction);
 
+	// Actions
+	//
+	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
+	connect(m_refreshAction, &QAction::triggered, this, &SchemaControlTabPage::refreshFiles);
+	addAction(m_refreshAction);
+
 	// --
 	//
 	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
@@ -1949,8 +1956,6 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 
 	setWindowTitle(schema->schemaId());
 
-	CreateActions();
-
 	// Create controls
 	//
 	schema->setChangeset(fileInfo.changeset());
@@ -2019,6 +2024,10 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
 	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
+
+	// --
+	//
+	CreateActions();
 
 	// --
 	//

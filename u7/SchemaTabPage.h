@@ -169,6 +169,7 @@ private:
 	QPushButton* m_searchButton = nullptr;
 
 	QAction* m_searchAction = nullptr;
+	QAction* m_refreshAction = nullptr;
 };
 
 
