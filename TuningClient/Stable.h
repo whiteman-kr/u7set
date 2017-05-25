@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <set>
 #include <assert.h>
 
 #include <QObject>

@@ -41,6 +41,20 @@ quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 	return crc;
 }
 
+bool Crc::checkDataBlockCrc(int frameIndex, const std::vector<quint8>& frame)
+{
+	std::vector<quint8> checkCrcFrame = frame;
+
+	quint64 crc = Crc::setDataBlockCrc(frameIndex, checkCrcFrame.data(), (int)checkCrcFrame.size());
+
+	crc = qToBigEndian(crc);
+
+	quint64 storedCrc = *reinterpret_cast<const qint64*>(frame.data() + frame.size() - sizeof(crc));
+
+	return crc == storedCrc;
+}
+
+
 quint16 Crc::crc4(quint16 value)
 {
 	const quint16 Polinom = 0x3;

@@ -80,7 +80,7 @@ namespace Hardware
 
 		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
 
-        std::vector<quint8> frame(int frameIndex);
+		const std::vector<quint8> frame(int frameIndex) const;
 
 		quint64 uniqueID(int lmNumber);
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
@@ -91,6 +91,7 @@ namespace Hardware
 
 		bool load_version1(const QJsonObject& jConfig, bool readDataFrames);
 		bool load_version2_3_4(const QJsonObject& jConfig, bool readDataFrames);
+		bool load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode);
 
 		// Properties
 		//
@@ -100,6 +101,7 @@ namespace Hardware
 		quint16 ssKey() const;
 		int uartId() const;
 		int frameSize() const;
+		int frameSizeWithCRC() const;
 		int frameCount() const;
 		int changesetId() const;
 		int fileVersion() const;
@@ -121,9 +123,10 @@ namespace Hardware
 		quint16 m_ssKey = 0;
 		int m_uartId = 0;
 		int m_frameSize = 0;
+		int m_frameSizeWithCRC = 0;
 		int m_changesetId = 0;
 		int m_fileVersion = 0;
-		int m_maxFileVersion = 4;	//Latest version
+		int m_maxFileVersion = 5;	//Latest version
 
 		QString m_projectName;
 		QString m_userName;

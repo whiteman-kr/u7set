@@ -1,7 +1,6 @@
 #ifndef TUNINGSIGNALSTORAGE_H
 #define TUNINGSIGNALSTORAGE_H
 
-#include "Stable.h"
 #include "../lib/Hash.h"
 #include "../lib/AppSignal.h"
 

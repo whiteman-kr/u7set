@@ -634,9 +634,10 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->editMask->setCompleter(m_completer);
 
 	ui->comboMaskType->blockSignals(true);
-	ui->comboMaskType->addItem("AppSignalId");
-	ui->comboMaskType->addItem("CustomAppSignalId");
-	ui->comboMaskType->addItem("EquipmentId");
+	ui->comboMaskType->addItem("All");
+	ui->comboMaskType->addItem("AppSignalID");
+	ui->comboMaskType->addItem("CustomAppSignalID");
+	ui->comboMaskType->addItem("EquipmentID");
 	ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
 	ui->comboMaskType->blockSignals(false);
 
@@ -680,6 +681,7 @@ void DialogSignalSnapshot::fillSignals()
 	}
 
 	std::set<QString> schemaAppSignals;
+
 	if (currentSchemaStrId.isEmpty() == false)
 	{
 		schemaAppSignals = m_configController->schemaAppSignals(currentSchemaStrId);
@@ -695,6 +697,8 @@ void DialogSignalSnapshot::fillSignals()
 		{
 			continue;
 		}
+
+		// Filter by Signal Type
 
 		switch (m_signalType)
 		{
@@ -724,50 +728,75 @@ void DialogSignalSnapshot::fillSignals()
 			break;
 		}
 
+		// Filter by Mask
+
 		if (m_strIdMasks.isEmpty() == false)
 		{
 			bool result = false;
-			QString strId;
+
+			QStringList strIdList;
+
 			switch (theSettings.m_signalSnapshotMaskType)
 			{
+			case MaskType::All:
+				{
+					strIdList << s.appSignalId().trimmed();
+					strIdList << s.customSignalId().trimmed();
+					strIdList << s.equipmentId().trimmed();
+				}
+				break;
 			case MaskType::AppSignalId:
 				{
-					strId = s.appSignalId().trimmed();
+					strIdList << s.appSignalId().trimmed();
 				}
 				break;
 			case MaskType::CustomAppSignalId:
 				{
-					strId = s.customSignalId().trimmed();
+					strIdList << s.customSignalId().trimmed();
 				}
 				break;
 			case MaskType::EquipmentId:
 				{
-					strId = s.equipmentId().trimmed();
+					strIdList << s.equipmentId().trimmed();
 				}
 				break;
 			}
 
-			for (QString idMask : m_strIdMasks)
+			for (const QString& mask : m_strIdMasks)
 			{
-				QRegExp rx(idMask.trimmed());
+				QRegExp rx(mask.trimmed());
 				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(strId))
+
+				for (const QString& strId : strIdList)
 				{
-					result = true;
+					if (rx.exactMatch(strId))
+					{
+						result = true;
+						break;
+					}
+				}
+
+				if (result == true)
+				{
 					break;
 				}
 			}
+
 			if (result == false)
 			{
 				continue;
 			}
 		}
 
+		// Filter by Schema
+
 		if (currentSchemaStrId.isEmpty() == false)
 		{
 			bool result = false;
+
 			QString strId = s.appSignalId().trimmed();
-			for (QString appSignal : schemaAppSignals)
+
+			for (const QString& appSignal : schemaAppSignals)
 			{
 				if (appSignal == strId)
 				{

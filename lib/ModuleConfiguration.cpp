@@ -52,6 +52,7 @@ namespace Hardware
 		m_ssKey = ssKey;
 		m_uartId = uartId;
 		m_frameSize = frameSize;
+		m_frameSizeWithCRC = frameSize + sizeof(quint64);
 		m_projectName = projectName;
 		m_userName = userName;
 		m_buildNumber = buildNumber;
@@ -64,7 +65,7 @@ namespace Hardware
 
 		for (int i = 0; i < frameCount; i++)
 		{
-			m_frames[i].resize(frameSize);
+			m_frames[i].resize(m_frameSizeWithCRC);
 		}
 
 		m_channelData.clear();
@@ -117,6 +118,8 @@ namespace Hardware
 		case 3:
 		case 4:
 			return load_version2_3_4(jConfig, readDataFrames);
+		case 5:
+			return load_version5(jConfig, readDataFrames, errorCode);
 		default:
 			errorCode = tr("This file version is not supported. Max supported version is %1.").arg(maxFileVersion());
 			return false;
@@ -162,6 +165,8 @@ namespace Hardware
         }
         m_frameSize = (int)jConfig.value("frameSize").toDouble();
 
+		m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
+
 		if (jConfig.value("changesetId").isUndefined() == true)
         {
             return false;
@@ -174,7 +179,6 @@ namespace Hardware
 		{
 			return true;
 		}
-
 
 		if (jConfig.value("framesCount").isUndefined() == true)
         {
@@ -212,14 +216,20 @@ namespace Hardware
                 return false;
             }
 
-            std::vector<quint8> frame;
-
             QJsonArray array = jFrame.value("data").toArray();
-            for (int i = 0; i < array.size(); i++)
+
+			std::vector<quint8> frame;
+
+			frame.resize(array.size() + sizeof(quint64));
+
+			for (int i = 0; i < array.size(); i++)
             {
-				frame.push_back((int)array[i].toInt());
+				frame[i] = (int)array[i].toInt();
             }
 
+			// Count CRC
+
+			Crc::setDataBlockCrc(v, frame.data(), (int)frame.size());
 
             m_frames.push_back(frame);
         }
@@ -266,6 +276,8 @@ namespace Hardware
 		}
 		m_frameSize = (int)jConfig.value("frameSize").toDouble();
 
+		m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
+
 		if (jConfig.value("buildConfig").isUndefined() == true)
 		{
 			m_buildConfig.clear();
@@ -304,7 +316,192 @@ namespace Hardware
 		int framesCount = (int)jConfig.value("framesCount").toDouble();
 
 		std::vector<quint8> frameVec;
-		frameVec.resize(m_frameSize);
+		frameVec.resize(m_frameSizeWithCRC);
+
+		quint16* framePtr = (quint16*)frameVec.data();
+
+		int frameStringWidth = -1;
+		int linesCount = 0;
+
+		for (int v = 0; v < framesCount; v++)
+		{
+
+			QJsonValue jFrameVal = jConfig.value("z_frame_" + QString::number(v).rightJustified(4, '0'));
+			if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
+			{
+				assert(false);
+
+				m_frames.clear();
+				return false;
+			}
+
+			QJsonObject jFrame = jFrameVal.toObject();
+
+			if (jFrame.value("frameIndex").isUndefined() == true)
+			{
+				assert(false);
+
+				m_frames.clear();
+				return false;
+			}
+
+			if (frameStringWidth == -1)
+			{
+				QString firstString = jFrame.value("data0000").toString();
+
+				frameStringWidth = firstString.split(' ').size();
+				if (frameStringWidth == 0)
+				{
+					assert(false);
+
+					m_frames.clear();
+					return false;
+				}
+
+				linesCount = ceil((float)m_frameSize / 2 / frameStringWidth);
+			}
+
+			int dataPos = 0;
+
+			quint16* ptr = framePtr;
+
+			for (int l = 0; l < linesCount; l++)
+			{
+				QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
+
+				QJsonValue v = jFrame.value(stringName);
+
+				if (v.isUndefined() == true)
+				{
+					assert(false);
+
+					m_frames.clear();
+					return false;
+				}
+
+				QString stringValue = v.toString();
+
+				for (QString& s : stringValue.split(' '))
+				{
+					bool ok = false;
+					quint16 v = s.toUInt(&ok, 16);
+
+					if (ok == false)
+					{
+						assert(false);
+
+						m_frames.clear();
+						return false;
+					}
+
+					if (dataPos >= m_frameSize / sizeof(quint16))
+					{
+						assert(false);
+						break;
+					}
+
+					dataPos++;
+
+					*ptr++ = qToBigEndian(v);
+				}
+			}
+
+			// Count CRC
+
+			Crc::setDataBlockCrc(v, frameVec.data(), (int)frameVec.size());
+
+			m_frames.push_back(frameVec);
+		}
+
+		return true;
+
+	}
+
+	bool ModuleFirmware::load_version5(const QJsonObject& jConfig, bool readDataFrames, QString& errorCode)
+	{
+		if (jConfig.value("projectName").isUndefined() == true)
+		{
+			return false;
+		}
+		m_projectName = jConfig.value("projectName").toString();
+
+		if (jConfig.value("userName").isUndefined() == true)
+		{
+			return false;
+		}
+		m_userName = jConfig.value("userName").toString();
+
+		if (jConfig.value("caption").isUndefined() == true)
+		{
+			return false;
+		}
+		m_caption = jConfig.value("caption").toString();
+
+		if (jConfig.value("subsysId").isUndefined() == true)
+		{
+			return false;
+		}
+		m_subsysId = jConfig.value("subsysId").toString();
+
+		if (jConfig.value("uartId").isUndefined() == true)
+		{
+			return false;
+		}
+		m_uartId = (int)jConfig.value("uartId").toDouble();
+
+		if (jConfig.value("frameSize").isUndefined() == true)
+		{
+			return false;
+		}
+		m_frameSize = (int)jConfig.value("frameSize").toDouble();
+
+		m_frameSizeWithCRC = (int)jConfig.value("frameSizeWithCRC").toDouble();
+
+		if (m_frameSizeWithCRC <= m_frameSize)
+		{
+			assert(false);
+			m_frameSizeWithCRC = m_frameSize + sizeof(quint64);
+		}
+
+		if (jConfig.value("buildConfig").isUndefined() == true)
+		{
+			m_buildConfig.clear();
+		}
+		else
+		{
+			m_buildConfig = jConfig.value("buildConfig").toString();
+		}
+
+		if (jConfig.value("buildNumber").isUndefined() == true)
+		{
+			m_buildNumber = 0;
+		}
+		else
+		{
+			m_buildNumber = (int)jConfig.value("buildNumber").toDouble();
+		}
+
+		if (jConfig.value("changesetId").isUndefined() == true)
+		{
+			return false;
+		}
+		m_changesetId = (int)jConfig.value("changesetId").toDouble();
+
+		//
+
+		if (readDataFrames == false)
+		{
+			return true;
+		}
+
+		if (jConfig.value("framesCount").isUndefined() == true)
+		{
+			return false;
+		}
+		int framesCount = (int)jConfig.value("framesCount").toDouble();
+
+		std::vector<quint8> frameVec;
+		frameVec.resize(m_frameSizeWithCRC);
 
 		quint16* framePtr = (quint16*)frameVec.data();
 
@@ -382,7 +579,7 @@ namespace Hardware
 						return false;
 					}
 
-					if (dataPos >= m_frameSize / sizeof(quint16))
+					if (dataPos >= m_frameSizeWithCRC / sizeof(quint16))
 					{
 						assert(false);
 						break;
@@ -394,11 +591,16 @@ namespace Hardware
 				}
 			}
 
+			if (Crc::checkDataBlockCrc(v, frameVec) == false)
+			{
+				errorCode = tr("File data is corrupt, CRC check error in frame %1.").arg(v);
+				return false;
+			}
+
 			m_frames.push_back(frameVec);
 		}
 
 		return true;
-
 	}
 
 	bool ModuleFirmware::isEmpty() const
@@ -626,7 +828,7 @@ namespace Hardware
 
 	}
 
-	std::vector<quint8> ModuleFirmware::frame(int frameIndex)
+	const std::vector<quint8> ModuleFirmware::frame(int frameIndex) const
     {
         if (frameIndex < 0 || frameIndex >= frameCount())
         {
@@ -719,6 +921,11 @@ namespace Hardware
 	int ModuleFirmware::frameSize() const
 	{
 		return m_frameSize;
+	}
+
+	int ModuleFirmware::frameSizeWithCRC() const
+	{
+		return m_frameSizeWithCRC;
 	}
 
 	int ModuleFirmware::frameCount() const

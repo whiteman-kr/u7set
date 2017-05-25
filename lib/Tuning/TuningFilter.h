@@ -1,19 +1,11 @@
 #ifndef OBJECTFILTER_H
 #define OBJECTFILTER_H
 
-#include "Stable.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningSignalState.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/Hash.h"
-
-struct SchemaDetails
-{
-	QString m_caption;
-	QString m_Id;
-	QStringList m_appSignalIDs;
-
-};
+#include "../VFrame30/Schema.h"
 
 class TuningFilterValue
 {
@@ -250,7 +242,7 @@ public:
 
 	bool loadSchemasDetails(const QByteArray& data, QString* errorCode);
 	int schemaDetailsCount();
-	SchemaDetails schemaDetails(int index);
+	VFrame30::SchemaDetails schemaDetails(int index);
 
 	// Operations
 
@@ -281,7 +273,7 @@ private:
 
 private:
 
-	std::vector<SchemaDetails> m_schemasDetails;
+	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)

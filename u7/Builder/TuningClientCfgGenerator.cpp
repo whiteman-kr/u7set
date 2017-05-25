@@ -378,33 +378,31 @@ bool TuningClientCfgGenerator::writeSchemas()
 
 bool TuningClientCfgGenerator::writeSchemasDetails()
 {
-	QByteArray data;
-	XmlWriteHelper xmlWriter(&data);
 
-	xmlWriter.setAutoFormatting(true);
-	xmlWriter.writeStartDocument();
-	xmlWriter.writeStartElement("Schemas");
+	VFrame30::SchemaDetailsSet detailsSet;
 
 	for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 	{
-		xmlWriter.writeStartElement("Schema");
-		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-		{
-			xmlWriter.writeEndElement();
-		});
+		auto details = std::make_shared<VFrame30::SchemaDetails>(schemaFile.details);
 
-		xmlWriter.writeStringAttribute("Details", schemaFile.details);
+		details->m_guids.clear();
+
+		detailsSet.add(details);
 	}
 
-	xmlWriter.writeEndElement();
+	QByteArray schemaSetFileData;
 
-	xmlWriter.writeEndDocument();
+	bool saveOk = detailsSet.Save(schemaSetFileData);
+	if (saveOk == false)
+	{
+		assert(saveOk);
+		return false;
+	}
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.xml", CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, "", data);
-
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.pbuf", CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, "", schemaSetFileData);
 	if (buildFile == nullptr)
 	{
-        m_log->errCMN0012("SchemasDetails.xml");
+		m_log->errCMN0012("SchemasDetails.pbuf");
 		return false;
 	}
 
