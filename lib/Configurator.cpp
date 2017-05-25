@@ -1027,7 +1027,7 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 					throw tr("Wrong UART, use %1h port.").arg(QString::number(conf->uartId(), 16));
 				}
 
-				int confFrameDataSize = conf->frameSize() - sizeof(pingReplyVersioned.crc64);
+				int confFrameDataSize = conf->frameSize();
 
 				if (pingReplyVersioned.frameSize < confFrameDataSize)
 				{
@@ -1180,7 +1180,6 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 			{
 				m_Log->writeMessage("Write configuration...");
 
-				//std::vector<int> frames = conf->frameCount();
 				for (int i = 0; i < conf->frameCount(); i++)
 				{
 					if (m_cancelFlag == true)
@@ -1189,7 +1188,6 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 						break;
 					}
 
-					//uint16_t frameIndex = static_cast<uint16_t>(frames[i]);
 					uint16_t frameIndex = i;
 
 					if (frameIndex == IdentificationFrameIndex)
@@ -1206,12 +1204,12 @@ void Configurator::writeConfigurationWorker(ModuleFirmware *conf)
 						throw tr("Wrong FrameIndex %1").arg(frameIndex);
 					}
 
-					std::vector<quint8> frameData = conf->frame(i);
-					frameData.resize(blockSize, 0);
+					const std::vector<quint8> frameData = conf->frame(i);
 
-					// Set Crc to databuffer
-					//
-					Crc::setDataBlockCrc(frameIndex, frameData.data(), (int)frameData.size());
+					if (frameData.size() != blockSize)
+					{
+						throw tr("Frame %1 size (%2) does not match module's BlockSize (%3).").arg(i).arg(frameData.size()).arg(blockSize);
+					}
 
 					// Write data
 					//
@@ -1605,7 +1603,8 @@ void Configurator::processConfDataFile(const QString& fileName, bool writeToFlas
 	m_Log->writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
 	m_Log->writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
 	m_Log->writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-	m_Log->writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
+	m_Log->writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
+	m_Log->writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));
 	m_Log->writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
 	if (writeToFlash == true)

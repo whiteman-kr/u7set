@@ -86,11 +86,16 @@ void ApplicationTabPage::openFileClicked()
 	
     theLog.writeMessage(tr("File %1 was loaded.").arg(fileName));
 
-    theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
-    //theLog.writeMessage(tr("Changeset: %1").arg(m_confFirmware.changeset()));
-    theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
-    theLog.writeMessage(tr("MinimumFrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
-    theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
+	theLog.writeMessage(tr("File Version: %1").arg(m_confFirmware.fileVersion()));
+	theLog.writeMessage(tr("SubsysID: %1").arg(m_confFirmware.subsysId()));
+	theLog.writeMessage(tr("ChangesetID: %1").arg(m_confFirmware.changesetId()));
+	theLog.writeMessage(tr("Build User: %1").arg(m_confFirmware.userName()));
+	theLog.writeMessage(tr("Build No: %1").arg(QString::number(m_confFirmware.buildNumber())));
+	theLog.writeMessage(tr("Build Config: %1").arg(m_confFirmware.buildConfig()));
+	theLog.writeMessage(tr("UartID: %1h").arg(QString::number(m_confFirmware.uartId(), 16)));
+	theLog.writeMessage(tr("FrameSize: %1").arg(QString::number(m_confFirmware.frameSize())));
+	theLog.writeMessage(tr("FrameSize with CRC: %1").arg(QString::number(m_confFirmware.frameSizeWithCRC())));
+	theLog.writeMessage(tr("FrameCount: %1").arg(QString::number(m_confFirmware.frameCount())));
 
 	return;
 }

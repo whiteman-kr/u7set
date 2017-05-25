@@ -1,5 +1,6 @@
 #include "../Builder/ModuleFirmwareWriter.h"
 #include "../lib/CsvFile.h"
+#include "../lib/Crc.h"
 #include <QtEndian>
 #include "version.h"
 
@@ -26,6 +27,18 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 			return false;
 		}
 	}
+
+	// Count CRC64 for all frames
+
+	for (int i = 0; i < frameCount(); i++)
+	{
+		std::vector<quint8>& frame = m_frames[i];
+
+		quint64 crc = Crc::crc64(frame.data(), frame.size() - sizeof(crc));
+		*reinterpret_cast<qint64*>(frame.data() + frame.size() - sizeof(crc)) = qToBigEndian(crc);
+	}
+
+	// Save all frames to file
 
 	const int frameStringWidth = 16;
 
@@ -150,6 +163,7 @@ bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 	jObject.insert("subsysId", subsysId());
 	jObject.insert("uartId", uartId());
 	jObject.insert("frameSize", frameSize());
+	jObject.insert("frameSizeWithCRC", frameSizeWithCRC());
 	jObject.insert("framesCount", frameCount());
 	jObject.insert("buildNumber", m_buildNumber);
 	jObject.insert("buildConfig", m_buildConfig);
