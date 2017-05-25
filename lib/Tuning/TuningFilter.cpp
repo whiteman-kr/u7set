@@ -1,8 +1,5 @@
-#include "Stable.h"
 #include "TuningFilter.h"
 #include "../lib/Types.h"
-
-#include <algorithm>    // std::find
 
 TuningFilterValue::TuningFilterValue()
 {
@@ -1244,12 +1241,12 @@ int TuningFilterStorage::schemaDetailsCount()
 	return static_cast<int>(m_schemasDetails.size());
 }
 
-SchemaDetails TuningFilterStorage::schemaDetails(int index)
+VFrame30::SchemaDetails  TuningFilterStorage::schemaDetails(int index)
 {
 	if (index < 0 || index >= m_schemasDetails.size())
 	{
 		assert(false);
-		return SchemaDetails();
+		return VFrame30::SchemaDetails();
 	}
 	return m_schemasDetails[index];
 }
@@ -1265,97 +1262,17 @@ bool TuningFilterStorage::loadSchemasDetails(const QByteArray& data, QString* er
 
 	m_schemasDetails.clear();
 
-	QXmlStreamReader reader(data);
+	VFrame30::SchemaDetailsSet detailsSet;
 
-	if (reader.readNextStartElement() == false)
+	if (detailsSet.Load(data) == false)
 	{
-		reader.raiseError(QObject::tr("Failed to load root element."));
-		*errorCode = reader.errorString();
-		return !reader.hasError();
+		*errorCode = QObject::tr("Failed to parse SchemaDetailsSet.");
+		return false;
 	}
 
-	if (reader.name() != "Schemas")
-	{
-		reader.raiseError(QObject::tr("The file is not an SchemasDetails file."));
-		*errorCode = reader.errorString();
-		return !reader.hasError();
-	}
+	m_schemasDetails = detailsSet.schemasDetails();
 
-	// Read signals
-	//
-	while (!reader.atEnd())
-	{
-		QXmlStreamReader::TokenType t = reader.readNext();
-
-		if (t == QXmlStreamReader::TokenType::Characters)
-		{
-			continue;
-		}
-
-		if (t != QXmlStreamReader::TokenType::StartElement)
-		{
-			continue;
-		}
-
-		if (reader.name() == "Schema")
-		{
-			if (reader.attributes().hasAttribute("Details"))
-			{
-				QString details = reader.attributes().value("Details").toString();
-				if (details.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QJsonDocument document = QJsonDocument::fromJson(details.toUtf8());
-				if (document.isEmpty() == true || document.isNull() == true || document.isObject() == false)
-				{
-					continue;
-				}
-
-				QJsonObject jDetails = document.object();
-				if (jDetails.isEmpty() == true)
-				{
-					continue;
-				}
-
-				SchemaDetails sd;
-
-				QJsonValue jValue = jDetails.value("SchemaID");
-				if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
-				{
-					sd.m_Id = jValue.toString();
-				}
-
-
-				jValue = jDetails.value("Caption");
-				if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
-				{
-					sd.m_caption = jValue.toString();
-				}
-
-				QJsonArray array = jDetails.value("Signals").toArray();
-				sd.m_appSignalIDs.reserve(array.size());
-				for (int i = 0; i < array.size(); i++)
-				{
-					sd.m_appSignalIDs.push_back(array[i].toString());
-				}
-
-				if (sd.m_appSignalIDs.empty() == false)
-				{
-					m_schemasDetails.push_back(sd);
-				}
-			}
-
-			continue;
-		}
-
-		reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-		*errorCode = reader.errorString();
-		return !reader.hasError();
-	}
-
-	return !reader.hasError();
+	return true;
 
 }
 
@@ -1378,10 +1295,10 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 		ofSchema->setCaption(QObject::tr("Schemas"));
 		ofSchema->setAutomatic(true);
 
-		for (const SchemaDetails& schemasDetails : m_schemasDetails)
+		for (const VFrame30::SchemaDetails& schemasDetails : m_schemasDetails)
 		{
 			std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
-			for (const QString& appSignalID : schemasDetails.m_appSignalIDs)
+			for (const QString& appSignalID : schemasDetails.m_signals)
 			{
 				// find if this signal is a tuning signal
 				//
@@ -1404,7 +1321,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 				continue;
 			}
 
-			ofTs->setID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_Id);
+			ofTs->setID("%AUFOFILTER%_SCHEMA_" + schemasDetails.m_schemaId);
 
 			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
 			ofTs->setCaption(schemasDetails.m_caption);
@@ -1489,7 +1406,7 @@ void TuningFilterStorage::slot_filtersUpdated(QByteArray data)
 
 	if (load(data, &errorStr, true) == false)
 	{
-		QString completeErrorMessage = QObject::tr("ObjectFilters.xml file loading error: %1").arg(errorStr);
+		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		writeLogError(completeErrorMessage);
 	}
 
@@ -1501,7 +1418,7 @@ void TuningFilterStorage::slot_schemasDetailsUpdated(QByteArray data)
 
 	if (loadSchemasDetails(data, &errorStr) == false)
 	{
-		QString completeErrorMessage = QObject::tr("SchemasDetails.xml file loading error: %1").arg(errorStr);
+		QString completeErrorMessage = QObject::tr("Schemas Details file loading error: %1").arg(errorStr);
 		writeLogError(completeErrorMessage);
 	}
 }
