@@ -165,6 +165,8 @@ public slots:
 	void addLogicSchemaToLm();
 	void showLogicSchemaForLm();
 
+	void showModuleOptoConnections();
+
 	void copySelectedDevices();
 	void pasteDevices();
 	bool canPaste() const;
@@ -243,7 +245,7 @@ public slots:
 	void clipboardChanged();
 
 	void modeSwitched();
-    void editConnections();
+	void showConnections();
 
 	//void moduleConfiguration();
 
@@ -299,6 +301,10 @@ private:
 	QAction* m_separatorSchemaLogic = nullptr;
 	QAction* m_addLogicSchemaToLm = nullptr;
 	QAction* m_showLmsLogicSchemas = nullptr;
+	//----------------------------------
+	QAction* m_separatorOptoConnection = nullptr;
+	//QAction* m_addLogicSchemaToLm = nullptr;
+	QAction* m_showModuleOptoConnections = nullptr;
 	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;

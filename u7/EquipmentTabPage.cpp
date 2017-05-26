@@ -2343,6 +2343,41 @@ void EquipmentView::showLogicSchemaForLm()
 	return;
 }
 
+void EquipmentView::showModuleOptoConnections()
+{
+	qDebug() << __FUNCTION__;
+
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	if (theDialogConnections == nullptr)
+	{
+		theDialogConnections = new DialogConnections(db(), this);
+		theDialogConnections->show();
+	}
+	else
+	{
+		theDialogConnections->activateWindow();
+	}
+
+	theDialogConnections->setFilter(device->equipmentId());
+
+	return;
+}
+
 void EquipmentView::copySelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3482,6 +3517,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_showLmsLogicSchemas);
 
 	// -----------------
+	m_equipmentView->addAction(m_separatorOptoConnection);
+	m_equipmentView->addAction(m_showModuleOptoConnections);
+
+	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
 	m_equipmentView->addAction(m_copyObjectAction);
 	m_equipmentView->addAction(m_pasteObjectAction);
@@ -3722,6 +3761,16 @@ void EquipmentTabPage::CreateActions()
 	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
 
 	//-----------------------------------
+	m_separatorOptoConnection = new QAction(tr("Connections"), this);
+	m_separatorOptoConnection->setSeparator(true);
+
+	m_showModuleOptoConnections = new QAction(tr("Show Connections..."), this);
+	m_showModuleOptoConnections->setStatusTip(tr("Show module or opto port connections"));
+	m_showModuleOptoConnections->setEnabled(false);
+	m_showModuleOptoConnections->setVisible(false);
+	connect(m_showModuleOptoConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showModuleOptoConnections);
+
+	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
 	m_separatorAction01->setSeparator(true);
 
@@ -3803,7 +3852,7 @@ void EquipmentTabPage::CreateActions()
     m_connectionsAction = new QAction(tr("Connections..."), this);
     m_connectionsAction->setStatusTip(tr("Edit connections"));
     m_connectionsAction->setEnabled(true);
-    connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::editConnections);
+	connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
     m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
@@ -3896,6 +3945,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addAppSignal);
 	assert(m_addLogicSchemaToLm);
 	assert(m_showLmsLogicSchemas);
+	assert(m_showModuleOptoConnections);
 
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
@@ -3955,6 +4005,9 @@ void EquipmentTabPage::setActionState()
 
 	m_showLmsLogicSchemas->setEnabled(false);
 	m_showLmsLogicSchemas->setVisible(false);
+
+	m_showModuleOptoConnections->setEnabled(false);
+	m_showModuleOptoConnections->setVisible(false);
 
 	m_copyObjectAction->setEnabled(false);
 
@@ -4053,6 +4106,46 @@ void EquipmentTabPage::setActionState()
 		}
 	}
 
+	// Show opto connections for selected LM/OCM or selected opto port
+	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		assert(device);
+
+		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
+		if (module != nullptr &&
+			(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+		{
+			m_showModuleOptoConnections->setEnabled(true);
+			m_showModuleOptoConnections->setVisible(true);
+		}
+
+		const Hardware::DeviceController* controller = dynamic_cast<const Hardware::DeviceController*>(device);
+		if (controller != nullptr)
+		{
+			// If parent is LM or OCM
+			//
+			const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device->parent());
+			if (module != nullptr &&
+				(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			{
+				// If id ends with _OPTOPORTXX
+				//
+				QString id = controller->equipmentIdTemplate();
+				if (id.size() > 10)
+				{
+					id.replace(id.size() - 2, 2, QLatin1String("##"));
+				}
+
+				if (id.endsWith("_OPTOPORT##") == true)
+				{
+					m_showModuleOptoConnections->setEnabled(true);
+					m_showModuleOptoConnections->setVisible(true);
+				}
+			}
+		}
+	}
 
 	// Show Application Logic Signal for current object
 	//
@@ -4342,7 +4435,7 @@ void EquipmentTabPage::modeSwitched()
 	return;
 }
 
-void EquipmentTabPage::editConnections()
+void EquipmentTabPage::showConnections()
 {
     if (dbController()->isProjectOpened() == false)
     {
@@ -4359,6 +4452,7 @@ void EquipmentTabPage::editConnections()
         theDialogConnections->activateWindow();
 	}
 
+	return;
 }
 
 //void EquipmentTabPage::moduleConfiguration()
