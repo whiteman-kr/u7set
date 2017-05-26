@@ -426,7 +426,8 @@ namespace Hardware
 				continue;
 			}
 
-			if (rxSignal->addrInBuf().offset() < 0 || rxSignal->addrInBuf().offset() >= m_rxRawDataSizeW)
+			if (rxSignal->addrInBuf().offset() < 0 ||
+				rxSignal->addrInBuf().offset() >= m_rxRawDataSizeW + OptoPort::TX_DATA_ID_SIZE_W)
 			{
 				assert(false);			// address out of range of raw data area
 				return false;
