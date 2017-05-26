@@ -253,7 +253,7 @@ void DialogConnections::onMaskApply()
 
 	if (maskText.isEmpty() == false)
 	{
-		m_masks = maskText.split(';');
+		m_masks = maskText.split(';', QString::SkipEmptyParts);
 
 		for (auto mask : m_masks)
 		{
@@ -335,6 +335,9 @@ bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> conn
 	updateTreeItemText(item);
 	updateButtonsEnableState();
 
+	m_connectionsTree->clearSelection();
+	item->setSelected(true);
+
 	return true;
 }
 
@@ -354,21 +357,21 @@ void DialogConnections::fillConnectionsList()
 
 		if (m_masks.empty() == false)
 		{
-			bool result = false;
+			bool maskResult = false;
 
-			for (QString mask : m_masks)
+			for (const QString& mask : m_masks)
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+						connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+						connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
 				{
-					result = true;
+					maskResult = true;
 					break;
 				}
 			}
 
-			if (result == false)
+			if (maskResult == false)
 			{
 				continue;
 			}
