@@ -115,12 +115,8 @@ SOURCES += \
     ObjectProperties.cpp \
     OutputSignalBase.cpp \
     RackBase.cpp \
-<<<<<<< HEAD
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp
-=======
-    MeasureBase.cpp
->>>>>>> develop
 
 #../lib/ExcelHelper.cpp
 
@@ -189,15 +185,9 @@ HEADERS  += \
     ObjectProperties.h \
     OutputSignalBase.h \
     RackBase.h \
-<<<<<<< HEAD
     MeasureBase.h \
     ../lib/CircularLogger.h
-=======
-    MeasureBase.h
-
 #../lib/ExcelHelper.h
->>>>>>> develop
-
 
 FORMS    +=
 

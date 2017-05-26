@@ -141,8 +141,7 @@ HEADERS += \
     ../lib/HostAddressPort.h \
     ../lib/AppDataSource.h \
     ../u7/Builder/ModulesRawData.h \
-    ../lib/CommandLineParser.h \
-    ../lib/CfgLoaderWithLog.h
+    ../lib/CommandLineParser.h
 
 include(../qtservice/src/qtservice.pri)
 

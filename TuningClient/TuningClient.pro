@@ -142,7 +142,6 @@ SOURCES +=\
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/Tuning/TuningSignal.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/XmlHelper.cpp \
@@ -195,11 +194,7 @@ HEADERS  += MainWindow.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
-<<<<<<< HEAD
     ../lib/CircularLogger.h \
-    ../lib/Tuning/TuningSignal.h \
-    ../lib/Tuning/TuningSignalManager.h
-=======
     ../lib/Tuning/TuningSignalManager.h \
     ../lib/DeviceObject.h \
     ../lib/XmlHelper.h \
@@ -210,7 +205,7 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningSignalStorage.h \
     TuningClientSignalManager.h
->>>>>>> develop
+
 
 FORMS    += \
     DialogSettings.ui \

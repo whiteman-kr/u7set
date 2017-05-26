@@ -584,7 +584,7 @@ namespace Builder
 			list.append(QString(tr("Link ID:\t\t\t%1\n")).arg(cn->linkID()));
 			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->modeStr()));
 			list.append(QString(tr("Settings:\t\t\t%1")).arg(cn->manualSettings() == true ? "Manual" : "Auto"));
-			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataID() == true ? "Disabled" : "Enabled"));
+			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataId() == true ? "Disabled" : "Enabled"));
 
 			if (cn->mode() == Hardware::OptoPort::Mode::Serial)
 			{
