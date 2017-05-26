@@ -1002,8 +1002,7 @@ namespace Hardware
 
         // Load the file from the database
         //
-
-        std::vector<DbFileInfo> fileList;
+		std::vector<DbFileInfo> fileList;
         bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, m_parentWidget);
         if (ok == false)
         {

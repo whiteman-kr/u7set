@@ -343,7 +343,6 @@ void DialogConnections::fillConnectionsList()
 	m_connectionsTree->clear();
 
 	int count = m_connections->count();
-
 	for (int i = 0; i < count; i++)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);

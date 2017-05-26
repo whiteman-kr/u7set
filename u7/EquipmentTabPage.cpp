@@ -2401,14 +2401,33 @@ void EquipmentView::showModuleOptoConnections()
 
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
-	if (selectedIndexList.size() != 1)
+	if (selectedIndexList.size() == 0)
 	{
 		assert(false);	// how did we get here?
 		return;
 	}
 
-	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
-	assert(device);
+	QString filter;
+	for (auto mi : selectedIndexList)
+	{
+		Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+
+		if (device == nullptr)
+		{
+			assert(device);
+			return;
+		}
+
+		if (filter.isEmpty() == true)
+		{
+			filter = device->equipmentId();
+		}
+		else
+		{
+			filter.append("; ");
+			filter.append(device->equipmentId());
+		}
+	}
 
 	if (theDialogConnections == nullptr)
 	{
@@ -2420,7 +2439,7 @@ void EquipmentView::showModuleOptoConnections()
 		theDialogConnections->activateWindow();
 	}
 
-	theDialogConnections->setFilter(device->equipmentId());
+	theDialogConnections->setFilter(filter);
 
 	return;
 }
@@ -4208,43 +4227,10 @@ void EquipmentTabPage::setActionState()
 
 	// Show opto connections for selected LM/OCM or selected opto port
 	//
-	if (selectedIndexList.size() == 1)
+	if (selectedIndexList.size() > 0)
 	{
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
-		assert(device);
-
-		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
-		if (module != nullptr &&
-			(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
-		{
-			m_showModuleOptoConnections->setEnabled(true);
-			m_showModuleOptoConnections->setVisible(true);
-		}
-
-		const Hardware::DeviceController* controller = dynamic_cast<const Hardware::DeviceController*>(device);
-		if (controller != nullptr)
-		{
-			// If parent is LM or OCM
-			//
-			const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device->parent());
-			if (module != nullptr &&
-				(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
-			{
-				// If id ends with _OPTOPORTXX
-				//
-				QString id = controller->equipmentIdTemplate();
-				if (id.size() > 10)
-				{
-					id.replace(id.size() - 2, 2, QLatin1String("##"));
-				}
-
-				if (id.endsWith("_OPTOPORT##") == true)
-				{
-					m_showModuleOptoConnections->setEnabled(true);
-					m_showModuleOptoConnections->setVisible(true);
-				}
-			}
-		}
+		m_showModuleOptoConnections->setEnabled(true);
+		m_showModuleOptoConnections->setVisible(true);
 	}
 
 	// Show Application Logic Signal for current object
