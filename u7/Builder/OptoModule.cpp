@@ -46,7 +46,6 @@ namespace Hardware
 
 		m_type = TxRxSignal::Type::Regular;
 
-
 #ifdef QT_DEBUG
 		if (isDiscrete() == true)
 		{
@@ -307,6 +306,32 @@ namespace Hardware
 			TxRxSignalShared& txSignal = m_txSignals[rawTxSignal.appSignalID];
 
 			txSignal->initRawSignal(rawTxSignal, TX_DATA_ID_SIZE_W);
+		}
+
+		return result;
+	}
+
+	bool OptoPort::initSerialRawRxSignals()
+	{
+		if (isSerial() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		for(const RawDataDescriptionItem& rawRxSignal : m_rawRxSignals)
+		{
+			if (m_rxSignals.contains(rawRxSignal.appSignalID) == false)
+			{
+				m_log->errALC5193(rawRxSignal.appSignalID, m_equipmentID, m_connectionID);
+				result = false;
+				continue;
+			}
+
+			TxRxSignalShared& rxSignal = m_rxSignals[rawRxSignal.appSignalID];
+
+			rxSignal->initRawSignal(rawRxSignal, TX_DATA_ID_SIZE_W);
 		}
 
 		return result;
@@ -896,12 +921,6 @@ namespace Hardware
 	bool OptoPort::getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16 &addr) const
 	{
 		TxRxSignalShared rxSignal = m_rxSignals.value(appSignalID);
-
-		if (appSignalID == "#LM1_ANALOG1")
-		{
-			int s = 0;
-			s++;
-		}
 
 		if (rxSignal == nullptr)
 		{
@@ -2646,6 +2665,10 @@ namespace Hardware
 		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::initRawTxSignals);
 	}
 
+	bool OptoModuleStorage::initSerialRawRxSignals(const QString& lmID)
+	{
+		return forEachPortOfLmAssociatedOptoModules(lmID, &OptoPort::initSerialRawRxSignals);
+	}
 
 	bool OptoModuleStorage::sortTxSignals(const QString& lmID)
 	{
@@ -3285,9 +3308,9 @@ namespace Hardware
 			return false;
 		}
 
-		p1->appendSerialRegularRxSignal(appSignal);
+		bool result = p1->appendSerialRegularRxSignal(appSignal);
 
-		return false;
+		return result;
 	}
 
 

@@ -111,6 +111,7 @@ namespace Hardware
 
 		bool appendRawTxSignals(const HashedVector<QString, Signal *>& lmAssociatedSignals);
 		bool initRawTxSignals();
+		bool initSerialRawRxSignals();
 		bool appendTxSignal(const Signal* txSignal);
 		bool sortTxSignals();
 		bool calculateTxSignalsAddresses();
@@ -131,6 +132,8 @@ namespace Hardware
 
 		const HashedVector<QString, TxRxSignalShared>& txSignals() const { return m_txSignals; }
 		const HashedVector<QString, TxRxSignalShared>& rxSignals() const { return m_rxSignals; }
+
+		int rxSignalsCount() const { return m_rxSignals.count(); }
 
 		void getTxAnalogSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
 		void getTxDiscreteSignals(QVector<TxRxSignalShared>& txSignals, bool excludeRawSignals) const;
@@ -445,6 +448,7 @@ namespace Hardware
 		bool processConnection(ConnectionShared connection);
 
 		bool initRawTxSignals(const QString& lmID);
+		bool initSerialRawRxSignals(const QString& lmID);
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);

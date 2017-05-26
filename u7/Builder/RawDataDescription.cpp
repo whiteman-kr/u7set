@@ -406,6 +406,24 @@ namespace Hardware
 			}
 		}
 
+		if (item.signalType == E::SignalType::Discrete && item.dataFormat !=E::DataFormat::UnsignedInt)
+		{
+			msg = QString("Discrete signal '%1' in raw data description of port '%2' must have UINT data format.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Analog && item.dataFormat == E::DataFormat::UnsignedInt)
+		{
+			msg = QString("Analog signal '%1' in raw data description of port '%2' must have SINT or FLOAT data format.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
 		// 4) DataSize
 
 		item.dataSize = descItemsList.at(3).trimmed().toInt(&res);
@@ -416,6 +434,24 @@ namespace Hardware
 					arg(keywordStr).arg(portEquipmentID);
 
 			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler,  msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Discrete && item.dataSize != SIZE_1BIT)
+		{
+			msg = QString("Discrete signal '%1' in raw data description of port '%2' must have 1-bit data size.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Analog && item.dataSize != SIZE_32BIT)
+		{
+			msg = QString("Analog signal '%1' in raw data description of port '%2' must have 32-bit data size.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
 			return false;
 		}
 
@@ -467,8 +503,25 @@ namespace Hardware
 			return false;
 		}
 
+		if (item.signalType == E::SignalType::Analog && item.bitNo != 0)
+		{
+			msg = QString("Analog signal '%1' in raw data description of port '%2' must have bitNo equal to 0.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
+		if (item.signalType == E::SignalType::Discrete && (item.bitNo < 0 || item.bitNo >= SIZE_16BIT))
+		{
+			msg = QString("Discrete signal '%1' in raw data description of port '%2' must have bitNo in range 0..15.").
+					arg(item.appSignalID).arg(portEquipmentID);
+
+			LOG_ERROR_OBSOLETE(log, Builder::IssueType::AlCompiler, msg);
+			return false;
+		}
+
 		return true;
 	}
-
 
 }

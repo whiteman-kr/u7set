@@ -3908,6 +3908,29 @@ namespace Builder
 						arg(appSignalID).arg(portID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5193
+	///
+	/// IssueType: Error
+	///
+	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Rx signal specified in port raw data description isn't assigned to reciever.
+	///
+	void IssueLogger::errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5193,
+				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
+						arg(appSignalID).arg(portID).arg(connectionID));
+	}
+
+
 
 	// EQP			Equipment issues						6000-6999
 	//
