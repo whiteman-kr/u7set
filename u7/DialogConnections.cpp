@@ -7,8 +7,8 @@
 DialogConnections* theDialogConnections = nullptr;
 
 DialogConnections::DialogConnections(DbController *pDbController, QWidget *parent)
-	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	  m_dbController(pDbController)
+	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
+      m_dbController(pDbController)
 {
 	m_connections = new Hardware::ConnectionStorage(m_dbController, parent);
 
