@@ -713,11 +713,9 @@ namespace Builder
 
 			// write module's opto ports information
 			//
-			QList<Hardware::OptoPortShared> ports;
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
 
-			module->getPorts(ports);
-
-			for(Hardware::OptoPortShared& port : ports)
+			for(const Hardware::OptoPortShared& port : ports)
 			{
 				writeOptoPortInfo(port, list);
 			}

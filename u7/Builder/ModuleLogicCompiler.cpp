@@ -742,7 +742,9 @@ namespace Builder
 	{
 		// copying serial rx signals from rx buffers to signals in LM memory
 		//
-		QList<Hardware::OptoPortShared> ports = m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate());
+		QList<Hardware::OptoPortShared> ports;
+
+		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), ports);
 
 		bool first = true;
 
@@ -3535,11 +3537,9 @@ namespace Builder
 
 			bool initialCommentPrinted = false;
 
-			QList<Hardware::OptoPortShared> ports;
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
 
-			module->getPorts(ports);
-
-			for(Hardware::OptoPortShared& port : ports)
+			for(const Hardware::OptoPortShared& port : ports)
 			{
 				if (port == nullptr)
 				{
@@ -6107,11 +6107,6 @@ namespace Builder
 
 		do
 		{
-			// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
-			// check that added raw Rx signals exists in current LM
-			//
-			//if (m_optoModuleStorage->appendSerialRawRxSignals(lmID, m_lmAssociatedSignals) == false) break;
-
 			// add regular Rx signals from receivers in rxSignal lists of all Serial (only!) ports associated with current LM
 			// check that added regulat Rx signals exists in current LM
 			//
@@ -6367,7 +6362,7 @@ namespace Builder
 			return false;
 		}
 
-		bool result = m_optoModuleStorage->addSerialRegularRxSignal(item->schemaID(),
+		bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
 																	connectionID,
 																	item->guid(),
 																	m_lm->equipmentIdTemplate(),
