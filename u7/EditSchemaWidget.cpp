@@ -12,6 +12,7 @@
 #include "ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
+#include "Connection.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
@@ -20,7 +21,6 @@
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemValue.h"
@@ -2150,20 +2150,12 @@ void EditSchemaWidget::createActions()
 	m_addTransmitter = new QAction(tr("Transmitter"), this);
 	m_addTransmitter->setEnabled(true);
 	m_addTransmitter->setIcon(QIcon(":/Images/Images/SchemaTransmitter.svg"));
-	connect(m_addTransmitter, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::SchemaItemTransmitter>(schema()->unit()));
-			});
+	connect(m_addTransmitter, &QAction::triggered, this, &EditSchemaWidget::addTransmitter);
 
 	m_addReceiver = new QAction(tr("Receiver"), this);
 	m_addReceiver->setEnabled(true);
 	m_addReceiver->setIcon(QIcon(":/Images/Images/SchemaReceiver.svg"));
-	connect(m_addReceiver, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit()));
-			});
+	connect(m_addReceiver, &QAction::triggered, this, &EditSchemaWidget::addReceiver);
 
 	m_addUfbAction = new QAction(tr("User Functional Block"), this);
 	m_addUfbAction->setEnabled(true);
@@ -6431,6 +6423,116 @@ void EditSchemaWidget::clipboardDataChanged()
 	//
 	m_editPasteAction->setEnabled(false);
 
+	return;
+}
+
+void EditSchemaWidget::addTransmitter()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemTransmitter>(schema()->unit());
+	addConnectionItem(schemaItem);
+}
+
+void EditSchemaWidget::addReceiver()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemReceiver>(schema()->unit());
+	addConnectionItem(schemaItem);
+}
+
+void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem)
+{
+	if (schema()->isLogicSchema() == false)
+	{
+		assert(false);		// No sense to add sconnection to non applogic schema
+		return;
+	}
+
+	// Select connectionId from existing connections
+	//
+	Hardware::ConnectionStorage connections(db(), this);
+
+	bool ok = connections.load();
+	if (ok == false)
+	{
+		addItem(schemaItem);
+		return;
+	}
+
+	// Find all connections for Schema EquipmentIDs
+	//
+	std::shared_ptr<VFrame30::LogicSchema> s = logicSchema();
+
+	std::set<std::shared_ptr<Hardware::Connection>> chassisConnectios;
+
+	QStringList lms = s->equipmentIdList();
+	for (QString lm : lms)
+	{
+		// Let's assume that LM has a Chassis parent, and LM's id is like SUSTEM_RACK_CHASSIS_LM.
+		// Try to cut ID to chassis
+		//
+		int lastUnderscoreIndex = lm.lastIndexOf('_');
+		if (lastUnderscoreIndex != -1)
+		{
+			lm = lm.left(lastUnderscoreIndex + 1);
+		}
+
+		std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
+		lmConnections = connections.get(QStringList() << lm.trimmed());
+
+		for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
+		{
+			chassisConnectios.insert(c);
+		}
+	}
+
+	// --
+	//
+	std::vector<std::shared_ptr<Hardware::Connection>> chassisConnectionsVector;
+	chassisConnectionsVector.reserve(chassisConnectios.size());
+
+	for (std::shared_ptr<Hardware::Connection> c : chassisConnectios)
+	{
+		chassisConnectionsVector.push_back(c);
+	}
+
+	std::sort(chassisConnectionsVector.begin(), chassisConnectionsVector.end(),
+		[](const std::shared_ptr<Hardware::Connection>& c1, const std::shared_ptr<Hardware::Connection>& c2) -> bool
+		{
+			return c1->connectionID() < c2->connectionID();
+		});
+
+
+	// Show menu
+	//
+	QObject actionParent;
+
+	QList<QAction*> menuActions;
+
+	QAction* empty = new QAction(QString("ConnectionID"), &actionParent);
+	empty->setData(empty->text());
+	menuActions << empty;
+
+	for (const std::shared_ptr<Hardware::Connection>& c : chassisConnectionsVector)
+	{
+		QString caption = QString("%1\t%2 <-> %3").arg(c->connectionID()).arg(c->port1EquipmentID()).arg(c->port2EquipmentID());
+		QAction* a = new QAction(caption , &actionParent);
+		a->setData(c->connectionID());
+
+		menuActions << a;
+	}
+
+	QPoint menuPos = QCursor::pos();
+
+	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
+	if (triggeredAction == nullptr)
+	{
+		return;
+	}
+
+	schemaItem->setConnectionId(triggeredAction->data().toString());
+
+	// Add item
+	//
+	addItem(schemaItem);
 	return;
 }
 
