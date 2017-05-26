@@ -16,6 +16,8 @@ namespace VFrame30
 		setDocWidth(1000);
 		setDocHeight(750);
 
+		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
+
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 

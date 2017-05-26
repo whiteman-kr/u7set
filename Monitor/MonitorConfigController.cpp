@@ -31,41 +31,6 @@ HostAddressPort ConfigConnection::address() const
 	return h;
 }
 
-void ConfigSchema::setFromBuildFileInfo(const Builder::BuildFileInfo& f)
-{
-	strId = f.ID;
-
-	QString details = f.getMetadata("Details");
-	if (details.isEmpty() == true)
-	{
-		return;
-	}
-
-	QJsonDocument document = QJsonDocument::fromJson(details.toUtf8());
-	if (document.isEmpty() == true || document.isNull() == true || document.isObject() == false)
-	{
-		return;
-	}
-
-	QJsonObject jDetails = document.object();
-	if (jDetails.isEmpty() == true)
-	{
-		return;
-	}
-
-	QJsonValue jValue = jDetails.value("Caption");
-	if (jValue.isNull() == false && jValue.isUndefined() == false && jValue.isString() == true)
-	{
-		caption = jValue.toString();
-	}
-
-	QJsonArray array = jDetails.value("Signals").toArray();
-	for (int i = 0; i < array.size(); i++)
-	{
-		appSignals.insert(array[i].toString());
-	}
-}
-
 MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostAddressPort address2)
 {
 	qRegisterMetaType<ConfigSettings>("ConfigSettings");
@@ -284,102 +249,124 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Get GlobalScript.js file
 	//
-	QString parsingError;
+	{
+		QString parsingError;
 
-	QByteArray ba;
-	QString globalScriptFileName = "/" + theSettings.instanceStrId() + "/GlobalScript.js";
-	bool ok = m_cfgLoaderThread->getFileBlocked(globalScriptFileName, &ba, &parsingError);
-	if (ok == true)
-	{
-		readSettings.globalScript = QString(ba);
-	}
-	else
-	{
-		qDebug() << "ERROR: Cannot get GlobalScript.js, " << parsingError;
+		QByteArray ba;
+		QString globalScriptFileName = "/" + theSettings.instanceStrId() + "/GlobalScript.js";
+		bool ok = m_cfgLoaderThread->getFileBlocked(globalScriptFileName, &ba, &parsingError);
+		if (ok == true)
+		{
+			readSettings.globalScript = QString(ba);
+		}
+		else
+		{
+			qDebug() << "ERROR: Cannot get GlobalScript.js, " << parsingError;
+		}
 	}
 
 	// Parse XML
 	//
-	QDomDocument xml;
-
-	bool result = xml.setContent(configurationXmlData, false, &parsingError);
-
-	if (result == false)
 	{
-		readSettings.errorMessage += parsingError + "\n";
-	}
-	else
-	{
-		// Get <Configuration>
-		//
-		QDomElement configElement = xml.documentElement();
+		QString parsingError;
+		QDomDocument xml;
 
-		// Software node
-		//
-		QDomNodeList softwareNodes = configElement.elementsByTagName("Software");
-		if (softwareNodes.size() != 1)
+		int errorLine = 0;
+		int errorColumn = 0;
+
+		bool result = xml.setContent(configurationXmlData, false, &parsingError, &errorLine, &errorColumn);
+
+		if (result == false)
 		{
-			readSettings.errorMessage += tr("Parsing Software node error.\n");
+			QString errorStr = tr("%1, line %2, column %3").arg(parsingError).arg(errorLine).arg(errorColumn);
+			readSettings.errorMessage += errorStr + "\n";
 		}
 		else
 		{
-			result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
+			// Get <Configuration>
+			//
+			QDomElement configElement = xml.documentElement();
+
+			// Software node
+			//
+			QDomNodeList softwareNodes = configElement.elementsByTagName("Software");
+			if (softwareNodes.size() != 1)
+			{
+				readSettings.errorMessage += tr("Parsing Software node error.\n");
+			}
+			else
+			{
+				result &= xmlReadSoftwareNode(softwareNodes.item(0), &readSettings);
+			}
+
+			// Settings node
+			//
+			QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
+			if (settingsNodes.size() != 1)
+			{
+				readSettings.errorMessage += tr("Parsing Settings node error.\n");
+			}
+			else
+			{
+				result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
+			}
 		}
 
-		// Settings node
+		// Error handling
 		//
-		QDomNodeList settingsNodes = configElement.elementsByTagName("Settings");
-		if (settingsNodes.size() != 1)
+		if (result == false ||
+			readSettings.errorMessage.isEmpty() == false)
 		{
-			readSettings.errorMessage += tr("Parsing Settings node error.\n");
-		}
-		else
-		{
-			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
+			QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
+
+			qDebug() << completeErrorMessage;
+			QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
 		}
 	}
 
-	// Error handling
+	// Get all schema details
 	//
-	if (result == false ||
-		readSettings.errorMessage.isEmpty() == false)
 	{
-		QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
+		// Get SchemaDetails.pbuf file
+		//
+		QString parsingError;
 
-		qDebug() << completeErrorMessage;
-		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
+		QByteArray ba;
+		QString fileName = "/" + theSettings.instanceStrId() + "/SchemaDetails.pbuf";
+		bool ok = m_cfgLoaderThread->getFileBlocked(fileName, &ba, &parsingError);
+
+		if (ok == false)
+		{
+			qDebug() << "ERROR: Cannot get " << fileName << ", " << parsingError;
+
+			QMutexLocker locker(&m_mutex);
+			m_schemaDetailsSet.clear();
+		}
+		else
+		{
+			QMutexLocker locker(&m_mutex);
+			m_schemaDetailsSet.clear();
+
+			m_schemaDetailsSet.Load(ba);
+		}
 	}
 
 	// Trace received params
 	//
 	qDebug() << "New configuration arrived";
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
-	qDebug() << "ADS1 (id, ip, port): " << readSettings.das1.equipmentId() << ", " << readSettings.das1.ip() << ", " << readSettings.das1.port();
-	qDebug() << "ADS2 (id, ip, port): " << readSettings.das2.equipmentId() << ", " << readSettings.das2.ip() << ", " << readSettings.das2.port();
+	qDebug() << "ADS1 (id, ip, port): " << readSettings.ads1.equipmentId() << ", " << readSettings.ads1.ip() << ", " << readSettings.ads1.port();
+	qDebug() << "ADS2 (id, ip, port): " << readSettings.ads2.equipmentId() << ", " << readSettings.ads2.ip() << ", " << readSettings.ads2.port();
 
-	// Get all schema list
-	//
-	{
-		QMutexLocker locker(&m_mutex);
-		m_schemas.clear();
-		m_schemas.reserve(buildFileInfoArray.size());
-
-		for (const Builder::BuildFileInfo& f: buildFileInfoArray)
-		{
-			if (f.tag == QLatin1String("LogicSchema") ||
-				f.tag == QLatin1String("MonitorSchema"))
-			{
-				ConfigSchema cs;
-				cs.setFromBuildFileInfo(f);
-
-				m_schemas.push_back(cs);
-			}
-		}
-	}
 
 	// Emit signal to inform everybody about new configuration
 	//
 	emit configurationArrived(readSettings);
+
+	{
+		QMutexLocker locker(&m_confugurationMutex);
+		m_configuration = readSettings;
+	}
 
 	return;
 }
@@ -486,8 +473,8 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 			QString dasIp2 = dasXmlElement.attribute("ip2");
 			int dasPort2 = dasXmlElement.attribute("port2").toInt();
 
-			outSetting->das1 = ConfigConnection(dasId1, dasIp1, dasPort1);
-			outSetting->das2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+			outSetting->ads1 = ConfigConnection(dasId1, dasIp1, dasPort1);
+			outSetting->ads2 = ConfigConnection(dasId2, dasIp2, dasPort2);
 		}
 	}
 
@@ -534,40 +521,33 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 //	return outSetting->errorMessage.isEmpty();
 }
 
-std::vector<ConfigSchema> MonitorConfigController::schemasParams() const
+
+std::vector<VFrame30::SchemaDetails> MonitorConfigController::schemasDetails() const
 {
-	QMutexLocker locker(&m_mutex);
+	QMutexLocker l(&m_mutex);
 
-	std::vector<ConfigSchema> result;
-	result.resize(m_schemas.size());
-
-	int index = 0;
-	for (auto s : m_schemas)
-	{
-		result[index].strId = s.strId;
-		result[index].caption = s.caption;
-		index++;
-	}
+	std::vector<VFrame30::SchemaDetails> result = m_schemaDetailsSet.schemasDetails();
 
 	return result;
 }
 
 std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schemaId)
 {
-	for (const ConfigSchema& s : m_schemas)
+	QMutexLocker l(&m_mutex);
+
+	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetailsSet.schemaDetails(schemaId);
+
+	if (details == nullptr)
 	{
-		if (s.strId == schemaId)
-		{
-			return s.appSignals;
-		}
+		return std::set<QString>();
 	}
 
-	return std::set<QString>();
+	return details->m_signals;
 }
 
 
-std::vector<ConfigSchema> MonitorConfigController::schemas() const
+ConfigSettings MonitorConfigController::configuration() const
 {
-	QMutexLocker locker(&m_mutex);
-	return m_schemas;
+	QMutexLocker locker(&m_confugurationMutex);
+	return m_configuration;
 }

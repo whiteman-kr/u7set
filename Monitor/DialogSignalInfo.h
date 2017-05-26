@@ -29,7 +29,7 @@ class DialogSignalInfo : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalInfo(QWidget *parent, const Signal& signal);
+	explicit DialogSignalInfo(QWidget *parent, const AppSignalParam& signal);
 	~DialogSignalInfo();
 
 public:
@@ -55,7 +55,7 @@ private:
 	Ui::DialogSignalInfo *ui;
 
 	QString m_appSignalId;
-	Signal m_signal;
+	AppSignalParam m_signal;
 	Hash m_hash;
 
 	int m_updateStateTimerId = -1;

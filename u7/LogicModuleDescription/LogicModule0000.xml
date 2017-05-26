@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0002">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0004">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -51,7 +51,6 @@
 		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="5"		VersionOpIndex="44"/>		<!-- 	ImpVersion="0" OpIndex="44 -->
 		<AFBComponent Caption="MATH"		OpCode="13"	ImpVersion="104"	VersionOpIndex="14"/>
 		<AFBComponent Caption="SCALE"		OpCode="14"	ImpVersion="107"	VersionOpIndex="16"/>		<!-- 	OpIndex 16 as in SCALE_P  !!!!!-->
-		<AFBComponent Caption="SCALE_P"		OpCode="15"	ImpVersion="4"		VersionOpIndex="38"/>		<!-- 	OpIndex 16 as in SCALE  !!!!!-->
 		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"/>		<!-- 	Same OpIndex, ImpVersion="0"-->
 		<AFBComponent Caption="INT"			OpCode="17"	ImpVersion="5"		VersionOpIndex="29"/>
 		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="2"		VersionOpIndex="16"/>		<!-- 	Same OpIndex, ImpVersion-->
@@ -64,7 +63,7 @@
 		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="1"		VersionOpIndex="22"/>
 	</AFBImplementation>
 	<AFBL>
-		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0002">
+		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0003">
 			<Properties>
 				<Description>Adder Block with float data format</Description>
 				<Category>Math</Category>
@@ -140,15 +139,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed/>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -195,7 +185,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-        <AFB id="#add_si_v1"       Caption="add_si"       Version="1.0002">
+        <AFB id="#add_si_v1"       Caption="add_si"       Version="1.0003">
 			<Properties>            
 				<Description>Adder Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -246,15 +236,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed/>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -298,7 +279,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#and_v1"          Caption="and"          Version="1.0001">
+		<AFB id="#and_v1"          Caption="and"          Version="1.0002">
 			<Properties>
 				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -354,15 +335,6 @@ function(videoItemFblElement, afbElement)
 						<Changed/>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed/>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -412,7 +384,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0002">
+		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0003">
 			<Properties>								
 				<Description>Comparator Block, equal single-precision floating-point comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -479,15 +451,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed/>						
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -531,7 +494,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0002">
+		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0003">
 			<Properties>												
 				<Description>Comparator Block, greater than single-precision floating-point format comparison (dynamic hysteresis)</Description>
 				 <Category>Compare</Category>
@@ -596,15 +559,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed/>			
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -647,7 +601,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0002">
+		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0003">
 			<Properties>												
 				<Description>Comparator Block, less than single-precision floating-point comparison (dynamic hysteresis)</Description>
 				<Category>Compare</Category>
@@ -713,15 +667,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -765,7 +710,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0002">
+		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0003">
 			<Properties>								
 				<Description>Comparator Block, not equal single-precision floating-point format comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -830,15 +775,6 @@ function(videoItemFblElement, afbElement)
 			</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -882,7 +818,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0003">
+		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0004">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -955,15 +891,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1007,7 +934,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0003">
+		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0004">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -1081,15 +1008,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1132,7 +1050,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0003">
+		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0004">
 			<Properties>
 				<Description>Comparator Block, less than single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -1205,15 +1123,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1257,7 +1166,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0003">
+		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0004">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -1330,15 +1239,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -1382,7 +1282,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0002">
+		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0003">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison</Description>
 				<Category>Compare</Category>
@@ -1415,15 +1315,6 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -1431,7 +1322,7 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0002">
+		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0003">
 			<Properties>								
 				<Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -1464,15 +1355,6 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -1480,7 +1362,7 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0002">
+		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0003">
 			<Properties>								
 				<Description>Comparator Block, less than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -1514,22 +1396,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0002">
+		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0003">
 			<Properties>
 				<Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -1563,22 +1436,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0003">
+		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0004">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1642,15 +1506,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library>
@@ -1692,7 +1547,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0004">
+		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0005">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1756,15 +1611,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library>
@@ -1806,7 +1652,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0003">
+		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0004">
 			<Properties>								
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1870,15 +1716,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library>
@@ -1920,7 +1757,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0003">
+		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0004">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1984,15 +1821,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library>
@@ -2034,7 +1862,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0002">
+		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0003">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2084,15 +1912,6 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -2100,7 +1919,7 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0002">
+		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0003">
 			<Properties>				
 				<Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2151,22 +1970,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0002">
+		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0003">
 			<Properties>
 				<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2217,22 +2027,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0002">
+		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0003">
 			<Properties>				
 				<Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2283,22 +2084,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				 <Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#cnt_dn_v1"	   Caption="cnt_dn"       Version="1.0002">
+		<AFB id="#cnt_dn_v1"	   Caption="cnt_dn"       Version="1.0003">
 			<Properties>
 				<Description>Down Counter Block performs the function of an Down Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
@@ -2323,22 +2115,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#cnt_up_v1"       Caption="cnt_up"       Version="1.0002">
+		<AFB id="#cnt_up_v1"       Caption="cnt_up"       Version="1.0003">
 			<Properties>				
 				<Description>Up Counter Block performs the function of an Up Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
@@ -2359,15 +2142,6 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<LowLimit>1</LowLimit>
 					<HighLimit>2</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -2417,7 +2191,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#damp_fp_v1"      Caption="damp_fp"      Version="1.0008">
+		<AFB id="#damp_fp_v1"      Caption="damp_fp"      Version="1.0009">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -2508,15 +2282,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -2568,7 +2333,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#damp_si_v1"      Caption="damp_si"      Version="1.0009">
+		<AFB id="#damp_si_v1"      Caption="damp_si"      Version="1.0010">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -2618,15 +2383,6 @@ function(videoItemFblElement, afbElement)
 	return createOutputSignals(videoItemFblElement, afbElement);
 }
 						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
 					</Script>
 				</Param>
 			</Params>
@@ -2677,7 +2433,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0007">
+		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0008">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -2778,15 +2534,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -2839,7 +2586,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0008">
+		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0009">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -2900,15 +2647,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -2957,7 +2695,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0003">
+		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0004">
 			<Properties>				
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -3042,15 +2780,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>    
 			</Params>
 			<CommonScript>
 				<Library>
@@ -3096,7 +2825,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0002">
+		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0003">
 			<Properties>				
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -3142,15 +2871,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -3194,7 +2914,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0003">
+		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0004">
 			<Properties>
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -3278,15 +2998,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>    
 			</Params>
 			<CommonScript>
@@ -3333,7 +3044,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0002">
+		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0003">
 			<Properties>
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -3378,15 +3089,6 @@ function(videoItemFblElement, afbElement)
 	return createOutputSignals(videoItemFblElement, afbElement);
 }
 						</Changed>
-					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
 					</Script>
 				</Param>            
 			</Params>
@@ -3469,7 +3171,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0006">
+		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0007">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -3573,15 +3275,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -3628,7 +3321,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#derivc_v1"       Caption="derivc"       Version="1.0005">
+		<AFB id="#derivc_v1"       Caption="derivc"       Version="1.0006">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -3749,15 +3442,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -3804,7 +3488,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#div_fp_v1"       Caption="div_fp"       Version="1.0002">
+		<AFB id="#div_fp_v1"       Caption="div_fp"       Version="1.0003">
 			<Properties>				
 				<Description>Divider Block with float data format</Description>
 				<Category>Math</Category>
@@ -3894,15 +3578,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -3949,7 +3624,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#div_si_v1"       Caption="div_si"       Version="1.0002">
+		<AFB id="#div_si_v1"       Caption="div_si"       Version="1.0003">
 			<Properties>				
 				<Description>Divider Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -4000,15 +3675,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4051,7 +3717,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#ff_d_decay_v1"   Caption="ff_d_decay"   Version="1.0002">
+		<AFB id="#ff_d_decay_v1"   Caption="ff_d_decay"   Version="1.0003">
 			<Properties>				
 				<Description>The D Flip-Flop Block captures the value of the D-input at a decay portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
@@ -4073,22 +3739,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#ff_d_front_v1"   Caption="ff_d_front"   Version="1.0002">
+		<AFB id="#ff_d_front_v1"   Caption="ff_d_front"   Version="1.0003">
 			<Properties>				
 				<Description>The D Flip-Flop Block captures the value of the D-input at a front portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
@@ -4110,22 +3767,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#ff_rs_v1"        Caption="ff_rs"        Version="1.0002">
+		<AFB id="#ff_rs_v1"        Caption="ff_rs"        Version="1.0003">
 			<Properties>				
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
 				<Category>FlipFlop</Category>
@@ -4147,22 +3795,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0002">
+		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0003">
 			<Properties>				
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
 				<Category>FlipFlop</Category>
@@ -4184,22 +3823,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#ff_t_decay_v1"   Caption="ff_t_decay"   Version="1.0002">
+		<AFB id="#ff_t_decay_v1"   Caption="ff_t_decay"   Version="1.0003">
 			<Properties>				
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a decay.</Description>
 				<Category>FlipFlop</Category>
@@ -4220,22 +3850,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>		
-		<AFB id="#ff_t_front_v1"   Caption="ff_t_front"   Version="1.0002">
+		<AFB id="#ff_t_front_v1"   Caption="ff_t_front"   Version="1.0003">
 			<Properties>				
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a front.</Description>
 				<Category>FlipFlop</Category>
@@ -4256,22 +3877,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0005">
+		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0006">
 			<Properties>				
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4386,15 +3998,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4441,7 +4044,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0004">
+		<AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0005">
 			<Properties>
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4573,15 +4176,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -4628,7 +4222,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_decay_fp_v1" Caption="latch_decay_fp" Version="1.0003">
+		<AFB id="#latch_decay_fp_v1" Caption="latch_decay_fp" Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4654,22 +4248,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_decay_si_v1" Caption="latch_decay_si" Version="1.0003">
+		<AFB id="#latch_decay_si_v1" Caption="latch_decay_si" Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4695,22 +4280,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_front_fp_v1" Caption="latch_front_fp" Version="1.0003">
+		<AFB id="#latch_front_fp_v1" Caption="latch_front_fp" Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4736,22 +4312,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_front_si_v1" Caption="latch_front_si" Version="1.0003">
+		<AFB id="#latch_front_si_v1" Caption="latch_front_si" Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4777,22 +4344,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_state_fp_v1" Caption="latch_state_fp" Version="1.0003">
+		<AFB id="#latch_state_fp_v1" Caption="latch_state_fp" Version="1.0004">
 			<Properties>
 				<Description>Latch Block performs a latching of the input(floating-point) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4819,22 +4377,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_state_si_v1" Caption="latch_state_si" Version="1.0003">
+		<AFB id="#latch_state_si_v1" Caption="latch_state_si" Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4860,22 +4409,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0001">
+		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0002">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4901,22 +4441,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0001">
+		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0002">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4938,15 +4469,6 @@ function(videoItemFblElement, afbElement)
 					<Default>4</Default>
 					<LowLimit>1</LowLimit>
 					<HighLimit>4</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -5100,705 +4622,8 @@ function(videoItemFblElement, afbElement)
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
-		</AFB>
-		<AFB id="#linfunc_fp_v1"     Caption="linfunc_fp"     Version="1.0003">
-			<Properties>				
-				<Description>Scaling for 6 points Block performs floating-point input data scaling and outputs floating-point result in accordance with control signals.</Description>
-				<Category>Scaling</Category>
-				<OpCode>15</OpCode>
-				<HasRam>false</HasRam>				
-				<InternalUse>false</InternalUse>
-			</Properties>
-			<Inputs>
-				<Pin OpName="i_x_data" Caption="x" Type="Analog" DataFormat="Float" OpIndex="29" Size="32"/>
-			</Inputs>
-			<Outputs>
-				<Pin OpName="o_y_data" Caption="y" Type="Analog" DataFormat="Float" OpIndex="31" Size="32"/>
-				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="33" Size="1"/>
-				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" OpIndex="34" Size="1"/>
-				<Pin OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="35" Size="1"/>
-				<Pin OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="36" Size="1"/>
-			</Outputs>
-			<Params>
-				<Param OpName="i_x1_data" Caption="InX1" Visible="false" OpIndex="1" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x2_data" Caption="InX2" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x3_data" Caption="InX3" Visible="false" OpIndex="5" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x4_data" Caption="InX4" Visible="false" OpIndex="7" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x1_coef" Caption="K1X1" Visible="false" OpIndex="9" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x2_coef" Caption="K1X2" Visible="false" OpIndex="11" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x3_coef" Caption="K1X3" Visible="false" OpIndex="13" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x4_coef" Caption="K1X4" Visible="false" OpIndex="15" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x5_coef" Caption="K1X5" Visible="false" OpIndex="17" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x1_coef" Caption="K2X1" Visible="false" OpIndex="19" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x2_coef" Caption="K2X2" Visible="false" OpIndex="21" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x3_coef" Caption="K2X3" Visible="false" OpIndex="23" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x4_coef" Caption="K2X4" Visible="false" OpIndex="25" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x5_coef" Caption="K2X5" Visible="false" OpIndex="27" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x0" Caption="X0" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y0" Caption="Y0" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x1" Caption="X1" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y1" Caption="Y1" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x2" Caption="X2" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y2" Caption="Y2" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x3" Caption="X3" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y3" Caption="Y3" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x4" Caption="X4" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y4" Caption="Y4" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x5" Caption="X5" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y5" Caption="Y5" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="Float">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
-					<HighLimit>3.40282e+38</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-					<Value>2</Value>
-					<Default>2</Default>
-					<LowLimit>1</LowLimit>
-					<HighLimit>2</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-			</Params>
-			<CommonScript>
-				<Library>
-            function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
-
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("y");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-
-	videoItemFblElement.adjustHeight();
-
-	return true;
-}
-				</Library>
-				<AfterCreation>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-				</AfterCreation>
-			</CommonScript>
-		</AFB>
-		<AFB id="#linfunc_si_v1"     Caption="linfunc_si"     Version="1.0002">
-			<Properties>				
-				<Description>Scaling for 6 points Block performs signed integer input data scaling and outputs signed integer result in accordance with control signals.</Description>
-				<Category>Scaling</Category>
-				<OpCode>15</OpCode>
-				<HasRam>false</HasRam>				
-				<InternalUse>false</InternalUse>
-			</Properties>
-			<Inputs>
-				<Pin OpName="i_x_data" Caption="x" Type="Analog" DataFormat="SignedInt" OpIndex="29" Size="32"/>
-			</Inputs>
-			<Outputs>
-				<Pin OpName="o_y_data" Caption="y" Type="Analog" DataFormat="SignedInt" OpIndex="31" Size="32"/>
-				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" OpIndex="33" Size="1"/>            
-				<Pin OpName="o_zero" Caption="zero" Type="Discrete" OpIndex="35" Size="1"/>
-			</Outputs>
-			<Params>
-				<Param OpName="i_x1_data" Caption="InX1" Visible="false" OpIndex="1" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x2_data" Caption="InX2" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x3_data" Caption="InX3" Visible="false" OpIndex="5" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_x4_data" Caption="InX4" Visible="false" OpIndex="7" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x1_coef" Caption="K1X1" Visible="false" OpIndex="9" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x2_coef" Caption="K1X2" Visible="false" OpIndex="11" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x3_coef" Caption="K1X3" Visible="false" OpIndex="13" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x4_coef" Caption="K1X4" Visible="false" OpIndex="15" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k1_x5_coef" Caption="K1X5" Visible="false" OpIndex="17" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x1_coef" Caption="K2X1" Visible="false" OpIndex="19" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x2_coef" Caption="K2X2" Visible="false" OpIndex="21" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x3_coef" Caption="K2X3" Visible="false" OpIndex="23" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x4_coef" Caption="K2X4" Visible="false" OpIndex="25" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_scal_k2_x5_coef" Caption="K2X5" Visible="false" OpIndex="27" Size="32" Instantiator="true" User="false" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x0" Caption="X0" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y0" Caption="Y0" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x1" Caption="X1" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y1" Caption="Y1" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x2" Caption="X2" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y2" Caption="Y2" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x3" Caption="X3" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y3" Caption="Y3" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x4" Caption="X4" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y4" Caption="Y4" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="x5" Caption="X5" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="y5" Caption="Y5" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" DataFormat="SignedInt">
-					<Value>0</Value>
-					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
-					<HighLimit>2147483647</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>1</LowLimit>
-					<HighLimit>2</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-			</Params>
-			<CommonScript>
-				<Library>
-            function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
-{
-	var show = videoItemFblElement.getParamBoolValue(paramName);
-	if (show == true)
-	{
-		var s = afbElement.getAfbSignalByCaption(signalCaption);
-		if (s != null)
-		{
-			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
-		}	
-	}
-}
-
-function createOutputSignals(videoItemFblElement, afbElement)
-{
-	videoItemFblElement.removeOutputSignals();
-	
-	var out = afbElement.getAfbSignalByCaption("y");
-	if (out != null)
-	{
-		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
-	}
-	
-	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
-	videoItemFblElement.adjustHeight();
-
-	return true;
-}
-				</Library>
-				<AfterCreation>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-				</AfterCreation>
-			</CommonScript>
-		</AFB>
-		<AFB id="#math_abs_fp_v1"    Caption="math_abs_fp"    Version="1.0002">
+		</AFB>		
+		<AFB id="#math_abs_fp_v1"    Caption="math_abs_fp"    Version="1.0003">
 			<Properties>								
 				<Description>Function Block outputs the absolute value of the input signal</Description>
 				<Category>Math</Category>
@@ -5822,15 +4647,6 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
@@ -5838,7 +4654,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_abs_si_v1"    Caption="math_abs_si"    Version="1.0002">
+		<AFB id="#math_abs_si_v1"    Caption="math_abs_si"    Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
 				<Category>Math</Category>
@@ -5861,15 +4677,6 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
-				</Param>           
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -5877,7 +4684,7 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#func_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0002">
+		<AFB id="#func_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0003">
 			<Properties>				
 				<Description>mathtion Block outputs the cosine calculation result</Description>
 				<Category>Math</Category>
@@ -5900,15 +4707,6 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -5916,7 +4714,7 @@ function(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0002">
+		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the exponential calculation result</Description>
 				<Category>Math</Category>
@@ -5992,15 +4790,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6045,7 +4834,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_inv_fp_v1"    Caption="math_inv_fp"    Version="1.0002">
+		<AFB id="#math_inv_fp_v1"    Caption="math_inv_fp"    Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
 				<Category>Math</Category>
@@ -6121,15 +4910,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6174,7 +4954,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_loge_fp_v1"   Caption="math_loge_fp"   Version="1.0002">
+		<AFB id="#math_loge_fp_v1"   Caption="math_loge_fp"   Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the natural logarithmic calculation result</Description>
 				<Category>Math</Category>
@@ -6224,15 +5004,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -6276,7 +5047,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0002">
+		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the sine calculation result</Description>
 				<Category>Math</Category>
@@ -6301,22 +5072,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.0002">
+		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.0003">
 			<Properties>				
 				<Description>Function Block outputs the square root calculation result</Description>
 				<Category>Math</Category>
@@ -6378,15 +5140,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>           
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -6431,7 +5184,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0003">
+		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0004">
 			<Properties>				
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>
@@ -6599,15 +5352,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6718,7 +5462,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0002">
+		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0003">
 			<Properties>
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
 				<Category>Logic</Category>
@@ -6832,15 +5576,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -6947,7 +5682,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0006">
+		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0007">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7063,15 +5798,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>                      
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -7177,7 +5903,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0002">
+		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0003">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -7320,15 +6046,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>                      
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -7434,7 +6151,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0002">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0003">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -7573,15 +6290,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>                      
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -7682,7 +6390,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0006">
+		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0007">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7794,15 +6502,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>                      
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -7904,7 +6603,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mul_fp_v1"         Caption="mul_fp"         Version="1.0002">
+		<AFB id="#mul_fp_v1"         Caption="mul_fp"         Version="1.0003">
 			<Properties>				
 				<Description>Multiply Block with float data format</Description>
 				<Category>Math</Category>
@@ -7981,15 +6680,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -8034,7 +6724,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#mul_si_v1"         Caption="mul_si"         Version="1.0002">
+		<AFB id="#mul_si_v1"         Caption="mul_si"         Version="1.0003">
 			<Properties>				
 				<Description>Multiply Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -8084,15 +6774,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -8136,7 +6817,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#not_v1"            Caption="not"            Version="1.0002">
+		<AFB id="#not_v1"            Caption="not"            Version="1.0003">
 			<Properties>				
 				<Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -8151,22 +6832,13 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Discrete" OpIndex="2" Size="1"/>
 			</Outputs>
 			<Params>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#or_v1"             Caption="or"             Version="1.0002">
+		<AFB id="#or_v1"             Caption="or"             Version="1.0003">
 			<Properties>				
 				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -8218,15 +6890,6 @@ function(videoItemFblElement, afbElement)
 				</Param>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
 					<Value>2</Value>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>
@@ -8491,7 +7154,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_16ui_16ui_v1" Caption="scale_16ui_16ui" Version="1.0002">
+		<AFB id="#scale_16ui_16ui_v1" Caption="scale_16ui_16ui" Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -8595,15 +7258,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -8646,7 +7300,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_16ui_fp_v1"   Caption="scale_16ui_fp"   Version="1.0002">
+		<AFB id="#scale_16ui_fp_v1"   Caption="scale_16ui_fp"   Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -8776,15 +7430,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -8829,7 +7474,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_16ui_si_v1"   Caption="scale_16ui_si"   Version="1.0002">
+		<AFB id="#scale_16ui_si_v1"   Caption="scale_16ui_si"   Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -8932,15 +7577,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -8984,7 +7620,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_fp_16ui_v1"   Caption="scale_fp_16ui"   Version="1.0002">
+		<AFB id="#scale_fp_16ui_v1"   Caption="scale_fp_16ui"   Version="1.0003">
 			<Properties>
 				<Description>Scaling Block, single-precision floating-point to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -9114,15 +7750,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -9167,7 +7794,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_fp_fp_v1"     Caption="scale_fp_fp"     Version="1.0002">
+		<AFB id="#scale_fp_fp_v1"     Caption="scale_fp_fp"     Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, single-precision floating-point to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -9297,15 +7924,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -9350,7 +7968,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_fp_si_v1"     Caption="scale_fp_si"     Version="1.0002">
+		<AFB id="#scale_fp_si_v1"     Caption="scale_fp_si"     Version="1.0003">
 			<Properties>								
 				<Description>Scaling Block, single-precision floating-point to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -9480,15 +8098,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -9533,7 +8142,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_si_16ui_v1"   Caption="scale_si_16ui"   Version="1.0002">
+		<AFB id="#scale_si_16ui_v1"   Caption="scale_si_16ui"   Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -9636,15 +8245,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -9688,7 +8288,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_si_fp_v1"     Caption="scale_si_fp"     Version="1.0002">
+		<AFB id="#scale_si_fp_v1"     Caption="scale_si_fp"     Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -9818,15 +8418,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -9871,7 +8462,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#scale_si_si_v1"     Caption="scale_si_si"     Version="1.0002">
+		<AFB id="#scale_si_si_v1"     Caption="scale_si_si"     Version="1.0003">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -9974,15 +8565,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -10026,7 +8608,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#simlock_v1"         Caption="simlock"         Version="1.0003">
+		<AFB id="#simlock_v1"         Caption="simlock"         Version="1.0004">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
@@ -10043,22 +8625,13 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="o_result" Caption="out" Type="Discrete" OpIndex="4" Size="16"/>
 			</Outputs>
 			<Params>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#sub_fp_v1"          Caption="sub_fp"          Version="1.0002">
+		<AFB id="#sub_fp_v1"          Caption="sub_fp"          Version="1.0003">
 			<Properties>				
 				<Description>Subtract Block with float data format</Description>
 				<Category>Math</Category>
@@ -10134,15 +8707,6 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
 				</Param>
 			</Params>
 			<CommonScript>
@@ -10188,7 +8752,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0002">
+		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0003">
 			<Properties>				
 				<Description>Multiply Block with signed int data format.</Description>
 				<Category>Math</Category>
@@ -10239,15 +8803,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10290,7 +8845,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#switch_fp_v1"       Caption="switch_fp"       Version="1.0002">
+		<AFB id="#switch_fp_v1"       Caption="switch_fp"       Version="1.0003">
 			<Properties>				
 				<Description>Multiplexor Block selects one of two floating-point input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -10306,23 +8861,14 @@ function(videoItemFblElement, afbElement)
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="6" Size="32"/>            
 			</Outputs>
-			<Params>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>                          
+			<Params>                          
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#switch_si_v1"       Caption="switch_si"       Version="1.0002">
+		<AFB id="#switch_si_v1"       Caption="switch_si"       Version="1.0003">
 			<Properties>				
 				<Description>Multiplexor Block selects one of two signed integer input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -10338,23 +8884,14 @@ function(videoItemFblElement, afbElement)
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="6" Size="32"/>            
 			</Outputs>
-			<Params>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>                          
+			<Params>                          
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_filter_v1"      Caption="tct_filter"      Version="1.0002">
+		<AFB id="#tct_filter_v1"      Caption="tct_filter"      Version="1.0003">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, filtering function</Description>
 				<Category>Delay</Category>
@@ -10392,15 +8929,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10442,7 +8970,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_off_v1"         Caption="tct_off"         Version="1.0002">
+		<AFB id="#tct_off_v1"         Caption="tct_off"         Version="1.0003">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -10480,15 +9008,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10530,7 +9049,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_on_v1"          Caption="tct_on"          Version="1.0002">
+		<AFB id="#tct_on_v1"          Caption="tct_on"          Version="1.0003">
 			<Properties>
 				<Description>Time Counter Block with dynamic time value, turn on delay function</Description>
 				<Category>Delay</Category>
@@ -10568,15 +9087,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10618,7 +9128,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_rsv_v1"         Caption="tct_rsv"         Version="1.0002">
+		<AFB id="#tct_rsv_v1"         Caption="tct_rsv"         Version="1.0003">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, delay function</Description>
 				<Category>Delay</Category>
@@ -10656,15 +9166,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10706,7 +9207,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_vibr_v1"        Caption="tct_vibr"        Version="1.0002">
+		<AFB id="#tct_vibr_v1"        Caption="tct_vibr"        Version="1.0003">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, single vibrator function</Description>
 				<Category>Delay</Category>
@@ -10744,15 +9245,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -10794,7 +9286,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0003">
+		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0004">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, filtering function</Description>
 				<Category>Delay</Category>
@@ -10828,22 +9320,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0003">
+		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0004">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -10877,22 +9360,13 @@ function(videoItemFblElement, afbElement)
 					</Script>
 					<Units>ms</Units>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0003">
+		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0004">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn on delay function</Description>
 				<Category>Delay</Category>
@@ -10926,22 +9400,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0003">
+		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0004">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, delay function</Description>
 				<Category>Delay</Category>
@@ -10975,22 +9440,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0003">
+		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0004">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, single vibrator function</Description>
 				<Category>Delay</Category>
@@ -11024,22 +9480,13 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#voter_v1"           Caption="voter"           Version="1.0002">
+		<AFB id="#voter_v1"           Caption="voter"           Version="1.0003">
 			<Properties>				
 				<Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Logic</Category>
@@ -11131,15 +9578,6 @@ function(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
 			</Params>
 			<CommonScript>
 				<Library>
@@ -11181,7 +9619,7 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#xor_v1"             Caption="xor"             Version="1.0002">
+		<AFB id="#xor_v1"             Caption="xor"             Version="1.0003">
 			<Properties>				
 				<Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -11233,15 +9671,6 @@ function(videoItemFblElement, afbElement)
 				</Param>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
 					<Value>3</Value>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-				<Param OpName="test_start_count" Caption="TestStartCount" Visible="false" OpIndex="-1" Size="16" Instantiator="false" User="true" Type="Analog" DataFormat="UnsignedInt">
-					<Value>1</Value>
-					<Default>1</Default>
-					<LowLimit>0</LowLimit>
-					<HighLimit>65535</HighLimit>
 					<Script>
 						<Changed></Changed>
 					</Script>

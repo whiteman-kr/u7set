@@ -9,7 +9,7 @@
 
 AppSignalStateEx::AppSignalStateEx()
 {
-	m_current.flags.all = 0;
+	m_current.m_flags.all = 0;
 }
 
 
@@ -34,8 +34,8 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	Hash hash = calcHash(signal->appSignalID());
 
-	m_current.hash = hash;
-	m_stored.hash = hash;
+	m_current.m_hash = hash;
+	m_stored.m_hash = hash;
 }
 
 
@@ -45,9 +45,9 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 
 	// update current state
 	//
-	m_current.time = time;
-	m_current.flags.valid = validity;
-	m_current.value = value;
+	m_current.m_time = time;
+	m_current.m_flags.valid = validity;
+	m_current.m_value = value;
 
 	if (m_initialized == false)
 	{
@@ -62,7 +62,7 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 		//
 		if (m_isDiscreteSignal == true)
 		{
-			if (m_stored.value != m_current.value)
+			if (m_stored.m_value != m_current.m_value)
 			{
 				updateStoredState = true;
 			}
@@ -71,24 +71,24 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 		{
 			// is analog signal
 			//
-			if (fabs(m_stored.value - m_current.value) > m_absAperture)
+			if (fabs(m_stored.m_value - m_current.m_value) > m_absAperture)
 			{
 				updateStoredState = true;
 			}
 
-			if (value > m_highLimit)
-			{
-				m_current.flags.overflow = 1;
-			}
+//			if (value > m_highLimit)
+//			{
+//				m_current.flags.overflow = 1;
+//			}
 
-			if (value < m_lowLimit)
-			{
-				m_current.flags.underflow = 1;
-			}
+//			if (value < m_lowLimit)
+//			{
+//				m_current.flags.underflow = 1;
+//			}
 		}
 	}
 
-	if (m_stored.flags.all != m_current.flags.all)
+	if (m_stored.m_flags.all != m_current.m_flags.all)
 	{
 		updateStoredState = true;		// changes of signal flags always write
 	}
@@ -106,9 +106,9 @@ void AppSignalStateEx::setState(Times time, quint32 validity, double value)
 
 Hash AppSignalStateEx::hash() const
 {
-	assert(m_current.hash == m_stored.hash);
+	assert(m_current.m_hash == m_stored.m_hash);
 
-	return m_current.hash;
+	return m_current.m_hash;
 }
 
 
@@ -213,7 +213,7 @@ bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 
 		state = stateEx->m_current;
 
-		assert(state.hash == hash);
+		assert(state.m_hash == hash);
 
 		return true;
 	}
@@ -230,7 +230,7 @@ bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 
 		state = stateEx->m_stored;
 
-		assert(state.hash == hash);
+		assert(state.m_hash == hash);
 
 		return true;
 	}

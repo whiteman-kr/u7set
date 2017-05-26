@@ -36,7 +36,7 @@ class UserManager
 public:
 	UserManager();
 
-    bool requestPassword(QWidget *parent, bool adminNeeded);
+	bool requestPassword(QWidget* parent, bool adminNeeded);
 
 	void Restore();
 	void Store();
@@ -44,7 +44,7 @@ public:
 	std::vector<User> m_users;
 
 private:
-    QString m_emptyMd5;
+	QString m_emptyMd5;
 };
 
 Q_DECLARE_METATYPE(User)

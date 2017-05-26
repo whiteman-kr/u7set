@@ -8,6 +8,7 @@
 //
 #include <cassert>
 #include <vector>
+#include <array>
 #include <map>
 #include <list>
 #include <memory>
@@ -15,22 +16,12 @@
 
 // Add Qt includes here
 //
-#include <QDebug>
-#include <QThread>
-#include <QPaintDevice>
-#include <QMutex>
-#include <QStandardPaths>
-#include <QDir>
-#include <QSettings>
-#include <QDesktopWidget>
-#include <QCloseEvent>
-#include <QLayout>
-#include <QGridLayout>
-#include <QApplication>
+#include <QtCore>
+#include <QtWidgets>
 
 // Add thirdparty and any stable includes here
 //
 //#include "thirdparty/include/libmain.h"
-//#include "my_stable_class.h"
+#include "../lib/TimeStamp.h"
 
 #endif // STABLE_H

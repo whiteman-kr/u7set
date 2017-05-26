@@ -33,6 +33,8 @@ void Settings::writeUserScope() const
 	s.setValue("MainWindow/pos", m_mainWindowPos);
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
+	s.setValue("MainWindow/ToolBar/viewType", m_viewType);
+	s.setValue("MainWindow/ToolBar/laneCount", m_laneCount);
 
 	return;
 }
@@ -44,6 +46,8 @@ void Settings::loadUserScope()
 	m_mainWindowPos = s.value("MainWindow/pos", QPoint(200, 200)).toPoint();
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
+	m_viewType = s.value("MainWindow/ToolBar/viewType", 0).toInt();
+	m_laneCount = s.value("MainWindow/ToolBar/laneCount", 2).toInt();
 
 	return;
 }

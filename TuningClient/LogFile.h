@@ -6,7 +6,7 @@
 class LogFile
 {
 public:
-	LogFile(const QString &fileName, const QString &path, int maxFileSize = 1048576);
+	LogFile(const QString& fileName, const QString& path, int maxFileSize = 1048576);
 	~LogFile();
 
 	enum class MessageType

@@ -1,9 +1,8 @@
-#include "Stable.h"
 #include "TuningWorkspace.h"
 #include "Settings.h"
 #include "MainWindow.h"
 
-TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage *filterStorage, const TuningSignalStorage* objects, QWidget *parent) :
+TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
 	m_filterStorage(filterStorage),
 	m_objects(*objects),
 	QWidget(parent)
@@ -11,15 +10,15 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 
 	assert(tuningSignalManager);
 	assert(m_filterStorage),
-	assert(objects);
+			assert(objects);
 
-    QVBoxLayout* pLayout = new QVBoxLayout();
+	QVBoxLayout* pLayout = new QVBoxLayout();
 	setLayout(pLayout);
 
-    // Fill tree
-    //
+	// Fill tree
+	//
 
-    fillFiltersTree();
+	fillFiltersTree();
 
 	// Fill tab pages
 	//
@@ -79,7 +78,7 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 		//
 		m_tab = new QTabWidget();
 
-        connect(m_tab, &QTabWidget::currentChanged, this, &TuningWorkspace::slot_currentTabChanged);
+		connect(m_tab, &QTabWidget::currentChanged, this, &TuningWorkspace::slot_currentTabChanged);
 
 
 		if (m_hSplitter != nullptr)
@@ -96,9 +95,9 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 			TuningPage* tp = t.first;
 			QString tabName = t.second;
 
-            m_tab->addTab(tp, tabName);
-        }
-    }
+			m_tab->addTab(tp, tabName);
+		}
+	}
 
 	// Restore splitter size
 	//
@@ -111,100 +110,103 @@ TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, Tunin
 
 TuningWorkspace::~TuningWorkspace()
 {
-    if (m_hSplitter != nullptr)
-    {
+	if (m_hSplitter != nullptr)
+	{
 		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
-    }
+	}
 }
 
 void TuningWorkspace::fillFiltersTree()
 {
-    // Fill the filter tree
-    //
+	// Fill the filter tree
+	//
 	std::shared_ptr<TuningFilter> rootFilter = m_filterStorage->m_root;
-    if (rootFilter == nullptr)
-    {
-        assert(rootFilter);
-        return;
-    }
+	if (rootFilter == nullptr)
+	{
+		assert(rootFilter);
+		return;
+	}
 
-    QString mask;
-    if (m_treeMask != nullptr)
-    {
-        mask = m_treeMask->text();
-    }
+	QString mask;
+	if (m_treeMask != nullptr)
+	{
+		mask = m_treeMask->text();
+	}
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<rootFilter->caption());
-    item->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
+	QStringList l;
+	l << rootFilter->caption();
 
-    addChildTreeObjects(rootFilter, item, mask);
+	QTreeWidgetItem* item = new QTreeWidgetItem(l);
+	item->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
 
-    if (item->childCount() == 0)
-    {
-        delete item;
-        return;
-    }
+	addChildTreeObjects(rootFilter, item, mask);
 
-    // Create tree control
-    //
-    if (m_hSplitter == nullptr)
-    {
-        m_filterTree = new QTreeWidget();
-        m_filterTree->setSortingEnabled(true);
-        connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
+	if (item->childCount() == 0)
+	{
+		delete item;
+		return;
+	}
 
-        QStringList headerLabels;
-        headerLabels<<tr("Caption");
+	// Create tree control
+	//
+	if (m_hSplitter == nullptr)
+	{
+		m_filterTree = new QTreeWidget();
+		m_filterTree->setSortingEnabled(true);
+		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
 
-        m_filterTree->setColumnCount(headerLabels.size());
-        m_filterTree->setHeaderLabels(headerLabels);
+		QStringList headerLabels;
+		headerLabels << tr("Caption");
 
-        m_treeMask = new QLineEdit();
-        connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
+		m_filterTree->setColumnCount(headerLabels.size());
+		m_filterTree->setHeaderLabels(headerLabels);
 
-        m_treeMaskApply = new QPushButton(tr("Filter"));
-        connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
+		m_treeMask = new QLineEdit();
+		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
 
-        QHBoxLayout* searchLayout = new QHBoxLayout();
-        searchLayout->addWidget(m_treeMask);
-        searchLayout->addWidget(m_treeMaskApply);
+		m_treeMaskApply = new QPushButton(tr("Filter"));
+		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
-        QWidget* treeLayoutWidget = new QWidget();
+		QHBoxLayout* searchLayout = new QHBoxLayout();
+		searchLayout->addWidget(m_treeMask);
+		searchLayout->addWidget(m_treeMaskApply);
 
-        QVBoxLayout* treeLayout = new QVBoxLayout(treeLayoutWidget);
+		QWidget* treeLayoutWidget = new QWidget();
 
-        treeLayout->addWidget(m_filterTree);
-        treeLayout->addLayout(searchLayout);
+		QVBoxLayout* treeLayout = new QVBoxLayout(treeLayoutWidget);
 
-        // Create splitter control
-        //
-        m_hSplitter = new QSplitter();
-        m_hSplitter->addWidget(treeLayoutWidget);
-    }
-    else
-    {
-        m_filterTree->clear();
-    }
+		treeLayout->addWidget(m_filterTree);
+		treeLayout->addLayout(searchLayout);
 
-    // Fill filters control
-    //
+		// Create splitter control
+		//
+		m_hSplitter = new QSplitter();
+		m_hSplitter->addWidget(treeLayoutWidget);
+	}
+	else
+	{
+		m_filterTree->clear();
+	}
 
-    m_filterTree->blockSignals(true);
+	// Fill filters control
+	//
 
-    m_filterTree->addTopLevelItem(item);
+	m_filterTree->blockSignals(true);
 
-    item->setSelected(true);
+	m_filterTree->addTopLevelItem(item);
 
-    item->setExpanded(true);
+	item->setSelected(true);
 
-    m_filterTree->sortItems(0, Qt::AscendingOrder);
+	item->setExpanded(true);
 
-    m_filterTree->blockSignals(false);
+	m_filterTree->sortItems(0, Qt::AscendingOrder);
 
-    if (mask.isEmpty() == false)
-    {
-        m_filterTree->expandAll();
-    }
+	m_filterTree->blockSignals(false);
+
+	if (mask.isEmpty() == false)
+	{
+		m_filterTree->expandAll();
+	}
 }
 
 void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask)
@@ -235,22 +237,25 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 			continue;
 		}
 
-        QString caption = f->caption();
+		QString caption = f->caption();
 
-        if (mask.isEmpty() == false)
-        {
-            if (f->childFiltersCount() == 0 && caption.contains(mask, Qt::CaseInsensitive) == false)
-            {
-                    continue;
-            }
-        }
+		if (mask.isEmpty() == false)
+		{
+			if (f->childFiltersCount() == 0 && caption.contains(mask, Qt::CaseInsensitive) == false)
+			{
+				continue;
+			}
+		}
 
-        QTreeWidgetItem* item = new QTreeWidgetItem(QStringList()<<caption);
+		QStringList l;
+		l << caption;
+
+		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 
 		parent->addChild(item);
 
-        addChildTreeObjects(f, item, mask);
+		addChildTreeObjects(f, item, mask);
 	}
 }
 
@@ -271,71 +276,71 @@ void TuningWorkspace::slot_treeSelectionChanged()
 
 void TuningWorkspace::slot_maskReturnPressed()
 {
-    fillFiltersTree();
+	fillFiltersTree();
 }
 
 void TuningWorkspace::slot_maskApply()
 {
-    fillFiltersTree();
+	fillFiltersTree();
 }
 
 
 void TuningWorkspace::slot_currentTabChanged(int index)
 {
-    if (m_tab == nullptr)
-    {
-        assert(m_tab);
-        return;
-    }
+	if (m_tab == nullptr)
+	{
+		assert(m_tab);
+		return;
+	}
 
-    TuningPage* page = dynamic_cast<TuningPage*>(m_tab->widget(index));
-    if (page == nullptr)
-    {
-        assert(page);
-        return;
-    }
+	TuningPage* page = dynamic_cast<TuningPage*>(m_tab->widget(index));
+	if (page == nullptr)
+	{
+		assert(page);
+		return;
+	}
 
-    // Set the tab back color
-    //
+	// Set the tab back color
+	//
 
-    QColor backColor = page->backColor();
-    QColor textColor = page->textColor();
+	QColor backColor = page->backColor();
+	QColor textColor = page->textColor();
 
-    if (backColor.isValid() && textColor.isValid() && backColor != textColor)
-    {
-        // See http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
-        //
+	if (backColor.isValid() && textColor.isValid() && backColor != textColor)
+	{
+		// See http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtabwidget-and-qtabbar
+		//
 
-        QString s = QString("\
-            QTabWidget::pane \
-            {\
-                background: solid %1;\
-                border-top: 2px solid %1;\
-                color: %2;\
-            }\
-            QTabWidget::tab-bar\
-            {\
-              alignment: left;\
-            }\
-            QTabBar::tab\
-            {\
-                border: 2px solid #C4C4C3;\
-                border-bottom-color: #C2C7CB;\
-                border-top-left-radius: 4px;\
-                border-top-right-radius: 4px;\
-                min-width: 8px;\
-                padding: 4px;\
-            }\
-            QTabBar::tab:selected\
-            {\
-                background: solid %1;\
-                border-color: #C2C7CB;\
-                border-bottom-color: #C2C7CB;\
-                color: %2;\
-            }\
-        ").arg(backColor.name()).arg(textColor.name());
+		QString s = QString("\
+							QTabWidget::pane \
+		{\
+								background: solid %1;\
+								border-top: 2px solid %1;\
+								color: %2;\
+							}\
+							QTabWidget::tab-bar\
+		{\
+								alignment: left;\
+							}\
+							QTabBar::tab\
+		{\
+								border: 2px solid #C4C4C3;\
+								border-bottom-color: #C2C7CB;\
+								border-top-left-radius: 4px;\
+								border-top-right-radius: 4px;\
+								min-width: 8px;\
+								padding: 4px;\
+							}\
+							QTabBar::tab:selected\
+		{\
+								background: solid %1;\
+								border-color: #C2C7CB;\
+								border-bottom-color: #C2C7CB;\
+								color: %2;\
+							}\
+							").arg(backColor.name()).arg(textColor.name());
 
-        m_tab->setStyleSheet(s);
-    }
+							m_tab->setStyleSheet(s);
+	}
 
 }

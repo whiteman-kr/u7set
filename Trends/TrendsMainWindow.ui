@@ -29,6 +29,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionPrint"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -41,29 +42,29 @@
    <addaction name="menu_File"/>
    <addaction name="menu"/>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="Trends.qrc">
+     <normaloff>:/Images/Images/Open.svg</normaloff>:/Images/Images/Open.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="Trends.qrc">
+     <normaloff>:/Images/Images/Save.svg</normaloff>:/Images/Images/Save.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionExit">
@@ -76,8 +77,22 @@
     <string>&amp;About</string>
    </property>
   </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="Trends.qrc">
+     <normaloff>:/Images/Images/Print.svg</normaloff>:/Images/Images/Print.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="Trends.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -51,7 +51,6 @@ SOURCES += main.cpp \
     ../lib/Tcp.cpp \
     ../lib/BuildInfo.cpp \
     ../lib/SimpleThread.cpp \
-    MonitorSchemaView.cpp \
     MonitorSchemaWidget.cpp \
     ../lib/Types.cpp \
     MonitorConfigController.cpp \
@@ -65,7 +64,7 @@ SOURCES += main.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
     Statistics.cpp \
     DialogSignalInfo.cpp \
@@ -73,7 +72,8 @@ SOURCES += main.cpp \
     DialogSignalSnapshot.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    MonitorView.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -87,7 +87,6 @@ HEADERS  += \
     ../lib/CfgServerLoader.h \
     ../lib/BuildInfo.h \
     ../lib/SimpleThread.h \
-    MonitorSchemaView.h \
     MonitorSchemaWidget.h \
     ../lib/Types.h \
     MonitorConfigController.h \
@@ -103,7 +102,7 @@ HEADERS  += \
     ../lib/DbStruct.h \
     ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
     Statistics.h \
     DialogSignalInfo.h \
@@ -111,7 +110,8 @@ HEADERS  += \
     DialogSignalSnapshot.h \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
-    ../lib/CircularLogger.h
+    ../lib/CircularLogger.h \
+    MonitorView.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -195,4 +195,5 @@ DISTFILES += \
     Images/About.svg \
     Images/readme.txt \
     ../Proto/network.proto \
-    ../Proto/serialization.proto
+    ../Proto/serialization.proto \
+    Images/Trends.svg

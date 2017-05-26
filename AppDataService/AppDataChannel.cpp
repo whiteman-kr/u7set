@@ -1,5 +1,5 @@
 #include "AppDataChannel.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
 
 
@@ -204,7 +204,7 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 
 	Times time;
 
-	time.system = currentTime;
+	time.system.timeStamp = currentTime;
 
 	for(const SignalParseInfo& parseInfo : *sourceParseInfo)
 	{

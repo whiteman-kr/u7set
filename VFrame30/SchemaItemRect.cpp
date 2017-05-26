@@ -210,8 +210,7 @@ namespace VFrame30
 
 		// Drawing Text
 		//
-		MacrosExpander me;
-		QString text = me.parse(m_text, drawParam->session(), schema, this);
+		QString text = MacrosExpander::parse(m_text, drawParam->session(), schema, this);
 
 		if (m_text.isEmpty() == false)
 		{

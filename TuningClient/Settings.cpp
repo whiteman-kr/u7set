@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "Settings.h"
 #include "../lib/SocketIO.h"
 
@@ -45,8 +44,8 @@ Settings::Settings():
 	m_configuratorIpAddress1("127.0.0.1"),
 	m_configuratorPort1(PORT_CONFIGURATION_SERVICE_REQUEST),
 	m_configuratorIpAddress2("127.0.0.1"),
-    m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
-    m_language("en")
+	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
+	m_language("en")
 {
 }
 
@@ -75,7 +74,7 @@ void Settings::RestoreSystem()
 	QSettings adminSettings(QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 	adminSettings.setValue("ApplicationName", qApp->applicationName());
 
-    adminSettings.sync();
+	adminSettings.sync();
 
 	if (adminSettings.status() == QSettings::AccessError)
 	{
@@ -98,44 +97,44 @@ void Settings::RestoreSystem()
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_REQUEST).toInt();
 
-    // Determine the Global settings folder
+	// Determine the Global settings folder
 
-    QSettings qs(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
+	QSettings qs(QSettings::IniFormat, QSettings::SystemScope, qApp->organizationName(), qApp->applicationName());
 
-    QString m_globalAppDataPath = QDir::toNativeSeparators(qs.fileName());
+	QString m_globalAppDataPath = QDir::toNativeSeparators(qs.fileName());
 
-    int ptPos = m_globalAppDataPath.indexOf('.');
-    if (ptPos != -1)
-    {
-        m_globalAppDataPath = m_globalAppDataPath.left(ptPos);
-    }
+	int ptPos = m_globalAppDataPath.indexOf('.');
+	if (ptPos != -1)
+	{
+		m_globalAppDataPath = m_globalAppDataPath.left(ptPos);
+	}
 
-    qDebug()<<m_globalAppDataPath;
+	qDebug() << m_globalAppDataPath;
 
-    if (m_admin == true)
-    {
-        QDir dir(m_globalAppDataPath);
+	if (m_admin == true)
+	{
+		QDir dir(m_globalAppDataPath);
 
-        if (dir.exists() == false)
-        {
-            dir.mkpath(m_globalAppDataPath);
-        }
-    }
+		if (dir.exists() == false)
+		{
+			dir.mkpath(m_globalAppDataPath);
+		}
+	}
 
-    // Determine the Local settings folder
+	// Determine the Local settings folder
 
-    m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+	m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 
-    qDebug()<<m_localAppDataPath;
+	qDebug() << m_localAppDataPath;
 
-    QDir dir(m_localAppDataPath);
+	QDir dir(m_localAppDataPath);
 
-    if (dir.exists() == false)
-    {
-        dir.mkpath(m_localAppDataPath);
-    }
+	if (dir.exists() == false)
+	{
+		dir.mkpath(m_localAppDataPath);
+	}
 
-    m_userFiltersFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
+	m_userFiltersFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
 
 }
 
@@ -171,26 +170,26 @@ void Settings::StoreUser()
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
 
-    // Preset editor
+	// Preset editor
 
-    s.setValue("PresetEditor/pos", m_presetEditorPos);
-    s.setValue("PresetEditor/geometry", m_presetEditorGeometry);
+	s.setValue("PresetEditor/pos", m_presetEditorPos);
+	s.setValue("PresetEditor/geometry", m_presetEditorGeometry);
 
-    s.setValue("PresetEditor/signalsColumnCount", static_cast<uint>(m_presetEditorSignalsTableColumnWidth.size()));
-    for (int i = 0; i < m_presetEditorSignalsTableColumnWidth.size(); i++)
-    {
-        s.setValue(QString("PresetEditor/signalsColumnWidth/column%1").arg(i), m_presetEditorSignalsTableColumnWidth[i]);
-    }
+	s.setValue("PresetEditor/signalsColumnCount", static_cast<uint>(m_presetEditorSignalsTableColumnWidth.size()));
+	for (int i = 0; i < m_presetEditorSignalsTableColumnWidth.size(); i++)
+	{
+		s.setValue(QString("PresetEditor/signalsColumnWidth/column%1").arg(i), m_presetEditorSignalsTableColumnWidth[i]);
+	}
 
-    s.setValue("PresetEditor/presetsColumnCount", static_cast<uint>(m_presetEditorPresetsTreeColumnWidth.size()));
-    for (int i = 0; i < m_presetEditorPresetsTreeColumnWidth.size(); i++)
-    {
-        s.setValue(QString("PresetEditor/presetsColumnWidth/column%1").arg(i), m_presetEditorPresetsTreeColumnWidth[i]);
-    }
+	s.setValue("PresetEditor/presetsColumnCount", static_cast<uint>(m_presetEditorPresetsTreeColumnWidth.size()));
+	for (int i = 0; i < m_presetEditorPresetsTreeColumnWidth.size(); i++)
+	{
+		s.setValue(QString("PresetEditor/presetsColumnWidth/column%1").arg(i), m_presetEditorPresetsTreeColumnWidth[i]);
+	}
 
-    //
+	//
 
-    s.setValue("MainWindow/language", m_language);
+	s.setValue("MainWindow/language", m_language);
 
 }
 
@@ -231,26 +230,26 @@ void Settings::RestoreUser()
 	m_presetPropertiesWindowPos = s.value("PresetProperties/pos", QPoint(-1, -1)).toPoint();
 	m_presetPropertiesWindowGeometry = s.value("PresetProperties/geometry").toByteArray();
 
-    // Preset Editor
+	// Preset Editor
 
-    m_presetEditorPos = s.value("PresetEditor/pos", QPoint(-1, -1)).toPoint();
-    m_presetEditorGeometry = s.value("PresetEditor/geometry").toByteArray();
+	m_presetEditorPos = s.value("PresetEditor/pos", QPoint(-1, -1)).toPoint();
+	m_presetEditorGeometry = s.value("PresetEditor/geometry").toByteArray();
 
-    int count = s.value("PresetEditor/signalsColumnCount", 0).toInt();
-    for (int i = 0; i < count; i++)
-    {
-        m_presetEditorSignalsTableColumnWidth.push_back(s.value(QString("PresetEditor/signalsColumnWidth/column%1").arg(i)).toInt());
-    }
+	int count = s.value("PresetEditor/signalsColumnCount", 0).toInt();
+	for (int i = 0; i < count; i++)
+	{
+		m_presetEditorSignalsTableColumnWidth.push_back(s.value(QString("PresetEditor/signalsColumnWidth/column%1").arg(i)).toInt());
+	}
 
-    count = s.value("PresetEditor/presetsColumnCount", 0).toInt();
-    for (int i = 0; i < count; i++)
-    {
-        m_presetEditorPresetsTreeColumnWidth.push_back(s.value(QString("PresetEditor/presetsColumnWidth/column%1").arg(i)).toInt());
-    }
+	count = s.value("PresetEditor/presetsColumnCount", 0).toInt();
+	for (int i = 0; i < count; i++)
+	{
+		m_presetEditorPresetsTreeColumnWidth.push_back(s.value(QString("PresetEditor/presetsColumnWidth/column%1").arg(i)).toInt());
+	}
 
-    //
+	//
 
-    m_language = s.value("MainWindow/language", m_language).toString();
+	m_language = s.value("MainWindow/language", m_language).toString();
 }
 
 QString Settings::instanceStrId()
@@ -292,12 +291,12 @@ void Settings::setConfiguratorAddress2(const QString& address, int port)
 
 QString Settings::language() const
 {
-    return m_language;
+	return m_language;
 }
 
 void Settings::setLanguage(const QString& value)
 {
-    m_language = value;
+	m_language = value;
 }
 
 bool Settings::admin() const
@@ -326,22 +325,22 @@ TuningPageSettings* Settings::tuningPageSettings(int index)
 		return nullptr;
 	}
 
-	return &m_tuningPageSettings[index];
+	return& m_tuningPageSettings[index];
 }
 
 QString Settings::globalAppDataPath()
 {
-    return m_globalAppDataPath;
+	return m_globalAppDataPath;
 }
 
 QString Settings::localAppDataPath()
 {
-    return m_localAppDataPath;
+	return m_localAppDataPath;
 }
 
 QString Settings::userFiltersFile()
 {
-    return m_userFiltersFile;
+	return m_userFiltersFile;
 }
 
 Settings theSettings;

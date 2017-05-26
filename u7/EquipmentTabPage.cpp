@@ -22,6 +22,7 @@
 #include <QtDoublePropertyManager>
 #include <QtBoolPropertyManager>
 #include <QtSpinBoxFactory>
+#include <QMimeData>
 
 //
 //
@@ -2261,6 +2262,169 @@ void EquipmentView::addAppSignal()
 	return;
 }
 
+void EquipmentView::addLogicSchemaToLm()
+{
+	qDebug() << __FUNCTION__;
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+	if (selectedIndexList.empty() == true)
+	{
+		assert(false);
+		return;
+	}
+
+	QStringList deviceStrIds;
+	QString lmDescriptioFile;
+	bool lmDescriptioFileInitialized = false;
+
+	for (const QModelIndex& mi : selectedIndexList)
+	{
+		const Hardware::DeviceObject* device = equipmentModel()->deviceObject(mi);
+		assert(device);
+
+		deviceStrIds.push_back(device->equipmentId());
+
+		if (device->isModule() == true &&
+			device->toModule()->isLogicModule() == true)
+		{
+			QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+
+			if (lmDescriptioFileInitialized == false)
+			{
+				lmDescriptioFile = thisModuleLmDescriprtionFile;
+				lmDescriptioFileInitialized = true;
+				continue;
+			}
+
+			if (lmDescriptioFile != thisModuleLmDescriprtionFile)
+			{
+				assert(false);	// How is it possible, it should be fileterd om nenu level
+				return;
+			}
+
+			continue;
+		}
+		else
+		{
+			assert(false);	// How is it possible, it should be fileterd om nenu level
+			return;
+		}
+	}
+
+	GlobalMessanger::instance()->fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
+	return;
+}
+
+void EquipmentView::showLogicSchemaForLm()
+{
+	qDebug() << __FUNCTION__;
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(device);
+
+	if (module == nullptr || module->isLogicModule() == false)
+	{
+		assert(module);
+		return;
+	}
+
+	GlobalMessanger::instance()->fireSearchSchemaForLm(module->equipmentId());
+
+	return;
+}
+
+void EquipmentView::addOptoConnection()
+{
+	qDebug() << __FUNCTION__;
+
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 2)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(equipmentModel()->deviceObject(selectedIndexList.front()));
+	const Hardware::DeviceController* controller2 = dynamic_cast<const Hardware::DeviceController*>(equipmentModel()->deviceObject(selectedIndexList.back()));
+
+	if (controller1 == nullptr || controller2 == nullptr)
+	{
+		assert(controller1);
+		assert(controller2);
+
+		return;
+	}
+
+	if (theDialogConnections == nullptr)
+	{
+		theDialogConnections = new DialogConnections(db(), this);
+		theDialogConnections->show();
+	}
+	else
+	{
+		theDialogConnections->activateWindow();
+	}
+
+	bool ok = theDialogConnections->addConnection(controller1->equipmentId(), controller2->equipmentId());
+	if (ok == true)
+	{
+		theDialogConnections->setFilter(controller1->equipmentId());
+	}
+
+	return;
+}
+
+void EquipmentView::showModuleOptoConnections()
+{
+	qDebug() << __FUNCTION__;
+
+	if (db()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
+
+	if (selectedIndexList.size() != 1)
+	{
+		assert(false);	// how did we get here?
+		return;
+	}
+
+	Hardware::DeviceObject* device = equipmentModel()->deviceObject(selectedIndexList.front());
+	assert(device);
+
+	if (theDialogConnections == nullptr)
+	{
+		theDialogConnections = new DialogConnections(db(), this);
+		theDialogConnections->show();
+	}
+	else
+	{
+		theDialogConnections->activateWindow();
+	}
+
+	theDialogConnections->setFilter(device->equipmentId());
+
+	return;
+}
+
 void EquipmentView::copySelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
@@ -3395,6 +3559,16 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_equipmentView->addAction(m_addAppSignal);
 
 	// -----------------
+	m_equipmentView->addAction(m_separatorSchemaLogic);
+	m_equipmentView->addAction(m_addLogicSchemaToLm);
+	m_equipmentView->addAction(m_showLmsLogicSchemas);
+
+	// -----------------
+	m_equipmentView->addAction(m_separatorOptoConnection);
+	m_equipmentView->addAction(m_addOptoConnection);
+	m_equipmentView->addAction(m_showModuleOptoConnections);
+
+	// -----------------
 	m_equipmentView->addAction(m_separatorAction01);
 	m_equipmentView->addAction(m_copyObjectAction);
 	m_equipmentView->addAction(m_pasteObjectAction);
@@ -3429,7 +3603,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	m_splitter = new QSplitter(this);
 
-    m_propertyEditor = new ExtWidgets::PropertyEditor(m_splitter);
+	m_propertyEditor = new IdePropertyEditor(m_splitter);
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
 
 
@@ -3619,6 +3793,39 @@ void EquipmentTabPage::CreateActions()
 	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
 
 	//-----------------------------------
+	m_separatorSchemaLogic = new QAction(tr("Application Logic"), this);
+	m_separatorSchemaLogic->setSeparator(true);
+
+	m_addLogicSchemaToLm = new QAction(tr("Add AppLogic Schema..."), this);
+	m_addLogicSchemaToLm->setStatusTip(tr("Add Application Logic Schema to selected module"));
+	m_addLogicSchemaToLm->setEnabled(false);
+	m_addLogicSchemaToLm->setVisible(false);
+	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
+
+	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
+	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
+	m_showLmsLogicSchemas->setEnabled(false);
+	m_showLmsLogicSchemas->setVisible(false);
+	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
+
+	//-----------------------------------
+	m_separatorOptoConnection = new QAction(tr("Connections"), this);
+	m_separatorOptoConnection->setSeparator(true);
+
+	m_addOptoConnection = new QAction(tr("Add Opto Connection..."), this);
+	m_addOptoConnection->setStatusTip(tr("Add opto connection to selected two opto ports"));
+	m_addOptoConnection->setEnabled(false);
+	m_addOptoConnection->setVisible(false);
+	connect(m_addOptoConnection, &QAction::triggered, m_equipmentView, &EquipmentView::addOptoConnection);
+
+
+	m_showModuleOptoConnections = new QAction(tr("Show Connections..."), this);
+	m_showModuleOptoConnections->setStatusTip(tr("Show module or opto port connections"));
+	m_showModuleOptoConnections->setEnabled(false);
+	m_showModuleOptoConnections->setVisible(false);
+	connect(m_showModuleOptoConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showModuleOptoConnections);
+
+	//-----------------------------------
 	m_separatorAction01 = new QAction(this);
 	m_separatorAction01->setSeparator(true);
 
@@ -3678,7 +3885,9 @@ void EquipmentTabPage::CreateActions()
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setStatusTip(tr("Refresh object list"));
 	m_refreshAction->setEnabled(false);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
 	connect(m_refreshAction, &QAction::triggered, m_equipmentView, &EquipmentView::refreshSelectedDevices);
+	addAction(m_refreshAction);
 
 	//-----------------------------------
 	m_separatorAction3 = new QAction(this);
@@ -3698,7 +3907,7 @@ void EquipmentTabPage::CreateActions()
     m_connectionsAction = new QAction(tr("Connections..."), this);
     m_connectionsAction->setStatusTip(tr("Edit connections"));
     m_connectionsAction->setEnabled(true);
-    connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::editConnections);
+	connect(m_connectionsAction, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
     m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
@@ -3789,7 +3998,10 @@ void EquipmentTabPage::setActionState()
 	assert(m_inOutsToSignals);
 	assert(m_showAppSignals);
 	assert(m_addAppSignal);
-
+	assert(m_addLogicSchemaToLm);
+	assert(m_showLmsLogicSchemas);
+	assert(m_addOptoConnection);
+	assert(m_showModuleOptoConnections);
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	// about does parent have any checked out files
@@ -3843,6 +4055,18 @@ void EquipmentTabPage::setActionState()
 	m_addAppSignal->setEnabled(false);
 	m_addAppSignal->setVisible(false);
 
+	m_addLogicSchemaToLm->setEnabled(false);
+	m_addLogicSchemaToLm->setVisible(false);
+
+	m_showLmsLogicSchemas->setEnabled(false);
+	m_showLmsLogicSchemas->setVisible(false);
+
+	m_addOptoConnection->setEnabled(false);
+	m_addOptoConnection->setVisible(false);
+
+	m_showModuleOptoConnections->setEnabled(false);
+	m_showModuleOptoConnections->setVisible(false);
+
 	m_copyObjectAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
@@ -3877,6 +4101,149 @@ void EquipmentTabPage::setActionState()
 		{
 			m_addAppSignal->setEnabled(true);
 			m_addAppSignal->setVisible(true);
+		}
+	}
+
+	// Add AppLogic Schema to LM
+	//
+	if (selectedIndexList.size() >= 1)
+	{
+		bool allSelectedAreLMs = true;
+		QString lmDescriptioFile;
+		bool lmDescriptioFileInitialized = false;
+
+		for (const QModelIndex& mi : selectedIndexList)
+		{
+			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
+			assert(device);
+
+			if (device->isModule() == true &&
+				device->toModule()->isLogicModule() == true)
+			{
+				QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+
+				if (lmDescriptioFileInitialized == false)
+				{
+					lmDescriptioFile = thisModuleLmDescriprtionFile;
+					lmDescriptioFileInitialized = true;
+					continue;
+				}
+
+				if (lmDescriptioFile != thisModuleLmDescriprtionFile)
+				{
+					allSelectedAreLMs = false;
+					break;
+				}
+
+				continue;
+			}
+			else
+			{
+				allSelectedAreLMs = false;
+				break;
+			}
+		}
+
+		m_addLogicSchemaToLm->setEnabled(allSelectedAreLMs);
+		m_addLogicSchemaToLm->setVisible(allSelectedAreLMs);
+	}
+
+	// Show logic schemas for selected LM
+	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		assert(device);
+
+		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
+
+		if (module != nullptr && module->isLogicModule() == true)
+		{
+			m_showLmsLogicSchemas->setEnabled(true);
+			m_showLmsLogicSchemas->setVisible(true);
+		}
+	}
+
+	// Add Opto Connection with TWO selected Opto Ports
+	//
+	if (selectedIndexList.size() == 2)
+	{
+		const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.front()));
+		const Hardware::DeviceController* controller2 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.back()));
+
+		if (controller1 != nullptr && controller2 != nullptr)
+		{
+			// If parent is LM or OCM
+			//
+			const Hardware::DeviceModule* parent1 = dynamic_cast<const Hardware::DeviceModule*>(controller1->parent());
+			const Hardware::DeviceModule* parent2 = dynamic_cast<const Hardware::DeviceModule*>(controller2->parent());
+
+			if (parent1 != nullptr && parent2 != nullptr &&
+				(parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM) &&
+				(parent2->isLogicModule() == true || parent2->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			{
+				// If id ends with _OPTOPORTXX
+				//
+				QString id1 = controller1->equipmentIdTemplate();
+				if (id1.size() > 10)
+				{
+					id1.replace(id1.size() - 2, 2, QLatin1String("##"));
+				}
+
+				QString id2 = controller2->equipmentIdTemplate();
+				if (id2.size() > 10)
+				{
+					id2.replace(id2.size() - 2, 2, QLatin1String("##"));
+				}
+
+				if (id1.endsWith("_OPTOPORT##") == true &&
+					id2.endsWith("_OPTOPORT##") == true)
+				{
+					m_addOptoConnection->setEnabled(true);
+					m_addOptoConnection->setVisible(true);
+				}
+			}
+		}
+	}
+
+	// Show opto connections for selected LM/OCM or selected opto port
+	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.front());
+		assert(device);
+
+		const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device);
+		if (module != nullptr &&
+			(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+		{
+			m_showModuleOptoConnections->setEnabled(true);
+			m_showModuleOptoConnections->setVisible(true);
+		}
+
+		const Hardware::DeviceController* controller = dynamic_cast<const Hardware::DeviceController*>(device);
+		if (controller != nullptr)
+		{
+			// If parent is LM or OCM
+			//
+			const Hardware::DeviceModule* module = dynamic_cast<const Hardware::DeviceModule*>(device->parent());
+			if (module != nullptr &&
+				(module->isLogicModule() == true || module->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			{
+				// If id ends with _OPTOPORTXX
+				//
+				QString id = controller->equipmentIdTemplate();
+				if (id.size() > 10)
+				{
+					id.replace(id.size() - 2, 2, QLatin1String("##"));
+				}
+
+				if (id.endsWith("_OPTOPORT##") == true)
+				{
+					m_showModuleOptoConnections->setEnabled(true);
+					m_showModuleOptoConnections->setVisible(true);
+				}
+			}
 		}
 	}
 
@@ -4168,7 +4535,7 @@ void EquipmentTabPage::modeSwitched()
 	return;
 }
 
-void EquipmentTabPage::editConnections()
+void EquipmentTabPage::showConnections()
 {
     if (dbController()->isProjectOpened() == false)
     {
@@ -4185,6 +4552,7 @@ void EquipmentTabPage::editConnections()
         theDialogConnections->activateWindow();
 	}
 
+	return;
 }
 
 //void EquipmentTabPage::moduleConfiguration()

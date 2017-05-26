@@ -96,17 +96,19 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			}
 		}
 
-		if (theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true)
-		{
-			if (isLogicSchema() == true)
-			{
-				ui->lmDescriptionFileComboBox->setEditText(logicSchema()->lmDescriptionFile());
-			}
+		QString lmDescriptionFile;
 
-			if (isUfbSchema() == true)
-			{
-				ui->lmDescriptionFileComboBox->setEditText(ufbSchema()->lmDescriptionFile());
-			}
+		if (isLogicSchema() == true ||
+			isUfbSchema() == true)
+		{
+			lmDescriptionFile = schema->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+		}
+
+		if ((isLogicSchema() == true ||	isUfbSchema() == true) &&
+			(lmDescriptionFile.isEmpty() == false ||
+			theSettings.m_lastSelectedLmDescriptionFile.isEmpty() == true))
+		{
+			ui->lmDescriptionFileComboBox->setEditText(lmDescriptionFile);
 		}
 		else
 		{

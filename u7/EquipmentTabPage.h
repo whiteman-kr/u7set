@@ -3,7 +3,7 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
-#include "../lib/PropertyEditor.h"
+#include "CodeEditor.h"
 
 class DbController;
 
@@ -162,6 +162,12 @@ public slots:
 	void showAppSignals(bool refreshSignalList = false);			// Show application signals for this object
 	void addAppSignal();
 
+	void addLogicSchemaToLm();
+	void showLogicSchemaForLm();
+
+	void addOptoConnection();
+	void showModuleOptoConnections();
+
 	void copySelectedDevices();
 	void pasteDevices();
 	bool canPaste() const;
@@ -240,13 +246,13 @@ public slots:
 	void clipboardChanged();
 
 	void modeSwitched();
-    void editConnections();
+	void showConnections();
 
 	//void moduleConfiguration();
 
 	void setProperties();
 
-    void propertiesChanged(QList<std::shared_ptr<PropertyObject> > objects);
+	void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 protected slots:
 	void addObjectTriggered();
@@ -293,6 +299,14 @@ private:
 	QAction* m_showAppSignals = nullptr;
 	QAction* m_addAppSignal = nullptr;
 	//----------------------------------
+	QAction* m_separatorSchemaLogic = nullptr;
+	QAction* m_addLogicSchemaToLm = nullptr;
+	QAction* m_showLmsLogicSchemas = nullptr;
+	//----------------------------------
+	QAction* m_separatorOptoConnection = nullptr;
+	QAction* m_addOptoConnection = nullptr;
+	QAction* m_showModuleOptoConnections = nullptr;
+	//----------------------------------
 	QAction* m_separatorAction01 = nullptr;
 	QAction* m_copyObjectAction = nullptr;
 	QAction* m_pasteObjectAction = nullptr;
@@ -323,7 +337,7 @@ private:
 	QSplitter* m_splitter = nullptr;
 	QToolBar* m_toolBar = nullptr;
 
-    ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+	IdePropertyEditor* m_propertyEditor = nullptr;
 };
 
 

@@ -1214,11 +1214,13 @@ namespace Builder
 
 		bool result = true;
 
+		int metadataFieldsVersion = 0;
+
 		QStringList metadataFields;
 
-		appLogicCode.getAsmMetadataFields(metadataFields);
+		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount, metadataFields);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount,metadataFieldsVersion, metadataFields);
 
 		if (multichannelFile != nullptr)
 		{

@@ -33,6 +33,7 @@ namespace VFrame30
 		QString equipmentIds() const;
 		QStringList equipmentIdList() const;
 		void setEquipmentIds(const QString& s);
+		void setEquipmentIdList(const QStringList& s);
 
 		QStringList* mutable_equipmentIds();
 

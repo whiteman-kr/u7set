@@ -1,15 +1,21 @@
 #include "FblItemLine.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
 	FblItemLine::FblItemLine(void)
 	{
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemLine::weight, FblItemLine::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemLine::lineColor, FblItemLine::setLineColor);
 	}
 
 	FblItemLine::FblItemLine(SchemaUnit unit) :
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0xC0))
 	{
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemLine::weight, FblItemLine::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemLine::lineColor, FblItemLine::setLineColor);
+
 		setItemUnit(unit);
 		m_static = false;
 	}
@@ -41,7 +47,7 @@ namespace VFrame30
 		Proto::FblItemLine* itemMessage = message->mutable_schemaitem()->mutable_fblitemline();
 
 		itemMessage->set_weight(m_weight);
-		itemMessage->set_linecolor(m_lineColor);
+		itemMessage->set_linecolor(m_lineColor.rgba());
 		
 		return true;
 	}
@@ -117,12 +123,12 @@ namespace VFrame30
 
 	// LineColor propertie
 	//
-	QRgb FblItemLine::lineColor() const
+	QColor FblItemLine::lineColor() const
 	{
 		return m_lineColor;
 	}
 
-	void FblItemLine::setLineColor(QRgb color)
+	void FblItemLine::setLineColor(QColor color)
 	{
 		m_lineColor = color;
 	}

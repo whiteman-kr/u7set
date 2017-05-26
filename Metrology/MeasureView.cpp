@@ -359,7 +359,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(detailLimitType, 19); break;
 
 		case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR), 10, 2); break;
-		case MVC_CMN_L_MSE:						result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_MSE), 10, 2); break;
+		case MVC_CMN_L_SD:						result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SD), 10, 2); break;
 		case MVC_CMN_L_BORDER:					result = tr("± ") + QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER), 10, 2); break;
 
 		case MVC_CMN_L_IN_ERROR:				result = m->errorStr(inputlimitType); break;

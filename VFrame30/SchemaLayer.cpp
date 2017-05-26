@@ -7,12 +7,14 @@ namespace VFrame30
 
 	Factory<VFrame30::SchemaLayer> VideoLayerFactory;
 
-	SchemaLayer::SchemaLayer(void)
+	SchemaLayer::SchemaLayer(void) :
+		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never)
 	{
 		Init("Undifined Layer", false);
 	}
 
-	SchemaLayer::SchemaLayer(const QString& name, bool compile)
+	SchemaLayer::SchemaLayer(const QString& name, bool compile) :
+		Proto::ObjectSerialization<SchemaLayer>(Proto::ProtoCompress::Never)
 	{
 		Init(name, compile);
 	}
@@ -36,7 +38,7 @@ namespace VFrame30
 		std::string className = this->metaObject()->className();
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Обязательное поле, хш имени класса, по нему восстанавливается класс.
+		message->set_classnamehash(classnamehash);	// Обязательное поле, хэш имени класса, по нему восстанавливается класс.
 
 		auto layer = message->mutable_schemalayer();
 

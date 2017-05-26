@@ -1,10 +1,9 @@
-#include "Stable.h"
 #include "Settings.h"
 #include "MainWindow.h"
 
 #include "SchemasWorkspace.h"
 
-SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSignalManager *tuningSignalManager, const TuningSignalStorage *objects, const QString& globalScript, QWidget *parent):
+SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent):
 	m_tuningSignalManager(tuningSignalManager),
 	m_objects(*objects),
 	QWidget(parent)
@@ -35,7 +34,14 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSig
 				continue;
 			}
 
-			m_schemasList->addTopLevelItem(new QTreeWidgetItem(QStringList()<<schemaID.m_id<<schemaID.m_caption));
+			QStringList l;
+
+			l << schemaID.m_id;
+			l << schemaID.m_caption;
+
+			QTreeWidgetItem* item = new QTreeWidgetItem(l);
+
+			m_schemasList->addTopLevelItem(item);
 
 			if (firstSchemaID.isEmpty() == true)
 			{
@@ -104,7 +110,7 @@ SchemasWorkspace::~SchemasWorkspace()
 	delete m_schemaStorage;
 }
 
-void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem *current, QTreeWidgetItem* /*previous*/)
+void SchemasWorkspace::slot_schemaListSelectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
 {
 	if (current == nullptr)
 	{

@@ -7,6 +7,13 @@
 #include "../lib/Signal.h"
 #include "../lib/MetrologySignal.h"
 
+namespace Network
+{
+	class DataSourceInfo;
+	class TuningSourceState;
+	class TuningSignalState;
+}
+
 // ==============================================================================================
 
 class TuningSourceState

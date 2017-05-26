@@ -37,8 +37,8 @@ private:
 	Network::GetSignalListNextRequest m_getSignalListNextRequest;
 	Network::GetSignalListNextReply m_getSignalListNextReply;
 
-	Network::GetAppSignalParamRequest m_getSignalParamRequest;
-	Network::GetAppSignalParamReply m_getSignalParamReply;
+	Network::GetAppSignalRequest m_getSignalsRequest;
+	Network::GetAppSignalReply m_getSignalsReply;
 
 	Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	Network::GetAppSignalStateReply m_getSignalStateReply;
@@ -68,7 +68,7 @@ private:
 
 	void onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
-	void onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppSignalReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
 
 	void onGetUnitsReply(const char* replyData, quint32 replyDataSize);

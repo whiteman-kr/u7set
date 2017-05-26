@@ -450,9 +450,14 @@ namespace  Tuning
 		return count;
 	}
 
-
-	const QStringList& TuningData::metadataFields()
+	void TuningData::getMetadataFields(QStringList& metadataFields, int* metadataVersion) const
 	{
+		if (metadataVersion)
+		{
+			const int TUNING_METADATA_VERSION = 1;
+			*metadataVersion = TUNING_METADATA_VERSION;
+		}
+
 		if (m_metadataFields.isEmpty() == true)
 		{
 			m_metadataFields.append("AppSignalID");
@@ -466,7 +471,7 @@ namespace  Tuning
 			m_metadataFields.append("BitNo");
 		}
 
-		return m_metadataFields;
+		metadataFields = m_metadataFields;
 	}
 
 

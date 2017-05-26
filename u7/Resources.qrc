@@ -27,6 +27,7 @@
         <file>Images/SchemaTerminator.svg</file>
         <file>Images/SchemaItemPushButton.svg</file>
         <file>Images/SchemaItemLineEdit.svg</file>
+        <file>Images/SchemaItemValue.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

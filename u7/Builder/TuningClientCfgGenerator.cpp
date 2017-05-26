@@ -1,6 +1,7 @@
 #include "TuningClientCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
+#include "../lib/AppSignal.h"
 
 namespace Builder
 {
@@ -377,33 +378,31 @@ bool TuningClientCfgGenerator::writeSchemas()
 
 bool TuningClientCfgGenerator::writeSchemasDetails()
 {
-	QByteArray data;
-	XmlWriteHelper xmlWriter(&data);
 
-	xmlWriter.setAutoFormatting(true);
-	xmlWriter.writeStartDocument();
-	xmlWriter.writeStartElement("Schemas");
+	VFrame30::SchemaDetailsSet detailsSet;
 
 	for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 	{
-		xmlWriter.writeStartElement("Schema");
-		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-		{
-			xmlWriter.writeEndElement();
-		});
+		auto details = std::make_shared<VFrame30::SchemaDetails>(schemaFile.details);
 
-		xmlWriter.writeStringAttribute("Details", schemaFile.details);
+		details->m_guids.clear();
+
+		detailsSet.add(details);
 	}
 
-	xmlWriter.writeEndElement();
+	QByteArray schemaSetFileData;
 
-	xmlWriter.writeEndDocument();
+	bool saveOk = detailsSet.Save(schemaSetFileData);
+	if (saveOk == false)
+	{
+		assert(saveOk);
+		return false;
+	}
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.xml", CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, "", data);
-
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemasDetails.pbuf", CFG_FILE_ID_TUNING_SCHEMAS_DETAILS, "", schemaSetFileData);
 	if (buildFile == nullptr)
 	{
-        m_log->errCMN0012("SchemasDetails.xml");
+		m_log->errCMN0012("SchemasDetails.pbuf");
 		return false;
 	}
 
@@ -432,16 +431,12 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 
 	// Write signals
 	//
-	QByteArray data;
-	XmlWriteHelper xmlWriter(&data);
 
-	xmlWriter.setAutoFormatting(true);
-	xmlWriter.writeStartDocument();
+	::Proto::AppSignalParamSet tuningSet;
 
-	xmlWriter.writeStartElement("TuningSignals");
+	int signalsCount = m_signalSet->count();
 
-	int count = m_signalSet->count();
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < signalsCount; i++)
 	{
 		const Signal& s = (*m_signalSet)[i];
 
@@ -479,32 +474,25 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 			}
 		}
 
-		xmlWriter.writeStartElement("TuningSignal");
-		std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-		{
-			xmlWriter.writeEndElement();
-		});
 
-		xmlWriter.writeStringAttribute("AppSignalID", s.appSignalID());
-		xmlWriter.writeStringAttribute("CustomAppSignalID", s.customAppSignalID());
-		xmlWriter.writeStringAttribute("EquipmentID", s.equipmentID());
-		xmlWriter.writeStringAttribute("Caption", s.caption());
-		xmlWriter.writeStringAttribute("Type", s.isAnalog() ? "A" : "D");
-		xmlWriter.writeDoubleAttribute("DefaultValue", s.tuningDefaultValue(), s.decimalPlaces());
-		xmlWriter.writeIntAttribute("DecimalPlaces", s.decimalPlaces());
-		xmlWriter.writeDoubleAttribute("LowLimit", s.lowEngeneeringUnits(), s.decimalPlaces());
-		xmlWriter.writeDoubleAttribute("HighLimit", s.highEngeneeringUnits(), s.decimalPlaces());
+		::Proto::AppSignalParam* aspMessage = tuningSet.add_items();
+		s.serializeToProtoAppSignalParam(aspMessage);
 	}
 
-	xmlWriter.writeEndElement();
+	// Write number of signals
 
-	xmlWriter.writeEndDocument();
+	QByteArray data;
+	data.resize(tuningSet.ByteSize());
 
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.xml", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+	tuningSet.SerializeToArray(data.data(), tuningSet.ByteSize());
+
+	// Write file
+
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
 
 	if (buildFile == nullptr)
 	{
-        m_log->errCMN0012("TuningSignals.xml");
+		m_log->errCMN0012("TuningSignals.dat");
 		return false;
 	}
 

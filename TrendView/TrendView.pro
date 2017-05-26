@@ -11,6 +11,8 @@ TEMPLATE = lib
 
 CONFIG += staticlib
 CONFIG += precompile_header
+CONFIG += c++14					# C++14 support is enabled.
+CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 PRECOMPILED_HEADER = Stable.h
 
@@ -27,12 +29,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     TrendWidget.cpp \
-    TrendSignal.cpp
+    TrendSignal.cpp \
+    TrendDrawParam.cpp
 
 HEADERS += \
     Stable.h \
     TrendWidget.h \
-    TrendSignal.h
+    TrendSignal.h \
+    TrendDrawParam.h \
+    ../lib/TimeStamp.h
 
 unix {
     target.path = /usr/lib

@@ -1,34 +1,61 @@
 #include "../lib/AppSignalManager.h"
-#include <QJSEngine>
 
-ScriptSignalManager::ScriptSignalManager(QJSEngine* engine, const AppSignalManager* signalManager)	:
-	m_engine(engine),
+ScriptSignalManager::ScriptSignalManager(const AppSignalManager* signalManager)	:
 	m_signalManager(signalManager)
 {
-	assert(m_engine);
 	assert(m_signalManager);
 }
 
-QObject* ScriptSignalManager::signal(QString signalId) const
+QVariant ScriptSignalManager::signalParam(QString signalId) const
 {
-	return m_signalManager->signal(signalId);
+	bool ok = false;
+	AppSignalParam s = m_signalManager->signalParam(signalId, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return QVariant::fromValue(s);
 }
 
-QObject* ScriptSignalManager::signal(Hash signalHash) const
+QVariant ScriptSignalManager::signalParam(Hash signalHash) const
 {
-	return m_signalManager->signal(signalHash);
+	bool ok = false;
+	AppSignalParam s = m_signalManager->signalParam(signalHash, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return QVariant::fromValue(s);
 }
 
-QObject* ScriptSignalManager::signalState(QString signalId) const
+QVariant ScriptSignalManager::signalState(QString signalId) const
 {
-	assert(false);
-	return nullptr;
+	bool ok = false;
+	AppSignalState s = m_signalManager->signalState(signalId, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return QVariant::fromValue(s);
 }
 
-QObject* ScriptSignalManager::signalState(Hash /*signalHash*/) const
+QVariant ScriptSignalManager::signalState(Hash signalHash) const
 {
-	assert(false);
-	return nullptr;
+	bool ok = false;
+	AppSignalState s = m_signalManager->signalState(signalHash, &ok);
+
+	if (ok == false)
+	{
+		return QVariant();
+	}
+
+	return QVariant::fromValue(s);
 }
 
 
@@ -51,12 +78,12 @@ void AppSignalManager::reset()
 
 	{
 		QMutexLocker l(&m_paramsMutex);
-		m_signals.clear();
+		m_signalParams.clear();
 	}
 
 	{
 		QMutexLocker l(&m_statesMutex);
-		m_states.clear();
+		m_signalStates.clear();
 	}
 
 	return;
@@ -64,13 +91,40 @@ void AppSignalManager::reset()
 
 void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
 {
-	QMutexLocker l(&m_unitsMutex);
+	std::map<int, QString> unitsCopy;
 
-	m_units.clear();
-
-	for (const AppSignalUnits& u : units)
 	{
-		m_units[u.id] = u.unit;
+		QMutexLocker l(&m_unitsMutex);
+
+		m_units.clear();
+
+		for (const AppSignalUnits& u : units)
+		{
+			m_units[u.id] = u.unit;
+		}
+
+		unitsCopy = m_units;
+	}
+
+	//  units in appsignals
+	//
+	{
+		QMutexLocker l(&m_paramsMutex);
+
+		for (auto& spair : m_signalParams)		// & is must be here, in other case pair will be a copy and AppSignalParam will be copy also
+		{
+			AppSignalParam& s = spair.second;
+			auto foundUnitIt = unitsCopy.find(s.unitId());
+
+			if (foundUnitIt == unitsCopy.end())
+			{
+				qDebug() << Q_FUNC_INFO << " Can't find unit, UnitID = " << s.unitId() << ", AppSiagnalID = " << s.appSignalId();
+			}
+			else
+			{
+				s.setUnit(foundUnitIt->second);
+			}
+		}
 	}
 
 	return;
@@ -98,23 +152,23 @@ QString AppSignalManager::units(int id) const
 	}
 }
 
-void AppSignalManager::addSignal(const Signal& signal)
+void AppSignalManager::addSignal(const AppSignalParam& signal)
 {
 	QMutexLocker l(&m_paramsMutex);
 
-	m_signals[signal.hash()] = signal;
+	m_signalParams[signal.hash()] = signal;
 
 	return;
 }
 
-std::vector<Signal> AppSignalManager::signalList() const
+std::vector<AppSignalParam> AppSignalManager::signalList() const
 {
 	QMutexLocker l(&m_paramsMutex);
 
-	std::vector<Signal> result;
-	result.reserve(m_signals.size());
+	std::vector<AppSignalParam> result;
+	result.reserve(m_signalParams.size());
 
-	for (auto& s : m_signals)
+	for (auto& s : m_signalParams)
 	{
 		result.push_back(s.second);
 	}
@@ -127,9 +181,9 @@ std::vector<Hash> AppSignalManager::signalHashes() const
 	QMutexLocker l(&m_paramsMutex);
 
 	std::vector<Hash> result;
-	result.reserve(m_signals.size());
+	result.reserve(m_signalParams.size());
 
-	for (auto& s : m_signals)
+	for (auto& s : m_signalParams)
 	{
 		result.push_back(s.first);
 	}
@@ -137,63 +191,47 @@ std::vector<Hash> AppSignalManager::signalHashes() const
 	return result;
 }
 
-bool AppSignalManager::signal(const QString& appSignalId, Signal* out) const
-{
-	Hash h = ::calcHash(appSignalId);
-	return signal(h, out);
-}
-
-bool AppSignalManager::signal(Hash signalHash, Signal* out) const
-{
-	if (out == nullptr)
-	{
-		assert(out);
-		return false;
-	}
-
-	QMutexLocker l(&m_paramsMutex);
-
-	auto result = m_signals.find(signalHash);
-
-	if (result == m_signals.end())
-	{
-		return false;
-	}
-	else
-	{
-		*out = result->second;
-		return true;
-	}
-}
-
-Signal AppSignalManager::signal(const QString& appSignalId, bool* found) const
+AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
 {
 	Hash signalHash = ::calcHash(appSignalId);
 
-	Signal resultSignal;
-
-	bool ok = signal(signalHash, &resultSignal);
-
-	if (found != nullptr)
-	{
-		*found = ok;
-	}
-
-	return resultSignal;
+	return signalParam(signalHash, found);
 }
 
-Signal AppSignalManager::signal(Hash signalHash, bool* found) const
+AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
 {
-	Signal resultSignal;
+	QMutexLocker l(&m_paramsMutex);
 
-	bool ok = signal(signalHash, &resultSignal);
+	auto result = m_signalParams.find(signalHash);
+
+	if (result == m_signalParams.end())
+	{
+		if (found != nullptr)
+		{
+			*found = false;
+		}
+
+		return AppSignalParam();
+	}
 
 	if (found != nullptr)
 	{
-		*found = ok;
+		*found = true;
 	}
 
-	return resultSignal;
+	return result->second;
+}
+
+void AppSignalManager::invalidateAllSignalStates()
+{
+	QMutexLocker l(&m_statesMutex);
+
+	for (auto it = m_signalStates.begin(); it != m_signalStates.end(); ++it)
+	{
+		it->second.m_flags.valid = false;
+	}
+
+	return;
 }
 
 void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state)
@@ -212,7 +250,7 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 
 	QMutexLocker l(&m_statesMutex);
 
-	m_states[signalHash] = state;
+	m_signalStates[signalHash] = state;
 
 	return;
 }
@@ -228,18 +266,18 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 	QMutexLocker l(&m_statesMutex);
 
 	AppSignalState result;
-	result.flags.valid = false;
+	result.m_flags.valid = false;
 
-	auto foundState = m_states.find(signalHash);
+	auto foundState = m_signalStates.find(signalHash);
 
-	if (foundState != m_states.end())
+	if (foundState != m_signalStates.end())
 	{
 		result = foundState->second;
 	}
 
 	if (found != nullptr)
 	{
-		*found = !(foundState == m_states.end());
+		*found = !(foundState == m_signalStates.end());
 	}
 
 	return result;
@@ -269,11 +307,11 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 	for (const Hash& signalHash : appSignalHashes)
 	{
 		AppSignalState state;
-		state.flags.valid = false;
+		state.m_flags.valid = false;
 
-		auto foundState = m_states.find(signalHash);
+		auto foundState = m_signalStates.find(signalHash);
 
-		if (foundState != m_states.end())
+		if (foundState != m_signalStates.end())
 		{
 			state = foundState->second;
 			found ++;
@@ -303,45 +341,5 @@ int AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std:
 	return signalState(appSignalHashes, result);
 }
 
-QObject* AppSignalManager::signal(QString signalId) const
-{
-	Hash signalHash = ::calcHash(signalId);
-	return signal(signalHash);
-}
-
-QObject* AppSignalManager::signal(Hash signalHash) const
-{
-	Signal* s = new Signal();
-	bool ok = signal(signalHash, s);
-
-	if (ok == false)
-	{
-		delete s;
-		return nullptr;
-	}
-
-	return s;
-}
-
-//QObject* AppSignalManager::signalState(QString signalId) const
-//{
-//	Hash signalHash = ::calcHash(signalId);
-//	return signalState(signalHash);
-//}
-
-//QObject* AppSignalManager::signalState(Hash signalHash) const
-//{
-//	AppSignalState* state = new AppSignalState();
-//	bool found = false;
-//	*state = signalState(signalHash, &found);
-
-//	if (found == false)
-//	{
-//		delete state;
-//		return nullptr;
-//	}
-
-//	return state;
-//}
 
 

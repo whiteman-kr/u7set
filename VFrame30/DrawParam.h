@@ -14,6 +14,7 @@ class QPainter;
 class QPaintDevice;
 class QPixmap;
 class AppSignalManager;
+class TuningController;
 
 namespace VFrame30
 {
@@ -65,8 +66,14 @@ namespace VFrame30
 		bool infoMode() const;
 		void setInfoMode(bool value);
 
+		bool blinkPhase() const;
+		void setBlinkPhase(bool value);
+
 		AppSignalManager* appSignalManager();
 		void setAppSignalManager(AppSignalManager* value);
+
+		TuningController* tuningController();
+		void setTuningController(TuningController* value);
 
 		const Session& session() const;
 		Session& session();
@@ -75,7 +82,9 @@ namespace VFrame30
 		QPainter* m_painter = nullptr;
 		Schema* m_schema = nullptr;
 		const SchemaView* m_schemaView = nullptr;
+
 		AppSignalManager* m_appSignalmanager = nullptr;
+		TuningController* m_tuningController = nullptr;
 
 		Session m_session;
 
@@ -84,6 +93,7 @@ namespace VFrame30
 		int m_pinGridStep = 0;
 		bool m_isEditMode = true;
 		bool m_infoMode = false;
+		bool m_blinkPhase = false;
 
 		int m_dpiX = -1;
 		int m_dpiY = -1;

@@ -1,7 +1,6 @@
 #ifndef CONFIGCONTROLLER_H
 #define CONFIGCONTROLLER_H
 
-#include "Stable.h"
 #include <vector>
 #include <set>
 #include <QThread>
@@ -57,7 +56,7 @@ private:
 
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
-	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray &buildFileInfoArray, ConfigSettings* outSetting);
+	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting);
 
 	void addEventMessage(const QString& text);
 

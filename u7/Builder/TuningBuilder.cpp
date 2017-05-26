@@ -123,7 +123,13 @@ namespace Builder
 				tuningData->getTuningData(&data);
 				uniqueID = tuningData->uniqueID();
 
-				firmware->setDescriptionFields(tuningData->metadataFields());
+				int metadataFieldsVersion = 0;
+
+				QStringList metadataFields;
+
+				tuningData->getMetadataFields(metadataFields, &metadataFieldsVersion);
+
+				firmware->setDescriptionFields(metadataFieldsVersion, metadataFields);
 				descriptionData = tuningData->metadata();
 			}
 

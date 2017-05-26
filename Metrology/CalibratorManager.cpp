@@ -592,7 +592,7 @@ void CalibratorManager::loadSettings(Calibrator* pCalibrator)
 	QSettings s;
 
 	QString	portName	= s.value(QString("%1Calibrator%2/port").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), QString("COM%1").arg(channel + 1)).toString();
-	int		type		= s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), CALIBRATOR_TYPE_TRXII).toInt();
+	int		type		= s.value(QString("%1Calibrator%2/type").arg(CALIBRATOR_OPTIONS_KEY).arg(channel + 1), CALIBRATOR_TYPE_CALYS75).toInt();
 
 	pCalibrator->setPortName(portName);
 	pCalibrator->setType(type);

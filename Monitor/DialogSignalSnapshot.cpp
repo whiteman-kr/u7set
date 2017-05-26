@@ -25,13 +25,13 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	bool found = false;
 
-	Signal s1 = m_model->signalParam(o1.first, &found);
+	AppSignalParam s1 = m_model->signalParam(o1.first, &found);
 	if (found == false)
 	{
 		return false;
 	}
 
-	Signal s2 = m_model->signalParam(o2.first, &found);
+	AppSignalParam s2 = m_model->signalParam(o2.first, &found);
 	if (found == false)
 	{
 		return false;
@@ -47,20 +47,20 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 	{
 	case SnapshotItemModel::Columns::SignalID:
 		{
-			v1 = s1.customAppSignalID();
-			v2 = s2.customAppSignalID();
+			v1 = s1.customSignalId();
+			v2 = s2.customSignalId();
 		}
 		break;
 	case SnapshotItemModel::Columns::EquipmentID:
 		{
-			v1 = s1.equipmentID();
-			v2 = s2.equipmentID();
+			v1 = s1.equipmentId();
+			v2 = s2.equipmentId();
 		}
 		break;
 	case SnapshotItemModel::Columns::AppSignalID:
 		{
-			v1 = s1.appSignalID();
-			v2 = s2.appSignalID();
+			v1 = s1.appSignalId();
+			v2 = s2.appSignalId();
 		}
 		break;
 	case SnapshotItemModel::Columns::Caption:
@@ -71,64 +71,64 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 		break;
 	case SnapshotItemModel::Columns::Units:
 		{
-			v1 = s1.unitID();
-			v2 = s2.unitID();
+			v1 = s1.unitId();
+			v2 = s2.unitId();
 		}
 		break;
 	case SnapshotItemModel::Columns::Type:
 		{
 			if (s1.isDiscrete() == true || s2.isDiscrete() == true)
 			{
-				v1 = s1.inOutTypeInt();
-				v2 = s2.inOutTypeInt();
+				v1 = static_cast<int>(s1.inOutType());
+				v2 = static_cast<int>(s2.inOutType());
 				break;
 			}
 
-			if (s1.signalType() == s2.signalType())
+			if (s1.type() == s2.type())
 			{
 				if (s1.analogSignalFormat() == s2.analogSignalFormat())
 				{
-					v1 = s1.inOutTypeInt();
-					v2 = s2.inOutTypeInt();
+					v1 = static_cast<int>(s1.inOutType());
+					v2 = static_cast<int>(s2.inOutType());
 				}
 				else
 				{
-					v1 = s1.analogSignalFormatInt();
-					v2 = s2.analogSignalFormatInt();
+					v1 = static_cast<int>(s1.analogSignalFormat());
+					v2 = static_cast<int>(s2.analogSignalFormat());
 				}
 			}
 			else
 			{
-				v1 = s1.signalTypeInt();
-				v2 = s2.signalTypeInt();
+				v1 = static_cast<int>(s1.type());
+				v2 = static_cast<int>(s2.type());
 			}
 		}
 		break;
 
 	case SnapshotItemModel::Columns::SystemTime:
 		{
-			v1 = st1.time.system;
-			v2 = st2.time.system;
+			v1 = st1.m_time.system.timeStamp;
+			v2 = st2.m_time.system.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::LocalTime:
 		{
-			v1 = st1.time.local;
-			v2 = st2.time.local;
+			v1 = st1.m_time.local.timeStamp;
+			v2 = st2.m_time.local.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::PlantTime:
 		{
-			v1 = st1.time.plant;
-			v2 = st2.time.plant;
+			v1 = st1.m_time.plant.timeStamp;
+			v2 = st2.m_time.plant.timeStamp;
 		}
 		break;
 	case SnapshotItemModel::Columns::Value:
 		{
 			if (s1.isAnalog() == s2.isAnalog())
 			{
-				v1 = st1.value;
-				v2 = st2.value;
+				v1 = st1.m_value;
+				v2 = st2.m_value;
 			}
 			else
 			{
@@ -139,22 +139,22 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 		break;
 	case SnapshotItemModel::Columns::Valid:
 		{
-			v1 = st1.flags.valid;
-			v2 = st2.flags.valid;
+			v1 = st1.m_flags.valid;
+			v2 = st2.m_flags.valid;
 		}
 		break;
-	case SnapshotItemModel::Columns::Underflow:
-		{
-			v1 = st1.flags.underflow;
-			v2 = st2.flags.underflow;
-		}
-		break;
-	case SnapshotItemModel::Columns::Overflow:
-		{
-			v1 = st1.flags.overflow;
-			v2 = st2.flags.overflow;
-		}
-		break;
+//	case SnapshotItemModel::Columns::Underflow:
+//		{
+//			v1 = st1.flags.underflow;
+//			v2 = st2.flags.underflow;
+//		}
+//		break;
+//	case SnapshotItemModel::Columns::Overflow:
+//		{
+//			v1 = st1.flags.overflow;
+//			v2 = st2.flags.overflow;
+//		}
+//		break;
 	default:
 		assert(false);
 		return false;
@@ -162,7 +162,7 @@ bool SnapshotItemSorter::sortFunction(const SnapshotItem& o1, const SnapshotItem
 
 	if (v1 == v2)
 	{
-		return s1.customAppSignalID() < s2.customAppSignalID();
+		return s1.customSignalId() < s2.customSignalId();
 	}
 
 	if (order == Qt::AscendingOrder)
@@ -192,8 +192,8 @@ SnapshotItemModel::SnapshotItemModel(QObject* parent)
 	m_columnsNames << tr("Plant Time");
 	m_columnsNames << tr("Value");
 	m_columnsNames << tr("Valid");
-	m_columnsNames << tr("Underflow");
-	m_columnsNames << tr("Overflow");
+//	m_columnsNames << tr("Underflow");
+//	m_columnsNames << tr("Overflow");
 
 
 	if (theSettings.m_signalSnapshotColumns.isEmpty() == true)
@@ -206,8 +206,8 @@ SnapshotItemModel::SnapshotItemModel(QObject* parent)
 		m_columnsIndexes.push_back(static_cast<int>(Columns::LocalTime));
 		m_columnsIndexes.push_back(static_cast<int>(Columns::Value));
 		m_columnsIndexes.push_back(static_cast<int>(Columns::Valid));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Underflow));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Overflow));
+//		m_columnsIndexes.push_back(static_cast<int>(Columns::Underflow));
+//		m_columnsIndexes.push_back(static_cast<int>(Columns::Overflow));
 	}
 	else
 	{
@@ -419,31 +419,31 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		{
 		case Columns::SystemTime:
 			{
-				QDateTime time = state.time.systemToDateTime();
+				QDateTime time = state.m_time.systemToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::LocalTime:
 			{
-				QDateTime time = state.time.localToDateTime();
+				QDateTime time = state.m_time.localToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::PlantTime:
 			{
-				QDateTime time = state.time.plantToDateTime();
+				QDateTime time = state.m_time.plantToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case Columns::Valid:
 			{
-				return (state.flags.valid == true) ? tr("") : tr("no");
+				return (state.m_flags.valid == true) ? tr("") : tr("no");
 			}
-		case Columns::Underflow:
-			{
-				return (state.flags.underflow == true) ? tr("yes") : tr("");
-			}
-		case Columns::Overflow:
-			{
-				return (state.flags.overflow == true) ? tr("yes") : tr("");
-			}
+//		case Columns::Underflow:
+//			{
+//				return (state.flags.underflow == true) ? tr("yes") : tr("");
+//			}
+//		case Columns::Overflow:
+//			{
+//				return (state.flags.overflow == true) ? tr("yes") : tr("");
+//			}
 		}
 
 		//
@@ -451,7 +451,7 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		//
 
 		bool found = false;
-		Signal s = signalParam(m_signalsTable[row].first, &found);
+		AppSignalParam s = signalParam(m_signalsTable[row].first, &found);
 
 		if (found == false)
 		{
@@ -463,26 +463,26 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 		{
 		case Columns::Value:
 			{
-				if (state.flags.valid == true)
+				if (state.m_flags.valid == true)
 				{
 					if (s.isDiscrete() == true)
 					{
-						return static_cast<int>(state.value) == 0 ? "0" : "1";
+						return static_cast<int>(state.m_value) == 0 ? "0" : "1";
 					}
 
 					if (s.isAnalog() == true)
 					{
-						QString str = QString::number(state.value, 'f', s.decimalPlaces());
+						QString str = QString::number(state.m_value, 'f', s.precision());
 
-						if (state.flags.underflow == true)
-						{
-							str += tr(" [UF]");
-						}
+//						if (state.flags.underflow == true)
+//						{
+//							str += tr(" [UF]");
+//						}
 
-						if (state.flags.overflow == true)
-						{
-							str += tr(" [OF]");
-						}
+//						if (state.flags.overflow == true)
+//						{
+//							str += tr(" [OF]");
+//						}
 
 						return str;
 					}
@@ -495,17 +495,17 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 		case Columns::SignalID:
 			{
-				return s.customAppSignalID();
+				return s.customSignalId();
 			}
 
 		case Columns::EquipmentID:
 			{
-				return s.equipmentID();
+				return s.equipmentId();
 			}
 
 		case Columns::AppSignalID:
 			{
-				return s.appSignalID();
+				return s.appSignalId();
 			}
 
 		case Columns::Caption:
@@ -515,19 +515,19 @@ QVariant SnapshotItemModel::data(const QModelIndex &index, int role) const
 
 		case Columns::Units:
 			{
-				return theSignals.units(s.unitID());
+				return s.unit();
 			}
 
 		case Columns::Type:
 			{
-				QString str = E::valueToString<E::SignalType>(s.signalType());
+				QString str = E::valueToString<E::SignalType>(s.type());
 
 				if (s.isAnalog() == true)
 				{
 					str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
 				}
 
-				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutTypeInt()));
+				str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(s.inOutType()));
 
 				return str;
 			}
@@ -559,20 +559,20 @@ QVariant SnapshotItemModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-Signal SnapshotItemModel::signalParam(Hash hash, bool* found) const
+AppSignalParam SnapshotItemModel::signalParam(Hash hash, bool* found) const
 {
 	if (found == nullptr)
 	{
 		assert(found);
-		return Signal();
+		return AppSignalParam();
 	}
 
 	*found = false;
 
-	Signal s1 = theSignals.signal(hash, found);
+	AppSignalParam s1 = theSignals.signalParam(hash, found);
 	if (*found == false)
 	{
-		return Signal();
+		return AppSignalParam();
 	}
 
 	return s1;
@@ -634,9 +634,10 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->editMask->setCompleter(m_completer);
 
 	ui->comboMaskType->blockSignals(true);
-	ui->comboMaskType->addItem("AppSignalId");
-	ui->comboMaskType->addItem("CustomAppSignalId");
-	ui->comboMaskType->addItem("EquipmentId");
+	ui->comboMaskType->addItem("All");
+	ui->comboMaskType->addItem("AppSignalID");
+	ui->comboMaskType->addItem("CustomAppSignalID");
+	ui->comboMaskType->addItem("EquipmentID");
 	ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
 	ui->comboMaskType->blockSignals(false);
 
@@ -680,6 +681,7 @@ void DialogSignalSnapshot::fillSignals()
 	}
 
 	std::set<QString> schemaAppSignals;
+
 	if (currentSchemaStrId.isEmpty() == false)
 	{
 		schemaAppSignals = m_configController->schemaAppSignals(currentSchemaStrId);
@@ -690,11 +692,13 @@ void DialogSignalSnapshot::fillSignals()
 	for (const Hash& hash : m_signalsHashes)
 	{
 		bool found = false;
-		const Signal& s = theSignals.signal(hash, &found);
+		const AppSignalParam& s = theSignals.signalParam(hash, &found);
 		if (found == false)
 		{
 			continue;
 		}
+
+		// Filter by Signal Type
 
 		switch (m_signalType)
 		{
@@ -724,50 +728,75 @@ void DialogSignalSnapshot::fillSignals()
 			break;
 		}
 
+		// Filter by Mask
+
 		if (m_strIdMasks.isEmpty() == false)
 		{
 			bool result = false;
-			QString strId;
+
+			QStringList strIdList;
+
 			switch (theSettings.m_signalSnapshotMaskType)
 			{
+			case MaskType::All:
+				{
+					strIdList << s.appSignalId().trimmed();
+					strIdList << s.customSignalId().trimmed();
+					strIdList << s.equipmentId().trimmed();
+				}
+				break;
 			case MaskType::AppSignalId:
 				{
-					strId = s.appSignalID().trimmed();
+					strIdList << s.appSignalId().trimmed();
 				}
 				break;
 			case MaskType::CustomAppSignalId:
 				{
-					strId = s.customAppSignalID().trimmed();
+					strIdList << s.customSignalId().trimmed();
 				}
 				break;
 			case MaskType::EquipmentId:
 				{
-					strId = s.equipmentID().trimmed();
+					strIdList << s.equipmentId().trimmed();
 				}
 				break;
 			}
 
-			for (QString idMask : m_strIdMasks)
+			for (const QString& mask : m_strIdMasks)
 			{
-				QRegExp rx(idMask.trimmed());
+				QRegExp rx(mask.trimmed());
 				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(strId))
+
+				for (const QString& strId : strIdList)
 				{
-					result = true;
+					if (rx.exactMatch(strId))
+					{
+						result = true;
+						break;
+					}
+				}
+
+				if (result == true)
+				{
 					break;
 				}
 			}
+
 			if (result == false)
 			{
 				continue;
 			}
 		}
 
+		// Filter by Schema
+
 		if (currentSchemaStrId.isEmpty() == false)
 		{
 			bool result = false;
-			QString strId = s.appSignalID().trimmed();
-			for (QString appSignal : schemaAppSignals)
+
+			QString strId = s.appSignalId().trimmed();
+
+			for (const QString& appSignal : schemaAppSignals)
 			{
 				if (appSignal == strId)
 				{
@@ -805,12 +834,14 @@ void DialogSignalSnapshot::fillSchemas()
 	ui->schemaCombo->addItem("All Schemas", "");
 
 	int index = 0;
-	std::vector<ConfigSchema> schemasParams = m_configController->schemasParams();
-	for (auto schema : schemasParams)
-	{
-		ui->schemaCombo->addItem(schema.strId + " - " + schema.caption, schema.strId);
 
-		if (currentStrId == schema.strId)
+	std::vector<VFrame30::SchemaDetails> schemasDetails = m_configController->schemasDetails();
+
+	for (const VFrame30::SchemaDetails& schema : schemasDetails )
+	{
+		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+
+		if (currentStrId == schema.m_schemaId )
 		{
 			ui->schemaCombo->setCurrentIndex(index);
 		}
@@ -875,14 +906,14 @@ void DialogSignalSnapshot::prepareContextMenu(const QPoint& pos)
 	}
 
 	bool found = false;
-	const Signal& s = m_model->signalParam(hash, &found);
+	const AppSignalParam& s = m_model->signalParam(hash, &found);
 
 	if (found == false)
 	{
 		return;
 	}
 
-	cw->currentTab()->signalContextMenu(QStringList()<<s.appSignalID());
+	cw->currentTab()->signalContextMenu(QStringList() << s.appSignalId());
 }
 
 void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
@@ -995,14 +1026,14 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 	}
 
 	bool found = false;
-	const Signal& s = m_model->signalParam(hash, &found);
+	const AppSignalParam& s = m_model->signalParam(hash, &found);
 
 	if (found == false)
 	{
 		return;
 	}
 
-	cw->currentTab()->signalInfo(s.appSignalID());
+	cw->currentTab()->signalInfo(s.appSignalId());
 }
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)

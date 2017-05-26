@@ -226,6 +226,11 @@ namespace VFrame30
 		m_equipmentIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 	}
 
+	void LogicSchema::setEquipmentIdList(const QStringList& s)
+	{
+		m_equipmentIds = s;
+	}
+
 	QStringList* LogicSchema::mutable_equipmentIds()
 	{
 		return &m_equipmentIds;

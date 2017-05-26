@@ -24,8 +24,6 @@
 #endif // Q_OS_WIN
 
 
-#include "StreamedData.h"
-
 class Property;
 
 namespace Proto
@@ -35,6 +33,13 @@ namespace Proto
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data);
 
 
+	enum class ProtoCompress
+	{
+		Auto,
+		Always,
+		Never
+	};
+
 
 	// Шаблон и реализация необходимых фукнций сериализации
 	// у VFrameType должны быть реализованы функции CreateObject, SaveData, LoadData
@@ -43,6 +48,12 @@ namespace Proto
 	class ObjectSerialization
 	{
 	public:
+		ObjectSerialization(ProtoCompress compression = ProtoCompress::Auto, size_t autoCompressionLimit = 4096) :
+			m_compression(compression),
+			m_autoCompressionLimit(autoCompressionLimit)
+		{
+		}
+
 		bool Save(const QString& fileName) const
 		{
 			std::wstring wfnstr(fileName.toStdWString());
@@ -89,7 +100,63 @@ namespace Proto
 
 			try
 			{
-				return message.SerializeToOstream(&stream);
+				switch (m_compression)
+				{
+				case ProtoCompress::Auto:
+				case ProtoCompress::Always:
+					{
+						std::string serializedString;
+						serializedString.reserve(255000);
+
+						bool ok = message.SerializeToString(&serializedString);
+						if (ok == false)
+						{
+							return false;
+						}
+
+						if (serializedString.size() >= m_autoCompressionLimit ||
+							m_compression == ProtoCompress::Always)
+						{
+							// Compress
+							//
+
+							// The bytes are not copied!!!, keep serializedString alive
+							//
+							QByteArray ba = QByteArray::fromRawData(serializedString.data(), static_cast<int>(serializedString.size()));
+							QByteArray compressedData = qCompress(ba, -1);
+
+							// If compressed size is somehow bigger than uncompressed, just leave it uncompressed
+							//
+							if (static_cast<size_t>(compressedData.size()) >= serializedString.size())
+							{
+								stream.write(serializedString.data(), serializedString.size());
+								return true;
+							}
+
+							// Create another Envelope, with compressed data,
+							//
+							Proto::Envelope compressMessage;
+
+							compressMessage.set_classnamehash(message.classnamehash());
+							compressMessage.set_compressedobject(compressedData.constData(), compressedData.size());
+
+							return compressMessage.SerializeToOstream(&stream);
+						}
+						else
+						{
+							// Do not compress
+							//
+							stream.write(serializedString.data(), serializedString.size());
+							return stream.rdstate() == std::ios_base::goodbit;
+						}
+					}
+
+				case ProtoCompress::Never:
+					return message.SerializeToOstream(&stream);
+				default:
+					assert(false);
+					return false;
+				}
 			}
 			catch(...)
 			{
@@ -97,26 +164,77 @@ namespace Proto
 				return false;
 			}
 		}
-		bool Save(Proto::StreamedData& data) const
-		{
-			Proto::Envelope message;
-			this->SaveData(&message);
-
-			auto mutable_data = data.mutable_data();
-			auto str = message.SerializeAsString();
-
-			mutable_data = QByteArray(str.data(), static_cast<int>(str.size()));
-
-			return true;
-		}
 		bool Save(QByteArray& data) const
 		{
 			Proto::Envelope message;
 			this->SaveData(&message);
 
-			std::string str = message.SerializeAsString();
-			data = QByteArray(str.data(), static_cast<int>(str.size()));
-			return true;
+			switch (m_compression)
+			{
+			case ProtoCompress::Auto:
+			case ProtoCompress::Always:
+				{
+					std::string serializedString;
+					serializedString.reserve(255000);
+
+					bool ok = message.SerializeToString(&serializedString);
+					if (ok == false)
+					{
+						return false;
+					}
+
+					if (serializedString.size() >= m_autoCompressionLimit ||
+						m_compression == ProtoCompress::Always)
+					{
+						// Compress
+						//
+
+						// The bytes are not copied !!!, keep serializedString alive
+						//
+						QByteArray ba = QByteArray::fromRawData(serializedString.data(), static_cast<int>(serializedString.size()));
+						QByteArray compressedData = qCompress(ba, -1);
+
+						// If compressed size is somehow bigger than uncompressed, just leave it uncompressed
+						//
+						if (static_cast<size_t>(compressedData.size()) >= serializedString.size())
+						{
+							data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
+							return true;
+						}
+
+						// Create another Envelope, with compressed data,
+						//
+						Proto::Envelope compressMessage;
+
+						compressMessage.set_classnamehash(message.classnamehash());
+						compressMessage.set_compressedobject(compressedData.constData(), compressedData.size());
+
+						std::string str = compressMessage.SerializeAsString();
+						data = QByteArray(str.data(), static_cast<int>(str.size()));
+
+						return true;
+					}
+					else
+					{
+						// Do not compress
+						//
+						data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
+						return true;
+					}
+				}
+				break;
+
+			case ProtoCompress::Never:
+				{
+					std::string str = message.SerializeAsString();
+					data = QByteArray(str.data(), static_cast<int>(str.size()));
+					return true;
+				}
+
+			default:
+				assert(false);
+				return false;
+			}
 		}
 		bool Save(Proto::Envelope* message) const
 		{
@@ -177,18 +295,6 @@ namespace Proto
 
 			return Load(message);
 		}
-		bool Load(const Proto::StreamedData& data)
-		{
-			Proto::Envelope message;
-
-			bool result = ParseFromArray(message, data.data());
-			if (result == false)
-			{
-				return false;
-			}
-
-			return Load(message);
-		}
 		bool Load(const QByteArray& data)
 		{
 			Proto::Envelope message;
@@ -205,7 +311,27 @@ namespace Proto
 		{
 			try
 			{
-				return this->LoadData(message);
+				if (message.has_compressedobject() == true)
+				{
+					// it is compressed Envelope, uncompress it and after it it will be possible to use it
+					//
+					const std::string& compressedString = message.compressedobject();
+					QByteArray uncompressedData = qUncompress(reinterpret_cast<const uchar*>(compressedString.data()), static_cast<int>(compressedString.size()));
+
+					Proto::Envelope uncompressedMessage;
+
+					bool result = ParseFromArray(uncompressedMessage, uncompressedData);
+					if (result == false)
+					{
+						return nullptr;
+					}
+
+					return this->LoadData(uncompressedMessage);
+				}
+				else
+				{
+					return this->LoadData(message);
+				}
 			}
 			catch (...)
 			{
@@ -242,25 +368,7 @@ namespace Proto
 				return nullptr;
 			}
 
-			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
-			assert(newItem != nullptr);
-
-			return newItem;
-		}
-		static std::shared_ptr<VFrameType> Create(const Proto::StreamedData& data)
-		{
-			Proto::Envelope message;
-
-			bool result = ParseFromString(message, data.data());
-			if (result == false)
-			{
-				return nullptr;
-			}
-
-			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
-			assert(newItem != nullptr);
-
-			return newItem;
+			return Create(message);
 		}
 		static std::shared_ptr<VFrameType> Create(const QByteArray& data)
 		{
@@ -272,22 +380,65 @@ namespace Proto
 				return nullptr;
 			}
 
-			std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
-			assert(newItem != nullptr);
-
-			return newItem;
+			return Create(message);
 		}
 		static std::shared_ptr<VFrameType> Create(const Proto::Envelope& message)
 		{
-			// function "static VFrameType* CreateObject(const Proto::Envelope& message)"
-			// must be defined in VFrameType
-			//
-			return VFrameType::CreateObject(message);
+			if (message.has_compressedobject() == true)
+			{
+				// it is compressed Envelope, uncompress it and after it it will be possible to use it
+				//
+				const std::string& compressedString = message.compressedobject();
+				QByteArray uncompressedData = qUncompress(reinterpret_cast<const uchar*>(compressedString.data()), static_cast<int>(compressedString.size()));
+
+				Proto::Envelope uncompressedMessage;
+
+				bool result = ParseFromArray(uncompressedMessage, uncompressedData);
+				if (result == false)
+				{
+					return nullptr;
+				}
+
+				std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(uncompressedMessage);
+				assert(newItem != nullptr);
+
+				return newItem;
+			}
+			else
+			{
+				std::shared_ptr<VFrameType> newItem = VFrameType::CreateObject(message);
+				assert(newItem != nullptr);
+
+				return newItem;
+			}
 		}
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const = 0;
 		virtual bool LoadData(const Proto::Envelope& message) = 0;
+
+	public:
+		ProtoCompress compression() const
+		{
+			return m_compression;
+		}
+		void setCompression(ProtoCompress value)
+		{
+			m_compression = value;
+		}
+
+		size_t autoCompressionLimit() const
+		{
+			return m_autoCompressionLimit;
+		}
+		void setAutoCompressionLimit(size_t value)
+		{
+			m_autoCompressionLimit = value;
+		}
+
+	private:
+		ProtoCompress m_compression = ProtoCompress::Auto;
+		size_t m_autoCompressionLimit = 4096;
 	};
 
 

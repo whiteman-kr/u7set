@@ -1,7 +1,9 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/ProtobufHelper.h"
+#include "../lib/DataSource.h"
 
+class DataSource;
 
 namespace Builder
 {

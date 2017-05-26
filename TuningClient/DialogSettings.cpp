@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
-DialogSettings::DialogSettings(QWidget *parent) :
+DialogSettings::DialogSettings(QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSettings)
 {
@@ -29,34 +29,34 @@ DialogSettings::DialogSettings(QWidget *parent) :
 
 	}
 
-    createLanguagesList();
+	createLanguagesList();
 }
 
 void DialogSettings::createLanguagesList()
 {
-    QString m_langPath = QApplication::applicationDirPath();
-    m_langPath.append("/languages");
+	QString m_langPath = QApplication::applicationDirPath();
+	m_langPath.append("/languages");
 
-    QDir dir(m_langPath);
+	QDir dir(m_langPath);
 
-    QStringList fileNames = dir.entryList(QStringList("TuningClient_*.qm"));
+	QStringList fileNames = dir.entryList(QStringList("TuningClient_*.qm"));
 
-    for (int i = 0; i < fileNames.size(); ++i)
-    {
-        QString locale;
-        locale = fileNames[i]; // "TuningClient_.qm"
-        locale.truncate(locale.lastIndexOf('.')); // "TuningClient_"
-        locale.remove(0, locale.indexOf('_') + 1); // "de"
+	for (int i = 0; i < fileNames.size(); ++i)
+	{
+		QString locale;
+		locale = fileNames[i]; // "TuningClient_.qm"
+		locale.truncate(locale.lastIndexOf('.')); // "TuningClient_"
+		locale.remove(0, locale.indexOf('_') + 1); // "de"
 
-        QString lang = QLocale::languageToString(QLocale(locale).language());
+		QString lang = QLocale::languageToString(QLocale(locale).language());
 
-        ui->m_languageCombo->addItem(lang, locale);
+		ui->m_languageCombo->addItem(lang, locale);
 
-        if (theSettings.language() == locale)
-        {
-            ui->m_languageCombo->setCurrentIndex(i);
-        }
-    }
+		if (theSettings.language() == locale)
+		{
+			ui->m_languageCombo->setCurrentIndex(i);
+		}
+	}
 }
 
 
@@ -67,42 +67,42 @@ DialogSettings::~DialogSettings()
 
 void DialogSettings::on_DialogSettings_accepted()
 {
-    // ID
+	// ID
 
 	theSettings.setInstanceId(ui->m_instanceID->text());
 
-    // IP Configuration
+	// IP Configuration
 
-    QString configIP1 = ui->m_IP1->text();
-    int configPort1 = ui->m_port1->text().toInt();
+	QString configIP1 = ui->m_IP1->text();
+	int configPort1 = ui->m_port1->text().toInt();
 
-    QString configIP2 = ui->m_IP2->text();
-    int configPort2 = ui->m_port2->text().toInt();
+	QString configIP2 = ui->m_IP2->text();
+	int configPort2 = ui->m_port2->text().toInt();
 
-    if (configIP1 != theSettings.configuratorAddress1().addressStr() || configIP2 != theSettings.configuratorAddress2().addressStr()
-            || configPort1 != theSettings.configuratorAddress1().port() || configPort2 != theSettings.configuratorAddress2().port())
-    {
+	if (configIP1 != theSettings.configuratorAddress1().addressStr() || configIP2 != theSettings.configuratorAddress2().addressStr()
+			|| configPort1 != theSettings.configuratorAddress1().port() || configPort2 != theSettings.configuratorAddress2().port())
+	{
 
-        theSettings.setConfiguratorAddress1(configIP1, configPort1);
-        theSettings.setConfiguratorAddress2(configIP2, configPort2);
+		theSettings.setConfiguratorAddress1(configIP1, configPort1);
+		theSettings.setConfiguratorAddress2(configIP2, configPort2);
 
-        QMessageBox::warning(this, tr("TuningClient"), tr("Configurator address has been changed, please restart the application."));
-    }
+		QMessageBox::warning(this, tr("TuningClient"), tr("Configurator address has been changed, please restart the application."));
+	}
 
 	// Language
 
-    QVariant data = ui->m_languageCombo->currentData();
+	QVariant data = ui->m_languageCombo->currentData();
 
-    QString lang = data.toString();
+	QString lang = data.toString();
 
-    if (lang != theSettings.language())
-    {
-        theSettings.setLanguage(lang);
+	if (lang != theSettings.language())
+	{
+		theSettings.setLanguage(lang);
 
-        QMessageBox::warning(this, tr("TuningClient"), tr("Language has been changed, please restart the application."));
-    }
+		QMessageBox::warning(this, tr("TuningClient"), tr("Language has been changed, please restart the application."));
+	}
 
-    //
+	//
 
 	if (theSettings.admin() == true)
 	{

@@ -36,6 +36,7 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaHeight", true, Schema::docHeightRegional, Schema::setDocHeightRegional);
+		ADD_PROPERTY_GETTER_SETTER(QColor, "BackgroundColor", true, Schema::backgroundColor, Schema::setBackgroundColor);
 
 		m_guid = QUuid();  // GUID_NULL
 
@@ -84,6 +85,7 @@ namespace VFrame30
 		mutableSchema->set_height(m_height);
 		mutableSchema->set_unit(static_cast<Proto::SchemaUnit>(m_unit));
 		mutableSchema->set_excludefrombuild(m_excludeFromBuild);
+		mutableSchema->set_backgroundcolor(m_backgroundColor.rgba());
 
 		// Save Layers
 		//
@@ -120,6 +122,11 @@ namespace VFrame30
 		m_height = schema.height();
 		m_unit = static_cast<SchemaUnit>(schema.unit());
 		m_excludeFromBuild = schema.excludefrombuild();
+
+		if (schema.has_backgroundcolor() == true)
+		{
+			m_backgroundColor = schema.backgroundcolor();
+		}
 
 		// Прочитать Layers
 		//
@@ -192,7 +199,7 @@ namespace VFrame30
 		// Нарисовать лист
 		//
 		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
-		p->fillRect(pageRect, Qt::white);
+		p->fillRect(pageRect, backgroundColor());
 
 		// Draw items by layers which has Show flag
 		//
@@ -924,6 +931,16 @@ namespace VFrame30
 		m_excludeFromBuild = value;
 	}
 
+	QColor Schema::backgroundColor() const
+	{
+		return m_backgroundColor;
+	}
+
+	void Schema::setBackgroundColor(const QColor& value)
+	{
+		m_backgroundColor = value;
+	}
+
 	bool Schema::isLogicSchema() const
 	{
 		return dynamic_cast<const VFrame30::LogicSchema*>(this) != nullptr;
@@ -1243,6 +1260,91 @@ namespace VFrame30
 		return true;
 	}
 
+	bool SchemaDetails::saveData(Proto::SchemaDetails* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		message->set_version(m_version);
+		message->set_schemaid(m_schemaId.toStdString());
+		message->set_caption(m_caption.toStdString());
+		message->set_excludedfrombuild(m_excludedFromBuild);
+		message->set_equipmentid(m_equipmentId.toStdString());
+		message->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
+
+		for (const QString& s : m_signals)
+		{
+			message->add_signalids(s.toStdString());
+		}
+
+		for (const QString& l : m_labels)
+		{
+			message->add_labels(l.toStdString());
+		}
+
+		for (const QString& c : m_connections)
+		{
+			message->add_connections(c.toStdString());
+		}
+
+		for (const QUuid& u : m_guids)
+		{
+			::Proto::Uuid* uuidMesage = message->add_guids();
+			assert(uuidMesage);
+
+			uuidMesage->set_uuid(&u, sizeof(u));
+		}
+
+		return true;
+	}
+
+	bool SchemaDetails::loadData(const Proto::SchemaDetails& message)
+	{
+		m_version = message.version();
+		m_schemaId = QString::fromStdString(message.schemaid());
+		m_caption = QString::fromStdString(message.caption());
+		m_excludedFromBuild = message.excludedfrombuild();
+		m_equipmentId = QString::fromStdString(message.equipmentid());
+		m_lmDescriptionFile = QString::fromStdString(message.lmdescriptionfile());
+
+		m_signals.clear();
+		int signalsCount = message.signalids_size();
+		for (int i = 0; i < signalsCount; i++)
+		{
+			QString signalId = QString::fromStdString(message.signalids(i));
+			m_signals.insert(signalId);
+		}
+
+		m_labels.clear();
+		int labelCount = message.labels_size();
+		for (int i = 0; i < labelCount; i++)
+		{
+			QString label = QString::fromStdString(message.labels(i));
+			m_labels.insert(label);
+		}
+
+		m_connections.clear();
+		int connectionCount = message.connections_size();
+		for (int i = 0; i < connectionCount; i++)
+		{
+			QString conn = QString::fromStdString(message.connections(i));
+			m_connections.insert(conn);
+		}
+
+		m_guids.clear();
+		int guidCount = message.guids_size();
+		for (int i = 0; i < guidCount; i++)
+		{
+			QUuid guid = Proto::Read(message.guids(i));
+			m_guids.insert(guid);
+		}
+
+		return true;
+	}
+
 	bool SchemaDetails::searchForString(const QString& searchText) const
 	{
 		if (m_schemaId.contains(searchText, Qt::CaseInsensitive) == true)
@@ -1285,4 +1387,98 @@ namespace VFrame30
 
 		return false;
 	}
+
+	SchemaDetailsSet::SchemaDetailsSet() :
+		Proto::ObjectSerialization<SchemaDetailsSet>(Proto::ProtoCompress::Never)
+	{
+	}
+
+	bool SchemaDetailsSet::SaveData(Proto::Envelope* envelopeMessage) const
+	{
+		std::string className = {"SchemaDetailsSet"};
+		quint32 classnamehash = CUtils::GetClassHashCode(className);
+		envelopeMessage->set_classnamehash(classnamehash);
+
+		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->mutable_schemadetailsset();
+
+		for (auto detailsPair : m_details)
+		{
+			::Proto::SchemaDetails* detailsMessage = setMessage->add_schemasdetails();
+			detailsPair.second->saveData(detailsMessage);
+		}
+
+		return true;
+	}
+
+	bool SchemaDetailsSet::LoadData(const Proto::Envelope& message)
+	{
+		clear();
+
+		if (message.has_schemadetailsset() == false)
+		{
+			assert(message.has_schemadetailsset());
+			return false;
+		}
+
+		const Proto::SchemaDetailsSet& setMessage = message.schemadetailsset();
+
+		int detailsCount = setMessage.schemasdetails_size();
+		for (int i = 0; i < detailsCount; i++)
+		{
+			std::shared_ptr<SchemaDetails> details = std::make_shared<SchemaDetails>();
+			bool loadOk = details->loadData(setMessage.schemasdetails(i));
+
+			if (loadOk == true)
+			{
+				add(details);
+			}
+		}
+
+		return true;
+	}
+
+	std::shared_ptr<SchemaDetailsSet> SchemaDetailsSet::CreateObject(const Proto::Envelope& message)
+	{
+		std::shared_ptr<SchemaDetailsSet> object = std::make_shared<SchemaDetailsSet>();
+		object->LoadData(message);
+
+		return object;
+	}
+
+	void SchemaDetailsSet::clear()
+	{
+		m_details.clear();
+	}
+
+	void SchemaDetailsSet::add(std::shared_ptr<SchemaDetails> details)
+	{
+		m_details[details->m_schemaId] = details;
+	}
+
+	std::vector<SchemaDetails> SchemaDetailsSet::schemasDetails() const
+	{
+		std::vector<SchemaDetails> result;
+		result.reserve(m_details.size());
+
+		for (auto schemaPair : m_details)
+		{
+			SchemaDetails* ptr = schemaPair.second.get();
+			result.push_back(*ptr);
+		}
+
+		return result;
+	}
+
+	std::shared_ptr<SchemaDetails> SchemaDetailsSet::schemaDetails(QString schemaId) const
+	{
+		auto it = m_details.find(schemaId);
+
+		if (it == m_details.end())
+		{
+			return std::shared_ptr<SchemaDetails>();
+		}
+
+		return it->second;
+	}
 }
+

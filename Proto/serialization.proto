@@ -107,6 +107,10 @@ message Envelope
 	// C++ Class for serizalization
 	//
 	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always the same
+	optional bytes compressedObject = 2;			// Can contain Envelope iself in compressed state, after uncompression should
+	                                                // be possible to read one of possible types for storing.
+													// Compression is done by qCompress
+													// To decompress it with zlib extra actions are required, read qUncompress help
 
 	// Possible types for storing
 	//
@@ -117,6 +121,7 @@ message Envelope
 	optional FblElement fblelement = 102;			// Fbl::FblElement
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 	optional Connection connection = 104;			// Hardware::Connection
+	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
 }
 
 
@@ -288,6 +293,7 @@ message Schema
 	required double height = 5;
 	required SchemaUnit unit = 6;
 	optional bool excludeFromBuild = 7 [default = false];
+	optional uint32 backgroundColor = 8;
 
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability
@@ -357,7 +363,7 @@ message SchemaItem
 	required bool isLocked = 3;
 	required SchemaUnit itemUnit = 4;
 	optional bool acceptClick = 5 [default = false];
-	//optional wstring clickScript = 6;
+	//optional wstring clickScript = 6;	DON'T REUSE IT
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
 	optional string objectName = 9;
@@ -696,7 +702,7 @@ message SchemaItemValue
     optional double weight = 1;
 	optional uint32 lineColor = 2;
 	optional uint32 fillColor = 3;
-	optional string analogText = 4;
+	optional string textAnalog = 4;
 	optional uint32 textColor = 5;
 	optional FontParam font = 6;
 	optional bool fill = 7;
@@ -705,6 +711,40 @@ message SchemaItemValue
 	optional int32 vertAlign = 10  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
 	optional string signalId = 11;
 	optional int32 signalSource = 12 [default = 0];
+	optional int32 precision = 13 [default = -1];	// -1: Take precision value from signal description
+	optional string textDiscrete0 = 14;
+	optional string textDiscrete1 = 15;
+	optional string textNonValid = 16;
+
+    optional uint32 fillColorNonValid0 = 30;
+	optional uint32 fillColorNonValid1 = 31;
+	optional uint32 textColorNonValid0 = 32;
+	optional uint32 textColorNonValid1 = 33;
+
+//  optional uint32 fillColorOverflow0 = 34;
+//	optional uint32 fillColorOverflow1 = 35;
+//	optional uint32 textColorOverflow0 = 36;
+//	optional uint32 textColorOverflow1 = 37;
+
+//  optional uint32 fillColorUnderflow0 = 38;
+//	optional uint32 fillColorUnderflow1 = 39;
+//	optional uint32 textColorUnderflow0 = 40;
+//	optional uint32 textColorUnderflow1 = 41;
+
+    optional uint32 fillColorAnalog0 = 42;
+	optional uint32 fillColorAnalog1 = 43;
+	optional uint32 textColorAnalog0 = 44;
+	optional uint32 textColorAnalog1 = 45;
+
+    optional uint32 fillColorDiscrYes0 = 46;
+	optional uint32 fillColorDiscrYes1 = 47;
+	optional uint32 textColorDiscrYes0 = 48;
+	optional uint32 textColorDiscrYes1 = 49;
+
+    optional uint32 fillColorDiscrNo0 = 50;
+	optional uint32 fillColorDiscrNo1 = 51;
+	optional uint32 textColorDiscrNo0 = 52;
+	optional uint32 textColorDiscrNo1 = 53;
 }
 
 //
@@ -990,6 +1030,53 @@ message AppSignalState
     optional sint64 plantTime = 6 [default = 0];
 }
 
+message AppSignalParam
+{
+    //optional int32 reserved = 1 [default = 0];		// reserved for future use (can be version)
+	optional uint64 hash = 2 [default = 0];
+	optional string appSignalId = 3 [default = ""];
+	optional string customSignalId = 4 [default = ""];
+	optional string caption = 5 [default = ""];
+	optional string equipmentId = 6 [default = ""];
+
+    optional int32 channel = 10 [default = 0];				// E::Channel:			A = 0, B = 1, C = 2, D = 3
+	optional int32 inOutType = 11 [default = 2];			// E::SignalInOutType:	Input = 0, Output = 1, Internal = 2
+	optional int32 signalType = 12 [default = 0];			// E::SignalType:		Analog = 0, Discrete = 1
+	optional int32 analogSignalFormat = 13 [default = 2];	// E::AnalogAppSignalFormat:	SignedInt32 = 1, Float32 = 2
+	optional int32 byteOrder = 14 [default = 2];			// E::ByteOrder:		LittleEndian = 0, BigEndian = 1
+
+    optional int32 unitId = 15 [default = 1];				// 1 = No unit
+	optional string unit = 16 [default = ""];				//
+
+    optional double lowValidRange = 20 [default = 0];
+	optional double highValidRange = 21 [default = 0];
+	optional double lowEngeneeringUnits = 22 [default = 0];
+	optional double highEngeneeringUnits = 23 [default = 0];
+
+    optional double inputLowLimit = 30 [default = 0];			// low electric value for input range
+	optional double inputHighLimit = 31 [default = 0];			// high electric value for input range
+	optional int32 inputUnitId = 32 [default = 1];				// electric unit for input range E::InputUnit, (NoInputUnit = 1, mA = 15, mV = 11, Ohm = 20, V = 12)
+	optional int32 inputSensorType = 33 [default = 0];			// electric sensor type for input range E::SensorType (was created for m_inputUnitID)
+
+    optional double outputLowLimit = 40 [default = 0];			// low physical value for output range
+	optional double outputHighLimit = 41 [default = 0];			// high physical value for output range
+	optional int32 outputUnitId = 42 [default = 1];				// physical unit for output range (kg, mm, Pa ...)
+	optional int32 outputMode = 43 [default = 0];				// output electric range E::OutputMode (Plus0_Plus5_V = 0, Plus4_Plus20_mA = 1, Minus10_Plus10_V = 2, Plus0_Plus5_mA = 3,
+	optional int32 outputSensorType = 44 [default = 0];			// electric sensor type for output range E::SensorType (NoSensorType = 0)
+
+    optional int32 precision = 50 [default = 2];
+	optional double aperture = 51 [default = 1];
+	optional double filteringTime = 52 [default = 0.005];
+	optional double spreadTolerance = 53 [default = 2];
+	optional bool enableTuning = 54 [default = false];
+	optional double tuningDefaultValue = 55 [default = 0];
+}
+
+message AppSignalParamSet
+{                       
+    repeated AppSignalParam items = 1;
+}
+
 message Connection
 {
     optional string ConnectionID = 2 [default = ""];
@@ -1020,6 +1107,24 @@ message Connection
     optional int32 Port2RxWordsQuantity = 19 [default = 479];
 
     optional Uuid uuid = 20;
+}
 
+message SchemaDetailsSet
+{
+    repeated SchemaDetails schemasDetails = 2;
+}
+
+message SchemaDetails
+{
+    optional int32 version = 2;
+	optional string schemaId = 4;
+	optional string caption = 5;
+	optional bool excludedfromBuild = 6;
+	optional string equipmentId = 7;
+	optional string lmDescriptionFile = 8;
+	repeated string signalIds = 20;
+	repeated string labels = 21;
+	repeated string connections = 22;
+	repeated Uuid guids = 23;
 }
 

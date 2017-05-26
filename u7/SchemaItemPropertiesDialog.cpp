@@ -17,7 +17,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
     {
 	   move(theSettings.m_schemaItemPropertiesWindowPos);
 	   restoreGeometry(theSettings.m_schemaItemPropertiesWindowGeometry);
-    }
+	}
     else
     {
         QRect scr = QApplication::desktop()->screenGeometry();
@@ -70,8 +70,8 @@ void SchemaItemPropertiesDialog::saveSettings()
 	theSettings.m_schemaItemSplitterState = m_propertyEditor->splitterPosition();
 	theSettings.m_schemaItemPropertiesWindowPos = pos();
 	theSettings.m_schemaItemPropertiesWindowGeometry = saveGeometry();
-}
 
+}
 
 //
 //
@@ -79,7 +79,7 @@ void SchemaItemPropertiesDialog::saveSettings()
 //
 //
 SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	ExtWidgets::PropertyEditor(parent),
+	IdePropertyEditor(parent),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);

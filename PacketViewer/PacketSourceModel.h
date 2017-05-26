@@ -8,6 +8,7 @@
 #include "../lib/DataProtocols.h"
 
 class QUdpSocket;
+class DataSource;
 class PacketSourceModel;
 class PacketBufferTableModel;
 class SignalTableModel;

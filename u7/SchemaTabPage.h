@@ -123,6 +123,7 @@ protected:
 class SchemaControlTabPage : public QWidget, public HasDbController
 {
 	Q_OBJECT
+
 public:
 	SchemaControlTabPage(QString fileExt,
 						 DbController* db,
@@ -138,7 +139,11 @@ public:
 signals:
 
 protected slots:
+
+	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema);
+
 	void deleteFile(std::vector<DbFileInfo> files);
 
 	void checkIn(std::vector<DbFileInfo> files);
@@ -152,6 +157,7 @@ protected slots:
 private slots:
 	void ctrlF();
 	void search();
+	void searchSchemaForLm(QString equipmentId);
 
 	// Properties
 	//
@@ -169,6 +175,7 @@ private:
 	QPushButton* m_searchButton = nullptr;
 
 	QAction* m_searchAction = nullptr;
+	QAction* m_refreshAction = nullptr;
 };
 
 

@@ -75,7 +75,7 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	m_instanceTimer = new QTimer(this);
 	m_instanceTimer->start(100);
 
-	connect (m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
+	connect(m_instanceTimer, &QTimer::timeout, this, &MonitorMainWindow::checkMonitorSingleInstance);
 
 	m_appInstanceSharedMemory.setKey(MonitorMainWindow::getInstanceKey());
 	m_appInstanceSharedMemory.attach();
@@ -299,11 +299,15 @@ void MonitorMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
+	m_trendsAction = new QAction(tr("Trends"), this);
+	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
+	m_trendsAction->setEnabled(true);
+	connect(m_trendsAction, &QAction::triggered, this, &MonitorMainWindow::slot_trends);
+
 	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
 	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
 	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Camera.svg"));
 	m_signalSnapshotAction->setEnabled(true);
-	m_signalSnapshotAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
 	connect(m_signalSnapshotAction, &QAction::triggered, this, &MonitorMainWindow::slot_signalSnapshot);
 
 	m_findSignalAction = new QAction(tr("Find Signal"), this);
@@ -344,6 +348,7 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_historyBack );
 
 	viewMenu->addSeparator();
+	viewMenu->addAction(m_trendsAction);
 	viewMenu->addAction(m_signalSnapshotAction);
 	viewMenu->addAction(m_findSignalAction);
 
@@ -393,6 +398,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_historyForward);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_trendsAction);
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
@@ -574,6 +580,39 @@ void MonitorMainWindow::checkMonitorSingleInstance()
 	}
 }
 
+void MonitorMainWindow::slot_trends()
+{
+	qDebug() << "";
+	qDebug() << Q_FUNC_INFO;
+
+	ConfigSettings conf = m_configController.configuration();
+
+	QStringList args;
+	args << QString("-ads1=%1:%2").arg(conf.ads1.ip()).arg(conf.ads1.port());
+	args << QString("-ads2=%1:%2").arg(conf.ads2.ip()).arg(conf.ads2.port());
+
+	qint64 pid = 0;
+
+	qDebug() << "Start trentd with arguments: " << args.join(' ');
+#ifdef Q_OS_WIN
+	bool ok = QProcess::startDetached("./Trends.exe", args, QString(), &pid);
+#else
+	bool ok = QProcess::startDetached("./Trends", args, QString(), &pid);
+#endif
+
+	if (ok == false)
+	{
+		qDebug() << "Cannot start Trends process. Check whether the executable exists and has propper rights and attributes.";
+		QMessageBox::critical(this, qApp->applicationName(), tr("Cannot start Trends process. Check whether the executable exists and has propper rights and attributes."));
+	}
+	else
+	{
+		qDebug() << "Trends process was started, pid: " << pid;
+	}
+
+	return;
+}
+
 void MonitorMainWindow::slot_signalSnapshot()
 {
 	DialogSignalSnapshot* dss = new DialogSignalSnapshot(&m_configController, this);
@@ -668,18 +707,18 @@ void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*
 	//
 	m_comboBox->clear();
 
-	std::vector<ConfigSchema> schemas = m_configController->schemas();
+	std::vector<VFrame30::SchemaDetails> schemas = m_configController->schemasDetails();
 
 	std::sort(schemas.begin(), schemas.end(),
-		[](const ConfigSchema& s1, const ConfigSchema& s2) -> bool
+		[](const VFrame30::SchemaDetails& s1, const VFrame30::SchemaDetails& s2) -> bool
 		{
-			return s1.strId < s2.strId;
+			return s1.m_schemaId < s2.m_schemaId;
 		});
 
-	for (const ConfigSchema& s : schemas)
+	for (const VFrame30::SchemaDetails& s : schemas)
 	{
-		QVariant data = QVariant::fromValue(s.strId);
-		m_comboBox->addItem(s.strId + "  " + s.caption, data);
+		QVariant data = QVariant::fromValue(s.m_schemaId);
+		m_comboBox->addItem(s.m_schemaId + "  " + s.m_caption, data);
 	}
 
 	// Restore selected
@@ -704,7 +743,7 @@ void SchemaListWidget::slot_configurationArrived(ConfigSettings /*configuration*
 
 	// Allow signals
 	//
-	m_comboBox->blockSignals(false);	// Allo wto emit signals
+	m_comboBox->blockSignals(false);	// Allow to emit signals
 
 	return;
 }

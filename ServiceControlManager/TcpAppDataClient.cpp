@@ -112,8 +112,8 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		onGetAppSignalListNextReply(replyData, replyDataSize);
 		break;
 
-	case ADS_GET_APP_SIGNAL_PARAM:
-		onGetAppSignalParamReply(replyData, replyDataSize);
+	case ADS_GET_APP_SIGNAL:
+		onGetAppSignalReply(replyData, replyDataSize);
 		break;
 
 	case ADS_GET_APP_SIGNAL_STATE:
@@ -310,20 +310,20 @@ void TcpAppDataClient::getNextParamPart()
 		paramsInPartCount = ADS_GET_APP_SIGNAL_PARAM_MAX;
 	}
 
-	m_getSignalParamRequest.Clear();
+	m_getSignalsRequest.Clear();
 
 	for(int i = 0; i < paramsInPartCount; i++)
 	{
-		m_getSignalParamRequest.add_signalhashes(m_signalHahes[startIndex + i]);
+		m_getSignalsRequest.add_signalhashes(m_signalHahes[startIndex + i]);
 	}
 
-	sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalParamRequest);
+	sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalsRequest);
 }
 
 
-void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 replyDataSize)
+void TcpAppDataClient::onGetAppSignalReply(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_getSignalParamReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 
 	if (result == false)
 	{
@@ -331,7 +331,7 @@ void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 r
 		return;
 	}
 
-	int paramCount = m_getSignalParamReply.appsignalparams_size();
+	int paramCount = m_getSignalsReply.appsignals_size();
 
 	int startIndex = m_getParamsCurrentPart * ADS_GET_APP_SIGNAL_PARAM_MAX;
 
@@ -345,7 +345,7 @@ void TcpAppDataClient::onGetAppSignalParamReply(const char* replyData, quint32 r
 			break;
 		}
 
-		m_signalParams[startIndex + i].serializeFromProtoAppSignal(&m_getSignalParamReply.appsignalparams(i));
+		m_signalParams[startIndex + i].serializeFromProtoAppSignal(&m_getSignalsReply.appsignals(i));
 	}
 
 	m_getParamsCurrentPart++;
@@ -423,7 +423,7 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 		int index = m_hash2Index[hash];
 
-		m_states[index].getProtoAppSignalState(&m_getSignalStateReply.appsignalstates(i));
+		m_states[index].load(m_getSignalStateReply.appsignalstates(i));
 	}
 
 	m_getParamsCurrentPart++;

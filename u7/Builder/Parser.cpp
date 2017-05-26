@@ -2619,46 +2619,23 @@ namespace Builder
 		bool ok = false;
 		std::vector<DbFileInfo> fileList;
 
-		if (release() == true)
+		ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
+
+		std::vector<DbFileInfo> markedAsDeletedRemoved;
+		markedAsDeletedRemoved.reserve(fileList.size());
+
+		for (DbFileInfo& fi : fileList)
 		{
-			ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
-
-			std::vector<DbFileInfo> markedAsDeletedRemoved;
-			markedAsDeletedRemoved.reserve(fileList.size());
-
-			for (DbFileInfo& fi : fileList)
+			if (fi.action() == VcsItemAction::Deleted)		// File is deleted
 			{
-				if (fi.action() == VcsItemAction::Deleted)		// File is deleted
-				{
-					qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
-					continue;
-				}
-
-				markedAsDeletedRemoved.push_back(fi);
+				qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
+				continue;
 			}
 
-			std::swap(markedAsDeletedRemoved, fileList);
+			markedAsDeletedRemoved.push_back(fi);
 		}
-		else
-		{
-			ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
 
-			std::vector<DbFileInfo> markedAsDeletedRemoved;
-			markedAsDeletedRemoved.reserve(fileList.size());
-
-			for (DbFileInfo& fi : fileList)
-			{
-				if (fi.action() == VcsItemAction::Deleted)		// File is deleted
-				{
-					qDebug() << "Skip file " << fi.fileId() << ", " << fi.fileName() << ", it was marked as deleted";
-					continue;
-				}
-
-				markedAsDeletedRemoved.push_back(fi);
-			}
-
-			std::swap(markedAsDeletedRemoved, fileList);
-		}
+		std::swap(markedAsDeletedRemoved, fileList);
 
 		if (ok == false)
 		{
@@ -2692,15 +2669,7 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Loading %1").arg(fi.fileName()));
 
 			std::shared_ptr<DbFile> file;
-
-			if (release() == true)
-			{
-				assert(false);			// get specific files
-			}
-			else
-			{
-				ok = db->getLatestVersion(fi, &file, nullptr);
-			}
+			ok = db->getLatestVersion(fi, &file, nullptr);
 
 			if (ok == false)
 			{

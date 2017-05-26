@@ -1984,11 +1984,11 @@ bool DbController::buildFinish(int buildID, int errors, int warnings, QString bu
 }
 
 
-bool DbController::isAnyCheckedOut(bool* result)
+bool DbController::isAnyCheckedOut(int* checkedOutCount)
 {
-	if (result == nullptr)
+	if (checkedOutCount == nullptr)
 	{
-		assert(result != nullptr);
+		assert(checkedOutCount != nullptr);
 		return false;
 	}
 
@@ -2001,7 +2001,7 @@ bool DbController::isAnyCheckedOut(bool* result)
 		return false;
 	}
 
-	emit signal_isAnyCheckedOut(result);
+	emit signal_isAnyCheckedOut(checkedOutCount);
 
 	ok = waitForComplete(nullptr, tr("Is Any Checked Out?"));
 

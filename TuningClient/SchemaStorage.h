@@ -8,7 +8,7 @@
 class SchemaStorage : public QObject
 {
 public:
-	explicit SchemaStorage(ConfigController *configController);
+	explicit SchemaStorage(ConfigController* configController);
 
 	std::shared_ptr<VFrame30::Schema> schema(QString schemaId);
 

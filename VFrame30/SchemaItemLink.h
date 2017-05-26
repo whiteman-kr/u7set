@@ -35,6 +35,7 @@ namespace VFrame30
 		virtual bool GetConnectionPointPos(const QUuid& connectionPointGuid, SchemaPoint* pResult, double gridSize, int pinGridStep) const override;
 
 		// Properties and Data
+		//
 	public:
 	private:
 	};

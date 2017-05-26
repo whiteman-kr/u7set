@@ -34,6 +34,9 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
+	int m_viewType = 0;
+	int m_laneCount = 0;
+
 private:
 	mutable QMutex m_mutex;
 };

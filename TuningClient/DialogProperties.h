@@ -8,13 +8,13 @@
 
 class DialogProperties : public PropertyEditorDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    DialogProperties(std::shared_ptr<PropertyObject> object, QWidget *parent, bool readOnly);
+	DialogProperties(std::shared_ptr<PropertyObject> object, QWidget* parent, bool readOnly);
 	~DialogProperties();
 
 private:
-	virtual void closeEvent(QCloseEvent * e);
+	virtual void closeEvent(QCloseEvent* e);
 	virtual void done(int r);
 
 	void saveSettings();

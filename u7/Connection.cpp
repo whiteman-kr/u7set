@@ -61,17 +61,17 @@ namespace Hardware
         static QString s_manualSettings = "Manual Settings";
         static QString s_serialCommunicationsOCM = "Serial Communications (OCM)";
 
-        auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, s_conectionId, true, Connection::connectionID, Connection::setConnectionID);
+		auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, s_conectionId, true, Connection::connectionID, Connection::setConnectionID);
         propConnId->setValidator("^[A-Z0-9_]+$");
 
         auto propFileName = ADD_PROPERTY_GETTER(QString, s_fileName, true, Connection::fileName);
         propFileName->setExpert(true);
 
-        auto propFileID = ADD_PROPERTY_GETTER(int, s_fileID, true, Connection::fileID);
+		auto propFileID = ADD_PROPERTY_GETTER(int, s_fileID, true, Connection::fileId);
         propFileID->setExpert(true);
 
-        ADD_PROPERTY_GETTER_SETTER(QString, s_port1EquipmentID, true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
-        ADD_PROPERTY_GETTER_SETTER(QString, s_port2EquipmentID, true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
+		ADD_PROPERTY_GETTER_SETTER(QString, s_port1EquipmentID, true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
+		ADD_PROPERTY_GETTER_SETTER(QString, s_port2EquipmentID, true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
 
         auto propPort1RawDataDescription = ADD_PROPERTY_GETTER_SETTER(QString, s_port1RawDataDescription, true, Connection::port1RawDataDescription, Connection::setPort1RawDataDescription);
         propPort1RawDataDescription->setCategory(s_miscellaneous);
@@ -120,10 +120,10 @@ namespace Hardware
 
         ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, s_mode, true, Connection::mode, Connection::setMode);
 
-        auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, s_disableDataIDControl, true, Connection::disableDataID, Connection::setDisableDataID);
+		auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, s_disableDataIDControl, true, Connection::disableDataId, Connection::setDisableDataID);
         propDisableDataID->setCategory(s_miscellaneous);
 
-        auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, s_generateConnectionVHDfile, true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
+		auto propGenerateVHD = ADD_PROPERTY_GETTER_SETTER(bool, s_generateConnectionVHDfile, true, Connection::generateVHDFile, Connection::setGenerateVHDFile);
         propGenerateVHD->setCategory(s_miscellaneous);
 	}
 
@@ -336,7 +336,7 @@ namespace Hardware
         m_uuid = value;
     }
 
-    QString Connection::connectionID() const
+	QString Connection::connectionID() const
     {
 		return m_connectionID;
     }
@@ -351,7 +351,7 @@ namespace Hardware
         return fileInfo().fileName();
     }
 
-    int Connection::fileID() const
+	int Connection::fileId() const
     {
         return fileInfo().fileId();
     }
@@ -377,7 +377,7 @@ namespace Hardware
         m_port2EquipmentID = value;
     }
 
-    quint16 Connection::getID() const
+	quint16 Connection::getID() const
     {
         // Connection ID calculation
         // range 1..999
@@ -648,7 +648,7 @@ namespace Hardware
         m_manualSettings = value;
     }
 
-    bool Connection::disableDataID() const
+	bool Connection::disableDataId() const
 	{
 		return m_disableDataID;
 	}
@@ -866,6 +866,21 @@ namespace Hardware
         return result;
     }
 
+	std::shared_ptr<Connection> ConnectionStorage::getPortConnection(QString portEquipmentId) const
+	{
+		for (const std::shared_ptr<Connection>& connection : m_connectionsVector)
+		{
+			assert(connection);
+
+			if (connection != nullptr &&
+				(connection->port1EquipmentID() == portEquipmentId || connection->port2EquipmentID() == portEquipmentId))
+			{
+				return connection;
+			}
+		}
+
+		return std::shared_ptr<Connection>();
+	}
 
     bool ConnectionStorage::checkOut(const QUuid &uuid)
     {

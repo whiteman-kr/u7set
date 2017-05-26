@@ -1,41 +1,57 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
-#include "TuningSignal.h"
+#include "TuningSignalState.h"
 #include "TuningFilter.h"
 
 
-class TuningItemModel;
+class TuningModel;
 
-class TuningItemSorter
+struct TuningModelRecord
 {
-public:
-	  TuningItemSorter(int column, Qt::SortOrder order);
+	AppSignalParam param;
+	TuningSignalState state;
 
-	  bool operator()(const TuningSignal& o1, const TuningSignal& o2) const
-	  {
-		  return sortFunction(o1, o2, m_column, m_order);
-	  }
+	bool limitsUnbalance() const
+	{
+		if (state.valid() == true && (param.lowEngineeringUnits() != state.readLowLimit() || param.highEngineeringUnits() != state.readHighLimit()))
+		{
+			return true;
+		}
+		return false;
 
-	  bool sortFunction(const TuningSignal& o1, const TuningSignal& o2, int column, Qt::SortOrder order) const;
-
-private:
-	  int m_column = -1;
-
-	  Qt::SortOrder m_order = Qt::AscendingOrder;
+	}
 };
 
-class TuningItemModel : public QAbstractItemModel
+class TuningModelRecordSorter
+{
+public:
+	TuningModelRecordSorter(int column, Qt::SortOrder order);
+
+	bool operator()(const TuningModelRecord& o1, const TuningModelRecord& o2) const
+	{
+		return sortFunction(o1, o2, m_column, m_order);
+	}
+
+	bool sortFunction(const TuningModelRecord& o1, const TuningModelRecord& o2, int column, Qt::SortOrder order) const;
+
+private:
+	int m_column = -1;
+
+	Qt::SortOrder m_order = Qt::AscendingOrder;
+};
+
+class TuningModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	TuningItemModel(QWidget *parent);
-	~TuningItemModel();
+	TuningModel(QWidget* parent);
+	~TuningModel();
 
 public:
 
-    enum class Columns
+	enum class Columns
 	{
 		CustomAppSignalID = 0,
 		EquipmentID,
@@ -45,9 +61,9 @@ public:
 		Type,
 
 		Value,
-        LowLimit,
-        HighLimit,
-        Default,
+		LowLimit,
+		HighLimit,
+		Default,
 		Valid,
 		Underflow,
 		Overflow,
@@ -55,28 +71,29 @@ public:
 
 
 public:
-    void setObjects(std::vector<TuningSignal>& objects);
+	void setSignals(std::vector<TuningModelRecord>& signalsList);
 
-    TuningSignal* object(int index);
+	AppSignalParam* param(int index);
+	TuningSignalState* state(int index);
 
 	void addColumn(Columns column);
-    void removeColumn(Columns column);
-    int columnIndex(int index) const;
+	void removeColumn(Columns column);
+	int columnIndex(int index) const;
 	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
-    void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
+	void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
 
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+	QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
 	void sort(int column, Qt::SortOrder order) override;
 
 protected:
-	QModelIndex parent(const QModelIndex &index) const override;
-	virtual	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	QModelIndex parent(const QModelIndex& index) const override;
+	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 	virtual QBrush backColor(const QModelIndex& index) const;
@@ -87,12 +104,12 @@ private:
 	QStringList m_columnsNames;
 
 	QFont* m_font = nullptr;
-    QFont* m_importantFont = nullptr;
+	QFont* m_importantFont = nullptr;
 
 protected:
 	std::vector<int> m_columnsIndexes;
 
-	std::vector<TuningSignal> m_objects;
+	std::vector<TuningModelRecord> m_items;
 
 	bool m_blink = false;
 
@@ -101,36 +118,36 @@ protected:
 
 class DialogInputTuningValue : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit DialogInputTuningValue(bool analog, float value, float defaultValue, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget *parent);
-    ~DialogInputTuningValue();
+	explicit DialogInputTuningValue(bool analog, float value, float defaultValue, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget* parent);
+	~DialogInputTuningValue();
 
 private:
 
-    float m_value = 0;
-    float m_defaultValue = 0;
-    float m_lowLimit = 0;
-    float m_highLimit = 0;
-    int m_decimalPlaces = 0;
-    bool m_analog = true;
+	float m_value = 0;
+	float m_defaultValue = 0;
+	float m_lowLimit = 0;
+	float m_highLimit = 0;
+	int m_decimalPlaces = 0;
+	bool m_analog = true;
 
-    virtual void accept();
+	virtual void accept();
 
 private:
-    QCheckBox* m_discreteCheck = nullptr;
-    QLineEdit* m_analogEdit = nullptr;
-    QPushButton* m_buttonDefault = nullptr;
-    QPushButton* m_buttonOK = nullptr;
-    QPushButton* m_buttonCancel = nullptr;
+	QCheckBox* m_discreteCheck = nullptr;
+	QLineEdit* m_analogEdit = nullptr;
+	QPushButton* m_buttonDefault = nullptr;
+	QPushButton* m_buttonOK = nullptr;
+	QPushButton* m_buttonCancel = nullptr;
 
 public:
-    float value() { return m_value; }
+	float value() { return m_value; }
 
 private slots:
-    void on_m_checkBox_clicked(bool checked);
-    void on_m_buttonDefault_clicked();
+	void on_m_checkBox_clicked(bool checked);
+	void on_m_buttonDefault_clicked();
 };
 
 

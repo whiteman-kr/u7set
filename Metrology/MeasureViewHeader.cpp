@@ -34,7 +34,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Ph. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Out. El. measure value"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "MSE"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Amount measuremets"), 80, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 1"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -358,7 +358,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
-						setColumnVisible(MVC_CMN_L_MSE, false);
+						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
@@ -372,7 +372,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_PERCENT, true);
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, true);
-						setColumnVisible(MVC_CMN_L_MSE, true);
+						setColumnVisible(MVC_CMN_L_SD, true);
 						setColumnVisible(MVC_CMN_L_BORDER, true);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)
@@ -387,7 +387,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);
-						setColumnVisible(MVC_CMN_L_MSE, false);
+						setColumnVisible(MVC_CMN_L_SD, false);
 						setColumnVisible(MVC_CMN_L_BORDER, false);
 
 						for (int m = 0; m < MAX_MEASUREMENT_IN_POINT; m ++)

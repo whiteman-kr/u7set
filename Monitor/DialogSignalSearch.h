@@ -1,7 +1,7 @@
 #ifndef DIALOGSIGNALSEARCH_H
 #define DIALOGSIGNALSEARCH_H
 
-#include "../lib/Signal.h"
+#include "../lib/AppSignal.h"
 #include <QDialog>
 
 namespace Ui {
@@ -31,9 +31,9 @@ private:
 private:
 	Ui::DialogSignalSearch *ui;
 
-	static QString m_signalID;
+	static QString m_signalId;
 
-	std::vector<Signal> m_signals;
+	std::vector<AppSignalParam> m_signals;
 };
 
 #endif // DIALOGSIGNALSEARCH_H

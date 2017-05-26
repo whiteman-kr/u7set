@@ -14,7 +14,7 @@ namespace VFrame30
 	QString MacrosExpander::parse(const QString& str,
 								  const Session& session,
 								  const Schema* schema,
-								  const PropertyObject* thisObject) const
+								  const PropertyObject* thisObject)
 	{
 		if (schema == nullptr ||
 			thisObject == nullptr)

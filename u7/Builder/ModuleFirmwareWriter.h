@@ -10,11 +10,11 @@ namespace Hardware
     {
     public:
         ModuleFirmwareWriter();
-		bool save(QByteArray &dest, Builder::IssueLogger *log);
-		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger *log);
+		bool save(QByteArray &dest, Builder::IssueLogger* log);
+		bool setChannelData(QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& data, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log);
 
 	private:
-        bool storeChannelData(Builder::IssueLogger *log);
+		bool storeChannelData(Builder::IssueLogger* log);
 
 
     };

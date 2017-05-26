@@ -1235,6 +1235,13 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 
 	this->addAction(m_searchAction);
 
+	// Actions
+	//
+	m_refreshAction = new QAction(tr("Refresh"), this);
+	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
+	connect(m_refreshAction, &QAction::triggered, this, &SchemaControlTabPage::refreshFiles);
+	addAction(m_refreshAction);
+
 	// --
 	//
 	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
@@ -1248,6 +1255,14 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
 
+	auto schema = createSchemaFunc();
+
+	if (schema->isLogicSchema() == true)
+	{
+		connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
+		connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
+	}
+
 	return;
 }
 
@@ -1259,6 +1274,59 @@ SchemaControlTabPage::~SchemaControlTabPage()
 VFrame30::Schema* SchemaControlTabPage::createSchema() const
 {
 	return m_createSchemaFunc();
+}
+
+
+void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
+{
+	// Create new Schema and add it to the vcs
+	//
+	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
+
+	if (schema->isLogicSchema() == false)
+	{
+		assert(schema->isLogicSchema());
+		return;
+	}
+
+	// Set New Guid
+	//
+	schema->setGuid(QUuid::createUuid());
+
+	int sequenceNo = db()->nextCounterValue();
+
+	// Set default properties
+	//
+	schema->setSchemaId("APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0'));
+	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
+
+	schema->setDocWidth(420.0 / 25.4);
+	schema->setDocHeight(297.0 / 25.4);
+
+	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
+	logicSchema->setEquipmentIdList(deviceStrIds);
+
+	logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
+
+	// --
+	//
+	addSchemaFile(schema);
+
+	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	if (parentTabWidget == nullptr)
+	{
+		assert(parentTabWidget);
+	}
+	else
+	{
+		parentTabWidget->setCurrentWidget(this);
+	}
+
+	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
+	m_filesView->setFocus();
+
+	return;
 }
 
 void SchemaControlTabPage::addFile()
@@ -1334,6 +1402,13 @@ void SchemaControlTabPage::addFile()
 		}
 	}
 
+	addSchemaFile(schema);
+
+	return;
+}
+
+void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema)
+{
 	// Show dialog to edit schema properties
 	//
 	CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
@@ -1375,13 +1450,14 @@ void SchemaControlTabPage::addFile()
 		{
 			QModelIndex md = m_filesView->filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
 			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+			m_filesView->scrollTo(md);
 		}
 	}
 
 	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
 	return;
 }
-
 
 void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 {
@@ -1697,7 +1773,10 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
+	QTime t;
+	t.start();
 	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
+	qDebug() << "Loading schema time " << t.elapsed();
 
 	if (vf == nullptr)
 	{
@@ -1925,6 +2004,32 @@ void SchemaControlTabPage::search()
 	return;
 }
 
+void SchemaControlTabPage::searchSchemaForLm(QString equipmentId)
+{
+	// Set focus to LogicSchemaTabPage and to ControlTabPage
+	//
+	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	if (parentTabWidget == nullptr)
+	{
+		assert(parentTabWidget);
+	}
+	else
+	{
+		parentTabWidget->setCurrentWidget(this);
+	}
+
+	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+
+	m_filesView->setFocus();
+
+	// Set Search string and perform search
+	//
+	m_searchEdit->setText(equipmentId.trimmed());
+	search();
+
+	return;
+}
+
 const DbFileInfo& SchemaControlTabPage::parentFile() const
 {
 	return m_filesView->parentFile();
@@ -1945,8 +2050,6 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 	assert(schema.get() != nullptr);
 
 	setWindowTitle(schema->schemaId());
-
-	CreateActions();
 
 	// Create controls
 	//
@@ -2016,6 +2119,10 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
 	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
+
+	// --
+	//
+	CreateActions();
 
 	// --
 	//
