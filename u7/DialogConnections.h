@@ -16,6 +16,7 @@ public:
     ~DialogConnections();
 
 	void setFilter(QString filter);
+	bool addConnection(QString port1Id, QString port2Id);
 
 private slots:
     void onMaskReturn();
@@ -38,6 +39,8 @@ private slots:
     void onCustomContextMenuRequested(const QPoint &pos);
 
 private:
+	bool addConnection(std::shared_ptr<Hardware::Connection> conn);
+
     void fillConnectionsList();
     void setPropertyEditorObjects();
     bool continueWithDuplicateCaptions();

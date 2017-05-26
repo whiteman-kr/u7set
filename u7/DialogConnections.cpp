@@ -227,6 +227,18 @@ void DialogConnections::setFilter(QString filter)
 	return;
 }
 
+bool DialogConnections::addConnection(QString port1Id, QString port2Id)
+{
+	std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
+
+	connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_dbController->nextCounterValue()).rightJustified(4, '0')));
+	connection->setPort1EquipmentID(port1Id);
+	connection->setPort2EquipmentID(port2Id);
+
+	bool ok = addConnection(connection);
+	return ok;
+}
+
 void DialogConnections::onMaskReturn()
 {
 	onMaskApply();
@@ -276,6 +288,54 @@ void DialogConnections::onMaskReset()
 	m_mask->setText(QString());
 	onMaskApply();
 	return;
+}
+
+bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> connection)
+{
+	if (connection == nullptr)
+	{
+		assert(connection);
+		return false;
+	}
+
+	// Check if connection ports are not used
+	//
+	auto foundPort1 = m_connections->getPortConnection(connection->port1EquipmentID());
+	auto foundPort2 = m_connections->getPortConnection(connection->port2EquipmentID());
+
+	if (foundPort1 != nullptr)
+	{
+		QMessageBox::critical(this, tr("Connections Editor"), tr("Connection with port %1 already exists.").arg(connection->port1EquipmentID()));
+		return false;
+	}
+
+	if (foundPort2 != nullptr)
+	{
+		QMessageBox::critical(this, tr("Connections Editor"), tr("Connection with port %1 already exists.").arg(connection->port2EquipmentID()));
+		return false;
+	}
+
+	// Add connection, update UI
+	//
+	m_connections->add(connection);
+
+	bool ok = m_connections->save(connection->uuid());
+	if (ok == false)
+	{
+		QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(connection->connectionID()));
+		return false;
+	}
+
+	QTreeWidgetItem* item = new QTreeWidgetItem();
+
+	item->setData(0, Qt::UserRole, connection->uuid());
+
+	m_connectionsTree->addTopLevelItem(item);
+
+	updateTreeItemText(item);
+	updateButtonsEnableState();
+
+	return true;
 }
 
 void DialogConnections::fillConnectionsList()
@@ -472,22 +532,7 @@ void DialogConnections::onAdd()
 	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
 	connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
 
-	m_connections->add(connection);
-
-	if (m_connections->save(connection->uuid()) == false)
-	{
-		QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(connection->connectionID()));
-	}
-
-	QTreeWidgetItem* item = new QTreeWidgetItem();
-
-	item->setData(0, Qt::UserRole, connection->uuid());
-
-	m_connectionsTree->addTopLevelItem(item);
-
-	updateTreeItemText(item);
-	updateButtonsEnableState();
-
+	addConnection(connection);
 	return;
 }
 
