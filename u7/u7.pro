@@ -18,58 +18,58 @@ INCLUDEPATH += $$PWD
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
 #
 win32 {
-	CONFIG(debug, debug|release): DESTDIR = ../bin/debug
-	CONFIG(release, debug|release): DESTDIR = ../bin/release
+    CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin/release
 }
 unix {
-	CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
-	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
+    CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 # /DESTDIR
 #
 
 CONFIG(debug, debug|release) {
-	OBJECTS_DIR = debug
-	MOC_DIR = debug/moc
-	RCC_DIR = debug/rcc
-	UI_DIR = debug/ui
+    OBJECTS_DIR = debug
+    MOC_DIR = debug/moc
+    RCC_DIR = debug/rcc
+    UI_DIR = debug/ui
 }
 
 CONFIG(release, debug|release) {
-	OBJECTS_DIR = release
-	MOC_DIR = release/moc
-	RCC_DIR = release/rcc
-	UI_DIR = release/ui
+    OBJECTS_DIR = release
+    MOC_DIR = release/moc
+    RCC_DIR = release/rcc
+    UI_DIR = release/ui
 }
 
 
 # Force prebuild version control info
 #
 win32 {
-	contains(QMAKE_TARGET.arch, x86_64){
-		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro)
-	}
-	else{
-		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro)
-	}
+    contains(QMAKE_TARGET.arch, x86_64){
+        QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro)
+    }
+    else{
+        QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
+        system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
+            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
+            nmake))
+        system(chdir $$PWD & \
+            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro)
+    }
 }
 unix {
-	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-	system(cd $$PWD/../GetGitProjectVersion; \
-		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make;)
-	system(cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro)
+    QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
+    system(cd $$PWD/../GetGitProjectVersion; \
+        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
+        make;)
+    system(cd $$PWD; \
+        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro)
 }
 
 
@@ -87,12 +87,12 @@ SOURCES +=\
     Settings.cpp \
     UserManagementDialog.cpp \
     ../lib/DbStruct.cpp \
-	../lib/DeviceObject.cpp \
-	../lib/DbController.cpp \
-	../lib/DbWorker.cpp \
-	../lib/DbProgressDialog.cpp \
-	../lib/ProtoSerialization.cpp \
-	../lib/Signal.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/DbController.cpp \
+    ../lib/DbWorker.cpp \
+    ../lib/DbProgressDialog.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Signal.cpp \
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
@@ -111,10 +111,10 @@ SOURCES +=\
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
     Builder/Builder.cpp \
-	Builder/BuildResultWriter.cpp \
+    Builder/BuildResultWriter.cpp \
     Builder/ConfigurationBuilder.cpp \
     Builder/ApplicationLogicCode.cpp \
-	Builder/ApplicationLogicCompiler.cpp \
+    Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     Subsystem.cpp \
     ChooseAfbDialog.cpp \
@@ -125,14 +125,14 @@ SOURCES +=\
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
-	Builder/Parser.cpp \
+    Builder/Parser.cpp \
     Connection.cpp \
     ../lib/PropertyEditorDialog.cpp \
     Builder/SoftwareCfgGenerator.cpp \
     ../lib/BuildInfo.cpp \
     Builder/TuningBuilder.cpp \
     Builder/IssueLogger.cpp \
-	Builder/OptoModule.cpp \
+    Builder/OptoModule.cpp \
     GlobalMessanger.cpp \
     Builder/LmMemoryMap.cpp \
     Builder/ModuleLogicCompiler.cpp \
@@ -189,7 +189,7 @@ SOURCES +=\
     Builder/ComparatorStorage.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-	CodeEditor.cpp \
+    CodeEditor.cpp \
     ../lib/CsvFile.cpp
 
 
@@ -207,15 +207,15 @@ HEADERS  += \
     Stable.h \
     UserManagementDialog.h \
     ../lib/DbStruct.h \
-	../lib/DeviceObject.h \
-	../lib/DbController.h \
-	../lib/DbWorker.h \
-	../lib/DbProgressDialog.h \
-	../lib/ProtoSerialization.h \
-	../lib/Factory.h \
-	../lib/CUtils.h \
-	../lib/Signal.h \
-	../lib/OrderedHash.h \
+    ../lib/DeviceObject.h \
+    ../lib/DbController.h \
+    ../lib/DbWorker.h \
+    ../lib/DbProgressDialog.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Factory.h \
+    ../lib/CUtils.h \
+    ../lib/Signal.h \
+    ../lib/OrderedHash.h \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
@@ -235,10 +235,10 @@ HEADERS  += \
     ../lib/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \
-	Builder/BuildResultWriter.h \
+    Builder/BuildResultWriter.h \
     Builder/ConfigurationBuilder.h \
     Builder/ApplicationLogicCode.h \
-	Builder/ApplicationLogicCompiler.h \
+    Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../lib/Types.h \
     Subsystem.h \
@@ -249,7 +249,7 @@ HEADERS  += \
     ../lib/PropertyObject.h \
     ../lib/PropertyEditorOld.h \
     ../lib/PropertyEditor.h \
-	Builder/Parser.h \
+    Builder/Parser.h \
     Connection.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
@@ -257,8 +257,8 @@ HEADERS  += \
     ../lib/BuildInfo.h \
     Builder/TuningBuilder.h \
     Builder/IssueLogger.h \
-	Builder/OptoModule.h \
-	GlobalMessanger.h \
+    Builder/OptoModule.h \
+    GlobalMessanger.h \
     Builder/LmMemoryMap.h \
     ../lib/Address16.h \
     Builder/ModuleLogicCompiler.h \
@@ -345,18 +345,18 @@ FORMS    += \
     DialogTuningClients.ui
 
 RESOURCES += \
-	Resources.qrc \
+    Resources.qrc \
     ../DatabaseUpgrade/DatabaseUpgrade.qrc
 
 OTHER_FILES += \
-	../Proto/proto_compile.bat \
-	../Proto/serialization.proto \
-	Tools/afbschema.xsd \
-	../Proto/proto_compile.sh \
+    ../Proto/proto_compile.bat \
+    ../Proto/serialization.proto \
+    Tools/afbschema.xsd \
+    ../Proto/proto_compile.sh \
     DatabaseUpgrade/Upgrade0039.txt
 
 DISTFILES += \
-	LogicModuleConfiguration.js \
+    LogicModuleConfiguration.js \
     Afbl/_convert_all.bat \
     Afbl/bcomp_great_v1.afb \
     Afbl/bcomp_less_v1.afb \
@@ -382,9 +382,9 @@ DISTFILES += \
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
 win32 {
-	#CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
-	#CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
-	#CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
+    #CONFIG(debug, debug|release): DEFINES += _CRTDBG_MAP_ALLOC
+    #CONFIG(debug, debug|release): DEFINES += "DBG_NEW=new(_NORMAL_BLOCK,__FILE__,__LINE__)"
+    #CONFIG(debug, debug|release): DEFINES += "new=DBG_NEW"
 }
 
 
@@ -399,12 +399,12 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 #Optimization flags
 #
 win32 {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
+    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -Od
+    CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O2
 }
 unix {
-	CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
-	CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
+    CONFIG(debug, debug|release): QMAKE_CXXFLAGS += -O0
+    CONFIG(release, debug|release): QMAKE_CXXFLAGS += -O3
 }
 
 #protobuf
@@ -412,12 +412,12 @@ unix {
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
 win32 {
-	LIBS += -L$$DESTDIR -lprotobuf
+    LIBS += -L$$DESTDIR -lprotobuf
 
-	INCLUDEPATH += ./../Protobuf
+    INCLUDEPATH += ./../Protobuf
 }
 unix {
-	LIBS += -lprotobuf
+    LIBS += -lprotobuf
 }
 
 #QScintilla
@@ -437,12 +437,12 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 # $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
 #
 win32 {
-	CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
+    CONFIG(debug, debug|release): LIBS += -L../bin/debug/ -lVFrame30
+    CONFIG(release, debug|release): LIBS += -L../bin/release/ -lVFrame30
 }
 unix {
-	CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
+    CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
+    CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
 }
 
 INCLUDEPATH += ../VFrame30
@@ -452,15 +452,16 @@ DEPENDPATH += ../VFrame30
 #
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
-# OpenMP
+# QtKeychain
 #
-#win32 {
-#	QMAKE_CXXFLAGS += /openmp
-	#CONFIG(debug, debug|release): LIBS += -lvcompd
-	#CONFIG(release, debug|release): LIBS += -lvcomp;
-#}
-#unix {
-	#CONFIG(debug, debug|release): LIBS += -L../bin_unix/debug/ -lVFrame30
-	#CONFIG(release, debug|release): LIBS += -L../bin_unix/release/ -lVFrame30
-#}
+win32 {
+    LIBS += Advapi32.lib
+}
+
+DEFINES += QTKEYCHAIN_NO_EXPORT
+DEFINES += USE_CREDENTIAL_STORE
+
+INCLUDEPATH += ./qtkeychain-0.8
+
+include(../Tools/qtkeychain-0.8/qt5keychain.pri)
 
