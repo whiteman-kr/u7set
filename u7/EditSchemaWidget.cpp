@@ -129,7 +129,6 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 			schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));
 
 		drawParam.setInfoMode(theSettings.infoMode());
-
 		drawParam.session() = session();
 
 		draw(drawParam);
@@ -5305,7 +5304,7 @@ void EditSchemaWidget::exportToPdf()
 
 	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaId() << " to PDF, " << fileName;
 
-	editSchemaView()->exportToPdf(fileName);
+	editSchemaView()->exportToPdf(fileName, editSchemaView()->session(), theSettings.infoMode());
 
 	return;
 }
