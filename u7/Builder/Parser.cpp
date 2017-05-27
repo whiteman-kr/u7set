@@ -547,7 +547,7 @@ namespace Builder
 
 				if (f->isSignalElement() == true && f->toSignalElement()->multiChannel() == true)
 				{
-					log->errALP4030(schema->schemaId(), f->buildName(), f->guid());
+					log->errALP4130(schema->schemaId(), f->buildName(), f->guid());
 				}
 
 				AppLogicItem li{f, schema};
@@ -2398,6 +2398,19 @@ namespace Builder
 			result = false;
 		}
 
+		// Check for the same inputs and outputs in ufbs
+		//
+		ok = checkSameInputsAndOutputs(ufbs);
+		if (ok == false)
+		{
+			// Continuing with this error will lead us to the error like
+			// ERR INT1001: Internal exception: Please, report to developers: Checking items relations consistency error: .....
+			// So, just stop compiling
+			//
+			result = false;
+			return result;
+		}
+
 		// Check Ufbs SchemaItemAfb.afbElement versions
 		//
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
@@ -2814,6 +2827,57 @@ namespace Builder
 			{
 				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(labelPair.first), labelPair.second);
 				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool Parser::checkSameInputsAndOutputs(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const
+	{
+		// UFB schema cannot have same inputs or outputs
+		//
+		bool  result = true;
+
+		for (std::shared_ptr<VFrame30::UfbSchema> ufb : schemas)
+		{
+			if (ufb->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			std::set<QString> pins;
+
+			for (const std::shared_ptr<VFrame30::SchemaLayer> layer : ufb->Layers)
+			{
+				if (layer->compile() == false)
+				{
+					continue;
+				}
+
+				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				{
+					if (item->isType<VFrame30::SchemaItemSignal>() == false)
+					{
+						continue;
+					}
+
+					VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
+					assert(itemSignal);
+
+					QString itemSignalId = itemSignal->appSignalIds();
+
+					size_t count = pins.count(itemSignalId);
+					if (count != 0)
+					{
+						m_log->errALP4023(ufb->schemaId(), itemSignalId, item->guid());
+						result = false;
+					}
+					else
+					{
+						pins.insert(itemSignalId);
+					}
+				}
 			}
 		}
 
@@ -3353,21 +3417,21 @@ namespace Builder
 				if (appSignal == nullptr)
 				{
 					alienLmIds = true;
-					m_log->errALP4034(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					m_log->errALP4134(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
 					continue;
 				}
 
 				if (appSignal->lm() == nullptr)
 				{
 					alienLmIds = true;
-					m_log->errALP4035(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					m_log->errALP4135(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
 					continue;
 				}
 
 				if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
 				{
 					alienLmIds = true;
-					m_log->errALP4036(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+					m_log->errALP4136(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
 					continue;
 				}
 			}
@@ -3539,21 +3603,21 @@ namespace Builder
 				if (appSignal == nullptr)
 				{
 					result = false;
-					m_log->errALP4034(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					m_log->errALP4134(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
 					continue;
 				}
 
 				if (appSignal->lm() == nullptr)
 				{
 					result = false;
-					m_log->errALP4035(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					m_log->errALP4135(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
 					continue;
 				}
 
 				if (appSignal->lm()->equipmentId() != equipmentId)
 				{
 					result = false;
-					m_log->errALP4037(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
+					m_log->errALP4137(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
 					continue;
 				}
 
@@ -3564,7 +3628,7 @@ namespace Builder
 				// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
 				//
 				result = false;
-				m_log->errALP4031(schema->schemaId(), signalItem->buildName(), signalItem->guid());
+				m_log->errALP4131(schema->schemaId(), signalItem->buildName(), signalItem->guid());
 				continue;
 			}
 
@@ -3654,14 +3718,14 @@ namespace Builder
 						if (signal == nullptr)
 						{
 							allSignalsFromThisChannel = false;
-							m_log->errALP4034(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							m_log->errALP4134(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
 							continue;
 						}
 
 						if (signal->lm() == nullptr)
 						{
 							allSignalsFromThisChannel = false;
-							m_log->errALP4035(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
+							m_log->errALP4135(schema->schemaId(), fbl.second->buildName(), appSignalId, fbl.second->guid());
 							continue;
 						}
 
@@ -3681,7 +3745,7 @@ namespace Builder
 								{
 									// Single channel branch contains signals (%1) from different channels (LogicSchema '%2').
 									//
-									m_log->errALP4033(schema->schemaId(), appSignalId, signalElement->guid());
+									m_log->errALP4133(schema->schemaId(), appSignalId, signalElement->guid());
 								}
 							}
 						}

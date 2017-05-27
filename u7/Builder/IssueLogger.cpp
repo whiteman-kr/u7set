@@ -1636,7 +1636,27 @@ namespace Builder
 				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
 	}
 
-	/// IssueCode: ALP4030
+	/// IssueCode: ALP4023
+	///
+	/// IssueType: Error
+	///
+	/// Title: UFB schema has duplicate pins %1 (UFB schema %2).
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		UFB schema has duplicate pins, all inputs and outputs must be unique.
+	///
+	void IssueLogger::errALP4023(QString schema, QString pinCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		LOG_ERROR(IssueType::AlParsing,
+				  4023,
+				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
+	}
+
+	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error
 	///
@@ -1650,12 +1670,12 @@ namespace Builder
 	///		Singlechannel Logic Schema '%1' cannot contain multichannel signal blocks ('%2'). Only one signal can be assigned for
 	/// input/output/internal signal elements.
 	///
-	void IssueLogger::errALP4030(QString schema, QString schemaItem, QUuid itemUuid)
+	void IssueLogger::errALP4130(QString schema, QString schemaItem, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4030,
+				  4130,
 				  tr("Singlechannel Logic Schema '%1' cannot contain multichannel signal block ('%2').")
 				  .arg(schema)
 				  .arg(schemaItem));
@@ -1663,7 +1683,7 @@ namespace Builder
 	}
 
 
-	/// IssueCode: ALP4031
+	/// IssueCode: ALP4131
 	///
 	/// IssueType: Error
 	///
@@ -1676,19 +1696,19 @@ namespace Builder
 	/// Description:
 	///		Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
 	///
-	void IssueLogger::errALP4031(QString schema, QString schemaItem, QUuid itemUuid)
+	void IssueLogger::errALP4131(QString schema, QString schemaItem, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4031,
+				  4131,
 				  tr("Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.")
 				  .arg(schema)
 				  .arg(schemaItem));
 	}
 
 
-	/// IssueCode: ALP4032
+	/// IssueCode: ALP4132
 	///
 	/// IssueType: Error
 	///
@@ -1701,17 +1721,17 @@ namespace Builder
 	///		Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').
 	/// All Inputs/Outputs/Interconnection Signal elements must be the same type.
 	///
-	void IssueLogger::errALP4032(QString schema, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::errALP4132(QString schema, const std::vector<QUuid>& itemsUuids)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4032,
+				  4132,
 				  tr("Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').")
 				  .arg(schema));
 	}
 
-	/// IssueCode: ALP4033
+	/// IssueCode: ALP4133
 	///
 	/// IssueType: Error
 	///
@@ -1725,18 +1745,18 @@ namespace Builder
 	///		Multichannel schema can contain single channel branch, all signals (inputs/outputs/intermediate) in the branch
 	/// must be from the same channel.
 	///
-	void IssueLogger::errALP4033(QString schema, QString appSignalId, QUuid itemUuid)
+	void IssueLogger::errALP4133(QString schema, QString appSignalId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4033,
+				  4133,
 				  tr("Single channel branch contains signals (%1) from different channels (LogicSchema '%2').")
 				  .arg(appSignalId)
 				  .arg(schema));
 	}
 
-	/// IssueCode: ALP4034
+	/// IssueCode: ALP4134
 	///
 	/// IssueType: Error
 	///
@@ -1750,19 +1770,19 @@ namespace Builder
 	/// Description:
 	///		Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').
 	///
-	void IssueLogger::errALP4034(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	void IssueLogger::errALP4134(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4034,
+				  4134,
 				  tr("Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
 	}
 
-	/// IssueCode: ALP4035
+	/// IssueCode: ALP4135
 	///
 	/// IssueType: Error
 	///
@@ -1776,19 +1796,19 @@ namespace Builder
 	/// Description:
 	///		Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').
 	///
-	void IssueLogger::errALP4035(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	void IssueLogger::errALP4135(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4035,
+				  4135,
 				  tr("Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
 	}
 
-	/// IssueCode: ALP4036
+	/// IssueCode: ALP4136
 	///
 	/// IssueType: Error
 	///
@@ -1802,19 +1822,19 @@ namespace Builder
 	/// Description:
 	///		Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').
 	///
-	void IssueLogger::errALP4036(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
+	void IssueLogger::errALP4136(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4036,
+				  4136,
 				  tr("Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
 	}
 
-	/// IssueCode: ALP4037
+	/// IssueCode: ALP4137
 	///
 	/// IssueType: Error
 	///
@@ -1829,12 +1849,12 @@ namespace Builder
 	/// Description:
 	///		Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').
 	///
-	void IssueLogger::errALP4037(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid)
+	void IssueLogger::errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4037,
+				  4137,
 				  tr("Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').")
 				  .arg(appSignalId)
 				  .arg(equipmentId)
