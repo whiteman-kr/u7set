@@ -27,11 +27,18 @@ plaintextstore {
     unix:!macx {
         QT += dbus
 
+        HEADERS += $$QT5KEYCHAIN_PWD/plaintextstore_p.h
+        SOURCES += $$QT5KEYCHAIN_PWD/plaintextstore.cpp
+
         HEADERS += $$QT5KEYCHAIN_PWD/gnomekeyring_p.h
+        HEADERS += $$QT5KEYCHAIN_PWD/libsecret_p.h
 
         SOURCES += \
             $$QT5KEYCHAIN_PWD/gnomekeyring.cpp \
-            $$QT5KEYCHAIN_PWD/keychain_unix.cpp
+            $$QT5KEYCHAIN_PWD/keychain_unix.cpp \
+            $$QT5KEYCHAIN_PWD/libsecret.cpp
+
+        DBUS_INTERFACES += $$PWD/org.kde.KWallet.xml
     }
 
     win32 {

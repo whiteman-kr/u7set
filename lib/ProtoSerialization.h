@@ -323,7 +323,7 @@ namespace Proto
 					bool result = ParseFromArray(uncompressedMessage, uncompressedData);
 					if (result == false)
 					{
-						return nullptr;
+						return false;
 					}
 
 					return this->LoadData(uncompressedMessage);
