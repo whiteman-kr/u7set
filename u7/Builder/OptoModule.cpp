@@ -96,9 +96,11 @@ namespace Hardware
 	{
 	}
 
-	bool OptoPort::init(const DeviceController* controller, int portNo, Builder::IssueLogger* log)
+	bool OptoPort::init(const DeviceController* controller, int portNo, LogicModule* lmDescription, Builder::IssueLogger* log)
 	{
-		if (controller == nullptr || log == nullptr)
+		if (controller == nullptr ||
+			log == nullptr ||
+			lmDescription == nullptr)
 		{
 			assert(false);
 			return false;
@@ -129,6 +131,83 @@ namespace Hardware
 		}
 
 		m_lmID = lm->equipmentIdTemplate();
+
+		// opto port validity signal finding
+		//
+		DeviceController* platformInterface = DeviceHelper::getPlatformInterfaceController(module, m_log);
+
+		if (platformInterface == nullptr)
+		{
+			return false;
+		}
+
+		QString optoPortValiditySignalSuffix = QString("_OPTOPORT0%1VALID").arg(portNo);
+
+		const DeviceObject* validityObject = DeviceHelper::getChildDeviceObjectBySuffix(platformInterface,
+																			  optoPortValiditySignalSuffix,
+																			  m_log);
+		if (validityObject == nullptr)
+		{
+			return false;
+		}
+
+		const DeviceSignal* validitySignal = validityObject->toSignal();
+
+		if (validitySignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		m_validitySignalID = validitySignal->equipmentIdTemplate();
+
+		if (validitySignal->memoryArea() != E::MemoryArea::DiagnosticsData)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Address16 addr(validitySignal->valueOffset(), validitySignal->valueBit());
+
+		if (module->isLogicModule() == true)
+		{
+			addr.addWord(lmDescription->memory().m_txDiagDataOffset);
+		}
+		else
+		{
+			if (module->isOptoModule() == true)
+			{
+				addr.addWord(lmDescription->memory().m_moduleDataOffset +
+							 lmDescription->memory().m_moduleDataSize * (module->place() - 1));
+
+				int txDiagDataOffset = BAD_ADDRESS;
+
+				bool res = DeviceHelper::getIntProperty(module, "TxDiagDataOffset", &txDiagDataOffset, m_log);
+
+				if (res == false)
+				{
+					return false;
+				}
+
+				if (txDiagDataOffset == BAD_ADDRESS)
+				{
+					assert(false);
+					return false;
+				}
+
+				addr.addWord(txDiagDataOffset);
+			}
+			else
+			{
+				// unknown opto module
+				//
+				assert(false);
+				return false;
+			}
+		}
+
+		m_validitySignalAbsAddr = addr;
 
 		return true;
 	}
@@ -1442,7 +1521,7 @@ namespace Hardware
 
 					OptoPortShared optoPort = std::make_shared<OptoPort>();
 
-					result &= optoPort->init(optoPortController, i + 1, log);
+					result &= optoPort->init(optoPortController, i + 1, m_lmDescription, log);
 
 					m_ports.insert(optoPortController->equipmentIdTemplate(), optoPort);
 
@@ -2662,6 +2741,58 @@ namespace Hardware
 		return optoModule->lmID();
 	}
 
+	bool OptoModuleStorage::getOptoPortValidityAbsAddr(const QString& lmID,
+													   const QString& connectionID,
+													   const QString& schemaID,
+													   QUuid receiverUuid,
+													   Address16& validityAddr)
+	{
+		ConnectionShared connection = getConnection(connectionID);
+
+		if (connection == nullptr)
+		{
+			m_log->errALC5040(connectionID, QUuid());
+			return nullptr;
+		}
+
+		OptoPortShared p1 = getOptoPort(connection->port1EquipmentID());
+
+		if (p1 == nullptr)
+		{
+			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
+			return nullptr;
+		}
+
+		if (p1->lmID() == lmID)
+		{
+			validityAddr = p1->validitySignalAbsAddr();
+			return true;
+		}
+
+		if (connection->isSerial() == true)
+		{
+			// in serial connections port2 isn't used
+			return false;
+		}
+
+		OptoPortShared p2 = getOptoPort(connection->port2EquipmentID());
+
+		if (p2 == nullptr)
+		{
+			m_log->errALC5021(connection->port2EquipmentID(), connection->connectionID());
+			return false;
+		}
+
+		if (p2->lmID() == lmID)
+		{
+			validityAddr = p2->validitySignalAbsAddr();
+			return true;
+		}
+
+		m_log->errALC5059(schemaID, connectionID, lmID, receiverUuid);
+		return false;
+	}
+
 	OptoPort* OptoModuleStorage::jsGetOptoPort(const QString& optoPortStrID)
 	{
 		OptoPortShared port = getOptoPort(optoPortStrID);
@@ -2686,8 +2817,8 @@ namespace Hardware
 			return false;
 		}
 
-		if (module->moduleFamily() != DeviceModule::FamilyType::LM &&
-			module->moduleFamily() != DeviceModule::FamilyType::OCM)
+		if (module->isLogicModule() != true &&
+			module->isOptoModule() != true)
 		{
 			// this is not opto-module
 			//

@@ -118,7 +118,7 @@ namespace Hardware
 	public:
 		OptoPort();
 
-		bool init(const DeviceController* controller, int portNo, Builder::IssueLogger* log);
+		bool init(const DeviceController* controller, int portNo, LogicModule *lmDescription, Builder::IssueLogger* log);
 
 		bool appendTxSignal(const Signal* txSignal);
 		bool initRawTxSignals();
@@ -255,6 +255,9 @@ namespace Hardware
 
 		QString lmID() const { return m_lmID; }
 
+		QString validitySignalID() const { return m_validitySignalID; }
+		Address16 validitySignalAbsAddr() const { return m_validitySignalAbsAddr; }
+
 	private:
 		bool appendTxSignal(const QString& appSignalID,
 							E::SignalType signalType,
@@ -300,6 +303,9 @@ namespace Hardware
 
 		QString m_lmID;
 		const DeviceController* m_controller = nullptr;
+
+		QString m_validitySignalID;
+		Address16 m_validitySignalAbsAddr;
 
 		QString m_optoModuleID;
 		QString m_linkedPortID;
@@ -494,9 +500,16 @@ namespace Hardware
 		static OptoPortShared getOptoPort(const QString& optoPortID);
 		bool getLmAssociatedOptoPorts(const QString& lmID, QList<OptoPortShared>& associatedPorts);
 
-		QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
+		static QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
+
+		static bool getOptoPortValidityAbsAddr(const QString& lmID,
+											   const QString& connectionID,
+											   const QString& schemaID,
+											   QUuid receiverUuid,
+											   Address16& validityAddr);
 
 		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
+
 
 	private:
 		bool addModule(DeviceModule* module);

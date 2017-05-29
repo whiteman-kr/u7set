@@ -1752,6 +1752,7 @@ namespace Builder
 				// no special code generation for receiver here
 				// code for receivers is generate in:
 				//		generateWriteReceiverToSignalCode()
+				//		generateWriteReceiverToFbCode()
 				//
 				continue;
 			}
@@ -2555,7 +2556,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const AppFb &fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
+	bool ModuleLogicCompiler::genearateWriteReceiverToFbCode(const AppFb& fb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(receiver.connectionId());
 
@@ -2652,7 +2653,40 @@ namespace Builder
 
 		if (receiver.isValidityPin(receiverPinGuid))
 		{
-			assert(false);	 // is not implemented now
+			// Discrete signal '%1' is connected to analog input '%2.%3'.
+			//
+			if (afbSignal.isDiscrete() == false)
+			{
+				m_log->errALC5007(QString("%1 validity").arg(receiver.connectionId()),
+								  fb.caption(),
+								  afbSignal.caption(),
+								  fb.guid());
+				return false;
+			}
+
+			Address16 validityAddr;
+
+			bool res = m_optoModuleStorage->getOptoPortValidityAbsAddr(m_lm->equipmentIdTemplate(),
+																	   receiver.connectionId(),
+																	   fb.schemaID(),
+																	   receiver.guid(),
+																	   validityAddr);
+			if (res == false)
+			{
+				return false;
+			}
+
+			QString str;
+
+			str = QString(tr("%1 >> validity => %2.%3")).
+					arg(receiver.connectionId()).
+					arg(fb.caption()).
+					arg(afbSignal.caption());
+
+			cmd.writeFuncBlockBit(fbType, fbInstance, fbParamNo, validityAddr.offset(), validityAddr.bit(), fb.caption());
+
+			cmd.setComment(str);
+			m_code.append(cmd);
 			return true;
 		}
 
@@ -2754,9 +2788,42 @@ namespace Builder
 			return true;
 		}
 
-		if (receiver.isValidityPin(pinGuid))
+		if (receiver.isValidityPin(pinGuid) == true)
 		{
-			assert(false);	 // is not implemented now
+			if (destSignal->isDiscrete() == false)
+			{
+				// Discrete signal '%1' is connected to analog signal '%2'.
+				//
+				m_log->errALC5037(QString("%1 validity").arg(receiver.connectionId()),
+								  receiver.guid(),
+								  destSignal->appSignalID(),
+								  appSignal.guid());
+				return false;
+			}
+
+			Address16 validityAddr;
+
+			bool res = m_optoModuleStorage->getOptoPortValidityAbsAddr(m_lm->equipmentIdTemplate(),
+																	   receiver.connectionId(),
+																	   appSignal.schemaID(),
+																	   receiver.guid(),
+																	   validityAddr);
+			if (res == false)
+			{
+				return false;
+			}
+
+			QString str;
+
+			str = QString(tr("%1 >> validity => %2")).
+					arg(receiver.connectionId()).
+					arg(destSignal->appSignalID());
+
+			cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
+						validityAddr.offset(), validityAddr.bit());
+
+			cmd.setComment(str);
+			m_code.append(cmd);
 			return true;
 		}
 
@@ -2766,7 +2833,6 @@ namespace Builder
 
 		return false;
 	}
-
 
 	bool ModuleLogicCompiler::checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid)
 	{

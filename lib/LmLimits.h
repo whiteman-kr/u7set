@@ -12,5 +12,3 @@ const int	LM1_PLACE = 0,
 
 			APP_MEMORY_SIZE = 65536,
 			CODE_MEMORY_SIZE = 65536;
-
-

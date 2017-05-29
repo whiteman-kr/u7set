@@ -980,6 +980,11 @@ namespace Builder
 		QString str;
 
 		list.append(QString(tr("Port %1 information\n")).arg(port->equipmentID()));
+
+		list.append(QString(tr("Port validity signal:\t\t%1\t%2\n")).
+					arg(port->validitySignalAbsAddr().toString()).
+					arg(port->validitySignalID()));
+
 		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(port->txBufAbsAddress()));
 		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(port->txBufAddress()));
 		list.append(QString(tr("Tx data full size:\t\t%1")).arg(port->txDataSizeW()));

@@ -5,6 +5,7 @@
 #include "../u7/Builder/IssueLogger.h"
 #include "../u7/Builder/ModulesRawData.h"
 
+
 class DeviceHelper : public QObject
 {
 	Q_OBJECT
@@ -27,6 +28,8 @@ public:
 		StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
 	};
 
+	static QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX;
+
 public:
 	static void init();
 	static void shutdown();
@@ -42,6 +45,8 @@ public:
 
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
 	static Hardware::DeviceController* getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);
+
+	static Hardware::DeviceController* getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
 	static const Hardware::DeviceModule* getLM(const Hardware::DeviceChassis* chassis);

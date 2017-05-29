@@ -217,6 +217,9 @@ namespace Hardware
 		const Hardware::DeviceController* toController() const;
 		Hardware::DeviceController* toController();
 
+		const Hardware::DeviceSignal* toSignal() const;
+		Hardware::DeviceSignal* toSignal();
+
 		const Hardware::Software* toSoftware() const;
 		Hardware::Software* toSoftware();
 

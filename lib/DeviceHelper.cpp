@@ -3,6 +3,8 @@
 
 
 QHash<QString, ModuleRawDataDescription*> DeviceHelper::m_modulesRawDataDescription;
+QString DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
+
 
 void DeviceHelper::init()
 {
@@ -165,12 +167,10 @@ Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardwar
 	return nullptr;
 }
 
-
 Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix)
 {
 	return getChildControllerBySuffix(device, suffix, nullptr);
 }
-
 
 Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
 {
@@ -184,6 +184,16 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 	return deviceObject->toController();
 }
 
+Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
+{
+	if (module->isModule() == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	return getChildControllerBySuffix(module, LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX, log);
+}
 
 const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
 {
