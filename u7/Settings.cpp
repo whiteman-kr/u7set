@@ -1,15 +1,85 @@
 #include "../u7/Settings.h"
-#include "QStandardPaths"
-#include "QDir"
+#include <QStandardPaths>
+#include <QDir>
 #include <QSettings>
+#include "../Tools/qtkeychain-0.8/keychain.h"
 
 Settings theSettings;
 
+//
+//	DatabaseConnectionParam
+//
+QString DatabaseConnectionParam::address() const
+{
+	return QString(m_address);
+}
+
+void DatabaseConnectionParam::setAddress(QString str)
+{
+	memset(m_address, 0, sizeof(DatabaseConnectionParam::m_address));
+	if (str.size() >= sizeof(DatabaseConnectionParam::m_address) / sizeof(DatabaseConnectionParam::m_address[0]) - 1)
+	{
+		return;
+	}
+
+	for (int i = 0; i < str.size(); i++)
+	{
+		m_address[i] = str.constData()[i];
+	}
+}
+
+int DatabaseConnectionParam::port() const
+{
+	return m_port;
+}
+
+void DatabaseConnectionParam::setPort(int port)
+{
+	m_port = port;
+}
+
+QString DatabaseConnectionParam::login() const
+{
+	return QString(m_login);
+}
+
+void DatabaseConnectionParam::setLogin(QString str)
+{
+	memset(m_login, 0, sizeof(DatabaseConnectionParam::m_login));
+	if (str.size() >= sizeof(DatabaseConnectionParam::m_login) / sizeof(DatabaseConnectionParam::m_login[0]) - 1)
+	{
+		return;
+	}
+
+	for (int i = 0; i < str.size(); i++)
+	{
+		m_login[i] = str.constData()[i];
+	}
+}
+
+QString DatabaseConnectionParam::password() const
+{
+	return QString(m_password);
+}
+
+void DatabaseConnectionParam::setPassword(QString str)
+{
+	memset(m_password, 0, sizeof(DatabaseConnectionParam::m_password));
+	if (str.size() >= sizeof(DatabaseConnectionParam::m_password) / sizeof(DatabaseConnectionParam::m_password[0]) - 1)
+	{
+		return;
+	}
+
+	for (int i = 0; i < str.size(); i++)
+	{
+		m_password[i] = str.constData()[i];
+	}
+}
+
+//
+//	Settings
+//
 Settings::Settings() :
-	m_serverIpAddress("127.0.0.1"),
-	m_serverPort(0),
-	m_serverUsername("u7"),
-	m_serverPassword("P2ssw0rd"),
 	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
 	m_expertMode(false),
 	#ifdef Q_OS_LINUX
@@ -170,12 +240,35 @@ void Settings::loadUserScope()
 
 void Settings::writeSystemScope() const
 {
+	// Database connection setting are sored in secure storage
+	//
+	{
+		QKeychain::WritePasswordJob writeJob(QLatin1String("u7keychain18"));
+		writeJob.setAutoDelete(false);
+		writeJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
+		//writeJob.setInsecureFallback(true);
+
+		QByteArray ba = QByteArray::fromRawData(reinterpret_cast<const char*>(&m_databaseConnection), sizeof(m_databaseConnection));
+		writeJob.setBinaryData(ba);
+
+		// Blocking job
+		//
+		QEventLoop loop;
+		writeJob.connect(&writeJob, &QKeychain::WritePasswordJob::finished, &loop, &QEventLoop::quit);
+
+		writeJob.start();
+		loop.exec();
+
+		if (writeJob.error() != QKeychain::Error::NoError)
+		{
+			qDebug() << "Storing keychain failed: " << writeJob.errorString();
+		}
+	}
+
+	// Save other settings
+	//
 	QSettings s;
 
-	s.setValue("m_serverIpAddress", m_serverIpAddress);
-	s.setValue("m_serverPort", m_serverPort);
-	s.setValue("m_serverUsername", m_serverUsername);
-	s.setValue("m_serverPassword", m_serverPassword);
 	s.setValue("m_buildOutputPath", m_buildOutputPath);
 	s.setValue("m_configuratorSerialPort", m_configuratorSerialPort);
 	s.setValue("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo);
@@ -185,12 +278,45 @@ void Settings::writeSystemScope() const
 }
 void Settings::loadSystemScope()
 {
+	// Database connection setting are sored in secure storage
+	//
+	{
+		QKeychain::ReadPasswordJob readJob(QLatin1String("u7keychain18"));
+		readJob.setAutoDelete(false);
+		readJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
+		//readJob.setInsecureFallback(true);
+
+		QEventLoop loop;
+		readJob.connect(&readJob, &QKeychain::ReadPasswordJob::finished, &loop, &QEventLoop::quit);
+
+		readJob.start();
+		loop.exec();
+
+		if (readJob.error() != QKeychain::Error::NoError)
+		{
+			qDebug() << "Restoring keychain failed: " << readJob.errorString();
+			qDebug() << "Default params will be used.";
+
+			// Set default params
+			//
+			m_databaseConnection.setAddress("127.0.0.1");
+			m_databaseConnection.setPort(5432);
+			m_databaseConnection.setLogin("u7");
+			m_databaseConnection.setPassword("P2ssw0rd");
+		}
+		else
+		{
+			QByteArray ba = readJob.binaryData();
+			const DatabaseConnectionParam* conn = reinterpret_cast<const DatabaseConnectionParam*>(ba.constData());
+
+			m_databaseConnection = *conn;
+		}
+	}
+
+	// Other settings
+	//
 	QSettings s;
 
-	m_serverIpAddress = s.value("m_serverIpAddress", "127.0.0.1").toString();
-	m_serverPort = s.value("m_serverPort", 5432).toInt();
-	m_serverUsername = s.value("m_serverUsername", "u7").toString();
-	m_serverPassword = s.value("m_serverPassword", "P2ssw0rd").toString();
 	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
 	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
 	m_configuratorShowDebugInfo = s.value("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo).toBool();
@@ -199,40 +325,40 @@ void Settings::loadSystemScope()
 	return;
 }
 
-const QString& Settings::serverIpAddress() const
+QString Settings::serverIpAddress() const
 {
-	return m_serverIpAddress;
+	return m_databaseConnection.address();
 }
 void Settings::setServerIpAddress(const QString& value)
 {
-	m_serverIpAddress = value;
+	m_databaseConnection.setAddress(value);
 }
 
 int Settings::serverPort() const
 {
-	return m_serverPort;
+	return m_databaseConnection.port();
 }
 void Settings::setServerPort(int value)
 {
-	m_serverPort = value;
+	m_databaseConnection.setPort(value);
 }
 
-const QString& Settings::serverUsername() const
+QString Settings::serverUsername() const
 {
-	return m_serverUsername;
+	return m_databaseConnection.login();
 }
 void Settings::setServerUsername(const QString& value)
 {
-	m_serverUsername = value;
+	m_databaseConnection.setLogin(value);
 }
 
-const QString& Settings::serverPassword() const
+QString Settings::serverPassword() const
 {
-	return m_serverPassword;
+	return m_databaseConnection.password();
 }
 void Settings::setServerPassword(const QString& value)
 {
-	m_serverPassword = value;
+	m_databaseConnection.setPassword(value);
 }
 
 

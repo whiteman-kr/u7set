@@ -8,7 +8,7 @@ DialogConnections* theDialogConnections = nullptr;
 
 DialogConnections::DialogConnections(DbController *pDbController, QWidget *parent)
 	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-      m_dbController(pDbController)
+	  m_dbController(pDbController)
 {
 	m_connections = new Hardware::ConnectionStorage(m_dbController, parent);
 
@@ -254,6 +254,12 @@ void DialogConnections::onMaskApply()
 	if (maskText.isEmpty() == false)
 	{
 		m_masks = maskText.split(';', QString::SkipEmptyParts);
+		m_masks.removeDuplicates();
+
+		for (QString& mask : m_masks)
+		{
+			mask = mask.trimmed();
+		}
 
 		for (auto mask : m_masks)
 		{
@@ -346,7 +352,6 @@ void DialogConnections::fillConnectionsList()
 	m_connectionsTree->clear();
 
 	int count = m_connections->count();
-
 	for (int i = 0; i < count; i++)
 	{
 		std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
@@ -363,9 +368,9 @@ void DialogConnections::fillConnectionsList()
 			for (const QString& mask : m_masks)
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+					connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+					connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					maskResult = true;
 					break;
