@@ -377,7 +377,8 @@ DISTFILES += \
     Ufbl/UFB_A3_LANDSCAPE.templ_ufb \
     Ufbl/UFB_A4_LANDSCAPE.templ_ufb \
     Ufbl/file2pgsql.exe \
-    Ufbl/_convert_all.bat
+    Ufbl/_convert_all.bat \
+    LogicModuleDescription/LogicModule0000.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

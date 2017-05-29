@@ -1473,11 +1473,11 @@ namespace Afb
 
 				if (minWidth.isNull() == true)
 				{
-					m_minWidth = 16;
+					m_minWidth = 10;
 				}
 				else
 				{
-					m_minWidth = qBound(16, minWidth.text().toInt(), 100);
+					m_minWidth = qBound(10, minWidth.text().toInt(), 100);
 				}
 			}
 
@@ -2068,7 +2068,7 @@ namespace Afb
 
 	void AfbElement::setMinWidth(int value)
 	{
-		m_minWidth = qBound(16, value, 100);
+		m_minWidth = qBound(10, value, 100);
 	}
 
 	int AfbElement::minHeight() const
