@@ -846,6 +846,32 @@ namespace Hardware
         return m_connectionsVector[index];
     }
 
+	std::vector<std::shared_ptr<Connection>> ConnectionStorage::get(const QStringList& masks) const
+	{
+		if (masks.empty() == true)
+		{
+			return m_connectionsVector;
+		}
+
+		std::vector<std::shared_ptr<Connection>> result;
+
+		for (std::shared_ptr<Connection> connection : m_connectionsVector)
+		{
+			for (const QString& mask : masks)
+			{
+				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
+						connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
+						connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+				{
+					result.push_back(connection);
+				}
+			}
+		}
+
+		return result;
+	}
+
     QObject* ConnectionStorage::jsGet(int index) const
     {
         if (index < 0 || index >= (int)m_connectionsVector.size())
@@ -1042,8 +1068,7 @@ namespace Hardware
 
         // Load the file from the database
         //
-
-        std::vector<DbFileInfo> fileList;
+		std::vector<DbFileInfo> fileList;
         bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, m_parentWidget);
         if (ok == false)
         {

@@ -201,6 +201,8 @@ namespace Hardware
 
         std::shared_ptr<Connection> get(const QUuid &uuid) const;
         std::shared_ptr<Connection> get(int index) const;
+		std::vector<std::shared_ptr<Connection>> get(const QStringList& masks) const;
+
         Q_INVOKABLE QObject* jsGet(int index) const;
 
 		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;

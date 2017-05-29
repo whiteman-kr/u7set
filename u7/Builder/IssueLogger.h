@@ -164,18 +164,21 @@ namespace Builder
 		void errALP4020(QString logicModule);
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
+		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
+
+
 
 
 		// Multichannel pasing errors
 		//
-		void errALP4030(QString schema, QString schemaItem, QUuid itemUuid);
-		void errALP4031(QString schema, QString schemaItem, QUuid itemUuid);
-		void errALP4032(QString schema, const std::vector<QUuid>& itemsUuids);
-		void errALP4033(QString schema, QString appSignalId, QUuid itemUuid);
-		void errALP4034(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
-		void errALP4035(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
-		void errALP4036(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
-		void errALP4037(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid);
+		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4131(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4132(QString schema, const std::vector<QUuid>& itemsUuids);
+		void errALP4133(QString schema, QString appSignalId, QUuid itemUuid);
+		void errALP4134(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
+		void errALP4135(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
+		void errALP4136(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
+		void errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//

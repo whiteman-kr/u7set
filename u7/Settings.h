@@ -4,6 +4,27 @@
 #include <QStringList>
 #include <QPoint>
 
+struct DatabaseConnectionParam
+{
+	QChar m_address[256];
+	qint32 m_port;
+	QChar m_login[256];
+	QChar m_password[256];
+
+	QString address() const;
+	void setAddress(QString str);
+
+	int port() const;
+	void setPort(int port);
+
+	QString login() const;
+	void setLogin(QString str);
+
+	QString password() const;
+	void setPassword(QString str);
+};
+
+
 class Settings
 {
 public:
@@ -25,16 +46,16 @@ public:
 	// Properties
 	//
 public:
-	const QString& serverIpAddress() const;
+	QString serverIpAddress() const;
 	void setServerIpAddress(const QString& value);
 
 	int serverPort() const;
 	void setServerPort(int value);
 
-	const QString& serverUsername() const;
+	QString serverUsername() const;
 	void setServerUsername(const QString& value);
 
-	const QString& serverPassword() const;
+	QString serverPassword() const;
 	void setServerPassword(const QString& value);
 
 	const QString& buildOutputPath() const;
@@ -136,12 +157,7 @@ public:
 	QByteArray m_UploadTabPageSplitterState;
 
 private:
-	// --
-	//
-	QString m_serverIpAddress;
-	int m_serverPort = 0;
-	QString m_serverUsername;
-	QString m_serverPassword;
+	DatabaseConnectionParam m_databaseConnection;
 	QString m_buildOutputPath;
 	bool m_expertMode = false;
 
@@ -151,7 +167,6 @@ private:
 	bool m_infoMode = false;
 	int m_buildWarningLevel = 0;		// 0 is Show All Warnings
 	QStringList m_buildSerachCompleter;
-
 };
 
 extern Settings theSettings;

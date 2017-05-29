@@ -7058,7 +7058,12 @@ function(videoItemFblElement, afbElement)
 					<LowLimit>2</LowLimit>
 					<HighLimit>10</HighLimit>
 					<Script>
-						<Changed></Changed>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return showCoeffitients(videoItemFblElement, afbElement);
+}
+						</Changed>
 					</Script>
 				</Param>
 				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
@@ -7145,11 +7150,31 @@ function createOutputSignals(videoItemFblElement, afbElement)
 
 	return true;
 }
+
+function showCoeffitients(videoItemFblElement, afbElement)
+{
+	var coefCount = videoItemFblElement.getParamIntValue("CoefCount");
+	if (coefCount == -1)
+	{
+		return false;
+	}
+	
+	for (var i = 0; i &lt; 10; i++)
+	{
+		var paramName = "C" + i;
+		videoItemFblElement.setParamVisible(paramName, i &lt; coefCount);
+	}
+
+	return true;
+}
+
 				</Library>
 				<AfterCreation>
 function(videoItemFblElement, afbElement)
 {
-	return createOutputSignals(videoItemFblElement, afbElement);
+	var result = showCoeffitients(videoItemFblElement, afbElement);
+	result &amp;= createOutputSignals(videoItemFblElement, afbElement);
+	return result;
 }
 				</AfterCreation>
 			</CommonScript>

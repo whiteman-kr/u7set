@@ -267,6 +267,8 @@ namespace Builder
 		template<typename SchemaType>
 		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType> >& schemas) const;
 
+		bool checkSameInputsAndOutputs(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const;
+
 		bool checkEquipmentIds(VFrame30::LogicSchema* logicSchema);
 
 		bool checkLmDescription(VFrame30::LogicSchema* logicSchema);

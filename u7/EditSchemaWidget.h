@@ -6,6 +6,7 @@
 #include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 
@@ -353,6 +354,10 @@ protected slots:
 	void selectionChanged();
 
 	void clipboardDataChanged();
+
+	void addTransmitter();
+	void addReceiver();
+	void addConnectionItem(std::shared_ptr<VFrame30::SchemaItemConnection> schemaItem);
 
 	void addAfbElement();			// Add Application Functional Block
 	void addUfbElement();			// Add User Functional Block

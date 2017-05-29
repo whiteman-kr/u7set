@@ -273,7 +273,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaView::exportToPdf(QString fileName) const
+	void SchemaView::exportToPdf(QString fileName, const Session& session, bool infoMode) const
 	{
 		if (schema().get() == nullptr)
 		{
@@ -310,6 +310,9 @@ namespace VFrame30
 		//
 		QPainter p(&pdfWriter);
 		CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
+
+		drawParam.setInfoMode(infoMode);
+		drawParam.session() = session;
 
 		// Calc size
 		//

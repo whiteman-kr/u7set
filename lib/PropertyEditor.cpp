@@ -1563,12 +1563,8 @@ namespace ExtWidgets
 					{
                         QString val = value.toString();
 
-						if (val.length() > 32)
-						{
-							val = val.left(32) + "...";
-						}
-
 						val.replace("\n", " ");
+
 						return val;
 					}
 					break;
