@@ -444,50 +444,6 @@ namespace Builder
 	}
 
 
-/*	bool ApplicationLogicCompiler::disposeOptoModulesTxRxBuffers()
-	{
-		if (m_connections->count() == 0)
-		{
-			return true;
-		}
-
-		if (m_optoModuleStorage == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		bool result = true;
-
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Dispose opto modules tx/rx buffers...")));
-
-		result = m_optoModuleStorage->calculatePortsAbsoulteTxStartAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result = m_optoModuleStorage->setPortsRxDataSizes();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		result = m_optoModuleStorage->calculateRxBufAddresses();
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		LOG_SUCCESS(m_log, QString(tr("Ok")));
-
-		return result;
-	}*/
-
 	// find all logic modules (LMs) in project
 	// fills m_lm vector
 	//
@@ -607,7 +563,8 @@ namespace Builder
 
 		QStringList list;
 
-		QString delim = "--------------------------------------------------------------------";
+		QString delim = "==================================================================================";
+		QString delim2 = "----------------------------------------------------------------------------------";
 
 		QString str;
 
@@ -621,26 +578,27 @@ namespace Builder
 				continue;
 			}
 
-			QString typeStr;
+			list.append(delim);
 
-			switch(cn->mode())
+			list.append(QString(tr("Connection ID:\t\t\t%1")).arg(cn->connectionID()));
+			list.append(QString(tr("Link ID:\t\t\t%1\n")).arg(cn->linkID()));
+			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->modeStr()));
+			list.append(QString(tr("Settings:\t\t\t%1")).arg(cn->manualSettings() == true ? "Manual" : "Auto"));
+			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataId() == true ? "Disabled" : "Enabled"));
+
+			if (cn->mode() == Hardware::OptoPort::Mode::Serial)
 			{
-			case Hardware::OptoPort::Mode::Serial:
-				typeStr = "Serial";
-				break;
+				list.append(QString(tr("Port1 equipmentID:\t\t%1\n")).arg(cn->port1EquipmentID()));
 
-			case Hardware::OptoPort::Mode::Optical:
-				typeStr = "Optical";
-				break;
-
-			default:
-				assert(false);
-				return false;
+				list.append(QString(tr("Serial mode:\t\t\t%1")).arg(cn->serialModeStr()));
+				list.append(QString(tr("Duplex mode:\t\t\t%1")).arg(cn->enableDuplex() == true ? "Enabled" : "Disabled"));
+			}
+			else
+			{
+				list.append(QString(tr("Port1 equipmentID:\t\t%1")).arg(cn->port1EquipmentID()));
+				list.append(QString(tr("Port2 equipmentID:\t\t%1")).arg(cn->port2EquipmentID()));
 			}
 
-			list.append(delim);
-			str = QString(tr("%1 connection %2")).arg(typeStr).arg(cn->connectionID());
-			list.append(str);
 			list.append(delim);
 			list.append("");
 
@@ -674,7 +632,7 @@ namespace Builder
 						assert(false);
 					}
 
-					list.append(delim);
+					list.append(delim2);
 					list.append("");
 
 					Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
@@ -755,11 +713,9 @@ namespace Builder
 
 			// write module's opto ports information
 			//
-			QList<Hardware::OptoPortShared> ports;
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
 
-			module->getPorts(ports);
-
-			for(Hardware::OptoPortShared& port : ports)
+			for(const Hardware::OptoPortShared& port : ports)
 			{
 				writeOptoPortInfo(port, list);
 			}
@@ -1015,43 +971,22 @@ namespace Builder
 			return;
 		}
 
-		QString str;
-
-		str = QString(tr("Port equipmentID:\t\t%1")).arg(port->equipmentID());
-		list.append(str);
-
 		if (port->isUsedInConnection() == false)
 		{
-			str = QString(tr("Connection ID:\t\t%1\n\n")).arg(port->connectionID());
-			list.append(str);
-
-			str = QString(tr("Link ID:\t\t-"));
-			list.append(str);
-
-			str = QString(tr("Linked port ID:\t\t%1\n")).arg(port->linkedPortID());
-			list.append(str);
+			list.append(QString(tr("Port %1 isn't used in connections\n")).arg(port->equipmentID()));
 			return;
 		}
 
-		str = QString(tr("Connection ID:\t\t\t%1")).arg(port->connectionID());
-		list.append(str);
+		QString str;
 
-		str = QString(tr("Link ID:\t\t\t%1")).arg(port->linkID());
-		list.append(str);
+		list.append(QString(tr("Port %1 information\n")).arg(port->equipmentID()));
+		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(port->txBufAbsAddress()));
+		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(port->txBufAddress()));
+		list.append(QString(tr("Tx data full size:\t\t%1")).arg(port->txDataSizeW()));
+		list.append(QString(tr("Tx data used size:\t\t%1")).arg(port->txUsedDataSizeW()));
+		list.append(QString("\t\t\t\t-----"));
 
-		str = QString(tr("Linked port ID:\t\t\t%1")).arg(port->linkedPortID());
-		list.append(str);
-
-		str = QString(tr("Associated LM ID:\t\t%1\n")).arg(port->lmID());
-		list.append(str);
-
-		str = QString(tr("Tx buffer abs address:\t\t%1")).arg(port->txBufAbsAddress());
-		list.append(str);
-
-		str = QString(tr("Tx buffer offset:\t\t%1")).arg(port->txBufAddress());
-		list.append(str);
-
-		str = QString(tr("Tx data full size:\t\t%1")).arg(port->txDataSizeW());
+		str = QString(tr("Tx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
 		list.append(str);
 
 		str = QString(tr("Tx raw data size:\t\t%1")).arg(port->txRawDataSizeW());
@@ -1072,6 +1007,8 @@ namespace Builder
 
 		list.append("Tx raw signals:\n");
 
+		bool hasSignals = false;
+
 		for(const Hardware::TxRxSignalShared& tx : txSignals)
 		{
 			if (tx->isRaw() == true)
@@ -1081,12 +1018,19 @@ namespace Builder
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							C_STR(tx->appSignalID()));
 				list.append(str);
+
+				hasSignals = true;
 			}
 		}
 
-		list.append("");
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
 
 		list.append("Tx analog signals:\n");
+
+		hasSignals = false;
 
 		for(const Hardware::TxRxSignalShared& tx : txSignals)
 		{
@@ -1097,12 +1041,19 @@ namespace Builder
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							C_STR(tx->appSignalID()));
 				list.append(str);
+
+				hasSignals = true;
 			}
 		}
 
-		list.append("");
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
 
 		list.append("Tx discrete signals:\n");
+
+		hasSignals = false;
 
 		for(const Hardware::TxRxSignalShared& tx : txSignals)
 		{
@@ -1113,18 +1064,25 @@ namespace Builder
 							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
 							C_STR(tx->appSignalID()));
 				list.append(str);
+
+				hasSignals = true;
 			}
 		}
 
-		list.append("\n-------------------------------\n");
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
 
-		str = QString(tr("Rx buffer abs address:\t\t%1")).arg(port->rxBufAbsAddress());
-		list.append(str);
+		list.append("-------------------------------------\n");
 
-		str = QString(tr("Rx buffer offset:\t\t%1")).arg(port->rxBufAddress());
-		list.append(str);
+		list.append(QString(tr("Rx buffer abs address:\t\t%1")).arg(port->rxBufAbsAddress()));
+		list.append(QString(tr("Rx buffer offset:\t\t%1")).arg(port->rxBufAddress()));
+		list.append(QString(tr("Rx data full size:\t\t%1")).arg(port->rxDataSizeW()));
+		list.append(QString(tr("Rx data used size:\t\t%1")).arg(port->rxUsedDataSizeW()));
+		list.append(QString("\t\t\t\t-----"));
 
-		str = QString(tr("Rx data full size:\t\t%1")).arg(port->rxDataSizeW());
+		str = QString(tr("Rx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
 		list.append(str);
 
 		str = QString(tr("Rx raw data size:\t\t%1")).arg(port->rxRawDataSizeW());
@@ -1136,20 +1094,78 @@ namespace Builder
 		str = QString(tr("Rx discrete signals size:\t%1\n")).arg(port->rxDiscreteSignalsSizeW());
 		list.append(str);
 
-		list.append("Rx signals:\n");
+		list.append(QString(tr("Port Rx data:\n")));
+
+		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u)\n", port->rxBufAbsAddress(), 0, 0, 0, port->rxDataID(), port->rxDataID());
+		list.append(str);
 
 		const HashedVector<QString, Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
 
+		list.append("Rx raw signals:\n");
+
+		hasSignals = false;
+
 		for(const Hardware::TxRxSignalShared& rx : rxSignals)
 		{
-			str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-						port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-						rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-						C_STR(rx->appSignalID()));
-			list.append(str);
+			if (rx->isRaw() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
 		}
 
-		if (rxSignals.count() > 0)
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Rx analog signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : rxSignals)
+		{
+			if (rx->isRegular() == true && rx->isAnalog() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Rx discrete signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : rxSignals)
+		{
+			if (rx->isRegular() == true && rx->isDiscrete() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
 		{
 			list.append("");
 		}
@@ -1198,11 +1214,13 @@ namespace Builder
 
 		bool result = true;
 
+		int metadataFieldsVersion = 0;
+
 		QStringList metadataFields;
 
-		appLogicCode.getAsmMetadataFields(metadataFields);
+		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
 
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount, metadataFields);
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount,metadataFieldsVersion, metadataFields);
 
 		if (multichannelFile != nullptr)
 		{

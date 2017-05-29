@@ -5,7 +5,7 @@
 #include "../lib/Tcp.h"
 #include "../lib/SocketIO.h"
 #include "../lib/Hash.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 
 #include "../Proto/network.pb.h"
 

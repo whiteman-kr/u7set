@@ -139,6 +139,8 @@ namespace Builder
 
 			// if (!initAfbs()) break;
 
+			//if (!copySerialRxSignals()) break;
+
 			if (!copyLMDataToRegBuf()) break;
 
 			if (!copyInModulesAppLogicDataToRegBuf()) break;
@@ -733,6 +735,128 @@ namespace Builder
 		m_code.append(comment);
 		m_code.newLine();
 
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copySerialRxSignals()
+	{
+		// copying serial rx signals from rx buffers to signals in LM memory
+		//
+		QList<Hardware::OptoPortShared> ports;
+
+		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), ports);
+
+		bool first = true;
+
+		Comment comment;
+		Command cmd;
+
+		bool result = true;
+
+		for(const Hardware::OptoPortShared& port : ports)
+		{
+			if (port == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (port->isSerial() == false || port->rxSignalsCount() == 0)
+			{
+				continue;
+			}
+
+			if (first == true)
+			{
+				comment.setComment("Copying serial ports rx signals from rx buffers to signals in LMs memory");
+
+				m_code.append(comment);
+				m_code.newLine();
+
+				first = false;
+			}
+
+			comment.setComment(QString("Copying rx signals of serial port %1").arg(port->equipmentID()));
+
+			m_code.append(comment);
+			m_code.newLine();
+
+			const HashedVector<QString, Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
+
+			for(const Hardware::TxRxSignalShared& rxSignal : rxSignals)
+			{
+				if(rxSignal == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				switch(rxSignal->signalType())
+				{
+				case E::SignalType::Analog:
+					result &= copySerialRxAnalogSignal(port, rxSignal);
+					break;
+
+				case E::SignalType::Discrete:
+					result &= copySerialRxDiscreteSignal(port, rxSignal);
+					break;
+
+				default:
+					assert(false);
+				}
+			}
+		}
+
+		if (first == false)
+		{
+			m_code.newLine();
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal)
+	{
+		TEST_PTR_RETURN_FALSE(port);
+		TEST_PTR_RETURN_FALSE(rxSignal);
+
+		if (rxSignal->signalType() != E::SignalType::Analog ||
+			rxSignal->dataSize() != SIZE_32BIT)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		Signal* s = m_signals->getSignal(rxSignal->appSignalID());
+
+		if (s == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (s->ramAddr().isValid() == false)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		bool res = s->isCompatibleFormat(rxSignal->signalType(), rxSignal->dataFormat(), rxSignal->dataSize(), rxSignal->byteOrder());
+
+		if (res == false)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		Command cmd;
+
+		cmd.mov32(s->ramAddr().offset(), port->rxBufAbsAddress() + rxSignal->addrInBuf().offset());
+		cmd.setComment(QString("copy rx signal %1").arg(rxSignal->appSignalID()));
+
+		m_code.append(cmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal)
+	{
 		return true;
 	}
 
@@ -2460,11 +2584,12 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
-														receiver.appSignalId(),
-														m_lm->equipmentIdTemplate(),
-														receiver.guid(),
-														rxAddress) == false)
+			if (m_optoModuleStorage->getRxSignalAbsAddress(fb.schemaID(),
+														   receiver.connectionId(),
+														   receiver.appSignalId(),
+														   m_lm->equipmentIdTemplate(),
+														   receiver.guid(),
+														   rxAddress) == false)
 			{
 				return false;
 			}
@@ -2575,11 +2700,12 @@ namespace Builder
 		{
 			SignalAddress16 rxAddress;
 
-			if (m_optoModuleStorage->getRxSignalAbsAddress(receiver.connectionId(),
-																 receiver.appSignalId(),
-																 m_lm->equipmentIdTemplate(),
-																 receiver.guid(),
-																 rxAddress) == false)
+			if (m_optoModuleStorage->getRxSignalAbsAddress(appSignal.schemaID(),
+														   receiver.connectionId(),
+														   receiver.appSignalId(),
+														   m_lm->equipmentIdTemplate(),
+														   receiver.guid(),
+														   rxAddress) == false)
 			{
 				return false;
 			}
@@ -3382,225 +3508,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::buildRS232SignalLists()
-	{
-		assert(false);		// reimplement!
-
-		return true;
-
-/*		if (m_optoModuleStorage == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		QList<Hardware::OptoModule*> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
-
-		if (optoModules.isEmpty())
-		{
-			return true;
-		}
-
-		bool result = true;
-
-		for(Hardware::OptoModule* optoModule : optoModules)
-		{
-			if (optoModule == nullptr)
-			{
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			QList<Hardware::OptoPort*> rs232Ports = optoModule->getSerialPorts();
-
-			if (rs232Ports.isEmpty())
-			{
-				continue;
-			}
-
-			for(Hardware::OptoPort* port : rs232Ports)
-			{
-				QVector<Hardware::OptoPort::TxRxSignal> txSignals = port->getTxSignals();
-
-				for(const Hardware::OptoPort::TxRxSignal& txSignal : txSignals)
-				{
-					if (m_signalsStrID.contains(txSignal.appSignalID) == false)
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-								  arg(txSignal.appSignalID).arg(port->connectionID()));
-
-						result = false;
-						continue;
-					}
-
-					Signal* s = m_signalsStrID[txSignal.appSignalID];
-
-					if (s == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					port->addTxSignal(s);
-				}
-
-				result &= port->calculateTxSignalsAddresses(m_log);
-
-//				QString idStr;
-//
-//				idStr.sprintf("0x%X", port->txDataID());
-//
-//				LOG_MESSAGE(m_log, QString(tr("RS232/485 connection '%1': analog signals %2, discrete signals %3, data size %4 bytes, dataID %5")).
-//							arg(port->connectionID()).
-//							arg(port->txAnalogSignalsCount()).
-//							arg(port->txDiscreteSignalsCount()).
-//							arg(port->txDataSizeW() * 2).
-//							arg(idStr)  );
-			}
-		}
-
-		return result; */
-	}
-
-
-/*	bool ModuleLogicCompiler::generateRS232ConectionCode()
-	{
-		if (m_lm == nullptr || m_optoModuleStorage == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			assert(false);
-			return false;
-		}
-
-		int connectionCount = m_connections->count();
-
-		bool result = true;
-
-		for(int i = 0; i < connectionCount; i++)
-		{
-			std::shared_ptr<Hardware::Connection> connection = m_connections->get(i);
-
-			if (connection == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				assert(false);
-				continue;
-			}
-
-			if (connection->mode() != Hardware::OptoPort::Mode::Serial)
-			{
-				continue;
-			}
-
-			Hardware::OptoPort* optoPort = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
-
-			if (optoPort == nullptr)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("OCM port '%1' is not found (connection '%2')")).
-						  arg(connection->port1EquipmentID().
-						  arg(connection->connectionID())));
-				return false;
-			}
-
-			Hardware::OptoModule* optoModule = m_optoModuleStorage->getOptoModule(optoPort);
-
-			if (optoModule == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (optoModule->lmID() == m_lm->equipmentIdTemplate())
-			{
-				// this serial connection must be processed in this LM
-				//
-				result &= generateRS232ConectionCode(connection, optoModule, optoPort);
-			}
-		}
-
-		return result;
-	}*/
-
-
-/*	bool ModuleLogicCompiler::generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection,
-														 Hardware::OptoModule* optoModule,
-														 Hardware::OptoPort* optoPort)
-	{
-		if (optoModule == nullptr ||
-			optoPort == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		assert(false);			// need reimplement !!!! WhiteMan 28.12.2016
-
-        return true;
-
-
-		// build analog and discrete signals list
-		//
-		QStringList&& signslList = connection->signalList();
-
-		bool result = true;
-
-		HashedVector<QString, Signal*> analogSignals;
-		HashedVector<QString, Signal*> discreteSignals;
-
-		int analogSgnalsSizeW = 0;
-		int discreteSignalsSizeBit = 0;
-
-		for(QString signalStrID : signslList)
-		{
-			if (m_signalsStrID.contains(signalStrID) == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Signal '%1' is not found (RS232/485 connection '%2')")).
-						  arg(signalStrID).arg(connection->connectionID()));
-				result &= false;
-				continue;
-			}
-
-			Signal* signal = m_signalsStrID[signalStrID];
-
-			if (signal == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				result &= false;
-				continue;
-			}
-
-			if (signal->isAnalog())
-			{
-				analogSignals.insert(signalStrID, signal);
-
-				analogSgnalsSizeW += signal->dataSize() / WORD_SIZE;
-			}
-			else
-			{
-				discreteSignals.insert(signalStrID, signal);
-
-				discreteSignalsSizeBit++;
-			}
-		}
-
-		if (result == false)
-		{
-			return result;
-		}
-
-		int discreteSignalsSizeW = discreteSignalsSizeBit / WORD_SIZE + (discreteSignalsSizeBit % WORD_SIZE ? 1 : 0);
-		Q_UNUSED(discreteSignalsSizeW)
-
-		return result;
-	}
-
-*/
-
 	bool ModuleLogicCompiler::copyOptoConnectionsTxData()
 	{
 		bool result = true;
@@ -3630,11 +3537,9 @@ namespace Builder
 
 			bool initialCommentPrinted = false;
 
-			QList<Hardware::OptoPortShared> ports;
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
 
-			module->getPorts(ports);
-
-			for(Hardware::OptoPortShared& port : ports)
+			for(const Hardware::OptoPortShared& port : ports)
 			{
 				if (port == nullptr)
 				{
@@ -3685,8 +3590,6 @@ namespace Builder
 			return true;
 		}
 
-		//assert(port->txDataSizeW() > Hardware::TX_DATA_ID_SIZE_W;	// txDataSizeW must be > then sizeofW(port DataID)
-
 		bool result = true;
 
 		Command cmd;
@@ -3709,6 +3612,20 @@ namespace Builder
 		result &= copyOptoPortTxAnalogSignals(port);
 
 		result &= copyOptoPortTxDiscreteSignals(port);
+
+		// rest of manually configured buffer fills by 0
+		//
+		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
+		{
+			int fillSize = port->txDataSizeW() - port->txUsedDataSizeW();
+
+			cmd.setMem(port->txBufAbsAddress() + port->txUsedDataSizeW(),
+					   0, fillSize);
+			cmd.setComment("rest of manually configured buffer fills by 0");
+
+			m_code.append(cmd);
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -3737,7 +3654,13 @@ namespace Builder
 
 		int offset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
-		int portDataOffset = offset;
+		Command cmd;
+
+		cmd.setMem(port->txBufAbsAddress() + offset, 0, port->txRawDataSizeW());
+		cmd.setComment("initialize tx raw data memory");
+
+		m_code.append(cmd);
+		m_code.newLine();
 
 		const Hardware::RawDataDescription& rawDataDescription = port->rawDataDescription();
 
@@ -3767,7 +3690,7 @@ namespace Builder
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::TxSignal:
-				result &= copyOptoPortTxOutSignalRawData(port, item, portDataOffset);
+				// code generate later
 				break;
 
 			case Hardware::RawDataDescriptionItem::Type::RxRawDataSize:
@@ -3781,9 +3704,12 @@ namespace Builder
 			}
 		}
 
-		return true;
-	}
+		result &= copyOptoPortRawTxAnalogSignals(port);
 
+		result &= copyOptoPortRawTxDiscreteSignals(port);
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port)
 	{
@@ -3793,19 +3719,21 @@ namespace Builder
 			return false;
 		}
 
-		QVector<Hardware::TxRxSignalShared> txAnalogSignals;
-
-		port->getTxAnalogSignals(txAnalogSignals, true);
-
-		if (txAnalogSignals.count() == 0)
-		{
-			return true;
-		}
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
 		bool result = true;
 
-		for(Hardware::TxRxSignalShared& txSignal : txAnalogSignals)
+		bool first = true;
+
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
 		{
+			if (txSignal->isRaw() == true || txSignal->isAnalog() == false)
+			{
+				// skip raw and non-analog signals
+				//
+				continue;
+			}
+
 			Signal* s = m_signals->getSignal(txSignal->appSignalID());
 
 			if (s == nullptr)
@@ -3815,6 +3743,18 @@ namespace Builder
 				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
+			}
+
+			if (first == true)
+			{
+				Comment comment;
+
+				comment.setComment(QString("Copying regular tx analog signals of opto-port %1").arg(port->equipmentID()));
+
+				m_code.append(comment);
+				m_code.newLine();
+
+				first = false;
 			}
 
 			Command cmd;
@@ -3827,7 +3767,10 @@ namespace Builder
 			m_code.append(cmd);
 		}
 
-		m_code.newLine();
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -3849,11 +3792,6 @@ namespace Builder
 
 		int count = txDiscreteSignals.count();
 
-		if (count == 0)
-		{
-			return true;
-		}
-
 		int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
 
 		int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
@@ -3864,12 +3802,15 @@ namespace Builder
 
 		int bitCount = 0;
 
+		bool first = true;
+
 		for(int i = 0; i < count; i++)
 		{
 			Hardware::TxRxSignalShared& txSignal = txDiscreteSignals[i];
 
 			if (txSignal->isRaw() == true)
 			{
+				assert(false);				// not must be here!
 				continue;					// raw signals copying in raw data section code generation
 			}
 
@@ -3882,6 +3823,18 @@ namespace Builder
 				m_log->errALC5000(txSignal->appSignalID(), QUuid());
 				result = false;
 				continue;
+			}
+
+			if (first == true)
+			{
+				Comment comment;
+
+				comment.setComment(QString("Copying regular tx discrete signals of opto-port %1").arg(port->equipmentID()));
+
+				m_code.append(comment);
+				m_code.newLine();
+
+				first = false;
 			}
 
 			if ((bitCount % WORD_SIZE) == 0)
@@ -3929,7 +3882,10 @@ namespace Builder
 			bitCount++;
 		}
 
-		m_code.newLine();
+		if (first == false)
+		{
+			m_code.newLine();
+		}
 
 		return result;
 	}
@@ -4201,80 +4157,95 @@ namespace Builder
 
 	}
 
-
-	bool ModuleLogicCompiler::copyOptoPortTxOutSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
-	{
-		if (port == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		assert(item.type == Hardware::RawDataDescriptionItem::Type::TxSignal);
-
-		switch(item.signalType)
-		{
-		case E::SignalType::Analog:
-			return copyOptoPortTxOutAnalogSignalRawData(port, item, portDataOffset);
-
-		case E::SignalType::Discrete:
-			LOG_INTERNAL_ERROR(m_log);			// out discrete signals is not supported now
-			break;
-
-		default:
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-		}
-
-		return false;
-	}
-
-
-	bool ModuleLogicCompiler::copyOptoPortTxOutAnalogSignalRawData(Hardware::OptoPortShared port, const Hardware::RawDataDescriptionItem& item, int portDataOffset)
+	bool ModuleLogicCompiler::copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port)
 	{
 		if (port == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		if (item.dataFormat != E::DataFormat::Float &&
-			item.dataFormat != E::DataFormat::SignedInt &&
-			item.dataFormat != E::DataFormat::UnsignedInt)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// unknown format
-			return false;
-		}
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
 
-		if (item.dataSize != SIZE_32BIT)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// other sizes is not supported now
-			return false;
-		}
-
-		if (item.byteOrder != E::ByteOrder::BigEndian)
-		{
-			LOG_INTERNAL_ERROR(m_log);		// other byte orders is not supported now
-			return false;
-		}
-
-		Signal* s = m_signals->getSignal(item.appSignalID);
-
-		if (s == nullptr)
-		{
-			// Signal '%1' is not found (opto port '%2' raw data description).
-			//
-			m_log->errALC5186(item.appSignalID, port->equipmentID());
-			return false;
-		}
+		bool result = true;
 
 		Command cmd;
 
-		cmd.mov32(port->txBufAbsAddress() + portDataOffset + item.offsetW, s->ramAddr().offset());
+		int count = 0;
 
-		cmd.setComment(QString("copying out signal %1 raw data").arg(item.appSignalID));
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal->isRaw() == false || txSignal->isAnalog() == false)
+			{
+				// skip non-Raw and non-Analog signals
+				//
+				continue;
+			}
 
-		m_code.append(cmd);
-		m_code.newLine();
+			Signal* s = m_signals->getSignal(txSignal->appSignalID());
+
+			if (s == nullptr)
+			{
+				// Signal '%1' is not found (opto port '%2' raw data description).
+				//
+				m_log->errALC5186(txSignal->appSignalID(), port->equipmentID());
+				result = false;
+				continue;
+			}
+
+			if (s->isCompatibleFormat(txSignal->signalType(), txSignal->dataFormat(), txSignal->dataSize(), txSignal->byteOrder()) == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log,
+								   Builder::IssueType::NotDefined,
+								   QString(tr("Format of signal '%1' isn't compatible with format in port '%2' raw data description (Connection '%3')")).
+								   arg(txSignal->appSignalID()).
+								   arg(port->equipmentID()).
+								   arg(port->connectionID()));
+
+				return false;
+			}
+
+			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ramAddr().offset());
+
+			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+
+			m_code.append(cmd);
+
+			count++;
+		}
+
+		if (count > 0)
+		{
+			m_code.newLine();
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port)
+	{
+		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
+
+		int count = 0;
+
+		for(const Hardware::TxRxSignalShared& txSignal : txSignals)
+		{
+			if (txSignal->isRaw() == false || txSignal->isDiscrete() == false)
+			{
+				// skip non-Raw and non-Discrete signals
+				//
+				continue;
+			}
+
+			count++;
+		}
+
+		if (count > 0)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Raw tx discrete signals isn't implement now (port %1).  ")).
+							   arg(port->equipmentID()));
+			return false;
+		}
 
 		return true;
 	}
@@ -4543,7 +4514,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::finishAppLogicCode()
 	{
-		m_code.newLine();
 		m_code.comment("End of application logic code");
 		m_code.newLine();
 
@@ -4596,7 +4566,7 @@ namespace Builder
 			return false;
 		}
 
-		QStringList mifCode;
+/*		QStringList mifCode;
 
 		m_code.getMifCode(mifCode);
 
@@ -4605,13 +4575,13 @@ namespace Builder
 		if (buildFile == nullptr)
 		{
 			result = false;
-		}
+		}*/
 
 		QStringList asmCode;
 
 		m_code.getAsmCode(asmCode);
 
-		buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").arg(m_lm->caption()).arg(m_lmNumber), asmCode);
+		BuildFile* buildFile = m_resultWriter->addFile(m_lmSubsystemID, QString("%1-%2.asm").arg(m_lm->caption()).arg(m_lmNumber), asmCode);
 
 		if (buildFile == nullptr)
 		{
@@ -5600,12 +5570,11 @@ namespace Builder
 		// find signals in algorithms
 		// build map: signal GUID -> ApplicationSignal
 		//
-
 		bool result = true;
 
 		for(AppItem* item : m_appItems)
 		{
-			if (!item->isSignal())
+			if (item->isSignal() == false)
 			{
 				continue;
 			}
@@ -5622,13 +5591,18 @@ namespace Builder
 			result &= m_appSignals.insert(item);
 		}
 
+		if (result == false)
+		{
+			return false;
+		}
+
 		// find fbl's outputs, which NOT connected to signals
 		// create and add to m_appSignals map 'shadow' signals
 		//
 
 		for(AppItem* item : m_appItems)
 		{
-			if (!item->isFb())
+			if (item->isFb() == false)
 			{
 				continue;
 			}
@@ -5695,7 +5669,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
 	{
@@ -6074,8 +6047,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::processTxSignals()
 	{
-		bool result = true;
-
 		if (m_optoModuleStorage == nullptr)
 		{
 			assert(false);
@@ -6085,43 +6056,44 @@ namespace Builder
 
 		QString lmID = m_lm->equipmentIdTemplate();
 
-		// add raw Tx signals in txSignals lists of all Optical and Serial ports associated with current LM
-		// check that added raw Tx signals exists in current LM
-		//
-		//result &= m_optoModuleStorage->appendRawTxSignals(lmID, m_lmAssociatedSignals);
+		bool result = false;
 
-		// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
-		// check that added regulat Tx signals exists in current LM
-		//
-		result &= processTransmitters();
+		do
+		{
+			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
+			// check that added regulat Tx signals exists in current LM
+			//
+			if (processTransmitters() == false) break;
 
-		// find raw tx signals and set it addresses
-		//
-		result &= m_optoModuleStorage->initRawTxSignals(lmID);
+			// find raw tx signals and set it addresses
+			//
+			if (m_optoModuleStorage->initRawTxSignals(lmID) == false) break;
 
-		// sort Tx signals lists of LM's associated opto ports
-		//
-		result &= m_optoModuleStorage->sortTxSignals(lmID);
+			// sort Tx signals lists of LM's associated opto ports
+			//
+			if (m_optoModuleStorage->sortTxSignals(lmID) == false) break;
 
-		// calculate relative Tx signals addresses in tx buffers
-		//
-		result &= m_optoModuleStorage->calculateTxSignalsAddresses(lmID);
+			// calculate relative Tx signals addresses in tx buffers
+			//
+			if (m_optoModuleStorage->calculateTxSignalsAddresses(lmID) == false) break;
 
-		// calculate txDataID
-		//
-		result &= m_optoModuleStorage->calculateTxDataIDs(lmID);
+			// calculate txDataID
+			//
+			if (m_optoModuleStorage->calculateTxDataIDs(lmID) == false) break;
 
-		// calculate tx buffers absolute addresses
-		//
-		result &= m_optoModuleStorage->calculateTxBufAddresses(lmID);
+			// calculate tx buffers absolute addresses
+			//
+			if (m_optoModuleStorage->calculateTxBufAddresses(lmID) == false) break;
+
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}
 
 	bool ModuleLogicCompiler::processSerialRxSignals()
 	{
-		bool result = true;
-
 		if (m_optoModuleStorage == nullptr)
 		{
 			assert(false);
@@ -6131,27 +6103,32 @@ namespace Builder
 
 		QString lmID = m_lm->equipmentIdTemplate();
 
-		// add raw Rx signals in rxSignals lists of all Serial (only!) ports associated with current LM
-		// check that added raw Rx signals exists in current LM
-		//
-		result &= m_optoModuleStorage->appendSerialRawRxSignals(lmID, m_lmAssociatedSignals);
+		bool result = false;
 
-		// add regular Rx signals from transmitters in rxSignal lists of all Serial (only!) ports associated with current LM
-		// check that added regulat Rx signals exists in current LM
-		//
-		result &= appendRegularSerialRxSignals();
+		do
+		{
+			// add regular Rx signals from receivers in rxSignal lists of all Serial (only!) ports associated with current LM
+			// check that added regulat Rx signals exists in current LM
+			//
+			if (processSerialReceivers() == false) break;
 
-		// sort Rx signals lists of LM's associated Serial ports
-		//
-		result &= m_optoModuleStorage->sortSerialRxSignals(lmID);
+			if (m_optoModuleStorage->initSerialRawRxSignals(lmID) == false) break;
 
-		// sort Rx signals lists of LM's associated Serial ports
-		//
-		result &= m_optoModuleStorage->calculateSerialRxSignalsAddresses(lmID);
+			// sort Rx signals lists of LM's associated Serial ports
+			//
+			if (m_optoModuleStorage->sortSerialRxSignals(lmID) == false) break;
 
-		// calculate rxDataID for serial ports
-		//
-		result &= m_optoModuleStorage->calculateSerialRxDataIDs(lmID);
+			// sort Rx signals lists of LM's associated Serial ports
+			//
+			if (m_optoModuleStorage->calculateSerialRxSignalsAddresses(lmID) == false) break;
+
+			// calculate rxDataID for serial ports
+			//
+			if (m_optoModuleStorage->calculateSerialRxDataIDs(lmID) == false) break;
+
+			result = true;
+		}
+		while (false);
 
 		return result;
 	}
@@ -6220,7 +6197,8 @@ namespace Builder
 				// The signal '%1' is repeatedly connected to the transmitter '%2'
 				//
 				m_log->errALC5029(connectedSignalID, transmitter.connectionId(), connectedSignalUuid, transmitter.guid());
-				ASSERT_RETURN_FALSE
+				result = false;
+				break;
 			}
 		}
 
@@ -6318,7 +6296,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::appendRegularSerialRxSignals()
+	bool ModuleLogicCompiler::processSerialReceivers()
 	{
 		bool result = true;
 
@@ -6368,14 +6346,6 @@ namespace Builder
 
 		QString rxSignalID = receiver.appSignalId();
 
-		Signal* rxSignal = m_signals->getSignal(rxSignalID);
-
-		if (rxSignal == nullptr)
-		{
-			m_log->errALC5000(rxSignalID, item->guid());
-			ASSERT_RETURN_FALSE
-		}
-
 		if (m_lmAssociatedSignals.contains(rxSignalID) == false)
 		{
 			// Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
@@ -6384,7 +6354,15 @@ namespace Builder
 			return false;
 		}
 
-		bool result = m_optoModuleStorage->addSerialRegularRxSignal(item->schemaID(),
+		Signal* rxSignal = m_signals->getSignal(rxSignalID);
+
+		if (rxSignal == nullptr)
+		{
+			m_log->errALC5000(rxSignalID, item->guid());
+			return false;
+		}
+
+		bool result = m_optoModuleStorage->appendSerialRxSignal(item->schemaID(),
 																	connectionID,
 																	item->guid(),
 																	m_lm->equipmentIdTemplate(),

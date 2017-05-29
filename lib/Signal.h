@@ -7,14 +7,14 @@
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
-#include "../lib/DataSource.h"
 #include "../VFrame30/Afb.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
 
 
 class QXmlStreamAttributes;
-
+class XmlWriteHelper;
+class XmlReadHelper;
 
 const char* const InOutTypeStr[] =
 {
@@ -280,6 +280,7 @@ public:
 	const Address16& tuningAddr() const { return m_tuningAddr; }
 
 	Hash hash() const { return m_hash; }
+	void setHash(Hash hash) { m_hash = hash; }
 
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
@@ -421,6 +422,8 @@ public:
 
 	void serializeToProtoAppSignal(Proto::AppSignal* s) const;
 	void serializeFromProtoAppSignal(const Proto::AppSignal* s);
+
+	void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
 
 	void setLm(std::shared_ptr<Hardware::DeviceModule> lm) { m_lm = lm; }
 	std::shared_ptr<Hardware::DeviceModule> lm() const { return m_lm; }

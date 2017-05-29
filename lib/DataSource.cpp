@@ -441,9 +441,9 @@ void DataSource::processPacket(quint32 ip, Rup::Frame& rupFrame, Queue<RupData>&
 		//
 		rupData->sourceIP = ip;
 
-		rupData->time.plant = plantTime.toMSecsSinceEpoch();
-		rupData->time.system = currentTime.toMSecsSinceEpoch();
-		rupData->time.local = currentTime.toLocalTime().toMSecsSinceEpoch();
+		rupData->time.plant.timeStamp = plantTime.toMSecsSinceEpoch();
+		rupData->time.system.timeStamp = currentTime.toMSecsSinceEpoch();
+		rupData->time.local.timeStamp = currentTime.toLocalTime().toMSecsSinceEpoch();
 
 		rupData->dataSize = framesQuantity * Rup::FRAME_DATA_SIZE;
 

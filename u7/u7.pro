@@ -91,13 +91,11 @@ SOURCES +=\
 	../lib/DbController.cpp \
 	../lib/DbWorker.cpp \
 	../lib/DbProgressDialog.cpp \
-	../lib/StreamedData.cpp \
 	../lib/ProtoSerialization.cpp \
 	../lib/Signal.cpp \
     EquipmentTabPage.cpp \
     CheckInDialog.cpp \
     ProjectsTabPage.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp \
     SignalsTabPage.cpp \
     SignalPropertiesDialog.cpp \
     EditEngine/EditEngine.cpp \
@@ -183,15 +181,17 @@ SOURCES +=\
     ../lib/MetrologySignal.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
-    ../lib/Tuning/TuningSignal.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
-    ../lib/CodeEditor.cpp \
-    Builder/RawDataDescription.cpp
-
+    Builder/RawDataDescription.cpp \
+    ../lib/Tuning/TuningSignalStorage.cpp \
+    ../lib/AppSignal.cpp \
+	CodeEditor.cpp \
+    ../lib/CsvFile.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -211,7 +211,6 @@ HEADERS  += \
 	../lib/DbController.h \
 	../lib/DbWorker.h \
 	../lib/DbProgressDialog.h \
-	../lib/StreamedData.h \
 	../lib/ProtoSerialization.h \
 	../lib/Factory.h \
 	../lib/CUtils.h \
@@ -220,7 +219,6 @@ HEADERS  += \
     EquipmentTabPage.h \
     CheckInDialog.h \
     ProjectsTabPage.h \
-    ../lib/CodeSyntaxHighlighter.h \
     SignalsTabPage.h \
     SignalPropertiesDialog.h \
     EditEngine/EditEngine.h \
@@ -311,14 +309,17 @@ HEADERS  += \
     ../lib/MetrologySignal.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
-    ../lib/Tuning/TuningSignal.h \
+    ../lib/Tuning/TuningSignalState.h \
     DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
     DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
-    ../lib/CodeEditor.h \
-    Builder/RawDataDescription.h
+    Builder/RawDataDescription.h \
+    ../lib/Tuning/TuningSignalStorage.h \
+    ../lib/AppSignal.h \
+    CodeEditor.h \
+    ../lib/CsvFile.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -419,6 +420,14 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+#QScintilla
+#
+INCLUDEPATH += ./../QScintilla/Qt4Qt5
+DEPENDPATH += ./../QScintilla/Qt4Qt5
+LIBS += -L$$DESTDIR -lQScintilla
+win32:PRE_TARGETDEPS += $$DESTDIR/QScintilla.lib
+unix:PRE_TARGETDEPS += $$DESTDIR/libQScintilla.a
 
 # Add curent dir to a list of library directory paths
 #

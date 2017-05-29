@@ -45,6 +45,9 @@ public slots:
 	void saveLastEditedSignalProperties();
 	void showError(QString errorString);
 
+protected:
+	void closeEvent(QCloseEvent* event);
+
 private:
 	DbController* m_dbController;
 	QVector<Signal*> m_signalVector;

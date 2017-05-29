@@ -461,7 +461,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 					return QVariant();
 				}
 				const AppSignalState& ass = m_clientSocket->signalStates()[row];
-				return ass.value;
+				return ass.m_value;
 			}
 			case SC_VALID:
 			{
@@ -470,7 +470,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 					return QVariant();
 				}
 				const AppSignalState& ass = m_clientSocket->signalStates()[row];
-				return ass.flags.valid ? tr("Yes") : tr("No");
+				return ass.m_flags.valid ? tr("Yes") : tr("No");
 			}
 			case SC_UNIT: return m_clientSocket->unit(s.unitID());
 			default:

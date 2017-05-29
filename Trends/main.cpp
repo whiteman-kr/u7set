@@ -6,10 +6,12 @@ int main(int argc, char *argv[])
 	//QCoreApplication::setAttribute(Qt::AA_Use96Dpi);
 	//QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 	//QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
 
 	QApplication a(argc, argv);
 
-	a.setApplicationName("Trends 1.0");
+	a.setApplicationName("Trends");
+	a.setApplicationVersion("1.0.1");
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 

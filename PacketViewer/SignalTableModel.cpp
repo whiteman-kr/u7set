@@ -2,6 +2,7 @@
 #include "../lib/Signal.h"
 #include "PacketBufferTableModel.h"
 #include "../lib/DataProtocols.h"
+#include "../lib/DataSource.h"
 
 const int C_STR_ID = 0,
 C_DESCRIPTION = 1,

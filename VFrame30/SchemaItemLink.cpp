@@ -14,8 +14,7 @@ namespace VFrame30
 	SchemaItemLink::SchemaItemLink(SchemaUnit unit) :
 		FblItemLine(unit)
 	{
-		//AddInput();
-		//AddOutput();
+		return;
 	}
 
 
@@ -37,10 +36,10 @@ namespace VFrame30
 		
 		// --
 		//
-		/*Proto::VideoItemLink* linkMessage = */message->mutable_schemaitem()->mutable_link();
+		/*Proto::SchemaItemLink* linkMessage = */message->mutable_schemaitem()->mutable_link();
 
-		//linkMessage->set_weight(weight);
-		//linkMessage->set_linecolor(lineColor);
+//		linkMessage->set_weight(m_weight);
+//		linkMessage->set_linecolor(m_lineColor.rgba());
 
 		return true;
 	}
@@ -68,10 +67,10 @@ namespace VFrame30
 			assert(message.schemaitem().has_link());
 		}
 
-		//const Proto::VideoItemLink& linkMessage = message.videoitem(0).link();
+//		const Proto::SchemaItemLink& linkMessage = message.schemaitem().link();
 
-		//weight = linkMessage.weight();
-		//lineColor = linkMessage.linecolor();
+//		m_weight = linkMessage.weight();
+//		m_lineColor = QColor::fromRgba(linkMessage.linecolor());
 
 		return true;
 	}
@@ -118,7 +117,6 @@ namespace VFrame30
 
 		// Пины входов/выходов
 		//
-
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		QPen redPen(QColor(0xE0D00000));
@@ -132,8 +130,8 @@ namespace VFrame30
 
 				if (connectionCount > 1)
 				{
-					p->setBrush(pen.color());
-					p->setPen(pen);
+					p->setBrush(QColor(qRgb(0x00, 0x00, 0xC0)));
+					p->setPen(Qt::NoPen);
 					DrawPinJoint(p, pt.X, pt.Y, pinWidth);
 					p->setBrush(Qt::NoBrush);
 				}

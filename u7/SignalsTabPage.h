@@ -206,6 +206,9 @@ public slots:
 	void cancel();
 	void openUndoDialog();
 
+protected:
+	void closeEvent(QCloseEvent* event);
+
 private:
 	SignalsModel *m_sourceModel;
 	CheckedoutSignalsModel* m_proxyModel;
@@ -213,7 +216,7 @@ private:
 	QPlainTextEdit* m_commentEdit;
 	QSplitter* m_splitter;
 
-	void saveGeometry();
+	void saveDialogGeometry();
 };
 
 
@@ -223,10 +226,14 @@ class UndoSignalsDialog : public QDialog
 public:
 	UndoSignalsDialog(SignalsModel* sourceModel, QWidget *parent = 0);
 
-    void setCheckStates(QModelIndexList selection, bool fromSourceModel);
+	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
+	void saveDialogGeometry();
 
 public slots:
 	void undoSelected();
+
+protected:
+	void closeEvent(QCloseEvent* event);
 
 private:
 	SignalsModel *m_sourceModel;

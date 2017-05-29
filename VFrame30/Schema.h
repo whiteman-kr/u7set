@@ -115,6 +115,9 @@ namespace VFrame30
 		bool excludeFromBuild() const;
 		void setExcludeFromBuild(bool value);
 
+		QColor backgroundColor() const;
+		void setBackgroundColor(const QColor& value);
+
 		bool isLogicSchema() const;
 		bool isUfbSchema() const;
 		bool isMonitorSchema() const;
@@ -128,7 +131,7 @@ namespace VFrame30
 
 		int changeset() const;
 		void setChangeset(int value);
-		
+
 	public:
 		std::vector<std::shared_ptr<SchemaLayer>> Layers;
 
@@ -146,6 +149,8 @@ namespace VFrame30
 		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
 
 		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
+
+		QColor m_backgroundColor = {qRgb(0xFF, 0xFF, 0xFF)};
 
 		int m_changeset = -1;					// Changeset, this field is not stored in file
 	};
@@ -169,6 +174,9 @@ namespace VFrame30
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
 
+		bool saveData(Proto::SchemaDetails* message) const;
+		bool loadData(const Proto::SchemaDetails& message);
+
 		bool searchForString(const QString& searchText) const;
 
 	public:
@@ -182,6 +190,35 @@ namespace VFrame30
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
 		std::set<QUuid> m_guids;
+	};
+
+	class VFRAME30LIBSHARED_EXPORT SchemaDetailsSet : public Proto::ObjectSerialization<SchemaDetailsSet>
+	{
+	public:
+		SchemaDetailsSet();
+
+		// Serializatin implementation of Proto::ObjectSerialization<>
+		//
+		friend Proto::ObjectSerialization<SchemaDetailsSet>;
+
+	protected:
+		virtual bool SaveData(Proto::Envelope* message) const override;
+		virtual bool LoadData(const Proto::Envelope& message) override;
+
+	private:
+		static std::shared_ptr<SchemaDetailsSet> CreateObject(const Proto::Envelope& message);
+
+		// Properties and functions
+		//
+	public:
+		void clear();
+		void add(std::shared_ptr<SchemaDetails> details);
+
+		std::vector<SchemaDetails> schemasDetails() const;
+		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
+
+	private:
+		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId
 	};
 
 

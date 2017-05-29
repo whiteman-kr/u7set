@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SchemaPoint.h"
+#include "../lib/TypesAndEnums.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"

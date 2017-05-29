@@ -117,7 +117,7 @@ SOURCES +=\
     DialogSettings.cpp \
     DialogTuningSources.cpp \
     ../Proto/network.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../Proto/serialization.pb.cc \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
@@ -135,18 +135,23 @@ SOURCES +=\
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     ../lib/Tuning/TuningController.cpp \
-    ../lib/CodeEditor.cpp \
-    ../lib/CodeSyntaxHighlighter.cpp \
     TuningClientFilterEditor.cpp \
     TuningClientFilterStorage.cpp \
-    TuningClientObjectManager.cpp \
     SchemaStorage.cpp \
     SchemasWorkspace.cpp \
     TuningSchemaView.cpp \
     TuningSchemaWidget.cpp \
     ../lib/CircularLogger.cpp \
-    ../lib/Tuning/TuningSignal.cpp \
-    ../lib/Tuning/TuningSignalManager.cpp
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/XmlHelper.cpp \
+    ../lib/Types.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/ProtobufHelper.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Tuning/TuningSignalState.cpp \
+    ../lib/Tuning/TuningSignalStorage.cpp \
+    TuningClientSignalManager.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -165,7 +170,7 @@ HEADERS  += MainWindow.h \
     DialogSettings.h \
     DialogTuningSources.h \
     ../Proto/network.pb.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../Proto/serialization.pb.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
@@ -183,18 +188,24 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningModel.h \
     ../lib/Tuning/TuningController.h \
-    ../lib/CodeEditor.h \
-    ../lib/CodeSyntaxHighlighter.h \
     TuningClientFilterEditor.h \
     TuningClientFilterStorage.h \
-    TuningClientObjectManager.h \
     TuningSchemaView.h \
     TuningSchemaWidget.h \
     SchemasWorkspace.h \
     SchemaStorage.h \
     ../lib/CircularLogger.h \
-    ../lib/Tuning/TuningSignal.h \
-    ../lib/Tuning/TuningSignalManager.h
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/DeviceObject.h \
+    ../lib/XmlHelper.h \
+    ../lib/Types.h \
+    ../lib/DbStruct.h \
+    ../lib/ProtobufHelper.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/Tuning/TuningSignalState.h \
+    ../lib/Tuning/TuningSignalStorage.h \
+    TuningClientSignalManager.h
+
 
 FORMS    += \
     DialogSettings.ui \

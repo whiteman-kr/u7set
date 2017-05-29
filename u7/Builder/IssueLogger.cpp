@@ -2810,14 +2810,16 @@ namespace Builder
 	/// Description:
 	///		The signal is not exists in connection. Use transmitter to send signal via connection.
 	///
-	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid)
+	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
-				  QString(tr("Signal '%1' is not exists in connection '%2'.")).
-				  arg(appSignalID).arg(connectionID));
+				  QString(tr("Signal '%1' is not exists in connection '%2'. (Logic schema '%3')")).
+						arg(appSignalID).
+						arg(connectionID).
+						arg(schemaID));
 	}
 
 	/// IssueCode: ALC5043
@@ -3905,6 +3907,29 @@ namespace Builder
 				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
 						arg(appSignalID).arg(portID).arg(connectionID));
 	}
+
+	/// IssueCode: ALC5193
+	///
+	/// IssueType: Error
+	///
+	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Rx signal specified in port raw data description isn't assigned to reciever.
+	///
+	void IssueLogger::errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5193,
+				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
+						arg(appSignalID).arg(portID).arg(connectionID));
+	}
+
 
 
 	// EQP			Equipment issues						6000-6999

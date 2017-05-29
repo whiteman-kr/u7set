@@ -2,7 +2,6 @@
 #include "SchemaItemSignal.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "../lib/Signal.h"
 #include "../lib/AppSignalManager.h"
 
 namespace VFrame30
@@ -430,17 +429,17 @@ namespace VFrame30
 		//
 		QString appSignalId = this->appSignalId();
 
-		Signal signal;
-		signal.setAppSignalID(appSignalId);
+		AppSignalParam signal;
+		signal.setAppSignalId(appSignalId);
 
 		AppSignalState signalState;
-		signalState.flags.valid = false;
+		signalState.m_flags.valid = false;
 
 		bool signalFound = false;
 
 		if (drawParam->isMonitorMode() == true)
 		{
-			signalFound = drawParam->appSignalManager()->signal(appSignalId, &signal);
+			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
 			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
 		}
 

@@ -2,6 +2,8 @@
 #define TRENDVIEW_H
 
 #include <QWaitCondition>
+#include "TrendSignal.h"
+#include "TrendDrawParam.h"
 
 namespace TrendLib
 {
@@ -10,28 +12,41 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		RenderThread(QObject* parent = 0);
+		explicit RenderThread(TrendSignalSet* signalSet, QObject* parent = 0);
 		virtual ~RenderThread();
 
-		void render(double centerX, double centerY, double scaleFactor, QSize resultSize);
+		void render(const TrendDrawParam& drawParam);
+
+	private:
+		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
+
+		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+		void drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
+
+		static double timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
+		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 
 	signals:
-		void renderedImage(const QImage& image, double scaleFactor);
+		void renderedImage(const QImage& image);
 
 	protected:
 		virtual void run() override;
 
 	private:
+		TrendSignalSet* m_signalSet = nullptr;
+
 		QMutex m_mutex;
 		QWaitCondition m_condition;
 
-		double m_centerX = 0;
-		double m_centerY = 0;
-		double m_scaleFactor = 0;
-		QSize m_resultSize = {0, 0};
+		TrendDrawParam m_drawParam;
 
 		bool m_restart = false;
-		bool m_abort = false;
+		volatile bool m_abort = false;
+
+		// Draw cache
+		//
+		QImage m_image;
 	};
 
 
@@ -40,7 +55,7 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit TrendWidget(QWidget* parent = nullptr);
+		TrendWidget(TrendSignalSet* signalSet, QWidget* parent = nullptr);
 		virtual ~TrendWidget();
 
 	public:
@@ -51,11 +66,24 @@ namespace TrendLib
 		virtual void resizeEvent(QResizeEvent*);
 
 	protected slots:
-		void updatePixmap(const QImage& image, double scaleFactor);
+		void updatePixmap(const QImage& image);
+
+	public:
+		TrendView view() const;
+		void setView(TrendView value);
+
+		int laneCount() const;
+		void setLaneCount(int value);
+
+		void setStartTime(const TimeStamp& startTime);
+		void setDuration(qint64 interval);
 
 	private:
 		RenderThread m_thread;
 		QPixmap m_pixmap;
+
+		TrendSignalSet* m_signalSet;
+		TrendDrawParam m_drawParam;
 	};
 }
 

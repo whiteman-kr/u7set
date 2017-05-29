@@ -15,9 +15,13 @@ public:
     DialogConnections(DbController *pDbController, QWidget *parent);
     ~DialogConnections();
 
+	void setFilter(QString filter);
+	bool addConnection(QString port1Id, QString port2Id);
+
 private slots:
     void onMaskReturn();
     void onMaskApply();
+	void onMaskReset();
 
     void onSortIndicatorChanged(int column, Qt::SortOrder order);
 
@@ -35,6 +39,8 @@ private slots:
     void onCustomContextMenuRequested(const QPoint &pos);
 
 private:
+	bool addConnection(std::shared_ptr<Hardware::Connection> conn);
+
     void fillConnectionsList();
     void setPropertyEditorObjects();
     bool continueWithDuplicateCaptions();
@@ -49,6 +55,7 @@ private:
 
     QLineEdit* m_mask = nullptr;
     QPushButton* m_maskApply = nullptr;
+	QPushButton* m_maskReset = nullptr;
 
     QPushButton* m_btnAdd = nullptr;
     QPushButton* m_btnRemove = nullptr;
@@ -70,7 +77,7 @@ private:
 
     DbController *m_dbController = nullptr;
 
-    Hardware::ConnectionStorage *m_connections;
+	Hardware::ConnectionStorage* m_connections = nullptr;
 
     QMenu* m_popupMenu = nullptr;
     QAction* m_addAction = nullptr;
@@ -79,8 +86,6 @@ private:
     QAction* m_checkInAction = nullptr;
     QAction* m_undoAction = nullptr;
     QAction* m_refreshAction = nullptr;
-
-
 };
 
 extern DialogConnections* theDialogConnections;

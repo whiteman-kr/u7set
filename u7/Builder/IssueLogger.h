@@ -8,11 +8,11 @@
 
 #include "../lib/OutputLog.h"
 
-#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
-#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 
 namespace Builder
@@ -222,7 +222,7 @@ namespace Builder
 		void errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid);		// Signals '%1' and '%2' have different data size.
 		void errALC5040(QString connectionID, QUuid item);									// Connection with ID '%1' is not found.
 		void errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid);				// Signal '%1' exists in LM '%2'. No receivers needed.
-		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid);		// Signal '%1' is not exists in connection '%2'. Use transmitter to send signal via connection.
+		void errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID);		// Signal '%1' is not exists in connection '%2'.
 		void errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid);			// Value of parameter '%1.%2' must be greater or equal to 0.
 		void errALC5044(QString fbCaption, int opcode, QUuid itemUuid);						// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 		void errALC5045(QString paramCaption, QString fbCaption, QUuid itemUuid);			// Required parameter '%1' of AFB '%2' is missing.
@@ -274,6 +274,8 @@ namespace Builder
 		void errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID);		// Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
 		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
 		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
+		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+
 
 
 		// EQP			Equipment issues						6000-6999

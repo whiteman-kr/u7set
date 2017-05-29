@@ -99,6 +99,8 @@ namespace VFrame30
 
 			QWidget* childWidget = controlItem->createWidget(this, editMode);
 			assert(childWidget);
+
+			Q_UNUSED(childWidget);
 		}
 	}
 
@@ -416,6 +418,27 @@ namespace VFrame30
 		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
 
 		return widget;
+	}
+
+	void SchemaView::warningMessageBox(QString text)
+	{
+		QMessageBox::warning(this, qAppName(), text);
+	}
+
+	void SchemaView::errorMessageBox(QString text)
+	{
+		QMessageBox::critical(this, qAppName(), text);
+
+	}
+
+	void SchemaView::infoMessageBox(QString text)
+	{
+		QMessageBox::information(this, qAppName(), text);
+	}
+
+	bool SchemaView::questionMessageBox(QString text)
+	{
+		return QMessageBox::question(this, qAppName(), text) == QMessageBox::Yes;
 	}
 
 	// Properties

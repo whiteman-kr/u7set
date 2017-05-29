@@ -48,14 +48,13 @@ namespace Hardware
         QUuid uuid() const;
         void setUuid(const QUuid& value);
 
-        QString connectionID() const;
-        void setConnectionID(const QString& value);
+		QString connectionID() const;
+		void setConnectionID(const QString& value);
 
         QString fileName() const;
+		int fileId() const;
 
-        int fileID() const;
-
-        QString port1EquipmentID() const;
+		QString port1EquipmentID() const;
 		void setPort1EquipmentID(const QString& value);
 
 		QString port2EquipmentID() const;
@@ -127,8 +126,12 @@ namespace Hardware
 		OptoPort::SerialMode serialMode() const;
 		void setSerialMode(const OptoPort::SerialMode value);
 
+		QString serialModeStr() const;
+
 		OptoPort::Mode mode() const;
 		void setMode(const OptoPort::Mode value);
+
+		QString modeStr() const;
 
 		bool isSerial() const;
 
@@ -138,7 +141,7 @@ namespace Hardware
 		bool manualSettings() const;
 		void setManualSettings(bool value);
 
-		bool disableDataID() const;
+		bool disableDataId() const;
 		void setDisableDataID(bool value);
 
 		bool generateVHDFile() const;
@@ -191,18 +194,16 @@ namespace Hardware
         void clear();
 
         void add(std::shared_ptr<Connection> connection);
-
         void remove(const QUuid& uuid);
-
         bool removeFile(const QUuid& uuid, bool &fileRemoved);
 
         Q_INVOKABLE int count() const;
 
         std::shared_ptr<Connection> get(const QUuid &uuid) const;
-
         std::shared_ptr<Connection> get(int index) const;
-
         Q_INVOKABLE QObject* jsGet(int index) const;
+
+		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;
 
         bool checkOut(const QUuid& uuid);
         bool checkIn(const QUuid& uuid, const QString &comment, bool &fileRemoved);
@@ -211,18 +212,15 @@ namespace Hardware
         bool load();
         bool loadFromConnectionsFolder();
         bool loadFromXmlDeprecated(QString &errorString);
-
         bool save(const QUuid& uuid);
 
         bool deleteXmlDeprecated();
 
-
     private:
-        std::vector<std::shared_ptr<Connection>> m_connectionsVector;
+		std::vector<std::shared_ptr<Connection>> m_connectionsVector;
         std::map<QUuid, std::shared_ptr<Connection>> m_connections;
 
         DbController* m_db = nullptr;
-
         QWidget* m_parentWidget = nullptr;
 	};
 }

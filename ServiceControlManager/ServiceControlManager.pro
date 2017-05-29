@@ -75,7 +75,7 @@ SOURCES += MainWindow.cpp \
     ../Proto/network.pb.cc \
     ../lib/Signal.cpp \
     ../Proto/serialization.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
@@ -108,7 +108,7 @@ HEADERS  += MainWindow.h \
     ../lib/Signal.h \
     ../lib/PropertyObject.h \
     ../Proto/serialization.pb.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     ../lib/DeviceObject.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \

@@ -151,11 +151,11 @@ namespace Builder
 		m_schemaFileList.clear();
 
 		bool result = true;
-		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), AlFileExtension, "LogicSchemas", "LogicSchema", log);
+		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), QLatin1String(".") + ::AlFileExtension, "LogicSchemas", "LogicSchema", log);
 
 		// Get all Monitor schemas
 		//
-		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
+		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), QLatin1String(".") + ::MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
 
 		return result;
 	}
@@ -231,7 +231,7 @@ namespace Builder
 
 			// Add file to build result
 			//
-			result = buildResultWriter->addFile(subDir, schema->schemaId() + "." + fileExtension, schema->schemaId(), group, file->data());
+			result = buildResultWriter->addFile(subDir, schema->schemaId() + fileExtension, schema->schemaId(), group, file->data());
 			if (result == false)
 			{
 				returnResult = false;
@@ -242,7 +242,7 @@ namespace Builder
 
 			schemaFile.id = schema->schemaId();
 			schemaFile.subDir = subDir;
-			schemaFile.fileName = schema->schemaId() + "." + fileExtension;		// File is stored under this name
+			schemaFile.fileName = schema->schemaId() + fileExtension;		// File is stored under this name
 			schemaFile.group = group;
 			schemaFile.details = schema->details();
 

@@ -423,6 +423,17 @@ namespace VFrame30
 	QRectF PosRectImpl::boundingRectInDocPt() const
 	{
 		QRectF result(m_leftDocPt, m_topDocPt, m_widthDocPt, m_heightDocPt);
+
+		if (std::abs(result.left() - result.right()) < 0.000001)
+		{
+			result.setRight(result.left() + 0.000001f);
+		}
+
+		if (std::abs(result.bottom() - result.top()) < 0.000001)
+		{
+			result.setBottom(result.top() + 0.000001f);
+		}
+
 		return result;
 	}
 

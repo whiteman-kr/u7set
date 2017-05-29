@@ -56,6 +56,8 @@ void TcpSignalClient::onDisconnection()
 {
 	qDebug() << "TcpSignalClient::onDisconnection";
 
+	theSignals.invalidateAllSignalStates();
+
 	emit connectionReset();
 }
 
@@ -309,15 +311,15 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 
 	for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
 	{
-		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignalparams(i);
+		const ::Proto::AppSignalParam& protoSignal = m_getSignalParamReply.appsignalparams(i);
 
-		Signal s;
-		s.serializeFromProtoAppSignal(&protoSignal);
+		AppSignalParam s;
+		s.load(protoSignal);
 
 		assert(s.hash() != 0);
-		assert(s.appSignalID().isEmpty() == false);
+		assert(s.appSignalId().isEmpty() == false);
 
-		if (s.hash() != 0 && s.appSignalID().isEmpty() == false)
+		if (s.hash() != 0 && s.appSignalId().isEmpty() == false)
 		{
 			theSignals.addSignal(s);
 		}
@@ -440,7 +442,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		}
 
 		AppSignalState state;
-		state.getProtoAppSignalState(&protoState);
+		state.load(protoState);
 
 		theSignals.setState(protoState.hash(), state);
 	}
@@ -452,8 +454,8 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort h1 = configuration.das1.address();
-	HostAddressPort h2 = configuration.das2.address();
+	HostAddressPort h1 = configuration.ads1.address();
+	HostAddressPort h2 = configuration.ads2.address();
 
 	setServers(h1, h2, true);
 

@@ -5,9 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets concurrent serialport network sql qml xml
-win32 {
-QT       += axcontainer
-}
+#axcontainer
 
 TARGET = Metrology
 TEMPLATE = app
@@ -92,7 +90,7 @@ SOURCES += \
     SignalBase.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../lib/AppSignalState.cpp \
+    ../lib/AppSignal.cpp \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
@@ -120,6 +118,7 @@ SOURCES += \
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp
 
+#../lib/ExcelHelper.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -161,7 +160,7 @@ HEADERS  += \
     SignalBase.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../lib/AppSignalState.h \
+    ../lib/AppSignal.h \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
@@ -188,7 +187,7 @@ HEADERS  += \
     RackBase.h \
     MeasureBase.h \
     ../lib/CircularLogger.h
-
+#../lib/ExcelHelper.h
 
 FORMS    +=
 

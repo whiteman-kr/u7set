@@ -241,64 +241,84 @@ int main(int argc, char *argv[])
 		git_reference_free(currentReference);
 	}
 
-	git_oid branch_oid = {0};
-	vector<git_oid> branch_history;
-	REPORT_RETURN1(git_reference_name_to_id(&branch_oid, repo, ("refs/remotes/origin/"+branchName).c_str()));
-	print_commit_info("LAST_SERVER_COMMIT", branch_oid, &branch_history);
+	int fileCount = -1;
 
-	// Fill local local commit history vector
-	//
-	git_oid head_oid = {0};
-	vector<git_oid> head_history;
-	REPORT_RETURN1(git_reference_name_to_id(&head_oid, repo, "HEAD"));
-	git_revwalk *walker;
-	REPORT(git_revwalk_new(&walker, repo))
-	git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL | GIT_SORT_TIME);
-	REPORT(git_revwalk_push(walker, &head_oid));
-
-	git_oid walked_oid;
-	while (!git_revwalk_next(&walked_oid, walker))
+	if (branchName == "HEAD")
 	{
-		head_history.insert(head_history.begin(), walked_oid);
-	}
-	//
+		branchName += " is detached";
+		versionInfoText << "#define " << "LAST_SERVER_COMMIT_SHA \"unknown\"\n";
+		versionInfoText << "#define " << "LAST_SERVER_COMMIT_NUMBER 0\n";
+		versionInfoText << "#define " << "LAST_SERVER_COMMIT_AUTHOR \"unknown\"\n";
+		versionInfoText << "#define " << "LAST_SERVER_COMMIT_DATE \"unknown\"\n";
+		versionInfoText << "#define " << "LAST_SERVER_COMMIT_DESCRIPTION \"unknown\"\n\n";
 
-	unsigned int commit_index = 0;
-	for (; commit_index < std::min(branch_history.size(), head_history.size()); commit_index++)
-	{
-		if (memcmp(branch_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
-		{
-			break;
-		}
-	}
-	git_oid used_server_oid = branch_history[commit_index - 1];
-	print_commit_info("USED_SERVER_COMMIT", used_server_oid);
-
-	versionInfoText << "const char* const ChangedFilesList[] =\n{\n";
-
-	git_tree *tree = NULL;
-	git_diff *diff = NULL;
-	git_commit *commit = NULL;
-	REPORT(git_commit_lookup(&commit, repo, &used_server_oid));
-	REPORT(git_tree_lookup(&tree, repo, git_commit_tree_id(commit)));
-	REPORT(git_diff_tree_to_workdir_with_index(&diff, repo, tree, NULL));
-	int fileCount = 0;
-#if defined(_WIN32) || LIBGIT2_VER_MINOR < 23
-	REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, &fileCount));
-#else
-	REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, nullptr, &fileCount));
-#endif
-
-	if (fileCount == 0)
-	{
-		versionInfoText << "\t\" \"\n"
-					<< "};\n\n"
-					<< "const uint CHANGED_FILES_COUNT = 0;\n\n";
+		versionInfoText << "#define " << "USED_SERVER_COMMIT_SHA \"unknown\"\n";
+		versionInfoText << "#define " << "USED_SERVER_COMMIT_NUMBER 0\n";
+		versionInfoText << "#define " << "USED_SERVER_COMMIT_AUTHOR \"unknown\"\n";
+		versionInfoText << "#define " << "USED_SERVER_COMMIT_DATE \"unknown\"\n";
+		versionInfoText << "#define " << "USED_SERVER_COMMIT_DESCRIPTION \"unknown\"\n\n";
 	}
 	else
 	{
-		versionInfoText << "};\n\n"
-					<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
+		git_oid branch_oid = {0};
+		vector<git_oid> branch_history;
+		REPORT_RETURN1(git_reference_name_to_id(&branch_oid, repo, ("refs/remotes/origin/"+branchName).c_str()));
+		print_commit_info("LAST_SERVER_COMMIT", branch_oid, &branch_history);
+
+		// Fill local local commit history vector
+		//
+		git_oid head_oid = {0};
+		vector<git_oid> head_history;
+		REPORT_RETURN1(git_reference_name_to_id(&head_oid, repo, "HEAD"));
+		git_revwalk *walker;
+		REPORT(git_revwalk_new(&walker, repo))
+				git_revwalk_sorting(walker, GIT_SORT_TOPOLOGICAL | GIT_SORT_TIME);
+		REPORT(git_revwalk_push(walker, &head_oid));
+
+		git_oid walked_oid;
+		while (!git_revwalk_next(&walked_oid, walker))
+		{
+			head_history.insert(head_history.begin(), walked_oid);
+		}
+		//
+
+		unsigned int commit_index = 0;
+		for (; commit_index < std::min(branch_history.size(), head_history.size()); commit_index++)
+		{
+			if (memcmp(branch_history[commit_index].id,head_history[commit_index].id, GIT_OID_RAWSZ) != 0)
+			{
+				break;
+			}
+		}
+		git_oid used_server_oid = branch_history[commit_index - 1];
+		print_commit_info("USED_SERVER_COMMIT", used_server_oid);
+
+		versionInfoText << "const char* const ChangedFilesList[] =\n{\n";
+
+		git_tree *tree = NULL;
+		git_diff *diff = NULL;
+		git_commit *commit = NULL;
+		REPORT(git_commit_lookup(&commit, repo, &used_server_oid));
+		REPORT(git_tree_lookup(&tree, repo, git_commit_tree_id(commit)));
+		REPORT(git_diff_tree_to_workdir_with_index(&diff, repo, tree, NULL));
+		fileCount = 0;
+#if defined(_WIN32) || LIBGIT2_VER_MINOR < 23
+		REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, &fileCount));
+#else
+		REPORT(git_diff_foreach(diff, each_file_cb, nullptr, nullptr, nullptr, &fileCount));
+#endif
+
+		if (fileCount == 0)
+		{
+			versionInfoText << "\t\" \"\n"
+							<< "};\n\n"
+							<< "const uint CHANGED_FILES_COUNT = 0;\n\n";
+		}
+		else
+		{
+			versionInfoText << "};\n\n"
+							<< "const uint CHANGED_FILES_COUNT = sizeof(ChangedFilesList) / sizeof(ChangedFilesList[0]);\n\n";
+		}
 	}
 
 	if (branchName == "master")
@@ -307,7 +327,7 @@ int main(int argc, char *argv[])
 	}
 	versionInfoText << "#define BUILD_BRANCH \"" << branchName << "\"\n";
 
-	if (fileCount > 0)
+	if (fileCount != 0)
 	{
 		versionInfoText << "#define BUILD_STATE \"Local build\"\n"
 					<< "#ifndef Q_DEBUG\n"

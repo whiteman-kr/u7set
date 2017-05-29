@@ -1,13 +1,12 @@
 #include "DialogUsers.h"
 #include "ui_DialogUsers.h"
-#include "Stable.h"
 #include "Settings.h"
 
 //
 // DialogUsers
 //
 
-DialogUsers::DialogUsers(const UserManager &userManager, QWidget *parent) :
+DialogUsers::DialogUsers(const UserManager& userManager, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogUsers),
 	m_userManager(userManager)
@@ -15,9 +14,9 @@ DialogUsers::DialogUsers(const UserManager &userManager, QWidget *parent) :
 	ui->setupUi(this);
 
 	QStringList headerLabels;
-    headerLabels<<tr("Name");
-    headerLabels<<tr("Description");
-    headerLabels<<tr("Administrator");
+	headerLabels << tr("Name");
+	headerLabels << tr("Description");
+	headerLabels << tr("Administrator");
 
 	ui->m_tree->setColumnCount(headerLabels.size());
 	ui->m_tree->setHeaderLabels(headerLabels);
@@ -68,19 +67,19 @@ void DialogUsers::on_m_edit_clicked()
 
 	User user = item->data(0, Qt::UserRole).value<User>();
 
-    QString oldPassword = user.password();
+	QString oldPassword = user.password();
 
-    QString passwordPrompt = tr("<Password>");
-    user.setPassword(passwordPrompt);
+	QString passwordPrompt = tr("<Password>");
+	user.setPassword(passwordPrompt);
 
 	std::shared_ptr<User> userPtr = std::make_shared<User>();
 	*userPtr = user;
 
-    DialogProperties d(userPtr, this, false);
+	DialogProperties d(userPtr, this, false);
 
 	if (d.exec() == QDialog::Accepted)
 	{
-		user = *userPtr;
+		user =* userPtr;
 
 		if (user.password() == passwordPrompt)
 		{
@@ -107,13 +106,13 @@ void DialogUsers::on_m_remove_clicked()
 		return;
 	}
 
-    User user = item->data(0, Qt::UserRole).value<User>();
+	User user = item->data(0, Qt::UserRole).value<User>();
 
-    if (user.name() == "Administrator")
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Can't delete the built-in Administrator account!"));
-        return;
-    }
+	if (user.name() == "Administrator")
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Can't delete the built-in Administrator account!"));
+		return;
+	}
 
 	QTreeWidgetItem* deleteItem = ui->m_tree->takeTopLevelItem(ui->m_tree->indexOfTopLevelItem(item));
 	if (deleteItem == nullptr)
@@ -124,7 +123,7 @@ void DialogUsers::on_m_remove_clicked()
 	delete deleteItem;
 }
 
-void DialogUsers::on_m_tree_doubleClicked(const QModelIndex &index)
+void DialogUsers::on_m_tree_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 	if (theSettings.admin() == true)
@@ -147,7 +146,7 @@ void DialogUsers::on_DialogUsers_accepted()
 	}
 }
 
-void DialogUsers::showUserData(QTreeWidgetItem *item, const User& user)
+void DialogUsers::showUserData(QTreeWidgetItem* item, const User& user)
 {
 	if (item == nullptr)
 	{
@@ -159,7 +158,7 @@ void DialogUsers::showUserData(QTreeWidgetItem *item, const User& user)
 
 	l << user.name();
 	l << user.description();
-    l << (user.admin() ? tr("Yes") : "");
+	l << (user.admin() ? tr("Yes") : "");
 
 	int i = 0;
 	for (auto s: l)

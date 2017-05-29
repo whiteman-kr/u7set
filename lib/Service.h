@@ -195,7 +195,8 @@ private:
 
 	ServiceState m_state = ServiceState::Stopped;
 
-	ServiceWorker& m_serviceWorker;
+	ServiceWorker& m_serviceWorkerFactory;
+	ServiceWorker* m_serviceWorker = nullptr;
 
 	SimpleThread* m_serviceWorkerThread = nullptr;
 	UdpSocketThread* m_baseRequestSocketThread = nullptr;

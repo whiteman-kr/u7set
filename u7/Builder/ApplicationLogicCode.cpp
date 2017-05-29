@@ -1875,9 +1875,14 @@ namespace Builder
 		mifCode.append("END;");
 	}
 
-
-	void ApplicationLogicCode::getAsmMetadataFields(QStringList& metadataFields)
+	void ApplicationLogicCode::getAsmMetadataFields(QStringList& metadataFields, int* metadataVersion)
 	{
+		if (metadataVersion)
+		{
+			const int ASM_METADATA_VERSION = 1;
+			*metadataVersion = ASM_METADATA_VERSION;
+		}
+
 		metadataFields.clear();
 
 		metadataFields.append("IsCommand");

@@ -57,17 +57,10 @@ HEADERS += VFrame30Lib_global.h \
     Print.h \
     VFrame30Library.h \
     HorzVertLinks.h \
-	../lib/TypesAndEnums.h \
 	Configuration.h \
     VFrame30.h \
-    ../lib/StreamedData.h \
-    ../lib/ProtoSerialization.h \
-    ../lib/CUtils.h \
 	MonitorSchema.h \
-    ../lib/DbStruct.h \
     Afb.h \
-    ../lib/DebugInstCounter.h \
-	../lib/PropertyObject.h \
     Schema.h \
     LogicSchema.h \
     WiringSchema.h \
@@ -82,28 +75,33 @@ HEADERS += VFrame30Lib_global.h \
     SchemaItemPath.h \
     SchemaItemRect.h \
     SchemaItemSignal.h \
+    SchemaItemControl.h \
+    SchemaItemPushButton.h \
+    SchemaItemLineEdit.h \
+    SchemaItemValue.h \
     BaseSchemaWidget.h \
     SchemaPoint.h \
-    ../lib/Types.h \
     PropertyNames.h \
-    ../lib/AppSignalState.h \
-    ../lib/AppSignalManager.h \
-    ../lib/Signal.h \
-    ../lib/XmlHelper.h \
-    ../lib/DeviceObject.h \
     SchemaItemConnection.h \
-    ../lib/HostAddressPort.h \
-    ../lib/Factory.h \
     UfbSchema.h \
     SchemaItemUfb.h \
     SchemaItemTerminator.h \
     MacrosExpander.h \
     Session.h \
-    SchemaItemControl.h \
-    SchemaItemPushButton.h \
-    SchemaItemLineEdit.h \
+    ../lib/TypesAndEnums.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/CUtils.h \
+    ../lib/DebugInstCounter.h \
+    ../lib/PropertyObject.h \
+    ../lib/Types.h \
+    ../lib/AppSignalManager.h \
+    ../lib/DeviceObject.h \
+    ../lib/HostAddressPort.h \
+    ../lib/Factory.h \
     ../lib/Tuning/TuningController.h \
-    SchemaItemValue.h
+    ../lib/AppSignal.h \
+    ../lib/DbStruct.h \
+    ../lib/Tuning/TuningSignalState.h
 
 SOURCES += \
     Settings.cpp \
@@ -119,10 +117,7 @@ SOURCES += \
     VFrame30Library.cpp \
     HorzVertLinks.cpp \
 	Configuration.cpp \
-    ../lib/StreamedData.cpp \
-    ../lib/ProtoSerialization.cpp \
 	MonitorSchema.cpp \
-    ../lib/DbStruct.cpp \
     Afb.cpp \
     Schema.cpp \
     LogicSchema.cpp \
@@ -138,27 +133,29 @@ SOURCES += \
     SchemaItemPath.cpp \
     SchemaItemRect.cpp \
     SchemaItemSignal.cpp \
+    SchemaItemControl.cpp \
+    SchemaItemPushButton.cpp \
+    SchemaItemLineEdit.cpp \
+    SchemaItemValue.cpp \
     BaseSchemaWidget.cpp \
     SchemaPoint.cpp \
-    ../lib/Types.cpp \
     PropertyNames.cpp \
-    ../lib/AppSignalState.cpp \
-    ../lib/AppSignalManager.cpp \
-    ../lib/Signal.cpp \
-    ../lib/XmlHelper.cpp \
-    ../lib/DeviceObject.cpp \
     SchemaItemConnection.cpp \
-    ../lib/HostAddressPort.cpp \
     UfbSchema.cpp \
     SchemaItemUfb.cpp \
     SchemaItemTerminator.cpp \
     MacrosExpander.cpp \
     Session.cpp \
-    SchemaItemControl.cpp \
-    SchemaItemPushButton.cpp \
-    SchemaItemLineEdit.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/Types.cpp \
+    ../lib/AppSignalManager.cpp \
+    ../lib/DeviceObject.cpp \
+    ../lib/HostAddressPort.cpp \
     ../lib/Tuning/TuningController.cpp \
-    SchemaItemValue.cpp
+    ../lib/AppSignal.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/Tuning/TuningSignalState.cpp
+
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
@@ -166,14 +163,17 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-#c++11 support for GCC
+#c++14 support
 #
-unix:QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++14
+
+#Warning level
+#
+CONFIG += warn_on
 
 #Optimization flags
 #
 win32 {
-
     QMAKE_CXXFLAGS += -wd4275
 }
 unix {

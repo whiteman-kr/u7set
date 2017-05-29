@@ -157,15 +157,15 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 				return theOptions.signalInfo().colorFlagValid();
 			}
 
-			if (state.flags().overflow == true)
-			{
-				return theOptions.signalInfo().colorFlagOverflow();
-			}
+//			if (state.flags().overflow == true)
+//			{
+//				return theOptions.signalInfo().colorFlagOverflow();
+//			}
 
-			if (state.flags().underflow == true)
-			{
-				return theOptions.signalInfo().colorFlagUnderflow();
-			}
+//			if (state.flags().underflow == true)
+//			{
+//				return theOptions.signalInfo().colorFlagUnderflow();
+//			}
 		}
 
 		return QVariant();
@@ -315,15 +315,15 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	// check flags
 	//
-	if (state.flags().underflow == true)
-	{
-		stateStr.append(" - Underflow");
-	}
+//	if (state.flags().underflow == true)
+//	{
+//		stateStr.append(" - Underflow");
+//	}
 
-	if (state.flags().overflow == true)
-	{
-		stateStr.append(" - Overflow");
-	}
+//	if (state.flags().overflow == true)
+//	{
+//		stateStr.append(" - Overflow");
+//	}
 
 	return stateStr;
 }

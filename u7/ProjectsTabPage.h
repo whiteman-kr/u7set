@@ -36,12 +36,14 @@ protected:
 	// Data
 	//
 private:
-	QTableWidget* m_pProjectTable;
+	QTableWidget* m_pProjectTable = nullptr;
 
-	QPushButton* m_pNewProject;
-	QPushButton* m_pOpenProject;
-	QPushButton* m_pCloseProject;
-	QPushButton* m_pDeleteProject;
-	QPushButton* m_pRefreshProjectList;
+	QPushButton* m_pNewProject = nullptr;
+	QPushButton* m_pOpenProject = nullptr;
+	QPushButton* m_pCloseProject = nullptr;
+	QPushButton* m_pDeleteProject = nullptr;
+	QPushButton* m_pRefreshProjectList = nullptr;
+
+	QAction* m_refreshAction = nullptr;
 };
 

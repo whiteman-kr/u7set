@@ -12,6 +12,9 @@
 #define ASSERT_RETURN_FALSE			assert(false); \
 									return false;
 
+#define ASSERT_FALSE_CONTINUE		assert(false); \
+									continue;
+
 #define TEST_PTR_RETURN_FALSE(ptr)	if (ptr == nullptr) \
 									{	\
 										assert(false);	\

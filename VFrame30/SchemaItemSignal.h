@@ -1,8 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
-#include "../lib/Signal.h"
-#include "../lib/AppSignalState.h"
+#include "../lib/AppSignal.h"
 
 namespace VFrame30
 {
@@ -38,7 +37,7 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		static QString getCoulumnText(CDrawParam* drawParam, const E::ColumnData& data, const Signal& signal, const AppSignalState& signalState, E::AnalogFormat analogFormat, int precision);
+		static QString getCoulumnText(CDrawParam* drawParam, const E::ColumnData& data, const AppSignalParam& signal, const AppSignalState& signalState, E::AnalogFormat analogFormat, int precision);
 
 	protected:
 		void drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const;

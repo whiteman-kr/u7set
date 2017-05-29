@@ -244,7 +244,7 @@ void ServiceWorker::onThreadFinished()
 
 Service::Service(ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger):
 	m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
-	m_serviceWorker(serviceWorker),
+	m_serviceWorkerFactory(serviceWorker),
 	m_logger(logger),
 	m_timer500ms(this)
 {
@@ -258,15 +258,17 @@ Service::~Service()
 
 void Service::start()
 {
-	startBaseRequestSocketThread();
 	startServiceWorkerThread();
+
+	startBaseRequestSocketThread();
 }
 
 
 void Service::stop()
 {
-	stopServiceWorkerThread();
 	stopBaseRequestSocketThread();
+
+	stopServiceWorkerThread();
 }
 
 
@@ -346,14 +348,14 @@ void Service::startServiceWorkerThread()
 
 	m_state = ServiceState::Starts;
 
-	ServiceWorker* newServiceWorker = m_serviceWorker.createInstance();
+	m_serviceWorker = m_serviceWorkerFactory.createInstance();
 
-	newServiceWorker->setService(this);
+	m_serviceWorker->setService(this);
 
-	connect(newServiceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
-	connect(newServiceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
+	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
+	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
 
-	m_serviceWorkerThread = new SimpleThread(newServiceWorker);
+	m_serviceWorkerThread = new SimpleThread(m_serviceWorker);
 	m_serviceWorkerThread->start();
 }
 
@@ -375,6 +377,7 @@ void Service::stopServiceWorkerThread()
 	delete m_serviceWorkerThread;
 
 	m_serviceWorkerThread = nullptr;
+	m_serviceWorker = nullptr;
 
 	m_state = ServiceState::Stopped;
 }
@@ -382,7 +385,7 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorker.serviceType())].port, m_logger);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorkerFactory.serviceType())].port, m_logger);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
@@ -403,11 +406,16 @@ void Service::stopBaseRequestSocketThread()
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
+	if (m_serviceWorker == nullptr)
+	{
+		return;
+	}
+
 	QMutexLocker locker(&m_mutex);
 
-	const VersionInfo& vi = m_serviceWorker.versionInfo();
+	const VersionInfo& vi = m_serviceWorker->versionInfo();
 
-	serviceInfo.set_type(TO_INT(m_serviceWorker.serviceType()));
+	serviceInfo.set_type(TO_INT(m_serviceWorker->serviceType()));
 
 	serviceInfo.set_majorversion(vi.majorVersion);
 	serviceInfo.set_minorversion(vi.minorVersion);
@@ -420,7 +428,7 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
 
-	m_serviceWorker.getServiceSpecificInfo(serviceInfo);
+	m_serviceWorker->getServiceSpecificInfo(serviceInfo);
 
 	if (m_state != ServiceState::Stopped)
 	{

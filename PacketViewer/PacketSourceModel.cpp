@@ -12,6 +12,7 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include "../lib/DataProtocols.h"
+#include "../lib/DataSource.h"
 #include <QTimer>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :

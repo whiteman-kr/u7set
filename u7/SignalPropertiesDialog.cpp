@@ -430,6 +430,13 @@ void SignalPropertiesDialog::showError(QString errorString)
 	}
 }
 
+void SignalPropertiesDialog::closeEvent(QCloseEvent* event)
+{
+	saveDialogSettings();
+
+	QDialog::closeEvent(event);
+}
+
 bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 {
 	if (s.checkedOut())

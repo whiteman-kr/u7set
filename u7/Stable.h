@@ -91,6 +91,7 @@
 
 #include <QAbstractItemModel>
 #include <QAbstractTableModel>
+#include <QStringListModel>
 
 #include <QCloseEvent>
 
