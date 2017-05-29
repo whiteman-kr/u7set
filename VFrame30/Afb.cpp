@@ -1397,64 +1397,104 @@ namespace Afb
 
 			// Section Properties::Description
 			//
-			QDomElement description = properties.firstChildElement("Description");
-
-			if (description.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Description. AFB %1").arg(m_strID);
-				return false;
-			}
+				QDomElement description = properties.firstChildElement("Description");
 
-			m_description = description.text();
+				if (description.isNull() == true)
+				{
+					*errorMessage = tr("Cant find section Description. AFB %1").arg(m_strID);
+					return false;
+				}
+
+				m_description = description.text();
+			}
 
 			// Section Properties::Category
 			//
-			QDomElement category = properties.firstChildElement("Category");
-
-			if (category.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section Category. AFB %1").arg(m_strID);
-				return false;
-			}
+				QDomElement category = properties.firstChildElement("Category");
 
-			m_category = category.text();
+				if (category.isNull() == true)
+				{
+					*errorMessage = tr("Cant find section Category. AFB %1").arg(m_strID);
+					return false;
+				}
+
+				m_category = category.text();
+			}
 
 			// Section Properties::OpCode
 			//
-			QDomElement opCode = properties.firstChildElement("OpCode");
-
-			if (opCode.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section OpCode. AFB %1").arg(m_strID);
-				return false;
-			}
+				QDomElement opCode = properties.firstChildElement("OpCode");
 
-			m_opCode = opCode.text().toInt();
+				if (opCode.isNull() == true)
+				{
+					*errorMessage = tr("Cant find section OpCode. AFB %1").arg(m_strID);
+					return false;
+				}
+
+				m_opCode = opCode.text().toInt();
+			}
 			//m_type.fromOpCode(m_opCode);
 
 			// Section Properties::HasRam
 			//
-			QDomElement hasRam = properties.firstChildElement("HasRam");
-
-			if (hasRam.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strID);
-				return false;
-			}
+				QDomElement hasRam = properties.firstChildElement("HasRam");
 
-			m_hasRam = hasRam.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+				if (hasRam.isNull() == true)
+				{
+					*errorMessage = tr("Cant find section HasRam. AFB %1").arg(m_strID);
+					return false;
+				}
+
+				m_hasRam = hasRam.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+			}
 
 			// Section Properties::InternalUse
 			//
-			QDomElement internalUse = properties.firstChildElement("InternalUse");
-
-			if (internalUse.isNull() == true)
 			{
-				*errorMessage = tr("Cant find section InternalUse. AFB %1").arg(m_strID);
-				return false;
+				QDomElement internalUse = properties.firstChildElement("InternalUse");
+
+				if (internalUse.isNull() == true)
+				{
+					*errorMessage = tr("Cant find section InternalUse. AFB %1").arg(m_strID);
+					return false;
+				}
+
+				m_internalUse = internalUse.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 			}
 
-			m_internalUse = internalUse.text().compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+			// Section Properties::MinWidth
+			//
+			{
+				QDomElement minWidth = properties.firstChildElement("MinWidth");
+
+				if (minWidth.isNull() == true)
+				{
+					m_minWidth = 10;
+				}
+				else
+				{
+					m_minWidth = qBound(10, minWidth.text().toInt(), 100);
+				}
+			}
+
+			// Section Properties::MinHeight
+			//
+			{
+				QDomElement minHeight = properties.firstChildElement("MinHeight");
+
+				if (minHeight.isNull() == true)
+				{
+					m_minHeight = 4;
+				}
+				else
+				{
+					m_minHeight = qBound(4, minHeight.text().toInt(), 100);
+				}
+			}
 		}
 
 		// Section <Inputs>
@@ -1787,6 +1827,22 @@ namespace Afb
 				s = properies.appendChild(s).toElement();
 				s.appendChild(doc.createTextNode(m_internalUse ? "true" : "false"));
 			}
+
+			// Section Properties::MinWidth
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("MinWidth"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(QString::number(minWidth())));
+			}
+
+			// Section Properties::MinHeight
+			//
+			{
+				QDomElement s = doc.createElement(QLatin1String("MinHeight"));
+				s = properies.appendChild(s).toElement();
+				s.appendChild(doc.createTextNode(QString::number(minHeight())));
+			}
 		}
 
 		// Section <Inputs>
@@ -2003,6 +2059,26 @@ namespace Afb
 	void AfbElement::setInternalUse(bool value)
 	{
 		m_internalUse = value;
+	}
+
+	int AfbElement::minWidth() const
+	{
+		return m_minWidth;
+	}
+
+	void AfbElement::setMinWidth(int value)
+	{
+		m_minWidth = qBound(10, value, 100);
+	}
+
+	int AfbElement::minHeight() const
+	{
+		return m_minHeight;
+	}
+
+	void AfbElement::setMinHeight(int value)
+	{
+		m_minHeight = qBound(4, value, 100);
 	}
 
 	QString AfbElement::libraryScript() const

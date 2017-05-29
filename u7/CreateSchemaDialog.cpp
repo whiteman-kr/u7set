@@ -46,9 +46,12 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	ui->strIdLabel->setText(idLable);
 
-
 	// Set height and width
 	//
+	QRegExp rx("^[A-Za-z\\d_]{1,64}$");
+	QRegExpValidator* strIdValidator = new QRegExpValidator(rx, this);
+	ui->strdIdEdit->setValidator(strIdValidator);
+
 	ui->strdIdEdit->setText(schema->schemaId());
 	ui->captionEdit->setText(schema->caption());
 

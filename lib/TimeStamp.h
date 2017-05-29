@@ -61,4 +61,4 @@ constexpr int64_t operator "" _day(unsigned long long int value)
 	return value * 24 * 3600 * 1000;
 }
 
-#endif TIMESTAMP_H
+#endif //TIMESTAMP_H
