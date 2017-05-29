@@ -26,6 +26,14 @@ const char* const JSON_DATE_TIME_FORMAT_STR = "dd.MM.yyy HH:mm:ss.zzz";
 	}
 
 
+#define	JSON_READ_BOOL(jsonObject, valueName, variable) \
+	{  \
+		QJsonValue jsonValue = jsonObject.value(valueName); \
+		JSON_TEST_VALUE(jsonValue, valueName) \
+		variable = 	jsonValue.toBool(); \
+	}
+
+
 #define	JSON_READ_STRING(jsonObject, valueName, variable) \
 	{  \
 		QJsonValue jsonValue = jsonObject.value(valueName); \

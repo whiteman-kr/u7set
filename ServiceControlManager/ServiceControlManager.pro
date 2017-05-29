@@ -82,7 +82,8 @@ SOURCES += MainWindow.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/AppDataSource.cpp \
-    ../lib/CircularLogger.cpp
+    ../lib/CircularLogger.cpp \
+    TcpConfigServiceClient.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -114,7 +115,8 @@ HEADERS  += MainWindow.h \
     ../lib/ProtoSerialization.h \
     ../lib/HostAddressPort.h \
     ../lib/AppDataSource.h \
-    ../lib/CircularLogger.h
+    ../lib/CircularLogger.h \
+    TcpConfigServiceClient.h
 
 FORMS    +=
 

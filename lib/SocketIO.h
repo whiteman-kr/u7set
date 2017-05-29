@@ -67,9 +67,11 @@ const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
 
 // ConfigurationService specific request IDs
 //
-const quint32	RQID_GET_CONFIGURATION_SERVICE_INFO = 1300,
-				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1301,
-				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1302;
+const quint32	RQID_GET_CONFIGURATION_SERVICE_STATE = 1300,
+				RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST = 1301,
+				RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO = 1302,
+				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1303,
+				RQID_GET_CONFIGURATION_SERVICE_LOG = 1304;	// Could be couple diferent queries
 
 
 // Request error codes
@@ -156,10 +158,14 @@ struct SendFileNext
 };
 
 
-// RQID_GET_CONFIGURATION_SERVICE_INFO reply format
+// RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO reply format
 //
-class ConfigurationServiceInfo : public JsonSerializable
+class ConfigurationServiceBuildInfo : public JsonSerializable
 {
+public:
+	ConfigurationServiceBuildInfo(const Builder::BuildInfo& buildInfo) { m_buildInfo = buildInfo; }
+	ConfigurationServiceBuildInfo() {}
+
 private:
 	Builder::BuildInfo m_buildInfo;
 

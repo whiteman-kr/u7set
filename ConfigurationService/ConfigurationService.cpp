@@ -34,28 +34,6 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 }
 
 
-void ConfigurationServiceWorker::onInformationRequest(UdpRequest request)
-{
-	switch(request.ID())
-	{
-	case RQID_GET_CONFIGURATION_SERVICE_INFO:
-		onGetInfo(request);
-		break;
-
-	case RQID_SET_CONFIGURATION_SERVICE_SETTINGS:
-		onSetSettings(request);
-		break;
-
-	case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
-		onGetSettings(request);
-		break;
-
-	default:
-		assert(false);
-	}
-}
-
-
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 {
 	stopCfgServerThread();
@@ -141,9 +119,9 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgServer* cfgServer = new CfgServer(buildPath, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(buildPath, m_logger);
 
-	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgServer, m_logger);
+	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
 
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 
@@ -190,9 +168,6 @@ void ConfigurationServiceWorker::startUdpThreads()
 {
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO, m_logger);
 
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &ConfigurationServiceWorker::onInformationRequest);
-	connect(this, &ConfigurationServiceWorker::ackInformationRequest, serverSocket, &UdpServerSocket::sendAck);
-
 	m_infoSocketThread = new UdpSocketThread(serverSocket);
 
 	m_infoSocketThread->start();
@@ -205,34 +180,3 @@ void ConfigurationServiceWorker::stopUdpThreads()
 
 	delete m_infoSocketThread;
 }
-
-
-void ConfigurationServiceWorker::onGetInfo(UdpRequest& request)
-{
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	ackInformationRequest(ack);
-}
-
-
-void ConfigurationServiceWorker::onSetSettings(UdpRequest& request)
-{
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	ackInformationRequest(ack);
-}
-
-
-void ConfigurationServiceWorker::onGetSettings(UdpRequest& request)
-{
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	ackInformationRequest(ack);
-}
-

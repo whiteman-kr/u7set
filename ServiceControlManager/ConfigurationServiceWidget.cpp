@@ -1,4 +1,5 @@
 #include "ConfigurationServiceWidget.h"
+#include "TcpConfigServiceClient.h"
 #include <../lib/SocketIO.h>
 #include <QTableView>
 #include <QStandardItemModel>
@@ -29,6 +30,11 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 	addTab(new QTableView(this), "Settings");
 
 	addTab(new QTableView(this), "Log");
+}
+
+ConfigurationServiceWidget::~ConfigurationServiceWidget()
+{
+	dropTcpConnection();
 }
 
 void ConfigurationServiceWidget::updateStateInfo()
@@ -63,22 +69,38 @@ void ConfigurationServiceWidget::updateStateInfo()
 	switch (state)
 	{
 		case ServiceState::Work:
-		{
-			runningStateStr = tr("Running");
+			{
+				runningStateStr = tr("Running");
 
-			m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
+				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
 
-			quint32 time = m_serviceInfo.serviceuptime();
+				quint32 time = m_serviceInfo.serviceuptime();
 
-			int s = time % 60; time /= 60;
-			int m = time % 60; time /= 60;
-			int h = time % 24; time /= 24;
+				int s = time % 60; time /= 60;
+				int m = time % 60; time /= 60;
+				int h = time % 24; time /= 24;
 
-			m_stateTabModel->setData(m_stateTabModel->index(3, 1), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+				m_stateTabModel->setData(m_stateTabModel->index(3, 1), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-			m_stateTabModel->setData(m_stateTabModel->index(4, 0), "Client request address");
-			m_stateTabModel->setData(m_stateTabModel->index(4, 1), QHostAddress(m_serviceInfo.clientrequestip()).toString() + QString(":%1").arg(m_serviceInfo.clientrequestport()));
-		}
+				quint32 ip = m_serviceInfo.clientrequestip();
+				quint16 port = m_serviceInfo.clientrequestport();
+				m_stateTabModel->setData(m_stateTabModel->index(4, 0), "Client request address");
+				m_stateTabModel->setData(m_stateTabModel->index(4, 1), QHostAddress(ip).toString() + QString(":%1").arg(port));
+
+				if (m_tcpClientSocket != nullptr)
+				{
+					HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
+					if (curAddress.address32() != ip || curAddress.port() != port)
+					{
+						dropTcpConnection();
+					}
+				}
+
+				if (m_tcpClientSocket == nullptr)
+				{
+					createTcpConnection(ip, port);
+				}
+			}
 
 			break;
 
@@ -109,4 +131,17 @@ void ConfigurationServiceWidget::updateStateInfo()
 	}
 
 	m_stateTabModel->setData(m_stateTabModel->index(2, 1), runningStateStr);
+}
+
+void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+{
+	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
+	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
+
+	m_tcpClientThread->start();
+}
+
+void ConfigurationServiceWidget::dropTcpConnection()
+{
+	m_tcpClientThread->quitAndWait();
 }

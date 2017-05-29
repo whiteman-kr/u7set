@@ -205,7 +205,7 @@ bool ConfigurationServiceSettings::fromJson(const QJsonObject& jsonObject, int)
 
 
 
-void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject) const
+void ConfigurationServiceBuildInfo::toJson(QJsonObject& jsonObject) const
 {
 	jsonObject.insert("project", m_buildInfo.project);
 	jsonObject.insert("buildID", m_buildInfo.id);
@@ -217,8 +217,17 @@ void ConfigurationServiceInfo::toJson(QJsonObject& jsonObject) const
 	JSON_WRITE_DATETIME(jsonObject, "date", m_buildInfo.date);
 }
 
-bool ConfigurationServiceInfo::fromJson(const QJsonObject &/*jsonObject*/, int /*version*/)
+bool ConfigurationServiceBuildInfo::fromJson(const QJsonObject &jsonObject, int /*version*/)
 {
+	JSON_READ_STRING(jsonObject, "project", m_buildInfo.project);
+	JSON_READ_INT(jsonObject, "buildID", m_buildInfo.id);
+	JSON_READ_BOOL(jsonObject, "release", m_buildInfo.release);
+	JSON_READ_INT(jsonObject, "changeset", m_buildInfo.changeset);
+	JSON_READ_STRING(jsonObject, "user", m_buildInfo.user);
+	JSON_READ_STRING(jsonObject, "workstation", m_buildInfo.workstation);
+
+	JSON_READ_DATETIME(jsonObject, "date", m_buildInfo.date);
+
 	return true;
 }
 
