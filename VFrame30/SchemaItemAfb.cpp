@@ -525,7 +525,12 @@ namespace VFrame30
 
 		if (minTextHeight < minPinHeight)
 		{
-			return minPinHeight;
+			minTextHeight = minPinHeight;
+		}
+
+		if (minTextHeight < m_cachedGridSize * static_cast<double>(m_afbElement.minHeight()))
+		{
+			minTextHeight = m_cachedGridSize * static_cast<double>(m_afbElement.minHeight());
 		}
 
 		return minTextHeight;
@@ -538,30 +543,7 @@ namespace VFrame30
 		m_cachedGridSize = gridSize;
 		m_cachedPinGridStep = pinGridStep;
 
-		return m_cachedGridSize * 16;
-
-//		std::shared_ptr<Afb::AfbElement> afb = schema->afbCollection().get(afbStrID());
-//		if (afb.get() == nullptr)
-//		{
-//			// Such AfbItem was not found
-//			//
-//			assert(afb.get() != nullptr);
-//			return m_cachedGridSize * 16;
-//			return;
-//		}
-
-//		QFont font(m_font.name(), m_font.drawSize());
-//		QFontMetricsF fm(font);
-
-//		double minTextWide = fm.width(afb->caption());
-
-//		double minWidth = CUtils::snapToGrid(minTextWide, gridSize);
-
-//		minWidth = std::max(minWidth, m_cachedGridSize * 16);
-
-//		// --
-//		//
-//		return m_cachedGridSize * 16;
+		return m_cachedGridSize * m_afbElement.minWidth();
 	}
 
 	void SchemaItemAfb::addSpecificParamProperties()

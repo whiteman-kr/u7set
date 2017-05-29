@@ -309,6 +309,12 @@ private:
 		bool internalUse() const;
 		void setInternalUse(bool value);
 
+		int minWidth() const;
+		void setMinWidth(int value);
+
+		int minHeight() const;
+		void setMinHeight(int value);
+
 		QString libraryScript() const;
 		void setLibraryScript(const QString& value);
 
@@ -344,6 +350,8 @@ private:
 		int m_opCode = -1;
 		bool m_hasRam = false;
 		bool m_internalUse = false;
+		int m_minWidth = 16;			// Min width in GridSize, so read minwidth is m_minWidth * GridSize
+		int m_minHeight = 0;
 
 		QString m_libraryScript;
 		QString m_afterCreationScript;
