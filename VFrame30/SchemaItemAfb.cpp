@@ -653,6 +653,19 @@ namespace VFrame30
 		return result.toBool();
 	}
 
+	bool SchemaItemAfb::setParamVisible(const QString& name, bool visible)
+	{
+		for (Afb::AfbParam& p : m_afbElement.params())
+		{
+			if (p.caption() == name)
+			{
+				p.setVisible(visible);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void SchemaItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
 	{
 		addInput(opIndex, caption);
