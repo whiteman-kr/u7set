@@ -51,6 +51,9 @@ void TcpConfigServiceClient::onDisconnection()
 	{
 		m_updateStatesTimer->stop();
 	}
+
+	m_buildInfoIsReady = false;
+	emit disconnected();
 }
 
 
@@ -83,6 +86,9 @@ void TcpConfigServiceClient::onGetConfigurationSerivceLoadedBuildInfoReply(const
 	info.readFromJson(data);
 
 	m_buildInfo = info.buildInfo();
+
+	m_buildInfoIsReady = true;
+	emit buildInfoLoaded();
 }
 
 void TcpConfigServiceClient::updateState()

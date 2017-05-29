@@ -18,6 +18,7 @@ class TcpConfigServiceClient : public Tcp::Client
 private:
 	QTimer* m_updateStatesTimer = nullptr;
 	Builder::BuildInfo m_buildInfo;
+	bool m_buildInfoIsReady = false;
 
 	void onGetConfigurationSerivceLoadedBuildInfoReply(const char* replyData, quint32 replyDataSize);
 
@@ -25,11 +26,7 @@ private slots:
 	void updateState();
 
 signals:
-	void dataSourcesInfoLoaded();
-	void appSignalListLoaded();
-
-	void dataSoursesStateUpdated();
-	void appSignalsStateUpdated();
+	void buildInfoLoaded();
 
 	void disconnected();
 
@@ -49,4 +46,5 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
+	bool buildInfoIsReady() { return m_buildInfoIsReady; }
 };

@@ -15,12 +15,14 @@ public:
 
 public slots:
 	void updateStateInfo();
+	void updateBuildInfo();
 
 private:
 	void createTcpConnection(quint32 ip, quint16 port);
 	void dropTcpConnection();
 
 	QStandardItemModel* m_stateTabModel = nullptr;
+	QStandardItemModel* m_buildTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 };

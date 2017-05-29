@@ -16,17 +16,35 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 	stateTableView->verticalHeader()->hide();
 	stateTableView->horizontalHeader()->setDefaultSectionSize(250);
 
-	m_stateTabModel = new QStandardItemModel(3, 2, this);
+	m_stateTabModel = new QStandardItemModel(1, 2, this);
 	stateTableView->setModel(m_stateTabModel);
 
 	m_stateTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_stateTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
 	m_stateTabModel->setData(m_stateTabModel->index(0, 0), "Connected to CfgSrv");
+	m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
 
 	addTab(stateTableView, "State");
 	addTab(new QTableView(this), "Clients");
-	addTab(new QTableView(this), "Build Info");
+
+	QTableView* buildInfoTableView = new QTableView(this);
+
+	buildInfoTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(stateTableView->fontMetrics().height() * 1.4));
+	buildInfoTableView->verticalHeader()->hide();
+	buildInfoTableView->horizontalHeader()->setDefaultSectionSize(250);
+
+	m_buildTabModel = new QStandardItemModel(1, 2, this);
+	buildInfoTableView->setModel(m_buildTabModel);
+
+	m_buildTabModel->setHeaderData(0, Qt::Horizontal, "Property");
+	m_buildTabModel->setHeaderData(1, Qt::Horizontal, "Value");
+
+	m_buildTabModel->setData(m_buildTabModel->index(0, 0), "Build status");
+	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
+
+	addTab(buildInfoTableView, "Build Info");
+
 	addTab(new QTableView(this), "Settings");
 
 	addTab(new QTableView(this), "Log");
@@ -133,10 +151,51 @@ void ConfigurationServiceWidget::updateStateInfo()
 	m_stateTabModel->setData(m_stateTabModel->index(2, 1), runningStateStr);
 }
 
+void ConfigurationServiceWidget::updateBuildInfo()
+{
+	if (m_tcpClientSocket->buildInfoIsReady() == false)
+	{
+		m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
+		m_buildTabModel->setRowCount(1);
+	}
+	else
+	{
+		const Builder::BuildInfo& b = m_tcpClientSocket->buildInfo();
+
+		m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Loaded");
+
+		m_buildTabModel->setRowCount(8);
+
+		m_buildTabModel->setData(m_buildTabModel->index(1, 0), "Project name");
+		m_buildTabModel->setData(m_buildTabModel->index(1, 1), b.project);
+
+		m_buildTabModel->setData(m_buildTabModel->index(2, 0), "Build type");
+		m_buildTabModel->setData(m_buildTabModel->index(2, 1), b.typeStr());
+
+		m_buildTabModel->setData(m_buildTabModel->index(3, 0), "Build No");
+		m_buildTabModel->setData(m_buildTabModel->index(3, 1), b.id);
+
+		m_buildTabModel->setData(m_buildTabModel->index(4, 0), "Build date");
+		m_buildTabModel->setData(m_buildTabModel->index(4, 1), b.dateStr());
+
+		m_buildTabModel->setData(m_buildTabModel->index(5, 0), "Changeset");
+		m_buildTabModel->setData(m_buildTabModel->index(5, 1), b.changeset);
+
+		m_buildTabModel->setData(m_buildTabModel->index(6, 0), "User name");
+		m_buildTabModel->setData(m_buildTabModel->index(6, 1), b.user);
+
+		m_buildTabModel->setData(m_buildTabModel->index(7, 0), "Workstation");
+		m_buildTabModel->setData(m_buildTabModel->index(7, 1), b.workstation);
+	}
+}
+
 void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
-	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, PORT_APP_DATA_SERVICE_CLIENT_REQUEST));
+	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
+
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::disconnected, this, &ConfigurationServiceWidget::updateBuildInfo);
 
 	m_tcpClientThread->start();
 }
@@ -144,4 +203,6 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 void ConfigurationServiceWidget::dropTcpConnection()
 {
 	m_tcpClientThread->quitAndWait();
+
+	m_tcpClientSocket = nullptr;
 }
