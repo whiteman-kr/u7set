@@ -36,6 +36,7 @@ public:
 signals:
 	void openFileSignal(std::vector<DbFileInfo> files);
 	void viewFileSignal(std::vector<DbFileInfo> files);
+	void cloneFileSignal(DbFileInfo file);
 	void addFileSignal();
 	void deleteFileSignal(std::vector<DbFileInfo> files);
 	void checkInSignal(std::vector<DbFileInfo> files);
@@ -56,6 +57,7 @@ protected slots:
 	void slot_compare();
 	void slot_showHistoryForAllSchemas();
 	void slot_AddFile();
+	void slot_cloneFile();
 	void slot_DeleteFile();
 	void slot_GetWorkcopy();
 	void slot_SetWorkcopy();
@@ -103,6 +105,7 @@ protected:
 	// --
 	QAction* m_separatorAction1 = nullptr;
 	QAction* m_addFileAction = nullptr;
+	QAction* m_cloneFileAction = nullptr;
 	QAction* m_deleteFileAction = nullptr;
 	// --
 	QAction* m_separatorAction2 = nullptr;
@@ -142,7 +145,7 @@ protected slots:
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
-	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema);
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog);
 
 	void deleteFile(std::vector<DbFileInfo> files);
 
@@ -151,6 +154,7 @@ protected slots:
 
 	void openFiles(std::vector<DbFileInfo> files);
 	void viewFiles(std::vector<DbFileInfo> files);
+	void cloneFile(DbFileInfo file);
 
 	void refreshFiles();
 

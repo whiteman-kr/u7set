@@ -3798,7 +3798,7 @@ void EquipmentTabPage::CreateActions()
 	m_inOutsToSignals = new QAction(tr("Add Inputs/Outs to App Signals"), this);
 	m_inOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
 	m_inOutsToSignals->setEnabled(false);
-	m_inOutsToSignals->setVisible(false);
+	//m_inOutsToSignals->setVisible(false);
 	connect(m_inOutsToSignals, &QAction::triggered, m_equipmentView, &EquipmentView::addInOutsToSignals);
 
 	m_showAppSignals = new QAction(tr("Show Application Signals"), this);
@@ -3818,30 +3818,30 @@ void EquipmentTabPage::CreateActions()
 	m_addLogicSchemaToLm = new QAction(tr("Add AppLogic Schema..."), this);
 	m_addLogicSchemaToLm->setStatusTip(tr("Add Application Logic Schema to selected module"));
 	m_addLogicSchemaToLm->setEnabled(false);
-	m_addLogicSchemaToLm->setVisible(false);
+	//m_addLogicSchemaToLm->setVisible(false);
 	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
 
 	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
 	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
 	m_showLmsLogicSchemas->setEnabled(false);
-	m_showLmsLogicSchemas->setVisible(false);
+	//m_showLmsLogicSchemas->setVisible(false);
 	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
 
 	//-----------------------------------
 	m_separatorOptoConnection = new QAction(tr("Connections"), this);
 	m_separatorOptoConnection->setSeparator(true);
 
-	m_addOptoConnection = new QAction(tr("Add Opto Connection..."), this);
-	m_addOptoConnection->setStatusTip(tr("Add opto connection to selected two opto ports"));
+	m_addOptoConnection = new QAction(tr("Create Opto Connection..."), this);
+	m_addOptoConnection->setStatusTip(tr("Create optical connection for TWO selected opto ports"));
 	m_addOptoConnection->setEnabled(false);
-	m_addOptoConnection->setVisible(false);
+	//m_addOptoConnection->setVisible(false);
 	connect(m_addOptoConnection, &QAction::triggered, m_equipmentView, &EquipmentView::addOptoConnection);
 
 
 	m_showModuleOptoConnections = new QAction(tr("Show Connections..."), this);
 	m_showModuleOptoConnections->setStatusTip(tr("Show module or opto port connections"));
 	m_showModuleOptoConnections->setEnabled(false);
-	m_showModuleOptoConnections->setVisible(false);
+	//m_showModuleOptoConnections->setVisible(false);
 	connect(m_showModuleOptoConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showModuleOptoConnections);
 
 	//-----------------------------------
@@ -4067,24 +4067,24 @@ void EquipmentTabPage::setActionState()
 	m_addPresetSoftwareAction->setEnabled(false);
 
 	m_inOutsToSignals->setEnabled(false);
-	m_inOutsToSignals->setVisible(false);
+	//m_inOutsToSignals->setVisible(false);
 
 	m_showAppSignals->setEnabled(false);
 
 	m_addAppSignal->setEnabled(false);
-	m_addAppSignal->setVisible(false);
+	//m_addAppSignal->setVisible(false);
 
 	m_addLogicSchemaToLm->setEnabled(false);
-	m_addLogicSchemaToLm->setVisible(false);
+	//m_addLogicSchemaToLm->setVisible(false);
 
 	m_showLmsLogicSchemas->setEnabled(false);
-	m_showLmsLogicSchemas->setVisible(false);
+	//m_showLmsLogicSchemas->setVisible(false);
 
 	m_addOptoConnection->setEnabled(false);
-	m_addOptoConnection->setVisible(false);
+	//m_addOptoConnection->setVisible(false);
 
 	m_showModuleOptoConnections->setEnabled(false);
-	m_showModuleOptoConnections->setVisible(false);
+	//m_showModuleOptoConnections->setVisible(false);
 
 	m_copyObjectAction->setEnabled(false);
 

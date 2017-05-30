@@ -68,6 +68,7 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 
 	addAction(m_separatorAction1);
 	addAction(m_addFileAction);
+	addAction(m_cloneFileAction);
 	addAction(m_deleteFileAction);
 
 	addAction(m_separatorAction2);
@@ -143,6 +144,11 @@ void SchemaFileView::CreateActions()
 	m_addFileAction->setStatusTip(tr("Add file to version control..."));
 	m_addFileAction->setEnabled(false);
 	connect(m_addFileAction, &QAction::triggered, this, &SchemaFileView::slot_AddFile);
+
+	m_cloneFileAction = new QAction(tr("Clone..."), this);
+	m_cloneFileAction->setStatusTip(tr("Clone file..."));
+	m_cloneFileAction->setEnabled(false);
+	connect(m_cloneFileAction, &QAction::triggered, this, &SchemaFileView::slot_cloneFile);
 
 	m_deleteFileAction = new QAction(tr("Delete File..."), this);
 	m_deleteFileAction ->setStatusTip(tr("Mark file as deleted..."));
@@ -349,25 +355,15 @@ void SchemaFileView::slot_ViewFile()
 	std::vector<DbFileInfo> selectedFiles;
 	getSelectedFiles(&selectedFiles);
 
-	std::vector<DbFileInfo> files;
-	files.reserve(selectedFiles.size());
-
-	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-	{
-		auto file = selectedFiles[i];
-		files.push_back(file);
-	}
-
-	if (files.empty() == true)
+	if (selectedFiles.empty() == true)
 	{
 		return;
 	}
 
-	emit viewFileSignal(files);
+	emit viewFileSignal(selectedFiles);
 
 	return;
 }
-
 
 void SchemaFileView::slot_CheckOut()
 {
@@ -529,6 +525,21 @@ void SchemaFileView::slot_AddFile()
 	//  setSortingEnabled() triggers a call to sortByColumn() with the current sort section and order.
 	//
 	setSortingEnabled(true);
+
+	return;
+}
+
+void SchemaFileView::slot_cloneFile()
+{
+	std::vector<DbFileInfo> selectedFiles;
+	getSelectedFiles(&selectedFiles);
+
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	emit cloneFileSignal(selectedFiles.front());
 
 	return;
 }
@@ -799,6 +810,7 @@ void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*
 
 	m_openFileAction->setEnabled(hasOpenPossibility);
 	m_viewFileAction->setEnabled(hasViewPossibility == 1);
+	m_cloneFileAction->setEnabled(hasViewPossibility == 1);
 
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
 	m_checkInAction->setEnabled(hasCheckInPossibility);
@@ -1246,6 +1258,7 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 	//
 	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
 	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
+	connect(m_filesView, &SchemaFileView::cloneFileSignal, this, &SchemaControlTabPage::cloneFile);
 	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
 	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
 	connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
@@ -1310,7 +1323,7 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 
 	// --
 	//
-	addSchemaFile(schema);
+	addSchemaFile(schema, false);
 
 	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
 	if (parentTabWidget == nullptr)
@@ -1402,20 +1415,23 @@ void SchemaControlTabPage::addFile()
 		}
 	}
 
-	addSchemaFile(schema);
+	addSchemaFile(schema, false);
 
 	return;
 }
 
-void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema)
+void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog)
 {
 	// Show dialog to edit schema properties
 	//
-	CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
-
-	if (propertiesDialog.exec() != QDialog::Accepted)
+	if (dontShowPropDialog == false)
 	{
-		return;
+		CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
+
+		if (propertiesDialog.exec() != QDialog::Accepted)
+		{
+			return;
+		}
 	}
 
 	//  Save file in DB
@@ -1773,10 +1789,7 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 
 	// Load file
 	//
-	QTime t;
-	t.start();
 	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
-	qDebug() << "Loading schema time " << t.elapsed();
 
 	if (vf == nullptr)
 	{
@@ -1894,6 +1907,81 @@ void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
 	tabWidget->addTab(editTabPage, tabPageTitle);
 	tabWidget->setCurrentWidget(editTabPage);
 
+	return;
+}
+
+void SchemaControlTabPage::cloneFile(DbFileInfo file)
+{
+	// Get file from the DB
+	//
+	std::shared_ptr<DbFile> out;
+
+	bool result = db()->getLatestVersion(file, &out, this);
+	if (result == false || out == nullptr)
+	{
+		return;
+	}
+
+	// Load file
+	//
+	std::shared_ptr<VFrame30::Schema> schema(VFrame30::Schema::Create(out->data()));
+	if (schema == nullptr)
+	{
+		assert(schema != nullptr);
+		return;
+	}
+
+	// Get new SchemaID
+	//
+	bool ok = false;
+	int globalCounter = db()->nextCounterValue();
+	QString newSchemaId = QInputDialog::getText(this, qAppName(), tr("New SchemaID <b>(cannot be changed later)</b>:"),
+												QLineEdit::Normal,
+												schema->schemaId() + QString::number(globalCounter), &ok,
+												Qt::WindowFlags() & (~Qt::WindowContextHelpButtonHint));
+
+	if (ok == false || newSchemaId.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Set new lables and guids
+	//
+	schema->setSchemaId(newSchemaId);
+	schema->setGuid(QUuid::createUuid());
+
+#ifdef _DEBUG
+	std::vector<QUuid> oldGuids = schema->getGuids();
+	std::set<QUuid> oldGuidsMap = {oldGuids.begin(), oldGuids.end()};
+#endif
+	for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+	{
+		layer->setGuid(QUuid::createUuid());
+
+		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		{
+			item->setNewGuid();
+
+			if (item->isFblItemRect() == true)
+			{
+				globalCounter = db()->nextCounterValue();
+				item->toFblItemRect()->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
+			}
+		}
+	}
+
+#ifdef _DEBUG
+	// Check if all guids were updated
+	//
+	std::vector<QUuid> newGuids = schema->getGuids();
+	for (const QUuid& guid : newGuids)
+	{
+		size_t c = oldGuidsMap.count(guid);
+		assert(c == 0);
+	}
+#endif
+
+	addSchemaFile(schema, true);
 	return;
 }
 
