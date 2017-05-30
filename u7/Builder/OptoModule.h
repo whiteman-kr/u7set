@@ -278,9 +278,13 @@ namespace Hardware
 		int m_portNo = 0;
 
 		Connection::Type m_connectionType = Connection::Type::PortToPort;
-		Connection::SerialMode m_serialMode = Connection::SerialMode::RS232;
 
-		bool m_enableDuplex = false;    // serial mode and OCMN only
+		bool m_enableSerial = false;
+
+		// if m_enableSerial == true settings
+		//
+		Connection::SerialMode m_serialMode = Connection::SerialMode::RS232;
+		bool m_enableDuplex = false;
 
 		bool m_manualSettings = false;
 		int m_manualTxStartAddressW = 0;
