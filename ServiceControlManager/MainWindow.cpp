@@ -143,6 +143,14 @@ void MainWindow::openConnectionInfo(QString text)
 	m_widgets.append(w);
 }
 
+void MainWindow::closeEvent(QCloseEvent *)
+{
+	if (qApp->quitOnLastWindowClosed())
+	{
+		qApp->quit();
+	}
+}
+
 void MainWindow::openEditor()
 {
 	showNormal();

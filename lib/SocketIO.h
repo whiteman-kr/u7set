@@ -67,9 +67,11 @@ const quint32	RQID_GET_DATA_SOURCES_IDS = 1250,
 
 // ConfigurationService specific request IDs
 //
-const quint32	RQID_GET_CONFIGURATION_SERVICE_INFO = 1300,
-				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1301,
-				RQID_SET_CONFIGURATION_SERVICE_SETTINGS = 1302;
+const quint32	RQID_GET_CONFIGURATION_SERVICE_STATE = 1300,
+				RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST = 1301,
+				RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO = 1302,
+				RQID_GET_CONFIGURATION_SERVICE_SETTINGS = 1303,
+				RQID_GET_CONFIGURATION_SERVICE_LOG = 1304;	// Could be couple diferent queries
 
 
 // Request error codes
@@ -156,10 +158,14 @@ struct SendFileNext
 };
 
 
-// RQID_GET_CONFIGURATION_SERVICE_INFO reply format
+// RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO reply format
 //
-class ConfigurationServiceInfo : public JsonSerializable
+class ConfigurationServiceBuildInfo : public JsonSerializable
 {
+public:
+	ConfigurationServiceBuildInfo(const Builder::BuildInfo& buildInfo) { m_buildInfo = buildInfo; }
+	ConfigurationServiceBuildInfo() {}
+
 private:
 	Builder::BuildInfo m_buildInfo;
 
@@ -171,30 +177,27 @@ public:
 };
 
 
-// RQID_SET_CONFIGURATION_SERVICE_SETTINGS request format &
 // RQID_GET_CONFIGURATION_SERVICE_SETTINGS reply format
 //
 class ConfigurationServiceSettings : public JsonSerializable
 {
 private:
-	quint32 m_cfgRequestAddress = 0;
-	int m_cfgRequestPort = 0;
-
-	QString m_buildFolder;
+	QString m_equipmentID;
+	QString m_autoloadBuildPath;
+	QString m_workDirectory;
 
 	virtual void toJson(QJsonObject& jsonObject) const final;
 	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
 
 public:
-	quint32 cfgRequestAddress() { return m_cfgRequestAddress; }
-	QString cfgRequestAddressStr() { return QHostAddress(m_cfgRequestAddress).toString(); }
-	void setCfgRequestAddress(quint32 cfgRequestAddress) { m_cfgRequestAddress = cfgRequestAddress; }
+	QString equipmentID() { return m_equipmentID; }
+	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
 
-	int cfgRequestPort() { return m_cfgRequestPort; }
-	void setCfgRequestPort(int cfgRequestPort) { m_cfgRequestPort = cfgRequestPort; }
+	QString autoloadBuildPath() { return m_autoloadBuildPath; }
+	void setAutoloadBuildPath(const QString& autoloadBuildPath) { m_autoloadBuildPath = autoloadBuildPath; }
 
-	QString buildFolder() { return m_buildFolder; }
-	void setBuildFolder(const QString& buildFolder) { m_buildFolder = buildFolder; }
+	QString workDirectory() { return m_workDirectory; }
+	void setWorkDirectory(const QString& workDirectory) { m_workDirectory = workDirectory; }
 };
 
 

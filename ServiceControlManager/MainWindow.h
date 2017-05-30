@@ -23,6 +23,9 @@ private:
 
     void openConnectionInfo(QString text);
 
+protected:
+	void closeEvent(QCloseEvent *event);
+
 public slots:
     void openEditor();
     void trayIconActivated(QSystemTrayIcon::ActivationReason);
