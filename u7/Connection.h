@@ -2,7 +2,6 @@
 #define CONNECTION_H
 
 #include "../lib/DbController.h"
-#include "./Builder/OptoModule.h"
 
 namespace Hardware
 {
@@ -11,6 +10,21 @@ namespace Hardware
 			public Proto::ObjectSerialization<Connection>
 	{
 		Q_OBJECT
+
+	public:
+		enum class Type
+		{
+			PortToPort,
+			SinglePort
+		};
+		Q_ENUM(Type)
+
+		enum class SerialMode
+		{
+			RS232,
+			RS485
+		};
+		Q_ENUM(SerialMode)
 
 	public:
 		Connection();
@@ -123,17 +137,18 @@ namespace Hardware
 		//
 		//
 
-		OptoPort::SerialMode serialMode() const;
-		void setSerialMode(const OptoPort::SerialMode value);
+		SerialMode serialMode() const;
+		void setSerialMode(const SerialMode value);
 
 		QString serialModeStr() const;
 
-		OptoPort::Mode mode() const;
-		void setMode(const OptoPort::Mode value);
+		Type type() const;
+		void setType(const Type value);
 
-		QString modeStr() const;
+		QString typeStr() const;
 
-		bool isSerial() const;
+		bool isPortToPort() const;
+		bool isSinglePort() const;
 
 		bool enableDuplex() const;
 		void setEnableDuplex(bool value);
@@ -173,8 +188,9 @@ namespace Hardware
 		quint32 m_port2TxRsDataUID = 0;
 		QString m_port2RawDataDescription;
 
-		OptoPort::SerialMode m_serialMode = OptoPort::SerialMode::RS232;
-		OptoPort::Mode m_mode = OptoPort::Mode::Optical;
+		SerialMode m_serialMode = SerialMode::RS232;
+
+		Type m_type = Type::PortToPort;
 
 		bool m_enableDuplex = false;
 		bool m_manualSettings = false;

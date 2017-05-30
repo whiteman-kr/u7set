@@ -8,6 +8,7 @@
 #include "../lib/Signal.h"
 
 #include "RawDataDescription.h"
+#include "../Connection.h"
 
 class LogicModule;
 class OutputLog;
@@ -21,8 +22,10 @@ namespace Builder
 
 namespace Hardware
 {
-	class Connection;
-	class ConnectionStorage;
+//	class Connection;
+//	enum Connection::Type;
+
+//	class ConnectionStorage;
 
 	typedef std::shared_ptr<Connection> ConnectionShared;
 
@@ -97,20 +100,6 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		enum class Mode
-		{
-			Optical,
-			Serial
-		};
-		Q_ENUM(Mode)
-
-		enum class SerialMode
-		{
-			RS232,
-			RS485
-		};
-		Q_ENUM(SerialMode)
-
 		const quint16 NOT_USED_PORT_ID = 0;
 
 		static const int TX_DATA_ID_SIZE_W = sizeof(quint32) / sizeof(quint16);		// size of opto port's txDataID in words
@@ -152,8 +141,8 @@ namespace Hardware
 
 		bool isUsedInConnection() const;
 
-		bool isOptical() const { return m_mode ==  Mode::Optical; }
-		bool isSerial() const { return m_mode ==  Mode::Serial; }
+		bool isPortToPortConnection() const { return m_connectionType ==  Connection::Type::PortToPort; }
+		bool isSinglePortConnection() const { return m_connectionType ==  Connection::Type::SinglePort; }
 
 //		Address16 getTxSignalAddrInBuf(const QString& appSignalID) const;
 
@@ -186,11 +175,11 @@ namespace Hardware
 		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
 		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
 
-		Q_INVOKABLE Mode mode() const { return m_mode; }
-		void setMode(Mode mode) { m_mode = mode; }
+		Q_INVOKABLE Connection::Type connectionType() const { return m_connectionType; }
+		void setConnectionType(Connection::Type type) { m_connectionType = type; }
 
-		Q_INVOKABLE SerialMode serialMode() const { return m_serialMode; }
-		void setSerialMode(SerialMode serialMode) { m_serialMode = serialMode; }
+		Q_INVOKABLE Connection::SerialMode serialMode() const { return m_serialMode; }
+		void setSerialMode(Connection::SerialMode serialMode) { m_serialMode = serialMode; }
 
 		int txBufAddress() const { return m_txBufAddress; }
 		void setTxBufAddress(int address) { m_txBufAddress = address; }
@@ -288,8 +277,8 @@ namespace Hardware
 		QString m_equipmentID;
 		int m_portNo = 0;
 
-		Mode m_mode = Mode::Optical;
-		SerialMode m_serialMode = SerialMode::RS232;
+		Connection::Type m_connectionType = Connection::Type::PortToPort;
+		Connection::SerialMode m_serialMode = Connection::SerialMode::RS232;
 
 		bool m_enableDuplex = false;    // serial mode and OCMN only
 

@@ -858,17 +858,14 @@ void DialogConnections::onReport()
 		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID() << "\r\n";
 		textStream << tr(connection->manualSettings() ? "\r\nMode: manual\r\n" : "\r\nMode: automatic\r\n");
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+		textStream << tr("Port type: ") << connection->typeStr() << "\r\n";
+
+		if (connection->isSinglePort() == true)
 		{
-			textStream << tr("Port mode: Optical")<<"\r\n";
-		}
+			assert(false);		// НЕ ПРАВИЛЬНО!!!! WhiteMan!!!
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
-		{
-			textStream << tr("Port mode: Serial") << "\r\n";
 
-			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
-
+			textStream << tr("Serial mode: ") << connection->serialModeStr() <<"\r\n";
 		}
 
 		if (connection->manualSettings() == true)

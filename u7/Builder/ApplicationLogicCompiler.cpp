@@ -582,11 +582,11 @@ namespace Builder
 
 			list.append(QString(tr("Connection ID:\t\t\t%1")).arg(cn->connectionID()));
 			list.append(QString(tr("Link ID:\t\t\t%1\n")).arg(cn->linkID()));
-			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->modeStr()));
+			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->typeStr()));
 			list.append(QString(tr("Settings:\t\t\t%1")).arg(cn->manualSettings() == true ? "Manual" : "Auto"));
 			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataId() == true ? "Disabled" : "Enabled"));
 
-			if (cn->mode() == Hardware::OptoPort::Mode::Serial)
+			if (cn->isSinglePort() == true)
 			{
 				list.append(QString(tr("Port1 equipmentID:\t\t%1\n")).arg(cn->port1EquipmentID()));
 
@@ -602,9 +602,9 @@ namespace Builder
 			list.append(delim);
 			list.append("");
 
-			switch(cn->mode())
+			switch(cn->type())
 			{
-			case Hardware::OptoPort::Mode::Serial:
+			case Hardware::Connection::Type::SinglePort:
 				{
 					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
@@ -619,7 +619,7 @@ namespace Builder
 				}
 				break;
 
-			case Hardware::OptoPort::Mode::Optical:
+			case Hardware::Connection::Type::PortToPort:
 				{
 					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
@@ -757,7 +757,7 @@ namespace Builder
 				continue;
 			}
 
-			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
+			if (cn->isPortToPort() == true)
 			{
 				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());

@@ -173,7 +173,16 @@ bool ServiceWorker::setStrSetting(const QString& settingName, const QString& val
 
 QString ServiceWorker::getStrSetting(const QString& settingName)
 {
-	return m_settings.value(settingName).toString();
+	CommandLineParser& cp = cmdLineParser();
+
+	QString cmdLineValue = cp.optionValue(settingName);
+
+	if (cmdLineValue.isEmpty() == true)
+	{
+		return m_settings.value(settingName).toString();
+	}
+
+	return cmdLineValue;
 }
 
 

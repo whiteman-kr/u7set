@@ -6,6 +6,7 @@
 
 #include "../LogicModule.h"
 
+#include "OptoModule.h"
 #include "Subsystem.h"
 #include "Connection.h"
 #include "BuildResultWriter.h"

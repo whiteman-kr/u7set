@@ -6,6 +6,7 @@
 #include "../lib/ProtoSerialization.h"
 
 #include "Connection.h"
+#include "./Builder/OptoModule.h"
 
 namespace Hardware
 {
@@ -109,7 +110,7 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(int, s_port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
         ADD_PROPERTY_GETTER_SETTER(quint32, s_port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-        auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(OptoPort::SerialMode, s_serialMode, true, Connection::serialMode, Connection::setSerialMode);
+		auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(Connection::SerialMode, s_serialMode, true, Connection::serialMode, Connection::setSerialMode);
         propSerialMode->setCategory(s_serialCommunicationsOCM);
 
         auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, s_enableDuplex, true, Connection::enableDuplex, Connection::setEnableDuplex);
@@ -118,7 +119,7 @@ namespace Hardware
         auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, s_enableManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
         propManual->setCategory(s_manualSettings);
 
-        ADD_PROPERTY_GETTER_SETTER(OptoPort::Mode, s_mode, true, Connection::mode, Connection::setMode);
+		ADD_PROPERTY_GETTER_SETTER(Connection::Type, s_mode, true, Connection::type, Connection::setType);
 
 		auto propDisableDataID = ADD_PROPERTY_GETTER_SETTER(bool, s_disableDataIDControl, true, Connection::disableDataId, Connection::setDisableDataID);
         propDisableDataID->setCategory(s_miscellaneous);
@@ -144,7 +145,7 @@ namespace Hardware
 		mutableConnection->set_port2rawdatadescription(m_port2RawDataDescription.toUtf8());
 
 		mutableConnection->set_serialmode(static_cast<int>(serialMode()));
-		mutableConnection->set_mode(static_cast<int>(mode()));
+		mutableConnection->set_mode(static_cast<int>(type()));
 		mutableConnection->set_enableduplex(m_enableDuplex);
 		mutableConnection->set_manualsettings(m_manualSettings);
 		mutableConnection->set_disabledataid(m_disableDataID);
@@ -178,8 +179,12 @@ namespace Hardware
 		m_port1RawDataDescription = connection.port1rawdatadescription().c_str();
 		m_port2RawDataDescription = connection.port2rawdatadescription().c_str();
 
-		m_serialMode = static_cast<OptoPort::SerialMode>(connection.serialmode());
-		m_mode = static_cast<OptoPort::Mode>(connection.mode());
+		m_serialMode = static_cast<Connection::SerialMode>(connection.serialmode());
+
+		assert(false);			// переименовать onnection.mode() в connection.type() !!!!
+		m_type = static_cast<Connection::Type>(connection.mode());
+
+
 		m_enableDuplex = connection.enableduplex();
 		m_manualSettings = connection.manualsettings();
 		m_disableDataID = connection.disabledataid();
@@ -232,12 +237,12 @@ namespace Hardware
 
         if (reader.attributes().hasAttribute("SerialMode"))
         {
-            setSerialMode(static_cast<OptoPort::SerialMode>(reader.attributes().value("SerialMode").toInt()));
+			setSerialMode(static_cast<Connection::SerialMode>(reader.attributes().value("SerialMode").toInt()));
         }
 
         if (reader.attributes().hasAttribute("Mode"))
         {
-            setMode(static_cast<OptoPort::Mode>(reader.attributes().value("Mode").toInt()));
+			setType(static_cast<Connection::Type>(reader.attributes().value("Mode").toInt()));
         }
 
         if (reader.attributes().hasAttribute("EnableDuplex"))
@@ -568,12 +573,12 @@ namespace Hardware
         m_port2TxRsDataUID = value;
     }
 
-    OptoPort::SerialMode Connection::serialMode() const
+	Connection::SerialMode Connection::serialMode() const
     {
         return m_serialMode;
     }
 
-    void Connection::setSerialMode(const OptoPort::SerialMode value)
+	void Connection::setSerialMode(const Connection::SerialMode value)
     {
         m_serialMode = value;
     }
@@ -582,10 +587,10 @@ namespace Hardware
 	{
 		switch(m_serialMode)
 		{
-		case OptoPort::SerialMode::RS232:
+		case SerialMode::RS232:
 			return "RS232";
 
-		case OptoPort::SerialMode::RS485:
+		case SerialMode::RS485:
 			return "RS485";
 
 		default:
@@ -595,37 +600,41 @@ namespace Hardware
 		return "RS???";
 	}
 
-    OptoPort::Mode Connection::mode() const
+	Connection::Type Connection::type() const
     {
-        return m_mode;
+		return m_type;
     }
 
-    void Connection::setMode(const OptoPort::Mode value)
+	void Connection::setType(const Connection::Type value)
     {
-        m_mode = value;
+		m_type = value;
     }
 
-	QString Connection::modeStr() const
+	QString Connection::typeStr() const
 	{
-		switch(m_mode)
+		switch(m_type)
 		{
-		case OptoPort::Mode::Optical:
-			return "Optical";
+		case Type::PortToPort:
+			return "PortToPort";
 
-		case OptoPort::Mode::Serial:
-			return "Serial";
+		case Type::SinglePort:
+			return "SinglePort";
 
 		default:
 			assert(false);
 		}
 
-		return "Mode???";
+		return "Type???";
 	}
 
-
-	bool Connection::isSerial() const
+	bool Connection::isPortToPort() const
 	{
-		return m_mode == OptoPort::Mode::Serial;
+		return m_type == Type::PortToPort;
+	}
+
+	bool Connection::isSinglePort() const
+	{
+		return m_type == Type::SinglePort;
 	}
 
     bool Connection::enableDuplex() const
