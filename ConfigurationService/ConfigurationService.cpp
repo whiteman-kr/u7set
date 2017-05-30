@@ -119,7 +119,7 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgControlServer* cfgControlServer = new CfgControlServer(buildPath, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, buildPath, m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
 

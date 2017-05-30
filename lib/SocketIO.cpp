@@ -188,17 +188,17 @@ void Serializable::copyBufferToString(const quint16* buffer, QString &str)
 
 void ConfigurationServiceSettings::toJson(QJsonObject& jsonObject) const
 {
-	jsonObject.insert("cfgRequestAddress", static_cast<qint64>(m_cfgRequestAddress));
-	jsonObject.insert("cfgRequestPort", m_cfgRequestPort);
-	jsonObject.insert("buildFolder", m_buildFolder);
+	jsonObject.insert("equipmentID", m_equipmentID);
+	jsonObject.insert("autoloadBuildPath", m_autoloadBuildPath);
+	jsonObject.insert("workDirectory", m_workDirectory);
 }
 
 
 bool ConfigurationServiceSettings::fromJson(const QJsonObject& jsonObject, int)
 {
-	JSON_READ_INT(jsonObject, "cfgRequestAddress", m_cfgRequestAddress);
-	JSON_READ_INT(jsonObject, "cfgRequestPort", m_cfgRequestPort);
-	JSON_READ_INT(jsonObject, "buildFolder", m_buildFolder);
+	JSON_READ_STRING(jsonObject, "equipmentID", m_equipmentID);
+	JSON_READ_STRING(jsonObject, "autoloadBuildPath", m_autoloadBuildPath);
+	JSON_READ_STRING(jsonObject, "workDirectory", m_workDirectory);
 
 	return true;
 }

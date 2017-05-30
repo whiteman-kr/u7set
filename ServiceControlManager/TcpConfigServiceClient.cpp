@@ -53,6 +53,7 @@ void TcpConfigServiceClient::onDisconnection()
 	}
 
 	m_buildInfoIsReady = false;
+	m_settingsIsReady = false;
 	emit disconnected();
 }
 
@@ -67,9 +68,13 @@ void TcpConfigServiceClient::processReply(quint32 requestID, const char* replyDa
 {
 	switch(requestID)
 	{
-	case RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO:
-		onGetConfigurationSerivceLoadedBuildInfoReply(replyData, replyDataSize);
-		break;
+		case RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO:
+			onGetConfigurationSerivceLoadedBuildInfoReply(replyData, replyDataSize);
+			break;
+
+		case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
+			onGetConfigurationSerivceSettingsReply(replyData, replyDataSize);
+			break;
 
 	default:
 		assert(false);
@@ -89,6 +94,20 @@ void TcpConfigServiceClient::onGetConfigurationSerivceLoadedBuildInfoReply(const
 
 	m_buildInfoIsReady = true;
 	emit buildInfoLoaded();
+
+	sendRequest(RQID_GET_CONFIGURATION_SERVICE_SETTINGS);
+}
+
+void TcpConfigServiceClient::onGetConfigurationSerivceSettingsReply(const char* replyData, quint32 replyDataSize)
+{
+	QByteArray data(replyData, replyDataSize);
+
+	ConfigurationServiceSettings s;
+
+	s.readFromJson(data);
+
+	m_settingsIsReady = true;
+	emit settingsLoaded(s.equipmentID(), s.autoloadBuildPath(), s.workDirectory());
 }
 
 void TcpConfigServiceClient::updateState()

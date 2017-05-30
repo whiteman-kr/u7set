@@ -13,7 +13,7 @@ class CfgControlServer : public CfgServer
 	Q_OBJECT
 
 public:
-	CfgControlServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger);
+	CfgControlServer(const QString& equipmentID, const QString& autoloadBuildPath, const QString& workDirectory, std::shared_ptr<CircularLogger> logger);
 
 	virtual CfgControlServer* getNewInstance() override;
 
@@ -27,4 +27,6 @@ private:
 	void sendServiceLog();
 
 	std::shared_ptr<CircularLogger> m_logger;
+	QString m_equipmentID;
+	QString m_autoloadBuildPath;
 };

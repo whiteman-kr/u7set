@@ -16,6 +16,9 @@ public:
 public slots:
 	void updateStateInfo();
 	void updateBuildInfo();
+	void updateServiceSettings(QString equipmentID, QString autoloadBuildPath, QString workDirectory);
+
+	void clearServiceData();
 
 private:
 	void createTcpConnection(quint32 ip, quint16 port);
@@ -23,6 +26,7 @@ private:
 
 	QStandardItemModel* m_stateTabModel = nullptr;
 	QStandardItemModel* m_buildTabModel = nullptr;
+	QStandardItemModel* m_settingsTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 };

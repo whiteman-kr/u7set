@@ -18,15 +18,19 @@ class TcpConfigServiceClient : public Tcp::Client
 private:
 	QTimer* m_updateStatesTimer = nullptr;
 	Builder::BuildInfo m_buildInfo;
+
 	bool m_buildInfoIsReady = false;
+	bool m_settingsIsReady = false;
 
 	void onGetConfigurationSerivceLoadedBuildInfoReply(const char* replyData, quint32 replyDataSize);
+	void onGetConfigurationSerivceSettingsReply(const char* replyData, quint32 replyDataSize);
 
 private slots:
 	void updateState();
 
 signals:
 	void buildInfoLoaded();
+	void settingsLoaded(QString equipmentID, QString autoloadBuildPath, QString workDirectory);
 
 	void disconnected();
 

@@ -6,16 +6,18 @@
 //
 // -------------------------------------------------------------------------------------
 
-CfgControlServer::CfgControlServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
-	CfgServer(buildFolder, logger),
-	m_logger(logger)
+CfgControlServer::CfgControlServer(const QString& equipmentID, const QString& autoloadBuildPath, const QString& workDirectory, std::shared_ptr<CircularLogger> logger) :
+	CfgServer(workDirectory, logger),
+	m_logger(logger),
+	m_equipmentID(equipmentID),
+	m_autoloadBuildPath(autoloadBuildPath)
 {
 
 }
 
 CfgControlServer* CfgControlServer::getNewInstance()
 {
-	return new CfgControlServer(m_rootFolder, m_logger);
+	return new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_rootFolder, m_logger);
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -69,7 +71,16 @@ void CfgControlServer::sendLoadedBuildInfo()
 
 void CfgControlServer::sendSettings()
 {
+	QByteArray data;
+	ConfigurationServiceSettings settings;
 
+	settings.setEquipmentID(m_equipmentID);
+	settings.setAutoloadBuildPath(m_autoloadBuildPath);
+	settings.setWorkDirectory(m_rootFolder);
+
+	settings.writeToJson(data);
+
+	sendReply(data);
 }
 
 void CfgControlServer::sendServiceLog()
