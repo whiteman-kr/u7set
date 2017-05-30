@@ -1540,15 +1540,12 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalParamSet));
   Connection_descriptor_ = file->message_type(64);
-  static const int Connection_offsets_[18] = {
+  static const int Connection_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2equipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1rawdatadescription_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2rawdatadescription_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, serialmode_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, mode_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, enableduplex_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, manualsettings_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, disabledataid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, generatevhdfile_),
@@ -1559,6 +1556,16 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2txwordsquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2rxwordsquantity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, uuid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1enableserial_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1serialmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1enableduplex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2enableserial_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2serialmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port2enableduplex_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, obsoletemode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, obsoleteserialmode_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, obsoleteenableduplex_),
   };
   Connection_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -2203,33 +2210,39 @@ void protobuf_AddDesc_serialization_2eproto() {
     "e\0305 \001(\001:\0012\022\033\n\014enableTuning\0306 \001(\010:\005false\022"
     "\035\n\022tuningDefaultValue\0307 \001(\001:\0010\"9\n\021AppSig"
     "nalParamSet\022$\n\005items\030\001 \003(\0132\025.Proto.AppSi"
-    "gnalParam\"\253\004\n\nConnection\022\026\n\014ConnectionID"
+    "gnalParam\"\224\006\n\nConnection\022\026\n\014ConnectionID"
     "\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022\032\n\020"
     "Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1RawData"
     "Description\030\005 \001(\t:\000\022!\n\027Port2RawDataDescr"
-    "iption\030\006 \001(\t:\000\022\025\n\nSerialMode\030\007 \001(\005:\0010\022\017\n"
-    "\004Mode\030\010 \001(\005:\0010\022\033\n\014EnableDuplex\030\n \001(\010:\005fa"
-    "lse\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n\rDi"
-    "sableDataID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDF"
-    "ile\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddress\030"
-    "\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003"
-    "479\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\003479\022\036"
-    "\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2T"
-    "xWordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxWord"
-    "sQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Pro"
-    "to.Uuid\"@\n\020SchemaDetailsSet\022,\n\016schemasDe"
-    "tails\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rSc"
-    "hemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaId"
-    "\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfromB"
-    "uild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDes"
-    "criptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n"
-    "\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005gu"
-    "ids\030\027 \003(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007"
-    "Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024C"
-    "onnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output"
-    "\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discr"
-    "ete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022"
-    "\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 12785);
+    "iption\030\006 \001(\t:\000\022\035\n\016ManualSettings\030\013 \001(\010:\005"
+    "false\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017G"
+    "enerateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1TxSt"
+    "artAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuant"
+    "ity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuantity\030\020"
+    " \001(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\001"
+    "0\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024"
+    "Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030"
+    "\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1EnableSerial\030"
+    "\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030\026 \001(\005:\0010"
+    "\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005false\022 \n\021Po"
+    "rt2EnableSerial\030\030 \001(\010:\005false\022\032\n\017Port2Ser"
+    "ialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableDuplex\030\032 "
+    "\001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteM"
+    "ode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005"
+    ":\0010\022#\n\024ObsoleteEnableDuplex\030\n \001(\010:\005false"
+    "\"@\n\020SchemaDetailsSet\022,\n\016schemasDetails\030\002"
+    " \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rSchemaDet"
+    "ails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022"
+    "\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 "
+    "\001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDescriptio"
+    "nFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels"
+    "\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030\027 \003"
+    "(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Display"
+    "\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connecti"
+    "onDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rF"
+    "blSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:"
+    "\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSign"
+    "edInt\020\001\022\t\n\005Float\020\002", 13018);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -30584,9 +30597,6 @@ const int Connection::kPort1EquipmentIDFieldNumber;
 const int Connection::kPort2EquipmentIDFieldNumber;
 const int Connection::kPort1RawDataDescriptionFieldNumber;
 const int Connection::kPort2RawDataDescriptionFieldNumber;
-const int Connection::kSerialModeFieldNumber;
-const int Connection::kModeFieldNumber;
-const int Connection::kEnableDuplexFieldNumber;
 const int Connection::kManualSettingsFieldNumber;
 const int Connection::kDisableDataIDFieldNumber;
 const int Connection::kGenerateVHDFileFieldNumber;
@@ -30597,6 +30607,16 @@ const int Connection::kPort2TxStartAddressFieldNumber;
 const int Connection::kPort2TxWordsQuantityFieldNumber;
 const int Connection::kPort2RxWordsQuantityFieldNumber;
 const int Connection::kUuidFieldNumber;
+const int Connection::kPort1EnableSerialFieldNumber;
+const int Connection::kPort1SerialModeFieldNumber;
+const int Connection::kPort1EnableDuplexFieldNumber;
+const int Connection::kPort2EnableSerialFieldNumber;
+const int Connection::kPort2SerialModeFieldNumber;
+const int Connection::kPort2EnableDuplexFieldNumber;
+const int Connection::kTypeFieldNumber;
+const int Connection::kObsoleteModeFieldNumber;
+const int Connection::kObsoleteSerialModeFieldNumber;
+const int Connection::kObsoleteEnableDuplexFieldNumber;
 #endif  // !_MSC_VER
 
 Connection::Connection()
@@ -30621,9 +30641,6 @@ void Connection::SharedCtor() {
   port2equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   port1rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   port2rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  serialmode_ = 0;
-  mode_ = 0;
-  enableduplex_ = false;
   manualsettings_ = false;
   disabledataid_ = false;
   generatevhdfile_ = false;
@@ -30634,6 +30651,16 @@ void Connection::SharedCtor() {
   port2txwordsquantity_ = 479;
   port2rxwordsquantity_ = 479;
   uuid_ = NULL;
+  port1enableserial_ = false;
+  port1serialmode_ = 0;
+  port1enableduplex_ = false;
+  port2enableserial_ = false;
+  port2serialmode_ = 0;
+  port2enableduplex_ = false;
+  type_ = 0;
+  obsoletemode_ = 0;
+  obsoleteserialmode_ = 0;
+  obsoleteenableduplex_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -30710,25 +30737,34 @@ void Connection::Clear() {
         port2rawdatadescription_->clear();
       }
     }
-    serialmode_ = 0;
-    mode_ = 0;
-    enableduplex_ = false;
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     manualsettings_ = false;
     disabledataid_ = false;
     generatevhdfile_ = false;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     port1txstartaddress_ = 0;
     port1txwordsquantity_ = 479;
     port1rxwordsquantity_ = 479;
     port2txstartaddress_ = 0;
     port2txwordsquantity_ = 479;
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     port2rxwordsquantity_ = 479;
     if (has_uuid()) {
       if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
     }
+    port1enableserial_ = false;
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    port1serialmode_ = 0;
+    port1enableduplex_ = false;
+    port2enableserial_ = false;
+    port2serialmode_ = 0;
+    port2enableduplex_ = false;
+    type_ = 0;
+    obsoletemode_ = 0;
+    obsoleteserialmode_ = 0;
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
+    obsoleteenableduplex_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -30820,51 +30856,51 @@ bool Connection::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_SerialMode;
+        if (input->ExpectTag(56)) goto parse_ObsoleteSerialMode;
         break;
       }
 
-      // optional int32 SerialMode = 7 [default = 0];
+      // optional int32 ObsoleteSerialMode = 7 [default = 0];
       case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_SerialMode:
+         parse_ObsoleteSerialMode:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &serialmode_)));
-          set_has_serialmode();
+                 input, &obsoleteserialmode_)));
+          set_has_obsoleteserialmode();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(64)) goto parse_Mode;
+        if (input->ExpectTag(64)) goto parse_ObsoleteMode;
         break;
       }
 
-      // optional int32 Mode = 8 [default = 0];
+      // optional int32 ObsoleteMode = 8 [default = 0];
       case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_Mode:
+         parse_ObsoleteMode:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &mode_)));
-          set_has_mode();
+                 input, &obsoletemode_)));
+          set_has_obsoletemode();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_EnableDuplex;
+        if (input->ExpectTag(80)) goto parse_ObsoleteEnableDuplex;
         break;
       }
 
-      // optional bool EnableDuplex = 10 [default = false];
+      // optional bool ObsoleteEnableDuplex = 10 [default = false];
       case 10: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_EnableDuplex:
+         parse_ObsoleteEnableDuplex:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &enableduplex_)));
-          set_has_enableduplex();
+                 input, &obsoleteenableduplex_)));
+          set_has_obsoleteenableduplex();
         } else {
           goto handle_uninterpreted;
         }
@@ -31026,6 +31062,118 @@ bool Connection::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(168)) goto parse_Port1EnableSerial;
+        break;
+      }
+
+      // optional bool Port1EnableSerial = 21 [default = false];
+      case 21: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1EnableSerial:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &port1enableserial_)));
+          set_has_port1enableserial();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(176)) goto parse_Port1SerialMode;
+        break;
+      }
+
+      // optional int32 Port1SerialMode = 22 [default = 0];
+      case 22: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1SerialMode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port1serialmode_)));
+          set_has_port1serialmode();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(184)) goto parse_Port1EnableDuplex;
+        break;
+      }
+
+      // optional bool Port1EnableDuplex = 23 [default = false];
+      case 23: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port1EnableDuplex:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &port1enableduplex_)));
+          set_has_port1enableduplex();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(192)) goto parse_Port2EnableSerial;
+        break;
+      }
+
+      // optional bool Port2EnableSerial = 24 [default = false];
+      case 24: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2EnableSerial:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &port2enableserial_)));
+          set_has_port2enableserial();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(200)) goto parse_Port2SerialMode;
+        break;
+      }
+
+      // optional int32 Port2SerialMode = 25 [default = 0];
+      case 25: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2SerialMode:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &port2serialmode_)));
+          set_has_port2serialmode();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(208)) goto parse_Port2EnableDuplex;
+        break;
+      }
+
+      // optional bool Port2EnableDuplex = 26 [default = false];
+      case 26: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Port2EnableDuplex:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &port2enableduplex_)));
+          set_has_port2enableduplex();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(216)) goto parse_Type;
+        break;
+      }
+
+      // optional int32 Type = 27 [default = 0];
+      case 27: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_Type:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+          set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -31093,19 +31241,19 @@ void Connection::SerializeWithCachedSizes(
       6, this->port2rawdatadescription(), output);
   }
 
-  // optional int32 SerialMode = 7 [default = 0];
-  if (has_serialmode()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->serialmode(), output);
+  // optional int32 ObsoleteSerialMode = 7 [default = 0];
+  if (has_obsoleteserialmode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->obsoleteserialmode(), output);
   }
 
-  // optional int32 Mode = 8 [default = 0];
-  if (has_mode()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->mode(), output);
+  // optional int32 ObsoleteMode = 8 [default = 0];
+  if (has_obsoletemode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->obsoletemode(), output);
   }
 
-  // optional bool EnableDuplex = 10 [default = false];
-  if (has_enableduplex()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->enableduplex(), output);
+  // optional bool ObsoleteEnableDuplex = 10 [default = false];
+  if (has_obsoleteenableduplex()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->obsoleteenableduplex(), output);
   }
 
   // optional bool ManualSettings = 11 [default = false];
@@ -31157,6 +31305,41 @@ void Connection::SerializeWithCachedSizes(
   if (has_uuid()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       20, this->uuid(), output);
+  }
+
+  // optional bool Port1EnableSerial = 21 [default = false];
+  if (has_port1enableserial()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(21, this->port1enableserial(), output);
+  }
+
+  // optional int32 Port1SerialMode = 22 [default = 0];
+  if (has_port1serialmode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(22, this->port1serialmode(), output);
+  }
+
+  // optional bool Port1EnableDuplex = 23 [default = false];
+  if (has_port1enableduplex()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(23, this->port1enableduplex(), output);
+  }
+
+  // optional bool Port2EnableSerial = 24 [default = false];
+  if (has_port2enableserial()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(24, this->port2enableserial(), output);
+  }
+
+  // optional int32 Port2SerialMode = 25 [default = 0];
+  if (has_port2serialmode()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(25, this->port2serialmode(), output);
+  }
+
+  // optional bool Port2EnableDuplex = 26 [default = false];
+  if (has_port2enableduplex()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(26, this->port2enableduplex(), output);
+  }
+
+  // optional int32 Type = 27 [default = 0];
+  if (has_type()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(27, this->type(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -31217,19 +31400,19 @@ void Connection::SerializeWithCachedSizes(
         6, this->port2rawdatadescription(), target);
   }
 
-  // optional int32 SerialMode = 7 [default = 0];
-  if (has_serialmode()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->serialmode(), target);
+  // optional int32 ObsoleteSerialMode = 7 [default = 0];
+  if (has_obsoleteserialmode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->obsoleteserialmode(), target);
   }
 
-  // optional int32 Mode = 8 [default = 0];
-  if (has_mode()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->mode(), target);
+  // optional int32 ObsoleteMode = 8 [default = 0];
+  if (has_obsoletemode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->obsoletemode(), target);
   }
 
-  // optional bool EnableDuplex = 10 [default = false];
-  if (has_enableduplex()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->enableduplex(), target);
+  // optional bool ObsoleteEnableDuplex = 10 [default = false];
+  if (has_obsoleteenableduplex()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->obsoleteenableduplex(), target);
   }
 
   // optional bool ManualSettings = 11 [default = false];
@@ -31284,6 +31467,41 @@ void Connection::SerializeWithCachedSizes(
         20, this->uuid(), target);
   }
 
+  // optional bool Port1EnableSerial = 21 [default = false];
+  if (has_port1enableserial()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(21, this->port1enableserial(), target);
+  }
+
+  // optional int32 Port1SerialMode = 22 [default = 0];
+  if (has_port1serialmode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(22, this->port1serialmode(), target);
+  }
+
+  // optional bool Port1EnableDuplex = 23 [default = false];
+  if (has_port1enableduplex()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(23, this->port1enableduplex(), target);
+  }
+
+  // optional bool Port2EnableSerial = 24 [default = false];
+  if (has_port2enableserial()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(24, this->port2enableserial(), target);
+  }
+
+  // optional int32 Port2SerialMode = 25 [default = 0];
+  if (has_port2serialmode()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(25, this->port2serialmode(), target);
+  }
+
+  // optional bool Port2EnableDuplex = 26 [default = false];
+  if (has_port2enableduplex()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(26, this->port2enableduplex(), target);
+  }
+
+  // optional int32 Type = 27 [default = 0];
+  if (has_type()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(27, this->type(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -31330,27 +31548,6 @@ int Connection::ByteSize() const {
           this->port2rawdatadescription());
     }
 
-    // optional int32 SerialMode = 7 [default = 0];
-    if (has_serialmode()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->serialmode());
-    }
-
-    // optional int32 Mode = 8 [default = 0];
-    if (has_mode()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->mode());
-    }
-
-    // optional bool EnableDuplex = 10 [default = false];
-    if (has_enableduplex()) {
-      total_size += 1 + 1;
-    }
-
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional bool ManualSettings = 11 [default = false];
     if (has_manualsettings()) {
       total_size += 1 + 1;
@@ -31366,6 +31563,8 @@ int Connection::ByteSize() const {
       total_size += 1 + 1;
     }
 
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 Port1TxStartAddress = 14 [default = 0];
     if (has_port1txstartaddress()) {
       total_size += 1 +
@@ -31401,8 +31600,6 @@ int Connection::ByteSize() const {
           this->port2txwordsquantity());
     }
 
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional int32 Port2RxWordsQuantity = 19 [default = 479];
     if (has_port2rxwordsquantity()) {
       total_size += 2 +
@@ -31415,6 +31612,70 @@ int Connection::ByteSize() const {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->uuid());
+    }
+
+    // optional bool Port1EnableSerial = 21 [default = false];
+    if (has_port1enableserial()) {
+      total_size += 2 + 1;
+    }
+
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional int32 Port1SerialMode = 22 [default = 0];
+    if (has_port1serialmode()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port1serialmode());
+    }
+
+    // optional bool Port1EnableDuplex = 23 [default = false];
+    if (has_port1enableduplex()) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool Port2EnableSerial = 24 [default = false];
+    if (has_port2enableserial()) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 Port2SerialMode = 25 [default = 0];
+    if (has_port2serialmode()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->port2serialmode());
+    }
+
+    // optional bool Port2EnableDuplex = 26 [default = false];
+    if (has_port2enableduplex()) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 Type = 27 [default = 0];
+    if (has_type()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->type());
+    }
+
+    // optional int32 ObsoleteMode = 8 [default = 0];
+    if (has_obsoletemode()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->obsoletemode());
+    }
+
+    // optional int32 ObsoleteSerialMode = 7 [default = 0];
+    if (has_obsoleteserialmode()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->obsoleteserialmode());
+    }
+
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
+    // optional bool ObsoleteEnableDuplex = 10 [default = false];
+    if (has_obsoleteenableduplex()) {
+      total_size += 1 + 1;
     }
 
   }
@@ -31459,17 +31720,6 @@ void Connection::MergeFrom(const Connection& from) {
     if (from.has_port2rawdatadescription()) {
       set_port2rawdatadescription(from.port2rawdatadescription());
     }
-    if (from.has_serialmode()) {
-      set_serialmode(from.serialmode());
-    }
-    if (from.has_mode()) {
-      set_mode(from.mode());
-    }
-    if (from.has_enableduplex()) {
-      set_enableduplex(from.enableduplex());
-    }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_manualsettings()) {
       set_manualsettings(from.manualsettings());
     }
@@ -31479,6 +31729,8 @@ void Connection::MergeFrom(const Connection& from) {
     if (from.has_generatevhdfile()) {
       set_generatevhdfile(from.generatevhdfile());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_port1txstartaddress()) {
       set_port1txstartaddress(from.port1txstartaddress());
     }
@@ -31494,13 +31746,45 @@ void Connection::MergeFrom(const Connection& from) {
     if (from.has_port2txwordsquantity()) {
       set_port2txwordsquantity(from.port2txwordsquantity());
     }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_port2rxwordsquantity()) {
       set_port2rxwordsquantity(from.port2rxwordsquantity());
     }
     if (from.has_uuid()) {
       mutable_uuid()->::Proto::Uuid::MergeFrom(from.uuid());
+    }
+    if (from.has_port1enableserial()) {
+      set_port1enableserial(from.port1enableserial());
+    }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    if (from.has_port1serialmode()) {
+      set_port1serialmode(from.port1serialmode());
+    }
+    if (from.has_port1enableduplex()) {
+      set_port1enableduplex(from.port1enableduplex());
+    }
+    if (from.has_port2enableserial()) {
+      set_port2enableserial(from.port2enableserial());
+    }
+    if (from.has_port2serialmode()) {
+      set_port2serialmode(from.port2serialmode());
+    }
+    if (from.has_port2enableduplex()) {
+      set_port2enableduplex(from.port2enableduplex());
+    }
+    if (from.has_type()) {
+      set_type(from.type());
+    }
+    if (from.has_obsoletemode()) {
+      set_obsoletemode(from.obsoletemode());
+    }
+    if (from.has_obsoleteserialmode()) {
+      set_obsoleteserialmode(from.obsoleteserialmode());
+    }
+  }
+  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
+    if (from.has_obsoleteenableduplex()) {
+      set_obsoleteenableduplex(from.obsoleteenableduplex());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -31533,9 +31817,6 @@ void Connection::Swap(Connection* other) {
     std::swap(port2equipmentid_, other->port2equipmentid_);
     std::swap(port1rawdatadescription_, other->port1rawdatadescription_);
     std::swap(port2rawdatadescription_, other->port2rawdatadescription_);
-    std::swap(serialmode_, other->serialmode_);
-    std::swap(mode_, other->mode_);
-    std::swap(enableduplex_, other->enableduplex_);
     std::swap(manualsettings_, other->manualsettings_);
     std::swap(disabledataid_, other->disabledataid_);
     std::swap(generatevhdfile_, other->generatevhdfile_);
@@ -31546,6 +31827,16 @@ void Connection::Swap(Connection* other) {
     std::swap(port2txwordsquantity_, other->port2txwordsquantity_);
     std::swap(port2rxwordsquantity_, other->port2rxwordsquantity_);
     std::swap(uuid_, other->uuid_);
+    std::swap(port1enableserial_, other->port1enableserial_);
+    std::swap(port1serialmode_, other->port1serialmode_);
+    std::swap(port1enableduplex_, other->port1enableduplex_);
+    std::swap(port2enableserial_, other->port2enableserial_);
+    std::swap(port2serialmode_, other->port2serialmode_);
+    std::swap(port2enableduplex_, other->port2enableduplex_);
+    std::swap(type_, other->type_);
+    std::swap(obsoletemode_, other->obsoletemode_);
+    std::swap(obsoleteserialmode_, other->obsoleteserialmode_);
+    std::swap(obsoleteenableduplex_, other->obsoleteenableduplex_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

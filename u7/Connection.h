@@ -137,10 +137,7 @@ namespace Hardware
 		//
 		//
 
-		SerialMode serialMode() const;
-		void setSerialMode(const SerialMode value);
-
-		QString serialModeStr() const;
+		QString serialModeStr(const Connection::SerialMode value) const;
 
 		Type type() const;
 		void setType(const Type value);
@@ -150,8 +147,23 @@ namespace Hardware
 		bool isPortToPort() const;
 		bool isSinglePort() const;
 
-		bool enableDuplex() const;
-		void setEnableDuplex(bool value);
+		bool port1EnableSerial() const;
+		void setPort1EnableSerial(bool value);
+
+		bool port2EnableSerial() const;
+		void setPort2EnableSerial(bool value);
+
+		SerialMode port1SerialMode() const;
+		void setPort1SerialMode(const SerialMode value);
+
+		SerialMode port2SerialMode() const;
+		void setPort2SerialMode(const SerialMode value);
+
+		bool port1EnableDuplex() const;
+		void setPort1EnableDuplex(bool value);
+
+		bool port2EnableDuplex() const;
+		void setPort2EnableDuplex(bool value);
 
 		bool manualSettings() const;
 		void setManualSettings(bool value);
@@ -188,11 +200,18 @@ namespace Hardware
 		quint32 m_port2TxRsDataUID = 0;
 		QString m_port2RawDataDescription;
 
-		SerialMode m_serialMode = SerialMode::RS232;
+		bool m_port1EnableSerial = false;
+		bool m_port2EnableSerial = false;
+
+		SerialMode m_port1SerialMode = SerialMode::RS232;
+		SerialMode m_port2SerialMode = SerialMode::RS232;
+
+		bool m_port1EnableDuplex = false;
+		bool m_port2EnableDuplex = false;
 
 		Type m_type = Type::PortToPort;
 
-		bool m_enableDuplex = false;
+
 		bool m_manualSettings = false;
 
 		bool m_disableDataID = false;

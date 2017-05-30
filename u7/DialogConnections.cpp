@@ -860,12 +860,16 @@ void DialogConnections::onReport()
 
 		textStream << tr("Port type: ") << connection->typeStr() << "\r\n";
 
-		if (connection->isSinglePort() == true)
+		if (connection->port1EnableSerial() == true)
 		{
-			assert(false);		// НЕ ПРАВИЛЬНО!!!! WhiteMan!!!
+			textStream << tr("Port 1 Serial mode: ") << connection->serialModeStr(connection->port1SerialMode()) <<"\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port1EnableDuplex() ? "Yes" : "No") <<"\r\n";
+		}
 
-
-			textStream << tr("Serial mode: ") << connection->serialModeStr() <<"\r\n";
+		if (connection->port2EnableSerial() == true)
+		{
+			textStream << tr("Port 2 Serial mode: ") << connection->serialModeStr(connection->port2SerialMode()) <<"\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port2EnableDuplex() ? "Yes" : "No") <<"\r\n";
 		}
 
 		if (connection->manualSettings() == true)
