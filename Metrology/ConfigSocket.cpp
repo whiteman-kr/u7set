@@ -22,7 +22,8 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 
 	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort, serverAddressPort2) ;
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort, serverAddressPort2, false, nullptr);
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;
@@ -45,7 +46,7 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const Host
 		return;
 	}
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort1,  serverAddressPort2);
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort1,  serverAddressPort2, false, nullptr);
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;

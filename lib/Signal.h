@@ -156,7 +156,7 @@ private:
 	//
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 
-	int m_dataSize = 32;
+	int m_dataSize = 32;											// signal data size in bits
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
     double m_lowEngeneeringUnits = 0;                               // low physical value for input range
@@ -240,6 +240,8 @@ public:
 	int signalTypeInt() const { return TO_INT(m_signalType); }
 	E::SignalType signalType() const { return m_signalType; }
 	void setSignalType(E::SignalType type) { m_signalType = type; }
+
+	E::DataFormat dataFormat() const;
 
 	bool isAnalog() const { return m_signalType == E::SignalType::Analog; }
 	bool isDiscrete() const { return m_signalType == E::SignalType::Discrete; }

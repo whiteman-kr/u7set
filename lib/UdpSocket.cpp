@@ -622,9 +622,10 @@ bool UdpClientRequestHandler::hasRequest()
 // UdpServerSocket class implementation
 //
 
-UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port) :
+UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger) :
 	m_bindToAddress(bindToAddress),
-	m_port(port)
+	m_port(port),
+	m_logger(logger)
 {
 }
 
@@ -636,7 +637,7 @@ UdpServerSocket::~UdpServerSocket()
 
 void UdpServerSocket::onThreadStarted()
 {
-	DEBUG_LOG_MSG(QString(tr("UdpServerSocket thread started (listen %1)").
+	DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket thread started (listen %1)").
 						  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
 
 	m_timer.start(1000);
@@ -654,7 +655,7 @@ void UdpServerSocket::onThreadFinished()
 {
 	onSocketThreadFinished();
 
-	DEBUG_LOG_MSG(QString(tr("UdpServerSocket thread finished (listen %1)")).
+	DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket thread finished (listen %1)")).
 				  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr()));
 }
 
@@ -681,7 +682,7 @@ void UdpServerSocket::bind()
 
 	if (result == true)
 	{
-		DEBUG_LOG_MSG(QString(tr("UdpServerSocket bound on  %1").
+		DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket bound on  %1").
 							  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr())));
 	}
 }

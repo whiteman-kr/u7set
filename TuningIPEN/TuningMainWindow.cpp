@@ -52,8 +52,9 @@ namespace TuningIPEN
 	}
 
 
-	TuningMainWindow::TuningMainWindow(int& argc, char** argv, QWidget* parent) :
+	TuningMainWindow::TuningMainWindow(int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget* parent) :
 		QMainWindow(parent),
+		m_logger(logger),
 		m_updateTimer(new QTimer(this))
 	{
 		QSettings settings("Radiy", "TuningIPEN");
@@ -91,11 +92,11 @@ namespace TuningIPEN
 		v.minorVersion = 0;
 		v.commitNo = 0;
 
-		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning IPEN Service", argc, argv, v);
+		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning IPEN Service", argc, argv, v, m_logger);
 
 		worker->init();
 
-		m_service = new TuningIPEN::TuningIPENService(worker);
+		m_service = new TuningIPEN::TuningIPENService(worker, m_logger);
 
 		connect(m_service, &TuningIPEN::TuningIPENService::tuningServiceReady, this, &TuningMainWindow::onTuningServiceReady);
 

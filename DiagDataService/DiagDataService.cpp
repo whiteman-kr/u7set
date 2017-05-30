@@ -10,8 +10,13 @@
 //
 // -------------------------------------------------------------------------------
 
-DiagDataServiceWorker::DiagDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
-	ServiceWorker(ServiceType::DiagDataService, serviceName, argc, argv, versionInfo)
+DiagDataServiceWorker::DiagDataServiceWorker(const QString& serviceName,
+											 int& argc,
+											 char** argv,
+											 const VersionInfo& versionInfo,
+											 std::shared_ptr<CircularLogger> logger) :
+	ServiceWorker(ServiceType::DiagDataService, serviceName, argc, argv, versionInfo, logger),
+	m_logger(logger)
 {
 }
 
@@ -23,7 +28,7 @@ DiagDataServiceWorker::~DiagDataServiceWorker()
 
 ServiceWorker* DiagDataServiceWorker::createInstance() const
 {
-	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(serviceName(), argc(), argv(), versionInfo());
+	DiagDataServiceWorker* diagDataServiceWorker = new DiagDataServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 
 	return diagDataServiceWorker;
 }
@@ -78,10 +83,10 @@ void DiagDataServiceWorker::loadSettings()
 
 	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	DEBUG_LOG_MSG(QString(tr("Load settings:")));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-	DEBUG_LOG_MSG(QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 }
 
 

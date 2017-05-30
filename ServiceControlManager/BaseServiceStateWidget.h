@@ -20,6 +20,7 @@ public:
 signals:
 	void needToReloadData();
 	void invalidateData();
+	void connectionStatisticChanged();
 
 public slots:
 	void updateServiceState();
@@ -35,22 +36,26 @@ public slots:
 protected:
 	UdpSocketThread* m_socketThread = nullptr;
 
+	quint32 m_ip = 0;
+	int m_portIndex = 0;
+
+	Network::ServiceInfo m_serviceInfo;
+
 private:
 	void sendCommand(int command);
 
-	QAction* startServiceButton;
-	QAction* stopServiceButton;
-	QAction* restartServiceButton;
+	int m_udpAckQuantity = 0;
+
+	QAction* m_startServiceButton;
+	QAction* m_stopServiceButton;
+	QAction* m_restartServiceButton;
 
 	QTimer* m_timer = nullptr;
 	UdpClientSocket* m_baseClientSocket = nullptr;
-	QLabel* m_whoIsLabel = nullptr;
-	QLabel* m_uptimeLabel = nullptr;
-	QLabel* m_runningLabel = nullptr;
-	QLabel* m_clientRequestAddressLabel = nullptr;
+	QLabel* m_connectionStateStatus = nullptr;
+	QLabel* m_uptimeStatus = nullptr;
+	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
-
-	Network::ServiceInfo serviceState;
 };
 
 #endif // BASESERVICESTATEWIDGET_H

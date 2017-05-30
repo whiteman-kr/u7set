@@ -1,6 +1,8 @@
 #include "ConfigurationService.h"
 #include "version.h"
 
+#define CIRCULAR_LOGGER_PTR_ASSERTING
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
@@ -9,21 +11,23 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER();						// init global CircularLogger object
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	logger.setLogCodeInfo(false);
+	LOGGER_INIT(logger);
+
+	logger->setLogCodeInfo(false);
 
 	VersionInfo vi = VERSION_INFO(1, 0);
 
-	ConfigurationServiceWorker cfgServiceWorker("RPCT Configuration Service", argc, argv, vi);
+	ConfigurationServiceWorker cfgServiceWorker("RPCT Configuration Service", argc, argv, vi, logger);
 
-	ServiceStarter serviceStarter(app, cfgServiceWorker);
+	ServiceStarter serviceStarter(app, cfgServiceWorker, logger);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	SHUTDOWN_LOGGER
+	LOGGER_SHUTDOWN(logger)
 
 	return result;
 }

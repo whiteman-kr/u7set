@@ -43,6 +43,8 @@ namespace TuningIPEN
 		QWidget* m_reactivityWidget;
 		QWidget* m_automaticPowerRegulatorWidget;
 
+		std::shared_ptr<CircularLogger> m_logger;
+
 		TuningIPEN::TuningIPENService* m_service = nullptr;
 		QVector<TuningIPEN::TuningSourceInfo> m_info;
 		QMap<QString, QLabel*> m_statusLabelMap;
@@ -71,7 +73,7 @@ namespace TuningIPEN
 		void automaticModeChanged(bool newValue);
 
 	public:
-		explicit TuningMainWindow(int& argc, char** argv, QWidget *parent = 0);
+		explicit TuningMainWindow(int& argc, char** argv, std::shared_ptr<CircularLogger> logger, QWidget *parent = 0);
 		~TuningMainWindow();
 
 		void onTuningServiceReady();

@@ -11,8 +11,9 @@ namespace Tuning
 
 	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
 
-	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service) :
-		m_service(service)
+	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service, std::shared_ptr<CircularLogger> logger) :
+		m_service(service),
+		m_logger(logger)
 	{
 	}
 
@@ -39,7 +40,7 @@ namespace Tuning
 
 	Tcp::Server* TcpTuningServer::getNewInstance()
 	{
-		TcpTuningServer* newServer =  new TcpTuningServer(m_service);
+		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_logger);
 
 		return newServer;
 	}
@@ -84,7 +85,7 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_getTuningSourcesInfo.clientequipmentid());
 
-		DEBUG_LOG_MSG(QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
 					  arg(clientRequestID).arg(peerAddr().addressStr()));
 
 
@@ -112,7 +113,7 @@ namespace Tuning
 				m_getTuningSourcesInfoReply.set_error(TO_INT(errCode));
 				sendReply(m_getTuningSourcesInfoReply);
 
-				DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
+				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
 							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 				return;
 			}
@@ -146,7 +147,7 @@ namespace Tuning
 
 		sendReply(m_getTuningSourcesInfoReply);
 
-		DEBUG_LOG_MSG(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_INFO to %2")).
 					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 	}
 
@@ -179,7 +180,7 @@ namespace Tuning
 				m_getTuningSourcesStatesReply.set_error(TO_INT(errCode));
 				sendReply(m_getTuningSourcesStatesReply);
 
-				DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_STATES to %2")).
+				DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_TUNING_SOURCES_STATES to %2")).
 							  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 				return;
 			}
@@ -236,7 +237,7 @@ namespace Tuning
 
 			sendReply(m_tuningSignalsReadReply);
 
-			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
 						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
@@ -253,7 +254,7 @@ namespace Tuning
 		{
 			// log errors only
 			//
-			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
 						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 		}
 	}
@@ -265,7 +266,7 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_tuningSignalsWriteRequest.clientequipmentid());
 
-		DEBUG_LOG_MSG(QString(tr("TDS_TUNING_SIGNALS_WRITE request from client %1, %2 (Signals %3, AutoApply is %4)")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_TUNING_SIGNALS_WRITE request from client %1, %2 (Signals %3, AutoApply is %4)")).
 					  arg(clientRequestID).
 					  arg(peerAddr().addressStr()).
 					  arg(m_tuningSignalsWriteRequest.tuningsignalwrite_size()).
@@ -288,7 +289,7 @@ namespace Tuning
 
 			sendReply(m_tuningSignalsWriteReply);
 
-			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_WRITE to %2")).
 						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
@@ -306,11 +307,11 @@ namespace Tuning
 
 		if (errCode == NetworkError::Success)
 		{
-			DEBUG_LOG_MSG(msg);
+			DEBUG_LOG_MSG(m_logger, msg);
 		}
 		else
 		{
-			DEBUG_LOG_ERR(msg);
+			DEBUG_LOG_ERR(m_logger, msg);
 		}
 	}
 
@@ -321,7 +322,7 @@ namespace Tuning
 
 		QString clientRequestID = QString::fromStdString(m_tuningSignalsApplyRequest.clientequipmentid());
 
-		DEBUG_LOG_MSG(QString(tr("TDS_TUNING_SIGNALS_APPLY request from client %1, %2")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_TUNING_SIGNALS_APPLY request from client %1, %2")).
 					  arg(clientRequestID).
 					  arg(peerAddr().addressStr()));
 
@@ -340,7 +341,7 @@ namespace Tuning
 
 			sendReply(m_tuningSignalsApplyReply);
 
-			DEBUG_LOG_ERR(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
 						  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 			return;
 		}
@@ -353,7 +354,7 @@ namespace Tuning
 
 		sendReply(m_tuningSignalsWriteReply);
 
-		DEBUG_LOG_MSG(QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
 					  arg(getNetworkErrorStr(errCode)).arg(peerAddr().addressStr()));
 	}
 
@@ -367,8 +368,9 @@ namespace Tuning
 	class TuningServiceWorker;
 
 	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-							TcpTuningServer* server) :
-		Tcp::ServerThread(listenAddressPort, server)
+							TcpTuningServer* server,
+							std::shared_ptr<CircularLogger> logger) :
+		Tcp::ServerThread(listenAddressPort, server, logger)
 	{
 	}
 

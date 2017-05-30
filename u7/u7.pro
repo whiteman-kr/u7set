@@ -187,11 +187,11 @@ SOURCES +=\
     DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
+    Builder/RawDataDescription.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     CodeEditor.cpp \
     ../lib/CsvFile.cpp
-
 
 HEADERS  += \
     CentralWidget.h \
@@ -315,6 +315,7 @@ HEADERS  += \
     DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
+    Builder/RawDataDescription.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
     CodeEditor.h \

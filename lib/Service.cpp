@@ -9,12 +9,18 @@
 
 int ServiceWorker::m_instanceNo = 0;
 
-ServiceWorker::ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
+ServiceWorker::ServiceWorker(ServiceType serviceType,
+							 const QString& serviceName,
+							 int& argc,
+							 char** argv,
+							 const VersionInfo& versionInfo,
+							 std::shared_ptr<CircularLogger> logger) :
 	m_serviceType(serviceType),
 	m_serviceName(serviceName),
 	m_argc(argc),
 	m_argv(argv),
 	m_versionInfo(versionInfo),
+	m_logger(logger),
 	m_cmdLineParser(argc, argv),
 	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this)
 {
@@ -182,22 +188,22 @@ bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
 	case QSettings::Status::AccessError:
 		if (settingName.isEmpty() == true)
 		{
-			DEBUG_LOG_ERR(QString(tr("Settings write error: QSettings::Status::AccessError.")))
+			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::AccessError.")))
 		}
 		else
 		{
-			DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
 		}
 		break;
 
 	case QSettings::Status::FormatError:
 		if (settingName.isEmpty() == true)
 		{
-			DEBUG_LOG_ERR(QString(tr("Settings write error: QSettings::Status::FormatError.")))
+			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::FormatError.")))
 		}
 		else
 		{
-			DEBUG_LOG_ERR(QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
 		}
 		break;
 
@@ -236,9 +242,10 @@ void ServiceWorker::onThreadFinished()
 //
 // -------------------------------------------------------------------------------------
 
-Service::Service(ServiceWorker& serviceWorker):
+Service::Service(ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger):
 	m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
-	m_serviceWorker(serviceWorker),
+	m_serviceWorkerFactory(serviceWorker),
+	m_logger(logger),
 	m_timer500ms(this)
 {
 }
@@ -251,15 +258,17 @@ Service::~Service()
 
 void Service::start()
 {
-	startBaseRequestSocketThread();
 	startServiceWorkerThread();
+
+	startBaseRequestSocketThread();
 }
 
 
 void Service::stop()
 {
-	stopServiceWorkerThread();
 	stopBaseRequestSocketThread();
+
+	stopServiceWorkerThread();
 }
 
 
@@ -294,17 +303,17 @@ void Service::onBaseRequest(UdpRequest request)
 		}
 
 		case RQID_SERVICE_START:
-			LOG_MSG(QString("Service START request from SCM (%1).").arg(ha.addressStr()));
+			LOG_MSG(m_logger, QString("Service START request from SCM (%1).").arg(ha.addressStr()));
 			startServiceWorkerThread();
 			break;
 
 		case RQID_SERVICE_STOP:
-			LOG_MSG(QString("Service STOP request from SCM (%1).").arg(ha.addressStr()));
+			LOG_MSG(m_logger, QString("Service STOP request from SCM (%1).").arg(ha.addressStr()));
 			stopServiceWorkerThread();
 			break;
 
 		case RQID_SERVICE_RESTART:
-			LOG_MSG(QString("Service RESTART request from SCM (%1).").arg(ha.addressStr()));
+			LOG_MSG(m_logger, QString("Service RESTART request from SCM (%1).").arg(ha.addressStr()));
 			stopServiceWorkerThread();
 			startServiceWorkerThread();
 			break;
@@ -335,18 +344,18 @@ void Service::startServiceWorkerThread()
 		return;
 	}
 
-	m_serviceStartTime = QDateTime::currentMSecsSinceEpoch();
+	m_serviceWorkerStartTime = QDateTime::currentMSecsSinceEpoch();
 
 	m_state = ServiceState::Starts;
 
-	ServiceWorker* newServiceWorker = m_serviceWorker.createInstance();
+	m_serviceWorker = m_serviceWorkerFactory.createInstance();
 
-	newServiceWorker->setService(this);
+	m_serviceWorker->setService(this);
 
-	connect(newServiceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
-	connect(newServiceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
+	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
+	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
 
-	m_serviceWorkerThread = new SimpleThread(newServiceWorker);
+	m_serviceWorkerThread = new SimpleThread(m_serviceWorker);
 	m_serviceWorkerThread->start();
 }
 
@@ -368,6 +377,7 @@ void Service::stopServiceWorkerThread()
 	delete m_serviceWorkerThread;
 
 	m_serviceWorkerThread = nullptr;
+	m_serviceWorker = nullptr;
 
 	m_state = ServiceState::Stopped;
 }
@@ -375,7 +385,7 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorker.serviceType())].port);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, serviceInfo[TO_INT(m_serviceWorkerFactory.serviceType())].port, m_logger);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
@@ -396,11 +406,16 @@ void Service::stopBaseRequestSocketThread()
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
+	if (m_serviceWorker == nullptr)
+	{
+		return;
+	}
+
 	QMutexLocker locker(&m_mutex);
 
-	const VersionInfo& vi = m_serviceWorker.versionInfo();
+	const VersionInfo& vi = m_serviceWorker->versionInfo();
 
-	serviceInfo.set_type(TO_INT(m_serviceWorker.serviceType()));
+	serviceInfo.set_type(TO_INT(m_serviceWorker->serviceType()));
 
 	serviceInfo.set_majorversion(vi.majorVersion);
 	serviceInfo.set_minorversion(vi.minorVersion);
@@ -413,11 +428,11 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
 
-	m_serviceWorker.getServiceSpecificInfo(serviceInfo);
+	m_serviceWorker->getServiceSpecificInfo(serviceInfo);
 
 	if (m_state != ServiceState::Stopped)
 	{
-		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceStartTime) / 1000);
+		serviceInfo.set_serviceuptime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
 	}
 	else
 	{
@@ -432,10 +447,11 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 //
 // -------------------------------------------------------------------------------------
 
-DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker) :
-	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName()),
+DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
+	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName(), logger),
 	m_app(app),
-	m_serviceWorker(serviceWorker)
+	m_serviceWorker(serviceWorker),
+	m_logger(logger)
 {
 }
 
@@ -458,9 +474,9 @@ int DaemonServiceStarter::exec()
 
 void DaemonServiceStarter::start()
 {
-	LOG_CALL();
+	LOG_CALL(m_logger);
 
-	m_service = new Service(m_serviceWorker);
+	m_service = new Service(m_serviceWorker, m_logger);
 
 	m_service->start();
 }
@@ -470,7 +486,7 @@ void DaemonServiceStarter::stop()
 {
 	stopAndDeleteService();
 
-	LOG_CALL();
+	LOG_CALL(m_logger);
 }
 
 
@@ -494,9 +510,10 @@ void DaemonServiceStarter::stopAndDeleteService()
 //
 // -------------------------------------------------------------------------------------
 
-ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker) :
+ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
 	m_app(app),
-	m_serviceWorker(serviceWorker)
+	m_serviceWorker(serviceWorker),
+	m_logger(logger)
 {
 	app.setOrganizationName(RADIY_ORG);
 	app.setApplicationName(serviceWorker.serviceName());
@@ -505,11 +522,11 @@ ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWork
 
 int ServiceStarter::exec()
 {
-	LOG_MSG(QString("Run: %1").arg(m_serviceWorker.cmdLine()));
+	LOG_MSG(m_logger, QString("Run: %1").arg(m_serviceWorker.cmdLine()));
 
 	int result = privateRun();
 
-	LOG_MSG(QString("Exit: %1, result = %2").arg(m_serviceWorker.appPath()).arg(result));
+	LOG_MSG(m_logger, QString("Exit: %1, result = %2").arg(m_serviceWorker.appPath()).arg(result));
 
 	QThread::msleep(500);			// not delete! wait while logger flush buffers
 
@@ -541,7 +558,7 @@ int ServiceStarter::privateRun()
 	}
 	else
 	{
-		DaemonServiceStarter daemonStarter(m_app, m_serviceWorker);
+		DaemonServiceStarter daemonStarter(m_app, m_serviceWorker, m_logger);
 
 		result = daemonStarter.exec();
 	}
@@ -569,7 +586,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		std::cout << C_STR(helpText);
 
-		LOG_MSG(QString(tr("Help printed.")))
+		LOG_MSG(m_logger, QString(tr("Help printed.")))
 
 		pauseAndExit = true;
 		return;
@@ -592,7 +609,7 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		std::cout << C_STR(versionInfo);
 
-		LOG_MSG(QString(tr("Version printed.")))
+		LOG_MSG(m_logger, QString(tr("Version printed.")))
 
 		pauseAndExit = true;
 		return;
@@ -606,11 +623,11 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		if (res == true)
 		{
-			DEBUG_LOG_MSG(QString(tr("\nService settings has been cleared.\n\n")));
+			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleared.\n\n")));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(QString(tr("\nError cleaning of service settings. Adminirative rights rquired.\n\n")));
+			DEBUG_LOG_ERR(m_logger, QString(tr("\nError cleaning of service settings. Adminirative rights rquired.\n\n")));
 		}
 
 		pauseAndExit = true;
@@ -635,7 +652,7 @@ int ServiceStarter::runAsRegularApplication()
 
 	// run service
 	//
-	Service* service = new Service(m_serviceWorker);
+	Service* service = new Service(m_serviceWorker, m_logger);
 
 	service->start();
 

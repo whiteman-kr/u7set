@@ -14,16 +14,22 @@ class ConfigurationServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	ConfigurationServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	ConfigurationServiceWorker(const QString& serviceName,
+							   int& argc,
+							   char** argv,
+							   const VersionInfo& versionInfo,
+							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
 
 public slots:
 	void onInformationRequest(UdpRequest request);
+	void onBuildPathChanged(QString newBuildPath);
 
 signals:
 	void ackInformationRequest(UdpRequest request);
+	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
 	virtual void initCmdLineParser() override;
@@ -33,7 +39,7 @@ private:
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	void startCfgServerThread();
+	void startCfgServerThread(const QString& buildPath);
 	void stopCfgServerThread();
 
 	void startCfgCheckerThread();
@@ -47,6 +53,7 @@ private:
 	void onSetSettings(UdpRequest& request);
 
 private:
+	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
@@ -61,76 +68,3 @@ private:
 
 	HostAddressPort m_clientIP;
 };
-
-
-// ------------------------------------------------------------------------------------
-//
-// ListenerWithLog class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class ListenerWithLog : public Tcp::Listener
-{
-public:
-	ListenerWithLog(const HostAddressPort& listenAddressPort, Tcp::Server* server);
-
-	virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr) override;
-};
-
-
-// ------------------------------------------------------------------------------------
-//
-// CfgServerWithLog class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class CfgServerWithLog : public CfgServer
-{
-public:
-	CfgServerWithLog(const QString& buildFolder);
-
-	virtual CfgServer* getNewInstance() override;
-
-	virtual void onConnection() override;
-	virtual void onDisconnection() override;
-
-	virtual void onFileSent(const QString& fileName) override;
-};
-
-
-// ------------------------------------------------------------------------------------
-//
-// CfgSrvStorage class declaration
-//
-// ------------------------------------------------------------------------------------
-
-class CfgCheckerWorker : public SimpleThreadWorker
-{
-	Q_OBJECT
-
-public:
-	CfgCheckerWorker(const QString& workFolder, const QString& autoloadBuildFolder, int checkNewBuildInterval = 0);
-
-	static QString getFileHash(const QString& filePath);
-	static bool copyPath(const QString& src, const QString& dst);
-	static bool checkBuild(const QString& buildDirectoryPath);
-
-signals:
-	void buildPathChanged(const QString& newBuildPath);
-
-public slots:
-	void updateBuildXml();
-
-protected:
-	void onThreadStarted();
-	//void onThreadFinished();
-
-private:
-	QString m_workFolder;
-	QString m_autoloadBuildFolder;
-	QDateTime m_lastBuildXmlModifyTime;
-	QString m_lastBuildXmlHash;
-	int m_checkNewBuildInterval;
-};
-
-

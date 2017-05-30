@@ -626,7 +626,8 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
 
     \sa exec(), start(), QtServiceController::install()
 */
-QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name)
+QtServiceBase::QtServiceBase(int argc, char **argv, const QString &name, std::shared_ptr<CircularLogger> logger) :
+	m_logger(logger)
 {
 #if defined(QTSERVICE_DEBUG)
     qInstallMsgHandler(qtServiceLogDebug);
@@ -784,10 +785,10 @@ int QtServiceBase::exec()
 			return terminateService();
 		}
 
-		DEBUG_LOG_WRN(QString(tr("\nUnknown command line arguments of service.")));
-		DEBUG_LOG_MSG(QString(tr("Use -i, -u, -t keys to control service.")));
-		DEBUG_LOG_MSG(QString(tr("Use -h key to display available command line arguments of service.")));
-		DEBUG_LOG_MSG(QString(tr("Or use -e key to run service as a regular application with extended command line arguments.\n")));
+		DEBUG_LOG_WRN(m_logger, QString(tr("\nUnknown command line arguments of service.")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Use -i, -u, -t keys to control service.")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Use -h key to display available command line arguments of service.")));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Or use -e key to run service as a regular application with extended command line arguments.\n")));
 
 /*		if (a == QLatin1String("-v") || a == QLatin1String("-version"))
 		{
@@ -950,17 +951,17 @@ int QtServiceBase::installService()
 
 		if (d_ptr->install(account, password) == false)
 		{
-			DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be installed.\n")).arg(serviceName()));
+			DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' could not be installed.\n")).arg(serviceName()));
 		}
 		else
 		{
-			DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been installed under: %2\n")).
+			DEBUG_LOG_MSG(m_logger, QString(tr("\nThe service '%1' has been installed under: %2\n")).
 						  arg(serviceName()).arg(d_ptr->filePath()));
 		}
 	}
 	else
 	{
-		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' is already installed\n")).arg(serviceName()));
+		DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' is already installed\n")).arg(serviceName()));
 	}
 
 	return 1;
@@ -973,17 +974,17 @@ int QtServiceBase::uninstallService()
 	{
 		if (!d_ptr->controller.uninstall())
 		{
-			DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be uninstalled.\n")).arg(serviceName()));
+			DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' could not be uninstalled.\n")).arg(serviceName()));
 			return 1;
 		}
 		else
 		{
-			DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been uninstalled.\n")).arg(serviceName()));
+			DEBUG_LOG_MSG(m_logger, QString(tr("\nThe service '%1' has been uninstalled.\n")).arg(serviceName()));
 		}
 	}
 	else
 	{
-		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' is not installed\n")).arg(serviceName()));
+		DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' is not installed\n")).arg(serviceName()));
 	}
 
 	return 1;
@@ -1020,11 +1021,11 @@ int QtServiceBase::terminateService()
 {
 	if (d_ptr->controller.stop() == false)
 	{
-		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not be stopped.\n")).arg(serviceName()));
+		DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' could not be stopped.\n")).arg(serviceName()));
 	}
 	else
 	{
-		DEBUG_LOG_MSG(QString(tr("\nThe service '%1' is stopped.\n")).arg(serviceName()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("\nThe service '%1' is stopped.\n")).arg(serviceName()));
 	}
 
 	return 1;
@@ -1118,11 +1119,11 @@ int QtServiceBase::startService()
 
 	if (d_ptr->start() == false)
 	{
-		DEBUG_LOG_WRN(QString(tr("\nThe service '%1' could not start.\n")).arg(serviceName()));
+		DEBUG_LOG_WRN(m_logger, QString(tr("\nThe service '%1' could not start.\n")).arg(serviceName()));
 		return 1;
 	}
 
-	DEBUG_LOG_MSG(QString(tr("\nThe service '%1' has been started.\n")).arg(serviceName()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("\nThe service '%1' has been started.\n")).arg(serviceName()));
 
 	return 1;
 }

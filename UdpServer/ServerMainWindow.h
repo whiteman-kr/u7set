@@ -48,6 +48,8 @@ private:
 	Tcp::ServerThread* m_tcpServerThread = nullptr;
 
 	CfgServer* m_cfgServer = nullptr;
+
+	std::shared_ptr<CircularLogger> m_logger;
 };
 
 #endif // SERVERMAINWINDOW_H

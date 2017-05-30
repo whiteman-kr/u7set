@@ -2400,9 +2400,9 @@ namespace Builder
 	/// Description:
 	///		Transmitter is linked to unknown opto connection. Check transmitter's 'ConnectionID' property.
 	///
-	void IssueLogger::errALC5024(QString schemaID, QString connection, QUuid transmitterUuid)
+	void IssueLogger::errALC5024(QString connection, QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5024,
@@ -2423,14 +2423,14 @@ namespace Builder
 	/// Description:
 	///		Receiver is linked to unknown opto connection. Check receiver's 'ConnectionID' property.
 	///
-	void IssueLogger::errALC5025(QString connection, QUuid transmitterUuid)
+	void IssueLogger::errALC5025(QString connection, QUuid receiverUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5025,
-				  QString(tr("Receiver is linked to unknown opto connection '%1'.")).
-				  arg(connection));
+				  QString(tr("Receiver is linked to unknown opto connection '%1' (Logic schema '%2').")).
+				  arg(connection).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5026
@@ -2785,8 +2785,10 @@ namespace Builder
 	/// Description:
 	///		Connection with specified identifier is not found. Check connection ID.
 	///
-	void IssueLogger::errALC5040(QString connectionID)
+	void IssueLogger::errALC5040(QString connectionID, QUuid item)
 	{
+		addItemsIssues(OutputMessageLevel::Error, item);
+
 		LOG_ERROR(IssueType::AlCompiler,
 				  5040,
 				  QString(tr("Connection with ID '%1' is not found.")).arg(connectionID));
@@ -2828,14 +2830,16 @@ namespace Builder
 	/// Description:
 	///		The signal is not exists in connection. Use transmitter to send signal via connection.
 	///
-	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid)
+	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+		addItemsIssues(OutputMessageLevel::Error, receiverUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
-				  QString(tr("Signal '%1' is not exists in connection '%2'.")).
-				  arg(appSignalID).arg(connectionID));
+				  QString(tr("Signal '%1' is not exists in connection '%2'. (Logic schema '%3')")).
+						arg(appSignalID).
+						arg(connectionID).
+						arg(schemaID));
 	}
 
 	/// IssueCode: ALC5043
@@ -3790,6 +3794,162 @@ namespace Builder
 				  QString(tr("Signal '%1' is not found (opto port '%2' raw data description).")).
 						arg(appSignalID).arg(portEquipmentID));
 	}
+
+
+	/// IssueCode: ALC5187
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx data memory areas of opto ports '%1' and '%2' are overlapped.
+	///
+	/// Parameters:
+	///		%1 Opto port 1 ID
+	///		%2 Opto port 2 ID
+	///
+	/// Description:
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
+	///
+	void IssueLogger::errALC5187(const QString& port1ID, const QString &port2ID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5187,
+				  QString(tr("Tx data memory areas of opto ports '%1' and '%2' are overlapped.")).
+						arg(port1ID).arg(port2ID));
+	}
+
+	/// IssueCode: ALC5188
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate signal ID '%1' in opto port '%2' raw data description.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///
+	/// Description:
+	///		Duplicate signal ID in specified opto port raw data description. Check description.
+	///
+	void IssueLogger::errALC5188(const QString& appSignalID, const QString &portID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5188,
+				  QString(tr("Signal ID '%1' is duplicate in opto port '%2' raw data description.")).
+						arg(appSignalID).arg(portID));
+	}
+
+	/// IssueCode: ALC5189
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Logic module ID
+	///
+	/// Description:
+	///		Transmitted signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
+	///
+	void IssueLogger::errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5189,
+				  QString(tr("Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.")).
+						arg(appSignalID).arg(portID).arg(lmID));
+	}
+
+	/// IssueCode: ALC5190
+	///
+	/// IssueType: Error
+	///
+	/// Title: Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Logic module ID
+	///
+	/// Description:
+	///		Receiving signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
+	///
+	void IssueLogger::errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5190,
+				  QString(tr("Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.")).
+						arg(appSignalID).arg(portID).arg(lmID));
+	}
+
+	/// IssueCode: ALC5191
+	///
+	/// IssueType: Error
+	///
+	/// Title: Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic module ID
+	///		%3 Logic schema ID
+	///
+	/// Description:
+	///		Receiving signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
+	///
+	void IssueLogger::errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemID, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5191,
+				  QString(tr("Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').")).
+						arg(appSignalID).arg(lmID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5192
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Tx signal specified in port raw data description isn't connected to transmitter. Connect signal to transmitter.
+	///
+	void IssueLogger::errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5192,
+				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
+						arg(appSignalID).arg(portID).arg(connectionID));
+	}
+
+	/// IssueCode: ALC5193
+	///
+	/// IssueType: Error
+	///
+	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Opto port ID
+	///		%3 Connection ID
+	///
+	/// Description:
+	///		Rx signal specified in port raw data description isn't assigned to reciever.
+	///
+	void IssueLogger::errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5193,
+				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
+						arg(appSignalID).arg(portID).arg(connectionID));
+	}
+
 
 
 	// EQP			Equipment issues						6000-6999

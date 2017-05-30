@@ -12,13 +12,21 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<TuningIPEN::TuningSourceState>("TuningDataSourceState");
 	qRegisterMetaType<TuningIPEN::FotipFrame>("FotipFrame");
 
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT(logger);
+
+	logger->setLogCodeInfo(false);
+
 	QApplication a(argc, argv);
-	TuningIPEN::TuningMainWindow w(argc, argv);
+	TuningIPEN::TuningMainWindow w(argc, argv, logger);
 	w.show();
 
 	int result =  a.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	LOGGER_SHUTDOWN(logger);
 
 	return result;
 }

@@ -40,17 +40,18 @@ struct ServiceInfo
 	ServiceType serviceType;
 	quint16 port;
 	const char* name;
+	const char* shortName;
 };
 
 
 const ServiceInfo serviceInfo[] =
 {
-	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service" },
-	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service" },
-	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service" },
-	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service" },
-	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service" },
-	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service" },
+	{ ServiceType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ ServiceType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ ServiceType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ ServiceType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ ServiceType::ArchivingService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ ServiceType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
 };
 
 const int SERVICE_TYPE_COUNT = sizeof(serviceInfo) / sizeof (ServiceInfo);
@@ -69,7 +70,13 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ServiceWorker(ServiceType serviceType, const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	ServiceWorker(ServiceType serviceType,
+				  const QString& serviceName,
+				  int& argc,
+				  char** argv,
+				  const VersionInfo& versionInfo,
+				  std::shared_ptr<CircularLogger> logger);
+
 	virtual ~ServiceWorker();
 
 	int& argc() const;
@@ -130,6 +137,7 @@ private:
 	int& m_argc;
 	char** m_argv = nullptr;
 	VersionInfo m_versionInfo;
+	std::shared_ptr<CircularLogger> m_logger;
 
 	QSettings m_settings;
 
@@ -152,7 +160,7 @@ class Service : public QObject
 	Q_OBJECT
 
 public:
-	Service(ServiceWorker& serviceWorker);
+	Service(ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger);
 	virtual ~Service();
 
 	void start();
@@ -178,6 +186,7 @@ private:
 
 private:
 	QMutex m_mutex;
+	std::shared_ptr<CircularLogger> m_logger;
 
 	quint32 m_crc = 0;
 
@@ -186,7 +195,8 @@ private:
 
 	ServiceState m_state = ServiceState::Stopped;
 
-	ServiceWorker& m_serviceWorker;
+	ServiceWorker& m_serviceWorkerFactory;
+	ServiceWorker* m_serviceWorker = nullptr;
 
 	SimpleThread* m_serviceWorkerThread = nullptr;
 	UdpSocketThread* m_baseRequestSocketThread = nullptr;
@@ -207,7 +217,7 @@ private:
 class DaemonServiceStarter : private QtService
 {
 public:
-	DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker);
+	DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger);
 	virtual ~DaemonServiceStarter();
 
 	int exec();
@@ -221,6 +231,7 @@ private:
 private:
 	QCoreApplication& m_app;
 	ServiceWorker& m_serviceWorker;
+	std::shared_ptr<CircularLogger> m_logger;
 
 	Service* m_service = nullptr;
 };
@@ -237,7 +248,7 @@ class ServiceStarter : public QObject
 	Q_OBJECT
 
 public:
-	ServiceStarter(QCoreApplication& app, ServiceWorker& m_serviceWorker);
+	ServiceStarter(QCoreApplication& app, ServiceWorker& m_serviceWorker, std::shared_ptr<CircularLogger> logger);
 
 	int exec();
 
@@ -260,4 +271,5 @@ private:
 private:
 	QCoreApplication& m_app;
 	ServiceWorker& m_serviceWorker;
+	std::shared_ptr<CircularLogger> m_logger;
 };

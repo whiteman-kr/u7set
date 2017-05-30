@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../lib/Tcp.h"
 #include <QFile>
 #include <QDir>
-#include "../lib/Md5Hash.h"
 
+#include "../lib/Md5Hash.h"
+#include "../lib/Tcp.h"
+#include "../lib/CircularLogger.h"
 
 namespace Tcp
 {
@@ -143,7 +144,7 @@ namespace Tcp
 	class FileServer : public Server, public FileTransfer
 	{
 	public:
-		FileServer(const QString& rootFolder);
+		FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger);
 
 		virtual Server* getNewInstance() override;
 
@@ -151,7 +152,7 @@ namespace Tcp
 
 		QString rootFolder() const;
 
-		virtual void onFileSent(const QString& fileName);
+		virtual void onFileSent(const QString& fileName, const QString& ip);
 
 	private:
 		void init();
@@ -162,6 +163,8 @@ namespace Tcp
 		void sendNextFilePart();
 
 	private:
+		std::shared_ptr<CircularLogger> m_logger;
+
 		GetFileReply& m_reply;
 		char* m_fileData = nullptr;
 

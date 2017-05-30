@@ -19,6 +19,8 @@ namespace TuningIPEN
 	private:
 		TuningIPENService* m_tuningIPENService = nullptr;
 
+		std::shared_ptr<CircularLogger> m_logger;
+
 		TuningServiceSettings m_tuningSettings;
 		TuningSources m_dataSources;
 
@@ -68,7 +70,11 @@ namespace TuningIPEN
 		void onSetSignalState(QString appSignalID, double value);
 
 	public:
-		TuningIPENServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+		TuningIPENServiceWorker(const QString& serviceName,
+								int& argc,
+								char** argv,
+								const VersionInfo& versionInfo,
+								std::shared_ptr<CircularLogger> logger);
 		virtual ~TuningIPENServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
@@ -94,7 +100,7 @@ namespace TuningIPEN
 		TuningIPENServiceWorker* m_tuningServiceWorker = nullptr;
 
 	public:
-		TuningIPENService(TuningIPENServiceWorker* worker);
+		TuningIPENService(TuningIPENServiceWorker* worker, std::shared_ptr<CircularLogger> logger);
 
 		void setTuningServiceWorker(TuningIPENServiceWorker* tuningServiceWorker) { m_tuningServiceWorker = tuningServiceWorker; }
 

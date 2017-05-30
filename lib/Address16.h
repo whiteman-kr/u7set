@@ -25,7 +25,6 @@ public:
 	Address16(const Address16& addr) : m_offset(addr.m_offset), m_bit(addr.m_bit) {}
 	Address16(int offset, int bit) : m_offset(offset), m_bit(bit) {}
 
-
 	void set(int offset, int bit) { m_offset = offset; m_bit = bit; }
 	void setOffset(int offset) { m_offset = offset; }
 	void setBit(int bit) { m_bit = bit; }
@@ -129,6 +128,8 @@ public:
 
 		return *this;
 	}
+
+	void setAddress(const Address16& addr) { (*this) = addr; }
 
 	void setSignalType(E::SignalType st) { m_signalType = st; }
 	E::SignalType signalType() const { return m_signalType; }

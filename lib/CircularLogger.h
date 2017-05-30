@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QSystemSemaphore>
+#include <memory>
 
 #include "SimpleThread.h"
 
@@ -115,18 +116,27 @@ private:
 };
 
 
-#define LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
-#define LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
-#define LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, false);
-#define LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, false);
+// To asserting "logger != nullptr" inside circularLogger* functions define symbol CIRCULAR_LOGGER_PTR_ASSERTING in your project:
+//
+// #define CIRCULAR_LOGGER_PTR_ASSERTING
+//
+bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, int fileCount, int fileSizeInMB);
+void circularLoggerShutdown(std::shared_ptr<CircularLogger> logger);
 
-#define DEBUG_LOG_ERR(str) logger.writeError(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
-#define DEBUG_LOG_WRN(str) logger.writeWarning(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
-#define DEBUG_LOG_MSG(str) logger.writeMessage(str, Q_FUNC_INFO, __FILE__, __LINE__, true);
-#define DEBUG_LOG_CALL() logger.writeMessage(Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
-
-#define INIT_LOGGER()				logger.init(10, 10);
-#define SHUTDOWN_LOGGER				logger.shutdown();
+void circularLoggerWriteError(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho);
+void circularLoggerWriteWarning(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho);
+void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho);
 
 
-extern CircularLogger logger;
+#define LOG_ERR(logger, str)		circularLoggerWriteError(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_WRN(logger, str)		circularLoggerWriteWarning(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_MSG(logger, str)		circularLoggerWriteMessage(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, false);
+#define LOG_CALL(logger)			circularLoggerWriteMessage(logger, Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, false);
+
+#define DEBUG_LOG_ERR(logger, str)	circularLoggerWriteError(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_WRN(logger, str)	circularLoggerWriteWarning(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_MSG(logger, str)	circularLoggerWriteMessage(logger, str, Q_FUNC_INFO, __FILE__, __LINE__, true);
+#define DEBUG_LOG_CALL(logger)		circularLoggerWriteMessage(logger, Q_FUNC_INFO, Q_FUNC_INFO, __FILE__, __LINE__, true);
+
+#define LOGGER_INIT(logger)			circularLoggerInit(logger, 10, 10);
+#define LOGGER_SHUTDOWN(logger)		circularLoggerShutdown(logger);

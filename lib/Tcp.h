@@ -8,10 +8,14 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <cassert>
+
+#include "../Proto/serialization.pb.h"
+
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/WUtils.h"
-#include "../Proto/serialization.pb.h"
+#include "../lib/CircularLogger.h"
+
 
 namespace Tcp
 {
@@ -277,7 +281,7 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		Listener(const HostAddressPort& listenAddressPort, Server* server);
+		Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger);
 		~Listener();
 
 		virtual void onListenerThreadStarted() {}
@@ -300,6 +304,9 @@ namespace Tcp
 	private:
 		HostAddressPort m_listenAddressPort;
 		TcpServer* m_tcpServer = nullptr;
+
+		std::shared_ptr<CircularLogger> m_logger;
+
 		QTimer m_periodicTimer;
 
 		Server* m_serverInstance = nullptr;
@@ -321,7 +328,9 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		ServerThread(const HostAddressPort& listenAddressPort, Server* server);
+		ServerThread(const HostAddressPort& listenAddressPort,
+					 Server* server,
+					 std::shared_ptr<CircularLogger> logger);
 		ServerThread(Listener* listener);
 
 		~ServerThread();

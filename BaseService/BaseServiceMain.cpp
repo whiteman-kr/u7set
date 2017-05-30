@@ -1,5 +1,6 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
+#include "../lib/CircularLogger.h"
 
 #include "version.h"
 
@@ -7,25 +8,30 @@
 class BaseServiceWorker : public ServiceWorker
 {
 public:
-	BaseServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
-		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, versionInfo)
+	BaseServiceWorker(const QString& serviceName,
+					  int& argc,
+					  char** argv,
+					  const VersionInfo& versionInfo,
+					  std::shared_ptr<CircularLogger> logger) :
+		ServiceWorker(ServiceType::BaseService, serviceName, argc, argv, versionInfo, logger),
+		m_logger(logger)
 	{
 	}
 
 	virtual ServiceWorker* createInstance() const override
 	{
-		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), versionInfo());
+		BaseServiceWorker* newInstance = new BaseServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 		return newInstance;
 	}
 
 	virtual void initialize() override
 	{
-		LOG_CALL();
+		LOG_CALL(m_logger);
 	}
 
 	virtual void shutdown() override
 	{
-		LOG_CALL();
+		LOG_CALL(m_logger);
 	}
 
 	virtual void initCmdLineParser() override
@@ -47,7 +53,7 @@ public:
 	{
 		m_serviceEquipmentID = getStrSetting("id");
 
-		LOG_MSG(QString("%1 = %2").arg("id").arg(m_serviceEquipmentID));
+		LOG_MSG(m_logger, QString("%1 = %2").arg("id").arg(m_serviceEquipmentID));
 	}
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override
@@ -57,6 +63,7 @@ public:
 
 private:
 	QString m_serviceEquipmentID;
+	std::shared_ptr<CircularLogger> m_logger;
 };
 
 
@@ -68,21 +75,23 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app(argc, argv);
 
-	INIT_LOGGER();			// init global CircularLogger object
+	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	logger.setLogCodeInfo(false);
+	LOGGER_INIT(logger);
+
+	logger->setLogCodeInfo(false);
 
 	VersionInfo vi = VERSION_INFO(1, 0);
 
-	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, vi);
+	BaseServiceWorker baseServiceWorker("RPCT Base Service", argc, argv, vi, logger);
 
-	ServiceStarter serviceStarter(app, baseServiceWorker);
+	ServiceStarter serviceStarter(app, baseServiceWorker, logger);
 
 	int result = serviceStarter.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	SHUTDOWN_LOGGER
+	LOGGER_SHUTDOWN(logger);
 
 	return result;
 }

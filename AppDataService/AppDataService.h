@@ -24,7 +24,11 @@ class AppDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
-	AppDataServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo);
+	AppDataServiceWorker(const QString& serviceName,
+						 int& argc,
+						 char** argv,
+						 const VersionInfo& versionInfo,
+						 std::shared_ptr<CircularLogger> logger);
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
@@ -83,6 +87,8 @@ private:
 
 	HostAddressPort m_cfgServiceIP1;
 	HostAddressPort m_cfgServiceIP2;
+
+	std::shared_ptr<CircularLogger> m_logger;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

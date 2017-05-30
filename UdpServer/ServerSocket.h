@@ -27,7 +27,7 @@ class ServerSocket : public UdpServerSocket
     Q_OBJECT
 
 public:
-    ServerSocket(const QHostAddress& bindToAddress, quint16 port);
+	ServerSocket(const QHostAddress& bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger);
     virtual ~ServerSocket();
 
     virtual UdpRequestProcessor* createUdpRequestProcessor();

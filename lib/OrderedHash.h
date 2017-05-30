@@ -563,7 +563,7 @@ public:
 template <typename KEY, typename VALUE>
 void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 {
-	if (contains(key))
+	if (contains(key) == true)
 	{
 		assert(false);		// duplicate key
 		return;
@@ -628,4 +628,3 @@ const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& default
 
 	return (*this)[index];
 }
-

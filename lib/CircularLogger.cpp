@@ -9,8 +9,6 @@
 #include "../lib/CircularLogger.h"
 
 
-CircularLogger logger;
-
 // ----------------------------------------------------------------------------------
 //
 // CircularLoggerWorker class implementation
@@ -277,7 +275,7 @@ bool CircularLogger::init(int fileCount, int fileSizeInMB)
 {
 	if (m_loggerInitialized == true)
 	{
-		assert(false);				// Logger object is allready initialized.
+		assert(false);				// Logger object is already initialized.
 		return false;
 	}
 
@@ -428,5 +426,94 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 
 
 	emit writeRecord(record);
+}
+
+
+bool circularLoggerInit(std::shared_ptr<CircularLogger> logger, int fileCount, int fileSizeInMB)
+{
+	if (logger != nullptr)
+	{
+		return logger->init(fileCount, fileSizeInMB);
+	}
+	else
+	{
+#ifdef CIRCULAR_LOGGER_PTR_ASSERTING
+		assert(false);
+#endif
+	}
+
+	return false;
+}
+
+
+void circularLoggerShutdown(std::shared_ptr<CircularLogger> logger)
+{
+	if (logger != nullptr)
+	{
+		logger->shutdown();
+	}
+	else
+	{
+#ifdef CIRCULAR_LOGGER_PTR_ASSERTING
+		assert(false);
+#endif
+	}
+}
+
+
+void circularLoggerWriteError(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
+{
+	if (logger != nullptr)
+	{
+		logger->writeError(message, function, file, line, debugEcho);
+	}
+	else
+	{
+#ifdef CIRCULAR_LOGGER_PTR_ASSERTING
+		assert(false);
+#endif
+		if (debugEcho == true)
+		{
+			qDebug() << C_STR(message);
+		}
+	}
+}
+
+
+void circularLoggerWriteWarning(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
+{
+	if (logger != nullptr)
+	{
+		logger->writeWarning(message, function, file, line, debugEcho);
+	}
+	else
+	{
+#ifdef CIRCULAR_LOGGER_PTR_ASSERTING
+		assert(false);
+#endif
+		if (debugEcho == true)
+		{
+			qDebug() << C_STR(message);
+		}
+	}
+}
+
+
+void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
+{
+	if (logger != nullptr)
+	{
+		logger->writeMessage(message, function, file, line, debugEcho);
+	}
+	else
+	{
+#ifdef CIRCULAR_LOGGER_PTR_ASSERTING
+		assert(false);
+#endif
+		if (debugEcho == true)
+		{
+			qDebug() << C_STR(message);
+		}
+	}
 }
 

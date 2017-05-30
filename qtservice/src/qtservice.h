@@ -43,6 +43,8 @@
 
 #include <QCoreApplication>
 
+#include "../lib/CircularLogger.h"
+
 #if defined(Q_OS_WIN)
 #  if !defined(QT_QTSERVICE_EXPORT) && !defined(QT_QTSERVICE_IMPORT)
 #    define QT_QTSERVICE_EXPORT
@@ -119,7 +121,7 @@ public:
 
     Q_DECLARE_FLAGS(ServiceFlags, ServiceFlag)
 
-    QtServiceBase(int argc, char **argv, const QString &name);
+	QtServiceBase(int argc, char **argv, const QString &name, std::shared_ptr<CircularLogger> logger);
     virtual ~QtServiceBase();
 
     QString serviceName() const;
@@ -171,14 +173,16 @@ private:
 
     friend class QtServiceSysPrivate;
     QtServiceBasePrivate *d_ptr;
+
+	std::shared_ptr<CircularLogger> m_logger;
 };
 
 
 class QtService : public QtServiceBase
 {
 public:
-	QtService(int argc, char** argv, QCoreApplication* app, const QString &name)
-		: QtServiceBase(argc, argv, name),
+	QtService(int argc, char** argv, QCoreApplication* app, const QString &name, std::shared_ptr<CircularLogger> logger)
+		: QtServiceBase(argc, argv, name, logger),
 		  m_app(app)
 	{
 	}

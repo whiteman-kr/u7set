@@ -1641,6 +1641,22 @@ namespace Hardware
 		return d;
 	}
 
+	const Hardware::DeviceSignal* DeviceObject::toSignal() const
+	{
+		const Hardware::DeviceSignal* d = dynamic_cast<const Hardware::DeviceSignal*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
+	Hardware::DeviceSignal* DeviceObject::toSignal()
+	{
+		Hardware::DeviceSignal* d = dynamic_cast<Hardware::DeviceSignal*>(this);
+		assert(d != nullptr);
+
+		return d;
+	}
+
 	const Hardware::Software* DeviceObject::toSoftware() const
 	{
 		const Hardware::Software* d = dynamic_cast<const Hardware::Software*>(this);
@@ -2909,6 +2925,11 @@ R"DELIM({
 	bool DeviceModule::isLogicModule() const
 	{
 		return moduleFamily() == FamilyType::LM;
+	}
+
+	bool DeviceModule::isOptoModule() const
+	{
+		return moduleFamily() == FamilyType::OCM;
 	}
 
 	//

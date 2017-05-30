@@ -117,58 +117,69 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 	// get double signal value from m_rupData.data buffer using parseInfo
 	//
 	int valueOffset = parseInfo.valueAddr.offset() * 2;		// offset in Words => offset in Bytes
+	int bitNo = parseInfo.valueAddr.bit();
 
-	if (valueOffset >= m_rupData.dataSize)
+	if (m_rupData.dataSize > (Rup::FRAME_DATA_SIZE * Rup::MAX_FRAME_COUNT) ||
+		valueOffset < 0 ||
+		valueOffset >= m_rupData.dataSize ||
+		bitNo <0 ||
+		bitNo >= SIZE_16BIT)
 	{
-		assert(false);
+//		assert(false);
 		return false;
 	}
 
-	if (parseInfo.dataSize == 1)
+	quint16 rawValue16 = 0;
+	quint32 rawValue32 = 0;
+
+	switch(parseInfo.dataSize)
 	{
-		quint16 rawValue = *reinterpret_cast<quint16*>(m_rupData.data + valueOffset);
+	case SIZE_1BIT:
+		rawValue16 = *reinterpret_cast<quint16*>(m_rupData.data + valueOffset);
 
 		if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
 		{
-			rawValue = reverseUint16(rawValue);
+			rawValue16 = reverseUint16(rawValue16);
 		}
 
-		value = static_cast<double>((rawValue >> parseInfo.valueAddr.bit()) & 0x0001);
-	}
-	else
-	{
-		if (parseInfo.dataSize == 32)
+
+		value = static_cast<double>((rawValue16 >> bitNo) & 0x0001);
+
+		break;
+
+	case SIZE_32BIT:
+		assert(bitNo == 0);
+
+		rawValue32 = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
+
+		if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
 		{
-			assert(parseInfo.valueAddr.bit() == 0);
-
-			quint32 rawValue = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
-
-			if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
-			{
-				rawValue = reverseUint32(rawValue);
-			}
-
-			switch (static_cast<E::DataFormat>(parseInfo.analogSignalFormat))
-			{
-			case E::DataFormat::Float:
-				value = static_cast<double>(*reinterpret_cast<float*>(&rawValue));
-				break;
-
-			case E::DataFormat::SignedInt:
-				value = static_cast<double>(*reinterpret_cast<qint32*>(&rawValue));
-				break;
-
-			case E::DataFormat::UnsignedInt:
-				value = static_cast<double>(rawValue);
-				break;
-			}
+			rawValue32 = reverseUint32(rawValue32);
 		}
-		else
+
+		switch (static_cast<E::DataFormat>(parseInfo.analogSignalFormat))
 		{
-			qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
+		case E::DataFormat::Float:
+			value = static_cast<double>(*reinterpret_cast<float*>(&rawValue32));
+			break;
+
+		case E::DataFormat::SignedInt:
+			value = static_cast<double>(*reinterpret_cast<qint32*>(&rawValue32));
+			break;
+
+		case E::DataFormat::UnsignedInt:
+			value = static_cast<double>(rawValue32);
+			break;
+
+		default:
 			assert(false);
-			return false;
 		}
+		break;
+
+	default:
+		qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
+//		assert(false);
+		return false;
 	}
 
 	return true;

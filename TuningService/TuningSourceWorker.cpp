@@ -176,7 +176,10 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	TuningSourceWorker::TuningSourceWorker(const TuningServiceSettings& settings, const TuningSource& source) :
+	TuningSourceWorker::TuningSourceWorker(const TuningServiceSettings& settings,
+										   const TuningSource& source,
+										   std::shared_ptr<CircularLogger> logger) :
+		m_logger(logger),
 		m_timer(this),
 		m_socket(this),
 		m_tuningCommandQueue(this, 1000),
@@ -288,7 +291,7 @@ namespace Tuning
 		if (signalIndex >= m_tuningSignals.count())
 		{
 			assert(false);
-			DEBUG_LOG_ERR("Signal index out of range (TuningSourceWorker::writeSignalState)");
+			DEBUG_LOG_ERR(m_logger, "Signal index out of range (TuningSourceWorker::writeSignalState)");
 			return;
 		}
 
@@ -304,7 +307,7 @@ namespace Tuning
 
 		writeResult.set_error(TO_INT(NetworkError::Success));
 
-		DEBUG_LOG_MSG(QString(tr("Queue write command: source %1 (%2), signal %3, value %4")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Queue write command: source %1 (%2), signal %3, value %4")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()).
 					  arg(m_tuningSignals[signalIndex].appSignalID()).
@@ -320,7 +323,7 @@ namespace Tuning
 
 		m_tuningCommandQueue.push(&cmd);
 
-		DEBUG_LOG_MSG(QString(tr("Queue apply command: source %1 (%2)")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Queue apply command: source %1 (%2)")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()));
 	}
@@ -335,13 +338,13 @@ namespace Tuning
 
 		restartTimer();
 
-		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is started")).arg(m_sourceIP.addressStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 worker is started")).arg(m_sourceIP.addressStr()));
 	}
 
 
 	void TuningSourceWorker::onThreadFinished()
 	{
-		DEBUG_LOG_MSG(QString(tr("Tuning source %1 worker is finished")).arg(m_sourceIP.addressStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("Tuning source %1 worker is finished")).arg(m_sourceIP.addressStr()));
 	}
 
 
@@ -562,7 +565,7 @@ namespace Tuning
 			{
 				QString valueStr = request.fotipFrame.valueStr(true);
 
-				DEBUG_LOG_MSG(QString(tr("RupFotipV2 WRITE request is sent to %1 (%2), value %3")).
+				DEBUG_LOG_MSG(m_logger, QString(tr("RupFotipV2 WRITE request is sent to %1 (%2), value %3")).
 							  arg(sourceEquipmentID()).
 							  arg(m_sourceIP.addressStr()).
 							  arg(valueStr));
@@ -570,7 +573,7 @@ namespace Tuning
 			break;
 
 		case FotipV2::OpCode::Apply:
-			DEBUG_LOG_MSG(QString(tr("RupFotipV2 APPLY request is sent to %1 (%2)")).
+			DEBUG_LOG_MSG(m_logger, QString(tr("RupFotipV2 APPLY request is sent to %1 (%2)")).
 						  arg(sourceEquipmentID()).
 						  arg(m_sourceIP.addressStr()));
 			break;
@@ -918,18 +921,18 @@ namespace Tuning
 
 		if (hasErrors == true)
 		{
-			DEBUG_LOG_ERR(msg);
+			DEBUG_LOG_ERR(m_logger, msg);
 		}
 		else
 		{
-			DEBUG_LOG_MSG(msg);
+			DEBUG_LOG_MSG(m_logger, msg);
 		}
 	}
 
 
 	void TuningSourceWorker::processApplyReply(RupFotipV2&)
 	{
-		DEBUG_LOG_MSG(QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request")).
+		DEBUG_LOG_MSG(m_logger, QString(tr("Reply is received from %1 (%2) on RupFotipV2 APPLY request")).
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()));
 	}
@@ -1203,9 +1206,11 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningServiceSettings& settings, const TuningSource& source)
+	TuningSourceWorkerThread::TuningSourceWorkerThread(const TuningServiceSettings& settings,
+													   const TuningSource& source,
+													   std::shared_ptr<CircularLogger> logger)
 	{
-		m_sourceWorker = new TuningSourceWorker(settings, source);
+		m_sourceWorker = new TuningSourceWorker(settings, source, logger);
 
 		addWorker(m_sourceWorker);
 	}
@@ -1264,9 +1269,12 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------
 
-	TuningSocketListener::TuningSocketListener(const HostAddressPort &listenIP, TuningSourceWorkerThreadMap& sourceWorkerMap) :
+	TuningSocketListener::TuningSocketListener(const HostAddressPort &listenIP, \
+											   TuningSourceWorkerThreadMap& sourceWorkerMap,
+											   std::shared_ptr<CircularLogger> logger) :
 		m_listenIP(listenIP),
 		m_sourceWorkerMap(sourceWorkerMap),
+		m_logger(logger),
 		m_timer(this)
 	{
 	}
@@ -1309,11 +1317,11 @@ namespace Tuning
 			//
 			connect(m_socket, &QUdpSocket::readyRead, this, &TuningSocketListener::onSocketReadyRead);
 
-			DEBUG_LOG_MSG(QString(tr("Tuning listening socket is created and bound to %1")).arg(m_listenIP.addressPortStr()));
+			DEBUG_LOG_MSG(m_logger, QString(tr("Tuning listening socket is created and bound to %1")).arg(m_listenIP.addressPortStr()));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(QString(tr("Tuning listening socket error binding to %1")).arg(m_listenIP.addressPortStr()));
+			DEBUG_LOG_ERR(m_logger, QString(tr("Tuning listening socket error binding to %1")).arg(m_listenIP.addressPortStr()));
 
 			// error binding
 			//
@@ -1412,7 +1420,7 @@ namespace Tuning
 		{
 			m_errUnknownTuningSource++;
 
-			DEBUG_LOG_ERR(QString(tr("Reply from unknown tuning source %1")).
+			DEBUG_LOG_ERR(m_logger, QString(tr("Reply from unknown tuning source %1")).
 						  arg(tuningSourceIP.toString()));
 			return;
 		}
@@ -1444,9 +1452,10 @@ namespace Tuning
 	// ----------------------------------------------------------------------------------
 
 	TuningSocketListenerThread::TuningSocketListenerThread(const HostAddressPort& listenIP,
-														   TuningSourceWorkerThreadMap& sourceWorkerMap)
+														   TuningSourceWorkerThreadMap& sourceWorkerMap,
+														   std::shared_ptr<CircularLogger> logger)
 	{
-		m_socketListener = new TuningSocketListener(listenIP, sourceWorkerMap);
+		m_socketListener = new TuningSocketListener(listenIP, sourceWorkerMap, logger);
 
 		addWorker(m_socketListener);
 	}

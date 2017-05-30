@@ -123,7 +123,7 @@ MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostA
 
 	// --
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2);
+	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2, false, nullptr);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 

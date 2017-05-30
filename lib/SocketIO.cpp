@@ -109,7 +109,18 @@ quint32 CRC32(const char* buffer, int len)
 }
 
 
+quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc)
+{
+	std::string stdStr = str.toStdString();
 
+	return CRC32(initialValue, stdStr.c_str(), static_cast<int>(stdStr.length()), finishCalc);
+}
+
+
+quint32 CRC32(quint32 initialValue, int value, bool finishCalc)
+{
+	return CRC32(initialValue, reinterpret_cast<const char*>(&value), sizeof(value), finishCalc);
+}
 
 
 char* Serializable::serializeVersion(char *buffer, bool write)

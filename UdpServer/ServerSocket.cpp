@@ -87,8 +87,8 @@ void TestRequestProcessor::processRequest(const UdpRequest& request)
     }
 }
 
-ServerSocket::ServerSocket(const QHostAddress &bindToAddress, quint16 port) :
-    UdpServerSocket(bindToAddress, port),
+ServerSocket::ServerSocket(const QHostAddress &bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger) :
+	UdpServerSocket(bindToAddress, port, logger),
     lastStartTime(QDateTime::currentDateTime()),
 	runTime(QDateTime::currentDateTime()),
 	isRunning(true)

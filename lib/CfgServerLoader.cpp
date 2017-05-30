@@ -30,21 +30,24 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 //
 // -------------------------------------------------------------------------------------
 
-CfgServer::CfgServer(const QString& buildFolder) :
-	Tcp::FileServer(buildFolder)
+CfgServer::CfgServer(const QString& buildFolder, std::shared_ptr<CircularLogger> logger) :
+	Tcp::FileServer(buildFolder, logger),
+	m_logger(logger)
 {
 }
 
 
 CfgServer* CfgServer::getNewInstance()
 {
-	return new CfgServer(m_rootFolder);
+	return new CfgServer(m_rootFolder, m_logger);
 }
 
 
 void CfgServer::onServerThreadStarted()
 {
-	onRootFolderChange();
+	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
+
+	readBuildXml();
 }
 
 
@@ -53,11 +56,15 @@ void CfgServer::onServerThreadFinished()
 }
 
 
-void CfgServer::onRootFolderChange()
+void CfgServer::onConnection()
 {
-	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
+	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
+}
 
-	readBuildXml();
+
+void CfgServer::onDisconnection()
+{
+	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer connection #%1 closed")).arg(id()));
 }
 
 
@@ -131,12 +138,14 @@ void CfgServer::readBuildXml()
 //
 // -------------------------------------------------------------------------------------
 
-CfgLoader::CfgLoader(	const QString& appEquipmentID,
+CfgLoader::CfgLoader(const QString& appEquipmentID,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
 						const HostAddressPort& serverAddressPort2,
-						bool enableDownloadCfg) :
+						bool enableDownloadCfg,
+						std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileClient("", serverAddressPort1, serverAddressPort2),
+	m_logger(logger),
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)
 {
@@ -304,29 +313,34 @@ bool CfgLoader::isFileReady()
 }
 
 
+void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
+{
+	DEBUG_LOG_MSG(m_logger, QString(tr("Try connect to server %1").arg(serverAddr.addressPortStr())));
+}
+
+
+void CfgLoader::onDisconnection()
+{
+	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader disconnected from server %1")).arg(peerAddr().addressStr()));
+}
+
+
 void CfgLoader::onStartDownload(const QString& fileName)
 {
-	qDebug() << C_STR(QString(tr("Start download: %1")).arg(fileName));
+	DEBUG_LOG_MSG(m_logger, QString(tr("Start download: %1")).arg(fileName));
 }
 
 
 void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
 {
-	QString msg;
-
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		msg = QString("File %1 download error - %2").
-					arg(fileName).
-					arg(getErrorStr(errorCode));
+		DEBUG_LOG_ERR(m_logger, QString("File %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
 	}
 	else
 	{
-		msg = QString("File %1 download Ok").
-					arg(fileName);
+		DEBUG_LOG_MSG(m_logger, QString("File %1 download Ok").arg(fileName));
 	}
-
-	qDebug() << msg;
 }
 
 
@@ -349,6 +363,8 @@ void CfgLoader::shutdown()
 
 void CfgLoader::onConnection()
 {
+	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
+
 	resetStatuses();
 
 	startConfigurationXmlLoading();
@@ -447,7 +463,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5) == true)
 	{
-		qDebug() << "File " << fileName << " allready exists, md5 = " << m_cfgFilesInfo[fileName].md5;
+		qDebug() << "File " << fileName << " already exists, md5 = " << m_cfgFilesInfo[fileName].md5;
 
 		m_lastError = Tcp::FileTransferResult::Ok;
 		setFileReady(true);
@@ -604,7 +620,7 @@ void CfgLoader::onTimer()
 			// file exists from previous downloads
 			// nothing to do
 			//
-			qDebug() << "File " << cfi.pathFileName << " allready exists, md5 = " << cfi.md5;
+			qDebug() << "File " << cfi.pathFileName << " already exists, md5 = " << cfi.md5;
 		}
 		else
 		{
@@ -829,9 +845,10 @@ CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
 									int appInstance,
 									const HostAddressPort& serverAddressPort1,
 									const HostAddressPort& serverAddressPort2,
-									bool enableDownloadCfg)
+									bool enableDownloadCfg,
+									std::shared_ptr<CircularLogger> logger)
 {
-	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2, enableDownloadCfg);		// it will be deleted during SimpleThread destruction
+	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2, enableDownloadCfg, logger);		// it will be deleted during SimpleThread destruction
 
 	addWorker(m_cfgLoader);
 

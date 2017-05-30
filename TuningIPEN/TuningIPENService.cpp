@@ -11,8 +11,13 @@ namespace TuningIPEN
 	// -------------------------------------------------------------------------------------
 
 
-	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceName, int& argc, char** argv, const VersionInfo& versionInfo) :
-		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo),
+	TuningIPENServiceWorker::TuningIPENServiceWorker(const QString& serviceName,
+													 int& argc,
+													 char** argv,
+													 const VersionInfo& versionInfo,
+													 std::shared_ptr<CircularLogger> logger) :
+		ServiceWorker(ServiceType::TuningService, serviceName, argc, argv, versionInfo, logger),
+		m_logger(logger),
 		m_timer(this)
 	{
 	}
@@ -26,7 +31,7 @@ namespace TuningIPEN
 
 	ServiceWorker* TuningIPENServiceWorker::createInstance() const
 	{
-		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(serviceName(), argc(), argv(), versionInfo());
+		TuningIPENServiceWorker* tuningIPENServiceWorker = new TuningIPENServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
 
 		return tuningIPENServiceWorker;
 	}
@@ -297,7 +302,7 @@ namespace TuningIPEN
 
 		// send request
 		//
-		//	allready filled inside source->setSignalState(appSignalID, value, &sr):
+		//	already filled inside source->setSignalState(appSignalID, value, &sr):
 		//
 		//	sr.dataType
 		//	sr.startAddressW - offset of frame!
@@ -553,8 +558,8 @@ namespace TuningIPEN
 	//
 	// -------------------------------------------------------------------------------------
 
-	TuningIPENService::TuningIPENService(TuningIPENServiceWorker* worker) :
-		Service(*worker)
+	TuningIPENService::TuningIPENService(TuningIPENServiceWorker* worker, std::shared_ptr<CircularLogger> logger) :
+		Service(*worker, logger)
 	{
 		worker->setTuningService(this);
 	}

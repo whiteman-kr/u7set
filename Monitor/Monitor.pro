@@ -72,6 +72,7 @@ SOURCES += main.cpp \
     DialogSignalSnapshot.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
+    ../lib/CircularLogger.cpp \
     MonitorView.cpp
 
 HEADERS  += \
@@ -109,6 +110,7 @@ HEADERS  += \
     DialogSignalSnapshot.h \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
+    ../lib/CircularLogger.h \
     MonitorView.h
 
 FORMS    += \

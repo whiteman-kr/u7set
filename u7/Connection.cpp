@@ -578,6 +578,23 @@ namespace Hardware
         m_serialMode = value;
     }
 
+	QString Connection::serialModeStr() const
+	{
+		switch(m_serialMode)
+		{
+		case OptoPort::SerialMode::RS232:
+			return "RS232";
+
+		case OptoPort::SerialMode::RS485:
+			return "RS485";
+
+		default:
+			assert(false);
+		}
+
+		return "RS???";
+	}
+
     OptoPort::Mode Connection::mode() const
     {
         return m_mode;
@@ -587,6 +604,29 @@ namespace Hardware
     {
         m_mode = value;
     }
+
+	QString Connection::modeStr() const
+	{
+		switch(m_mode)
+		{
+		case OptoPort::Mode::Optical:
+			return "Optical";
+
+		case OptoPort::Mode::Serial:
+			return "Serial";
+
+		default:
+			assert(false);
+		}
+
+		return "Mode???";
+	}
+
+
+	bool Connection::isSerial() const
+	{
+		return m_mode == OptoPort::Mode::Serial;
+	}
 
     bool Connection::enableDuplex() const
     {
