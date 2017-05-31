@@ -141,8 +141,10 @@ public:
 
 signals:
 
-protected slots:
+public slots:
+	void refreshFiles();
 
+protected slots:
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog);
@@ -156,7 +158,6 @@ protected slots:
 	void viewFiles(std::vector<DbFileInfo> files);
 	void cloneFile(DbFileInfo file);
 
-	void refreshFiles();
 
 private slots:
 	void ctrlF();
@@ -206,6 +207,8 @@ public:
 
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
+
+	void refreshControlTabPage();
 
 public slots:
 	void projectOpened();

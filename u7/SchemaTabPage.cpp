@@ -942,6 +942,25 @@ bool SchemasTabPage::saveUnsavedSchemas()
 	return ok;
 }
 
+void SchemasTabPage::refreshControlTabPage()
+{
+	assert(m_tabWidget);
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* tabPage = m_tabWidget->widget(i);
+
+		if (qobject_cast<SchemaControlTabPage*>(tabPage) != nullptr)
+		{
+			SchemaControlTabPage* controlTabPage = dynamic_cast<SchemaControlTabPage*>(tabPage);
+			controlTabPage->refreshFiles();
+			break;
+		}
+	}
+
+	return;
+}
+
 void SchemasTabPage::projectOpened()
 {
 	this->setEnabled(true);
@@ -1296,6 +1315,12 @@ VFrame30::Schema* SchemaControlTabPage::createSchema() const
 	return m_createSchemaFunc();
 }
 
+void SchemaControlTabPage::refreshFiles()
+{
+	assert(m_filesView);
+	m_filesView->refreshFiles();
+	return;
+}
 
 void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
@@ -1992,12 +2017,6 @@ void SchemaControlTabPage::cloneFile(DbFileInfo file)
 	return;
 }
 
-void SchemaControlTabPage::refreshFiles()
-{
-	assert(m_filesView);
-	m_filesView->refreshFiles();
-	return;
-}
 
 void SchemaControlTabPage::ctrlF()
 {

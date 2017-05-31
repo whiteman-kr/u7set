@@ -194,29 +194,12 @@ namespace Builder
 
 	// LogicModule Description Set
 	//
-    class LmDescriptionSet : public QObject
+	class LmDescriptionSet : public LogicModuleSet
 	{
         Q_OBJECT
 
     public:
-
-		bool has(QString fileName) const;
-
 		bool loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName);
-
-		void add(QString fileName, std::shared_ptr<LogicModule> lm);
-
-		std::shared_ptr<LogicModule> get(QString fileName) const;
-		std::shared_ptr<LogicModule> get(QString fileName);
-
-		std::shared_ptr<LogicModule> get(const Hardware::DeviceModule* logicModule) const;
-		std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule);
-
-		static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
-
-		// Data
-		//
-		std::map<QString, std::shared_ptr<LogicModule>> m_lmDescriptions;		// Key is LmDescriptionFile
 	};
 
 	// ------------------------------------------------------------------------
