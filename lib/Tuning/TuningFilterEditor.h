@@ -32,7 +32,7 @@ public slots:
 
 protected:
 
-	virtual double getCurrentSignalValue(Hash appSignalHash, bool& ok);
+	virtual float getCurrentSignalValue(Hash appSignalHash, bool& ok);
 
 private slots:
 

@@ -16,7 +16,7 @@ public:
 
 protected:
 
-	virtual double getCurrentSignalValue(Hash appSignalHash, bool& ok) override;
+	virtual float getCurrentSignalValue(Hash appSignalHash, bool& ok) override;
 
 private:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
