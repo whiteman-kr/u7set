@@ -590,8 +590,8 @@ namespace Builder
 			{
 				list.append(QString(tr("Port1 equipmentID:\t\t%1\n")).arg(cn->port1EquipmentID()));
 
-				list.append(QString(tr("Serial mode:\t\t\t%1")).arg(cn->serialModeStr()));
-				list.append(QString(tr("Duplex mode:\t\t\t%1")).arg(cn->enableDuplex() == true ? "Enabled" : "Disabled"));
+				list.append(QString(tr("Serial mode:\t\t\t%1")).arg(cn->serialModeStr(cn->port1SerialMode())));
+				list.append(QString(tr("Duplex mode:\t\t\t%1")).arg(cn->port1EnableDuplex() == true ? "Enabled" : "Disabled"));
 			}
 			else
 			{

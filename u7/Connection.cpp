@@ -51,9 +51,15 @@ namespace Hardware
         static QString s_port2TxRsID = "Port2TxRsID";
         static QString s_port2TxRsDataUID = "Port2TxRsDataUID";
 
-        static QString s_serialMode = "SerialMode";
-        static QString s_enableDuplex = "EnableDuplex";
-        static QString s_enableManualSettings = "EnableManualSettings";
+		static QString s_port1EnableSerial = "Port1EnableSerial";
+		static QString s_port1SerialMode = "Port1SerialMode";
+		static QString s_port1EnableDuplex = "Port1EnableDuplex";
+
+		static QString s_port2EnableSerial = "Port2EnableSerial";
+		static QString s_port2SerialMode = "Port2SerialMode";
+		static QString s_port2EnableDuplex = "Port2EnableDuplex";
+
+		static QString s_enableManualSettings = "EnableManualSettings";
         static QString s_mode = "Mode";
         static QString s_disableDataIDControl = "Disable DataID Control";
         static QString s_generateConnectionVHDfile = "Generate connection VHD file";
@@ -110,13 +116,25 @@ namespace Hardware
         ADD_PROPERTY_GETTER_SETTER(int, s_port2TxRsID, false, Connection::port2TxRsID, Connection::setPort2TxRsID);
         ADD_PROPERTY_GETTER_SETTER(quint32, s_port2TxRsDataUID, false, Connection::port2TxRsDataUID, Connection::setPort2TxRsDataUID);
 
-		auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(Connection::SerialMode, s_serialMode, true, Connection::serialMode, Connection::setSerialMode);
+		auto propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, s_port1EnableSerial, true, Connection::port1EnableSerial, Connection::setPort1EnableSerial);
+		propEnableSerial->setCategory(s_serialCommunicationsOCM);
+
+		propEnableSerial = ADD_PROPERTY_GETTER_SETTER(bool, s_port2EnableSerial, true, Connection::port2EnableSerial, Connection::setPort2EnableSerial);
+		propEnableSerial->setCategory(s_serialCommunicationsOCM);
+
+		auto propSerialMode = ADD_PROPERTY_GETTER_SETTER(Connection::SerialMode, s_port1SerialMode, true, Connection::port1SerialMode, Connection::setPort1SerialMode);
         propSerialMode->setCategory(s_serialCommunicationsOCM);
 
-        auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, s_enableDuplex, true, Connection::enableDuplex, Connection::setEnableDuplex);
+		propSerialMode = ADD_PROPERTY_GETTER_SETTER(Connection::SerialMode, s_port2SerialMode, true, Connection::port2SerialMode, Connection::setPort2SerialMode);
+		propSerialMode->setCategory(s_serialCommunicationsOCM);
+
+		auto propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, s_port1EnableDuplex, true, Connection::port1EnableDuplex, Connection::setPort1EnableDuplex);
         propEnableDuplex->setCategory(s_serialCommunicationsOCM);
 
-        auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, s_enableManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
+		propEnableDuplex = ADD_PROPERTY_GETTER_SETTER(bool, s_port2EnableDuplex, true, Connection::port2EnableDuplex, Connection::setPort2EnableDuplex);
+		propEnableDuplex->setCategory(s_serialCommunicationsOCM);
+
+		auto propManual = ADD_PROPERTY_GETTER_SETTER(bool, s_enableManualSettings, true, Connection::manualSettings, Connection::setManualSettings);
         propManual->setCategory(s_manualSettings);
 
 		ADD_PROPERTY_GETTER_SETTER(Connection::Type, s_mode, true, Connection::type, Connection::setType);
@@ -144,9 +162,16 @@ namespace Hardware
 		mutableConnection->set_port1rawdatadescription(m_port1RawDataDescription.toUtf8());
 		mutableConnection->set_port2rawdatadescription(m_port2RawDataDescription.toUtf8());
 
-		mutableConnection->set_serialmode(static_cast<int>(serialMode()));
-		mutableConnection->set_mode(static_cast<int>(type()));
-		mutableConnection->set_enableduplex(m_enableDuplex);
+		mutableConnection->set_type(static_cast<int>(type()));
+
+		mutableConnection->set_port1enableserial(m_port1EnableDuplex);
+		mutableConnection->set_port1serialmode(static_cast<int>(port1SerialMode()));
+		mutableConnection->set_port1enableduplex(m_port1EnableDuplex);
+
+		mutableConnection->set_port2enableserial(m_port2EnableDuplex);
+		mutableConnection->set_port2serialmode(static_cast<int>(port2SerialMode()));
+		mutableConnection->set_port2enableduplex(m_port2EnableDuplex);
+
 		mutableConnection->set_manualsettings(m_manualSettings);
 		mutableConnection->set_disabledataid(m_disableDataID);
 		mutableConnection->set_generatevhdfile(m_generateVHDFile);
@@ -179,13 +204,16 @@ namespace Hardware
 		m_port1RawDataDescription = connection.port1rawdatadescription().c_str();
 		m_port2RawDataDescription = connection.port2rawdatadescription().c_str();
 
-		m_serialMode = static_cast<Connection::SerialMode>(connection.serialmode());
+		m_type = static_cast<Connection::Type>(connection.type());
 
-		assert(false);			// переименовать onnection.mode() в connection.type() !!!!
-		m_type = static_cast<Connection::Type>(connection.mode());
+		m_port1EnableSerial = connection.port1enableserial();
+		m_port1SerialMode = static_cast<Connection::SerialMode>(connection.port1serialmode());
+		m_port1EnableDuplex = connection.port1enableduplex();
 
+		m_port2EnableSerial = connection.port2enableserial();
+		m_port2SerialMode = static_cast<Connection::SerialMode>(connection.port2serialmode());
+		m_port2EnableDuplex = connection.port2enableduplex();
 
-		m_enableDuplex = connection.enableduplex();
 		m_manualSettings = connection.manualsettings();
 		m_disableDataID = connection.disabledataid();
 		m_generateVHDFile = connection.generatevhdfile();
@@ -197,6 +225,33 @@ namespace Hardware
 		m_port2TxStartAddress = connection.port2txstartaddress();
 		m_port2ManualTxWordsQuantity = connection.port2txwordsquantity();
 		m_port2ManualRxWordsQuantity = connection.port2rxwordsquantity();
+
+		// obsolete fields, needed to read projects until 30.05.2017
+
+		if (connection.has_obsoletemode())
+		{
+			//const int Mode_Optical = 0;
+			const int Mode_Serial = 1;
+
+			int obsolete_mode = connection.obsoletemode();
+
+			if (obsolete_mode == Mode_Serial)
+			{
+				setType(Connection::Type::SinglePort);
+				m_port1EnableSerial = true;
+			}
+		}
+
+		if (connection.has_obsoleteserialmode())
+		{
+			m_port1SerialMode = static_cast<Connection::SerialMode>(connection.obsoleteserialmode());
+			m_port2SerialMode = static_cast<Connection::SerialMode>(connection.obsoleteserialmode());
+		}
+		if (connection.has_obsoleteenableduplex())
+		{
+			m_port1EnableDuplex = connection.obsoleteenableduplex();
+			m_port2EnableDuplex = connection.obsoleteenableduplex();
+		}
 
 		return true;
 	}
@@ -237,18 +292,29 @@ namespace Hardware
 
         if (reader.attributes().hasAttribute("SerialMode"))
         {
-			setSerialMode(static_cast<Connection::SerialMode>(reader.attributes().value("SerialMode").toInt()));
-        }
+			setPort1SerialMode(static_cast<Connection::SerialMode>(reader.attributes().value("SerialMode").toInt()));
+			setPort2SerialMode(static_cast<Connection::SerialMode>(reader.attributes().value("SerialMode").toInt()));
+		}
 
         if (reader.attributes().hasAttribute("Mode"))
         {
-			setType(static_cast<Connection::Type>(reader.attributes().value("Mode").toInt()));
+			//const int Mode_Optical = 0;
+			const int Mode_Serial = 1;
+
+			int obsolete_mode = reader.attributes().value("Mode").toInt();
+
+			if (obsolete_mode == Mode_Serial)
+			{
+				setType(Connection::Type::SinglePort);
+				m_port1EnableSerial = true;
+			}
         }
 
         if (reader.attributes().hasAttribute("EnableDuplex"))
         {
-            setEnableDuplex(reader.attributes().value("EnableDuplex").toString() == "true" ? true : false);
-        }
+			setPort1EnableDuplex(reader.attributes().value("EnableDuplex").toString() == "true" ? true : false);
+			setPort2EnableDuplex(reader.attributes().value("EnableDuplex").toString() == "true" ? true : false);
+		}
 
         if (reader.attributes().hasAttribute("ManualSettings"))
         {
@@ -573,19 +639,29 @@ namespace Hardware
         m_port2TxRsDataUID = value;
     }
 
-	Connection::SerialMode Connection::serialMode() const
+	Connection::SerialMode Connection::port1SerialMode() const
     {
-        return m_serialMode;
+		return m_port1SerialMode;
     }
 
-	void Connection::setSerialMode(const Connection::SerialMode value)
+	void Connection::setPort1SerialMode(const Connection::SerialMode value)
     {
-        m_serialMode = value;
+		m_port1SerialMode = value;
     }
 
-	QString Connection::serialModeStr() const
+	Connection::SerialMode Connection::port2SerialMode() const
 	{
-		switch(m_serialMode)
+		return m_port2SerialMode;
+	}
+
+	void Connection::setPort2SerialMode(const Connection::SerialMode value)
+	{
+		m_port2SerialMode = value;
+	}
+
+	QString Connection::serialModeStr(const Connection::SerialMode value) const
+	{
+		switch(value)
 		{
 		case SerialMode::RS232:
 			return "RS232";
@@ -637,17 +713,47 @@ namespace Hardware
 		return m_type == Type::SinglePort;
 	}
 
-    bool Connection::enableDuplex() const
+	bool Connection::port1EnableSerial() const
+	{
+		return m_port1EnableSerial;
+	}
+
+	void Connection::setPort1EnableSerial(bool value)
+	{
+		m_port1EnableSerial = value;
+	}
+
+	bool Connection::port2EnableSerial() const
+	{
+		return m_port2EnableSerial;
+	}
+
+	void Connection::setPort2EnableSerial(bool value)
+	{
+		m_port2EnableSerial = value;
+	}
+
+	bool Connection::port1EnableDuplex() const
     {
-        return m_enableDuplex;
+		return m_port1EnableDuplex;
     }
 
-    void Connection::setEnableDuplex(bool value)
+	void Connection::setPort1EnableDuplex(bool value)
     {
-        m_enableDuplex = value;
+		m_port1EnableDuplex = value;
     }
 
-    bool Connection::manualSettings() const
+	bool Connection::port2EnableDuplex() const
+	{
+		return m_port2EnableDuplex;
+	}
+
+	void Connection::setPort2EnableDuplex(bool value)
+	{
+		m_port2EnableDuplex = value;
+	}
+
+	bool Connection::manualSettings() const
     {
         return m_manualSettings;
     }
