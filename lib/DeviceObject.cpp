@@ -359,7 +359,7 @@ namespace Hardware
 		{
 			m_preset = deviceobject.preset();
 
-			if (m_preset == true && propertyExists("PresetName") == false)
+			if (m_preset == true && propertyExists(QLatin1String("PresetName")) == false)
 			{
 				auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 				presetNameProp->setExpert(true);
@@ -506,10 +506,10 @@ namespace Hardware
 
 		if (parent() != nullptr)
 		{
-			m_equipmentId.replace(QString("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
+			m_equipmentId.replace(QLatin1String("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
 		}
 
-		m_equipmentId.replace(QString("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+		m_equipmentId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
 		for (int i = 0; i < childrenCount(); i++)
 		{
@@ -696,19 +696,19 @@ namespace Hardware
 			return;
 		}
 
-		if (type != "qint32" &&
-				type != "quint32" &&
-				type != "bool" &&
-				type != "double" &&
-				type != "E::Channel" &&
-				type != "string")
+		if (type != QLatin1String("qint32") &&
+			type != QLatin1String("quint32") &&
+			type != QLatin1String("bool") &&
+			type != QLatin1String("double") &&
+			type != QLatin1String("E::Channel") &&
+			type != QLatin1String("string"))
 		{
 			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
 			return;
 		}
 
 
-		if (type == "qint32")
+		if (type == QLatin1String("qint32"))
 		{
 			// Min
 			//
@@ -745,7 +745,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "quint32")
+		if (type == QLatin1String("quint32"))
 		{
 			// Min
 			//
@@ -782,7 +782,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "double")
+		if (type == QLatin1String("double"))
 		{
 			// Min
 			//
@@ -819,11 +819,11 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "bool")
+		if (type == QLatin1String("bool"))
 		{
 			// Default Value
 			//
-			bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+			bool defaultBool = defaultValue.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -838,7 +838,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "E::Channel")
+		if (type == QLatin1String("E::Channel"))
 		{
 			// Default Value
 			//
@@ -858,7 +858,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "string")
+		if (type == QLatin1String("string"))
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -913,19 +913,19 @@ namespace Hardware
 			return;
 		}
 
-		if (type != "qint32" &&
-			type != "quint32" &&
-			type != "bool" &&
-			type != "double" &&
-			type != "E::Channel" &&
-			type != "string")
+		if (type != QLatin1String("qint32") &&
+			type != QLatin1String("quint32") &&
+			type != QLatin1String("bool") &&
+			type != QLatin1String("double") &&
+			type != QLatin1String("E::Channel") &&
+			type != QLatin1String("string"))
 		{
 			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
 			return;
 		}
 
 
-		if (type == "qint32")
+		if (type == QLatin1String("qint32"))
 		{
 			// Min
 			//
@@ -964,7 +964,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "quint32")
+		if (type == QLatin1String("quint32"))
 		{
 			// Min
 			//
@@ -1003,7 +1003,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "double")
+		if (type == QLatin1String("double"))
 		{
 			// Min
 			//
@@ -1042,11 +1042,11 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "bool")
+		if (type == QLatin1String("bool"))
 		{
 			// Default Value
 			//
-			bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+			bool defaultBool = defaultValue.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -1063,7 +1063,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "E::Channel")
+		if (type == QLatin1String("E::Channel"))
 		{
 			// Default Value
 			//
@@ -1085,7 +1085,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "string")
+		if (type == QLatin1String("string"))
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -1126,19 +1126,19 @@ namespace Hardware
 		int precision = strPrecision.toInt();
 
 		bool updateFromPreset = false;
-		if (strUpdateFromPreset.toUpper() == "TRUE")
+		if (strUpdateFromPreset.toUpper() == QLatin1String("TRUE"))
 		{
 			updateFromPreset = true;
 		}
 
 		bool expert = false;
-		if (strExpert.toUpper() == "TRUE")
+		if (strExpert.toUpper() == QLatin1String("TRUE"))
 		{
 			expert = true;
 		}
 
 		bool visible = false;
-		if (strVisible.toUpper() == "TRUE")
+		if (strVisible.toUpper() == QLatin1String("TRUE"))
 		{
 			visible = true;
 		}
@@ -1149,19 +1149,19 @@ namespace Hardware
 			return;
 		}
 
-		if (type != "qint32" &&
-			type != "quint32" &&
-			type != "bool" &&
-			type != "double" &&
-			type != "E::Channel" &&
-			type != "string")
+		if (type != QLatin1String("qint32") &&
+			type != QLatin1String("quint32") &&
+			type != QLatin1String("bool") &&
+			type != QLatin1String("double") &&
+			type != QLatin1String("E::Channel") &&
+			type != QLatin1String("string"))
 		{
 			qDebug() << Q_FUNC_INFO << " SpecificProperties: wrong filed tyep: " << type;
 			return;
 		}
 
 
-		if (type == "qint32")
+		if (type == QLatin1String("qint32"))
 		{
 			// Min
 			//
@@ -1201,7 +1201,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "quint32")
+		if (type == QLatin1String("quint32"))
 		{
 			// Min
 			//
@@ -1241,7 +1241,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "double")
+		if (type == QLatin1String("double"))
 		{
 			// Min
 			//
@@ -1281,11 +1281,11 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "bool")
+		if (type == QLatin1String("bool"))
 		{
 			// Default Value
 			//
-			bool defaultBool = defaultValue.compare("true", Qt::CaseInsensitive) == 0;
+			bool defaultBool = defaultValue.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -1303,7 +1303,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "E::Channel")
+		if (type == QLatin1String("E::Channel"))
 		{
 			// Default Value
 			//
@@ -1326,7 +1326,7 @@ namespace Hardware
 			return;
 		}
 
-		if (type == "string")
+		if (type == QLatin1String("string"))
 		{
 			// Add property with default value, if present old value, it will be set later
 			//
@@ -2293,10 +2293,10 @@ namespace Hardware
 
 			if (device->parent() != nullptr)
 			{
-				equipId.replace(QString("$(PARENT)"), parentId, Qt::CaseInsensitive);
+				equipId.replace(QLatin1String("$(PARENT)"), parentId, Qt::CaseInsensitive);
 			}
 
-			equipId.replace(QString("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+			equipId.replace(QLatin1String("$(PLACE)"), QString::number(device->place()).rightJustified(2, '0'), Qt::CaseInsensitive);
 
 			parentId = equipId;
 		}
@@ -2386,8 +2386,8 @@ namespace Hardware
 	QString DeviceObject::details() const
 	{
 		QString captionEscaped = caption();
-		captionEscaped.replace("'", "''");
-		captionEscaped.replace("\"", "\\\"");
+		captionEscaped.replace(QLatin1String("'"), QLatin1String("''"));
+		captionEscaped.replace(QLatin1String("\""), QLatin1String("\\\""));
 
 		QString json = QString(
 R"DELIM({
@@ -3889,7 +3889,7 @@ R"DELIM({
 
 					for (auto p : pDeviceObject->properties())
 					{
-						if (p->readOnly() || p->caption() == "SpecificProperties")
+						if (p->readOnly() || p->caption() == QLatin1String("SpecificProperties"))
 						{
 							continue;
 						}
