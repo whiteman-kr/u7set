@@ -2182,6 +2182,7 @@ namespace Hardware
 
 			optoPort1->setLinkID(linkID);
 			optoPort1->setConnectionType(Connection::Type::SinglePort);
+			optoPort1->setEnableSerial(connection->port1EnableSerial());
 			optoPort1->setSerialMode(connection->port1SerialMode());
 			optoPort1->setEnableDuplex(connection->port1EnableDuplex());
 

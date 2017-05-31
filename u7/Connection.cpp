@@ -164,11 +164,11 @@ namespace Hardware
 
 		mutableConnection->set_type(static_cast<int>(type()));
 
-		mutableConnection->set_port1enableserial(m_port1EnableDuplex);
+		mutableConnection->set_port1enableserial(m_port1EnableSerial);
 		mutableConnection->set_port1serialmode(static_cast<int>(port1SerialMode()));
 		mutableConnection->set_port1enableduplex(m_port1EnableDuplex);
 
-		mutableConnection->set_port2enableserial(m_port2EnableDuplex);
+		mutableConnection->set_port2enableserial(m_port2EnableSerial);
 		mutableConnection->set_port2serialmode(static_cast<int>(port2SerialMode()));
 		mutableConnection->set_port2enableduplex(m_port2EnableDuplex);
 
