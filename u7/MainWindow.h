@@ -63,6 +63,7 @@ protected slots:
 	void runSubsystemListEditor();
     void runConnectionsEditor();
     void runTuningFiltersEditor();
+	void updateUfbsAfbs();
     void showAbout();
 	void debug();
 	void startBuild();
@@ -91,6 +92,7 @@ private:
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
     QAction* m_tuningFiltersEditorAction = nullptr;
+	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;

@@ -97,7 +97,7 @@ namespace TuningIPEN
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("b", "Path to RPCT project build.");
+		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
 	}
 
 

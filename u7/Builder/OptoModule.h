@@ -177,10 +177,11 @@ namespace Hardware
 		Q_INVOKABLE QString connectionID() const { return m_connectionID; }
 		void setConnectionID(const QString& connectionID) { m_connectionID = connectionID; }
 
-		Q_INVOKABLE Connection::Type connectionType() const { return m_connectionType; }
+		Connection::Type connectionType() const { return m_connectionType; }
 		void setConnectionType(Connection::Type type) { m_connectionType = type; }
 
-		Q_INVOKABLE Connection::SerialMode serialMode() const { return m_serialMode; }
+		Connection::SerialMode serialMode() const { return m_serialMode; }
+		Q_INVOKABLE int jsSerialMode() const { return static_cast<int>(m_serialMode); }
 		void setSerialMode(Connection::SerialMode serialMode) { m_serialMode = serialMode; }
 
 		QString serialModeStr() const;

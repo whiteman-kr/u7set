@@ -5,7 +5,6 @@ CommandLineParser::CommandLineParser()
 {
 }
 
-
 CommandLineParser::CommandLineParser(int argc, char** argv)
 {
 	setCmdLineArgs(argc, argv);
@@ -65,19 +64,25 @@ int CommandLineParser::argCount() const
 
 bool CommandLineParser::addSimpleOption(const QString& name, const QString& description)
 {
-	return addOption(OptionType::Simple, name, description, QString(""));
+	return addOption(OptionType::Simple, name, "", description, QString(""));
 }
 
 
-bool CommandLineParser::addSingleValueOption(const QString& name, const QString& description, const QString& paramExample)
+bool CommandLineParser::addSingleValueOption(const QString& name,
+											 const QString& settingName,
+											 const QString& description,
+											 const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, name, description, paramExample);
+	return addOption(OptionType::SingleValue, name, settingName, description, paramExample);
 }
 
 
-bool CommandLineParser::addMultipleValuesOption(const QString& name, const QString& description, const QString& paramsExample)
+bool CommandLineParser::addMultipleValuesOption(const QString& name,
+												const QString& settingName,
+												const QString& description,
+												const QString& paramsExample)
 {
-	return addOption(OptionType::MultipleValues, name, description, paramsExample);
+	return addOption(OptionType::MultipleValues, name, settingName, description, paramsExample);
 }
 
 
@@ -153,53 +158,73 @@ void CommandLineParser::parse()
 }
 
 
-bool CommandLineParser::optionIsSet(const QString& name) const
+bool CommandLineParser::optionIsSet(const QString& optionName) const
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
+	if (m_options.contains(optionName) == false)
 	{
-		assert(false);				// option isn't defined
+//		assert(false);				// option isn't defined
 		return false;
 	}
 
-	return m_options.value(name).isSet;
+	return m_options.value(optionName).isSet;
 }
 
 
-QString CommandLineParser::optionValue(const QString& name) const
+QString CommandLineParser::optionValue(const QString& optionName) const
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
+	if (m_options.contains(optionName) == false)
 	{
-		assert(false);				// option isn't defined
+//		assert(false);				// option isn't defined
 		return QString("");
 	}
 
-	Option op = m_options.value(name);
+	Option op = m_options.value(optionName);
 
 	assert(op.type == OptionType::SingleValue);
 
 	return op.values.first();
 }
 
-
-QStringList CommandLineParser::optionValues(const QString& name) const
+QStringList CommandLineParser::optionValues(const QString& optionName) const
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
+	if (m_options.contains(optionName) == false)
 	{
-		assert(false);				// option isn't defined
+//		assert(false);				// option isn't defined
 		return QStringList();
 	}
 
-	Option op = m_options.value(name);
+	Option op = m_options.value(optionName);
 
 	assert(op.type == OptionType::MultipleValues);
 
 	return op.values;
+}
+
+QString CommandLineParser::settingValue(const QString& settingName) const
+{
+	assert(m_parsed == true);
+
+	if (m_settings.contains(settingName) == false)
+	{
+		return QString();
+	}
+
+	Option op = m_settings.value(settingName);
+
+	assert(op.type == OptionType::SingleValue);
+
+	if (op.values.count() > 0)
+	{
+		return op.values.first();
+	}
+
+	return QString();
 }
 
 
@@ -276,7 +301,10 @@ QString CommandLineParser::helpText() const
 }
 
 
-bool CommandLineParser::addOption(OptionType type, const QString& name, const QString& description, const QString& paramsExample)
+bool CommandLineParser::addOption(OptionType type,
+								  const QString& name,
+								  const QString& settingName,
+								  const QString& description, const QString& paramsExample)
 {
 	if (name.isEmpty() == true)
 	{
@@ -304,6 +332,18 @@ bool CommandLineParser::addOption(OptionType type, const QString& name, const QS
 	if (optionLen > m_maxOptionLen)
 	{
 		m_maxOptionLen = optionLen;
+	}
+
+	if (settingName.isEmpty() == false)
+	{
+		if (m_settings.contains(settingName) == false)
+		{
+			m_settings.insert(settingName, op);
+		}
+		else
+		{
+			assert(false);			// duplicate setting name
+		}
 	}
 
 	return true;

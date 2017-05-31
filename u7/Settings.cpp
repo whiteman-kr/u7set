@@ -244,7 +244,7 @@ void Settings::writeSystemScope() const
 	//
 	{
 		QKeychain::WritePasswordJob writeJob(QLatin1String("u7keychain18"));
-		writeJob.setAutoDelete(false);
+		//writeJob.setAutoDelete(false);
 		writeJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
 		//writeJob.setInsecureFallback(true);
 
@@ -282,7 +282,7 @@ void Settings::loadSystemScope()
 	//
 	{
 		QKeychain::ReadPasswordJob readJob(QLatin1String("u7keychain18"));
-		readJob.setAutoDelete(false);
+		//readJob.setAutoDelete(false);
 		readJob.setKey("f1646f45-238a-45ec-ad0c-0d0960067b96");
 		//readJob.setInsecureFallback(true);
 

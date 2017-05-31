@@ -1337,10 +1337,6 @@ namespace Hardware
 			list.append("");
 		}
 
-		list.append(QString(tr("Port validity signal:\t\t%1\t%2\n")).
-					arg(validitySignalAbsAddr().toString()).
-					arg(validitySignalID()));
-
 		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(txBufAbsAddress()));
 		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(txBufAddress()));
 		list.append(QString(tr("Tx data full size:\t\t%1")).arg(txDataSizeW()));
@@ -1452,6 +1448,10 @@ namespace Hardware
 
 		str = QString(tr("Rx discrete signals size:\t%1\n")).arg(rxDiscreteSignalsSizeW());
 		list.append(str);
+
+		list.append(QString(tr("Rx validity signal:\t\t%1\t%2\n")).
+					arg(validitySignalAbsAddr().toString()).
+					arg(validitySignalID()));
 
 		list.append(QString(tr("Port Rx data:\n")));
 

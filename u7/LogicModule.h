@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDomDocument>
 #include "../VFrame30/Afb.h"
+#include "../lib/DbController.h"
 
 namespace Hardware
 {
@@ -141,6 +142,32 @@ private:
 	//
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbs;
+};
+
+class LogicModuleSet : public QObject
+{
+	Q_OBJECT
+public:
+	LogicModuleSet();
+
+public:
+	bool loadFile(DbController* db, QString fileName, QString* errorString);
+
+	void add(QString fileName, std::shared_ptr<LogicModule> lm);
+	bool has(QString fileName) const;
+
+	std::shared_ptr<LogicModule> get(QString fileName) const;
+	std::shared_ptr<LogicModule> get(QString fileName);
+
+	std::shared_ptr<LogicModule> get(const Hardware::DeviceModule* logicModule) const;
+	std::shared_ptr<LogicModule> get(Hardware::DeviceModule* logicModule);
+
+	static QString lmDescriptionFile(const Hardware::DeviceModule* logicModule);
+
+	// Data
+	//
+private:
+	std::map<QString, std::shared_ptr<LogicModule>>	m_lmDescriptions;		// Key is LogicModule description file name
 };
 
 #endif // LOGICMODULE_H

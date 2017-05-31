@@ -23,6 +23,9 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceNam
 ServiceWorker* ConfigurationServiceWorker::createInstance() const
 {
 	ConfigurationServiceWorker* newInstance = new ConfigurationServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+
+	newInstance->init();
+
 	return newInstance;
 }
 
@@ -49,10 +52,10 @@ void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("b", "Path to RPCT project's build  for auto load.", "PathToBuild");
-	cp.addSingleValueOption("ip", "Client request IP.", "IPv4");
-	cp.addSingleValueOption("w", "Work directory of Configuration Service.", "Path");
+	cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("b", "AutoloadBuildPath", "Path to RPCT project's build  for auto load.", "PathToBuild");
+	cp.addSingleValueOption("ip", "ClientRequestIP", "Client request IP.", "IPv4");
+	cp.addSingleValueOption("w", "WorkDirectory", "Work directory of Configuration Service.", "Path");
 }
 
 

@@ -90,7 +90,7 @@ public:
 
 	const VersionInfo& versionInfo() const;
 
-	void init();
+	void initAndProcessCmdLineSettings();
 
 	void setService(Service* service);
 	Service* service();
@@ -115,6 +115,8 @@ signals:
 	void stopped();
 
 protected:
+	void init();
+
 	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
 	virtual void processCmdLineSettings() = 0;		// override to process service-specific cmd line settings
 	virtual void loadSettings() = 0;				// override to load service-specific settings
@@ -124,6 +126,7 @@ protected:
 
 	bool setStrSetting(const QString& settingName, const QString& value);
 	QString getStrSetting(const QString& settingName);
+
 
 private:
 	bool checkSettingWriteStatus(const QString& settingName);

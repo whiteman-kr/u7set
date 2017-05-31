@@ -25,15 +25,26 @@ public:
 
 	// specify name without "-"
 	//
-	bool addSimpleOption(const QString& name, const QString& description);
-	bool addSingleValueOption(const QString& name, const QString& description, const QString& paramExample = QString(""));
-	bool addMultipleValuesOption(const QString& name, const QString& description, const QString& paramsExample = QString(""));
+	bool addSimpleOption(const QString& name,
+						 const QString& description);
+
+	bool addSingleValueOption(const QString& name,
+							  const QString& settingName,
+							  const QString& description,
+							  const QString& paramExample);
+
+	bool addMultipleValuesOption(const QString& name,
+								 const QString& settingName,
+								 const QString& description,
+								 const QString& paramsExample);
 
 	void parse();
 
-	bool optionIsSet(const QString& name) const;					// use with all option types
-	QString optionValue(const QString& name) const;					// use only with OptionType::SingleValue
-	QStringList optionValues(const QString& name) const;			// use only with OptionType::MultipleValues
+	bool optionIsSet(const QString& optionName) const;					// use with all option types
+	QString optionValue(const QString& optionName) const;			// use only with OptionType::SingleValue
+	QStringList optionValues(const QString& optionName) const;			// use only with OptionType::MultipleValues
+
+	QString settingValue(const QString& settingName) const;
 
 	QString helpText() const;
 
@@ -49,13 +60,18 @@ private:
 		QStringList values;
 	};
 
-	bool addOption(OptionType type, const QString& name, const QString& description, const QString& paramsExample);
+	bool addOption(OptionType type,
+				   const QString& name,
+				   const QString &settingName,
+				   const QString& description,
+				   const QString& paramsExample);
 
 private:
 	QString m_appPath;
 	QVector<QString> m_cmdLineArgs;
 
 	HashedVector<QString, Option> m_options;
+	HashedVector<QString, Option> m_settings;
 
 	bool m_parsed = false;
 	bool m_cmdLineArgsIsSet = false;

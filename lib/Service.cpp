@@ -103,30 +103,18 @@ const VersionInfo& ServiceWorker::versionInfo() const
 	return m_versionInfo;
 }
 
-
-void ServiceWorker::init()
+void ServiceWorker::initAndProcessCmdLineSettings()
 {
 	if (m_instanceNo > 1)
 	{
-		assert(false);			// call init() for first ServiceWorker instance only!
+		assert(false);			// call initAndProcessCmdLineSettings() for first ServiceWorker instance only!
 		return;
 	}
 
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
-	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
-	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
-	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
-
-	initCmdLineParser();
-
-	m_cmdLineParser.parse();
+	init();
 
 	processCmdLineSettings();
 }
-
 
 void ServiceWorker::setService(Service* service)
 {
@@ -160,6 +148,20 @@ bool ServiceWorker::clearSettings()
 	return checkSettingWriteStatus("");
 }
 
+void ServiceWorker::init()
+{
+	m_cmdLineParser.addSimpleOption("h", "Print this help.");
+	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
+	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
+	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
+
+	initCmdLineParser();
+
+	m_cmdLineParser.parse();
+}
 
 bool ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
 {
@@ -175,7 +177,7 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	QString cmdLineValue = cp.optionValue(settingName);
+	QString cmdLineValue = cp.settingValue(settingName);
 
 	if (cmdLineValue.isEmpty() == true)
 	{
@@ -184,7 +186,6 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 
 	return cmdLineValue;
 }
-
 
 bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
 {
@@ -549,10 +550,9 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
-	m_serviceWorker.init();			// 1. init CommanLineParser
-									// 2. process cmd line args
-									// 3. update and store service settings
-
+	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
+																// 2. process cmd line args
+																// 3. update and store service settings
 	bool pauseAndExit = false;
 	bool startAsRegularApp = false;
 

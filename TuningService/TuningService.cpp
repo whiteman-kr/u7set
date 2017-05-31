@@ -44,10 +44,10 @@ namespace Tuning
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
-		cp.addSingleValueOption("b", "Path to RPCT project build.");
-		cp.addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-		cp.addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+		cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
+		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
+		cp.addSingleValueOption("cfgip1", "CfgServiceIP1", "IP-addres of first Configuration Service.", "");
+		cp.addSingleValueOption("cfgip2", "CfgServiceIP2", "IP-addres of second Configuration Service.", "");
 	}
 
 

@@ -238,26 +238,31 @@ void MainWindow::createActions()
 	m_settingsAction->setEnabled(true);
 	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_ufbLibraryAction = new QAction(tr("UFB Library Editor..."), this);
+	m_ufbLibraryAction = new QAction(tr("UFB Library..."), this);
 	m_ufbLibraryAction->setStatusTip(tr("Run UFB Library Editor"));
 	m_ufbLibraryAction->setEnabled(false);
 	m_ufbLibraryAction->setCheckable(true);
 	connect(m_ufbLibraryAction, &QAction::toggled, this, &MainWindow::showUfbLibraryTabPage);
 
-    m_subsystemListEditorAction = new QAction(tr("Subsystem List Editor..."), this);
+	m_subsystemListEditorAction = new QAction(tr("Subsystems..."), this);
 	m_subsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
 	m_subsystemListEditorAction->setEnabled(false);
 	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
-    m_connectionsEditorAction = new QAction(tr("Connections Editor..."), this);
+	m_connectionsEditorAction = new QAction(tr("Connections..."), this);
     m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
-    m_tuningFiltersEditorAction = new QAction(tr("Tuning Clients Filters Editor..."), this);
+	m_tuningFiltersEditorAction = new QAction(tr("Tuning Clients Filters..."), this);
     m_tuningFiltersEditorAction->setStatusTip(tr("Run Tuning Clients Filters Editor"));
     m_tuningFiltersEditorAction->setEnabled(false);
     connect(m_tuningFiltersEditorAction, &QAction::triggered, this, &MainWindow::runTuningFiltersEditor);
+
+	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs..."), this);
+	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs on all schemas"));
+	m_updateUfbsAfbs->setEnabled(false);
+	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbs);
 
     m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
@@ -326,6 +331,9 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
     pToolsMenu->addAction(m_tuningFiltersEditorAction);
+
+	pToolsMenu->addSeparator();
+	pToolsMenu->addAction(m_updateUfbsAfbs);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
@@ -513,6 +521,289 @@ void MainWindow::runTuningFiltersEditor()
     }
 }
 
+
+void MainWindow::updateUfbsAfbs()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	if (m_ufbLibrary == nullptr ||
+		m_logicSchema == nullptr)
+	{
+		assert(m_logicSchema);
+		assert(m_ufbLibrary);
+		return;
+	}
+
+	QMessageBox mb(this);
+	mb.setText(tr("Update schemas AFBs/UFBs."));
+	mb.setInformativeText(tr("To perform operation all Application Logic and UFB schemas must be checked in."));
+	mb.setIcon(QMessageBox::NoIcon);
+	QPushButton* updateButton = mb.addButton(tr("Update"), QMessageBox::ActionRole);
+	/*QPushButton* cancelButton = */mb.addButton(QMessageBox::Cancel);
+
+	mb.exec();
+
+	if (mb.clickedButton() != updateButton)
+	{
+		return;
+	}
+
+	showUfbLibraryTabPage(true);
+	GlobalMessanger::instance()->fireChangeCurrentTab(m_logicSchema);
+
+	// Get UFB schema list
+	//
+	QStringList checkedOutFiles;
+
+	std::vector<DbFileInfo>	ufbSchemaFileInfos;
+	db()->getFileList(&ufbSchemaFileInfos, db()->ufblFileId(), QLatin1String(".") + ::UfbFileExtension, true, this);
+
+	for (const DbFileInfo& f : ufbSchemaFileInfos)
+	{
+		if (f.state() == VcsState::CheckedOut)
+		{
+			checkedOutFiles.push_back(f.fileName());
+		}
+	}
+
+	// Get ApplicationLogic schema list
+	//
+	std::vector<DbFileInfo>	alSchemaFileInfos;
+	db()->getFileList(&alSchemaFileInfos, db()->alFileId(), QLatin1String(".") + ::AlFileExtension, true, this);
+
+	for (const DbFileInfo& f : alSchemaFileInfos)
+	{
+		if (f.state() == VcsState::CheckedOut)
+		{
+			checkedOutFiles.push_back(f.fileName());
+		}
+	}
+
+	if (checkedOutFiles.empty() == false)
+	{
+		QMessageBox mbError(this);
+
+		mbError.setIcon(QMessageBox::Critical);
+		mbError.setText(tr("Update AFBs/UFBs error."));
+		mbError.setInformativeText("There are some checked out Application Logic and/or UFB schemas. CheckIn these files and repeat operation.");
+		mbError.setDetailedText(checkedOutFiles.join(QChar::LineSeparator));
+
+		mbError.exec();
+		return;
+	}
+
+	// Update UFB schemas
+	//
+	LogicModuleSet logicModuleSet;
+	int totalUpdatedAfbs = 0;
+
+	QProgressDialog progress("Updating AFBs on UFB schemas...", "Abort", 0, static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()), this);
+	progress.setWindowModality(Qt::WindowModal);
+	int progressIndicator = 0;
+
+	QStringList updateDetails;
+
+	{
+		bool ok = false;
+
+		std::vector<DbFileInfo> allFiles;
+		allFiles.reserve(ufbSchemaFileInfos.size() + alSchemaFileInfos.size());
+
+		allFiles.insert(allFiles.end(), ufbSchemaFileInfos.begin(), ufbSchemaFileInfos.end());
+		allFiles.insert(allFiles.end(), alSchemaFileInfos.begin(), alSchemaFileInfos.end());
+
+		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbSchemas;
+		ufbSchemas.reserve(ufbSchemaFileInfos.size());
+
+		for (DbFileInfo& fi : allFiles)
+		{
+			progress.setValue(progressIndicator++);
+			if (progress.wasCanceled() == true)
+			{
+				break;
+			}
+
+			// Get latest version
+			//
+			std::shared_ptr<DbFile> file;
+			ok = db()->getLatestVersion(fi, &file, this);
+
+			if (ok == false || file == nullptr)
+			{
+				break;
+			}
+
+			// Load schema from file
+			//
+			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
+
+			if (schema == nullptr ||
+				(schema->isUfbSchema() == false && schema->isLogicSchema() == false))
+			{
+				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true);
+				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				break;
+			}
+
+			// Get UFB schema logic module description
+			//
+			QString lmDescriptionFile;
+
+			if (schema->isUfbSchema() == true)
+			{
+				std::shared_ptr<VFrame30::UfbSchema> ufbSchema = std::dynamic_pointer_cast<VFrame30::UfbSchema>(schema);
+				assert(ufbSchema);
+
+				ufbSchemas.push_back(ufbSchema);
+
+				lmDescriptionFile = ufbSchema->lmDescriptionFile();
+			}
+			else
+			{
+				if (schema->isLogicSchema())
+				{
+					std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema);
+					assert(logicSchema);
+
+					lmDescriptionFile = logicSchema->lmDescriptionFile();
+				}
+				else
+				{
+					assert(false);
+					break;
+				}
+			}
+
+			if (logicModuleSet.has(lmDescriptionFile) == false)
+			{
+				QString errorMessage;
+				ok = logicModuleSet.loadFile(db(), lmDescriptionFile, &errorMessage);
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), errorMessage);
+					break;
+				}
+			}
+
+			std::shared_ptr<LogicModule> logicModuleDescription = logicModuleSet.get(lmDescriptionFile);
+			if (logicModuleDescription == nullptr)
+			{
+				assert(logicModuleDescription);
+				break;
+			}
+
+			// Update AFBs on schemas
+			//
+			int thisSchemaUpdatedCount = 0;
+			int updatedCount = 0;
+			QString updateErrorMessage;
+
+			ok = schema->updateAllSchemaItemFbs(logicModuleDescription->afbs(), &updatedCount, &updateErrorMessage);
+
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), updateErrorMessage);
+				break;
+			}
+
+			totalUpdatedAfbs += updatedCount;
+			thisSchemaUpdatedCount += updatedCount;
+
+			// Update UFBs on schemas
+			//
+			if (schema->isLogicSchema() == true)
+			{
+				ok = schema->updateAllSchemaItemUfb(ufbSchemas, &updatedCount, &updateErrorMessage);
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), updateErrorMessage);
+					break;
+				}
+
+				totalUpdatedAfbs += updatedCount;
+				thisSchemaUpdatedCount += updatedCount;
+			}
+
+			// CheckOut and save file if changes are made
+			//
+			if (thisSchemaUpdatedCount > 0)
+			{
+				ok = db()->checkOut(fi, this);
+
+				if (ok == false || fi.state() != VcsState::CheckedOut)
+				{
+					break;
+				}
+
+				// Set workcopy
+				//
+				ok = schema->Save(file->data());
+
+				if (ok == false)
+				{
+					QMessageBox::critical(this, qAppName(), tr("Saving %1 error.").arg(file->fileName()));
+					break;
+				}
+
+				ok = db()->setWorkcopy(file, this);
+
+				if (ok == false)
+				{
+					break;
+				}
+			}
+
+			updateDetails << tr("%1: %2, updated %3 item(s)")
+								.arg(schema->isUfbSchema() ? "UFB" : "AL")
+								.arg(schema->schemaId())
+								.arg(thisSchemaUpdatedCount);
+		}
+
+		if (static_cast<size_t>(progressIndicator) != allFiles.size())
+		{
+			updateDetails << tr("...");
+			updateDetails << tr("Operation is aborted");
+		}
+		else
+		{
+			updateDetails << QString("Done");
+		}
+	}
+
+	progress.setValue(progress.maximum());
+
+	// Show result, refresh files list
+	//
+	if (totalUpdatedAfbs != 0)
+	{
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("%1 AFB(s) are updated according to the latest AFB description.").arg(totalUpdatedAfbs));
+		msgBox.setInformativeText("Please, check input/output pins and parameters.\nCheckIn schemas to accept changes, Undo to reject.");
+		msgBox.setDetailedText(updateDetails.join(QChar::LineSeparator));
+		msgBox.exec();
+	}
+
+	// Refresh view
+	//
+	if (m_logicSchema != nullptr)
+	{
+		m_logicSchema->refreshControlTabPage();
+	}
+
+	if (m_ufbLibrary != nullptr)
+	{
+		m_ufbLibrary->refreshControlTabPage();
+	}
+
+	return;
+}
+
 void MainWindow::showAbout()
 {
 	QDialog aboutDialog(this);
@@ -638,6 +929,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
     m_tuningFiltersEditorAction->setEnabled(/*true*/false);
+	m_updateUfbsAfbs->setEnabled(true);
 
 
 	// Status bar
@@ -669,6 +961,7 @@ void MainWindow::projectClosed()
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
     m_tuningFiltersEditorAction->setEnabled(false);
+	m_updateUfbsAfbs->setEnabled(false);
 
 	// Status bar
 	//

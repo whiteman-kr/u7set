@@ -36,7 +36,7 @@ public:
 
 	virtual void initCmdLineParser() override
 	{
-		cmdLineParser().addSingleValueOption("id", "Assign EquipmentID of service.", "EQUIPMENT_ID");
+		cmdLineParser().addSingleValueOption("id", "EquipmentID", "Assign EquipmentID of service.", "EQUIPMENT_ID");
 	}
 
 	void processCmdLineSettings() override
