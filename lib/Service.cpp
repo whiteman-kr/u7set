@@ -173,7 +173,16 @@ bool ServiceWorker::setStrSetting(const QString& settingName, const QString& val
 
 QString ServiceWorker::getStrSetting(const QString& settingName)
 {
-	return m_settings.value(settingName).toString();
+	CommandLineParser& cp = cmdLineParser();
+
+	QString cmdLineValue = cp.optionValue(settingName);
+
+	if (cmdLineValue.isEmpty() == true)
+	{
+		return m_settings.value(settingName).toString();
+	}
+
+	return cmdLineValue;
 }
 
 
@@ -406,16 +415,17 @@ void Service::stopBaseRequestSocketThread()
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 {
-	if (m_serviceWorker == nullptr)
+	ServiceWorker* serviceWorker = m_serviceWorker;
+	if (serviceWorker == nullptr)
 	{
-		return;
+		serviceWorker = &m_serviceWorkerFactory;
 	}
 
 	QMutexLocker locker(&m_mutex);
 
-	const VersionInfo& vi = m_serviceWorker->versionInfo();
+	const VersionInfo& vi = serviceWorker->versionInfo();
 
-	serviceInfo.set_type(TO_INT(m_serviceWorker->serviceType()));
+	serviceInfo.set_type(TO_INT(serviceWorker->serviceType()));
 
 	serviceInfo.set_majorversion(vi.majorVersion);
 	serviceInfo.set_minorversion(vi.minorVersion);
@@ -428,7 +438,10 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_servicestate(TO_INT(m_state));
 
-	m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+	if (m_serviceWorker != nullptr)
+	{
+		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+	}
 
 	if (m_state != ServiceState::Stopped)
 	{

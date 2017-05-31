@@ -53,6 +53,8 @@ public:
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
 
+	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
+
 private:
 	void readBuildXml();
 

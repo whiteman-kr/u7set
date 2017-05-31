@@ -166,6 +166,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0148.sql", "Upgrade to version 148, Added version in configuration script fields description"},
 	{":/DatabaseUpgrade/Upgrade0149.sql", "Upgrade to version 149, Changed func is_any_checked_out according to current user"},
 	{":/DatabaseUpgrade/Upgrade0150.sql", "Upgrade to version 150, LogicModule0000.xml file update"},
+	{":/DatabaseUpgrade/Upgrade0151.sql", "Upgrade to version 151, OCM and OCMN presets update"},
 };
 
 

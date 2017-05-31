@@ -1089,9 +1089,6 @@ message Connection
 
     // Flags
 	//
-    optional int32 SerialMode = 7 [default = 0];
-    optional int32 Mode = 8 [default = 0];
-    optional bool EnableDuplex = 10 [default = false];
     optional bool ManualSettings = 11 [default = false];
     optional bool DisableDataID = 12 [default = false];
     optional bool GenerateVHDFile = 13 [default = false];
@@ -1107,6 +1104,26 @@ message Connection
     optional int32 Port2RxWordsQuantity = 19 [default = 479];
 
     optional Uuid uuid = 20;
+
+    // Serial
+
+    optional bool Port1EnableSerial = 21 [default = false];
+    optional int32 Port1SerialMode = 22 [default = 0];
+    optional bool Port1EnableDuplex = 23 [default = false];
+
+    optional bool Port2EnableSerial = 24 [default = false];
+    optional int32 Port2SerialMode = 25 [default = 0];
+    optional bool Port2EnableDuplex = 26 [default = false];
+
+    //
+
+    optional int32 Type = 27 [default = 0];
+
+    // Obsolete fields
+
+    optional int32 ObsoleteMode = 8 [default = 0];
+    optional int32 ObsoleteSerialMode = 7 [default = 0];
+    optional bool ObsoleteEnableDuplex = 10 [default = false];
 }
 
 message SchemaDetailsSet

@@ -416,7 +416,7 @@ namespace Hardware
 	{
 		TEST_PTR_RETURN_FALSE(rxSignal);
 
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			assert(false);				// port is not Serial!
 			return false;
@@ -438,7 +438,7 @@ namespace Hardware
 
 	bool OptoPort::initSerialRawRxSignals()
 	{
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			return true;
 		}
@@ -464,7 +464,7 @@ namespace Hardware
 
 	bool OptoPort::sortSerialRxSignals()
 	{
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			// on this step of execution m_rxSignals of Optical ports must be empty!
 			//
@@ -482,7 +482,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Serial)
+		if (isSinglePortConnection() == false)
 		{
 			return true;				// process Serial ports only
 		}
@@ -609,7 +609,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Serial)
+		if (isSinglePortConnection() == false)
 		{
 			return true;
 		}
@@ -642,7 +642,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Optical)
+		if (isPortToPortConnection() == false)
 		{
 			return true;
 		}
@@ -686,7 +686,7 @@ namespace Hardware
 	{
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			assert(false);
 			return false;
@@ -1603,7 +1603,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Serial)
+			if (port->isSinglePortConnection() == true)
 			{
 				serialPortsList.append(port);
 			}
@@ -1620,7 +1620,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Optical)
+			if (port->isPortToPortConnection() == true)
 			{
 				optoPortsList.append(port);
 			}
@@ -1911,7 +1911,7 @@ namespace Hardware
 					continue;
 				}
 
-				if (connection->isSerial() == true)
+				if (connection->isSinglePort() == true)
 				{
 					if (connection->port1EquipmentID() != port->equipmentID() )
 					{
@@ -2170,7 +2170,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		if (connection->isSinglePort() == true)
 		{
 			if (optoModule->isLM() == true)
 			{
@@ -2181,9 +2181,10 @@ namespace Hardware
 			}
 
 			optoPort1->setLinkID(linkID);
-			optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
-			optoPort1->setSerialMode(connection->serialMode());
-			optoPort1->setEnableDuplex(connection->enableDuplex());
+			optoPort1->setConnectionType(Connection::Type::SinglePort);
+			optoPort1->setEnableSerial(connection->port1EnableSerial());
+			optoPort1->setSerialMode(connection->port1SerialMode());
+			optoPort1->setEnableDuplex(connection->port1EnableDuplex());
 
 			optoPort1->setManualSettings(connection->manualSettings());
 			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
@@ -2203,7 +2204,7 @@ namespace Hardware
 		}
 		else
 		{
-			assert(connection->mode() == Hardware::OptoPort::Mode::Optical);
+			assert(connection->isPortToPort() == true);
 
 			// check port 2
 			//
@@ -2240,7 +2241,7 @@ namespace Hardware
 			bool res = true;
 
 			optoPort1->setLinkID(linkID);
-			optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
+			optoPort1->setConnectionType(Connection::Type::PortToPort);
 			optoPort1->setManualSettings(connection->manualSettings());
 			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
 			optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
@@ -2251,7 +2252,7 @@ namespace Hardware
 			res &= optoPort1->parseRawDescription();
 
 			optoPort2->setLinkID(linkID);
-			optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
+			optoPort2->setConnectionType(Connection::Type::PortToPort);
 			optoPort2->setManualSettings(connection->manualSettings());
 			optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
 			optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
@@ -2385,7 +2386,7 @@ namespace Hardware
 				return false;
 			}
 
-			if (port->isSerial() == true)
+			if (port->isSinglePortConnection() == true)
 			{
 				result &= port->writeSerialDataXml(resultWriter);
 			}
@@ -2419,7 +2420,7 @@ namespace Hardware
 
 		QString appSignalID = appSignal->appSignalID();
 
-		if (cn->isSerial() == true)
+		if (cn->isSinglePort() == true)
 		{
 			OptoPortShared p1 = getOptoPort(cn->port1EquipmentID());
 
@@ -2602,7 +2603,7 @@ namespace Hardware
 			}
 		}
 
-		if (connection->mode() != OptoPort::Mode::Optical)
+		if (connection->isSinglePort() == true)
 		{
 			// this is Serial connection
 			// port2 is not used
@@ -2769,7 +2770,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (connection->isSerial() == true)
+		if (connection->isSinglePort() == true)
 		{
 			// in serial connections port2 isn't used
 			return false;

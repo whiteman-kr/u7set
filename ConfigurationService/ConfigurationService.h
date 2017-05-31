@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/Service.h"
-#include "../lib/CfgServerLoader.h"
+#include "CfgControlServer.h"
 
 // ------------------------------------------------------------------------------------
 //
@@ -24,11 +24,9 @@ public:
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
 
 public slots:
-	void onInformationRequest(UdpRequest request);
 	void onBuildPathChanged(QString newBuildPath);
 
 signals:
-	void ackInformationRequest(UdpRequest request);
 	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
@@ -47,10 +45,6 @@ private:
 
 	void startUdpThreads();
 	void stopUdpThreads();
-
-	void onGetInfo(UdpRequest& request);
-	void onGetSettings(UdpRequest& request);
-	void onSetSettings(UdpRequest& request);
 
 private:
 	std::shared_ptr<CircularLogger> m_logger;

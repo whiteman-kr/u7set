@@ -154,10 +154,11 @@ namespace Tcp
 
 		virtual void onFileSent(const QString& fileName, const QString& ip);
 
+	protected:
+		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+
 	private:
 		void init();
-
-		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
 
 		void sendFirstFilePart(const QString& fileName);
 		void sendNextFilePart();
