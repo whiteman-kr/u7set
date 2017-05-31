@@ -195,6 +195,9 @@ namespace Hardware
 		Q_INVOKABLE bool enableDuplex() const { return m_enableDuplex; }
 		void setEnableDuplex(bool enable) { m_enableDuplex = enable; }
 
+		Q_INVOKABLE bool enableSerial() const { return m_enableSerial; }
+		void setEnableSerial(bool enable) { m_enableSerial = enable; }
+
 		const DeviceController* deviceController() const { return m_controller; }
 
 		QString optoModuleID() const { return m_optoModuleID; }
