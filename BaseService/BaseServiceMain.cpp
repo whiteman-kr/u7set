@@ -39,16 +39,6 @@ public:
 		cmdLineParser().addSingleValueOption("id", "EquipmentID", "Assign EquipmentID of service.", "EQUIPMENT_ID");
 	}
 
-	void processCmdLineSettings() override
-	{
-		CommandLineParser& cp = cmdLineParser();
-
-		if (cp.optionIsSet("id") == true)
-		{
-			setStrSetting("id", cp.optionValue("id"));
-		}
-	}
-
 	void loadSettings() override
 	{
 		m_serviceEquipmentID = getStrSetting("id");

@@ -10,6 +10,12 @@
 //
 // ------------------------------------------------------------------------------------
 
+const char* const ConfigurationServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
+const char* const ConfigurationServiceWorker::SETTING_AUTOLOAD_BUILD_PATH = "AutoloadBuildPath";
+const char* const ConfigurationServiceWorker::SETTING_CLIENT_REQUEST_IP = "ClientRequestIP";
+const char* const ConfigurationServiceWorker::SETTING_WORK_DIRECTORY = "WorkDirectory";
+
+
 ConfigurationServiceWorker::ConfigurationServiceWorker(const QString& serviceName,
 													   int& argc, char** argv,
 													   const VersionInfo& versionInfo,
@@ -52,53 +58,26 @@ void ConfigurationServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("b", "AutoloadBuildPath", "Path to RPCT project's build  for auto load.", "PathToBuild");
-	cp.addSingleValueOption("ip", "ClientRequestIP", "Client request IP.", "IPv4");
-	cp.addSingleValueOption("w", "WorkDirectory", "Work directory of Configuration Service.", "Path");
+	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("b", SETTING_AUTOLOAD_BUILD_PATH, "Path to RPCT project's build  for auto load.", "PathToBuild");
+	cp.addSingleValueOption("ip", SETTING_CLIENT_REQUEST_IP, "Client request IP.", "IPv4");
+	cp.addSingleValueOption("w", SETTING_WORK_DIRECTORY, "Work directory of Configuration Service.", "Path");
 }
-
-
-void ConfigurationServiceWorker::processCmdLineSettings()
-{
-	CommandLineParser& cp = cmdLineParser();
-
-	if (cp.optionIsSet("id") == true)
-	{
-		setStrSetting("EquipmentID", cp.optionValue("id"));
-	}
-
-	if (cp.optionIsSet("b") == true)
-	{
-		setStrSetting("AutoloadBuildPath", cp.optionValue("b"));
-	}
-
-	if (cp.optionIsSet("ip") == true)
-	{
-		setStrSetting("ClientRequestIP", cp.optionValue("ip"));
-	}
-
-	if (cp.optionIsSet("w") == true)
-	{
-		setStrSetting("WorkDirectory", cp.optionValue("w"));
-	}
-}
-
 
 void ConfigurationServiceWorker::loadSettings()
 {
-	m_equipmentID = getStrSetting("EquipmentID");
-	m_autoloadBuildPath = getStrSetting("AutoloadBuildPath");
-	m_clientIPStr = getStrSetting("ClientRequestIP");
-	m_workDirectory = getStrSetting("WorkDirectory");
+	m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
+	m_autoloadBuildPath = getStrSetting(SETTING_AUTOLOAD_BUILD_PATH);
+	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
+	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 
 	m_clientIP = HostAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_REQUEST);
 
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
-	DEBUG_LOG_MSG(m_logger, QString("EquipmentID = %1").arg(m_equipmentID));
-	DEBUG_LOG_MSG(m_logger, QString("AutoloadBuildPath = %1").arg(m_autoloadBuildPath));
-	DEBUG_LOG_MSG(m_logger, QString("ClientRequestIP = %1 (%2)").arg(m_clientIPStr).arg(m_clientIP.addressPortStr()));
-	DEBUG_LOG_MSG(m_logger, QString("WorkDirectory = %1").arg(m_workDirectory));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_CLIENT_REQUEST_IP).arg(m_clientIP.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
 }
 
 

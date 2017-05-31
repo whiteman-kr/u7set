@@ -1,3 +1,4 @@
+#include "CircularLogger.h"
 #include "CommandLineParser.h"
 
 
@@ -62,27 +63,31 @@ int CommandLineParser::argCount() const
 }
 
 
-bool CommandLineParser::addSimpleOption(const QString& name, const QString& description)
+bool CommandLineParser::addSimpleOption(const QString& optionName, const QString& description)
 {
-	return addOption(OptionType::Simple, name, "", description, QString(""));
+	return addOption(OptionType::Simple, optionName, QStringList(), description, QString(""));
 }
 
 
-bool CommandLineParser::addSingleValueOption(const QString& name,
+bool CommandLineParser::addSingleValueOption(const QString& optionName,
 											 const QString& settingName,
 											 const QString& description,
 											 const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, name, settingName, description, paramExample);
+	QStringList settingsNames;
+
+	settingsNames.append(settingName);
+
+	return addOption(OptionType::SingleValue, optionName, settingsNames, description, paramExample);
 }
 
 
-bool CommandLineParser::addMultipleValuesOption(const QString& name,
-												const QString& settingName,
+bool CommandLineParser::addMultipleValuesOption(const QString& optionName,
+												const QStringList& settingsNames,
 												const QString& description,
 												const QString& paramsExample)
 {
-	return addOption(OptionType::MultipleValues, name, settingName, description, paramsExample);
+	return addOption(OptionType::MultipleValues, optionName, settingsNames, description, paramsExample);
 }
 
 
@@ -125,6 +130,13 @@ void CommandLineParser::parse()
 						if (pos != -1)
 						{
 							op.values.append(cmdLineArg.mid(pos + 1));
+
+							if (op.settingsNames.count() > 0)
+							{
+								assert(op.settingsNames.count() == 1);
+
+								m_settingsValues.insert(op.settingsNames.first(), op.values.first());
+							}
 						}
 					}
 					break;
@@ -140,6 +152,21 @@ void CommandLineParser::parse()
 							QString value = cmdLineArg.mid(pos + 1);
 
 							op.values = value.split(",", QString::KeepEmptyParts);
+
+							int valueIndex = 0;
+							int settingsCount = op.settingsNames.count();
+
+							for(QString opValue : op.values)
+							{
+								if (valueIndex >= settingsCount)
+								{
+									break;
+								}
+
+								m_settingsValues.insert(op.settingsNames.at(valueIndex), opValue);
+
+								valueIndex++;
+							}
 						}
 					}
 					break;
@@ -155,6 +182,76 @@ void CommandLineParser::parse()
 	}
 
 	m_parsed = true;
+}
+
+void CommandLineParser::processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log)
+{
+	assert(m_parsed == true);
+
+	QList<QString> settingNames = m_settingsValues.keys();
+
+	for(const QString& settingName : settingNames)
+	{
+		if (settingName.isEmpty() == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		QString settingValue = m_settingsValues.value(settingName, QString());
+
+		settings.setValue(settingName, QVariant(settingValue));
+
+		settings.sync();
+
+		checkSettingWriteStatus(settings, settingName, log);
+	}
+}
+
+
+bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger)
+{
+	QSettings::Status s = settings.status();
+
+	if (s == QSettings::Status::NoError)
+	{
+		return true;
+	}
+
+	if (logger == nullptr)
+	{
+		return false;
+	}
+
+	switch(s)
+	{
+	case QSettings::Status::AccessError:
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Settings write error: QSettings::Status::AccessError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+		}
+		break;
+
+	case QSettings::Status::FormatError:
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Settings write error: QSettings::Status::FormatError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+		}
+		break;
+
+	default:
+		assert(false);		// wtf?
+	}
+
+	return false;
 }
 
 
@@ -210,23 +307,15 @@ QString CommandLineParser::settingValue(const QString& settingName) const
 {
 	assert(m_parsed == true);
 
-	if (m_settings.contains(settingName) == false)
+	if (m_settingsValues.contains(settingName) == false)
 	{
 		return QString();
 	}
 
-	Option op = m_settings.value(settingName);
+	QString settingValue = m_settingsValues.value(settingName, QString());
 
-	assert(op.type == OptionType::SingleValue);
-
-	if (op.values.count() > 0)
-	{
-		return op.values.first();
-	}
-
-	return QString();
+	return settingValue;
 }
-
 
 QString CommandLineParser::helpText() const
 {
@@ -303,7 +392,7 @@ QString CommandLineParser::helpText() const
 
 bool CommandLineParser::addOption(OptionType type,
 								  const QString& name,
-								  const QString& settingName,
+								  const QStringList& settingsNames,
 								  const QString& description, const QString& paramsExample)
 {
 	if (name.isEmpty() == true)
@@ -322,6 +411,7 @@ bool CommandLineParser::addOption(OptionType type,
 
 	op.type = type;
 	op.name = QString("-") + name;
+	op.settingsNames = settingsNames;
 	op.description = description;
 	op.paramsExample = paramsExample;
 
@@ -332,18 +422,6 @@ bool CommandLineParser::addOption(OptionType type,
 	if (optionLen > m_maxOptionLen)
 	{
 		m_maxOptionLen = optionLen;
-	}
-
-	if (settingName.isEmpty() == false)
-	{
-		if (m_settings.contains(settingName) == false)
-		{
-			m_settings.insert(settingName, op);
-		}
-		else
-		{
-			assert(false);			// duplicate setting name
-		}
 	}
 
 	return true;

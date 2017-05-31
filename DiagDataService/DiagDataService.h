@@ -25,7 +25,6 @@ public:
 
 private:
 	void initCmdLineParser() override;
-	virtual void processCmdLineSettings() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;

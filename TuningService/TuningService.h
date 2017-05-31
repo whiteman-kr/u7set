@@ -39,8 +39,11 @@ namespace Tuning
 	public slots:
 
 	private:
+		static const char* const SETTING_EQUIPMENT_ID;
+		static const char* const SETTING_CFG_SERVICE_IP1;
+		static const char* const SETTING_CFG_SERVICE_IP2;
+
 		virtual void initCmdLineParser() override;
-		virtual void processCmdLineSettings() override;
 		virtual void loadSettings() override;
 
 		void clear();

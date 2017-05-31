@@ -115,6 +115,8 @@ private:
 	bool m_logCodeInfo = true;
 };
 
+typedef std::shared_ptr<CircularLogger> CircularLoggerShared;
+
 
 // To asserting "logger != nullptr" inside circularLogger* functions define symbol CIRCULAR_LOGGER_PTR_ASSERTING in your project:
 //

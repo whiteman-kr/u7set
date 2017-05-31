@@ -129,7 +129,7 @@ Service* ServiceWorker::service()
 }
 
 
-CommandLineParser &ServiceWorker::cmdLineParser()
+CommandLineParser& ServiceWorker::cmdLineParser()
 {
 	return m_cmdLineParser;
 }
@@ -145,7 +145,9 @@ bool ServiceWorker::clearSettings()
 {
 	m_settings.clear();
 
-	return checkSettingWriteStatus("");
+	m_settings.sync();
+
+	return CommandLineParser::checkSettingWriteStatus(m_settings, "", nullptr);
 }
 
 void ServiceWorker::init()
@@ -163,21 +165,15 @@ void ServiceWorker::init()
 	m_cmdLineParser.parse();
 }
 
-bool ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
+
+void ServiceWorker::processCmdLineSettings()
 {
-	m_settings.setValue(settingName, QVariant(value));
-
-	m_settings.sync();
-
-	return checkSettingWriteStatus(settingName);
+	m_cmdLineParser.processSettings(m_settings, m_logger);
 }
-
 
 QString ServiceWorker::getStrSetting(const QString& settingName)
 {
-	CommandLineParser& cp = cmdLineParser();
-
-	QString cmdLineValue = cp.settingValue(settingName);
+	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
 
 	if (cmdLineValue.isEmpty() == true)
 	{
@@ -186,48 +182,6 @@ QString ServiceWorker::getStrSetting(const QString& settingName)
 
 	return cmdLineValue;
 }
-
-bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
-{
-	QSettings::Status s = m_settings.status();
-
-	bool result = false;
-
-	switch(s)
-	{
-	case QSettings::Status::AccessError:
-		if (settingName.isEmpty() == true)
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::AccessError.")))
-		}
-		else
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
-		}
-		break;
-
-	case QSettings::Status::FormatError:
-		if (settingName.isEmpty() == true)
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::FormatError.")))
-		}
-		else
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
-		}
-		break;
-
-	case QSettings::Status::NoError:
-		result = true;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	return result;
-}
-
 
 void ServiceWorker::onThreadStarted()
 {
@@ -636,11 +590,11 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		if (res == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleared.\n\n")));
+			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleaned.\n\n")));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("\nError cleaning of service settings. Adminirative rights rquired.\n\n")));
+			DEBUG_LOG_ERR(m_logger, QString(tr("\nService settings cleaning error. Administrative rights required.\n\n")));
 		}
 
 		pauseAndExit = true;

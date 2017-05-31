@@ -10,6 +10,11 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
+	const char* const TuningServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
+	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
+	const char* const TuningServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
+
+
 	TuningServiceWorker::TuningServiceWorker(const QString& serviceName,
 											 int& argc,
 											 char** argv,
@@ -44,58 +49,31 @@ namespace Tuning
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
-		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
-		cp.addSingleValueOption("cfgip1", "CfgServiceIP1", "IP-addres of first Configuration Service.", "");
-		cp.addSingleValueOption("cfgip2", "CfgServiceIP2", "IP-addres of second Configuration Service.", "");
+		cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+//		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
+		cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+		cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
 	}
-
-
-	void TuningServiceWorker::processCmdLineSettings()
-	{
-		CommandLineParser& cp = cmdLineParser();
-
-		if (cp.optionIsSet("id") == true)
-		{
-			setStrSetting("EquipmentID", cp.optionValue("id"));
-		}
-
-		if (cp.optionIsSet("b") == true)
-		{
-			setStrSetting("BuildPath", cp.optionValue("b"));
-		}
-
-		if (cp.optionIsSet("cfgip1") == true)
-		{
-			setStrSetting("CfgServiceIP1", cp.optionValue("cfgip1"));
-		}
-
-		if (cp.optionIsSet("cfgip2") == true)
-		{
-			setStrSetting("CfgServiceIP2", cp.optionValue("cfgip2"));
-		}
-	}
-
 
 	void TuningServiceWorker::loadSettings()
 	{
-		m_equipmentID = getStrSetting("EquipmentID");
+		m_equipmentID = getStrSetting(SETTING_EQUIPMENT_ID);
 
-		m_buildPath = getStrSetting("BuildPath");
+//		m_buildPath = getStrSetting("BuildPath");
 
-		m_cfgServiceIP1Str = getStrSetting("CfgServiceIP1");
+		m_cfgServiceIP1Str = getStrSetting(SETTING_CFG_SERVICE_IP1);
 
 		m_cfgServiceIP1 = HostAddressPort(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
-		m_cfgServiceIP2Str = getStrSetting("CfgServiceIP2");
+		m_cfgServiceIP2Str = getStrSetting(SETTING_CFG_SERVICE_IP2);
 
 		m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
 		DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(m_equipmentID));
+//		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("BuildPath").arg(m_buildPath));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(m_cfgServiceIP1.addressPortStr()));
+		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(m_cfgServiceIP2.addressPortStr()));
 	}
 
 
