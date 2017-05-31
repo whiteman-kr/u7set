@@ -659,7 +659,7 @@ namespace Hardware
 		m_port2SerialMode = value;
 	}
 
-	QString Connection::serialModeStr(const Connection::SerialMode value) const
+	QString Connection::serialModeStr(const Connection::SerialMode value)
 	{
 		switch(value)
 		{
@@ -688,7 +688,12 @@ namespace Hardware
 
 	QString Connection::typeStr() const
 	{
-		switch(m_type)
+		return typeStr(m_type);
+	}
+
+	QString Connection::typeStr(Connection::Type t)
+	{
+		switch(t)
 		{
 		case Type::PortToPort:
 			return "PortToPort";

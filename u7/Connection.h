@@ -137,12 +137,13 @@ namespace Hardware
 		//
 		//
 
-		QString serialModeStr(const Connection::SerialMode value) const;
+		static QString serialModeStr(const Connection::SerialMode value);
 
 		Type type() const;
 		void setType(const Type value);
 
 		QString typeStr() const;
+		static QString typeStr(Connection::Type t);
 
 		bool isPortToPort() const;
 		bool isSinglePort() const;

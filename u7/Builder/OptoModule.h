@@ -109,6 +109,8 @@ namespace Hardware
 
 		bool init(const DeviceController* controller, int portNo, LogicModule *lmDescription, Builder::IssueLogger* log);
 
+		bool initSettings(ConnectionShared cn);
+
 		bool appendTxSignal(const Signal* txSignal);
 		bool initRawTxSignals();
 		bool sortTxSignals();
@@ -181,6 +183,8 @@ namespace Hardware
 		Q_INVOKABLE Connection::SerialMode serialMode() const { return m_serialMode; }
 		void setSerialMode(Connection::SerialMode serialMode) { m_serialMode = serialMode; }
 
+		QString serialModeStr() const;
+
 		int txBufAddress() const { return m_txBufAddress; }
 		void setTxBufAddress(int address) { m_txBufAddress = address; }
 
@@ -249,6 +253,8 @@ namespace Hardware
 
 		QString validitySignalID() const { return m_validitySignalID; }
 		Address16 validitySignalAbsAddr() const { return m_validitySignalAbsAddr; }
+
+		void writeInfo(QStringList& list) const;
 
 	private:
 		bool appendTxSignal(const QString& appSignalID,
