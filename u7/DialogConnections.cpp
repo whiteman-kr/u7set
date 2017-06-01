@@ -235,6 +235,15 @@ bool DialogConnections::addConnection(QString port1Id, QString port2Id)
 	connection->setPort1EquipmentID(port1Id);
 	connection->setPort2EquipmentID(port2Id);
 
+	if (port2Id.isEmpty() == true)
+	{
+		connection->setType(Hardware::Connection::Type::SinglePort);
+	}
+	else
+	{
+		connection->setType(Hardware::Connection::Type::PortToPort);
+	}
+
 	bool ok = addConnection(connection);
 	return ok;
 }
