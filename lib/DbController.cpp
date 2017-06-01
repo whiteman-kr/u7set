@@ -25,6 +25,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_createProject, m_worker, &DbWorker::slot_createProject);
 	connect(this, &DbController::signal_openProject, m_worker, &DbWorker::slot_openProject);
 	connect(this, &DbController::signal_closeProject, m_worker, &DbWorker::slot_closeProject);
+	connect(this, &DbController::signal_cloneProject, m_worker, &DbWorker::slot_cloneProject);
 	connect(this, &DbController::signal_deleteProject, m_worker, &DbWorker::slot_deleteProject);
 	connect(this, &DbController::signal_upgradeProject, m_worker, &DbWorker::slot_upgradeProject);
 
@@ -139,7 +140,7 @@ bool DbController::getProjectList(std::vector<DbProject>* out, QWidget* parentWi
 	return result;
 }
 
-bool DbController::createProject(const QString& projectName, const QString& administratorPassword, QWidget* parentWidget)
+bool DbController::createProject(QString projectName, QString administratorPassword, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -165,7 +166,7 @@ bool DbController::createProject(const QString& projectName, const QString& admi
 	return result;
 }
 
-bool DbController::openProject(const QString& projectName, const QString& username, const QString& password, QWidget* parentWidget)
+bool DbController::openProject(QString projectName, QString username, QString password, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -251,7 +252,7 @@ bool DbController::closeProject(QWidget* parentWidget)
 	return result;
 }
 
-bool DbController::deleteProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget)
+bool DbController::cloneProject(QString projectName, QString password, QString newProjectName, QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -262,6 +263,32 @@ bool DbController::deleteProject(const QString& projectName, const QString& pass
 		return false;
 	}
 
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_cloneProject(projectName, password, newProjectName);
+
+	bool result = waitForComplete(parentWidget, tr("Cloning project"));
+	return result;
+}
+
+bool DbController::deleteProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (projectName.isEmpty() || password.isEmpty())
+	{
+		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
+		return false;
+	}
 
 	// Init progress and check availability
 	//
@@ -279,7 +306,7 @@ bool DbController::deleteProject(const QString& projectName, const QString& pass
 	return result;
 }
 
-bool DbController::upgradeProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget)
+bool DbController::upgradeProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget)
 {
 	// Check parameters
 	//
