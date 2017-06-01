@@ -181,7 +181,7 @@ void TuningModelClient::updateStates()
 	{
 		TuningModelRecord& item = m_items[i];
 
-        TuningSignalState state = m_tuningSignalManager->stateByHash(item.param.hash());
+		TuningSignalState state = m_tuningSignalManager->stateByHash(item.param.hash());
 
 		item.state.copy(state);
 	}
@@ -522,7 +522,12 @@ void TuningModelClient::slot_setAll()
 			continue;
 }
 
+			float scalePercent = fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
+
+			if (fabs(o.param.tuningDefaultValue() - o.state.editValue()) > scalePercent)
+	{
 			o.state.onEditValue(o.param.tuningDefaultValue());
+}
 }
 };
 
@@ -1173,7 +1178,7 @@ void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 
 void TuningPage::slot_setValue()
 {
-	QModelIndexList selection = m_objectList->selectionModel()->selectedIndexes();
+	QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
 
 	std::vector<int> selectedRows;
 
