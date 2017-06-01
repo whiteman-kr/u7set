@@ -146,16 +146,33 @@ namespace Builder
 					//
 					subsystemModules.push_back(lm);
 
+					LogicModule* description = m_lmDescriptions->get(lm).get();
+
+					if (description == nullptr)
+					{
+						m_log->errEQP6004(lm->equipmentIdTemplate(), LogicModuleSet::lmDescriptionFile(lm), lm->uuid());
+						return false;
+					}
+
 					if (logicModuleDescription == nullptr)
 					{
-						logicModuleDescription = m_lmDescriptions->get(lm).get();
+						logicModuleDescription = description;
+					}
+					else
+					{
+						assert(description == logicModuleDescription);
 					}
 				}
 			}
 
-			if (subsystemModules.empty() == true || logicModuleDescription == nullptr)
+			if (subsystemModules.empty() == true)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, modules descriptions for subsystem %2 is undefined!").arg(__FUNCTION__).arg(subsystem->caption()));
+				continue;
+			}
+
+			if (logicModuleDescription == nullptr)
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, Logic Modules descriptions for subsystem %2 is undefined!").arg(__FUNCTION__).arg(subsystem->caption()));
 				return false;
 			}
 

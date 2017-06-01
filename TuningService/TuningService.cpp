@@ -34,7 +34,10 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		ServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+		TuningServiceWorker* newInstance = new TuningServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+
+		newInstance->init();
+
 		return newInstance;
 	}
 
