@@ -1320,7 +1320,7 @@ void TuningFilterEditor::slot_signalsUpdated()
 	fillObjectsList();
 }
 
-double TuningFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
+float TuningFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
 {
 	Q_UNUSED(appSignalHash);
 	ok = false;
