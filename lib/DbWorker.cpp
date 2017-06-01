@@ -1079,6 +1079,120 @@ void DbWorker::slot_closeProject()
 	return;
 }
 
+void DbWorker::slot_cloneProject(QString projectName, QString password, QString newProjectName)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	projectName = projectName.trimmed();
+	QString username = "Administrator";
+
+	if (projectName.isEmpty() || username.isEmpty() || password.isEmpty())
+	{
+		assert(projectName.isEmpty() == false);
+		assert(password.isEmpty() == false);
+		return;
+	}
+
+	// Check password for Administrator
+	//
+	projectName = projectName.trimmed();
+	QString databaseName = "u7_" + projectName.toLower();
+	username = username.trimmed();
+
+	QString newDatabaseName = "u7_" + newProjectName.trimmed().toLower();
+
+	// Open database, removeDatabase will be called in slot_closeProject()
+	//
+	{
+		std::shared_ptr<int*> removeNewDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(projectConnectionName());		// remove database
+		});
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", projectConnectionName());
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName(databaseName);
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool result = db.open();
+		if (result == false)
+		{
+			emitError(db, db.lastError());
+			return;
+		}
+
+		addLogRecord(db, QString("About to clone project to.").arg(newDatabaseName));
+
+		result = db_checkUserPassword(db, username, password);
+		if (result == false)
+		{
+			emitError(db, "Wrong password.");
+			db.close();
+			return;
+		}
+	}
+
+	// Clone project
+	//
+	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
+		{
+			QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
+		});
+
+	{
+		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
+		if (db.lastError().isValid() == true)
+		{
+			emitError(db, db.lastError());
+			return;
+		}
+
+		db.setHostName(host());
+		db.setPort(port());
+		db.setDatabaseName("postgres");
+		db.setUserName(serverUsername());
+		db.setPassword(serverPassword());
+
+		bool ok = db.open();
+		if (ok == false)
+		{
+			emitError(db, db.lastError());
+			return;
+		}
+
+		QSqlQuery query(db);
+		QString sqlRequest = QString("CREATE DATABASE %1 WITH TEMPLATE %2").arg(newDatabaseName).arg(databaseName);
+
+		bool result = query.exec(sqlRequest);
+
+		if (result == false)
+		{
+			emitError(db, query.lastError(), false);
+			db.close();
+			return;
+		}
+
+		db.close();
+	}
+
+	// --
+	//
+	setCurrentProject(DbProject());
+	setCurrentUser(DbUser());
+
+	return;
+}
+
 void DbWorker::slot_deleteProject(QString projectName, QString password, bool doNotBackup)
 {
 	// Init automitic varaiables

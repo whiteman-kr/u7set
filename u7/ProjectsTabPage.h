@@ -23,6 +23,7 @@ private slots:
 	void createProject();
 	void openProject();
 	void closeProject();
+	void cloneProject();
 	void deleteProject();
 	void refreshProjectList();
 	void selectProject(const QString &projectName);
@@ -36,13 +37,14 @@ protected:
 	// Data
 	//
 private:
-	QTableWidget* m_pProjectTable = nullptr;
+	QTableWidget* m_projectTable = nullptr;
 
-	QPushButton* m_pNewProject = nullptr;
-	QPushButton* m_pOpenProject = nullptr;
-	QPushButton* m_pCloseProject = nullptr;
-	QPushButton* m_pDeleteProject = nullptr;
-	QPushButton* m_pRefreshProjectList = nullptr;
+	QPushButton* m_newProjectButton = nullptr;
+	QPushButton* m_openProjectButton = nullptr;
+	QPushButton* m_closeProjectButton = nullptr;
+	QPushButton* m_cloneProjectButton = nullptr;
+	QPushButton* m_deleteProjectButton = nullptr;
+	QPushButton* m_refreshProjectListButton = nullptr;
 
 	QAction* m_refreshAction = nullptr;
 };
