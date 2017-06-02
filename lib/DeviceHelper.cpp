@@ -189,7 +189,7 @@ Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const H
 	if (module->isModule() == false)
 	{
 		assert(false);
-		return false;
+		return nullptr;
 	}
 
 	return getChildControllerBySuffix(module, LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX, log);

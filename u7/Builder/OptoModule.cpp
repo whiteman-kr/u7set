@@ -3035,7 +3035,7 @@ namespace Hardware
 		if (connection == nullptr)
 		{
 			m_log->errALC5040(connectionID, QUuid());
-			return nullptr;
+			return false;
 		}
 
 		OptoPortShared p1 = getOptoPort(connection->port1EquipmentID());
@@ -3043,7 +3043,7 @@ namespace Hardware
 		if (p1 == nullptr)
 		{
 			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
-			return nullptr;
+			return false;
 		}
 
 		if (p1->lmID() == lmID)

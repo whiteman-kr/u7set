@@ -522,7 +522,7 @@ void TuningModelClient::slot_setAll()
 			continue;
 }
 
-			float scalePercent = fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
+			float scalePercent = std::fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
 
 			if (fabs(o.param.tuningDefaultValue() - o.state.editValue()) > scalePercent)
 	{

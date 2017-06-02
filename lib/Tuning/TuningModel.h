@@ -1,6 +1,8 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
+#include <cmath>
+
 #include "TuningSignalState.h"
 #include "TuningFilter.h"
 
@@ -19,12 +21,12 @@ struct TuningModelRecord
 			return false;
 		}
 
-		float scalePercent = fabs(param.lowEngineeringUnits() - param.highEngineeringUnits()) / 100.0;
+		float scalePercent = std::fabs(param.lowEngineeringUnits() - param.highEngineeringUnits()) / 100.0;
 
 		if (state.valid() == true)
 		{
-			if ((fabs(param.lowEngineeringUnits() - state.readLowLimit()) > scalePercent)  ||
-				fabs(param.highEngineeringUnits() - state.readHighLimit()) > scalePercent)
+			if ((std::fabs(param.lowEngineeringUnits() - state.readLowLimit()) > scalePercent)  ||
+				std::fabs(param.highEngineeringUnits() - state.readHighLimit()) > scalePercent)
 			{
 				return true;
 			}
