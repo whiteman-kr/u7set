@@ -36,7 +36,7 @@ public:
 
 	const QVector<Item>& items() const { return m_items; }
 
-	const int rawDataSize() const { return m_rawDataSize; }
+	int rawDataSize() const { return m_rawDataSize; }
 
 private:
 	bool parse(const QString& moduleEquipmentID, const QString& rawDataDescriptionStr, Builder::IssueLogger* log);

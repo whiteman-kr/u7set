@@ -8,7 +8,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-std::list<Tcp::ConnectionState> CfgControlServer::m_connectionStates;
+std::list<std::shared_ptr<const Tcp::ConnectionState>> CfgControlServer::m_connectionStates;
 
 CfgControlServer::CfgControlServer(const QString& equipmentID, const QString& autoloadBuildPath, const QString& workDirectory, const QString& buildPath, const CfgCheckerWorker& checkerWorker, std::shared_ptr<CircularLogger> logger) :
 	CfgServer(buildPath, logger),
@@ -70,16 +70,16 @@ void CfgControlServer::sendClientList()
 {
 	Network::ConfigurationServiceClients message;
 
-	for(const Tcp::ConnectionState& state : m_connectionStates)
+	for(const std::shared_ptr<const Tcp::ConnectionState>& state : m_connectionStates)
 	{
 		Network::ConfigurationServiceClientInfo* i = message.add_clients();
 
 		i->set_softwaretype(0);
 		i->set_equipmentid("???");
-		i->set_ip(state.peerAddr.address32());
-		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+		i->set_ip(state->peerAddr.address32());
+		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state->startTime);
 		i->set_isactual(false);
-		i->set_replyquantity(state.replyCount);
+		i->set_replyquantity(state->replyCount);
 	}
 
 	sendReply(message);

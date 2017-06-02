@@ -28,6 +28,7 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	SocketWorker::SocketWorker() :
+		m_state(std::make_shared<ConnectionState>()),
 		m_mutex(QMutex::Recursive),
 		m_watchdogTimer(this)
 	{
@@ -406,17 +407,22 @@ namespace Tcp
 	{
 		m_stateMutex.lock();
 
-		ConnectionState state = m_state;
+		ConnectionState state = *m_state;
 
 		m_stateMutex.unlock();
 
 		return state;
 	}
 
+	std::shared_ptr<const ConnectionState> SocketWorker::getConnectionStatePtr() const
+	{
+		return m_state;
+	}
+
 
 	HostAddressPort SocketWorker::peerAddr() const
 	{
-		return m_state.peerAddr;
+		return m_state->peerAddr;
 	}
 
 
@@ -424,13 +430,13 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.isConnected = true;
-		m_state.peerAddr = peerAddr;
-		m_state.startTime = QDateTime::currentMSecsSinceEpoch();
-		m_state.sentBytes = 0;
-		m_state.receivedBytes = 0;
-		m_state.requestCount = 0;
-		m_state.replyCount = 0;
+		m_state->isConnected = true;
+		m_state->peerAddr = peerAddr;
+		m_state->startTime = QDateTime::currentMSecsSinceEpoch();
+		m_state->sentBytes = 0;
+		m_state->receivedBytes = 0;
+		m_state->requestCount = 0;
+		m_state->replyCount = 0;
 	}
 
 
@@ -438,13 +444,13 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.isConnected = false;
-		m_state.peerAddr.clear();
-		m_state.startTime = 0;
-		m_state.sentBytes = 0;
-		m_state.receivedBytes = 0;
-		m_state.requestCount = 0;
-		m_state.replyCount = 0;
+		m_state->isConnected = false;
+		m_state->peerAddr.clear();
+		m_state->startTime = 0;
+		m_state->sentBytes = 0;
+		m_state->receivedBytes = 0;
+		m_state->requestCount = 0;
+		m_state->replyCount = 0;
 	}
 
 
@@ -452,7 +458,7 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.sentBytes += bytes;
+		m_state->sentBytes += bytes;
 	}
 
 
@@ -460,14 +466,14 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.receivedBytes += bytes;
+		m_state->receivedBytes += bytes;
 	}
 
 	void SocketWorker::addRequest()
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.requestCount++;
+		m_state->requestCount++;
 	}
 
 
@@ -475,7 +481,7 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_stateMutex);
 
-		m_state.replyCount++;
+		m_state->replyCount++;
 	}
 
 
@@ -754,9 +760,9 @@ namespace Tcp
 
 	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, std::shared_ptr<CircularLogger> logger) :
 		m_listenAddressPort(listenAddressPort),
+		m_logger(logger),
 		m_periodicTimer(this),
-		m_serverInstance(server),
-		m_logger(logger)
+		m_serverInstance(server)
 	{
 		assert(m_serverInstance != nullptr);
 
@@ -866,21 +872,22 @@ namespace Tcp
 
 		newThread->start();
 
-		updateClientsInfo();
+		updateClientsList();
 	}
 
-	void Listener::updateClientsInfo()
+
+	void Listener::updateClientsList()
 	{
-		std::list<ConnectionState> clientsInfo;
+		std::list<std::shared_ptr<const ConnectionState>> clientsInfo;
 
 		QList<const SocketWorker*>&& servers = m_runningServers.keys();
 
-		for (auto& server : servers)
+		for (const SocketWorker* server : servers)
 		{
-			clientsInfo.push_back(server->getConnectionState());
+			clientsInfo.push_back(server->getConnectionStatePtr());
 		}
 
-		emit connectedClientsDataChanged(clientsInfo);
+		emit connectedClientsListChanged(clientsInfo);
 	}
 
 
@@ -908,7 +915,7 @@ namespace Tcp
 		thread->quit();
 		delete thread;
 
-		updateClientsInfo();
+		updateClientsList();
 	}
 
 
