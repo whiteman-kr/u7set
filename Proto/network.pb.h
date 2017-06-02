@@ -55,6 +55,11 @@ class GetUnitsReply;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
+class ConfigurationServiceState;
+class ConfigurationServiceClientInfo;
+class ConfigurationServiceClients;
+class BuildInfo;
+class ConfigurationServiceSettings;
 class GetTuningSourcesInfo;
 class GetTuningSourcesInfoReply;
 class GetTuningSourcesStates;
@@ -2357,6 +2362,609 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetServiceInfoReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ConfigurationServiceState : public ::google::protobuf::Message {
+ public:
+  ConfigurationServiceState();
+  virtual ~ConfigurationServiceState();
+
+  ConfigurationServiceState(const ConfigurationServiceState& from);
+
+  inline ConfigurationServiceState& operator=(const ConfigurationServiceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ConfigurationServiceState& default_instance();
+
+  void Swap(ConfigurationServiceState* other);
+
+  // implements Message ----------------------------------------------
+
+  ConfigurationServiceState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ConfigurationServiceState& from);
+  void MergeFrom(const ConfigurationServiceState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string currentBuildDirectory = 1;
+  inline bool has_currentbuilddirectory() const;
+  inline void clear_currentbuilddirectory();
+  static const int kCurrentBuildDirectoryFieldNumber = 1;
+  inline const ::std::string& currentbuilddirectory() const;
+  inline void set_currentbuilddirectory(const ::std::string& value);
+  inline void set_currentbuilddirectory(const char* value);
+  inline void set_currentbuilddirectory(const char* value, size_t size);
+  inline ::std::string* mutable_currentbuilddirectory();
+  inline ::std::string* release_currentbuilddirectory();
+  inline void set_allocated_currentbuilddirectory(::std::string* currentbuilddirectory);
+
+  // required int32 checkBuildAttemptQuantity = 2;
+  inline bool has_checkbuildattemptquantity() const;
+  inline void clear_checkbuildattemptquantity();
+  static const int kCheckBuildAttemptQuantityFieldNumber = 2;
+  inline ::google::protobuf::int32 checkbuildattemptquantity() const;
+  inline void set_checkbuildattemptquantity(::google::protobuf::int32 value);
+
+  // required int32 buildCheckerState = 3;
+  inline bool has_buildcheckerstate() const;
+  inline void clear_buildcheckerstate();
+  static const int kBuildCheckerStateFieldNumber = 3;
+  inline ::google::protobuf::int32 buildcheckerstate() const;
+  inline void set_buildcheckerstate(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceState)
+ private:
+  inline void set_has_currentbuilddirectory();
+  inline void clear_has_currentbuilddirectory();
+  inline void set_has_checkbuildattemptquantity();
+  inline void clear_has_checkbuildattemptquantity();
+  inline void set_has_buildcheckerstate();
+  inline void clear_has_buildcheckerstate();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* currentbuilddirectory_;
+  ::google::protobuf::int32 checkbuildattemptquantity_;
+  ::google::protobuf::int32 buildcheckerstate_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ConfigurationServiceState* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
+ public:
+  ConfigurationServiceClientInfo();
+  virtual ~ConfigurationServiceClientInfo();
+
+  ConfigurationServiceClientInfo(const ConfigurationServiceClientInfo& from);
+
+  inline ConfigurationServiceClientInfo& operator=(const ConfigurationServiceClientInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ConfigurationServiceClientInfo& default_instance();
+
+  void Swap(ConfigurationServiceClientInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  ConfigurationServiceClientInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ConfigurationServiceClientInfo& from);
+  void MergeFrom(const ConfigurationServiceClientInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 softwareType = 1;
+  inline bool has_softwaretype() const;
+  inline void clear_softwaretype();
+  static const int kSoftwareTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 softwaretype() const;
+  inline void set_softwaretype(::google::protobuf::int32 value);
+
+  // required string equipmentId = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 2;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required int32 ip = 3;
+  inline bool has_ip() const;
+  inline void clear_ip();
+  static const int kIpFieldNumber = 3;
+  inline ::google::protobuf::int32 ip() const;
+  inline void set_ip(::google::protobuf::int32 value);
+
+  // required int64 uptime = 5;
+  inline bool has_uptime() const;
+  inline void clear_uptime();
+  static const int kUptimeFieldNumber = 5;
+  inline ::google::protobuf::int64 uptime() const;
+  inline void set_uptime(::google::protobuf::int64 value);
+
+  // required bool isActual = 6;
+  inline bool has_isactual() const;
+  inline void clear_isactual();
+  static const int kIsActualFieldNumber = 6;
+  inline bool isactual() const;
+  inline void set_isactual(bool value);
+
+  // required int64 replyQuantity = 7;
+  inline bool has_replyquantity() const;
+  inline void clear_replyquantity();
+  static const int kReplyQuantityFieldNumber = 7;
+  inline ::google::protobuf::int64 replyquantity() const;
+  inline void set_replyquantity(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceClientInfo)
+ private:
+  inline void set_has_softwaretype();
+  inline void clear_has_softwaretype();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_ip();
+  inline void clear_has_ip();
+  inline void set_has_uptime();
+  inline void clear_has_uptime();
+  inline void set_has_isactual();
+  inline void clear_has_isactual();
+  inline void set_has_replyquantity();
+  inline void clear_has_replyquantity();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::google::protobuf::int32 softwaretype_;
+  ::google::protobuf::int32 ip_;
+  ::google::protobuf::int64 uptime_;
+  ::google::protobuf::int64 replyquantity_;
+  bool isactual_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ConfigurationServiceClientInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ConfigurationServiceClients : public ::google::protobuf::Message {
+ public:
+  ConfigurationServiceClients();
+  virtual ~ConfigurationServiceClients();
+
+  ConfigurationServiceClients(const ConfigurationServiceClients& from);
+
+  inline ConfigurationServiceClients& operator=(const ConfigurationServiceClients& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ConfigurationServiceClients& default_instance();
+
+  void Swap(ConfigurationServiceClients* other);
+
+  // implements Message ----------------------------------------------
+
+  ConfigurationServiceClients* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ConfigurationServiceClients& from);
+  void MergeFrom(const ConfigurationServiceClients& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Network.ConfigurationServiceClientInfo clients = 1;
+  inline int clients_size() const;
+  inline void clear_clients();
+  static const int kClientsFieldNumber = 1;
+  inline const ::Network::ConfigurationServiceClientInfo& clients(int index) const;
+  inline ::Network::ConfigurationServiceClientInfo* mutable_clients(int index);
+  inline ::Network::ConfigurationServiceClientInfo* add_clients();
+  inline const ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >&
+      clients() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >*
+      mutable_clients();
+
+  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceClients)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo > clients_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ConfigurationServiceClients* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class BuildInfo : public ::google::protobuf::Message {
+ public:
+  BuildInfo();
+  virtual ~BuildInfo();
+
+  BuildInfo(const BuildInfo& from);
+
+  inline BuildInfo& operator=(const BuildInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const BuildInfo& default_instance();
+
+  void Swap(BuildInfo* other);
+
+  // implements Message ----------------------------------------------
+
+  BuildInfo* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const BuildInfo& from);
+  void MergeFrom(const BuildInfo& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string project = 1;
+  inline bool has_project() const;
+  inline void clear_project();
+  static const int kProjectFieldNumber = 1;
+  inline const ::std::string& project() const;
+  inline void set_project(const ::std::string& value);
+  inline void set_project(const char* value);
+  inline void set_project(const char* value, size_t size);
+  inline ::std::string* mutable_project();
+  inline ::std::string* release_project();
+  inline void set_allocated_project(::std::string* project);
+
+  // required int32 id = 2 [default = -1];
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 2;
+  inline ::google::protobuf::int32 id() const;
+  inline void set_id(::google::protobuf::int32 value);
+
+  // required bool release = 3 [default = false];
+  inline bool has_release() const;
+  inline void clear_release();
+  static const int kReleaseFieldNumber = 3;
+  inline bool release() const;
+  inline void set_release(bool value);
+
+  // required int64 date = 4;
+  inline bool has_date() const;
+  inline void clear_date();
+  static const int kDateFieldNumber = 4;
+  inline ::google::protobuf::int64 date() const;
+  inline void set_date(::google::protobuf::int64 value);
+
+  // required int32 changeset = 5 [default = 0];
+  inline bool has_changeset() const;
+  inline void clear_changeset();
+  static const int kChangesetFieldNumber = 5;
+  inline ::google::protobuf::int32 changeset() const;
+  inline void set_changeset(::google::protobuf::int32 value);
+
+  // required string user = 6;
+  inline bool has_user() const;
+  inline void clear_user();
+  static const int kUserFieldNumber = 6;
+  inline const ::std::string& user() const;
+  inline void set_user(const ::std::string& value);
+  inline void set_user(const char* value);
+  inline void set_user(const char* value, size_t size);
+  inline ::std::string* mutable_user();
+  inline ::std::string* release_user();
+  inline void set_allocated_user(::std::string* user);
+
+  // required string workstation = 7;
+  inline bool has_workstation() const;
+  inline void clear_workstation();
+  static const int kWorkstationFieldNumber = 7;
+  inline const ::std::string& workstation() const;
+  inline void set_workstation(const ::std::string& value);
+  inline void set_workstation(const char* value);
+  inline void set_workstation(const char* value, size_t size);
+  inline ::std::string* mutable_workstation();
+  inline ::std::string* release_workstation();
+  inline void set_allocated_workstation(::std::string* workstation);
+
+  // @@protoc_insertion_point(class_scope:Network.BuildInfo)
+ private:
+  inline void set_has_project();
+  inline void clear_has_project();
+  inline void set_has_id();
+  inline void clear_has_id();
+  inline void set_has_release();
+  inline void clear_has_release();
+  inline void set_has_date();
+  inline void clear_has_date();
+  inline void set_has_changeset();
+  inline void clear_has_changeset();
+  inline void set_has_user();
+  inline void clear_has_user();
+  inline void set_has_workstation();
+  inline void clear_has_workstation();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* project_;
+  ::google::protobuf::int32 id_;
+  bool release_;
+  ::google::protobuf::int64 date_;
+  ::std::string* user_;
+  ::std::string* workstation_;
+  ::google::protobuf::int32 changeset_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static BuildInfo* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ConfigurationServiceSettings : public ::google::protobuf::Message {
+ public:
+  ConfigurationServiceSettings();
+  virtual ~ConfigurationServiceSettings();
+
+  ConfigurationServiceSettings(const ConfigurationServiceSettings& from);
+
+  inline ConfigurationServiceSettings& operator=(const ConfigurationServiceSettings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ConfigurationServiceSettings& default_instance();
+
+  void Swap(ConfigurationServiceSettings* other);
+
+  // implements Message ----------------------------------------------
+
+  ConfigurationServiceSettings* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ConfigurationServiceSettings& from);
+  void MergeFrom(const ConfigurationServiceSettings& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string equipmentID = 1;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIDFieldNumber = 1;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required string autoloadBuildPath = 2;
+  inline bool has_autoloadbuildpath() const;
+  inline void clear_autoloadbuildpath();
+  static const int kAutoloadBuildPathFieldNumber = 2;
+  inline const ::std::string& autoloadbuildpath() const;
+  inline void set_autoloadbuildpath(const ::std::string& value);
+  inline void set_autoloadbuildpath(const char* value);
+  inline void set_autoloadbuildpath(const char* value, size_t size);
+  inline ::std::string* mutable_autoloadbuildpath();
+  inline ::std::string* release_autoloadbuildpath();
+  inline void set_allocated_autoloadbuildpath(::std::string* autoloadbuildpath);
+
+  // required string workDirectory = 3;
+  inline bool has_workdirectory() const;
+  inline void clear_workdirectory();
+  static const int kWorkDirectoryFieldNumber = 3;
+  inline const ::std::string& workdirectory() const;
+  inline void set_workdirectory(const ::std::string& value);
+  inline void set_workdirectory(const char* value);
+  inline void set_workdirectory(const char* value, size_t size);
+  inline ::std::string* mutable_workdirectory();
+  inline ::std::string* release_workdirectory();
+  inline void set_allocated_workdirectory(::std::string* workdirectory);
+
+  // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceSettings)
+ private:
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_autoloadbuildpath();
+  inline void clear_has_autoloadbuildpath();
+  inline void set_has_workdirectory();
+  inline void clear_has_workdirectory();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::std::string* autoloadbuildpath_;
+  ::std::string* workdirectory_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static ConfigurationServiceSettings* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -6152,6 +6760,853 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
     set_has_serviceinfo();
   } else {
     clear_has_serviceinfo();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// ConfigurationServiceState
+
+// required string currentBuildDirectory = 1;
+inline bool ConfigurationServiceState::has_currentbuilddirectory() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ConfigurationServiceState::set_has_currentbuilddirectory() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ConfigurationServiceState::clear_has_currentbuilddirectory() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ConfigurationServiceState::clear_currentbuilddirectory() {
+  if (currentbuilddirectory_ != &::google::protobuf::internal::kEmptyString) {
+    currentbuilddirectory_->clear();
+  }
+  clear_has_currentbuilddirectory();
+}
+inline const ::std::string& ConfigurationServiceState::currentbuilddirectory() const {
+  return *currentbuilddirectory_;
+}
+inline void ConfigurationServiceState::set_currentbuilddirectory(const ::std::string& value) {
+  set_has_currentbuilddirectory();
+  if (currentbuilddirectory_ == &::google::protobuf::internal::kEmptyString) {
+    currentbuilddirectory_ = new ::std::string;
+  }
+  currentbuilddirectory_->assign(value);
+}
+inline void ConfigurationServiceState::set_currentbuilddirectory(const char* value) {
+  set_has_currentbuilddirectory();
+  if (currentbuilddirectory_ == &::google::protobuf::internal::kEmptyString) {
+    currentbuilddirectory_ = new ::std::string;
+  }
+  currentbuilddirectory_->assign(value);
+}
+inline void ConfigurationServiceState::set_currentbuilddirectory(const char* value, size_t size) {
+  set_has_currentbuilddirectory();
+  if (currentbuilddirectory_ == &::google::protobuf::internal::kEmptyString) {
+    currentbuilddirectory_ = new ::std::string;
+  }
+  currentbuilddirectory_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ConfigurationServiceState::mutable_currentbuilddirectory() {
+  set_has_currentbuilddirectory();
+  if (currentbuilddirectory_ == &::google::protobuf::internal::kEmptyString) {
+    currentbuilddirectory_ = new ::std::string;
+  }
+  return currentbuilddirectory_;
+}
+inline ::std::string* ConfigurationServiceState::release_currentbuilddirectory() {
+  clear_has_currentbuilddirectory();
+  if (currentbuilddirectory_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = currentbuilddirectory_;
+    currentbuilddirectory_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ConfigurationServiceState::set_allocated_currentbuilddirectory(::std::string* currentbuilddirectory) {
+  if (currentbuilddirectory_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentbuilddirectory_;
+  }
+  if (currentbuilddirectory) {
+    set_has_currentbuilddirectory();
+    currentbuilddirectory_ = currentbuilddirectory;
+  } else {
+    clear_has_currentbuilddirectory();
+    currentbuilddirectory_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 checkBuildAttemptQuantity = 2;
+inline bool ConfigurationServiceState::has_checkbuildattemptquantity() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ConfigurationServiceState::set_has_checkbuildattemptquantity() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ConfigurationServiceState::clear_has_checkbuildattemptquantity() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ConfigurationServiceState::clear_checkbuildattemptquantity() {
+  checkbuildattemptquantity_ = 0;
+  clear_has_checkbuildattemptquantity();
+}
+inline ::google::protobuf::int32 ConfigurationServiceState::checkbuildattemptquantity() const {
+  return checkbuildattemptquantity_;
+}
+inline void ConfigurationServiceState::set_checkbuildattemptquantity(::google::protobuf::int32 value) {
+  set_has_checkbuildattemptquantity();
+  checkbuildattemptquantity_ = value;
+}
+
+// required int32 buildCheckerState = 3;
+inline bool ConfigurationServiceState::has_buildcheckerstate() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ConfigurationServiceState::set_has_buildcheckerstate() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ConfigurationServiceState::clear_has_buildcheckerstate() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ConfigurationServiceState::clear_buildcheckerstate() {
+  buildcheckerstate_ = 0;
+  clear_has_buildcheckerstate();
+}
+inline ::google::protobuf::int32 ConfigurationServiceState::buildcheckerstate() const {
+  return buildcheckerstate_;
+}
+inline void ConfigurationServiceState::set_buildcheckerstate(::google::protobuf::int32 value) {
+  set_has_buildcheckerstate();
+  buildcheckerstate_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ConfigurationServiceClientInfo
+
+// required int32 softwareType = 1;
+inline bool ConfigurationServiceClientInfo::has_softwaretype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_softwaretype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_softwaretype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ConfigurationServiceClientInfo::clear_softwaretype() {
+  softwaretype_ = 0;
+  clear_has_softwaretype();
+}
+inline ::google::protobuf::int32 ConfigurationServiceClientInfo::softwaretype() const {
+  return softwaretype_;
+}
+inline void ConfigurationServiceClientInfo::set_softwaretype(::google::protobuf::int32 value) {
+  set_has_softwaretype();
+  softwaretype_ = value;
+}
+
+// required string equipmentId = 2;
+inline bool ConfigurationServiceClientInfo::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ConfigurationServiceClientInfo::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& ConfigurationServiceClientInfo::equipmentid() const {
+  return *equipmentid_;
+}
+inline void ConfigurationServiceClientInfo::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ConfigurationServiceClientInfo::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ConfigurationServiceClientInfo::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ConfigurationServiceClientInfo::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* ConfigurationServiceClientInfo::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ConfigurationServiceClientInfo::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 ip = 3;
+inline bool ConfigurationServiceClientInfo::has_ip() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_ip() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_ip() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ConfigurationServiceClientInfo::clear_ip() {
+  ip_ = 0;
+  clear_has_ip();
+}
+inline ::google::protobuf::int32 ConfigurationServiceClientInfo::ip() const {
+  return ip_;
+}
+inline void ConfigurationServiceClientInfo::set_ip(::google::protobuf::int32 value) {
+  set_has_ip();
+  ip_ = value;
+}
+
+// required int64 uptime = 5;
+inline bool ConfigurationServiceClientInfo::has_uptime() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_uptime() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_uptime() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ConfigurationServiceClientInfo::clear_uptime() {
+  uptime_ = GOOGLE_LONGLONG(0);
+  clear_has_uptime();
+}
+inline ::google::protobuf::int64 ConfigurationServiceClientInfo::uptime() const {
+  return uptime_;
+}
+inline void ConfigurationServiceClientInfo::set_uptime(::google::protobuf::int64 value) {
+  set_has_uptime();
+  uptime_ = value;
+}
+
+// required bool isActual = 6;
+inline bool ConfigurationServiceClientInfo::has_isactual() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_isactual() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_isactual() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void ConfigurationServiceClientInfo::clear_isactual() {
+  isactual_ = false;
+  clear_has_isactual();
+}
+inline bool ConfigurationServiceClientInfo::isactual() const {
+  return isactual_;
+}
+inline void ConfigurationServiceClientInfo::set_isactual(bool value) {
+  set_has_isactual();
+  isactual_ = value;
+}
+
+// required int64 replyQuantity = 7;
+inline bool ConfigurationServiceClientInfo::has_replyquantity() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_replyquantity() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_replyquantity() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ConfigurationServiceClientInfo::clear_replyquantity() {
+  replyquantity_ = GOOGLE_LONGLONG(0);
+  clear_has_replyquantity();
+}
+inline ::google::protobuf::int64 ConfigurationServiceClientInfo::replyquantity() const {
+  return replyquantity_;
+}
+inline void ConfigurationServiceClientInfo::set_replyquantity(::google::protobuf::int64 value) {
+  set_has_replyquantity();
+  replyquantity_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ConfigurationServiceClients
+
+// repeated .Network.ConfigurationServiceClientInfo clients = 1;
+inline int ConfigurationServiceClients::clients_size() const {
+  return clients_.size();
+}
+inline void ConfigurationServiceClients::clear_clients() {
+  clients_.Clear();
+}
+inline const ::Network::ConfigurationServiceClientInfo& ConfigurationServiceClients::clients(int index) const {
+  return clients_.Get(index);
+}
+inline ::Network::ConfigurationServiceClientInfo* ConfigurationServiceClients::mutable_clients(int index) {
+  return clients_.Mutable(index);
+}
+inline ::Network::ConfigurationServiceClientInfo* ConfigurationServiceClients::add_clients() {
+  return clients_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >&
+ConfigurationServiceClients::clients() const {
+  return clients_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Network::ConfigurationServiceClientInfo >*
+ConfigurationServiceClients::mutable_clients() {
+  return &clients_;
+}
+
+// -------------------------------------------------------------------
+
+// BuildInfo
+
+// required string project = 1;
+inline bool BuildInfo::has_project() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void BuildInfo::set_has_project() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void BuildInfo::clear_has_project() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void BuildInfo::clear_project() {
+  if (project_ != &::google::protobuf::internal::kEmptyString) {
+    project_->clear();
+  }
+  clear_has_project();
+}
+inline const ::std::string& BuildInfo::project() const {
+  return *project_;
+}
+inline void BuildInfo::set_project(const ::std::string& value) {
+  set_has_project();
+  if (project_ == &::google::protobuf::internal::kEmptyString) {
+    project_ = new ::std::string;
+  }
+  project_->assign(value);
+}
+inline void BuildInfo::set_project(const char* value) {
+  set_has_project();
+  if (project_ == &::google::protobuf::internal::kEmptyString) {
+    project_ = new ::std::string;
+  }
+  project_->assign(value);
+}
+inline void BuildInfo::set_project(const char* value, size_t size) {
+  set_has_project();
+  if (project_ == &::google::protobuf::internal::kEmptyString) {
+    project_ = new ::std::string;
+  }
+  project_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BuildInfo::mutable_project() {
+  set_has_project();
+  if (project_ == &::google::protobuf::internal::kEmptyString) {
+    project_ = new ::std::string;
+  }
+  return project_;
+}
+inline ::std::string* BuildInfo::release_project() {
+  clear_has_project();
+  if (project_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = project_;
+    project_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BuildInfo::set_allocated_project(::std::string* project) {
+  if (project_ != &::google::protobuf::internal::kEmptyString) {
+    delete project_;
+  }
+  if (project) {
+    set_has_project();
+    project_ = project;
+  } else {
+    clear_has_project();
+    project_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 id = 2 [default = -1];
+inline bool BuildInfo::has_id() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void BuildInfo::set_has_id() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void BuildInfo::clear_has_id() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void BuildInfo::clear_id() {
+  id_ = -1;
+  clear_has_id();
+}
+inline ::google::protobuf::int32 BuildInfo::id() const {
+  return id_;
+}
+inline void BuildInfo::set_id(::google::protobuf::int32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// required bool release = 3 [default = false];
+inline bool BuildInfo::has_release() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void BuildInfo::set_has_release() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void BuildInfo::clear_has_release() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void BuildInfo::clear_release() {
+  release_ = false;
+  clear_has_release();
+}
+inline bool BuildInfo::release() const {
+  return release_;
+}
+inline void BuildInfo::set_release(bool value) {
+  set_has_release();
+  release_ = value;
+}
+
+// required int64 date = 4;
+inline bool BuildInfo::has_date() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void BuildInfo::set_has_date() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void BuildInfo::clear_has_date() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void BuildInfo::clear_date() {
+  date_ = GOOGLE_LONGLONG(0);
+  clear_has_date();
+}
+inline ::google::protobuf::int64 BuildInfo::date() const {
+  return date_;
+}
+inline void BuildInfo::set_date(::google::protobuf::int64 value) {
+  set_has_date();
+  date_ = value;
+}
+
+// required int32 changeset = 5 [default = 0];
+inline bool BuildInfo::has_changeset() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void BuildInfo::set_has_changeset() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void BuildInfo::clear_has_changeset() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void BuildInfo::clear_changeset() {
+  changeset_ = 0;
+  clear_has_changeset();
+}
+inline ::google::protobuf::int32 BuildInfo::changeset() const {
+  return changeset_;
+}
+inline void BuildInfo::set_changeset(::google::protobuf::int32 value) {
+  set_has_changeset();
+  changeset_ = value;
+}
+
+// required string user = 6;
+inline bool BuildInfo::has_user() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void BuildInfo::set_has_user() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void BuildInfo::clear_has_user() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void BuildInfo::clear_user() {
+  if (user_ != &::google::protobuf::internal::kEmptyString) {
+    user_->clear();
+  }
+  clear_has_user();
+}
+inline const ::std::string& BuildInfo::user() const {
+  return *user_;
+}
+inline void BuildInfo::set_user(const ::std::string& value) {
+  set_has_user();
+  if (user_ == &::google::protobuf::internal::kEmptyString) {
+    user_ = new ::std::string;
+  }
+  user_->assign(value);
+}
+inline void BuildInfo::set_user(const char* value) {
+  set_has_user();
+  if (user_ == &::google::protobuf::internal::kEmptyString) {
+    user_ = new ::std::string;
+  }
+  user_->assign(value);
+}
+inline void BuildInfo::set_user(const char* value, size_t size) {
+  set_has_user();
+  if (user_ == &::google::protobuf::internal::kEmptyString) {
+    user_ = new ::std::string;
+  }
+  user_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BuildInfo::mutable_user() {
+  set_has_user();
+  if (user_ == &::google::protobuf::internal::kEmptyString) {
+    user_ = new ::std::string;
+  }
+  return user_;
+}
+inline ::std::string* BuildInfo::release_user() {
+  clear_has_user();
+  if (user_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = user_;
+    user_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BuildInfo::set_allocated_user(::std::string* user) {
+  if (user_ != &::google::protobuf::internal::kEmptyString) {
+    delete user_;
+  }
+  if (user) {
+    set_has_user();
+    user_ = user;
+  } else {
+    clear_has_user();
+    user_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string workstation = 7;
+inline bool BuildInfo::has_workstation() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void BuildInfo::set_has_workstation() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void BuildInfo::clear_has_workstation() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void BuildInfo::clear_workstation() {
+  if (workstation_ != &::google::protobuf::internal::kEmptyString) {
+    workstation_->clear();
+  }
+  clear_has_workstation();
+}
+inline const ::std::string& BuildInfo::workstation() const {
+  return *workstation_;
+}
+inline void BuildInfo::set_workstation(const ::std::string& value) {
+  set_has_workstation();
+  if (workstation_ == &::google::protobuf::internal::kEmptyString) {
+    workstation_ = new ::std::string;
+  }
+  workstation_->assign(value);
+}
+inline void BuildInfo::set_workstation(const char* value) {
+  set_has_workstation();
+  if (workstation_ == &::google::protobuf::internal::kEmptyString) {
+    workstation_ = new ::std::string;
+  }
+  workstation_->assign(value);
+}
+inline void BuildInfo::set_workstation(const char* value, size_t size) {
+  set_has_workstation();
+  if (workstation_ == &::google::protobuf::internal::kEmptyString) {
+    workstation_ = new ::std::string;
+  }
+  workstation_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BuildInfo::mutable_workstation() {
+  set_has_workstation();
+  if (workstation_ == &::google::protobuf::internal::kEmptyString) {
+    workstation_ = new ::std::string;
+  }
+  return workstation_;
+}
+inline ::std::string* BuildInfo::release_workstation() {
+  clear_has_workstation();
+  if (workstation_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = workstation_;
+    workstation_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BuildInfo::set_allocated_workstation(::std::string* workstation) {
+  if (workstation_ != &::google::protobuf::internal::kEmptyString) {
+    delete workstation_;
+  }
+  if (workstation) {
+    set_has_workstation();
+    workstation_ = workstation;
+  } else {
+    clear_has_workstation();
+    workstation_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// ConfigurationServiceSettings
+
+// required string equipmentID = 1;
+inline bool ConfigurationServiceSettings::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ConfigurationServiceSettings::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ConfigurationServiceSettings::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ConfigurationServiceSettings::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& ConfigurationServiceSettings::equipmentid() const {
+  return *equipmentid_;
+}
+inline void ConfigurationServiceSettings::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ConfigurationServiceSettings::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* ConfigurationServiceSettings::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ConfigurationServiceSettings::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string autoloadBuildPath = 2;
+inline bool ConfigurationServiceSettings::has_autoloadbuildpath() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ConfigurationServiceSettings::set_has_autoloadbuildpath() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ConfigurationServiceSettings::clear_has_autoloadbuildpath() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ConfigurationServiceSettings::clear_autoloadbuildpath() {
+  if (autoloadbuildpath_ != &::google::protobuf::internal::kEmptyString) {
+    autoloadbuildpath_->clear();
+  }
+  clear_has_autoloadbuildpath();
+}
+inline const ::std::string& ConfigurationServiceSettings::autoloadbuildpath() const {
+  return *autoloadbuildpath_;
+}
+inline void ConfigurationServiceSettings::set_autoloadbuildpath(const ::std::string& value) {
+  set_has_autoloadbuildpath();
+  if (autoloadbuildpath_ == &::google::protobuf::internal::kEmptyString) {
+    autoloadbuildpath_ = new ::std::string;
+  }
+  autoloadbuildpath_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_autoloadbuildpath(const char* value) {
+  set_has_autoloadbuildpath();
+  if (autoloadbuildpath_ == &::google::protobuf::internal::kEmptyString) {
+    autoloadbuildpath_ = new ::std::string;
+  }
+  autoloadbuildpath_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_autoloadbuildpath(const char* value, size_t size) {
+  set_has_autoloadbuildpath();
+  if (autoloadbuildpath_ == &::google::protobuf::internal::kEmptyString) {
+    autoloadbuildpath_ = new ::std::string;
+  }
+  autoloadbuildpath_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ConfigurationServiceSettings::mutable_autoloadbuildpath() {
+  set_has_autoloadbuildpath();
+  if (autoloadbuildpath_ == &::google::protobuf::internal::kEmptyString) {
+    autoloadbuildpath_ = new ::std::string;
+  }
+  return autoloadbuildpath_;
+}
+inline ::std::string* ConfigurationServiceSettings::release_autoloadbuildpath() {
+  clear_has_autoloadbuildpath();
+  if (autoloadbuildpath_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = autoloadbuildpath_;
+    autoloadbuildpath_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ConfigurationServiceSettings::set_allocated_autoloadbuildpath(::std::string* autoloadbuildpath) {
+  if (autoloadbuildpath_ != &::google::protobuf::internal::kEmptyString) {
+    delete autoloadbuildpath_;
+  }
+  if (autoloadbuildpath) {
+    set_has_autoloadbuildpath();
+    autoloadbuildpath_ = autoloadbuildpath;
+  } else {
+    clear_has_autoloadbuildpath();
+    autoloadbuildpath_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required string workDirectory = 3;
+inline bool ConfigurationServiceSettings::has_workdirectory() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ConfigurationServiceSettings::set_has_workdirectory() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ConfigurationServiceSettings::clear_has_workdirectory() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ConfigurationServiceSettings::clear_workdirectory() {
+  if (workdirectory_ != &::google::protobuf::internal::kEmptyString) {
+    workdirectory_->clear();
+  }
+  clear_has_workdirectory();
+}
+inline const ::std::string& ConfigurationServiceSettings::workdirectory() const {
+  return *workdirectory_;
+}
+inline void ConfigurationServiceSettings::set_workdirectory(const ::std::string& value) {
+  set_has_workdirectory();
+  if (workdirectory_ == &::google::protobuf::internal::kEmptyString) {
+    workdirectory_ = new ::std::string;
+  }
+  workdirectory_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_workdirectory(const char* value) {
+  set_has_workdirectory();
+  if (workdirectory_ == &::google::protobuf::internal::kEmptyString) {
+    workdirectory_ = new ::std::string;
+  }
+  workdirectory_->assign(value);
+}
+inline void ConfigurationServiceSettings::set_workdirectory(const char* value, size_t size) {
+  set_has_workdirectory();
+  if (workdirectory_ == &::google::protobuf::internal::kEmptyString) {
+    workdirectory_ = new ::std::string;
+  }
+  workdirectory_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ConfigurationServiceSettings::mutable_workdirectory() {
+  set_has_workdirectory();
+  if (workdirectory_ == &::google::protobuf::internal::kEmptyString) {
+    workdirectory_ = new ::std::string;
+  }
+  return workdirectory_;
+}
+inline ::std::string* ConfigurationServiceSettings::release_workdirectory() {
+  clear_has_workdirectory();
+  if (workdirectory_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = workdirectory_;
+    workdirectory_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ConfigurationServiceSettings::set_allocated_workdirectory(::std::string* workdirectory) {
+  if (workdirectory_ != &::google::protobuf::internal::kEmptyString) {
+    delete workdirectory_;
+  }
+  if (workdirectory) {
+    set_has_workdirectory();
+    workdirectory_ = workdirectory;
+  } else {
+    clear_has_workdirectory();
+    workdirectory_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
