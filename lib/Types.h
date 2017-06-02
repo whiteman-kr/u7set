@@ -232,6 +232,19 @@ public:
 	};
 	Q_ENUM(DataSourceState)
 
+	// ConfigCheckerState
+	//
+	enum class ConfigCheckerState
+	{
+		Unknown = 0,
+		Check = 1,
+		Copy = 2,
+		Verification = 3,
+		Switch = 4,
+		Actual = 5
+	};
+	Q_ENUM(ConfigCheckerState)
+
 public:
 	// Convert enum value (not index) to QString
 	//

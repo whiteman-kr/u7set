@@ -29,6 +29,10 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	statusBar()->addWidget(m_uptimeStatus = new QLabel(this));
 	statusBar()->addWidget(m_runningStatus = new QLabel(this));
 
+	m_connectionStateStatus->setMargin(5);
+	m_uptimeStatus->setMargin(5);
+	m_runningStatus->setMargin(5);
+
 	m_socketThread = new UdpSocketThread();
 
 	m_baseClientSocket = new UdpClientSocket(QHostAddress(ip), serviceInfo[portIndex].port);
@@ -89,7 +93,7 @@ void BaseServiceStateWidget::updateServiceState()
 							   .arg(QHostAddress(m_ip).toString())
 							   .arg(serviceInfo[m_portIndex].port));
 
-				m_connectionStateStatus->setText("Connected to " + serviceShortName + QString(" - %1").arg(m_udpAckQuantity));
+				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
 				quint32 time = m_serviceInfo.uptime();
 
@@ -109,7 +113,7 @@ void BaseServiceStateWidget::updateServiceState()
 		case Unavailable:
 			setWindowTitle(serviceName + " - No connection");
 
-			m_connectionStateStatus->setText("No connection with " + serviceShortName);
+			m_connectionStateStatus->setText("No connection with service");
 
 			m_uptimeStatus->setHidden(true);
 			m_runningStatus->setHidden(true);
@@ -166,12 +170,12 @@ void BaseServiceStateWidget::updateServiceState()
 	switch(serviceState)
 	{
 		case ServiceState::Work:
-			m_runningStatus->setStyleSheet("background-color: rgb(127, 255, 127);");
+			m_runningStatus->setStyleSheet("background-color: rgb(0, 128, 0);");
 			break;
 		case ServiceState::Starts:
 		case ServiceState::Stops:
 		case ServiceState::Stopped:
-			m_runningStatus->setStyleSheet("background-color: rgb(255, 255, 127);");
+			m_runningStatus->setStyleSheet("background-color: rgb(160, 160, 0);");
 			break;
 		case ServiceState::Unavailable:
 			m_runningStatus->setStyleSheet("background-color: lightGray;");

@@ -15,8 +15,10 @@ public:
 
 public slots:
 	void updateStateInfo();
+	void updateServiceState();
+	void updateClients();
 	void updateBuildInfo();
-	void updateServiceSettings(QString equipmentID, QString autoloadBuildPath, QString workDirectory);
+	void updateServiceSettings();
 
 	void clearServiceData();
 
@@ -25,6 +27,7 @@ private:
 	void dropTcpConnection();
 
 	QStandardItemModel* m_stateTabModel = nullptr;
+	QStandardItemModel* m_clientsTabModel = nullptr;
 	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;

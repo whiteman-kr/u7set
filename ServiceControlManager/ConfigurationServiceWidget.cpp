@@ -22,15 +22,33 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 	m_stateTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_stateTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
-	m_stateTabModel->setData(m_stateTabModel->index(0, 0), "Connected to CfgSrv");
+	m_stateTabModel->setData(m_stateTabModel->index(0, 0), "Connected to service");
 	m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
 
 	addTab(stateTableView, "State");
-	addTab(new QTableView(this), "Clients");
+
+	QTableView* clientsTableView = new QTableView(this);
+
+	clientsTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(clientsTableView->fontMetrics().height() * 1.4));
+	clientsTableView->verticalHeader()->hide();
+	clientsTableView->horizontalHeader()->setDefaultSectionSize(250);
+
+	m_clientsTabModel = new QStandardItemModel(0, 7, this);
+	clientsTableView->setModel(m_clientsTabModel);
+
+	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
+	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Equipment ID");
+	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "IPv4");
+	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "Connection time");
+	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Uptime");
+	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "State");
+	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Packet counter");
+
+	addTab(clientsTableView, "Clients");
 
 	QTableView* buildInfoTableView = new QTableView(this);
 
-	buildInfoTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(stateTableView->fontMetrics().height() * 1.4));
+	buildInfoTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(buildInfoTableView->fontMetrics().height() * 1.4));
 	buildInfoTableView->verticalHeader()->hide();
 	buildInfoTableView->horizontalHeader()->setDefaultSectionSize(250);
 
@@ -47,7 +65,7 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	QTableView* settingsTableView = new QTableView(this);
 
-	settingsTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(stateTableView->fontMetrics().height() * 1.4));
+	settingsTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(settingsTableView->fontMetrics().height() * 1.4));
 	settingsTableView->verticalHeader()->hide();
 	settingsTableView->horizontalHeader()->setDefaultSectionSize(250);
 
@@ -79,7 +97,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 	{
 		m_stateTabModel->setData(m_stateTabModel->index(0, 1), "Yes");
 
-		m_stateTabModel->setRowCount(state == ServiceState::Work ? 5 /*9*/ : 3);
+		m_stateTabModel->setRowCount(state == ServiceState::Work ? 9 : 3);
 
 		m_stateTabModel->setData(m_stateTabModel->index(1, 0), "Uptime");
 		m_stateTabModel->setData(m_stateTabModel->index(2, 0), "Runing state");
@@ -123,6 +141,12 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 				m_stateTabModel->setData(m_stateTabModel->index(4, 0), "Client request address");
 				m_stateTabModel->setData(m_stateTabModel->index(4, 1), address);
+
+				m_stateTabModel->setData(m_stateTabModel->index(5, 0), "Current work build directory");
+				m_stateTabModel->setData(m_stateTabModel->index(6, 0), "Check build attempt quantity");
+				m_stateTabModel->setData(m_stateTabModel->index(7, 0), "Status of build updating");
+				m_stateTabModel->setData(m_stateTabModel->index(8, 0), "Connected client quantity");
+				m_stateTabModel->setData(m_stateTabModel->index(8, 1), m_clientsTabModel->rowCount());
 
 				m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), address);
 
@@ -172,6 +196,53 @@ void ConfigurationServiceWidget::updateStateInfo()
 	m_stateTabModel->setData(m_stateTabModel->index(2, 1), runningStateStr);
 }
 
+void ConfigurationServiceWidget::updateServiceState()
+{
+	assert(m_tcpClientSocket->serviceStateIsReady());
+
+	const Network::ConfigurationServiceState& s = m_tcpClientSocket->serviceState();
+
+	m_stateTabModel->setData(m_stateTabModel->index(5, 1), QString::fromStdString(s.currentbuilddirectory()));
+	m_stateTabModel->setData(m_stateTabModel->index(6, 1), s.checkbuildattemptquantity());
+	m_stateTabModel->setData(m_stateTabModel->index(7, 1), E::valueToString<E::ConfigCheckerState>(s.buildcheckerstate()));
+}
+
+void ConfigurationServiceWidget::updateClients()
+{
+	assert(m_tcpClientSocket->clientsIsReady());
+
+	const Network::ConfigurationServiceClients& cs = m_tcpClientSocket->clients();
+
+	m_clientsTabModel->setRowCount(cs.clients_size());
+	m_stateTabModel->setData(m_stateTabModel->index(8, 1), cs.clients_size());
+
+	for (int i = 0; i < cs.clients_size(); i++)
+	{
+		const Network::ConfigurationServiceClientInfo& ci = cs.clients(i);
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0), ci.softwaretype());
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1), QString::fromStdString(ci.equipmentid()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QHostAddress(ci.ip()).toString());
+
+		quint64 uptime = ci.uptime();
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
+
+		int ms = uptime % 1000; uptime /= 1000;
+		int s = uptime % 60; uptime /= 60;
+		int m = uptime % 60; uptime /= 60;
+		int h = uptime % 24; uptime /= 24;
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QString("(%1d %2:%3:%4.%5)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')).arg(ms, 3, 10, QChar('0')));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), ci.isactual() ? "Actual" : "Non actual");
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), static_cast<qint64>(ci.replyquantity()));
+	}
+}
+
 void ConfigurationServiceWidget::updateBuildInfo()
 {
 	assert(m_tcpClientSocket->buildInfoIsReady());
@@ -204,17 +275,21 @@ void ConfigurationServiceWidget::updateBuildInfo()
 	m_buildTabModel->setData(m_buildTabModel->index(7, 1), b.workstation);
 }
 
-void ConfigurationServiceWidget::updateServiceSettings(QString equipmentID, QString autoloadBuildPath, QString workDirectory)
+void ConfigurationServiceWidget::updateServiceSettings()
 {
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), equipmentID);
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), autoloadBuildPath);
-	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), workDirectory);
+	assert(m_tcpClientSocket->settingsIsReady());
+
+	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
+	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->autoloadBuildPath());
+	m_settingsTabModel->setData(m_settingsTabModel->index(3, 1), m_tcpClientSocket->workDirectory());
 }
 
 void ConfigurationServiceWidget::clearServiceData()
 {
 	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
 	m_buildTabModel->setRowCount(1);
+
+	m_clientsTabModel->setRowCount(0);
 
 	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
 	{
@@ -227,6 +302,8 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	m_tcpClientSocket = new TcpConfigServiceClient(HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &ConfigurationServiceWidget::updateClients);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceSettings);
 

@@ -402,7 +402,7 @@ namespace Tcp
 	}
 
 
-	ConnectionState SocketWorker::getConnectionState()
+	ConnectionState SocketWorker::getConnectionState() const
 	{
 		m_stateMutex.lock();
 
@@ -865,6 +865,22 @@ namespace Tcp
 		m_runningServers.insert(newServerInstance, newThread);
 
 		newThread->start();
+
+		updateClientsInfo();
+	}
+
+	void Listener::updateClientsInfo()
+	{
+		std::list<ConnectionState> clientsInfo;
+
+		QList<const SocketWorker*>&& servers = m_runningServers.keys();
+
+		for (auto& server : servers)
+		{
+			clientsInfo.push_back(server->getConnectionState());
+		}
+
+		emit connectedClientsDataChanged(clientsInfo);
 	}
 
 
@@ -891,6 +907,8 @@ namespace Tcp
 
 		thread->quit();
 		delete thread;
+
+		updateClientsInfo();
 	}
 
 

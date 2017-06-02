@@ -158,49 +158,6 @@ struct SendFileNext
 };
 
 
-// RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO reply format
-//
-class ConfigurationServiceBuildInfo : public JsonSerializable
-{
-public:
-	ConfigurationServiceBuildInfo(const Builder::BuildInfo& buildInfo) { m_buildInfo = buildInfo; }
-	ConfigurationServiceBuildInfo() {}
-
-private:
-	Builder::BuildInfo m_buildInfo;
-
-	virtual void toJson(QJsonObject& jsonObject) const final;
-	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
-
-public:
-	Builder::BuildInfo buildInfo() { return m_buildInfo; }
-};
-
-
-// RQID_GET_CONFIGURATION_SERVICE_SETTINGS reply format
-//
-class ConfigurationServiceSettings : public JsonSerializable
-{
-private:
-	QString m_equipmentID;
-	QString m_autoloadBuildPath;
-	QString m_workDirectory;
-
-	virtual void toJson(QJsonObject& jsonObject) const final;
-	virtual bool fromJson(const QJsonObject& jsonObject, int version) final;
-
-public:
-	QString equipmentID() { return m_equipmentID; }
-	void setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
-	QString autoloadBuildPath() { return m_autoloadBuildPath; }
-	void setAutoloadBuildPath(const QString& autoloadBuildPath) { m_autoloadBuildPath = autoloadBuildPath; }
-
-	QString workDirectory() { return m_workDirectory; }
-	void setWorkDirectory(const QString& workDirectory) { m_workDirectory = workDirectory; }
-};
-
-
 // Serialization framework
 //
 #define BEGIN_SERIALIZATION() char* _ptr = buffer;

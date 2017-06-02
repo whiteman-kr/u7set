@@ -52,6 +52,7 @@ void TcpConfigServiceClient::onDisconnection()
 		m_updateStatesTimer->stop();
 	}
 
+	m_serviceStateIsReady = false;
 	m_buildInfoIsReady = false;
 	m_settingsIsReady = false;
 	emit disconnected();
@@ -68,29 +69,83 @@ void TcpConfigServiceClient::processReply(quint32 requestID, const char* replyDa
 {
 	switch(requestID)
 	{
+		case RQID_GET_CONFIGURATION_SERVICE_STATE:
+			onGetConfigurationServiceState(replyData, replyDataSize);
+			break;
+
+		case RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST:
+			onGetConfigurationServiceClientList(replyData, replyDataSize);
+			break;
+
 		case RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO:
-			onGetConfigurationSerivceLoadedBuildInfoReply(replyData, replyDataSize);
+			onGetConfigurationServiceLoadedBuildInfoReply(replyData, replyDataSize);
 			break;
 
 		case RQID_GET_CONFIGURATION_SERVICE_SETTINGS:
-			onGetConfigurationSerivceSettingsReply(replyData, replyDataSize);
+			onGetConfigurationServiceSettingsReply(replyData, replyDataSize);
 			break;
 
-	default:
-		assert(false);
+		default:
+			assert(false);
 	}
 }
 
-
-void TcpConfigServiceClient::onGetConfigurationSerivceLoadedBuildInfoReply(const char* replyData, quint32 replyDataSize)
+void TcpConfigServiceClient::onGetConfigurationServiceState(const char* replyData, quint32 replyDataSize)
 {
-	QByteArray data(replyData, replyDataSize);
+	bool result = m_configurationServiceStateMessage.ParseFromArray(replyData, replyDataSize);
 
-	ConfigurationServiceBuildInfo info;
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
 
-	info.readFromJson(data);
+	m_serviceStateIsReady = true;
+	emit serviceStateLoaded();
 
-	m_buildInfo = info.buildInfo();
+	sendRequest(RQID_GET_CONFIGURATION_SERVICE_CLIENT_LIST);
+}
+
+void TcpConfigServiceClient::onGetConfigurationServiceClientList(const char* replyData, quint32 replyDataSize)
+{
+	bool result = m_configurationServiceClientsMessage.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_clientsIsReady = true;
+	emit clientsLoaded();
+
+	sendRequest(RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO);
+}
+
+
+void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const char* replyData, quint32 replyDataSize)
+{
+	Network::BuildInfo message;
+
+	bool result = message.ParseFromArray(replyData, replyDataSize);
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_buildInfo.project = QString::fromStdString(message.project());
+
+	m_buildInfo.id = message.id();
+	m_buildInfo.release = message.release();
+
+	m_buildInfo.date = QDateTime::fromMSecsSinceEpoch(message.date());
+
+	m_buildInfo.changeset = message.changeset();
+
+	m_buildInfo.user = QString::fromStdString(message.user());
+	m_buildInfo.workstation = QString::fromStdString(message.workstation());
 
 	m_buildInfoIsReady = true;
 	emit buildInfoLoaded();
@@ -98,20 +153,33 @@ void TcpConfigServiceClient::onGetConfigurationSerivceLoadedBuildInfoReply(const
 	sendRequest(RQID_GET_CONFIGURATION_SERVICE_SETTINGS);
 }
 
-void TcpConfigServiceClient::onGetConfigurationSerivceSettingsReply(const char* replyData, quint32 replyDataSize)
+
+void TcpConfigServiceClient::onGetConfigurationServiceSettingsReply(const char* replyData, quint32 replyDataSize)
 {
-	QByteArray data(replyData, replyDataSize);
+	Network::ConfigurationServiceSettings message;
 
-	ConfigurationServiceSettings s;
+	bool result = message.ParseFromArray(replyData, replyDataSize);
 
-	s.readFromJson(data);
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_equipmentID = QString::fromStdString(message.equipmentid());
+	m_autoloadBuildPath = QString::fromStdString(message.autoloadbuildpath());
+	m_workDirectory = QString::fromStdString(message.workdirectory());
 
 	m_settingsIsReady = true;
-	emit settingsLoaded(s.equipmentID(), s.autoloadBuildPath(), s.workDirectory());
+	emit settingsLoaded();
 }
+
 
 void TcpConfigServiceClient::updateState()
 {
-	sendRequest(RQID_GET_CONFIGURATION_SERVICE_LOADED_BUILD_INFO);
+	if (isClearToSendRequest())
+	{
+		sendRequest(RQID_GET_CONFIGURATION_SERVICE_STATE);
+	}
 }
 

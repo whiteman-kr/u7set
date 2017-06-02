@@ -93,7 +93,7 @@ namespace Tcp
 
 		ConnectionState m_state;
 
-		QMutex m_stateMutex;
+		mutable QMutex m_stateMutex;
 
 		QMutex m_mutex;
 
@@ -172,7 +172,7 @@ namespace Tcp
 
 		void restartWatchdogTimer();
 
-		ConnectionState getConnectionState();
+		ConnectionState getConnectionState() const;
 
 		HostAddressPort peerAddr() const;
 	};
@@ -290,12 +290,17 @@ namespace Tcp
 		virtual void onNewConnectionAccepted(const HostAddressPort& peerAddr, int connectionNo);
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
+	signals:
+		void connectedClientsDataChanged(std::list<ConnectionState> connectionStates);
+
 	private:
 		virtual void onThreadStarted() override;
 		virtual void onThreadFinished() override;
 
 		void startListening();
 		void onNewConnection(qintptr socketDescriptor);
+
+		void updateClientsInfo();
 
 	private slots:
 		void onPeriodicTimer();

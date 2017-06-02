@@ -185,53 +185,6 @@ void Serializable::copyBufferToString(const quint16* buffer, QString &str)
 }
 
 
-
-void ConfigurationServiceSettings::toJson(QJsonObject& jsonObject) const
-{
-	jsonObject.insert("equipmentID", m_equipmentID);
-	jsonObject.insert("autoloadBuildPath", m_autoloadBuildPath);
-	jsonObject.insert("workDirectory", m_workDirectory);
-}
-
-
-bool ConfigurationServiceSettings::fromJson(const QJsonObject& jsonObject, int)
-{
-	JSON_READ_STRING(jsonObject, "equipmentID", m_equipmentID);
-	JSON_READ_STRING(jsonObject, "autoloadBuildPath", m_autoloadBuildPath);
-	JSON_READ_STRING(jsonObject, "workDirectory", m_workDirectory);
-
-	return true;
-}
-
-
-
-void ConfigurationServiceBuildInfo::toJson(QJsonObject& jsonObject) const
-{
-	jsonObject.insert("project", m_buildInfo.project);
-	jsonObject.insert("buildID", m_buildInfo.id);
-	jsonObject.insert("release", m_buildInfo.release);
-	jsonObject.insert("changeset", m_buildInfo.changeset);
-	jsonObject.insert("user", m_buildInfo.user);
-	jsonObject.insert("workstation", m_buildInfo.workstation);
-
-	JSON_WRITE_DATETIME(jsonObject, "date", m_buildInfo.date);
-}
-
-bool ConfigurationServiceBuildInfo::fromJson(const QJsonObject &jsonObject, int /*version*/)
-{
-	JSON_READ_STRING(jsonObject, "project", m_buildInfo.project);
-	JSON_READ_INT(jsonObject, "buildID", m_buildInfo.id);
-	JSON_READ_BOOL(jsonObject, "release", m_buildInfo.release);
-	JSON_READ_INT(jsonObject, "changeset", m_buildInfo.changeset);
-	JSON_READ_STRING(jsonObject, "user", m_buildInfo.user);
-	JSON_READ_STRING(jsonObject, "workstation", m_buildInfo.workstation);
-
-	JSON_READ_DATETIME(jsonObject, "date", m_buildInfo.date);
-
-	return true;
-}
-
-
 QString getNetworkErrorStr(NetworkError err)
 {
 	switch(err)

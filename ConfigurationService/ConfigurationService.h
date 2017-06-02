@@ -51,6 +51,7 @@ private:
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
+	CfgCheckerWorker* m_cfgCheckerWorker = nullptr;
 	SimpleThread* m_cfgCheckerThread = nullptr;
 
 	// settings

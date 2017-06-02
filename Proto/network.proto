@@ -187,6 +187,47 @@ message GetServiceInfoReply
 }
 
 
+message ConfigurationServiceState
+{
+    required string currentBuildDirectory = 1;
+    required int32 checkBuildAttemptQuantity = 2;
+    required int32 buildCheckerState = 3;
+}
+
+message ConfigurationServiceClientInfo
+{
+    required int32 softwareType = 1;
+    required string equipmentId = 2;
+    required int32 ip = 3;
+    required int64 uptime = 5;
+    required bool isActual = 6;
+    required int64 replyQuantity = 7;
+}
+
+message ConfigurationServiceClients
+{
+    repeated ConfigurationServiceClientInfo clients = 1;
+}
+
+message BuildInfo
+{
+    required string project = 1;
+    required int32 id = 2 [default = -1];
+    required bool release = 3 [default = false];
+    required int64 date = 4;
+    required int32 changeset = 5 [default = 0];
+    required string user = 6;
+    required string workstation = 7;
+}
+
+message ConfigurationServiceSettings
+{
+    required string equipmentID = 1;
+    required string autoloadBuildPath = 2;
+    required string workDirectory = 3;
+}
+
+
 // TuningService requests and replies
 //
 

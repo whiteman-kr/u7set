@@ -238,6 +238,9 @@ bool CfgCheckerWorker::updateBuildXml()
 		return false;
 	}
 
+	m_checkNewBuildCounter++;
+	m_state = E::ConfigCheckerState::Check;
+
 	// Has build.xml been changed?
 	//
 	QString buildXmlPath = m_autoloadBuildFolder + "/build.xml";
@@ -245,6 +248,7 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	if (buildXmlInfo.lastModified() == m_lastBuildXmlModifyTime)
 	{
+		m_state = E::ConfigCheckerState::Actual;
 		return false;
 	}
 
@@ -252,15 +256,19 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	if (getFileHash(buildXmlPath, newBuildXmlHash) == false)
 	{
+		m_state = E::ConfigCheckerState::Actual;
 		return false;
 	}
 
 	if (newBuildXmlHash == m_lastBuildXmlHash)
 	{
+		m_state = E::ConfigCheckerState::Actual;
 		return false;
 	}
 
 	DEBUG_LOG_MSG(m_logger, buildXmlPath + " has been changed");
+
+	m_state = E::ConfigCheckerState::Copy;
 
 	m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
 	m_lastBuildXmlHash = newBuildXmlHash;
@@ -274,12 +282,15 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	if (workDirectory.mkpath(newCheckDirectoryPath) == false)
 	{
+		m_state = E::ConfigCheckerState::Actual;
 		DEBUG_LOG_ERR(m_logger, "Could not create directory " + newCheckDirectoryPath);
 		return false;
 	}
 
 	if (copyPath(m_autoloadBuildFolder, newCheckDirectoryPath) == false)
 	{
+		m_state = E::ConfigCheckerState::Actual;
+
 		DEBUG_LOG_ERR(m_logger, "Could not copy content from " + m_autoloadBuildFolder + " to " + newCheckDirectoryPath);
 
 		QDir newCheckDirectory(newCheckDirectoryPath);
@@ -289,10 +300,14 @@ bool CfgCheckerWorker::updateBuildXml()
 		return false;
 	}
 
+	m_state = E::ConfigCheckerState::Verification;
+
 	// Checking copied build folder
 	//
 	if (checkBuild(newCheckDirectoryPath) == false)
 	{
+		m_state = E::ConfigCheckerState::Actual;
+
 		DEBUG_LOG_ERR(m_logger, "Build in " + newCheckDirectoryPath + " is not consistent");
 
 		QDir newCheckDirectory(newCheckDirectoryPath);
@@ -303,12 +318,16 @@ bool CfgCheckerWorker::updateBuildXml()
 
 	DEBUG_LOG_MSG(m_logger, "Build in " + newCheckDirectoryPath + " is correct");
 
+	m_state = E::ConfigCheckerState::Switch;
+
 	// Renaming to workDirectory/work-date
 	QString date = newCheckDirectoryPath.right(19);	// 19 symbols in date YYYY-DD-MM-hh-mm-ss
 	QString newWorkDirectoryPath = workStorage + "/work-" + date;
 
 	if (workDirectory.rename(newCheckDirectoryPath, newWorkDirectoryPath) == false)
 	{
+		m_state = E::ConfigCheckerState::Actual;
+
 		DEBUG_LOG_MSG(m_logger, "Could not rename " + newCheckDirectoryPath + " to " + newWorkDirectoryPath);
 
 		return false;
@@ -317,6 +336,9 @@ bool CfgCheckerWorker::updateBuildXml()
 	DEBUG_LOG_MSG(m_logger, newCheckDirectoryPath + " renamed to " + newWorkDirectoryPath);
 
 	emit buildPathChanged(newWorkDirectoryPath);
+
+	m_state = E::ConfigCheckerState::Actual;
+
 	return true;
 }
 

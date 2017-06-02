@@ -96,7 +96,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/XmlHelper.h \
     CfgChecker.h \
-    CfgControlServer.h
+    CfgControlServer.h \
+    ../lib/Types.h
 
 include(../qtservice/src/qtservice.pri)
 

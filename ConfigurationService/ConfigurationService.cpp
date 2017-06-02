@@ -119,9 +119,11 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, buildPath, m_logger);
+	CfgControlServer* cfgControlServer = new CfgControlServer(m_equipmentID, m_autoloadBuildPath, m_workDirectory, buildPath, *m_cfgCheckerWorker, m_logger);
 
 	Tcp::Listener* listener = new Tcp::Listener(m_clientIP, cfgControlServer, m_logger);
+
+	connect(listener, &Tcp::Listener::connectedClientsDataChanged, cfgControlServer, &CfgControlServer::updateClientsInfo);
 
 	m_cfgServerThread = new Tcp::ServerThread(listener);
 
@@ -144,14 +146,14 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
-	CfgCheckerWorker* cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 3 * 1000, m_logger);
+	m_cfgCheckerWorker = new CfgCheckerWorker(m_workDirectory, m_autoloadBuildPath, 3 * 1000, m_logger);
 
-	m_cfgCheckerThread = new SimpleThread(cfgCheckerWorker);
+	m_cfgCheckerThread = new SimpleThread(m_cfgCheckerWorker);
 
 	m_cfgCheckerThread->start();
 
-	connect(cfgCheckerWorker, &CfgCheckerWorker::buildPathChanged, this, &ConfigurationServiceWorker::onBuildPathChanged);
-	connect(this, &ConfigurationServiceWorker::renameWorkBuildToBackupExcept, cfgCheckerWorker, &CfgCheckerWorker::renameWorkToBackup);
+	connect(m_cfgCheckerWorker, &CfgCheckerWorker::buildPathChanged, this, &ConfigurationServiceWorker::onBuildPathChanged);
+	connect(this, &ConfigurationServiceWorker::renameWorkBuildToBackupExcept, m_cfgCheckerWorker, &CfgCheckerWorker::renameWorkToBackup);
 }
 
 
@@ -161,6 +163,8 @@ void ConfigurationServiceWorker::stopCfgCheckerThread()
 
 	m_cfgCheckerThread->quit();
 	delete m_cfgCheckerThread;
+
+	m_cfgCheckerWorker = nullptr;
 }
 
 
