@@ -49,7 +49,6 @@ namespace Builder
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
-		//bool disposeOptoModulesTxRxBuffers();
 
 		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode);
 
@@ -58,8 +57,6 @@ namespace Builder
 		bool writeOptoVhdFiles();
 		bool writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort);
 		bool writeOptoModulesReport();
-
-		void writeOptoPortInfo(Hardware::OptoPortShared port, QStringList& list);
 
 		const LmDescriptionSet& lmDescriptionSet() const;
 

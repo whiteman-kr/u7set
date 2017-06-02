@@ -94,7 +94,7 @@ namespace TuningIPEN
 
 		TuningIPEN::TuningIPENServiceWorker* worker = new TuningIPEN::TuningIPENServiceWorker("Tuning IPEN Service", argc, argv, v, m_logger);
 
-		worker->init();
+		worker->initAndProcessCmdLineSettings();
 
 		m_service = new TuningIPEN::TuningIPENService(worker, m_logger);
 

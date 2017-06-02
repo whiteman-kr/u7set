@@ -90,7 +90,7 @@ public:
 
 	const VersionInfo& versionInfo() const;
 
-	void init();
+	void initAndProcessCmdLineSettings();
 
 	void setService(Service* service);
 	Service* service();
@@ -115,19 +115,18 @@ signals:
 	void stopped();
 
 protected:
-	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
-	virtual void processCmdLineSettings() = 0;		// override to process service-specific cmd line settings
-	virtual void loadSettings() = 0;				// override to load service-specific settings
+	void init();
 
+	void processCmdLineSettings();					// override to process service-specific cmd line settings
+
+	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
+	virtual void loadSettings() = 0;				// override to load service-specific settings
 	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
 	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
 
-	bool setStrSetting(const QString& settingName, const QString& value);
 	QString getStrSetting(const QString& settingName);
 
 private:
-	bool checkSettingWriteStatus(const QString& settingName);
-
 	void onThreadStarted() final;
 	void onThreadFinished() final;
 
@@ -137,7 +136,7 @@ private:
 	int& m_argc;
 	char** m_argv = nullptr;
 	VersionInfo m_versionInfo;
-	std::shared_ptr<CircularLogger> m_logger;
+	CircularLoggerShared m_logger;
 
 	QSettings m_settings;
 

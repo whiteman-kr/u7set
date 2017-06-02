@@ -1,10 +1,10 @@
+#include "CircularLogger.h"
 #include "CommandLineParser.h"
 
 
 CommandLineParser::CommandLineParser()
 {
 }
-
 
 CommandLineParser::CommandLineParser(int argc, char** argv)
 {
@@ -63,21 +63,31 @@ int CommandLineParser::argCount() const
 }
 
 
-bool CommandLineParser::addSimpleOption(const QString& name, const QString& description)
+bool CommandLineParser::addSimpleOption(const QString& optionName, const QString& description)
 {
-	return addOption(OptionType::Simple, name, description, QString(""));
+	return addOption(OptionType::Simple, optionName, QStringList(), description, QString(""));
 }
 
 
-bool CommandLineParser::addSingleValueOption(const QString& name, const QString& description, const QString& paramExample)
+bool CommandLineParser::addSingleValueOption(const QString& optionName,
+											 const QString& settingName,
+											 const QString& description,
+											 const QString& paramExample)
 {
-	return addOption(OptionType::SingleValue, name, description, paramExample);
+	QStringList settingsNames;
+
+	settingsNames.append(settingName);
+
+	return addOption(OptionType::SingleValue, optionName, settingsNames, description, paramExample);
 }
 
 
-bool CommandLineParser::addMultipleValuesOption(const QString& name, const QString& description, const QString& paramsExample)
+bool CommandLineParser::addMultipleValuesOption(const QString& optionName,
+												const QStringList& settingsNames,
+												const QString& description,
+												const QString& paramsExample)
 {
-	return addOption(OptionType::MultipleValues, name, description, paramsExample);
+	return addOption(OptionType::MultipleValues, optionName, settingsNames, description, paramsExample);
 }
 
 
@@ -120,6 +130,13 @@ void CommandLineParser::parse()
 						if (pos != -1)
 						{
 							op.values.append(cmdLineArg.mid(pos + 1));
+
+							if (op.settingsNames.count() > 0)
+							{
+								assert(op.settingsNames.count() == 1);
+
+								m_settingsValues.insert(op.settingsNames.first(), op.values.first());
+							}
 						}
 					}
 					break;
@@ -135,6 +152,21 @@ void CommandLineParser::parse()
 							QString value = cmdLineArg.mid(pos + 1);
 
 							op.values = value.split(",", QString::KeepEmptyParts);
+
+							int valueIndex = 0;
+							int settingsCount = op.settingsNames.count();
+
+							for(QString opValue : op.values)
+							{
+								if (valueIndex >= settingsCount)
+								{
+									break;
+								}
+
+								m_settingsValues.insert(op.settingsNames.at(valueIndex), opValue);
+
+								valueIndex++;
+							}
 						}
 					}
 					break;
@@ -152,56 +184,138 @@ void CommandLineParser::parse()
 	m_parsed = true;
 }
 
-
-bool CommandLineParser::optionIsSet(const QString& name) const
+void CommandLineParser::processSettings(QSettings& settings, std::shared_ptr<CircularLogger> log)
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
-	{
-		assert(false);				// option isn't defined
-		return false;
-	}
+	QList<QString> settingNames = m_settingsValues.keys();
 
-	return m_options.value(name).isSet;
+	for(const QString& settingName : settingNames)
+	{
+		if (settingName.isEmpty() == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		QString settingValue = m_settingsValues.value(settingName, QString());
+
+		settings.setValue(settingName, QVariant(settingValue));
+
+		settings.sync();
+
+		checkSettingWriteStatus(settings, settingName, log);
+	}
 }
 
 
-QString CommandLineParser::optionValue(const QString& name) const
+bool CommandLineParser::checkSettingWriteStatus(QSettings& settings, const QString& settingName, std::shared_ptr<CircularLogger> logger)
+{
+	QSettings::Status s = settings.status();
+
+	if (s == QSettings::Status::NoError)
+	{
+		return true;
+	}
+
+	if (logger == nullptr)
+	{
+		return false;
+	}
+
+	switch(s)
+	{
+	case QSettings::Status::AccessError:
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Settings write error: QSettings::Status::AccessError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
+		}
+		break;
+
+	case QSettings::Status::FormatError:
+		if (settingName.isEmpty() == true)
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Settings write error: QSettings::Status::FormatError.")))
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger, QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
+		}
+		break;
+
+	default:
+		assert(false);		// wtf?
+	}
+
+	return false;
+}
+
+
+bool CommandLineParser::optionIsSet(const QString& optionName) const
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
+	if (m_options.contains(optionName) == false)
 	{
-		assert(false);				// option isn't defined
+//		assert(false);				// option isn't defined
+		return false;
+	}
+
+	return m_options.value(optionName).isSet;
+}
+
+
+QString CommandLineParser::optionValue(const QString& optionName) const
+{
+	assert(m_parsed == true);
+
+	if (m_options.contains(optionName) == false)
+	{
+//		assert(false);				// option isn't defined
 		return QString("");
 	}
 
-	Option op = m_options.value(name);
+	Option op = m_options.value(optionName);
 
 	assert(op.type == OptionType::SingleValue);
 
 	return op.values.first();
 }
 
-
-QStringList CommandLineParser::optionValues(const QString& name) const
+QStringList CommandLineParser::optionValues(const QString& optionName) const
 {
 	assert(m_parsed == true);
 
-	if (m_options.contains(name) == false)
+	if (m_options.contains(optionName) == false)
 	{
-		assert(false);				// option isn't defined
+//		assert(false);				// option isn't defined
 		return QStringList();
 	}
 
-	Option op = m_options.value(name);
+	Option op = m_options.value(optionName);
 
 	assert(op.type == OptionType::MultipleValues);
 
 	return op.values;
 }
 
+QString CommandLineParser::settingValue(const QString& settingName) const
+{
+	assert(m_parsed == true);
+
+	if (m_settingsValues.contains(settingName) == false)
+	{
+		return QString();
+	}
+
+	QString settingValue = m_settingsValues.value(settingName, QString());
+
+	return settingValue;
+}
 
 QString CommandLineParser::helpText() const
 {
@@ -276,7 +390,10 @@ QString CommandLineParser::helpText() const
 }
 
 
-bool CommandLineParser::addOption(OptionType type, const QString& name, const QString& description, const QString& paramsExample)
+bool CommandLineParser::addOption(OptionType type,
+								  const QString& name,
+								  const QStringList& settingsNames,
+								  const QString& description, const QString& paramsExample)
 {
 	if (name.isEmpty() == true)
 	{
@@ -294,6 +411,7 @@ bool CommandLineParser::addOption(OptionType type, const QString& name, const QS
 
 	op.type = type;
 	op.name = QString("-") + name;
+	op.settingsNames = settingsNames;
 	op.description = description;
 	op.paramsExample = paramsExample;
 

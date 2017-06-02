@@ -223,6 +223,9 @@ bool LibSecretKeyring::isAvailable() {
 bool LibSecretKeyring::findPassword(const QString &user, const QString &server,
                                     QKeychain::JobPrivate *self)
 {
+	Q_UNUSED(user)
+	Q_UNUSED(server)
+	Q_UNUSED(self)
 #if defined(HAVE_LIBSECRET)
     if (!isAvailable()) {
         return false;
@@ -255,6 +258,12 @@ bool LibSecretKeyring::writePassword(const QString &display_name,
                                      const QByteArray &password,
                                      QKeychain::JobPrivate *self)
 {
+	Q_UNUSED(display_name)
+	Q_UNUSED(user)
+	Q_UNUSED(server)
+	Q_UNUSED(mode)
+	Q_UNUSED(password)
+	Q_UNUSED(self)
 #if defined(HAVE_LIBSECRET)
     if (!isAvailable()) {
         return false;
@@ -288,6 +297,10 @@ bool LibSecretKeyring::writePassword(const QString &display_name,
 bool LibSecretKeyring::deletePassword(const QString &key, const QString &service,
                                       QKeychain::JobPrivate* self)
 {
+	Q_UNUSED(key);
+	Q_UNUSED(service);
+	Q_UNUSED(self);
+
 #if defined(HAVE_LIBSECRET)
     if (!isAvailable()) {
         return false;

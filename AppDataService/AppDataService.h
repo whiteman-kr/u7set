@@ -12,13 +12,6 @@
 #include "AppSignalStateEx.h"
 #include "TcpAppDataServer.h"
 
-
-/*namespace Hardware
-{
-	class DeviceRoot;
-}*/
-
-
 class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
@@ -36,7 +29,6 @@ public:
 
 private:
 	virtual void initCmdLineParser() override;
-	virtual void processCmdLineSettings() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;
@@ -81,6 +73,10 @@ private:
 	void applyNewConfiguration();
 
 private:
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_CFG_SERVICE_IP1;
+	static const char* const SETTING_CFG_SERVICE_IP2;
+
 	QString m_equipmentID;
 	QString m_cfgServiceIP1Str;
 	QString m_cfgServiceIP2Str;

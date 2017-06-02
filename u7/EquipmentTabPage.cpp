@@ -2354,7 +2354,7 @@ void EquipmentView::addOptoConnection()
 
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
-	if (selectedIndexList.size() != 2)
+	if (selectedIndexList.size() != 1 && selectedIndexList.size() != 2)
 	{
 		assert(false);	// how did we get here?
 		return;
@@ -2381,7 +2381,15 @@ void EquipmentView::addOptoConnection()
 		theDialogConnections->activateWindow();
 	}
 
-	bool ok = theDialogConnections->addConnection(controller1->equipmentId(), controller2->equipmentId());
+	QString port1Id = controller1->equipmentId();
+	QString port2Id = controller2->equipmentId();
+
+	if (port1Id == port2Id)
+	{
+		port2Id.clear();	// Single port connection
+	}
+
+	bool ok = theDialogConnections->addConnection(port1Id, port2Id);
 	if (ok == true)
 	{
 		theDialogConnections->setFilter(controller1->equipmentId());
@@ -3832,7 +3840,7 @@ void EquipmentTabPage::CreateActions()
 	m_separatorOptoConnection->setSeparator(true);
 
 	m_addOptoConnection = new QAction(tr("Create Opto Connection..."), this);
-	m_addOptoConnection->setStatusTip(tr("Create optical connection for TWO selected opto ports"));
+	m_addOptoConnection->setStatusTip(tr("Create optical connection for selected opto port(s)"));
 	m_addOptoConnection->setEnabled(false);
 	//m_addOptoConnection->setVisible(false);
 	connect(m_addOptoConnection, &QAction::triggered, m_equipmentView, &EquipmentView::addOptoConnection);
@@ -4185,6 +4193,36 @@ void EquipmentTabPage::setActionState()
 
 	// Add Opto Connection with TWO selected Opto Ports
 	//
+	if (selectedIndexList.size() == 1)
+	{
+		const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.front()));
+
+		if (controller1 != nullptr)
+		{
+			// If parent is LM or OCM
+			//
+			const Hardware::DeviceModule* parent1 = dynamic_cast<const Hardware::DeviceModule*>(controller1->parent());
+
+			if (parent1 != nullptr &&
+				(parent1->isLogicModule() == true || parent1->moduleFamily() == Hardware::DeviceModule::FamilyType::OCM))
+			{
+				// If id ends with _OPTOPORTXX
+				//
+				QString id1 = controller1->equipmentIdTemplate();
+				if (id1.size() > 10)
+				{
+					id1.replace(id1.size() - 2, 2, QLatin1String("##"));
+				}
+
+				if (id1.endsWith("_OPTOPORT##") == true)
+				{
+					m_addOptoConnection->setEnabled(true);
+					m_addOptoConnection->setVisible(true);
+				}
+			}
+		}
+	}
+
 	if (selectedIndexList.size() == 2)
 	{
 		const Hardware::DeviceController* controller1 = dynamic_cast<const Hardware::DeviceController*>(m_equipmentModel->deviceObject(selectedIndexList.front()));

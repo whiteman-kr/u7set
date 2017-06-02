@@ -47,19 +47,6 @@ namespace TuningIPEN
 	{
 	}
 
-
-/*	TuningIPENServiceWorker* TuningIPENServiceWorker::createInstance()
-	{
-		TuningIPENServiceWorker* worker = new TuningIPENServiceWorker(serviceEquipmentID(), buildPath());
-
-		worker->setTuningService(m_tuningIPENService);
-
-		m_tuningIPENService->setTuningServiceWorker(worker);
-
-		return worker;
-	}*/
-
-
 	void TuningIPENServiceWorker::requestPreprocessing(SocketRequest& sr)
 	{
 		if (sr.operation != FotipOpCode::Write)
@@ -97,20 +84,8 @@ namespace TuningIPEN
 	{
 		CommandLineParser& cp = cmdLineParser();
 
-		cp.addSingleValueOption("b", "Path to RPCT project build.");
+		cp.addSingleValueOption("b", "BuildPath", "Path to RPCT project build.", "");
 	}
-
-
-	void TuningIPENServiceWorker::processCmdLineSettings()
-	{
-		CommandLineParser& cp = cmdLineParser();
-
-		if (cp.optionIsSet("b") == true)
-		{
-			setStrSetting("BuildPath", cp.optionValue("b"));
-		}
-	}
-
 
 	void TuningIPENServiceWorker::loadSettings()
 	{

@@ -235,6 +235,15 @@ bool DialogConnections::addConnection(QString port1Id, QString port2Id)
 	connection->setPort1EquipmentID(port1Id);
 	connection->setPort2EquipmentID(port2Id);
 
+	if (port2Id.isEmpty() == true)
+	{
+		connection->setType(Hardware::Connection::Type::SinglePort);
+	}
+	else
+	{
+		connection->setType(Hardware::Connection::Type::PortToPort);
+	}
+
 	bool ok = addConnection(connection);
 	return ok;
 }
@@ -858,17 +867,18 @@ void DialogConnections::onReport()
 		textStream << tr("Port2 EquipmentID: ") << connection->port2EquipmentID() << "\r\n";
 		textStream << tr(connection->manualSettings() ? "\r\nMode: manual\r\n" : "\r\nMode: automatic\r\n");
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Optical)
+		textStream << tr("Port type: ") << connection->typeStr() << "\r\n";
+
+		if (connection->port1EnableSerial() == true)
 		{
-			textStream << tr("Port mode: Optical")<<"\r\n";
+			textStream << tr("Port 1 Serial mode: ") << connection->serialModeStr(connection->port1SerialMode()) <<"\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port1EnableDuplex() ? "Yes" : "No") <<"\r\n";
 		}
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		if (connection->port2EnableSerial() == true)
 		{
-			textStream << tr("Port mode: Serial") << "\r\n";
-
-			textStream << tr("Serial mode: ") << (connection->serialMode() == Hardware::OptoPort::SerialMode::RS232  ? tr("RS232") : tr("RS485")) <<"\r\n";
-
+			textStream << tr("Port 2 Serial mode: ") << connection->serialModeStr(connection->port2SerialMode()) <<"\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port2EnableDuplex() ? "Yes" : "No") <<"\r\n";
 		}
 
 		if (connection->manualSettings() == true)

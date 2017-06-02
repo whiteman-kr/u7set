@@ -31,7 +31,6 @@ signals:
 
 private:
 	virtual void initCmdLineParser() override;
-	virtual void processCmdLineSettings() override;
 	virtual void loadSettings() override;
 
 	virtual void initialize() override;
@@ -47,6 +46,11 @@ private:
 	void stopUdpThreads();
 
 private:
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_AUTOLOAD_BUILD_PATH;
+	static const char* const SETTING_CLIENT_REQUEST_IP;
+	static const char* const SETTING_WORK_DIRECTORY;
+
 	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;

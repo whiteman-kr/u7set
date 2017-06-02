@@ -582,35 +582,29 @@ namespace Builder
 
 			list.append(QString(tr("Connection ID:\t\t\t%1")).arg(cn->connectionID()));
 			list.append(QString(tr("Link ID:\t\t\t%1\n")).arg(cn->linkID()));
-			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->modeStr()));
+			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->typeStr()));
 			list.append(QString(tr("Settings:\t\t\t%1")).arg(cn->manualSettings() == true ? "Manual" : "Auto"));
 			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataId() == true ? "Disabled" : "Enabled"));
 
-			if (cn->mode() == Hardware::OptoPort::Mode::Serial)
-			{
-				list.append(QString(tr("Port1 equipmentID:\t\t%1\n")).arg(cn->port1EquipmentID()));
+			list.append(QString(tr("Port1 equipmentID:\t\t%1")).arg(cn->port1EquipmentID()));
 
-				list.append(QString(tr("Serial mode:\t\t\t%1")).arg(cn->serialModeStr()));
-				list.append(QString(tr("Duplex mode:\t\t\t%1")).arg(cn->enableDuplex() == true ? "Enabled" : "Disabled"));
-			}
-			else
+			if (cn->isPortToPort() == true)
 			{
-				list.append(QString(tr("Port1 equipmentID:\t\t%1")).arg(cn->port1EquipmentID()));
 				list.append(QString(tr("Port2 equipmentID:\t\t%1")).arg(cn->port2EquipmentID()));
 			}
 
 			list.append(delim);
 			list.append("");
 
-			switch(cn->mode())
+			switch(cn->type())
 			{
-			case Hardware::OptoPort::Mode::Serial:
+			case Hardware::Connection::Type::SinglePort:
 				{
 					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
 					if (p1 != nullptr)
 					{
-						writeOptoPortInfo(p1, list);
+						p1->writeInfo(list);
 					}
 					else
 					{
@@ -619,13 +613,13 @@ namespace Builder
 				}
 				break;
 
-			case Hardware::OptoPort::Mode::Optical:
+			case Hardware::Connection::Type::PortToPort:
 				{
 					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 
 					if (p1 != nullptr)
 					{
-						writeOptoPortInfo(p1, list);
+						p1->writeInfo(list);
 					}
 					else
 					{
@@ -639,7 +633,7 @@ namespace Builder
 
 					if (p2 != nullptr)
 					{
-						writeOptoPortInfo(p2, list);
+						p2->writeInfo(list);
 					}
 					else
 					{
@@ -717,7 +711,7 @@ namespace Builder
 
 			for(const Hardware::OptoPortShared& port : ports)
 			{
-				writeOptoPortInfo(port, list);
+				port->writeInfo(list);
 			}
 		}
 
@@ -757,7 +751,7 @@ namespace Builder
 				continue;
 			}
 
-			if (cn->mode() == Hardware::OptoPort::Mode::Optical)
+			if (cn->isPortToPort() == true)
 			{
 				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
 				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
@@ -963,218 +957,6 @@ namespace Builder
 	}
 
 
-	void ApplicationLogicCompiler::writeOptoPortInfo(Hardware::OptoPortShared port, QStringList& list)
-	{
-		if (port == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		if (port->isUsedInConnection() == false)
-		{
-			list.append(QString(tr("Port %1 isn't used in connections\n")).arg(port->equipmentID()));
-			return;
-		}
-
-		QString str;
-
-		list.append(QString(tr("Port %1 information\n")).arg(port->equipmentID()));
-
-		list.append(QString(tr("Port validity signal:\t\t%1\t%2\n")).
-					arg(port->validitySignalAbsAddr().toString()).
-					arg(port->validitySignalID()));
-
-		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(port->txBufAbsAddress()));
-		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(port->txBufAddress()));
-		list.append(QString(tr("Tx data full size:\t\t%1")).arg(port->txDataSizeW()));
-		list.append(QString(tr("Tx data used size:\t\t%1")).arg(port->txUsedDataSizeW()));
-		list.append(QString("\t\t\t\t-----"));
-
-		str = QString(tr("Tx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
-		list.append(str);
-
-		str = QString(tr("Tx raw data size:\t\t%1")).arg(port->txRawDataSizeW());
-		list.append(str);
-
-		str = QString(tr("Tx analog signals size:\t\t%1")).arg(port->txAnalogSignalsSizeW());
-		list.append(str);
-
-		str = QString(tr("Tx discrete signals size:\t%1\n")).arg(port->txDiscreteSignalsSizeW());
-		list.append(str);
-
-		list.append(QString(tr("Port Tx data:\n")));
-
-		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)\n", port->txBufAbsAddress(), 0, 0, 0, port->txDataID(), port->txDataID());
-		list.append(str);
-
-		const HashedVector<QString, Hardware::TxRxSignalShared>& txSignals = port->txSignals();
-
-		list.append("Tx raw signals:\n");
-
-		bool hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& tx : txSignals)
-		{
-			if (tx->isRaw() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-
-		list.append("Tx analog signals:\n");
-
-		hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& tx : txSignals)
-		{
-			if (tx->isRegular() == true && tx->isAnalog() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-
-		list.append("Tx discrete signals:\n");
-
-		hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& tx : txSignals)
-		{
-			if (tx->isRegular() == true && tx->isDiscrete() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
-							C_STR(tx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-
-		list.append("-------------------------------------\n");
-
-		list.append(QString(tr("Rx buffer abs address:\t\t%1")).arg(port->rxBufAbsAddress()));
-		list.append(QString(tr("Rx buffer offset:\t\t%1")).arg(port->rxBufAddress()));
-		list.append(QString(tr("Rx data full size:\t\t%1")).arg(port->rxDataSizeW()));
-		list.append(QString(tr("Rx data used size:\t\t%1")).arg(port->rxUsedDataSizeW()));
-		list.append(QString("\t\t\t\t-----"));
-
-		str = QString(tr("Rx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
-		list.append(str);
-
-		str = QString(tr("Rx raw data size:\t\t%1")).arg(port->rxRawDataSizeW());
-		list.append(str);
-
-		str = QString(tr("Rx analog signals size:\t\t%1")).arg(port->rxAnalogSignalsSizeW());
-		list.append(str);
-
-		str = QString(tr("Rx discrete signals size:\t%1\n")).arg(port->rxDiscreteSignalsSizeW());
-		list.append(str);
-
-		list.append(QString(tr("Port Rx data:\n")));
-
-		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u)\n", port->rxBufAbsAddress(), 0, 0, 0, port->rxDataID(), port->rxDataID());
-		list.append(str);
-
-		const HashedVector<QString, Hardware::TxRxSignalShared>& rxSignals = port->rxSignals();
-
-		list.append("Rx raw signals:\n");
-
-		hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& rx : rxSignals)
-		{
-			if (rx->isRaw() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-
-		list.append("Rx analog signals:\n");
-
-		hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& rx : rxSignals)
-		{
-			if (rx->isRegular() == true && rx->isAnalog() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-
-		list.append("Rx discrete signals:\n");
-
-		hasSignals = false;
-
-		for(const Hardware::TxRxSignalShared& rx : rxSignals)
-		{
-			if (rx->isRegular() == true && rx->isDiscrete() == true)
-			{
-				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
-							port->rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
-							C_STR(rx->appSignalID()));
-				list.append(str);
-
-				hasSignals = true;
-			}
-		}
-
-		if (hasSignals == true)
-		{
-			list.append("");
-		}
-	}
 
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass2()

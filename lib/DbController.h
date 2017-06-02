@@ -31,11 +31,12 @@ public:
 	// Project Management
 	//
 	bool getProjectList(std::vector<DbProject>* out, QWidget* parentWidget);
-	bool createProject(const QString& projectName, const QString& administratorPassword, QWidget* parentWidget);
-	bool openProject(const QString& projectName, const QString& username, const QString& password, QWidget* parentWidget);
+	bool createProject(QString projectName, QString administratorPassword, QWidget* parentWidget);
+	bool openProject(QString projectName, QString username, QString password, QWidget* parentWidget);
 	bool closeProject(QWidget* parentWidget);
-	bool deleteProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
-	bool upgradeProject(const QString& projectName, const QString& password, bool doNotBackup, QWidget* parentWidget);
+	bool cloneProject(QString projectName, QString password, QString newProjectName, QWidget* parentWidget);
+	bool deleteProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget);
+	bool upgradeProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget);
 
 	bool setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget);
 	bool getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget);
@@ -151,6 +152,7 @@ signals:
 	void signal_createProject(QString projectName, QString administratorPassword);
 	void signal_openProject(QString projectName, QString username, QString password);
 	void signal_closeProject();
+	void signal_cloneProject(QString projectName, QString password, QString newProjectName);
 	void signal_deleteProject(QString projectName, QString password, bool doNotBackup);
 	void signal_upgradeProject(QString projectName, QString password, bool doNotBackup);
 

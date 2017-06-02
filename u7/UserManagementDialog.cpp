@@ -30,6 +30,10 @@ UserManagementDialog::UserManagementDialog(QWidget* parent, DbController* dbCont
 	//
 	ui->isAdministrator->setEnabled(false);
 
+	// Temporary hide ui->isReadonly
+	//
+	ui->isReadonly->setVisible(false);
+
 	return;
 }
 

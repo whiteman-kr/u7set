@@ -103,30 +103,18 @@ const VersionInfo& ServiceWorker::versionInfo() const
 	return m_versionInfo;
 }
 
-
-void ServiceWorker::init()
+void ServiceWorker::initAndProcessCmdLineSettings()
 {
 	if (m_instanceNo > 1)
 	{
-		assert(false);			// call init() for first ServiceWorker instance only!
+		assert(false);			// call initAndProcessCmdLineSettings() for first ServiceWorker instance only!
 		return;
 	}
 
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
-	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
-	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
-	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
-
-	initCmdLineParser();
-
-	m_cmdLineParser.parse();
+	init();
 
 	processCmdLineSettings();
 }
-
 
 void ServiceWorker::setService(Service* service)
 {
@@ -141,7 +129,7 @@ Service* ServiceWorker::service()
 }
 
 
-CommandLineParser &ServiceWorker::cmdLineParser()
+CommandLineParser& ServiceWorker::cmdLineParser()
 {
 	return m_cmdLineParser;
 }
@@ -157,67 +145,43 @@ bool ServiceWorker::clearSettings()
 {
 	m_settings.clear();
 
-	return checkSettingWriteStatus("");
-}
-
-
-bool ServiceWorker::setStrSetting(const QString& settingName, const QString& value)
-{
-	m_settings.setValue(settingName, QVariant(value));
-
 	m_settings.sync();
 
-	return checkSettingWriteStatus(settingName);
+	return CommandLineParser::checkSettingWriteStatus(m_settings, "", nullptr);
 }
 
+void ServiceWorker::init()
+{
+	m_cmdLineParser.addSimpleOption("h", "Print this help.");
+	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
+	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
+	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
+	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
+
+	initCmdLineParser();
+
+	m_cmdLineParser.parse();
+}
+
+
+void ServiceWorker::processCmdLineSettings()
+{
+	m_cmdLineParser.processSettings(m_settings, m_logger);
+}
 
 QString ServiceWorker::getStrSetting(const QString& settingName)
 {
-	return m_settings.value(settingName).toString();
-}
+	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
 
-
-bool ServiceWorker::checkSettingWriteStatus(const QString& settingName)
-{
-	QSettings::Status s = m_settings.status();
-
-	bool result = false;
-
-	switch(s)
+	if (cmdLineValue.isEmpty() == true)
 	{
-	case QSettings::Status::AccessError:
-		if (settingName.isEmpty() == true)
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::AccessError.")))
-		}
-		else
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::AccessError.")).arg(settingName))
-		}
-		break;
-
-	case QSettings::Status::FormatError:
-		if (settingName.isEmpty() == true)
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Settings write error: QSettings::Status::FormatError.")))
-		}
-		else
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("Setting '%1' write error: QSettings::Status::FormatError.")).arg(settingName))
-		}
-		break;
-
-	case QSettings::Status::NoError:
-		result = true;
-		break;
-
-	default:
-		assert(false);
+		return m_settings.value(settingName).toString();
 	}
 
-	return result;
+	return cmdLineValue;
 }
-
 
 void ServiceWorker::onThreadStarted()
 {
@@ -540,10 +504,9 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
-	m_serviceWorker.init();			// 1. init CommanLineParser
-									// 2. process cmd line args
-									// 3. update and store service settings
-
+	m_serviceWorker.initAndProcessCmdLineSettings();			// 1. init CommanLineParser
+																// 2. process cmd line args
+																// 3. update and store service settings
 	bool pauseAndExit = false;
 	bool startAsRegularApp = false;
 
@@ -627,11 +590,11 @@ void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRe
 
 		if (res == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleared.\n\n")));
+			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleaned.\n\n")));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("\nError cleaning of service settings. Adminirative rights rquired.\n\n")));
+			DEBUG_LOG_ERR(m_logger, QString(tr("\nService settings cleaning error. Administrative rights required.\n\n")));
 		}
 
 		pauseAndExit = true;

@@ -15,7 +15,7 @@ TuningClientFilterEditor::TuningClientFilterEditor(TuningSignalManager* tuningSi
 	assert(objects);
 }
 
-double TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
+float TuningClientFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
 {
 	ok = true;
 

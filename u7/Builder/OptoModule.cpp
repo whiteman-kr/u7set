@@ -212,6 +212,87 @@ namespace Hardware
 		return true;
 	}
 
+	bool OptoPort::initSettings(ConnectionShared cn)
+	{
+		if (cn == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		bool isFirstPort = false;
+
+		if (cn->port1EquipmentID() == m_equipmentID)
+		{
+			isFirstPort = true;
+		}
+		else
+		{
+			if (cn->isSinglePort() == true)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			if (cn->port2EquipmentID() == m_equipmentID)
+			{
+				isFirstPort = false;
+			}
+			else
+			{
+				ASSERT_RETURN_FALSE;
+			}
+		}
+
+		if (isFirstPort == true)
+		{
+			// this port is the first port in connection
+			//
+			setLinkID(cn->linkID());
+			setConnectionType(cn->type());
+			setEnableSerial(cn->port1EnableSerial());
+			setSerialMode(cn->port1SerialMode());
+			setEnableDuplex(cn->port1EnableDuplex());
+
+			setManualSettings(cn->manualSettings());
+			setManualTxStartAddressW(cn->port1ManualTxStartAddress());
+			setManualTxSizeW(cn->port1ManualTxWordsQuantity());
+			setManualRxSizeW(cn->port1ManualRxWordsQuantity());
+			setRawDataDescriptionStr(cn->port1RawDataDescription());
+
+			if (cn->isPortToPort() == true)
+			{
+				setLinkedPortID(cn->port2EquipmentID());
+			}
+			else
+			{
+				setLinkedPortID("");
+			}
+		}
+		else
+		{
+			// this port is the second port in connection
+			//
+			setLinkID(cn->linkID());
+			setConnectionType(cn->type());
+			setEnableSerial(cn->port2EnableSerial());
+			setSerialMode(cn->port2SerialMode());
+			setEnableDuplex(cn->port2EnableDuplex());
+
+			setManualSettings(cn->manualSettings());
+			setManualTxStartAddressW(cn->port2ManualTxStartAddress());
+			setManualTxSizeW(cn->port2ManualTxWordsQuantity());
+			setManualRxSizeW(cn->port2ManualRxWordsQuantity());
+			setRawDataDescriptionStr(cn->port2RawDataDescription());
+
+			assert(cn->isPortToPort() == true);
+
+			setLinkedPortID(cn->port1EquipmentID());
+		}
+
+		bool res = parseRawDescription();
+
+		return res;
+	}
+
 	bool OptoPort::appendTxSignal(const Signal* txSignal)
 	{
 		if (txSignal == nullptr)
@@ -416,7 +497,7 @@ namespace Hardware
 	{
 		TEST_PTR_RETURN_FALSE(rxSignal);
 
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			assert(false);				// port is not Serial!
 			return false;
@@ -438,7 +519,7 @@ namespace Hardware
 
 	bool OptoPort::initSerialRawRxSignals()
 	{
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			return true;
 		}
@@ -464,7 +545,7 @@ namespace Hardware
 
 	bool OptoPort::sortSerialRxSignals()
 	{
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			// on this step of execution m_rxSignals of Optical ports must be empty!
 			//
@@ -482,7 +563,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Serial)
+		if (isSinglePortConnection() == false)
 		{
 			return true;				// process Serial ports only
 		}
@@ -609,7 +690,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Serial)
+		if (isSinglePortConnection() == false)
 		{
 			return true;
 		}
@@ -642,7 +723,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (m_mode != OptoPort::Mode::Optical)
+		if (isPortToPortConnection() == false)
 		{
 			return true;
 		}
@@ -686,7 +767,7 @@ namespace Hardware
 	{
 		TEST_PTR_RETURN_FALSE(resultWriter);
 
-		if (isSerial() == false)
+		if (isSinglePortConnection() == false)
 		{
 			assert(false);
 			return false;
@@ -1159,6 +1240,11 @@ namespace Hardware
 		return result;
 	}
 
+	QString OptoPort::serialModeStr() const
+	{
+		return Connection::serialModeStr(m_serialMode);
+	}
+
 	int OptoPort::txBufAbsAddress() const
 	{
 		if (m_txBufAddress == BAD_ADDRESS)
@@ -1215,6 +1301,233 @@ namespace Hardware
 
 		m_txRawDataSizeWIsCalculated = true;
 	}
+
+	void OptoPort::writeInfo(QStringList& list) const
+	{
+		if (isUsedInConnection() == false)
+		{
+			list.append(QString(tr("Port %1 isn't used in connections\n")).arg(equipmentID()));
+			return;
+		}
+
+		QString str;
+
+		list.append(QString(tr("Port %1 information\n")).arg(equipmentID()));
+
+		list.append(QString(tr("Manual settings:\t\t%1")).arg(manualSettings() == true ? "True" : "False"));
+
+		if (manualSettings() == true)
+		{
+			list.append(QString(tr("Manual Tx start address:\t%1")).arg(manualTxStartAddressW()));
+			list.append(QString(tr("Manual Tx size:\t\t\t%1")).arg(manualTxSizeW()));
+			list.append(QString(tr("Manual Rx size:\t\t\t%1")).arg(manualRxSizeW()));
+		}
+
+		list.append("");
+
+		list.append(QString(tr("Enable serial:\t\t\t%1")).arg(enableSerial() == true ? "True" : "False"));
+
+		if (enableSerial() == true)
+		{
+			list.append(QString(tr("Serial mode:\t\t\t%1")).arg(serialModeStr()));
+			list.append(QString(tr("Enable duplex:\t\t\t%1\n")).arg(enableDuplex() == true ? "True" : "False"));
+		}
+		else
+		{
+			list.append("");
+		}
+
+		list.append(QString(tr("Tx buffer abs address:\t\t%1")).arg(txBufAbsAddress()));
+		list.append(QString(tr("Tx buffer offset:\t\t%1")).arg(txBufAddress()));
+		list.append(QString(tr("Tx data full size:\t\t%1")).arg(txDataSizeW()));
+		list.append(QString(tr("Tx data used size:\t\t%1")).arg(txUsedDataSizeW()));
+		list.append(QString("\t\t\t\t-----"));
+
+		str = QString(tr("Tx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
+		list.append(str);
+
+		str = QString(tr("Tx raw data size:\t\t%1")).arg(txRawDataSizeW());
+		list.append(str);
+
+		str = QString(tr("Tx analog signals size:\t\t%1")).arg(txAnalogSignalsSizeW());
+		list.append(str);
+
+		str = QString(tr("Tx discrete signals size:\t%1\n")).arg(txDiscreteSignalsSizeW());
+		list.append(str);
+
+		list.append(QString(tr("Port Tx data:\n")));
+
+		str.sprintf("%04d:%02d  [%04d:%02d]  TxDataID = 0x%08X (%u)\n", txBufAbsAddress(), 0, 0, 0, txDataID(), txDataID());
+		list.append(str);
+
+		list.append("Tx raw signals:\n");
+
+		bool hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& tx : m_txSignals)
+		{
+			if (tx->isRaw() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Tx analog signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& tx : m_txSignals)
+		{
+			if (tx->isRegular() == true && tx->isAnalog() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Tx discrete signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& tx : m_txSignals)
+		{
+			if (tx->isRegular() == true && tx->isDiscrete() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							txBufAbsAddress() + tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							tx->addrInBuf().offset(), tx->addrInBuf().bit(),
+							C_STR(tx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("-------------------------------------\n");
+
+		list.append(QString(tr("Rx buffer abs address:\t\t%1")).arg(rxBufAbsAddress()));
+		list.append(QString(tr("Rx buffer offset:\t\t%1")).arg(rxBufAddress()));
+		list.append(QString(tr("Rx data full size:\t\t%1")).arg(rxDataSizeW()));
+		list.append(QString(tr("Rx data used size:\t\t%1")).arg(rxUsedDataSizeW()));
+		list.append(QString("\t\t\t\t-----"));
+
+		str = QString(tr("Rx data ID size:\t\t%1")).arg(Hardware::OptoPort::TX_DATA_ID_SIZE_W);
+		list.append(str);
+
+		str = QString(tr("Rx raw data size:\t\t%1")).arg(rxRawDataSizeW());
+		list.append(str);
+
+		str = QString(tr("Rx analog signals size:\t\t%1")).arg(rxAnalogSignalsSizeW());
+		list.append(str);
+
+		str = QString(tr("Rx discrete signals size:\t%1\n")).arg(rxDiscreteSignalsSizeW());
+		list.append(str);
+
+		list.append(QString(tr("Rx validity signal:\t\t%1\t%2\n")).
+					arg(validitySignalAbsAddr().toString()).
+					arg(validitySignalID()));
+
+		list.append(QString(tr("Port Rx data:\n")));
+
+		str.sprintf("%04d:%02d  [%04d:%02d]  RxDataID = 0x%08X (%u)\n", rxBufAbsAddress(), 0, 0, 0, rxDataID(), rxDataID());
+		list.append(str);
+
+		list.append("Rx raw signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : m_rxSignals)
+		{
+			if (rx->isRaw() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Rx analog signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : m_rxSignals)
+		{
+			if (rx->isRegular() == true && rx->isAnalog() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+
+		list.append("Rx discrete signals:\n");
+
+		hasSignals = false;
+
+		for(const Hardware::TxRxSignalShared& rx : m_rxSignals)
+		{
+			if (rx->isRegular() == true && rx->isDiscrete() == true)
+			{
+				str.sprintf("%04d:%02d  [%04d:%02d]  %s",
+							rxBufAbsAddress() + rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							rx->addrInBuf().offset(), rx->addrInBuf().bit(),
+							C_STR(rx->appSignalID()));
+				list.append(str);
+
+				hasSignals = true;
+			}
+		}
+
+		if (hasSignals == true)
+		{
+			list.append("");
+		}
+	}
+
 
 	bool OptoPort::appendTxSignal(const QString& appSignalID,
 								  E::SignalType signalType,
@@ -1603,7 +1916,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Serial)
+			if (port->isSinglePortConnection() == true)
 			{
 				serialPortsList.append(port);
 			}
@@ -1620,7 +1933,7 @@ namespace Hardware
 				continue;
 			}
 
-			if (port->mode() == OptoPort::Mode::Optical)
+			if (port->isPortToPortConnection() == true)
 			{
 				optoPortsList.append(port);
 			}
@@ -1911,7 +2224,7 @@ namespace Hardware
 					continue;
 				}
 
-				if (connection->isSerial() == true)
+				if (connection->isSinglePort() == true)
 				{
 					if (connection->port1EquipmentID() != port->equipmentID() )
 					{
@@ -2170,7 +2483,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+		if (connection->isSinglePort() == true)
 		{
 			if (optoModule->isLM() == true)
 			{
@@ -2180,18 +2493,7 @@ namespace Hardware
 				return false;
 			}
 
-			optoPort1->setLinkID(linkID);
-			optoPort1->setMode(Hardware::OptoPort::Mode::Serial);
-			optoPort1->setSerialMode(connection->serialMode());
-			optoPort1->setEnableDuplex(connection->enableDuplex());
-
-			optoPort1->setManualSettings(connection->manualSettings());
-			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
-			optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
-			optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
-			optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
-
-			bool res = optoPort1->parseRawDescription();
+			bool res = optoPort1->initSettings(connection);
 
 			if (res == false)
 			{
@@ -2203,7 +2505,7 @@ namespace Hardware
 		}
 		else
 		{
-			assert(connection->mode() == Hardware::OptoPort::Mode::Optical);
+			assert(connection->isPortToPort() == true);
 
 			// check port 2
 			//
@@ -2239,27 +2541,8 @@ namespace Hardware
 
 			bool res = true;
 
-			optoPort1->setLinkID(linkID);
-			optoPort1->setMode(Hardware::OptoPort::Mode::Optical);
-			optoPort1->setManualSettings(connection->manualSettings());
-			optoPort1->setManualTxStartAddressW(connection->port1ManualTxStartAddress());
-			optoPort1->setManualTxSizeW(connection->port1ManualTxWordsQuantity());
-			optoPort1->setManualRxSizeW(connection->port1ManualRxWordsQuantity());
-			optoPort1->setRawDataDescriptionStr(connection->port1RawDataDescription());
-			optoPort1->setLinkedPortID(optoPort2->equipmentID());
-
-			res &= optoPort1->parseRawDescription();
-
-			optoPort2->setLinkID(linkID);
-			optoPort2->setMode(Hardware::OptoPort::Mode::Optical);
-			optoPort2->setManualSettings(connection->manualSettings());
-			optoPort2->setManualTxStartAddressW(connection->port2ManualTxStartAddress());
-			optoPort2->setManualTxSizeW(connection->port2ManualTxWordsQuantity());
-			optoPort2->setManualRxSizeW(connection->port2ManualRxWordsQuantity());
-			optoPort2->setRawDataDescriptionStr(connection->port2RawDataDescription());
-			optoPort2->setLinkedPortID(optoPort1->equipmentID());
-
-			res &= optoPort2->parseRawDescription();
+			res &= optoPort1->initSettings(connection);
+			res &= optoPort2->initSettings(connection);
 
 			if (res == false)
 			{
@@ -2385,7 +2668,7 @@ namespace Hardware
 				return false;
 			}
 
-			if (port->isSerial() == true)
+			if (port->isSinglePortConnection() == true)
 			{
 				result &= port->writeSerialDataXml(resultWriter);
 			}
@@ -2419,7 +2702,7 @@ namespace Hardware
 
 		QString appSignalID = appSignal->appSignalID();
 
-		if (cn->isSerial() == true)
+		if (cn->isSinglePort() == true)
 		{
 			OptoPortShared p1 = getOptoPort(cn->port1EquipmentID());
 
@@ -2602,7 +2885,7 @@ namespace Hardware
 			}
 		}
 
-		if (connection->mode() != OptoPort::Mode::Optical)
+		if (connection->isSinglePort() == true)
 		{
 			// this is Serial connection
 			// port2 is not used
@@ -2769,7 +3052,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (connection->isSerial() == true)
+		if (connection->isSinglePort() == true)
 		{
 			// in serial connections port2 isn't used
 			return false;

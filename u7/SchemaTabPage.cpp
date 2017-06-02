@@ -204,7 +204,7 @@ void SchemaFileView::setFiles(const std::vector<DbFileInfo>& files)
 		}
 	}
 
-	selModel->clear();
+	selModel->reset();
 
 	// Get file list from the DB
 	//
@@ -215,6 +215,7 @@ void SchemaFileView::setFiles(const std::vector<DbFileInfo>& files)
 
 	// Restore selection
 	//
+	selModel->blockSignals(true);
 	for (unsigned int i = 0; i < filesIds.size(); i++)
 	{
 		int selectRow = filesModel().getFileRow(filesIds[i]);
@@ -225,6 +226,7 @@ void SchemaFileView::setFiles(const std::vector<DbFileInfo>& files)
 			selModel->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 		}
 	}
+	selModel->blockSignals(false);
 
 	return;
 }
@@ -334,7 +336,7 @@ void SchemaFileView::slot_OpenFile()
 		auto file = selectedFiles[i];
 
 		if (file.state() == VcsState::CheckedOut &&
-			(file.fileId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+			(file.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
 		{
 			files.push_back(file);
 		}
@@ -431,9 +433,14 @@ void SchemaFileView::slot_UndoChanges()
 	std::vector<DbFileInfo> files;
 	files.reserve(selectedFiles.size());
 
-	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	for (size_t i = 0; i < selectedFiles.size(); i++)
 	{
-		auto file = selectedFiles[i];
+		DbFileInfo& file = selectedFiles[i];
+
+		if (file.state() != VcsState::CheckedOut)
+		{
+			continue;
+		}
 
 		if (file.userId() == db()->currentUser().userId() ||
 			db()->currentUser().isAdminstrator() == true)
@@ -935,6 +942,25 @@ bool SchemasTabPage::saveUnsavedSchemas()
 	return ok;
 }
 
+void SchemasTabPage::refreshControlTabPage()
+{
+	assert(m_tabWidget);
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		QWidget* tabPage = m_tabWidget->widget(i);
+
+		if (qobject_cast<SchemaControlTabPage*>(tabPage) != nullptr)
+		{
+			SchemaControlTabPage* controlTabPage = dynamic_cast<SchemaControlTabPage*>(tabPage);
+			controlTabPage->refreshFiles();
+			break;
+		}
+	}
+
+	return;
+}
+
 void SchemasTabPage::projectOpened()
 {
 	this->setEnabled(true);
@@ -1289,6 +1315,12 @@ VFrame30::Schema* SchemaControlTabPage::createSchema() const
 	return m_createSchemaFunc();
 }
 
+void SchemaControlTabPage::refreshFiles()
+{
+	assert(m_filesView);
+	m_filesView->refreshFiles();
+	return;
+}
 
 void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
@@ -1985,12 +2017,6 @@ void SchemaControlTabPage::cloneFile(DbFileInfo file)
 	return;
 }
 
-void SchemaControlTabPage::refreshFiles()
-{
-	assert(m_filesView);
-	m_filesView->refreshFiles();
-	return;
-}
 
 void SchemaControlTabPage::ctrlF()
 {

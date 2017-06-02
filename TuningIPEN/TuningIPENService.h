@@ -58,7 +58,6 @@ namespace TuningIPEN
 		virtual void replyPreprocessing(SocketReply& sr);
 
 		virtual void initCmdLineParser();
-		virtual void processCmdLineSettings();
 		virtual void loadSettings();
 
 	private slots:

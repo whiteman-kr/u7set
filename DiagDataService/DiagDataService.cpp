@@ -44,32 +44,10 @@ void DiagDataServiceWorker::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
-	cp.addSingleValueOption("id", "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", "IP-addres of first Configuration Service.");
-	cp.addSingleValueOption("cfgip2", "IP-addres of second Configuration Service.");
+	cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
+	cp.addSingleValueOption("cfgip1", "CfgServiceIP1", "IP-addres of first Configuration Service.", "");
+	cp.addSingleValueOption("cfgip2", "CfgServiceIP2", "IP-addres of second Configuration Service.", "");
 }
-
-
-void DiagDataServiceWorker::processCmdLineSettings()
-{
-	CommandLineParser& cp = cmdLineParser();
-
-	if (cp.optionIsSet("id") == true)
-	{
-		setStrSetting("EquipmentID", cp.optionValue("id"));
-	}
-
-	if (cp.optionIsSet("cfgip1") == true)
-	{
-		setStrSetting("CfgServiceIP1", cp.optionValue("cfgip1"));
-	}
-
-	if (cp.optionIsSet("cfgip2") == true)
-	{
-		setStrSetting("CfgServiceIP2", cp.optionValue("cfgip2"));
-	}
-}
-
 
 void DiagDataServiceWorker::loadSettings()
 {

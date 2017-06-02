@@ -335,6 +335,7 @@ public:
 	//
 public:
 	const QByteArray& data() const;
+	QByteArray& data();
 	void swapData(QByteArray& data);
 	void clearData();
 

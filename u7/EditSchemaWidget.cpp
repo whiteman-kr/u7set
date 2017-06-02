@@ -4482,7 +4482,7 @@ bool EditSchemaWidget::updateAfbsForSchema()
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(qApp->applicationName());
 		msgBox.setText(tr("%1 AFB(s) are updated according to the latest AFB description.").arg(updatedItemCount));
-		msgBox.setInformativeText("Please, check iput/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.setInformativeText("Please, check input/output pins and parameters.\nClose schema without saving to discard changes.");
 		msgBox.exec();
 	}
 
@@ -4522,7 +4522,7 @@ bool EditSchemaWidget::updateUfbsForSchema()
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(qApp->applicationName());
 		msgBox.setText(tr("%1 UFB(s) are updated according to the latest UFB schemas.").arg(updatedItemCount));
-		msgBox.setInformativeText("Please, check iput/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.setInformativeText("Please, check input/output pins and parameters.\nClose schema without saving to discard changes.");
 		msgBox.exec();
 	}
 

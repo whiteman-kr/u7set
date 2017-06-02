@@ -648,6 +648,11 @@ const QByteArray& DbFile::data() const
 	return m_data;
 }
 
+QByteArray& DbFile::data()
+{
+	return m_data;
+}
+
 void DbFile::swapData(QByteArray& data)
 {
 	m_data.swap(data);

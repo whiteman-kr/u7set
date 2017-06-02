@@ -14,9 +14,20 @@ struct TuningModelRecord
 
 	bool limitsUnbalance() const
 	{
-		if (state.valid() == true && (param.lowEngineeringUnits() != state.readLowLimit() || param.highEngineeringUnits() != state.readHighLimit()))
+		if (param.isAnalog() == false)
 		{
-			return true;
+			return false;
+		}
+
+		float scalePercent = fabs(param.lowEngineeringUnits() - param.highEngineeringUnits()) / 100.0;
+
+		if (state.valid() == true)
+		{
+			if ((fabs(param.lowEngineeringUnits() - state.readLowLimit()) > scalePercent)  ||
+				fabs(param.highEngineeringUnits() - state.readHighLimit()) > scalePercent)
+			{
+				return true;
+			}
 		}
 		return false;
 

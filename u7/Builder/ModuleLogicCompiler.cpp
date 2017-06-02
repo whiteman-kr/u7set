@@ -761,7 +761,7 @@ namespace Builder
 				continue;
 			}
 
-			if (port->isSerial() == false || port->rxSignalsCount() == 0)
+			if (port->isSinglePortConnection() == false || port->rxSignalsCount() == 0)
 			{
 				continue;
 			}
@@ -2605,7 +2605,7 @@ namespace Builder
 				return false;
 			}
 
-			if (connection->mode() == Hardware::OptoPort::Mode::Serial)
+			if (connection->isSinglePort() == true)
 			{
 				// check serial InSignal parameters compatibility with srcSignal
 				//
@@ -6405,7 +6405,7 @@ namespace Builder
 			return false;
 		}
 
-		if (connection->isSerial() == false)
+		if (connection->isSinglePort() == false)
 		{
 			return true;				// process Serial connections receivers only
 		}

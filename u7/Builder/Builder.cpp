@@ -1418,11 +1418,6 @@ namespace Builder
 	//
 	//		LmDescriptionSet
 	//
-	bool LmDescriptionSet::has(QString fileName) const
-	{
-		return m_lmDescriptions.count(fileName) > 0;
-	}
-
 	bool LmDescriptionSet::loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName)
 	{
 		assert(log);
@@ -1475,100 +1470,6 @@ namespace Builder
 		return true;
 	}
 
-	void LmDescriptionSet::add(QString fileName, std::shared_ptr<LogicModule> lm)
-	{
-		assert(lm);
-		m_lmDescriptions[fileName] = lm;
-	}
-
-	std::shared_ptr<LogicModule> LmDescriptionSet::get(QString fileName) const
-	{
-		auto it = m_lmDescriptions.find(fileName);
-
-		if (it == std::end(m_lmDescriptions))
-		{
-			return std::shared_ptr<LogicModule>();
-		}
-		else
-		{
-			return it->second;
-		}
-	}
-
-	std::shared_ptr<LogicModule> LmDescriptionSet::get(QString fileName)
-	{
-		auto it = m_lmDescriptions.find(fileName);
-
-		if (it == std::end(m_lmDescriptions))
-		{
-			return std::shared_ptr<LogicModule>();
-		}
-		else
-		{
-			return it->second;
-		}
-	}
-
-	std::shared_ptr<LogicModule> LmDescriptionSet::get(const Hardware::DeviceModule* logicModule) const
-	{
-		if (logicModule == nullptr ||
-			logicModule->isLogicModule() == false)
-		{
-			assert(logicModule);
-			assert(logicModule->isLogicModule());
-			return std::shared_ptr<LogicModule>();
-		}
-
-		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
-		if (lmDescriptionFileProp == nullptr)
-		{
-			assert(lmDescriptionFileProp);
-			return std::shared_ptr<LogicModule>();
-		}
-
-		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
-		if (lmDescriptionFile.isEmpty() == true)
-		{
-			assert(lmDescriptionFile.isEmpty() == false);
-			return std::shared_ptr<LogicModule>();
-		}
-
-		return get(lmDescriptionFile);
-	}
-
-	std::shared_ptr<LogicModule> LmDescriptionSet::get(Hardware::DeviceModule* logicModule)
-	{
-		if (logicModule == nullptr ||
-			logicModule->isLogicModule() == false)
-		{
-			assert(logicModule);
-			assert(logicModule->isLogicModule());
-			return std::shared_ptr<LogicModule>();
-		}
-
-		auto lmDescriptionFileProp = logicModule->propertyByCaption(Hardware::PropertyNames::lmDescriptionFile);
-		if (lmDescriptionFileProp == nullptr)
-		{
-			assert(lmDescriptionFileProp);
-			return std::shared_ptr<LogicModule>();
-		}
-
-		QString lmDescriptionFile = lmDescriptionFileProp->value().toString();
-		if (lmDescriptionFile.isEmpty() == true)
-		{
-			assert(lmDescriptionFile.isEmpty() == false);
-			return std::shared_ptr<LogicModule>();
-		}
-
-		return get(lmDescriptionFile);
-	}
-
-	QString LmDescriptionSet::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
-	{
-		assert(logicModule);
-		assert(logicModule->isLogicModule());
-		return LogicModule::lmDescriptionFile(logicModule);
-	}
 
 	// ------------------------------------------------------------------------
 	//
