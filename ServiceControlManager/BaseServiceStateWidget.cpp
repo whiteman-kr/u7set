@@ -4,6 +4,8 @@
 #include <QLabel>
 #include <QToolBar>
 #include <QMessageBox>
+#include <QApplication>
+#include <QDesktopWidget>
 #include "../lib/Types.h"
 
 
@@ -14,8 +16,6 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 {
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
-
-	resize(640, 480);
 
 	m_serviceInfo.set_type(portIndex);
 	m_serviceInfo.set_servicestate(TO_INT(ServiceState::Undefined));
@@ -46,6 +46,25 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
 	m_timer->start(500);
 
+	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
+	QPoint center = desktopRect.center();
+	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
+	desktopRect.moveCenter(center);
+
+	QSettings settings;
+	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port);
+	QRect windowRect = settings.value(settingName, desktopRect).toRect();
+
+	if (windowRect.height() > desktopRect.height())
+	{
+		windowRect.setHeight(desktopRect.height());
+	}
+	if (windowRect.width() > desktopRect.width())
+	{
+		windowRect.setWidth(desktopRect.width());
+	}
+	setGeometry(windowRect);
+
 	updateServiceState();
 }
 
@@ -58,6 +77,10 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 		m_socketThread->quitAndWait();
 		delete m_socketThread;
 	}
+
+	QSettings settings;
+	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(m_ip).toString()).arg(serviceInfo[m_portIndex].port);
+	settings.setValue(settingName, geometry());
 }
 
 void BaseServiceStateWidget::updateServiceState()
@@ -170,12 +193,12 @@ void BaseServiceStateWidget::updateServiceState()
 	switch(serviceState)
 	{
 		case ServiceState::Work:
-			m_runningStatus->setStyleSheet("background-color: rgb(0, 128, 0);");
+			m_runningStatus->setStyleSheet("background-color: rgb(192, 255, 192);");
 			break;
 		case ServiceState::Starts:
 		case ServiceState::Stops:
 		case ServiceState::Stopped:
-			m_runningStatus->setStyleSheet("background-color: rgb(160, 160, 0);");
+			m_runningStatus->setStyleSheet("background-color: rgb(255, 255, 192);");
 			break;
 		case ServiceState::Unavailable:
 			m_runningStatus->setStyleSheet("background-color: lightGray;");

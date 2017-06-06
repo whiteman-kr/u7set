@@ -14,7 +14,13 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	stateTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(stateTableView->fontMetrics().height() * 1.4));
 	stateTableView->verticalHeader()->hide();
+
 	stateTableView->horizontalHeader()->setDefaultSectionSize(250);
+	stateTableView->horizontalHeader()->setStretchLastSection(true);
+
+	stateTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	stateTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	stateTableView->setAlternatingRowColors(true);
 
 	m_stateTabModel = new QStandardItemModel(1, 2, this);
 	stateTableView->setModel(m_stateTabModel);
@@ -31,7 +37,13 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	clientsTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(clientsTableView->fontMetrics().height() * 1.4));
 	clientsTableView->verticalHeader()->hide();
-	clientsTableView->horizontalHeader()->setDefaultSectionSize(250);
+
+	clientsTableView->horizontalHeader()->setDefaultSectionSize(150);
+	clientsTableView->horizontalHeader()->setStretchLastSection(true);
+
+	clientsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	clientsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	clientsTableView->setAlternatingRowColors(true);
 
 	m_clientsTabModel = new QStandardItemModel(0, 7, this);
 	clientsTableView->setModel(m_clientsTabModel);
@@ -50,7 +62,13 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	buildInfoTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(buildInfoTableView->fontMetrics().height() * 1.4));
 	buildInfoTableView->verticalHeader()->hide();
+
 	buildInfoTableView->horizontalHeader()->setDefaultSectionSize(250);
+	buildInfoTableView->horizontalHeader()->setStretchLastSection(true);
+
+	buildInfoTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	buildInfoTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	buildInfoTableView->setAlternatingRowColors(true);
 
 	m_buildTabModel = new QStandardItemModel(1, 2, this);
 	buildInfoTableView->setModel(m_buildTabModel);
@@ -67,7 +85,13 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	settingsTableView->verticalHeader()->setDefaultSectionSize(static_cast<int>(settingsTableView->fontMetrics().height() * 1.4));
 	settingsTableView->verticalHeader()->hide();
+
 	settingsTableView->horizontalHeader()->setDefaultSectionSize(250);
+	settingsTableView->horizontalHeader()->setStretchLastSection(true);
+
+	settingsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	settingsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	settingsTableView->setAlternatingRowColors(true);
 
 	m_settingsTabModel = new QStandardItemModel(4, 2, this);
 	settingsTableView->setModel(m_settingsTabModel);
@@ -146,6 +170,15 @@ void ConfigurationServiceWidget::updateStateInfo()
 				m_stateTabModel->setData(m_stateTabModel->index(6, 0), "Check build attempt quantity");
 				m_stateTabModel->setData(m_stateTabModel->index(7, 0), "Status of build updating");
 				m_stateTabModel->setData(m_stateTabModel->index(8, 0), "Connected client quantity");
+
+				if (m_tcpClientSocket == nullptr || m_tcpClientSocket->serviceStateIsReady() == false)
+				{
+					m_stateTabModel->setData(m_stateTabModel->index(5, 1), "???");
+					m_stateTabModel->setData(m_stateTabModel->index(6, 1), "???");
+					m_stateTabModel->setData(m_stateTabModel->index(7, 1), "???");
+					m_stateTabModel->setData(m_stateTabModel->index(8, 1), "???");
+				}
+
 				m_stateTabModel->setData(m_stateTabModel->index(8, 1), m_clientsTabModel->rowCount());
 
 				m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), address);
@@ -198,7 +231,13 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 void ConfigurationServiceWidget::updateServiceState()
 {
-	assert(m_tcpClientSocket->serviceStateIsReady());
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->serviceStateIsReady() == false)
+	{
+		m_stateTabModel->setData(m_stateTabModel->index(5, 1), "???");
+		m_stateTabModel->setData(m_stateTabModel->index(6, 1), "???");
+		m_stateTabModel->setData(m_stateTabModel->index(7, 1), "???");
+		m_stateTabModel->setData(m_stateTabModel->index(8, 1), "???");
+	}
 
 	const Network::ConfigurationServiceState& s = m_tcpClientSocket->serviceState();
 
@@ -209,7 +248,10 @@ void ConfigurationServiceWidget::updateServiceState()
 
 void ConfigurationServiceWidget::updateClients()
 {
-	assert(m_tcpClientSocket->clientsIsReady());
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
+	{
+		m_clientsTabModel->setRowCount(0);
+	}
 
 	const Network::ConfigurationServiceClients& cs = m_tcpClientSocket->clients();
 
@@ -245,7 +287,12 @@ void ConfigurationServiceWidget::updateClients()
 
 void ConfigurationServiceWidget::updateBuildInfo()
 {
-	assert(m_tcpClientSocket->buildInfoIsReady());
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->buildInfoIsReady() == false)
+	{
+		m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
+		m_buildTabModel->setRowCount(1);
+		return;
+	}
 
 	const Builder::BuildInfo& b = m_tcpClientSocket->buildInfo();
 
@@ -277,7 +324,14 @@ void ConfigurationServiceWidget::updateBuildInfo()
 
 void ConfigurationServiceWidget::updateServiceSettings()
 {
-	assert(m_tcpClientSocket->settingsIsReady());
+	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
+	{
+		for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
+		{
+			m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
+		}
+		return;
+	}
 
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), m_tcpClientSocket->equipmentID());
 	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), m_tcpClientSocket->autoloadBuildPath());
@@ -293,7 +347,7 @@ void ConfigurationServiceWidget::clearServiceData()
 
 	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
 	{
-		m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "");
+		m_settingsTabModel->setData(m_settingsTabModel->index(i, 1), "???");
 	}
 }
 
