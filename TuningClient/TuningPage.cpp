@@ -12,8 +12,8 @@ using namespace std;
 
 
 TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, int tuningPageIndex, QWidget* parent):
-	m_tuningSignalManager(tuningSignalManager),
-	TuningModel(parent)
+	TuningModel(parent),
+	m_tuningSignalManager(tuningSignalManager)
 {
 
 	assert(m_tuningSignalManager);
@@ -730,11 +730,11 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 
 TuningPage::TuningPage(int tuningPageIndex, std::shared_ptr<TuningFilter> tabFilter, TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
 	QWidget(parent),
-	m_tuningPageIndex(tuningPageIndex),
-	m_tabFilter(tabFilter),
+	m_objects(objects),
 	m_tuningSignalManager(tuningSignalManager),
 	m_filterStorage(filterStorage),
-	m_objects(objects)
+	m_tabFilter(tabFilter),
+	m_tuningPageIndex(tuningPageIndex)
 {
 
 	assert(m_tuningSignalManager);

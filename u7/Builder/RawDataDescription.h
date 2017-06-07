@@ -61,7 +61,7 @@ namespace Hardware
 
 		bool rxRawDataSizeIsValid() const { return m_rxRawDataSizeIsValid; }
 		bool rxRawDataSizeIsAuto() const { return m_rxRawDataSizeIsAuto; }
-		int rxRawDataSize() const { m_rxRawDataSize; }
+		int rxRawDataSize() const { return m_rxRawDataSize; }
 
 		bool parse(const OptoPort& optoPort, Builder::IssueLogger* log);
 

@@ -374,9 +374,9 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 //
 Configurator::Configurator(QString serialDevice, OutputLog *log, QObject* parent)
 	: QObject(parent),
-	  m_Log(log),
 	m_device(serialDevice),
-    m_serialPort(nullptr)
+	m_serialPort(nullptr),
+	m_Log(log)
 {
 }
 

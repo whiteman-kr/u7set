@@ -15,9 +15,9 @@ namespace TuningIPEN
 	TuningIPENSocketWorker::TuningIPENSocketWorker(const HostAddressPort &tuningIP, TuningIPENService *tuningService) :
 		m_tuningIP(tuningIP),
 		m_tuningService(tuningService),
+		m_timer(this),
 		m_requests(50),
-		m_replies(50),
-		m_timer(this)
+		m_replies(50)
 	{
 	}
 

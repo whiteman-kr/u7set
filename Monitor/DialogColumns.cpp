@@ -5,9 +5,9 @@
 
 DialogColumns::DialogColumns(QWidget *parent, const QStringList& columnsNames, const std::vector<int>& columnsIndexes) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	ui(new Ui::DialogColumns),
 	m_columnsNames(columnsNames),
-	m_columnsIndexes(columnsIndexes),
-	ui(new Ui::DialogColumns)
+	m_columnsIndexes(columnsIndexes)
 {
 	ui->setupUi(this);
 

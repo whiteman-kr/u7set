@@ -80,14 +80,14 @@ void DatabaseConnectionParam::setPassword(QString str)
 //	Settings
 //
 Settings::Settings() :
-	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
-	m_expertMode(false),
 	#ifdef Q_OS_LINUX
-		m_configuratorSerialPort("ttyS0")
+		m_configuratorSerialPort("ttyS0"),
 	#endif
 	#ifdef Q_OS_WIN32
-		m_configuratorSerialPort("\\\\.\\COM3")
+		m_configuratorSerialPort("\\\\.\\COM3"),
 	#endif
+	m_buildOutputPath(QDir().toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation))),
+	m_expertMode(false)
 {
 }
 

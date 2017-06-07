@@ -584,8 +584,8 @@ AppSignalParam SnapshotItemModel::signalParam(Hash hash, bool* found) const
 
 DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configController, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_configController(configController),
-	ui(new Ui::DialogSignalSnapshot)
+	ui(new Ui::DialogSignalSnapshot),
+	m_configController(configController)
 {
 	ui->setupUi(this);
 

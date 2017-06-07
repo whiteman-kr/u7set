@@ -3,9 +3,9 @@
 #include "MainWindow.h"
 
 TuningWorkspace::TuningWorkspace(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, QWidget* parent) :
-	m_filterStorage(filterStorage),
+	QWidget(parent),
 	m_objects(*objects),
-	QWidget(parent)
+	m_filterStorage(filterStorage)
 {
 
 	assert(tuningSignalManager);

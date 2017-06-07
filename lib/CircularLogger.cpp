@@ -16,8 +16,8 @@
 // ----------------------------------------------------------------------------------
 
 CircularLoggerWorker::CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB) :
-	m_path(logPath),
 	m_logName(logName),
+	m_path(logPath),
 	m_fileCount(fileCount),
 	m_fileSizeLimit(fileSizeInMB)
 {

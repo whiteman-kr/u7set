@@ -36,8 +36,8 @@ namespace  Tuning
 	TuningData::TuningData(QString lmID, int tuningMemoryStartAddrW,
 							int tuningFrameSizeBytes,
 							int tuningFramesCount) :
-		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
 		m_lmEquipmentID(lmID),
+		m_tuningMemoryStartAddrW(tuningMemoryStartAddrW),
 		m_tuningFrameSizeBytes(tuningFrameSizeBytes),
 		m_tuningFramesCount(tuningFramesCount)
 	{

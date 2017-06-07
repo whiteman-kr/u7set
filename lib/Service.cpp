@@ -21,8 +21,8 @@ ServiceWorker::ServiceWorker(ServiceType serviceType,
 	m_argv(argv),
 	m_versionInfo(versionInfo),
 	m_logger(logger),
-	m_cmdLineParser(argc, argv),
-	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this)
+	m_settings(QSettings::SystemScope, RADIY_ORG, serviceName, this),
+	m_cmdLineParser(argc, argv)
 {
 	TEST_PTR_RETURN(argv);
 
@@ -207,9 +207,9 @@ void ServiceWorker::onThreadFinished()
 // -------------------------------------------------------------------------------------
 
 Service::Service(ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger):
+	m_logger(logger),
 	m_serviceStartTime(QDateTime::currentMSecsSinceEpoch()),
 	m_serviceWorkerFactory(serviceWorker),
-	m_logger(logger),
 	m_timer500ms(this)
 {
 }

@@ -8,8 +8,8 @@
 
 DialogUsers::DialogUsers(const UserManager& userManager, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogUsers),
-	m_userManager(userManager)
+	m_userManager(userManager),
+	ui(new Ui::DialogUsers)
 {
 	ui->setupUi(this);
 

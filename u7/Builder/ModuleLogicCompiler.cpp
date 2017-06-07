@@ -857,6 +857,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal)
 	{
+		Q_UNUSED(port);
+		Q_UNUSED(rxSignal);
 		return true;
 	}
 
@@ -3062,6 +3064,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb)
 	{
+		Q_UNUSED(cmp);
+
 		bool result = true;
 
 		if (appFb->isConstComaparator() == true)

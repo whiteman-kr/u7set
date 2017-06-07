@@ -15,8 +15,8 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 CalibratorManager::CalibratorManager(Calibrator *pCalibrator, QWidget *parent)
-	: m_pCalibrator (pCalibrator)
-	, QDialog(parent)
+	: QDialog(parent)
+	, m_pCalibrator (pCalibrator)
 {
 	loadSettings(pCalibrator);
 

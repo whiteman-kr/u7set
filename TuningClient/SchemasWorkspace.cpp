@@ -4,9 +4,9 @@
 #include "SchemasWorkspace.h"
 
 SchemasWorkspace::SchemasWorkspace(ConfigController* configController, TuningSignalManager* tuningSignalManager, const TuningSignalStorage* objects, const QString& globalScript, QWidget* parent):
+	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
-	m_objects(*objects),
-	QWidget(parent)
+	m_objects(*objects)
 {
 	m_schemaStorage = new SchemaStorage(configController);
 

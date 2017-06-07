@@ -17,13 +17,13 @@ namespace Builder
 		m_subsystems(subsystems),
 		m_tuningDataStorage(tuningDataStorage),
 		m_log(log),
+        m_lmModules(lmModules),
+		m_lmDescriptionSet(lmDescriptionSet),
 		m_buildNo(buildNo),
 		m_changesetId(changesetId),
 		m_debug(debug),
 		m_projectName(projectName),
-		m_userName(userName),
-        m_lmModules(lmModules),
-        m_lmDescriptionSet(lmDescriptionSet)
+		m_userName(userName)
 	{
 		assert(m_db);
 		assert(m_deviceRoot);

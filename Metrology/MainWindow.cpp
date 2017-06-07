@@ -1819,7 +1819,7 @@ void MainWindow::setPlace(int index)
 
 void MainWindow::MainWindow::setMetrologySignalByPosition(int index)
 {
-	if (index = -1)
+	if (index == -1)
 	{
 		return;
 	}

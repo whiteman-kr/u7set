@@ -112,8 +112,8 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 DialogSignalInfo::DialogSignalInfo(QWidget *parent, const AppSignalParam& signal) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_signal(signal),
-	ui(new Ui::DialogSignalInfo)
+	ui(new Ui::DialogSignalInfo),
+	m_signal(signal)
 {
 	ui->setupUi(this);
 

@@ -144,6 +144,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 
 bool ExportData::saveExcelFile(const QString& fileName)
 {
+	Q_UNUSED(fileName);
     /*if (m_pView == nullptr)
 	{
 		return false;

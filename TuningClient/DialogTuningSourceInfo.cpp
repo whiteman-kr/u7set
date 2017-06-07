@@ -5,8 +5,8 @@
 
 DialogTuningSourceInfo::DialogTuningSourceInfo(TuningSignalManager* tuningSignalManager, QWidget* parent, quint64 tuningSourceId) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	ui(new Ui::DialogTuningSourceInfo),
 	m_tuningSourceId(tuningSourceId),
+	ui(new Ui::DialogTuningSourceInfo),
 	m_tuningSignalManager(tuningSignalManager)
 {
 	assert(tuningSignalManager);

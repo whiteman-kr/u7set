@@ -635,10 +635,10 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 DialogInputTuningValue::DialogInputTuningValue(bool analog, float value, float defaultValue, bool sameValue, float lowLimit, float highLimit, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_defaultValue(defaultValue),
-	m_analog(analog),
 	m_lowLimit(lowLimit),
 	m_highLimit(highLimit),
-	m_decimalPlaces(decimalPlaces)
+	m_decimalPlaces(decimalPlaces),
+	m_analog(analog)
 {
 
 	m_discreteCheck = new QCheckBox();

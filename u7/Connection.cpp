@@ -1003,7 +1003,7 @@ namespace Hardware
         if (m_connectionsVector.size() != m_connections.size())
         {
             assert(false);
-            nullptr;
+			return nullptr;
         }
 
         QObject* result = m_connectionsVector[index].get();

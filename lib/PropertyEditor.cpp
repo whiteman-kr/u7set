@@ -647,9 +647,9 @@ namespace ExtWidgets
 
 	QtMultiTextEdit::QtMultiTextEdit(QWidget* parent, PropertyEditor* propertyEditor, std::shared_ptr<Property> p):
 		QWidget(parent),
-		m_propertyEditor(propertyEditor),
 		m_property(p),
-		m_userType(p->value().userType())
+		m_userType(p->value().userType()),
+		m_propertyEditor(propertyEditor)
 	{
 
 		if (p == nullptr || propertyEditor == nullptr)

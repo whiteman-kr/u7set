@@ -12,8 +12,8 @@
 #include "version.h"
 
 MainWindow::MainWindow(QWidget* parent) :
-	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2()),
-	QMainWindow(parent)
+	QMainWindow(parent),
+	m_configController(this, theSettings.configuratorAddress1(), theSettings.configuratorAddress2())
 {
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{

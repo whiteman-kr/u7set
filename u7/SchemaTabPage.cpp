@@ -1246,8 +1246,8 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 										   QString templateFileExtension,
 										   std::function<VFrame30::Schema*()> createSchemaFunc) :
 		HasDbController(db),
-		m_templateFileExtension(templateFileExtension),
-		m_createSchemaFunc(createSchemaFunc)
+		m_createSchemaFunc(createSchemaFunc),
+		m_templateFileExtension(templateFileExtension)
 {
 	// Create controls
 	//

@@ -182,8 +182,8 @@ namespace Tuning
 		m_logger(logger),
 		m_timer(this),
 		m_socket(this),
-		m_tuningCommandQueue(this, 1000),
-		m_replyQueue(this, 10)
+		m_replyQueue(this, 10),
+		m_tuningCommandQueue(this, 1000)
 	{
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
