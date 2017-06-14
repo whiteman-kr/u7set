@@ -582,6 +582,12 @@ bool TuningFilter::value(Hash hash, TuningFilterValue& value)
 	}
 
 	value = it->second;
+
+	if (value.useValue() == false)
+	{
+		return false;
+	}
+
 	return true;
 
 }
