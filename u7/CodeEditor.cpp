@@ -103,6 +103,8 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 {
 	m_textEdit = new QsciScintilla();
 
+	m_textEdit->setUtf8(true);
+
 	m_textEdit->installEventFilter(this);
 
 	QHBoxLayout* l = new QHBoxLayout(this);
