@@ -7,6 +7,7 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
+#include "../lib/WidgetUtils.h"
 #include "Stable.h"
 
 // Returns vector of pairs,
@@ -233,20 +234,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	vl->addWidget(m_buttonBox);
 	setLayout(vl);
 
-	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-	QPoint center = desktopRect.center();
-	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-	desktopRect.moveCenter(center);
-	QRect windowRect = settings.value("SignalPropertiesDialog/geometry", desktopRect).toRect();
-	if (windowRect.height() > desktopRect.height())
-	{
-		windowRect.setHeight(desktopRect.height());
-	}
-	if (windowRect.width() > desktopRect.width())
-	{
-		windowRect.setWidth(desktopRect.width());
-	}
-	setGeometry(windowRect);
+	setWindowPosition(this, "SignalPropertiesDialog/geometry");
 }
 
 

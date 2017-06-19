@@ -116,7 +116,8 @@ HEADERS  += MainWindow.h \
     ../lib/HostAddressPort.h \
     ../lib/AppDataSource.h \
     ../lib/CircularLogger.h \
-    TcpConfigServiceClient.h
+    TcpConfigServiceClient.h \
+    ../lib/WidgetUtils.h
 
 FORMS    +=
 

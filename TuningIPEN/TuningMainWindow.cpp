@@ -17,6 +17,7 @@
 #include <QStatusBar>
 #include <QLabel>
 #include <QPixmap>
+#include "../lib/WidgetUtils.h"
 
 
 namespace TuningIPEN
@@ -61,22 +62,7 @@ namespace TuningIPEN
 
 		//Window geometry
 		//
-		QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-		QPoint center = desktopRect.center();
-		desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-		desktopRect.moveCenter(center);
-		QRect windowRect = settings.value("TuningMainWindow/geometry", desktopRect).toRect();
-
-		if (windowRect.height() > desktopRect.height())
-		{
-			windowRect.setHeight(desktopRect.height());
-		}
-
-		if (windowRect.width() > desktopRect.width())
-		{
-			windowRect.setWidth(desktopRect.width());
-		}
-		setGeometry(windowRect);
+		setWindowPosition(this, "TuningMainWindow/geometry");
 
 		setWindowTitle("Tuning IPEN");
 

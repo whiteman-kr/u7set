@@ -319,7 +319,8 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
     CodeEditor.h \
-    ../lib/CsvFile.h
+    ../lib/CsvFile.h \
+    ../lib/WidgetUtils.h
 
 FORMS    += \
     CreateProjectDialog.ui \

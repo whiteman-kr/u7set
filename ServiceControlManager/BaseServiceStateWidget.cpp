@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include "../lib/Types.h"
+#include "../lib/WidgetUtils.h"
 
 
 BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidget *parent) :
@@ -46,24 +47,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(quint32 ip, int portIndex, QWidge
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
 	m_timer->start(500);
 
-	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-	QPoint center = desktopRect.center();
-	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-	desktopRect.moveCenter(center);
-
-	QSettings settings;
-	QString settingName = QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port);
-	QRect windowRect = settings.value(settingName, desktopRect).toRect();
-
-	if (windowRect.height() > desktopRect.height())
-	{
-		windowRect.setHeight(desktopRect.height());
-	}
-	if (windowRect.width() > desktopRect.width())
-	{
-		windowRect.setWidth(desktopRect.width());
-	}
-	setGeometry(windowRect);
+	setWindowPosition(this, QString("Service_%1_%2/geometry").arg(QHostAddress(ip).toString()).arg(serviceInfo[portIndex].port));
 
 	updateServiceState();
 }

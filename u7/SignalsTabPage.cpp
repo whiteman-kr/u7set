@@ -22,6 +22,7 @@
 #include "SignalsTabPage.h"
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
+#include "../lib/WidgetUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 
@@ -1985,21 +1986,7 @@ void SignalsTabPage::editColumnsVisibilityAndOrder()
 
 	//Window geometry
 	//
-	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-	QPoint center = desktopRect.center();
-	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-	desktopRect.moveCenter(center);
-	QSettings settings;
-	QRect windowRect = settings.value("ColumnsVisibilityDialog/geometry", desktopRect).toRect();
-	if (windowRect.height() > desktopRect.height())
-	{
-		windowRect.setHeight(desktopRect.height());
-	}
-	if (windowRect.width() > desktopRect.width())
-	{
-		windowRect.setWidth(desktopRect.width());
-	}
-	dlg.setGeometry(windowRect);
+	setWindowPosition(&dlg, "ColumnsVisibilityDialog/geometry");
 
 	// Show/Hide column
 	//
@@ -2060,6 +2047,7 @@ void SignalsTabPage::editColumnsVisibilityAndOrder()
 
 	dlg.exec();
 
+	QSettings settings;
 	settings.setValue("ColumnsVisibilityDialog/geometry", dlg.geometry());
 }
 
@@ -2582,20 +2570,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_splitter->setChildrenCollapsible(false);
 
-	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-	QPoint center = desktopRect.center();
-	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-	desktopRect.moveCenter(center);
-	QRect windowRect = settings.value("PendingChangesDialog/geometry", desktopRect).toRect();
-	if (windowRect.height() > desktopRect.height())
-	{
-		windowRect.setHeight(desktopRect.height());
-	}
-	if (windowRect.width() > desktopRect.width())
-	{
-		windowRect.setWidth(desktopRect.width());
-	}
-	setGeometry(windowRect);
+	setWindowPosition(this, "PendingChangesDialog/geometry");
 
 	QList<int> list = m_splitter->sizes();
 	list[0] = height();
@@ -2720,21 +2695,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 {
 	setWindowTitle(tr("Undo signal changes"));
 
-	QSettings settings;
-	QRect desktopRect = QApplication::desktop()->screenGeometry(this);
-	QPoint center = desktopRect.center();
-	desktopRect.setSize(QSize(desktopRect.width() * 2 / 3, desktopRect.height() * 2 / 3));
-	desktopRect.moveCenter(center);
-	QRect windowRect = settings.value("UndoSignalsDialog/geometry", desktopRect).toRect();
-	if (windowRect.height() > desktopRect.height())
-	{
-		windowRect.setHeight(desktopRect.height());
-	}
-	if (windowRect.width() > desktopRect.width())
-	{
-		windowRect.setWidth(desktopRect.width());
-	}
-	setGeometry(windowRect);
+	setWindowPosition(this, "UndoSignalsDialog/geometry");
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
@@ -2751,6 +2712,7 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, QWidget* parent)
 
 	signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(signalsView->fontMetrics().height() * 1.4));
 
+	QSettings settings;
 	signalsView->setColumnWidth(0, settings.value(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[0]).replace("/", "|")).replace("\n", " "),
 												  signalsView->columnWidth(0)).toInt() + 30);	// basic column width + checkbox size
 	for (int i = 1; i < COLUMNS_COUNT; i++)
