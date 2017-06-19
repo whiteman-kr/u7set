@@ -1206,7 +1206,15 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 	message->set_byteorder(m_byteOrder);
 
 	message->set_unitid(m_unitID);
-	message->set_unit("");
+
+	if (unitList != nullptr && unitList->contains(m_unitID))
+	{
+		message->set_unit(unitList->value(m_unitID).toStdString());
+	}
+	else
+	{
+		message->set_unit("???");
+	}
 
 	message->set_lowvalidrange(m_lowValidRange);
 	message->set_highvalidrange(m_highValidRange);
