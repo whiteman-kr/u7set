@@ -3774,6 +3774,30 @@ namespace Builder
 						arg(portEquipmentID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5086
+	///
+	/// IssueType: Error
+	///
+	/// Title: Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Constant connected to discrete signal or FB input must have value 0 or 1. Check constant value.
+	///
+
+	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, constItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5086,
+				  QString(tr("Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').")).
+						arg(schemaID));
+
+	}
+
 	/// IssueCode: ALC5186
 	///
 	/// IssueType: Error
@@ -3794,7 +3818,6 @@ namespace Builder
 				  QString(tr("Signal '%1' is not found (opto port '%2' raw data description).")).
 						arg(appSignalID).arg(portEquipmentID));
 	}
-
 
 	/// IssueCode: ALC5187
 	///

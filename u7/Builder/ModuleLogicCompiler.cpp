@@ -1929,7 +1929,7 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			if (!constItem.isIntegral())
+			if (constItem.isIntegral() == false)
 			{
 				// Floating point constant is connected to discrete signal '%1'
 				//
@@ -1938,11 +1938,21 @@ namespace Builder
 			}
 			else
 			{
-				quint16 constValue = constItem.intValue() > 0 ? 1 : 0;
+				int constValue = constItem.intValue();
 
-				cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
-				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-							   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constValue));
+				if (constValue == 0 || constValue == 1)
+				{
+					cmd.movBitConst(ramAddrOffset, ramAddrBit, constValue);
+					cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+								   arg(appSignal.appSignalID()).arg(appSignal.regAddr().toString()).arg(constValue));
+				}
+				else
+				{
+					// Constant connected to discrete signal or FB input must have value 0 or 1.
+					//
+					m_log->errALC5086(constItem.guid(), appSignal.schemaID());
+					return false;
+				}
 			}
 			break;
 
@@ -1959,7 +1969,7 @@ namespace Builder
 				switch(appSignal.analogSignalFormat())
 				{
 				case E::AnalogAppSignalFormat::SignedInt32:
-					if (constItem.isIntegral())
+					if (constItem.isIntegral() == true)
 					{
 						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
 						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
@@ -1974,7 +1984,7 @@ namespace Builder
 					break;
 
 				case E::AnalogAppSignalFormat::Float32:
-					if (constItem.isFloat())
+					if (constItem.isFloat() == true)
 					{
 						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
 						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
@@ -2384,10 +2394,20 @@ namespace Builder
 			}
 			else
 			{
-				quint16 constValue = constItem.intValue() > 0 ? 1 : 0;
+				int constValue = constItem.intValue();
 
-				cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
-				cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
+				if (constValue == 1 || constValue == 0)
+				{
+					cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constValue, appFb.caption());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constValue));
+				}
+				else
+				{
+					// Constant connected to discrete signal or FB input must have value 0 or 1.
+					//
+					m_log->errALC5086(constItem.guid(), appFb.schemaID());
+					return false;
+				}
 			}
 			break;
 
