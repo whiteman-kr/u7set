@@ -1920,6 +1920,14 @@ namespace Builder
 			return false;
 		}
 
+		if (appSignal.isInput() == true)
+		{
+			// Can't assign value to input signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5087(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		quint16 ramAddrOffset = appSignal.ramAddr().offset();
 		quint16 ramAddrBit = appSignal.ramAddr().bit();
 
@@ -2035,14 +2043,22 @@ namespace Builder
 			return false;
 		}
 
+		if (appSignal.isInput() == true)
+		{
+			// Can't assign value to input signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5087(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		if (appSignal.appSignalID() == srcSignal.appSignalID())
 		{
 			return true;
 		}
 
-		if (appSignal.isAnalog())
+		if (appSignal.isAnalog() == true)
 		{
-			if (!srcSignal.isAnalog())
+			if (srcSignal.isAnalog() == false)
 			{
 				msg = QString(tr("Discrete signal %1 connected to analog signal %2")).
 						arg(srcSignal.appSignalID()).arg(appSignal.appSignalID());
@@ -2074,9 +2090,9 @@ namespace Builder
 		}
 		else
 		{
-			if (appSignal.isDiscrete())
+			if (appSignal.isDiscrete() == true)
 			{
-				if (!srcSignal.isDiscrete())
+				if (srcSignal.isDiscrete() == false)
 				{
 					msg = QString(tr("Analog signal %1 connected to discrete signal %2")).
 							arg(srcSignal.appSignalID()).arg(appSignal.appSignalID());
@@ -2740,6 +2756,14 @@ namespace Builder
 			return false;
 		}
 
+		if (appSignal.isInput() == true)
+		{
+			// Can't assign value to input signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5087(appSignal.schemaID(), appSignal.appSignalID(), appSignal.guid());
+			return false;
+		}
+
 		Signal* destSignal = m_signals->getSignal(appSignal.appSignalID());
 
 		if (destSignal == nullptr)
@@ -3119,6 +3143,14 @@ namespace Builder
 			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
 			//
 			m_log->errALC5071(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+			return false;
+		}
+
+		if (appSignal->isInput() == true)
+		{
+			// Can't assign value to input signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5087(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
 			return false;
 		}
 

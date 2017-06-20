@@ -3490,7 +3490,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5071,
@@ -3796,6 +3796,28 @@ namespace Builder
 				  QString(tr("Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').")).
 						arg(schemaID));
 
+	}
+
+	/// IssueCode: ALC5087
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Can't assign value to input signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Can't assign value to input signal. Such signals are read-only.
+	///
+	void IssueLogger::errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5087,
+				  QString(tr("Can't assign value to input signal '%1' (Logic schema '%2').")).
+					arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5186
