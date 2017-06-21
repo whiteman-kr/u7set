@@ -4,15 +4,11 @@
 
 -- Append TuningLowBound field
 
-ALTER TABLE public.signalinstance ADD COLUMN tuninglowbound double precision;
-ALTER TABLE public.signalinstance ALTER COLUMN tuninglowbound SET NOT NULL;
-ALTER TABLE public.signalinstance ALTER COLUMN tuninglowbound SET DEFAULT 0;
+ALTER TABLE public.signalinstance ADD COLUMN tuninglowbound double precision NOT NULL DEFAULT 0;
 
 -- Append TuningHighBound field
 
-ALTER TABLE public.signalinstance ADD COLUMN tuninghighbound double precision;
-ALTER TABLE public.signalinstance ALTER COLUMN tuninghighbound SET NOT NULL;
-ALTER TABLE public.signalinstance ALTER COLUMN tuninghighbound SET DEFAULT 100;
+ALTER TABLE public.signalinstance ADD COLUMN tuninghighbound double precision NOT NULL DEFAULT 100;
 
 -- Append BusTypeID field
 
@@ -20,9 +16,7 @@ ALTER TABLE public.signalinstance ADD COLUMN bustypeid text;
 
 -- Append AdaptiveAperture field
 
-ALTER TABLE public.signalinstance ADD COLUMN adaptiveaperture boolean;
-ALTER TABLE public.signalinstance ALTER COLUMN adaptiveaperture SET NOT NULL;
-ALTER TABLE public.signalinstance ALTER COLUMN adaptiveaperture SET DEFAULT false;
+ALTER TABLE public.signalinstance ADD COLUMN adaptiveaperture boolean NOT NULL DEFAULT false;
 
 -- Drop all stored procedures dependent from SignalData type
 
