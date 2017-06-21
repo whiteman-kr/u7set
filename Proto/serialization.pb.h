@@ -8393,19 +8393,52 @@ class AppSignal : public ::google::protobuf::Message {
   inline bool enabletuning() const;
   inline void set_enabletuning(bool value);
 
-  // optional double tuningDefaultValue = 47;
+  // optional float tuningDefaultValue = 47;
   inline bool has_tuningdefaultvalue() const;
   inline void clear_tuningdefaultvalue();
   static const int kTuningDefaultValueFieldNumber = 47;
-  inline double tuningdefaultvalue() const;
-  inline void set_tuningdefaultvalue(double value);
+  inline float tuningdefaultvalue() const;
+  inline void set_tuningdefaultvalue(float value);
 
-  // optional uint64 hash = 48;
+  // optional float tuningLowBound = 48;
+  inline bool has_tuninglowbound() const;
+  inline void clear_tuninglowbound();
+  static const int kTuningLowBoundFieldNumber = 48;
+  inline float tuninglowbound() const;
+  inline void set_tuninglowbound(float value);
+
+  // optional float tuningHighBound = 49;
+  inline bool has_tuninghighbound() const;
+  inline void clear_tuninghighbound();
+  static const int kTuningHighBoundFieldNumber = 49;
+  inline float tuninghighbound() const;
+  inline void set_tuninghighbound(float value);
+
+  // optional uint64 hash = 50;
   inline bool has_hash() const;
   inline void clear_hash();
-  static const int kHashFieldNumber = 48;
+  static const int kHashFieldNumber = 50;
   inline ::google::protobuf::uint64 hash() const;
   inline void set_hash(::google::protobuf::uint64 value);
+
+  // optional string busTypeID = 51;
+  inline bool has_bustypeid() const;
+  inline void clear_bustypeid();
+  static const int kBusTypeIDFieldNumber = 51;
+  inline const ::std::string& bustypeid() const;
+  inline void set_bustypeid(const ::std::string& value);
+  inline void set_bustypeid(const char* value);
+  inline void set_bustypeid(const char* value, size_t size);
+  inline ::std::string* mutable_bustypeid();
+  inline ::std::string* release_bustypeid();
+  inline void set_allocated_bustypeid(::std::string* bustypeid);
+
+  // optional bool adaptiveAperture = 52;
+  inline bool has_adaptiveaperture() const;
+  inline void clear_adaptiveaperture();
+  static const int kAdaptiveApertureFieldNumber = 52;
+  inline bool adaptiveaperture() const;
+  inline void set_adaptiveaperture(bool value);
 
   // optional int32 regValueAddrOffset = 200;
   inline bool has_regvalueaddroffset() const;
@@ -8559,8 +8592,16 @@ class AppSignal : public ::google::protobuf::Message {
   inline void clear_has_enabletuning();
   inline void set_has_tuningdefaultvalue();
   inline void clear_has_tuningdefaultvalue();
+  inline void set_has_tuninglowbound();
+  inline void clear_has_tuninglowbound();
+  inline void set_has_tuninghighbound();
+  inline void clear_has_tuninghighbound();
   inline void set_has_hash();
   inline void clear_has_hash();
+  inline void set_has_bustypeid();
+  inline void clear_has_bustypeid();
+  inline void set_has_adaptiveaperture();
+  inline void clear_has_adaptiveaperture();
   inline void set_has_regvalueaddroffset();
   inline void clear_has_regvalueaddroffset();
   inline void set_has_regvalueaddrbit();
@@ -8625,10 +8666,14 @@ class AppSignal : public ::google::protobuf::Message {
   double filteringtime_;
   double spreadtolerance_;
   ::google::protobuf::int32 byteorder_;
-  bool enabletuning_;
-  double tuningdefaultvalue_;
+  float tuningdefaultvalue_;
+  float tuninglowbound_;
+  float tuninghighbound_;
   ::google::protobuf::uint64 hash_;
+  bool enabletuning_;
+  bool adaptiveaperture_;
   ::google::protobuf::int32 regvalueaddroffset_;
+  ::std::string* bustypeid_;
   ::google::protobuf::int32 regvalueaddrbit_;
   ::google::protobuf::int32 regvalidityaddroffset_;
   ::google::protobuf::int32 regvalidityaddrbit_;
@@ -8638,7 +8683,7 @@ class AppSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 ramaddrbit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(56 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(60 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -21705,7 +21750,7 @@ inline void AppSignal::set_enabletuning(bool value) {
   enabletuning_ = value;
 }
 
-// optional double tuningDefaultValue = 47;
+// optional float tuningDefaultValue = 47;
 inline bool AppSignal::has_tuningdefaultvalue() const {
   return (_has_bits_[1] & 0x00004000u) != 0;
 }
@@ -21719,23 +21764,67 @@ inline void AppSignal::clear_tuningdefaultvalue() {
   tuningdefaultvalue_ = 0;
   clear_has_tuningdefaultvalue();
 }
-inline double AppSignal::tuningdefaultvalue() const {
+inline float AppSignal::tuningdefaultvalue() const {
   return tuningdefaultvalue_;
 }
-inline void AppSignal::set_tuningdefaultvalue(double value) {
+inline void AppSignal::set_tuningdefaultvalue(float value) {
   set_has_tuningdefaultvalue();
   tuningdefaultvalue_ = value;
 }
 
-// optional uint64 hash = 48;
-inline bool AppSignal::has_hash() const {
+// optional float tuningLowBound = 48;
+inline bool AppSignal::has_tuninglowbound() const {
   return (_has_bits_[1] & 0x00008000u) != 0;
 }
-inline void AppSignal::set_has_hash() {
+inline void AppSignal::set_has_tuninglowbound() {
   _has_bits_[1] |= 0x00008000u;
 }
-inline void AppSignal::clear_has_hash() {
+inline void AppSignal::clear_has_tuninglowbound() {
   _has_bits_[1] &= ~0x00008000u;
+}
+inline void AppSignal::clear_tuninglowbound() {
+  tuninglowbound_ = 0;
+  clear_has_tuninglowbound();
+}
+inline float AppSignal::tuninglowbound() const {
+  return tuninglowbound_;
+}
+inline void AppSignal::set_tuninglowbound(float value) {
+  set_has_tuninglowbound();
+  tuninglowbound_ = value;
+}
+
+// optional float tuningHighBound = 49;
+inline bool AppSignal::has_tuninghighbound() const {
+  return (_has_bits_[1] & 0x00010000u) != 0;
+}
+inline void AppSignal::set_has_tuninghighbound() {
+  _has_bits_[1] |= 0x00010000u;
+}
+inline void AppSignal::clear_has_tuninghighbound() {
+  _has_bits_[1] &= ~0x00010000u;
+}
+inline void AppSignal::clear_tuninghighbound() {
+  tuninghighbound_ = 0;
+  clear_has_tuninghighbound();
+}
+inline float AppSignal::tuninghighbound() const {
+  return tuninghighbound_;
+}
+inline void AppSignal::set_tuninghighbound(float value) {
+  set_has_tuninghighbound();
+  tuninghighbound_ = value;
+}
+
+// optional uint64 hash = 50;
+inline bool AppSignal::has_hash() const {
+  return (_has_bits_[1] & 0x00020000u) != 0;
+}
+inline void AppSignal::set_has_hash() {
+  _has_bits_[1] |= 0x00020000u;
+}
+inline void AppSignal::clear_has_hash() {
+  _has_bits_[1] &= ~0x00020000u;
 }
 inline void AppSignal::clear_hash() {
   hash_ = GOOGLE_ULONGLONG(0);
@@ -21749,15 +21838,107 @@ inline void AppSignal::set_hash(::google::protobuf::uint64 value) {
   hash_ = value;
 }
 
+// optional string busTypeID = 51;
+inline bool AppSignal::has_bustypeid() const {
+  return (_has_bits_[1] & 0x00040000u) != 0;
+}
+inline void AppSignal::set_has_bustypeid() {
+  _has_bits_[1] |= 0x00040000u;
+}
+inline void AppSignal::clear_has_bustypeid() {
+  _has_bits_[1] &= ~0x00040000u;
+}
+inline void AppSignal::clear_bustypeid() {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    bustypeid_->clear();
+  }
+  clear_has_bustypeid();
+}
+inline const ::std::string& AppSignal::bustypeid() const {
+  return *bustypeid_;
+}
+inline void AppSignal::set_bustypeid(const ::std::string& value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void AppSignal::set_bustypeid(const char* value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void AppSignal::set_bustypeid(const char* value, size_t size) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppSignal::mutable_bustypeid() {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  return bustypeid_;
+}
+inline ::std::string* AppSignal::release_bustypeid() {
+  clear_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = bustypeid_;
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AppSignal::set_allocated_bustypeid(::std::string* bustypeid) {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypeid_;
+  }
+  if (bustypeid) {
+    set_has_bustypeid();
+    bustypeid_ = bustypeid;
+  } else {
+    clear_has_bustypeid();
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool adaptiveAperture = 52;
+inline bool AppSignal::has_adaptiveaperture() const {
+  return (_has_bits_[1] & 0x00080000u) != 0;
+}
+inline void AppSignal::set_has_adaptiveaperture() {
+  _has_bits_[1] |= 0x00080000u;
+}
+inline void AppSignal::clear_has_adaptiveaperture() {
+  _has_bits_[1] &= ~0x00080000u;
+}
+inline void AppSignal::clear_adaptiveaperture() {
+  adaptiveaperture_ = false;
+  clear_has_adaptiveaperture();
+}
+inline bool AppSignal::adaptiveaperture() const {
+  return adaptiveaperture_;
+}
+inline void AppSignal::set_adaptiveaperture(bool value) {
+  set_has_adaptiveaperture();
+  adaptiveaperture_ = value;
+}
+
 // optional int32 regValueAddrOffset = 200;
 inline bool AppSignal::has_regvalueaddroffset() const {
-  return (_has_bits_[1] & 0x00010000u) != 0;
+  return (_has_bits_[1] & 0x00100000u) != 0;
 }
 inline void AppSignal::set_has_regvalueaddroffset() {
-  _has_bits_[1] |= 0x00010000u;
+  _has_bits_[1] |= 0x00100000u;
 }
 inline void AppSignal::clear_has_regvalueaddroffset() {
-  _has_bits_[1] &= ~0x00010000u;
+  _has_bits_[1] &= ~0x00100000u;
 }
 inline void AppSignal::clear_regvalueaddroffset() {
   regvalueaddroffset_ = 0;
@@ -21773,13 +21954,13 @@ inline void AppSignal::set_regvalueaddroffset(::google::protobuf::int32 value) {
 
 // optional int32 regValueAddrBit = 201;
 inline bool AppSignal::has_regvalueaddrbit() const {
-  return (_has_bits_[1] & 0x00020000u) != 0;
+  return (_has_bits_[1] & 0x00200000u) != 0;
 }
 inline void AppSignal::set_has_regvalueaddrbit() {
-  _has_bits_[1] |= 0x00020000u;
+  _has_bits_[1] |= 0x00200000u;
 }
 inline void AppSignal::clear_has_regvalueaddrbit() {
-  _has_bits_[1] &= ~0x00020000u;
+  _has_bits_[1] &= ~0x00200000u;
 }
 inline void AppSignal::clear_regvalueaddrbit() {
   regvalueaddrbit_ = 0;
@@ -21795,13 +21976,13 @@ inline void AppSignal::set_regvalueaddrbit(::google::protobuf::int32 value) {
 
 // optional int32 regValidityAddrOffset = 202;
 inline bool AppSignal::has_regvalidityaddroffset() const {
-  return (_has_bits_[1] & 0x00040000u) != 0;
+  return (_has_bits_[1] & 0x00400000u) != 0;
 }
 inline void AppSignal::set_has_regvalidityaddroffset() {
-  _has_bits_[1] |= 0x00040000u;
+  _has_bits_[1] |= 0x00400000u;
 }
 inline void AppSignal::clear_has_regvalidityaddroffset() {
-  _has_bits_[1] &= ~0x00040000u;
+  _has_bits_[1] &= ~0x00400000u;
 }
 inline void AppSignal::clear_regvalidityaddroffset() {
   regvalidityaddroffset_ = 0;
@@ -21817,13 +21998,13 @@ inline void AppSignal::set_regvalidityaddroffset(::google::protobuf::int32 value
 
 // optional int32 regValidityAddrBit = 203;
 inline bool AppSignal::has_regvalidityaddrbit() const {
-  return (_has_bits_[1] & 0x00080000u) != 0;
+  return (_has_bits_[1] & 0x00800000u) != 0;
 }
 inline void AppSignal::set_has_regvalidityaddrbit() {
-  _has_bits_[1] |= 0x00080000u;
+  _has_bits_[1] |= 0x00800000u;
 }
 inline void AppSignal::clear_has_regvalidityaddrbit() {
-  _has_bits_[1] &= ~0x00080000u;
+  _has_bits_[1] &= ~0x00800000u;
 }
 inline void AppSignal::clear_regvalidityaddrbit() {
   regvalidityaddrbit_ = 0;
@@ -21839,13 +22020,13 @@ inline void AppSignal::set_regvalidityaddrbit(::google::protobuf::int32 value) {
 
 // optional int32 ioBufferAddrOffset = 204;
 inline bool AppSignal::has_iobufferaddroffset() const {
-  return (_has_bits_[1] & 0x00100000u) != 0;
+  return (_has_bits_[1] & 0x01000000u) != 0;
 }
 inline void AppSignal::set_has_iobufferaddroffset() {
-  _has_bits_[1] |= 0x00100000u;
+  _has_bits_[1] |= 0x01000000u;
 }
 inline void AppSignal::clear_has_iobufferaddroffset() {
-  _has_bits_[1] &= ~0x00100000u;
+  _has_bits_[1] &= ~0x01000000u;
 }
 inline void AppSignal::clear_iobufferaddroffset() {
   iobufferaddroffset_ = 0;
@@ -21861,13 +22042,13 @@ inline void AppSignal::set_iobufferaddroffset(::google::protobuf::int32 value) {
 
 // optional int32 ioBufferAddrBit = 205;
 inline bool AppSignal::has_iobufferaddrbit() const {
-  return (_has_bits_[1] & 0x00200000u) != 0;
+  return (_has_bits_[1] & 0x02000000u) != 0;
 }
 inline void AppSignal::set_has_iobufferaddrbit() {
-  _has_bits_[1] |= 0x00200000u;
+  _has_bits_[1] |= 0x02000000u;
 }
 inline void AppSignal::clear_has_iobufferaddrbit() {
-  _has_bits_[1] &= ~0x00200000u;
+  _has_bits_[1] &= ~0x02000000u;
 }
 inline void AppSignal::clear_iobufferaddrbit() {
   iobufferaddrbit_ = 0;
@@ -21883,13 +22064,13 @@ inline void AppSignal::set_iobufferaddrbit(::google::protobuf::int32 value) {
 
 // optional int32 ramAddrOffset = 206;
 inline bool AppSignal::has_ramaddroffset() const {
-  return (_has_bits_[1] & 0x00400000u) != 0;
+  return (_has_bits_[1] & 0x04000000u) != 0;
 }
 inline void AppSignal::set_has_ramaddroffset() {
-  _has_bits_[1] |= 0x00400000u;
+  _has_bits_[1] |= 0x04000000u;
 }
 inline void AppSignal::clear_has_ramaddroffset() {
-  _has_bits_[1] &= ~0x00400000u;
+  _has_bits_[1] &= ~0x04000000u;
 }
 inline void AppSignal::clear_ramaddroffset() {
   ramaddroffset_ = 0;
@@ -21905,13 +22086,13 @@ inline void AppSignal::set_ramaddroffset(::google::protobuf::int32 value) {
 
 // optional int32 ramAddrBit = 207;
 inline bool AppSignal::has_ramaddrbit() const {
-  return (_has_bits_[1] & 0x00800000u) != 0;
+  return (_has_bits_[1] & 0x08000000u) != 0;
 }
 inline void AppSignal::set_has_ramaddrbit() {
-  _has_bits_[1] |= 0x00800000u;
+  _has_bits_[1] |= 0x08000000u;
 }
 inline void AppSignal::clear_has_ramaddrbit() {
-  _has_bits_[1] &= ~0x00800000u;
+  _has_bits_[1] &= ~0x08000000u;
 }
 inline void AppSignal::clear_ramaddrbit() {
   ramaddrbit_ = 0;

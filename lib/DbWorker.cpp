@@ -169,6 +169,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0151.sql", "Upgrade to version 151, OCM and OCMN presets update"},
 	{":/DatabaseUpgrade/Upgrade0152.sql", "Upgrade to version 152, add func public.delete_file_on_update"},
 	{":/DatabaseUpgrade/Upgrade0153.sql", "Upgrade to version 153, OCM and OCMN presets update, delete old signals"},
+	{":/DatabaseUpgrade/Upgrade0154.sql", "Upgrade to version 154, append new fields in SignalInstance table"},
 };
 
 
@@ -4081,7 +4082,11 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
     s.setSpreadTolerance(q.value(43).toDouble());									//
 	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
 	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
-	s.setTuningDefaultValue(q.value(46).toDouble());								// since version 58 of database
+	s.setTuningDefaultValue(q.value(46).toFloat());									// since version 58 of database
+	s.setTuningLowBound(q.value(47).toFloat());										// since version 154 of database
+	s.setTuningHighBound(q.value(48).toFloat());
+	s.setBusTypeID(q.value(49).toString());
+	s.setAdaptiveAperture(q.value(50).toBool());
 }
 
 
@@ -4092,7 +4097,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 			"'%11',%12,'%13','%14','%15',%16,%17,%18,%19,%20,"
 			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"'%41',%42,%43,%44,%45,%46,%47)")
+			"'%41',%42,%43,%44,%45,%46,%47,%48,%49,'%50',%51)")
 	.arg(s.ID())
 	.arg(s.signalGroupID())
 	.arg(s.signalInstanceID())
@@ -4138,10 +4143,12 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.filteringTime())						//
 	.arg(s.spreadTolerance())					//
 	.arg(TO_INT(s.byteOrder()))					//
-	.arg(toSqlBoolean(s.enableTuning()))			// since version 42 of database
-	.arg(s.tuningDefaultValue());				// since version 58 of database
-
-	//qDebug() << str;
+	.arg(toSqlBoolean(s.enableTuning()))		// since version 42 of database
+	.arg(s.tuningDefaultValue())				// since version 58 of database
+	.arg(s.tuningLowBound())					// since version 154 of database
+	.arg(s.tuningHighBound())
+	.arg(s.busTypeID())
+	.arg(toSqlBoolean(s.adaptiveAperture()));
 
 	return str;
 }

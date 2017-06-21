@@ -124,6 +124,11 @@ void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value, int
 	writeStringAttribute(name, QString::number(value, 'f', decimalPlaces));
 }
 
+void XmlWriteHelper::writeFloatAttribute(const QString& name, float value)
+{
+	writeStringAttribute(name, QString::number(value));
+}
+
 void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
 {
 	m_xmlWriter->writeTextElement(name, value);
@@ -214,9 +219,11 @@ bool XmlReadHelper::readIntAttribute(const QString& name, int* value)
 		return false;
 	}
 
-	*value = m_xmlReader->attributes().value(name).toInt();
+	bool result = false;
 
-	return true;
+	*value = m_xmlReader->attributes().value(name).toInt(&result);
+
+	return result;
 }
 
 
@@ -233,9 +240,32 @@ bool XmlReadHelper::readDoubleAttribute(const QString& name, double* value)
 		return false;
 	}
 
-	*value = m_xmlReader->attributes().value(name).toDouble();
+	bool result = false;
 
-	return true;
+	*value = m_xmlReader->attributes().value(name).toDouble(&result);
+
+	return result;
+}
+
+
+bool XmlReadHelper::readFloatAttribute(const QString& name, float* value)
+{
+	if(value == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_xmlReader->attributes().hasAttribute(name) == false)
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	*value = m_xmlReader->attributes().value(name).toFloat(&result);
+
+	return result;
 }
 
 

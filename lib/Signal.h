@@ -185,7 +185,13 @@ private:
 	double m_spreadTolerance = 2;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	bool m_enableTuning = false;
-	double m_tuningDefaultValue = 0;
+
+	float m_tuningDefaultValue = 0;
+	float m_tuningLowBound = 0;
+	float m_tuningHighBound = 100;
+
+	QString m_busTypeID;
+	bool m_adaptiveAperture = false;
 
 	Hash m_hash = 0;					// hash of AppSignalID
 
@@ -251,7 +257,7 @@ public:
 	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
 	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
 
-	bool isRegistered() const { return acquire(); }
+	bool isAcquired() const { return m_acquire; }
 
 	int sizeW() const { return (m_dataSize / 16 + (m_dataSize % 16 ? 1 : 0)); }
 
@@ -308,9 +314,6 @@ public:
 
 	Q_INVOKABLE QString caption() const { return m_caption; }
 	void setCaption(const QString& caption) { m_caption = caption; }
-
-	/*Q_INVOKABLE E::DataFormat dataFormat() const { return m_appSignalDataFormat; }
-	Q_INVOKABLE int dataFormatInt() const { return TO_INT(m_appSignalDataFormat); }*/
 
 	E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
 	int analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
@@ -415,8 +418,20 @@ public:
 	Q_INVOKABLE bool enableTuning() const { return m_enableTuning; }
 	void setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
 
-	Q_INVOKABLE double tuningDefaultValue() const { return m_tuningDefaultValue; }
-	void setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
+	Q_INVOKABLE float tuningDefaultValue() const { return m_tuningDefaultValue; }
+	void setTuningDefaultValue(float value) { m_tuningDefaultValue = value; }
+
+	Q_INVOKABLE float tuningLowBound() const { return m_tuningLowBound; }
+	void setTuningLowBound(float value) { m_tuningLowBound = value; }
+
+	Q_INVOKABLE float tuningHighBound() const { return m_tuningHighBound; }
+	void setTuningHighBound(float value) { m_tuningHighBound = value; }
+
+	void setBusTypeID(const QString& busTypeID) { m_busTypeID = busTypeID; }
+	QString busTypeID() const { return m_busTypeID; }
+
+	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
+	bool adaptiveAperture() const { return m_adaptiveAperture; }
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -433,7 +448,6 @@ public:
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 
 	QString regValueAddrStr() const;
-
 
 	friend class DbWorker;
 };

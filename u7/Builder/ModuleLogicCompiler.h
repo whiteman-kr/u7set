@@ -388,7 +388,7 @@ namespace Builder
 		bool isDiscrete() const { return m_signal->isDiscrete(); }
 		bool isBus() const { return m_signal->isBus(); }
 
-		bool isRegistered() const { return m_signal->isRegistered(); }
+		bool isRegistered() const { return m_signal->isAcquired(); }
 		bool isInternal() const { return m_signal->isInternal(); }
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
