@@ -137,6 +137,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_normalState = signal.m_normalState;
 	m_decimalPlaces = signal.m_decimalPlaces;
 	m_aperture = signal.m_aperture;
+	m_adaptiveAperture = signal.m_adaptiveAperture;
 	m_inOutType = signal.m_inOutType;
 	m_equipmentID = signal.m_equipmentID;
 	m_filteringTime = signal.m_filteringTime;
