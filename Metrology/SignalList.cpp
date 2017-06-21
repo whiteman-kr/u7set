@@ -343,6 +343,9 @@ void SignalListDialog::createInterface(bool hasButtons)
 	m_pTypeDiscreteAction = m_pViewTypeADMenu->addAction(tr("Discrete"));
 	m_pTypeDiscreteAction->setCheckable(true);
 	m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
+	m_pTypeBusAction = m_pViewTypeADMenu->addAction(tr("Bus"));
+	m_pTypeBusAction->setCheckable(true);
+	m_pTypeBusAction->setChecked(m_typeAD == E::SignalType::Bus);
 
 	m_pViewTypeIOMenu = new QMenu(tr("Type I/O"), this);
 	m_pTypeInputAction = m_pViewTypeIOMenu->addAction(tr("Input"));
@@ -378,6 +381,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 
 	connect(m_pTypeAnalogAction, &QAction::triggered, this, &SignalListDialog::showTypeAnalog);
 	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &SignalListDialog::showTypeDiscrete);
+	connect(m_pTypeBusAction, &QAction::triggered, this, &SignalListDialog::showTypeBus);
 	connect(m_pTypeInputAction, &QAction::triggered, this, &SignalListDialog::showTypeInput);
 	connect(m_pTypeInternalAction, &QAction::triggered, this, &SignalListDialog::showTypeInternal);
 	connect(m_pTypeOutputAction, &QAction::triggered, this, &SignalListDialog::showTypeOutput);
@@ -508,6 +512,7 @@ void SignalListDialog::updateVisibleColunm()
 {
 	m_pTypeAnalogAction->setChecked(m_typeAD == E::SignalType::Analog);
 	m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
+	m_pTypeBusAction->setChecked(m_typeAD == E::SignalType::Bus);
 	m_pTypeInputAction->setChecked(m_typeIO == E::SignalInOutType::Input);
 	m_pTypeInternalAction->setChecked(m_typeIO == E::SignalInOutType::Internal);
 	m_pTypeOutputAction->setChecked(m_typeIO == E::SignalInOutType::Output);
@@ -567,6 +572,19 @@ void SignalListDialog::updateVisibleColunm()
 
 			break;
 
+		case E::SignalType::Bus:
+
+			hideColumn(SIGNAL_LIST_COLUMN_ADC, true);
+			hideColumn(SIGNAL_LIST_COLUMN_IN_PH_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
+			hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
+			hideColumn(SIGNAL_LIST_COLUMN_TUN_SIGNAL, true);
+			hideColumn(SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL, true);
+
+			break;
 
 		default:
 			assert(0);
@@ -718,6 +736,16 @@ void SignalListDialog::showTypeDiscrete()
 
 	updateList();
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalListDialog::showTypeBus()
+{
+	m_typeAD = E::SignalType::Bus;
+
+	updateList();
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
