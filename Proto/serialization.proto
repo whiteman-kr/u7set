@@ -1041,7 +1041,7 @@ message AppSignalParam
 
     optional int32 channel = 10 [default = 0];				// E::Channel:			A = 0, B = 1, C = 2, D = 3
 	optional int32 inOutType = 11 [default = 2];			// E::SignalInOutType:	Input = 0, Output = 1, Internal = 2
-	optional int32 signalType = 12 [default = 0];			// E::SignalType:		Analog = 0, Discrete = 1
+	optional int32 signalType = 12 [default = 0];			// E::SignalType:		Analog = 0, Discrete = 1, Bus = 2
 	optional int32 analogSignalFormat = 13 [default = 2];	// E::AnalogAppSignalFormat:	SignedInt32 = 1, Float32 = 2
 	optional int32 byteOrder = 14 [default = 2];			// E::ByteOrder:		LittleEndian = 0, BigEndian = 1
 
