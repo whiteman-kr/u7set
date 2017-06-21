@@ -161,7 +161,7 @@ namespace VFrame30
 
 		switch (type())
 		{
-			case ConstType::IntegerlType:
+			case ConstType::IntegerType:
 				text = QString::number(intValue());
 				break;
 			case ConstType::FloatType:
@@ -192,7 +192,7 @@ namespace VFrame30
 
 	bool SchemaItemConst::isIntegral() const
 	{
-		return m_type == SchemaItemConst::ConstType::IntegerlType;
+		return m_type == SchemaItemConst::ConstType::IntegerType;
 	}
 
 	bool SchemaItemConst::isFloat() const
