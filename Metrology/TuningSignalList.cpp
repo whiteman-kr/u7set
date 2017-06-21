@@ -524,6 +524,12 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 			break;
 
+		case E::SignalType::Bus:
+
+			stateStr.clear();
+
+			break;
+
 		default:
 			assert(0);
 	}
@@ -710,6 +716,9 @@ void TuningSignalListDialog::createInterface()
 	m_pTypeDiscreteAction = m_pViewTypeADMenu->addAction(tr("Discrete"));
 	m_pTypeDiscreteAction->setCheckable(true);
 	m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
+	m_pTypeBusAction = m_pViewTypeADMenu->addAction(tr("Bus"));
+	m_pTypeBusAction->setCheckable(true);
+	m_pTypeBusAction->setChecked(m_typeAD == E::SignalType::Bus);
 
 
 	m_pViewShowMenu = new QMenu(tr("Show"), this);
@@ -733,6 +742,7 @@ void TuningSignalListDialog::createInterface()
 
 	connect(m_pTypeAnalogAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeAnalog);
 	connect(m_pTypeDiscreteAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeDiscrete);
+	connect(m_pTypeBusAction, &QAction::triggered, this, &TuningSignalListDialog::showTypeBus);
 	connect(m_pShowSoucreAction, &QAction::triggered, this, &TuningSignalListDialog::showSources);
 
 
@@ -903,6 +913,7 @@ void TuningSignalListDialog::updateVisibleColunm()
 {
 	m_pTypeAnalogAction->setChecked(m_typeAD == E::SignalType::Analog);
 	m_pTypeDiscreteAction->setChecked(m_typeAD == E::SignalType::Discrete);
+	m_pTypeBusAction->setChecked(m_typeAD == E::SignalType::Bus);
 
 	m_pShowSoucreAction->setChecked(m_showSource);
 
@@ -916,6 +927,13 @@ void TuningSignalListDialog::updateVisibleColunm()
 
 	if (m_typeAD == E::SignalType::Discrete)
 	{
+		hideColumn(TUN_SIGNAL_LIST_COLUMN_RANGE, true);
+	}
+
+	if (m_typeAD == E::SignalType::Bus)
+	{
+		hideColumn(TUN_SIGNAL_LIST_COLUMN_STATE, true);
+		hideColumn(TUN_SIGNAL_LIST_COLUMN_DEFAULT, true);
 		hideColumn(TUN_SIGNAL_LIST_COLUMN_RANGE, true);
 	}
 }
@@ -1044,6 +1062,15 @@ void TuningSignalListDialog::showTypeAnalog()
 void TuningSignalListDialog::showTypeDiscrete()
 {
 	m_typeAD = E::SignalType::Discrete;
+
+	updateSignalList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalListDialog::showTypeBus()
+{
+	m_typeAD = E::SignalType::Bus;
 
 	updateSignalList();
 }

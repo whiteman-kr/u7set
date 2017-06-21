@@ -221,6 +221,7 @@ namespace Metrology
 
 		bool					isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool					isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
+		bool					isBus() const { return m_signalType == E::SignalType::Bus; }
 
 		bool					isInput() const { return m_inOutType == E::SignalInOutType::Input; }
 		bool					isOutput() const { return m_inOutType == E::SignalInOutType::Output; }

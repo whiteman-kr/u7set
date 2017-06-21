@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0005">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0006">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -4523,7 +4523,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0003">
+		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4533,8 +4533,7 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>28</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>
-				<Pin OpName="i_set" Caption="set" Type="Discrete" OpIndex="6" Size="1"/>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>				
 				<Pin OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="7" Size="1"/>
 			</Inputs>
 			<Outputs>
@@ -4557,7 +4556,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0003">
+		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0004">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4567,8 +4566,7 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>28</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>
-				<Pin OpName="i_set" Caption="set" Type="Discrete" OpIndex="6" Size="1"/>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="4" Size="32"/>				
 				<Pin OpName="i_reset" Caption="reset" Type="Discrete" OpIndex="7" Size="1"/>
 			</Inputs>
 			<Outputs>

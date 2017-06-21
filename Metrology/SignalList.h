@@ -146,6 +146,7 @@ private:
 
 	QAction*				m_pTypeAnalogAction = nullptr;
 	QAction*				m_pTypeDiscreteAction = nullptr;
+	QAction*				m_pTypeBusAction = nullptr;
 	QAction*				m_pTypeInputAction = nullptr;
 	QAction*				m_pTypeInternalAction = nullptr;
 	QAction*				m_pTypeOutputAction = nullptr;
@@ -206,6 +207,7 @@ private slots:
 							//
 	void					showTypeAnalog();
 	void					showTypeDiscrete();
+	void					showTypeBus();
 
 	void					showTypeInput();
 	void					showTypeInternal();

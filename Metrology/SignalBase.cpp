@@ -1636,6 +1636,7 @@ void SignalBase::initSignals()
 {
 	int analogTuningSignalCount = 0;
 	int discreteTuningSignalCount = 0;
+	int busTuningSignalCount = 0;
 
 	m_signalMutex.lock();
 
@@ -1678,6 +1679,7 @@ void SignalBase::initSignals()
 				{
 					case E::SignalType::Analog:		param.setPlace(analogTuningSignalCount++);		break;
 					case E::SignalType::Discrete:	param.setPlace(discreteTuningSignalCount++);	break;
+					case E::SignalType::Bus:		param.setPlace(busTuningSignalCount++);			break;
 					default:						assert(0);
 				}
 			}

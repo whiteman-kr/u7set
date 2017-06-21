@@ -169,7 +169,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0151.sql", "Upgrade to version 151, OCM and OCMN presets update"},
 	{":/DatabaseUpgrade/Upgrade0152.sql", "Upgrade to version 152, add func public.delete_file_on_update"},
 	{":/DatabaseUpgrade/Upgrade0153.sql", "Upgrade to version 153, OCM and OCMN presets update, delete old signals"},
-	{":/DatabaseUpgrade/Upgrade0154.sql", "Upgrade to version 154, append new fields in SignalInstance table"},
+	{":/DatabaseUpgrade/Upgrade0154.sql", "Upgrade to version 154, LogicModule0000.xml file update"},
+	{":/DatabaseUpgrade/Upgrade0155.sql", "Upgrade to version 155, append new fields in SignalInstance table"},
 };
 
 
