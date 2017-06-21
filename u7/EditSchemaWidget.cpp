@@ -5945,7 +5945,7 @@ void EditSchemaWidget::editPaste()
 
 			switch (constItem->type())
 			{
-			case VFrame30::SchemaItemConst::ConstType::IntegerlType:
+			case VFrame30::SchemaItemConst::ConstType::IntegerType:
 				if (okInteger == true)
 				{
 					constIntItems.push_back(item);
@@ -6304,7 +6304,7 @@ void EditSchemaWidget::clipboardDataChanged()
 
 		switch (constItem->type())
 		{
-		case VFrame30::SchemaItemConst::ConstType::IntegerlType:
+		case VFrame30::SchemaItemConst::ConstType::IntegerType:
 			if (okInteger == true)
 			{
 				constIntItems.push_back(item);
