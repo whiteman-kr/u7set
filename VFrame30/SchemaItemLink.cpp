@@ -1,5 +1,6 @@
 #include "SchemaItemLink.h"
 #include "SchemaLayer.h"
+#include "SchemaView.h"
 #include "DrawParam.h"
 
 namespace VFrame30
@@ -90,6 +91,7 @@ namespace VFrame30
 		}
 
 		QPainter* p = drawParam->painter();
+
 		int dpiX = drawParam->dpiX();
 
 		// Draw the main part
@@ -106,7 +108,8 @@ namespace VFrame30
 
 		for (auto pt = poinlist.cbegin(); pt != poinlist.cend(); ++pt)
 		{
-			polyline[index++] = QPointF(pt->X, pt->Y);
+			polyline[index] = drawParam->gridToDpi(*pt);
+			index++;
 		}
 
 		QPen pen(lineColor());

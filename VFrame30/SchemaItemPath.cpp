@@ -109,7 +109,7 @@ namespace VFrame30
 
 		for (auto pt = poinlist.cbegin(); pt != poinlist.cend(); ++pt)
 		{
-			polyline[index++] = QPointF(pt->X, pt->Y);
+			polyline[index++] = drawParam->gridToDpi(pt->X, pt->Y);
 		}
 
 		QPen pen(lineColor());

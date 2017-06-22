@@ -54,8 +54,13 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
-		int dpiX();
-		int dpiY();
+		int dpiX() const;
+		int dpiY() const;
+
+		double gridToDpiX(double pos) const;
+		double gridToDpiY(double pos) const;
+		QPointF gridToDpi(double x, double y) const;
+		QPointF gridToDpi(QPointF pos) const;
 
 		bool isEditMode() const;
 		void setEditMode(bool value);
