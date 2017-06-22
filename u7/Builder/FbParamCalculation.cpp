@@ -1730,11 +1730,11 @@ namespace Builder
 			}
 			else
 			{
-				if (i_ust.signedIntValue() == 0)
+				if (i_ust.signedIntValue() <= 0)
 				{
-					// Parameter '%1' of AFB '%2' can't be 0.
+					// Value of parameter '%1.%2' must be greater then 0.
 					//
-					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					m_log->errALC5088(i_ust.caption(), caption(), guid());
 					return false;
 				}
 			}
@@ -1773,11 +1773,11 @@ namespace Builder
 			}
 			else
 			{
-				if (i_ust.floatValue() == 0)
+				if (i_ust.floatValue() <= 0)
 				{
-					// Parameter '%1' of AFB '%2' can't be 0.
+					// Value of parameter '%1.%2' must be greater then 0.
 					//
-					m_log->errALC5058(i_ust.caption(), caption(), guid());
+					m_log->errALC5088(i_ust.caption(), caption(), guid());
 					return false;
 				}
 			}
