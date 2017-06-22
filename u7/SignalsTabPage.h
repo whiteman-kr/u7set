@@ -26,6 +26,7 @@ class QActionGroup;
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
 			ST_DISCRETE = TO_INT(E::SignalType::Discrete),
+			ST_BUS = TO_INT(E::SignalType::Bus),
 			ST_ANY = 0xff;
 
 

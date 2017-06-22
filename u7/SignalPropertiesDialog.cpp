@@ -170,10 +170,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
 		signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
 
-		if (signalProperties->signal().isDiscrete())
-		{
-		}
-
 		if (!signalProperties->signal().isInternal())
 		{
 			signalProperties->propertyByCaption("EnableTuning")->setVisible(false);
