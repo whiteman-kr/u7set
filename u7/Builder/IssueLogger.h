@@ -271,6 +271,7 @@ namespace Builder
 		void errALC5085(const QString& portEquipmentID, const QString& connectionID);	// Rx data size of RS232/485 port '%1' is undefined (connection '%2').
 		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Constant connected to discrete signal or FB input must have value 0 or 1.
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
+		void errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid);	// Value of parameter '%1.%2' must be greater then 0.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
