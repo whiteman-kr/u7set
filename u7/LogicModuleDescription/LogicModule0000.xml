@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0006">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0007">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -6289,7 +6289,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0004">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0005">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6381,55 +6381,7 @@ function(videoItemFblElement, afbElement)
 }
 						</Changed>
 					</Script>
-				</Param>            
-				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
+				</Param>  
 			</Params>
 			<CommonScript>
 				<Library>
@@ -6530,7 +6482,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0008">
+		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0009">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6585,54 +6537,6 @@ function(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>            
-				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-}
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
