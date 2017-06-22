@@ -2161,6 +2161,20 @@ void EditSchemaWidget::createActions()
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
+	m_addSeparatorBus = new QAction(this);
+	m_addSeparatorBus->setSeparator(true);
+
+	m_addBusComposer = new QAction(tr("Bus Composer"), this);
+	m_addBusComposer->setEnabled(true);
+	m_addBusComposer->setIcon(QIcon(":/Images/Images/SchemaBusComposer.svg"));
+	connect(m_addBusComposer, &QAction::triggered, this, &EditSchemaWidget::addBusComposer);
+
+	m_addBusExtractor = new QAction(tr("Bus Extractor"), this);
+	m_addBusExtractor->setEnabled(true);
+	m_addBusExtractor->setIcon(QIcon(":/Images/Images/SchemaBusExtractor.svg"));
+	connect(m_addBusExtractor, &QAction::triggered, this, &EditSchemaWidget::addBusExtractor);
+
+
 	m_addValueAction = new QAction(tr("Value"), this);
 	m_addValueAction->setEnabled(true);
 	m_addValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
@@ -2522,6 +2536,10 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
 			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorBus);
+			m_addMenu->addAction(m_addBusComposer);
+			m_addMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isUfbSchema() == true)
@@ -2532,6 +2550,10 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addAfbAction);
+
+			m_addMenu->addAction(m_addSeparatorBus);
+			m_addMenu->addAction(m_addBusComposer);
+			m_addMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isMonitorSchema() == true)
@@ -6608,6 +6630,117 @@ void EditSchemaWidget::addUfbElement()
 		}
 	}
 
+	return;
+}
+
+void EditSchemaWidget::addBusComposer()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusComposer>(schema()->unit());
+	addBusItem(schemaItem);
+}
+
+void EditSchemaWidget::addBusExtractor()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusExtractor>(schema()->unit());
+	addBusItem(schemaItem);
+}
+
+void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem)
+{
+	if (schema()->isLogicSchema() == false &&
+		schema()->isUfbSchema() == false)
+	{
+		assert(false);		// No sense to add sconnection to non applogic schema
+		return;
+	}
+
+//	// Select connectionId from existing connections
+//	//
+//	Hardware::ConnectionStorage connections(db(), this);
+
+//	bool ok = connections.load();
+//	if (ok == false)
+//	{
+//		addItem(schemaItem);
+//		return;
+//	}
+
+//	// Find all connections for Schema EquipmentIDs
+//	//
+//	std::shared_ptr<VFrame30::LogicSchema> s = logicSchema();
+
+//	std::set<std::shared_ptr<Hardware::Connection>> chassisConnectios;
+
+//	QStringList lms = s->equipmentIdList();
+//	for (QString lm : lms)
+//	{
+//		// Let's assume that LM has a Chassis parent, and LM's id is like SUSTEM_RACK_CHASSIS_LM.
+//		// Try to cut ID to chassis
+//		//
+//		int lastUnderscoreIndex = lm.lastIndexOf('_');
+//		if (lastUnderscoreIndex != -1)
+//		{
+//			lm = lm.left(lastUnderscoreIndex + 1);
+//		}
+
+//		std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
+//		lmConnections = connections.get(QStringList() << lm.trimmed());
+
+//		for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
+//		{
+//			chassisConnectios.insert(c);
+//		}
+//	}
+
+//	// --
+//	//
+//	std::vector<std::shared_ptr<Hardware::Connection>> chassisConnectionsVector;
+//	chassisConnectionsVector.reserve(chassisConnectios.size());
+
+//	for (std::shared_ptr<Hardware::Connection> c : chassisConnectios)
+//	{
+//		chassisConnectionsVector.push_back(c);
+//	}
+
+//	std::sort(chassisConnectionsVector.begin(), chassisConnectionsVector.end(),
+//		[](const std::shared_ptr<Hardware::Connection>& c1, const std::shared_ptr<Hardware::Connection>& c2) -> bool
+//		{
+//			return c1->connectionID() < c2->connectionID();
+//		});
+
+
+//	// Show menu
+//	//
+//	QObject actionParent;
+
+//	QList<QAction*> menuActions;
+
+//	QAction* empty = new QAction(QString("ConnectionID"), &actionParent);
+//	empty->setData(empty->text());
+//	menuActions << empty;
+
+//	for (const std::shared_ptr<Hardware::Connection>& c : chassisConnectionsVector)
+//	{
+//		QString caption = QString("%1\t%2 <-> %3").arg(c->connectionID()).arg(c->port1EquipmentID()).arg(c->port2EquipmentID());
+//		QAction* a = new QAction(caption , &actionParent);
+//		a->setData(c->connectionID());
+
+//		menuActions << a;
+//	}
+
+//	QPoint menuPos = QCursor::pos();
+
+//	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
+//	if (triggeredAction == nullptr)
+//	{
+//		return;
+//	}
+
+//	schemaItem->setConnectionId(triggeredAction->data().toString());
+
+	// Add item
+	//
+	addItem(schemaItem);
 	return;
 }
 

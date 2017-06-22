@@ -121,6 +121,7 @@ namespace VFrame30
 	const QString PropertyNames::connectionId("ConnectionID");
 	const QString PropertyNames::signalSource("SignalSource");
 
+	const QString PropertyNames::busTypeId("BusTypeID");
 
 	const QString PropertyNames::behaviourCategory("Behaviour");
 	const QString PropertyNames::appearanceCategory("Appearance");

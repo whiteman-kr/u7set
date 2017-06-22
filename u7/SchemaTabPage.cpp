@@ -2207,6 +2207,10 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 		m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
 		m_toolBar->addAction(m_schemaWidget->m_addReceiver);
 		m_toolBar->addAction(m_schemaWidget->m_addUfbAction);
+
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
+		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
+		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
 	}
 
 	if (schema->isUfbSchema())
@@ -2218,6 +2222,10 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFra
 		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
 		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
 		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
+
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
+		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
+		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
 	}
 
 	if (schema->isMonitorSchema())

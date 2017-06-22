@@ -1,4 +1,5 @@
 #include "SchemaItemBus.h"
+#include "SchemaLayer.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
 
@@ -73,6 +74,17 @@ namespace VFrame30
 	void SchemaItemBus::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, schema, layer);
+
+		QPainter* painter = drawParam->painter();
+		QRectF r = itemRectPinIndent(painter->device());
+
+		r.setLeft(r.left() + m_font.drawSize() / 4.0);
+		r.setRight(r.right() - m_font.drawSize() / 4.0);
+
+		painter->setPen(textColor());
+
+		DrawHelper::drawText(painter, m_font, itemUnit(), "bus type:\n" + busTypeId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
+
 		return;
 	}
 
@@ -163,56 +175,70 @@ namespace VFrame30
 		SchemaItemBus::Draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
+
 		QRectF r = itemRectPinIndent(painter->device());
+		r.setTopRight(drawParam->gridToDpi(r.topRight()));
+		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
+		// Draw bold left line
+		//
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
-		p->setPen(pen);
+		//pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		pen.setWidthF(BusSideLineWidth);
+		pen.setCapStyle(Qt::FlatCap);
+		painter->setPen(pen);
 
+		QLineF leftLine = {QPointF(r.right() - pen.widthF() / 2.0, r.top()),
+						   QPointF(r.right() - pen.widthF() / 2.0 , r.bottom())};
 
-//		// Custom draw
-//		//
-//		QPainter* p = drawParam->painter();
+		painter->drawLine(leftLine);
 
-//		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+		// Draw bold output pin
+		//
+		if (outputsCount() != 1)
+		{
+			assert(outputsCount() == 1);
+			return;
+		}
 
-//		if (std::abs(r.left() - r.right()) < 0.000001)
-//		{
-//			r.setRight(r.left() + 0.000001);
-//		}
+		const std::vector<AfbPin>& outputPins = outputs();
+		const AfbPin& output = outputPins[0];
 
-//		if (std::abs(r.bottom() - r.top()) < 0.000001)
-//		{
-//			r.setBottom(r.top() + 0.000001);
-//		}
+		// Get pin position
+		//
+		SchemaPoint vip;
+		GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
 
-//		int dpiX = drawParam->dpiX();
-//		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		// Draw pin
+		//
+		int dpiX = drawParam->dpiX();
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
-//		// Draw line and symbol >>
-//		//
-//		QPen linePen(lineColor());
-//		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
-//		p->setPen(linePen);
+		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
+		QPointF pt2(drawParam->gridToDpi(vip.X - pinWidth, vip.Y));
 
-//		p->drawLine(QPointF(r.right() - pinWidth, r.top()), QPointF(r.right() - pinWidth, r.bottom()));
+		painter->setPen(pen);
+		painter->drawLine(pt1, pt2);
 
-//		// >>
-//		//
-//		QRectF arrowRect(r);
-//		arrowRect.setLeft(r.right() - pinWidth);
+		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
 
-//		p->setPen(textColor());
-//		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		if (connectionCount > 1)
+		{
+			painter->setBrush(pen.color());
+			painter->setPen(pen);
+			DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
+			painter->setBrush(Qt::NoBrush);
+		}
+		else
+		{
+			// Draw red cross error mark
+			//
+			QPen redPen(QColor(0xE0B00000));
+			redPen.setWidthF(pen.widthF());
 
-//		// Draw ConnectionID
-//		//
-//		r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
-//		r.setRight(r.right() - pinWidth - m_font.drawSize() / 4.0);
-
-//		p->setPen(textColor());
-
-//		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
+			painter->setPen(redPen);
+			DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
+		}
 
 		return;
 	}
@@ -221,6 +247,23 @@ namespace VFrame30
 	{
 		return	FblItemRect::searchText(text) ||
 				busTypeId().contains(text, Qt::CaseInsensitive);
+	}
+
+	double SchemaItemBusComposer::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		int pinCount = qBound(2, inputsCount(), 128);
+
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+
+		return minHeight;
 	}
 
 	QString SchemaItemBusComposer::buildName() const
@@ -297,9 +340,75 @@ namespace VFrame30
 	{
 		SchemaItemBus::Draw(drawParam, schema, layer);
 
-//		// Custom draw
-//		//
-//		QPainter* p = drawParam->painter();
+		QPainter* painter = drawParam->painter();
+
+		// Custom draw
+		//
+		QRectF r = itemRectPinIndent(painter->device());
+		r.setTopRight(drawParam->gridToDpi(r.topRight()));
+		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
+
+		// Draw bold left line
+		//
+		QPen pen(lineColor());
+		//pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		pen.setWidthF(BusSideLineWidth);
+		pen.setCapStyle(Qt::FlatCap);
+		painter->setPen(pen);
+
+		QLineF leftLine = {QPointF(r.left() + pen.widthF() / 2.0, r.top()),
+						   QPointF(r.left() + pen.widthF() / 2.0 , r.bottom())};
+
+		painter->drawLine(leftLine);
+
+		// Draw bold input pin
+		//
+		if (inputsCount() != 1)
+		{
+			assert(inputsCount() == 1);
+			return;
+		}
+
+		const std::vector<AfbPin>& inputPins = inputs();
+		const AfbPin& input = inputPins[0];
+
+		// Get pin position
+		//
+		SchemaPoint vip;
+		GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
+
+		// Draw pin
+		//
+		int dpiX = drawParam->dpiX();
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
+		QPointF pt2(drawParam->gridToDpi(vip.X + pinWidth, vip.Y));
+
+		painter->setPen(pen);
+		painter->drawLine(pt1, pt2);
+
+		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
+
+		if (connectionCount > 1)
+		{
+			painter->setBrush(pen.color());
+			painter->setPen(pen);
+			DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
+			painter->setBrush(Qt::NoBrush);
+		}
+		else
+		{
+			// Draw red cross error mark
+			//
+			QPen redPen(QColor(0xE0B00000));
+			redPen.setWidthF(pen.widthF());
+
+			painter->setPen(redPen);
+			DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
+		}
+
+
 
 //		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
@@ -374,22 +483,22 @@ namespace VFrame30
 		return f0 || f1;
 	}
 
-//	double SchemaItemBusExtractor::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
-//	{
-//		// Cache values
-//		//
-//		m_cachedGridSize = gridSize;
-//		m_cachedPinGridStep = pinGridStep;
+	double SchemaItemBusExtractor::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
 
-//		// --
-//		//
-//		int pinCount = 2;
+		// --
+		//
+		int pinCount = qBound(2, outputsCount(), 128);
 
-//		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-//		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
-//		return minHeight;
-//	}
+		return minHeight;
+	}
 
 	QString SchemaItemBusExtractor::buildName() const
 	{

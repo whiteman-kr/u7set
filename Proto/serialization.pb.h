@@ -77,6 +77,9 @@ class SchemaItemReceiver;
 class SchemaItemUfb;
 class SchemaItemTerminator;
 class SchemaItemValue;
+class SchemaItemBus;
+class SchemaItemBusComposer;
+class SchemaItemBusExtractor;
 class SchemaItemControl;
 class SchemaItemPushButton;
 class SchemaItemLineEdit;
@@ -2863,6 +2866,33 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemValue* release_value();
   inline void set_allocated_value(::Proto::SchemaItemValue* value);
 
+  // optional .Proto.SchemaItemBus BusItem = 150;
+  inline bool has_busitem() const;
+  inline void clear_busitem();
+  static const int kBusItemFieldNumber = 150;
+  inline const ::Proto::SchemaItemBus& busitem() const;
+  inline ::Proto::SchemaItemBus* mutable_busitem();
+  inline ::Proto::SchemaItemBus* release_busitem();
+  inline void set_allocated_busitem(::Proto::SchemaItemBus* busitem);
+
+  // optional .Proto.SchemaItemBusComposer BusComposer = 151;
+  inline bool has_buscomposer() const;
+  inline void clear_buscomposer();
+  static const int kBusComposerFieldNumber = 151;
+  inline const ::Proto::SchemaItemBusComposer& buscomposer() const;
+  inline ::Proto::SchemaItemBusComposer* mutable_buscomposer();
+  inline ::Proto::SchemaItemBusComposer* release_buscomposer();
+  inline void set_allocated_buscomposer(::Proto::SchemaItemBusComposer* buscomposer);
+
+  // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
+  inline bool has_busextractor() const;
+  inline void clear_busextractor();
+  static const int kBusExtractorFieldNumber = 152;
+  inline const ::Proto::SchemaItemBusExtractor& busextractor() const;
+  inline ::Proto::SchemaItemBusExtractor* mutable_busextractor();
+  inline ::Proto::SchemaItemBusExtractor* release_busextractor();
+  inline void set_allocated_busextractor(::Proto::SchemaItemBusExtractor* busextractor);
+
   // optional .Proto.SchemaItemControl control = 200;
   inline bool has_control() const;
   inline void clear_control();
@@ -2954,6 +2984,12 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_terminator();
   inline void set_has_value();
   inline void clear_has_value();
+  inline void set_has_busitem();
+  inline void clear_has_busitem();
+  inline void set_has_buscomposer();
+  inline void clear_has_buscomposer();
+  inline void set_has_busextractor();
+  inline void clear_has_busextractor();
   inline void set_has_control();
   inline void clear_has_control();
   inline void set_has_pushbutton();
@@ -2994,12 +3030,15 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemUfb* ufb_;
   ::Proto::SchemaItemTerminator* terminator_;
   ::Proto::SchemaItemValue* value_;
+  ::Proto::SchemaItemBus* busitem_;
+  ::Proto::SchemaItemBusComposer* buscomposer_;
+  ::Proto::SchemaItemBusExtractor* busextractor_;
   ::Proto::SchemaItemControl* control_;
   ::Proto::SchemaItemPushButton* pushbutton_;
   ::Proto::SchemaItemLineEdit* lineedit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(34 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(37 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5846,6 +5885,237 @@ class SchemaItemValue : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemBus : public ::google::protobuf::Message {
+ public:
+  SchemaItemBus();
+  virtual ~SchemaItemBus();
+
+  SchemaItemBus(const SchemaItemBus& from);
+
+  inline SchemaItemBus& operator=(const SchemaItemBus& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemBus& default_instance();
+
+  void Swap(SchemaItemBus* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemBus* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemBus& from);
+  void MergeFrom(const SchemaItemBus& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string busTypeId = 2;
+  inline bool has_bustypeid() const;
+  inline void clear_bustypeid();
+  static const int kBusTypeIdFieldNumber = 2;
+  inline const ::std::string& bustypeid() const;
+  inline void set_bustypeid(const ::std::string& value);
+  inline void set_bustypeid(const char* value);
+  inline void set_bustypeid(const char* value, size_t size);
+  inline ::std::string* mutable_bustypeid();
+  inline ::std::string* release_bustypeid();
+  inline void set_allocated_bustypeid(::std::string* bustypeid);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemBus)
+ private:
+  inline void set_has_bustypeid();
+  inline void clear_has_bustypeid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* bustypeid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemBus* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemBusComposer : public ::google::protobuf::Message {
+ public:
+  SchemaItemBusComposer();
+  virtual ~SchemaItemBusComposer();
+
+  SchemaItemBusComposer(const SchemaItemBusComposer& from);
+
+  inline SchemaItemBusComposer& operator=(const SchemaItemBusComposer& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemBusComposer& default_instance();
+
+  void Swap(SchemaItemBusComposer* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemBusComposer* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemBusComposer& from);
+  void MergeFrom(const SchemaItemBusComposer& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemBusComposer)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemBusComposer* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemBusExtractor : public ::google::protobuf::Message {
+ public:
+  SchemaItemBusExtractor();
+  virtual ~SchemaItemBusExtractor();
+
+  SchemaItemBusExtractor(const SchemaItemBusExtractor& from);
+
+  inline SchemaItemBusExtractor& operator=(const SchemaItemBusExtractor& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemBusExtractor& default_instance();
+
+  void Swap(SchemaItemBusExtractor* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemBusExtractor* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemBusExtractor& from);
+  void MergeFrom(const SchemaItemBusExtractor& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemBusExtractor)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemBusExtractor* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -14163,15 +14433,129 @@ inline void SchemaItem::set_allocated_value(::Proto::SchemaItemValue* value) {
   }
 }
 
-// optional .Proto.SchemaItemControl control = 200;
-inline bool SchemaItem::has_control() const {
+// optional .Proto.SchemaItemBus BusItem = 150;
+inline bool SchemaItem::has_busitem() const {
   return (_has_bits_[0] & 0x80000000u) != 0;
 }
-inline void SchemaItem::set_has_control() {
+inline void SchemaItem::set_has_busitem() {
   _has_bits_[0] |= 0x80000000u;
 }
-inline void SchemaItem::clear_has_control() {
+inline void SchemaItem::clear_has_busitem() {
   _has_bits_[0] &= ~0x80000000u;
+}
+inline void SchemaItem::clear_busitem() {
+  if (busitem_ != NULL) busitem_->::Proto::SchemaItemBus::Clear();
+  clear_has_busitem();
+}
+inline const ::Proto::SchemaItemBus& SchemaItem::busitem() const {
+  return busitem_ != NULL ? *busitem_ : *default_instance_->busitem_;
+}
+inline ::Proto::SchemaItemBus* SchemaItem::mutable_busitem() {
+  set_has_busitem();
+  if (busitem_ == NULL) busitem_ = new ::Proto::SchemaItemBus;
+  return busitem_;
+}
+inline ::Proto::SchemaItemBus* SchemaItem::release_busitem() {
+  clear_has_busitem();
+  ::Proto::SchemaItemBus* temp = busitem_;
+  busitem_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_busitem(::Proto::SchemaItemBus* busitem) {
+  delete busitem_;
+  busitem_ = busitem;
+  if (busitem) {
+    set_has_busitem();
+  } else {
+    clear_has_busitem();
+  }
+}
+
+// optional .Proto.SchemaItemBusComposer BusComposer = 151;
+inline bool SchemaItem::has_buscomposer() const {
+  return (_has_bits_[1] & 0x00000001u) != 0;
+}
+inline void SchemaItem::set_has_buscomposer() {
+  _has_bits_[1] |= 0x00000001u;
+}
+inline void SchemaItem::clear_has_buscomposer() {
+  _has_bits_[1] &= ~0x00000001u;
+}
+inline void SchemaItem::clear_buscomposer() {
+  if (buscomposer_ != NULL) buscomposer_->::Proto::SchemaItemBusComposer::Clear();
+  clear_has_buscomposer();
+}
+inline const ::Proto::SchemaItemBusComposer& SchemaItem::buscomposer() const {
+  return buscomposer_ != NULL ? *buscomposer_ : *default_instance_->buscomposer_;
+}
+inline ::Proto::SchemaItemBusComposer* SchemaItem::mutable_buscomposer() {
+  set_has_buscomposer();
+  if (buscomposer_ == NULL) buscomposer_ = new ::Proto::SchemaItemBusComposer;
+  return buscomposer_;
+}
+inline ::Proto::SchemaItemBusComposer* SchemaItem::release_buscomposer() {
+  clear_has_buscomposer();
+  ::Proto::SchemaItemBusComposer* temp = buscomposer_;
+  buscomposer_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_buscomposer(::Proto::SchemaItemBusComposer* buscomposer) {
+  delete buscomposer_;
+  buscomposer_ = buscomposer;
+  if (buscomposer) {
+    set_has_buscomposer();
+  } else {
+    clear_has_buscomposer();
+  }
+}
+
+// optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
+inline bool SchemaItem::has_busextractor() const {
+  return (_has_bits_[1] & 0x00000002u) != 0;
+}
+inline void SchemaItem::set_has_busextractor() {
+  _has_bits_[1] |= 0x00000002u;
+}
+inline void SchemaItem::clear_has_busextractor() {
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline void SchemaItem::clear_busextractor() {
+  if (busextractor_ != NULL) busextractor_->::Proto::SchemaItemBusExtractor::Clear();
+  clear_has_busextractor();
+}
+inline const ::Proto::SchemaItemBusExtractor& SchemaItem::busextractor() const {
+  return busextractor_ != NULL ? *busextractor_ : *default_instance_->busextractor_;
+}
+inline ::Proto::SchemaItemBusExtractor* SchemaItem::mutable_busextractor() {
+  set_has_busextractor();
+  if (busextractor_ == NULL) busextractor_ = new ::Proto::SchemaItemBusExtractor;
+  return busextractor_;
+}
+inline ::Proto::SchemaItemBusExtractor* SchemaItem::release_busextractor() {
+  clear_has_busextractor();
+  ::Proto::SchemaItemBusExtractor* temp = busextractor_;
+  busextractor_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtractor* busextractor) {
+  delete busextractor_;
+  busextractor_ = busextractor;
+  if (busextractor) {
+    set_has_busextractor();
+  } else {
+    clear_has_busextractor();
+  }
+}
+
+// optional .Proto.SchemaItemControl control = 200;
+inline bool SchemaItem::has_control() const {
+  return (_has_bits_[1] & 0x00000004u) != 0;
+}
+inline void SchemaItem::set_has_control() {
+  _has_bits_[1] |= 0x00000004u;
+}
+inline void SchemaItem::clear_has_control() {
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline void SchemaItem::clear_control() {
   if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
@@ -14203,13 +14587,13 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::has_pushbutton() const {
-  return (_has_bits_[1] & 0x00000001u) != 0;
+  return (_has_bits_[1] & 0x00000008u) != 0;
 }
 inline void SchemaItem::set_has_pushbutton() {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000008u;
 }
 inline void SchemaItem::clear_has_pushbutton() {
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
@@ -14241,13 +14625,13 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::has_lineedit() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[1] & 0x00000010u) != 0;
 }
 inline void SchemaItem::set_has_lineedit() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000010u;
 }
 inline void SchemaItem::clear_has_lineedit() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
@@ -17381,6 +17765,88 @@ inline void SchemaItemValue::set_textcolordiscrno1(::google::protobuf::uint32 va
   set_has_textcolordiscrno1();
   textcolordiscrno1_ = value;
 }
+
+// -------------------------------------------------------------------
+
+// SchemaItemBus
+
+// optional string busTypeId = 2;
+inline bool SchemaItemBus::has_bustypeid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemBus::set_has_bustypeid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemBus::clear_has_bustypeid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemBus::clear_bustypeid() {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    bustypeid_->clear();
+  }
+  clear_has_bustypeid();
+}
+inline const ::std::string& SchemaItemBus::bustypeid() const {
+  return *bustypeid_;
+}
+inline void SchemaItemBus::set_bustypeid(const ::std::string& value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void SchemaItemBus::set_bustypeid(const char* value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void SchemaItemBus::set_bustypeid(const char* value, size_t size) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemBus::mutable_bustypeid() {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  return bustypeid_;
+}
+inline ::std::string* SchemaItemBus::release_bustypeid() {
+  clear_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = bustypeid_;
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemBus::set_allocated_bustypeid(::std::string* bustypeid) {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypeid_;
+  }
+  if (bustypeid) {
+    set_has_bustypeid();
+    bustypeid_ = bustypeid;
+  } else {
+    clear_has_bustypeid();
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemBusComposer
+
+// -------------------------------------------------------------------
+
+// SchemaItemBusExtractor
 
 // -------------------------------------------------------------------
 

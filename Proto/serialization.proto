@@ -401,6 +401,10 @@ message SchemaItem
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
 	optional SchemaItemValue Value = 136;					// +PosRectImpl
 
+    optional SchemaItemBus BusItem = 150;					// +FblItemRect
+	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
+	optional SchemaItemBusExtractor BusExtractor = 152;		// +SchemaItemBus, FblItemRect
+
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
@@ -745,6 +749,34 @@ message SchemaItemValue
 	optional uint32 fillColorDiscrNo1 = 51;
 	optional uint32 textColorDiscrNo0 = 52;
 	optional uint32 textColorDiscrNo1 = 53;
+}
+
+//
+//
+// SchemaItemBus
+//
+//
+message SchemaItemBus
+{
+    optional string busTypeId = 2;
+}
+
+//
+//
+// SchemaItemBusComposer
+//
+//
+message SchemaItemBusComposer
+{
+}
+
+//
+//
+// SchemaItemBusExtractor
+//
+//
+message SchemaItemBusExtractor
+{
 }
 
 //

@@ -24,10 +24,12 @@
         <file>Images/SchemaInOutSignal.svg</file>
         <file>Images/SchemaText.svg</file>
         <file>Images/SchemaUfbElement.svg</file>
-		<file>Images/SchemaTerminator.svg</file>
+        <file>Images/SchemaTerminator.svg</file>
         <file>Images/SchemaItemPushButton.svg</file>
         <file>Images/SchemaItemLineEdit.svg</file>
         <file>Images/SchemaItemValue.svg</file>
+        <file>Images/SchemaBusComposer.svg</file>
+        <file>Images/SchemaBusExtractor.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

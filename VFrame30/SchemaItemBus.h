@@ -5,6 +5,8 @@
 namespace VFrame30
 {
 
+	static const double BusSideLineWidth = mm2in(0.4);
+
 	//
 	//
 	//		SchemaItemBus
@@ -89,6 +91,7 @@ namespace VFrame30
 		// Public Methods
 		//
 	public:
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
 
 		// Properties
@@ -138,7 +141,7 @@ namespace VFrame30
 		// Public Methods
 		//
 	public:
-		//virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
 
 		// Properties
