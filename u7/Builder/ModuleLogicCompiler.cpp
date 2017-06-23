@@ -5536,7 +5536,33 @@ namespace Builder
 	bool ModuleLogicCompiler::createSignalLists()
 	{
 		bool result = true;
+
+		result &= createRegDiscreteInputSignalList();
+
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createRegDiscreteInputSignalList()
+	{
+		m_regDiscreteInputSignals.clear();
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == true &&
+				s->isDiscrete() == true &&
+				s->isInput() == true)
+			{
+				m_regDiscreteInputSignals.append(s);
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::createAppLogicItemsMaps()

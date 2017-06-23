@@ -570,8 +570,10 @@ namespace Builder
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
-		QHash<QString, QString> m_linkedValidtySignalsID;			// device signals with linked validity signals
+		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+
+		QVector<Signal*> m_regDiscreteInputSignals;				// registered discrete input signals
 
 		QHash<QUuid, QUuid> m_outPinSignal;						// output pin GUID -> signal GUID
 
@@ -610,6 +612,7 @@ namespace Builder
 		bool loadModulesSettings();
 		bool createChassisSignalsMap();
 		bool createSignalLists();
+		bool createRegDiscreteInputSignalList();
 
 		bool createAppLogicItemsMaps();
 		bool createAppSignalsMap();
