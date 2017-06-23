@@ -246,7 +246,7 @@ namespace  Tuning
 
 						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
 
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(ramAddr);
 
 						sizeB += sizeof(float);
 						testSizeB = true;
@@ -283,7 +283,7 @@ namespace  Tuning
 
 						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
 
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(ramAddr);
 
 						sizeB += sizeof(qint32);
 						testSizeB = true;
@@ -328,7 +328,7 @@ namespace  Tuning
 
 						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
 
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(ramAddr);
 
 						//
 

@@ -195,14 +195,19 @@ private:
 
 	Hash m_hash = 0;					// hash of AppSignalID
 
-	Address16 m_ioBufferAddr;			// only for modules input/output signals
-										// signal address in i/o modules buffers
+	Address16 m_ioBufAddr;				// signal address in i/o modules buffers
+										// only for signals of input/output modules (input and output signals)
 
-	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_regValueAddr;			// signal Value address in FSC data packet (registration address)
-	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet (registration address)
+	Address16 m_tuningAddr;				// signal address in tuning buffer
+										// only for tuningable signals
 
-	Address16 m_tuningAddr;
+	Address16 m_ualAddr;				// signal address is used in UAL
+										// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not
+										// this address should be used in all signals value read/write operations in UAL
+
+	Address16 m_regValueAddr;			// signal Value address in FSC data packet (registration buffer)
+	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet (registration buffer)
+
 
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
 
@@ -266,25 +271,25 @@ public:
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	VcsItemAction instanceAction() const { return m_instanceAction; }
 
-	Address16& iobufferAddr() { return m_ioBufferAddr; }
-	Address16& ramAddr() { return m_ramAddr; }
+	Address16& ioBufAddr() { return m_ioBufAddr; }
+	Address16& ualAddr() { return m_ualAddr; }
 	Address16& regValueAddr() { return m_regValueAddr; }
 	Address16& regValidityAddr() { return m_regValidityAddr; }
+	Address16& tuningAddr() { return m_tuningAddr; }
 
-	const Address16& iobufferAddr() const { return m_ioBufferAddr; }
-	const Address16& ramAddr() const { return m_ramAddr; }
-
+	const Address16& ioBufAddr() const { return m_ioBufAddr; }
+	const Address16& ualAddr() const { return m_ualAddr; }
 	const Address16& regValueAddr() const { return m_regValueAddr; }
 	const Address16& regValidityAddr() const { return m_regValidityAddr; }
-
-	void resetAddresses() { m_ramAddr.reset(); m_regValueAddr.reset(); m_regValidityAddr.reset(); }
-
-	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
-	void setRegValueAddr(const Address16& regValueAddr) { m_regValueAddr = regValueAddr; }
-	void setRegValidityAddr(const Address16& regValidityAddr) { m_regValidityAddr = regValidityAddr; }
-
-	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
 	const Address16& tuningAddr() const { return m_tuningAddr; }
+
+	void setIoBufAddr(const Address16& addr) { m_ioBufAddr = addr; }
+	void setUalAddr(const Address16& addr) { m_ualAddr = addr; }
+	void setRegValueAddr(const Address16& addr) { m_regValueAddr = addr; }
+	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
+	void setTuningAddr(const Address16& addr) { m_tuningAddr = addr; }
+
+	void resetAddresses();
 
 	Hash hash() const { return m_hash; }
 	void setHash(Hash hash) { m_hash = hash; }

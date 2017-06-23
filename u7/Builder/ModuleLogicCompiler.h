@@ -374,10 +374,10 @@ namespace Builder
 
 		QUuid guid() const;
 
-		const Address16& ramAddr() const { return m_signal->ramAddr(); }
+		const Address16& ramAddr() const { return m_signal->ualAddr(); }
 		const Address16& regAddr() const { return m_signal->regValueAddr(); }
 
-		Address16& ramAddr() { return m_signal->ramAddr(); }
+		Address16& ramAddr() { return m_signal->ualAddr(); }
 		Address16& regAddr() { return m_signal->regValueAddr(); }
 
 		E::SignalType signalType() const { return m_signal->signalType(); }
@@ -510,8 +510,6 @@ namespace Builder
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorStorage* m_cmpStorage = nullptr;
 
-		HashedVector<QString, Signal*> m_lmAssociatedSignals;
-
 		std::shared_ptr<LogicModule> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
@@ -549,7 +547,7 @@ namespace Builder
 
 		int m_bitAccumulatorAddress = 0;
 
-		QVector<Module> m_modules;
+		HashedVector<QString, Module> m_modules;		// modules installed in chassis, module EquipmentID => Module
 
 		//
 
@@ -565,11 +563,16 @@ namespace Builder
 
 		// service maps
 		//
-		HashedVector<QUuid, AppItem*> m_appItems;			// item GUID -> item ptr
-		QHash<QUuid, AppItem*> m_pinParent;					// pin GUID -> parent item ptr
-		QHash<QString, Signal*> m_signalsStrID;				// signals StrID -> Signal ptr
-		QHash<QString, Signal*> m_deviceBoundSignals;		// device signal strID -> Signal ptr
-		QHash<QUuid, QUuid> m_outPinSignal;					// output pin GUID -> signal GUID
+		HashedVector<QUuid, AppItem*> m_appItems;				// item GUID => item ptr
+		QHash<QUuid, AppItem*> m_pinParent;						// pin GUID => parent item ptr
+
+		HashedVector<QString, Signal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
+		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
+
+		QHash<QString, QString> m_linkedValidtySignalsID;			// device signals with linked validity signals
+																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+
+		QHash<QUuid, QUuid> m_outPinSignal;						// output pin GUID -> signal GUID
 
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
@@ -602,15 +605,11 @@ namespace Builder
 
 		// pass #1 compilation functions
 		//
-		bool getLMChassis();
 		bool loadLMSettings();
 		bool loadModulesSettings();
 
-		bool prepareAppLogicGeneration();
-
-		bool getLmAssociatedSignals();
-		bool buildServiceMaps();
-		bool createDeviceBoundSignalsMap();
+		bool createChassisSignalsMap();
+		bool createAppLogicItemsMaps();
 		bool createAppSignalsMap();
 
 		bool setOptoRawInSignalsAsComputed();
@@ -717,7 +716,7 @@ namespace Builder
 		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
 
 		bool calculateLmMemoryMap();
-		bool calculateInOutSignalsAddresses();
+		bool calculateIoSignalsAddresses();
 		bool calculateInternalSignalsAddresses();
 		bool setOutputSignalsAsComputed();
 
@@ -760,7 +759,7 @@ namespace Builder
 		~ModuleLogicCompiler();
 
 		const SignalSet& signalSet() { return *m_signals; }
-		Signal* getSignal(const QString& strID);
+		Signal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
 

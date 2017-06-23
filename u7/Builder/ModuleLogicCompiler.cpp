@@ -51,46 +51,77 @@ namespace Builder
 		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OCM, "OCM");
 	}
 
-
 	ModuleLogicCompiler::~ModuleLogicCompiler()
 	{
 		cleanup();
 	}
 
-
-	Signal* ModuleLogicCompiler::getSignal(const QString& strID)
+	Signal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
-		if (m_signalsStrID.contains(strID))
-		{
-			return m_signalsStrID.value(strID);
-		}
-
-		return nullptr;
+		return m_chassisSignals.value(appSignalID, nullptr);
 	}
-
 
 	bool ModuleLogicCompiler::pass1()
 	{
-
 		LOG_EMPTY_LINE(m_log)
 
 		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
 
 		LOG_MESSAGE(m_log, msg);
 
+		m_chassis = m_lm->getParentChassis();
+
+		if (m_chassis == nullptr)
+		{
+			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->equipmentIdTemplate());
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			return false;
+		}
+
+		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(m_lm->equipmentIdTemplate());
+
+		m_moduleLogic = appLogicModule.get();
+
+		if (m_moduleLogic == nullptr)
+		{
+			//	Application logic for module '%1' is not found.
+			//
+			m_log->wrnALC5001(m_lm->equipmentIdTemplate());
+		}
+
 		bool result = false;
 
 		do
 		{
-			if (!getLMChassis()) break;
+			if (loadLMSettings() == false) break;
 
-			if (!loadLMSettings()) break;
+			if (loadModulesSettings() == false) break;
 
-			if (!loadModulesSettings()) break;
+			if (createChassisSignalsMap() == false) break;
 
-			if (!prepareAppLogicGeneration()) break;
+			if (calculateIoSignalsAddresses() == false) break;
 
-			if (!buildTuningData()) break;
+			if (createAppLogicItemsMaps() == false) break;
+
+			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
+
+			if (createAppFbsMap() == false) break;
+
+			if (createAppSignalsMap() == false) break;
+
+			if (calculateLmMemoryMap() == false) break;
+
+			if (calculateInternalSignalsAddresses() == false) break;
+
+			if (setOutputSignalsAsComputed() == false) break;
+
+			if (processTxSignals() == false) break;
+
+			if (processSerialRxSignals() == false) break;
+
+			if (setOptoRawInSignalsAsComputed() == false) break;
+
+			if (buildTuningData() == false) break;
 
 			result = true;
 		}
@@ -344,88 +375,44 @@ namespace Builder
 		}
 	}
 
-
-	bool ModuleLogicCompiler::getLMChassis()
-	{
-		m_chassis = m_lm->getParentChassis();
-
-		if (m_chassis == nullptr)
-		{
-			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->equipmentIdTemplate());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-			return false;
-		}
-
-		return true;
-	}
-
-
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
 
-		MemoryArea m_moduleData;
-		m_moduleData.setStartAddress(m_lmDescription->memory().m_moduleDataOffset);
-		m_moduleData.setSizeW(m_lmDescription->memory().m_moduleDataSize);
+		MemoryArea moduleData;
+		moduleData.setStartAddress(m_lmDescription->memory().m_moduleDataOffset);
+		moduleData.setSizeW(m_lmDescription->memory().m_moduleDataSize);
 
-		MemoryArea m_optoInterfaceData;
-		m_optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().m_optoInterfaceDataOffset);
+		MemoryArea optoInterfaceData;
+		optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().m_optoInterfaceDataOffset);
 
-		MemoryArea m_appLogicBitData;
-		m_appLogicBitData.setStartAddress(m_lmDescription->memory().m_appLogicBitDataOffset);
-		m_appLogicBitData.setSizeW(m_lmDescription->memory().m_appLogicBitDataSize);
+		MemoryArea appLogicBitData;
+		appLogicBitData.setStartAddress(m_lmDescription->memory().m_appLogicBitDataOffset);
+		appLogicBitData.setSizeW(m_lmDescription->memory().m_appLogicBitDataSize);
 
-		MemoryArea m_tuningData;
-		m_tuningData.setStartAddress(m_lmDescription->memory().m_tuningDataOffset);
-		m_tuningData.setSizeW(m_lmDescription->memory().m_tuningDataSize);
+		MemoryArea tuningData;
+		tuningData.setStartAddress(m_lmDescription->memory().m_tuningDataOffset);
+		tuningData.setSizeW(m_lmDescription->memory().m_tuningDataSize);
 
-		MemoryArea m_appLogicWordData;
-		m_appLogicWordData.setStartAddress(m_lmDescription->memory().m_appLogicWordDataOffset);
-		m_appLogicWordData.setSizeW(m_lmDescription->memory().m_appLogicWordDataSize);
+		MemoryArea appLogicWordData;
+		appLogicWordData.setStartAddress(m_lmDescription->memory().m_appLogicWordDataOffset);
+		appLogicWordData.setSizeW(m_lmDescription->memory().m_appLogicWordDataSize);
 
-		MemoryArea m_lmDiagData;
-		m_lmDiagData.setStartAddress(m_lmDescription->memory().m_txDiagDataOffset);
-		m_lmDiagData.setSizeW(m_lmDescription->memory().m_txDiagDataSize);
+		MemoryArea lmDiagData;
+		lmDiagData.setStartAddress(m_lmDescription->memory().m_txDiagDataOffset);
+		lmDiagData.setSizeW(m_lmDescription->memory().m_txDiagDataSize);
 
-		MemoryArea m_lmAppData;
-		m_lmAppData.setStartAddress(m_lmDescription->memory().m_appDataOffset);
-		m_lmAppData.setSizeW(m_lmDescription->memory().m_appDataSize);
+		MemoryArea lmAppData;
+		lmAppData.setStartAddress(m_lmDescription->memory().m_appDataOffset);
+		lmAppData.setSizeW(m_lmDescription->memory().m_appDataSize);
 
-//		const DeviceHelper::IntPropertyNameVar memSettings[] =
-//		{
-//			{	"ModuleDataOffset", m_moduleData.ptrStartAddress() },
-//			{	"ModuleDataSize", m_moduleData.ptrSizeW() },
-
-//			{	"OptoInterfaceDataOffset", m_optoInterfaceData.ptrStartAddress() },
-
-//			{	"AppLogicBitDataOffset", m_appLogicBitData.ptrStartAddress() },
-//			{	"AppLogicBitDataSize", m_appLogicBitData.ptrSizeW() },
-
-//			{	"TuningDataOffset", m_tuningData.ptrStartAddress() },
-//			{	"TuningDataSize", m_tuningData.ptrSizeW() },
-
-//			{	"AppLogicWordDataOffset", m_appLogicWordData.ptrStartAddress() },
-//			{	"AppLogicWordDataSize", m_appLogicWordData.ptrSizeW() },
-
-//			{	"TxDiagDataOffset", m_lmDiagData.ptrStartAddress() },
-//			{	"TxDiagDataSize", m_lmDiagData.ptrSizeW() },
-
-//			{	"AppDataOffset", m_lmAppData.ptrStartAddress() },
-//			{	"AppDataSize", m_lmAppData.ptrSizeW() }
-//		};
-
-//		for(DeviceHelper::IntPropertyNameVar memSetting : memSettings)
-//		{
-//			result &= getLMIntProperty(memSetting.name, memSetting.var);
-//		}
-
-		m_memoryMap.init(m_moduleData,
-						 m_optoInterfaceData,
-						 m_appLogicBitData,
-						 m_tuningData,
-						 m_appLogicWordData,
-						 m_lmDiagData,
-						 m_lmAppData);
+		m_memoryMap.init(moduleData,
+						 optoInterfaceData,
+						 appLogicBitData,
+						 tuningData,
+						 appLogicWordData,
+						 lmDiagData,
+						 lmAppData);
 
 		m_code.setMemoryMap(&m_memoryMap, m_log);
 
@@ -436,15 +423,6 @@ namespace Builder
 
 		m_lmAppLogicFrameSize = m_lmDescription->flashMemory().m_appLogicFrameSize;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
-
-//		result &= getLMIntProperty("ClockFrequency", &m_lmClockFrequency);
-//		result &= getLMIntProperty("ALPPhaseTime", &m_lmALPPhaseTime);
-//		result &= getLMIntProperty("IDRPhaseTime", &m_lmIDRPhaseTime);
-
-//		result &= getLMIntProperty("AppLogicFrameSize", &m_lmAppLogicFrameSize);
-//		result &= getLMIntProperty("AppLogicFrameCount", &m_lmAppLogicFrameCount);
-
-//		result &= getLMIntProperty("CycleDuration", &m_lmCycleDuration);
 
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
@@ -542,7 +520,7 @@ namespace Builder
 				m.appRegDataOffset = m_memoryMap.addModule(place, m.appRegDataSize);
 			}
 
-			m_modules.append(m);
+			m_modules.insert(device->equipmentIdTemplate(), m);
 		}
 
 		if (result == true)
@@ -552,58 +530,6 @@ namespace Builder
 
 		return result;
 	}
-
-
-	bool ModuleLogicCompiler::prepareAppLogicGeneration()
-	{
-		bool result = false;
-
-		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(m_lm->equipmentIdTemplate());
-
-		m_moduleLogic = appLogicModule.get();
-
-		if (m_moduleLogic == nullptr)
-		{
-			//	Application logic for module '%1' is not found.
-			//
-			m_log->wrnALC5001(m_lm->equipmentIdTemplate());
-		}
-
-		do
-		{
-			if (!getLmAssociatedSignals()) break;
-
-			if (!buildServiceMaps()) break;
-
-			if (!createDeviceBoundSignalsMap()) break;
-
-			if (!appendFbsForAnalogInOutSignalsConversion()) break;
-
-			if (!createAppFbsMap()) break;
-
-			if (!createAppSignalsMap()) break;
-
-			if (!calculateLmMemoryMap()) break;
-
-			if (!calculateInOutSignalsAddresses()) break;
-
-			if (!calculateInternalSignalsAddresses()) break;
-
-			if (!setOutputSignalsAsComputed()) break;
-
-			if (!processTxSignals()) break;
-
-			if (!processSerialRxSignals()) break;
-
-			if (!setOptoRawInSignalsAsComputed()) break;
-
-			result = true;
-		}
-		while(false);
-
-		return result;
-	}
-
 
 	void ModuleLogicCompiler::dumApplicationLogicItems()
 	{
@@ -833,7 +759,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE;
 		}
 
-		if (s->ramAddr().isValid() == false)
+		if (s->ualAddr().isValid() == false)
 		{
 			ASSERT_RETURN_FALSE;
 		}
@@ -847,7 +773,7 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.mov32(s->ramAddr().offset(), port->rxBufAbsAddress() + rxSignal->addrInBuf().offset());
+		cmd.mov32(s->ualAddr().offset(), port->rxBufAbsAddress() + rxSignal->addrInBuf().offset());
 		cmd.setComment(QString("copy rx signal %1").arg(rxSignal->appSignalID()));
 
 		m_code.append(cmd);
@@ -1311,12 +1237,12 @@ namespace Builder
 				continue;
 			}
 
-			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+			if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
 			}
 
-			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+			QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
 
 			if (boundSignals.count() > 1)
 			{
@@ -1392,7 +1318,7 @@ namespace Builder
 				cmd.clearComment();
 				m_code.append(cmd);
 
-				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
+				cmd.readFuncBlock32(signal->ualAddr().offset(), appFb->opcode(), appFb->instance(),
 									fbScal.outputSignalIndex, appFb->caption());
 				m_code.append(cmd);
 
@@ -1453,12 +1379,12 @@ namespace Builder
 
 		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 		{
-			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+			if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
 			}
 
-			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+			QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
 
 			if (boundSignals.count() > 1)
 			{
@@ -1483,7 +1409,7 @@ namespace Builder
 
 					// this is validity signal
 
-					cmd.mov(signal->ramAddr().offset(), module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset());
+					cmd.mov(signal->ualAddr().offset(), module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset());
 					cmd.setComment("copy validity");
 					m_code.append(cmd);
 
@@ -1546,7 +1472,7 @@ namespace Builder
 				cmd.clearComment();
 				m_code.append(cmd);
 
-				cmd.readFuncBlock32(signal->ramAddr().offset(), appFb->opcode(), appFb->instance(),
+				cmd.readFuncBlock32(signal->ualAddr().offset(), appFb->opcode(), appFb->instance(),
 									fbScal.outputSignalIndex, appFb->caption());
 				m_code.append(cmd);
 
@@ -2811,13 +2737,13 @@ namespace Builder
 
 			if (destSignal->isAnalog())
 			{
-				cmd.mov32(destSignal->ramAddr().offset(), rxAddress.offset());
+				cmd.mov32(destSignal->ualAddr().offset(), rxAddress.offset());
 			}
 			else
 			{
 				if (destSignal->isDiscrete())
 				{
-					cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
+					cmd.movBit(destSignal->ualAddr().offset(), destSignal->ualAddr().bit(),
 							   rxAddress.offset(), rxAddress.bit());
 				}
 				else
@@ -2865,7 +2791,7 @@ namespace Builder
 					arg(receiver.connectionId()).
 					arg(destSignal->appSignalID());
 
-			cmd.movBit(destSignal->ramAddr().offset(), destSignal->ramAddr().bit(),
+			cmd.movBit(destSignal->ualAddr().offset(), destSignal->ualAddr().bit(),
 						validityAddr.offset(), validityAddr.bit());
 
 			cmd.setComment(str);
@@ -3289,14 +3215,14 @@ namespace Builder
 				switch(appSignal->dataSize())
 				{
 				case SIZE_32BIT:
-					cmd.mov32(regBufStartAddr + s.regValueAddr().offset(), s.ramAddr().offset());
+					cmd.mov32(regBufStartAddr + s.regValueAddr().offset(), s.ualAddr().offset());
 					cmd.setComment(QString(tr("regBuf <= %1 %2").
 							arg(s.appSignalID()).arg(s.regValueAddrStr())));
 					m_code.append(cmd);
 					break;
 
 				case SIZE_16BIT:
-					cmd.mov(regBufStartAddr + s.regValueAddr().offset(), s.ramAddr().offset());
+					cmd.mov(regBufStartAddr + s.regValueAddr().offset(), s.ualAddr().offset());
 					cmd.setComment(QString(tr("regBuf <= %1 %2").
 							arg(s.appSignalID()).arg(s.regValueAddrStr())));
 					m_code.append(cmd);
@@ -3405,7 +3331,7 @@ namespace Builder
 
 				assert(s.regValueAddr().bit() == bitNoInBitAcc);
 
-				cmd.movBit(bitAccAddr, bitNoInBitAcc, s.ramAddr().offset(), s.ramAddr().bit());
+				cmd.movBit(bitAccAddr, bitNoInBitAcc, s.ualAddr().offset(), s.ualAddr().bit());
 				cmd.setComment(QString(tr("bitAcc <= %1 %2").
 							arg(s.appSignalID()).arg(s.regValueAddrStr())));
 				m_code.append(cmd);
@@ -3883,7 +3809,7 @@ namespace Builder
 
 			int txSignalAddress = port->txBufAbsAddress() + txSignal->addrInBuf().offset();
 
-			cmd.mov32(txSignalAddress, s->ramAddr().offset());
+			cmd.mov32(txSignalAddress, s->ualAddr().offset());
 			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
 
 			m_code.append(cmd);
@@ -3981,7 +3907,7 @@ namespace Builder
 
 			// copy discrete signal value to bit accumulator
 			//
-			cmd.movBit(bitAccumulatorAddress, bit, s->ramAddr().offset(), s->ramAddr().bit());
+			cmd.movBit(bitAccumulatorAddress, bit, s->ualAddr().offset(), s->ualAddr().bit());
 			cmd.setComment(QString("%1 >> %2").arg(s->appSignalID()).arg(port->connectionID()));
 
 			m_code.append(cmd);
@@ -4326,7 +4252,7 @@ namespace Builder
 				return false;
 			}
 
-			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ramAddr().offset());
+			cmd.mov32(port->txBufAbsAddress() + txSignal->addrInBuf().offset(), s->ualAddr().offset());
 
 			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
 
@@ -4399,7 +4325,7 @@ namespace Builder
 		//
 		bool result = true;
 
-		result &= tuningData->buildTuningSignalsLists(m_lmAssociatedSignals, m_log);
+		result &= tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
 		result &= tuningData->buildTuningData();
 
 		if (result == true)
@@ -4538,12 +4464,12 @@ namespace Builder
 				continue;
 			}
 
-			if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+			if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
 			{
 				continue;
 			}
 
-			QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+			QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
 
 			if (boundSignals.count() > 1)
 			{
@@ -4608,7 +4534,7 @@ namespace Builder
 				}
 
 				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   signal->ramAddr().offset(), appFb->caption());
+								   signal->ualAddr().offset(), appFb->caption());
 				cmd.setComment(QString(tr("output %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
 				m_code.append(cmd);
 
@@ -4928,7 +4854,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeOcmRsSignalsXml()
 	{
-		if (!m_signals || m_signals->isEmpty())
+		/*if (!m_signals || m_signals->isEmpty())
 		{
 			LOG_MESSAGE(m_log, tr("Signals not found!"));
 			return true;
@@ -4940,10 +4866,10 @@ namespace Builder
 			return true;
 		}
 
-		if (m_signalsStrID.isEmpty())
+		if (m_signalsID.isEmpty())
 		{
 			createDeviceBoundSignalsMap();
-		}
+		}*/
 	/*
 		equipmentWalker(m_chassis, [this](const Hardware::DeviceObject* device)
 		{
@@ -5234,12 +5160,12 @@ namespace Builder
 
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
-				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+				if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
 				{
 					continue;
 				}
 
-				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+				QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
 
 				if (boundSignals.count() > 1)
 				{
@@ -5460,13 +5386,15 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::getLmAssociatedSignals()
+	bool ModuleLogicCompiler::createChassisSignalsMap()
 	{
 		bool result = true;
 
 		int signalCount = m_signals->count();
 
-		m_lmAssociatedSignals.clear();
+		m_chassisSignals.clear();
+		m_ioSignals.clear();
+		m_linkedValidtySignalsID.clear();
 
 		for(int i = 0; i < signalCount; i++)
 		{
@@ -5477,11 +5405,9 @@ namespace Builder
 				continue;
 			}
 
-			if (signal.equipmentID() == m_lm->equipmentIdTemplate())
-			{
-				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
-				continue;
-			}
+			Hardware::DeviceSignal* deviceSignal = nullptr;
+
+			bool isIoSignal = false;
 
 			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
 
@@ -5490,24 +5416,123 @@ namespace Builder
 				continue;
 			}
 
-			const Hardware::DeviceChassis* chassis = device->getParentChassis();
-
-			if (chassis == nullptr)
+			switch(device->deviceType())
 			{
+			case Hardware::DeviceType::Module:
+				{
+					Hardware::DeviceModule* deviceModule = device->toModule();
+
+					if (deviceModule == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (deviceModule->isLogicModule() == false)
+					{
+						assert(false); // signal must be associated with Logic Module only
+						continue;
+					}
+
+					if (deviceModule->equipmentIdTemplate() != m_lm->equipmentIdTemplate())
+					{
+						continue;
+					}
+
+					// signal is associated with current LM
+
+					isIoSignal = false;
+				}
+				break;
+
+			case Hardware::DeviceType::Signal:
+				{
+					deviceSignal = device->toSignal();
+
+					if (deviceSignal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					const Hardware::DeviceChassis* chassis = deviceSignal->getParentChassis();
+
+					if (chassis == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					if (chassis != m_chassis)
+					{
+						continue;
+					}
+
+					// signal is associated with current LM
+
+					isIoSignal = true;
+
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					//
+					// Uncomment this code when validitySignalID property is added  !!!!!!!!
+					//
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+/*					QString validitySignalID;
+
+					bool res = DeviceHelper::getStrProperty(deviceSignal, QString("ValiditySignalID"), &validitySignalID, m_log);
+
+					if (res == false)
+					{
+						result = false;
+						continue;
+					}
+
+					if (validitySignalID.isEmpty() == false)
+					{
+
+						if (m_linkedValidtySignalsID.contains(deviceSignal->equipmentIdTemplate()) == true)
+						{
+							assert(false);
+						}
+
+						// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+						//
+						m_linkedValidtySignalsID.insert(deviceSignal->equipmentIdTemplate(), validitySignalID);
+					}  */
+				}
+
+				break;
+
+			default:
+				assert(false); // signal must be associated with DeviceSignal or DeviceModule (LM) only
 				continue;
 			}
 
-			if (chassis == m_chassis)
+			m_chassisSignals.insert(signal.appSignalID(), &signal);
+
+			if (isIoSignal == true)
 			{
-				m_lmAssociatedSignals.insert(signal.appSignalID(), &signal);
+				m_ioSignals.insert(signal.appSignalID(), &signal);
+
+				if (deviceSignal != nullptr)
+				{
+					m_equipmentSignals.insert(deviceSignal->equipmentIdTemplate(), &signal);
+				}
+				else
+				{
+					assert(false);
+				}
 			}
+
+			continue;
 		}
 
 		return result;
 	}
 
 
-	bool ModuleLogicCompiler::buildServiceMaps()
+	bool ModuleLogicCompiler::createAppLogicItemsMaps()
 	{
 		m_afbs.clear();
 
@@ -5531,7 +5556,7 @@ namespace Builder
 			// build QHash<QUuid, AppItem*> m_appItems
 			// item GUID -> item ptr
 			//
-			if (m_appItems.contains(logicItem.m_fblItem->guid()))
+			if (m_appItems.contains(logicItem.m_fblItem->guid()) == true)
 			{
 				AppItem* firstItem = m_appItems[logicItem.m_fblItem->guid()];
 
@@ -5656,34 +5681,6 @@ namespace Builder
 		return appFb;
 	}
 
-
-	bool ModuleLogicCompiler::createDeviceBoundSignalsMap()
-	{
-		int count = m_signals->count();
-
-		for(int i = 0; i < count; i++)
-		{
-			Signal* s = &(*m_signals)[i];
-
-			if (m_signalsStrID.contains(s->appSignalID()))
-			{
-				msg = QString(tr("Duplicate signal identifier: %1")).arg(s->appSignalID());
-				LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
-			}
-			else
-			{
-				m_signalsStrID.insert(s->appSignalID(), s);
-			}
-
-			if (!s->equipmentID().isEmpty())
-			{
-				m_deviceBoundSignals.insertMulti(s->equipmentID(), s);
-			}
-		}
-
-		return true;
-	}
-
 	bool ModuleLogicCompiler::createAppSignalsMap()
 	{
 		m_appSignals.clear();
@@ -5701,7 +5698,7 @@ namespace Builder
 				continue;
 			}
 
-			if (m_lmAssociatedSignals.contains(item->strID()) == false)
+			if (m_chassisSignals.contains(item->strID()) == false)
 			{
 				// The signal '%1' is not associated with LM '%2'.
 				//
@@ -5792,13 +5789,124 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::calculateInOutSignalsAddresses()
+	// calculation m_ioBufAddr of in/out signals
+	//
+	bool ModuleLogicCompiler::calculateIoSignalsAddresses()
 	{
 		LOG_MESSAGE(m_log, QString(tr("Input & Output signals addresses calculation...")));
 
 		bool result = true;
 
-		for(const Module& module : m_modules)
+		for(const Signal* s : m_ioSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			// retrieve linked device
+			//
+			Hardware::DeviceObject* deviceSignal = m_equipmentSet->deviceObject(s->equipmentID());
+
+			if (deviceSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (deviceSignal->isSignal() == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			// retrieve associated module
+			//
+			const Hardware::DeviceModule* deviceModule = deviceSignal->getParentModule();
+
+			if (deviceModule == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (m_modules.contains(deviceModule->equipmentIdTemplate()) == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			Module module = m_modules.value(deviceModule->equipmentIdTemplate());
+
+			int valueOffset = 0;
+			int valueBit = 0;
+			E::MemoryArea memoryArea;
+
+			bool res = true;
+
+			res &= DeviceHelper::getIntProperty(deviceSignal, QString("ValueOffset"), &valueOffset, m_log);
+			res &= DeviceHelper::getIntProperty(deviceSignal, QString("ValueBit"), &valueBit, m_log);
+			res &= DeviceHelper::getProperty<E::MemoryArea>(deviceSignal, QString("MemoryArea"), &memoryArea, m_log);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			Address16 ioBufAddr(valueOffset, valueBit);
+
+			switch(memoryArea)
+			{
+			case E::MemoryArea::ApplicationData:
+
+				switch(s->inOutType())
+				{
+				case E::SignalInOutType::Input:
+					ioBufAddr.addWord(module.txAppDataOffset);
+					break;
+
+				case E::SignalInOutType::Output:
+					ioBufAddr.addWord(module.rxAppDataOffset);
+					break;
+
+				case E::SignalInOutType::Internal:
+					assert(false);							// internal signals can't be in m_ioSignals
+					break;
+
+				default:
+					assert(false);
+				}
+				break;
+
+			case E::MemoryArea::DiagnosticsData:
+
+				switch(s->inOutType())
+				{
+				case E::SignalInOutType::Input:
+					ioBufAddr.addWord(module.txDiagDataOffset);
+					break;
+
+				case E::SignalInOutType::Output:
+					assert(false);							// output diagnostics signals do not exist
+					break;
+
+				case E::SignalInOutType::Internal:
+					assert(false);							// internal signals can't be in m_ioSignals
+					break;
+
+				default:
+					assert(false);
+				}
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+/*		for(const Module& module : m_modules)
 		{
 			if (module.device == nullptr)
 			{
@@ -5813,7 +5921,7 @@ namespace Builder
 
 			for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
 			{
-				if (!m_deviceBoundSignals.contains(deviceSignal->equipmentIdTemplate()))
+				if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
 				{
 					continue;
 				}
@@ -5823,7 +5931,7 @@ namespace Builder
 					continue;
 				}
 
-				QList<Signal*> boundSignals = m_deviceBoundSignals.values(deviceSignal->equipmentIdTemplate());
+				QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
 
 				if (boundSignals.count() > 1)
 				{
@@ -5901,7 +6009,7 @@ namespace Builder
 							Address16 ramAddr(module.appRegDataOffset + valueOffset, valueBit);
 							Address16 regAddr(ramAddr.offset() - m_memoryMap.appWordMemoryStart(), valueBit);
 
-							signal->ramAddr() = ramAddr;
+							signal->ualAddr() = ramAddr;
 							signal->regValueAddr() = regAddr;
 
 							// set same ramAddr & regAddr for corresponding signals in m_appSignals map
@@ -5926,7 +6034,7 @@ namespace Builder
 					}
 				}
 			}
-		}
+		}*/
 
 		return result;
 	}
@@ -6468,7 +6576,7 @@ namespace Builder
 
 		QString rxSignalID = receiver.appSignalId();
 
-		if (m_lmAssociatedSignals.contains(rxSignalID) == false)
+		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
 			// Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//

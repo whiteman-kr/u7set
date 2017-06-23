@@ -1024,6 +1024,25 @@ namespace Builder
                   .arg(propertyName));
     }
 
+	/// IssueCode: CFG3023
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1.%2' conversion error.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Error occurs during property conversion.
+	///
+	void IssueLogger::errCFG3023(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3023,
+				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
+	}
 
 	// ALP			Application Logic Parsing				4000-4999
 	//

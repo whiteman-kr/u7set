@@ -134,6 +134,8 @@ namespace Builder
 		void errCFG3020(QString objectID, QString propertyName);							// Property '%1.%2' is not found.
         void errCFG3021(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
         void errCFG3022(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
+		void errCFG3023(QString objectID, QString propertyName);							// Property '%1.%2' conversion error.
+
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
@@ -165,9 +167,6 @@ namespace Builder
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
-
-
-
 
 		// Multichannel pasing errors
 		//
