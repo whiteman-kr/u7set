@@ -285,6 +285,7 @@ public:
 	int mvsFileId() const;			// Monotor Video Schemas
 	int dvsFileId() const;			// Diaginostics Video Schemas
 	int connectionsFileId() const;	// Connections
+	int busTypesFileId() const;		// BusTypes
 
 	std::vector<DbFileInfo> systemFiles() const;
 

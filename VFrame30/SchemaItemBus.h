@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "Bus.h"
 
 namespace VFrame30
 {
@@ -36,21 +37,28 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		// Public Methods
+		// Methods
 		//
 	public:
 		virtual QString buildName() const override;
+
+	protected:
+		virtual void setBusPins(const VFrame30::Bus& bus);
 
 		// Properties
 		//
 	public:
 		QString busTypeId() const;
-		void setBusTypeId(const QString& value);
+
+		const VFrame30::Bus& busType() const;
+		void setBusType(const VFrame30::Bus&bus);
+
+		int busTypeVersion() const;
 
 		// Data
 		//
 	private:
-		QString m_busTypeId = {"BUSTYPEID"};
+		Bus m_bus;
 	};
 
 
@@ -93,6 +101,9 @@ namespace VFrame30
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
+
+	protected:
+		virtual void setBusPins(const VFrame30::Bus& bus);
 
 		// Properties
 		//
@@ -143,6 +154,9 @@ namespace VFrame30
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
+
+	protected:
+		virtual void setBusPins(const VFrame30::Bus& bus);
 
 		// Properties
 		//

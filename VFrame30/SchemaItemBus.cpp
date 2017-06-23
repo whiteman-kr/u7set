@@ -16,12 +16,8 @@ namespace VFrame30
 	SchemaItemBus::SchemaItemBus(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::busTypeId,
-								 PropertyNames::functionalCategory,
-								 true,
-								 SchemaItemBus::busTypeId,
-								 SchemaItemBus::setBusTypeId);
+		auto p = ADD_PROPERTY_GETTER(QString, PropertyNames::busTypeId, true, SchemaItemBus::busTypeId);
+		p->setCategory(PropertyNames::functionalCategory);
 	}
 
 	SchemaItemBus::~SchemaItemBus()
@@ -43,7 +39,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemBus* busitem = message->mutable_schemaitem()->mutable_busitem();
 
-		busitem->set_bustypeid(m_busTypeId.toStdString());
+		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
 
 		return true;
 	}
@@ -66,7 +62,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemBus& busitem = message.schemaitem().busitem();
 
-		m_busTypeId = QString::fromStdString(busitem.bustypeid());
+		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
 
 		return true;
 	}
@@ -94,14 +90,31 @@ namespace VFrame30
 		return QString();
 	}
 
-	QString SchemaItemBus::busTypeId() const
+	void SchemaItemBus::setBusPins(const Bus& bus)
 	{
-		return m_busTypeId;
+		Q_UNUSED(bus);
+		assert(false);
 	}
 
-	void SchemaItemBus::setBusTypeId(const QString& value)
+	QString SchemaItemBus::busTypeId() const
 	{
-		m_busTypeId = value.trimmed();
+		return m_bus.busTypeId();
+	}
+
+	const VFrame30::Bus& SchemaItemBus::busType() const
+	{
+		return m_bus;
+	}
+
+	void SchemaItemBus::setBusType(const VFrame30::Bus& bus)
+	{
+		m_bus = bus;
+		setBusPins(bus);
+	}
+
+	int SchemaItemBus::busTypeVersion() const
+	{
+		return m_bus.version();
 	}
 
 	//
@@ -269,6 +282,18 @@ namespace VFrame30
 	QString SchemaItemBusComposer::buildName() const
 	{
 		return QString("BusComposer %1").arg(busTypeId());
+	}
+
+	void SchemaItemBusComposer::setBusPins(const VFrame30::Bus& bus)
+	{
+		inputs().clear();
+
+		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
+		{
+			addInput(-1, busSignal.name());
+		}
+
+		return;
 	}
 
 	//
@@ -503,6 +528,18 @@ namespace VFrame30
 	QString SchemaItemBusExtractor::buildName() const
 	{
 		return QString("BusExtractor %1").arg(busTypeId());
+	}
+
+	void SchemaItemBusExtractor::setBusPins(const VFrame30::Bus& bus)
+	{
+		outputs().clear();
+
+		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
+		{
+			addOutput(-1, busSignal.name());
+		}
+
+		return;
 	}
 
 }

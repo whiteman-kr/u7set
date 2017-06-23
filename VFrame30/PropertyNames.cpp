@@ -8,6 +8,7 @@ namespace VFrame30
 	const QString PropertyNames::preDrawScript("PreDrawScript");
 	const QString PropertyNames::commented("Commented");
 	const QString PropertyNames::objectName("ObjectName");
+	const QString PropertyNames::name("Name");
 
 	const QString PropertyNames::fontName("FontName");
 	const QString PropertyNames::fontSize("FontSize");

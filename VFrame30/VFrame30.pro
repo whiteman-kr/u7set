@@ -102,7 +102,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/AppSignal.h \
     ../lib/DbStruct.h \
     ../lib/Tuning/TuningSignalState.h \
-    SchemaItemBus.h
+    SchemaItemBus.h \
+    Bus.h
 
 SOURCES += \
     Settings.cpp \
@@ -156,7 +157,8 @@ SOURCES += \
     ../lib/AppSignal.cpp \
     ../lib/DbStruct.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    SchemaItemBus.cpp
+    SchemaItemBus.cpp \
+    Bus.cpp
 
 
 DEFINES += VFRAME30LIB_LIBRARY

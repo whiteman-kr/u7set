@@ -28,6 +28,7 @@
 #include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
+#include "../VFrame30/Bus.h"
 #include "LogicModule.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
@@ -6654,93 +6655,96 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 		return;
 	}
 
-//	// Select connectionId from existing connections
-//	//
-//	Hardware::ConnectionStorage connections(db(), this);
+	// Select BustType from existing
+	//
+	std::vector<DbFileInfo> fileInfos;
 
-//	bool ok = connections.load();
-//	if (ok == false)
-//	{
-//		addItem(schemaItem);
-//		return;
-//	}
+	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ".xml", true, this);
+	if (ok == false)
+	{
+		return;
+	}
 
-//	// Find all connections for Schema EquipmentIDs
-//	//
-//	std::shared_ptr<VFrame30::LogicSchema> s = logicSchema();
+	std::vector<std::shared_ptr<DbFile>> files;
 
-//	std::set<std::shared_ptr<Hardware::Connection>> chassisConnectios;
+	ok = db()->getLatestVersion(fileInfos, &files, this);
+	if (ok == false)
+	{
+		return;
+	}
 
-//	QStringList lms = s->equipmentIdList();
-//	for (QString lm : lms)
-//	{
-//		// Let's assume that LM has a Chassis parent, and LM's id is like SUSTEM_RACK_CHASSIS_LM.
-//		// Try to cut ID to chassis
-//		//
-//		int lastUnderscoreIndex = lm.lastIndexOf('_');
-//		if (lastUnderscoreIndex != -1)
-//		{
-//			lm = lm.left(lastUnderscoreIndex + 1);
-//		}
-
-//		std::vector<std::shared_ptr<Hardware::Connection>> lmConnections;
-//		lmConnections = connections.get(QStringList() << lm.trimmed());
-
-//		for (const std::shared_ptr<Hardware::Connection>& c : lmConnections)
-//		{
-//			chassisConnectios.insert(c);
-//		}
-//	}
-
-//	// --
-//	//
-//	std::vector<std::shared_ptr<Hardware::Connection>> chassisConnectionsVector;
-//	chassisConnectionsVector.reserve(chassisConnectios.size());
-
-//	for (std::shared_ptr<Hardware::Connection> c : chassisConnectios)
-//	{
-//		chassisConnectionsVector.push_back(c);
-//	}
-
-//	std::sort(chassisConnectionsVector.begin(), chassisConnectionsVector.end(),
-//		[](const std::shared_ptr<Hardware::Connection>& c1, const std::shared_ptr<Hardware::Connection>& c2) -> bool
-//		{
-//			return c1->connectionID() < c2->connectionID();
-//		});
+	// Parse files
+	//
+	std::vector<VFrame30::Bus> busses;
+	busses.reserve(files.size());
 
 
-//	// Show menu
-//	//
-//	QObject actionParent;
+	for (std::shared_ptr<DbFile> f : files)
+	{
+		VFrame30::Bus bus;
+		QString errorMessage;
 
-//	QList<QAction*> menuActions;
+		ok = bus.load(f->data(), &errorMessage);
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), QString("Error reading %1 file: %2").arg(f->fileName()).arg(errorMessage));
+			continue;
+		}
 
-//	QAction* empty = new QAction(QString("ConnectionID"), &actionParent);
+		busses.push_back(bus);
+	}
+
+	std::sort(busses.begin(), busses.end(),
+			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			{
+				return b1.busTypeId() < b2.busTypeId();
+			});
+	// Show menu
+	//
+	QObject actionParent;
+	QList<QAction*> menuActions;
+
+//	QAction* empty = new QAction(QString("BusTypeID"), &actionParent);
 //	empty->setData(empty->text());
 //	menuActions << empty;
 
-//	for (const std::shared_ptr<Hardware::Connection>& c : chassisConnectionsVector)
-//	{
-//		QString caption = QString("%1\t%2 <-> %3").arg(c->connectionID()).arg(c->port1EquipmentID()).arg(c->port2EquipmentID());
-//		QAction* a = new QAction(caption , &actionParent);
-//		a->setData(c->connectionID());
+	for (const VFrame30::Bus& bus : busses)
+	{
+		QString caption = QString("%1").arg(bus.busTypeId());
+		QAction* a = new QAction(caption , &actionParent);
+		a->setData(bus.busTypeId());
 
-//		menuActions << a;
-//	}
+		menuActions << a;
+	}
 
-//	QPoint menuPos = QCursor::pos();
+	QPoint menuPos = QCursor::pos();
 
-//	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
-//	if (triggeredAction == nullptr)
-//	{
-//		return;
-//	}
+	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
+	if (triggeredAction == nullptr)
+	{
+		return;
+	}
 
-//	schemaItem->setConnectionId(triggeredAction->data().toString());
-
-	// Add item
+	// --
 	//
-	addItem(schemaItem);
+	QString selectedBusId = triggeredAction->data().toString();
+
+	for (const VFrame30::Bus& bus : busses)
+	{
+		if (bus.busTypeId() == selectedBusId)
+		{
+			schemaItem->setBusType(bus);
+
+			// Add item
+			//
+			addItem(schemaItem);
+			return;
+		}
+	}
+
+	// Selected bus not found
+	//
+	assert(false);
 	return;
 }
 

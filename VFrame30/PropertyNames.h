@@ -15,6 +15,7 @@ namespace VFrame30
 		static const QString preDrawScript;
 		static const QString commented;
 		static const QString objectName;
+		static const QString name;
 
 		static const QString fontName;
 		static const QString fontSize;

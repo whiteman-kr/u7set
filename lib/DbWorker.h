@@ -62,6 +62,7 @@ public:
     int dvsFileId() const;
     int mcFileId() const;
 	int connectionsFileId() const;
+	int busTypesFileId() const;
 
     std::vector<DbFileInfo> systemFiles() const;
 
@@ -247,6 +248,7 @@ private:
 	int m_dvsFileId = -1;			// Diagnostics Visualization Schemas
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections
+	int m_busTypesFileId = -1;		// BusTypes
 
     std::vector<DbFileInfo> m_systemFiles;		// All system files
 
