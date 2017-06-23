@@ -114,10 +114,9 @@ namespace Hardware
 	const QString PropertyNames::memoryArea = "MemoryArea";
 	const QString PropertyNames::size = "Size";
 
-	const QString PropertyNames::validityOffset = "ValidityOffset";
-	const QString PropertyNames::validityBit = "ValidityBit";
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";
+	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
 
 	const QString PropertyNames::appSignalLowAdc = "LowAdc";
 	const QString PropertyNames::appSignalHighAdc = "HighAdc";
@@ -503,7 +502,6 @@ namespace Hardware
 	{
 		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
 		//
-
 		if (parent() != nullptr)
 		{
 			m_equipmentId.replace(QLatin1String("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
@@ -3019,11 +3017,11 @@ R"DELIM({
 		auto memoryAreaProp = ADD_PROPERTY_GETTER_SETTER(E::MemoryArea, PropertyNames::memoryArea, true, DeviceSignal::memoryArea, DeviceSignal::setMemoryArea)
 
 		auto sizeProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::size, true, DeviceSignal::size, DeviceSignal::setSize)
-		auto validityOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::validityOffset, true, DeviceSignal::validityOffset, DeviceSignal::setValidityOffset)
-		auto valididtyBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::validityBit, true, DeviceSignal::validityBit, DeviceSignal::setValidityBit)
 
 		auto valueOffsetProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueOffset, true, DeviceSignal::valueOffset, DeviceSignal::setValueOffset)
 		auto valueBitProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::valueBit, true, DeviceSignal::valueBit, DeviceSignal::setValueBit)
+
+		auto validitySignalId = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::validitySignalId, true, DeviceSignal::validitySignalId, DeviceSignal::setValiditySignalId)
 
 		auto appSignalLowAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalLowAdc, true, DeviceSignal::appSignalLowAdc, DeviceSignal::setAppSignalLowAdc)
 		auto appSignalHighAdcProp = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::appSignalHighAdc, true, DeviceSignal::appSignalHighAdc, DeviceSignal::setAppSignalHighAdc)
@@ -3057,11 +3055,8 @@ R"DELIM({
 		sizeProp->setUpdateFromPreset(true);
 		sizeProp->setExpert(preset);
 
-		validityOffsetProp->setUpdateFromPreset(true);
-		validityOffsetProp->setExpert(preset);
-
-		valididtyBitProp->setUpdateFromPreset(true);
-		valididtyBitProp->setExpert(preset);
+		validitySignalId->setUpdateFromPreset(true);
+		validitySignalId->setExpert(preset);
 
 		valueOffsetProp->setUpdateFromPreset(true);
 		valueOffsetProp->setExpert(preset);
@@ -3118,11 +3113,10 @@ R"DELIM({
 
 		signalMessage->set_size(static_cast<int>(m_size));
 
-		signalMessage->set_validityoffset(static_cast<int>(m_validityOffset));
-		signalMessage->set_validitybit(static_cast<int>(m_validityBit));
-
 		signalMessage->set_valueoffset(static_cast<int>(m_valueOffset));
 		signalMessage->set_valuebit(static_cast<int>(m_valueBit));
+
+		signalMessage->set_validitysignalid(m_validitySignalId.toUtf8());
 
 		signalMessage->set_appsignallowadc(m_appSignalLowAdc);
 		signalMessage->set_appsignalhighadc(m_appSignalHighAdc);
@@ -3208,11 +3202,10 @@ R"DELIM({
 
 		m_size = signalMessage.size();
 
-		m_validityOffset = signalMessage.validityoffset();
-		m_validityBit = signalMessage.validitybit();
-
 		m_valueOffset = signalMessage.valueoffset();
 		m_valueBit = signalMessage.valuebit();
+
+		m_validitySignalId = QString::fromUtf8(signalMessage.validitysignalid().data());
 
 		m_appSignalLowAdc = signalMessage.appsignallowadc();
 		m_appSignalHighAdc = signalMessage.appsignalhighadc();
@@ -3230,10 +3223,9 @@ R"DELIM({
 			setExpertToProperty(PropertyNames::format, true);
 			setExpertToProperty(PropertyNames::memoryArea, true);
 			setExpertToProperty(PropertyNames::size, true);
-			setExpertToProperty(PropertyNames::validityOffset, true);
-			setExpertToProperty(PropertyNames::validityBit, true);
 			setExpertToProperty(PropertyNames::valueOffset, true);
 			setExpertToProperty(PropertyNames::valueBit, true);
+			setExpertToProperty(PropertyNames::validitySignalId, true);
 			setExpertToProperty(PropertyNames::appSignalLowAdc, true);
 			setExpertToProperty(PropertyNames::appSignalHighAdc, true);
 			setExpertToProperty(PropertyNames::appSignalLowEngUnits, true);
@@ -3242,6 +3234,23 @@ R"DELIM({
 		}
 
 		return true;
+	}
+
+	void DeviceSignal::expandEquipmentId()
+	{
+		if (m_validitySignalId.isEmpty() == false)
+		{
+			if (parent() != nullptr)
+			{
+				m_validitySignalId.replace(QLatin1String("$(PARENT)"), parent()->equipmentIdTemplate(), Qt::CaseInsensitive);
+			}
+
+			m_validitySignalId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
+
+			qDebug() << m_validitySignalId;
+		}
+
+		DeviceObject::expandEquipmentId();
 	}
 
 	DeviceType DeviceSignal::deviceType() const
@@ -3404,26 +3413,6 @@ R"DELIM({
 		m_size = value;
 	}
 
-	int DeviceSignal::validityOffset() const
-	{
-		return m_validityOffset;
-	}
-
-	void DeviceSignal::setValidityOffset(int value)
-	{
-		m_validityOffset = value;
-	}
-
-	int DeviceSignal::validityBit() const
-	{
-		return m_validityBit;
-	}
-
-	void DeviceSignal::setValidityBit(int value)
-	{
-		m_validityBit = value;
-	}
-
 	int DeviceSignal::valueOffset() const
 	{
 		return m_valueOffset;
@@ -3442,6 +3431,16 @@ R"DELIM({
 	void DeviceSignal::setValueBit(int value)
 	{
 		m_valueBit = value;
+	}
+
+	QString DeviceSignal::validitySignalId() const
+	{
+		return m_validitySignalId;
+	}
+
+	void DeviceSignal::setValiditySignalId(const QString& value)
+	{
+		m_validitySignalId = value.trimmed();
 	}
 
 	bool DeviceSignal::isInputSignal() const
