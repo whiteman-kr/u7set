@@ -711,100 +711,106 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		if (signal.signalType() == E::SignalType::Analog)
+		switch (signal.signalType())
 		{
-			switch (col)
-			{
-				case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
-				case SC_STR_ID: return signal.appSignalID();
-				case SC_EXT_STR_ID: return signal.customAppSignalID();
-				case SC_NAME: return signal.caption();
-				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
-				case SC_TYPE: return QChar('A');
-				case SC_ANALOG_DATA_FORMAT:
-					if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
-					{
-						return m_dataFormatInfo.value(signal.analogSignalFormatInt());
-					}
-					else
-					{
-						return tr("Unknown data format");
-					}
+			case E::SignalType::Analog:
+				switch (col)
+				{
+					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
+					case SC_STR_ID: return signal.appSignalID();
+					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_NAME: return signal.caption();
+					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
+					case SC_TYPE: return QChar('A');
+					case SC_ANALOG_DATA_FORMAT:
+						if (m_dataFormatInfo.contains(signal.analogSignalFormatInt()))
+						{
+							return m_dataFormatInfo.value(signal.analogSignalFormatInt());
+						}
+						else
+						{
+							return tr("Unknown data format");
+						}
 
-				case SC_DATA_SIZE: return signal.dataSize();
-				case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
-				case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
-				case SC_LOW_LIMIT: return signal.lowEngeneeringUnits();
-				case SC_HIGH_LIMIT: return signal.highEngeneeringUnits();
-				case SC_UNIT: return getUnitStr(signal.unitID());
+					case SC_DATA_SIZE: return signal.dataSize();
+					case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
+					case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
+					case SC_LOW_LIMIT: return signal.lowEngeneeringUnits();
+					case SC_HIGH_LIMIT: return signal.highEngeneeringUnits();
+					case SC_UNIT: return getUnitStr(signal.unitID());
 
-				case SC_DROP_LIMIT: return signal.lowValidRange();
-				case SC_EXCESS_LIMIT: return signal.highValidRange();
-				case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+					case SC_DROP_LIMIT: return signal.lowValidRange();
+					case SC_EXCESS_LIMIT: return signal.highValidRange();
+					case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
-				case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
+					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
-				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
-				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
+					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
+					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 
-				case SC_NORMAL_STATE: return signal.normalState();
-				case SC_DECIMAL_PLACES: return signal.decimalPlaces();
-				case SC_APERTURE: return signal.aperture();
-				case SC_FILTERING_TIME: return signal.filteringTime();
-				case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
-				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
+					case SC_NORMAL_STATE: return signal.normalState();
+					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
+					case SC_APERTURE: return signal.aperture();
+					case SC_FILTERING_TIME: return signal.filteringTime();
+					case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
+					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
 
-				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
-				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
+					case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
+					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 
-				case SC_DEVICE_STR_ID: return signal.equipmentID();
+					case SC_DEVICE_STR_ID: return signal.equipmentID();
 
-				default:
-					assert(false);
-			}
-		}
-		else
-		{
-			switch (col)
-			{
-				case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
-				case SC_STR_ID: return signal.appSignalID();
-				case SC_EXT_STR_ID: return signal.customAppSignalID();
-				case SC_NAME: return signal.caption();
-				case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
-				case SC_TYPE: return QChar('D');
-				case SC_ANALOG_DATA_FORMAT: return "";
+					default:
+						assert(false);
+				}
+				break;
 
-				case SC_DATA_SIZE: return signal.dataSize();
-				case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
-				case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
-				case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
-				case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
-				case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
-				case SC_DEVICE_STR_ID: return signal.equipmentID();
+			case E::SignalType::Discrete:
+			case E::SignalType::Bus:
+				switch (col)
+				{
+					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
+					case SC_STR_ID: return signal.appSignalID();
+					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_NAME: return signal.caption();
+					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
+					case SC_TYPE: return QChar('D');
+					case SC_ANALOG_DATA_FORMAT: return "";
 
-				case SC_LOW_ADC:
-				case SC_HIGH_ADC:
-				case SC_LOW_LIMIT:
-				case SC_HIGH_LIMIT:
-				case SC_UNIT:
+					case SC_DATA_SIZE: return signal.dataSize();
+					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
+					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
+					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
+					case SC_IN_OUT_TYPE: return (TO_INT(signal.inOutType()) < IN_OUT_TYPE_COUNT) ? InOutTypeStr[TO_INT(signal.inOutType())] : tr("Unknown type");
+					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
+					case SC_DEVICE_STR_ID: return signal.equipmentID();
 
-				case SC_DROP_LIMIT:
-				case SC_EXCESS_LIMIT:
-				case SC_UNBALANCE_LIMIT:
+					case SC_LOW_ADC:
+					case SC_HIGH_ADC:
+					case SC_LOW_LIMIT:
+					case SC_HIGH_LIMIT:
+					case SC_UNIT:
 
-				case SC_OUTPUT_MODE:
+					case SC_DROP_LIMIT:
+					case SC_EXCESS_LIMIT:
+					case SC_UNBALANCE_LIMIT:
 
-				case SC_NORMAL_STATE:
-				case SC_DECIMAL_PLACES:
-				case SC_APERTURE:
-				case SC_FILTERING_TIME:
-				case SC_SPREAD_TOLERANCE:
-					return QVariant();
+					case SC_OUTPUT_MODE:
 
-				default:
-					assert(false);
-			}
+					case SC_NORMAL_STATE:
+					case SC_DECIMAL_PLACES:
+					case SC_APERTURE:
+					case SC_FILTERING_TIME:
+					case SC_SPREAD_TOLERANCE:
+						return QVariant();
+
+					default:
+						assert(false);
+				}
+				break;
+
+			default:
+				assert(false);
 		}
 	}
 
@@ -1046,7 +1052,7 @@ void SignalsModel::addSignal()
 	fl->addRow(tr("EquipmentID"), deviceIdEdit);
 
 	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
-	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete"));
+	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete") << tr("Bus"));
 	signalTypeCombo->setCurrentIndex(0);
 
 	fl->addRow(tr("Signal type"), signalTypeCombo);
@@ -1091,17 +1097,25 @@ void SignalsModel::addSignal()
 
 	QSettings settings;
 
-	if (E::SignalType(signalTypeCombo->currentIndex()) == E::SignalType::Analog)
+	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
+
+	switch (signal.signalType())
 	{
-		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-		signal.setDataSize(FLOAT32_SIZE);
-		signal.setSignalType(E::SignalType::Analog);
+		case E::SignalType::Analog:
+			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+			signal.setDataSize(FLOAT32_SIZE);
+			break;
+
+		case E::SignalType::Discrete:
+			signal.setDataSize(DISCRETE_SIZE);
+			break;
+
+		case E::SignalType::Bus:
+		default:
+			break;
 	}
-	else
-	{
-		signal.setDataSize(DISCRETE_SIZE);
-		signal.setSignalType(E::SignalType::Discrete);
-	}
+
+
 	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
 	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
 	signal.setLowEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits").toDouble());
@@ -1149,7 +1163,7 @@ void SignalsModel::addSignal()
 	int signalCounter = dbController()->nextCounterValue();
 	if (signalCounter >= 0)
 	{
-		QString newId = QString(signal.isAnalog() ? "ANALOG_%1" : "DISCRETE_%1").arg(signalCounter, 3, 10, QLatin1Char('0'));
+		QString newId = QString(E::valueToString<E::SignalType>(signal.signalType()).toUpper() + "_%1").arg(signalCounter, 3, 10, QLatin1Char('0'));
 		signal.setAppSignalID('#' + newId);
 		signal.setCustomAppSignalID(newId);
 		signal.setCaption(newId);
@@ -1431,6 +1445,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalTypeFilterCombo->addItem(tr("All signals"), ST_ANY);
 	m_signalTypeFilterCombo->addItem(tr("Analog signals"), ST_ANALOG);
 	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), ST_DISCRETE);
+	m_signalTypeFilterCombo->addItem(tr("Bus signals"), ST_BUS);
 
 	m_signalIdFieldCombo = new QComboBox(this);
 	m_signalIdFieldCombo->addItem(tr("Any"), FI_ANY);
@@ -1660,7 +1675,7 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	int channelNo = 0;
 	for (QString lmId : selectedLmIdList)
 	{
-		QString signalSuffix = QString("%1%2").arg(type == E::SignalType::Analog ? "A" : "D").arg(schemaCounter, 4, 10, QChar('0'));
+		QString signalSuffix = QString("%1%2").arg(QChar(E::valueToString<E::SignalType>(type)[0])).arg(schemaCounter, 4, 10, QChar('0'));
 		if (lmIdList.count() > 1)
 		{
 			signalSuffix += QString("_%1").arg(QChar('A' + channelNo));
@@ -1685,14 +1700,20 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 
 		newSignal.setSignalType(type);
 
-		if (type == E::SignalType::Analog)
+		switch (type)
 		{
-			newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-			newSignal.setDataSize(FLOAT32_SIZE);
-		}
-		else
-		{
-			newSignal.setDataSize(DISCRETE_SIZE);
+			case E::SignalType::Analog:
+				newSignal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+				newSignal.setDataSize(FLOAT32_SIZE);
+				break;
+
+			case E::SignalType::Discrete:
+				newSignal.setDataSize(DISCRETE_SIZE);
+				break;
+
+			case E::SignalType::Bus:
+			default:
+				break;
 		}
 
 		newSignal.setAppSignalID(newSignalStrId);
@@ -2165,11 +2186,13 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	switch(singalType)
 	{
 		case ST_DISCRETE:
+		case ST_BUS:
 			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, true);
 			}
 			break;
+
 		case ST_ANALOG:
 		case ST_ANY:
 			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
@@ -2177,6 +2200,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 				m_signalsView->setColumnHidden(i, false);
 			}
 			break;
+
 		default:
 			assert(false);
 	}

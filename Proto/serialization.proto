@@ -1031,10 +1031,16 @@ message AppSignal
     optional double filteringTime = 43;
     optional double spreadTolerance = 44;
     optional int32 byteOrder = 45;
-    optional bool enableTuning = 46;
-    optional double tuningDefaultValue = 47;
 
-    optional uint64 hash = 48;
+    optional bool enableTuning = 46;
+    optional float tuningDefaultValue = 47;
+    optional float tuningLowBound = 48;
+    optional float tuningHighBound = 49;
+
+    optional uint64 hash = 50;
+
+    optional string busTypeID = 51;
+    optional bool adaptiveAperture = 52;
 
     optional int32 regValueAddrOffset = 200;
     optional int32 regValueAddrBit = 201;
@@ -1047,8 +1053,6 @@ message AppSignal
 
     optional int32 ramAddrOffset = 206;
     optional int32 ramAddrBit = 207;
-
-
 }
 
 

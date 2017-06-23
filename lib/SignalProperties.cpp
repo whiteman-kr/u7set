@@ -45,6 +45,7 @@ void SignalProperties::initProperties()
 	static const QString normalStateCaption("NormalState");
 	static const QString decimalPlacesCaption("DecimalPlaces");
 	static const QString apertureCaption("Aperture");
+	static const QString adaptiveApertureCaption("AdaptiveAperture");
 	static const QString filteringTimeCaption("FilteringTime");
 	static const QString spreadToleranceCaption("SpreadTolerance");
 	static const QString byteOrderCaption("ByteOrder");
@@ -165,6 +166,9 @@ void SignalProperties::initProperties()
 
 		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, apertureCaption, true, Signal::aperture, Signal::setAperture, m_signal);
 		apertureProperty->setCategory(onlineMonitoringSystemCategory);
+
+		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
+		adaptiveApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto spreadToleranceProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, spreadToleranceCaption, true, Signal::spreadTolerance, Signal::setSpreadTolerance, m_signal);
 		m_propertiesDependentOnPrecision.push_back(spreadToleranceProperty);

@@ -137,6 +137,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_normalState = signal.m_normalState;
 	m_decimalPlaces = signal.m_decimalPlaces;
 	m_aperture = signal.m_aperture;
+	m_adaptiveAperture = signal.m_adaptiveAperture;
 	m_inOutType = signal.m_inOutType;
 	m_equipmentID = signal.m_equipmentID;
 	m_filteringTime = signal.m_filteringTime;
@@ -703,8 +704,14 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
 	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
+
 	xml.writeBoolAttribute("EnableTuning", enableTuning());
-	xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+	xml.writeFloatAttribute("TuningDefaultValue", tuningDefaultValue());
+	xml.writeFloatAttribute("TuningLowBound", tuningLowBound());
+	xml.writeFloatAttribute("TuningHighBound", tuningHighBound());
+
+	xml.writeStringAttribute("BusTypeID", busTypeID());
+	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
 
 	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
@@ -795,7 +802,12 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);
 
 	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-	result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+	result &= xml.readFloatAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+	result &= xml.readFloatAttribute("TuningLowBound", &m_tuningLowBound);
+	result &= xml.readFloatAttribute("TuningHighBound", &m_tuningHighBound);
+
+	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
+	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
 
 	int offset = 0;
 	int bit = 0;
@@ -882,10 +894,16 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_filteringtime(m_filteringTime);
 	s->set_spreadtolerance(m_spreadTolerance);
 	s->set_byteorder(TO_INT(m_byteOrder));
+
 	s->set_enabletuning(m_enableTuning);
 	s->set_tuningdefaultvalue(m_tuningDefaultValue);
+	s->set_tuninglowbound(m_tuningLowBound);
+	s->set_tuninghighbound(m_tuningHighBound);
 
 	s->set_hash(calcHash(m_appSignalID));
+
+	s->set_bustypeid(m_busTypeID.toStdString());
+	s->set_adaptiveaperture(m_adaptiveAperture);
 
 	s->set_regvalueaddroffset(m_regValueAddr.offset());
 	s->set_regvalueaddrbit(m_regValueAddr.bit());
@@ -1139,9 +1157,29 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 		m_tuningDefaultValue = s->tuningdefaultvalue();
 	}
 
+	if (s->has_tuninglowbound())
+	{
+		m_tuningLowBound = s->tuninglowbound();
+	}
+
+	if (s->has_tuninghighbound())
+	{
+		m_tuningHighBound = s->tuninghighbound();
+	}
+
 	if (s->has_hash())
 	{
 		m_hash = s->hash();
+	}
+
+	if (s->has_bustypeid())
+	{
+		m_busTypeID = QString::fromStdString(s->bustypeid());
+	}
+
+	if (s->has_adaptiveaperture())
+	{
+		m_adaptiveAperture = s->adaptiveaperture();
 	}
 
 	if (s->has_regvalueaddroffset())

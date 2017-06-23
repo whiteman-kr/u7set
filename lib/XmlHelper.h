@@ -32,6 +32,7 @@ public:
 	void writeUInt32Attribute(const QString& name, quint32 value, bool hex);
 	void writeDoubleAttribute(const QString& name, double value);
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
+	void writeFloatAttribute(const QString& name, float value);
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
@@ -62,6 +63,7 @@ public:
 	bool readStringAttribute(const QString& name, QString* value);
 	bool readIntAttribute(const QString& name, int* value);
 	bool readDoubleAttribute(const QString& name, double* value);
+	bool readFloatAttribute(const QString& name, float* value);
 	bool readBoolAttribute(const QString& name, bool* value);
 	bool readUInt64Attribute(const QString& name, qulonglong* value);
 	bool readUInt32Attribute(const QString& name, quint32 *value);

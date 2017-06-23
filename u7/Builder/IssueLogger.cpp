@@ -3820,6 +3820,30 @@ namespace Builder
 					arg(appSignalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5088
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter '%1.%2' must be greater then 0.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Value of specified parameter must be greater or equal to 0. Check parameter value.
+	///
+	void IssueLogger::errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5088,
+				  QString(tr("Value of parameter '%1.%2' must be greater then 0.")).
+				  arg(fbCaption).arg(paramCaption));
+	}
+
 	/// IssueCode: ALC5186
 	///
 	/// IssueType: Error

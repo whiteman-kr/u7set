@@ -1444,7 +1444,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
   AppSignal_descriptor_ = file->message_type(63);
-  static const int AppSignal_offsets_[56] = {
+  static const int AppSignal_offsets_[60] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signalgroupid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signalinstanceid_),
@@ -1492,7 +1492,11 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, byteorder_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, enabletuning_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuningdefaultvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuninglowbound_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, tuninghighbound_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, hash_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, bustypeid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, adaptiveaperture_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalueaddroffset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalueaddrbit_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, regvalidityaddroffset_),
@@ -2225,7 +2229,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "igurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 "
     "\002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002"
     " \002(\t\"0\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n"
-    "\003bit\030\002 \002(\005:\002-1\"\336\t\n\tAppSignal\022\n\n\002ID\030\001 \001(\005"
+    "\003bit\030\002 \002(\005:\002-1\"\274\n\n\tAppSignal\022\n\n\002ID\030\001 \001(\005"
     "\022\025\n\rsignalGroupID\030\002 \001(\005\022\030\n\020signalInstanc"
     "eID\030\003 \001(\005\022\023\n\013changesetID\030\004 \001(\005\022\022\n\nchecke"
     "dOut\030\005 \001(\010\022\016\n\006userID\030\006 \001(\005\022\030\n\020subsystemC"
@@ -2250,70 +2254,72 @@ void protobuf_AddDesc_serialization_2eproto() {
     "inOutType\030) \001(\005\022\023\n\013equipmentID\030* \001(\t\022\025\n\r"
     "filteringTime\030+ \001(\001\022\027\n\017spreadTolerance\030,"
     " \001(\001\022\021\n\tbyteOrder\030- \001(\005\022\024\n\014enableTuning\030"
-    ". \001(\010\022\032\n\022tuningDefaultValue\030/ \001(\001\022\014\n\004has"
-    "h\0300 \001(\004\022\033\n\022regValueAddrOffset\030\310\001 \001(\005\022\030\n\017"
-    "regValueAddrBit\030\311\001 \001(\005\022\036\n\025regValidityAdd"
-    "rOffset\030\312\001 \001(\005\022\033\n\022regValidityAddrBit\030\313\001 "
-    "\001(\005\022\033\n\022ioBufferAddrOffset\030\314\001 \001(\005\022\030\n\017ioBu"
-    "fferAddrBit\030\315\001 \001(\005\022\026\n\rramAddrOffset\030\316\001 \001"
-    "(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210\001\n\016AppSignalSta"
-    "te\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n"
-    "\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\022:\0010\022\024"
-    "\n\tlocalTime\030\005 \001(\022:\0010\022\024\n\tplantTime\030\006 \001(\022:"
-    "\0010\"\231\006\n\016AppSignalParam\022\017\n\004hash\030\002 \001(\004:\0010\022\025"
-    "\n\013appSignalId\030\003 \001(\t:\000\022\030\n\016customSignalId\030"
-    "\004 \001(\t:\000\022\021\n\007caption\030\005 \001(\t:\000\022\025\n\013equipmentI"
-    "d\030\006 \001(\t:\000\022\022\n\007channel\030\n \001(\005:\0010\022\024\n\tinOutTy"
-    "pe\030\013 \001(\005:\0012\022\025\n\nsignalType\030\014 \001(\005:\0010\022\035\n\022an"
-    "alogSignalFormat\030\r \001(\005:\0012\022\024\n\tbyteOrder\030\016"
-    " \001(\005:\0012\022\021\n\006unitId\030\017 \001(\005:\0011\022\016\n\004unit\030\020 \001(\t"
-    ":\000\022\030\n\rlowValidRange\030\024 \001(\001:\0010\022\031\n\016highVali"
-    "dRange\030\025 \001(\001:\0010\022\036\n\023lowEngeneeringUnits\030\026"
-    " \001(\001:\0010\022\037\n\024highEngeneeringUnits\030\027 \001(\001:\0010"
-    "\022\030\n\rinputLowLimit\030\036 \001(\001:\0010\022\031\n\016inputHighL"
-    "imit\030\037 \001(\001:\0010\022\026\n\013inputUnitId\030  \001(\005:\0011\022\032\n"
-    "\017inputSensorType\030! \001(\005:\0010\022\031\n\016outputLowLi"
-    "mit\030( \001(\001:\0010\022\032\n\017outputHighLimit\030) \001(\001:\0010"
-    "\022\027\n\014outputUnitId\030* \001(\005:\0011\022\025\n\noutputMode\030"
-    "+ \001(\005:\0010\022\033\n\020outputSensorType\030, \001(\005:\0010\022\024\n"
-    "\tprecision\0302 \001(\005:\0012\022\023\n\010aperture\0303 \001(\001:\0011"
-    "\022\034\n\rfilteringTime\0304 \001(\001:\0050.005\022\032\n\017spread"
-    "Tolerance\0305 \001(\001:\0012\022\033\n\014enableTuning\0306 \001(\010"
-    ":\005false\022\035\n\022tuningDefaultValue\0307 \001(\001:\0010\"9"
-    "\n\021AppSignalParamSet\022$\n\005items\030\001 \003(\0132\025.Pro"
-    "to.AppSignalParam\"\224\006\n\nConnection\022\026\n\014Conn"
-    "ectionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001"
-    "(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port"
-    "1RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2RawD"
-    "ataDescription\030\006 \001(\t:\000\022\035\n\016ManualSettings"
-    "\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005fa"
-    "lse\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023P"
-    "ort1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWo"
-    "rdsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQu"
-    "antity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress"
-    "\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:"
-    "\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022"
-    "\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1Enabl"
-    "eSerial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030"
-    "\026 \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005fal"
-    "se\022 \n\021Port2EnableSerial\030\030 \001(\010:\005false\022\032\n\017"
-    "Port2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableD"
-    "uplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014O"
-    "bsoleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMo"
-    "de\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n \001("
-    "\010:\005false\"@\n\020SchemaDetailsSet\022,\n\016schemasD"
-    "etails\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rS"
-    "chemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaI"
-    "d\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfrom"
-    "Build\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDe"
-    "scriptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016"
-    "\n\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005g"
-    "uids\030\027 \003(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n"
-    "\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024"
-    "ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Outpu"
-    "t\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Disc"
-    "rete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000"
-    "\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13226);
+    ". \001(\010\022\032\n\022tuningDefaultValue\030/ \001(\002\022\026\n\016tun"
+    "ingLowBound\0300 \001(\002\022\027\n\017tuningHighBound\0301 \001"
+    "(\002\022\014\n\004hash\0302 \001(\004\022\021\n\tbusTypeID\0303 \001(\t\022\030\n\020a"
+    "daptiveAperture\0304 \001(\010\022\033\n\022regValueAddrOff"
+    "set\030\310\001 \001(\005\022\030\n\017regValueAddrBit\030\311\001 \001(\005\022\036\n\025"
+    "regValidityAddrOffset\030\312\001 \001(\005\022\033\n\022regValid"
+    "ityAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrOffset\030"
+    "\314\001 \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026\n\rramA"
+    "ddrOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210\001"
+    "\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005val"
+    "ue\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemT"
+    "ime\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001(\022:\0010\022\024\n\tpl"
+    "antTime\030\006 \001(\022:\0010\"\231\006\n\016AppSignalParam\022\017\n\004h"
+    "ash\030\002 \001(\004:\0010\022\025\n\013appSignalId\030\003 \001(\t:\000\022\030\n\016c"
+    "ustomSignalId\030\004 \001(\t:\000\022\021\n\007caption\030\005 \001(\t:\000"
+    "\022\025\n\013equipmentId\030\006 \001(\t:\000\022\022\n\007channel\030\n \001(\005"
+    ":\0010\022\024\n\tinOutType\030\013 \001(\005:\0012\022\025\n\nsignalType\030"
+    "\014 \001(\005:\0010\022\035\n\022analogSignalFormat\030\r \001(\005:\0012\022"
+    "\024\n\tbyteOrder\030\016 \001(\005:\0012\022\021\n\006unitId\030\017 \001(\005:\0011"
+    "\022\016\n\004unit\030\020 \001(\t:\000\022\030\n\rlowValidRange\030\024 \001(\001:"
+    "\0010\022\031\n\016highValidRange\030\025 \001(\001:\0010\022\036\n\023lowEnge"
+    "neeringUnits\030\026 \001(\001:\0010\022\037\n\024highEngeneering"
+    "Units\030\027 \001(\001:\0010\022\030\n\rinputLowLimit\030\036 \001(\001:\0010"
+    "\022\031\n\016inputHighLimit\030\037 \001(\001:\0010\022\026\n\013inputUnit"
+    "Id\030  \001(\005:\0011\022\032\n\017inputSensorType\030! \001(\005:\0010\022"
+    "\031\n\016outputLowLimit\030( \001(\001:\0010\022\032\n\017outputHigh"
+    "Limit\030) \001(\001:\0010\022\027\n\014outputUnitId\030* \001(\005:\0011\022"
+    "\025\n\noutputMode\030+ \001(\005:\0010\022\033\n\020outputSensorTy"
+    "pe\030, \001(\005:\0010\022\024\n\tprecision\0302 \001(\005:\0012\022\023\n\010ape"
+    "rture\0303 \001(\001:\0011\022\034\n\rfilteringTime\0304 \001(\001:\0050"
+    ".005\022\032\n\017spreadTolerance\0305 \001(\001:\0012\022\033\n\014enab"
+    "leTuning\0306 \001(\010:\005false\022\035\n\022tuningDefaultVa"
+    "lue\0307 \001(\001:\0010\"9\n\021AppSignalParamSet\022$\n\005ite"
+    "ms\030\001 \003(\0132\025.Proto.AppSignalParam\"\224\006\n\nConn"
+    "ection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1E"
+    "quipmentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004"
+    " \001(\t:\000\022!\n\027Port1RawDataDescription\030\005 \001(\t:"
+    "\000\022!\n\027Port2RawDataDescription\030\006 \001(\t:\000\022\035\n\016"
+    "ManualSettings\030\013 \001(\010:\005false\022\034\n\rDisableDa"
+    "taID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001"
+    "(\010:\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\001"
+    "0\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024"
+    "Port1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2"
+    "TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQ"
+    "uantity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuanti"
+    "ty\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid"
+    "\022 \n\021Port1EnableSerial\030\025 \001(\010:\005false\022\032\n\017Po"
+    "rt1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDup"
+    "lex\030\027 \001(\010:\005false\022 \n\021Port2EnableSerial\030\030 "
+    "\001(\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 "
+    "\n\021Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n\004Type"
+    "\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022Ob"
+    "soleteSerialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEna"
+    "bleDuplex\030\n \001(\010:\005false\"@\n\020SchemaDetailsS"
+    "et\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.Schem"
+    "aDetails\"\342\001\n\rSchemaDetails\022\017\n\007version\030\002 "
+    "\001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031"
+    "\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013equipmentId"
+    "\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\021\n\tsig"
+    "nalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connecti"
+    "ons\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid*3\n"
+    "\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001"
+    "\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005In"
+    "put\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006An"
+    "alog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n"
+    "\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13320);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -26796,7 +26802,11 @@ const int AppSignal::kSpreadToleranceFieldNumber;
 const int AppSignal::kByteOrderFieldNumber;
 const int AppSignal::kEnableTuningFieldNumber;
 const int AppSignal::kTuningDefaultValueFieldNumber;
+const int AppSignal::kTuningLowBoundFieldNumber;
+const int AppSignal::kTuningHighBoundFieldNumber;
 const int AppSignal::kHashFieldNumber;
+const int AppSignal::kBusTypeIDFieldNumber;
+const int AppSignal::kAdaptiveApertureFieldNumber;
 const int AppSignal::kRegValueAddrOffsetFieldNumber;
 const int AppSignal::kRegValueAddrBitFieldNumber;
 const int AppSignal::kRegValidityAddrOffsetFieldNumber;
@@ -26870,7 +26880,11 @@ void AppSignal::SharedCtor() {
   byteorder_ = 0;
   enabletuning_ = false;
   tuningdefaultvalue_ = 0;
+  tuninglowbound_ = 0;
+  tuninghighbound_ = 0;
   hash_ = GOOGLE_ULONGLONG(0);
+  bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  adaptiveaperture_ = false;
   regvalueaddroffset_ = 0;
   regvalueaddrbit_ = 0;
   regvalidityaddroffset_ = 0;
@@ -26898,6 +26912,9 @@ void AppSignal::SharedDtor() {
   }
   if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
     delete equipmentid_;
+  }
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypeid_;
   }
   if (this != default_instance_) {
   }
@@ -26999,13 +27016,23 @@ void AppSignal::Clear() {
     byteorder_ = 0;
     enabletuning_ = false;
     tuningdefaultvalue_ = 0;
-    hash_ = GOOGLE_ULONGLONG(0);
+    tuninglowbound_ = 0;
   }
   if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    tuninghighbound_ = 0;
+    hash_ = GOOGLE_ULONGLONG(0);
+    if (has_bustypeid()) {
+      if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+        bustypeid_->clear();
+      }
+    }
+    adaptiveaperture_ = false;
     regvalueaddroffset_ = 0;
     regvalueaddrbit_ = 0;
     regvalidityaddroffset_ = 0;
     regvalidityaddrbit_ = 0;
+  }
+  if (_has_bits_[56 / 32] & (0xffu << (56 % 32))) {
     iobufferaddroffset_ = 0;
     iobufferaddrbit_ = 0;
     ramaddroffset_ = 0;
@@ -27756,28 +27783,60 @@ bool AppSignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(377)) goto parse_tuningDefaultValue;
+        if (input->ExpectTag(381)) goto parse_tuningDefaultValue;
         break;
       }
 
-      // optional double tuningDefaultValue = 47;
+      // optional float tuningDefaultValue = 47;
       case 47: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
          parse_tuningDefaultValue:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &tuningdefaultvalue_)));
           set_has_tuningdefaultvalue();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(384)) goto parse_hash;
+        if (input->ExpectTag(389)) goto parse_tuningLowBound;
         break;
       }
 
-      // optional uint64 hash = 48;
+      // optional float tuningLowBound = 48;
       case 48: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+         parse_tuningLowBound:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &tuninglowbound_)));
+          set_has_tuninglowbound();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(397)) goto parse_tuningHighBound;
+        break;
+      }
+
+      // optional float tuningHighBound = 49;
+      case 49: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+         parse_tuningHighBound:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &tuninghighbound_)));
+          set_has_tuninghighbound();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(400)) goto parse_hash;
+        break;
+      }
+
+      // optional uint64 hash = 50;
+      case 50: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_hash:
@@ -27785,6 +27844,39 @@ bool AppSignal::MergePartialFromCodedStream(
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  input, &hash_)));
           set_has_hash();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(410)) goto parse_busTypeID;
+        break;
+      }
+
+      // optional string busTypeID = 51;
+      case 51: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_busTypeID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_bustypeid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->bustypeid().data(), this->bustypeid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(416)) goto parse_adaptiveAperture;
+        break;
+      }
+
+      // optional bool adaptiveAperture = 52;
+      case 52: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_adaptiveAperture:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &adaptiveaperture_)));
+          set_has_adaptiveaperture();
         } else {
           goto handle_uninterpreted;
         }
@@ -28184,14 +28276,38 @@ void AppSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(46, this->enabletuning(), output);
   }
 
-  // optional double tuningDefaultValue = 47;
+  // optional float tuningDefaultValue = 47;
   if (has_tuningdefaultvalue()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(47, this->tuningdefaultvalue(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(47, this->tuningdefaultvalue(), output);
   }
 
-  // optional uint64 hash = 48;
+  // optional float tuningLowBound = 48;
+  if (has_tuninglowbound()) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(48, this->tuninglowbound(), output);
+  }
+
+  // optional float tuningHighBound = 49;
+  if (has_tuninghighbound()) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(49, this->tuninghighbound(), output);
+  }
+
+  // optional uint64 hash = 50;
   if (has_hash()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(48, this->hash(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(50, this->hash(), output);
+  }
+
+  // optional string busTypeID = 51;
+  if (has_bustypeid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->bustypeid().data(), this->bustypeid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      51, this->bustypeid(), output);
+  }
+
+  // optional bool adaptiveAperture = 52;
+  if (has_adaptiveaperture()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(52, this->adaptiveaperture(), output);
   }
 
   // optional int32 regValueAddrOffset = 200;
@@ -28492,14 +28608,39 @@ void AppSignal::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(46, this->enabletuning(), target);
   }
 
-  // optional double tuningDefaultValue = 47;
+  // optional float tuningDefaultValue = 47;
   if (has_tuningdefaultvalue()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(47, this->tuningdefaultvalue(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(47, this->tuningdefaultvalue(), target);
   }
 
-  // optional uint64 hash = 48;
+  // optional float tuningLowBound = 48;
+  if (has_tuninglowbound()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(48, this->tuninglowbound(), target);
+  }
+
+  // optional float tuningHighBound = 49;
+  if (has_tuninghighbound()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(49, this->tuninghighbound(), target);
+  }
+
+  // optional uint64 hash = 50;
   if (has_hash()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(48, this->hash(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(50, this->hash(), target);
+  }
+
+  // optional string busTypeID = 51;
+  if (has_bustypeid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->bustypeid().data(), this->bustypeid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        51, this->bustypeid(), target);
+  }
+
+  // optional bool adaptiveAperture = 52;
+  if (has_adaptiveaperture()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(52, this->adaptiveaperture(), target);
   }
 
   // optional int32 regValueAddrOffset = 200;
@@ -28849,20 +28990,42 @@ int AppSignal::ByteSize() const {
       total_size += 2 + 1;
     }
 
-    // optional double tuningDefaultValue = 47;
+    // optional float tuningDefaultValue = 47;
     if (has_tuningdefaultvalue()) {
-      total_size += 2 + 8;
+      total_size += 2 + 4;
     }
 
-    // optional uint64 hash = 48;
+    // optional float tuningLowBound = 48;
+    if (has_tuninglowbound()) {
+      total_size += 2 + 4;
+    }
+
+  }
+  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    // optional float tuningHighBound = 49;
+    if (has_tuninghighbound()) {
+      total_size += 2 + 4;
+    }
+
+    // optional uint64 hash = 50;
     if (has_hash()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::UInt64Size(
           this->hash());
     }
 
-  }
-  if (_has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    // optional string busTypeID = 51;
+    if (has_bustypeid()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->bustypeid());
+    }
+
+    // optional bool adaptiveAperture = 52;
+    if (has_adaptiveaperture()) {
+      total_size += 2 + 1;
+    }
+
     // optional int32 regValueAddrOffset = 200;
     if (has_regvalueaddroffset()) {
       total_size += 2 +
@@ -28891,6 +29054,8 @@ int AppSignal::ByteSize() const {
           this->regvalidityaddrbit());
     }
 
+  }
+  if (_has_bits_[56 / 32] & (0xffu << (56 % 32))) {
     // optional int32 ioBufferAddrOffset = 204;
     if (has_iobufferaddroffset()) {
       total_size += 2 +
@@ -29097,11 +29262,23 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_tuningdefaultvalue()) {
       set_tuningdefaultvalue(from.tuningdefaultvalue());
     }
-    if (from.has_hash()) {
-      set_hash(from.hash());
+    if (from.has_tuninglowbound()) {
+      set_tuninglowbound(from.tuninglowbound());
     }
   }
   if (from._has_bits_[48 / 32] & (0xffu << (48 % 32))) {
+    if (from.has_tuninghighbound()) {
+      set_tuninghighbound(from.tuninghighbound());
+    }
+    if (from.has_hash()) {
+      set_hash(from.hash());
+    }
+    if (from.has_bustypeid()) {
+      set_bustypeid(from.bustypeid());
+    }
+    if (from.has_adaptiveaperture()) {
+      set_adaptiveaperture(from.adaptiveaperture());
+    }
     if (from.has_regvalueaddroffset()) {
       set_regvalueaddroffset(from.regvalueaddroffset());
     }
@@ -29114,6 +29291,8 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_regvalidityaddrbit()) {
       set_regvalidityaddrbit(from.regvalidityaddrbit());
     }
+  }
+  if (from._has_bits_[56 / 32] & (0xffu << (56 % 32))) {
     if (from.has_iobufferaddroffset()) {
       set_iobufferaddroffset(from.iobufferaddroffset());
     }
@@ -29196,7 +29375,11 @@ void AppSignal::Swap(AppSignal* other) {
     std::swap(byteorder_, other->byteorder_);
     std::swap(enabletuning_, other->enabletuning_);
     std::swap(tuningdefaultvalue_, other->tuningdefaultvalue_);
+    std::swap(tuninglowbound_, other->tuninglowbound_);
+    std::swap(tuninghighbound_, other->tuninghighbound_);
     std::swap(hash_, other->hash_);
+    std::swap(bustypeid_, other->bustypeid_);
+    std::swap(adaptiveaperture_, other->adaptiveaperture_);
     std::swap(regvalueaddroffset_, other->regvalueaddroffset_);
     std::swap(regvalueaddrbit_, other->regvalueaddrbit_);
     std::swap(regvalidityaddroffset_, other->regvalidityaddroffset_);

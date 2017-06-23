@@ -67,8 +67,8 @@ unix {
     QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
     system(cd $$PWD/../GetGitProjectVersion; \
         qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make;)
-    system(cd $$PWD; \
+        make; \
+        cd $$PWD; \
         $$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro)
 }
 

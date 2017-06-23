@@ -488,14 +488,14 @@ namespace Builder
 
 	Address16 LmMemoryMap::addRegDiscreteSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isRegistered() && signal.isDiscrete());
+		assert(signal.isInternal() && signal.isAcquired() && signal.isDiscrete());
 
 		return m_appBitAdressed.regDiscretSignals.appendSignal(signal);
 	}
 
 	Address16 LmMemoryMap::addRegDiscreteSignalToRegBuffer(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isRegistered() && signal.isDiscrete());
+		assert(signal.isInternal() && signal.isAcquired() && signal.isDiscrete());
 
 		return m_appWordAdressed.regDiscreteSignals.appendSignal(signal);
 	}
@@ -503,7 +503,7 @@ namespace Builder
 
 	Address16 LmMemoryMap::addRegTuningSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isRegistered() && signal.enableTuning());
+		assert(signal.isInternal() && signal.isAcquired() && signal.enableTuning());
 
 		return m_appWordAdressed.regTuningSignals.appendSignal(signal);
 	}
@@ -511,7 +511,7 @@ namespace Builder
 
 	Address16 LmMemoryMap::addNonRegDiscreteSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && !signal.isRegistered() && signal.isDiscrete());
+		assert(signal.isInternal() && !signal.isAcquired() && signal.isDiscrete());
 
 		return m_appBitAdressed.nonRegDiscretSignals.appendSignal(signal);
 	}
@@ -519,14 +519,14 @@ namespace Builder
 
 	Address16 LmMemoryMap::addRegAnalogSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isRegistered() && signal.isAnalog());
+		assert(signal.isInternal() && signal.isAcquired() && signal.isAnalog());
 
 		return m_appWordAdressed.regAnalogSignals.appendSignal(signal);
 	}
 
 	Address16 LmMemoryMap::addNonRegAnalogSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && !signal.isRegistered() && signal.isAnalog());
+		assert(signal.isInternal() && !signal.isAcquired() && signal.isAnalog());
 
 		return m_appWordAdressed.nonRegAnalogSignals.appendSignal(signal);
 	}
