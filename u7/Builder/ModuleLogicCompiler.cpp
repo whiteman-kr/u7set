@@ -99,6 +99,8 @@ namespace Builder
 
 			if (createChassisSignalsMap() == false) break;
 
+			if (createSignalLists() == false) break;
+
 			if (calculateIoSignalsAddresses() == false) break;
 
 			if (createAppLogicItemsMaps() == false) break;
@@ -5531,6 +5533,11 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::createSignalLists()
+	{
+		bool result = true;
+		return result;
+	}
 
 	bool ModuleLogicCompiler::createAppLogicItemsMaps()
 	{
@@ -5757,7 +5764,7 @@ namespace Builder
 					}
 				}
 
-				if (connectedToFb && !connectedToSignal)
+				if (connectedToFb == true && connectedToSignal == false)
 				{
 					// create shadow signal with Uuid of this output pin
 					//

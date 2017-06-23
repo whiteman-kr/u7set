@@ -568,6 +568,7 @@ namespace Builder
 
 		HashedVector<QString, Signal*> m_chassisSignals;		// all signals available in current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
+		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
 		QHash<QString, QString> m_linkedValidtySignalsID;			// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
@@ -607,8 +608,9 @@ namespace Builder
 		//
 		bool loadLMSettings();
 		bool loadModulesSettings();
-
 		bool createChassisSignalsMap();
+		bool createSignalLists();
+
 		bool createAppLogicItemsMaps();
 		bool createAppSignalsMap();
 
