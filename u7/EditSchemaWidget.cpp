@@ -4552,6 +4552,46 @@ bool EditSchemaWidget::updateUfbsForSchema()
 	return true;
 }
 
+bool EditSchemaWidget::updateBussesForSchema()
+{
+	// Get Bus list
+	//
+	std::vector<VFrame30::Bus> busses;
+
+	bool ok = loadBusses(&busses);
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Update
+	//
+	QString errorMessage;
+	int updatedItemCount = 0;
+
+	ok = schema()->updateAllSchemaItemBusses(busses, &updatedItemCount, &errorMessage);
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qApp->applicationName(), tr("Update Bus items error: ") + errorMessage);
+		return false;
+	}
+
+	if (updatedItemCount != 0)
+	{
+		setModified();
+
+		QMessageBox msgBox(this);
+		msgBox.setWindowTitle(qApp->applicationName());
+		msgBox.setText(tr("%1 Bus(s) are updated according to the latest Bus descriptions.").arg(updatedItemCount));
+		msgBox.setInformativeText("Please, check input/output pins and parameters.\nClose schema without saving to discard changes.");
+		msgBox.exec();
+	}
+
+	return true;
+}
+
 
 void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 {
@@ -5100,6 +5140,67 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 	std::swap(ufbs, *out);
 
+	return true;
+}
+
+bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	out->clear();
+
+	// Get Busses
+	//
+	std::vector<DbFileInfo> fileList;
+
+	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), QLatin1String(".xml"), true, this);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Get Busses latest version from the DB
+	//
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	ok = db()->getLatestVersion(fileList, &files, this);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Parse files, create actual Busses
+	//
+	std::vector<VFrame30::Bus> busses;
+	busses.reserve(files.size());
+
+	for (const std::shared_ptr<DbFile>& f : files)
+	{
+		if (f->deleted() == true ||
+			f->action() == VcsItemAction::Deleted)
+		{
+			continue;
+		}
+
+		VFrame30::Bus bus;
+		QString errorMessage;
+
+		ok = bus.load(f->data(), &errorMessage);
+
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), "Parsing file " + f->fileName() + " error: " + errorMessage);
+			return false;
+		}
+
+		busses.push_back(bus);
+	}
+
+	std::swap(busses, *out);
 	return true;
 }
 
@@ -5867,6 +5968,7 @@ void EditSchemaWidget::editPaste()
 
 		bool schemaItemAfbIsPresent = false;
 		bool schemaItemUfbIsPresent = false;
+		bool schemaItemBusIsPresent = false;
 
 		for (int i = 0; i < message.items_size(); i++)
 		{
@@ -5885,9 +5987,14 @@ void EditSchemaWidget::editPaste()
 				schemaItemAfbIsPresent = true;
 			}
 
-			if (schemaItem->isType<VFrame30::UfbSchema>() == true)
+			if (schemaItem->isType<VFrame30::SchemaItemUfb>() == true)
 			{
 				schemaItemUfbIsPresent = true;
+			}
+
+			if (schemaItem->isType<VFrame30::SchemaItemBus>() == true)
+			{
+				schemaItemBusIsPresent = true;
 			}
 
 			if (schemaItem->isFblItemRect() == true)
@@ -5924,6 +6031,11 @@ void EditSchemaWidget::editPaste()
 		if (schemaItemUfbIsPresent == true)
 		{
 			updateUfbsForSchema();
+		}
+
+		if (schemaItemBusIsPresent == true)
+		{
+			updateBussesForSchema();
 		}
 
 		return;

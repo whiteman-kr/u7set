@@ -40,6 +40,11 @@ namespace VFrame30
 		Proto::SchemaItemBus* busitem = message->mutable_schemaitem()->mutable_busitem();
 
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
+		busitem->set_bustypehash(m_busTypeHash);
+
+		QByteArray busXml;
+		m_bus.save(&busXml);
+		busitem->set_bustypexml(busXml.constData(), busXml.size());
 
 		return true;
 	}
@@ -63,6 +68,12 @@ namespace VFrame30
 		const Proto::SchemaItemBus& busitem = message.schemaitem().busitem();
 
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
+		m_busTypeHash = busitem.bustypehash();
+
+		QByteArray xml = QByteArray::fromRawData(busitem.bustypexml().data(),
+												 static_cast<int>(busitem.bustypexml().size()));
+		QString erorrMessaage;
+		m_bus.load(xml, &erorrMessaage);
 
 		return true;
 	}

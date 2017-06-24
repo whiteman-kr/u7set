@@ -298,14 +298,14 @@ namespace VFrame30
 
 		QDomDocument doc;
 
-		QDomElement busTypeElement = doc.createElement("BusType");
+		QDomElement busTypeElement = doc.createElement(QLatin1String("BusType"));
 		doc.appendChild(busTypeElement);
 
-		busTypeElement.setAttribute("ID", m_busTypeId);
+		busTypeElement.setAttribute(QLatin1String("ID"), m_busTypeId);
 
 		for (const BusSignal& busSignal : m_busSignals)
 		{
-			QDomElement busSignalElement = doc.createElement("BusSignal");
+			QDomElement busSignalElement = doc.createElement(QLatin1String("BusSignal"));
 			busTypeElement.appendChild(busSignalElement);
 
 			busSignal.save(&busSignalElement);

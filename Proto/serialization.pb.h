@@ -5954,17 +5954,42 @@ class SchemaItemBus : public ::google::protobuf::Message {
   inline ::std::string* release_bustypeid();
   inline void set_allocated_bustypeid(::std::string* bustypeid);
 
+  // optional fixed64 busTypeHash = 3;
+  inline bool has_bustypehash() const;
+  inline void clear_bustypehash();
+  static const int kBusTypeHashFieldNumber = 3;
+  inline ::google::protobuf::uint64 bustypehash() const;
+  inline void set_bustypehash(::google::protobuf::uint64 value);
+
+  // optional string busTypeXml = 4;
+  inline bool has_bustypexml() const;
+  inline void clear_bustypexml();
+  static const int kBusTypeXmlFieldNumber = 4;
+  inline const ::std::string& bustypexml() const;
+  inline void set_bustypexml(const ::std::string& value);
+  inline void set_bustypexml(const char* value);
+  inline void set_bustypexml(const char* value, size_t size);
+  inline ::std::string* mutable_bustypexml();
+  inline ::std::string* release_bustypexml();
+  inline void set_allocated_bustypexml(::std::string* bustypexml);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemBus)
  private:
   inline void set_has_bustypeid();
   inline void clear_has_bustypeid();
+  inline void set_has_bustypehash();
+  inline void clear_has_bustypehash();
+  inline void set_has_bustypexml();
+  inline void clear_has_bustypexml();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* bustypeid_;
+  ::google::protobuf::uint64 bustypehash_;
+  ::std::string* bustypexml_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -17877,6 +17902,98 @@ inline void SchemaItemBus::set_allocated_bustypeid(::std::string* bustypeid) {
   } else {
     clear_has_bustypeid();
     bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional fixed64 busTypeHash = 3;
+inline bool SchemaItemBus::has_bustypehash() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemBus::set_has_bustypehash() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemBus::clear_has_bustypehash() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemBus::clear_bustypehash() {
+  bustypehash_ = GOOGLE_ULONGLONG(0);
+  clear_has_bustypehash();
+}
+inline ::google::protobuf::uint64 SchemaItemBus::bustypehash() const {
+  return bustypehash_;
+}
+inline void SchemaItemBus::set_bustypehash(::google::protobuf::uint64 value) {
+  set_has_bustypehash();
+  bustypehash_ = value;
+}
+
+// optional string busTypeXml = 4;
+inline bool SchemaItemBus::has_bustypexml() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemBus::set_has_bustypexml() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemBus::clear_has_bustypexml() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemBus::clear_bustypexml() {
+  if (bustypexml_ != &::google::protobuf::internal::kEmptyString) {
+    bustypexml_->clear();
+  }
+  clear_has_bustypexml();
+}
+inline const ::std::string& SchemaItemBus::bustypexml() const {
+  return *bustypexml_;
+}
+inline void SchemaItemBus::set_bustypexml(const ::std::string& value) {
+  set_has_bustypexml();
+  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
+    bustypexml_ = new ::std::string;
+  }
+  bustypexml_->assign(value);
+}
+inline void SchemaItemBus::set_bustypexml(const char* value) {
+  set_has_bustypexml();
+  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
+    bustypexml_ = new ::std::string;
+  }
+  bustypexml_->assign(value);
+}
+inline void SchemaItemBus::set_bustypexml(const char* value, size_t size) {
+  set_has_bustypexml();
+  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
+    bustypexml_ = new ::std::string;
+  }
+  bustypexml_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemBus::mutable_bustypexml() {
+  set_has_bustypexml();
+  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
+    bustypexml_ = new ::std::string;
+  }
+  return bustypexml_;
+}
+inline ::std::string* SchemaItemBus::release_bustypexml() {
+  clear_has_bustypexml();
+  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = bustypexml_;
+    bustypexml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemBus::set_allocated_bustypexml(::std::string* bustypexml) {
+  if (bustypexml_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypexml_;
+  }
+  if (bustypexml) {
+    set_has_bustypexml();
+    bustypexml_ = bustypexml;
+  } else {
+    clear_has_bustypexml();
+    bustypexml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
