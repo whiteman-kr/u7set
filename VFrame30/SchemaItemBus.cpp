@@ -110,11 +110,13 @@ namespace VFrame30
 	{
 		m_bus = bus;
 		setBusPins(bus);
+
+		m_busTypeHash = m_bus.calcHash();
 	}
 
-	int SchemaItemBus::busTypeVersion() const
+	Hash SchemaItemBus::busTypeHash() const
 	{
-		return m_bus.version();
+		return m_busTypeHash;
 	}
 
 	//
@@ -132,7 +134,7 @@ namespace VFrame30
 	SchemaItemBusComposer::SchemaItemBusComposer(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addOutput();
+		addOutput(-1, "bus_out");
 	}
 
 	SchemaItemBusComposer::~SchemaItemBusComposer()
@@ -312,7 +314,7 @@ namespace VFrame30
 	SchemaItemBusExtractor::SchemaItemBusExtractor(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addInput();
+		addInput(-1, "bus_in");
 	}
 
 	SchemaItemBusExtractor::~SchemaItemBusExtractor()

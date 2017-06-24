@@ -295,10 +295,6 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-
-	// Ğèñîâàíèå ıëåìåíòà, âûïîëíÿåòñÿ â 100% ìàñøòàáå.
-	// Graphcis äîëæåí èìåòü ıêğàííóş êîîğäèíàòíóş ñèñòåìó (0, 0 - ëåâûé âåğõíèé óãîë, âíèç è âïğàâî - ïîëîæèòåëüíûå êîîğäèíàòû)
-	//
 	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();

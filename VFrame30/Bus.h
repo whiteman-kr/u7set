@@ -3,6 +3,7 @@
 
 #include "../lib/PropertyObject.h"
 #include "../lib/Types.h"
+#include "../lib/Hash.h"
 
 class QDomElement;
 
@@ -67,14 +68,13 @@ namespace VFrame30
 		QString busTypeId() const;
 		void setBusTypeId(const QString& value);
 
-		int version() const;
-		void incrementVersion();
+		Hash calcHash() const;
 
 		const std::vector<BusSignal>& busSignals() const;
+		std::vector<BusSignal>& busSignals();
 
 	private:
 		QString m_busTypeId = "BUSTYPEID";
-		int m_version = -1;
 		std::vector<BusSignal> m_busSignals;
 	};
 
