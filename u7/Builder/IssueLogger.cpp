@@ -2123,21 +2123,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application item '%1' has unknown type.
+	/// Title: Application item '%1' has unknown type, SchemaID '%2'.
 	///
 	/// Parameters:
 	///		%1 Item Uuid
+	///		%2 SchemaID
 	///
 	/// Description:
 	///		Application item has unknown type. Contact to the RPCT developers.
 	///
-	void IssueLogger::errALC5011(QUuid itemUuid)
+	void IssueLogger::errALC5011(QString itemLabel, QString schemaId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaId);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5011,
-				  tr("Application item '%1' has unknown type. Contact to the RPCT developers.").arg(itemUuid.toString()));
+				  tr("Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.")
+					.arg(itemLabel)
+					.arg(schemaId));
 	}
 
 	/// IssueCode: ALC5012
