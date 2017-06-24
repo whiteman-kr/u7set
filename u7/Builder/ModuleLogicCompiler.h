@@ -388,7 +388,7 @@ namespace Builder
 		bool isDiscrete() const { return m_signal->isDiscrete(); }
 		bool isBus() const { return m_signal->isBus(); }
 
-		bool isRegistered() const { return m_signal->isAcquired(); }
+		bool isAcquired() const { return m_signal->isAcquired(); }
 		bool isInternal() const { return m_signal->isInternal(); }
 		bool isInput() const { return m_signal->isInput(); }
 		bool isOutput() const { return m_signal->isOutput(); }
@@ -433,7 +433,8 @@ namespace Builder
 		bool insert(const AppItem* appItem);
 		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
 
-		AppSignal* getByStrID(const QString& strID);
+		AppSignal* getSignal(const QString& appSignalID);
+		bool containsSignal(const QString& appSignalID);
 
 		void clear();
 	};
@@ -573,7 +574,18 @@ namespace Builder
 		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
 																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
 
-		QVector<Signal*> m_regDiscreteInputSignals;				// registered discrete input signals
+		QVector<Signal*> m_acquiredDiscreteInputSignals;		// acquired discrete input signals, no matter used in UAL or not
+		QVector<Signal*> m_acquiredDiscreteOutputSignals;		// acquired discrete output signals, used in UAL
+		QVector<Signal*> m_acquiredDiscreteInternalSignals;		// acquired discrete internal signals, used in UAL
+		QVector<Signal*> m_nonAcquiredDiscreteOutputSignals;	// non acquired discrete output signals, used in UAL
+		QVector<Signal*> m_nonAcquiredDiscreteInternalSignals;	// non acquired discrete internal signals, used in UAL
+
+		QVector<Signal*> m_acquiredAnalogInputSignals;			// acquired analog input signals, no matter used in UAL or not
+		QVector<Signal*> m_acquiredAnalogOutputSignals;			// acquired analog input signals, used in UAL
+
+		QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
+																		// for grant unique records
+
 
 		QHash<QUuid, QUuid> m_outPinSignal;						// output pin GUID -> signal GUID
 
@@ -611,8 +623,20 @@ namespace Builder
 		bool loadLMSettings();
 		bool loadModulesSettings();
 		bool createChassisSignalsMap();
+
 		bool createSignalLists();
-		bool createRegDiscreteInputSignalList();
+
+		bool createAcquiredDiscreteInputSignalsList();
+		bool createAquiredDiscreteOutputSignalsList();
+		bool createAquiredDiscreteInternalSignalsList();
+		bool createNonAquiredDiscreteOutputSignalsList();
+		bool createNonAquiredDiscreteInternalSignalsList();
+
+		bool createAcquiredAnalogInputSignalsList();
+		bool createAcquiredAnalogOutputSignalsList();
+
+		bool appendLinkedValiditySignal(const Signal* s);
+		void sortSignalList(QVector<Signal *> &signalList);
 
 		bool createAppLogicItemsMaps();
 		bool createAppSignalsMap();
