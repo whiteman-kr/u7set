@@ -258,6 +258,12 @@ namespace VFrame30
 			return false;
 		}
 
+		if (busType.hasAttribute(QLatin1String("ID")) == false)
+		{
+			*errorMessage = QString("Can't find attribute ID in section BusType.");
+			return false;
+		}
+
 		m_busTypeId = busType.attribute(QLatin1String("ID"));
 
 		// Read set of <BusSignal>
@@ -349,5 +355,47 @@ namespace VFrame30
 	std::vector<BusSignal>& Bus::busSignals()
 	{
 		return m_busSignals;
+	}
+
+	//
+	// BusSet
+	//
+	bool BusSet::hasBus(QString busTypeId) const
+	{
+		auto it = std::find_if(m_busses.begin(), m_busses.end(),
+			[&busTypeId](const VFrame30::Bus& bus)
+			{
+				return bus.busTypeId() == busTypeId;
+			});
+		return it != m_busses.end();
+	}
+
+	const VFrame30::Bus& BusSet::bus(QString busTypeId) const
+	{
+		auto it = std::find_if(m_busses.begin(), m_busses.end(),
+			[&busTypeId](const VFrame30::Bus& bus)
+			{
+				return bus.busTypeId() == busTypeId;
+			});
+
+		if (it == m_busses.end())
+		{
+			static const VFrame30::Bus staticBus;
+			return staticBus;
+		}
+		else
+		{
+			return *it;
+		}
+	}
+
+	const std::vector<VFrame30::Bus>& BusSet::busses() const
+	{
+		return m_busses;
+	}
+
+	void BusSet::setBusses(const std::vector<VFrame30::Bus>& src)
+	{
+		m_busses = src;
 	}
 }

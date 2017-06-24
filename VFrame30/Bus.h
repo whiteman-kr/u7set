@@ -78,6 +78,26 @@ namespace VFrame30
 		std::vector<BusSignal> m_busSignals;
 	};
 
+	//
+	// BusSet
+	//
+	class VFRAME30LIBSHARED_EXPORT BusSet
+	{
+	public:
+		BusSet() = default;
+
+	public:
+		bool hasBus(QString busTypeId) const;
+
+		const VFrame30::Bus& bus(QString busTypeId) const;
+
+		const std::vector<VFrame30::Bus>& busses() const;
+		void setBusses(const std::vector<VFrame30::Bus>& src);
+
+	private:
+		std::vector<VFrame30::Bus> m_busses;
+	};
+
 }
 
 #endif // BUS_H

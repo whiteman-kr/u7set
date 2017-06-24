@@ -1656,6 +1656,58 @@ namespace Builder
 				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
 	}
 
+
+	/// IssueCode: ALP4040
+	///
+	/// IssueType: Error
+	///
+	/// Title: BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').
+	///
+	/// Parameters:
+	///		%1 BusTypeID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
+	///
+	/// Description:
+	///		To proccess logic block it is required Bus description which is not found.
+	///
+	void IssueLogger::errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4040,
+				  tr("BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  .arg(busTypeId)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+
+	/// IssueCode: ALP4041
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItem '%1' has outdated BusType description (LogicSchema '%2').
+	///
+	/// Parameters:
+	///		%1 Schema item description
+	///		%2 Logic schema StrID
+	///
+	/// Description:
+	///		SchemaItem has an outdated BusType description.
+	///
+	void IssueLogger::errALP4041(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4041,
+				  tr("SchemaItem '%1' has outdated BusType description (LogicSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error
