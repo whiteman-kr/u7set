@@ -15,7 +15,8 @@ const char* const HpFileName = "HP";					// Hardware Presets
 const char* const MvsFileName = "MVS";					// Monitor Video Schemas
 const char* const DvsFileName = "DVS";					// Diagnostics Video Schemas
 const char* const McFileName = "MC";					// Module Configuration
-const char* const ConnectionsFileName = "CONNECTIONS";	// Module Configuration
+const char* const ConnectionsFileName = "CONNECTIONS";	// Connections
+const char* const BusTypesFileName = "BUSTYPES";		// BustTypes
 
 const char* const AlFileExtension = "als";				// Application Logic schema file extnesion
 const char* const AlTemplExtension = "templ_als";		// Application Logic schema template file extnesion

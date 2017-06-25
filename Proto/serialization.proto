@@ -401,6 +401,10 @@ message SchemaItem
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
 	optional SchemaItemValue Value = 136;					// +PosRectImpl
 
+    optional SchemaItemBus BusItem = 150;					// +FblItemRect
+	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
+	optional SchemaItemBusExtractor BusExtractor = 152;		// +SchemaItemBus, FblItemRect
+
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
@@ -749,6 +753,34 @@ message SchemaItemValue
 
 //
 //
+// SchemaItemBus
+//
+//
+message SchemaItemBus
+{
+    optional string busTypeId = 2;
+}
+
+//
+//
+// SchemaItemBusComposer
+//
+//
+message SchemaItemBusComposer
+{
+}
+
+//
+//
+// SchemaItemBusExtractor
+//
+//
+message SchemaItemBusExtractor
+{
+}
+
+//
+//
 // SchemaItemControl
 //
 //
@@ -879,8 +911,8 @@ message DeviceSignal
 	optional int32 byteOrder = 2 [default = 0];
 	optional int32 format = 3 [default = 0];
 	optional int32 size = 4 [default = 0];
-	optional int32 validityOffset = 5 [default = 0];
-	optional int32 validityBit = 6 [default = 0];
+	//optional int32 validityOffset = 5 [default = 0];		// Obsolete from RPCT-1660
+	//optional int32 validityBit = 6 [default = 0];			// Obsolete from RPCT-1660
 	optional int32 valueOffset = 7 [default = 0];
 	optional int32 valueBit = 8 [default = 0];
 	optional int32 type = 9 [default = 0];					// RPCT-345
@@ -892,6 +924,8 @@ message DeviceSignal
 	optional double appSignalLowEngUnits = 14 [default = 0];
 	optional double appSignalHighEngUnits = 15 [default = 100];
 	optional int32 appSignalDataFormat = 16 [default = 2];		// E::DataFormat::Float = 2
+
+    optional string validitySignalId = 20;					// RPCT-1660
 }
 
 message Workstation

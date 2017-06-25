@@ -173,6 +173,9 @@ namespace VFrame30
 		//
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
+		r.setTopRight(drawParam->gridToDpi(r.topRight()));
+		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
+
 		if (std::abs(r.left() - r.right()) < 0.000001)
 		{
 			r.setRight(r.left() + 0.000001f);

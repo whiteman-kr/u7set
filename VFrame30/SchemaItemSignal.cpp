@@ -292,7 +292,7 @@ namespace VFrame30
 			assert(inputPins.empty() == false);
 
 			painter->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
-						QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
+							  QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
 		}
 
 		if (outputsCount() > 0)
@@ -301,7 +301,7 @@ namespace VFrame30
 			assert(pins.empty() == false);
 
 			painter->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
-						QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
+							  QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
 		}
 
 		return;
@@ -463,7 +463,7 @@ namespace VFrame30
 			}
 		}
 
-		// Draw horizontal deviders
+		// Draw horizontal dividers
 		//
 		painter->setPen(linePen);
 
@@ -480,7 +480,8 @@ namespace VFrame30
 				break;
 			}
 
-			painter->drawLine(QLineF(rect.left(), bottom, rect.right(), bottom));
+			painter->drawLine(drawParam->gridToDpi(rect.left(), bottom),
+							  drawParam->gridToDpi(rect.right(), bottom));
 		}
 
 		//  Draw vertical deviders
@@ -512,8 +513,8 @@ namespace VFrame30
 			//
 			if (i < m_columns.size() - 1)	// For all columns exceprt last
 			{
-				painter->drawLine(QPointF(rect.left() + startOffset, rect.top()),
-								  QPointF(rect.left() + startOffset, rect.bottom()));
+				painter->drawLine(drawParam->gridToDpi(rect.left() + startOffset, rect.top()),
+								  drawParam->gridToDpi(rect.left() + startOffset, rect.bottom()));
 			}
 		}
 
@@ -595,8 +596,8 @@ namespace VFrame30
 			{
 				painter->setPen(linePen);
 
-				painter->drawLine(QPointF(rect.left() + startOffset, rect.top()),
-								  QPointF(rect.left() + startOffset, rect.bottom()));
+				painter->drawLine(drawParam->gridToDpi(rect.left() + startOffset, rect.top()),
+								  drawParam->gridToDpi(rect.left() + startOffset, rect.bottom()));
 			}
 		}
 

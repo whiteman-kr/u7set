@@ -28,6 +28,7 @@
 #include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
+#include "../VFrame30/Bus.h"
 #include "LogicModule.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
@@ -2161,6 +2162,20 @@ void EditSchemaWidget::createActions()
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
+	m_addSeparatorBus = new QAction(this);
+	m_addSeparatorBus->setSeparator(true);
+
+	m_addBusComposer = new QAction(tr("Bus Composer"), this);
+	m_addBusComposer->setEnabled(true);
+	m_addBusComposer->setIcon(QIcon(":/Images/Images/SchemaBusComposer.svg"));
+	connect(m_addBusComposer, &QAction::triggered, this, &EditSchemaWidget::addBusComposer);
+
+	m_addBusExtractor = new QAction(tr("Bus Extractor"), this);
+	m_addBusExtractor->setEnabled(true);
+	m_addBusExtractor->setIcon(QIcon(":/Images/Images/SchemaBusExtractor.svg"));
+	connect(m_addBusExtractor, &QAction::triggered, this, &EditSchemaWidget::addBusExtractor);
+
+
 	m_addValueAction = new QAction(tr("Value"), this);
 	m_addValueAction->setEnabled(true);
 	m_addValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
@@ -2522,6 +2537,10 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
 			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorBus);
+			m_addMenu->addAction(m_addBusComposer);
+			m_addMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isUfbSchema() == true)
@@ -2532,6 +2551,10 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
 			m_addMenu->addAction(m_addAfbAction);
+
+			m_addMenu->addAction(m_addSeparatorBus);
+			m_addMenu->addAction(m_addBusComposer);
+			m_addMenu->addAction(m_addBusExtractor);
 		}
 
 		if (isMonitorSchema() == true)
@@ -6608,6 +6631,120 @@ void EditSchemaWidget::addUfbElement()
 		}
 	}
 
+	return;
+}
+
+void EditSchemaWidget::addBusComposer()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusComposer>(schema()->unit());
+	addBusItem(schemaItem);
+}
+
+void EditSchemaWidget::addBusExtractor()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemBusExtractor>(schema()->unit());
+	addBusItem(schemaItem);
+}
+
+void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem)
+{
+	if (schema()->isLogicSchema() == false &&
+		schema()->isUfbSchema() == false)
+	{
+		assert(false);		// No sense to add sconnection to non applogic schema
+		return;
+	}
+
+	// Select BustType from existing
+	//
+	std::vector<DbFileInfo> fileInfos;
+
+	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ".xml", true, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	std::vector<std::shared_ptr<DbFile>> files;
+
+	ok = db()->getLatestVersion(fileInfos, &files, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Parse files
+	//
+	std::vector<VFrame30::Bus> busses;
+	busses.reserve(files.size());
+
+
+	for (std::shared_ptr<DbFile> f : files)
+	{
+		VFrame30::Bus bus;
+		QString errorMessage;
+
+		ok = bus.load(f->data(), &errorMessage);
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), QString("Error reading %1 file: %2").arg(f->fileName()).arg(errorMessage));
+			continue;
+		}
+
+		busses.push_back(bus);
+	}
+
+	std::sort(busses.begin(), busses.end(),
+			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			{
+				return b1.busTypeId() < b2.busTypeId();
+			});
+	// Show menu
+	//
+	QObject actionParent;
+	QList<QAction*> menuActions;
+
+//	QAction* empty = new QAction(QString("BusTypeID"), &actionParent);
+//	empty->setData(empty->text());
+//	menuActions << empty;
+
+	for (const VFrame30::Bus& bus : busses)
+	{
+		QString caption = QString("%1").arg(bus.busTypeId());
+		QAction* a = new QAction(caption , &actionParent);
+		a->setData(bus.busTypeId());
+
+		menuActions << a;
+	}
+
+	QPoint menuPos = QCursor::pos();
+
+	QAction* triggeredAction = QMenu::exec(menuActions, menuPos);
+	if (triggeredAction == nullptr)
+	{
+		return;
+	}
+
+	// --
+	//
+	QString selectedBusId = triggeredAction->data().toString();
+
+	for (const VFrame30::Bus& bus : busses)
+	{
+		if (bus.busTypeId() == selectedBusId)
+		{
+			schemaItem->setBusType(bus);
+
+			// Add item
+			//
+			addItem(schemaItem);
+			return;
+		}
+	}
+
+	// Selected bus not found
+	//
+	assert(false);
 	return;
 }
 

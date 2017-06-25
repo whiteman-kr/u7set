@@ -88,10 +88,9 @@ namespace Hardware
 		static const QString memoryArea;
 		static const QString size;
 
-		static const QString validityOffset;
-		static const QString validityBit;
 		static const QString valueOffset;
 		static const QString valueBit;
+		static const QString validitySignalId;
 
 		static const QString appSignalLowAdc;
 		static const QString appSignalHighAdc;
@@ -153,7 +152,7 @@ namespace Hardware
 
 		// Expand EquipmentIDTemplate for this and for all children
 		//
-		void expandEquipmentId();
+		virtual void expandEquipmentId();
 
 		// Get all signals, including signals from child items
 		std::vector<std::shared_ptr<DeviceSignal>> getAllSignals() const;
@@ -579,6 +578,11 @@ namespace Hardware
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
+		// Expand EquipmentIDTemplate, ValiditySignalId for this and for all children
+		//
+	public:
+		virtual void expandEquipmentId() override;
+
 	public:
 		virtual DeviceType deviceType() const override;
 
@@ -587,7 +591,6 @@ namespace Hardware
 		// Properties
 		//
 	public:
-
 		E::SignalType type() const;
 		Q_INVOKABLE int jsType() const;
 		void setType(E::SignalType value);
@@ -608,17 +611,14 @@ namespace Hardware
 		int size() const;
 		void setSize(int value);
 
-		int validityOffset() const;
-		void setValidityOffset(int value);
-
-		int validityBit() const;
-		void setValidityBit(int value);
-
 		int valueOffset() const;
 		void setValueOffset(int value);
 
 		int valueBit() const;
 		void setValueBit(int value);
+
+		QString validitySignalId() const;
+		void setValiditySignalId(const QString& value);
 
 		bool isInputSignal() const;
 		bool isOutputSignal() const;
@@ -657,10 +657,10 @@ namespace Hardware
 		E::MemoryArea m_memoryArea = E::MemoryArea::ApplicationData;
 
 		int m_size = 0;
-		int m_validityOffset = -1;
-		int m_validityBit = -1;
 		int m_valueOffset = 0;
 		int m_valueBit = 0;
+
+		QString m_validitySignalId;
 
 		// Signals for creating Analog AppSignals
 		//

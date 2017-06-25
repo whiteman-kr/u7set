@@ -171,6 +171,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0153.sql", "Upgrade to version 153, OCM and OCMN presets update, delete old signals"},
 	{":/DatabaseUpgrade/Upgrade0154.sql", "Upgrade to version 154, LogicModule0000.xml file update"},
 	{":/DatabaseUpgrade/Upgrade0155.sql", "Upgrade to version 155, append new fields in SignalInstance table"},
+	{":/DatabaseUpgrade/Upgrade0156.sql", "Upgrade to version 156, Add BUSTYPES system folder"},
 };
 
 
@@ -358,6 +359,12 @@ int DbWorker::connectionsFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_connectionsFileId;
+}
+
+int DbWorker::busTypesFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_busTypesFileId;
 }
 
 std::vector<DbFileInfo> DbWorker::systemFiles() const
@@ -902,6 +909,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	m_dvsFileId = -1;
 	m_mcFileId = -1;
 	m_connectionsFileId = -1;
+	m_busTypesFileId = -1;
 	m_systemFiles.clear();
 	m_mutex.unlock();
 
@@ -989,6 +997,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			m_systemFiles.push_back(fi);
 			continue;
 		}
+
+		if (fi.fileName() == ::BusTypesFileName)
+		{
+			QMutexLocker locker(&m_mutex);
+			m_busTypesFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
 	}
 
 
@@ -1002,6 +1018,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	result &= m_dvsFileId != -1;
 	result &= m_mcFileId != -1;
 	result &= m_connectionsFileId != -1;
+	result &= m_busTypesFileId != -1;
 	m_mutex.unlock();
 
 	if (result == false)

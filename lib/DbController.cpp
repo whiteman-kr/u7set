@@ -2298,6 +2298,11 @@ int DbController::connectionsFileId() const
 	return m_worker->connectionsFileId();
 }
 
+int DbController::busTypesFileId() const
+{
+	return m_worker->busTypesFileId();
+}
+
 std::vector<DbFileInfo> DbController::systemFiles() const
 {
 	return m_worker->systemFiles();
