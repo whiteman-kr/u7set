@@ -156,6 +156,8 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
 
+		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);
+
 	protected:
 		virtual void setBusPins(const VFrame30::Bus& bus);
 

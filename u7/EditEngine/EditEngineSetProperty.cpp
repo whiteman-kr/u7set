@@ -1,6 +1,7 @@
 #include "EditEngineSetProperty.h"
 #include "EditSchemaWidget.h"
 #include "../../VFrame30/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItemBus.h"
 #include <QMessageBox>
 
 namespace EditEngine
@@ -60,32 +61,44 @@ namespace EditEngine
 				//
 				newValue = r.item->propertyValue(r.propertyName);
 
-				// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
-				//
-				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
-
-				if (fblElement == nullptr)
+				if (r.item->isSchemaItemAfb() == true)
 				{
+					VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 					assert(fblElement != nullptr);
+
+					QString errorMsg;
+					bool ok = fblElement->setAfbParam(r.propertyName, newValue, m_schema, &errorMsg);
+
+					if (ok == false)
+					{
+						QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+					}
+
+					// setAfbParam executes script that can correct the value. If it was corrected, update the value
+					//
+
+					QVariant v = fblElement->getAfbParam(r.propertyName);
+					if (v != newValue)
+					{
+						r.item->setPropertyValue(r.propertyName, v);
+					}
+
 					continue;
 				}
 
-				QString errorMsg;
-				bool ok = fblElement->setAfbParam(r.propertyName, newValue, m_schema, &errorMsg);
-
-				if (ok == false)
+				if (r.item->isType<VFrame30::SchemaItemBusExtractor>() == true)
 				{
-					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+					VFrame30::SchemaItemBusExtractor* busExtractor = dynamic_cast<VFrame30::SchemaItemBusExtractor*>(r.item.get());
+					assert(busExtractor != nullptr);
+
+					// It will update output pins
+					//
+					busExtractor->specificPropertyCouldBeChanged(r.propertyName, newValue);
+
+					continue;
 				}
 
-				// setAfbParam executes script that can correct the value. If it was corrected, update the value
-				//
-
-				QVariant v = fblElement->getAfbParam(r.propertyName);
-				if (v != newValue)
-				{
-					r.item->setPropertyValue(r.propertyName, v);
-				}
+				assert(false);		// Specific proprties have only SchemaItemAfb and SchemaItemBusExtractor
 			}
 		}
 
@@ -102,29 +115,40 @@ namespace EditEngine
 			sel.push_back(r.item);
 			r.item->setPropertyValue(r.propertyName, r.oldValue);
 
-
 			auto property = r.item->propertyByCaption(r.propertyName);
 			assert(property);
 
 			if (property.get() != nullptr && property->specific() == true)
 			{
-				// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
-				//
-				VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
-
-				if (fblElement == nullptr)
+				if (r.item->isSchemaItemAfb() == true)
 				{
+					// Apparently it is FblParam, only VFrame30::SchemaItemAfb can have such kind of props
+					//
+					VFrame30::SchemaItemAfb* fblElement = dynamic_cast<VFrame30::SchemaItemAfb*>(r.item.get());
 					assert(fblElement != nullptr);
+
+					QString errorMsg;
+					bool ok = fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema, &errorMsg);
+
+					if (ok == false)
+					{
+						QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
+					}
+				}
+
+				if (r.item->isType<VFrame30::SchemaItemBusExtractor>() == true)
+				{
+					VFrame30::SchemaItemBusExtractor* busExtractor = dynamic_cast<VFrame30::SchemaItemBusExtractor*>(r.item.get());
+					assert(busExtractor != nullptr);
+
+					// It will update output pins
+					//
+					busExtractor->specificPropertyCouldBeChanged(r.propertyName, r.oldValue);
+
 					continue;
 				}
 
-				QString errorMsg;
-				bool ok = fblElement->setAfbParam(r.propertyName, r.oldValue, m_schema, &errorMsg);
-
-				if (ok == false)
-				{
-					QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
-				}
+				assert(false);		// Specific proprties have only SchemaItemAfb and SchemaItemBusExtractor
 			}
 		}
 

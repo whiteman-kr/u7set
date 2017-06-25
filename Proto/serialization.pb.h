@@ -6126,14 +6126,27 @@ class SchemaItemBusExtractor : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // repeated .Proto.Property properties = 2;
+  inline int properties_size() const;
+  inline void clear_properties();
+  static const int kPropertiesFieldNumber = 2;
+  inline const ::Proto::Property& properties(int index) const;
+  inline ::Proto::Property* mutable_properties(int index);
+  inline ::Proto::Property* add_properties();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
+      properties() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
+      mutable_properties();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemBusExtractor)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::RepeatedPtrField< ::Proto::Property > properties_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -18004,6 +18017,31 @@ inline void SchemaItemBus::set_allocated_bustypexml(::std::string* bustypexml) {
 // -------------------------------------------------------------------
 
 // SchemaItemBusExtractor
+
+// repeated .Proto.Property properties = 2;
+inline int SchemaItemBusExtractor::properties_size() const {
+  return properties_.size();
+}
+inline void SchemaItemBusExtractor::clear_properties() {
+  properties_.Clear();
+}
+inline const ::Proto::Property& SchemaItemBusExtractor::properties(int index) const {
+  return properties_.Get(index);
+}
+inline ::Proto::Property* SchemaItemBusExtractor::mutable_properties(int index) {
+  return properties_.Mutable(index);
+}
+inline ::Proto::Property* SchemaItemBusExtractor::add_properties() {
+  return properties_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Property >&
+SchemaItemBusExtractor::properties() const {
+  return properties_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
+SchemaItemBusExtractor::mutable_properties() {
+  return &properties_;
+}
 
 // -------------------------------------------------------------------
 
