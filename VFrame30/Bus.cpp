@@ -399,17 +399,7 @@ namespace VFrame30
 		}
 
 		QString xml(data);
-
-		QFile file("bus.xml");
-		file.open(QIODevice::WriteOnly | QIODevice::Text);
-
-		 QTextStream out(&file);
-		 out << xml;
-
 		Hash h = ::calcHash(xml);
-
-		qDebug() << "Bus::calcHash() : " << h;
-		qDebug() << "Bus::calcHash() xml: " << xml;
 
 		return h;
 	}
