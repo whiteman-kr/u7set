@@ -6,6 +6,7 @@
 #include "../lib/Hash.h"
 
 class QDomElement;
+class QXmlStreamWriter;
 
 namespace VFrame30
 {
@@ -32,6 +33,7 @@ namespace VFrame30
 
 		bool load(const QDomElement& domElement, QString* errorMessage);
 		bool save(QDomElement* domElement) const;
+		bool save(QXmlStreamWriter* stream) const;
 
 	public:
 		QString name() const;

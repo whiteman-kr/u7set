@@ -1,6 +1,7 @@
 #include "Bus.h"
 #include "PropertyNames.h"
 #include <QDomDocument>
+#include <QXmlStreamWriter>
 
 namespace VFrame30
 {
@@ -177,6 +178,39 @@ namespace VFrame30
 		return true;
 	}
 
+	bool BusSignal::save(QXmlStreamWriter* stream) const
+	{
+		if (stream == nullptr)
+		{
+			assert(stream);
+			return false;
+		}
+
+		// Name
+		//
+		stream->writeAttribute(QLatin1String("Name"), m_name);
+
+		// Type
+		//
+		stream->writeAttribute(QLatin1String("Type"), E::valueToString(m_type));
+
+		switch (m_type)
+		{
+		case E::SignalType::Discrete:
+			break;
+		case E::SignalType::Analog:
+			stream->writeAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
+			break;
+		case E::SignalType::Bus:
+			stream->writeAttribute(QLatin1String("BusTypeID"), m_busTypeId);
+			break;
+		default:
+			assert(false);
+		}
+
+		return true;
+	}
+
 	QString BusSignal::name() const
 	{
 		return m_name;
@@ -302,22 +336,45 @@ namespace VFrame30
 			return false;
 		}
 
-		QDomDocument doc;
+		// Save is done via QXmlStreamWriter, because QDomDocument from run to run sometimes can keep the same xml in different way
+		// for example attributes can be in different order, it's still the same xml but,
+		// as we calc hash from the XML for checking version (SchemaItemBus) it's good idea to have always the SAME xml for same data
+		// So, just use QXmlStreamWriter for saving and QDomDocument for reading bus xml.
+		//
+		QXmlStreamWriter stream(data);
 
-		QDomElement busTypeElement = doc.createElement(QLatin1String("BusType"));
-		doc.appendChild(busTypeElement);
+		stream.setAutoFormatting(true);
+		stream.writeStartDocument();
 
-		busTypeElement.setAttribute(QLatin1String("ID"), m_busTypeId);
+		stream.writeStartElement("BusType");
+		stream.writeAttribute(QLatin1String("ID"), m_busTypeId);
 
 		for (const BusSignal& busSignal : m_busSignals)
 		{
-			QDomElement busSignalElement = doc.createElement(QLatin1String("BusSignal"));
-			busTypeElement.appendChild(busSignalElement);
-
-			busSignal.save(&busSignalElement);
+			stream.writeStartElement(QLatin1String("BusSignal"));
+			busSignal.save(&stream);
+			stream.writeEndElement();	// BusSignal
 		}
 
-		*data = doc.toByteArray();
+		stream.writeEndElement();	// BusType
+		stream.writeEndDocument();
+
+//		QDomDocument doc;
+
+//		QDomElement busTypeElement = doc.createElement(QLatin1String("BusType"));
+//		doc.appendChild(busTypeElement);
+
+//		busTypeElement.setAttribute(QLatin1String("ID"), m_busTypeId);
+
+//		for (const BusSignal& busSignal : m_busSignals)
+//		{
+//			QDomElement busSignalElement = doc.createElement(QLatin1String("BusSignal"));
+//			busTypeElement.appendChild(busSignalElement);
+
+//			busSignal.save(&busSignalElement);
+//		}
+
+//		*data = doc.toByteArray();
 		return true;
 	}
 
@@ -342,7 +399,17 @@ namespace VFrame30
 		}
 
 		QString xml(data);
+
+		QFile file("bus.xml");
+		file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+		 QTextStream out(&file);
+		 out << xml;
+
 		Hash h = ::calcHash(xml);
+
+		qDebug() << "Bus::calcHash() : " << h;
+		qDebug() << "Bus::calcHash() xml: " << xml;
 
 		return h;
 	}
