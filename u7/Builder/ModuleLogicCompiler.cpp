@@ -101,19 +101,17 @@ namespace Builder
 
 			if (createAppLogicItemsMaps() == false) break;
 
-			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
-
 			if (createAppFbsMap() == false) break;
 
 			if (createAppSignalsMap() == false) break;
 
 			if (createSignalLists() == false) break;
 
-			if (calculateIoSignalsAddresses() == false) break;
+			if (disposeSignalsInMemory() == false) break;
 
-			if (calculateLmMemoryMap() == false) break;
+			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
 
-			if (calculateInternalSignalsAddresses() == false) break;
+			//if (calculateInternalSignalsAddresses() == false) break;
 
 			if (setOutputSignalsAsComputed() == false) break;
 
@@ -585,6 +583,17 @@ namespace Builder
 		qDebug() << "----------------------------- APPLICATION LOGIC END --------------------------";
 	}
 
+	bool ModuleLogicCompiler::isUsedInUal(const Signal* s) const
+	{
+		TEST_PTR_RETURN_FALSE(s);
+
+		return isUsedInUal(s->appSignalID());
+	}
+
+	bool ModuleLogicCompiler::isUsedInUal(const QString& appSignalID) const
+	{
+		return m_appSignals.containsSignal(appSignalID);
+	}
 
 	QString ModuleLogicCompiler::getSchemaID(const LogicConst& constItem)
 	{
@@ -597,20 +606,6 @@ namespace Builder
 
 		return QString();
 	}
-
-
-
-	bool ModuleLogicCompiler::buildOptoModulesStorage()
-	{
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::calculateLmMemoryMap()
-	{
-		return true;
-	}
-
 
 	bool ModuleLogicCompiler::generateAppStartCommand()
 	{
@@ -5474,34 +5469,21 @@ namespace Builder
 
 					isIoSignal = true;
 
-					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					//
-					// Uncomment this code when validitySignalID property is added  !!!!!!!!
-					//
-					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-/*					QString validitySignalID;
-
-					bool res = DeviceHelper::getStrProperty(deviceSignal, QString("ValiditySignalID"), &validitySignalID, m_log);
-
-					if (res == false)
-					{
-						result = false;
-						continue;
-					}
+					QString validitySignalID = deviceSignal->validitySignalId();
 
 					if (validitySignalID.isEmpty() == false)
 					{
-
 						if (m_linkedValidtySignalsID.contains(deviceSignal->equipmentIdTemplate()) == true)
 						{
 							assert(false);
 						}
-
-						// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
-						//
-						m_linkedValidtySignalsID.insert(deviceSignal->equipmentIdTemplate(), validitySignalID);
-					}  */
+						else
+						{
+							// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+							//
+							m_linkedValidtySignalsID.insert(deviceSignal->equipmentIdTemplate(), validitySignalID);
+						}
+					}
 				}
 
 				break;
@@ -5544,9 +5526,58 @@ namespace Builder
 		bool result = true;
 
 		result &= createAcquiredDiscreteInputSignalsList();
-		result &= createAquiredDiscreteOutputSignalsList();
+		result &= createAcquiredDiscreteOutputSignalsList();
+		result &= createAcquiredDiscreteInternalSignalsList();
+		result &= createAcquiredDiscreteTuningSignalsList();
+
+		result &= createNonAcquiredDiscreteInputSignalsList();
+		result &= createNonAcquiredDiscreteOutputSignalsList();
+		result &= createNonAcquiredDiscreteInternalSignalsList();
+		result &= createNonAcquiredDiscreteTuningSignalsList();
+
+		result &= createAcquiredAnalogInputSignalsList();
+		result &= createAcquiredAnalogOutputSignalsList();
+		result &= createAcquiredAnalogInternalSignalsList();
+		result &= createAcquiredAnalogTuninglSignalsList();
+
+		result &= createNonAcquiredAnalogInputSignalsList();
+		result &= createNonAcquiredAnalogOutputSignalsList();
+		result &= createNonAcquiredAnalogInternalSignalsList();
+		result &= createNonAcquiredAnalogTuningSignalsList();
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		result = listsUniquenessCheck();
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
 		sortSignalList(m_acquiredDiscreteInputSignals);
+		sortSignalList(m_acquiredDiscreteOutputSignals);
+		sortSignalList(m_acquiredDiscreteInternalSignals);
+		sortSignalList(m_acquiredDiscreteTuningSignals);			// not need to sort if will be copy in reg buffer as block of memory
+
+		sortSignalList(m_nonAcquiredDiscreteInputSignals);
+		sortSignalList(m_nonAcquiredDiscreteOutputSignals);
+		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
+		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
+
+		sortSignalList(m_acquiredAnalogInputSignals);
+		sortSignalList(m_acquiredAnalogOutputSignals);
+		sortSignalList(m_acquiredAnalogInternalSignals);
+		sortSignalList(m_acquiredAnalogTuningSignals);
+
+		sortSignalList(m_nonAcquiredAnalogInputSignals);
+		sortSignalList(m_nonAcquiredAnalogOutputSignals);
+		sortSignalList(m_nonAcquiredAnalogInternalSignals);
+		sortSignalList(m_nonAcquiredAnalogTuningSignals);			// not need to sort if will be copy in reg buffer as block of memory
 
 		return result;
 	}
@@ -5556,13 +5587,12 @@ namespace Builder
 		m_acquiredDiscreteInputSignals.clear();
 		m_acquiredDiscreteInputSignalsMap.clear();
 
-		//	m_acquiredDiscreteInputSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ discrete
 		//	+ input
-		//
-		//	no matter used in UAL or not
+		//	+ no matter used in UAL or not
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5591,19 +5621,16 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAquiredDiscreteOutputSignalsList()
+	bool ModuleLogicCompiler::createAcquiredDiscreteOutputSignalsList()
 	{
 		m_acquiredDiscreteOutputSignals.clear();
 
-		//	m_acquiredDiscreteOutputSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ discrete
 		//	+ output
 		//	+ used in UAL
-		//
-
-		QHash<Signal*, Signal*> list;
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5616,37 +5643,25 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
 				s->isOutput() == true &&
-				m_appSignals.containsSignal(s->appSignalID()) == true)
+				isUsedInUal(s) == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_acquiredDiscreteOutputSignals.append(s);
-
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_acquiredDiscreteOutputSignals.append(s);
 			}
 		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createAquiredDiscreteInternalSignalsList()
+	bool ModuleLogicCompiler::createAcquiredDiscreteInternalSignalsList()
 	{
 		m_acquiredDiscreteInternalSignals.clear();
 
-		//	m_acquiredDiscreteInternalSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ discrete
 		//	+ internal
 		//	+ used in UAL
-		//
-
-		QHash<Signal*, Signal*> list;
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5659,37 +5674,88 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				m_appSignals.containsSignal(s->appSignalID()) == true)
+				isUsedInUal(s) == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_acquiredDiscreteInternalSignals.append(s);
-
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_acquiredDiscreteInternalSignals.append(s);
 			}
 		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createNonAquiredDiscreteOutputSignalsList()
+	bool ModuleLogicCompiler::createAcquiredDiscreteTuningSignalsList()
 	{
-		m_nonAcquiredDiscreteOutputSignals.clear();
+		m_acquiredDiscreteTuningSignals.clear();
 
-		//	m_nonAcquiredDiscreteOutputSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ discrete
+		//	+ internal
+		//	+ tuningable
+		//	+ no matter used in UAL or not
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == true &&
+				s->isDiscrete() == true &&
+				s->isInternal() == true &&
+				s->enableTuning() == true)
+			{
+				m_acquiredDiscreteTuningSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteInputSignalsList()
+	{
+		m_nonAcquiredDiscreteInputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ discrete
+		//	+ input
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isDiscrete() == true &&
+				s->isInput() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredDiscreteInputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteOutputSignalsList()
+	{
+		m_nonAcquiredDiscreteOutputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ discrete
 		//	+ output
 		//	+ used in UAL
-		//
-
-		QHash<Signal*, Signal*> list;
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5702,37 +5768,26 @@ namespace Builder
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isOutput() == true &&
-				m_appSignals.containsSignal(s->appSignalID()) == true)
+				isUsedInUal(s) == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_nonAcquiredDiscreteOutputSignals.append(s);
-
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_nonAcquiredDiscreteOutputSignals.append(s);
 			}
 		}
 
 		return true;
 	}
 
-	bool ModuleLogicCompiler::createNonAquiredDiscreteInternalSignalsList()
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteInternalSignalsList()
 	{
 		m_nonAcquiredDiscreteInternalSignals.clear();
 
-		//	m_nonAcquiredDiscreteInternalSignals include signals that:
+		//	list include signals that:
 		//
-		//	+ acquired
+		//	+ non acquired
 		//	+ discrete
-		//	+ output
+		//	+ internal
 		//	+ used in UAL
 		//	+ shadow discrete internal signals (auto generated in m_appSignals)
-
-		QHash<Signal*, Signal*> list;
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5745,18 +5800,9 @@ namespace Builder
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				m_appSignals.containsSignal(s->appSignalID()) == true)
+				isUsedInUal(s) == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_nonAcquiredDiscreteInternalSignals.append(s);
-
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_nonAcquiredDiscreteInternalSignals.append(s);
 			}
 		}
 
@@ -5773,8 +5819,6 @@ namespace Builder
 			if (appSignal->isShadowSignal() == true &&
 				appSignal->isDiscrete() == true)
 			{
-				assert(appSignal->isAcquired() == false);
-
 				Signal* s = appSignal->signal();
 
 				if (s == nullptr)
@@ -5783,16 +5827,43 @@ namespace Builder
 					continue;
 				}
 
-				if (list.contains(s) == false)
-				{
-					m_nonAcquiredDiscreteInternalSignals.append(s);
+				assert(s->isAcquired() == false);
+				assert(s->isInternal() == true);
 
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_nonAcquiredDiscreteInternalSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredDiscreteTuningSignalsList()
+	{
+		m_nonAcquiredDiscreteTuningSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ discrete
+		//	+ internal
+		//	+ tuningable
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isDiscrete() == true &&
+				s->isInternal() == true &&
+				s->enableTuning() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredDiscreteTuningSignals.append(s);
 			}
 		}
 
@@ -5803,15 +5874,12 @@ namespace Builder
 	{
 		m_acquiredAnalogInputSignals.clear();
 
-		//	m_acquiredAnalogInputSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ analog
 		//	+ input
-		//
-		//	no matter used in UAL or not
-
-		QHash<Signal*, Signal*> list;
+		//	+ no matter used in UAL or not
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5825,12 +5893,7 @@ namespace Builder
 				s->isAnalog() == true &&
 				s->isInput() == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_acquiredAnalogInputSignals.append(s);
-
-					list.insert(s, s);
-				}
+				m_acquiredAnalogInputSignals.append(s);
 
 				// if input signal is acquired, then validity signal (if exists) also always acquired
 				//
@@ -5845,15 +5908,12 @@ namespace Builder
 	{
 		m_acquiredAnalogOutputSignals.clear();
 
-		//	m_acquiredAnalogOutputSignals include signals that:
+		//	list include signals that:
 		//
 		//	+ acquired
 		//	+ analog
 		//	+ output
 		//	+ used in UAL
-		//
-
-		QHash<Signal*, Signal*> list;
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -5866,24 +5926,348 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isOutput() == true &&
-				m_appSignals.containsSignal(s->appSignalID()) == true)
+				isUsedInUal(s) == true)
 			{
-				if (list.contains(s) == false)
-				{
-					m_acquiredAnalogOutputSignals.append(s);
-
-					list.insert(s, s);
-				}
-				else
-				{
-					assert(false);
-				}
+				m_acquiredAnalogOutputSignals.append(s);
 			}
 		}
 
 		return true;
 	}
 
+	bool ModuleLogicCompiler::createAcquiredAnalogInternalSignalsList()
+	{
+		m_acquiredAnalogInternalSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ acquired
+		//	+ analog
+		//	+ internal
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == true &&
+				s->isAnalog() == true &&
+				s->isInternal() == true &&
+				isUsedInUal(s->appSignalID()) == true)
+			{
+				m_acquiredAnalogInternalSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createAcquiredAnalogTuninglSignalsList()
+	{
+		m_acquiredAnalogTuningSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ acquired
+		//	+ analog
+		//	+ internal
+		//	+ tuningable
+		//	+ no matter used in UAL or not
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == true &&
+				s->isAnalog() == true &&
+				s->isInternal() == true &&
+				s->enableTuning() == true)
+			{
+				m_acquiredAnalogTuningSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredAnalogInputSignalsList()
+	{
+		m_nonAcquiredAnalogInputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ analog
+		//	+ input
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isAnalog() == true &&
+				s->isInput() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredAnalogInputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredAnalogOutputSignalsList()
+	{
+		m_nonAcquiredAnalogOutputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ analog
+		//	+ output
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isAnalog() == true &&
+				s->isOutput() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredAnalogOutputSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredAnalogInternalSignalsList()
+	{
+		m_nonAcquiredAnalogInternalSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ analog
+		//	+ internal
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isAnalog() == true &&
+				s->isInternal() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredAnalogInternalSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredAnalogTuningSignalsList()
+	{
+		m_nonAcquiredAnalogTuningSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ acquired
+		//	+ analog
+		//	+ internal
+		//	+ tuningable
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isAnalog() == true &&
+				s->isInternal() == true &&
+				s->enableTuning() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredAnalogTuningSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::disposeSignalsInMemory()
+	{
+		bool result = false;
+
+		do
+		{
+			if (calculateIoSignalsAddresses() == false) break;
+
+			if (disposeAcquiredDiscreteSignals() == false) break;
+
+			if (disposeNonAcquiredDiscreteSignals() == false) break;
+
+
+			//bool createAcquiredDiscreteInternalSignalsList();
+			//bool createAcquiredDiscreteTuningSignalsList();
+
+
+			result = true;
+		}
+		while(false);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredDiscreteSignals()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredDiscreteOutputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignal(*s);
+
+			s->setUalAddr(addr);
+		}
+
+		for(Signal* s : m_acquiredDiscreteInternalSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignal(*s);
+
+			s->setUalAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeNonAcquiredDiscreteSignals()
+	{
+		bool result = true;
+
+		for(Signal* s : m_nonAcquiredDiscreteOutputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredDiscreteSignal(*s);
+
+			s->setUalAddr(addr);
+		}
+
+		for(Signal* s : m_nonAcquiredDiscreteInternalSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredDiscreteSignal(*s);
+
+			s->setUalAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::listsUniquenessCheck() const
+	{
+		bool result = true;
+
+		QHash<Signal*, Signal*> signalsMap;
+
+		signalsMap.reserve(m_chassisSignals.count());
+
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteTuningSignals);
+
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteInputSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteTuningSignals);
+
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogTuningSignals);
+
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInputSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogOutputSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInternalSignals);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogTuningSignals);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const
+	{
+		bool result = true;
+
+		for(Signal* s : signalList)
+		{
+			if (signalsMap.contains(s) == true)
+			{
+				assert(false);				// signal is duplicate in different signals lists!
+				result = false;
+				continue;
+			}
+
+			signalsMap.insert(s, s);
+		}
+
+		return result;
+	}
 
 	bool ModuleLogicCompiler::appendLinkedValiditySignal(const Signal* s)
 	{
@@ -6256,7 +6640,7 @@ namespace Builder
 
 			Module module = m_modules.value(deviceModule->equipmentIdTemplate());
 
-			Address16 ioBufAddr(deviceSignal->validityOffset(), deviceSignal->valueBit());
+			Address16 ioBufAddr(deviceSignal->valueOffset(), deviceSignal->valueBit());
 
 			switch(deviceSignal->memoryArea())
 			{
@@ -6493,7 +6877,7 @@ namespace Builder
 				appSignal->isDiscrete() == true &&
 				appSignal->enableTuning() == false)
 			{
-				Address16 ramAddr = m_memoryMap.addRegDiscreteSignal(appSignal->constSignal());
+				Address16 ramAddr = m_memoryMap.appendAcquiredDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 
@@ -6614,7 +6998,7 @@ namespace Builder
 				//
 				// tuningable signals ramAddr is calculate in buildTuningData: tuningData->buildTuningData();
 
-				Address16 ramAddr = m_memoryMap.addNonRegDiscreteSignal(appSignal->constSignal());
+				Address16 ramAddr = m_memoryMap.appendNonAcquiredDiscreteSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 
@@ -8057,7 +8441,7 @@ namespace Builder
 		return m_signalStrIdMap.value(appSignalID, nullptr);
 	}
 
-	bool AppSignalMap::containsSignal(const QString& appSignalID)
+	bool AppSignalMap::containsSignal(const QString& appSignalID) const
 	{
 		return m_signalStrIdMap.contains(appSignalID);
 	}

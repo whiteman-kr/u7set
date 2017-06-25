@@ -131,8 +131,8 @@ namespace Builder
 		m_appBitAdressed.bitAccumulator.setStartAddress(appLogicBitData.startAddress());
 		m_appBitAdressed.bitAccumulator.setSizeW(1);        // bit accumulator has 1 word (16 bit) size
 
-		m_appBitAdressed.regDiscretSignals.setStartAddress(appLogicBitData.startAddress());
-		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(appLogicBitData.startAddress());
+		m_appBitAdressed.acquiredDiscreteSignals.setStartAddress(appLogicBitData.startAddress());
+		m_appBitAdressed.nonAcquiredDiscreteSignals.setStartAddress(appLogicBitData.startAddress());
 
 		// init tuning interface memory mapping
 		//
@@ -171,16 +171,18 @@ namespace Builder
 		// recalc application bit-addressed memory mapping
 		//
 
-		m_appBitAdressed.regDiscretSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
+		m_appBitAdressed.acquiredDiscreteSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 
-		m_appBitAdressed.nonRegDiscretSignals.setStartAddress(m_appBitAdressed.regDiscretSignals.nextAddress());
+		m_appBitAdressed.nonAcquiredDiscreteSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteSignals.nextAddress());
 
-		if (m_appBitAdressed.nonRegDiscretSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
+		if (m_appBitAdressed.nonAcquiredDiscreteSignals.nextAddress() > m_appBitAdressed.memory.nextAddress())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of bit-addressed memory range!"));
 
 			return false;
 		}
+
+		// -------------- END OF REVISED!!! -----------------
 
 		// recalc application word-addressed memory mapping
 		//
@@ -223,7 +225,7 @@ namespace Builder
 		// registered discrete signals
 
 		m_appWordAdressed.regDiscreteSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
-		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.regDiscretSignals.sizeW());
+		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.acquiredDiscreteSignals.sizeW());
 
 		// registered tuningable signals
 
@@ -317,17 +319,17 @@ namespace Builder
 
 		memFile.append("");
 
-		addRecord(memFile, m_appBitAdressed.regDiscretSignals, "registered discrete signals");
+		addRecord(memFile, m_appBitAdressed.acquiredDiscreteSignals, "registered discrete signals");
 
 		memFile.append("");
 
-		addSignals(memFile, m_appBitAdressed.regDiscretSignals);
+		addSignals(memFile, m_appBitAdressed.acquiredDiscreteSignals);
 
-		addRecord(memFile, m_appBitAdressed.nonRegDiscretSignals, "non-registered discrete signals");
+		addRecord(memFile, m_appBitAdressed.nonAcquiredDiscreteSignals, "non-registered discrete signals");
 
 		memFile.append("");
 
-		addSignals(memFile, m_appBitAdressed.nonRegDiscretSignals);
+		addSignals(memFile, m_appBitAdressed.nonAcquiredDiscreteSignals);
 
 		memFile.append("");
 
@@ -485,12 +487,22 @@ namespace Builder
 		memFile.append("");
 	}
 
-
-	Address16 LmMemoryMap::addRegDiscreteSignal(const Signal& signal)
+	Address16 LmMemoryMap::appendAcquiredDiscreteSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isAcquired() && signal.isDiscrete());
+		assert(signal.isAcquired() == true &&
+			   signal.isDiscrete() == true &&
+			   (signal.isOutput() == true || signal.isInternal() == true));
 
-		return m_appBitAdressed.regDiscretSignals.appendSignal(signal);
+		return m_appBitAdressed.acquiredDiscreteSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::appendNonAcquiredDiscreteSignal(const Signal& signal)
+	{
+		assert(signal.isAcquired() == false &&
+			   signal.isDiscrete() == true &&
+			   (signal.isOutput() == true || signal.isInternal() == true));
+
+		return m_appBitAdressed.nonAcquiredDiscreteSignals.appendSignal(signal);
 	}
 
 	Address16 LmMemoryMap::addRegDiscreteSignalToRegBuffer(const Signal& signal)
@@ -509,12 +521,6 @@ namespace Builder
 	}
 
 
-	Address16 LmMemoryMap::addNonRegDiscreteSignal(const Signal& signal)
-	{
-		assert(signal.isInternal() && !signal.isAcquired() && signal.isDiscrete());
-
-		return m_appBitAdressed.nonRegDiscretSignals.appendSignal(signal);
-	}
 
 
 	Address16 LmMemoryMap::addRegAnalogSignal(const Signal& signal)
@@ -534,7 +540,8 @@ namespace Builder
 
 	double LmMemoryMap::bitAddressedMemoryUsed()
 	{
-		return double((m_appBitAdressed.regDiscretSignals.sizeW() + m_appBitAdressed.nonRegDiscretSignals.sizeW()) * 100) /
+		return double((m_appBitAdressed.acquiredDiscreteSignals.sizeW() +
+					   m_appBitAdressed.nonAcquiredDiscreteSignals.sizeW()) * 100) /
 				double(m_appBitAdressed.memory.sizeW());
 	}
 

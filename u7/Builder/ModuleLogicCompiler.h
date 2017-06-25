@@ -434,7 +434,7 @@ namespace Builder
 		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
 
 		AppSignal* getSignal(const QString& appSignalID);
-		bool containsSignal(const QString& appSignalID);
+		bool containsSignal(const QString& appSignalID) const;
 
 		void clear();
 	};
@@ -576,12 +576,23 @@ namespace Builder
 
 		QVector<Signal*> m_acquiredDiscreteInputSignals;		// acquired discrete input signals, no matter used in UAL or not
 		QVector<Signal*> m_acquiredDiscreteOutputSignals;		// acquired discrete output signals, used in UAL
-		QVector<Signal*> m_acquiredDiscreteInternalSignals;		// acquired discrete internal signals, used in UAL
+		QVector<Signal*> m_acquiredDiscreteInternalSignals;		// acquired discrete internal non tuningable signals, used in UAL
+		QVector<Signal*> m_acquiredDiscreteTuningSignals;		// acquired discrete internal tuningable signals, no matter used in UAL or not
+
+		QVector<Signal*> m_nonAcquiredDiscreteInputSignals;		// non acquired discrete input signals, used in UAL
 		QVector<Signal*> m_nonAcquiredDiscreteOutputSignals;	// non acquired discrete output signals, used in UAL
-		QVector<Signal*> m_nonAcquiredDiscreteInternalSignals;	// non acquired discrete internal signals, used in UAL
+		QVector<Signal*> m_nonAcquiredDiscreteInternalSignals;	// non acquired discrete internal non tuningbale signals, used in UAL
+		QVector<Signal*> m_nonAcquiredDiscreteTuningSignals;	// non acquired discrete internal tuningable signals, used in UAL
 
 		QVector<Signal*> m_acquiredAnalogInputSignals;			// acquired analog input signals, no matter used in UAL or not
-		QVector<Signal*> m_acquiredAnalogOutputSignals;			// acquired analog input signals, used in UAL
+		QVector<Signal*> m_acquiredAnalogOutputSignals;			// acquired analog output signals, used in UAL
+		QVector<Signal*> m_acquiredAnalogInternalSignals;		// acquired analog internal signals, used in UAL
+		QVector<Signal*> m_acquiredAnalogTuningSignals;			// acquired analog internal tuningable signals, no matter used in UAL or not
+
+		QVector<Signal*> m_nonAcquiredAnalogInputSignals;		// non acquired analog input signals, used in UAL
+		QVector<Signal*> m_nonAcquiredAnalogOutputSignals;		// non acquired analog output signals, used in UAL
+		QVector<Signal*> m_nonAcquiredAnalogInternalSignals;	// non acquired analog internal non tunigable signals, used in UAL
+		QVector<Signal*> m_nonAcquiredAnalogTuningSignals;		// non acquired analog internal tuningable signals, used in UAL
 
 		QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
 																		// for grant unique records
@@ -627,13 +638,32 @@ namespace Builder
 		bool createSignalLists();
 
 		bool createAcquiredDiscreteInputSignalsList();
-		bool createAquiredDiscreteOutputSignalsList();
-		bool createAquiredDiscreteInternalSignalsList();
-		bool createNonAquiredDiscreteOutputSignalsList();
-		bool createNonAquiredDiscreteInternalSignalsList();
+		bool createAcquiredDiscreteOutputSignalsList();
+		bool createAcquiredDiscreteInternalSignalsList();
+		bool createAcquiredDiscreteTuningSignalsList();
+
+		bool createNonAcquiredDiscreteInputSignalsList();
+		bool createNonAcquiredDiscreteOutputSignalsList();
+		bool createNonAcquiredDiscreteInternalSignalsList();
+		bool createNonAcquiredDiscreteTuningSignalsList();
 
 		bool createAcquiredAnalogInputSignalsList();
 		bool createAcquiredAnalogOutputSignalsList();
+		bool createAcquiredAnalogInternalSignalsList();
+		bool createAcquiredAnalogTuninglSignalsList();
+
+		bool createNonAcquiredAnalogInputSignalsList();
+		bool createNonAcquiredAnalogOutputSignalsList();
+		bool createNonAcquiredAnalogInternalSignalsList();
+		bool createNonAcquiredAnalogTuningSignalsList();
+
+		bool disposeSignalsInMemory();
+
+		bool disposeAcquiredDiscreteSignals();
+		bool disposeNonAcquiredDiscreteSignals();
+
+		bool listsUniquenessCheck() const;
+		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
 
 		bool appendLinkedValiditySignal(const Signal* s);
 		void sortSignalList(QVector<Signal *> &signalList);
@@ -761,8 +791,6 @@ namespace Builder
 
 		bool finalizeOptoConnectionsProcessing();
 
-		bool buildOptoModulesStorage();
-
 		bool generateApplicationLogicCode();
 
 		bool writeResult();
@@ -780,6 +808,9 @@ namespace Builder
 		void cleanup();
 
 		void dumApplicationLogicItems();
+
+		bool isUsedInUal(const Signal* s) const;
+		bool isUsedInUal(const QString& appSignalID) const;
 
 		QString getSchemaID(const LogicConst& constItem);
 

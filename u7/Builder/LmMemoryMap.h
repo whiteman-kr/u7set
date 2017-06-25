@@ -115,8 +115,10 @@ namespace Builder
 			MemoryArea memory;
 
 			MemoryArea bitAccumulator;
-			MemoryArea regDiscretSignals;
-			MemoryArea nonRegDiscretSignals;
+
+			MemoryArea acquiredDiscreteSignals;
+
+			MemoryArea nonAcquiredDiscreteSignals;
 
 		} m_appBitAdressed;
 
@@ -189,8 +191,8 @@ namespace Builder
 		int lmInOutsAddress() const { return m_lmInOuts.memory.startAddress(); }
 		int lmInOutsSizeW() const { return m_lmInOuts.memory.sizeW(); }
 
-		int regDiscreteSignalsAddress() const { return m_appBitAdressed.regDiscretSignals.startAddress(); }
-		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.regDiscretSignals.sizeW(); }
+		int regDiscreteSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteSignals.startAddress(); }
+		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteSignals.sizeW(); }
 
 		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
 		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
@@ -218,9 +220,10 @@ namespace Builder
 
 		void getFile(QStringList& memFile);
 
-		Address16 addRegDiscreteSignal(const Signal& signal);
+		Address16 appendAcquiredDiscreteSignal(const Signal& signal);
+		Address16 appendNonAcquiredDiscreteSignal(const Signal& signal);
+
 		Address16 addRegDiscreteSignalToRegBuffer(const Signal& signal);
-		Address16 addNonRegDiscreteSignal(const Signal& signal);
 		Address16 addRegAnalogSignal(const Signal& signal);
 		Address16 addRegTuningSignal(const Signal& signal);
 		Address16 addNonRegAnalogSignal(const Signal& signal);
