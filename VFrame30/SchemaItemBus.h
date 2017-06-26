@@ -53,11 +53,12 @@ namespace VFrame30
 		const VFrame30::Bus& busType() const;
 		void setBusType(const VFrame30::Bus&bus);
 
-		int busTypeVersion() const;
+		Hash busTypeHash() const;
 
 		// Data
 		//
 	private:
+		Hash m_busTypeHash = 0xFFFFFFFFFFFFFFFF;
 		Bus m_bus;
 	};
 
@@ -155,40 +156,18 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
 
+		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);
+
 	protected:
 		virtual void setBusPins(const VFrame30::Bus& bus);
 
 		// Properties
 		//
 	public:
-//		const QString& appSignalId() const;
-//		void setAppSignalId(const QString& value);
-
-//		bool showValidity() const;
-//		void setShowValidity(bool value);
-
-//		bool isValidityPin(const QUuid& pin) const;
-//		bool isOutputPin(const QUuid& pinGuid) const;
-
-//		E::ColumnData data() const;
-//		void setData(E::ColumnData value);
-
-//		int precision() const;
-//		void setPrecision(int value);
-
-//		E::AnalogFormat analogFormat() const;
-//		void setAnalogFormat(E::AnalogFormat value);
 
 		// Data
 		//
 	private:
-//		QString m_appSignalId = "#APPSIGNALID";
-//		bool m_showValidity = true;
-
-//		E::ColumnData m_dataType = E::ColumnData::AppSignalID;	// Data for displaying
-
-//		int m_precision = 2;
-//		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 	};
 
 }

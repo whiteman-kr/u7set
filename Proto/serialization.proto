@@ -759,6 +759,8 @@ message SchemaItemValue
 message SchemaItemBus
 {
     optional string busTypeId = 2;
+	optional fixed64 busTypeHash = 3;
+	optional string busTypeXml = 4;
 }
 
 //
@@ -777,6 +779,7 @@ message SchemaItemBusComposer
 //
 message SchemaItemBusExtractor
 {
+    repeated Property properties = 2;
 }
 
 //

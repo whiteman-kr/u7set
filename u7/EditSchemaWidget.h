@@ -291,6 +291,7 @@ public:
 
 	bool updateAfbsForSchema();
 	bool updateUfbsForSchema();
+	bool updateBussesForSchema();
 
 protected:
 	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
@@ -304,6 +305,7 @@ protected:
 
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
+	bool loadBusses(std::vector<VFrame30::Bus>* out);
 
 public:
 	void resetAction();

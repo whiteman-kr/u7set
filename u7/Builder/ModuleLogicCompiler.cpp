@@ -1765,7 +1765,7 @@ namespace Builder
 				continue;
 			}
 
-			m_log->errALC5011(appItem->guid());			// Application item '%1' has unknown type.
+			m_log->errALC5011(appItem->label(), appItem->schemaID(), appItem->guid());		// Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.
 			result = false;
 			break;
 		}
@@ -6950,13 +6950,7 @@ namespace Builder
 
 	QString AppItem::label() const
 	{
-		if (isFb() == false)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_appLogicItem.m_fblItem->toAfbElement()->label();
+		return m_appLogicItem.m_fblItem->label();
 	}
 
 

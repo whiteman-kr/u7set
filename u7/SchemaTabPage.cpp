@@ -1860,6 +1860,7 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 	//
 	editTabPage->updateAfbSchemaItems();
 	editTabPage->updateUfbSchemaItems();
+	editTabPage->updateBussesSchemaItems();
 
 	return;
 }
@@ -2355,6 +2356,20 @@ void EditSchemaTabPage::updateUfbSchemaItems()
 
 	return;
 }
+
+void EditSchemaTabPage::updateBussesSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
+
+	m_schemaWidget->updateBussesForSchema();
+
+	return;
+}
+
 
 void EditSchemaTabPage::CreateActions()
 {

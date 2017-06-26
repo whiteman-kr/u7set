@@ -40,6 +40,11 @@ namespace VFrame30
 		Proto::SchemaItemBus* busitem = message->mutable_schemaitem()->mutable_busitem();
 
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
+		busitem->set_bustypehash(m_busTypeHash);
+
+		QByteArray busXml;
+		m_bus.save(&busXml);
+		busitem->set_bustypexml(busXml.constData(), busXml.size());
 
 		return true;
 	}
@@ -63,6 +68,14 @@ namespace VFrame30
 		const Proto::SchemaItemBus& busitem = message.schemaitem().busitem();
 
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
+		m_busTypeHash = busitem.bustypehash();
+
+		QByteArray xml = QByteArray::fromRawData(busitem.bustypexml().data(),
+												 static_cast<int>(busitem.bustypexml().size()));
+		QString erorrMessaage;
+		m_bus.load(xml, &erorrMessaage);
+
+		setBusPins(m_bus);
 
 		return true;
 	}
@@ -110,11 +123,13 @@ namespace VFrame30
 	{
 		m_bus = bus;
 		setBusPins(bus);
+
+		m_busTypeHash = m_bus.calcHash();
 	}
 
-	int SchemaItemBus::busTypeVersion() const
+	Hash SchemaItemBus::busTypeHash() const
 	{
-		return m_bus.version();
+		return m_busTypeHash;
 	}
 
 	//
@@ -132,7 +147,7 @@ namespace VFrame30
 	SchemaItemBusComposer::SchemaItemBusComposer(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addOutput();
+		addOutput(-1, "bus_out");
 	}
 
 	SchemaItemBusComposer::~SchemaItemBusComposer()
@@ -293,6 +308,8 @@ namespace VFrame30
 			addInput(-1, busSignal.name());
 		}
 
+		adjustHeight();
+
 		return;
 	}
 
@@ -312,7 +329,7 @@ namespace VFrame30
 	SchemaItemBusExtractor::SchemaItemBusExtractor(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addInput();
+		addInput(-1, "bus_in");
 	}
 
 	SchemaItemBusExtractor::~SchemaItemBusExtractor()
@@ -334,7 +351,19 @@ namespace VFrame30
 		// --
 		//
 		Proto::SchemaItemBusExtractor* extractor = message->mutable_schemaitem()->mutable_busextractor();
-		Q_UNUSED(extractor);
+
+		// Save specific properties' values
+		//
+		std::vector<std::shared_ptr<Property>> props = this->properties();
+
+		for (auto p : props)
+		{
+			if (p->specific() == true)
+			{
+				::Proto::Property* protoProp = extractor->mutable_properties()->Add();
+				::Proto::saveProperty(protoProp, p);
+			}
+		}
 
 		return true;
 	}
@@ -356,7 +385,37 @@ namespace VFrame30
 		}
 
 		const Proto::SchemaItemBusExtractor& extractor = message.schemaitem().busextractor();
-		Q_UNUSED(extractor);
+
+		// Load specific properties' values. They are already exists after calling setBus
+		//
+		std::vector<std::shared_ptr<Property>> specificProps = this->properties();
+
+		for (const ::Proto::Property& p :  extractor.properties())
+		{
+			auto it = std::find_if(specificProps.begin(), specificProps.end(),
+				[p](std::shared_ptr<Property> dp)
+				{
+					return dp->caption().toStdString() == p.name();
+				});
+
+			if (it == specificProps.end())
+			{
+				qDebug() << "ERROR: Can't find property " << p.name().c_str() << " in" << label();
+			}
+			else
+			{
+				std::shared_ptr<Property> property = *it;
+				assert(property->specific() == true);	// it's suppose to be specific property;
+
+				bool loadOk = ::Proto::loadProperty(p, property);
+				Q_UNUSED(loadOk);
+				assert(loadOk);
+			}
+		}
+
+		// Update pins
+		//
+		specificPropertyCouldBeChanged("", true);
 
 		return true;
 	}
@@ -433,70 +492,6 @@ namespace VFrame30
 			DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
 		}
 
-
-
-//		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-//		if (std::abs(r.left() - r.right()) < 0.000001)
-//		{
-//			r.setRight(r.left() + 0.000001);
-//		}
-
-//		if (std::abs(r.bottom() - r.top()) < 0.000001)
-//		{
-//			r.setBottom(r.top() + 0.000001);
-//		}
-
-//		int dpiX = drawParam->dpiX();
-//		double pinWidth = GetPinWidth(itemUnit(), dpiX);
-
-//		// Draw line and symbol >>
-//		//
-//		QPen linePen(lineColor());
-//		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
-//		p->setPen(linePen);
-
-//		p->drawLine(QPointF(r.left() + pinWidth, r.top()), QPointF(r.left() + pinWidth, r.bottom()));
-
-//		// >>
-//		//
-//		QRectF arrowRect(r);
-//		arrowRect.setRight(r.left() + pinWidth);
-
-//		p->setPen(textColor());
-//		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
-
-//		// Draw ConnectionID
-//		//
-//		r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
-//		r.setRight(r.right() - pinWidth - m_font.drawSize() / 4.0);
-
-//		p->setPen(textColor());
-
-//		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
-
-//		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
-//		//
-//		QString appSignalId = this->appSignalId();
-
-//		AppSignalParam signal;
-//		signal.setAppSignalId(appSignalId);
-
-//		AppSignalState signalState;
-//		signalState.m_flags.valid = false;
-
-//		bool signalFound = false;
-
-//		if (drawParam->isMonitorMode() == true)
-//		{
-//			signal = drawParam->appSignalManager()->signalParam(appSignalId, &signalFound);
-//			signalState = drawParam->appSignalManager()->signalState(appSignalId, nullptr);
-//		}
-
-//		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);
-
-//		DrawHelper::drawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
-
 		return;
 	}
 
@@ -530,14 +525,81 @@ namespace VFrame30
 		return QString("BusExtractor %1").arg(busTypeId());
 	}
 
+	void SchemaItemBusExtractor::specificPropertyCouldBeChanged(QString propertyName, const QVariant& value)
+	{
+		Q_UNUSED(propertyName)
+		Q_UNUSED(value)
+
+		outputs().clear();
+
+		std::vector<std::shared_ptr<Property>> props = properties();
+
+		for (const VFrame30::BusSignal& busSignal : busType().busSignals())
+		{
+			QString propName = "ShowOut_" + busSignal.name();
+
+			auto it = std::find_if(props.begin(), props.end(),
+					[&propName](std::shared_ptr<Property> p)
+					{
+						return p->caption() == propName;
+					});
+
+			if (it == props.end())
+			{
+				assert(false);
+				addOutput(-1, busSignal.name());
+			}
+			else
+			{
+				std::shared_ptr<Property> p = *it;
+
+				if (p->value().toBool() == false)
+				{
+				}
+				else
+				{
+					addOutput(-1, busSignal.name());
+				}
+			}
+		}
+
+		adjustHeight();
+
+		return;
+	}
+
 	void SchemaItemBusExtractor::setBusPins(const VFrame30::Bus& bus)
 	{
-		outputs().clear();
+		// Update ShowOut properties
+		//
+		std::vector<std::shared_ptr<Property>> props = properties();
+
+		removeSpecificProperties();
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			addOutput(-1, busSignal.name());
+			QString propName = "ShowOut_" + busSignal.name();
+
+			auto it = std::find_if(props.begin(), props.end(),
+					[&propName](std::shared_ptr<Property> p)
+					{
+						return p->caption() == propName;
+					});
+
+			if (it == props.end())
+			{
+				auto p = this->addProperty(propName, PropertyNames::parametersCategory, true);
+				p->setSpecific(true);
+				p->setValue(true);
+			}
+			else
+			{
+				addProperty(*it);
+			}
 		}
+
+		specificPropertyCouldBeChanged("", true);
+		adjustHeight();
 
 		return;
 	}

@@ -302,8 +302,6 @@ namespace VFrame30
 	void FblItem::DrawPinJoint(QPainter* p, double x, double y, double pinWidth) const
 	{
 		double radius = pinWidth / 9.0;
-
-		//p->drawEllipse(QPointF(x, y), radius, radius);
 		p->drawEllipse(QRectF(x - radius, y - radius, 2 * radius, 2 * radius));		//Using drawEllipse(QPoint) creates
 	}
 

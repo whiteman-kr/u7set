@@ -21,38 +21,6 @@ inline Hash calcHash(const QString& str)
 	return hash;
 }
 
-//inline HASH CalcHash(LPCTSTR str)
-//{
-//	if (!str)
-//	{
-//		ASSERT(str);
-//		return UNDEFINED_HASH;
-//	}
-
-//	HASH nHash = 0;
-
-//	while (*str)
-//		nHash += (nHash<<5) + *str++;
-
-//	return nHash;
-//}
-
-//inline UINT CalcHash32(LPCTSTR str)
-//{
-//	if (!str)
-//	{
-//		ASSERT(str);
-//		return UNDEFINED_HASH;
-//	}
-
-//	UINT nHash = 0;
-
-//	while (*str)
-//		nHash += (nHash<<5) + *str++;
-
-//	return nHash;
-//}
-
 //inline HASH CalcHash(void* ptr, int nSize)
 //{
 //	if (ptr == NULL)
