@@ -7,6 +7,7 @@
 #include "FblItem.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
+#include "SchemaItemBus.h"
 #include "SchemaItemLink.h"
 #include "SchemaItemConnection.h"
 #include "HorzVertLinks.h"
@@ -623,6 +624,64 @@ namespace VFrame30
 				{
 					(*updatedItemCount) ++;
 				}
+			}
+		}
+
+		return errorMessage->isEmpty();
+	}
+
+	bool Schema::updateAllSchemaItemBusses(const std::vector<Bus>& busses, int* updatedItemCount, QString* errorMessage)
+	{
+		if (updatedItemCount == nullptr ||
+			errorMessage == nullptr)
+		{
+			assert(updatedItemCount);
+			assert(errorMessage);
+			return false;
+		}
+
+		*updatedItemCount = 0;
+
+		// Find all VFrame30::SchemaItemBus items
+		//
+		std::vector<std::shared_ptr<VFrame30::SchemaItemBus>> schemaItemBusses;
+
+		for (std::shared_ptr<SchemaLayer> l : Layers)
+		{
+			for (std::shared_ptr<SchemaItem> si : l->Items)
+			{
+				std::shared_ptr<VFrame30::SchemaItemBus> schemaItemBus = std::dynamic_pointer_cast<VFrame30::SchemaItemBus>(si);
+
+				if (schemaItemBus != nullptr)
+				{
+					schemaItemBusses.push_back(schemaItemBus);
+				}
+			}
+		}
+
+		// Update found items
+		//
+		for (std::shared_ptr<VFrame30::SchemaItemBus> si : schemaItemBusses)
+		{
+			auto foundIt = std::find_if(busses.begin(), busses.end(),
+				[&si](const Bus& bus)
+				{
+					return si->busTypeId() == bus.busTypeId();
+				});
+
+			if (foundIt == busses.end())
+			{
+				*errorMessage += tr("Cant find BusType %1.\n").arg(si->busTypeId());
+				continue;
+			}
+
+			const Bus& bus = *foundIt;
+
+			if (si->busTypeHash() != bus.calcHash())
+			{
+				si->setBusType(bus);
+
+				(*updatedItemCount) ++;
 			}
 		}
 

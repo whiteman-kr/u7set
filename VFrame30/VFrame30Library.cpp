@@ -21,6 +21,7 @@
 #include "SchemaItemPushButton.h"
 #include "SchemaItemLineEdit.h"
 #include "SchemaItemValue.h"
+#include "SchemaItemBus.h"
 #include "../lib/Types.h"
 
 namespace VFrame30
@@ -66,6 +67,9 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemPushButton>();
 		SchemaItemFactory.Register<SchemaItemLineEdit>();
 		SchemaItemFactory.Register<SchemaItemValue>();
+		SchemaItemFactory.Register<SchemaItemBus>();
+		SchemaItemFactory.Register<SchemaItemBusComposer>();
+		SchemaItemFactory.Register<SchemaItemBusExtractor>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

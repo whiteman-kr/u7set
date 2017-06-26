@@ -21,20 +21,8 @@
 #include <QDebug>
 
 #include "../lib/OrderedHash.h"
-//#include "../lib/PlainObjectHeap.h"
-
-//extern poh::PlainObjectHeap thePropertyObjectHeap;
 
 class PropertyObject;
-
-// Add property which is stored in QVariant and does not have getter or setter
-//
-#define ADD_PROPERTY_QVARIANT(TYPE, NAME, VISIBLE) \
-	addProperty<TYPE>(NAME, VISIBLE);
-
-// Add property which has getter	QString caption() const;
-void setCaption(QString value);
-//
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
@@ -514,7 +502,7 @@ static QVariant staticQVariant;
 			setValue(presetProperty->value());
 		}
 
-		// Do not copy m_getter/m_setter, because the yare binded to own object instances
+		// Do not copy m_getter/m_setter, because the are binded to their own object instances
 		//
 		return;
 	}
@@ -827,7 +815,7 @@ private:
 //
 //			Dynamic Enum Property
 //			Class PropertyValue specialization for OrderedHash<int, QString>,
-//			class behave like enum
+//			class behaves like enum
 //
 //
 template <>
@@ -923,13 +911,11 @@ public:
 	}
 
 private:
-
 	void checkLimits()
 	{
 	}
 
 public:
-
 	void setLimits(const QVariant& low, const QVariant& high)
 	{
 		Q_UNUSED(low);
@@ -1188,6 +1174,12 @@ public:
 		}
 	}
 
+	void addProperty(std::shared_ptr<Property> property)
+	{
+		uint hash = qHash(property->caption());
+		m_properties[hash] = property;
+	}
+
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
@@ -1346,227 +1338,6 @@ public:
 private:
 	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
 };
-
-
-//
-//
-//		Test and examples
-//
-//
-class TestEnum : public QObject
-{
-	Q_OBJECT
-public:
-
-	enum Priority { VeryLow, Low, High, VeryHigh = 10 , Extreme = 12 };
-	Q_ENUM(Priority)
-
-};
-
-//class TestProp : public PropertyObject
-//{
-//	Q_OBJECT
-
-//public:
-//	TestProp()
-//	{
-//		static QString BoolProp0_Caption("BoolProp0");
-//		static QString BoolProp1_Caption("BoolProp1");
-//		static QString BoolProp2_Caption("BoolProp2");
-//		static QString BoolProp3_Caption("BoolProp3");
-//		static QString BoolProp4_Caption("BoolProp4");
-//		static QString BoolProp5_Caption("BoolProp5");
-//		static QString BoolProp6_Caption("BoolProp6");
-//		static QString BoolProp7_Caption("BoolProp7");
-//		static QString BoolProp8_Caption("BoolProp8");
-//		static QString BoolProp9_Caption("BoolProp9");
-
-//		static QString IntProp0_Caption("IntProp0");
-//		static QString IntProp1_Caption("IntProp1");
-//		static QString IntProp2_Caption("IntProp2");
-//		static QString IntProp3_Caption("IntProp3");
-//		static QString IntProp4_Caption("IntProp4");
-//		static QString IntProp5_Caption("IntProp5");
-//		static QString IntProp6_Caption("IntProp6");
-//		static QString IntProp7_Caption("IntProp7");
-//		static QString IntProp8_Caption("IntProp8");
-//		static QString IntProp9_Caption("IntProp9");
-
-//		static QString StringProp0_Caption("StringProp0");
-//		static QString StringProp1_Caption("StringProp1");
-//		static QString StringProp2_Caption("StringProp2");
-//		static QString StringProp3_Caption("StringProp3");
-//		static QString StringProp4_Caption("StringProp4");
-//		static QString StringProp5_Caption("StringProp5");
-//		static QString StringProp6_Caption("StringProp6");
-//		static QString StringProp7_Caption("StringProp7");
-//		static QString StringProp8_Caption("StringProp8");
-//		static QString StringProp9_Caption("StringProp9");
-
-//		addProperty<bool>(BoolProp0_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp1_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp2_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp3_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp4_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp5_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp6_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp7_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp8_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-//		addProperty<bool>(BoolProp9_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-//				std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-
-//		addProperty<int>(IntProp0_Caption, true, (std::function<bool(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp1_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp2_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp3_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp4_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp5_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp6_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp7_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp8_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-//		addProperty<int>(IntProp9_Caption, true, (std::function<int(void)>)std::bind(&TestProp::someProp, this),
-//				std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-
-//		addProperty<QString>(StringProp0_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp1_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp2_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp3_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp4_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp5_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp6_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp7_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp8_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-//		addProperty<QString>(StringProp9_Caption, true, (std::function<QString(void)>)std::bind(&TestProp::someString, this),
-//				std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp0, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp1, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp2, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp3, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp4, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp5, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp6, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp7, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp8, true, TestProp::someBool, TestProp::setSomeBool);
-////		ADD_PROPERTY_GETTER_SETTER(bool, BoolProp9, true, TestProp::someBool, TestProp::setSomeBool);
-
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp1, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp2, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp0, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp3, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp4, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp5, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp6, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp7, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp8, true, TestProp::someProp, TestProp::setSomeProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, IntProp9, true, TestProp::someProp, TestProp::setSomeProp);
-
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp0, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp1, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp2, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp3, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp4, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp5, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp6, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp7, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp8, true, TestProp::someString, TestProp::setSomeString);
-////		ADD_PROPERTY_GETTER_SETTER(QString, StringProp9, true, TestProp::someString, TestProp::setSomeString);
-
-////		ADD_PROPERTY_QVARIANT(int, varint, true);
-////		ADD_PROPERTY_GETTER(int, varintgetter, true, TestProp::someProp);
-////		ADD_PROPERTY_GETTER_SETTER(int, varintgs, true, TestProp::someProp, TestProp::setSomeProp);
-
-////		PropertyValue<int>* pi = addProperty<int>(
-////					tr("SomeProp"),
-////					true,
-////					(std::function<int(void)>)std::bind(&TestProp::someProp, this),
-////					std::bind(&TestProp::setSomeProp, this, std::placeholders::_1));
-////		pi->setLowLimit(-100);
-
-////		PropertyValue<int>* pdi = addProperty<int>(tr("SomeDynProp"));
-////		pdi->setLowLimit(-200);
-
-////		addProperty<bool>(tr("SomeBool"),
-////						  true,
-////						  (std::function<bool(void)>)std::bind(&TestProp::someBool, this),
-////						  std::bind(&TestProp::setSomeBool, this, std::placeholders::_1));
-
-////		addProperty<QString>(tr("SomeString"),
-////							 true,
-////							 std::bind(&TestProp::someString, this),
-////							 std::bind(&TestProp::setSomeString, this, std::placeholders::_1));
-
-////		addProperty<TestEnum::Priority>(tr("Priority"),
-////										true,
-////										std::bind(&TestProp::priority, this),
-////										std::bind(&TestProp::setPriority, this, std::placeholders::_1));
-
-////		std::shared_ptr<OrderedHash<int, QString>> enumValues = std::make_shared<OrderedHash<int, QString>>();
-////		enumValues->append(0, "Zero");
-////		enumValues->append(1, "One");
-////		enumValues->append(10, "Ten");
-
-////		PropertyValue<OrderedHash<int, QString>>* pu = addDynamicEnumProperty(
-////					tr("Units"),
-////					enumValues,
-////					true,
-////					(std::function<int(void)>)std::bind(&TestProp::units, this),
-////					std::bind(&TestProp::setUnits, this, std::placeholders::_1));
-
-////		pu->setValue(2);
-
-////		ADD_PROPERTY_DYNAMIC_ENUM(Units2, true, enumValues, TestProp::units, TestProp::setUnits);
-//	}
-
-//	int someProp() const				{		return m_someProp;		}
-//	void setSomeProp(int value)			{		m_someProp = value;		}
-
-//	int units() const					{		return m_units;		}
-//	void setUnits(int value)			{		m_units = value;		}
-
-//	bool someBool() const				{		return m_someBool;		}
-//	void setSomeBool(bool value)		{		m_someBool = value;		}
-
-//	QString someString() const			{		return m_someString;	}
-//	void setSomeString(QString value)	{		m_someString = value;	}
-
-//	void setPriority(TestEnum::Priority priority)	{	m_priority = priority;	}
-//	TestEnum::Priority priority() const				{	return m_priority;		}
-
-//private:
-//	int m_someProp = -1;
-//	int m_units = 0;
-//	bool m_someBool = false;
-//	QString m_someString;
-//	TestEnum::Priority m_priority = TestEnum::Priority::Low;
-//};
 
 
 #endif // PROPERTYOBJECT

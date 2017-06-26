@@ -15,6 +15,7 @@ namespace VFrame30
 		static const QString preDrawScript;
 		static const QString commented;
 		static const QString objectName;
+		static const QString name;
 
 		static const QString fontName;
 		static const QString fontSize;
@@ -123,6 +124,8 @@ namespace VFrame30
 		static const QString appSignalId;
 		static const QString connectionId;
 		static const QString signalSource;
+
+		static const QString busTypeId;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;

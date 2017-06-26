@@ -295,26 +295,12 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-
-	// Рисование элемента, выполняется в 100% масштабе.
-	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
-	//
 	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
 
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001);
-		}
+		QRectF r = itemRectWithPins();
 
 		// --
 		//
@@ -336,6 +322,9 @@ namespace VFrame30
 		{
 			r.setRight(r.right() - pinWidth);
 		}
+
+		r.setTopRight(drawParam->gridToDpi(r.topRight()));
+		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
 		QRectF labelRect(r);	// save rect for future use
 		QRectF userTextRect(r);	// save rect for future use
@@ -376,8 +365,8 @@ namespace VFrame30
 
 			// Drawing pin
 			//
-			QPointF pt1(vip.X, vip.Y);
-			QPointF pt2(vip.X + pinWidth, vip.Y);
+			QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
+			QPointF pt2(drawParam->gridToDpi(vip.X + pinWidth, vip.Y));
 
 			p->setPen(pen);
 			p->drawLine(pt1, pt2);
@@ -431,8 +420,8 @@ namespace VFrame30
 
 			// Draw pin
 			//
-			QPointF pt1(vip.X, vip.Y);
-			QPointF pt2(vip.X - pinWidth, vip.Y);
+			QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
+			QPointF pt2(drawParam->gridToDpi(vip.X - pinWidth, vip.Y));
 
 			p->setPen(pen);
 			p->drawLine(pt1, pt2);
@@ -560,6 +549,17 @@ namespace VFrame30
 	QRectF FblItemRect::itemRectWithPins() const
 	{
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+
+		if (std::abs(r.left() - r.right()) < 0.000001)
+		{
+			r.setRight(r.left() + 0.000001);
+		}
+
+		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		{
+			r.setBottom(r.top() + 0.000001);
+		}
+
 		return r;
 	}
 
@@ -587,7 +587,7 @@ namespace VFrame30
 		return r;
 	}
 
-	Q_INVOKABLE void FblItemRect::adjustHeight()
+	void FblItemRect::adjustHeight()
 	{
 		// Here m_gridSize and m_pingGridStep are cached copies from Schema, they set in CalcPointPos
 		//

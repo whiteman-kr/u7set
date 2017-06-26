@@ -1,4 +1,6 @@
 #include "DrawParam.h"
+#include "Schema.h"
+#include "SchemaView.h"
 #include <QFont>
 
 namespace VFrame30
@@ -94,40 +96,153 @@ namespace VFrame30
 		return m_cosmeticPenWidth;
 	}
 
-	int CDrawParam::dpiX()
+	int CDrawParam::dpiX() const
 	{
 		if (m_dpiX == -1)
 		{
+			CDrawParam* mutable_this = const_cast<CDrawParam*>(this);
+
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				m_dpiX = m_painter->device()->physicalDpiX();
+				mutable_this->m_dpiX = m_painter->device()->physicalDpiX();
 			}
 			else
 			{
 				assert(m_painter);
-				m_dpiX = 96;
+				mutable_this->m_dpiX = 96;
 			}
 		}
 
 		return m_dpiX;
 	}
 
-	int CDrawParam::dpiY()
+	int CDrawParam::dpiY() const
 	{
 		if (m_dpiY == -1)
 		{
+			CDrawParam* mutable_this = const_cast<CDrawParam*>(this);
+
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				m_dpiY = m_painter->device()->physicalDpiY();
+				mutable_this->m_dpiY = m_painter->device()->physicalDpiY();
 			}
 			else
 			{
 				assert(m_painter);
-				m_dpiY = 96;
+				mutable_this->m_dpiY = 96;
 			}
 		}
 
 		return m_dpiY;
+	}
+
+	double CDrawParam::gridToDpiX(double pos) const
+	{
+		if (schemaView() == nullptr)
+		{
+			assert(schemaView() != nullptr);
+			return pos;
+		}
+
+		double zoom = schemaView()->zoom() / 100.0;
+
+		if (schema()->unit() == SchemaUnit::Display)
+		{
+			return (double)qRound(pos * zoom) / zoom;
+		}
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			int dpix = this->dpiX();
+			return (static_cast<double>(static_cast<int>(pos * zoom * dpix)) / dpix) / zoom;
+		}
+
+		assert(false);
+		return pos;
+
+	}
+
+	double CDrawParam::gridToDpiY(double pos) const
+	{
+		if (schemaView() == nullptr)
+		{
+			assert(schemaView() != nullptr);
+			return pos;
+		}
+
+		double zoom = schemaView()->zoom() / 100.0;
+
+		if (schema()->unit() == SchemaUnit::Display)
+		{
+			return (double)qRound(pos * zoom) / zoom;
+		}
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			int dpiy = this->dpiY();
+			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
+		}
+
+		assert(false);
+		return pos;
+	}
+
+	QPointF CDrawParam::gridToDpi(double x, double y) const
+	{
+		if (schemaView() == nullptr)
+		{
+			assert(schemaView() != nullptr);
+			return QPointF(x, y);
+		}
+
+		double zoom = schemaView()->zoom() / 100.0;
+
+		if (schema()->unit() == SchemaUnit::Display)
+		{
+			return QPointF((double)qRound(x * zoom) / zoom,
+						   (double)qRound(y * zoom) / zoom);
+		}
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			int dpix = this->dpiX();
+			int dpiy = this->dpiY();
+
+			return QPointF((static_cast<double>(static_cast<int>(x * zoom * dpix)) / dpix) / zoom,
+						   (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
+		}
+
+		assert(false);
+		return QPointF(x, y);
+	}
+
+	QPointF CDrawParam::gridToDpi(QPointF pos) const
+	{
+		if (schemaView() == nullptr)
+		{
+			assert(schemaView() != nullptr);
+			return pos;
+		}
+
+		double zoom = schemaView()->zoom() / 100.0;
+
+		if (schema()->unit() == SchemaUnit::Display)
+		{
+			return QPointF((double)qRound(pos.x() * zoom) / zoom,
+						   (double)qRound(pos.y() * zoom) / zoom);
+		}
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			int dpix = this->dpiX();
+			int dpiy = this->dpiY();
+
+			return QPointF((static_cast<double>(static_cast<int>(pos.x() * zoom * dpix)) / dpix) / zoom,
+						   (static_cast<double>(static_cast<int>(pos.y() * zoom * dpiy)) / dpiy) / zoom);
+		}
+
+		assert(false);
+		return pos;
 	}
 
 	bool CDrawParam::isEditMode() const

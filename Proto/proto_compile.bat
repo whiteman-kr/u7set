@@ -1,7 +1,15 @@
 @echo off
 
 echo Compile Protobuf file serialization.proto
+
 call ..\Protobuf\protoc.exe --cpp_out=. serialization.proto
+
+if %ERRORLEVEL% == 0 goto :next
+echo @
+echo ERRORS encountered during execution. Exited with status: %errorlevel%
+goto :endoffile
+
+:next
 move /Y serialization.pb.cc body.pb.cc
 copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a serialization.pb.cc /b
 del body.pb.cc
@@ -12,3 +20,4 @@ move /Y network.pb.cc body.pb.cc
 copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a network.pb.cc /b
 del body.pb.cc
 
+:endoffile

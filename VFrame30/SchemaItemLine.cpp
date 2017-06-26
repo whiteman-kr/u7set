@@ -99,8 +99,8 @@ namespace VFrame30
 
 		QPainter* p = drawParam->painter();
 
-		QPointF p1(startXDocPt(), startYDocPt());
-		QPointF p2(endXDocPt(), endYDocPt());
+		QPointF p1 = drawParam->gridToDpi(startXDocPt(), startYDocPt());
+		QPointF p2 = drawParam->gridToDpi(endXDocPt(), endYDocPt());
 
 		if (std::abs(p1.x() - p2.x()) < 0.000001 && std::abs(p1.y() - p2.y()) < 0.000001)
 		{

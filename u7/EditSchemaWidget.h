@@ -7,6 +7,7 @@
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemBus.h"
 #include "../lib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 
@@ -290,6 +291,7 @@ public:
 
 	bool updateAfbsForSchema();
 	bool updateUfbsForSchema();
+	bool updateBussesForSchema();
 
 protected:
 	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
@@ -303,6 +305,7 @@ protected:
 
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
+	bool loadBusses(std::vector<VFrame30::Bus>* out);
 
 public:
 	void resetAction();
@@ -361,6 +364,10 @@ protected slots:
 
 	void addAfbElement();			// Add Application Functional Block
 	void addUfbElement();			// Add User Functional Block
+
+	void addBusComposer();
+	void addBusExtractor();
+	void addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem);
 
 	void onLeftKey();
 	void onRightKey();
@@ -544,6 +551,10 @@ private:
 		QAction* m_addTransmitter = nullptr;
 		QAction* m_addReceiver = nullptr;
 		QAction* m_addUfbAction = nullptr;
+		// ------------------------------
+		QAction* m_addSeparatorBus = nullptr;
+		QAction* m_addBusComposer = nullptr;
+		QAction* m_addBusExtractor = nullptr;
 
 		QAction* m_addValueAction = nullptr;
 		QAction* m_addPushButtonAction = nullptr;

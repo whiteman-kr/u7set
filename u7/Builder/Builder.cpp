@@ -11,6 +11,7 @@
 #include "../../VFrame30/LogicSchema.h"
 #include "../../VFrame30/SchemaItemLink.h"
 #include "../../VFrame30/HorzVertLinks.h"
+#include "../../VFrame30/Bus.h"
 
 #include "ApplicationLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
@@ -170,7 +171,6 @@ namespace Builder
             //
             // Check child restirictions
             //
-
             ok = checkChildRestrictions(equipmentSet.root());
 
             if (ok == false)
@@ -257,11 +257,23 @@ namespace Builder
 			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &lmDescriptions, m_log);
 
 			//
+			// Loading BusTypes
+			//
+			VFrame30::BusSet busSet;
+
+			ok = loadBusses(&db, &busSet);
+
+			if (ok == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
+			}
+
+			//
 			// Parse application logic
 			//
 			AppLogicData appLogicData;
 
-			ok = parseApplicationLogic(&db, &appLogicData, lmDescriptions, &equipmentSet, &signalSet, lastChangesetId);
+			ok = parseApplicationLogic(&db, &appLogicData, lmDescriptions, &equipmentSet, &signalSet, &busSet, lastChangesetId);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1016,6 +1028,66 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::loadBusses(DbController* db, VFrame30::BusSet* out)
+	{
+		if (db == nullptr ||
+			out == nullptr)
+		{
+			assert(db);
+			assert(out);
+			return false;
+		}
+
+		// Get Busses
+		//
+		std::vector<DbFileInfo> fileList;
+
+		bool ok = db->getFileList(&fileList, db->busTypesFileId(), QLatin1String(".xml"), true, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Get Busses latest version from the DB
+		//
+		std::vector<std::shared_ptr<DbFile>> files;
+
+		ok = db->getLatestVersion(fileList, &files, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
+
+		// Parse files, create actual Busses
+		//
+		std::vector<VFrame30::Bus> busses;
+		busses.reserve(files.size());
+
+		for (const std::shared_ptr<DbFile>& f : files)
+		{
+			if (f->deleted() == true ||
+				f->action() == VcsItemAction::Deleted)
+			{
+				continue;
+			}
+
+			VFrame30::Bus bus;
+			QString errorMessage;
+
+			ok = bus.load(f->data(), &errorMessage);
+			if (ok == false)
+			{
+				return false;
+			}
+
+			busses.push_back(bus);
+		}
+
+		out->setBusses(busses);
+
+		return true;
+	}
+
 
 	bool BuildWorkerThread::loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions)
 	{
@@ -1067,24 +1139,27 @@ namespace Builder
 												  LmDescriptionSet& lmDescriptions,
 												  Hardware::EquipmentSet* equipment,
 												  SignalSet* signalSet,
+												  VFrame30::BusSet* busSet,
 												  int changesetId)
 	{
 		if (db == nullptr ||
 			appLogicData == nullptr ||
 			equipment == nullptr ||
-			signalSet == nullptr)
+			signalSet == nullptr ||
+			busSet == nullptr)
 		{
 			assert(db);
 			assert(appLogicData);
 			assert(equipment);
 			assert(signalSet);
+			assert(busSet);
 			return false;
 		}
 
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, tr("Application Logic parsing..."));
 
-		Parser alPareser(db, m_log, appLogicData, &lmDescriptions, equipment, signalSet, changesetId, debug());
+		Parser alPareser(db, m_log, appLogicData, &lmDescriptions, equipment, signalSet, busSet, changesetId, debug());
 
 		bool result = alPareser.parse();
 
