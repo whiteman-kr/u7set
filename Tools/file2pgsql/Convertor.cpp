@@ -4,8 +4,6 @@
 #include <iostream>
 #include <stdint.h>
 
-
-
 const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 							 "101112131415161718191a1b1c1d1e1f"
 							 "202122232425262728292a2b2c2d2e2f"
@@ -23,31 +21,32 @@ const static char* rawhex = {"000102030405060708090a0b0c0d0e0f"
 							 "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
 							 "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"};
 
-QString Convertor::start(const QString& inputFilePath, const QString& parentFile)
+bool Convertor::createQueryFiles(const QString& inputFileName, const QString& parentFile, std::vector<FileQuery>& queries)
 {
-	QString query = "";
-	QString convertResult = Convertor::convert(inputFilePath, parentFile, query);
-
-	if (convertResult.indexOf("ERROR") != -1)
+	if (convert(inputFileName, parentFile, queries) == false)
 	{
-		// working with single file
-		return "ERROR";
+		std::cout << "ERROR converting signle file" << std::endl;
+		return false;
 	}
 
-	QString dirName = inputFilePath + ".files";
-	QString parent = parentFile + "/" + inputFilePath;
-	QString filePathes = "";
+	QString dirName = inputFileName + ".files";
 
-	if (Convertor::findFiles(dirName, parent, query, filePathes).indexOf("ERROR") != -1)
+
+	QFileInfo fi(inputFileName);
+
+	QString parent = parentFile + "/" + fi.fileName();
+
+	if (convertFiles(dirName, parent, queries) == false)
 	{
 		std::cout << "ERROR in recursive file search" << std::endl;
-		return "ERROR";
+		return false;
 	}
 
-	return query;
+
+	return true;
 }
 
-QString Convertor::convert(const QString& inputFilePath, const QString& parentFile, QString& query)
+bool Convertor::convert(const QString& inputFilePath, const QString& parentFile, std::vector<FileQuery>& queries)
 {
 	// Read file
 	//
@@ -57,7 +56,7 @@ QString Convertor::convert(const QString& inputFilePath, const QString& parentFi
 	if (ok == false)
 	{
 		std::cout << "Cannot read input file" << inputFilePath.toStdString() << std::endl;
-		return "ERROR: Cannot read input file";
+		return false;
 	}
 
 	QByteArray data = input.readAll();
@@ -89,14 +88,17 @@ QString Convertor::convert(const QString& inputFilePath, const QString& parentFi
 	QFileInfo fi(inputFilePath);
 	QString inputFileName = fi.fileName();
 
-	// Write result to file
-	//
-	query += "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ", '{}');\n\n\n";
-	//out << str <<"\n\n";
-	return query;
+	FileQuery fq;
+	fq.path = parentFile + "/" + inputFileName;
+	fq.addQuery = "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ", '{}');\n\n\n";
+	fq.deleteQuery = "SELECT * FROM public.delete_file_on_update(1, '" + fq.path + "', 'Delete file " + inputFileName + "');\n\n\n";
+
+	queries.push_back(fq);
+
+	return true;
 }
 
-QString Convertor::findFiles(const QString& dirName, const QString& parentFile, QString& query, QString& filePathes)
+bool Convertor::convertFiles(const QString& dirName, const QString& parentFile, std::vector<FileQuery>& queries)
 {
 	QDir dir(dirName);
 
@@ -107,27 +109,25 @@ QString Convertor::findFiles(const QString& dirName, const QString& parentFile, 
 		// working with files inside dir
 
 		QString fileFromDir = dirName + QDir::separator() + file;   //making a path to file in dir
-		QFileInfo fileFromDirFile (fileFromDir);
-		if (convert(fileFromDir, parentFile, query).indexOf("ERROR") != -1)
+		if (convert(fileFromDir, parentFile, queries) == false)
 		{
-
-			return "ERROR";
+			return false;
 		}
-		filePathes += fileFromDirFile.filePath();
-		filePathes += QDir::separator();
-		filePathes += QDir::separator();
+
 		QDir checkDir(dirName + QDir::separator() + file + ".files");
 
 		if (checkDir.exists())
 		{
-			if (findFiles(dirName + QDir::separator() + file + ".files", parentFile + "/" + file, query, filePathes) == "ERROR")
-				return "ERROR";
+			if (convertFiles(dirName + QDir::separator() + file + ".files", parentFile + "/" + file, queries) == false)
+			{
+				return false;
+			}
 		}
 	}
-	return filePathes;
+	return true;
 }
 
-bool Convertor::writeToFile(QString &outputFileName, QString query)
+bool Convertor::writeToFile(const QString& outputFileName, const QString& header, const std::vector<FileQuery>& queries, FileQueryType queryType)
 {
 	QFile outputFile(outputFileName);											// creating file
 	if (outputFile.open(QIODevice::WriteOnly | QIODevice::Text) == false)
@@ -136,6 +136,26 @@ bool Convertor::writeToFile(QString &outputFileName, QString query)
 		return false;
 	}
 	QTextStream out(&outputFile);
-	out << query;
+
+	out << header;
+
+	for (const FileQuery& fq : queries)
+	{
+		switch (queryType)
+		{
+		case FileQueryType::Add:
+			out << fq.addQuery;
+			break;
+
+		case FileQueryType::Delete:
+			out << fq.deleteQuery;
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return false;
+		}
+	}
+
 	return true;
 }
