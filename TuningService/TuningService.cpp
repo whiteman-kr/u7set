@@ -1,5 +1,6 @@
 #include "../lib/WUtils.h"
 #include "TuningService.h"
+#include "version.h"
 
 
 namespace Tuning
@@ -144,7 +145,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
+		CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::TuningService, 0, 1, USED_SERVER_COMMIT_NUMBER);
 
 		m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 

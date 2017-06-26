@@ -1,14 +1,15 @@
 #include "TcpAppDataClient.h"
+#include "version.h"
 
 
 TcpAppDataClient::TcpAppDataClient(const HostAddressPort& serverAddressPort) :
-	Tcp::Client(serverAddressPort)
+	Tcp::Client(serverAddressPort, E::SoftwareType::ServiceControlManager, "", 0, 1, USED_SERVER_COMMIT_NUMBER)
 {
 }
 
 
 TcpAppDataClient::TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2)
+	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::ServiceControlManager, "", 0, 1, USED_SERVER_COMMIT_NUMBER)
 {
 }
 

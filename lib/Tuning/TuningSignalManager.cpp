@@ -7,8 +7,12 @@
 //
 
 
-TuningSignalManager::TuningSignalManager()
-	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0))
+TuningSignalManager::TuningSignalManager(E::SoftwareType softwareType,
+										 const QString equipmentID,
+										 int majorVersion,
+										 int minorVersion,
+										 int commitNo)
+	:Tcp::Client(HostAddressPort (QLatin1String("0.0.0.0"), 0), softwareType, equipmentID, majorVersion, minorVersion, commitNo)
 {
 }
 

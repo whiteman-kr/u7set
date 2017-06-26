@@ -36,7 +36,7 @@ class TuningSignalManager : public Tcp::Client
 	Q_OBJECT
 
 public:
-	TuningSignalManager();
+	TuningSignalManager(E::SoftwareType softwareType, const QString equipmentID, int majorVersion, int minorVersion, int commitNo);
 	virtual ~TuningSignalManager();
 
 	void setInstanceId(const QString& instanceId);

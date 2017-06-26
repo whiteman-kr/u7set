@@ -8,6 +8,8 @@
 
 #include "../lib/ServiceSettings.h"
 
+#include "version.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
@@ -22,7 +24,16 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort)
 
 	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_REQUEST);
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort, serverAddressPort2, false, nullptr);
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID,
+											1,
+											serverAddressPort,
+											serverAddressPort2,
+											false,
+											nullptr,
+											E::SoftwareType::Metrology,
+											0,
+											1,
+											USED_SERVER_COMMIT_NUMBER);
 
 	if (m_cfgLoaderThread == nullptr)
 	{
@@ -46,7 +57,17 @@ ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1, const Host
 		return;
 	}
 
-	m_cfgLoaderThread = new CfgLoaderThread(equipmentID, 1, serverAddressPort1,  serverAddressPort2, false, nullptr);
+	m_cfgLoaderThread = new CfgLoaderThread(equipmentID,
+											1,
+											serverAddressPort1,
+											serverAddressPort2,
+											false,
+											nullptr,
+											E::SoftwareType::Metrology,
+											0,
+											1,
+											USED_SERVER_COMMIT_NUMBER);
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;

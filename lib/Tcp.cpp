@@ -1,4 +1,5 @@
 #include "../lib/Tcp.h"
+#include "../Proto/network.pb.h"
 
 namespace Tcp
 {
@@ -87,7 +88,7 @@ namespace Tcp
 
 		setStateConnected(HostAddressPort(m_tcpSocket->peerAddress(), m_tcpSocket->peerPort()));
 
-		onConnection();
+		onInitConnection();
 	}
 
 
@@ -382,7 +383,7 @@ namespace Tcp
 	}
 
 
-	void SocketWorker::onConnection()
+	void SocketWorker::onInitConnection()
 	{
 		if (m_tcpSocket == nullptr)
 		{
@@ -585,7 +586,30 @@ namespace Tcp
 
 		addRequest();
 
-		processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
+		if (m_header.id == RQID_INTRODUCE_MYSELF)
+		{
+			Network::TcpClientIntroduceMyself message;
+
+			bool result = message.ParseFromArray(m_dataBuffer, m_header.dataSize);
+
+			if (result == false)
+			{
+				assert(false);
+				return;
+			}
+
+			m_state->softwareType = IntToEnum<E::SoftwareType>(message.softwaretype());
+			m_state->equipmentID = QString::fromStdString(message.equipmentid());
+			m_state->majorVersion = message.majorversion();
+			m_state->minorVersion = message.minorversion();
+			m_state->commitNo = message.commitno();
+
+			sendReply();
+		}
+		else
+		{
+			processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
+		}
 	}
 
 
@@ -950,18 +974,38 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	Client::Client(const HostAddressPort &serverAddressPort) :
+	Client::Client(const HostAddressPort &serverAddressPort,
+				   E::SoftwareType softwareType,
+				   const QString equipmentID,
+				   int majorVersion,
+				   int minorVersion,
+				   int commitNo) :
 		m_periodicTimer(this),
-		m_replyTimeoutTimer(this)
+		m_replyTimeoutTimer(this),
+		m_softwareType(softwareType),
+		m_equipmentID(equipmentID),
+		m_majorVersion(majorVersion),
+		m_minorVersion(minorVersion),
+		m_commitNo(commitNo)
 	{
 		setServer(serverAddressPort, false);
 		initReadStatusVariables();
 	}
 
 
-	Client::Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
+	Client::Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2,
+				   E::SoftwareType softwareType,
+				   const QString equipmentID,
+				   int majorVersion,
+				   int minorVersion,
+				   int commitNo) :
 		m_periodicTimer(this),
-		m_replyTimeoutTimer(this)
+		m_replyTimeoutTimer(this),
+		m_softwareType(softwareType),
+		m_equipmentID(equipmentID),
+		m_majorVersion(majorVersion),
+		m_minorVersion(minorVersion),
+		m_commitNo(commitNo)
 	{
 		setServers(serverAddressPort1, serverAddressPort2, false);
 		initReadStatusVariables();
@@ -1058,9 +1102,19 @@ namespace Tcp
 	}
 
 
-	void Client::onConnection()
+	void Client::onInitConnection()
 	{
 		qDebug() << qPrintable(QString("Socket connected to server %1").arg(m_selectedServer.addressPortStr()));
+
+		Network::TcpClientIntroduceMyself message;
+
+		message.set_softwaretype(TO_INT(m_softwareType));
+		message.set_equipmentid(m_equipmentID.toStdString());
+		message.set_majorversion(m_majorVersion);
+		message.set_minorversion(m_minorVersion);
+		message.set_commitno(m_commitNo);
+
+		sendRequest(RQID_INTRODUCE_MYSELF, message);
 	}
 
 
@@ -1121,7 +1175,14 @@ namespace Tcp
 
 			addReply();
 
-			processReply(m_header.id, m_dataBuffer, m_header.dataSize);
+			if (m_header.id == RQID_INTRODUCE_MYSELF)
+			{
+				onConnection();
+			}
+			else
+			{
+				processReply(m_header.id, m_dataBuffer, m_header.dataSize);
+			}
 
 			break;
 
