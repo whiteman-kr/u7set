@@ -172,6 +172,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0154.sql", "Upgrade to version 154, LogicModule0000.xml file update"},
 	{":/DatabaseUpgrade/Upgrade0155.sql", "Upgrade to version 155, append new fields in SignalInstance table"},
 	{":/DatabaseUpgrade/Upgrade0156.sql", "Upgrade to version 156, Add BUSTYPES system folder"},
+	{":/DatabaseUpgrade/Upgrade0157.sql", "Upgrade to version 157, Modified validity signals in IO modules and LM"},
 };
 
 
