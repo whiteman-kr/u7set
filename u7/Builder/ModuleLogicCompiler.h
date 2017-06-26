@@ -594,6 +594,9 @@ namespace Builder
 		QVector<Signal*> m_nonAcquiredAnalogInternalSignals;	// non acquired analog internal non tunigable signals, used in UAL
 		QVector<Signal*> m_nonAcquiredAnalogTuningSignals;		// non acquired analog internal tuningable signals, used in UAL
 
+		QVector<Signal*> m_acquiredBuses;						// acquired bus signals, used in UAL
+		QVector<Signal*> m_nonAcquiredBuses;					// non acquired bus signals, used in UAL
+
 		QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
 																		// for grant unique records
 
@@ -657,10 +660,20 @@ namespace Builder
 		bool createNonAcquiredAnalogInternalSignalsList();
 		bool createNonAcquiredAnalogTuningSignalsList();
 
+		bool createAcquiredBusSignalsList();
+		bool createNonAcquiredBusSignalsList();
+
 		bool disposeSignalsInMemory();
 
 		bool disposeAcquiredDiscreteSignals();
 		bool disposeNonAcquiredDiscreteSignals();
+
+		bool disposeRegRawData();
+
+		bool disposeAcquiredAnalogSignals();
+		bool disposeAcquiredAnalogTuningSignals();
+		bool disposeAcquiredBuses();
+		bool disposeAcquiredDiscreteSignalsInRegBuf();
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;

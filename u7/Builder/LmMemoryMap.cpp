@@ -42,13 +42,22 @@ namespace Builder
 
 		signalAddress = m_nextSignalAddress;
 
-		if (signal.isAnalog())
+		switch(signal.signalType())
 		{
+		case E::SignalType::Analog:
 			m_nextSignalAddress.addWord(signal.sizeW());
-		}
-		else
-		{
+			break;
+
+		case E::SignalType::Discrete:
 			m_nextSignalAddress.add1Bit();
+			break;
+
+		case E::SignalType::Bus:
+			m_nextSignalAddress.addWord(signal.sizeW());
+			break;
+
+		default:
+			assert(false);
 		}
 
 		m_signals.append(SignalAddress16(signal.appSignalID(), signalAddress, signal.sizeW(), signal.isDiscrete()));
@@ -147,8 +156,8 @@ namespace Builder
 		m_appWordAdressed.regRawData.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmInputs.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.lmOutputs.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.regAnalogSignals.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.regDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.regTuningSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(appLogicWordData.startAddress());
 
@@ -182,58 +191,29 @@ namespace Builder
 			return false;
 		}
 
-		// -------------- END OF REVISED!!! -----------------
-
 		// recalc application word-addressed memory mapping
 		//
-
-		// LM diagnostics
-
-		//m_appWordAdressed.lmDiagnostics.setStartAddress(m_appWordAdressed.memory.startAddress());
-		//m_appWordAdressed.lmDiagnostics.setSizeW(m_lmDiagnostics.memory.sizeW());
-
-		// LM input discrete signals
-
 		m_appWordAdressed.regRawData.setStartAddress(m_appWordAdressed.memory.startAddress());
 
-		m_appWordAdressed.lmInputs.setStartAddress(m_appWordAdressed.regRawData.nextAddress());
-		m_appWordAdressed.lmInputs.setSizeW(m_lmInOuts.memory.sizeW());
+		m_appWordAdressed.acquiredAnalogSignals.setStartAddress(m_appWordAdressed.regRawData.nextAddress());
 
-		// LM output discrete signals
+		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(m_appWordAdressed.acquiredAnalogSignals.nextAddress());
 
-		m_appWordAdressed.lmOutputs.setStartAddress(m_appWordAdressed.lmInputs.nextAddress());
-		m_appWordAdressed.lmOutputs.setSizeW(m_lmInOuts.memory.sizeW());
+		// -------------- END OF REVISED!!! -----------------
 
-		// modules data
-
-		for(int i = 0; i < MODULES_COUNT; i++)
-		{
-			if (i == 0)
-			{
-				m_appWordAdressed.module[0].setStartAddress(m_appWordAdressed.lmOutputs.nextAddress());
-			}
-			else
-			{
-				m_appWordAdressed.module[i].setStartAddress(m_appWordAdressed.module[i-1].nextAddress());
-			}
-		}
-
-		// registered analog signals
-
-		m_appWordAdressed.regAnalogSignals.setStartAddress(m_appWordAdressed.module[MODULES_COUNT - 1].nextAddress());
 
 		// registered discrete signals
 
-		m_appWordAdressed.regDiscreteSignals.setStartAddress(m_appWordAdressed.regAnalogSignals.nextAddress());
-		m_appWordAdressed.regDiscreteSignals.setSizeW(m_appBitAdressed.acquiredDiscreteSignals.sizeW());
+		m_appWordAdressed.acquiredDiscreteSignals.setStartAddress(m_appWordAdressed.acquiredAnalogSignals.nextAddress());
+		m_appWordAdressed.acquiredDiscreteSignals.setSizeW(m_appBitAdressed.acquiredDiscreteSignals.sizeW());
 
 		// registered tuningable signals
 
-		m_appWordAdressed.regTuningSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
+		m_appWordAdressed.regTuningSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteSignals.nextAddress());
 
 		// non registered analog signals
 
-		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.regDiscreteSignals.nextAddress());
+		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteSignals.nextAddress());
 
 		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
@@ -356,19 +336,19 @@ namespace Builder
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regAnalogSignals, "registered analogs signals");
+		addRecord(memFile, m_appWordAdressed.acquiredAnalogSignals, "registered analogs signals");
 
 		memFile.append("");
 
-		addSignals(memFile, m_appWordAdressed.regAnalogSignals);
+		addSignals(memFile, m_appWordAdressed.acquiredAnalogSignals);
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regDiscreteSignals, "registered discrete signals (from bit-addressed memory)");
+		addRecord(memFile, m_appWordAdressed.acquiredDiscreteSignals, "registered discrete signals (from bit-addressed memory)");
 
 		memFile.append("");
 
-		addSignals(memFile, m_appWordAdressed.regDiscreteSignals);
+		addSignals(memFile, m_appWordAdressed.acquiredDiscreteSignals);
 
 		memFile.append("");
 
@@ -505,11 +485,48 @@ namespace Builder
 		return m_appBitAdressed.nonAcquiredDiscreteSignals.appendSignal(signal);
 	}
 
-	Address16 LmMemoryMap::addRegDiscreteSignalToRegBuffer(const Signal& signal)
+	Address16 LmMemoryMap::setRegRawDataSize(int sizeW)
 	{
-		assert(signal.isInternal() && signal.isAcquired() && signal.isDiscrete());
+		m_appWordAdressed.regRawData.setSizeW(sizeW);
 
-		return m_appWordAdressed.regDiscreteSignals.appendSignal(signal);
+		return Address16(m_appWordAdressed.regRawData.startAddress(), 0);
+	}
+
+	Address16 LmMemoryMap::appendAcquiredAnalogSignal(const Signal& signal)
+	{
+		assert(signal.isAcquired() == true &&
+			   signal.isAnalog() == true &&
+			   (signal.isInput() == true || signal.isOutput() == true || signal.isInternal() == true));
+
+		return m_appWordAdressed.acquiredAnalogSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::appendAcquiredAnalogTuningSignal(const Signal& signal)
+	{
+		assert(signal.isAcquired() == true &&
+			   signal.isAnalog() == true &&
+			   signal.isInternal() == true &&
+			   signal.enableTuning() == true);
+
+		return m_appWordAdressed.acquiredAnalogTuningSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::appendAcquiredBus(const Signal& signal)
+	{
+		assert(signal.isAcquired() == true &&
+			   signal.isBus() == true);
+
+		return m_appWordAdressed.acquiredBusses.appendSignal(signal);
+	}
+
+
+	Address16 LmMemoryMap::appendAcquiredDiscreteSignalToRegBuf(const Signal& signal)
+	{
+		assert(signal.isAcquired() == true &&
+			   signal.isDiscrete() == true &&
+			   (signal.isInput() == true || signal.isOutput() == true || signal.isInternal() == true));
+
+		return m_appWordAdressed.acquiredDiscreteSignals.appendSignal(signal);
 	}
 
 
@@ -518,16 +535,6 @@ namespace Builder
 		assert(signal.isInternal() && signal.isAcquired() && signal.enableTuning());
 
 		return m_appWordAdressed.regTuningSignals.appendSignal(signal);
-	}
-
-
-
-
-	Address16 LmMemoryMap::addRegAnalogSignal(const Signal& signal)
-	{
-		assert(signal.isInternal() && signal.isAcquired() && signal.isAnalog());
-
-		return m_appWordAdressed.regAnalogSignals.appendSignal(signal);
 	}
 
 	Address16 LmMemoryMap::addNonRegAnalogSignal(const Signal& signal)

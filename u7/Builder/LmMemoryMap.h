@@ -132,12 +132,11 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea regRawData;						// rawData
-			MemoryArea lmInputs;						// reads from this->m_lmInOuts area
-			MemoryArea lmOutputs;						// writes to this->m_lmInOuts ares
-			MemoryArea module[MODULES_COUNT];			// depends from chassis	configuration
-			MemoryArea regAnalogSignals;
-			MemoryArea regDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
+			MemoryArea regRawData;							// registered raw data
+			MemoryArea acquiredAnalogSignals;
+			MemoryArea acquiredAnalogTuningSignals;
+			MemoryArea acquiredBusses;
+			MemoryArea acquiredDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
 			MemoryArea regTuningSignals;
 			MemoryArea nonRegAnalogSignals;
 
@@ -204,7 +203,7 @@ namespace Builder
 
 		// rb_* - adrresses and sizes in Registration Buffer
 		//
-		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.regDiscreteSignals.startAddress(); }
+		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.acquiredDiscreteSignals.startAddress(); }
 
 		int rb_lmInputsAddress() const { return m_appWordAdressed.lmInputs.startAddress(); }
 		int rb_lmOutputsAddress() const { return m_appWordAdressed.lmOutputs.startAddress(); }
@@ -223,10 +222,16 @@ namespace Builder
 		Address16 appendAcquiredDiscreteSignal(const Signal& signal);
 		Address16 appendNonAcquiredDiscreteSignal(const Signal& signal);
 
-		Address16 addRegDiscreteSignalToRegBuffer(const Signal& signal);
-		Address16 addRegAnalogSignal(const Signal& signal);
+		Address16 setRegRawDataSize(int sizeW);
+
+		Address16 appendAcquiredAnalogSignal(const Signal& signal);
+		Address16 appendAcquiredAnalogTuningSignal(const Signal& signal);
+		Address16 appendAcquiredBus(const Signal& signal);
+
+		Address16 appendAcquiredDiscreteSignalToRegBuf(const Signal& signal);
 		Address16 addRegTuningSignal(const Signal& signal);
 		Address16 addNonRegAnalogSignal(const Signal& signal);
+		Address16 appendNonAcquiredBus(const Signal& signal);
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();

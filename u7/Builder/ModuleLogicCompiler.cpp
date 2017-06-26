@@ -5545,6 +5545,9 @@ namespace Builder
 		result &= createNonAcquiredAnalogInternalSignalsList();
 		result &= createNonAcquiredAnalogTuningSignalsList();
 
+		result &= createAcquiredBusSignalsList();
+		result &= createNonAcquiredBusSignalsList();
+
 		if (result == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
@@ -5578,6 +5581,9 @@ namespace Builder
 		sortSignalList(m_nonAcquiredAnalogOutputSignals);
 		sortSignalList(m_nonAcquiredAnalogInternalSignals);
 		sortSignalList(m_nonAcquiredAnalogTuningSignals);			// not need to sort if will be copy in reg buffer as block of memory
+
+		sortSignalList(m_acquiredBuses);
+		sortSignalList(m_nonAcquiredBuses);
 
 		return result;
 	}
@@ -6124,6 +6130,64 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::createAcquiredBusSignalsList()
+	{
+		m_acquiredBuses.clear();
+
+		//	list include signals that:
+		//
+		//	+ acquired
+		//	+ bus
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == true &&
+				s->isBus() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_acquiredBuses.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createNonAcquiredBusSignalsList()
+	{
+		m_nonAcquiredBuses.clear();
+
+		//	list include signals that:
+		//
+		//	+ non acquired
+		//	+ bus
+		//	+ used in UAL
+
+		for(Signal* s : m_chassisSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (s->isAcquired() == false &&
+				s->isBus() == true &&
+				isUsedInUal(s) == true)
+			{
+				m_nonAcquiredBuses.append(s);
+			}
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::disposeSignalsInMemory()
 	{
 		bool result = false;
@@ -6135,6 +6199,14 @@ namespace Builder
 			if (disposeAcquiredDiscreteSignals() == false) break;
 
 			if (disposeNonAcquiredDiscreteSignals() == false) break;
+
+			if (disposeRegRawData() == false) break;
+
+			if (disposeAcquiredAnalogSignals() == false) break;
+
+			if (disposeAcquiredBuses() == false) break;
+
+//			if (disposeNonAcquiredDiscreteSignals() == false) break;
 
 
 			//bool createAcquiredDiscreteInternalSignalsList();
@@ -6218,6 +6290,172 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::disposeRegRawData()
+	{
+		if (m_lm->rawDataDescription().isEmpty() == false)
+		{
+			assert(false);			// set actual raw data size here !!!
+		}
+		else
+		{
+			m_memoryMap.setRegRawDataSize(0);
+		}
+
+		m_memoryMap.recalculateAddresses();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredAnalogSignals()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredAnalogInputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_acquiredAnalogOutputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_acquiredAnalogInternalSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredAnalogTuningSignals()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredAnalogTuningSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogTuningSignal(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredBuses()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredBuses)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredBus(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredDiscreteSignalsInRegBuf()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredDiscreteInputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			assert(s->ioBufAddr().isValid() == true);
+
+			s->setUalAddr(s->ioBufAddr());
+
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignalToRegBuf(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_acquiredDiscreteOutputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_acquiredAnalogInternalSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+
 
 	bool ModuleLogicCompiler::listsUniquenessCheck() const
 	{
@@ -6246,6 +6484,9 @@ namespace Builder
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogOutputSignals);
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInternalSignals);
 		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogTuningSignals);
+
+		result &= listUniquenessCheck(signalsMap, m_acquiredBuses);
+		result &= listUniquenessCheck(signalsMap, m_nonAcquiredBuses);
 
 		return result;
 	}
@@ -6852,7 +7093,7 @@ namespace Builder
 				appSignal->isAnalog() == true &&
 				appSignal->enableTuning() == false)
 			{
-				Address16 ramAddr = m_memoryMap.addRegAnalogSignal(appSignal->constSignal());
+				Address16 ramAddr = m_memoryMap.appendAcquiredAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 				appSignal->regAddr() = Address16(ramAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
@@ -6881,7 +7122,7 @@ namespace Builder
 
 				appSignal->ramAddr() = ramAddr;
 
-				Address16 regAddr = m_memoryMap.addRegDiscreteSignalToRegBuffer(appSignal->constSignal());
+				Address16 regAddr = m_memoryMap.appendAcquiredDiscreteSignalToRegBuf(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), ramAddr.bit());
 
