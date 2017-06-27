@@ -56,6 +56,8 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "State");
 	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Packet counter");
 
+	clientsTableView->setColumnWidth(0, 250);
+
 	addTab(clientsTableView, "Clients");
 
 	QTableView* buildInfoTableView = new QTableView(this);
@@ -262,7 +264,11 @@ void ConfigurationServiceWidget::updateClients()
 	{
 		const Network::ConfigurationServiceClientInfo& ci = cs.clients(i);
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0), ci.softwaretype());
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
+								   E::valueToString<E::SoftwareType>(ci.softwaretype()) + QString(" v%1.%2.%3")
+								   .arg(ci.majorversion())
+								   .arg(ci.minorversion())
+								   .arg(ci.commitno()));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1), QString::fromStdString(ci.equipmentid()));
 

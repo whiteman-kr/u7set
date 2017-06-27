@@ -15,7 +15,17 @@ TcpClientMainWindow::TcpClientMainWindow(QWidget *parent) :
 
 	m_tcpThread->start();
 
-	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE", 1, HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST), true, nullptr);
+	m_cfgLoader = new CfgLoader("SYSTEMID_RACKID_WS00_DACQSERVICE",
+								1,
+								HostAddressPort("127.0.0.1", PORT_CONFIGURATION_SERVICE_REQUEST),
+								HostAddressPort("227.33.0.1", PORT_CONFIGURATION_SERVICE_REQUEST),
+								true,
+								nullptr,
+								E::SoftwareType::AppDataService,
+								0,
+								1,
+								2);
+
 	m_fileClientThread = new Tcp::Thread(m_cfgLoader);
 
 	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &TcpClientMainWindow::onConfigurationReady);
@@ -57,7 +67,7 @@ void TcpClientMainWindow::slot_changeCount(int count)
 
 
 TestClient::TestClient(const HostAddressPort &serverAddressPort1, const HostAddressPort &serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2)
+	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::AppDataService, "TcpClient", 0, 1, 2)
 {
 	m_data = new char[Tcp::TCP_MAX_DATA_SIZE];
 }

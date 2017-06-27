@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include <QDomElement>
 #include <QDomNodeList>
+#include "version.h"
 
 ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
 	m_equipmentId(EquipmentId),
@@ -123,7 +124,7 @@ MonitorConfigController::MonitorConfigController(HostAddressPort address1, HostA
 
 	// --
 	//
-	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2, false, nullptr);
+	m_cfgLoaderThread = new CfgLoaderThread(theSettings.instanceStrId(), m_appInstanceNo, address1,  address2, false, nullptr, E::SoftwareType::Monitor, 0, 1, USED_SERVER_COMMIT_NUMBER);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
 
