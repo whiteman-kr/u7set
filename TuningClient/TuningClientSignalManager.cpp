@@ -1,8 +1,9 @@
 #include "MainWindow.h"
 #include "TuningClientSignalManager.h"
+#include "version.h"
 
 TuningClientSignalManager::TuningClientSignalManager()
-	:TuningSignalManager()
+	:TuningSignalManager(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER)
 {
 
 }

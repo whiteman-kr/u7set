@@ -172,10 +172,6 @@ namespace Builder
 
 			//if (!copySerialRxSignals()) break;
 
-			if (!copyLMDataToRegBuf()) break;
-
-			if (!copyInModulesAppLogicDataToRegBuf()) break;
-
 			if (!initOutModulesAppLogicDataInRegBuf()) break;
 
 			if (!generateAppLogicCode()) break;
@@ -185,8 +181,6 @@ namespace Builder
 			if (!copyDiscreteSignalsToRegBuf()) break;
 
 			if (!copyTuningDiscreteSignalsToRegBuf()) break;
-
-			if (!copyLmOutSignalsToModuleMemory()) break;
 
 			if (!copyOutModulesAppLogicDataToModulesMemory()) break;
 
@@ -398,21 +392,11 @@ namespace Builder
 		appLogicWordData.setStartAddress(m_lmDescription->memory().m_appLogicWordDataOffset);
 		appLogicWordData.setSizeW(m_lmDescription->memory().m_appLogicWordDataSize);
 
-		MemoryArea lmDiagData;
-		lmDiagData.setStartAddress(m_lmDescription->memory().m_txDiagDataOffset);
-		lmDiagData.setSizeW(m_lmDescription->memory().m_txDiagDataSize);
-
-		MemoryArea lmAppData;
-		lmAppData.setStartAddress(m_lmDescription->memory().m_appDataOffset);
-		lmAppData.setSizeW(m_lmDescription->memory().m_appDataSize);
-
 		m_memoryMap.init(moduleData,
 						 optoInterfaceData,
 						 appLogicBitData,
 						 tuningData,
-						 appLogicWordData,
-						 lmDiagData,
-						 lmAppData);
+						 appLogicWordData);
 
 		m_code.setMemoryMap(&m_memoryMap, m_log);
 
@@ -486,8 +470,6 @@ namespace Builder
 				m.rxAppDataOffset = m.txAppDataOffset;
 				m.rxAppDataSize = m.txAppDataSize;
 
-				m.appRegDataSize = m.txAppDataSize;
-
 				// LM diag data has been removed form registartion buffer !!!
 				//
 				// m.appLogicRegDataOffset = m_memoryMap.addModule(place, m.appLogicRegDataSize);
@@ -507,8 +489,6 @@ namespace Builder
 					{	"RxDataSize", &m.rxDataSize },
 					{	"RxAppDataOffset", &m.rxAppDataOffset },
 					{	"RxAppDataSize", &m.rxAppDataSize },
-
-					{	"AppRegDataSize", &m.appRegDataSize },
 				};
 
 				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
@@ -517,7 +497,6 @@ namespace Builder
 				}
 
 				m.moduleDataOffset = m_memoryMap.getModuleDataOffset(place);
-				m.appRegDataOffset = m_memoryMap.addModule(place, m.appRegDataSize);
 			}
 
 			m_modules.insert(device->equipmentIdTemplate(), m);
@@ -1010,67 +989,6 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyLMDataToRegBuf()
-	{
-		Comment comment;
-		Command cmd;
-
-		/*comment.setComment("Copy LM diagnostics data to RegBuf");
-
-		m_code.append(comment);
-		m_code.newLine();
-
-		Command cmd;
-
-		cmd.movMem(m_memoryMap.rb_lmDiagnosticsAddress(),
-				   m_memoryMap.lmDiagnosticsAddress(),
-				   m_memoryMap.lmDiagnosticsSizeW());
-
-		m_code.append(cmd);
-		m_code.newLine();*/
-
-		comment.setComment("Copy LM's' input signals to RegBuf");
-
-		m_code.append(comment);
-		m_code.newLine();
-
-		cmd.movMem(m_memoryMap.rb_lmInputsAddress(),
-				   m_memoryMap.lmInOutsAddress(),
-				   m_memoryMap.lmInOutsSizeW());
-
-		m_code.append(cmd);
-		m_code.newLine();
-
-		comment.setComment("Init to 0 LM's output signals");
-
-		m_code.append(comment);
-		m_code.newLine();
-
-		cmd.setMem(m_memoryMap.rb_lmOutputsAddress(), 0, m_memoryMap.lmInOutsSizeW());
-
-		m_code.append(cmd);
-		m_code.newLine();
-
-		return true;
-	}
-
-	bool ModuleLogicCompiler::copyLmOutSignalsToModuleMemory()
-	{
-		m_code.comment("Copy LM's output signals from RegBuf to LM's in/out memory");
-		m_code.newLine();
-
-		Command cmd;
-
-		cmd.movMem(	m_memoryMap.lmInOutsAddress(),
-					m_memoryMap.rb_lmOutputsAddress(),
-					m_memoryMap.lmInOutsSizeW());
-		m_code.append(cmd);
-		m_code.newLine();
-
-		return true;
-	}
-
-
 	bool ModuleLogicCompiler::copyInModulesAppLogicDataToRegBuf()
 	{
 		bool firstInputModle = true;
@@ -1132,7 +1050,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
 	{
-		m_code.comment(QString(tr("Copying DIM data place %2 to RegBuf")).arg(module.place));
+/*		m_code.comment(QString(tr("Copying DIM data place %2 to RegBuf")).arg(module.place));
 		m_code.newLine();
 
 		Command cmd;
@@ -1140,7 +1058,7 @@ namespace Builder
 		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
 		m_code.append(cmd);
 
-		m_code.newLine();
+		m_code.newLine();*/
 
 		return true;
 	}
@@ -1148,7 +1066,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
 	{
-		if (module.device == nullptr)
+	/*	if (module.device == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
@@ -1326,9 +1244,9 @@ namespace Builder
 			{
 				m_code.newLine();
 			}
-		}
+		}*/
 
-		return result;
+		return true;
 	}
 
 
@@ -1688,7 +1606,7 @@ namespace Builder
 				continue;
 			}
 
-			m_log->errALC5011(appItem->guid());			// Application item '%1' has unknown type.
+			m_log->errALC5011(appItem->label(), appItem->schemaID(), appItem->guid());		// Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.
 			result = false;
 			break;
 		}
@@ -6200,18 +6118,21 @@ namespace Builder
 
 			if (disposeNonAcquiredDiscreteSignals() == false) break;
 
-			if (disposeRegRawData() == false) break;
+			if (disposeRawDataInRegBuf() == false) break;
 
-			if (disposeAcquiredAnalogSignals() == false) break;
+			if (disposeAcquiredAnalogSignalsInRegBuf() == false) break;
 
-			if (disposeAcquiredBuses() == false) break;
+			if (disposeAcquiredAnalogTuningSignalsInRegBuf() == false) break;
 
-//			if (disposeNonAcquiredDiscreteSignals() == false) break;
+			if (disposeAcquiredBusesInRegBuf() == false) break;
 
+			if (disposeAcquiredDiscreteSignalsInRegBuf() == false) break;
 
-			//bool createAcquiredDiscreteInternalSignalsList();
-			//bool createAcquiredDiscreteTuningSignalsList();
+			if (disposeAcquiredDiscreteTuningSignalsInRegBuf() == false) break;
 
+			if (disposeNonAcquiredAnalogSignals() == false) break;
+
+			if (disposeNonAcquiredBuses() == false) break;
 
 			result = true;
 		}
@@ -6290,7 +6211,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::disposeRegRawData()
+	bool ModuleLogicCompiler::disposeRawDataInRegBuf()
 	{
 		if (m_lm->rawDataDescription().isEmpty() == false)
 		{
@@ -6306,7 +6227,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::disposeAcquiredAnalogSignals()
+	bool ModuleLogicCompiler::disposeAcquiredAnalogSignalsInRegBuf()
 	{
 		bool result = true;
 
@@ -6357,7 +6278,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::disposeAcquiredAnalogTuningSignals()
+	bool ModuleLogicCompiler::disposeAcquiredAnalogTuningSignalsInRegBuf()
 	{
 		bool result = true;
 
@@ -6379,7 +6300,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::disposeAcquiredBuses()
+	bool ModuleLogicCompiler::disposeAcquiredBusesInRegBuf()
 	{
 		bool result = true;
 
@@ -6417,7 +6338,7 @@ namespace Builder
 
 			s->setUalAddr(s->ioBufAddr());
 
-			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignalToRegBuf(*s);
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignalInRegBuf(*s);
 
 			s->setRegValueAddr(addr);
 		}
@@ -6430,13 +6351,14 @@ namespace Builder
 				continue;
 			}
 
-			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+			assert(s->ualAddr().isValid() == true);
 
-			s->setUalAddr(addr);
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignalInRegBuf(*s);
+
 			s->setRegValueAddr(addr);
 		}
 
-		for(Signal* s : m_acquiredAnalogInternalSignals)
+		for(Signal* s : m_acquiredDiscreteInternalSignals)
 		{
 			if (s == nullptr)
 			{
@@ -6444,7 +6366,82 @@ namespace Builder
 				continue;
 			}
 
-			Address16 addr = m_memoryMap.appendAcquiredAnalogSignal(*s);
+			assert(s->ualAddr().isValid() == true);
+
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteSignalInRegBuf(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeAcquiredDiscreteTuningSignalsInRegBuf()
+	{
+		bool result = true;
+
+		for(Signal* s : m_acquiredDiscreteTuningSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendAcquiredDiscreteTuningSignal(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::disposeNonAcquiredAnalogSignals()
+	{
+		bool result = true;
+
+		for(Signal* s : m_nonAcquiredAnalogInputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_nonAcquiredAnalogOutputSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredAnalogSignal(*s);
+
+			s->setUalAddr(addr);
+			s->setRegValueAddr(addr);
+		}
+
+		for(Signal* s : m_nonAcquiredAnalogInternalSignals)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredAnalogSignal(*s);
 
 			s->setUalAddr(addr);
 			s->setRegValueAddr(addr);
@@ -6455,6 +6452,27 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::disposeNonAcquiredBuses()
+	{
+		bool result = true;
+
+		for(Signal* s : m_nonAcquiredBuses)
+		{
+			if (s == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			Address16 addr = m_memoryMap.appendNonAcquiredBus(*s);
+
+			s->setRegValueAddr(addr);
+		}
+
+		result = m_memoryMap.recalculateAddresses();
+
+		return result;
+	}
 
 
 	bool ModuleLogicCompiler::listsUniquenessCheck() const
@@ -7122,7 +7140,7 @@ namespace Builder
 
 				appSignal->ramAddr() = ramAddr;
 
-				Address16 regAddr = m_memoryMap.appendAcquiredDiscreteSignalToRegBuf(appSignal->constSignal());
+				Address16 regAddr = m_memoryMap.appendAcquiredDiscreteSignalInRegBuf(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), ramAddr.bit());
 
@@ -7157,7 +7175,7 @@ namespace Builder
 				appSignal->isAnalog() == true &&
 				appSignal->enableTuning() == true)
 			{
-				Address16 regAddr = m_memoryMap.addRegTuningSignal(appSignal->constSignal());
+				Address16 regAddr = m_memoryMap.appendAcquiredDiscreteTuningSignal(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), 0);
 
@@ -7181,7 +7199,7 @@ namespace Builder
 				appSignal->isDiscrete() == true &&
 				appSignal->enableTuning() == true)
 			{
-				Address16 regAddr = m_memoryMap.addRegTuningSignal(appSignal->constSignal());
+				Address16 regAddr = m_memoryMap.appendAcquiredDiscreteTuningSignal(appSignal->constSignal());
 
 				appSignal->regAddr() = Address16(regAddr.offset() - m_memoryMap.appWordMemoryStart(), regAddr.bit());
 
@@ -7210,7 +7228,7 @@ namespace Builder
 				//
 				// tuningable signals ramAddr is calculate in buildTuningData: tuningData->buildTuningData();
 
-				Address16 ramAddr = m_memoryMap.addNonRegAnalogSignal(appSignal->constSignal());
+				Address16 ramAddr = m_memoryMap.appendNonAcquiredAnalogSignal(appSignal->constSignal());
 
 				appSignal->ramAddr() = ramAddr;
 
@@ -8084,13 +8102,7 @@ namespace Builder
 
 	QString AppItem::label() const
 	{
-		if (isFb() == false)
-		{
-			assert(false);
-			return QString();
-		}
-
-		return m_appLogicItem.m_fblItem->toAfbElement()->label();
+		return m_appLogicItem.m_fblItem->label();
 	}
 
 

@@ -4,13 +4,36 @@
 #include <QString>
 #include <QTextStream>
 
+struct FileQuery
+{
+	QString path;
+	QString addQuery;
+	QString deleteQuery;
+};
+
+enum class FileQueryType
+{
+	Add,
+	Delete
+};
+
 class Convertor
 {
 public:
-	static QString start(const QString& inputFilePath, const QString& parentFile);
-	static QString convert(const QString& inputFilePath, const QString& parentFile, QString& query);
-	static QString findFiles(const QString& dirName, const QString& parentFile, QString& out, QString& filePathes);
-	static bool writeToFile(QString& outputFileName, QString query);
+	bool createQueryFiles(const QString& inputFileName, const QString& parentFile, std::vector<FileQuery>& queries);
+
+	bool writeToFile(const QString& outputFileName, const QString& header, const std::vector<FileQuery>& queries, FileQueryType queryType);
+
+private:
+
+	bool convertFiles(const QString& dirName, const QString& parentFile, std::vector<FileQuery>& queries);
+
+	bool convert(const QString& inputFilePath, const QString& parentFile, std::vector<FileQuery>& queries);
+
+
+private:
+
+
 };
 
 #endif // CONVERTOR_H

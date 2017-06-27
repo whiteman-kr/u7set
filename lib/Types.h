@@ -151,6 +151,7 @@ public:
 		DiagDataService = 9005,
 		TuningClient = 9006,
 		Metrology = 9007,
+		ServiceControlManager = 9008,
 	};
 	Q_ENUM(SoftwareType)
 

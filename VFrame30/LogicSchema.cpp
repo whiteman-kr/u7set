@@ -184,12 +184,12 @@ namespace VFrame30
 		{
 			for (std::shared_ptr<SchemaItem> item : layer->Items)
 			{
-				if (item->isSchemaItemAfb() == true)
+				if (item->isFblItemRect() == true)
 				{
-					const VFrame30::SchemaItemAfb* afb = item->toType<VFrame30::SchemaItemAfb>();
-					assert(afb);
+					const VFrame30::FblItemRect* f = item->toType<VFrame30::FblItemRect>();
+					assert(f);
 
-					labels.append(afb->label());
+					labels.append(f->label());
 				}
 			}
 		}

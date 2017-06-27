@@ -168,6 +168,9 @@ namespace Builder
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
 
+		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
+		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
@@ -193,7 +196,7 @@ namespace Builder
 		void errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString &schemaID);		// Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')
 		void errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Signal '%1' is connected to input '%2.%3' with uncompatible data size.
 		void errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Analog signal '%1' is connected to discrete input '%2.%3'.
-		void errALC5011(QUuid itemUuid);										// Application item '%1' has unknown type.
+		void errALC5011(QString itemLabel, QString schemaId, QUuid itemUuid);	// Application item '%1' has unknown type, SchemaID '%2'.
 		void wrnALC5012(QString appSignalID);									// Application signal '%1' is not bound to any device object.
 		void errALC5013(QString appSignalID, QString equipmentID);				// Application signal '%1' is bound to unknown device object '%2'.
 		void errALC5014(QString appSignalID);									// Discrete signal '%1' must have DataSize equal to 1.

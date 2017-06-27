@@ -7,6 +7,8 @@
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 
+#include "version.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -86,7 +88,7 @@ void AppDataServiceWorker::loadSettings()
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger);
+	CfgLoader* cfgLoader = new CfgLoader(m_equipmentID, 1, m_cfgServiceIP1, m_cfgServiceIP2, false, m_logger, E::SoftwareType::AppDataService, 0, 1, USED_SERVER_COMMIT_NUMBER);
 
 	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
 

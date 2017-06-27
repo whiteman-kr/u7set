@@ -1,10 +1,11 @@
 #include "TcpTuningClient.h"
+#include "version.h"
 
 namespace Tuning
 {
 
-	TcpTuningClient::TcpTuningClient(const HostAddressPort& hostAddr) :
-		Tcp::Client(hostAddr)
+	TcpTuningClient::TcpTuningClient(const HostAddressPort& hostAddr, const QString equipmentID) :
+		Tcp::Client(hostAddr, E::TuningService, equipmentID, 0, 1, USED_SERVER_COMMIT_NUMBER)
 	{
 	}
 

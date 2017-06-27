@@ -1,6 +1,7 @@
 #include "Bus.h"
 #include "PropertyNames.h"
 #include <QDomDocument>
+#include <QXmlStreamWriter>
 
 namespace VFrame30
 {
@@ -160,13 +161,52 @@ namespace VFrame30
 		//
 		domElement->setAttribute(QLatin1String("Type"), E::valueToString(m_type));
 
-		// AnalogFormat
-		//
-		domElement->setAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
+		switch (m_type)
+		{
+		case E::SignalType::Discrete:
+			break;
+		case E::SignalType::Analog:
+			domElement->setAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
+			break;
+		case E::SignalType::Bus:
+			domElement->setAttribute(QLatin1String("BusTypeID"), m_busTypeId);
+			break;
+		default:
+			assert(false);
+		}
 
-		// BusTypeID
+		return true;
+	}
+
+	bool BusSignal::save(QXmlStreamWriter* stream) const
+	{
+		if (stream == nullptr)
+		{
+			assert(stream);
+			return false;
+		}
+
+		// Name
 		//
-		domElement->setAttribute(QLatin1String("BusTypeID"), m_busTypeId);
+		stream->writeAttribute(QLatin1String("Name"), m_name);
+
+		// Type
+		//
+		stream->writeAttribute(QLatin1String("Type"), E::valueToString(m_type));
+
+		switch (m_type)
+		{
+		case E::SignalType::Discrete:
+			break;
+		case E::SignalType::Analog:
+			stream->writeAttribute(QLatin1String("AnalogFormat"), E::valueToString(m_analogDataFormat));
+			break;
+		case E::SignalType::Bus:
+			stream->writeAttribute(QLatin1String("BusTypeID"), m_busTypeId);
+			break;
+		default:
+			assert(false);
+		}
 
 		return true;
 	}
@@ -252,8 +292,13 @@ namespace VFrame30
 			return false;
 		}
 
+		if (busType.hasAttribute(QLatin1String("ID")) == false)
+		{
+			*errorMessage = QString("Can't find attribute ID in section BusType.");
+			return false;
+		}
+
 		m_busTypeId = busType.attribute(QLatin1String("ID"));
-		m_version = busType.attribute(QLatin1String("Version")).toInt();
 
 		// Read set of <BusSignal>
 		//
@@ -285,7 +330,51 @@ namespace VFrame30
 
 	bool Bus::save(QByteArray* data) const
 	{
-		assert(false);
+		if (data == nullptr)
+		{
+			assert(data);
+			return false;
+		}
+
+		// Save is done via QXmlStreamWriter, because QDomDocument from run to run sometimes can keep the same xml in different way
+		// for example attributes can be in different order, it's still the same xml but,
+		// as we calc hash from the XML for checking version (SchemaItemBus) it's good idea to have always the SAME xml for same data
+		// So, just use QXmlStreamWriter for saving and QDomDocument for reading bus xml.
+		//
+		QXmlStreamWriter stream(data);
+
+		stream.setAutoFormatting(true);
+		stream.writeStartDocument();
+
+		stream.writeStartElement("BusType");
+		stream.writeAttribute(QLatin1String("ID"), m_busTypeId);
+
+		for (const BusSignal& busSignal : m_busSignals)
+		{
+			stream.writeStartElement(QLatin1String("BusSignal"));
+			busSignal.save(&stream);
+			stream.writeEndElement();	// BusSignal
+		}
+
+		stream.writeEndElement();	// BusType
+		stream.writeEndDocument();
+
+//		QDomDocument doc;
+
+//		QDomElement busTypeElement = doc.createElement(QLatin1String("BusType"));
+//		doc.appendChild(busTypeElement);
+
+//		busTypeElement.setAttribute(QLatin1String("ID"), m_busTypeId);
+
+//		for (const BusSignal& busSignal : m_busSignals)
+//		{
+//			QDomElement busSignalElement = doc.createElement(QLatin1String("BusSignal"));
+//			busTypeElement.appendChild(busSignalElement);
+
+//			busSignal.save(&busSignalElement);
+//		}
+
+//		*data = doc.toByteArray();
 		return true;
 	}
 
@@ -299,14 +388,20 @@ namespace VFrame30
 		m_busTypeId = value.trimmed();
 	}
 
-	int Bus::version() const
+	Hash Bus::calcHash() const
 	{
-		return m_version;
-	}
+		QByteArray data;
+		bool ok = save(&data);
 
-	void Bus::incrementVersion()
-	{
-		m_version++;
+		if (ok == false)
+		{
+			return 0xFFFFFFFFFFFFFFFF;
+		}
+
+		QString xml(data);
+		Hash h = ::calcHash(xml);
+
+		return h;
 	}
 
 	const std::vector<BusSignal>& Bus::busSignals() const
@@ -314,4 +409,50 @@ namespace VFrame30
 		return m_busSignals;
 	}
 
+	std::vector<BusSignal>& Bus::busSignals()
+	{
+		return m_busSignals;
+	}
+
+	//
+	// BusSet
+	//
+	bool BusSet::hasBus(QString busTypeId) const
+	{
+		auto it = std::find_if(m_busses.begin(), m_busses.end(),
+			[&busTypeId](const VFrame30::Bus& bus)
+			{
+				return bus.busTypeId() == busTypeId;
+			});
+		return it != m_busses.end();
+	}
+
+	const VFrame30::Bus& BusSet::bus(QString busTypeId) const
+	{
+		auto it = std::find_if(m_busses.begin(), m_busses.end(),
+			[&busTypeId](const VFrame30::Bus& bus)
+			{
+				return bus.busTypeId() == busTypeId;
+			});
+
+		if (it == m_busses.end())
+		{
+			static const VFrame30::Bus staticBus;
+			return staticBus;
+		}
+		else
+		{
+			return *it;
+		}
+	}
+
+	const std::vector<VFrame30::Bus>& BusSet::busses() const
+	{
+		return m_busses;
+	}
+
+	void BusSet::setBusses(const std::vector<VFrame30::Bus>& src)
+	{
+		m_busses = src;
+	}
 }

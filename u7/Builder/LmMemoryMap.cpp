@@ -92,9 +92,7 @@ namespace Builder
 							const MemoryArea& optoInterfaceData,
 							const MemoryArea& appLogicBitData,
 							const MemoryArea& tuningData,
-							const MemoryArea& appLogicWordData,
-							const MemoryArea& lmDiagData,
-							const MemoryArea& lmIntOutData)
+							const MemoryArea& appLogicWordData)
 	{
 
 		// init modules memory mapping
@@ -154,22 +152,16 @@ namespace Builder
 		m_appWordAdressed.memory.lock();
 
 		m_appWordAdressed.regRawData.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.lmInputs.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.lmOutputs.setStartAddress(appLogicWordData.startAddress());
+
 		m_appWordAdressed.acquiredAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredBuses.setStartAddress(appLogicWordData.startAddress());
+
 		m_appWordAdressed.acquiredDiscreteSignals.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.regTuningSignals.setStartAddress(appLogicWordData.startAddress());
-		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredDiscreteTuningSignals.setStartAddress(appLogicWordData.startAddress());
 
-		// init LM diagnostics memory mapping
-		//
-		m_lmDiagnostics.memory = lmDiagData;
-		m_lmDiagnostics.memory.lock();
-
-		// init LM in/out controller memory mapping
-		//
-		m_lmInOuts.memory = lmIntOutData;
-		m_lmInOuts.memory.lock();
+		m_appWordAdressed.nonAcquiredAnalogSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.nonAcquiredBuses.setStartAddress(appLogicWordData.startAddress());
 
 		return recalculateAddresses();
 	}
@@ -179,7 +171,6 @@ namespace Builder
 	{
 		// recalc application bit-addressed memory mapping
 		//
-
 		m_appBitAdressed.acquiredDiscreteSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 
 		m_appBitAdressed.nonAcquiredDiscreteSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteSignals.nextAddress());
@@ -199,23 +190,17 @@ namespace Builder
 
 		m_appWordAdressed.acquiredAnalogTuningSignals.setStartAddress(m_appWordAdressed.acquiredAnalogSignals.nextAddress());
 
-		// -------------- END OF REVISED!!! -----------------
+		m_appWordAdressed.acquiredBuses.setStartAddress(m_appWordAdressed.acquiredAnalogTuningSignals.nextAddress());
 
+		m_appWordAdressed.acquiredDiscreteSignals.setStartAddress(m_appWordAdressed.acquiredBuses.nextAddress());
 
-		// registered discrete signals
+		m_appWordAdressed.acquiredDiscreteTuningSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteSignals.nextAddress());
 
-		m_appWordAdressed.acquiredDiscreteSignals.setStartAddress(m_appWordAdressed.acquiredAnalogSignals.nextAddress());
-		m_appWordAdressed.acquiredDiscreteSignals.setSizeW(m_appBitAdressed.acquiredDiscreteSignals.sizeW());
+		m_appWordAdressed.nonAcquiredAnalogSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteTuningSignals.nextAddress());
 
-		// registered tuningable signals
+		m_appWordAdressed.nonAcquiredBuses.setStartAddress(m_appWordAdressed.nonAcquiredAnalogSignals.nextAddress());
 
-		m_appWordAdressed.regTuningSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteSignals.nextAddress());
-
-		// non registered analog signals
-
-		m_appWordAdressed.nonRegAnalogSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteSignals.nextAddress());
-
-		if (m_appWordAdressed.nonRegAnalogSignals.nextAddress() > m_appWordAdressed.memory.nextAddress())
+		if (m_appWordAdressed.nonAcquiredBuses.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of word-addressed memory range!"));
 
@@ -234,29 +219,9 @@ namespace Builder
 	}
 
 
-	int LmMemoryMap::getModuleRegDataOffset(int place) const
-	{
-		assert(place >= LM1_PLACE && place <= LAST_MODULE_PLACE);
-
-		return m_appWordAdressed.module[place - 1].startAddress();;
-	}
-
-
 	int LmMemoryMap::getRegBufStartAddr() const
 	{
 		return m_appWordAdressed.memory.startAddress();
-	}
-
-
-	int LmMemoryMap::addModule(int place, int moduleAppRegDataSize)
-	{
-		assert(place >= LM1_PLACE && place <= LAST_MODULE_PLACE);
-
-		m_appWordAdressed.module[place - 1].setSizeW(moduleAppRegDataSize);
-
-		recalculateAddresses();
-
-		return getModuleRegDataOffset(place);
 	}
 
 
@@ -323,17 +288,6 @@ namespace Builder
 
 		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory", m_appWordAdressed.memory.startAddress());
 
-		//		addRecord(memFile, m_appWordAdressed.lmDiagnostics, "LM's diagnostics data");
-		addRecord(memFile, m_appWordAdressed.lmInputs, "LM's inputs state");
-		addRecord(memFile, m_appWordAdressed.lmOutputs, "LM's outputs state");
-
-		memFile.append("");
-
-		for(int i = 0; i < MODULES_COUNT; i++)
-		{
-			addRecord(memFile, m_appWordAdressed.module[i], QString().sprintf("I/O module %02d data", i + 1));
-		}
-
 		memFile.append("");
 
 		addRecord(memFile, m_appWordAdressed.acquiredAnalogSignals, "registered analogs signals");
@@ -352,24 +306,11 @@ namespace Builder
 
 		memFile.append("");
 
-		addRecord(memFile, m_appWordAdressed.regTuningSignals, "registered tuning signals");
+		addRecord(memFile, m_appWordAdressed.nonAcquiredAnalogSignals, "non-registered analogs signals");
 
 		memFile.append("");
 
-		addSignals(memFile, m_appWordAdressed.regTuningSignals);
-
-		memFile.append("");
-
-		addRecord(memFile, m_appWordAdressed.nonRegAnalogSignals, "non-registered analogs signals");
-
-		memFile.append("");
-
-		addSignals(memFile, m_appWordAdressed.nonRegAnalogSignals);
-
-		//
-
-		addSection(memFile, m_lmDiagnostics.memory, "LM's diagnostics memory");
-		addSection(memFile, m_lmInOuts.memory, "LM's inputs/outputs memory");
+		addSignals(memFile, m_appWordAdressed.nonAcquiredAnalogSignals);
 	}
 
 
@@ -516,11 +457,11 @@ namespace Builder
 		assert(signal.isAcquired() == true &&
 			   signal.isBus() == true);
 
-		return m_appWordAdressed.acquiredBusses.appendSignal(signal);
+		return m_appWordAdressed.acquiredBuses.appendSignal(signal);
 	}
 
 
-	Address16 LmMemoryMap::appendAcquiredDiscreteSignalToRegBuf(const Signal& signal)
+	Address16 LmMemoryMap::appendAcquiredDiscreteSignalInRegBuf(const Signal& signal)
 	{
 		assert(signal.isAcquired() == true &&
 			   signal.isDiscrete() == true &&
@@ -529,19 +470,31 @@ namespace Builder
 		return m_appWordAdressed.acquiredDiscreteSignals.appendSignal(signal);
 	}
 
-
-	Address16 LmMemoryMap::addRegTuningSignal(const Signal& signal)
+	Address16 LmMemoryMap::appendAcquiredDiscreteTuningSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && signal.isAcquired() && signal.enableTuning());
+		assert(signal.isAcquired() == true &&
+			   signal.isDiscrete() == true &&
+			   signal.isInternal() == true &&
+			   signal.enableTuning() == true);
 
-		return m_appWordAdressed.regTuningSignals.appendSignal(signal);
+		return m_appWordAdressed.acquiredDiscreteTuningSignals.appendSignal(signal);
 	}
 
-	Address16 LmMemoryMap::addNonRegAnalogSignal(const Signal& signal)
+	Address16 LmMemoryMap::appendNonAcquiredAnalogSignal(const Signal& signal)
 	{
-		assert(signal.isInternal() && !signal.isAcquired() && signal.isAnalog());
+		assert(signal.isAcquired() == false &&
+			   signal.isAnalog() == true &&
+			   (signal.isOutput() == true || signal.isInternal() == true));
 
-		return m_appWordAdressed.nonRegAnalogSignals.appendSignal(signal);
+		return m_appWordAdressed.nonAcquiredAnalogSignals.appendSignal(signal);
+	}
+
+	Address16 LmMemoryMap::appendNonAcquiredBus(const Signal& signal)
+	{
+		assert(signal.isAcquired() == false &&
+			   signal.isBus() == true);
+
+		return m_appWordAdressed.nonAcquiredBuses.appendSignal(signal);
 	}
 
 
@@ -555,7 +508,7 @@ namespace Builder
 
 	double LmMemoryMap::wordAddressedMemoryUsed()
 	{
-		return double((m_appWordAdressed.nonRegAnalogSignals.nextAddress() - m_appWordAdressed.memory.startAddress()) * 100) /
+		return double((m_appWordAdressed.nonAcquiredAnalogSignals.nextAddress() - m_appWordAdressed.memory.startAddress()) * 100) /
 				double(m_appWordAdressed.memory.sizeW());
 	}
 

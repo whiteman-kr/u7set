@@ -3,8 +3,10 @@
 
 #include "../lib/PropertyObject.h"
 #include "../lib/Types.h"
+#include "../lib/Hash.h"
 
 class QDomElement;
+class QXmlStreamWriter;
 
 namespace VFrame30
 {
@@ -31,6 +33,7 @@ namespace VFrame30
 
 		bool load(const QDomElement& domElement, QString* errorMessage);
 		bool save(QDomElement* domElement) const;
+		bool save(QXmlStreamWriter* stream) const;
 
 	public:
 		QString name() const;
@@ -67,15 +70,34 @@ namespace VFrame30
 		QString busTypeId() const;
 		void setBusTypeId(const QString& value);
 
-		int version() const;
-		void incrementVersion();
+		Hash calcHash() const;
 
 		const std::vector<BusSignal>& busSignals() const;
+		std::vector<BusSignal>& busSignals();
 
 	private:
 		QString m_busTypeId = "BUSTYPEID";
-		int m_version = -1;
 		std::vector<BusSignal> m_busSignals;
+	};
+
+	//
+	// BusSet
+	//
+	class VFRAME30LIBSHARED_EXPORT BusSet
+	{
+	public:
+		BusSet() = default;
+
+	public:
+		bool hasBus(QString busTypeId) const;
+
+		const VFrame30::Bus& bus(QString busTypeId) const;
+
+		const std::vector<VFrame30::Bus>& busses() const;
+		void setBusses(const std::vector<VFrame30::Bus>& src);
+
+	private:
+		std::vector<VFrame30::Bus> m_busses;
 	};
 
 }

@@ -194,7 +194,11 @@ public:
 				const HostAddressPort& serverAddressPort1,
 				const HostAddressPort& serverAddressPort2,
 				bool enableDownloadCfg,
-				std::shared_ptr<CircularLogger> logger);
+				std::shared_ptr<CircularLogger> logger,
+				E::SoftwareType softwareType,
+				int majorVersion,
+				int minorVersion,
+				int commitNo);
 
 	virtual void onClientThreadStarted() override;
 
@@ -244,7 +248,11 @@ public:
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg,
-					std::shared_ptr<CircularLogger> logger);
+					std::shared_ptr<CircularLogger> logger,
+					E::SoftwareType softwareType,
+					int majorVersion,
+					int minorVersion,
+					int commitNo);
 
 	CfgLoaderThread(CfgLoader* cfgLoader);
 

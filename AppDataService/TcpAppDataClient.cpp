@@ -1,8 +1,9 @@
 #include "TcpAppDataClient.h"
 #include "../lib/DataSource.h"
+#include "version.h"
 
 TcpAppDataClient::TcpAppDataClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2)
+	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::AppDataService, "AppDataServiceClient", 0, 1, USED_SERVER_COMMIT_NUMBER)
 {
 }
 

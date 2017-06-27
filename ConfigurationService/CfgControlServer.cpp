@@ -74,9 +74,16 @@ void CfgControlServer::sendClientList()
 	{
 		Network::ConfigurationServiceClientInfo* i = message.add_clients();
 
-		i->set_softwaretype(0);
-		i->set_equipmentid("???");
+		i->set_softwaretype(TO_INT(state->softwareType));
+
+		i->set_equipmentid(state->equipmentID.toStdString());
+
+		i->set_majorversion(state->majorVersion);
+		i->set_minorversion(state->minorVersion);
+		i->set_commitno(state->commitNo);
+
 		i->set_ip(state->peerAddr.address32());
+
 		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state->startTime);
 		i->set_isactual(false);
 		i->set_replyquantity(state->replyCount);

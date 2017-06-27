@@ -67,8 +67,19 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	FileClient::FileClient(const QString& rootFolder, const HostAddressPort &serverAddressPort) :
-		Client(serverAddressPort)
+	FileClient::FileClient(const QString& rootFolder,
+						   const HostAddressPort &serverAddressPort,
+						   E::SoftwareType softwareType,
+						   const QString equipmentID,
+						   int majorVersion,
+						   int minorVersion,
+						   int commitNo) :
+		Client(serverAddressPort,
+			   softwareType,
+			   equipmentID,
+			   majorVersion,
+			   minorVersion,
+			   commitNo)
 	{
 		m_rootFolder = rootFolder;
 		m_file.setParent(this);
@@ -77,8 +88,21 @@ namespace Tcp
 	}
 
 
-	FileClient::FileClient(const QString &rootFolder, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-		Client(serverAddressPort1, serverAddressPort2)
+	FileClient::FileClient(const QString &rootFolder,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2,
+						   E::SoftwareType softwareType,
+						   const QString equipmentID,
+						   int majorVersion,
+						   int minorVersion,
+						   int commitNo) :
+		Client(serverAddressPort1,
+			   serverAddressPort2,
+			   softwareType,
+			   equipmentID,
+			   majorVersion,
+			   minorVersion,
+			   commitNo)
 	{
 		m_rootFolder = rootFolder;
 		m_file.setParent(this);

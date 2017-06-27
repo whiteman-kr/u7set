@@ -27,6 +27,7 @@ namespace VFrame30
 	class LogicSchema;
 	class SchemaLayer;
 	class SchemaItemAfb;
+	class BusSet;
 }
 
 namespace Builder
@@ -250,6 +251,7 @@ namespace Builder
 			   LmDescriptionSet* lmDescriptions,
 			   Hardware::EquipmentSet* equipmentSet,
 			   SignalSet* signalSet,
+			   VFrame30::BusSet* busSet,
 			   int changesetId,
 			   bool debug);
 
@@ -274,6 +276,7 @@ namespace Builder
 		bool checkLmDescription(VFrame30::LogicSchema* logicSchema);
 
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
+		bool checkBusItemsVersion(VFrame30::Schema* schema, const VFrame30::BusSet& busSet);
 		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
 								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
 
@@ -327,6 +330,7 @@ namespace Builder
 		LmDescriptionSet* m_lmDescriptions = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;
+		VFrame30::BusSet* m_busSet = nullptr;
 	};
 
 }

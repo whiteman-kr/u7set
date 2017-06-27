@@ -17,6 +17,7 @@ namespace VFrame30
 	class SchemaItem;
 	class LogicSchema;
 	class UfbSchema;
+	class Bus;
 	class SchemaDetails;
 	
 	class VFRAME30LIBSHARED_EXPORT Schema :
@@ -71,6 +72,7 @@ namespace VFrame30
 
 		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
+		bool updateAllSchemaItemBusses(const std::vector<Bus>& busses, int* updatedItemCount, QString* errorMessage);
 
 		virtual QStringList getSignalList() const;
 		virtual QStringList getLabels() const;

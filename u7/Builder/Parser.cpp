@@ -18,6 +18,7 @@
 #include "../../VFrame30/SchemaItemSignal.h"
 #include "../../VFrame30/SchemaItemConst.h"
 #include "../../VFrame30/SchemaItemUfb.h"
+#include "../../VFrame30/SchemaItemBus.h"
 #include "../../VFrame30/SchemaItemTerminator.h"
 #include "../../VFrame30/HorzVertLinks.h"
 #include "../../VFrame30/PropertyNames.h"
@@ -2333,7 +2334,7 @@ namespace Builder
 				   AppLogicData* appLogicData,
 				   LmDescriptionSet* lmDescriptions,
 				   Hardware::EquipmentSet* equipmentSet,
-				   SignalSet* signalSet,
+				   SignalSet* signalSet, VFrame30::BusSet* busSet,
 				   int changesetId,
 				   bool debug) :
 		m_db(db),
@@ -2343,7 +2344,8 @@ namespace Builder
 		m_applicationData(appLogicData),
 		m_lmDescriptions(lmDescriptions),
 		m_equipmentSet(equipmentSet),
-		m_signalSet(signalSet)
+		m_signalSet(signalSet),
+		m_busSet(busSet)
 	{
 		assert(m_db);
 		assert(m_log);
@@ -2362,6 +2364,12 @@ namespace Builder
 	bool Parser::parse()
 	{
 		bool result = true;
+
+		//
+		//
+		// User Functional Blocks
+		//
+		//
 
 		// Load User Functional Blocks
 		//
@@ -2418,6 +2426,14 @@ namespace Builder
 			checkAfbItemsVersion(schema.get());
 		}
 
+		// Check Ufbs Busses versions
+		//
+		assert(m_busSet);
+		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
+		{
+			checkBusItemsVersion(schema.get(), *m_busSet);
+		}
+
 		// Parse User Functional Blocks
 		//
 		if (ufbs.empty() == false)
@@ -2455,7 +2471,10 @@ namespace Builder
 			result = false;
 		}
 
-		// Get Application Logic
+		//
+		//
+		// Application Logic
+		//
 		//
 		std::vector<std::shared_ptr<VFrame30::LogicSchema>> schemas;
 
@@ -2518,6 +2537,14 @@ namespace Builder
 			checkAfbItemsVersion(schema.get());
 		}
 
+		// Check SchemaItemBus bus versions
+		//
+		assert(m_busSet);
+		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
+		{
+			checkBusItemsVersion(schema.get(), *m_busSet);
+		}
+
 		// Check SchemaItemUfb versions
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
@@ -2525,7 +2552,8 @@ namespace Builder
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
 
-		// Parse application logic
+
+		// Parse Application Logic
 		//
 		LOG_MESSAGE(m_log, tr("Parsing schemas..."));
 
@@ -3097,6 +3125,66 @@ namespace Builder
 											  afbItem->afbElement().version(),
 											  afbDescription->version(),
 											  si->guid());
+
+							ok = false;
+							continue;
+						}
+					}
+				}
+
+				// We can parse only one layer
+				//
+				break;
+			}
+		}
+
+		return ok;
+	}
+
+	bool Parser::checkBusItemsVersion(VFrame30::Schema* schema, const VFrame30::BusSet& busSet)
+	{
+		if (schema == nullptr)
+		{
+			assert(schema);
+
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", logicSchema %1")
+							  .arg(reinterpret_cast<size_t>(schema)));
+			return false;
+		}
+
+		bool ok = true;
+
+		// Check SchemaItemBus
+		//
+		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
+		{
+			if (l->compile() == true)
+			{
+				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				{
+					if (dynamic_cast<VFrame30::SchemaItemBus*>(si.get()) != nullptr)
+					{
+						VFrame30::SchemaItemBus* busItem = dynamic_cast<VFrame30::SchemaItemBus*>(si.get());
+
+						QString busTypeId = busItem->busTypeId();
+
+						if (busSet.hasBus(busTypeId) == false)
+						{
+							// Bus not found, error
+							//
+							m_log->errALP4040(schema->schemaId(), busItem->label(), busTypeId, si->guid());
+
+							ok = false;
+							continue;
+						}
+
+						const VFrame30::Bus& bus = busSet.bus(busTypeId);
+
+						if (busItem->busTypeHash() != bus.calcHash())
+						{
+							// Bus has different version
+							//
+							m_log->errALP4041(schema->schemaId(), busItem->label(), si->guid());
 
 							ok = false;
 							continue;

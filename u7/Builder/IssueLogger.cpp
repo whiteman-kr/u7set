@@ -1675,6 +1675,58 @@ namespace Builder
 				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
 	}
 
+
+	/// IssueCode: ALP4040
+	///
+	/// IssueType: Error
+	///
+	/// Title: BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').
+	///
+	/// Parameters:
+	///		%1 BusTypeID
+	///		%2 Schema item description
+	///		%3 Logic schema StrID
+	///
+	/// Description:
+	///		To proccess logic block it is required Bus description which is not found.
+	///
+	void IssueLogger::errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4040,
+				  tr("BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  .arg(busTypeId)
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
+
+	/// IssueCode: ALP4041
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItem '%1' has outdated BusType description (LogicSchema '%2').
+	///
+	/// Parameters:
+	///		%1 Schema item description
+	///		%2 Logic schema StrID
+	///
+	/// Description:
+	///		SchemaItem has an outdated BusType description.
+	///
+	void IssueLogger::errALP4041(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4041,
+				  tr("SchemaItem '%1' has outdated BusType description (LogicSchema '%2').")
+				  .arg(schemaItem)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error
@@ -2142,21 +2194,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application item '%1' has unknown type.
+	/// Title: Application item '%1' has unknown type, SchemaID '%2'.
 	///
 	/// Parameters:
 	///		%1 Item Uuid
+	///		%2 SchemaID
 	///
 	/// Description:
 	///		Application item has unknown type. Contact to the RPCT developers.
 	///
-	void IssueLogger::errALC5011(QUuid itemUuid)
+	void IssueLogger::errALC5011(QString itemLabel, QString schemaId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaId);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5011,
-				  tr("Application item '%1' has unknown type. Contact to the RPCT developers.").arg(itemUuid.toString()));
+				  tr("Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.")
+					.arg(itemLabel)
+					.arg(schemaId));
 	}
 
 	/// IssueCode: ALC5012

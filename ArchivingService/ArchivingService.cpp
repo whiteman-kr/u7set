@@ -1,6 +1,7 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
 #include "ArchivingService.h"
+#include "version.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -91,7 +92,7 @@ void ArchivingServiceWorker::shutdown()
 
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2, false, nullptr);
+	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2, false, nullptr, E::SoftwareType::ArchiveService, 0, 1, USED_SERVER_COMMIT_NUMBER);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingServiceWorker::onConfigurationReady);
 

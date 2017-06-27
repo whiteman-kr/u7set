@@ -40,6 +40,7 @@ namespace VFrame30
 {
 	class LogicSchema;
 	class SchemaLayer;
+	class BusSet;
 }
 
 namespace Afb
@@ -95,13 +96,23 @@ namespace Builder
 
 		bool checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment);
 
+		// Load BusTypes (VFrame30::BusSet)
+		//
+		bool loadBusses(DbController* db, VFrame30::BusSet* out);
+
 		// Load Application Functional Block Library
 		//
 		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
 
 		// Build Application Logic
 		//
-		bool parseApplicationLogic(DbController* db, AppLogicData* appLogicData, LmDescriptionSet& lmDescriptions, Hardware::EquipmentSet* equipment, SignalSet* signalSet, int changesetId);
+		bool parseApplicationLogic(DbController* db,
+								   AppLogicData* appLogicData,
+								   LmDescriptionSet& lmDescriptions,
+								   Hardware::EquipmentSet* equipment,
+								   SignalSet* signalSet,
+								   VFrame30::BusSet* busSet,
+								   int changesetId);
 
 		// Compile Application Logic
 		//

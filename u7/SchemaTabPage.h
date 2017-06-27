@@ -281,6 +281,7 @@ public:
 
 	void updateAfbSchemaItems();
 	void updateUfbSchemaItems();
+	void updateBussesSchemaItems();
 
 protected:
 	void CreateActions();

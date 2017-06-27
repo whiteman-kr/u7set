@@ -469,8 +469,6 @@ namespace Builder
 			int rxAppDataOffset = 0;
 			int rxAppDataSize = 0;
 
-			int appRegDataSize = 0;		// size of module data in registartion buffer
-
 			// calculated fields
 			//
 			int moduleDataOffset = 0;	// offset of data received from module or transmitted to module in LM's memory
@@ -665,15 +663,24 @@ namespace Builder
 
 		bool disposeSignalsInMemory();
 
+		// disposing discrete signals in bit-addressed memory
+		//
 		bool disposeAcquiredDiscreteSignals();
 		bool disposeNonAcquiredDiscreteSignals();
 
-		bool disposeRegRawData();
-
-		bool disposeAcquiredAnalogSignals();
-		bool disposeAcquiredAnalogTuningSignals();
-		bool disposeAcquiredBuses();
+		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
+		//
+		bool disposeRawDataInRegBuf();
+		bool disposeAcquiredAnalogSignalsInRegBuf();
+		bool disposeAcquiredAnalogTuningSignalsInRegBuf();
+		bool disposeAcquiredBusesInRegBuf();
 		bool disposeAcquiredDiscreteSignalsInRegBuf();
+		bool disposeAcquiredDiscreteTuningSignalsInRegBuf();
+
+		// disposing non acquired analog and bus signals in word-addressed memory
+		//
+		bool disposeNonAcquiredAnalogSignals();
+		bool disposeNonAcquiredBuses();
 
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
@@ -699,10 +706,7 @@ namespace Builder
 
 		bool initAfbs();
 
-		bool copyLMDataToRegBuf();
 		bool copyInModulesAppLogicDataToRegBuf();
-
-		bool copyLmOutSignalsToModuleMemory();
 
 		bool copyDimDataToRegBuf(const Module& module);
 		bool copyAimDataToRegBuf(const Module& module);
