@@ -5313,9 +5313,15 @@ namespace Builder
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			Signal& signal = (*m_signals)[i];
+			Signal& s = (*m_signals)[i];
 
-			if (signal.equipmentID().isEmpty() == true)
+/*			if (s.appSignalID() == "#TEST_R01_CH01_MD07_CTRLIN_INH01A")
+			{
+				int a = 0;
+				a++;
+			}*/
+
+			if (s.equipmentID().isEmpty() == true)
 			{
 				continue;
 			}
@@ -5324,7 +5330,7 @@ namespace Builder
 
 			bool isIoSignal = false;
 
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signal.equipmentID());
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID());
 
 			if (device == nullptr)
 			{
@@ -5411,21 +5417,21 @@ namespace Builder
 				continue;
 			}
 
-			if (m_chassisSignals.contains(signal.appSignalID()) == true)
+			if (m_chassisSignals.contains(s.appSignalID()) == true)
 			{
 				assert(false);				// duplicate signal!
 				continue;
 			}
 
-			m_chassisSignals.insert(signal.appSignalID(), &signal);
+			m_chassisSignals.insert(s.appSignalID(), &s);
 
 			if (isIoSignal == true)
 			{
-				m_ioSignals.insert(signal.appSignalID(), &signal);
+				m_ioSignals.insert(s.appSignalID(), &s);
 
 				if (deviceSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceSignal->equipmentIdTemplate(), &signal);
+					m_equipmentSignals.insert(deviceSignal->equipmentIdTemplate(), &s);
 				}
 				else
 				{
@@ -6849,13 +6855,20 @@ namespace Builder
 
 		bool result = true;
 
-		for(const Signal* s : m_ioSignals)
+		for(Signal* s : m_ioSignals)
 		{
 			if (s == nullptr)
 			{
 				assert(false);
 				continue;
 			}
+
+			/*if (s->appSignalID() == "#TEST_R01_CH01_MD07_CTRLIN_INH01A")
+			{
+				int a = 0;
+				a++;
+			}*/
+
 
 			// retrieve linked device
 			//
@@ -6909,10 +6922,12 @@ namespace Builder
 				{
 				case E::SignalInOutType::Input:
 					ioBufAddr.addWord(module.txAppDataOffset);
+					s->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Output:
 					ioBufAddr.addWord(module.rxAppDataOffset);
+					s->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Internal:
@@ -6930,6 +6945,7 @@ namespace Builder
 				{
 				case E::SignalInOutType::Input:
 					ioBufAddr.addWord(module.txDiagDataOffset);
+					s->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Output:
