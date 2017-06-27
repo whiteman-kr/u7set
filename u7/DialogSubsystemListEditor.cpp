@@ -6,15 +6,15 @@
 
 //
 //
-// EditorDelegate
+// SubsystemListEditorDelegate
 //
 //
 
-EditorDelegate::EditorDelegate(QObject *parent):QItemDelegate(parent)
+SubsystemListEditorDelegate::SubsystemListEditorDelegate(QObject *parent):QItemDelegate(parent)
 {
 }
 
-QWidget* EditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget* SubsystemListEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if(index.column() == DialogSubsystemListEditor::Key)
     {
@@ -44,7 +44,7 @@ QWidget* EditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewIte
     return nullptr;
 }
 
-void EditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void SubsystemListEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     if (index.column() == DialogSubsystemListEditor::Key || index.column() == DialogSubsystemListEditor::SubsystemID)
     {
@@ -58,7 +58,7 @@ void EditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) co
     }
 }
 
-void EditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+void SubsystemListEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     if (index.column() == DialogSubsystemListEditor::Key || index.column() == DialogSubsystemListEditor::SubsystemID)
     {
@@ -100,7 +100,7 @@ DialogSubsystemListEditor::DialogSubsystemListEditor(DbController *pDbController
 	ui->m_list->setColumnWidth(2, 100);
     ui->m_list->setColumnWidth(3, 130);
 
-	m_editorDelegate = new EditorDelegate(this);
+	m_editorDelegate = new SubsystemListEditorDelegate(this);
 	ui->m_list->setItemDelegate(m_editorDelegate);
 
 	QString errorCode;

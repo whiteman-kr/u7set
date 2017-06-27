@@ -257,6 +257,7 @@ namespace VFrame30
 	//
 	Bus::Bus()
 	{
+		setUuid(QUuid::createUuid());
 	}
 
 	bool Bus::load(const QByteArray& data, QString* errorMessage)
@@ -298,7 +299,14 @@ namespace VFrame30
 			return false;
 		}
 
+		if (busType.hasAttribute(QLatin1String("Uuid")) == false)
+		{
+			*errorMessage = QString("Can't find attribute Uuid in section BusType.");
+			return false;
+		}
+
 		m_busTypeId = busType.attribute(QLatin1String("ID"));
+		m_uuid = QUuid(busType.attribute(QLatin1String("Uuid")));
 
 		// Read set of <BusSignal>
 		//
@@ -328,6 +336,16 @@ namespace VFrame30
 		return true;
 	}
 
+	QUuid Bus::uuid() const
+	{
+		return m_uuid;
+	}
+
+	void Bus::setUuid(const QUuid& uuid)
+	{
+		m_uuid = uuid;
+	}
+
 	bool Bus::save(QByteArray* data) const
 	{
 		if (data == nullptr)
@@ -348,6 +366,7 @@ namespace VFrame30
 
 		stream.writeStartElement("BusType");
 		stream.writeAttribute(QLatin1String("ID"), m_busTypeId);
+		stream.writeAttribute(QLatin1String("Uuid"), m_uuid.toString());
 
 		for (const BusSignal& busSignal : m_busSignals)
 		{

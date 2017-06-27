@@ -139,6 +139,14 @@ public:
 	Qt::SortOrder m_connectionEditorSortOrder;
 	QStringList m_connectionEditorMasks;
 
+	// Bus Editor
+	QPoint m_busEditorWindowPos;
+	QByteArray m_busEditorWindowGeometry;
+	QByteArray m_busEditorSplitterState;
+	int m_busEditorSortColumn;
+	Qt::SortOrder m_busEditorSortOrder;
+
+
 	// CreateSchema dialog
 	//
 	QString m_lastSelectedLmDescriptionFile;

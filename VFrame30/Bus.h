@@ -67,6 +67,9 @@ namespace VFrame30
 		bool save(QByteArray* data) const;
 
 	public:
+		QUuid uuid() const;
+		void setUuid(const QUuid& uuid);
+
 		QString busTypeId() const;
 		void setBusTypeId(const QString& value);
 
@@ -76,6 +79,7 @@ namespace VFrame30
 		std::vector<BusSignal>& busSignals();
 
 	private:
+		QUuid m_uuid;
 		QString m_busTypeId = "BUSTYPEID";
 		std::vector<BusSignal> m_busSignals;
 	};
