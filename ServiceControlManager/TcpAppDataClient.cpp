@@ -125,6 +125,9 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		onGetUnitsReply(replyData, replyDataSize);
 		break;
 
+	case ADS_GET_APP_SIGNAL_PARAM:
+		break;
+
 	default:
 		assert(false);
 	}
