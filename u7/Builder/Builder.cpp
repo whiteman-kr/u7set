@@ -1048,6 +1048,11 @@ namespace Builder
 			return false;
 		}
 
+		if (fileList.empty() == true)
+		{
+			return true;
+		}
+
 		// Get Busses latest version from the DB
 		//
 		std::vector<std::shared_ptr<DbFile>> files;
