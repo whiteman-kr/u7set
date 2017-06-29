@@ -433,6 +433,30 @@ namespace VFrame30
 		return m_busSignals;
 	}
 
+	void Bus::setBusSignals(const std::vector<BusSignal>& busSignals)
+	{
+		m_busSignals = busSignals;
+	}
+
+	void Bus::addSignal(const BusSignal& signal)
+	{
+		m_busSignals.push_back(signal);
+	}
+
+	bool Bus::removeSignal(int index)
+	{
+		if (index < 0 || index >= static_cast<int>(m_busSignals.size()))
+		{
+			assert(false);
+			return false;
+		}
+
+		m_busSignals.erase(m_busSignals.begin() + index);
+
+		return true;
+
+	}
+
 	//
 	// BusSet
 	//

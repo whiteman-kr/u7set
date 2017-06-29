@@ -143,6 +143,9 @@ public:
 	QPoint m_busEditorWindowPos;
 	QByteArray m_busEditorWindowGeometry;
 	QByteArray m_busEditorSplitterState;
+	QPoint m_busEditorPeWindowPos;
+	QByteArray m_busEditorPeWindowGeometry;
+	int m_busEditorPeSplitterPosition = 0;
 	int m_busEditorSortColumn;
 	Qt::SortOrder m_busEditorSortOrder;
 

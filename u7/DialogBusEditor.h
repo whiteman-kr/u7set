@@ -41,11 +41,22 @@ private slots:
 	void onUndo();
 	void onRefresh();
 
+	void onSignalAdd();
+	void onSignalCreate(E::SignalType type);
+	void onSignalEdit();
+	void onSignalRemove();
+	void onSignalUp();
+	void onSignalDown();
+
+	void onSignalItemDoubleClicked(QTreeWidgetItem *item, int column);
+
 	void onBusItemChanged(QTreeWidgetItem *item, int column);
 	void onBusItemSelectionChanged();
 	void onBusCustomContextMenuRequested(const QPoint& pos);
 	void onBusSortIndicatorChanged(int column, Qt::SortOrder order);
 
+	void onSignalItemSelectionChanged();
+	void onSignalCustomContextMenuRequested(const QPoint& pos);
 
 protected:
 	virtual void closeEvent(QCloseEvent* e);
@@ -64,6 +75,8 @@ private:
 	void updateBusTreeItemText(QTreeWidgetItem* item);
 
 	void updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal);
+
+	VFrame30::Bus* getCurrentBus(QUuid* uuid);
 
 private:
 
@@ -91,6 +104,28 @@ private:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoAction = nullptr;
 	QAction* m_refreshAction = nullptr;
+
+	QPushButton* m_btnSignalAdd = nullptr;
+	QPushButton* m_btnSignalEdit = nullptr;
+	QPushButton* m_btnSignalRemove = nullptr;
+	QPushButton* m_btnSignalUp = nullptr;
+	QPushButton* m_btnSignalDown = nullptr;
+
+	QMenu* m_signalPopupMenu = nullptr;
+	QAction* m_signalAddAction = nullptr;
+	QAction* m_signalAddSubmenuAction = nullptr;
+	QAction* m_signalEditAction = nullptr;
+	QAction* m_signalRemoveAction = nullptr;
+	QAction* m_signalUpAction = nullptr;
+	QAction* m_signalDownAction = nullptr;
+
+	QMenu* m_addSignalMenu = nullptr;
+
+	QAction* m_analogAction = nullptr;
+	QAction* m_discreteAction = nullptr;
+	QAction* m_busAction = nullptr;
+
+	PropertyEditorDialog* m_peDialog = nullptr;
 };
 
 extern DialogBusEditor* theDialogBusEditor;

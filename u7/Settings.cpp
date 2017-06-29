@@ -145,6 +145,9 @@ void Settings::writeUserScope() const
 	s.setValue("BusEditor/pos", m_busEditorWindowPos);
 	s.setValue("BusEditor/geometry", m_busEditorWindowGeometry);
 	s.setValue("BusEditor/splitter", m_busEditorSplitterState);
+	s.setValue("BusEditor/pePos", m_busEditorPeWindowPos);
+	s.setValue("BusEditor/peGeometry", m_busEditorPeWindowGeometry);
+	s.setValue("BusEditor/peSplitterPos", m_busEditorPeSplitterPosition);
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
 	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
 
@@ -221,6 +224,13 @@ void Settings::loadUserScope()
 	m_busEditorWindowPos = s.value("BusEditor/pos", QPoint(-1, -1)).toPoint();
 	m_busEditorWindowGeometry = s.value("BusEditor/geometry").toByteArray();
 	m_busEditorSplitterState = s.value("BusEditor/splitter").toByteArray();
+	m_busEditorPeWindowPos = s.value("BusEditor/pePos", QPoint(-1, -1)).toPoint();
+	m_busEditorPeWindowGeometry = s.value("BusEditor/peGeometry").toByteArray();
+	m_busEditorPeSplitterPosition = s.value("BusEditor/peSplitterPos").toInt();
+	if (m_busEditorPeSplitterPosition < 150)
+	{
+		m_busEditorPeSplitterPosition = 150;
+	}
 	m_busEditorSortColumn = s.value("BusEditor/sortColumn").toInt();
 	m_busEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BusEditor/sortOrder").toInt());
 

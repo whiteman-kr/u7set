@@ -754,7 +754,12 @@ void TuningFilterEditor::on_m_editPreset_clicked()
 
 	bool readOnly = editFilter->automatic();
 
-	PropertyEditorDialog d(editFilter, this, readOnly);
+	PropertyEditorDialog d(this);
+
+	d.setReadOnly(readOnly);
+
+	d.setObject(editFilter);
+
 	if (d.exec() == QDialog::Accepted)
 	{
 		setFilterItemText(editItem, editFilter.get());

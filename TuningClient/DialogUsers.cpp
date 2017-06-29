@@ -75,7 +75,9 @@ void DialogUsers::on_m_edit_clicked()
 	std::shared_ptr<User> userPtr = std::make_shared<User>();
 	*userPtr = user;
 
-	DialogProperties d(userPtr, this, false);
+	DialogProperties d(this);
+
+	d.setObject(userPtr);
 
 	if (d.exec() == QDialog::Accepted)
 	{
