@@ -130,9 +130,12 @@ namespace Builder
 			Terminator
 		};
 
+		AppItem();
 		AppItem(const AppItem& appItem);
 		AppItem(const AppLogicItem& appLogicItem);
 		AppItem(std::shared_ptr<Afb::AfbElement> afbElement, QString &errorMsg);
+
+		bool init(std::shared_ptr<Afb::AfbElement> afbElement, QString& errorMsg);
 
 		QUuid guid() const { return m_appLogicItem.m_fblItem->guid(); }
 		QString afbStrID() const { return m_appLogicItem.m_afbElement.strID(); }
@@ -665,14 +668,12 @@ namespace Builder
 
 		// disposing discrete signals in bit-addressed memory
 		//
-		bool disposeAcquiredDiscreteSignals();
-		bool disposeNonAcquiredDiscreteSignals();
+		bool disposeDiscreteSignalsInBitMemory();
 
 		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
 		//
-		bool disposeRawDataInRegBuf();
+		bool disposeAcquiredRawDataInRegBuf();
 		bool disposeAcquiredAnalogSignalsInRegBuf();
-		bool disposeAcquiredAnalogTuningSignalsInRegBuf();
 		bool disposeAcquiredBusesInRegBuf();
 		bool disposeAcquiredDiscreteSignalsInRegBuf();
 		bool disposeAcquiredDiscreteTuningSignalsInRegBuf();
@@ -697,14 +698,16 @@ namespace Builder
 		//
 
 		bool generateAppStartCommand();
-		bool generateFbTestCode();
-		bool finishTestCode();
+		bool initAfbs();
 		bool startAppLogicCode();
+		bool copyAcquiredRawDataInRegBuf();
+		bool convertAnalogInputSignals();
+		bool copyAcquiredDiscreteInputSignalsInRegBuf();
+
 		bool copySerialRxSignals();
 		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 
-		bool initAfbs();
 
 		bool copyInModulesAppLogicDataToRegBuf();
 
@@ -779,8 +782,8 @@ namespace Builder
 
 		bool findFbsForAnalogInOutSignalsConversion();
 		bool appendFbsForAnalogInOutSignalsConversion();
-		AppItem* createFbForAnalogInputSignalConversion(const Signal &signal);
-		AppItem* createFbForAnalogOutputSignalConversion(const Signal &signal);
+		bool createFbForAnalogInputSignalConversion(const Signal& signal, AppItem& appItem);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, AppItem& appItem);
 
 		bool createAppFbsMap();
 		AppFb* createAppFb(const AppItem& appItem);

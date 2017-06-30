@@ -116,8 +116,11 @@ namespace Builder
 
 			MemoryArea bitAccumulator;
 
-			MemoryArea acquiredDiscreteSignals;
-			MemoryArea nonAcquiredDiscreteSignals;
+			MemoryArea acquiredDiscreteOutputSignals;
+			MemoryArea acquiredDiscreteInternalSignals;
+
+			MemoryArea nonAcquiredDiscreteOutputSignals;
+			MemoryArea nonAcquiredDiscreteInternalSignals;
 
 		} m_appBitAdressed;
 
@@ -131,13 +134,24 @@ namespace Builder
 		{
 			MemoryArea memory;
 
-			MemoryArea regRawData;							// registered raw data
-			MemoryArea acquiredAnalogSignals;
+			MemoryArea acquiredRawData;							// registered raw data
+
+			MemoryArea acquiredAnalogInputSignals;
+			MemoryArea acquiredAnalogOutputSignals;
+			MemoryArea acquiredAnalogInternalSignals;
 			MemoryArea acquiredAnalogTuningSignals;
+
 			MemoryArea acquiredBuses;
-			MemoryArea acquiredDiscreteSignals;				// copying from this->appBitAdressed.regDiscretSignals
+
+			MemoryArea acquiredDiscreteInputSignals;
+			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
+			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
 			MemoryArea acquiredDiscreteTuningSignals;
-			MemoryArea nonAcquiredAnalogSignals;
+
+			MemoryArea nonAcquiredAnalogInputSignals;
+			MemoryArea nonAcquiredAnalogOutputSignals;
+			MemoryArea nonAcquiredAnalogInternalSignals;
+
 			MemoryArea nonAcquiredBuses;
 
 		} m_appWordAdressed;
@@ -172,8 +186,11 @@ namespace Builder
 
 		bool recalculateAddresses();
 
-		int regDiscreteSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteSignals.startAddress(); }
-		int regDiscreteSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteSignals.sizeW(); }
+		int acquiredDiscreteOutputSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteOutputSignals.startAddress(); }
+		int acquiredDiscreteInternalSignalsAddress() const { return m_appBitAdressed.acquiredDiscreteInternalSignals.startAddress(); }
+
+		int acquiredDiscreteOutputSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteOutputSignals.sizeW(); }
+		int acquiredDiscreteIternalSignalsSizeW() const { return m_appBitAdressed.acquiredDiscreteInternalSignals.sizeW(); }
 
 		int appBitMemoryStart() const { return m_appBitAdressed.memory.startAddress(); }
 		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
@@ -183,9 +200,9 @@ namespace Builder
 		int appWordMemoryStart() const { return m_appWordAdressed.memory.startAddress(); }
 		int appWordMemorySizeW() const { return m_appWordAdressed.memory.sizeW(); }
 
-		// rb_* - adrresses and sizes in Registration Buffer
-		//
-		int rb_regDiscreteSignalsAddress() const { return m_appWordAdressed.acquiredDiscreteSignals.startAddress(); }
+		int aquiredDiscreteInputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInputSignals.startAddress(); }
+		int aquiredDiscreteOutputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteOutputSignals.startAddress(); }
+		int aquiredDiscreteInternalSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInternalSignals.startAddress(); }
 
 		//
 
@@ -196,24 +213,37 @@ namespace Builder
 
 		void getFile(QStringList& memFile);
 
-		Address16 appendAcquiredDiscreteSignal(const Signal& signal);
-		Address16 appendNonAcquiredDiscreteSignal(const Signal& signal);
+		Address16 appendAcquiredDiscreteOutputSignal(const Signal& signal);
+		Address16 appendAcquiredDiscreteInternalSignal(const Signal& signal);
 
-		Address16 setRegRawDataSize(int sizeW);
+		Address16 appendNonAcquiredDiscreteOutputSignal(const Signal& signal);
+		Address16 appendNonAcquiredDiscreteInternalSignal(const Signal& signal);
 
-		Address16 appendAcquiredAnalogSignal(const Signal& signal);
+		Address16 setAcquiredRawDataSize(int sizeW);
+
+		Address16 appendAcquiredAnalogInputSignal(const Signal& signal);
+		Address16 appendAcquiredAnalogOutputSignal(const Signal& signal);
+		Address16 appendAcquiredAnalogInternalSignal(const Signal& signal);
 		Address16 appendAcquiredAnalogTuningSignal(const Signal& signal);
+
 		Address16 appendAcquiredBus(const Signal& signal);
 
-		Address16 appendAcquiredDiscreteSignalInRegBuf(const Signal& signal);
+		Address16 appendAcquiredDiscreteInputSignalInRegBuf(const Signal& signal);
+		Address16 appendAcquiredDiscreteOutputSignalInRegBuf(const Signal& signal);
+		Address16 appendAcquiredDiscreteInternalSignalInRegBuf(const Signal& signal);
+
 		Address16 appendAcquiredDiscreteTuningSignal(const Signal& signal);
-		Address16 appendNonAcquiredAnalogSignal(const Signal& signal);
+
+		Address16 appendNonAcquiredAnalogInputSignal(const Signal& signal);
+		Address16 appendNonAcquiredAnalogOutputSignal(const Signal& signal);
+		Address16 appendNonAcquiredAnalogInternalSignal(const Signal& signal);
+
 		Address16 appendNonAcquiredBus(const Signal& signal);
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();
 
-		int getAppDataSize() const { return m_appWordAdressed.nonAcquiredAnalogSignals.startAddress() - m_appWordAdressed.memory.startAddress(); }
+		int getAppDataSize() const { return m_appWordAdressed.nonAcquiredAnalogInputSignals.startAddress() - m_appWordAdressed.memory.startAddress(); }
 
 		bool read16(int address);
 		bool read32(int address);
