@@ -395,7 +395,7 @@ namespace VFrame30
 
 		if (ok == false)
 		{
-			return 0xFFFFFFFFFFFFFFFF;
+			return UNDEFINED_HASH;
 		}
 
 		QString xml(data);
