@@ -9,10 +9,10 @@ class BusStorage : public DbObjectStorage<VFrame30::Bus>
 {
 public:
 	BusStorage() = delete;
-	BusStorage(DbController* db, QWidget* parentWidget);
+	BusStorage(DbController* db);
 
-	bool load() override;
-	bool save(const QUuid& uuid) override;
+	bool load(QString* errorMessage) override;
+	bool save(const QUuid& uuid, QString* errorMessage) override;
 };
 
 #endif // BUSSTORAGE_H

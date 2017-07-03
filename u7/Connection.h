@@ -75,7 +75,6 @@ namespace Hardware
 		//
 		//
 		//
-
 		int port1ManualTxStartAddress() const;
 		void setPort1ManualTxStartAddress(int value);
 
@@ -100,10 +99,8 @@ namespace Hardware
 		QString port1RawDataDescription() const;
 		void setPort1RawDataDescription(const QString& value);
 
+		// --
 		//
-		//
-		//
-
 		int port2ManualTxStartAddress() const;
 		void setPort2ManualTxStartAddress(int value);
 
@@ -128,10 +125,8 @@ namespace Hardware
 		QString port2RawDataDescription() const;
 		void setPort2RawDataDescription(const QString& value);
 
+		// --
 		//
-		//
-		//
-
 		static QString serialModeStr(const Connection::SerialMode value);
 
 		Type type() const;
@@ -215,7 +210,7 @@ namespace Hardware
 	class ConnectionStorage : public DbObjectStorage<std::shared_ptr<Connection>>
 	{
 	public:
-        ConnectionStorage(DbController* db, QWidget* parentWidget);
+		ConnectionStorage(DbController* db);
         virtual ~ConnectionStorage();
 
 		using DbObjectStorage::get;
@@ -224,15 +219,15 @@ namespace Hardware
 
 		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;
 
-		bool load() override;
-		bool save(const QUuid& uuid) override;
+		bool load(QString* errorMessage) override;
+		bool save(const QUuid& uuid, QString* errorMessage) override;
 
 		//
 
-		bool loadFromConnectionsFolder();
-        bool loadFromXmlDeprecated(QString &errorString);
+		bool loadFromConnectionsFolder(QString* errorMessage);
+		bool loadFromXmlDeprecated(QString* errorMessage);
 
-        bool deleteXmlDeprecated();
+		bool deleteXmlDeprecated(QString* errorMessage);
 	};
 }
 

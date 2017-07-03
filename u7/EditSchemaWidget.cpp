@@ -6582,11 +6582,15 @@ void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemCon
 
 	// Select connectionId from existing connections
 	//
-	Hardware::ConnectionStorage connections(db(), this);
+	Hardware::ConnectionStorage connections(db());
 
-	bool ok = connections.load();
+	QString errorMessage;
+
+	bool ok = connections.load(&errorMessage);
 	if (ok == false)
 	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+
 		addItem(schemaItem);
 		return;
 	}

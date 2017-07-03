@@ -62,7 +62,6 @@ protected:
 	virtual void reject();
 
 private:
-
 	void fillBusList();
 	void fillBusSignals();
 
@@ -74,8 +73,10 @@ private:
 
 	VFrame30::Bus* getCurrentBus(QUuid* uuid);
 
+	bool saveBus(const QUuid& busUuid);
+
 private:
-	BusStorage* m_busses = nullptr;
+	BusStorage m_busses = nullptr;
 	DbController* m_db = nullptr;
 
 	QSplitter* m_splitter = nullptr;
@@ -83,12 +84,12 @@ private:
 	QTreeWidget* m_busTree = nullptr;
 	QTreeWidget* m_signalsTree = nullptr;
 
-	QPushButton* m_btnAdd = nullptr;
-	QPushButton* m_btnRemove = nullptr;
-	QPushButton* m_btnCheckOut = nullptr;
-	QPushButton* m_btnCheckIn = nullptr;
-	QPushButton* m_btnUndo = nullptr;
-	QPushButton* m_btnRefresh = nullptr;
+	QPushButton* m_buttonAdd = nullptr;
+	QPushButton* m_buttonRemove = nullptr;
+	QPushButton* m_buttonCheckOut = nullptr;
+	QPushButton* m_buttonCheckIn = nullptr;
+	QPushButton* m_buttonUndo = nullptr;
+	QPushButton* m_buttonRefresh = nullptr;
 	QPushButton* m_btnClose = nullptr;
 
 	QMenu* m_popupMenu = nullptr;
@@ -119,7 +120,7 @@ private:
 	QAction* m_discreteAction = nullptr;
 	QAction* m_busAction = nullptr;
 
-	PropertyEditorDialog* m_peDialog = nullptr;
+	PropertyEditorDialog* m_propEditorDialog = nullptr;
 };
 
 extern DialogBusEditor* theDialogBusEditor;

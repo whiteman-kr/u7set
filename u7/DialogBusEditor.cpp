@@ -13,8 +13,8 @@
 //
 //
 
-DialogBusEditorDelegate::DialogBusEditorDelegate(QObject *parent)
-	:QItemDelegate(parent)
+DialogBusEditorDelegate::DialogBusEditorDelegate(QObject* parent)
+	: QItemDelegate(parent)
 {
 }
 
@@ -70,12 +70,10 @@ DialogBusEditor* theDialogBusEditor = nullptr;
 
 DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
+	m_busses(db),
 	m_db(db)
 {
 	assert(m_db);
-
-	m_busses = new BusStorage(m_db, this);
-
 	setWindowTitle(tr("Bus Types Editor"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -84,11 +82,10 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	// Create user interface
 	//
-
-	m_peDialog = new PropertyEditorDialog(this);
+	m_propEditorDialog = new PropertyEditorDialog(this);
 
 	// Add signal context menu
-
+	//
 	m_addSignalMenu = new QMenu(this);
 
 	m_analogAction = new QAction("Analog signal", this);
@@ -104,11 +101,11 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_addSignalMenu->addAction(m_busAction);
 
 	// m_busTree
-
+	//
 	m_busTree = new QTreeWidget();
 
 	QStringList l;
-	l << tr("Bus Type ID");
+	l << tr("BusTypeID");
 	l << tr("State");
 	l << tr("User");
 
@@ -133,10 +130,8 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	DialogBusEditorDelegate* editorDelegate = new DialogBusEditorDelegate(this);
 	m_busTree->setItemDelegate(editorDelegate);
 
-	//
-
 	// m_signalsTree
-
+	//
 	m_signalsTree = new QTreeWidget();
 
 	l.clear();
@@ -167,27 +162,27 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	//
 	QGridLayout* leftButtonsLayout = new QGridLayout();
 
-	m_btnAdd = new QPushButton(tr("Add"));
-	m_btnRemove = new QPushButton(tr("Remove"));
-	m_btnCheckOut = new QPushButton(tr("Check Out"));
-	m_btnCheckIn = new QPushButton(tr("Check In"));
-	m_btnUndo = new QPushButton(tr("Undo"));
-	m_btnRefresh = new QPushButton(tr("Refresh"));
+	m_buttonAdd = new QPushButton(tr("Add"));
+	m_buttonRemove = new QPushButton(tr("Remove"));
+	m_buttonCheckOut = new QPushButton(tr("Check Out"));
+	m_buttonCheckIn = new QPushButton(tr("Check In"));
+	m_buttonUndo = new QPushButton(tr("Undo"));
+	m_buttonRefresh = new QPushButton(tr("Refresh"));
 
-	leftButtonsLayout->addWidget(m_btnAdd, 0, 0);
-	leftButtonsLayout->addWidget(m_btnRemove, 0, 1);
-	leftButtonsLayout->addWidget(m_btnCheckOut, 1, 0);
-	leftButtonsLayout->addWidget(m_btnCheckIn, 1, 1);
-	leftButtonsLayout->addWidget(m_btnUndo, 1, 2);
-	leftButtonsLayout->addWidget(m_btnRefresh, 1, 3);
+	leftButtonsLayout->addWidget(m_buttonAdd, 0, 0);
+	leftButtonsLayout->addWidget(m_buttonRemove, 0, 1);
+	leftButtonsLayout->addWidget(m_buttonCheckOut, 1, 0);
+	leftButtonsLayout->addWidget(m_buttonCheckIn, 1, 1);
+	leftButtonsLayout->addWidget(m_buttonUndo, 1, 2);
+	leftButtonsLayout->addWidget(m_buttonRefresh, 1, 3);
 	leftButtonsLayout->addItem(new QSpacerItem(100, 10, QSizePolicy::Expanding), 1, 4);
 
-	connect (m_btnAdd, &QPushButton::clicked, this, &DialogBusEditor::onAdd);
-	connect (m_btnRemove, &QPushButton::clicked, this, &DialogBusEditor::onRemove);
-	connect (m_btnCheckOut, &QPushButton::clicked, this, &DialogBusEditor::onCheckOut);
-	connect (m_btnCheckIn, &QPushButton::clicked, this, &DialogBusEditor::onCheckIn);
-	connect (m_btnUndo, &QPushButton::clicked, this, &DialogBusEditor::onUndo);
-	connect (m_btnRefresh, &QPushButton::clicked, this, &DialogBusEditor::onRefresh);
+	connect(m_buttonAdd, &QPushButton::clicked, this, &DialogBusEditor::onAdd);
+	connect(m_buttonRemove, &QPushButton::clicked, this, &DialogBusEditor::onRemove);
+	connect(m_buttonCheckOut, &QPushButton::clicked, this, &DialogBusEditor::onCheckOut);
+	connect(m_buttonCheckIn, &QPushButton::clicked, this, &DialogBusEditor::onCheckIn);
+	connect(m_buttonUndo, &QPushButton::clicked, this, &DialogBusEditor::onUndo);
+	connect(m_buttonRefresh, &QPushButton::clicked, this, &DialogBusEditor::onRefresh);
 
 	// Right side
 	//
@@ -307,9 +302,11 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	// Load buses
 	//
-	if (m_busses->load() == false)
+	QString errorMessage;
+
+	if (m_busses.load(&errorMessage) == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Busses loading error!"));
+		QMessageBox::critical(parent, qAppName(), tr("Bus loading error: %1").arg(errorMessage));
 		return;
 	}
 
@@ -343,18 +340,20 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	if (theSettings.m_busEditorPeWindowPos.x() != -1 && theSettings.m_busEditorPeWindowPos.y() != -1)
 	{
-		m_peDialog->move(theSettings.m_busEditorPeWindowPos);
-		m_peDialog->restoreGeometry(theSettings.m_busEditorPeWindowGeometry);
-		m_peDialog->setSplitterPosition(theSettings.m_busEditorPeSplitterPosition);
+		m_propEditorDialog->move(theSettings.m_busEditorPeWindowPos);
+		m_propEditorDialog->restoreGeometry(theSettings.m_busEditorPeWindowGeometry);
+		m_propEditorDialog->setSplitterPosition(theSettings.m_busEditorPeSplitterPosition);
 	}
 	else
 	{
 		int w = 300;
 		int h = 400;
 
-		m_peDialog->move(qApp->desktop()->width() / 2 - w / 2, qApp->desktop()->height() / 2 - h / 2 );
-		m_peDialog->resize(w, h);
+		m_propEditorDialog->move(qApp->desktop()->width() / 2 - w / 2, qApp->desktop()->height() / 2 - h / 2 );
+		m_propEditorDialog->resize(w, h);
 	}
+
+	return;
 }
 
 DialogBusEditor::~DialogBusEditor()
@@ -363,10 +362,10 @@ DialogBusEditor::~DialogBusEditor()
 	theSettings.m_busEditorWindowGeometry = saveGeometry();
 	theSettings.m_busEditorSplitterState = m_splitter->saveState();
 
-	theSettings.m_busEditorPeWindowPos = m_peDialog->pos();
-	theSettings.m_busEditorPeWindowGeometry = m_peDialog->saveGeometry();
+	theSettings.m_busEditorPeWindowPos = m_propEditorDialog->pos();
+	theSettings.m_busEditorPeWindowGeometry = m_propEditorDialog->saveGeometry();
 
-	theSettings.m_busEditorPeSplitterPosition = m_peDialog->splitterPosition();
+	theSettings.m_busEditorPeSplitterPosition = m_propEditorDialog->splitterPosition();
 
 	::theDialogBusEditor = nullptr;
 
@@ -405,19 +404,20 @@ void DialogBusEditor::onRemove()
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileRemoved = false;
+		QString errorMessage;
 
-		bool ok = m_busses->removeFile(uuid, fileRemoved);
+		bool ok = m_busses.removeFile(uuid, &fileRemoved, &errorMessage);
 		if (ok == false)
 		{
-			assert(false);
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		if (fileRemoved == true)
 		{
 			// File was removed, delete the connection from the list and from the storage
 			//
-			m_busses->remove(uuid);
+			m_busses.remove(uuid);
 
 			int index = m_busTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -459,20 +459,23 @@ void DialogBusEditor::onCheckOut()
 		return;
 	}
 
+	QString errorMessage;
+
 	for (auto item : selectedItems)
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_busses->checkOut(uuid) == false)
+		bool ok = m_busses.checkOut(uuid, &errorMessage);
+		if (ok == false)
 		{
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		updateBusTreeItemText(item);
 	}
 
 	updateButtonsEnableState();
-
 	return;
 }
 
@@ -506,17 +509,20 @@ void DialogBusEditor::onCheckIn()
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileWasRemoved = false;
+		QString errorMessage;
 
-		if (m_busses->checkIn(uuid, comment, fileWasRemoved) == false)
+		bool ok = m_busses.checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
+		if (ok == false)
 		{
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		if (fileWasRemoved == true)
 		{
 			// File was removed, delete the connection from the list and from the storage
 			//
-			m_busses->remove(uuid);
+			m_busses.remove(uuid);
 
 			int index = m_busTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -565,17 +571,19 @@ void DialogBusEditor::onUndo()
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileRemoved = false;
+		QString errorMessage;
 
-		if (m_busses->undo(uuid, fileRemoved) == false)
+		if (m_busses.undo(uuid, &fileRemoved, &errorMessage) == false)
 		{
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		if (fileRemoved == true)
 		{
 			// File was removed, delete the connection from the list and from the storage
 			//
-			m_busses->remove(uuid);
+			m_busses.remove(uuid);
 
 			int index = m_busTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -599,7 +607,7 @@ void DialogBusEditor::onUndo()
 
 			std::shared_ptr<DbFile> file = nullptr;
 
-			DbFileInfo fi = m_busses->fileInfo(uuid);
+			DbFileInfo fi = m_busses.fileInfo(uuid);
 
 			bool ok = m_db->getLatestVersion(fi, &file, this);
 			if (ok == true && file != nullptr)
@@ -607,7 +615,7 @@ void DialogBusEditor::onUndo()
 				QByteArray data;
 				file->swapData(data);
 
-				VFrame30::Bus* bus = m_busses->getPtr(uuid);
+				VFrame30::Bus* bus = m_busses.getPtr(uuid);
 
 				QString errorMessage;
 
@@ -625,10 +633,13 @@ void DialogBusEditor::onUndo()
 
 void DialogBusEditor::onRefresh()
 {
-	m_busses->clear();
+	m_busses.clear();
 
-	if (m_busses->load() == false)
+	QString errorMessage;
+
+	if (m_busses.load(&errorMessage) == false)
 	{
+		QMessageBox::critical(this, qAppName(), tr("Bus loading error: %1").arg(errorMessage));
 		return;
 	}
 
@@ -663,7 +674,9 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 
 	m_signalsTree->addTopLevelItem(item);
 
-	m_busses->save(uuid);
+	saveBus(uuid);
+
+	return;
 }
 
 void DialogBusEditor::onSignalEdit()
@@ -708,12 +721,12 @@ void DialogBusEditor::onSignalEdit()
 		editSignalsPointers.push_back(bs);
 	}
 
-	m_peDialog->setReadOnly(m_busses->fileInfo(uuid).state() != VcsState::CheckedOut);
-	m_peDialog->setObjects(editSignalsPointers);
+	m_propEditorDialog->setReadOnly(m_busses.fileInfo(uuid).state() != VcsState::CheckedOut);
+	m_propEditorDialog->setObjects(editSignalsPointers);
 
 	// Run property editor
 	//
-	if (m_peDialog->exec() == QDialog::Accepted)
+	if (m_propEditorDialog->exec() == QDialog::Accepted)
 	{
 		// Save data back to bus
 		//
@@ -735,7 +748,7 @@ void DialogBusEditor::onSignalEdit()
 		bus->setBusSignals(busSignals);
 	}
 
-	m_busses->save(uuid);
+	saveBus(uuid);
 
 	return;
 }
@@ -777,7 +790,7 @@ void DialogBusEditor::onSignalRemove()
 
 	fillBusSignals();
 
-	m_busses->save(uuid);
+	saveBus(uuid);
 
 	return;
 }
@@ -838,7 +851,7 @@ void DialogBusEditor::onSignalUp()
 
 	bus->setBusSignals(busSignals);
 
-	m_busses->save(uuid);
+	saveBus(uuid);
 
 	return;
 }
@@ -899,7 +912,9 @@ void DialogBusEditor::onSignalDown()
 
 	bus->setBusSignals(busSignals);
 
-	m_busses->save(uuid);
+	saveBus(uuid);
+
+	return;
 }
 
 void DialogBusEditor::onSignalItemDoubleClicked(QTreeWidgetItem *item, int column)
@@ -946,7 +961,7 @@ void DialogBusEditor::onBusItemChanged(QTreeWidgetItem *item, int column)
 
 	bus->setBusTypeId(text);
 
-	m_busses->save(uuid);
+	saveBus(uuid);
 
 	return;
 }
@@ -991,11 +1006,11 @@ void DialogBusEditor::fillBusList()
 {
 	m_busTree->clear();
 
-	int count = m_busses->count();
+	int count = m_busses.count();
 
 	for (int i = 0; i < count; i++)
 	{
-		const VFrame30::Bus& bus = m_busses->get(i);
+		const VFrame30::Bus& bus = m_busses.get(i);
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 
@@ -1042,7 +1057,7 @@ void DialogBusEditor::fillBusSignals()
 
 	QUuid uuid = d.toUuid();
 
-	const VFrame30::Bus bus = m_busses->get(uuid);
+	const VFrame30::Bus bus = m_busses.get(uuid);
 
 	std::vector<VFrame30::BusSignal> busSignals = bus.busSignals();
 
@@ -1071,12 +1086,11 @@ bool DialogBusEditor::addBus(VFrame30::Bus bus)
 {
 	// Add bus, update UI
 	//
-	m_busses->add(bus.uuid(), bus);
+	m_busses.add(bus.uuid(), bus);
 
-	bool ok = m_busses->save(bus.uuid());
+	bool ok = saveBus(bus.uuid());
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Failed to save connection %1").arg(bus.busTypeId()));
 		return false;
 	}
 
@@ -1110,9 +1124,9 @@ void DialogBusEditor::updateButtonsEnableState()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		const VFrame30::Bus& bus = m_busses->get(uuid);
+		const VFrame30::Bus& bus = m_busses.get(uuid);
 
-		if (m_busses->fileInfo(bus.uuid()).state() == VcsState::CheckedOut)
+		if (m_busses.fileInfo(bus.uuid()).state() == VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}
@@ -1128,16 +1142,16 @@ void DialogBusEditor::updateButtonsEnableState()
 
 	// --
 	//
-	m_btnRemove->setEnabled(selectedBusCount > 0);
+	m_buttonRemove->setEnabled(selectedBusCount > 0);
 	m_removeAction->setEnabled(selectedBusCount > 0);
 
-	m_btnCheckOut->setEnabled(selectedBusCount > 0 && checkedInCount > 0);
+	m_buttonCheckOut->setEnabled(selectedBusCount > 0 && checkedInCount > 0);
 	m_checkOutAction->setEnabled(selectedBusCount > 0 && checkedInCount > 0);
 
-	m_btnCheckIn->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
+	m_buttonCheckIn->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 	m_checkInAction->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 
-	m_btnUndo->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
+	m_buttonUndo->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 	m_undoAction->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 
 	// --
@@ -1171,12 +1185,12 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-	const VFrame30::Bus& bus = m_busses->get(uuid);
+	const VFrame30::Bus& bus = m_busses.get(uuid);
 
 	int c = 0;
 	item->setText(c++, bus.busTypeId());
 
-	DbFileInfo fi = m_busses->fileInfo(uuid);
+	DbFileInfo fi = m_busses.fileInfo(uuid);
 
 	if (fi.state() == VcsState::CheckedOut)
 	{
@@ -1243,5 +1257,20 @@ VFrame30::Bus* DialogBusEditor::getCurrentBus(QUuid* uuid)
 
 	*uuid = item->data(0, Qt::UserRole).toUuid();
 
-	return m_busses->getPtr(*uuid);
+	return m_busses.getPtr(*uuid);
+}
+
+bool DialogBusEditor::saveBus(const QUuid& busUuid)
+{
+	QString errorMessage;
+
+	bool ok = m_busses.save(busUuid, &errorMessage);
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save bus: ").arg(errorMessage));
+		return false;
+	}
+
+	return true;
 }

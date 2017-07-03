@@ -5,9 +5,8 @@ template <class T>
 class DbObjectStorage
 {
 public:
-	DbObjectStorage(DbController* db, QWidget* parentWidget, int fileTypeId):
+	DbObjectStorage(DbController* db, int fileTypeId):
 		 m_db(db),
-		 m_parentWidget(parentWidget),
 		 m_fileTypeId(fileTypeId)
 	{
 	}
@@ -82,44 +81,53 @@ public:
 		return;
 	}
 
-	bool removeFile(const QUuid& uuid, bool& fileRemoved)
+	bool removeFile(const QUuid& uuid, bool* fileRemoved, QString* errorMessage)
 	{
-		if (m_db == nullptr)
+		if (m_db == nullptr ||
+			fileRemoved == nullptr ||
+			errorMessage == nullptr)
 		{
 			assert(m_db);
+			assert(fileRemoved);
+			assert(errorMessage);
 			return false;
 		}
 
-		fileRemoved = false;
+		*fileRemoved = false;
 
 		DbFileInfo fi = fileInfo(uuid);
 
 		std::vector<DbFileInfo> fileList;
-		bool ok = m_db->getFileList(&fileList, m_fileTypeId, fi.fileName(), true, m_parentWidget);
+		bool ok = m_db->getFileList(&fileList, m_fileTypeId, fi.fileName(), true, nullptr);
+
 		if (ok == false || fileList.size() != 1)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
 		std::shared_ptr<DbFile> file = nullptr;
 
-		ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
+		ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
 		if (ok == false || file == nullptr)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
 		if (file->state() != VcsState::CheckedOut)
 		{
-			if (m_db->checkOut(fileList[0], m_parentWidget) == false)
+			if (m_db->checkOut(fileList[0], nullptr) == false)
 			{
+				*errorMessage = m_db->lastError();
 				return false;
 			}
 		}
 
-		ok = m_db->deleteFiles(&fileList, m_parentWidget);
+		ok = m_db->deleteFiles(&fileList, nullptr);
 		if (ok == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
@@ -129,7 +137,7 @@ public:
 
 		if (fi.deleted() == true)
 		{
-			fileRemoved = true;
+			*fileRemoved = true;
 		}
 
 		setFileInfo(uuid, fi);
@@ -212,11 +220,13 @@ public:
 		return &m_objectsVector[index];
 	}
 
-	bool checkOut(const QUuid& uuid)
+	bool checkOut(const QUuid& uuid, QString* errorMessage)
 	{
-		if (m_db == nullptr)
+		if (m_db == nullptr ||
+			errorMessage == nullptr)
 		{
 			assert(m_db);
+			assert(errorMessage);
 			return false;
 		}
 
@@ -227,8 +237,10 @@ public:
 			return true;
 		}
 
-		if (m_db->checkOut(fi, m_parentWidget) == false)
+		bool ok = m_db->checkOut(fi, nullptr);
+		if (ok == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
@@ -237,15 +249,19 @@ public:
 		return true;
 	}
 
-	bool checkIn(const QUuid& uuid, const QString& comment, bool& fileRemoved)
+	bool checkIn(const QUuid& uuid, const QString& comment, bool* fileRemoved, QString* errorMessage)
 	{
-		if (m_db == nullptr)
+		if (m_db == nullptr ||
+			fileRemoved == nullptr ||
+			errorMessage == nullptr)
 		{
 			assert(m_db);
+			assert(fileRemoved);
+			assert(errorMessage);
 			return false;
 		}
 
-		fileRemoved = false;
+		*fileRemoved = false;
 
 		DbFileInfo fi = fileInfo(uuid);
 
@@ -254,14 +270,15 @@ public:
 			return true;
 		}
 
-		if (m_db->checkIn(fi, comment, m_parentWidget) == false)
+		if (m_db->checkIn(fi, comment, nullptr) == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
 		if (fi.deleted() == true)
 		{
-			fileRemoved = true;
+			*fileRemoved = true;
 		}
 
 		setFileInfo(uuid, fi);
@@ -269,15 +286,19 @@ public:
 		return true;
 	}
 
-	bool undo(const QUuid& uuid, bool& fileRemoved)
+	bool undo(const QUuid& uuid, bool* fileRemoved, QString* errorMessage)
 	{
-		if (m_db == nullptr)
+		if (m_db == nullptr ||
+			fileRemoved == nullptr ||
+			errorMessage == nullptr)
 		{
 			assert(m_db);
+			assert(fileRemoved);
+			assert(errorMessage);
 			return false;
 		}
 
-		fileRemoved = false;
+		*fileRemoved = false;
 
 		DbFileInfo fi = fileInfo(uuid);
 
@@ -286,8 +307,9 @@ public:
 			return true;
 		}
 
-		if (m_db->undoChanges(fi, m_parentWidget) == false)
+		if (m_db->undoChanges(fi, nullptr) == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
@@ -297,7 +319,7 @@ public:
 
 		if (fi.deleted() == true)
 		{
-			fileRemoved = true;
+			*fileRemoved = true;
 		}
 
 		return true;
@@ -321,19 +343,17 @@ public:
 	}
 
 protected:
-	virtual bool load() = 0;
-	virtual bool save(const QUuid& uuid) = 0;
+	virtual bool load(QString* errorMessage) = 0;
+	virtual bool save(const QUuid& uuid, QString* errorMessage) = 0;
 
 protected:
 	DbController* m_db = nullptr;
-	QWidget* m_parentWidget = nullptr;
 	std::vector<T> m_objectsVector;
 
 private:
 	int m_fileTypeId = -1;
 	std::map<QUuid, size_t> m_objectsMap;
 	std::map<QUuid, DbFileInfo> m_fileInfo;
-
 };
 
 #endif // DBOBJECTSTORAGE_H

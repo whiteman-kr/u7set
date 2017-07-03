@@ -238,18 +238,18 @@ namespace Builder
 			//
 			// Loading connections
 			//
-			QString errorCode;
+			QString errorMessage;
 
-            Hardware::ConnectionStorage connections(&db, nullptr);
+			Hardware::ConnectionStorage connections(&db);
 
-            ok = connections.load();
+			ok = connections.load(&errorMessage);
 
 			if (ok == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load connections file"));
-				if (errorCode.isEmpty() == false)
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load connections file: "));
+				if (errorMessage.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorCode);
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMessage);
 					break;
 				}
 			}

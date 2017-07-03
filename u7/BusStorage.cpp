@@ -4,17 +4,19 @@
 // BusStorage
 //
 
-BusStorage::BusStorage(DbController* db, QWidget* parentWidget)
-	: DbObjectStorage(db, parentWidget, db->busTypesFileId())
+BusStorage::BusStorage(DbController* db)
+	: DbObjectStorage(db, db->busTypesFileId())
 {
 
 }
 
-bool BusStorage::load()
+bool BusStorage::load(QString* errorMessage)
 {
-	if (m_db == nullptr)
+	if (m_db == nullptr ||
+		errorMessage == nullptr)
 	{
 		assert(m_db);
+		assert(errorMessage);
 		return false;
 	}
 
@@ -25,6 +27,7 @@ bool BusStorage::load()
 	bool ok = m_db->getFileList(&fileList, m_db->busTypesFileId(), BusFileExtension, true, nullptr);
 	if (ok == false)
 	{
+		*errorMessage = m_db->lastError();
 		return false;
 	}
 
@@ -40,6 +43,7 @@ bool BusStorage::load()
 	ok = m_db->getLatestVersion(fileList, &files, nullptr);
 	if (ok == false)
 	{
+		*errorMessage = m_db->lastError();
 		return false;
 	}
 
@@ -57,12 +61,12 @@ bool BusStorage::load()
 		}
 
 		VFrame30::Bus bus;
-		QString errorMessage;
+		QString loadBusErrorMessage;
 
-		ok = bus.load(f->data(), &errorMessage);
-
+		ok = bus.load(f->data(), &loadBusErrorMessage);
 		if (ok == false)
 		{
+			*errorMessage = QString("Load bus %1 error ").arg(f->fileName()) + loadBusErrorMessage;
 			return false;
 		}
 
@@ -73,19 +77,24 @@ bool BusStorage::load()
 	return true;
 }
 
-bool BusStorage::save(const QUuid& uuid)
+bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 {
-	if (m_db == nullptr)
+	if (m_db == nullptr ||
+		errorMessage == nullptr)
 	{
 		assert(m_db);
+		assert(errorMessage);
 		return false;
 	}
 
 	VFrame30::Bus bus = get(uuid);
 	QByteArray data;
 
-	if (bus.save(&data) == false)
+	bool ok = bus.save(&data);
+
+	if (ok == false)
 	{
+		*errorMessage = QString("Error saving bus %1 to xml.").arg(bus.busTypeId());
 		return false;
 	}
 
@@ -104,11 +113,13 @@ bool BusStorage::save(const QUuid& uuid)
 		fileName = fileName.remove('}');
 
 		file->setFileName(fileName);
-
 		file->swapData(data);
 
-		if (m_db->addFile(file, m_db->busTypesFileId(), m_parentWidget) == false)
+		ok = m_db->addFile(file, m_db->busTypesFileId(), nullptr);
+
+		if (ok == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
@@ -118,23 +129,26 @@ bool BusStorage::save(const QUuid& uuid)
 	{
 		std::shared_ptr<DbFile> file = nullptr;
 
-		// save to existing file
+		// Save to existing file
 		//
-		bool ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
+		bool ok = m_db->getLatestVersion(fi, &file, nullptr);
 		if (ok == false || file == nullptr)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 
 		if (file->state() != VcsState::CheckedOut)
 		{
+			*errorMessage = QString("file %1 is not checked out.").arg(file->fileName());
 			return false;
 		}
 
 		file->swapData(data);
 
-		if (m_db->setWorkcopy(file, m_parentWidget) == false)
+		if (m_db->setWorkcopy(file, nullptr) == false)
 		{
+			*errorMessage = m_db->lastError();
 			return false;
 		}
 

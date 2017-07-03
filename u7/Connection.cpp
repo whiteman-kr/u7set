@@ -18,13 +18,12 @@ namespace Hardware
     //
     Connection::Connection()
     {
-
         QUuid uuid = QUuid::createUuid();
         setUuid(uuid);
 
         static QString s_conectionId = "ConnectionID";
-        static QString s_fileName = "FileName";
-        static QString s_fileID = "FileID";
+		//static QString s_fileName = "FileName";
+		//static QString s_fileID = "FileID";
         static QString s_port1EquipmentID = "Port1EquipmentID";
         static QString s_port2EquipmentID = "Port2EquipmentID";
         static QString s_port1RawDataDescription = "Port1RawDataDescription";
@@ -761,8 +760,8 @@ namespace Hardware
     //
     //
 
-    ConnectionStorage::ConnectionStorage(DbController* db, QWidget *parentWidget)
-		 :DbObjectStorage(db, parentWidget, db->connectionsFileId())
+	ConnectionStorage::ConnectionStorage(DbController* db)
+		 :DbObjectStorage(db, db->connectionsFileId())
     {
     }
 
@@ -812,16 +811,21 @@ namespace Hardware
 		return std::shared_ptr<Connection>();
 	}
 
-    bool ConnectionStorage::load()
+    bool ConnectionStorage::load(QString* errorMessage)
     {
-        bool ok = loadFromConnectionsFolder();
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
+
+		bool ok = loadFromConnectionsFolder(errorMessage);
         if (ok == false)
         {
             return false;
         }
 
-        QString errorCode;
-        ok = loadFromXmlDeprecated(errorCode);
+		ok = loadFromXmlDeprecated(errorMessage);
         if (ok == false)
         {
             return false;
@@ -830,11 +834,13 @@ namespace Hardware
         return true;
     }
 
-	bool ConnectionStorage::save(const QUuid &uuid)
+	bool ConnectionStorage::save(const QUuid &uuid, QString* errorMessage)
 	{
-		if (m_db == nullptr)
+		if (m_db == nullptr ||
+			errorMessage == nullptr)
 		{
 			assert(m_db);
+			assert(errorMessage);
 			return false;
 		}
 
@@ -871,11 +877,11 @@ namespace Hardware
 			fileName = fileName.remove('}');
 
 			file->setFileName(fileName);
-
 			file->swapData(data);
 
-			if (m_db->addFile(file, m_db->connectionsFileId(), m_parentWidget) == false)
+			if (m_db->addFile(file, m_db->connectionsFileId(), nullptr) == false)
 			{
+				*errorMessage = m_db->lastError();
 				return false;
 			}
 
@@ -887,21 +893,24 @@ namespace Hardware
 
 			// save to existing file
 			//
-			bool ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
+			bool ok = m_db->getLatestVersion(fi, &file, nullptr);
 			if (ok == false || file == nullptr)
 			{
+				*errorMessage = m_db->lastError();
 				return false;
 			}
 
 			if (file->state() != VcsState::CheckedOut)
 			{
+				*errorMessage = QString("File %1 state is not CheckedOut").arg(file->fileName());
 				return false;
 			}
 
 			file->swapData(data);
 
-			if (m_db->setWorkcopy(file, m_parentWidget) == false)
+			if (m_db->setWorkcopy(file, nullptr) == false)
 			{
+				*errorMessage = m_db->lastError();
 				return false;
 			}
 
@@ -911,55 +920,60 @@ namespace Hardware
 		return true;
 	}
 
-	bool ConnectionStorage::loadFromConnectionsFolder()
+	bool ConnectionStorage::loadFromConnectionsFolder(QString* errorMessage)
     {
-        if (m_db == nullptr)
+		if (m_db == nullptr ||
+			errorMessage == nullptr)
         {
             assert(m_db);
+			assert(errorMessage);
             return false;
         }
 
         // Load the file from the database
         //
 		std::vector<DbFileInfo> fileList;
-        bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, m_parentWidget);
+		bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, nullptr);
         if (ok == false)
         {
-            return true;
+			*errorMessage = m_db->lastError();
+			return false;
         }
 
 		for (DbFileInfo& fi : fileList)
         {
             std::shared_ptr<DbFile> file = nullptr;
 
-            ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
+			ok = m_db->getLatestVersion(fi, &file, nullptr);
             if (ok == false || file == nullptr)
             {
+				*errorMessage = m_db->lastError();
                 return false;
             }
 
 			std::shared_ptr<Hardware::Connection> c = Hardware::Connection::Create(file->data());
 
-			if (c != nullptr)
+			if (c == nullptr)
             {
-				setFileInfo(c->uuid(), *file);
-				add(c->uuid(), c);
-            }
-            else
-            {
-                return false;
-            }
+				*errorMessage = QString("Create connection file error. Please, inform developers. %1").arg(__FUNCTION__);
+				return false;
+			}
+
+			setFileInfo(c->uuid(), *file);
+			add(c->uuid(), c);
         }
 
         return true;
     }
 
 
-    bool ConnectionStorage::loadFromXmlDeprecated(QString& errorCode)
+	bool ConnectionStorage::loadFromXmlDeprecated(QString* errorMessage)
     {
-        if (m_db == nullptr)
+		if (m_db == nullptr ||
+			errorMessage == nullptr)
         {
             assert(m_db);
+			assert(errorMessage);
             return false;
         }
 
@@ -967,16 +981,18 @@ namespace Hardware
         //
 
         std::vector<DbFileInfo> fileList;
-        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, m_parentWidget);
+		bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, nullptr);
         if (ok == false || fileList.size() != 1)
         {
+			*errorMessage = m_db->lastError();
             return true;
         }
 
         std::shared_ptr<DbFile> file = nullptr;
-        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
+		ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
         if (ok == false || file == nullptr)
         {
+			*errorMessage = m_db->lastError();
             return false;
         }
 
@@ -985,20 +1001,19 @@ namespace Hardware
 
         // Load connections from XML
         //
-
         QXmlStreamReader reader(data);
 
         if (reader.readNextStartElement() == false)
         {
             reader.raiseError(QObject::tr("Failed to load root element."));
-            errorCode = reader.errorString();
+			*errorMessage = reader.errorString();
             return !reader.hasError();
         }
 
         if (reader.name() != "Connections")
         {
             reader.raiseError(QObject::tr("The file is not an Connections file."));
-            errorCode = reader.errorString();
+			*errorMessage = reader.errorString();
             return !reader.hasError();
         }
 
@@ -1018,7 +1033,7 @@ namespace Hardware
             else
             {
                 reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
-                errorCode = reader.errorString();
+				*errorMessage = reader.errorString();
                 reader.skipCurrentElement();
             }
         }
@@ -1026,52 +1041,54 @@ namespace Hardware
         return !reader.hasError();
     }
 
-    bool ConnectionStorage::deleteXmlDeprecated()
+	bool ConnectionStorage::deleteXmlDeprecated(QString* errorMessage)
     {
-        if (m_db == nullptr)
+		if (m_db == nullptr ||
+			errorMessage == nullptr)
         {
             assert(m_db);
+			assert(errorMessage);
             return false;
         }
 
         // Load the file from the database
         //
         std::vector<DbFileInfo> fileList;
-        bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, m_parentWidget);
+		bool ok = m_db->getFileList(&fileList, m_db->mcFileId(), "Connections.xml", true, nullptr);
         if (ok == false || fileList.size() != 1)
         {
+			*errorMessage = m_db->lastError();
             return true;
         }
 
         std::shared_ptr<DbFile> file = nullptr;
 
-        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
+		ok = m_db->getLatestVersion(fileList[0], &file, nullptr);
         if (ok == false || file == nullptr)
         {
+			*errorMessage = m_db->lastError();
             return false;
         }
 
         if (file->state() != VcsState::CheckedOut)
         {
-            if (m_db->checkOut(fileList[0], m_parentWidget) == false)
+			if (m_db->checkOut(fileList[0], nullptr) == false)
             {
+				*errorMessage = m_db->lastError();
                 return false;
             }
         }
 
-        ok = m_db->deleteFiles(&fileList, m_parentWidget);
+		ok = m_db->deleteFiles(&fileList, nullptr);
         if (ok == false)
         {
+			*errorMessage = m_db->lastError();
             return false;
         }
 
-        if (m_db->checkIn(fileList[0], "Deleted deprecated file Connections.xml", m_parentWidget) == false)
+		if (m_db->checkIn(fileList[0], "Deleted deprecated file Connections.xml", nullptr) == false)
         {
-            return false;
-        }
-
-        if (ok == false)
-        {
+			*errorMessage = m_db->lastError();
             return false;
         }
 
