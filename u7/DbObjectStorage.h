@@ -4,19 +4,16 @@
 template <class T>
 class DbObjectStorage
 {
-
 public:
 	DbObjectStorage(DbController* db, QWidget* parentWidget, int fileTypeId):
 		 m_db(db),
 		 m_parentWidget(parentWidget),
 		 m_fileTypeId(fileTypeId)
 	{
-
 	}
 
 	virtual ~DbObjectStorage()
 	{
-
 	}
 
 	void clear()
@@ -35,9 +32,10 @@ public:
 
 		m_objectsVector.push_back(object);
 
-		m_objectsMap[uuid] = static_cast<int>(m_objectsVector.size()) - 1;
+		m_objectsMap[uuid] = m_objectsVector.size() - 1;
 
-		assert (m_objectsVector.size() == m_objectsMap.size());
+		assert(m_objectsVector.size() == m_objectsMap.size());
+		return;
 	}
 
 
@@ -51,10 +49,10 @@ public:
 		}
 
 		// Delete object from vector
+		//
+		size_t index = it->second;
 
-		int index = it->second;
-
-		if (index < 0 || index >= static_cast<int>(m_objectsVector.size()))
+		if (index < 0 || index >= m_objectsVector.size())
 		{
 			assert(false);
 			return;
@@ -63,15 +61,15 @@ public:
 		m_objectsVector.erase(m_objectsVector.begin() + index);
 
 		// Delete index from map
-
+		//
 		m_objectsMap.erase(it);
 
 		// Decrease all indexes in the map that are bigger than deleted
-
+		//
 		for (auto i : m_objectsMap)
 		{
 			const QUuid& decUuid = i.first;
-			int decIndex = i.second;
+			size_t decIndex = i.second;
 
 			if (decIndex > index)
 			{
@@ -80,7 +78,8 @@ public:
 			}
 		}
 
-		assert (m_objectsVector.size() == m_objectsMap.size());
+		assert(m_objectsVector.size() == m_objectsMap.size());
+		return;
 	}
 
 	bool removeFile(const QUuid& uuid, bool& fileRemoved)
@@ -124,8 +123,8 @@ public:
 			return false;
 		}
 
-		// checkin file if it exists
-
+		// Checkin file if it exists
+		//
 		fi = fileList[0];
 
 		if (fi.deleted() == true)
@@ -136,7 +135,6 @@ public:
 		setFileInfo(uuid, fi);
 
 		return true;
-
 	}
 
 	int count() const
@@ -163,7 +161,7 @@ public:
 			return T();
 		}
 
-		int index = it->second;
+		int index = static_cast<int>(it->second);
 
 		return get(index, ok);
 	}
@@ -175,7 +173,7 @@ public:
 			*ok = true;
 		}
 
-		if (index < 0 || index >= (int)m_objectsVector.size())
+		if (index < 0 || index >= static_cast<int>(m_objectsVector.size()))
 		{
 			if (ok)
 			{
@@ -198,14 +196,14 @@ public:
 			return nullptr;
 		}
 
-		int index = it->second;
+		int index = static_cast<int>(it->second);
 
 		return getPtr(index);
 	}
 
 	T* getPtr(int index)
 	{
-		if (index < 0 || index >= (int)m_objectsVector.size())
+		if (index < 0 || index >= static_cast<int>(m_objectsVector.size()))
 		{
 			assert(false);
 			return nullptr;
@@ -269,7 +267,6 @@ public:
 		setFileInfo(uuid, fi);
 
 		return true;
-
 	}
 
 	bool undo(const QUuid& uuid, bool& fileRemoved)
@@ -294,8 +291,8 @@ public:
 			return false;
 		}
 
-		// after undo operation, file can be removed, check this
-
+		// After undo operation, file can be removed, check this
+		//
 		setFileInfo(uuid, fi);
 
 		if (fi.deleted() == true)
@@ -323,26 +320,18 @@ public:
 		m_fileInfo[uuid] = fileInfo;
 	}
 
-
 protected:
-
 	virtual bool load() = 0;
 	virtual bool save(const QUuid& uuid) = 0;
 
 protected:
-
 	DbController* m_db = nullptr;
-
 	QWidget* m_parentWidget = nullptr;
-
 	std::vector<T> m_objectsVector;
 
 private:
-
 	int m_fileTypeId = -1;
-
-	std::map<QUuid, int> m_objectsMap;
-
+	std::map<QUuid, size_t> m_objectsMap;
 	std::map<QUuid, DbFileInfo> m_fileInfo;
 
 };

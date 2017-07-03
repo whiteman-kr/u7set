@@ -68,10 +68,12 @@ void DialogBusEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *
 
 DialogBusEditor* theDialogBusEditor = nullptr;
 
-DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
+DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-	m_db(pDbController)
+	m_db(db)
 {
+	assert(m_db);
+
 	m_busses = new BusStorage(m_db, this);
 
 	setWindowTitle(tr("Bus Types Editor"));
@@ -141,7 +143,7 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 	l << tr("Name");
 	l << tr("Type");
 	l << tr("Signal Format");
-	l << tr("Bus Type ID");
+	l << tr("BusTypeID");
 
 	m_signalsTree->setColumnCount(l.size());
 	m_signalsTree->setHeaderLabels(l);
@@ -162,7 +164,7 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 	connect(m_signalsTree, &QTreeWidget::itemDoubleClicked, this, &DialogBusEditor::onSignalItemDoubleClicked);
 
 	// Left side
-
+	//
 	QGridLayout* leftButtonsLayout = new QGridLayout();
 
 	m_btnAdd = new QPushButton(tr("Add"));
@@ -188,7 +190,7 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 	connect (m_btnRefresh, &QPushButton::clicked, this, &DialogBusEditor::onRefresh);
 
 	// Right side
-
+	//
 	QGridLayout* rightButtonsLayout = new QGridLayout();
 
 	m_btnSignalAdd = new QPushButton(tr("Add"));
@@ -218,15 +220,15 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 
 	m_splitter = new QSplitter(Qt::Horizontal);
 
+	// --
 	//
-
 	QWidget* lw = new QWidget();
 	QWidget* rw = new QWidget();
 
 	m_splitter->setChildrenCollapsible(false);
 
+	// --
 	//
-
 	QVBoxLayout* leftLayout = new QVBoxLayout();
 	lw->setLayout(leftLayout);
 
@@ -235,8 +237,8 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 	leftLayout->addWidget(m_busTree);
 	leftLayout->addLayout(leftButtonsLayout);
 
+	// --
 	//
-
 	QVBoxLayout* rightLayout = new QVBoxLayout();
 	rw->setLayout(rightLayout);
 
@@ -311,13 +313,13 @@ DialogBusEditor::DialogBusEditor(DbController* pDbController, QWidget* parent)
 		return;
 	}
 
-	// fill data
+	// Fill data
 	//
 	fillBusList();
 
 	updateButtonsEnableState();
 
-	// sort items
+	// Sort items
 	//
 	for (int i = 0; i < m_busTree->columnCount(); i++)
 	{
@@ -369,7 +371,6 @@ DialogBusEditor::~DialogBusEditor()
 	::theDialogBusEditor = nullptr;
 
 	return;
-
 }
 
 void DialogBusEditor::onAdd()
@@ -634,6 +635,7 @@ void DialogBusEditor::onRefresh()
 	fillBusList();
 
 	updateButtonsEnableState();
+	return;
 }
 
 void DialogBusEditor::onSignalAdd()
@@ -680,7 +682,7 @@ void DialogBusEditor::onSignalEdit()
 	}
 
 	// Create a vector with pointers to objects
-
+	//
 	std::vector<VFrame30::BusSignal> busSignals = bus->busSignals();
 
 	QList<std::shared_ptr<PropertyObject>> editSignalsPointers;
@@ -710,12 +712,12 @@ void DialogBusEditor::onSignalEdit()
 	m_peDialog->setObjects(editSignalsPointers);
 
 	// Run property editor
-
+	//
 	if (m_peDialog->exec() == QDialog::Accepted)
 	{
 		// Save data back to bus
-
-		if(editIndexes.size() != editSignalsPointers.size())
+		//
+		if (editIndexes.size() != editSignalsPointers.size())
 		{
 			assert(false);
 			return;
@@ -734,6 +736,8 @@ void DialogBusEditor::onSignalEdit()
 	}
 
 	m_busses->save(uuid);
+
+	return;
 }
 
 void DialogBusEditor::onSignalRemove()
@@ -774,6 +778,8 @@ void DialogBusEditor::onSignalRemove()
 	fillBusSignals();
 
 	m_busses->save(uuid);
+
+	return;
 }
 
 void DialogBusEditor::onSignalUp()
@@ -833,6 +839,8 @@ void DialogBusEditor::onSignalUp()
 	bus->setBusSignals(busSignals);
 
 	m_busses->save(uuid);
+
+	return;
 }
 
 void DialogBusEditor::onSignalDown()
@@ -916,7 +924,6 @@ void DialogBusEditor::reject()
 
 void DialogBusEditor::onBusItemChanged(QTreeWidgetItem *item, int column)
 {
-
 	QUuid uuid;
 
 	VFrame30::Bus* bus = getCurrentBus(&uuid);
@@ -941,6 +948,7 @@ void DialogBusEditor::onBusItemChanged(QTreeWidgetItem *item, int column)
 
 	m_busses->save(uuid);
 
+	return;
 }
 
 void DialogBusEditor::onBusItemSelectionChanged()
@@ -1118,8 +1126,8 @@ void DialogBusEditor::updateButtonsEnableState()
 
 	int selectedSignalCount = selectedSignalItems.size();
 
+	// --
 	//
-
 	m_btnRemove->setEnabled(selectedBusCount > 0);
 	m_removeAction->setEnabled(selectedBusCount > 0);
 
@@ -1132,8 +1140,8 @@ void DialogBusEditor::updateButtonsEnableState()
 	m_btnUndo->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 	m_undoAction->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
 
+	// --
 	//
-
 	m_btnSignalAdd->setEnabled(checkedOutCount == 1);
 	m_signalAddAction->setEnabled(checkedOutCount == 1);
 	m_signalAddSubmenuAction->setEnabled(checkedOutCount == 1);
@@ -1217,7 +1225,6 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 
 	return;
 }
-
 
 VFrame30::Bus* DialogBusEditor::getCurrentBus(QUuid* uuid)
 {

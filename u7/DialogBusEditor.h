@@ -21,7 +21,6 @@ public:
 private:
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-
 };
 
 
@@ -29,7 +28,7 @@ class DialogBusEditor : public QDialog
 {
 	Q_OBJECT
 public:
-	DialogBusEditor(DbController *pDbController, QWidget* parent);
+	DialogBusEditor(DbController* db, QWidget* parent);
 	~DialogBusEditor();
 
 private slots:
@@ -65,23 +64,18 @@ protected:
 private:
 
 	void fillBusList();
-
 	void fillBusSignals();
 
 	bool addBus(VFrame30::Bus bus);
 
 	void updateButtonsEnableState();
-
 	void updateBusTreeItemText(QTreeWidgetItem* item);
-
 	void updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal);
 
 	VFrame30::Bus* getCurrentBus(QUuid* uuid);
 
 private:
-
 	BusStorage* m_busses = nullptr;
-
 	DbController* m_db = nullptr;
 
 	QSplitter* m_splitter = nullptr;

@@ -8,12 +8,11 @@
 class BusStorage : public DbObjectStorage<VFrame30::Bus>
 {
 public:
-
+	BusStorage() = delete;
 	BusStorage(DbController* db, QWidget* parentWidget);
 
 	bool load() override;
 	bool save(const QUuid& uuid) override;
-
 };
 
 #endif // BUSSTORAGE_H

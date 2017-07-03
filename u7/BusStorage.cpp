@@ -5,7 +5,7 @@
 //
 
 BusStorage::BusStorage(DbController* db, QWidget* parentWidget)
-	:DbObjectStorage(db, parentWidget, db->busTypesFileId())
+	: DbObjectStorage(db, parentWidget, db->busTypesFileId())
 {
 
 }
@@ -20,7 +20,6 @@ bool BusStorage::load()
 
 	// Get Busses
 	//
-
 	std::vector<DbFileInfo> fileList;
 
 	bool ok = m_db->getFileList(&fileList, m_db->busTypesFileId(), BusFileExtension, true, nullptr);
@@ -36,7 +35,6 @@ bool BusStorage::load()
 
 	// Get Busses latest version from the DB
 	//
-
 	std::vector<std::shared_ptr<DbFile>> files;
 
 	ok = m_db->getLatestVersion(fileList, &files, nullptr);
@@ -47,7 +45,6 @@ bool BusStorage::load()
 
 	// Parse files, create actual Busses
 	//
-
 	std::vector<VFrame30::Bus> busses;
 	busses.reserve(files.size());
 
@@ -55,11 +52,9 @@ bool BusStorage::load()
 	{
 		if (f->deleted() == true ||
 			f->action() == VcsItemAction::Deleted)
-
 		{
 			continue;
 		}
-
 
 		VFrame30::Bus bus;
 		QString errorMessage;
@@ -68,9 +63,7 @@ bool BusStorage::load()
 
 		if (ok == false)
 		{
-
 			return false;
-
 		}
 
 		setFileInfo(bus.uuid(), *f);
@@ -89,7 +82,6 @@ bool BusStorage::save(const QUuid& uuid)
 	}
 
 	VFrame30::Bus bus = get(uuid);
-
 	QByteArray data;
 
 	if (bus.save(&data) == false)
@@ -99,7 +91,6 @@ bool BusStorage::save(const QUuid& uuid)
 
 	// save to db
 	//
-
 	DbFileInfo fi = fileInfo(bus.uuid());
 
 	if (fi.isNull() == true)
