@@ -67,7 +67,7 @@ namespace Tuning
 		static const int TYPES_COUNT = 3;
 
 	private:
-		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
+		void writeDiscreteToBigEndianUint32(quint8* dataPtr, int bitNo, quint16 bitValue);
 		void sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals);
 
 	protected:

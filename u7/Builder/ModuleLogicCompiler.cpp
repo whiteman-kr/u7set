@@ -1495,109 +1495,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::initDOMAppLogicDataInRegBuf(const Module& module)
-	{
-		Comment comment;
-
-		comment.setComment(QString(tr("Init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-		m_code.append(comment);
-		m_code.newLine();
-
-		Command cmd;
-
-		// DOM registartion data format
-		//
-		// +0	output signals 16..01
-		// +1	fault flags of output signals 16..01
-		// +2	output signals 32..17
-		// +3	fault flags of output signals 32..17
-		//
-		const int OUT_SIGNALS_OFFSET1 = 0;
-		const int TX_FAULT_FLAGS_OFFSET1 = 1;
-		const int OUT_SIGNALS_OFFSET2 = 2;
-		const int TX_FAULT_FLAGS_OFFSET2 = 3;
-
-		//
-		// output signals initialization has been removed
-		// because if this signals involving in back loop
-		// its state from previous work cycle will be lost !!!
-		//
-
-		/*cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET1, 0);
-		cmd.setComment(QString(tr("init output signals 16..01")));
-		m_code.append(cmd);*/
-
-		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET1,
-				module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET1);
-		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 16..01")));
-		m_code.append(cmd);
-
-		/*cmd.movConst(module.appRegDataOffset + OUT_SIGNALS_OFFSET2, 0);
-		cmd.setComment(QString(tr("init output signals 32..17")));
-		m_code.append(cmd);*/
-
-		cmd.mov(module.appRegDataOffset + TX_FAULT_FLAGS_OFFSET2,
-		module.moduleDataOffset + module.txAppDataOffset + TX_FAULT_FLAGS_OFFSET2);
-		cmd.setComment(QString(tr("copy 'Fault' flags of output signals 32..17")));
-		m_code.append(cmd);
-
-		m_code.newLine();
-
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::initAOMAppLogicDataInRegBuf(const Module& module)
-	{
-		Comment comment;
-
-		comment.setComment(QString(tr("Init %1 data (place %2) in RegBuf")).arg(getModuleFamilyTypeStr(module.familyType())).arg(module.place));
-
-		m_code.append(comment);
-		m_code.newLine();
-
-		Command cmd;
-
-		// AOM registartion data format
-		//
-		// +0	output signal 01
-		// +2	output signal 02
-		//		...
-		// +60	output signal 31
-		// +62	output signal 32
-		// +64	fault flags of output signals 16..01
-		// +65	fault flags of output signals 32..17
-		//
-		const int TX_ADC_DAC_COMPARISON_RESULT_OFFSET = 32;
-		const int REG_ADC_DAC_COMPARISON_RESULT_OFFSET = 64;
-
-		//
-		// output signals initialization has been removed
-		// because if this signals involving in back loop
-		// its state from previous work cycle will be lost !!!
-		//
-
-		/*cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize - 2);
-		cmd.setComment(QString(tr("init output signals 32..01 to 0")));
-		m_code.append(cmd);*/
-
-		cmd.mov(module.appRegDataOffset + REG_ADC_DAC_COMPARISON_RESULT_OFFSET,
-				module.moduleDataOffset + module.txAppDataOffset + TX_ADC_DAC_COMPARISON_RESULT_OFFSET);
-		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 16..01")));
-		m_code.append(cmd);
-
-		cmd.mov(module.appRegDataOffset + REG_ADC_DAC_COMPARISON_RESULT_OFFSET + 1,
-				module.moduleDataOffset + module.txAppDataOffset + TX_ADC_DAC_COMPARISON_RESULT_OFFSET + 1);
-		cmd.setComment(QString(tr("copy ADC-DAC comparison result of signals 32..17")));
-		m_code.append(cmd);
-
-		m_code.newLine();
-
-		return true;
-	}
-
-
 	bool ModuleLogicCompiler::generateAppLogicCode()
 	{
 		LOG_MESSAGE(m_log, QString("Generation of application logic code was started..."));
@@ -3207,7 +3104,7 @@ namespace Builder
 			else
 			{
 				if (s->tuningAddr().offset() == (prevTuningAddr + prevSignalSizeW) &&
-					s->RegBufAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
+					s->regValueAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
 				{
 					// address is plain
 					// reassing variables and continue
@@ -3225,9 +3122,7 @@ namespace Builder
 					//
 					// generate command to copy previous signals
 					//
-					commentStr = " " + s->appSignalID();
-
-					cmd.movMem(startRegBufaddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+					cmd.movMem(startRegBufAddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
 					cmd.setComment(commentStr);
 					m_code.append(cmd);
 
@@ -3251,7 +3146,7 @@ namespace Builder
 
 		// generate command to copy rest of signals
 		//
-		cmd.movMem(startRegBufaddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+		cmd.movMem(startRegBufAddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
 		cmd.setComment(commentStr);
 		m_code.append(cmd);
 
@@ -3287,99 +3182,108 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf()
 	{
-		bool first = true;
+		if (m_acquiredDiscreteTuningSignals.isEmpty() == true)
+		{
+			return true;
+		}
 
-		QHash<int, int> processedSignalsMap;
+		Comment cmnt;
 
-		int regBufStartAddr = m_memoryMap.getRegBufStartAddr();
+		cmnt.setComment(QString(tr("Copy acquired tuningable discrete signals to regBuf")));
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+		m_code.append(cmnt);
+		m_code.newLine();
 
-		int bitNoInBitAcc = 0;
+		int startTuningAddr = -1;
+		int startRegBufAddr = -1;
 
-		int signalsRegOffset = 0;
+		int prevTuningAddr = -1;
+		int prevRegBufAddr = -1;
 
 		Command cmd;
 
-		for(AppSignal* appSignal : m_appSignals)
+		QString commentStr;
+
+		for(Signal* s : m_acquiredDiscreteTuningSignals)
 		{
-			TEST_PTR_CONTINUE(appSignal);
+			TEST_PTR_CONTINUE(s);
 
-			if (processedSignalsMap.contains(appSignal->ID()) == true)
+			// check signal!
+
+			assert(s->dataSize() == SIZE_1BIT);
+			assert(s->tuningAddr().bit() == s->regValueAddr().bit());
+
+			if (startTuningAddr == -1)
 			{
-				continue;
+				// is first signal, init variables
+				//
+				startTuningAddr = prevTuningAddr = s->tuningAddr().bitAddress();
+				startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
+
+				commentStr = "copy: " + s->appSignalID();
 			}
-
-			if (appSignal->isInternal() == true &&
-				appSignal->isAcquired() == true &&
-				appSignal->isDiscrete() == true &&
-				appSignal->enableTuning() == true)
+			else
 			{
-				cmd.clearComment();
-
-				if (first == true)
+				if (s->tuningAddr().bitAddress() == (prevTuningAddr + SIZE_1BIT) &&
+					s->regValueAddr().bitAddress() == (prevRegBufAddr + SIZE_1BIT))
 				{
-					Comment cmnt;
+					// address is plain
+					// reassing variables and continue
+					//
+					prevTuningAddr = s->tuningAddr().bitAddress();
+					prevRegBufAddr = s->regValueAddr().bitAddress();
 
-					cmnt.setComment(QString(tr("Copy registered tuningable discrete signals to regBuf")));
-
-					m_code.append(cmnt);
-					m_code.newLine();
-
-					first = false;
-				}
-
-				const Signal& s = appSignal->constSignal();
-
-				if (bitNoInBitAcc == 0)
-				{
-					signalsRegOffset = s.regValueAddr().offset();
-
-					cmd.movConst(bitAccAddr, 0);
-					m_code.append(cmd);
+					commentStr += " " + s->appSignalID();
 				}
 				else
 				{
-					// check that all signals is disposed in same word in regBuf
+					// not plain address!
 					//
-					assert(s.regValueAddr().offset() == signalsRegOffset);
-				}
+					// generate command to copy previous signals
+					//
+					assert((startRegBufAddr % SIZE_16BIT) == 0);
+					assert((startTuningAddr % SIZE_16BIT) == 0);
 
-				assert(s.regValueAddr().bit() == bitNoInBitAcc);
+					int copySizeBit = prevRegBufAddr - startRegBufAddr + SIZE_1BIT;
+					int copySizeW = (copySizeBit / SIZE_16BIT) + ((copySizeBit % SIZE_16BIT) == 0 ? 0 : 1);
 
-				cmd.movBit(bitAccAddr, bitNoInBitAcc, s.ualAddr().offset(), s.ualAddr().bit());
-				cmd.setComment(QString(tr("bitAcc <= %1 %2").
-							arg(s.appSignalID()).arg(s.regValueAddrStr())));
-				m_code.append(cmd);
-
-				bitNoInBitAcc++;
-
-				if (bitNoInBitAcc == SIZE_16BIT)
-				{
-					cmd.clearComment();
-					cmd.mov(regBufStartAddr + signalsRegOffset, bitAccAddr);
+					cmd.movMem(startRegBufAddr / SIZE_16BIT,
+							   startTuningAddr / SIZE_16BIT,
+							   copySizeW);
+					cmd.setComment(commentStr);
 					m_code.append(cmd);
-					m_code.newLine();
 
-					bitNoInBitAcc = 0;
+					// init variables for the next block
+					//
+					startTuningAddr = prevTuningAddr = s->tuningAddr().bitAddress();
+					startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
+
+					commentStr = "copy: " + s->appSignalID();
 				}
-
-				processedSignalsMap.insert(appSignal->ID(), appSignal->ID());
 			}
 		}
 
-		if (bitNoInBitAcc > 0)
-		{
-			cmd.clearComment();
-			cmd.mov(regBufStartAddr + signalsRegOffset, bitAccAddr);
-			m_code.append(cmd);
-			m_code.newLine();
-		}
+		assert(startTuningAddr != -1);
+		assert(startRegBufAddr != -1);
+		assert(prevTuningAddr != -1);
+		assert(prevRegBufAddr != -1);
 
-		if (first == false)
-		{
-			m_code.newLine();
-		}
+		assert((startRegBufAddr % SIZE_16BIT) == 0);
+		assert((startTuningAddr % SIZE_16BIT) == 0);
+
+		// generate command to copy rest of signals
+		//
+		int copySizeBit = prevRegBufAddr - startRegBufAddr + SIZE_1BIT;
+		int copySizeW = (copySizeBit / SIZE_16BIT) + ((copySizeBit % SIZE_16BIT) == 0 ? 0 : 1);
+
+		cmd.movMem(startRegBufAddr / SIZE_16BIT,
+				   startTuningAddr / SIZE_16BIT,
+				   copySizeW);
+
+		cmd.setComment(commentStr);
+		m_code.append(cmd);
+
+		m_code.newLine();
 
 		return true;
 	}
@@ -5904,7 +5808,7 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(appSignal);
 
 			if (appSignal->isShadowSignal() == true &&
 				appSignal->isDiscrete() == true)
@@ -6619,6 +6523,8 @@ namespace Builder
 
 			s->setUalAddr(s->tuningAddr());
 		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::listsUniquenessCheck() const

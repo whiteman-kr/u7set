@@ -741,8 +741,8 @@ namespace Builder
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
 
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
-		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
+		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
 		bool setLmAppLANDataSize();
