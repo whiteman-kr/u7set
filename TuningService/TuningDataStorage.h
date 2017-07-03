@@ -49,6 +49,9 @@ namespace Tuning
 
 		const QVector<Signal*>& getSignals(int type) const;
 
+		void getAcquiredAnalogSignals(QVector<Signal *>& analogSignals);
+		void getAcquiredDiscreteSignals(QVector<Signal*>& discreteSignals);
+
 		int getSignalsCount() const;
 
 		void getMetadataFields(QStringList& getMetadataFields, int* metadataVersion) const;
@@ -65,6 +68,7 @@ namespace Tuning
 
 	private:
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
+		void sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals);
 
 	protected:
 		QString m_lmEquipmentID;

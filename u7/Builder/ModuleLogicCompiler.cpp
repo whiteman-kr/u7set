@@ -105,15 +105,13 @@ namespace Builder
 
 			if (createAppSignalsMap() == false) break;
 
-			if (createSignalLists() == false) break;
-
 			if (buildTuningData() == false) break;
+
+			if (createSignalLists() == false) break;
 
 			if (disposeSignalsInMemory() == false) break;
 
 			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
-
-			//if (calculateInternalSignalsAddresses() == false) break;
 
 			if (setOutputSignalsAsComputed() == false) break;
 
@@ -122,7 +120,6 @@ namespace Builder
 			if (processSerialRxSignals() == false) break;
 
 			if (setOptoRawInSignalsAsComputed() == false) break;
-
 
 			result = true;
 		}
@@ -173,17 +170,16 @@ namespace Builder
 
 			if (convertAnalogInputSignals() == false) break;
 
-			if (copyAcquiredDiscreteInputSignalsInRegBuf() == false) break;
-
-			if (initOutModulesAppLogicDataInRegBuf() == false) break;
-
 			if (generateAppLogicCode() == false) break;
 
-			if (copyTuningAnalogSignalsToRegBuf() == false) break;
+			if (copyAcquiredTuningAnalogSignalsToRegBuf() == false) break;
 
-			if (copyDiscreteSignalsToRegBuf() == false) break;
+			if (copyAcquiredTuningDiscreteSignalsToRegBuf() == false) break;
 
-			if (copyTuningDiscreteSignalsToRegBuf() == false) break;
+			if (copyAcquiredDiscreteInputSignalsToRegBuf() == false) break;
+
+			if (copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf() == false) break;
+
 
 			if (copyOutModulesAppLogicDataToModulesMemory() == false) break;
 
@@ -751,7 +747,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf()
+	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf()
 	{
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
@@ -1498,40 +1494,6 @@ namespace Builder
 
 		return result;
 	}
-
-
-	bool ModuleLogicCompiler::initOutModulesAppLogicDataInRegBuf()
-	{
-		bool result = true;
-
-		m_code.comment("Init output modules application logic data in RegBuf");
-		m_code.newLine();
-
-		for(const Module& module : m_modules)
-		{
-			if (!module.isOutputModule())
-			{
-				continue;
-			}
-
-			switch(module.familyType())
-			{
-			case Hardware::DeviceModule::FamilyType::DOM:
-				result &= initDOMAppLogicDataInRegBuf(module);
-				break;
-
-			case Hardware::DeviceModule::FamilyType::AOM:
-				result &= initAOMAppLogicDataInRegBuf(module);
-				break;
-
-			default:
-				assert(false);
-			}
-		}
-
-		return result;
-	}
-
 
 	bool ModuleLogicCompiler::initDOMAppLogicDataInRegBuf(const Module& module)
 	{
@@ -3186,77 +3148,120 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyTuningAnalogSignalsToRegBuf()
+	bool ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsToRegBuf()
 	{
-		bool first = true;
-
-		QHash<int, int> processedSignalsMap;
-
-		int regBufStartAddr = m_memoryMap.getRegBufStartAddr();
-
-		for(AppSignal* appSignal : m_appSignals)
+		if (m_acquiredAnalogTuningSignals.isEmpty() == true)
 		{
-			TEST_PTR_CONTINUE(appSignal);
+			return true;
+		}
 
-			if (processedSignalsMap.contains(appSignal->ID()) == true)
+		Comment cmnt;
+
+		cmnt.setComment(QString(tr("Copy acquired tuningable analog signals to regBuf")));
+
+		m_code.append(cmnt);
+		m_code.newLine();
+
+		int startTuningAddr = -1;
+		int startRegBufAddr = -1;
+
+		int prevTuningAddr = -1;
+		int prevRegBufAddr = -1;
+		int prevSignalSizeW = -1;
+
+		Command cmd;
+
+		QString commentStr;
+
+		for(Signal* s : m_acquiredAnalogTuningSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			// check signal!
+			//
+			switch(s->analogSignalFormat())
 			{
-				continue;
+			case E::AnalogAppSignalFormat::SignedInt32:
+			case E::AnalogAppSignalFormat::Float32:
+
+				assert(s->dataSize() == SIZE_32BIT);
+				assert(s->tuningAddr().isValid() == true);
+				assert(s->regValueAddr().isValid() == true);
+				break;
+
+			default:
+				assert(false);
 			}
 
-			if (appSignal->isInternal() == true &&
-				appSignal->isAcquired() == true &&
-				appSignal->isAnalog() == true &&
-				appSignal->enableTuning() == true)
+			if (prevSignalSizeW == -1)
 			{
-				if (first == true)
+				// is first signal, init variables
+				//
+				startTuningAddr = prevTuningAddr = s->tuningAddr().offset();
+				startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
+
+				prevSignalSizeW = s->dataSize() / SIZE_16BIT;
+
+				commentStr = "copy: " + s->appSignalID();
+			}
+			else
+			{
+				if (s->tuningAddr().offset() == (prevTuningAddr + prevSignalSizeW) &&
+					s->RegBufAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
 				{
-					Comment cmnt;
+					// address is plain
+					// reassing variables and continue
+					//
+					prevTuningAddr = s->tuningAddr().offset();
+					prevRegBufAddr = s->regValueAddr().offset();
 
-					cmnt.setComment(QString(tr("Copy registered tuningable analog signals to regBuf")));
+					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
 
-					m_code.append(cmnt);
-					m_code.newLine();
-
-					first = false;
+					commentStr += " " + s->appSignalID();
 				}
-
-				Command cmd;
-				const Signal& s = appSignal->constSignal();
-
-				switch(appSignal->dataSize())
+				else
 				{
-				case SIZE_32BIT:
-					cmd.mov32(regBufStartAddr + s.regValueAddr().offset(), s.ualAddr().offset());
-					cmd.setComment(QString(tr("regBuf <= %1 %2").
-							arg(s.appSignalID()).arg(s.regValueAddrStr())));
-					m_code.append(cmd);
-					break;
+					// not plain address!
+					//
+					// generate command to copy previous signals
+					//
+					commentStr = " " + s->appSignalID();
 
-				case SIZE_16BIT:
-					cmd.mov(regBufStartAddr + s.regValueAddr().offset(), s.ualAddr().offset());
-					cmd.setComment(QString(tr("regBuf <= %1 %2").
-							arg(s.appSignalID()).arg(s.regValueAddrStr())));
+					cmd.movMem(startRegBufaddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+					cmd.setComment(commentStr);
 					m_code.append(cmd);
-					break;
 
-				default:
-					assert(false);
+					// init variables for the next block
+					//
+					startTuningAddr = prevTuningAddr = s->tuningAddr().offset();
+					startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
+
+					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
+
+					commentStr = "copy: " + s->appSignalID();
 				}
-
-				processedSignalsMap.insert(appSignal->ID(), appSignal->ID());
 			}
 		}
 
-		if (first == false)
-		{
-			m_code.newLine();
-		}
+		assert(startTuningAddr != -1);
+		assert(startRegBufAddr != -1);
+		assert(prevTuningAddr != -1);
+		assert(prevRegBufAddr != -1);
+		assert(prevSignalSizeW != -1);
+
+		// generate command to copy rest of signals
+		//
+		cmd.movMem(startRegBufaddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+		cmd.setComment(commentStr);
+		m_code.append(cmd);
+
+		m_code.newLine();
 
 		return true;
 	}
 
 
-	bool ModuleLogicCompiler::copyDiscreteSignalsToRegBuf()
+	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf()
 	{
 		if (m_memoryMap.acquiredDiscreteOutputSignalsSizeW() == 0)
 		{
@@ -3280,7 +3285,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyTuningDiscreteSignalsToRegBuf()
+	bool ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsToRegBuf()
 	{
 		bool first = true;
 
@@ -5663,7 +5668,7 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteInputSignals);
 		sortSignalList(m_acquiredDiscreteOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
-		sortSignalList(m_acquiredDiscreteTuningSignals);			// not need to sort if will be copy in reg buffer as block of memory
+		// sortSignalList(m_acquiredDiscreteTuningSignals);			// Not need to sort!
 
 		sortSignalList(m_nonAcquiredDiscreteInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteOutputSignals);
@@ -5673,12 +5678,12 @@ namespace Builder
 		sortSignalList(m_acquiredAnalogInputSignals);
 		sortSignalList(m_acquiredAnalogOutputSignals);
 		sortSignalList(m_acquiredAnalogInternalSignals);
-		sortSignalList(m_acquiredAnalogTuningSignals);
+		// sortSignalList(m_acquiredAnalogTuningSignals);			// Not need to sort!
 
 		sortSignalList(m_nonAcquiredAnalogInputSignals);
 		sortSignalList(m_nonAcquiredAnalogOutputSignals);
 		sortSignalList(m_nonAcquiredAnalogInternalSignals);
-		sortSignalList(m_nonAcquiredAnalogTuningSignals);			// not need to sort if will be copy in reg buffer as block of memory
+		sortSignalList(m_nonAcquiredAnalogTuningSignals);
 
 		sortSignalList(m_acquiredBuses);
 		sortSignalList(m_nonAcquiredBuses);
@@ -5700,11 +5705,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
@@ -5738,11 +5739,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
@@ -5769,11 +5766,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
@@ -5791,6 +5784,11 @@ namespace Builder
 	{
 		m_acquiredDiscreteTuningSignals.clear();
 
+		if (m_tuningData == nullptr)
+		{
+			return true;
+		}
+
 		//	list include signals that:
 		//
 		//	+ acquired
@@ -5799,20 +5797,24 @@ namespace Builder
 		//	+ tuningable
 		//	+ no matter used in UAL or not
 
-		for(Signal* s : m_chassisSignals)
+		m_tuningData->getAcquiredDiscreteSignals(m_acquiredDiscreteTuningSignals);
+
+		// check signals!
+
+		for(Signal* s : m_acquiredDiscreteTuningSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
 				s->enableTuning() == true)
 			{
-				m_acquiredDiscreteTuningSignals.append(s);
+				continue;
+			}
+			else
+			{
+				assert(false);
 			}
 		}
 
@@ -5832,11 +5834,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
@@ -5863,11 +5861,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
@@ -5895,11 +5889,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
@@ -5914,11 +5904,7 @@ namespace Builder
 		//
 		for(AppSignal* appSignal : m_appSignals)
 		{
-			if (appSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (appSignal->isShadowSignal() == true &&
 				appSignal->isDiscrete() == true)
@@ -5955,11 +5941,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isDiscrete() == true &&
@@ -5987,11 +5969,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
@@ -6021,11 +5999,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
@@ -6052,11 +6026,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
@@ -6074,6 +6044,11 @@ namespace Builder
 	{
 		m_acquiredAnalogTuningSignals.clear();
 
+		if (m_tuningData == nullptr)
+		{
+			return true;
+		}
+
 		//	list include signals that:
 		//
 		//	+ acquired
@@ -6082,20 +6057,24 @@ namespace Builder
 		//	+ tuningable
 		//	+ no matter used in UAL or not
 
-		for(Signal* s : m_chassisSignals)
+		m_tuningData->getAcquiredAnalogSignals(m_acquiredAnalogTuningSignals);
+
+		// check signals!
+
+		for(Signal* s : m_acquiredAnalogTuningSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
 				s->enableTuning() == true)
 			{
-				m_acquiredAnalogTuningSignals.append(s);
+				continue;
+			}
+			else
+			{
+				assert(false);
 			}
 		}
 
@@ -6115,11 +6094,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isAnalog() == true &&
@@ -6146,11 +6121,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isAnalog() == true &&
@@ -6177,11 +6148,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isAnalog() == true &&
@@ -6209,11 +6176,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isAnalog() == true &&
@@ -6240,11 +6203,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == true &&
 				s->isBus() == true &&
@@ -6269,11 +6228,7 @@ namespace Builder
 
 		for(Signal* s : m_chassisSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			if (s->isAcquired() == false &&
 				s->isBus() == true &&
@@ -6308,6 +6263,8 @@ namespace Builder
 
 			if (disposeNonAcquiredBuses() == false) break;
 
+			if (setUalAddrOfNonAcquiredTuningSignals() == false) break;
+
 			result = true;
 		}
 		while(false);
@@ -6321,11 +6278,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteOutputSignal(*s);
 
@@ -6341,11 +6294,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteInternalSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteInternalSignal(*s);
 
@@ -6361,11 +6310,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredDiscreteOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredDiscreteOutputSignal(*s);
 
@@ -6381,11 +6326,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredDiscreteInternalSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredDiscreteInternalSignal(*s);
 
@@ -6419,11 +6360,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredAnalogInputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredAnalogInputSignal(*s);
 
@@ -6440,11 +6377,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredAnalogOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredAnalogOutputSignal(*s);
 
@@ -6461,11 +6394,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredAnalogInternalSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredAnalogInternalSignal(*s);
 
@@ -6482,11 +6411,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredAnalogTuningSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->tuningAddr().isValid() == true);
 
@@ -6508,11 +6433,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredBuses)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendAcquiredBus(*s);
 
@@ -6531,11 +6452,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteInputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->ioBufAddr().isValid() == true);
 
@@ -6555,11 +6472,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->ualAddr().isValid() == true);
 
@@ -6579,11 +6492,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteInternalSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->ualAddr().isValid() == true);
 
@@ -6603,11 +6512,7 @@ namespace Builder
 
 		for(Signal* s : m_acquiredDiscreteTuningSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->tuningAddr().isValid() == true);
 
@@ -6629,11 +6534,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredAnalogInputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInputSignal(*s);
 
@@ -6650,11 +6551,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredAnalogOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogOutputSignal(*s);
 
@@ -6671,11 +6568,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredAnalogInternalSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInternalSignal(*s);
 
@@ -6694,11 +6587,7 @@ namespace Builder
 
 		for(Signal* s : m_nonAcquiredBuses)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			Address16 addr = m_memoryMap.appendNonAcquiredBus(*s);
 
@@ -6709,6 +6598,27 @@ namespace Builder
 		result = m_memoryMap.recalculateAddresses();
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::setUalAddrOfNonAcquiredTuningSignals()
+	{
+		for(Signal* s : m_nonAcquiredDiscreteTuningSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			assert(s->tuningAddr().isValid() == true);
+
+			s->setUalAddr(s->tuningAddr());
+		}
+
+		for(Signal* s : m_nonAcquiredAnalogTuningSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			assert(s->tuningAddr().isValid() == true);
+
+			s->setUalAddr(s->tuningAddr());
+		}
 	}
 
 	bool ModuleLogicCompiler::listsUniquenessCheck() const

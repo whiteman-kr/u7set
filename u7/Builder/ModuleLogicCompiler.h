@@ -683,6 +683,8 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
+		bool setUalAddrOfNonAcquiredTuningSignals();
+
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
 
@@ -702,7 +704,7 @@ namespace Builder
 		bool startAppLogicCode();
 		bool copyAcquiredRawDataInRegBuf();
 		bool convertAnalogInputSignals();
-		bool copyAcquiredDiscreteInputSignalsInRegBuf();
+		bool copyAcquiredDiscreteInputSignalsToRegBuf();
 
 		bool copySerialRxSignals();
 		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
@@ -715,10 +717,6 @@ namespace Builder
 		bool copyAimDataToRegBuf(const Module& module);
 		bool copyAifmDataToRegBuf(const Module& module);
 		bool copyMps17DataToRegBuf(const Module& module);
-
-		bool initOutModulesAppLogicDataInRegBuf();
-		bool initDOMAppLogicDataInRegBuf(const Module& module);
-		bool initAOMAppLogicDataInRegBuf(const Module& module);
 
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
@@ -742,9 +740,9 @@ namespace Builder
 		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
 
-		bool copyTuningAnalogSignalsToRegBuf();
-		bool copyDiscreteSignalsToRegBuf();
-		bool copyTuningDiscreteSignalsToRegBuf();
+		bool copyAcquiredTuningAnalogSignalsToRegBuf();
+		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
+		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 
 		bool copyOutModulesAppLogicDataToModulesMemory();
 		bool setLmAppLANDataSize();
