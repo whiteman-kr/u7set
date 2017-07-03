@@ -12,7 +12,7 @@
 class DialogConnections : public QDialog
 {
 public:
-    DialogConnections(DbController *pDbController, QWidget *parent);
+	DialogConnections(DbController* db, QWidget* parent);
     ~DialogConnections();
 
 	void setFilter(QString filter);
@@ -75,7 +75,7 @@ private:
 
     QStringList m_masks;
 
-    DbController *m_dbController = nullptr;
+	DbController* m_db = nullptr;
 
 	Hardware::ConnectionStorage* m_connections = nullptr;
 

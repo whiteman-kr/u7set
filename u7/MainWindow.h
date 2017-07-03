@@ -62,7 +62,7 @@ protected slots:
 	void showUfbLibraryTabPage(bool show);
 	void runSubsystemListEditor();
     void runConnectionsEditor();
-    void runTuningFiltersEditor();
+	void runBusEditor();
 	void updateUfbsAfbs();
     void showAbout();
 	void debug();
@@ -91,7 +91,7 @@ private:
 	QAction* m_ufbLibraryAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
-    QAction* m_tuningFiltersEditorAction = nullptr;
+	QAction* m_busEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;

@@ -14,7 +14,7 @@
 #include "SignalsTabPage.h"
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
-#include "DialogTuningClients.h"
+#include "DialogBusEditor.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "GlobalMessanger.h"
@@ -254,10 +254,10 @@ void MainWindow::createActions()
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
-	m_tuningFiltersEditorAction = new QAction(tr("Tuning Clients Filters..."), this);
-    m_tuningFiltersEditorAction->setStatusTip(tr("Run Tuning Clients Filters Editor"));
-    m_tuningFiltersEditorAction->setEnabled(false);
-    connect(m_tuningFiltersEditorAction, &QAction::triggered, this, &MainWindow::runTuningFiltersEditor);
+	m_busEditorAction = new QAction(tr("Bus Types Editor..."), this);
+	m_busEditorAction->setStatusTip(tr("Run Bus Types Editor"));
+	m_busEditorAction->setEnabled(false);
+	connect(m_busEditorAction, &QAction::triggered, this, &MainWindow::runBusEditor);
 
 	m_updateUfbsAfbs = new QAction(tr("Update AFBs/UFBs..."), this);
 	m_updateUfbsAfbs->setStatusTip(tr("Update AFBs/UFBs on all schemas"));
@@ -330,7 +330,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_ufbLibraryAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
-    pToolsMenu->addAction(m_tuningFiltersEditorAction);
+	pToolsMenu->addAction(m_busEditorAction);
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
@@ -503,23 +503,25 @@ void MainWindow::runConnectionsEditor()
 	}
 }
 
-void MainWindow::runTuningFiltersEditor()
-{
-    if (dbController()->isProjectOpened() == false)
-    {
-        return;
-    }
 
-    if (theDialogTuningClients == nullptr)
-    {
-        theDialogTuningClients = new DialogTuningClients(this);
-        theDialogTuningClients->show();
-    }
-    else
-    {
-        theDialogTuningClients->activateWindow();
-    }
+void MainWindow::runBusEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	if (theDialogBusEditor == nullptr)
+	{
+		theDialogBusEditor = new DialogBusEditor(dbController(), this);
+		theDialogBusEditor->show();
+	}
+	else
+	{
+		theDialogBusEditor->activateWindow();
+	}
 }
+
 
 
 void MainWindow::updateUfbsAfbs()
@@ -928,7 +930,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
-    m_tuningFiltersEditorAction->setEnabled(/*true*/false);
+	m_busEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 
 
@@ -960,7 +962,7 @@ void MainWindow::projectClosed()
 	m_ufbLibraryAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
-    m_tuningFiltersEditorAction->setEnabled(false);
+	m_busEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 
 	// Status bar

@@ -7,8 +7,8 @@
 //
 //
 
-DialogProperties::DialogProperties(std::shared_ptr<PropertyObject> object, QWidget* parent, bool readOnly)
-	:PropertyEditorDialog(object, parent, readOnly)
+DialogProperties::DialogProperties(QWidget* parent)
+	: PropertyEditorDialog(parent)
 {
 	setWindowTitle(tr("Properties"));
 
