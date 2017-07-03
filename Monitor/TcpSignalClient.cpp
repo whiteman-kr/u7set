@@ -1,8 +1,9 @@
 #include "TcpSignalClient.h"
 #include "Settings.h"
+#include "version.h"
 
 TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2),
+	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::Monitor, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER),
 	m_cfgController(configController)
 {
 	assert(m_cfgController);

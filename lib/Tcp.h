@@ -41,6 +41,12 @@ namespace Tcp
 		qint64 requestCount = 0;
 		qint64 replyCount = 0;
 
+		E::SoftwareType softwareType;
+		QString equipmentID;
+		int majorVersion;
+		int minorVersion;
+		int commitNo;
+
 		void dump();
 	};
 
@@ -163,7 +169,8 @@ namespace Tcp
 
 		void closeConnection();
 
-		virtual void onConnection();
+		virtual void onInitConnection();
+		virtual void onConnection() {}
 		virtual void onDisconnection();
 
 		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
@@ -380,6 +387,12 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
+		E::SoftwareType m_softwareType;
+		const QString m_equipmentID;
+		int m_majorVersion;
+		int m_minorVersion;
+		int m_commitNo;
+
 	private:
 		void autoSwitchServer();
 		void selectServer(int serverIndex, bool reconnect);
@@ -406,8 +419,19 @@ namespace Tcp
 		virtual void onWatchdogTimerTimeout() override;
 
 	public:
-		Client(const HostAddressPort& serverAddressPort);
-		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+		Client(const HostAddressPort& serverAddressPort,
+			   E::SoftwareType softwareType,
+			   const QString equipmentID,
+			   int majorVersion,
+			   int minorVersion,
+			   int commitNo);
+
+		Client(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2,
+			   E::SoftwareType softwareType,
+			   const QString equipmentID,
+			   int majorVersion,
+			   int minorVersion,
+			   int commitNo);
 
 		virtual ~Client();
 
@@ -426,7 +450,7 @@ namespace Tcp
 		virtual void onClientThreadStarted() {}
 		virtual void onClientThreadFinished() {}
 
-		virtual void onConnection() override;
+		virtual void onInitConnection() final;
 		virtual void onDisconnection() override;
 
 		virtual void onTryConnectToServer(const HostAddressPort& serverAddr);
@@ -441,6 +465,7 @@ namespace Tcp
 		bool sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
 
+		void processInitReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 	};
 

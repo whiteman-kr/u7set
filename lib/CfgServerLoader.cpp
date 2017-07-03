@@ -143,8 +143,12 @@ CfgLoader::CfgLoader(const QString& appEquipmentID,
 						const HostAddressPort& serverAddressPort1,
 						const HostAddressPort& serverAddressPort2,
 						bool enableDownloadCfg,
-						std::shared_ptr<CircularLogger> logger) :
-	Tcp::FileClient("", serverAddressPort1, serverAddressPort2),
+						std::shared_ptr<CircularLogger> logger,
+						E::SoftwareType softwareType,
+						int majorVersion,
+						int minorVersion,
+						int commitNo) :
+	Tcp::FileClient("", serverAddressPort1, serverAddressPort2, softwareType, appEquipmentID, majorVersion, minorVersion, commitNo),
 	m_logger(logger),
 	m_timer(this),
 	m_enableDownloadConfiguration(enableDownloadCfg)
@@ -846,9 +850,22 @@ CfgLoaderThread::CfgLoaderThread(	const QString& appStrID,
 									const HostAddressPort& serverAddressPort1,
 									const HostAddressPort& serverAddressPort2,
 									bool enableDownloadCfg,
-									std::shared_ptr<CircularLogger> logger)
+									std::shared_ptr<CircularLogger> logger,
+									E::SoftwareType softwareType,
+									int majorVersion,
+									int minorVersion,
+									int commitNo)
 {
-	m_cfgLoader = new CfgLoader(appStrID, appInstance, serverAddressPort1, serverAddressPort2, enableDownloadCfg, logger);		// it will be deleted during SimpleThread destruction
+	m_cfgLoader = new CfgLoader(appStrID,
+								appInstance,
+								serverAddressPort1,
+								serverAddressPort2,
+								enableDownloadCfg,
+								logger,
+								softwareType,
+								majorVersion,
+								minorVersion,
+								commitNo);		// it will be deleted during SimpleThread destruction
 
 	addWorker(m_cfgLoader);
 

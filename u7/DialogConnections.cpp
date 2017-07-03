@@ -165,7 +165,7 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
 		{
 			std::shared_ptr<Hardware::Connection> c = xmlConnections.get(i);
 
-			m_connections->add(c);
+			m_connections->add(c->uuid(), c);
 
 			m_connections->save(c->uuid());
 
@@ -332,7 +332,7 @@ bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> conn
 
 	// Add connection, update UI
 	//
-	m_connections->add(connection);
+	m_connections->add(connection->uuid(), connection);
 
 	bool ok = m_connections->save(connection->uuid());
 	if (ok == false)
@@ -378,8 +378,7 @@ void DialogConnections::fillConnectionsList()
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
 					connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					maskResult = true;
 					break;
@@ -432,7 +431,7 @@ void DialogConnections::setPropertyEditorObjects()
 			return;
 		}
 
-		if (connection->fileInfo().state() != VcsState::CheckedOut)
+		if (m_connections->fileInfo(connection->uuid()).state() != VcsState::CheckedOut)
 		{
 			readOnly = true;
 		}
@@ -764,7 +763,25 @@ void DialogConnections::onUndo()
 		}
 		else
 		{
-			updateTreeItemText(item);
+			// read previous data from file
+
+			std::shared_ptr<DbFile> file = nullptr;
+
+			DbFileInfo fi = m_connections->fileInfo(uuid);
+
+			bool ok = m_dbController->getLatestVersion(fi, &file, this);
+			if (ok == true && file != nullptr)
+			{
+				QByteArray data;
+				file->swapData(data);
+
+				std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
+
+				if (connection != nullptr && connection->Load(data) == true)
+				{
+					updateTreeItemText(item);
+				}
+			}
 		}
 	}
 
@@ -930,11 +947,13 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 	item->setText(c++, connection->connectionID());
 	item->setText(c++, connection->manualSettings() ? tr("Manual") : tr("Auto"));
 
-	if (connection->fileInfo().state() == VcsState::CheckedOut)
-	{
-		item->setText(c++, connection->fileInfo().action().text());
+	DbFileInfo fi = m_connections->fileInfo(connection->uuid());
 
-		int userId = connection->fileInfo().userId();
+	if (fi.state() == VcsState::CheckedOut)
+	{
+		item->setText(c++, fi.action().text());
+
+		int userId = fi.userId();
 		item->setText(c++, m_dbController->username(userId));
 	}
 	else
@@ -967,7 +986,7 @@ void DialogConnections::updateButtonsEnableState()
 			return;
 		}
 
-		if (connection->fileInfo().state() == VcsState::CheckedOut)
+		if (m_connections->fileInfo(connection->uuid()).state() == VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}

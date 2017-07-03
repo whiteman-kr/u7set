@@ -11,7 +11,7 @@ namespace Tuning
 	class TcpTuningClient : public Tcp::Client
 	{
 	public:
-		TcpTuningClient(const HostAddressPort& hostAddr);
+		TcpTuningClient(const HostAddressPort& hostAddr, const QString equipmentID);
 
 	private:
 		virtual void onConnection() override;

@@ -55,6 +55,7 @@ class GetUnitsReply;
 class GetServiceInfoRequest;
 class ServiceInfo;
 class GetServiceInfoReply;
+class TcpClientIntroduceMyself;
 class ConfigurationServiceState;
 class ConfigurationServiceClientInfo;
 class ConfigurationServiceClients;
@@ -2365,6 +2366,133 @@ class GetServiceInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class TcpClientIntroduceMyself : public ::google::protobuf::Message {
+ public:
+  TcpClientIntroduceMyself();
+  virtual ~TcpClientIntroduceMyself();
+
+  TcpClientIntroduceMyself(const TcpClientIntroduceMyself& from);
+
+  inline TcpClientIntroduceMyself& operator=(const TcpClientIntroduceMyself& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TcpClientIntroduceMyself& default_instance();
+
+  void Swap(TcpClientIntroduceMyself* other);
+
+  // implements Message ----------------------------------------------
+
+  TcpClientIntroduceMyself* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TcpClientIntroduceMyself& from);
+  void MergeFrom(const TcpClientIntroduceMyself& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 softwareType = 1;
+  inline bool has_softwaretype() const;
+  inline void clear_softwaretype();
+  static const int kSoftwareTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 softwaretype() const;
+  inline void set_softwaretype(::google::protobuf::int32 value);
+
+  // required string equipmentId = 2;
+  inline bool has_equipmentid() const;
+  inline void clear_equipmentid();
+  static const int kEquipmentIdFieldNumber = 2;
+  inline const ::std::string& equipmentid() const;
+  inline void set_equipmentid(const ::std::string& value);
+  inline void set_equipmentid(const char* value);
+  inline void set_equipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_equipmentid();
+  inline ::std::string* release_equipmentid();
+  inline void set_allocated_equipmentid(::std::string* equipmentid);
+
+  // required int32 majorVersion = 3;
+  inline bool has_majorversion() const;
+  inline void clear_majorversion();
+  static const int kMajorVersionFieldNumber = 3;
+  inline ::google::protobuf::int32 majorversion() const;
+  inline void set_majorversion(::google::protobuf::int32 value);
+
+  // required int32 minorVersion = 4;
+  inline bool has_minorversion() const;
+  inline void clear_minorversion();
+  static const int kMinorVersionFieldNumber = 4;
+  inline ::google::protobuf::int32 minorversion() const;
+  inline void set_minorversion(::google::protobuf::int32 value);
+
+  // required int32 commitNo = 5;
+  inline bool has_commitno() const;
+  inline void clear_commitno();
+  static const int kCommitNoFieldNumber = 5;
+  inline ::google::protobuf::int32 commitno() const;
+  inline void set_commitno(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.TcpClientIntroduceMyself)
+ private:
+  inline void set_has_softwaretype();
+  inline void clear_has_softwaretype();
+  inline void set_has_equipmentid();
+  inline void clear_has_equipmentid();
+  inline void set_has_majorversion();
+  inline void clear_has_majorversion();
+  inline void set_has_minorversion();
+  inline void clear_has_minorversion();
+  inline void set_has_commitno();
+  inline void clear_has_commitno();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* equipmentid_;
+  ::google::protobuf::int32 softwaretype_;
+  ::google::protobuf::int32 majorversion_;
+  ::google::protobuf::int32 minorversion_;
+  ::google::protobuf::int32 commitno_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TcpClientIntroduceMyself* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class ConfigurationServiceState : public ::google::protobuf::Message {
  public:
   ConfigurationServiceState();
@@ -2573,6 +2701,27 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 replyquantity() const;
   inline void set_replyquantity(::google::protobuf::int64 value);
 
+  // required int32 majorVersion = 8;
+  inline bool has_majorversion() const;
+  inline void clear_majorversion();
+  static const int kMajorVersionFieldNumber = 8;
+  inline ::google::protobuf::int32 majorversion() const;
+  inline void set_majorversion(::google::protobuf::int32 value);
+
+  // required int32 minorVersion = 9;
+  inline bool has_minorversion() const;
+  inline void clear_minorversion();
+  static const int kMinorVersionFieldNumber = 9;
+  inline ::google::protobuf::int32 minorversion() const;
+  inline void set_minorversion(::google::protobuf::int32 value);
+
+  // required int32 commitNo = 10;
+  inline bool has_commitno() const;
+  inline void clear_commitno();
+  static const int kCommitNoFieldNumber = 10;
+  inline ::google::protobuf::int32 commitno() const;
+  inline void set_commitno(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Network.ConfigurationServiceClientInfo)
  private:
   inline void set_has_softwaretype();
@@ -2587,6 +2736,12 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   inline void clear_has_isactual();
   inline void set_has_replyquantity();
   inline void clear_has_replyquantity();
+  inline void set_has_majorversion();
+  inline void clear_has_majorversion();
+  inline void set_has_minorversion();
+  inline void clear_has_minorversion();
+  inline void set_has_commitno();
+  inline void clear_has_commitno();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2596,9 +2751,12 @@ class ConfigurationServiceClientInfo : public ::google::protobuf::Message {
   ::google::protobuf::int64 uptime_;
   ::google::protobuf::int64 replyquantity_;
   bool isactual_;
+  ::google::protobuf::int32 majorversion_;
+  ::google::protobuf::int32 minorversion_;
+  ::google::protobuf::int32 commitno_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -6765,6 +6923,168 @@ inline void GetServiceInfoReply::set_allocated_serviceinfo(::Network::ServiceInf
 
 // -------------------------------------------------------------------
 
+// TcpClientIntroduceMyself
+
+// required int32 softwareType = 1;
+inline bool TcpClientIntroduceMyself::has_softwaretype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TcpClientIntroduceMyself::set_has_softwaretype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TcpClientIntroduceMyself::clear_has_softwaretype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TcpClientIntroduceMyself::clear_softwaretype() {
+  softwaretype_ = 0;
+  clear_has_softwaretype();
+}
+inline ::google::protobuf::int32 TcpClientIntroduceMyself::softwaretype() const {
+  return softwaretype_;
+}
+inline void TcpClientIntroduceMyself::set_softwaretype(::google::protobuf::int32 value) {
+  set_has_softwaretype();
+  softwaretype_ = value;
+}
+
+// required string equipmentId = 2;
+inline bool TcpClientIntroduceMyself::has_equipmentid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TcpClientIntroduceMyself::set_has_equipmentid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TcpClientIntroduceMyself::clear_has_equipmentid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TcpClientIntroduceMyself::clear_equipmentid() {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    equipmentid_->clear();
+  }
+  clear_has_equipmentid();
+}
+inline const ::std::string& TcpClientIntroduceMyself::equipmentid() const {
+  return *equipmentid_;
+}
+inline void TcpClientIntroduceMyself::set_equipmentid(const ::std::string& value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void TcpClientIntroduceMyself::set_equipmentid(const char* value) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(value);
+}
+inline void TcpClientIntroduceMyself::set_equipmentid(const char* value, size_t size) {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  equipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TcpClientIntroduceMyself::mutable_equipmentid() {
+  set_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    equipmentid_ = new ::std::string;
+  }
+  return equipmentid_;
+}
+inline ::std::string* TcpClientIntroduceMyself::release_equipmentid() {
+  clear_has_equipmentid();
+  if (equipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = equipmentid_;
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TcpClientIntroduceMyself::set_allocated_equipmentid(::std::string* equipmentid) {
+  if (equipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete equipmentid_;
+  }
+  if (equipmentid) {
+    set_has_equipmentid();
+    equipmentid_ = equipmentid;
+  } else {
+    clear_has_equipmentid();
+    equipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 majorVersion = 3;
+inline bool TcpClientIntroduceMyself::has_majorversion() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TcpClientIntroduceMyself::set_has_majorversion() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TcpClientIntroduceMyself::clear_has_majorversion() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TcpClientIntroduceMyself::clear_majorversion() {
+  majorversion_ = 0;
+  clear_has_majorversion();
+}
+inline ::google::protobuf::int32 TcpClientIntroduceMyself::majorversion() const {
+  return majorversion_;
+}
+inline void TcpClientIntroduceMyself::set_majorversion(::google::protobuf::int32 value) {
+  set_has_majorversion();
+  majorversion_ = value;
+}
+
+// required int32 minorVersion = 4;
+inline bool TcpClientIntroduceMyself::has_minorversion() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TcpClientIntroduceMyself::set_has_minorversion() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TcpClientIntroduceMyself::clear_has_minorversion() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TcpClientIntroduceMyself::clear_minorversion() {
+  minorversion_ = 0;
+  clear_has_minorversion();
+}
+inline ::google::protobuf::int32 TcpClientIntroduceMyself::minorversion() const {
+  return minorversion_;
+}
+inline void TcpClientIntroduceMyself::set_minorversion(::google::protobuf::int32 value) {
+  set_has_minorversion();
+  minorversion_ = value;
+}
+
+// required int32 commitNo = 5;
+inline bool TcpClientIntroduceMyself::has_commitno() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void TcpClientIntroduceMyself::set_has_commitno() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void TcpClientIntroduceMyself::clear_has_commitno() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void TcpClientIntroduceMyself::clear_commitno() {
+  commitno_ = 0;
+  clear_has_commitno();
+}
+inline ::google::protobuf::int32 TcpClientIntroduceMyself::commitno() const {
+  return commitno_;
+}
+inline void TcpClientIntroduceMyself::set_commitno(::google::protobuf::int32 value) {
+  set_has_commitno();
+  commitno_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // ConfigurationServiceState
 
 // required string currentBuildDirectory = 1;
@@ -7063,6 +7383,72 @@ inline ::google::protobuf::int64 ConfigurationServiceClientInfo::replyquantity()
 inline void ConfigurationServiceClientInfo::set_replyquantity(::google::protobuf::int64 value) {
   set_has_replyquantity();
   replyquantity_ = value;
+}
+
+// required int32 majorVersion = 8;
+inline bool ConfigurationServiceClientInfo::has_majorversion() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_majorversion() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_majorversion() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ConfigurationServiceClientInfo::clear_majorversion() {
+  majorversion_ = 0;
+  clear_has_majorversion();
+}
+inline ::google::protobuf::int32 ConfigurationServiceClientInfo::majorversion() const {
+  return majorversion_;
+}
+inline void ConfigurationServiceClientInfo::set_majorversion(::google::protobuf::int32 value) {
+  set_has_majorversion();
+  majorversion_ = value;
+}
+
+// required int32 minorVersion = 9;
+inline bool ConfigurationServiceClientInfo::has_minorversion() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_minorversion() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_minorversion() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void ConfigurationServiceClientInfo::clear_minorversion() {
+  minorversion_ = 0;
+  clear_has_minorversion();
+}
+inline ::google::protobuf::int32 ConfigurationServiceClientInfo::minorversion() const {
+  return minorversion_;
+}
+inline void ConfigurationServiceClientInfo::set_minorversion(::google::protobuf::int32 value) {
+  set_has_minorversion();
+  minorversion_ = value;
+}
+
+// required int32 commitNo = 10;
+inline bool ConfigurationServiceClientInfo::has_commitno() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ConfigurationServiceClientInfo::set_has_commitno() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void ConfigurationServiceClientInfo::clear_has_commitno() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void ConfigurationServiceClientInfo::clear_commitno() {
+  commitno_ = 0;
+  clear_has_commitno();
+}
+inline ::google::protobuf::int32 ConfigurationServiceClientInfo::commitno() const {
+  return commitno_;
+}
+inline void ConfigurationServiceClientInfo::set_commitno(::google::protobuf::int32 value) {
+  set_has_commitno();
+  commitno_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -22,11 +22,6 @@ namespace Hardware
         QUuid uuid = QUuid::createUuid();
         setUuid(uuid);
 
-        QString f = QString("connection-%1.%2").arg(uuid.toString()).arg(::OclFileExtension);
-        f.remove('{');
-        f.remove('}');
-        m_fileInfo.setFileName(f);
-
         static QString s_conectionId = "ConnectionID";
         static QString s_fileName = "FileName";
         static QString s_fileID = "FileID";
@@ -70,12 +65,6 @@ namespace Hardware
 
 		auto propConnId = ADD_PROPERTY_GETTER_SETTER(QString, s_conectionId, true, Connection::connectionID, Connection::setConnectionID);
         propConnId->setValidator("^[A-Z0-9_]+$");
-
-        auto propFileName = ADD_PROPERTY_GETTER(QString, s_fileName, true, Connection::fileName);
-        propFileName->setExpert(true);
-
-		auto propFileID = ADD_PROPERTY_GETTER(int, s_fileID, true, Connection::fileId);
-        propFileID->setExpert(true);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, s_port1EquipmentID, true, Connection::port1EquipmentID, Connection::setPort1EquipmentID);
 		ADD_PROPERTY_GETTER_SETTER(QString, s_port2EquipmentID, true, Connection::port2EquipmentID, Connection::setPort2EquipmentID);
@@ -386,17 +375,6 @@ namespace Hardware
         return true;
     }
 
-
-	const DbFileInfo& Connection::fileInfo() const
-	{
-		return m_fileInfo;
-	}
-
-	void Connection::setFileInfo(const DbFileInfo& value)
-	{
-		m_fileInfo = value;
-	}
-
     QUuid Connection::uuid() const
     {
         return m_uuid;
@@ -416,17 +394,6 @@ namespace Hardware
     {
 		m_connectionID = value;
     }
-
-    QString Connection::fileName() const
-    {
-        return fileInfo().fileName();
-    }
-
-	int Connection::fileId() const
-    {
-        return fileInfo().fileId();
-    }
-
 
 	QString Connection::port1EquipmentID() const
     {
@@ -788,7 +755,6 @@ namespace Hardware
 		m_generateVHDFile = value;
 	}
 
-
     //
     //
     // ConnectionStorage
@@ -796,9 +762,7 @@ namespace Hardware
     //
 
     ConnectionStorage::ConnectionStorage(DbController* db, QWidget *parentWidget)
-        :QObject(parentWidget),
-         m_db(db),
-         m_parentWidget(parentWidget)
+		 :DbObjectStorage(db, parentWidget, db->connectionsFileId())
     {
     }
 
@@ -807,182 +771,22 @@ namespace Hardware
 
     }
 
-    void ConnectionStorage::clear()
-    {
-        m_connections.clear();
-        m_connectionsVector.clear();
-    }
-
-    void ConnectionStorage::add(std::shared_ptr<Connection> connection)
-    {
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return;
-        }
-
-        if (m_connections.find(connection->uuid()) != m_connections.end())
-        {
-            assert(false);
-            return;
-        }
-
-        m_connections[connection->uuid()] = connection;
-
-        m_connectionsVector.push_back(connection);
-
-        assert (m_connectionsVector.size() == m_connections.size());
-    }
-
-    void ConnectionStorage::remove(const QUuid &uuid)
-    {
-        auto it = m_connections.find(uuid);
-        if (it == m_connections.end())
-        {
-            assert(false);
-            return;
-        }
-
-        m_connections.erase(it);
-
-        bool vectorFound = false;
-
-        int count = (int)m_connectionsVector.size();
-        for (int i = 0; i < count; i++)
-        {
-            if (m_connectionsVector[i]->uuid() == uuid)
-            {
-                m_connectionsVector.erase(m_connectionsVector.begin() + i);
-
-                vectorFound = true;
-
-                break;
-            }
-        }
-
-        if (vectorFound == false)
-        {
-            assert(false);
-        }
-
-        assert (m_connectionsVector.size() == m_connections.size());
-
-    }
-
-
-    bool ConnectionStorage::removeFile(const QUuid &uuid, bool &fileRemoved)
-    {
-        if (m_db == nullptr)
-        {
-            assert(m_db);
-            return false;
-        }
-
-        auto it = m_connections.find(uuid);
-        if (it == m_connections.end())
-        {
-            assert(false);
-            return false;
-        }
-
-        std::shared_ptr<Connection> connection = it->second;
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return false;
-        }
-
-        fileRemoved = false;
-
-        std::vector<DbFileInfo> fileList;
-        bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), connection->fileName(), true, m_parentWidget);
-        if (ok == false || fileList.size() != 1)
-        {
-            return false;
-        }
-
-        std::shared_ptr<DbFile> file = nullptr;
-
-        ok = m_db->getLatestVersion(fileList[0], &file, m_parentWidget);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        if (file->state() != VcsState::CheckedOut)
-        {
-            if (m_db->checkOut(fileList[0], m_parentWidget) == false)
-            {
-                return false;
-            }
-        }
-
-        ok = m_db->deleteFiles(&fileList, m_parentWidget);
-        if (ok == false)
-        {
-            return false;
-        }
-
-        // checkin file if it exists
-
-        DbFileInfo& fi = fileList[0];
-
-        if (fi.deleted() == true)
-        {
-            fileRemoved = true;
-        }
-
-        connection->setFileInfo(fi);
-
-        return true;
-    }
-
-
-    int ConnectionStorage::count() const
-    {
-        return static_cast<int>(m_connections.size());
-    }
-
-    std::shared_ptr<Connection> ConnectionStorage::get(const QUuid& uuid) const
-    {
-        auto it = m_connections.find(uuid);
-        if (it == m_connections.end())
-        {
-            assert(false);
-            return std::make_shared<Connection>();
-        }
-
-        return it->second;
-    }
-
-    std::shared_ptr<Connection> ConnectionStorage::get(int index) const
-    {
-        if (index < 0 || index >= (int)m_connectionsVector.size())
-        {
-            assert(false);
-            return nullptr;
-        }
-
-        return m_connectionsVector[index];
-    }
-
 	std::vector<std::shared_ptr<Connection>> ConnectionStorage::get(const QStringList& masks) const
 	{
 		if (masks.empty() == true)
 		{
-			return m_connectionsVector;
+			return m_objectsVector;
 		}
 
 		std::vector<std::shared_ptr<Connection>> result;
 
-		for (std::shared_ptr<Connection> connection : m_connectionsVector)
+		for (std::shared_ptr<Connection> connection : m_objectsVector)
 		{
 			for (const QString& mask : masks)
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
 						connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-						connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+						connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					result.push_back(connection);
 				}
@@ -992,29 +796,9 @@ namespace Hardware
 		return result;
 	}
 
-    QObject* ConnectionStorage::jsGet(int index) const
-    {
-        if (index < 0 || index >= (int)m_connectionsVector.size())
-        {
-            assert(false);
-            return nullptr;
-        }
-
-        if (m_connectionsVector.size() != m_connections.size())
-        {
-            assert(false);
-			return nullptr;
-        }
-
-        QObject* result = m_connectionsVector[index].get();
-        QQmlEngine::setObjectOwnership(result, QQmlEngine::CppOwnership);
-
-        return result;
-    }
-
 	std::shared_ptr<Connection> ConnectionStorage::getPortConnection(QString portEquipmentId) const
 	{
-		for (const std::shared_ptr<Connection>& connection : m_connectionsVector)
+		for (const std::shared_ptr<Connection>& connection : m_objectsVector)
 		{
 			assert(connection);
 
@@ -1027,138 +811,6 @@ namespace Hardware
 
 		return std::shared_ptr<Connection>();
 	}
-
-    bool ConnectionStorage::checkOut(const QUuid &uuid)
-    {
-        if (m_db == nullptr)
-        {
-            assert(m_db);
-            return false;
-        }
-
-        std::shared_ptr<Connection> connection = get(uuid);
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return false;
-        }
-
-        DbFileInfo fi = connection->fileInfo();
-
-        if (fi.state() == VcsState::CheckedOut)
-        {
-            return true;
-        }
-
-        if (m_db->checkOut(fi, m_parentWidget) == false)
-        {
-            return false;
-        }
-
-        connection->setFileInfo(fi);
-
-        return true;
-    }
-
-    bool ConnectionStorage::checkIn(const QUuid &uuid, const QString& comment, bool &fileRemoved)
-    {
-        if (m_db == nullptr)
-        {
-            assert(m_db);
-            return false;
-        }
-
-        std::shared_ptr<Connection> connection = get(uuid);
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return false;
-        }
-
-        fileRemoved = false;
-
-        DbFileInfo fi = connection->fileInfo();
-
-        if (fi.state() == VcsState::CheckedIn)
-        {
-            return true;
-        }
-
-        if (m_db->checkIn(fi, comment, m_parentWidget) == false)
-        {
-            return false;
-        }
-
-        if (fi.deleted() == true)
-        {
-            fileRemoved = true;
-        }
-
-        connection->setFileInfo(fi);
-
-        return true;
-    }
-
-    bool ConnectionStorage::undo(const QUuid &uuid, bool &fileRemoved)
-    {
-        if (m_db == nullptr)
-        {
-            assert(m_db);
-            return false;
-        }
-
-        std::shared_ptr<Connection> connection = get(uuid);
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return false;
-        }
-
-        fileRemoved = false;
-
-        DbFileInfo fi = connection->fileInfo();
-
-        if (fi.state() != VcsState::CheckedOut)
-        {
-            return true;
-        }
-
-        if (m_db->undoChanges(fi, m_parentWidget) == false)
-        {
-            return false;
-        }
-
-        // after undo operation, file can be removed, check this
-
-        connection->setFileInfo(fi);
-
-        if (fi.deleted() == true)
-        {
-            fileRemoved = true;
-
-            return true;
-        }
-
-        // read previous data from file
-
-        std::shared_ptr<DbFile> file = nullptr;
-
-        bool ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
-        if (ok == false || file == nullptr)
-        {
-            return false;
-        }
-
-        QByteArray data;
-        file->swapData(data);
-
-        if (connection->Load(data) == false)
-        {
-            return false;
-        }
-
-        return true;
-    }
 
     bool ConnectionStorage::load()
     {
@@ -1178,7 +830,88 @@ namespace Hardware
         return true;
     }
 
-    bool ConnectionStorage::loadFromConnectionsFolder()
+	bool ConnectionStorage::save(const QUuid &uuid)
+	{
+		if (m_db == nullptr)
+		{
+			assert(m_db);
+			return false;
+		}
+
+		std::shared_ptr<Connection> connection = get(uuid);
+		if (connection == nullptr)
+		{
+			assert(connection);
+			return false;
+		}
+
+		Proto::Envelope message;
+		connection->Save(&message);
+
+		QByteArray data;
+
+		int size = message.ByteSize();
+		data.resize(size);
+
+		message.SerializeToArray(data.data(), size);
+
+		// save to db
+		//
+
+		DbFileInfo fi = fileInfo(connection->uuid());
+
+		if (fi.isNull() == true)
+		{
+			// create a file, if it does not exists
+			//
+			std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+			QString fileName = QString("connection-%1.%2").arg(connection->uuid().toString()).arg(OclFileExtension);
+			fileName = fileName.remove('{');
+			fileName = fileName.remove('}');
+
+			file->setFileName(fileName);
+
+			file->swapData(data);
+
+			if (m_db->addFile(file, m_db->connectionsFileId(), m_parentWidget) == false)
+			{
+				return false;
+			}
+
+			setFileInfo(connection->uuid(), *file);
+		}
+		else
+		{
+			std::shared_ptr<DbFile> file = nullptr;
+
+			// save to existing file
+			//
+			bool ok = m_db->getLatestVersion(fi, &file, m_parentWidget);
+			if (ok == false || file == nullptr)
+			{
+				return false;
+			}
+
+			if (file->state() != VcsState::CheckedOut)
+			{
+				return false;
+			}
+
+			file->swapData(data);
+
+			if (m_db->setWorkcopy(file, m_parentWidget) == false)
+			{
+				return false;
+			}
+
+			setFileInfo(connection->uuid(), *file);
+		}
+
+		return true;
+	}
+
+	bool ConnectionStorage::loadFromConnectionsFolder()
     {
         if (m_db == nullptr)
         {
@@ -1209,8 +942,8 @@ namespace Hardware
 
 			if (c != nullptr)
             {
-				c->setFileInfo(*file);
-                add(c);
+				setFileInfo(c->uuid(), *file);
+				add(c->uuid(), c);
             }
             else
             {
@@ -1221,90 +954,6 @@ namespace Hardware
         return true;
     }
 
-    bool ConnectionStorage::save(const QUuid &uuid)
-    {
-        if (m_db == nullptr)
-        {
-            assert(m_db);
-            return false;
-        }
-
-        auto it = m_connections.find(uuid);
-        if (it == m_connections.end())
-        {
-            assert(false);
-            return false;
-        }
-
-        std::shared_ptr<Connection> connection = it->second;
-        if (connection == nullptr)
-        {
-            assert(connection);
-            return false;
-        }
-
-        Proto::Envelope message;
-        connection->Save(&message);
-
-        QByteArray data;
-
-        int size = message.ByteSize();
-        data.resize(size);
-
-        message.SerializeToArray(data.data(), size);
-
-        // save to db
-        //
-
-
-
-        if (connection->fileInfo().isNull() == true)
-        {
-            // create a file, if it does not exists
-            //
-            std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
-
-            file->setFileName(connection->fileName());
-
-            file->swapData(data);
-
-            if (m_db->addFile(file, m_db->connectionsFileId(), m_parentWidget) == false)
-            {
-                return false;
-            }
-
-            connection->setFileInfo(*file);
-        }
-        else
-        {
-            std::shared_ptr<DbFile> file = nullptr;
-
-            // save to existing file
-            //
-            bool ok = m_db->getLatestVersion(connection->fileInfo(), &file, m_parentWidget);
-            if (ok == false || file == nullptr)
-            {
-                return false;
-            }
-
-            if (file->state() != VcsState::CheckedOut)
-            {
-                return false;
-            }
-
-            file->swapData(data);
-
-            if (m_db->setWorkcopy(file, m_parentWidget) == false)
-            {
-                return false;
-            }
-
-            connection->setFileInfo(*file);
-        }
-
-        return true;
-
-    }
 
     bool ConnectionStorage::loadFromXmlDeprecated(QString& errorCode)
     {
@@ -1363,7 +1012,7 @@ namespace Hardware
 
                 if (c->loadFromXml(reader) == true)
                 {
-                    add(c);
+					add(c->uuid(), c);
                 }
             }
             else
@@ -1428,6 +1077,4 @@ namespace Hardware
 
         return true;
     }
-
 }
-

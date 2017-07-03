@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //	runFscDataSources();
 
-	Tuning::TcpTuningClient* tuningClient = new Tuning::TcpTuningClient(HostAddressPort("192.168.14.87", 13333));
+	Tuning::TcpTuningClient* tuningClient = new Tuning::TcpTuningClient(HostAddressPort("192.168.14.87", 13333), "");
 
 	m_thread = new SimpleThread(tuningClient);
 
