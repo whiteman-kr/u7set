@@ -710,7 +710,6 @@ namespace Builder
 		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 
-
 		bool copyInModulesAppLogicDataToRegBuf();
 
 		bool copyDimDataToRegBuf(const Module& module);

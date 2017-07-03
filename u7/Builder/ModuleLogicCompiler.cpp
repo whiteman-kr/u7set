@@ -3059,10 +3059,10 @@ namespace Builder
 		m_code.append(cmnt);
 		m_code.newLine();
 
-		int startTuningAddr = -1;
+		int startUalAddr = -1;
 		int startRegBufAddr = -1;
 
-		int prevTuningAddr = -1;
+		int prevUalAddr = -1;
 		int prevRegBufAddr = -1;
 		int prevSignalSizeW = -1;
 
@@ -3082,7 +3082,7 @@ namespace Builder
 			case E::AnalogAppSignalFormat::Float32:
 
 				assert(s->dataSize() == SIZE_32BIT);
-				assert(s->tuningAddr().isValid() == true);
+				assert(s->ualAddr().isValid() == true);
 				assert(s->regValueAddr().isValid() == true);
 				break;
 
@@ -3094,7 +3094,7 @@ namespace Builder
 			{
 				// is first signal, init variables
 				//
-				startTuningAddr = prevTuningAddr = s->tuningAddr().offset();
+				startUalAddr = prevUalAddr = s->ualAddr().offset();
 				startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
 
 				prevSignalSizeW = s->dataSize() / SIZE_16BIT;
@@ -3103,13 +3103,13 @@ namespace Builder
 			}
 			else
 			{
-				if (s->tuningAddr().offset() == (prevTuningAddr + prevSignalSizeW) &&
+				if (s->ualAddr().offset() == (prevUalAddr + prevSignalSizeW) &&
 					s->regValueAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
 				{
 					// address is plain
 					// reassing variables and continue
 					//
-					prevTuningAddr = s->tuningAddr().offset();
+					prevUalAddr = s->ualAddr().offset();
 					prevRegBufAddr = s->regValueAddr().offset();
 
 					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
@@ -3122,13 +3122,13 @@ namespace Builder
 					//
 					// generate command to copy previous signals
 					//
-					cmd.movMem(startRegBufAddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+					cmd.movMem(startRegBufAddr, startUalAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
 					cmd.setComment(commentStr);
 					m_code.append(cmd);
 
 					// init variables for the next block
 					//
-					startTuningAddr = prevTuningAddr = s->tuningAddr().offset();
+					startUalAddr = prevUalAddr = s->ualAddr().offset();
 					startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
 
 					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
@@ -3138,15 +3138,15 @@ namespace Builder
 			}
 		}
 
-		assert(startTuningAddr != -1);
+		assert(startUalAddr != -1);
 		assert(startRegBufAddr != -1);
-		assert(prevTuningAddr != -1);
+		assert(prevUalAddr != -1);
 		assert(prevRegBufAddr != -1);
 		assert(prevSignalSizeW != -1);
 
 		// generate command to copy rest of signals
 		//
-		cmd.movMem(startRegBufAddr, startTuningAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
+		cmd.movMem(startRegBufAddr, startUalAddr, prevRegBufAddr - startRegBufAddr + prevSignalSizeW);
 		cmd.setComment(commentStr);
 		m_code.append(cmd);
 
@@ -3194,10 +3194,10 @@ namespace Builder
 		m_code.append(cmnt);
 		m_code.newLine();
 
-		int startTuningAddr = -1;
+		int startUalAddr = -1;
 		int startRegBufAddr = -1;
 
-		int prevTuningAddr = -1;
+		int prevUalAddr = -1;
 		int prevRegBufAddr = -1;
 
 		Command cmd;
@@ -3210,27 +3210,29 @@ namespace Builder
 
 			// check signal!
 
+			assert(s->ualAddr().isValid() == true);
+			assert(s->regValueAddr().isValid() == true);
 			assert(s->dataSize() == SIZE_1BIT);
-			assert(s->tuningAddr().bit() == s->regValueAddr().bit());
+			assert(s->ualAddr().bit() == s->regValueAddr().bit());
 
-			if (startTuningAddr == -1)
+			if (startUalAddr == -1)
 			{
 				// is first signal, init variables
 				//
-				startTuningAddr = prevTuningAddr = s->tuningAddr().bitAddress();
+				startUalAddr = prevUalAddr = s->ualAddr().bitAddress();
 				startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
 
 				commentStr = "copy: " + s->appSignalID();
 			}
 			else
 			{
-				if (s->tuningAddr().bitAddress() == (prevTuningAddr + SIZE_1BIT) &&
+				if (s->ualAddr().bitAddress() == (prevUalAddr + SIZE_1BIT) &&
 					s->regValueAddr().bitAddress() == (prevRegBufAddr + SIZE_1BIT))
 				{
 					// address is plain
 					// reassing variables and continue
 					//
-					prevTuningAddr = s->tuningAddr().bitAddress();
+					prevUalAddr = s->ualAddr().bitAddress();
 					prevRegBufAddr = s->regValueAddr().bitAddress();
 
 					commentStr += " " + s->appSignalID();
@@ -3242,20 +3244,20 @@ namespace Builder
 					// generate command to copy previous signals
 					//
 					assert((startRegBufAddr % SIZE_16BIT) == 0);
-					assert((startTuningAddr % SIZE_16BIT) == 0);
+					assert((startUalAddr % SIZE_16BIT) == 0);
 
 					int copySizeBit = prevRegBufAddr - startRegBufAddr + SIZE_1BIT;
 					int copySizeW = (copySizeBit / SIZE_16BIT) + ((copySizeBit % SIZE_16BIT) == 0 ? 0 : 1);
 
 					cmd.movMem(startRegBufAddr / SIZE_16BIT,
-							   startTuningAddr / SIZE_16BIT,
+							   startUalAddr / SIZE_16BIT,
 							   copySizeW);
 					cmd.setComment(commentStr);
 					m_code.append(cmd);
 
 					// init variables for the next block
 					//
-					startTuningAddr = prevTuningAddr = s->tuningAddr().bitAddress();
+					startUalAddr = prevUalAddr = s->ualAddr().bitAddress();
 					startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
 
 					commentStr = "copy: " + s->appSignalID();
@@ -3263,13 +3265,13 @@ namespace Builder
 			}
 		}
 
-		assert(startTuningAddr != -1);
+		assert(startUalAddr != -1);
 		assert(startRegBufAddr != -1);
-		assert(prevTuningAddr != -1);
+		assert(prevUalAddr != -1);
 		assert(prevRegBufAddr != -1);
 
 		assert((startRegBufAddr % SIZE_16BIT) == 0);
-		assert((startTuningAddr % SIZE_16BIT) == 0);
+		assert((startUalAddr % SIZE_16BIT) == 0);
 
 		// generate command to copy rest of signals
 		//
@@ -3277,7 +3279,7 @@ namespace Builder
 		int copySizeW = (copySizeBit / SIZE_16BIT) + ((copySizeBit % SIZE_16BIT) == 0 ? 0 : 1);
 
 		cmd.movMem(startRegBufAddr / SIZE_16BIT,
-				   startTuningAddr / SIZE_16BIT,
+				   startUalAddr / SIZE_16BIT,
 				   copySizeW);
 
 		cmd.setComment(commentStr);
@@ -6167,7 +6169,7 @@ namespace Builder
 
 			if (disposeNonAcquiredBuses() == false) break;
 
-			if (setUalAddrOfNonAcquiredTuningSignals() == false) break;
+			//if (setUalAddrOfNonAcquiredTuningSignals() == false) break;
 
 			result = true;
 		}
@@ -6319,7 +6321,9 @@ namespace Builder
 
 			assert(s->tuningAddr().isValid() == true);
 
-			s->setUalAddr(s->tuningAddr());
+			// ualAddr of acquired analog tuning signals is assigned in TuningData::buildTuningData() !
+			//
+			// s->setUalAddr(s->tuningAddr());
 
 			Address16 addr = m_memoryMap.appendAcquiredAnalogTuningSignal(*s);
 
@@ -6420,7 +6424,9 @@ namespace Builder
 
 			assert(s->tuningAddr().isValid() == true);
 
-			s->setUalAddr(s->tuningAddr());
+			// ualAddr of acquired discrete tuning signals is assigned in TuningData::buildTuningData() !
+			//
+			// s->setUalAddr(s->tuningAddr());
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteTuningSignal(*s);
 
