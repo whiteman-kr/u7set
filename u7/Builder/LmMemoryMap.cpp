@@ -626,7 +626,6 @@ namespace Builder
 					   double(m_appBitAdressed.memory.sizeW());
 	}
 
-
 	double LmMemoryMap::wordAddressedMemoryUsed()
 	{
 		return double((m_appWordAdressed.nonAcquiredBuses.nextAddress() -
@@ -634,6 +633,10 @@ namespace Builder
 				double(m_appWordAdressed.memory.sizeW());
 	}
 
+	int LmMemoryMap::getAppDataSize() const
+	{
+		return m_appWordAdressed.acquiredDiscreteTuningSignals.nextAddress() - m_appWordAdressed.acquiredRawData.startAddress();
+	}
 
 	bool LmMemoryMap::read16(int address)
 	{

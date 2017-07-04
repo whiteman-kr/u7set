@@ -180,14 +180,17 @@ namespace Builder
 
 			if (copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf() == false) break;
 
+			if (copyOutputSignalsInOutputModulesMemory() == false) break;
 
-			if (copyOutModulesAppLogicDataToModulesMemory() == false) break;
-
-			if (setLmAppLANDataSize() == false) break;
+			//
 
 			if (copyOptoConnectionsTxData() == false) break;
 
 			if (finishAppLogicCode() == false) break;
+
+			//
+
+			if (setLmAppLANDataSize() == false) break;
 
 			if (calculateCodeRunTime() == false) break;
 
@@ -692,6 +695,14 @@ namespace Builder
 		analogInputSignals.append(m_acquiredAnalogInputSignals);
 		analogInputSignals.append(m_nonAcquiredAnalogInputSignals);
 
+		if (analogInputSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Convertion of input analog signals");
+		m_code.newLine();
+
 		for(Signal* s : analogInputSignals)
 		{
 			if (s == nullptr)
@@ -749,15 +760,26 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsToRegBuf()
 	{
+		if (m_acquiredDiscreteInputSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		Comment comment;
+
+		comment.setComment("Copy acquired discrete input signals in regBuf");
+		m_code.append(comment);
+		m_code.newLine();
+
 		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
 		int signalsCount = m_acquiredDiscreteInputSignals.count();
 
-		int signalsCount16 = (signalsCount / SIZE_16BIT) * SIZE_16BIT;
-
 		int count = 0;
 
 		Command cmd;
+
+		int countReminder16 = 0;
 
 		for(Signal* s : m_acquiredDiscreteInputSignals)
 		{
@@ -767,18 +789,11 @@ namespace Builder
 				return false;
 			}
 
-			int countReminder16  = count % SIZE_16BIT;
+			countReminder16 = count % SIZE_16BIT;
 
-			if (countReminder16 == 0 && count >= signalsCount16)
-			{
-				cmd.movConst(bitAccAddr, 0);
-				cmd.clearComment();
-				m_code.append(cmd);
-			}
+			assert(s->regBufAddr().bit() == countReminder16);
 
-			assert(s->regValueAddr().bit() == (countReminder16));
-
-			cmd.movBit(bitAccAddr, countReminder16, s->ioBufAddr().offset(), s->ioBufAddr().bit());
+			cmd.movBit(bitAccAddr, s->regBufAddr().bit(), s->ioBufAddr().offset(), s->ioBufAddr().bit());
 			cmd.setComment(QString("copy %1").arg(s->appSignalID()));
 			m_code.append(cmd);
 
@@ -786,11 +801,21 @@ namespace Builder
 
 			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
 			{
-				cmd.mov(s->regValueAddr().offset(), bitAccAddr);
+				cmd.clearComment();
+
+				for(int i = countReminder16 + 1; i < SIZE_16BIT; i++)
+				{
+					cmd.movBitConst(bitAccAddr, i, 0);
+					m_code.append(cmd);
+				}
+
+				cmd.mov(s->regBufAddr().offset(), bitAccAddr);
 				m_code.append(cmd);
 				m_code.newLine();;
 			}
 		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::copySerialRxSignals()
@@ -1079,420 +1104,6 @@ namespace Builder
 		}
 
 		return true;
-	}
-
-	bool ModuleLogicCompiler::copyInModulesAppLogicDataToRegBuf()
-	{
-		bool firstInputModle = true;
-
-		bool result = true;
-
-		for(Module module : m_modules)
-		{
-			if (module.device == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-
-				result = false;
-
-				continue;
-			}
-
-			if (!module.isInputModule())
-			{
-				continue;
-			}
-
-			if (firstInputModle)
-			{
-				m_code.comment("Copy input modules application logic data to RegBuf");
-				m_code.newLine();
-
-				firstInputModle = false;
-			}
-
-			switch(module.familyType())
-			{
-			case Hardware::DeviceModule::FamilyType::DIM:
-				result &= copyDimDataToRegBuf(module);
-				break;
-
-			case Hardware::DeviceModule::FamilyType::AIM:
-				result &= copyAimDataToRegBuf(module);
-				break;
-
-			case Hardware::DeviceModule::FamilyType::AIFM:
-				result &= copyAifmDataToRegBuf(module);
-				break;
-
-			case Hardware::DeviceModule::FamilyType::MPS17:
-				result &= copyMps17DataToRegBuf(module);
-				break;
-
-			default:
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Unknown input module %1 family type")).arg(module.device->equipmentIdTemplate()));
-
-				result = false;
-			}
-		}
-
-		return result;
-	}
-
-
-	bool ModuleLogicCompiler::copyDimDataToRegBuf(const Module& module)
-	{
-/*		m_code.comment(QString(tr("Copying DIM data place %2 to RegBuf")).arg(module.place));
-		m_code.newLine();
-
-		Command cmd;
-
-		cmd.movMem(module.appRegDataOffset, module.moduleDataOffset + module.txAppDataOffset, module.appRegDataSize);
-		m_code.append(cmd);
-
-		m_code.newLine();*/
-
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::copyAimDataToRegBuf(const Module& module)
-	{
-	/*	if (module.device == nullptr)
-		{
-			ASSERT_RETURN_FALSE
-		}
-
-		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
-
-		if (controller == nullptr)
-		{
-			return false;
-		}
-
-		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
-
-		int moduleSignalsCount = static_cast<int>(moduleSignals.size());
-
-		if (moduleSignalsCount != 128)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("AIM module must have 128 input signals")));
-			return false;
-		}
-
-		// sort signals by place ascending
-		//
-		for(int i = 0; i < moduleSignalsCount - 1; i++)
-		{
-			for(int j = i + 1; j < moduleSignalsCount; j++)
-			{
-				if (moduleSignals[i]->place() > moduleSignals[j]->place())
-				{
-					std::shared_ptr<Hardware::DeviceSignal> tmp = moduleSignals[i];
-					moduleSignals[i] = moduleSignals[j];
-					moduleSignals[j] = tmp;
-				}
-			}
-
-		}
-
-		msg = QString(tr("Copying AIM data place %1 to RegBuf")).arg(module.place);
-
-		if (m_convertUsedInOutAnalogSignalsOnly == true)
-		{
-			msg += QString(tr(" (validities & used signals only)"));
-		}
-		else
-		{
-			msg += QString(tr(" (all signals)"));
-		}
-
-		m_code.comment(msg);
-		m_code.newLine();
-
-		Command cmd;
-
-		// initialize module signals memory to 0
-		//
-		cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
-		cmd.setComment(tr("initialize module memory to 0"));
-		m_code.append(cmd);
-		m_code.newLine();
-
-		bool result = true;
-
-		// copy validity words
-		//
-		const int DATA_BLOCK_SIZE = 17;
-		const int REG_DATA_BLOCK_SIZE = 33;
-		const int DATA_BLOCK_COUNT = 4;
-
-		for(int block = 0; block < DATA_BLOCK_COUNT; block++)
-		{
-			cmd.mov(module.appRegDataOffset + REG_DATA_BLOCK_SIZE * block,
-					module.moduleDataOffset + module.txAppDataOffset + DATA_BLOCK_SIZE * block);
-			cmd.setComment(QString(tr("validity of %1 ... %2 inputs")).arg(block * 16 + 16).arg(block * 16 + 1));
-			m_code.append(cmd);
-		}
-
-		m_code.newLine();
-
-		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
-		{
-			if (deviceSignal->isAnalogSignal() == false)
-			{
-				continue;
-			}
-
-			if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
-			{
-				continue;
-			}
-
-			QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
-
-			if (boundSignals.count() > 1)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
-				result = false;
-				break;
-			}
-
-			bool commandWritten = false;
-
-			for(Signal* signal : boundSignals)
-			{
-				if (signal == nullptr)
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (signal->isDiscrete())
-				{
-					continue;
-				}
-
-				if (signal->dataSize() != SIZE_32BIT)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
-					RESULT_FALSE_BREAK
-				}
-
-				if (m_convertUsedInOutAnalogSignalsOnly == true &&
-					m_appSignals.getSignal(signal->appSignalID()) == nullptr)
-				{
-					continue;
-				}
-
-				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
-
-				if (appFb == nullptr)
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
-
-				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-				{
-					;	// already assigned
-				}
-				else
-				{
-					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-					{
-						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
-					}
-					else
-					{
-						assert(false);
-					}
-				}
-
-				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(), appFb->caption());
-				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
-				m_code.append(cmd);
-
-				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-				cmd.clearComment();
-				m_code.append(cmd);
-
-				cmd.readFuncBlock32(signal->ualAddr().offset(), appFb->opcode(), appFb->instance(),
-									fbScal.outputSignalIndex, appFb->caption());
-				m_code.append(cmd);
-
-				commandWritten = true;
-			}
-
-			if (commandWritten)
-			{
-				m_code.newLine();
-			}
-		}*/
-
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::copyAifmDataToRegBuf(const Module& module)
-	{
-		LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					QString(tr("Copying AIFM data to RegBuf is not implemented (module %1)")).arg(module.device->equipmentIdTemplate()));
-
-		return true;
-	}
-
-
-	bool ModuleLogicCompiler::copyMps17DataToRegBuf(const Module& module)
-	{
-		m_code.comment(QString(tr("Copying MPS17 data place %2 to RegBuf")).arg(module.place));
-		m_code.newLine();
-
-		if (module.device == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		Command cmd;
-
-		// initialize module signals memory to 0
-		//
-		//cmd.setMem(module.appRegDataOffset, 0, module.appRegDataSize);
-		//cmd.setComment(tr("initialize module memory to 0"));
-		//m_code.append(cmd);
-		//m_code.newLine();
-
-		Hardware::DeviceController* controller = DeviceHelper::getChildControllerBySuffix(module.device, INPUT_CONTROLLER_SUFFIX, m_log);
-
-		if (controller == nullptr)
-		{
-			return false;
-		}
-
-		std::vector<std::shared_ptr<Hardware::DeviceSignal>> moduleSignals = controller->getAllSignals();
-
-		bool result = true;
-
-		bool commandWritten = false;
-
-		for(std::shared_ptr<Hardware::DeviceSignal>& deviceSignal : moduleSignals)
-		{
-			if (!m_ioSignals.contains(deviceSignal->equipmentIdTemplate()))
-			{
-				continue;
-			}
-
-			QList<Signal*> boundSignals = m_ioSignals.values(deviceSignal->equipmentIdTemplate());
-
-			if (boundSignals.count() > 1)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("More than one application signal is bound to device signal %1")).arg(deviceSignal->equipmentIdTemplate()));
-				return false;
-			}
-
-			for(Signal* signal : boundSignals)
-			{
-				if (signal == nullptr)
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (signal->isDiscrete())
-				{
-					if (deviceSignal->equipmentIdTemplate().endsWith("_TEMPVALID") == false)
-					{
-						continue;
-					}
-
-					// this is validity signal
-
-					cmd.mov(signal->ualAddr().offset(), module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset());
-					cmd.setComment("copy validity");
-					m_code.append(cmd);
-
-					commandWritten = true;
-
-					continue;
-				}
-
-				assert(signal->isAnalog());
-
-				if (signal->dataSize() != SIZE_32BIT)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal %1 must have 32-bit data size")).arg(signal->appSignalID()));
-					return false;
-				}
-
-				if (m_inOutSignalsToScalAppFbMap.contains(signal->appSignalID()) == false)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("SCALE element is not found for input analog signal %1")).arg(signal->appSignalID()));
-					return false;
-				}
-
-				AppFb* appFb = m_inOutSignalsToScalAppFbMap[signal->appSignalID()];
-
-				if (appFb == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					return false;
-				}
-
-				FbScal& fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
-
-				if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
-				{
-					;	// already assigned
-				}
-				else
-				{
-					if (signal->analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
-					{
-						fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
-					}
-					else
-					{
-						LOG_INTERNAL_ERROR(m_log);
-						return false;
-					}
-				}
-
-				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   module.moduleDataOffset + module.txAppDataOffset + deviceSignal->valueOffset(),
-								   appFb->caption());
-
-				cmd.setComment(QString(tr("input %1 %2")).arg(deviceSignal->place()).arg(signal->appSignalID()));
-				m_code.append(cmd);
-
-				cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
-				cmd.clearComment();
-				m_code.append(cmd);
-
-				cmd.readFuncBlock32(signal->ualAddr().offset(), appFb->opcode(), appFb->instance(),
-									fbScal.outputSignalIndex, appFb->caption());
-				m_code.append(cmd);
-
-				commandWritten = true;
-			}
-		}
-
-		if (commandWritten)
-		{
-			m_code.newLine();
-		}
-
-		return result;
 	}
 
 	bool ModuleLogicCompiler::generateAppLogicCode()
@@ -3083,7 +2694,7 @@ namespace Builder
 
 				assert(s->dataSize() == SIZE_32BIT);
 				assert(s->ualAddr().isValid() == true);
-				assert(s->regValueAddr().isValid() == true);
+				assert(s->regBufAddr().isValid() == true);
 				break;
 
 			default:
@@ -3095,7 +2706,7 @@ namespace Builder
 				// is first signal, init variables
 				//
 				startUalAddr = prevUalAddr = s->ualAddr().offset();
-				startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
+				startRegBufAddr = prevRegBufAddr = s->regBufAddr().offset();
 
 				prevSignalSizeW = s->dataSize() / SIZE_16BIT;
 
@@ -3104,13 +2715,13 @@ namespace Builder
 			else
 			{
 				if (s->ualAddr().offset() == (prevUalAddr + prevSignalSizeW) &&
-					s->regValueAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
+					s->regBufAddr().offset() == (prevRegBufAddr + prevSignalSizeW))
 				{
 					// address is plain
 					// reassing variables and continue
 					//
 					prevUalAddr = s->ualAddr().offset();
-					prevRegBufAddr = s->regValueAddr().offset();
+					prevRegBufAddr = s->regBufAddr().offset();
 
 					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
 
@@ -3129,7 +2740,7 @@ namespace Builder
 					// init variables for the next block
 					//
 					startUalAddr = prevUalAddr = s->ualAddr().offset();
-					startRegBufAddr = prevRegBufAddr = s->regValueAddr().offset();
+					startRegBufAddr = prevRegBufAddr = s->regBufAddr().offset();
 
 					prevSignalSizeW = s->dataSize() / SIZE_16BIT;
 
@@ -3158,23 +2769,41 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf()
 	{
-		if (m_memoryMap.acquiredDiscreteOutputSignalsSizeW() == 0)
+		if (m_acquiredDiscreteOutputSignals.isEmpty() == false)
 		{
-			return true;
+			assert(m_memoryMap.acquiredDiscreteOutputSignalsSizeW() ==
+				   m_memoryMap.acquiredDiscreteOutputSignalsInRegBufSizeW());
+
+			m_code.comment("Copy acquired discrete output signals from bit-addressed memory to regBuf");
+			m_code.newLine();
+
+			Command cmd;
+
+			cmd.movMem(m_memoryMap.aquiredDiscreteOutputSignalsAddressInRegBuf(),
+					   m_memoryMap.acquiredDiscreteOutputSignalsAddress(),
+					   m_memoryMap.acquiredDiscreteOutputSignalsSizeW());
+
+			m_code.append(cmd);
+			m_code.newLine();
 		}
 
-		m_code.comment("Copy internal discrete signals from bit-addressed memory to RegBuf");
-		m_code.newLine();
+		if (m_acquiredDiscreteInternalSignals.isEmpty() == false)
+		{
+			assert(m_memoryMap.acquiredDiscreteInternalSignalsSizeW() ==
+				   m_memoryMap.acquiredDiscreteInternalSignalsInRegBufSizeW());
 
-		Command cmd;
+			m_code.comment("Copy acquired discrete internal signals from bit-addressed memory to regBuf");
+			m_code.newLine();
 
-		cmd.movMem(m_memoryMap.aquiredDiscreteOutputSignalsAddressInRegBuf(),
-				   m_memoryMap.acquiredDiscreteOutputSignalsAddress(),
-				   m_memoryMap.acquiredDiscreteOutputSignalsSizeW());
+			Command cmd;
 
-		m_code.append(cmd);
+			cmd.movMem(m_memoryMap.aquiredDiscreteInternalSignalsAddressInRegBuf(),
+					   m_memoryMap.acquiredDiscreteInternalSignalsAddress(),
+					   m_memoryMap.acquiredDiscreteInternalSignalsSizeW());
 
-		m_code.newLine();
+			m_code.append(cmd);
+			m_code.newLine();
+		}
 
 		return true;
 	}
@@ -3211,29 +2840,29 @@ namespace Builder
 			// check signal!
 
 			assert(s->ualAddr().isValid() == true);
-			assert(s->regValueAddr().isValid() == true);
+			assert(s->regBufAddr().isValid() == true);
 			assert(s->dataSize() == SIZE_1BIT);
-			assert(s->ualAddr().bit() == s->regValueAddr().bit());
+			assert(s->ualAddr().bit() == s->regBufAddr().bit());
 
 			if (startUalAddr == -1)
 			{
 				// is first signal, init variables
 				//
 				startUalAddr = prevUalAddr = s->ualAddr().bitAddress();
-				startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
+				startRegBufAddr = prevRegBufAddr = s->regBufAddr().bitAddress();
 
 				commentStr = "copy: " + s->appSignalID();
 			}
 			else
 			{
 				if (s->ualAddr().bitAddress() == (prevUalAddr + SIZE_1BIT) &&
-					s->regValueAddr().bitAddress() == (prevRegBufAddr + SIZE_1BIT))
+					s->regBufAddr().bitAddress() == (prevRegBufAddr + SIZE_1BIT))
 				{
 					// address is plain
 					// reassing variables and continue
 					//
 					prevUalAddr = s->ualAddr().bitAddress();
-					prevRegBufAddr = s->regValueAddr().bitAddress();
+					prevRegBufAddr = s->regBufAddr().bitAddress();
 
 					commentStr += " " + s->appSignalID();
 				}
@@ -3258,7 +2887,7 @@ namespace Builder
 					// init variables for the next block
 					//
 					startUalAddr = prevUalAddr = s->ualAddr().bitAddress();
-					startRegBufAddr = prevRegBufAddr = s->regValueAddr().bitAddress();
+					startRegBufAddr = prevRegBufAddr = s->regBufAddr().bitAddress();
 
 					commentStr = "copy: " + s->appSignalID();
 				}
@@ -3291,11 +2920,19 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::copyOutModulesAppLogicDataToModulesMemory()
+	bool ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory()
 	{
-		bool firstOutputModule = true;
-
 		bool result = true;
+
+		result &= conevrtOutputAnalogSignals();
+		result &= copyOutputDiscreteSignals();
+
+		return result;
+
+
+/*		bool firstOutputModule = true;
+
+
 
 		for(Module module : m_modules)
 		{
@@ -3331,11 +2968,113 @@ namespace Builder
 
 				result = false;
 			}
-		}
-
-		return result;
+		}*/
 	}
 
+	bool ModuleLogicCompiler::conevrtOutputAnalogSignals()
+	{
+		QVector<Signal*> outAnalogSignals;
+
+		outAnalogSignals.append(m_acquiredAnalogOutputSignals);
+		outAnalogSignals.append(m_nonAcquiredAnalogOutputSignals);
+
+		if (outAnalogSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Convertion of output analog signals");
+		m_code.newLine();
+
+		Command cmd;
+
+		for(Signal* s : outAnalogSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			assert(s->isAnalog() == true);
+			assert(s->isOutput() == true);
+			assert(s->dataSize() == SIZE_32BIT);
+			assert(s->ualAddr().isValid() == true);
+			assert(s->ioBufAddr().isValid() == true);
+
+			AppFb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
+
+			TEST_PTR_CONTINUE(appFb);
+
+			FbScal fbScal;
+
+			switch(s->analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+
+				fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+
+				fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+				break;
+
+			default:
+				assert(false);
+			}
+
+			cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+							   s->ualAddr().offset(), appFb->caption());
+			cmd.setComment(QString(tr("conversion of analog output %1")).arg(s->appSignalID()));
+			m_code.append(cmd);
+
+			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+			cmd.clearComment();
+			m_code.append(cmd);
+
+			cmd.readFuncBlock(s->ioBufAddr().offset(),
+							  appFb->opcode(), appFb->instance(),
+							  fbScal.outputSignalIndex, appFb->caption());
+			m_code.append(cmd);
+
+			m_code.newLine();
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::copyOutputDiscreteSignals()
+	{
+		QVector<Signal*> outDiscreteSignals;
+
+		outDiscreteSignals.append(m_acquiredDiscreteOutputSignals);
+		outDiscreteSignals.append(m_nonAcquiredDiscreteOutputSignals);
+
+		if (outDiscreteSignals.isEmpty() == true)
+		{
+			return true;
+		}
+
+		m_code.comment("Copy output discrete signals to output modules memory");
+		m_code.newLine();
+
+		for(Signal* s : outDiscreteSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			assert(s->isDiscrete() == true);
+			assert(s->isOutput() == true);
+			assert(s->ualAddr().isValid() == true);
+			assert(s->ioBufAddr().isValid() == true);
+
+			Command cmd;
+
+			cmd.movBit(s->ioBufAddr().offset(), s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
+			cmd.setComment(QString("copy %1").arg(s->appSignalID()));
+			m_code.append(cmd);
+		}
+
+		m_code.newLine();
+
+		return true;
+	}
 
 	bool ModuleLogicCompiler::setLmAppLANDataSize()
 	{
@@ -6264,6 +6003,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		int regBufOffset = -m_memoryMap.appWordMemoryStart();	// minus is OK!
+
 		for(Signal* s : m_acquiredAnalogInputSignals)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -6271,6 +6012,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendAcquiredAnalogInputSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6288,6 +6032,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendAcquiredAnalogOutputSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6305,6 +6052,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendAcquiredAnalogInternalSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6327,6 +6077,9 @@ namespace Builder
 
 			Address16 addr = m_memoryMap.appendAcquiredAnalogTuningSignal(*s);
 
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6339,6 +6092,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		int regBufOffset = -m_memoryMap.appWordMemoryStart();	// minus is OK!
+
 		for(Signal* s : m_acquiredBuses)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -6346,6 +6101,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendAcquiredBus(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6358,6 +6116,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		int regBufOffset = -m_memoryMap.appWordMemoryStart();	// minus is OK!
+
 		for(Signal* s : m_acquiredDiscreteInputSignals)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -6368,6 +6128,9 @@ namespace Builder
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteInputSignalInRegBuf(*s);
 
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6386,9 +6149,12 @@ namespace Builder
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteOutputSignalInRegBuf(*s);
 
-			s->setRegValueAddr(addr);
+			s->setRegBufAddr(addr);
 
-			assert(s->ualAddr().bit() == s->regValueAddr().bit());
+			assert(s->ualAddr().bit() == s->regBufAddr().bit());
+
+			addr.addWord(regBufOffset);
+			s->setRegValueAddr(addr);
 		}
 
 		result = m_memoryMap.recalculateAddresses();
@@ -6406,9 +6172,12 @@ namespace Builder
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteInternalSignalInRegBuf(*s);
 
-			s->setRegValueAddr(addr);
+			s->setRegBufAddr(addr);
 
-			assert(s->ualAddr().bit() == s->regValueAddr().bit());
+			assert(s->ualAddr().bit() == s->regBufAddr().bit());
+
+			addr.addWord(regBufOffset);
+			s->setRegValueAddr(addr);
 		}
 
 		result = m_memoryMap.recalculateAddresses();
@@ -6430,6 +6199,9 @@ namespace Builder
 
 			Address16 addr = m_memoryMap.appendAcquiredDiscreteTuningSignal(*s);
 
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6442,6 +6214,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		int regBufOffset = -m_memoryMap.appWordMemoryStart();	// minus is OK!
+
 		for(Signal* s : m_nonAcquiredAnalogInputSignals)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -6449,6 +6223,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInputSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6466,6 +6243,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogOutputSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6483,6 +6263,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendNonAcquiredAnalogInternalSignal(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -6495,6 +6278,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		int regBufOffset = -m_memoryMap.appWordMemoryStart();	// minus is OK!
+
 		for(Signal* s : m_nonAcquiredBuses)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -6502,6 +6287,9 @@ namespace Builder
 			Address16 addr = m_memoryMap.appendNonAcquiredBus(*s);
 
 			s->setUalAddr(addr);
+			s->setRegBufAddr(addr);
+
+			addr.addWord(regBufOffset);
 			s->setRegValueAddr(addr);
 		}
 
@@ -7649,14 +7437,11 @@ namespace Builder
 
 	QString ModuleLogicCompiler::getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType)
 	{
-		if (m_moduleFamilyTypeStr.contains(familyType))
-		{
-			return m_moduleFamilyTypeStr[familyType];
-		}
+		QString typeStr = m_moduleFamilyTypeStr.value(familyType, "???");
 
-		assert(false);
+		assert(typeStr != "???");
 
-		return tr("UNKNOWN MODULE TYPE");
+		return typeStr;
 	}
 
 

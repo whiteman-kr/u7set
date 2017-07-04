@@ -710,13 +710,6 @@ namespace Builder
 		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
 
-		bool copyInModulesAppLogicDataToRegBuf();
-
-		bool copyDimDataToRegBuf(const Module& module);
-		bool copyAimDataToRegBuf(const Module& module);
-		bool copyAifmDataToRegBuf(const Module& module);
-		bool copyMps17DataToRegBuf(const Module& module);
-
 		bool generateAppLogicCode();
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateFbCode(const AppItem *appItem);
@@ -742,8 +735,11 @@ namespace Builder
 		bool copyAcquiredTuningAnalogSignalsToRegBuf();
 		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
 		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
+		bool copyOutputSignalsInOutputModulesMemory();
 
-		bool copyOutModulesAppLogicDataToModulesMemory();
+		bool conevrtOutputAnalogSignals();
+		bool copyOutputDiscreteSignals();
+
 		bool setLmAppLANDataSize();
 		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
 
