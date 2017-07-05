@@ -174,6 +174,9 @@ namespace Builder
 
 		m_appWordAdressed.nonAcquiredBuses.setStartAddress(appLogicWordData.startAddress());
 
+		m_appWordAdressed.wordAccumulator.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.wordAccumulator.setSizeW(1);        // word accumulator has 1 word size
+
 		return recalculateAddresses();
 	}
 
@@ -182,6 +185,9 @@ namespace Builder
 	{
 		// recalc application bit-addressed memory mapping
 		//
+		m_appBitAdressed.bitAccumulator.setStartAddress(m_appBitAdressed.memory.startAddress());
+		m_appBitAdressed.bitAccumulator.setSizeW(1);
+
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteOutputSignals.nextAddress());
 
@@ -217,7 +223,10 @@ namespace Builder
 
 		m_appWordAdressed.nonAcquiredBuses.setStartAddress(m_appWordAdressed.nonAcquiredAnalogInternalSignals.nextAddress());
 
-		if (m_appWordAdressed.nonAcquiredBuses.nextAddress() > m_appWordAdressed.memory.nextAddress())
+		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredBuses.nextAddress());
+		m_appWordAdressed.wordAccumulator.setSizeW(1);
+
+		if (m_appWordAdressed.wordAccumulator.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of word-addressed memory range!"));
 
@@ -307,7 +316,6 @@ namespace Builder
 		addSection(memFile, m_appWordAdressed.memory, "Application logic word-addressed memory", m_appWordAdressed.memory.startAddress());
 
 		addRecord(memFile, m_appWordAdressed.acquiredRawData, "acquired raw data");
-
 		memFile.append("");
 
 		addRecord(memFile, m_appWordAdressed.acquiredAnalogInputSignals, "acquired analog input signals");
@@ -361,8 +369,10 @@ namespace Builder
 		addRecord(memFile, m_appWordAdressed.nonAcquiredBuses, "non acquired buses");
 		memFile.append("");
 		addSignals(memFile, m_appWordAdressed.nonAcquiredBuses);
-	}
 
+		addRecord(memFile, m_appWordAdressed.wordAccumulator, "word accumulator");
+		memFile.append("");
+	}
 
 	void LmMemoryMap::addSection(QStringList& memFile, MemoryArea& memArea, const QString& title, int sectionStartAddrW)
 	{
@@ -633,7 +643,7 @@ namespace Builder
 				double(m_appWordAdressed.memory.sizeW());
 	}
 
-	int LmMemoryMap::getAppDataSize() const
+	int LmMemoryMap::regBufSizeW() const
 	{
 		return m_appWordAdressed.acquiredDiscreteTuningSignals.nextAddress() - m_appWordAdressed.acquiredRawData.startAddress();
 	}

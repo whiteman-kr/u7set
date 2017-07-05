@@ -191,7 +191,8 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
     CodeEditor.cpp \
-    ../lib/CsvFile.cpp
+    ../lib/CsvFile.cpp \
+    Builder/AppItems.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -320,7 +321,8 @@ HEADERS  += \
     ../lib/AppSignal.h \
     CodeEditor.h \
     ../lib/CsvFile.h \
-    ../lib/WidgetUtils.h
+    ../lib/WidgetUtils.h \
+    Builder/AppItems.h
 
 FORMS    += \
     CreateProjectDialog.ui \

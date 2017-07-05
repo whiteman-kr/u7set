@@ -3466,12 +3466,12 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+	/// Title:	   Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.
 	///
 	/// Parameters:
 	///		%1 Destination address
-	///		%2 Source address
-	///		%3 Memory size to move
+	///		%2 Destination bit
+	///		%3 Const bit value
 	///
 	/// Description:
 	///		Command 'MOVBC' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
@@ -3480,7 +3480,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5067,
-				  QString(tr("Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.")).
+				  QString(tr("Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.")).
 					arg(addrTo).arg(bit).arg(value));
 	}
 
@@ -3917,6 +3917,30 @@ namespace Builder
 				  QString(tr("Value of parameter '%1.%2' must be greater then 0.")).
 				  arg(fbCaption).arg(paramCaption));
 	}
+
+	/// IssueCode: ALC5089
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+	///
+	/// Parameters:
+	///		%1 Destination address
+	///		%2 Destination bit
+	///		%3 Source address
+	///		%4 Source bit
+	///
+	/// Description:
+	///		Command 'MOVB' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5089,
+				  QString(tr("Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.")).
+					arg(addrTo).arg(bitTo).arg(addrFrom).arg(bitFrom));
+	}
+
 
 	/// IssueCode: ALC5186
 	///

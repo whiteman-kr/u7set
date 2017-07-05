@@ -1000,6 +1000,11 @@ namespace Tuning
 		if (fotipHeader.uniqueId != m_sourceUniqueID)
 		{
 			m_stat.errFotipUniqueID++;
+
+			if ((m_stat.errFotipUniqueID % 100) == 0)
+			{
+				// DEBUG_LOG_ERR(QString("Wrong tuning source UniqueID: %1."));
+			}
 			result = false;
 		}
 

@@ -154,6 +154,8 @@ namespace Builder
 
 			MemoryArea nonAcquiredBuses;
 
+			MemoryArea wordAccumulator;
+
 		} m_appWordAdressed;
 
 		struct ReadWriteAccess
@@ -196,9 +198,13 @@ namespace Builder
 		int appBitMemorySizeW() const { return m_appBitAdressed.memory.sizeW(); }
 
 		int bitAccumulatorAddress() const { return m_appBitAdressed.bitAccumulator.startAddress(); }
+		int wordAccumulatorAddress() const { return m_appWordAdressed.wordAccumulator.startAddress(); }
 
 		int appWordMemoryStart() const { return m_appWordAdressed.memory.startAddress(); }
 		int appWordMemorySizeW() const { return m_appWordAdressed.memory.sizeW(); }
+
+		int regBufStartAddr() const { return m_appWordAdressed.acquiredRawData.startAddress(); }
+		int regBufSizeW() const;
 
 		int aquiredDiscreteInputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInputSignals.startAddress(); }
 		int aquiredDiscreteOutputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteOutputSignals.startAddress(); }
@@ -245,8 +251,6 @@ namespace Builder
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();
-
-		int getAppDataSize() const;
 
 		bool read16(int address);
 		bool read32(int address);

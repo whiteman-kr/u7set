@@ -707,21 +707,32 @@ namespace Builder
 	}
 
 
-	void Command::movBit(quint16 addrTo, quint16 addrToMask, quint16 addrFrom, quint16 addrFromMask)
+	void Command::movBit(quint16 addrTo, quint16 bitTo, quint16 addrFrom, quint16 bitFrom)
 	{
 		m_result = true;
 
 		m_code.setOpCode(LmCommandCode::MOVB);
 		m_code.setWord2(addrTo);
-		m_code.setBitNo2(addrToMask);
+		m_code.setBitNo2(bitTo);
 		m_code.setWord3(addrFrom);
-		m_code.setBitNo1(addrFromMask);
+		m_code.setBitNo1(bitFrom);
+
+		if (addressInBitMemory(addrTo) == false &&
+			addressInWordMemory(addrTo) == false)
+		{
+
+			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+			//
+			m_log->errALC5089(addrTo, bitTo, addrFrom, bitFrom);
+
+			m_result = false;
+		}
 
 		//
 
 		read16(addrFrom);
+		write16(addrTo);
 	}
-
 
 	void Command::nstart(quint16 fbType, quint16 fbInstance, quint16 startCount, const QString& fbCaption, int fbRunTime)
 	{
