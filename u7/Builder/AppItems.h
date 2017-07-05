@@ -33,10 +33,10 @@ namespace Builder
 	class AppItem;
 	class ModuleLogicCompiler;
 
-	// Functional Block Library element
-	//
 	class LogicAfb
 	{
+		// Functional Block Library element
+		//
 	public:
 		LogicAfb(std::shared_ptr<Afb::AfbElement> afb);
 		virtual ~LogicAfb();
@@ -85,11 +85,11 @@ namespace Builder
 		QHash<QString, LogicAfbParam*> m_afbParams;
 	};
 
-	// Base class for AppFb & AppSignal
-	// contains pointer to AppLogicItem
-	//
 	class AppItem : public QObject
 	{
+		// Base class for AppFb & AppSignal
+		// contains pointer to AppLogicItem
+		//
 		Q_OBJECT
 
 	public:
@@ -208,14 +208,13 @@ namespace Builder
 
 	typedef HashedVector<QString, AppFbParamValue> AppFbParamValuesArray;
 
-
-	// Application Functional Block
-	// represent all FB items in application logic schemas
-	//
 	class ModuleLogicCompiler;
 
 	class AppFb : public AppItem
 	{
+		// Application Functional Block
+		// represent all FB items in application logic schemas
+		//
 	public:
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
 
@@ -316,11 +315,11 @@ namespace Builder
 		void clear();
 	};
 
-	// Application Signal
-	// represent all signal in application logic schemas, and signals, which createad in compiling time
-	//
 	class AppSignal
 	{
+		// Application Signal
+		// represent all signal in application logic schemas, and signals, which createad in compiling time
+		//
 	public:
 		AppSignal(Signal* signal, const AppItem* appItem);
 		AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
@@ -341,11 +340,8 @@ namespace Builder
 
 		QUuid guid() const;
 
-		const Address16& ramAddr() const { return m_signal->ualAddr(); }
-		const Address16& regAddr() const { return m_signal->regValueAddr(); }
-
-		Address16& ramAddr() { return m_signal->ualAddr(); }
-		Address16& regAddr() { return m_signal->regValueAddr(); }
+		const Address16& ualAddr() const { return m_signal->ualAddr(); }
+		const Address16& regBufAddr() const { return m_signal->regBufAddr(); }
 
 		E::SignalType signalType() const { return m_signal->signalType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signal->analogSignalFormat(); }
@@ -387,6 +383,21 @@ namespace Builder
 	class AppSignalMap: public QObject, public HashedVector<QUuid, AppSignal*>
 	{
 		Q_OBJECT
+	public:
+		AppSignalMap(ModuleLogicCompiler& compiler);
+		~AppSignalMap();
+
+		bool insert(const AppItem* appItem);
+		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
+
+		AppSignal* getSignal(const QString& appSignalID);
+		bool containsSignal(const QString& appSignalID) const;
+
+		void clear();
+
+	private:
+		QString getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin);
+		void incCounters(const AppSignal* appSignal);
 
 	private:
 		QHash<QString, AppSignal*> m_signalStrIdMap;
@@ -400,22 +411,6 @@ namespace Builder
 
 		int m_notRegisteredAnalogSignalCount = 0;
 		int m_notRegisteredDiscreteSignalCount = 0;
-
-		void incCounters(const AppSignal* appSignal);
-
-		QString getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin);
-
-	public:
-		AppSignalMap(ModuleLogicCompiler& compiler);
-		~AppSignalMap();
-
-		bool insert(const AppItem* appItem);
-		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
-
-		AppSignal* getSignal(const QString& appSignalID);
-		bool containsSignal(const QString& appSignalID) const;
-
-		void clear();
 	};
 
 }

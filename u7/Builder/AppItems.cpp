@@ -499,6 +499,7 @@ namespace Builder
 	//
 	// AppFb class implementation
 	//
+	// ---------------------------------------------------------------------------------------
 
 	AppFb::AppFb(const AppItem& appItem) :
 		AppItem(appItem)
@@ -783,7 +784,11 @@ namespace Builder
 		}
 	}
 
-	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat dataFormat, int dataSize, const AppItem *appItem, const QString& strID) :
+	AppSignal::AppSignal(const QUuid& guid, E::SignalType signalType,
+						 E::AnalogAppSignalFormat dataFormat,
+						 int dataSize,
+						 const AppItem *appItem,
+						 const QString& strID) :
 		m_appItem(appItem),
 		m_guid(guid)
 	{
@@ -829,12 +834,10 @@ namespace Builder
 		return QUuid();
 	}
 
-
 	bool AppSignal::isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const
 	{
 		return m_signal->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
-
 
 	QString AppSignal::schemaID() const
 	{
@@ -848,11 +851,11 @@ namespace Builder
 		return "";
 	}
 
-
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation
 	//
+	// ---------------------------------------------------------------------------------------
 
 	AppSignalMap::AppSignalMap(ModuleLogicCompiler& compiler) :
 		m_compiler(compiler)
@@ -865,41 +868,40 @@ namespace Builder
 		clear();
 	}
 
-
-	// insert signal from application logic schema
-	//
 	bool AppSignalMap::insert(const AppItem* appItem)
 	{
+		// insert signal from application logic schema
+		//
 		if (appItem == nullptr)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		if (!appItem->isSignal())
+		if (appItem->isSignal() == false)
 		{
 			ASSERT_RETURN_FALSE
 		}
 
-		QString strID = appItem->strID();
+		QString appSignalID = appItem->strID();
 
-		if (strID[0] != '#')
+		if (appSignalID[0] != '#')
 		{
-			strID = "#" + strID;
+			appSignalID = "#" + appSignalID;
 		}
 
-		Signal* s = m_compiler.getSignal(strID);
+		Signal* s = m_compiler.getSignal(appSignalID);
 
 		if (s == nullptr)
 		{
-			m_compiler.log()->errALC5000(strID, appItem->guid());			// Signal identifier '%1' is not found.
+			m_compiler.log()->errALC5000(appSignalID, appItem->guid());			// Signal identifier '%1' is not found.
 			return false;
 		}
 
 		AppSignal* appSignal = nullptr;
 
-		if (m_signalStrIdMap.contains(strID))
+		if (m_signalStrIdMap.contains(appSignalID))
 		{
-			appSignal = m_signalStrIdMap[strID];
+			appSignal = m_signalStrIdMap[appSignalID];
 
 			//qDebug() << "Bind appSignal = " << strID;
 		}
@@ -907,7 +909,7 @@ namespace Builder
 		{
 			appSignal = new AppSignal(s, appItem);
 
-			m_signalStrIdMap.insert(strID, appSignal);
+			m_signalStrIdMap.insert(appSignalID, appSignal);
 
 			//qDebug() << "Create appSignal = " << strID;
 
@@ -921,10 +923,10 @@ namespace Builder
 		return true;
 	}
 
-	// insert "shadow" signal bound to FB output pin
-	//
 	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log)
 	{
+		// insert "shadow" signal bound to FB output pin
+		//
 		if (appFb == nullptr || log == nullptr)
 		{
 			ASSERT_RETURN_FALSE
@@ -1012,6 +1014,33 @@ namespace Builder
 		return true;
 	}
 
+	AppSignal* AppSignalMap::getSignal(const QString& appSignalID)
+	{
+		return m_signalStrIdMap.value(appSignalID, nullptr);
+	}
+
+	bool AppSignalMap::containsSignal(const QString& appSignalID) const
+	{
+		return m_signalStrIdMap.contains(appSignalID);
+	}
+
+	void AppSignalMap::clear()
+	{
+		for(AppSignal* appSignal : m_signalStrIdMap)
+		{
+			delete appSignal;
+		}
+
+		m_signalStrIdMap.clear();
+
+		HashedVector<QUuid, AppSignal*>::clear();
+
+		m_registeredAnalogSignalCount = 0;
+		m_registeredDiscreteSignalCount = 0;
+
+		m_notRegisteredAnalogSignalCount = 0;
+		m_notRegisteredDiscreteSignalCount = 0;
+	}
 
 	QString AppSignalMap::getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin)
 	{
@@ -1063,33 +1092,4 @@ namespace Builder
 			}
 		}
 	}
-
-	AppSignal* AppSignalMap::getSignal(const QString& appSignalID)
-	{
-		return m_signalStrIdMap.value(appSignalID, nullptr);
-	}
-
-	bool AppSignalMap::containsSignal(const QString& appSignalID) const
-	{
-		return m_signalStrIdMap.contains(appSignalID);
-	}
-
-	void AppSignalMap::clear()
-	{
-		for(AppSignal* appSignal : m_signalStrIdMap)
-		{
-			delete appSignal;
-		}
-
-		m_signalStrIdMap.clear();
-
-		HashedVector<QUuid, AppSignal*>::clear();
-
-		m_registeredAnalogSignalCount = 0;
-		m_registeredDiscreteSignalCount = 0;
-
-		m_notRegisteredAnalogSignalCount = 0;
-		m_notRegisteredDiscreteSignalCount = 0;
-	}
-
 }

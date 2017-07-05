@@ -27,11 +27,15 @@ namespace Builder
 		Q_OBJECT
 
 	private:
-		static const int ERR_VALUE = -1;
-
 		struct Module
 		{
-			Hardware::DeviceModule* device = nullptr;
+			bool isInputModule() const;
+			bool isOutputModule() const;
+			Hardware::DeviceModule::FamilyType familyType() const;
+
+			//
+
+			const Hardware::DeviceModule* device = nullptr;
 			int place = 0;
 
 			// properties loaded from Hardware::DeviceModule::dynamicProperties
@@ -52,12 +56,7 @@ namespace Builder
 										// depends of module place in the chassis
 
 			int appRegDataOffset = 0;	// offset of module application data in registration buffer
-
-			bool isInputModule() const;
-			bool isOutputModule() const;
-			Hardware::DeviceModule::FamilyType familyType() const;
 		};
-
 
 		struct FbScal
 		{
@@ -74,9 +73,207 @@ namespace Builder
 			int outputSignalIndex = -1;
 		};
 
+	public:
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
+		~ModuleLogicCompiler();
+
+		const SignalSet& signalSet() { return *m_signals; }
+		Signal* getSignal(const QString& appSignalID);
+
+		IssueLogger* log() { return m_log; }
+
+		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
+
+		bool pass1();
+		bool pass2();
+
+	private:
+		// pass #1 compilation functions
+		//
+		bool loadLMSettings();
+		bool loadModulesSettings();
+
+		bool createChassisSignalsMap();
+
+		bool createAppLogicItemsMaps();
+		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const;
+
+		bool createAppFbsMap();
+		bool createAppSignalsMap();
+
+		bool buildTuningData();
+
+		bool createSignalLists();
+
+		bool createAcquiredDiscreteInputSignalsList();
+		bool createAcquiredDiscreteOutputSignalsList();
+		bool createAcquiredDiscreteInternalSignalsList();
+		bool createAcquiredDiscreteTuningSignalsList();
+
+		bool createNonAcquiredDiscreteInputSignalsList();
+		bool createNonAcquiredDiscreteOutputSignalsList();
+		bool createNonAcquiredDiscreteInternalSignalsList();
+		bool createNonAcquiredDiscreteTuningSignalsList();
+
+		bool createAcquiredAnalogInputSignalsList();
+		bool createAcquiredAnalogOutputSignalsList();
+		bool createAcquiredAnalogInternalSignalsList();
+		bool createAcquiredAnalogTuninglSignalsList();
+
+		bool createNonAcquiredAnalogInputSignalsList();
+		bool createNonAcquiredAnalogOutputSignalsList();
+		bool createNonAcquiredAnalogInternalSignalsList();
+		bool createNonAcquiredAnalogTuningSignalsList();
+
+		bool createAcquiredBusSignalsList();
+		bool createNonAcquiredBusSignalsList();
+
+		bool appendLinkedValiditySignal(const Signal* s);
+
+		bool listsUniquenessCheck() const;
+		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
+		void sortSignalList(QVector<Signal *> &signalList);
+
+		bool disposeSignalsInMemory();
+
+		bool calculateIoSignalsAddresses();
+
+		// disposing discrete signals in bit-addressed memory
+		//
+		bool disposeDiscreteSignalsInBitMemory();
+
+		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
+		//
+		bool disposeAcquiredRawDataInRegBuf();
+		bool disposeAcquiredAnalogSignalsInRegBuf();
+		bool disposeAcquiredBusesInRegBuf();
+		bool disposeAcquiredDiscreteSignalsInRegBuf();
+		bool disposeAcquiredDiscreteTuningSignalsInRegBuf();
+
+		// disposing non acquired analog and bus signals in word-addressed memory
+		//
+		bool disposeNonAcquiredAnalogSignals();
+		bool disposeNonAcquiredBuses();
+
+		bool appendFbsForAnalogInOutSignalsConversion();
+		bool findFbsForAnalogInOutSignalsConversion();
+		bool createFbForAnalogInputSignalConversion(const Signal& signal, AppItem& appItem);
+		bool createFbForAnalogOutputSignalConversion(const Signal& signal, AppItem& appItem);
+
+		AppFb* createAppFb(const AppItem& appItem);
+		bool setOutputSignalsAsComputed();
+
+		bool processTxSignals();
+		bool processSerialRxSignals();
+
+		bool processTransmitters();
+		bool processTransmitter(const AppItem *item);
+		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
+
+		bool processSerialReceivers();
+		bool processSerialReceiver(const AppItem* item);
+
+		bool setOptoRawInSignalsAsComputed();
+
+		// pass #2 compilation functions
+		//
+		bool finalizeOptoConnectionsProcessing();
+		bool generateAppStartCommand();
+
+		bool initAfbs();
+		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
+		bool displayAfbParams(const AppFb& appFb);
+
+		bool startAppLogicCode();
+
+		bool copyAcquiredRawDataInRegBuf();
+		bool convertAnalogInputSignals();
+
+		bool copySerialRxSignals();
+		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
+		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
+
+		bool generateAppLogicCode();
+
+		bool generateAppSignalCode(const AppItem* appItem);
+		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
+		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
+
+		bool generateFbCode(const AppItem *appItem);
+
+		bool writeFbInputSignals(const AppFb *appFb);
+		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
+		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
+		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
+
+		bool startFb(const AppFb* appFb);
+
+		bool readFbOutputSignals(const AppFb *appFb);
+		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
+
+		bool addToComparatorStorage(const AppFb *appFb);
+		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);
+
+		bool copyAcquiredTuningAnalogSignalsToRegBuf();
+		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
+
+		bool copyAcquiredDiscreteInputSignalsToRegBuf();
+		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
+
+		bool copyOutputSignalsInOutputModulesMemory();
+		bool initOutputModulesMemory();
+		bool conevrtOutputAnalogSignals();
+		bool copyOutputDiscreteSignals();
+
+		bool copyOptoConnectionsTxData();
+
+		bool copyOptoPortTxData(Hardware::OptoPortShared port);
+		bool copyOptoPortTxRawData(Hardware::OptoPortShared port);
+		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
+		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
+		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
+		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
+		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
+		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
+
+		bool finishAppLogicCode();
+		bool setLmAppLANDataSize();
+		bool calculateCodeRunTime();
+
+		bool writeResult();
+		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
+		bool writeTuningInfoFile(const QString& lmCaption, const QString& subsystemID, int lmNumber);
+		bool writeOcmRsSignalsXml();
+		void writeLMCodeTestFile();
+
+		void displayUsedMemoryInfo();
+		void displayTimingInfo();
+		void cleanup();
+
+		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
+		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const AppFb& fb, const LogicAfbSignal& afbSignal);
+
+		bool isUsedInUal(const Signal* s) const;
+		bool isUsedInUal(const QString& appSignalID) const;
+
+		QString getSchemaID(const LogicConst& constItem);
+
+		bool getLMIntProperty(const QString& name, int* value);
+		bool getLMStrProperty(const QString& name, QString *value);
+
+		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
+
+		void dumpApplicationLogicItems();
+
+	private:
+		static const int ERR_VALUE = -1;
+
 		// input parameters
 		//
-
 		ApplicationLogicCompiler& m_appLogicCompiler;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
@@ -94,11 +291,6 @@ namespace Builder
 
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;
-
-		// compiler settings
-		//
-
-		bool m_convertUsedInOutAnalogSignalsOnly = false;
 
 		// LM's and modules settings
 		//
@@ -118,10 +310,7 @@ namespace Builder
 
 		// LM's calculated memory offsets and sizes
 		//
-
 		LmMemoryMap m_memoryMap;
-
-		int m_bitAccumulatorAddress = 0;
 
 		HashedVector<QString, Module> m_modules;		// modules installed in chassis, module EquipmentID => Module
 
@@ -175,8 +364,7 @@ namespace Builder
 		QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
 																		// for grant unique records
 
-
-		QHash<QUuid, QUuid> m_outPinSignal;						// output pin GUID -> signal GUID
+		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
 
 		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
 
@@ -184,10 +372,10 @@ namespace Builder
 
 		QVector<FbScal> m_fbScal;
 
-		const int FB_SCALE_16UI_FP_INDEX = 0;
-		const int FB_SCALE_16UI_SI_INDEX = 1;
-		const int FB_SCALE_FP_16UI_INDEX = 2;
-		const int FB_SCALE_SI_16UI_INDEX = 3;
+		static const int FB_SCALE_16UI_FP_INDEX = 0;
+		static const int FB_SCALE_16UI_SI_INDEX = 1;
+		static const int FB_SCALE_FP_16UI_INDEX = 2;
+		static const int FB_SCALE_SI_16UI_INDEX = 3;
 
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;
@@ -197,225 +385,5 @@ namespace Builder
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
-
-	private:
-
-		bool getLMIntProperty(const QString& name, int* value);
-		bool getLMStrProperty(const QString& name, QString *value);
-
-		Hardware::DeviceModule* getModuleOnPlace(int place);
-
-		QString getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType);
-
-		// pass #1 compilation functions
-		//
-		bool loadLMSettings();
-		bool loadModulesSettings();
-		bool createChassisSignalsMap();
-
-		bool createSignalLists();
-
-		bool createAcquiredDiscreteInputSignalsList();
-		bool createAcquiredDiscreteOutputSignalsList();
-		bool createAcquiredDiscreteInternalSignalsList();
-		bool createAcquiredDiscreteTuningSignalsList();
-
-		bool createNonAcquiredDiscreteInputSignalsList();
-		bool createNonAcquiredDiscreteOutputSignalsList();
-		bool createNonAcquiredDiscreteInternalSignalsList();
-		bool createNonAcquiredDiscreteTuningSignalsList();
-
-		bool createAcquiredAnalogInputSignalsList();
-		bool createAcquiredAnalogOutputSignalsList();
-		bool createAcquiredAnalogInternalSignalsList();
-		bool createAcquiredAnalogTuninglSignalsList();
-
-		bool createNonAcquiredAnalogInputSignalsList();
-		bool createNonAcquiredAnalogOutputSignalsList();
-		bool createNonAcquiredAnalogInternalSignalsList();
-		bool createNonAcquiredAnalogTuningSignalsList();
-
-		bool createAcquiredBusSignalsList();
-		bool createNonAcquiredBusSignalsList();
-
-		bool disposeSignalsInMemory();
-
-		// disposing discrete signals in bit-addressed memory
-		//
-		bool disposeDiscreteSignalsInBitMemory();
-
-		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
-		//
-		bool disposeAcquiredRawDataInRegBuf();
-		bool disposeAcquiredAnalogSignalsInRegBuf();
-		bool disposeAcquiredBusesInRegBuf();
-		bool disposeAcquiredDiscreteSignalsInRegBuf();
-		bool disposeAcquiredDiscreteTuningSignalsInRegBuf();
-
-		// disposing non acquired analog and bus signals in word-addressed memory
-		//
-		bool disposeNonAcquiredAnalogSignals();
-		bool disposeNonAcquiredBuses();
-
-		bool setUalAddrOfNonAcquiredTuningSignals();
-
-		bool listsUniquenessCheck() const;
-		bool listUniquenessCheck(QHash<Signal*, Signal*>& signalsMap, const QVector<Signal*>& signalList) const;
-
-		bool appendLinkedValiditySignal(const Signal* s);
-		void sortSignalList(QVector<Signal *> &signalList);
-
-		bool createAppLogicItemsMaps();
-		bool createAppSignalsMap();
-
-		bool setOptoRawInSignalsAsComputed();
-
-		// pass #2 compilation functions
-		//
-
-		bool generateAppStartCommand();
-		bool initAfbs();
-		bool startAppLogicCode();
-		bool copyAcquiredRawDataInRegBuf();
-		bool convertAnalogInputSignals();
-		bool copyAcquiredDiscreteInputSignalsToRegBuf();
-
-		bool copySerialRxSignals();
-		bool copySerialRxAnalogSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
-		bool copySerialRxDiscreteSignal(Hardware::OptoPortShared port, Hardware::TxRxSignalShared rxSignal);
-
-		bool generateAppLogicCode();
-		bool generateAppSignalCode(const AppItem* appItem);
-		bool generateFbCode(const AppItem *appItem);
-
-		bool writeFbInputSignals(const AppFb *appFb);
-		bool startFb(const AppFb* appFb);
-		bool readFbOutputSignals(const AppFb *appFb);
-		bool addToComparatorStorage(const AppFb *appFb);
-
-		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);
-
-		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
-
-		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
-		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
-
-		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
-		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
-
-		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
-		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
-
-		bool copyAcquiredTuningAnalogSignalsToRegBuf();
-		bool copyAcquiredTuningDiscreteSignalsToRegBuf();
-		bool copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf();
-		bool copyOutputSignalsInOutputModulesMemory();
-
-		bool initOutputModulesMemory();
-		bool conevrtOutputAnalogSignals();
-		bool copyOutputDiscreteSignals();
-
-		bool setLmAppLANDataSize();
-		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
-
-		/*bool generateRS232ConectionCode();
-		bool generateRS232ConectionCode(std::shared_ptr<Hardware::Connection> connection, Hardware::OptoModule *optoModule, Hardware::OptoPort *optoPort);*/
-
-		bool copyOptoConnectionsTxData();
-		bool copyOptoPortTxData(Hardware::OptoPortShared port);
-
-		bool copyOptoPortTxRawData(Hardware::OptoPortShared port);
-		bool copyOptoPortTxAnalogSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortTxDiscreteSignals(Hardware::OptoPortShared port);
-
-		bool copyOptoPortAllNativeRawData(Hardware::OptoPortShared port, int& offset);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, int modulePlace);
-		bool copyOptoPortTxModuleRawData(Hardware::OptoPortShared port, int& offset, const Hardware::DeviceModule* module);
-		bool copyOptoPortTxOptoPortRawData(Hardware::OptoPortShared port, int& offset, const QString& portEquipmentID);
-		bool copyOptoPortTxConst16RawData(Hardware::OptoPortShared port, int const16value, int& offset);
-		bool copyOptoPortRawTxAnalogSignals(Hardware::OptoPortShared port);
-		bool copyOptoPortRawTxDiscreteSignals(Hardware::OptoPortShared port);
-
-		int getNededTuningFramesCount(int tuningFrameSizeBytes, int signalsCount, int signalValueSizeBits);
-
-		bool copyDomDataToModuleMemory(const Module& module);
-		bool copyAomDataToModuleMemory(const Module& module);
-
-		bool buildTuningData();
-		bool writeTuningInfoFile(const QString& lmCaption, const QString& subsystemID, int lmNumber);
-
-		bool calculateCodeRunTime();
-
-		bool finishAppLogicCode();
-
-		bool findFbsForAnalogInOutSignalsConversion();
-		bool appendFbsForAnalogInOutSignalsConversion();
-		bool createFbForAnalogInputSignalConversion(const Signal& signal, AppItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(const Signal& signal, AppItem& appItem);
-
-		bool createAppFbsMap();
-		AppFb* createAppFb(const AppItem& appItem);
-
-		bool initAppFbParams(AppFb* appFb, bool instantiatorsOnly);
-		bool displayAfbParams(const AppFb& appFb);
-
-		bool getUsedAfbs();
-		QString getAppLogicItemStrID(const AppLogicItem& appLogicItem) const { AppItem appItem(appLogicItem); return appItem.strID(); }
-
-		bool calculateIoSignalsAddresses();
-		bool setOutputSignalsAsComputed();
-
-		bool processTxSignals();
-		bool processSerialRxSignals();
-
-		bool processTransmitters();
-		bool processTransmitter(const AppItem *item);
-		bool getSignalsConnectedToTransmitter(const LogicTransmitter &transmitter, QVector<QPair<QString, QUuid>>& connectedSignals);
-
-		bool processSerialReceivers();
-		bool processSerialReceiver(const AppItem* item);
-
-		bool finalizeOptoConnectionsProcessing();
-
-		bool generateApplicationLogicCode();
-
-		bool writeResult();
-
-		void displayUsedMemoryInfo();
-		void displayTimingInfo();
-
-		void writeLMCodeTestFile();
-
-		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const Signal& destSignal, QUuid destSignalUuid);
-		bool checkSignalsCompatibility(const Signal& srcSignal, QUuid srcSignalUuid, const AppFb& fb, const LogicAfbSignal& afbSignal);
-
-		bool writeOcmRsSignalsXml();
-
-		void cleanup();
-
-		void dumApplicationLogicItems();
-
-		bool isUsedInUal(const Signal* s) const;
-		bool isUsedInUal(const QString& appSignalID) const;
-
-		QString getSchemaID(const LogicConst& constItem);
-
-	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
-		~ModuleLogicCompiler();
-
-		const SignalSet& signalSet() { return *m_signals; }
-		Signal* getSignal(const QString& appSignalID);
-
-		IssueLogger* log() { return m_log; }
-
-		const LogicAfbSignal getAfbSignal(const QString& afbStrID, int signalIndex) { return m_afbs.getAfbSignal(afbStrID, signalIndex); }
-
-		bool pass1();
-		bool pass2();
-
-		int lmCycleDuration() const { return m_lmCycleDuration; }
 	};
-
-
 }
