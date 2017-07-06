@@ -1001,9 +1001,9 @@ namespace Tuning
 		{
 			m_stat.errFotipUniqueID++;
 
-			if ((m_stat.errFotipUniqueID % 100) == 0)
+			if ((m_stat.errFotipUniqueID % 500) == 0)
 			{
-				// DEBUG_LOG_ERR(QString("Wrong tuning source UniqueID: %1."));
+				DEBUG_LOG_ERR(m_logger, QString("Wrong tuning source UniqueID: %1.").arg(m_sourceIP.addressStr()));
 			}
 			result = false;
 		}

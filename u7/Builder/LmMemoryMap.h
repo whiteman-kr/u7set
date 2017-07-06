@@ -106,7 +106,7 @@ namespace Builder
 			MemoryArea memory;
 
 			MemoryArea channel[OPTO_INTERFACE_COUNT];
-			MemoryArea result;
+			MemoryArea reserv;
 
 		} m_optoInterface;
 

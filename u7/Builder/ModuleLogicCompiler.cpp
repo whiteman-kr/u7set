@@ -231,6 +231,7 @@ namespace Builder
 
 		MemoryArea optoInterfaceData;
 		optoInterfaceData.setStartAddress(m_lmDescription->optoInterface().m_optoInterfaceDataOffset);
+		optoInterfaceData.setSizeW(m_lmDescription->optoInterface().m_optoPortDataSize);
 
 		MemoryArea appLogicBitData;
 		appLogicBitData.setStartAddress(m_lmDescription->memory().m_appLogicBitDataOffset);
@@ -264,6 +265,26 @@ namespace Builder
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
 		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
 
+		m_modules.clear();
+
+		Module m;
+
+		m.device = m_lm;
+		m.place = LM1_PLACE;
+
+		m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
+		m.txDiagDataSize = m_lmDescription->memory().m_txDiagDataSize;
+
+		m.txAppDataOffset = m_lmDescription->memory().m_appDataOffset;
+		m.txAppDataSize = m_lmDescription->memory().m_appDataSize;
+
+		m.moduleDataOffset = 0;
+
+		m.rxAppDataOffset = m.txAppDataOffset;
+		m.rxAppDataSize = m.txAppDataSize;
+
+		m_modules.insert(m_lm->equipmentIdTemplate(), m);
+
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString(tr("Loading LMs settings... Ok")));
@@ -288,11 +309,9 @@ namespace Builder
 	{
 		bool result = true;
 
-		m_modules.clear();
-
 		// build Module structures array
 		//
-		for(int place = 0; place <= LAST_MODULE_PLACE; place++)
+		for(int place = FIRST_MODULE_PLACE; place <= LAST_MODULE_PLACE; place++)
 		{
 			Module m;
 
@@ -306,43 +325,25 @@ namespace Builder
 			m.device = device;
 			m.place = place;
 
-			if (device->isLogicModule() == true)
+			const DeviceHelper::IntPropertyNameVar moduleSettings[] =
 			{
-				assert(m_lmDescription);
+				{	"TxDataSize", &m.txDataSize },
+				{	"TxDiagDataOffset", &m.txDiagDataOffset },
+				{	"TxDiagDataSize", &m.txDiagDataSize },
+				{	"TxAppDataOffset", &m.txAppDataOffset },
+				{	"TxAppDataSize", &m.txAppDataSize },
 
-				m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
-				m.txDiagDataSize = m_lmDescription->memory().m_txDiagDataSize;
+				{	"RxDataSize", &m.rxDataSize },
+				{	"RxAppDataOffset", &m.rxAppDataOffset },
+				{	"RxAppDataSize", &m.rxAppDataSize },
+			};
 
-				m.txAppDataOffset = m_lmDescription->memory().m_appDataOffset;
-				m.txAppDataSize = m_lmDescription->memory().m_appDataSize;
-
-				m.moduleDataOffset = 0;
-
-				m.rxAppDataOffset = m.txAppDataOffset;
-				m.rxAppDataSize = m.txAppDataSize;
-			}
-			else
+			for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
 			{
-				const DeviceHelper::IntPropertyNameVar moduleSettings[] =
-				{
-					{	"TxDataSize", &m.txDataSize },
-					{	"TxDiagDataOffset", &m.txDiagDataOffset },
-					{	"TxDiagDataSize", &m.txDiagDataSize },
-					{	"TxAppDataOffset", &m.txAppDataOffset },
-					{	"TxAppDataSize", &m.txAppDataSize },
-
-					{	"RxDataSize", &m.rxDataSize },
-					{	"RxAppDataOffset", &m.rxAppDataOffset },
-					{	"RxAppDataSize", &m.rxAppDataSize },
-				};
-
-				for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
-				{
-					result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
-				}
-
-				m.moduleDataOffset = m_memoryMap.getModuleDataOffset(place);
+				result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
 			}
+
+			m.moduleDataOffset = m_memoryMap.getModuleDataOffset(place);
 
 			m_modules.insert(device->equipmentIdTemplate(), m);
 		}

@@ -127,8 +127,8 @@ namespace Builder
 			m_optoInterface.channel[i].setSizeW(optoInterfaceData.sizeW());
 		}
 
-		m_optoInterface.result.setStartAddress(m_optoInterface.channel[OPTO_INTERFACE_COUNT -1].nextAddress());
-		m_optoInterface.result.setSizeW(optoInterfaceData.sizeW());
+		m_optoInterface.reserv.setStartAddress(m_optoInterface.channel[OPTO_INTERFACE_COUNT -1].nextAddress());
+		m_optoInterface.reserv.setSizeW(optoInterfaceData.sizeW());
 
 		// init application bit-addressed memory mapping
 		//
@@ -273,12 +273,12 @@ namespace Builder
 
 		for(int i = 0; i < OPTO_INTERFACE_COUNT; i++)
 		{
-			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto interface %02d", i + 1));
+			addRecord(memFile, m_optoInterface.channel[i], QString().sprintf("opto port %02d", i + 1));
 		}
 
 		memFile.append("");
 
-		addRecord(memFile, m_optoInterface.result, "opto interfaces data processing result");
+		addRecord(memFile, m_optoInterface.reserv, "reserv");
 
 		memFile.append("");
 
