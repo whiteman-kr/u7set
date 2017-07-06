@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TypesAndEnums.h"
+#include "Hash.h"
 
 #include <QtWidgets/QApplication>
 #include <assert.h>
@@ -614,8 +615,6 @@ public:
 
 		return true;
 	}
-
-	#define UNDEFINED_HASH	0x0000000000000000l
 
     static quint16 calcHash16(const void* src, int l)
     {

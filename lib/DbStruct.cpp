@@ -31,6 +31,7 @@ const char* const DvsFileExtension = "dvs";				// Diagnostics schema file extnes
 const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema template file extnesion
 
 const char* const OclFileExtension = "ocl";				// (Optical) Connection Link
+const char* const BusFileExtension = "xml";				// Bus type
 
 //
 //

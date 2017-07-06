@@ -184,7 +184,6 @@ SOURCES +=\
     ../lib/Tuning/TuningSignalState.cpp \
     DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    DialogTuningClients.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
@@ -192,7 +191,9 @@ SOURCES +=\
     ../lib/AppSignal.cpp \
     CodeEditor.cpp \
     ../lib/CsvFile.cpp \
-    Builder/AppItems.cpp
+    Builder/AppItems.cpp \
+    DialogBusEditor.cpp \
+    BusStorage.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -313,7 +314,6 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
-    DialogTuningClients.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
@@ -322,7 +322,10 @@ HEADERS  += \
     CodeEditor.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
-    Builder/AppItems.h
+    Builder/AppItems.h \
+    DialogBusEditor.h \
+    DbObjectStorage.h \
+    BusStorage.h
 
 FORMS    += \
     CreateProjectDialog.ui \

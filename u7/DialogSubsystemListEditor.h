@@ -10,12 +10,12 @@ namespace Ui {
 class DialogSubsystemListEditor;
 }
 
-class EditorDelegate: public QItemDelegate
+class SubsystemListEditorDelegate: public QItemDelegate
 {
 	Q_OBJECT
 
 public:
-	EditorDelegate(QObject *parent);
+	SubsystemListEditorDelegate(QObject *parent);
 	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 private:
@@ -62,7 +62,7 @@ private:
 	Ui::DialogSubsystemListEditor *ui;
 
 	bool m_modified = false;
-	EditorDelegate* m_editorDelegate = nullptr;
+	SubsystemListEditorDelegate* m_editorDelegate = nullptr;
 
 	DbController* db();
 	DbController* m_dbController;

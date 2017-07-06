@@ -2,6 +2,7 @@
 #define CONNECTION_H
 
 #include "../lib/DbController.h"
+#include "DbObjectStorage.h"
 
 namespace Hardware
 {
@@ -56,17 +57,11 @@ namespace Hardware
 		//
 	public:
 
-		const DbFileInfo& fileInfo() const;
-		void setFileInfo(const DbFileInfo& value);
-
         QUuid uuid() const;
         void setUuid(const QUuid& value);
 
 		QString connectionID() const;
 		void setConnectionID(const QString& value);
-
-        QString fileName() const;
-		int fileId() const;
 
 		QString port1EquipmentID() const;
 		void setPort1EquipmentID(const QString& value);
@@ -80,7 +75,6 @@ namespace Hardware
 		//
 		//
 		//
-
 		int port1ManualTxStartAddress() const;
 		void setPort1ManualTxStartAddress(int value);
 
@@ -105,10 +99,8 @@ namespace Hardware
 		QString port1RawDataDescription() const;
 		void setPort1RawDataDescription(const QString& value);
 
+		// --
 		//
-		//
-		//
-
 		int port2ManualTxStartAddress() const;
 		void setPort2ManualTxStartAddress(int value);
 
@@ -133,10 +125,8 @@ namespace Hardware
 		QString port2RawDataDescription() const;
 		void setPort2RawDataDescription(const QString& value);
 
+		// --
 		//
-		//
-		//
-
 		static QString serialModeStr(const Connection::SerialMode value);
 
 		Type type() const;
@@ -179,8 +169,6 @@ namespace Hardware
         QUuid m_uuid;
 		QString m_connectionID;
 
-		DbFileInfo m_fileInfo;
-
 		int m_port1TxStartAddress = 0;
 		QString m_port1EquipmentID;
 		int m_port1ManualTxWordsQuantity = 479;
@@ -219,47 +207,27 @@ namespace Hardware
 		bool m_generateVHDFile = false;
     };
 
-	class ConnectionStorage : public QObject
+	class ConnectionStorage : public DbObjectStorage<std::shared_ptr<Connection>>
 	{
-		Q_OBJECT
-
 	public:
-        ConnectionStorage(DbController* db, QWidget* parentWidget);
+		ConnectionStorage(DbController* db);
         virtual ~ConnectionStorage();
 
-        void clear();
+		using DbObjectStorage::get;
 
-        void add(std::shared_ptr<Connection> connection);
-        void remove(const QUuid& uuid);
-        bool removeFile(const QUuid& uuid, bool &fileRemoved);
-
-        Q_INVOKABLE int count() const;
-
-        std::shared_ptr<Connection> get(const QUuid &uuid) const;
-        std::shared_ptr<Connection> get(int index) const;
 		std::vector<std::shared_ptr<Connection>> get(const QStringList& masks) const;
-
-        Q_INVOKABLE QObject* jsGet(int index) const;
 
 		std::shared_ptr<Connection> getPortConnection(QString portEquipmentId) const;
 
-        bool checkOut(const QUuid& uuid);
-        bool checkIn(const QUuid& uuid, const QString &comment, bool &fileRemoved);
-        bool undo(const QUuid& uuid, bool &fileRemoved);
+		bool load(QString* errorMessage) override;
+		bool save(const QUuid& uuid, QString* errorMessage) override;
 
-        bool load();
-        bool loadFromConnectionsFolder();
-        bool loadFromXmlDeprecated(QString &errorString);
-        bool save(const QUuid& uuid);
+		//
 
-        bool deleteXmlDeprecated();
+		bool loadFromConnectionsFolder(QString* errorMessage);
+		bool loadFromXmlDeprecated(QString* errorMessage);
 
-    private:
-		std::vector<std::shared_ptr<Connection>> m_connectionsVector;
-        std::map<QUuid, std::shared_ptr<Connection>> m_connections;
-
-        DbController* m_db = nullptr;
-        QWidget* m_parentWidget = nullptr;
+		bool deleteXmlDeprecated(QString* errorMessage);
 	};
 }
 

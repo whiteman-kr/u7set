@@ -9,9 +9,14 @@
 class PropertyEditorDialog : public QDialog
 {
 public:
-	PropertyEditorDialog(std::shared_ptr<PropertyObject> object, QWidget *parent, bool readOnly);
-    ~PropertyEditorDialog();
+	PropertyEditorDialog(QWidget *parent);
+	~PropertyEditorDialog();
 
+	void setObjects(QList<std::shared_ptr<PropertyObject> > objects);
+
+	void setObject(std::shared_ptr<PropertyObject> object);
+
+	void setReadOnly(bool readOnly);
 
     int splitterPosition();
     void setSplitterPosition(int value);
@@ -23,7 +28,10 @@ private slots:
     void onOk();
 
 private:
-    std::shared_ptr<PropertyObject> m_object;
+
+	QList<std::shared_ptr<PropertyObject>> m_objects;
+
+	bool m_readOnly = false;
 
     ExtWidgets::PropertyEditor* pe = nullptr;
 

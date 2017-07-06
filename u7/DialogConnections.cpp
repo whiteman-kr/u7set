@@ -6,11 +6,13 @@
 
 DialogConnections* theDialogConnections = nullptr;
 
-DialogConnections::DialogConnections(DbController *pDbController, QWidget *parent)
+DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-	  m_dbController(pDbController)
+	  m_db(db)
 {
-	m_connections = new Hardware::ConnectionStorage(m_dbController, parent);
+	assert(m_db);
+
+	m_connections = new Hardware::ConnectionStorage(m_db);
 
 	setWindowTitle(tr("Connections Editor"));
 
@@ -142,18 +144,23 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
 
 	// Load connections
 	//
-	if (m_connections->loadFromConnectionsFolder() == false)
+	QString errorMessage;
+
+	bool ok = m_connections->loadFromConnectionsFolder(&errorMessage);
+	if (ok == false)
 	{
+		QMessageBox::critical(parent, qAppName(), errorMessage);
 		return;
 	}
 
 	// Load deprecated connections
 	//
-	Hardware::ConnectionStorage xmlConnections(m_dbController, parent);
+	Hardware::ConnectionStorage xmlConnections(m_db);
 
-	QString errorCode;
-	if (xmlConnections.loadFromXmlDeprecated(errorCode) == false)
+	ok = xmlConnections.loadFromXmlDeprecated(&errorMessage);
+	if (ok == false)
 	{
+		QMessageBox::critical(parent, qAppName(), errorMessage);
 		return;
 	}
 
@@ -165,13 +172,15 @@ DialogConnections::DialogConnections(DbController *pDbController, QWidget *paren
 		{
 			std::shared_ptr<Hardware::Connection> c = xmlConnections.get(i);
 
-			m_connections->add(c);
-
-			m_connections->save(c->uuid());
-
+			m_connections->add(c->uuid(), c);
+			m_connections->save(c->uuid(), &errorMessage);
 		}
 
-		xmlConnections.deleteXmlDeprecated();
+		ok = xmlConnections.deleteXmlDeprecated(&errorMessage);
+		if (ok == false)
+		{
+			QMessageBox::critical(parent, qAppName(), QString("Delete deprecated connection xml file error: ") + errorMessage);
+		}
 	}
 
 	// fill data
@@ -231,7 +240,7 @@ bool DialogConnections::addConnection(QString port1Id, QString port2Id)
 {
 	std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
 
-	connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_dbController->nextCounterValue()).rightJustified(4, '0')));
+	connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_db->nextCounterValue()).rightJustified(4, '0')));
 	connection->setPort1EquipmentID(port1Id);
 	connection->setPort2EquipmentID(port2Id);
 
@@ -332,12 +341,14 @@ bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> conn
 
 	// Add connection, update UI
 	//
-	m_connections->add(connection);
+	QString errorMessage;
 
-	bool ok = m_connections->save(connection->uuid());
+	m_connections->add(connection->uuid(), connection);
+
+	bool ok = m_connections->save(connection->uuid(), &errorMessage);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(connection->connectionID()));
+		QMessageBox::critical(this, qAppName(), tr("Failed to save connection %1: %2").arg(connection->connectionID()).arg(errorMessage));
 		return false;
 	}
 
@@ -378,8 +389,7 @@ void DialogConnections::fillConnectionsList()
 			{
 				if (connection->connectionID().contains(mask, Qt::CaseInsensitive) == true ||
 					connection->port1EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true ||
-					connection->fileName().contains(mask, Qt::CaseInsensitive) == true)
+					connection->port2EquipmentID().contains(mask, Qt::CaseInsensitive) == true)
 				{
 					maskResult = true;
 					break;
@@ -432,7 +442,7 @@ void DialogConnections::setPropertyEditorObjects()
 			return;
 		}
 
-		if (connection->fileInfo().state() != VcsState::CheckedOut)
+		if (m_connections->fileInfo(connection->uuid()).state() != VcsState::CheckedOut)
 		{
 			readOnly = true;
 		}
@@ -523,9 +533,12 @@ void DialogConnections::onPropertiesChanged(QList<std::shared_ptr<PropertyObject
 			continue;
 		}
 
-		if (m_connections->save(c->uuid()) == false)
+		QString errorMessage;
+		bool ok = m_connections->save(c->uuid(), &errorMessage);
+
+		if (ok == false)
 		{
-			QMessageBox::critical(this, tr("Connections Editor"), tr("Failed to save connection %1").arg(c->connectionID()));
+			QMessageBox::critical(this, qAppName(), tr("Failed to save connection %1: %2").arg(c->connectionID()).arg(errorMessage));
 			continue;
 		}
 	}
@@ -545,7 +558,7 @@ void DialogConnections::onAdd()
 {
 	std::shared_ptr<Hardware::Connection> connection = std::make_shared<Hardware::Connection>();
 
-	connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_dbController->nextCounterValue()).rightJustified(4, '0')));
+	connection->setConnectionID(tr("CONN_%1").arg(QString::number(m_db->nextCounterValue()).rightJustified(4, '0')));
 	connection->setPort1EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT01");
 	connection->setPort2EquipmentID("SYSTEMID_RACKID_CHID_MD00_PORT02");
 
@@ -568,17 +581,19 @@ void DialogConnections::onRemove()
 		return;
 	}
 
+	QString errorMessage;
+
 	for (auto item : selectedItems)
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileRemoved = false;
 
-		bool ok = m_connections->removeFile(uuid, fileRemoved);
+		bool ok = m_connections->removeFile(uuid, &fileRemoved, &errorMessage);
 		if (ok == false)
 		{
-			assert(false);
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		if (fileRemoved == true)
@@ -626,13 +641,17 @@ void DialogConnections::onCheckOut()
 		return;
 	}
 
+	QString errorMessage;
+
 	for (auto item : selectedItems)
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_connections->checkOut(uuid) == false)
+		bool ok = m_connections->checkOut(uuid, &errorMessage);
+		if (ok == false)
 		{
-			continue;
+			QMessageBox::critical(this, qAppName(), errorMessage);
+			break;
 		}
 
 		updateTreeItemText(item);
@@ -674,9 +693,12 @@ void DialogConnections::onCheckIn()
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileWasRemoved = false;
+		QString errorMessage;
 
-		if (m_connections->checkIn(uuid, comment, fileWasRemoved) == false)
+		ok = m_connections->checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
+		if (ok == false)
 		{
+			QMessageBox::critical(this, qAppName(), errorMessage);
 			continue;
 		}
 
@@ -734,9 +756,12 @@ void DialogConnections::onUndo()
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
 		bool fileRemoved = false;
+		QString errorMessage;
 
-		if (m_connections->undo(uuid, fileRemoved) == false)
+		bool ok = m_connections->undo(uuid, &fileRemoved, &errorMessage);
+		if (ok == false)
 		{
+			QMessageBox::critical(this, qAppName(), errorMessage);
 			continue;
 		}
 
@@ -764,7 +789,25 @@ void DialogConnections::onUndo()
 		}
 		else
 		{
-			updateTreeItemText(item);
+			// read previous data from file
+
+			std::shared_ptr<DbFile> file = nullptr;
+
+			DbFileInfo fi = m_connections->fileInfo(uuid);
+
+			bool ok = m_db->getLatestVersion(fi, &file, this);
+			if (ok == true && file != nullptr)
+			{
+				QByteArray data;
+				file->swapData(data);
+
+				std::shared_ptr<Hardware::Connection> connection = m_connections->get(uuid);
+
+				if (connection != nullptr && connection->Load(data) == true)
+				{
+					updateTreeItemText(item);
+				}
+			}
 		}
 	}
 
@@ -777,14 +820,19 @@ void DialogConnections::onRefresh()
 {
 	m_connections->clear();
 
-	if (m_connections->load() == false)
+	QString errorMessage;
+
+	bool ok = m_connections->load(&errorMessage);
+	if (ok == false)
 	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
 		return;
 	}
 
 	fillConnectionsList();
-
 	updateButtonsEnableState();
+
+	return;
 }
 
 void DialogConnections::closeEvent(QCloseEvent* e)
@@ -833,8 +881,8 @@ void DialogConnections::onReport()
 
 	textStream << "\r\n";
 
-	textStream << tr("Project Name:\t") << m_dbController->currentProject().projectName() << "\r\n";
-	textStream << tr("User Name:\t") << m_dbController->currentUser().username() << "\r\n";
+	textStream << tr("Project Name:\t") << m_db->currentProject().projectName() << "\r\n";
+	textStream << tr("User Name:\t") << m_db->currentUser().username() << "\r\n";
 
 	textStream << "\r\n";
 
@@ -930,12 +978,14 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 	item->setText(c++, connection->connectionID());
 	item->setText(c++, connection->manualSettings() ? tr("Manual") : tr("Auto"));
 
-	if (connection->fileInfo().state() == VcsState::CheckedOut)
-	{
-		item->setText(c++, connection->fileInfo().action().text());
+	DbFileInfo fi = m_connections->fileInfo(connection->uuid());
 
-		int userId = connection->fileInfo().userId();
-		item->setText(c++, m_dbController->username(userId));
+	if (fi.state() == VcsState::CheckedOut)
+	{
+		item->setText(c++, fi.action().text());
+
+		int userId = fi.userId();
+		item->setText(c++, m_db->username(userId));
 	}
 	else
 	{
@@ -967,7 +1017,7 @@ void DialogConnections::updateButtonsEnableState()
 			return;
 		}
 
-		if (connection->fileInfo().state() == VcsState::CheckedOut)
+		if (m_connections->fileInfo(connection->uuid()).state() == VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}

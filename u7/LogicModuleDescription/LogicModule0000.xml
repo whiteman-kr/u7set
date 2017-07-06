@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0007">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0008">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -56,7 +56,7 @@
 		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="2"		VersionOpIndex="16"/>		<!-- 	Same OpIndex, ImpVersion-->
 		<AFBComponent Caption="MUX"			OpCode="21"	ImpVersion="1"		VersionOpIndex="8"/>		<!-- 	Same ImpVersion="0"-->
 		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="3"		VersionOpIndex="15"/>
-		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="4"		VersionOpIndex="12"/>
+		<AFBComponent Caption="LIM"			OpCode="23"	ImpVersion="5"		VersionOpIndex="14"/>
 		<AFBComponent Caption="DEAD_ZONE"	OpCode="24"	ImpVersion="5"		VersionOpIndex="15"/>
 		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"/>
 		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="4"		VersionOpIndex="28"/>
@@ -4589,7 +4589,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0003">
+		<AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0004">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -4604,6 +4604,8 @@ function(videoItemFblElement, afbElement)
 			<Outputs>
 				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="8" Size="32"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" OpIndex="11" Size="1"/>            
+				<Pin OpName="o_max" Caption="max" Type="Discrete" OpIndex="12" Size="1"/>
+				<Pin OpName="o_min" Caption="min" Type="Discrete" OpIndex="13" Size="1"/>
 			</Outputs>
 			<Params>
 				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
@@ -4687,7 +4689,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0003">
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0004">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -4700,7 +4702,9 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>            
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="8" Size="32"/>            
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="8" Size="32"/>
+                <Pin OpName="o_max" Caption="max" Type="Discrete" OpIndex="12" Size="1"/>
+				<Pin OpName="o_min" Caption="min" Type="Discrete" OpIndex="13" Size="1"/>
 			</Outputs>
 			<Params>
 				 <Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">

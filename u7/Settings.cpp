@@ -129,7 +129,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
 	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
-
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
 	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 
@@ -139,11 +138,18 @@ void Settings::writeUserScope() const
 	s.setValue("ConnectionEditor/geometry", m_connectionEditorWindowGeometry);
     s.setValue("ConnectionEditor/splitter", m_connectionEditorSplitterState);
     s.setValue("ConnectionEditor/peSplitterPos", m_connectionEditorPeSplitterPosition);
-
 	s.setValue("ConnectionEditor/sortColumn", m_connectionEditorSortColumn);
 	s.setValue("ConnectionEditor/sortOrder", static_cast<int>(m_connectionEditorSortOrder));
-
 	s.setValue("ConnectionEditor/masks", m_connectionEditorMasks);
+
+	s.setValue("BusEditor/pos", m_busEditorWindowPos);
+	s.setValue("BusEditor/geometry", m_busEditorWindowGeometry);
+	s.setValue("BusEditor/splitter", m_busEditorSplitterState);
+	s.setValue("BusEditor/pePos", m_busEditorPeWindowPos);
+	s.setValue("BusEditor/peGeometry", m_busEditorPeWindowGeometry);
+	s.setValue("BusEditor/peSplitterPos", m_busEditorPeSplitterPosition);
+	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
+	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
 
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
@@ -213,6 +219,20 @@ void Settings::loadUserScope()
 	m_connectionEditorSortColumn = s.value("ConnectionEditor/sortColumn").toInt();
 	m_connectionEditorSortOrder = static_cast<Qt::SortOrder>(s.value("ConnectionEditor/sortOrder").toInt());
 	m_connectionEditorMasks = s.value("ConnectionEditor/masks").toStringList();
+
+	//
+	m_busEditorWindowPos = s.value("BusEditor/pos", QPoint(-1, -1)).toPoint();
+	m_busEditorWindowGeometry = s.value("BusEditor/geometry").toByteArray();
+	m_busEditorSplitterState = s.value("BusEditor/splitter").toByteArray();
+	m_busEditorPeWindowPos = s.value("BusEditor/pePos", QPoint(-1, -1)).toPoint();
+	m_busEditorPeWindowGeometry = s.value("BusEditor/peGeometry").toByteArray();
+	m_busEditorPeSplitterPosition = s.value("BusEditor/peSplitterPos").toInt();
+	if (m_busEditorPeSplitterPosition < 150)
+	{
+		m_busEditorPeSplitterPosition = 150;
+	}
+	m_busEditorSortColumn = s.value("BusEditor/sortColumn").toInt();
+	m_busEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BusEditor/sortOrder").toInt());
 
     //
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
