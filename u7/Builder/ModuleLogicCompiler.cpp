@@ -1447,8 +1447,11 @@ namespace Builder
 
 			if (linkedValiditySignal == nullptr)
 			{
-				assert(false);
-				return false;
+				LOG_WARNING_OBSOLETE(m_log, Builder:::IssueType::NotDefined,
+						  QString(tr("Linked validity signal with equipmentID '%1' is not found (input signal '%2')")).
+									 arg(linkedValiditySignalEquipmentID).
+									 arg(s->appSignalID()));
+				return true;
 			}
 
 			if (linkedValiditySignal->isInput() == false ||
