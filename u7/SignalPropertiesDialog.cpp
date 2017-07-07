@@ -153,9 +153,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		//std::shared_ptr<SharedIdSignalProperties> signalProperties = std::make_shared<SharedIdSignalProperties>(signalVector, i);
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(*signalVector[i]);
 
+		int precision = signalVector[i]->isAnalog() ? signalVector[i]->decimalPlaces() : 0;
+
 		for (auto property : signalProperties->propertiesDependentOnPrecision())
 		{
-			property->setPrecision(signalVector[i]->decimalPlaces());
+			property->setPrecision(precision);
 		}
 
 		if (readOnly)
@@ -333,9 +335,11 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 		Signal& signal = signalProperties->signal();
 
+		int precision = signal.isAnalog() ? signal.decimalPlaces() : 0;
+
 		for (auto property : signalProperties->propertiesDependentOnPrecision())
 		{
-			property->setPrecision(signal.decimalPlaces());
+			property->setPrecision(precision);
 			m_propertyEditor->updateProperty(property->caption());
 		}
 	}
