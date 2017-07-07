@@ -802,9 +802,14 @@ namespace Builder
 		m_signal->setSignalType(signalType);
 		m_signal->setAnalogSignalFormat(dataFormat);
 		m_signal->setDataSize(dataSize);
+
+		if (signalType == E::SignalType::Analog && dataSize != SIZE_32BIT)
+		{
+			assert(false);
+		}
+
 		m_signal->setInOutType(E::SignalInOutType::Internal);
 		m_signal->setAcquire(false);								// non-registered signal !
-
 	}
 
 	AppSignal::~AppSignal()
@@ -934,6 +939,10 @@ namespace Builder
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
+		QUuid outPinGuid = outputPin.guid();
+
+		QString strID = getShadowSignalStrID(appFb, outputPin);
+
 		E::AnalogAppSignalFormat analogSignalFormat;
 		int dataSize = 1;
 
@@ -964,6 +973,7 @@ namespace Builder
 					return false;
 				}
 			}
+			break;
 
 		case E::SignalType::Discrete:
 			dataSize = 1;
@@ -977,10 +987,6 @@ namespace Builder
 		default:
 			assert(false);
 		}
-
-		QUuid outPinGuid = outputPin.guid();
-
-		QString strID = getShadowSignalStrID(appFb, outputPin);
 
 		AppSignal* appSignal = nullptr;
 

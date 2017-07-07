@@ -472,6 +472,11 @@ namespace Builder
 				continue;
 			}
 
+			if (s.isAnalog() == true && s.dataSize() != SIZE_32BIT)
+			{
+				assert(false);
+			}
+
 			m_chassisSignals.insert(s.appSignalID(), &s);
 
 			if (isIoSignal == true)
@@ -1304,6 +1309,7 @@ namespace Builder
 		//	+ internal
 		//  - enableTuning
 		//	+ used in UAL
+		//	+ shadow analog internal signals (auto generated in m_appSignals)
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -1318,6 +1324,32 @@ namespace Builder
 				m_nonAcquiredAnalogInternalSignals.append(s);
 			}
 		}
+
+		// append shadow analog internal signals (auto generated in m_appSignals)
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
+
+			if (appSignal->isShadowSignal() == true &&
+				appSignal->isAnalog() == true)
+			{
+				Signal* s = appSignal->signal();
+
+				if (s == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				assert(s->isAcquired() == false);
+				assert(s->isInternal() == true);
+				assert(s->dataSize() == SIZE_32BIT);
+
+				m_nonAcquiredAnalogInternalSignals.append(s);
+			}
+		}
+
 
 		return true;
 	}
@@ -1585,7 +1617,7 @@ namespace Builder
 
 			if (deviceModule == nullptr)
 			{
-				assert(false);
+				//assert(false);
 				continue;
 			}
 
@@ -3655,56 +3687,44 @@ namespace Builder
 			break;
 
 		case E::SignalType::Analog:
-			switch(appSignal.dataSize())
+
+			switch(appSignal.analogSignalFormat())
 			{
-			case SIZE_16BIT:
-				cmd.movConst(ramAddrOffset, constItem.intValue());
-				cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-							   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.intValue()));
+			case E::AnalogAppSignalFormat::SignedInt32:
+				if (constItem.isIntegral() == true)
+				{
+					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
+					cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.intValue()));
+				}
+				else
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
+							  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
+				}
 				break;
 
-			case SIZE_32BIT:
-				switch(appSignal.analogSignalFormat())
+			case E::AnalogAppSignalFormat::Float32:
+				if (constItem.isFloat() == true)
 				{
-				case E::AnalogAppSignalFormat::SignedInt32:
-					if (constItem.isIntegral() == true)
-					{
-						cmd.movConstInt32(ramAddrOffset, constItem.intValue());
-						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-									   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.intValue()));
-					}
-					else
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
-								  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
-					}
-					break;
-
-				case E::AnalogAppSignalFormat::Float32:
-					if (constItem.isFloat() == true)
-					{
-						cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
-						cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-									   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.floatValue()));
-					}
-					else
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
-								  arg(constItem.intValue()).arg(appSignal.appSignalID()));
-					}
-					break;
-
-				default:
-					assert(false);
+					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
+					cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
+								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.floatValue()));
 				}
-
+				else
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
+							  arg(constItem.intValue()).arg(appSignal.appSignalID()));
+				}
 				break;
 
 			default:
 				assert(false);
+				return false;
 			}
+
 			break;
 
 		default:
@@ -3984,23 +4004,20 @@ namespace Builder
 			return false;
 		}
 
-		if (appSignal.isAnalog())
+		if (appSignal.isAnalog() == true)
 		{
 			// move value of analog signal
 			//
-			switch(appSignal.dataSize())
+			switch(appSignal.analogSignalFormat())
 			{
-			case SIZE_16BIT:
-				cmd.mov(destRamAddrOffset, srcRamAddrOffset);
-				break;
-
-			case SIZE_32BIT:
+			case E::AnalogAppSignalFormat::Float32:
+			case E::AnalogAppSignalFormat::SignedInt32:
 				cmd.mov32(destRamAddrOffset, srcRamAddrOffset);
 				break;
 
 			default:
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Unknown data size of signal %1 - %2 bit")).
+						  QString(tr("Unknown analog signal format of signal %1 - %2 bit")).
 						  arg(appSignal.appSignalID()).arg(appSignal.dataSize()));
 				return false;
 			}
@@ -4741,35 +4758,31 @@ namespace Builder
 
 		Command cmd;
 
-		int ramAddrOffset = appSignal->ualAddr().offset();
-		int ramAddrBit = appSignal->ualAddr().bit();
+		int ualAddrOffset = appSignal->ualAddr().offset();
+		int ualAddrBit = appSignal->ualAddr().bit();
 
-		if (ramAddrOffset == -1 || ramAddrBit == -1)
+		if (ualAddrOffset == -1 || ualAddrBit == -1)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("RAM-address of signal %1 is not calculated")).arg(appSignal->appSignalID()));
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("UAL address of signal %1 is not calculated")).arg(appSignal->appSignalID()));
 			return false;
 		}
 		else
 		{
-			if (appSignal->isAnalog())
+			if (appSignal->isAnalog() == true)
 			{
 				// output connected to analog signal
 				//
-				switch(appSignal->dataSize())
+				switch(appSignal->analogSignalFormat())
 				{
-				case SIZE_16BIT:
-					cmd.readFuncBlock(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
-					break;
-
-				case SIZE_32BIT:
-					cmd.readFuncBlock32(ramAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
+				case E::AnalogAppSignalFormat::Float32:
+				case E::AnalogAppSignalFormat::SignedInt32:
+					cmd.readFuncBlock32(ualAddrOffset, fbType, fbInstance, fbParamNo, appFb.caption());
 					break;
 
 				default:
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal %1 has wrong data size - %2 bit(s)")).
-									   arg(appSignal->appSignalID()).
-									   arg(appSignal->dataSize()));
+							  QString(tr("Signal %1 has unknown analog signal format")).
+									   arg(appSignal->appSignalID()));
 					return false;
 				}
 			}
@@ -4777,7 +4790,7 @@ namespace Builder
 			{
 				// output connected to discrete signal
 				//
-				cmd.readFuncBlockBit(ramAddrOffset, ramAddrBit, fbType, fbInstance, fbParamNo, appFb.caption());
+				cmd.readFuncBlockBit(ualAddrOffset, ualAddrBit, fbType, fbInstance, fbParamNo, appFb.caption());
 			}
 
 			cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
