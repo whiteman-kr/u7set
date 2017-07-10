@@ -44,7 +44,7 @@
 		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"/>
 		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="105"	VersionOpIndex="21"/>
 		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"/>
-		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="102"	VersionOpIndex="20"/>
+		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="38"/>
 		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="102"	VersionOpIndex="19"/>
 		<AFBComponent Caption="BCOMP"		OpCode="10"	ImpVersion="110"	VersionOpIndex="12"/>
 		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="108"	VersionOpIndex="21"/>		<!-- 	OpIndex 19 as in BDEC  !!!!!-->
