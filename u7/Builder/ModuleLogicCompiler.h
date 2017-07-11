@@ -157,8 +157,9 @@ namespace Builder
 
 		bool appendFbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
-		bool createFbForAnalogInputSignalConversion(const Signal& signal, AppItem& appItem);
-		bool createFbForAnalogOutputSignalConversion(const Signal& signal, AppItem& appItem);
+		bool createFbForAnalogInputSignalConversion(Signal& signal, AppItem& appItem);
+		bool createFbForAnalogOutputSignalConversion(Signal& signal, AppItem& appItem);
+		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal);
 
 		AppFb* createAppFb(const AppItem& appItem);
 		bool setOutputSignalsAsComputed();

@@ -206,6 +206,8 @@ namespace Builder
 		int regBufStartAddr() const { return m_appWordAdressed.acquiredRawData.startAddress(); }
 		int regBufSizeW() const;
 
+		int acquiredRawDataAddress() const { return m_appWordAdressed.acquiredRawData.startAddress(); }
+
 		int aquiredDiscreteInputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInputSignals.startAddress(); }
 		int aquiredDiscreteOutputSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteOutputSignals.startAddress(); }
 		int aquiredDiscreteInternalSignalsAddressInRegBuf() const { return m_appWordAdressed.acquiredDiscreteInternalSignals.startAddress(); }

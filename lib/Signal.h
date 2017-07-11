@@ -210,6 +210,7 @@ private:
 	Address16 m_regValueAddr;			// signal Value address in FSC data packet
 	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet
 
+	bool m_needConversion = false;
 
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
 
@@ -456,6 +457,9 @@ public:
 
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
+
+	void setNeedConversion(bool need) { m_needConversion = need; }
+	bool needConversion() const { return m_needConversion; }
 
 	QString regValueAddrStr() const;
 

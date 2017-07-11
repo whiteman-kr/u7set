@@ -2090,11 +2090,7 @@ namespace Builder
 
 		for(Signal* s : analogInputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->isAnalog() == true);
 			assert(s->isInput() == true);
@@ -2122,11 +2118,7 @@ namespace Builder
 
 		for(Signal* s : analogOutputSignals)
 		{
-			if (s == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			assert(s->isAnalog() == true);
 			assert(s->isOutput() == true);
@@ -2310,11 +2302,45 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogInputSignalConversion(const Signal& signal, AppItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogInputSignalConversion(Signal& signal, AppItem& appItem)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isInput());
 		assert(signal.equipmentID().isEmpty() == false);
+
+		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID());
+
+		if (deviceObject == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		Hardware::DeviceSignal* deviceSignal = deviceObject->toSignal();
+
+		if (deviceSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceSignal, signal);
+
+		if (signalsIsCompatible == true)
+		{
+			signal.setNeedConversion(false);
+			return true;
+		}
+
+		signal.setNeedConversion(true);
+
+		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			return false;
+		}
 
 		int x1 = signal.lowADC();
 		int x2 = signal.highADC();
@@ -2387,11 +2413,45 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(const Signal& signal, AppItem& appItem)
+	bool ModuleLogicCompiler::createFbForAnalogOutputSignalConversion(Signal& signal, AppItem& appItem)
 	{
 		assert(signal.isAnalog());
 		assert(signal.isOutput());
 		assert(signal.equipmentID().isEmpty() == false);
+
+		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.appSignalID());
+
+		if (deviceObject == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		Hardware::DeviceSignal* deviceSignal = deviceObject->toSignal();
+
+		if (deviceSignal == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool signalsIsCompatible = isDeviceAndAppSignalsIsCompatible(*deviceSignal, signal);
+
+		if (signalsIsCompatible == true)
+		{
+			signal.setNeedConversion(false);
+			return true;
+		}
+
+		signal.setNeedConversion(true);
+
+		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			return false;
+		}
 
 		double x1 = signal.lowEngeneeringUnits();
 		double x2 = signal.highEngeneeringUnits();
@@ -2462,6 +2522,39 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceSignal& deviceSignal, const Signal& appSignal)
+	{
+		switch(deviceSignal.format())
+		{
+		case E::DataFormat::Float:
+
+			if (deviceSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			{
+				return true;
+			}
+
+			return false;
+
+		case E::DataFormat::SignedInt:
+
+			if (deviceSignal.size() == SIZE_32BIT && appSignal.analogSignalFormat() == E::AnalogAppSignalFormat::SignedInt32)
+			{
+				return true;
+			}
+
+			return false;
+
+		case E::DataFormat::UnsignedInt:
+
+			return false;
+
+		default:
+			assert(false);
+		}
+
+		return false;
 	}
 
 	AppFb* ModuleLogicCompiler::createAppFb(const AppItem& appItem)
@@ -3200,6 +3293,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::copyAcquiredRawDataInRegBuf()
 	{
+		m_code.comment("Copy acquired raw data");
+		m_code.newLine();
+
 		return true;
 	}
 
@@ -3220,11 +3316,31 @@ namespace Builder
 		m_code.comment("Convertion of input analog signals");
 		m_code.newLine();
 
+		Command cmd;
+
 		for(Signal* s : analogInputSignals)
 		{
 			if (s == nullptr)
 			{
 				assert(false);
+				continue;
+			}
+
+			assert(s->isAnalog() == true);
+			assert(s->isInput() == true);
+			assert(s->dataSize() == SIZE_32BIT);
+			assert(s->ualAddr().isValid() == true);
+			assert(s->ioBufAddr().isValid() == true);
+
+			if (s->needConversion() == false)
+			{
+				// signal isn't need conversion
+				// copy signal only
+				//
+				cmd.mov32(s->ualAddr().offset(), s->ioBufAddr().offset());
+				cmd.setComment(QString("copy analog input %1").arg(s->appSignalID()));
+				m_code.append(cmd);
+
 				continue;
 			}
 
@@ -3254,8 +3370,6 @@ namespace Builder
 
 			assert(s->ioBufAddr().isValid() == true);
 			assert(s->ualAddr().isValid() == true);
-
-			Command cmd;
 
 			cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
 							   s->ioBufAddr().offset(), appFb->caption());
@@ -5273,6 +5387,18 @@ namespace Builder
 			assert(s->dataSize() == SIZE_32BIT);
 			assert(s->ualAddr().isValid() == true);
 			assert(s->ioBufAddr().isValid() == true);
+
+			if (s->needConversion() == false)
+			{
+				// signal isn't need conversion
+				// copy signal only
+				//
+				cmd.mov32(s->ioBufAddr().offset(), s->ualAddr().offset());
+				cmd.setComment(QString("copy analog output %1").arg(s->appSignalID()));
+				m_code.append(cmd);
+
+				continue;
+			}
 
 			AppFb* appFb = m_inOutSignalsToScalAppFbMap.value(s->appSignalID(), nullptr);
 
