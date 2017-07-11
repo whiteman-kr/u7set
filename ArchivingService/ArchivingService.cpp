@@ -47,6 +47,8 @@ void ArchivingServiceWorker::initCmdLineParser()
 	cp.addSingleValueOption("id", "EquipmentID", "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption("cfgip1", "CfgServiceIP1", "IP-addres of first Configuration Service.", "");
 	cp.addSingleValueOption("cfgip2", "CfgServiceIP2", "IP-addres of second Configuration Service.", "");
+	cp.addSingleValueOption("appdata1", "AppDataIP1", "First IP-addres for receiving application data.", "");
+	cp.addSingleValueOption("appdata2", "AppDataIP2", "Second IP-addres for receiving application data.", "");
 }
 
 void ArchivingServiceWorker::loadSettings()
@@ -61,10 +63,20 @@ void ArchivingServiceWorker::loadSettings()
 
 	m_cfgServiceIP2 = HostAddressPort(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_REQUEST);
 
+	m_appDataIP1Str = getStrSetting("AppDataIP1");
+
+	m_appDataIP1 = HostAddressPort(m_appDataIP1Str, PORT_ARCHIVING_SERVICE_APP_DATA);
+
+	m_appDataIP2Str = getStrSetting("AppDataIP2");
+
+	m_appDataIP2 = HostAddressPort(m_appDataIP2Str, PORT_ARCHIVING_SERVICE_APP_DATA);
+
 	DEBUG_LOG_MSG(m_logger, QString(tr("Load settings:")));
 	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg("EquipmentID").arg(m_equipmentID));
 	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP1").arg(m_cfgServiceIP1Str).arg(m_cfgServiceIP1.addressPortStr()));
 	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("AppDataIP1").arg(m_appDataIP1Str).arg(m_appDataIP1.addressPortStr()));
+	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("AppDataIP2").arg(m_appDataIP2Str).arg(m_appDataIP2.addressPortStr()));
 }
 
 
@@ -114,15 +126,57 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 
 void ArchivingServiceWorker::clearConfiguration()
 {
-	// free all resources allocated in onConfigurationReady
-	//
+	stopClientDataServerThread();
+	stopAppDataServerThread();
+	stopDbWriteThread();
 }
 
 
 void ArchivingServiceWorker::applyNewConfiguration()
 {
+	runDbWriteThread();
+	runAppDataServerThread();
+	runClientDataServerThread();
 }
 
+void ArchivingServiceWorker::runDbWriteThread()
+{
+
+}
+
+void ArchivingServiceWorker::runAppDataServerThread()
+{
+	TcpAppDataServer* server = new TcpAppDataServer();
+
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_appDataIP1, server, m_logger);
+
+	m_tcpAppDataServerThread->start();
+}
+
+void ArchivingServiceWorker::runClientDataServerThread()
+{
+
+}
+
+void ArchivingServiceWorker::stopDbWriteThread()
+{
+
+}
+
+void ArchivingServiceWorker::stopAppDataServerThread()
+{
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->quitAndWait();
+		delete m_tcpAppDataServerThread;
+		m_tcpAppDataServerThread = nullptr;
+	}
+}
+
+void ArchivingServiceWorker::stopClientDataServerThread()
+{
+
+}
 
 bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 {

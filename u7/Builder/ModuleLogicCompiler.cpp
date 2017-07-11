@@ -105,6 +105,10 @@ namespace Builder
 
 			if (createAppSignalsMap() == false) break;
 
+			if (processTxSignals() == false) break;
+
+			if (processSerialRxSignals() == false) break;
+
 			if (buildTuningData() == false) break;
 
 			if (createSignalLists() == false) break;
@@ -114,10 +118,6 @@ namespace Builder
 			if (appendFbsForAnalogInOutSignalsConversion() == false) break;
 
 			if (setOutputSignalsAsComputed() == false) break;
-
-			if (processTxSignals() == false) break;
-
-			if (processSerialRxSignals() == false) break;
 
 			if (setOptoRawInSignalsAsComputed() == false) break;
 
@@ -920,7 +920,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//  - enableTuning
-		//	+ used in UAL
+		//	+ used in UAL || is a SerialRx signal
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -930,7 +930,8 @@ namespace Builder
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
 				s->enableTuning() == false &&
-				isUsedInUal(s) == true)
+				(isUsedInUal(s->appSignalID()) == true ||
+				m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID())))
 			{
 				m_acquiredDiscreteInternalSignals.append(s);
 			}
@@ -1184,7 +1185,7 @@ namespace Builder
 		//	+ analog
 		//	+ internal
 		//  - enableTuning
-		//	+ used in UAL
+		//	+ used in UAL || is a SerialRx signal
 
 		for(Signal* s : m_chassisSignals)
 		{
@@ -1194,7 +1195,8 @@ namespace Builder
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
 				s->enableTuning() == false &&
-				isUsedInUal(s->appSignalID()) == true)
+				(isUsedInUal(s->appSignalID()) == true ||
+				 m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID()) == true))
 			{
 				m_acquiredAnalogInternalSignals.append(s);
 			}

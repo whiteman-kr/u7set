@@ -393,4 +393,19 @@ message TuningSignalsApplyReply
     optional int32 error = 1 [default = 0];
 }
 
+// ArchService requests and replies
+//
+
+message SaveAppSignalsStatesToArchiveRequest
+{
+    optional string clientEquipmentID = 1;
+    repeated Proto.AppSignalState appSignalStates = 2;
+}
+
+message SaveAppSignalsStatesToArchiveReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
+
 

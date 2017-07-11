@@ -88,7 +88,8 @@ SOURCES += \
     ../lib/Types.cpp \
     ../u7/Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
-    ArchServiceMain.cpp
+    ArchServiceMain.cpp \
+    TcpAppDataServer.cpp
 
 HEADERS += \
     version.h \
@@ -121,7 +122,8 @@ HEADERS += \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../u7/Builder/ModulesRawData.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    TcpAppDataServer.h
 
 include(../qtservice/src/qtservice.pri)
 
