@@ -193,10 +193,10 @@ namespace Builder
 			}
 
 			AppDataServiceSettings dasSettings1;
-			dasSettings1.readFromDevice(dasObject1, m_log);
+			dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
 
 			AppDataServiceSettings dasSettings2;
-			dasSettings2.readFromDevice(dasObject2, m_log);
+			dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
 
 			// Get ip addresses and ports, write them to configurations
 			//

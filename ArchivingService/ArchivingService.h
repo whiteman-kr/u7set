@@ -53,14 +53,9 @@ private:
 	QString m_equipmentID;
 	QString m_cfgServiceIP1Str;
 	QString m_cfgServiceIP2Str;
-	QString m_appDataIP1Str;
-	QString m_appDataIP2Str;
 
 	HostAddressPort m_cfgServiceIP1;
 	HostAddressPort m_cfgServiceIP2;
-
-	HostAddressPort m_appDataIP1;
-	HostAddressPort m_appDataIP2;
 
 	std::shared_ptr<CircularLogger> m_logger;
 

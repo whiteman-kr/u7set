@@ -6,6 +6,7 @@
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
+#include "TcpArchiveClient.h"
 
 #include "version.h"
 
@@ -32,6 +33,7 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		m_appDataChannelThread[channel] = nullptr;
+		m_tcpArchiveClientThreads[channel] = nullptr;
 	}
 }
 
@@ -113,7 +115,6 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 	delete m_cfgLoaderThread;
 }
 
-
 void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
@@ -130,7 +131,6 @@ void AppDataServiceWorker::runTcpAppDataServer()
 	m_tcpAppDataServerThread->start();
 }
 
-
 void AppDataServiceWorker::stopTcpAppDataServer()
 {
 	if (m_tcpAppDataServerThread != nullptr)
@@ -142,6 +142,49 @@ void AppDataServiceWorker::stopTcpAppDataServer()
 	}
 }
 
+void AppDataServiceWorker::runTcpArchiveClientThreads()
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		assert(m_tcpArchiveClientThreads[channel] == nullptr);
+
+		if (m_cfgSettings.appDataServiceChannel[channel].archServiceStrID.isEmpty() == true)
+		{
+			m_tcpArchiveClientThreads[channel] = nullptr;
+			continue;
+		}
+
+		TcpArchiveClient* client = new TcpArchiveClient(channel,
+														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
+														E::SoftwareType::AppDataService,
+														m_equipmentID,
+														m_majorVersion,
+														m_minorVersion,
+														USED_SERVER_COMMIT_NUMBER,
+														m_logger);
+
+		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
+
+		m_tcpArchiveClientThreads[channel]->start();
+	}
+}
+
+void AppDataServiceWorker::stopTcpArchiveClientThreads()
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_tcpArchiveClientThreads[channel] == nullptr)
+		{
+			continue;
+		}
+
+		m_tcpArchiveClientThreads[channel]->quitAndWait();
+
+		delete m_tcpArchiveClientThreads[channel];
+
+		m_tcpArchiveClientThreads[channel] = nullptr;
+	}
+}
 
 void AppDataServiceWorker::runTimer()
 {
@@ -460,6 +503,7 @@ void AppDataServiceWorker::clearConfiguration()
 	//
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
+	stopTcpArchiveClientThreads();
 
 	m_unitInfo.clear();
 
@@ -472,6 +516,8 @@ void AppDataServiceWorker::clearConfiguration()
 void AppDataServiceWorker::applyNewConfiguration()
 {
 	createAndInitSignalStates();
+
+	runTcpArchiveClientThreads();
 
 	initDataChannelThreads();
 

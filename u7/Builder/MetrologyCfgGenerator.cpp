@@ -110,7 +110,7 @@ namespace Builder
 				}
 				else
 				{
-					adsSettings1.readFromDevice(appDataObject1, m_log);
+					adsSettings1.readFromDevice(m_equipment, appDataObject1, m_log);
 					appDataPropertyIsValid1 = true;
 				}
 			}
@@ -127,7 +127,7 @@ namespace Builder
 				}
 				else
 				{
-					adsSettings2.readFromDevice(appDataObject2, m_log);
+					adsSettings2.readFromDevice(m_equipment, appDataObject2, m_log);
 					appDataPropertyIsValid2 = true;
 				}
 			}

@@ -17,6 +17,10 @@ class AppDataServiceWorker : public ServiceWorker
 	Q_OBJECT
 
 public:
+	static const int m_majorVersion = 0;
+	static const int m_minorVersion = 5;
+
+public:
 	AppDataServiceWorker(const QString& serviceName,
 						 int& argc,
 						 char** argv,
@@ -46,6 +50,9 @@ private:
 
 	void runTcpAppDataServer();
 	void stopTcpAppDataServer();
+
+	void runTcpArchiveClientThreads();
+	void stopTcpArchiveClientThreads();
 
 	void runTimer();
 	void stopTimer();
@@ -102,6 +109,8 @@ private:
 	AppDataChannelThread* m_appDataChannelThread[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
+
+	Tcp::Thread* m_tcpArchiveClientThreads[AppDataServiceSettings::DATA_CHANNEL_COUNT];
 
 	QTimer m_timer;
 };

@@ -23,6 +23,8 @@ private:
 	static const char* PROP_APP_DATA_RECEIVING_PORT;
 
 	static const char* PROP_ARCH_SERVICE_ID;
+	static const char* PROP_ARCH_SERVICE_IP;
+	static const char* PROP_ARCH_SERVICE_PORT;
 
 	static const char* PROP_CFG_SERVICE_ID;
 
@@ -40,7 +42,7 @@ public:
 	QString cfgServiceStrID;
 	HostAddressPort cfgServiceIP;
 
-	bool readFromDevice(Hardware::DeviceController *controller, Builder::IssueLogger* log);
+	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::DeviceController* controller, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml, int channel);
 	bool readFromXml(XmlReadHelper& xml, int channel);
 };
@@ -49,6 +51,9 @@ public:
 class AppDataServiceSettings
 {
 public:
+	static const int DATA_CHANNEL_1 = 0;
+	static const int DATA_CHANNEL_2 = 1;
+
 	static const int DATA_CHANNEL_COUNT = 2;
 
 private:
@@ -64,7 +69,7 @@ public:
 
 	AppDataServiceChannel appDataServiceChannel[DATA_CHANNEL_COUNT];
 
-	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
+	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 };
@@ -125,8 +130,6 @@ public:
 class ArchivingServiceSettings
 {
 public:
-
-private:
 	static const char* SECTION_NAME;
 
 	static const char* PROP_CLIENT_REQUEST_IP;

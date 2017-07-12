@@ -826,7 +826,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't find child object wuith suffix '%1' in object '%2'
+	/// Title: Can't find child object with suffix '%1' in object '%2'
 	///
 	/// Parameters:
 	///         %1 Suffix
@@ -839,7 +839,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3014,
-				  tr("Can't find child object wuith suffix '%1' in object '%2'.")
+				  tr("Can't find child object with suffix '%1' in object '%2'.")
 				  .arg(suffix)
 				  .arg(objectID));
 	}
@@ -1043,6 +1043,29 @@ namespace Builder
 				  3023,
 				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
 	}
+
+	/// IssueCode: CFG3024
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
+	///
+	/// Parameters:
+	///         %1 AppDataService equipmentID
+	///         %2 ArchivingService equipmentID
+	///
+	/// Description:
+	///			Both data channels of specified AppDataService is linked to same ArchivingService. Check settings of AppDataService.
+	///
+	void IssueLogger::wrnCFG3024(QString appDataServiceID, QString archServiceID)
+	{
+		LOG_WARNING1(IssueType::FscConfiguration,
+				  3024,
+				  tr("Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.")
+				  .arg(appDataServiceID)
+				  .arg(archServiceID));
+	}
+
 
 	// ALP			Application Logic Parsing				4000-4999
 	//
