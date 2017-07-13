@@ -2462,7 +2462,7 @@ namespace Builder
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
-			return nullptr;
+			return false;
 		}
 
 		int y1 = signal.lowADC();
@@ -5470,7 +5470,7 @@ namespace Builder
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
-		QVector<int>& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
+		QVector<int>&& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
 		qSort(sortedWriteAddress);
 
