@@ -134,4 +134,19 @@ bool QueueBase::completePush()
 	return true;
 }
 
+void QueueBase::resize(int newQueueSize)
+{
+	assert(newQueueSize < 1024 * 1024);
+
+	AUTO_LOCK(m_mutex)
+
+	delete [] m_buffer;
+
+	m_queueSize = newQueueSize;
+	m_buffer = new char [m_itemSize * m_queueSize];
+
+	m_writeIndex.reset();
+	m_readIndex.reset();
+}
+
 

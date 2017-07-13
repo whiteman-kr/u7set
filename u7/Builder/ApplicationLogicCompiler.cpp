@@ -261,6 +261,12 @@ namespace Builder
 					m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
 					result = false;
 				}
+
+				if (s.aperture() <= 0)
+				{
+					m_log->errALC5090(s.appSignalID());
+					result = false;
+				}
 			}
 
 			// check tuningable signals properties

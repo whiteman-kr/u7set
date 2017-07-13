@@ -51,7 +51,8 @@ SOURCES +=\
     ../u7/Builder/ModulesRawData.cpp \
     TuningIPENDataStorage.cpp \
     ../TuningService/TuningDataStorage.cpp \
-    ../lib/CommandLineParser.cpp
+    ../lib/CommandLineParser.cpp \
+    ../lib/AppSignal.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -90,7 +91,8 @@ HEADERS  += TuningMainWindow.h \
     ../u7/Builder/ModulesRawData.h \
     TuningIPENDataStorage.h \
     ../TuningService/TuningDataStorage.h \
-    ../lib/CommandLineParser.h
+    ../lib/CommandLineParser.h \
+    ../lib/AppSignal.h
 
 include(../qtservice/src/qtservice.pri)
 

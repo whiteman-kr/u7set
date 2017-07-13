@@ -8,17 +8,26 @@
 struct AppSignalStateEx
 {
 private:
-	AppSignalState m_current;
-	AppSignalState m_stored;
+	SimpleAppSignalState m_current;
+	SimpleAppSignalState m_stored;
 
 	// paramters needed to update state
 	//
 	bool m_initialized = false;
 	bool m_isDiscreteSignal = false;
-	double m_aperture = 0;
+
+	bool m_adaptiveAperture = false;
+
+	double m_roughAperture = 0;
+	double m_smoothAperture = 0;
+
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
-	double m_absAperture = 0;
+
+	//
+
+	double m_absRoughAperture = 0;
+	double m_absSmoothAperture = 0;
 
 	Signal* m_signal = nullptr;
 	int m_index = 0;
@@ -27,15 +36,18 @@ public:
 	AppSignalStateEx();
 
 	void setSignalParams(int index, Signal* signal);
-	void setState(Times time, quint32 validity, double value);
+	bool setState(Times time, quint32 validity, double value);
 
-	void invalidate() { m_current.m_flags.all = 0; }
+	void invalidate() { m_current.flags.all = 0; }
 
 	Hash hash() const;
 
 	QString appSignalID() const;
 
 	friend class AppSignalStates;
+
+	const SimpleAppSignalState& current() const { return m_current; }
+	const SimpleAppSignalState& stored() const { return m_stored; }
 };
 
 

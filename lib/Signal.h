@@ -178,7 +178,8 @@ private:
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
-	double m_aperture = 1;
+	double m_roughAperture = 1;
+	double m_smoothAperture = 0.5;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
 	double m_filteringTime = 0.005;
@@ -406,8 +407,8 @@ public:
 	Q_INVOKABLE int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
-	Q_INVOKABLE double aperture() const { return m_aperture; }
-	void setAperture(double aperture) { m_aperture = aperture; }
+	Q_INVOKABLE double aperture() const { return m_roughAperture; }
+	void setAperture(double aperture) { m_roughAperture = aperture; }
 
 	int inOutTypeInt() const { return TO_INT(m_inOutType); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }

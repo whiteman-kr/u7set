@@ -28,7 +28,8 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
 										   std::shared_ptr<CircularLogger> logger) :
 	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
 	m_logger(logger),
-	m_timer(this)
+	m_timer(this),
+	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
@@ -161,7 +162,8 @@ void AppDataServiceWorker::runTcpArchiveClientThreads()
 														m_majorVersion,
 														m_minorVersion,
 														USED_SERVER_COMMIT_NUMBER,
-														m_logger);
+														m_logger,
+														m_signalStatesQueue);
 
 		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
 
@@ -512,9 +514,10 @@ void AppDataServiceWorker::clearConfiguration()
 	m_signalStates.clear();
 }
 
-
 void AppDataServiceWorker::applyNewConfiguration()
 {
+	resizeAppSignalEventsQueue();
+
 	createAndInitSignalStates();
 
 	runTcpArchiveClientThreads();
@@ -526,6 +529,24 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 }
 
+void AppDataServiceWorker::resizeAppSignalEventsQueue()
+{
+	int queueSize = m_appSignals.count() * 2;
+
+	if (queueSize == 0)
+	{
+		queueSize = 1;
+	}
+
+	if (queueSize > APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE)
+	{
+		DEBUG_LOG_WRN(m_logger,"AppSignalEvents queue is reached max size");
+
+		queueSize = APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE;
+	}
+
+	m_signalStatesQueue.resize(queueSize);
+}
 
 void AppDataServiceWorker::initDataChannelThreads()
 {
@@ -534,7 +555,8 @@ void AppDataServiceWorker::initDataChannelThreads()
 		// create AppDataChannelThread
 		//
 		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
-						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP);
+						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
+						m_signalStatesQueue);
 
 		// add AppDataSources to channel
 		//

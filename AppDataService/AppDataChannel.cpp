@@ -9,12 +9,13 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannel::AppDataChannel(int channel, const HostAddressPort& dataReceivingIP) :
+AppDataChannel::AppDataChannel(int channel, const HostAddressPort& dataReceivingIP, AppSignalStatesQueue& signalStatesQueue) :
 	m_dataType(DataSource::DataType::App),
 	m_channel(channel),
 	m_dataReceivingIP(dataReceivingIP),
 	m_rupDataQueue(500),
-	m_timer1s(this)
+	m_timer1s(this),
+	m_signalStatesQueue(signalStatesQueue)
 {
 }
 
@@ -110,7 +111,7 @@ void AppDataChannel::addDataSource(AppDataSource* appDataSource)
 
 void AppDataChannel::onThreadStarted()
 {
-	m_processingThreadsPool.createProcessingThreads(1, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
+	m_processingThreadsPool.createProcessingThreads(1, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates, m_signalStatesQueue);
 
 //	m_processingThreadsPool.createProcessingThreads(4, m_rupDataQueue, m_sourceParseInfoMap, *m_signalStates);
 	m_processingThreadsPool.startProcessingThreads();
@@ -216,7 +217,7 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 			continue;
 		}
 
-		signalState->setState(time, INVALID_STATE, 0);
+		signalState->setState(time, AppSignalState::INVALID, 0);
 	}
 
 	HostAddressPort addr(dataSourceIP, 0);
@@ -308,9 +309,9 @@ void AppDataChannel::onSocketReadyRead()
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannelThread::AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP)
+AppDataChannelThread::AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP, AppSignalStatesQueue& signalStatesQueue)
 {
-	m_appDataChannel = new AppDataChannel(channel, dataRecievingIP);
+	m_appDataChannel = new AppDataChannel(channel, dataRecievingIP, signalStatesQueue);
 	addWorker(m_appDataChannel);
 }
 

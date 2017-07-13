@@ -3964,6 +3964,25 @@ namespace Builder
 					arg(addrTo).arg(bitTo).arg(addrFrom).arg(bitFrom));
 	}
 
+	/// IssueCode: ALC5090
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Analog signal '%1' aperture should be greate then 0.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Analog signal aperture should be greate then 0. Check properties of specified signal.
+	///
+	void IssueLogger::errALC5090(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5090,
+				  QString(tr("Analog signal '%1' aperture should be greate then 0.")).
+					arg(appSignalID));
+	}
 
 	/// IssueCode: ALC5186
 	///

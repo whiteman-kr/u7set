@@ -13,7 +13,7 @@
 class AppDataChannel : public SimpleThreadWorker
 {
 public:
-	AppDataChannel(int channel, const HostAddressPort& dataReceivingIP);
+	AppDataChannel(int channel, const HostAddressPort& dataReceivingIP, AppSignalStatesQueue& signalStatesQueue);
 	virtual ~AppDataChannel();
 
 	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
@@ -60,6 +60,7 @@ private:
 	SourceParseInfoMap m_sourceParseInfoMap;		// source ip => QVector<SignalParseInfo> map
 	AppSignalStates* m_signalStates = nullptr;		// allocated and freed in AppDataService
 	AppDataProcessingThreadsPool m_processingThreadsPool;
+	AppSignalStatesQueue& m_signalStatesQueue;
 };
 
 
@@ -71,7 +72,7 @@ private:
 	AppDataChannel* m_appDataChannel = nullptr;
 
 public:
-	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP);
+	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP, AppSignalStatesQueue& signalStatesQueue);
 
 	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
 	void addDataSource(AppDataSource* appDataSource);

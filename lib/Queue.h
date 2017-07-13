@@ -72,6 +72,8 @@ public:
 
 	char* beginPush();
 	bool completePush();
+
+	void resize(int newQueueSize);
 };
 
 

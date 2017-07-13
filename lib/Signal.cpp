@@ -136,7 +136,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_calculated = signal.m_calculated;
 	m_normalState = signal.m_normalState;
 	m_decimalPlaces = signal.m_decimalPlaces;
-	m_aperture = signal.m_aperture;
+	m_roughAperture = signal.m_roughAperture;
 	m_adaptiveAperture = signal.m_adaptiveAperture;
 	m_inOutType = signal.m_inOutType;
 	m_equipmentID = signal.m_equipmentID;
@@ -798,7 +798,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolAttribute("Calculated", &m_calculated);
 	result &= xml.readIntAttribute("NormalState", &m_normalState);
 	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
-	result &= xml.readDoubleAttribute("Aperture", &m_aperture);
+	result &= xml.readDoubleAttribute("Aperture", &m_roughAperture);
 
 	result &= xml.readIntAttribute("InOutType", &intValue);
 	m_inOutType = static_cast<E::SignalInOutType>(intValue);
@@ -896,7 +896,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_calculated(m_calculated);
 	s->set_normalstate(m_normalState);
 	s->set_decimalplaces(m_decimalPlaces);
-	s->set_aperture(m_aperture);
+	s->set_aperture(m_roughAperture);
 	s->set_inouttype(TO_INT(m_inOutType));
 	s->set_equipmentid(m_equipmentID.toStdString());
 	s->set_filteringtime(m_filteringTime);
@@ -1127,7 +1127,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_aperture())
 	{
-		m_aperture = s->aperture();
+		m_roughAperture = s->aperture();
 	}
 
 	if (s->has_inouttype())
@@ -1279,7 +1279,7 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 	message->set_outputsensortype(m_outputSensorType);
 
 	message->set_precision(m_decimalPlaces);
-	message->set_aperture(m_aperture);
+	message->set_aperture(m_roughAperture);
 	message->set_filteringtime(m_filteringTime);
 	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);

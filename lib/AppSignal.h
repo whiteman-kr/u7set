@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include "../Proto/serialization.pb.h"
 #include "../lib/Hash.h"
+#include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
 #include "Types.h"
 
@@ -24,17 +25,30 @@ union AppSignalStateFlags
 	struct
 	{
 		quint32	valid : 1;
-		//quint32	overflow : 1;
-		//quint32	underflow : 1;
+
+		// reasons to archiving
+		//
+		quint32 validityChange : 1;
+		quint32 autoPoint : 1;
+		quint32 roughAperture : 1;
+		quint32 smoothAperture : 1;
 	};
 
 	quint32 all;
+
+	void clear() { all = 0; }
+
+	bool hasArchivingReason()
+	{
+		return	validityChange == 1 ||
+				autoPoint == 1 ||
+				roughAperture == 1 ||
+				smoothAperture == 1;
+	}
 };
 
 
-const quint32 VALID_STATE = 1;
-const quint32 INVALID_STATE = 0;
-
+struct SimpleAppSignalState;
 
 class AppSignalState
 {
@@ -44,6 +58,8 @@ class AppSignalState
 	Q_PROPERTY(double Value READ value)
 
 public:
+	static const quint32 VALID = 1;
+	static const quint32 INVALID = 0;
 
 	Q_INVOKABLE Hash hash() const;
 	const Times& time() const;
@@ -56,6 +72,8 @@ public:
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
 
+	const AppSignalState& operator = (const SimpleAppSignalState& smState);
+
 public:
 	Hash m_hash = 0;					// == calcHash(AppSignalID)
 	Times m_time;
@@ -64,6 +82,22 @@ public:
 };
 
 Q_DECLARE_METATYPE(AppSignalState)
+
+
+struct SimpleAppSignalState
+{
+	// light version of AppSignalState to use in queues and other AppDataService data structs
+	//
+	Hash hash = 0;					// == calcHash(AppSignalID)
+	Times time;
+	AppSignalStateFlags flags;
+	double value = 0;
+
+	void save(Proto::AppSignalState* protoState);
+	Hash load(const Proto::AppSignalState& protoState);
+};
+
+typedef Queue<SimpleAppSignalState> AppSignalStatesQueue;
 
 
 class AppSignalParam
