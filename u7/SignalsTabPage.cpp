@@ -1840,15 +1840,6 @@ void SignalsTabPage::editSignal()
 	}
 
 	m_signalsModel->editSignals(selectedSignalId);
-
-	m_signalsView->selectionModel()->clearSelection();
-	QAbstractItemView::SelectionMode selectionMode = m_signalsView->selectionMode();
-	m_signalsView->setSelectionMode(QAbstractItemView::MultiSelection);
-	for (int i = 0; i < selectedSignalId.count(); i++)
-	{
-		m_signalsView->selectRow(m_signalsProxyModel->mapFromSource(m_signalsModel->index(m_signalsModel->keyIndex(selectedSignalId[i]), 0)).row());
-	}
-	m_signalsView->setSelectionMode(selectionMode);
 }
 
 void SignalsTabPage::cloneSignal()
