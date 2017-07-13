@@ -178,7 +178,8 @@ private:
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
-	double m_aperture = 1;
+	double m_roughAperture = 1;
+	double m_smoothAperture = 0.5;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
 	QString m_equipmentID;
 	double m_filteringTime = 0.005;
@@ -195,14 +196,22 @@ private:
 
 	Hash m_hash = 0;					// hash of AppSignalID
 
-	Address16 m_ioBufferAddr;			// only for modules input/output signals
-										// signal address in i/o modules buffers
+	Address16 m_ioBufAddr;				// signal address in i/o modules buffers
+										// only for signals of input/output modules (input and output signals)
 
-	Address16 m_ramAddr;				// signal address in LM RAM
-	Address16 m_regValueAddr;			// signal Value address in FSC data packet (registration address)
-	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet (registration address)
+	Address16 m_tuningAddr;				// signal address in tuning buffer
+										// only for tuningable signals
 
-	Address16 m_tuningAddr;
+	Address16 m_ualAddr;				// signal address is used in UAL
+										// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not
+										// this address should be used in all signals value read/write operations in UAL
+
+	Address16 m_regBufAddr;				// absolute signal address in registration buffer (LM's memory address)
+
+	Address16 m_regValueAddr;			// signal Value address in FSC data packet
+	Address16 m_regValidityAddr;		// signal Validity address in FSC data packet
+
+	bool m_needConversion = false;
 
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
 
@@ -266,25 +275,28 @@ public:
 	QDateTime instanceCreated() const { return m_instanceCreated; }
 	VcsItemAction instanceAction() const { return m_instanceAction; }
 
-	Address16& iobufferAddr() { return m_ioBufferAddr; }
-	Address16& ramAddr() { return m_ramAddr; }
+	Address16& ioBufAddr() { return m_ioBufAddr; }
+	Address16& ualAddr() { return m_ualAddr; }
+	Address16& regBufAddr() { return m_regBufAddr; }
 	Address16& regValueAddr() { return m_regValueAddr; }
 	Address16& regValidityAddr() { return m_regValidityAddr; }
+	Address16& tuningAddr() { return m_tuningAddr; }
 
-	const Address16& iobufferAddr() const { return m_ioBufferAddr; }
-	const Address16& ramAddr() const { return m_ramAddr; }
-
+	const Address16& ioBufAddr() const { return m_ioBufAddr; }
+	const Address16& ualAddr() const { return m_ualAddr; }
+	const Address16& regBufAddr() const { return m_regBufAddr; }
 	const Address16& regValueAddr() const { return m_regValueAddr; }
 	const Address16& regValidityAddr() const { return m_regValidityAddr; }
-
-	void resetAddresses() { m_ramAddr.reset(); m_regValueAddr.reset(); m_regValidityAddr.reset(); }
-
-	void setRamAddr(const Address16& ramAddr) { m_ramAddr = ramAddr; }
-	void setRegValueAddr(const Address16& regValueAddr) { m_regValueAddr = regValueAddr; }
-	void setRegValidityAddr(const Address16& regValidityAddr) { m_regValidityAddr = regValidityAddr; }
-
-	void setTuningAddr(const Address16& tuningAddr) { m_tuningAddr = tuningAddr; }
 	const Address16& tuningAddr() const { return m_tuningAddr; }
+
+	void setIoBufAddr(const Address16& addr) { m_ioBufAddr = addr; }
+	void setUalAddr(const Address16& addr) { m_ualAddr = addr; }
+	void setRegBufAddr(const Address16& addr) { m_regBufAddr = addr; }
+	void setRegValueAddr(const Address16& addr) { m_regValueAddr = addr; }
+	void setRegValidityAddr(const Address16& addr) { m_regValidityAddr = addr; }
+	void setTuningAddr(const Address16& addr) { m_tuningAddr = addr; }
+
+	void resetAddresses();
 
 	Hash hash() const { return m_hash; }
 	void setHash(Hash hash) { m_hash = hash; }
@@ -395,8 +407,8 @@ public:
 	Q_INVOKABLE int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
-	Q_INVOKABLE double aperture() const { return m_aperture; }
-	void setAperture(double aperture) { m_aperture = aperture; }
+	Q_INVOKABLE double aperture() const { return m_roughAperture; }
+	void setAperture(double aperture) { m_roughAperture = aperture; }
 
 	int inOutTypeInt() const { return TO_INT(m_inOutType); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_inOutType; }
@@ -446,6 +458,9 @@ public:
 
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
+
+	void setNeedConversion(bool need) { m_needConversion = need; }
+	bool needConversion() const { return m_needConversion; }
 
 	QString regValueAddrStr() const;
 

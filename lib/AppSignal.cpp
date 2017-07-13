@@ -82,6 +82,16 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 	return m_hash;
 }
 
+const AppSignalState& AppSignalState::operator = (const SimpleAppSignalState& smState)
+{
+	m_hash = smState.hash;
+	m_time = smState.time;
+	m_flags = smState.flags;
+	m_value = smState.value;
+
+	return *this;
+}
+
 AppSignalParam::AppSignalParam()
 {
 }

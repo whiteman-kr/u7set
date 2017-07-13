@@ -8,11 +8,16 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataProcessingWorker::AppDataProcessingWorker(int number, RupDataQueue& rupDataQueue, const SourceParseInfoMap& sourceParseInfoMap, AppSignalStates& signalStates) :
+AppDataProcessingWorker::AppDataProcessingWorker(int number,
+												 RupDataQueue& rupDataQueue,
+												 const SourceParseInfoMap& sourceParseInfoMap,
+												 AppSignalStates& signalStates,
+												 AppSignalStatesQueue& signalStatesQueue) :
 	m_number(number),
 	m_rupDataQueue(rupDataQueue),
 	m_sourceParseInfoMap(sourceParseInfoMap),
-	m_signalStates(signalStates)
+	m_signalStates(signalStates),
+	m_signalStatesQueue(signalStatesQueue)
 {
 }
 
@@ -107,7 +112,12 @@ void AppDataProcessingWorker::parseRupData()
 			continue;
 		}
 
-		signalState->setState(m_rupData.time, validity, value);
+		bool hasArchivingReason = signalState->setState(m_rupData.time, validity, value);
+
+		if (hasArchivingReason == true)
+		{
+			m_signalStatesQueue.push(&signalState->stored());
+		}
 	}
 }
 
@@ -125,16 +135,18 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		bitNo <0 ||
 		bitNo >= SIZE_16BIT)
 	{
-//		assert(false);
 		return false;
 	}
 
 	quint16 rawValue16 = 0;
 	quint32 rawValue32 = 0;
 
-	switch(parseInfo.dataSize)
+	switch(parseInfo.type)
 	{
-	case SIZE_1BIT:
+	case E::SignalType::Discrete:
+
+		assert(parseInfo.dataSize == SIZE_1BIT);
+
 		rawValue16 = *reinterpret_cast<quint16*>(m_rupData.data + valueOffset);
 
 		if (parseInfo.byteOrder == E::ByteOrder::BigEndian)
@@ -142,12 +154,13 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 			rawValue16 = reverseUint16(rawValue16);
 		}
 
-
 		value = static_cast<double>((rawValue16 >> bitNo) & 0x0001);
 
 		break;
 
-	case SIZE_32BIT:
+	case E::SignalType::Analog:
+
+		assert(parseInfo.dataSize == SIZE_32BIT);
 		assert(bitNo == 0);
 
 		rawValue32 = *reinterpret_cast<quint32*>(m_rupData.data + valueOffset);
@@ -157,18 +170,14 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 			rawValue32 = reverseUint32(rawValue32);
 		}
 
-		switch (static_cast<E::DataFormat>(parseInfo.analogSignalFormat))
+		switch (parseInfo.analogSignalFormat)
 		{
-		case E::DataFormat::Float:
+		case E::AnalogAppSignalFormat::Float32:
 			value = static_cast<double>(*reinterpret_cast<float*>(&rawValue32));
 			break;
 
-		case E::DataFormat::SignedInt:
+		case E::AnalogAppSignalFormat::SignedInt32:
 			value = static_cast<double>(*reinterpret_cast<qint32*>(&rawValue32));
-			break;
-
-		case E::DataFormat::UnsignedInt:
-			value = static_cast<double>(rawValue32);
 			break;
 
 		default:
@@ -177,8 +186,7 @@ bool AppDataProcessingWorker::getDoubleValue(const SignalParseInfo& parseInfo, d
 		break;
 
 	default:
-		qDebug() << "Signal index (" << parseInfo.index << ") has dataSize = " << parseInfo.dataSize;
-//		assert(false);
+		qDebug() << "Signal index (" << parseInfo.index << ") has unknown E::SignalType " << parseInfo.dataSize;
 		return false;
 	}
 
@@ -194,7 +202,7 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, quin
 
 	if (validityOffset == BAD_ADDRESS)
 	{
-		validity = VALID_STATE;				// no validity flags in reg buffer
+		validity = AppSignalState::VALID;				// no validity flags in reg buffer
 		return true;
 	}
 
@@ -203,7 +211,7 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, quin
 	if (validityOffset >= m_rupData.dataSize)
 	{
 		assert(false);
-		validity = INVALID_STATE;
+		validity = AppSignalState::INVALID;
 		return false;
 	}
 
@@ -227,8 +235,9 @@ bool AppDataProcessingWorker::getValidity(const SignalParseInfo& parseInfo, quin
 
 AppDataProcessingThread::AppDataProcessingThread(int number, RupDataQueue& rupDataQueue,
 												const SourceParseInfoMap& sourceParseInfoMap,
-												AppSignalStates& signalStates) :
-	SimpleThread(new AppDataProcessingWorker(number, rupDataQueue, sourceParseInfoMap, signalStates))
+												AppSignalStates& signalStates,
+												AppSignalStatesQueue& signalStatesQueue) :
+	SimpleThread(new AppDataProcessingWorker(number, rupDataQueue, sourceParseInfoMap, signalStates, signalStatesQueue))
 {
 }
 
@@ -241,7 +250,8 @@ AppDataProcessingThread::AppDataProcessingThread(int number, RupDataQueue& rupDa
 
 void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize, RupDataQueue& rupDataQueue,
 											const SourceParseInfoMap& sourceParseInfoMap,
-											AppSignalStates& signalStates)
+											AppSignalStates& signalStates,
+											AppSignalStatesQueue& signalStatesQueue)
 {
 	if (count() > 0)
 	{
@@ -262,7 +272,7 @@ void AppDataProcessingThreadsPool::createProcessingThreads(int poolSize, RupData
 
 	for(int i = 0; i < poolSize; i++)
 	{
-		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i, rupDataQueue, sourceParseInfoMap, signalStates);
+		AppDataProcessingThread* processingThread = new AppDataProcessingThread(i, rupDataQueue, sourceParseInfoMap, signalStates, signalStatesQueue);
 
 		append(processingThread);
 	}

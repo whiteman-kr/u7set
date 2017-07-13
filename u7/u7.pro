@@ -191,6 +191,7 @@ SOURCES +=\
     ../lib/AppSignal.cpp \
     CodeEditor.cpp \
     ../lib/CsvFile.cpp \
+    Builder/AppItems.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp
 
@@ -321,6 +322,7 @@ HEADERS  += \
     CodeEditor.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
+    Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h

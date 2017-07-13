@@ -31,7 +31,6 @@ namespace Builder
 		result &= writeSettings();
 		result &= writeAppDataSourcesXml();
 		result &= writeAppSignalsXml();
-//		result &= writeEquipmentXml();
 
 		return result;
 	}
@@ -43,7 +42,7 @@ namespace Builder
 
 		bool result = true;
 
-		result = dasSettings.readFromDevice(m_software, m_log);
+		result = dasSettings.readFromDevice(m_equipment, m_software, m_log);
 
 		if (result == false)
 		{

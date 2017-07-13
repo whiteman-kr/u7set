@@ -144,6 +144,8 @@ namespace  Tuning
 
 		for(QVector<Signal*>& signalList : m_tuningSignals)
 		{
+			sortSignalsByAcquiredProperty(signalList);
+
 			int signalCount = signalList.size();
 
 			switch(t)
@@ -244,9 +246,7 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
-
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(float);
 						testSizeB = true;
@@ -281,9 +281,7 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / sizeof(quint16), 0));
 
-						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0);
-
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16), 0));
 
 						sizeB += sizeof(qint32);
 						testSizeB = true;
@@ -326,9 +324,9 @@ namespace  Tuning
 							bitNo = bitNo % SIZE_16BIT;
 						}
 
-						Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
+						//Address16 ramAddr(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo);
 
-						signal->setRamAddr(ramAddr);
+						signal->setUalAddr(Address16(m_tuningMemoryStartAddrW + sizeB / sizeof(quint16) + additionalOffsetToDiscreteW, bitNo));
 
 						//
 
@@ -359,8 +357,8 @@ namespace  Tuning
 					sizeB += m_tuningFrameSizeBytes * 2;
 				}
 
-				metaData.append(QVariant(signal->tuningAddr().offset()));
-				metaData.append(QVariant(signal->tuningAddr().bit()));
+				metaData.append(QVariant(signal->ualAddr().offset()));
+				metaData.append(QVariant(signal->ualAddr().bit()));
 
 				m_metadata.push_back(metaData);
 			}
@@ -437,6 +435,35 @@ namespace  Tuning
 		return m_tuningSignals[type];
 	}
 
+	void TuningData::getAcquiredAnalogSignals(QVector<Signal *>& analogSignals)
+	{
+		for(Signal* s : m_tuningSignals[TYPE_ANALOG_FLOAT])
+		{
+			if (s->isAcquired() == true)
+			{
+				analogSignals.append(s);
+			}
+		}
+
+		for(Signal* s : m_tuningSignals[TYPE_ANALOG_INT])
+		{
+			if (s->isAcquired() == true)
+			{
+				analogSignals.append(s);
+			}
+		}
+	}
+
+	void TuningData::getAcquiredDiscreteSignals(QVector<Signal*>& discreteSignals)
+	{
+		for(Signal* s : m_tuningSignals[TYPE_DISCRETE])
+		{
+			if (s->isAcquired() == true)
+			{
+				discreteSignals.append(s);
+			}
+		}
+	}
 
 	int TuningData::getSignalsCount() const
 	{
@@ -617,6 +644,55 @@ namespace  Tuning
 		*data32Ptr = reverseUint32(value);
 	}
 
+	void TuningData::sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals)
+	{
+		int count = tuningSignals.count();
+
+		// 1 Sort tuning signals by Acquire property
+		//
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				Signal* s1 = tuningSignals[i];
+				Signal* s2 = tuningSignals[k];
+
+				TEST_PTR_CONTINUE(s1);
+				TEST_PTR_CONTINUE(s2);
+
+				if (s1->isAcquired() == false && s2->isAcquired() == true)
+				{
+					tuningSignals[i] = s2;
+					tuningSignals[k] = s1;
+				}
+			}
+		}
+
+		// 2 Sort tuning Acquired and non Acquired signals by appSignalID
+		//
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				Signal* s1 = tuningSignals[i];
+				Signal* s2 = tuningSignals[k];
+
+				TEST_PTR_CONTINUE(s1);
+				TEST_PTR_CONTINUE(s2);
+
+				if (s1->isAcquired() != s2->isAcquired())
+				{
+					continue;
+				}
+
+				if (s1->appSignalID() > s2->appSignalID())
+				{
+					tuningSignals[i] = s2;
+					tuningSignals[k] = s1;
+				}
+			}
+		}
+	}
 
 	int TuningData::signalValueSizeBits(int type)
 	{

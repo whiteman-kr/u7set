@@ -6,6 +6,7 @@
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
+#include "TcpArchiveClient.h"
 
 #include "version.h"
 
@@ -27,11 +28,13 @@ AppDataServiceWorker::AppDataServiceWorker(const QString& serviceName,
 										   std::shared_ptr<CircularLogger> logger) :
 	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
 	m_logger(logger),
-	m_timer(this)
+	m_timer(this),
+	m_signalStatesQueue(1)			// shoud be resized after cfg loading according to signals count
 {
 	for(int channel = 0; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
 	{
 		m_appDataChannelThread[channel] = nullptr;
+		m_tcpArchiveClientThreads[channel] = nullptr;
 	}
 }
 
@@ -113,7 +116,6 @@ void AppDataServiceWorker::stopCfgLoaderThread()
 	delete m_cfgLoaderThread;
 }
 
-
 void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
@@ -130,7 +132,6 @@ void AppDataServiceWorker::runTcpAppDataServer()
 	m_tcpAppDataServerThread->start();
 }
 
-
 void AppDataServiceWorker::stopTcpAppDataServer()
 {
 	if (m_tcpAppDataServerThread != nullptr)
@@ -142,6 +143,50 @@ void AppDataServiceWorker::stopTcpAppDataServer()
 	}
 }
 
+void AppDataServiceWorker::runTcpArchiveClientThreads()
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		assert(m_tcpArchiveClientThreads[channel] == nullptr);
+
+		if (m_cfgSettings.appDataServiceChannel[channel].archServiceStrID.isEmpty() == true)
+		{
+			m_tcpArchiveClientThreads[channel] = nullptr;
+			continue;
+		}
+
+		TcpArchiveClient* client = new TcpArchiveClient(channel,
+														m_cfgSettings.appDataServiceChannel[channel].archServiceIP,
+														E::SoftwareType::AppDataService,
+														m_equipmentID,
+														m_majorVersion,
+														m_minorVersion,
+														USED_SERVER_COMMIT_NUMBER,
+														m_logger,
+														m_signalStatesQueue);
+
+		m_tcpArchiveClientThreads[channel] = new Tcp::Thread(client);
+
+		m_tcpArchiveClientThreads[channel]->start();
+	}
+}
+
+void AppDataServiceWorker::stopTcpArchiveClientThreads()
+{
+	for(int channel = AppDataServiceSettings::DATA_CHANNEL_1; channel < AppDataServiceSettings::DATA_CHANNEL_COUNT; channel++)
+	{
+		if (m_tcpArchiveClientThreads[channel] == nullptr)
+		{
+			continue;
+		}
+
+		m_tcpArchiveClientThreads[channel]->quitAndWait();
+
+		delete m_tcpArchiveClientThreads[channel];
+
+		m_tcpArchiveClientThreads[channel] = nullptr;
+	}
+}
 
 void AppDataServiceWorker::runTimer()
 {
@@ -460,6 +505,7 @@ void AppDataServiceWorker::clearConfiguration()
 	//
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
+	stopTcpArchiveClientThreads();
 
 	m_unitInfo.clear();
 
@@ -468,10 +514,13 @@ void AppDataServiceWorker::clearConfiguration()
 	m_signalStates.clear();
 }
 
-
 void AppDataServiceWorker::applyNewConfiguration()
 {
+	resizeAppSignalEventsQueue();
+
 	createAndInitSignalStates();
+
+	runTcpArchiveClientThreads();
 
 	initDataChannelThreads();
 
@@ -480,6 +529,24 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 }
 
+void AppDataServiceWorker::resizeAppSignalEventsQueue()
+{
+	int queueSize = m_appSignals.count() * 2;
+
+	if (queueSize == 0)
+	{
+		queueSize = 1;
+	}
+
+	if (queueSize > APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE)
+	{
+		DEBUG_LOG_WRN(m_logger,"AppSignalEvents queue is reached max size");
+
+		queueSize = APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE;
+	}
+
+	m_signalStatesQueue.resize(queueSize);
+}
 
 void AppDataServiceWorker::initDataChannelThreads()
 {
@@ -488,7 +555,8 @@ void AppDataServiceWorker::initDataChannelThreads()
 		// create AppDataChannelThread
 		//
 		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
-						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP);
+						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
+						m_signalStatesQueue);
 
 		// add AppDataSources to channel
 		//

@@ -1,6 +1,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include "../lib/ServiceSettings.h"
+#include "../lib/WUtils.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -14,14 +15,20 @@ const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_IP = "AppDataReceivin
 const char* AppDataServiceChannel::PROP_APP_DATA_RECEIVING_PORT = "AppDataReceivingPort";
 
 const char* AppDataServiceChannel::PROP_ARCH_SERVICE_ID = "ArchiveServiceID";
+const char* AppDataServiceChannel::PROP_ARCH_SERVICE_IP = "ArchiveServiceIP";
+const char* AppDataServiceChannel::PROP_ARCH_SERVICE_PORT = "ArchiveServicePort";
 
 const char* AppDataServiceChannel::PROP_CFG_SERVICE_ID = "ConfigurationServiceID";
 
 const char* AppDataServiceChannel::SECTION_FORMAT_STR = "DataChannel%1";
 
 
-bool AppDataServiceChannel::readFromDevice(Hardware::DeviceController* controller, Builder::IssueLogger* log)
+bool AppDataServiceChannel::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::DeviceController* controller, Builder::IssueLogger* log)
 {
+	TEST_PTR_RETURN_FALSE(equipment);
+	TEST_PTR_RETURN_FALSE(controller);
+	TEST_PTR_RETURN_FALSE(log);
+
 	bool result = true;
 
 	QString appDataNetmaskStr;
@@ -33,6 +40,39 @@ bool AppDataServiceChannel::readFromDevice(Hardware::DeviceController* controlle
 	result &= DeviceHelper::getIntProperty(controller, PROP_APP_DATA_RECEIVING_PORT, &appDataReceivingPort, log);
 
 	result &= DeviceHelper::getStrProperty(controller, PROP_ARCH_SERVICE_ID, &archServiceStrID, log);
+
+	if (archServiceStrID.isEmpty() == false)
+	{
+		Hardware::DeviceObject* deviceObject = equipment->deviceObject(archServiceStrID);
+
+		if (deviceObject == nullptr || deviceObject->isSoftware() == false)
+		{
+			// Property '%1.%2' is linked to undefined software ID '%3'.
+			//
+			log->errCFG3021(controller->equipmentIdTemplate(), PROP_ARCH_SERVICE_ID, archServiceStrID);
+			return false;
+		}
+
+		const Hardware::Software* software = deviceObject->toSoftware();
+
+		if (software == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log);
+			return false;
+		}
+
+		QString ipStr;
+		int port = 0;
+
+		result &= DeviceHelper::getStrProperty(software, ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_IP, &ipStr, log);
+		result &= DeviceHelper::getIntProperty(software, ArchivingServiceSettings::PROP_APP_DATA_SERVICE_REQUEST_PORT, &port, log);
+
+		if (result == true)
+		{
+			archServiceIP.setAddress(ipStr);
+			archServiceIP.setPort(port);
+		}
+	}
 
 	result &= DeviceHelper::getStrProperty(controller, PROP_CFG_SERVICE_ID, &cfgServiceStrID, log);
 
@@ -60,6 +100,7 @@ bool AppDataServiceChannel::writeToXml(XmlWriteHelper& xml, int channel)
 	xml.writeHostAddress(PROP_APP_DATA_NETMASK, appDataNetmask);
 
 	xml.writeStringElement(PROP_ARCH_SERVICE_ID, archServiceStrID);
+	xml.writeHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, archServiceIP);
 
 	xml.writeStringElement(PROP_CFG_SERVICE_ID, cfgServiceStrID);
 
@@ -88,6 +129,8 @@ bool AppDataServiceChannel::readFromXml(XmlReadHelper& xml, int channel)
 
 	result &= xml.readStringElement(PROP_ARCH_SERVICE_ID, &archServiceStrID);
 
+	result &= xml.readHostAddressPort(PROP_ARCH_SERVICE_IP, PROP_ARCH_SERVICE_PORT, &archServiceIP);
+
 	if (xml.findElement(PROP_CFG_SERVICE_ID) == false)
 	{
 		return false;
@@ -112,8 +155,12 @@ const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPor
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
 
 
-bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
+bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
+	TEST_PTR_RETURN_FALSE(equipment);
+	TEST_PTR_RETURN_FALSE(software);
+	TEST_PTR_RETURN_FALSE(log);
+
 	bool result = true;
 
 	QString clientRequestIPStr;
@@ -127,16 +174,37 @@ bool AppDataServiceSettings::readFromDevice(Hardware::Software* software, Builde
 	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
 	clientRequestNetmask.setAddress(clientNetmaskStr);
 
+	QString archServiceID[DATA_CHANNEL_COUNT];
+
 	for(int channel = 0; channel < DATA_CHANNEL_COUNT; channel++)
 	{
 		Hardware::DeviceController* ethernet =
 				DeviceHelper::getChildControllerBySuffix(software,
 					QString(DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR).arg(channel + 1), log);
 
-		if (ethernet != nullptr)
+		if (ethernet == nullptr)
 		{
-			result &= appDataServiceChannel[channel].readFromDevice(ethernet, log);
+			// Can't find child object wuith suffix '%1' in object '%2'
+			//
+			log->errCFG3014(DATA_CHANNEL_CONTROLLER_ID_FORMAT_STR, software->equipmentIdTemplate());
+
+			result = false;
+			continue;
 		}
+
+		result &= appDataServiceChannel[channel].readFromDevice(equipment, ethernet, log);
+
+		if (result == false)
+		{
+			continue;
+		}
+
+		archServiceID[channel] = appDataServiceChannel[channel].archServiceStrID;
+	}
+
+	if (archServiceID[DATA_CHANNEL_1] == archServiceID[DATA_CHANNEL_2])
+	{
+		log->wrnCFG3024(software->equipmentIdTemplate(), archServiceID[DATA_CHANNEL_1]);
 	}
 
 	return result;

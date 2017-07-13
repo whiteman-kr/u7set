@@ -5,6 +5,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/Queue.h"
 
+#include "TcpAppDataServer.h"
 
 class ArchivingServiceWorker : public ServiceWorker
 {
@@ -34,6 +35,14 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
+	void runDbWriteThread();
+	void runAppDataServerThread();
+	void runClientDataServerThread();
+
+	void stopDbWriteThread();
+	void stopAppDataServerThread();
+	void stopClientDataServerThread();
+
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
 
@@ -56,5 +65,8 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
+	//
+
+	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 };
 

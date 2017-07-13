@@ -114,15 +114,57 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 
 void ArchivingServiceWorker::clearConfiguration()
 {
-	// free all resources allocated in onConfigurationReady
-	//
+	stopClientDataServerThread();
+	stopAppDataServerThread();
+	stopDbWriteThread();
 }
 
 
 void ArchivingServiceWorker::applyNewConfiguration()
 {
+	runDbWriteThread();
+	runAppDataServerThread();
+	runClientDataServerThread();
 }
 
+void ArchivingServiceWorker::runDbWriteThread()
+{
+
+}
+
+void ArchivingServiceWorker::runAppDataServerThread()
+{
+	TcpAppDataServer* server = new TcpAppDataServer();
+
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, m_logger);
+
+	m_tcpAppDataServerThread->start();
+}
+
+void ArchivingServiceWorker::runClientDataServerThread()
+{
+
+}
+
+void ArchivingServiceWorker::stopDbWriteThread()
+{
+
+}
+
+void ArchivingServiceWorker::stopAppDataServerThread()
+{
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->quitAndWait();
+		delete m_tcpAppDataServerThread;
+		m_tcpAppDataServerThread = nullptr;
+	}
+}
+
+void ArchivingServiceWorker::stopClientDataServerThread()
+{
+
+}
 
 bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 {

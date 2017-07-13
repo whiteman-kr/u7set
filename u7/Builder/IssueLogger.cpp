@@ -826,7 +826,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't find child object wuith suffix '%1' in object '%2'
+	/// Title: Can't find child object with suffix '%1' in object '%2'
 	///
 	/// Parameters:
 	///         %1 Suffix
@@ -839,7 +839,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3014,
-				  tr("Can't find child object wuith suffix '%1' in object '%2'.")
+				  tr("Can't find child object with suffix '%1' in object '%2'.")
 				  .arg(suffix)
 				  .arg(objectID));
 	}
@@ -1023,6 +1023,48 @@ namespace Builder
                   .arg(objectID)
                   .arg(propertyName));
     }
+
+	/// IssueCode: CFG3023
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property '%1.%2' conversion error.
+	///
+	/// Parameters:
+	///			%1 Object equipmentID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Error occurs during property conversion.
+	///
+	void IssueLogger::errCFG3023(QString objectID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3023,
+				  tr("Property '%1.%2' conversion error.").arg(objectID).arg(propertyName));
+	}
+
+	/// IssueCode: CFG3024
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
+	///
+	/// Parameters:
+	///         %1 AppDataService equipmentID
+	///         %2 ArchivingService equipmentID
+	///
+	/// Description:
+	///			Both data channels of specified AppDataService is linked to same ArchivingService. Check settings of AppDataService.
+	///
+	void IssueLogger::wrnCFG3024(QString appDataServiceID, QString archServiceID)
+	{
+		LOG_WARNING1(IssueType::FscConfiguration,
+				  3024,
+				  tr("Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.")
+				  .arg(appDataServiceID)
+				  .arg(archServiceID));
+	}
 
 
 	// ALP			Application Logic Parsing				4000-4999
@@ -3447,12 +3489,12 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.
+	/// Title:	   Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.
 	///
 	/// Parameters:
 	///		%1 Destination address
-	///		%2 Source address
-	///		%3 Memory size to move
+	///		%2 Destination bit
+	///		%3 Const bit value
 	///
 	/// Description:
 	///		Command 'MOVBC' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
@@ -3461,7 +3503,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5067,
-				  QString(tr("Command 'MOVBC %1, %2, #%3' can't write out of application bit- or word-addressed memory.")).
+				  QString(tr("Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.")).
 					arg(addrTo).arg(bit).arg(value));
 	}
 
@@ -3897,6 +3939,49 @@ namespace Builder
 				  5088,
 				  QString(tr("Value of parameter '%1.%2' must be greater then 0.")).
 				  arg(fbCaption).arg(paramCaption));
+	}
+
+	/// IssueCode: ALC5089
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+	///
+	/// Parameters:
+	///		%1 Destination address
+	///		%2 Destination bit
+	///		%3 Source address
+	///		%4 Source bit
+	///
+	/// Description:
+	///		Command 'MOVB' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5089,
+				  QString(tr("Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.")).
+					arg(addrTo).arg(bitTo).arg(addrFrom).arg(bitFrom));
+	}
+
+	/// IssueCode: ALC5090
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Analog signal '%1' aperture should be greate then 0.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Analog signal aperture should be greate then 0. Check properties of specified signal.
+	///
+	void IssueLogger::errALC5090(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5090,
+				  QString(tr("Analog signal '%1' aperture should be greate then 0.")).
+					arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5186

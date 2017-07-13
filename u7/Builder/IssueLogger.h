@@ -125,7 +125,7 @@ namespace Builder
 
 		Q_INVOKABLE void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);
 
-		void errCFG3014(QString suffix, QString objectID);									// Can't find child object wuith suffix '%1' in object '%2'
+		void errCFG3014(QString suffix, QString objectID);									// Can't find child object with suffix '%1' in object '%2'
 		void wrnCFG3015(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
 		void wrnCFG3016(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
         void errCFG3017(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to not compatible software ID '%3'.
@@ -134,6 +134,8 @@ namespace Builder
 		void errCFG3020(QString objectID, QString propertyName);							// Property '%1.%2' is not found.
         void errCFG3021(QString objectID, QString propertyName, QString softwareID);		// Property '%1.%2' is linked to undefined software ID '%3'.
         void errCFG3022(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
+		void errCFG3023(QString objectID, QString propertyName);							// Property '%1.%2' conversion error.
+		void wrnCFG3024(QString appDataServiceID, QString archServiceID);					// Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
@@ -168,9 +170,6 @@ namespace Builder
 
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
-
-
-
 
 		// Multichannel pasing errors
 		//
@@ -275,6 +274,8 @@ namespace Builder
 		void errALC5086(QUuid constItemUuid, const QString& schemaID);				// Constant connected to discrete signal or FB input must have value 0 or 1.
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal '%1' (Logic schema '%2').
 		void errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid);	// Value of parameter '%1.%2' must be greater then 0.
+		void errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom);			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+		void errALC5090(QString appSignalID);						// Analog signal aperture should be greate then 0.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

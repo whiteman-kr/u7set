@@ -141,6 +141,8 @@ namespace Hardware
 		bool isTxSignalExists(const QString& appSignalID);
 		bool isRxSignalExists(const QString& appSignalID);
 
+		bool isSerialRxSignalExists(const QString& appSignalID);
+
 		bool isUsedInConnection() const;
 
 		bool isPortToPortConnection() const { return m_connectionType ==  Connection::Type::PortToPort; }
@@ -396,6 +398,8 @@ namespace Hardware
 
 		bool forEachPort(OptoPortFunc funcPtr);
 
+		bool isSerialRxSignalExists(const QString& appSignalID);
+
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
 
@@ -513,6 +517,7 @@ namespace Hardware
 
 		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
 
+		bool isSerialRxSignalExists(const QString& lmID, const QString& appSignalID);
 
 	private:
 		bool addModule(DeviceModule* module);

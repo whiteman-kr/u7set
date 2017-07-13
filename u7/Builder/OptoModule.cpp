@@ -939,6 +939,16 @@ namespace Hardware
 		return m_rxSignals.contains(appSignalID);
 	}
 
+	bool OptoPort::isSerialRxSignalExists(const QString& appSignalID)
+	{
+		if (isSinglePortConnection() == false)
+		{
+			return false;
+		}
+
+		return m_rxSignals.contains(appSignalID);
+	}
+
 	bool OptoPort::isUsedInConnection() const
 	{
 		return m_connectionID.isEmpty() != true;
@@ -2305,6 +2315,24 @@ namespace Hardware
 		return result;
 	}
 
+	bool OptoModule::isSerialRxSignalExists(const QString& appSignalID)
+	{
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			if (port->isSerialRxSignalExists(appSignalID) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
 	{
 		int count = ports.count();
@@ -3089,6 +3117,26 @@ namespace Hardware
 		}
 
 		return nullptr;
+	}
+
+	bool OptoModuleStorage::isSerialRxSignalExists(const QString& lmID, const QString& appSignalID)
+	{
+		QList<OptoModuleShared> modules = getLmAssociatedOptoModules(lmID);
+
+		for(OptoModuleShared& module : modules)
+		{
+			if (module == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			if (module->isSerialRxSignalExists(appSignalID) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool OptoModuleStorage::addModule(DeviceModule* module)

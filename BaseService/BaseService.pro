@@ -101,5 +101,3 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
-
-s

@@ -136,7 +136,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_calculated = signal.m_calculated;
 	m_normalState = signal.m_normalState;
 	m_decimalPlaces = signal.m_decimalPlaces;
-	m_aperture = signal.m_aperture;
+	m_roughAperture = signal.m_roughAperture;
 	m_adaptiveAperture = signal.m_adaptiveAperture;
 	m_inOutType = signal.m_inOutType;
 	m_equipmentID = signal.m_equipmentID;
@@ -146,7 +146,7 @@ Signal& Signal::operator =(const Signal& signal)
 	m_enableTuning = signal.m_enableTuning;
 	m_tuningDefaultValue = signal.m_tuningDefaultValue;
 
-	m_ramAddr = signal.m_ramAddr;
+	m_ualAddr = signal.m_ualAddr;
 	m_regValueAddr = signal.m_regValueAddr;
 	m_regValidityAddr = signal.m_regValidityAddr;
 	m_tuningAddr = signal.m_tuningAddr;
@@ -185,6 +185,14 @@ E::DataFormat Signal::dataFormat() const
 	}
 }
 
+void Signal::resetAddresses()
+{
+	m_ioBufAddr.reset();
+	m_tuningAddr.reset();
+	m_ualAddr.reset();
+	m_regValueAddr.reset();
+	m_regValidityAddr.reset();
+}
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
 {
@@ -474,7 +482,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
 	serializeField(attr, "SpreadTolerance", &Signal::setSpreadTolerance);
 	serializeField(attr, "ByteOrder", &Signal::setByteOrder);
-	serializeField(attr, "RamAddr", &Signal::setRamAddr);
+	serializeField(attr, "RamAddr", &Signal::setUalAddr);
 	serializeField(attr, "RegAddr", &Signal::setRegValueAddr);
 }
 
@@ -713,8 +721,8 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute("BusTypeID", busTypeID());
 	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
 
-	xml.writeIntAttribute("RamAddrOffset", ramAddr().offset());
-	xml.writeIntAttribute("RamAddrBit", ramAddr().bit());
+	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
+	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
 	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
 	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
 	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
@@ -790,7 +798,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolAttribute("Calculated", &m_calculated);
 	result &= xml.readIntAttribute("NormalState", &m_normalState);
 	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
-	result &= xml.readDoubleAttribute("Aperture", &m_aperture);
+	result &= xml.readDoubleAttribute("Aperture", &m_roughAperture);
 
 	result &= xml.readIntAttribute("InOutType", &intValue);
 	m_inOutType = static_cast<E::SignalInOutType>(intValue);
@@ -815,8 +823,8 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("RamAddrOffset", &offset);
 	result &= xml.readIntAttribute("RamAddrBit", &bit);
 
-	m_ramAddr.setOffset(offset);
-	m_ramAddr.setBit(bit);
+	m_ualAddr.setOffset(offset);
+	m_ualAddr.setBit(bit);
 
 	offset = bit = 0;
 
@@ -888,7 +896,7 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_calculated(m_calculated);
 	s->set_normalstate(m_normalState);
 	s->set_decimalplaces(m_decimalPlaces);
-	s->set_aperture(m_aperture);
+	s->set_aperture(m_roughAperture);
 	s->set_inouttype(TO_INT(m_inOutType));
 	s->set_equipmentid(m_equipmentID.toStdString());
 	s->set_filteringtime(m_filteringTime);
@@ -911,11 +919,11 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_regvalidityaddroffset(m_regValidityAddr.offset());
 	s->set_regvalidityaddrbit(m_regValidityAddr.bit());
 
-	s->set_iobufferaddroffset(m_ioBufferAddr.offset());
-	s->set_iobufferaddrbit(m_ioBufferAddr.bit());
+	s->set_iobufferaddroffset(m_ioBufAddr.offset());
+	s->set_iobufferaddrbit(m_ioBufAddr.bit());
 
-	s->set_ramaddroffset(m_ramAddr.offset());
-	s->set_ramaddrbit(m_ramAddr.bit());
+	s->set_ramaddroffset(m_ualAddr.offset());
+	s->set_ramaddrbit(m_ualAddr.bit());
 }
 
 
@@ -1119,7 +1127,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_aperture())
 	{
-		m_aperture = s->aperture();
+		m_roughAperture = s->aperture();
 	}
 
 	if (s->has_inouttype())
@@ -1204,22 +1212,22 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_iobufferaddroffset())
 	{
-		m_ioBufferAddr.setOffset(s->iobufferaddroffset());
+		m_ioBufAddr.setOffset(s->iobufferaddroffset());
 	}
 
 	if (s->has_iobufferaddrbit())
 	{
-		m_ioBufferAddr.setBit(s->iobufferaddrbit());
+		m_ioBufAddr.setBit(s->iobufferaddrbit());
 	}
 
 	if (s->has_ramaddroffset())
 	{
-		m_ramAddr.setOffset(s->ramaddroffset());
+		m_ualAddr.setOffset(s->ramaddroffset());
 	}
 
 	if (s->has_ramaddrbit())
 	{
-		m_ramAddr.setBit(s->ramaddrbit());
+		m_ualAddr.setBit(s->ramaddrbit());
 	}
 }
 
@@ -1271,7 +1279,7 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 	message->set_outputsensortype(m_outputSensorType);
 
 	message->set_precision(m_decimalPlaces);
-	message->set_aperture(m_aperture);
+	message->set_aperture(m_roughAperture);
 	message->set_filteringtime(m_filteringTime);
 	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);

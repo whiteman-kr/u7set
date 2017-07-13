@@ -38,6 +38,9 @@ public:
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
 
+	template<typename T>
+	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);
+
 	static bool setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log);
 
 	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
@@ -66,3 +69,38 @@ private:
 private:
 	static QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 };
+
+template<typename T>
+bool DeviceHelper::getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	if (val.canConvert<T>() == false)
+	{
+		assert(false);
+
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+
+		return false;
+	}
+
+	*value = val.value<T>();
+
+	return true;
+}
