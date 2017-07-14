@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0010">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="LogicModuleConf0000.js" Version="1.0011">
 	<FlashMemory>
 		<AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFrameSize>1016</AppLogicFrameSize>
@@ -2322,7 +2322,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#cod_bus_v1"          Caption="cod_bus"          Version="1.0002">
+		<AFB id="#cod_bus_v1"          Caption="cod_bus"          Version="1.0003">
 			<Properties>
 				<Description>Binary Coder Block analyses input signals state strictly inorder in 32 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -2366,8 +2366,7 @@ function(videoItemFblElement, afbElement)
 				<Pin OpName="i_32_oprd" Caption="in_32" Type="Discrete" OpIndex="33" Size="1"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="34" Size="32"/>
-				<Pin OpName="o_in_activ" Caption="active" Type="Discrete" OpIndex="36" Size="1"/>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="34" Size="32"/>				
 			</Outputs>
 			<Params>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
