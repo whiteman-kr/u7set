@@ -15,7 +15,8 @@ ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
 											   const VersionInfo& versionInfo,
 											   std::shared_ptr<CircularLogger> logger) :
 	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
-	m_logger(logger)
+	m_logger(logger),
+	m_saveStatesQueue(1024 * 1024)
 {
 }
 
@@ -28,6 +29,8 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 ServiceWorker* ArchivingServiceWorker::createInstance() const
 {
 	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
+
+	archServiceWorker->init();
 
 	return archServiceWorker;
 }
@@ -116,25 +119,29 @@ void ArchivingServiceWorker::clearConfiguration()
 {
 	stopClientDataServerThread();
 	stopAppDataServerThread();
-	stopDbWriteThread();
+	stopArchWriteThread();
 }
 
 
 void ArchivingServiceWorker::applyNewConfiguration()
 {
-	runDbWriteThread();
+	m_projectID = m_cfgLoaderThread->buildInfo().project;
+
+	runArchWriteThread();
 	runAppDataServerThread();
 	runClientDataServerThread();
 }
 
-void ArchivingServiceWorker::runDbWriteThread()
+void ArchivingServiceWorker::runArchWriteThread()
 {
+	m_archWriteThread = new ArchWriteThread(m_projectID, m_saveStatesQueue, m_logger);
 
+	m_archWriteThread->start();
 }
 
 void ArchivingServiceWorker::runAppDataServerThread()
 {
-	TcpAppDataServer* server = new TcpAppDataServer();
+	TcpAppDataServer* server = new TcpAppDataServer(m_saveStatesQueue);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, m_logger);
 
@@ -146,9 +153,14 @@ void ArchivingServiceWorker::runClientDataServerThread()
 
 }
 
-void ArchivingServiceWorker::stopDbWriteThread()
+void ArchivingServiceWorker::stopArchWriteThread()
 {
-
+	if (m_archWriteThread != nullptr)
+	{
+		m_archWriteThread->quitAndWait();
+		delete m_archWriteThread;
+		m_archWriteThread = nullptr;
+	}
 }
 
 void ArchivingServiceWorker::stopAppDataServerThread()

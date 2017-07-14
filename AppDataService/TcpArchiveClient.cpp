@@ -19,6 +19,15 @@ TcpArchiveClient::TcpArchiveClient(int channel,
 
 void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
+	switch(requestID)
+	{
+	case ARCHS_SAVE_APP_SIGNALS_STATES:
+		onSaveAppSignalsStatesReply(replyData, replyDataSize);
+		break;
+
+	default:
+		assert(false);
+	}
 }
 
 void TcpArchiveClient::onClientThreadStarted()
@@ -39,31 +48,94 @@ void TcpArchiveClient::onClientThreadFinished()
 								arg(m_channel + 1).arg(serverAddressPort(0).addressPortStr()));
 }
 
-void TcpArchiveClient::sendSignalStatesToArchive()
+void TcpArchiveClient::onConnection()
+{
+}
+
+void TcpArchiveClient::sendSignalStatesToArchiveRequest()
 {
 	if (isClearToSendRequest() == false)
 	{
 		return;
 	}
 
+	if (m_signalStatesQueue.size() < 100)
+	{
+		return;
+	}
+
+	Network::SaveAppSignalsStatesToArchiveRequest request;
+
 	int count = 0;
 
 	do
 	{
 		SimpleAppSignalState state;
-		m_signalStatesQueue.pop(&state);
+
+		bool res = m_signalStatesQueue.pop(&state);
+
+		if (res == false)
+		{
+			break;
+		}
+
+		Proto::AppSignalState* appSignalState = request.add_appsignalstates();
+
+		if (appSignalState == nullptr)
+		{
+			assert(false);
+			break;
+		}
+
+		state.save(appSignalState);
+
+		count++;
 	}
 	while(count < 1000);
+
+	if (count == 0)
+	{
+		return;
+	}
+
+	request.set_clientequipmentid(equipmentID().toStdString());
+
+	sendRequest(ARCHS_SAVE_APP_SIGNALS_STATES, request);
+
+	qDebug() << "Send SaveSignalsToArchive count = " << count;
+}
+
+void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint32 replyDataSize)
+{
+	Network::SaveAppSignalsStatesToArchiveReply msg;
+
+	msg.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+
+	NetworkError errorCode = static_cast<NetworkError>(msg.error());
+
+	if (errorCode == NetworkError::Success)
+	{
+		sendSignalStatesToArchiveRequest();
+	}
+	else
+	{
+		m_saveAppSignalsStateErrorReplyCount = 0;
+
+		// in future, may be, depends to error code:
+		//
+		//  1) Save the perivous request message
+		//  2) Try again to send "save" request to prevent signal states loosing
+	}
 }
 
 void TcpArchiveClient::onTimer()
 {
-	sendSignalStatesToArchive();
+	sendSignalStatesToArchiveRequest();
 }
 
 void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()
 {
-	sendSignalStatesToArchive();
+	sendSignalStatesToArchiveRequest();
 }
 
 

@@ -2,6 +2,7 @@
 
 #include "../lib/Tcp.h"
 #include "../lib/AppSignal.h"
+#include "../Proto/network.pb.h"
 
 class TcpArchiveClient : public Tcp::Client
 {
@@ -22,7 +23,10 @@ private:
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
 
-	void sendSignalStatesToArchive();
+	virtual void onConnection() override;
+
+	void sendSignalStatesToArchiveRequest();
+	void onSaveAppSignalsStatesReply(const char* replyData, quint32 replyDataSize);
 
 private slots:
 	void onTimer();
@@ -36,5 +40,7 @@ private:
 	AppSignalStatesQueue& m_signalStatesQueue;
 
 	QTimer m_timer;
+
+	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };
 

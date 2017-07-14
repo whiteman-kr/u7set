@@ -1292,7 +1292,6 @@ namespace Tcp
 		m_replyTimeoutTimer.stop();
 	}
 
-
 	bool Client::sendRequest(quint32 requestID)
 	{
 		return sendRequest(requestID, nullptr, 0);

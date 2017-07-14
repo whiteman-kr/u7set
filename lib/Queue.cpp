@@ -13,7 +13,7 @@ QueueBase::QueueBase(QObject* parent, int itemSize, int queueSize) :
 	assert(itemSize > 0);
 	assert(queueSize > 0);
 
-	assert(itemSize * queueSize < 20 *1024 * 1024);		// limit to 20Mb
+	assert(itemSize * queueSize < 100 * 1024 * 1024);		// limit to 20Mb
 
 	AUTO_LOCK(m_mutex)
 

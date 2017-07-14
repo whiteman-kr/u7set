@@ -56,7 +56,7 @@ public:
 	QueueBase(QObject* parent, int itemSize, int queueSize);
 	virtual ~QueueBase();
 
-	int getSize() { return m_size; }
+	int size() { return m_size; }
 
 	bool isEmpty() { return m_size == 0; }
 

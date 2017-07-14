@@ -53,7 +53,7 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value)
 
 	// check time to set !!!!
 	//
-	m_current.flags.autoPoint = 0;
+	m_current.flags.clearReasonsFlags();
 
 	m_current.time = time;
 

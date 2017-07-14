@@ -36,15 +36,11 @@ union AppSignalStateFlags
 
 	quint32 all;
 
-	void clear() { all = 0; }
+	void clear();
 
-	bool hasArchivingReason()
-	{
-		return	validityChange == 1 ||
-				autoPoint == 1 ||
-				roughAperture == 1 ||
-				smoothAperture == 1;
-	}
+	void clearReasonsFlags();
+
+	bool hasArchivingReason();
 };
 
 

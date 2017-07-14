@@ -441,6 +441,8 @@ namespace Tcp
 		void selectServer1(bool reconnect) { selectServer(0, reconnect); }
 		void selectServer2(bool reconnect) { selectServer(1, reconnect); }
 
+		QString equipmentID() const { return m_equipmentID; }
+
 		HostAddressPort serverAddressPort(int serverIndex);
 		int selectedServerIndex() { return m_selectedServerIndex; }
 
@@ -465,7 +467,6 @@ namespace Tcp
 		bool sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
 
-		void processInitReply(quint32 requestID, const char* replyData, quint32 replyDataSize);
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 	};
 

@@ -5,6 +5,8 @@
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
 
+#include "../lib/AppSignal.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -15,7 +17,7 @@
 class TcpAppDataServer : public Tcp::Server
 {
 public:
-	TcpAppDataServer();
+	TcpAppDataServer(AppSignalStatesQueue& saveStatesQueue);
 
 	virtual Tcp::Server* getNewInstance() override;
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
@@ -26,6 +28,8 @@ private:
 private:
 	Network::SaveAppSignalsStatesToArchiveRequest m_saveStatesRequest;
 	Network::SaveAppSignalsStatesToArchiveReply m_saveStatesReply;
+
+	AppSignalStatesQueue& m_saveStatesQueue;
 };
 
 
@@ -41,5 +45,4 @@ public:
 	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 				 Tcp::Server* server,
 				 std::shared_ptr<CircularLogger> logger);
-
 };

@@ -51,7 +51,7 @@ SimpleThread::~SimpleThread()
 
 void SimpleThread::addWorker(SimpleThreadWorker* worker)
 {
-	if (m_thread.isRunning())
+	if (m_thread.isRunning() == true)
 	{
 		// All workers should be added before the thread is started
 		//

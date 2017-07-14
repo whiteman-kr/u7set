@@ -349,7 +349,7 @@ const quint32 TDS_TUNING_SIGNALS_APPLY = 0x1505;
 
 // ArchivingService and AppData Service communications, Port PORT_ARCHIVING_SERVICE_APP_DATA
 //
-const quint32 ARCHS_SAVE_APP_SIGNALS_STATES_TO_ARCHIVE = 0x1601;
+const quint32 ARCHS_SAVE_APP_SIGNALS_STATES = 0x1601;
 
 
 // Getting application signals Units

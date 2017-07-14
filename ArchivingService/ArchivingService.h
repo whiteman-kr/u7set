@@ -6,6 +6,7 @@
 #include "../lib/Queue.h"
 
 #include "TcpAppDataServer.h"
+#include "ArchWriteThread.h"
 
 class ArchivingServiceWorker : public ServiceWorker
 {
@@ -35,11 +36,11 @@ private:
 	void clearConfiguration();
 	void applyNewConfiguration();
 
-	void runDbWriteThread();
+	void runArchWriteThread();
 	void runAppDataServerThread();
 	void runClientDataServerThread();
 
-	void stopDbWriteThread();
+	void stopArchWriteThread();
 	void stopAppDataServerThread();
 	void stopClientDataServerThread();
 
@@ -62,11 +63,15 @@ private:
 	QSettings m_settings;
 
 	ArchivingServiceSettings m_cfgSettings;
+	QString m_projectID;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 	//
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
+	ArchWriteThread* m_archWriteThread = nullptr;
+
+	AppSignalStatesQueue m_saveStatesQueue;
 };
 

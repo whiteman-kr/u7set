@@ -303,8 +303,6 @@ QString CfgLoader::getFilePathNameByID(QString fileID)
 	return pathFileName;
 }
 
-
-
 bool CfgLoader::isFileReady()
 {
 	mutex.lock();
@@ -316,6 +314,18 @@ bool CfgLoader::isFileReady()
 	return result;
 }
 
+Builder::BuildInfo CfgLoader::buildInfo()
+{
+	Builder::BuildInfo buildInfo;
+
+	mutex.lock();
+
+	buildInfo = m_buildInfo;
+
+	mutex.unlock();
+
+	return buildInfo;
+}
 
 void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
 {
@@ -947,6 +957,10 @@ bool CfgLoaderThread::isFileReady()
 	return m_cfgLoader->isFileReady();
 }
 
+Builder::BuildInfo CfgLoaderThread::buildInfo()
+{
+	return m_cfgLoader->buildInfo();
+}
 
 QString CfgLoaderThread::getLastErrorStr()
 {

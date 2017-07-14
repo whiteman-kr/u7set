@@ -16,6 +16,26 @@ QDateTime Times::plantToDateTime() const
 	return plant.toDateTime();
 }
 
+void AppSignalStateFlags::clear()
+{
+	all = 0;
+}
+
+void AppSignalStateFlags::clearReasonsFlags()
+{
+	validityChange = 0;
+	autoPoint = 0;
+	roughAperture = 0;
+	smoothAperture = 0;
+}
+
+bool AppSignalStateFlags::hasArchivingReason()
+{
+	return	validityChange == 1 ||
+			autoPoint == 1 ||
+			roughAperture == 1 ||
+			smoothAperture == 1;
+}
 
 Hash AppSignalState::hash() const
 {
@@ -90,6 +110,40 @@ const AppSignalState& AppSignalState::operator = (const SimpleAppSignalState& sm
 	m_value = smState.value;
 
 	return *this;
+}
+
+void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
+{
+	if (protoState == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	assert(hash != 0);
+
+	protoState->set_hash(hash);
+	protoState->set_value(value);
+	protoState->set_flags(flags.all);
+	protoState->set_systemtime(time.system.timeStamp);
+	protoState->set_localtime(time.local.timeStamp);
+	protoState->set_planttime(time.plant.timeStamp);
+}
+
+Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
+{
+	hash = protoState.hash();
+
+	assert(hash != 0);
+
+	value = protoState.value();
+	flags.all = protoState.flags();
+
+	time.system.timeStamp = protoState.systemtime();
+	time.local.timeStamp = protoState.localtime();
+	time.plant.timeStamp = protoState.planttime();
+
+	return hash;
 }
 
 AppSignalParam::AppSignalParam()

@@ -6,20 +6,21 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer()
+TcpAppDataServer::TcpAppDataServer(AppSignalStatesQueue& saveStatesQueue) :
+	m_saveStatesQueue(saveStatesQueue)
 {
 }
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	return new TcpAppDataServer();
+	return new TcpAppDataServer(m_saveStatesQueue);
 }
 
 void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 {
 	switch(requestID)
 	{
-	case ARCHS_SAVE_APP_SIGNALS_STATES_TO_ARCHIVE:
+	case ARCHS_SAVE_APP_SIGNALS_STATES:
 		onSaveAppSignalsStatesToArchive(requestData, requestDataSize);
 		break;
 
@@ -40,6 +41,23 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 		sendReply(m_saveStatesReply);
 		return;
 	}
+
+	//
+	// Check m_saveStatesRequest.clientequipmentid() here!
+	//
+
+	int statesCount = m_saveStatesRequest.appsignalstates_size();
+
+	SimpleAppSignalState state;
+
+	for(int i = 0; i < statesCount; i++)
+	{
+		state.load(m_saveStatesRequest.appsignalstates(i));
+
+		m_saveStatesQueue.push(&state);
+	}
+
+	qDebug() << "Receive " << statesCount << " states to save";
 
 	m_saveStatesReply.set_error(TO_INT(NetworkError::Success));
 

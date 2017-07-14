@@ -215,6 +215,8 @@ public:
 
 	bool isFileReady();
 
+	Builder::BuildInfo buildInfo();
+
 	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
 	virtual void onConnection() override;
 	virtual void onDisconnection() override;
@@ -264,8 +266,9 @@ public:
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr);
 	bool getFileByID(const QString& fileID, QByteArray* fileData);
 
-
 	bool isFileReady();
+
+	Builder::BuildInfo buildInfo();
 
 	QString getLastErrorStr();
 
