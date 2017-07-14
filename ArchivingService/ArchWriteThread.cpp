@@ -63,9 +63,9 @@ void ArchWriteThreadWorker::tryConnectToDb()
 		return;
 	}
 
-	if (archiveIsExists(db) == false)
+	if (databaseIsExists(db) == false)
 	{
-		bool res = createArchive(db);
+		bool res = createDatabase(db);
 
 		if (res == false)
 		{
@@ -102,7 +102,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 	getSignalsTablesList();
 }
 
-bool ArchWriteThreadWorker::archiveIsExists(QSqlDatabase& db)
+bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
 {
 	if (db.isOpen() == false)
 	{
@@ -142,7 +142,7 @@ bool ArchWriteThreadWorker::archiveIsExists(QSqlDatabase& db)
 	return false;
 }
 
-bool ArchWriteThreadWorker::createArchive(QSqlDatabase& db)
+bool ArchWriteThreadWorker::createDatabase(QSqlDatabase& db)
 {
 	if (db.isOpen() == false)
 	{
@@ -170,7 +170,6 @@ bool ArchWriteThreadWorker::createArchive(QSqlDatabase& db)
 
 	return true;
 }
-
 
 bool ArchWriteThreadWorker::getSignalsTablesList()
 {

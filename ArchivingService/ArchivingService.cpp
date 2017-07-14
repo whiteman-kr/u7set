@@ -70,7 +70,6 @@ void ArchivingServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2 (%3)")).arg("CfgServiceIP2").arg(m_cfgServiceIP2Str).arg(m_cfgServiceIP2.addressPortStr()));
 }
 
-
 void ArchivingServiceWorker::initialize()
 {
 	// Service Main Function initialization

@@ -24,8 +24,8 @@ private:
 	void onThreadFinished() override;
 
 	void tryConnectToDb();
-	bool archiveIsExists(QSqlDatabase& db);
-	bool createArchive(QSqlDatabase& db);
+	bool databaseIsExists(QSqlDatabase& db);
+	bool createDatabase(QSqlDatabase& db);
 
 	bool getSignalsTablesList();
 	void appendTable(const QString& tableName, SignalStatesTableType tableType);

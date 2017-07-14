@@ -157,4 +157,7 @@ DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
 
+RESOURCES += \
+    Database/Database.qrc
+
 
