@@ -1066,9 +1066,10 @@ message AppSignalState
     optional uint64 hash = 1 [default = 0];
     optional double value = 2 [default = 0];
     optional uint32 flags = 3 [default = 0];
-    optional sint64 systemTime = 4 [default = 0];
-    optional sint64 localTime = 5 [default = 0];
-    optional sint64 plantTime = 6 [default = 0];
+    optional sfixed64 systemTime = 4 [default = 0];
+    optional sfixed64 localTime = 5 [default = 0];
+    optional sfixed64 plantTime = 6 [default = 0];
+    optional sfixed64 archiveId = 7 [default = -1];
 }
 
 message AppSignalParam

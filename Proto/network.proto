@@ -407,5 +407,32 @@ message SaveAppSignalsStatesToArchiveReply
     optional int32 error = 1 [default = 0];
 }
 
+message GetSignalStatesFromArchiveRequest
+{
+    optional string clientEquipmentID = 1;
+    optional int32 timeType = 2;			// enum TimeType values:
+                                                        // 0 - plant time
+							// 1 - system time
+							// 2 - local time
+							// 3 - archive id
+    optional sfixed64 startTime = 3;
+    optional sfixed64 endTime = 4;
+
+    repeated uint64 signalHashes = 5;
+}
+
+
+message GetSignalStatesFromArchiveReply
+{
+    optional int32 error = 1 [default = 0];
+
+    optional int32 timeType = 2;			// enum TimeType values
+
+    optional sfixed64 startTime = 3;
+    optional sfixed64 endTime = 4;
+
+    repeated Proto.AppSignalState appSignalStates = 5;
+}
+
 
 

@@ -116,7 +116,7 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 
 void ArchivingServiceWorker::clearConfiguration()
 {
-	stopClientDataServerThread();
+	stopArchiveRequestsServerThread();
 	stopAppDataServerThread();
 	stopArchWriteThread();
 }
@@ -128,7 +128,7 @@ void ArchivingServiceWorker::applyNewConfiguration()
 
 	runArchWriteThread();
 	runAppDataServerThread();
-	runClientDataServerThread();
+	runArchiveRequestsServerThread();
 }
 
 void ArchivingServiceWorker::runArchWriteThread()
@@ -147,9 +147,15 @@ void ArchivingServiceWorker::runAppDataServerThread()
 	m_tcpAppDataServerThread->start();
 }
 
-void ArchivingServiceWorker::runClientDataServerThread()
+void ArchivingServiceWorker::runArchiveRequestsServerThread()
 {
+	TcpArchiveRequestsServer* server = new TcpArchiveRequestsServer(m_logger);
 
+	m_tcpArchiveRequestsServerThread = new TcpArchiveRequestsServerThread(m_cfgSettings.clientRequestIP,
+																		  server,
+																		  m_logger);
+
+	m_tcpArchiveRequestsServerThread->start();
 }
 
 void ArchivingServiceWorker::stopArchWriteThread()
@@ -172,9 +178,14 @@ void ArchivingServiceWorker::stopAppDataServerThread()
 	}
 }
 
-void ArchivingServiceWorker::stopClientDataServerThread()
+void ArchivingServiceWorker::stopArchiveRequestsServerThread()
 {
-
+	if (m_tcpArchiveRequestsServerThread != nullptr)
+	{
+		m_tcpArchiveRequestsServerThread->quitAndWait();
+		delete m_tcpArchiveRequestsServerThread;
+		m_tcpArchiveRequestsServerThread = nullptr;
+	}
 }
 
 bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
