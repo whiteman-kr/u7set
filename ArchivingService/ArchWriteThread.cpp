@@ -4,6 +4,12 @@ const char* ArchWriteThreadWorker::ARCH_DB_PREFIX = "u7arch_";
 const char* ArchWriteThreadWorker::LONG_TERM_TABLE_PREFIX = "lt_";
 const char* ArchWriteThreadWorker::SHORT_TERM_TABLE_PREFIX = "st_";
 
+const StringPair ArchWriteThreadWorker::m_upgradeFiles[] =
+{
+	StringPair(":/Upgrade0001.sql", "Initial upgrade"),
+};
+
+
 ArchWriteThreadWorker::ArchWriteThreadWorker(const QString& projectID,
 											 AppSignalStatesQueue& saveStatesQueue,
 											 CircularLoggerShared logger) :
@@ -63,6 +69,8 @@ void ArchWriteThreadWorker::tryConnectToDb()
 		return;
 	}
 
+	bool dbJustCreated = false;
+
 	if (databaseIsExists(db) == false)
 	{
 		bool res = createDatabase(db);
@@ -71,6 +79,8 @@ void ArchWriteThreadWorker::tryConnectToDb()
 		{
 			return;
 		}
+
+		dbJustCreated = true;
 	}
 
 	db.close();		// close connection to 'postgress' database
@@ -98,6 +108,13 @@ void ArchWriteThreadWorker::tryConnectToDb()
 		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
 		return;
 	}
+
+	if (dbJustCreated == true)
+	{
+		initDatabase();
+	}
+
+	upgradeDatabase();
 
 	getSignalsTablesList();
 }
@@ -167,6 +184,128 @@ bool ArchWriteThreadWorker::createDatabase(QSqlDatabase& db)
 	}
 
 	DEBUG_LOG_MSG(m_logger, QString("Archive database '%1' is successful created").arg(projectArchDbName));
+
+	return true;
+}
+
+bool ArchWriteThreadWorker::initDatabase()
+{
+	QString queryStr = QString("CREATE TABLE public.version("
+								"versionid serial, "
+								"date timestamp with time zone NOT NULL DEFAULT now(), "
+								"reasone text NOT NULL, "
+								"CONSTRAINT version_pkey PRIMARY KEY (versionid)) "
+								"WITH (OIDS=FALSE);");
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return false;
+	}
+
+	DEBUG_LOG_MSG(m_logger, QString("Table 'Version' is successful created"));
+
+	return true;
+}
+
+bool ArchWriteThreadWorker::upgradeDatabase()
+{
+	int version = getDatabaseVersion();
+
+	int filesArraySize = sizeof(m_upgradeFiles) / sizeof(StringPair);
+
+	if (version == filesArraySize)
+	{
+		return true;				// nothing to upgrade
+	}
+
+	assert(version >= 0 && version < filesArraySize);
+
+	for(int v = version; v < filesArraySize; v++)
+	{
+		QString fileName = m_upgradeFiles[v].first;
+
+		QFile upgradeFile(fileName);
+
+		bool result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+		if (result == false)
+		{
+			DEBUG_LOG_ERR(m_logger, QString("Can't open database upgrade file '%1'").arg(fileName));
+			return false;
+		}
+
+		QString upgradeScript = upgradeFile.readAll();
+
+		QSqlQuery query(m_db);
+
+		result = query.exec(upgradeScript);
+
+		if (result == false)
+		{
+			DEBUG_LOG_ERR(m_logger, QString("Execution error of upgrade file '%1'").arg(fileName));
+			DEBUG_LOG_ERR(m_logger, query.lastError().text());
+			m_db.close();
+			return false;
+		}
+
+		result = updateVersion(m_upgradeFiles[v].second);
+
+		if (result == false)
+		{
+			break;
+		}
+	}
+
+	DEBUG_LOG_MSG(m_logger, QString("Archive database is successful upgraded to version %1").arg(getDatabaseVersion()))
+
+	return true;
+}
+
+int ArchWriteThreadWorker::getDatabaseVersion()
+{
+	QString queryStr = QString("SELECT MAX(versionId) FROM version;");
+
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return 0;
+	}
+
+	int versionNo = 0;
+
+	while(query.next() == true)
+	{
+		versionNo = query.value(0).toInt();
+		break;
+	}
+
+	return versionNo;
+}
+
+bool ArchWriteThreadWorker::updateVersion(const QString& reasone)
+{
+	QString queryStr = QString("INSERT INTO version (reasone) VALUES('%1');").arg(reasone);
+
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return 0;
+	}
 
 	return true;
 }
@@ -282,13 +421,39 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 		return false;
 	}
 
-	QString queryStr = QString("CREATE TABLE public.%1("
-								"uid bigint, "
-								"state double precision, "
-								"flags integer, "
-								"planttime bigint, "
-								"systime bigint, "
-								"loctime bigint)").arg(tableName);
+	QString queryStr;
+
+	switch(tableType)
+	{
+	case SignalStatesTableType::LongTerm:
+		queryStr = QString("CREATE TABLE public.%1 ("
+							"archid bigint NOT NULL, "
+							 "state double precision, "
+							 "flags integer, "
+							 "planttime bigint, "
+							 "systime bigint, "
+							 "loctime bigint, "
+							 "CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
+						   "WITH (OIDS=FALSE);").arg(tableName);
+		break;
+
+	case SignalStatesTableType::ShortTerm:
+
+		queryStr = QString("CREATE TABLE public.%1 ("
+							"archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass), "
+							 "state double precision, "
+							 "flags integer, "
+							 "planttime bigint, "
+							 "systime bigint, "
+							 "loctime bigint, "
+							 "CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
+						   "WITH (OIDS=FALSE);").arg(tableName);
+		break;
+
+	default:
+		assert(false);
+		return false;
+	}
 
 	QSqlQuery query(m_db);
 
@@ -317,6 +482,8 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 		assert(false);
 	}
 
+	DEBUG_LOG_MSG(m_logger, QString("Archive table '%1' is successful created").arg(tableName));
+
 	return true;
 }
 
@@ -343,8 +510,7 @@ QString ArchWriteThreadWorker::getTableName(Hash signalHash, SignalStatesTableTy
 		return tableName;
 	}
 
-
-	tableName += QString().setNum(signalHash, 16);
+	tableName += QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false);
 
 	return tableName;
 }
