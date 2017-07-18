@@ -30,16 +30,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     TrendWidget.cpp \
     TrendSignal.cpp \
-    TrendDrawParam.cpp
+    TrendDrawParam.cpp \
+    TrendSlider.cpp \
+    TrendSettings.cpp \
+    TrendMainWindow.cpp
 
 HEADERS += \
     Stable.h \
     TrendWidget.h \
     TrendSignal.h \
     TrendDrawParam.h \
-    ../lib/TimeStamp.h
+    ../lib/TimeStamp.h \
+    TrendSlider.h \
+    TrendSettings.h \
+    TrendMainWindow.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+RESOURCES += \
+    TrendView.qrc
+
+FORMS += \
+    TrendsMainWindow.ui

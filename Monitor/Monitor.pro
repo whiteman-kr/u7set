@@ -73,7 +73,8 @@ SOURCES += main.cpp \
     DialogColumns.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/CircularLogger.cpp \
-    MonitorView.cpp
+    MonitorView.cpp \
+    MonitorTrends.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -111,7 +112,8 @@ HEADERS  += \
     DialogColumns.h \
     ../lib/HostAddressPort.h \
     ../lib/CircularLogger.h \
-    MonitorView.h
+    MonitorView.h \
+    MonitorTrends.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -197,3 +199,18 @@ DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto \
     Images/Trends.svg
+
+# TrendView library
+#
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../TrendView/release/ -lTrendView
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../TrendView/debug/ -lTrendView
+else:unix:!macx: LIBS += -L$$OUT_PWD/../TrendView/ -lTrendView
+
+INCLUDEPATH += $$PWD/../TrendView
+DEPENDPATH += $$PWD/../TrendView
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/libTrendView.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/libTrendView.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/release/TrendView.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../TrendView/debug/TrendView.lib
+else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../TrendView/libTrendView.a

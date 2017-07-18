@@ -1,6 +1,7 @@
 #ifndef TRENDSIGNAL_H
 #define TRENDSIGNAL_H
 
+#include <array>
 #include "../lib/Types.h"
 
 namespace TrendLib

@@ -34,9 +34,12 @@ int main(int argc, char *argv[])
 	//
 	theSettings.load();
 
+	// Init TrendLib resources
+	//
+	Q_INIT_RESOURCE(TrendView);
+
 	// Create memory segment for check single Instance
 	//
-
 	QSharedMemory instanceChecker;
 	instanceChecker.setKey(MonitorMainWindow::getInstanceKey());
 
