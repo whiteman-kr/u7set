@@ -3,6 +3,14 @@
 
 #include <QDateTime>
 
+enum class TimeType
+{
+	Plant,
+	System,
+	Local,
+	ArchiveId
+};
+
 struct TimeStamp
 {
 	qint64 timeStamp = 0;

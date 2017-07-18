@@ -1521,13 +1521,14 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
   AppSignalState_descriptor_ = file->message_type(64);
-  static const int AppSignalState_offsets_[6] = {
+  static const int AppSignalState_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, flags_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, systemtime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, localtime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, planttime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, archiveid_),
   };
   AppSignalState_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -2267,64 +2268,65 @@ void protobuf_AddDesc_serialization_2eproto() {
     "gValidityAddrOffset\030\312\001 \001(\005\022\033\n\022regValidit"
     "yAddrBit\030\313\001 \001(\005\022\033\n\022ioBufferAddrOffset\030\314\001"
     " \001(\005\022\030\n\017ioBufferAddrBit\030\315\001 \001(\005\022\026\n\rramAdd"
-    "rOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\210\001\n\016"
+    "rOffset\030\316\001 \001(\005\022\023\n\nramAddrBit\030\317\001 \001(\005\"\237\001\n\016"
     "AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value"
     "\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTim"
-    "e\030\004 \001(\022:\0010\022\024\n\tlocalTime\030\005 \001(\022:\0010\022\024\n\tplan"
-    "tTime\030\006 \001(\022:\0010\"\231\006\n\016AppSignalParam\022\017\n\004has"
-    "h\030\002 \001(\004:\0010\022\025\n\013appSignalId\030\003 \001(\t:\000\022\030\n\016cus"
-    "tomSignalId\030\004 \001(\t:\000\022\021\n\007caption\030\005 \001(\t:\000\022\025"
-    "\n\013equipmentId\030\006 \001(\t:\000\022\022\n\007channel\030\n \001(\005:\001"
-    "0\022\024\n\tinOutType\030\013 \001(\005:\0012\022\025\n\nsignalType\030\014 "
-    "\001(\005:\0010\022\035\n\022analogSignalFormat\030\r \001(\005:\0012\022\024\n"
-    "\tbyteOrder\030\016 \001(\005:\0012\022\021\n\006unitId\030\017 \001(\005:\0011\022\016"
-    "\n\004unit\030\020 \001(\t:\000\022\030\n\rlowValidRange\030\024 \001(\001:\0010"
-    "\022\031\n\016highValidRange\030\025 \001(\001:\0010\022\036\n\023lowEngene"
-    "eringUnits\030\026 \001(\001:\0010\022\037\n\024highEngeneeringUn"
-    "its\030\027 \001(\001:\0010\022\030\n\rinputLowLimit\030\036 \001(\001:\0010\022\031"
-    "\n\016inputHighLimit\030\037 \001(\001:\0010\022\026\n\013inputUnitId"
-    "\030  \001(\005:\0011\022\032\n\017inputSensorType\030! \001(\005:\0010\022\031\n"
-    "\016outputLowLimit\030( \001(\001:\0010\022\032\n\017outputHighLi"
-    "mit\030) \001(\001:\0010\022\027\n\014outputUnitId\030* \001(\005:\0011\022\025\n"
-    "\noutputMode\030+ \001(\005:\0010\022\033\n\020outputSensorType"
-    "\030, \001(\005:\0010\022\024\n\tprecision\0302 \001(\005:\0012\022\023\n\010apert"
-    "ure\0303 \001(\001:\0011\022\034\n\rfilteringTime\0304 \001(\001:\0050.0"
-    "05\022\032\n\017spreadTolerance\0305 \001(\001:\0012\022\033\n\014enable"
-    "Tuning\0306 \001(\010:\005false\022\035\n\022tuningDefaultValu"
-    "e\0307 \001(\001:\0010\"9\n\021AppSignalParamSet\022$\n\005items"
-    "\030\001 \003(\0132\025.Proto.AppSignalParam\"\224\006\n\nConnec"
-    "tion\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1Equ"
-    "ipmentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001"
-    "(\t:\000\022!\n\027Port1RawDataDescription\030\005 \001(\t:\000\022"
-    "!\n\027Port2RawDataDescription\030\006 \001(\t:\000\022\035\n\016Ma"
-    "nualSettings\030\013 \001(\010:\005false\022\034\n\rDisableData"
-    "ID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001(\010"
-    ":\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022"
-    "!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024Po"
-    "rt1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2Tx"
-    "StartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQua"
-    "ntity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuantity"
-    "\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 "
-    "\n\021Port1EnableSerial\030\025 \001(\010:\005false\022\032\n\017Port"
-    "1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDuple"
-    "x\030\027 \001(\010:\005false\022 \n\021Port2EnableSerial\030\030 \001("
-    "\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 \n\021"
-    "Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033"
-    " \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022Obso"
-    "leteSerialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEnabl"
-    "eDuplex\030\n \001(\010:\005false\"@\n\020SchemaDetailsSet"
-    "\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.SchemaD"
-    "etails\"\342\001\n\rSchemaDetails\022\017\n\007version\030\002 \001("
-    "\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021"
-    "excludedfromBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007"
-    " \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\021\n\tsigna"
-    "lIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connection"
-    "s\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid*3\n\nS"
-    "chemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010"
-    "\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Inpu"
-    "t\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Anal"
-    "og\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013U"
-    "nsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13398);
+    "e\030\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tplan"
+    "tTime\030\006 \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002-1\"\231\006"
+    "\n\016AppSignalParam\022\017\n\004hash\030\002 \001(\004:\0010\022\025\n\013app"
+    "SignalId\030\003 \001(\t:\000\022\030\n\016customSignalId\030\004 \001(\t"
+    ":\000\022\021\n\007caption\030\005 \001(\t:\000\022\025\n\013equipmentId\030\006 \001"
+    "(\t:\000\022\022\n\007channel\030\n \001(\005:\0010\022\024\n\tinOutType\030\013 "
+    "\001(\005:\0012\022\025\n\nsignalType\030\014 \001(\005:\0010\022\035\n\022analogS"
+    "ignalFormat\030\r \001(\005:\0012\022\024\n\tbyteOrder\030\016 \001(\005:"
+    "\0012\022\021\n\006unitId\030\017 \001(\005:\0011\022\016\n\004unit\030\020 \001(\t:\000\022\030\n"
+    "\rlowValidRange\030\024 \001(\001:\0010\022\031\n\016highValidRang"
+    "e\030\025 \001(\001:\0010\022\036\n\023lowEngeneeringUnits\030\026 \001(\001:"
+    "\0010\022\037\n\024highEngeneeringUnits\030\027 \001(\001:\0010\022\030\n\ri"
+    "nputLowLimit\030\036 \001(\001:\0010\022\031\n\016inputHighLimit\030"
+    "\037 \001(\001:\0010\022\026\n\013inputUnitId\030  \001(\005:\0011\022\032\n\017inpu"
+    "tSensorType\030! \001(\005:\0010\022\031\n\016outputLowLimit\030("
+    " \001(\001:\0010\022\032\n\017outputHighLimit\030) \001(\001:\0010\022\027\n\014o"
+    "utputUnitId\030* \001(\005:\0011\022\025\n\noutputMode\030+ \001(\005"
+    ":\0010\022\033\n\020outputSensorType\030, \001(\005:\0010\022\024\n\tprec"
+    "ision\0302 \001(\005:\0012\022\023\n\010aperture\0303 \001(\001:\0011\022\034\n\rf"
+    "ilteringTime\0304 \001(\001:\0050.005\022\032\n\017spreadToler"
+    "ance\0305 \001(\001:\0012\022\033\n\014enableTuning\0306 \001(\010:\005fal"
+    "se\022\035\n\022tuningDefaultValue\0307 \001(\001:\0010\"9\n\021App"
+    "SignalParamSet\022$\n\005items\030\001 \003(\0132\025.Proto.Ap"
+    "pSignalParam\"\224\006\n\nConnection\022\026\n\014Connectio"
+    "nID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022"
+    "\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1RawD"
+    "ataDescription\030\005 \001(\t:\000\022!\n\027Port2RawDataDe"
+    "scription\030\006 \001(\t:\000\022\035\n\016ManualSettings\030\013 \001("
+    "\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022\036"
+    "\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1T"
+    "xStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQu"
+    "antity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuantit"
+    "y\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001("
+    "\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479\022"
+    "!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004uu"
+    "id\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1EnableSeri"
+    "al\030\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030\026 \001(\005"
+    ":\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005false\022 \n"
+    "\021Port2EnableSerial\030\030 \001(\010:\005false\022\032\n\017Port2"
+    "SerialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableDuplex"
+    "\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014Obsole"
+    "teMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 "
+    "\001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n \001(\010:\005fa"
+    "lse\"@\n\020SchemaDetailsSet\022,\n\016schemasDetail"
+    "s\030\002 \003(\0132\024.Proto.SchemaDetails\"\342\001\n\rSchema"
+    "Details\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaId\030\004 \001"
+    "(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfromBuild"
+    "\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDescrip"
+    "tionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006lab"
+    "els\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030"
+    "\027 \003(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Disp"
+    "lay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conne"
+    "ctionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)"
+    "\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020"
+    "\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tS"
+    "ignedInt\020\001\022\t\n\005Float\020\002", 13421);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -29566,6 +29568,7 @@ const int AppSignalState::kFlagsFieldNumber;
 const int AppSignalState::kSystemTimeFieldNumber;
 const int AppSignalState::kLocalTimeFieldNumber;
 const int AppSignalState::kPlantTimeFieldNumber;
+const int AppSignalState::kArchiveIdFieldNumber;
 #endif  // !_MSC_VER
 
 AppSignalState::AppSignalState()
@@ -29590,6 +29593,7 @@ void AppSignalState::SharedCtor() {
   systemtime_ = GOOGLE_LONGLONG(0);
   localtime_ = GOOGLE_LONGLONG(0);
   planttime_ = GOOGLE_LONGLONG(0);
+  archiveid_ = GOOGLE_LONGLONG(-1);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -29631,6 +29635,7 @@ void AppSignalState::Clear() {
     systemtime_ = GOOGLE_LONGLONG(0);
     localtime_ = GOOGLE_LONGLONG(0);
     planttime_ = GOOGLE_LONGLONG(0);
+    archiveid_ = GOOGLE_LONGLONG(-1);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -29685,51 +29690,67 @@ bool AppSignalState::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_systemTime;
+        if (input->ExpectTag(33)) goto parse_systemTime;
         break;
       }
 
-      // optional sint64 systemTime = 4 [default = 0];
+      // optional sfixed64 systemTime = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
          parse_systemTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SINT64>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
                  input, &systemtime_)));
           set_has_systemtime();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_localTime;
+        if (input->ExpectTag(41)) goto parse_localTime;
         break;
       }
 
-      // optional sint64 localTime = 5 [default = 0];
+      // optional sfixed64 localTime = 5 [default = 0];
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
          parse_localTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SINT64>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
                  input, &localtime_)));
           set_has_localtime();
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_plantTime;
+        if (input->ExpectTag(49)) goto parse_plantTime;
         break;
       }
 
-      // optional sint64 plantTime = 6 [default = 0];
+      // optional sfixed64 plantTime = 6 [default = 0];
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
          parse_plantTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SINT64>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
                  input, &planttime_)));
           set_has_planttime();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(57)) goto parse_archiveId;
+        break;
+      }
+
+      // optional sfixed64 archiveId = 7 [default = -1];
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_archiveId:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SFIXED64>(
+                 input, &archiveid_)));
+          set_has_archiveid();
         } else {
           goto handle_uninterpreted;
         }
@@ -29770,19 +29791,24 @@ void AppSignalState::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->flags(), output);
   }
 
-  // optional sint64 systemTime = 4 [default = 0];
+  // optional sfixed64 systemTime = 4 [default = 0];
   if (has_systemtime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteSInt64(4, this->systemtime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(4, this->systemtime(), output);
   }
 
-  // optional sint64 localTime = 5 [default = 0];
+  // optional sfixed64 localTime = 5 [default = 0];
   if (has_localtime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteSInt64(5, this->localtime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(5, this->localtime(), output);
   }
 
-  // optional sint64 plantTime = 6 [default = 0];
+  // optional sfixed64 plantTime = 6 [default = 0];
   if (has_planttime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteSInt64(6, this->planttime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(6, this->planttime(), output);
+  }
+
+  // optional sfixed64 archiveId = 7 [default = -1];
+  if (has_archiveid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteSFixed64(7, this->archiveid(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -29808,19 +29834,24 @@ void AppSignalState::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->flags(), target);
   }
 
-  // optional sint64 systemTime = 4 [default = 0];
+  // optional sfixed64 systemTime = 4 [default = 0];
   if (has_systemtime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(4, this->systemtime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(4, this->systemtime(), target);
   }
 
-  // optional sint64 localTime = 5 [default = 0];
+  // optional sfixed64 localTime = 5 [default = 0];
   if (has_localtime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(5, this->localtime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(5, this->localtime(), target);
   }
 
-  // optional sint64 plantTime = 6 [default = 0];
+  // optional sfixed64 plantTime = 6 [default = 0];
   if (has_planttime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(6, this->planttime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(6, this->planttime(), target);
+  }
+
+  // optional sfixed64 archiveId = 7 [default = -1];
+  if (has_archiveid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(7, this->archiveid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -29853,25 +29884,24 @@ int AppSignalState::ByteSize() const {
           this->flags());
     }
 
-    // optional sint64 systemTime = 4 [default = 0];
+    // optional sfixed64 systemTime = 4 [default = 0];
     if (has_systemtime()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::SInt64Size(
-          this->systemtime());
+      total_size += 1 + 8;
     }
 
-    // optional sint64 localTime = 5 [default = 0];
+    // optional sfixed64 localTime = 5 [default = 0];
     if (has_localtime()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::SInt64Size(
-          this->localtime());
+      total_size += 1 + 8;
     }
 
-    // optional sint64 plantTime = 6 [default = 0];
+    // optional sfixed64 plantTime = 6 [default = 0];
     if (has_planttime()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::SInt64Size(
-          this->planttime());
+      total_size += 1 + 8;
+    }
+
+    // optional sfixed64 archiveId = 7 [default = -1];
+    if (has_archiveid()) {
+      total_size += 1 + 8;
     }
 
   }
@@ -29919,6 +29949,9 @@ void AppSignalState::MergeFrom(const AppSignalState& from) {
     if (from.has_planttime()) {
       set_planttime(from.planttime());
     }
+    if (from.has_archiveid()) {
+      set_archiveid(from.archiveid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -29948,6 +29981,7 @@ void AppSignalState::Swap(AppSignalState* other) {
     std::swap(systemtime_, other->systemtime_);
     std::swap(localtime_, other->localtime_);
     std::swap(planttime_, other->planttime_);
+    std::swap(archiveid_, other->archiveid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

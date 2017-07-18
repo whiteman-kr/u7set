@@ -91,7 +91,8 @@ SOURCES += \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
-    ArchWriteThread.cpp
+    ArchWriteThread.cpp \
+    TcpArchiveRequestsServer.cpp
 
 HEADERS += \
     version.h \
@@ -127,7 +128,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \
-    ArchWriteThread.h
+    ArchWriteThread.h \
+    TcpArchiveRequestsServer.h
 
 include(../qtservice/src/qtservice.pri)
 
@@ -156,5 +158,8 @@ CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
+
+RESOURCES += \
+    Database/Database.qrc
 
 

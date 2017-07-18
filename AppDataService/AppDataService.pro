@@ -143,7 +143,8 @@ HEADERS += \
     ../lib/AppDataSource.h \
     ../u7/Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
-    TcpArchiveClient.h
+    TcpArchiveClient.h \
+    ../lib/TimeStamp.h
 
 include(../qtservice/src/qtservice.pri)
 

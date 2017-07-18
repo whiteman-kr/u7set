@@ -24,10 +24,17 @@ private:
 	void onThreadFinished() override;
 
 	void tryConnectToDb();
-	bool archiveIsExists(QSqlDatabase& db);
-	bool createArchive(QSqlDatabase& db);
+	bool databaseIsExists(QSqlDatabase& db);
+	bool createDatabase(QSqlDatabase& db);
+
+	bool initDatabase();
+	bool upgradeDatabase();
+
+	int getDatabaseVersion();
+	bool updateVersion(const QString& reasone);
 
 	bool getSignalsTablesList();
+
 	void appendTable(const QString& tableName, SignalStatesTableType tableType);
 	bool createTableIfNotExists(Hash signalHash);
 	bool createSignalStatesTable(Hash signalHash, SignalStatesTableType tableType);
@@ -59,6 +66,8 @@ private:
 
 	QHash<Hash, QString> m_longTermTables;
 	QHash<Hash, QString> m_shortTermTables;
+
+	static const StringPair m_upgradeFiles[];
 };
 
 

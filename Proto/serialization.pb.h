@@ -9072,26 +9072,33 @@ class AppSignalState : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 flags() const;
   inline void set_flags(::google::protobuf::uint32 value);
 
-  // optional sint64 systemTime = 4 [default = 0];
+  // optional sfixed64 systemTime = 4 [default = 0];
   inline bool has_systemtime() const;
   inline void clear_systemtime();
   static const int kSystemTimeFieldNumber = 4;
   inline ::google::protobuf::int64 systemtime() const;
   inline void set_systemtime(::google::protobuf::int64 value);
 
-  // optional sint64 localTime = 5 [default = 0];
+  // optional sfixed64 localTime = 5 [default = 0];
   inline bool has_localtime() const;
   inline void clear_localtime();
   static const int kLocalTimeFieldNumber = 5;
   inline ::google::protobuf::int64 localtime() const;
   inline void set_localtime(::google::protobuf::int64 value);
 
-  // optional sint64 plantTime = 6 [default = 0];
+  // optional sfixed64 plantTime = 6 [default = 0];
   inline bool has_planttime() const;
   inline void clear_planttime();
   static const int kPlantTimeFieldNumber = 6;
   inline ::google::protobuf::int64 planttime() const;
   inline void set_planttime(::google::protobuf::int64 value);
+
+  // optional sfixed64 archiveId = 7 [default = -1];
+  inline bool has_archiveid() const;
+  inline void clear_archiveid();
+  static const int kArchiveIdFieldNumber = 7;
+  inline ::google::protobuf::int64 archiveid() const;
+  inline void set_archiveid(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:Proto.AppSignalState)
  private:
@@ -9107,6 +9114,8 @@ class AppSignalState : public ::google::protobuf::Message {
   inline void clear_has_localtime();
   inline void set_has_planttime();
   inline void clear_has_planttime();
+  inline void set_has_archiveid();
+  inline void clear_has_archiveid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -9115,10 +9124,11 @@ class AppSignalState : public ::google::protobuf::Message {
   ::google::protobuf::int64 systemtime_;
   ::google::protobuf::int64 localtime_;
   ::google::protobuf::int64 planttime_;
+  ::google::protobuf::int64 archiveid_;
   ::google::protobuf::uint32 flags_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -22818,7 +22828,7 @@ inline void AppSignalState::set_flags(::google::protobuf::uint32 value) {
   flags_ = value;
 }
 
-// optional sint64 systemTime = 4 [default = 0];
+// optional sfixed64 systemTime = 4 [default = 0];
 inline bool AppSignalState::has_systemtime() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -22840,7 +22850,7 @@ inline void AppSignalState::set_systemtime(::google::protobuf::int64 value) {
   systemtime_ = value;
 }
 
-// optional sint64 localTime = 5 [default = 0];
+// optional sfixed64 localTime = 5 [default = 0];
 inline bool AppSignalState::has_localtime() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -22862,7 +22872,7 @@ inline void AppSignalState::set_localtime(::google::protobuf::int64 value) {
   localtime_ = value;
 }
 
-// optional sint64 plantTime = 6 [default = 0];
+// optional sfixed64 plantTime = 6 [default = 0];
 inline bool AppSignalState::has_planttime() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -22882,6 +22892,28 @@ inline ::google::protobuf::int64 AppSignalState::planttime() const {
 inline void AppSignalState::set_planttime(::google::protobuf::int64 value) {
   set_has_planttime();
   planttime_ = value;
+}
+
+// optional sfixed64 archiveId = 7 [default = -1];
+inline bool AppSignalState::has_archiveid() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppSignalState::set_has_archiveid() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppSignalState::clear_has_archiveid() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppSignalState::clear_archiveid() {
+  archiveid_ = GOOGLE_LONGLONG(-1);
+  clear_has_archiveid();
+}
+inline ::google::protobuf::int64 AppSignalState::archiveid() const {
+  return archiveid_;
+}
+inline void AppSignalState::set_archiveid(::google::protobuf::int64 value) {
+  set_has_archiveid();
+  archiveid_ = value;
 }
 
 // -------------------------------------------------------------------

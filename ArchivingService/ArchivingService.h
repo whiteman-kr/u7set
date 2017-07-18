@@ -7,6 +7,7 @@
 
 #include "TcpAppDataServer.h"
 #include "ArchWriteThread.h"
+#include "TcpArchiveRequestsServer.h"
 
 class ArchivingServiceWorker : public ServiceWorker
 {
@@ -38,11 +39,11 @@ private:
 
 	void runArchWriteThread();
 	void runAppDataServerThread();
-	void runClientDataServerThread();
+	void runArchiveRequestsServerThread();
 
 	void stopArchWriteThread();
 	void stopAppDataServerThread();
-	void stopClientDataServerThread();
+	void stopArchiveRequestsServerThread();
 
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
@@ -71,6 +72,7 @@ private:
 
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 	ArchWriteThread* m_archWriteThread = nullptr;
+	TcpArchiveRequestsServerThread* m_tcpArchiveRequestsServerThread = nullptr;
 
 	AppSignalStatesQueue m_saveStatesQueue;
 };
