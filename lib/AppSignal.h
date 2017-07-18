@@ -28,10 +28,10 @@ union AppSignalStateFlags
 
 		// reasons to archiving
 		//
-		quint32 validityChange : 1;
-		quint32 autoPoint : 1;
-		quint32 roughAperture : 1;
 		quint32 smoothAperture : 1;
+		quint32 roughAperture : 1;
+		quint32 autoPoint : 1;
+		quint32 validityChange : 1;
 	};
 
 	quint32 all;
