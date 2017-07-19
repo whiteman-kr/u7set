@@ -244,13 +244,10 @@ bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	return result;
 }
 
-
 bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 {
 	return true;
 }
-
-
 
 void ArchivingServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
