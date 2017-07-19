@@ -1187,3 +1187,15 @@ message SchemaDetails
 	repeated Uuid guids = 23;
 }
 
+
+message ArchSignal
+{
+    required uint64 hash = 1;
+    required bool isAnalog = 2;
+}
+
+
+message ArchSignals
+{
+    repeated ArchSignal archSignals = 1;
+}

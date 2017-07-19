@@ -43,6 +43,7 @@ private:
 	void disconnectFromDb();
 
 	void writeStatesToArchive();
+	bool saveAppSignalStateToArchive(SimpleAppSignalState& state);
 
 	QString projectArchiveDbName();
 
@@ -68,6 +69,10 @@ private:
 	QHash<Hash, QString> m_shortTermTables;
 
 	static const StringPair m_upgradeFiles[];
+
+	//
+
+	qint64 m_saveErrors = 0;
 };
 
 

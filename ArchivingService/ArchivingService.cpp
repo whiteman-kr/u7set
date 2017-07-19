@@ -245,6 +245,13 @@ bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 }
 
 
+bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
+{
+	return true;
+}
+
+
+
 void ArchivingServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
 	qDebug() << "Configuration Ready!";
@@ -274,6 +281,11 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		{
 			qDebug() << errStr;
 			continue;
+		}
+
+		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
+		{
+			initArchSignalsMap(fileData);
 		}
 
 /*		result = true;

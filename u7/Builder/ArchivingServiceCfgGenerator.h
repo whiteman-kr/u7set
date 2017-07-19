@@ -20,6 +20,8 @@ namespace Builder
 
 	private:
 		bool writeSettings();
+		bool writeArchSignalsFile();
+
 	};
 
 }

@@ -41,6 +41,7 @@ union AppSignalStateFlags
 	void clearReasonsFlags();
 
 	bool hasArchivingReason();
+	bool hasShortTermArchivingReasonOnly();
 };
 
 

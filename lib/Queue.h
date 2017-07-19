@@ -31,6 +31,8 @@ class QueueBase : public QObject
 		int operator () () const { return m_index; }
 
 		void reset() { m_index = 0; }
+
+		void setMaxValue(int maxValue) { m_maxValue = maxValue; }
 	};
 
 signals:

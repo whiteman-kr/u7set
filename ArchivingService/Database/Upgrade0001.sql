@@ -25,11 +25,13 @@ $BODY$
 
 
 CREATE OR REPLACE FUNCTION saveAppSignalState(signalHash bigint,
-                                              inPlantTime bigint,
-					      inSysTime bigint,
-					      inLocTime bigint,
-					      inState double precision,
-					      inFlags integer)
+                                              plantTime bigint,
+					      sysTime bigint,
+					      locTime bigint,
+					      val double precision,
+					      flags integer,
+					      isAnalogSignal boolean,
+					      writeInShortTermArchiveOnly boolean)
   RETURNS bigint AS
 $BODY$
 DECLARE
@@ -40,30 +42,43 @@ DECLARE
 BEGIN
         hashHex = int64hex(signalHash);
 
-        shortTermTable = concat('st_', hashHex);
+        IF isAnalogSignal = TRUE THEN
 
-        -- write signal state in short term table
+                shortTermTable = concat('st_', hashHex);
 
-        EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, state, flags)'
-	        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
-		shortTermTable, inPlantTime, inSysTime, inLocTime, inState, inFlags, 'archid')
-	INTO archid;
+                -- write signal state in short term table
 
-        -- test if set smoothAperture flag only
+                EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, val, flags)'
+		        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
+			shortTermTable, plantTime, sysTime, locTime, val, flags, 'archid')
+		INTO archid;
 
-        IF (inFlags & 2) = inFlags THEN
-	        RETURN archid;
+                -- test if set smoothAperture flag only
+
+                IF writeInShortTermArchiveOnly = TRUE THEN
+		        RETURN archid;
+		END IF;
+
+                -- write signal state in long ter table
+
+                longTermTable = concat('lt_', hashHex);
+
+                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+		        'VALUES (%L,%L,%L,%L,%L,%L)',
+			longTermTable, archid, plantTime, sysTime, locTime, val, flags);
+
+                RETURN archid;
+	ELSE
+	        longTermTable = concat('lt_', hashHex);
+
+                archid = nextval('archid_seq'::regclass);
+
+                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+		        'VALUES (%L,%L,%L,%L,%L,%L)',
+			longTermTable, archid, plantTime, sysTime, locTime, val, flags);
+
+                RETURN archid;
 	END IF;
-
-        -- write signal state in long ter table
-
-        longTermTable = concat('lt_', hashHex);
-
-        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, state, flags)'
-	        'VALUES (%L,%L,%L,%L,%L,%L)',
-		longTermTable, archid, inPlantTime, inSysTime, inLocTime, inState, inFlags);
-
-        RETURN archid;
 END
 $BODY$
  LANGUAGE plpgsql;

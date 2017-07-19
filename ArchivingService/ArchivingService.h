@@ -48,6 +48,9 @@ private:
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
 
+	bool initArchSignalsMap(const QByteArray& fileData);
+
+
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
@@ -75,5 +78,7 @@ private:
 	TcpArchiveRequestsServerThread* m_tcpArchiveRequestsServerThread = nullptr;
 
 	AppSignalStatesQueue m_saveStatesQueue;
+
+	QHash<Hash, bool> m_archSignals;
 };
 

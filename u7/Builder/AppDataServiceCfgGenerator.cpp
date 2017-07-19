@@ -479,9 +479,6 @@ namespace Builder
 			return false;
 		}
 
-		buildFile->addMetadata("Meta1", "Data1");
-		buildFile->addMetadata("Meta2", "Data2");
-
 		m_cfgXml->addLinkToFile(buildFile);
 
 		return result;

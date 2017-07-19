@@ -145,7 +145,10 @@ void QueueBase::resize(int newQueueSize)
 	m_queueSize = newQueueSize;
 	m_buffer = new char [m_itemSize * m_queueSize];
 
+	m_writeIndex.setMaxValue(newQueueSize);
 	m_writeIndex.reset();
+
+	m_readIndex.setMaxValue(newQueueSize);
 	m_readIndex.reset();
 }
 
