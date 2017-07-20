@@ -46,7 +46,7 @@ BEGIN
 
                 shortTermTable = concat('st_', hashHex);
 
-                -- write signal state in short term table
+                -- write analog signal state in short term table
 
                 EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, val, flags)'
 		        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
@@ -59,7 +59,7 @@ BEGIN
 		        RETURN archid;
 		END IF;
 
-                -- write signal state in long ter table
+                -- write analog signal state in long term table
 
                 longTermTable = concat('lt_', hashHex);
 
@@ -69,6 +69,8 @@ BEGIN
 
                 RETURN archid;
 	ELSE
+	        -- discrete signal states is writes in long term table only
+
 	        longTermTable = concat('lt_', hashHex);
 
                 archid = nextval('archid_seq'::regclass);
@@ -79,6 +81,76 @@ BEGIN
 
                 RETURN archid;
 	END IF;
+END
+$BODY$
+ LANGUAGE plpgsql;
+
+
+CREATE TYPE appsignalstate AS
+   (signalHash bigint,
+   plantTime bigint,
+   sysTime bigint,
+   locTime bigint,
+   val double precision,
+   flags integer,
+   isAnalogSignal boolean,
+   writeInShortTermArchiveOnly boolean);
+
+
+CREATE OR REPLACE FUNCTION saveAppSignalStatesArray(appSignalStates AppSignalState[])
+  RETURNS bigint AS
+$BODY$
+DECLARE
+        hashHex text;
+	shortTermTable text;
+	longTermTable text;
+	archid bigint;
+	state AppSignalState;
+BEGIN
+        FOREACH state IN ARRAY appSignalStates LOOP
+
+                hashHex = int64hex(state.signalHash);
+
+                IF state.isAnalogSignal = TRUE THEN
+
+                        shortTermTable = concat('st_', hashHex);
+
+                        -- write analog signal state in short term table
+
+                        EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, val, flags)'
+			        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
+				shortTermTable, state.plantTime, state.sysTime, state.locTime, state.val, state.flags, 'archid')
+			INTO archid;
+
+                        -- test if set smoothAperture flag only
+
+                        IF state.writeInShortTermArchiveOnly = TRUE THEN
+			        RETURN archid;
+			END IF;
+
+                        -- write analog signal state in long term table
+
+                        longTermTable = concat('lt_', hashHex);
+
+                        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+			        'VALUES (%L,%L,%L,%L,%L,%L)',
+				longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
+
+                        RETURN archid;
+		ELSE
+		        -- discrete signal states is writes in long term table only
+
+                        longTermTable = concat('lt_', hashHex);
+
+                        archid = nextval('archid_seq'::regclass);
+
+                        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+			        'VALUES (%L,%L,%L,%L,%L,%L)',
+				longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
+
+                        RETURN archid;
+		END IF;
+	END LOOP;
 END
 $BODY$
  LANGUAGE plpgsql;

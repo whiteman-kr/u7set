@@ -119,6 +119,8 @@ void ArchivingServiceWorker::clearConfiguration()
 	stopArchiveRequestsServerThread();
 	stopAppDataServerThread();
 	stopArchWriteThread();
+
+	m_archSignals.clear();
 }
 
 
@@ -133,7 +135,7 @@ void ArchivingServiceWorker::applyNewConfiguration()
 
 void ArchivingServiceWorker::runArchWriteThread()
 {
-	m_archWriteThread = new ArchWriteThread(m_projectID, m_saveStatesQueue, m_logger);
+	m_archWriteThread = new ArchWriteThread(m_projectID, m_saveStatesQueue, m_archSignals, m_logger);
 
 	m_archWriteThread->start();
 }
@@ -246,6 +248,33 @@ bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 
 bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 {
+	Proto::ArchSignals msg;
+
+	bool result = msg.ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
+
+	if (result == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	m_archSignals.clear();
+
+	int count = msg.archsignals_size();
+
+	for(int i = 0; i < count; i++)
+	{
+		const Proto::ArchSignal& archSignal = msg.archsignals(i);
+
+		if (m_archSignals.contains(archSignal.hash()) == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		m_archSignals.insert(archSignal.hash(), archSignal.isanalog());
+	}
+
 	return true;
 }
 
@@ -313,6 +342,4 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		applyNewConfiguration();
 	}
 }
-
-
 

@@ -1,4 +1,7 @@
 #include "ArchWriteThread.h"
+#include "ArchivingService.h"
+
+#include <chrono>
 
 const char* ArchWriteThreadWorker::ARCH_DB_PREFIX = "u7arch_";
 const char* ArchWriteThreadWorker::LONG_TERM_TABLE_PREFIX = "lt_";
@@ -12,9 +15,11 @@ const StringPair ArchWriteThreadWorker::m_upgradeFiles[] =
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const QString& projectID,
 											 AppSignalStatesQueue& saveStatesQueue,
+											 const ArchSignals &archSignals,
 											 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_saveStatesQueue(saveStatesQueue),
+	m_archSignals(archSignals),
 	m_logger(logger),
 	m_timer(this)
 {
@@ -390,7 +395,7 @@ void ArchWriteThreadWorker::appendTable(const QString& tableName, SignalStatesTa
 	}
 }
 
-bool ArchWriteThreadWorker::createTableIfNotExists(Hash signalHash)
+bool ArchWriteThreadWorker::createTableIfNotExists(Hash signalHash, bool isAnalogSignal)
 {
 	bool result = true;
 
@@ -399,9 +404,14 @@ bool ArchWriteThreadWorker::createTableIfNotExists(Hash signalHash)
 		result &= createSignalStatesTable(signalHash, SignalStatesTableType::LongTerm);
 	}
 
-	if (m_shortTermTables.contains(signalHash) == false)
+	if (isAnalogSignal == true)
 	{
-		result &= createSignalStatesTable(signalHash, SignalStatesTableType::ShortTerm);
+		// short term tables is creates for analog signals only
+		//
+		if (m_shortTermTables.contains(signalHash) == false)
+		{
+			result &= createSignalStatesTable(signalHash, SignalStatesTableType::ShortTerm);
+		}
 	}
 
 	return result;
@@ -536,9 +546,28 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 		return;
 	}
 
+	if (m_saveStatesQueue.size() < 1000)
+	{
+		return;
+	}
+
 	int count = 0;
 
-	int written = 0;
+	int toWriteCount = 0;
+
+	QTime t;
+
+	t.start();
+
+	QString	arrayStr;
+
+	arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
+
+//	QString format1("row(%1::bigint,%2::bigint,%3::bigint,%4::bigint,%5::double precision,%6::integer,%7,%8)::AppSignalState");
+//	QString format2(",row(%1::bigint,%2::bigint,%3::bigint,%4::bigint,%5::double precision,%6::integer,%7,%8)::AppSignalState");
+
+	QString format1("row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
+	QString format2(",row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
 
 	do
 	{
@@ -551,7 +580,16 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 			break;
 		}
 
-		res = createTableIfNotExists(state.hash);
+		if (m_archSignals.contains(state.hash) == false)
+		{
+			assert(false);
+			count++;
+			continue;
+		}
+
+		bool isAnalogSignal = m_archSignals.value(state.hash);
+
+		res = createTableIfNotExists(state.hash, isAnalogSignal);
 
 		if (res == false)
 		{
@@ -559,7 +597,8 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 			continue;
 		}
 
-		res = saveAppSignalStateToArchive(state);
+/*
+ *		res = saveAppSignalStateToArchive(state, isAnalogSignal);
 
 		if (res == false)
 		{
@@ -568,16 +607,57 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 		else
 		{
 			written++;
+		} */
+
+		qint64 bigintHash = *reinterpret_cast<qint64*>(&state.hash);
+
+		bool writeToShortTimeArchiveOnly = state.flags.hasShortTermArchivingReasonOnly();
+
+		if (toWriteCount == 0)
+		{
+			arrayStr = QString(format1).
+					arg(bigintHash).
+					arg(state.time.plant.timeStamp).
+					arg(state.time.system.timeStamp).
+					arg(state.time.local.timeStamp).
+					arg(state.value).
+					arg(state.flags.all).
+					arg(isAnalogSignal == true ? "TRUE" : "FALSE").
+					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
 		}
+		else
+		{
+			arrayStr.append(QString(format2).
+					arg(bigintHash).
+					arg(state.time.plant.timeStamp).
+					arg(state.time.system.timeStamp).
+					arg(state.time.local.timeStamp).
+					arg(state.value).
+					arg(state.flags.all).
+					arg(isAnalogSignal == true ? "TRUE" : "FALSE").
+					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE"));
+		}
+
+		toWriteCount++;
 
 		count++;
 	}
-	while(count < 500);
+	while(count < 1000);
 
-	qDebug() << "Write states " << written;
+	if (toWriteCount > 0)
+	{
+		saveAppSignalStatesArrayToArchive(arrayStr);
+	}
+
+	if (toWriteCount != 0)
+	{
+		int time = t.elapsed();
+
+		qDebug() << "Write states " << toWriteCount << "time " << time << "(per write =" << double(time) / toWriteCount << ")";
+	}
 }
 
-bool ArchWriteThreadWorker::saveAppSignalStateToArchive(SimpleAppSignalState& state)
+bool ArchWriteThreadWorker::saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal)
 {
 	if (m_db.isOpen() == false)
 	{
@@ -598,15 +678,48 @@ bool ArchWriteThreadWorker::saveAppSignalStateToArchive(SimpleAppSignalState& st
 						arg(state.time.local.timeStamp).
 						arg(state.value).
 						arg(state.flags.all).
-						arg("TRUE").
+						arg(isAnalogSignal == true ? "TRUE" : "FALSE").
 						arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
 
 	QSqlQuery query(m_db);
 
 	bool result = query.exec(queryStr);
 
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return false;
+	}
+
 	return result;
 }
+
+
+bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arrayStr)
+{
+	if (m_db.isOpen() == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString queryStr = QString("SELECT * FROM saveAppSignalStatesArray(ARRAY[%1])").arg(arrayStr);
+
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return false;
+	}
+
+	return result;
+}
+
 
 QString ArchWriteThreadWorker::projectArchiveDbName()
 {
@@ -632,9 +745,12 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 	writeStatesToArchive();
 }
 
-ArchWriteThread::ArchWriteThread(const QString& projectID, AppSignalStatesQueue& saveStatesQueue, CircularLoggerShared logger)
+ArchWriteThread::ArchWriteThread(const QString& projectID,
+								 AppSignalStatesQueue& saveStatesQueue,
+								 const ArchSignals& archSignals,
+								 CircularLoggerShared logger)
 {
-	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(projectID, saveStatesQueue, logger);
+	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(projectID, saveStatesQueue, archSignals, logger);
 
 	addWorker(worker);
 }

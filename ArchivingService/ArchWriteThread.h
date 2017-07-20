@@ -6,11 +6,14 @@
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
 
+typedef QHash<Hash, bool> ArchSignals;
+
 class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
 	ArchWriteThreadWorker(const QString& projectID,
 						  AppSignalStatesQueue& saveStatesQueue,
+						  const ArchSignals& archSignals,
 						  CircularLoggerShared logger);
 
 private:
@@ -36,14 +39,15 @@ private:
 	bool getSignalsTablesList();
 
 	void appendTable(const QString& tableName, SignalStatesTableType tableType);
-	bool createTableIfNotExists(Hash signalHash);
+	bool createTableIfNotExists(Hash signalHash, bool isAnalogSignal);
 	bool createSignalStatesTable(Hash signalHash, SignalStatesTableType tableType);
 	QString getTableName(Hash signalHash, SignalStatesTableType tableType);
 
 	void disconnectFromDb();
 
 	void writeStatesToArchive();
-	bool saveAppSignalStateToArchive(SimpleAppSignalState& state);
+	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
+	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
 
 	QString projectArchiveDbName();
 
@@ -54,8 +58,8 @@ private slots:
 private:
 	QString m_projectID;
 	AppSignalStatesQueue& m_saveStatesQueue;
+	const ArchSignals& m_archSignals;
 	CircularLoggerShared m_logger;
-
 
 	QTimer m_timer;
 
@@ -79,5 +83,9 @@ private:
 class ArchWriteThread : public SimpleThread
 {
 public:
-	ArchWriteThread(const QString& projectID, AppSignalStatesQueue& saveStatesQueue, CircularLoggerShared logger);
+	ArchWriteThread(const QString& projectID,
+					AppSignalStatesQueue& saveStatesQueue,
+					const ArchSignals& archSignals,
+					CircularLoggerShared logger);
 };
+

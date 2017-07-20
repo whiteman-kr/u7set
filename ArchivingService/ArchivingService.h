@@ -79,6 +79,5 @@ private:
 
 	AppSignalStatesQueue m_saveStatesQueue;
 
-	QHash<Hash, bool> m_archSignals;
+	ArchSignals m_archSignals;
 };
-
