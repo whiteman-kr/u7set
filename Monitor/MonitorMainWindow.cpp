@@ -8,6 +8,7 @@
 #include "MonitorSchemaWidget.h"
 #include "DialogSignalSearch.h"
 #include "DialogSignalSnapshot.h"
+#include "MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
@@ -585,29 +586,73 @@ void MonitorMainWindow::slot_trends()
 	qDebug() << "";
 	qDebug() << Q_FUNC_INFO;
 
-	ConfigSettings conf = m_configController.configuration();
+	// Get Trends list
+	//
+	std::vector<QString> trends = MonitorTrends::getTrendsList();
 
-	QStringList args;
-	args << QString("-ads1=%1:%2").arg(conf.ads1.ip()).arg(conf.ads1.port());
-	args << QString("-ads2=%1:%2").arg(conf.ads2.ip()).arg(conf.ads2.port());
+	// Choose trend
+	//
+	QString trendToActivate;
 
-	qint64 pid = 0;
-
-	qDebug() << "Start trentd with arguments: " << args.join(' ');
-#ifdef Q_OS_WIN
-	bool ok = QProcess::startDetached("./Trends.exe", args, QString(), &pid);
-#else
-	bool ok = QProcess::startDetached("./Trends", args, QString(), &pid);
-#endif
-
-	if (ok == false)
+	if (trends.empty() == true)
 	{
-		qDebug() << "Cannot start Trends process. Check whether the executable exists and has propper rights and attributes.";
-		QMessageBox::critical(this, qApp->applicationName(), tr("Cannot start Trends process. Check whether the executable exists and has propper rights and attributes."));
+		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
 	}
 	else
 	{
-		qDebug() << "Trends process was started, pid: " << pid;
+		QMenu menu;
+
+		QAction* newTrendAction = menu.addAction("New Trend...");
+		newTrendAction->setData(QVariant::fromValue<int>(-1));		// Data -1 means, create new trend widget
+
+		menu.addSeparator();
+
+		for (size_t i = 0; i < trends.size(); i++)
+		{
+			QAction* a = menu.addAction(trends[i]);
+			assert(a);
+
+			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
+		}
+
+		QAction* triggeredAction = menu.exec(QCursor::pos());
+		if (triggeredAction == nullptr)
+		{
+			return;
+		}
+
+		QVariant data = triggeredAction->data();
+
+		bool ok = false;
+		size_t trendIndex = data.toInt(&ok);
+
+		if (trendIndex == -1)
+		{
+			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		}
+		else
+		{
+			if (ok == false || trendIndex < 0 || trendIndex >= trends.size())
+			{
+				assert(ok == true);
+				assert(trendIndex >= 0 && trendIndex < trends.size());
+				return;
+			}
+
+			trendToActivate = trends.at(trendIndex);
+		}
+	}
+
+	// Start new trend or activate chosen one
+	//
+	if (trendToActivate.isEmpty() == true)
+	{
+		ConfigSettings conf = m_configController.configuration();
+		MonitorTrends::startTrendApp(conf.ads1.ip(), conf.ads1.port(), conf.ads2.ip(), conf.ads2.port(), this);
+	}
+	else
+	{
+		MonitorTrends::activateTrendWindow(trendToActivate);
 	}
 
 	return;

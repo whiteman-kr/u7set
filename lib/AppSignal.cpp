@@ -1,4 +1,5 @@
 #include "../lib/AppSignal.h"
+#include "../Proto/serialization.pb.h"
 
 
 QDateTime Times::systemToDateTime() const

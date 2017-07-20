@@ -5,7 +5,18 @@ namespace TrendLib
 
 	TrendSignalParam::TrendSignalParam()
 	{
+	}
 
+	TrendSignalParam::TrendSignalParam(const AppSignalParam& appSignal) :
+		m_signalId(appSignal.customSignalId()),
+		m_appSignalId(appSignal.appSignalId()),
+		m_caption(appSignal.caption()),
+		m_equipmentId(appSignal.equipmentId()),
+		m_type(appSignal.type()),
+		m_lowLimit(appSignal.lowEngineeringUnits()),
+		m_highLimit(appSignal.highEngineeringUnits()),
+		m_unit(appSignal.unit())
+	{
 	}
 
 	QString TrendSignalParam::signalId() const
@@ -16,6 +27,16 @@ namespace TrendLib
 	void TrendSignalParam::setSignalId(const QString& value)
 	{
 		m_signalId = value;
+	}
+
+	QString TrendSignalParam::appSignalId() const
+	{
+		return m_appSignalId;
+	}
+
+	void TrendSignalParam::setAppSignalId(const QString& value)
+	{
+		m_appSignalId = value;
 	}
 
 	QString TrendSignalParam::caption() const
@@ -121,14 +142,14 @@ namespace TrendLib
 		return true;
 	}
 
-	void TrendSignalSet::removeSignal(QString signalId)
+	void TrendSignalSet::removeSignal(QString appSignalId)
 	{
 		QMutexLocker locker(&m_paramMutex);
 
 		m_signalParams.remove_if(
-			[&signalId](const TrendSignalParam& s)
+			[&appSignalId](const TrendSignalParam& s)
 			{
-				return s.signalId() == signalId;
+				return s.appSignalId() == appSignalId;
 			});
 
 		return;

@@ -324,7 +324,6 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
 		connect(a, &QAction::triggered, this, f);
 
 		actions << a;
-
 	}
 
 	menu.exec(actions, QCursor::pos(), 0, this);

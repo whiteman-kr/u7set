@@ -13,6 +13,7 @@ SUBDIRS += qtservice \
     ConfigurationService \
     ArchivingService \
 	QScintilla \	
+    TrendView \
 	VFrame30 \
 	u7 \
     Monitor \
@@ -20,8 +21,6 @@ SUBDIRS += qtservice \
     TuningService \
     AppDataService \
     DiagDataService \
-    mconf \
     TuningClient \
     TuningIPEN \
-    TrendView \
-    Trends
+    mconf

@@ -1,5 +1,5 @@
 #include "TuningSignalStorage.h"
-
+#include "../Proto/serialization.pb.h"
 
 
 //

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>683</width>
-    <height>373</height>
+    <width>691</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TrendsMainWindow</string>
+   <string>Trends</string>
   </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>683</width>
+     <width>691</width>
      <height>20</height>
     </rect>
    </property>
@@ -45,8 +45,8 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="Trends.qrc">
-     <normaloff>:/Images/Images/Open.svg</normaloff>:/Images/Images/Open.svg</iconset>
+    <iconset resource="TrendView.qrc">
+     <normaloff>:/TrendImages/Images/Open.svg</normaloff>:/TrendImages/Images/Open.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -57,8 +57,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="Trends.qrc">
-     <normaloff>:/Images/Images/Save.svg</normaloff>:/Images/Images/Save.svg</iconset>
+    <iconset resource="TrendView.qrc">
+     <normaloff>:/TrendImages/Images/Save.svg</normaloff>:/TrendImages/Images/Save.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -79,8 +79,8 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="Trends.qrc">
-     <normaloff>:/Images/Images/Print.svg</normaloff>:/Images/Images/Print.svg</iconset>
+    <iconset resource="TrendView.qrc">
+     <normaloff>:/TrendImages/Images/Print.svg</normaloff>:/TrendImages/Images/Print.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Print</string>
@@ -92,7 +92,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="Trends.qrc"/>
+  <include location="TrendView.qrc"/>
  </resources>
  <connections/>
 </ui>

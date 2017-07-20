@@ -2,11 +2,17 @@
 
 #include <QtGlobal>
 #include <QDateTime>
-#include "../Proto/serialization.pb.h"
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
 #include "Types.h"
+
+namespace Proto
+{
+	class AppSignalState;
+	class AppSignalParam;
+}
+
 
 struct Times
 {
