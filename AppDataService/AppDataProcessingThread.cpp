@@ -116,6 +116,15 @@ void AppDataProcessingWorker::parseRupData()
 
 		if (hasArchivingReason == true)
 		{
+
+			/*if (signalState->current().hash == 17879691435266363839)
+			{
+				int a = 0;
+				a++;
+
+				qDebug() << "write Time = " << signalState->current().time.system.timeStamp << " Flags = " << signalState->current().flags.all << " Value = " << signalState->current().value;
+			}*/
+
 			m_signalStatesQueue.push(&signalState->stored());
 		}
 	}

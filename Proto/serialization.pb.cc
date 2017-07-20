@@ -241,6 +241,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* SchemaDetails_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemaDetails_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ArchSignal_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ArchSignal_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ArchSignals_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ArchSignals_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
@@ -1679,6 +1685,37 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
+  ArchSignal_descriptor_ = file->message_type(70);
+  static const int ArchSignal_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
+  };
+  ArchSignal_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ArchSignal_descriptor_,
+      ArchSignal::default_instance_,
+      ArchSignal_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ArchSignal));
+  ArchSignals_descriptor_ = file->message_type(71);
+  static const int ArchSignals_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, archsignals_),
+  };
+  ArchSignals_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ArchSignals_descriptor_,
+      ArchSignals::default_instance_,
+      ArchSignals_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ArchSignals));
   SchemaUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
@@ -1835,6 +1872,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
     SchemaDetailsSet_descriptor_, &SchemaDetailsSet::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemaDetails_descriptor_, &SchemaDetails::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ArchSignal_descriptor_, &ArchSignal::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ArchSignals_descriptor_, &ArchSignals::default_instance());
 }
 
 }  // namespace
@@ -1982,6 +2023,10 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete SchemaDetailsSet_reflection_;
   delete SchemaDetails::default_instance_;
   delete SchemaDetails_reflection_;
+  delete ArchSignal::default_instance_;
+  delete ArchSignal_reflection_;
+  delete ArchSignals::default_instance_;
+  delete ArchSignals_reflection_;
 }
 
 void protobuf_AddDesc_serialization_2eproto() {
@@ -2321,12 +2366,15 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDescrip"
     "tionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006lab"
     "els\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030"
-    "\027 \003(\0132\013.Proto.Uuid*3\n\nSchemaUnit\022\013\n\007Disp"
-    "lay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Conne"
-    "ctionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)"
-    "\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020"
-    "\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tS"
-    "ignedInt\020\001\022\t\n\005Float\020\002", 13421);
+    "\027 \003(\0132\013.Proto.Uuid\",\n\nArchSignal\022\014\n\004hash"
+    "\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\"5\n\013ArchSignals\022"
+    "&\n\013archSignals\030\001 \003(\0132\021.Proto.ArchSignal*"
+    "3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
+    "\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005"
+    "Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006"
+    "Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022"
+    "\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float"
+    "\020\002", 13522);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2403,6 +2451,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   Connection::default_instance_ = new Connection();
   SchemaDetailsSet::default_instance_ = new SchemaDetailsSet();
   SchemaDetails::default_instance_ = new SchemaDetails();
+  ArchSignal::default_instance_ = new ArchSignal();
+  ArchSignals::default_instance_ = new ArchSignals();
   Uuid::default_instance_->InitAsDefaultInstance();
   qvariant::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
@@ -2473,6 +2523,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   Connection::default_instance_->InitAsDefaultInstance();
   SchemaDetailsSet::default_instance_->InitAsDefaultInstance();
   SchemaDetails::default_instance_->InitAsDefaultInstance();
+  ArchSignal::default_instance_->InitAsDefaultInstance();
+  ArchSignals::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
 
@@ -33811,6 +33863,459 @@ void SchemaDetails::Swap(SchemaDetails* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = SchemaDetails_descriptor_;
   metadata.reflection = SchemaDetails_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ArchSignal::kHashFieldNumber;
+const int ArchSignal::kIsAnalogFieldNumber;
+#endif  // !_MSC_VER
+
+ArchSignal::ArchSignal()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void ArchSignal::InitAsDefaultInstance() {
+}
+
+ArchSignal::ArchSignal(const ArchSignal& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void ArchSignal::SharedCtor() {
+  _cached_size_ = 0;
+  hash_ = GOOGLE_ULONGLONG(0);
+  isanalog_ = false;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ArchSignal::~ArchSignal() {
+  SharedDtor();
+}
+
+void ArchSignal::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void ArchSignal::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ArchSignal::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ArchSignal_descriptor_;
+}
+
+const ArchSignal& ArchSignal::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+ArchSignal* ArchSignal::default_instance_ = NULL;
+
+ArchSignal* ArchSignal::New() const {
+  return new ArchSignal;
+}
+
+void ArchSignal::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    hash_ = GOOGLE_ULONGLONG(0);
+    isanalog_ = false;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ArchSignal::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required uint64 hash = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &hash_)));
+          set_has_hash();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_isAnalog;
+        break;
+      }
+
+      // required bool isAnalog = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_isAnalog:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &isanalog_)));
+          set_has_isanalog();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void ArchSignal::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required uint64 hash = 1;
+  if (has_hash()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->hash(), output);
+  }
+
+  // required bool isAnalog = 2;
+  if (has_isanalog()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->isanalog(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* ArchSignal::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required uint64 hash = 1;
+  if (has_hash()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->hash(), target);
+  }
+
+  // required bool isAnalog = 2;
+  if (has_isanalog()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->isanalog(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int ArchSignal::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required uint64 hash = 1;
+    if (has_hash()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->hash());
+    }
+
+    // required bool isAnalog = 2;
+    if (has_isanalog()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ArchSignal::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ArchSignal* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ArchSignal*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ArchSignal::MergeFrom(const ArchSignal& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_hash()) {
+      set_hash(from.hash());
+    }
+    if (from.has_isanalog()) {
+      set_isanalog(from.isanalog());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ArchSignal::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ArchSignal::CopyFrom(const ArchSignal& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ArchSignal::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void ArchSignal::Swap(ArchSignal* other) {
+  if (other != this) {
+    std::swap(hash_, other->hash_);
+    std::swap(isanalog_, other->isanalog_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ArchSignal::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ArchSignal_descriptor_;
+  metadata.reflection = ArchSignal_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ArchSignals::kArchSignalsFieldNumber;
+#endif  // !_MSC_VER
+
+ArchSignals::ArchSignals()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void ArchSignals::InitAsDefaultInstance() {
+}
+
+ArchSignals::ArchSignals(const ArchSignals& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void ArchSignals::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ArchSignals::~ArchSignals() {
+  SharedDtor();
+}
+
+void ArchSignals::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void ArchSignals::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ArchSignals::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ArchSignals_descriptor_;
+}
+
+const ArchSignals& ArchSignals::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+ArchSignals* ArchSignals::default_instance_ = NULL;
+
+ArchSignals* ArchSignals::New() const {
+  return new ArchSignals;
+}
+
+void ArchSignals::Clear() {
+  archsignals_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ArchSignals::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .Proto.ArchSignal archSignals = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_archSignals:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_archsignals()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_archSignals;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void ArchSignals::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .Proto.ArchSignal archSignals = 1;
+  for (int i = 0; i < this->archsignals_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->archsignals(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* ArchSignals::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .Proto.ArchSignal archSignals = 1;
+  for (int i = 0; i < this->archsignals_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->archsignals(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int ArchSignals::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .Proto.ArchSignal archSignals = 1;
+  total_size += 1 * this->archsignals_size();
+  for (int i = 0; i < this->archsignals_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->archsignals(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ArchSignals::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ArchSignals* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ArchSignals*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ArchSignals::MergeFrom(const ArchSignals& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  archsignals_.MergeFrom(from.archsignals_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ArchSignals::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ArchSignals::CopyFrom(const ArchSignals& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ArchSignals::IsInitialized() const {
+
+  for (int i = 0; i < archsignals_size(); i++) {
+    if (!this->archsignals(i).IsInitialized()) return false;
+  }
+  return true;
+}
+
+void ArchSignals::Swap(ArchSignals* other) {
+  if (other != this) {
+    archsignals_.Swap(&other->archsignals_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ArchSignals::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ArchSignals_descriptor_;
+  metadata.reflection = ArchSignals_reflection_;
   return metadata;
 }
 

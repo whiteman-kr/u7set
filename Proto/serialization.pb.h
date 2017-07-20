@@ -104,6 +104,8 @@ class AppSignalParamSet;
 class Connection;
 class SchemaDetailsSet;
 class SchemaDetails;
+class ArchSignal;
+class ArchSignals;
 
 enum SchemaUnit {
   Display = 0,
@@ -10278,6 +10280,183 @@ class SchemaDetails : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaDetails* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ArchSignal : public ::google::protobuf::Message {
+ public:
+  ArchSignal();
+  virtual ~ArchSignal();
+
+  ArchSignal(const ArchSignal& from);
+
+  inline ArchSignal& operator=(const ArchSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ArchSignal& default_instance();
+
+  void Swap(ArchSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  ArchSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ArchSignal& from);
+  void MergeFrom(const ArchSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint64 hash = 1;
+  inline bool has_hash() const;
+  inline void clear_hash();
+  static const int kHashFieldNumber = 1;
+  inline ::google::protobuf::uint64 hash() const;
+  inline void set_hash(::google::protobuf::uint64 value);
+
+  // required bool isAnalog = 2;
+  inline bool has_isanalog() const;
+  inline void clear_isanalog();
+  static const int kIsAnalogFieldNumber = 2;
+  inline bool isanalog() const;
+  inline void set_isanalog(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.ArchSignal)
+ private:
+  inline void set_has_hash();
+  inline void clear_has_hash();
+  inline void set_has_isanalog();
+  inline void clear_has_isanalog();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint64 hash_;
+  bool isanalog_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ArchSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ArchSignals : public ::google::protobuf::Message {
+ public:
+  ArchSignals();
+  virtual ~ArchSignals();
+
+  ArchSignals(const ArchSignals& from);
+
+  inline ArchSignals& operator=(const ArchSignals& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ArchSignals& default_instance();
+
+  void Swap(ArchSignals* other);
+
+  // implements Message ----------------------------------------------
+
+  ArchSignals* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ArchSignals& from);
+  void MergeFrom(const ArchSignals& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.ArchSignal archSignals = 1;
+  inline int archsignals_size() const;
+  inline void clear_archsignals();
+  static const int kArchSignalsFieldNumber = 1;
+  inline const ::Proto::ArchSignal& archsignals(int index) const;
+  inline ::Proto::ArchSignal* mutable_archsignals(int index);
+  inline ::Proto::ArchSignal* add_archsignals();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal >&
+      archsignals() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal >*
+      mutable_archsignals();
+
+  // @@protoc_insertion_point(class_scope:Proto.ArchSignals)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal > archsignals_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ArchSignals* default_instance_;
 };
 // ===================================================================
 
@@ -25193,6 +25372,83 @@ SchemaDetails::guids() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
 SchemaDetails::mutable_guids() {
   return &guids_;
+}
+
+// -------------------------------------------------------------------
+
+// ArchSignal
+
+// required uint64 hash = 1;
+inline bool ArchSignal::has_hash() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ArchSignal::set_has_hash() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ArchSignal::clear_has_hash() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ArchSignal::clear_hash() {
+  hash_ = GOOGLE_ULONGLONG(0);
+  clear_has_hash();
+}
+inline ::google::protobuf::uint64 ArchSignal::hash() const {
+  return hash_;
+}
+inline void ArchSignal::set_hash(::google::protobuf::uint64 value) {
+  set_has_hash();
+  hash_ = value;
+}
+
+// required bool isAnalog = 2;
+inline bool ArchSignal::has_isanalog() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ArchSignal::set_has_isanalog() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ArchSignal::clear_has_isanalog() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ArchSignal::clear_isanalog() {
+  isanalog_ = false;
+  clear_has_isanalog();
+}
+inline bool ArchSignal::isanalog() const {
+  return isanalog_;
+}
+inline void ArchSignal::set_isanalog(bool value) {
+  set_has_isanalog();
+  isanalog_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ArchSignals
+
+// repeated .Proto.ArchSignal archSignals = 1;
+inline int ArchSignals::archsignals_size() const {
+  return archsignals_.size();
+}
+inline void ArchSignals::clear_archsignals() {
+  archsignals_.Clear();
+}
+inline const ::Proto::ArchSignal& ArchSignals::archsignals(int index) const {
+  return archsignals_.Get(index);
+}
+inline ::Proto::ArchSignal* ArchSignals::mutable_archsignals(int index) {
+  return archsignals_.Mutable(index);
+}
+inline ::Proto::ArchSignal* ArchSignals::add_archsignals() {
+  return archsignals_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal >&
+ArchSignals::archsignals() const {
+  return archsignals_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal >*
+ArchSignals::mutable_archsignals() {
+  return &archsignals_;
 }
 
 

@@ -187,6 +187,8 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 
 	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
 
+	qDebug() << "App cfg data root folder: " << C_STR(m_rootFolder);
+
 	//m_rootFolder = "d:/cfgloader" + m_appDataPath;		// for debugging only!!!
 
 	setRootFolder(m_rootFolder);
@@ -797,12 +799,6 @@ bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData)
 	*fileData = file.readAll();
 
 	file.close();
-
-	if (fileData->isEmpty())
-	{
-		assert(false);
-		return false;
-	}
 
 	return true;
 }

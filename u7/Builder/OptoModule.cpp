@@ -1048,7 +1048,7 @@ namespace Hardware
 			switch(item.type)
 			{
 			case RawDataDescriptionItem::Type::TxRawDataSize:
-				m_txRawDataSizeW = item.txRawDataSize;
+				//m_txRawDataSizeW = item.txRawDataSize;
 				break;
 
 			case RawDataDescriptionItem::Type::RxRawDataSize:
@@ -1310,6 +1310,8 @@ namespace Hardware
 		m_txRawDataSizeW = rawDataSizeW;
 
 		m_txRawDataSizeWIsCalculated = true;
+
+		// qDebug() << "Port " << C_STR(equipmentID()) << " raw data size " << m_txRawDataSizeW;
 	}
 
 	void OptoPort::writeInfo(QStringList& list) const
@@ -2458,6 +2460,13 @@ namespace Hardware
 				result = false;
 				break;
 			}
+		}
+
+		for(OptoPortShared& port : m_ports)
+		{
+			TEST_PTR_CONTINUE(port);
+
+			port->calculatePortRawDataSize(this);		// set m_txRawDataSizeW !
 		}
 
 		return result;

@@ -428,26 +428,26 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 	case SignalStatesTableType::LongTerm:
 		queryStr = QString("CREATE TABLE public.%1 ("
 							"archid bigint NOT NULL, "
-							 "state double precision, "
-							 "flags integer, "
-							 "planttime bigint, "
-							 "systime bigint, "
-							 "loctime bigint, "
-							 "CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
-						   "WITH (OIDS=FALSE);").arg(tableName);
+							"planttime bigint, "
+							"systime bigint, "
+							"loctime bigint, "
+							"val double precision, "
+							"flags integer, "
+							"CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
+							"WITH (OIDS=FALSE);").arg(tableName);
 		break;
 
 	case SignalStatesTableType::ShortTerm:
 
 		queryStr = QString("CREATE TABLE public.%1 ("
 							"archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass), "
-							 "state double precision, "
-							 "flags integer, "
-							 "planttime bigint, "
-							 "systime bigint, "
-							 "loctime bigint, "
-							 "CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
-						   "WITH (OIDS=FALSE);").arg(tableName);
+							"planttime bigint, "
+							"systime bigint, "
+							"loctime bigint, "
+							"val double precision, "
+							"flags integer, "
+							"CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
+							"WITH (OIDS=FALSE);").arg(tableName);
 		break;
 
 	default:
@@ -559,13 +559,53 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 			continue;
 		}
 
-		written++;
+		res = saveAppSignalStateToArchive(state);
+
+		if (res == false)
+		{
+			m_saveErrors++;
+		}
+		else
+		{
+			written++;
+		}
 
 		count++;
 	}
 	while(count < 500);
 
 	qDebug() << "Write states " << written;
+}
+
+bool ArchWriteThreadWorker::saveAppSignalStateToArchive(SimpleAppSignalState& state)
+{
+	if (m_db.isOpen() == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	// convert unsigned int 64 hash to signet int 64 (equivalent to pgsql ::bigint)
+	//
+	qint64 bigintHash = *reinterpret_cast<qint64*>(&state.hash);
+
+	bool writeToShortTimeArchiveOnly = state.flags.hasShortTermArchivingReasonOnly();
+
+	QString queryStr = QString("SELECT * FROM saveAppSignalState(%1::bigint,%2::bigint,%3::bigint,%4::bigint,%5::double precision,%6::integer,%7,%8)").
+						arg(bigintHash).
+						arg(state.time.plant.timeStamp).
+						arg(state.time.system.timeStamp).
+						arg(state.time.local.timeStamp).
+						arg(state.value).
+						arg(state.flags.all).
+						arg("TRUE").
+						arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
+
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	return result;
 }
 
 QString ArchWriteThreadWorker::projectArchiveDbName()

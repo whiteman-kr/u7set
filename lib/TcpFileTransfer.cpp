@@ -509,7 +509,17 @@ namespace Tcp
 		QFileInfo fi(m_file);
 
 		m_reply.fileSize = fi.size();
-		m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);
+
+		assert(m_reply.fileSize >= 0);
+
+		if (m_reply.fileSize == 0)
+		{
+			m_reply.totalParts = 1;
+		}
+		else
+		{
+			m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);
+		}
 
 		sendNextFilePart();
 	}
@@ -537,13 +547,6 @@ namespace Tcp
 
 			DEBUG_LOG_ERR(m_logger, QString("Read file '%1' error.").arg(m_file.fileName()));
 			return;
-		}
-
-		if (readed == 0)
-		{
-			int a = 0;
-
-			a++;
 		}
 
 		m_reply.currentPart++;

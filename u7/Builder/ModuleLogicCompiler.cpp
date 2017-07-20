@@ -5651,7 +5651,11 @@ namespace Builder
 
 		Command cmd;
 
-		cmd.setMem(port->txBufAbsAddress() + offset, 0, port->txRawDataSizeW());
+		// qDebug() << "Fill port " << C_STR(port->equipmentID()) << " raw data";
+
+		int txRawDataSizeW = port->txRawDataSizeW();
+
+		cmd.setMem(port->txBufAbsAddress() + offset, 0, txRawDataSizeW);
 		cmd.setComment("initialize tx raw data memory");
 
 		m_code.append(cmd);
