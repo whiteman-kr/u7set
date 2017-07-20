@@ -14,9 +14,14 @@
 //	first: previous AppSignalID
 //  second: new AppSignalID
 //
-std::vector<std::pair<QString, QString>> editApplicationSignals(const QStringList& signalId, DbController* dbController, QWidget* parent)
+std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget* parent)
 {
 	QVector<Signal> signalVector;
+
+	for (QString& id : signalId)
+	{
+		id = id.trimmed();
+	}
 
 	if (!dbController->getLatestSignalsByAppSignalIDs(signalId, &signalVector, parent))
 	{
