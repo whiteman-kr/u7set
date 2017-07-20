@@ -77,6 +77,8 @@ private:
 	//
 
 	qint64 m_saveErrors = 0;
+
+	Times m_lastTime;
 };
 
 

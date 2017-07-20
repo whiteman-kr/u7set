@@ -1,5 +1,20 @@
 CREATE SEQUENCE archid_seq INCREMENT BY 1 CACHE 1;
 
+CREATE TABLE minutesmarks
+(
+  archid bigint NOT NULL,
+  planttime bigint,
+  systime bigint,
+  loctime bigint,
+  CONSTRAINT minutesmarks_pkey PRIMARY KEY (archid)
+)
+WITH (
+  OIDS=FALSE
+);
+
+CREATE INDEX systimeindex ON minutesmarks (systime ASC);
+CREATE INDEX loctimeindex ON minutesmarks (loctime ASC);
+CREATE INDEX planttimeindex ON minutesmarks (planttime ASC);
 
 CREATE OR REPLACE FUNCTION int64hex(val bigint)
   RETURNS text AS
