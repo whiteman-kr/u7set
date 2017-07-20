@@ -27,6 +27,7 @@ namespace TrendLib
 		//
 	public:
 		void ensureVisible();
+		void updateWidget();
 
 	protected:
 		void createToolBar();
@@ -34,12 +35,18 @@ namespace TrendLib
 		void saveWindowState();
 		void restoreWindowState();
 
+		TrendSignalSet& signalSet();
+		const TrendSignalSet& signalSet() const;
+
 		// Events
 		//
 	protected:
 		virtual void closeEvent(QCloseEvent*e) override;
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void showEvent(QShowEvent*) override;
+
+	protected slots:
+		virtual void signalsButton();
 
 	private slots:
 		void actionOpenTriggered();
@@ -61,6 +68,7 @@ namespace TrendLib
 		QComboBox* m_timeCombo = nullptr;
 		QComboBox* m_viewCombo = nullptr;
 		QComboBox* m_lanesCombo = nullptr;
+		QPushButton* m_signalsButton = nullptr;
 
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendWidget* m_trendWidget = nullptr;

@@ -3,6 +3,7 @@
 
 #include <array>
 #include "../lib/Types.h"
+#include "../lib/AppSignal.h"
 
 namespace TrendLib
 {
@@ -24,12 +25,16 @@ namespace TrendLib
 	{
 	public:
 		TrendSignalParam();
+		TrendSignalParam(const AppSignalParam& appSignal);
 
 		// Proprties
 		//
 	public:
 		QString signalId() const;
 		void setSignalId(const QString& value);
+
+		QString appSignalId() const;
+		void setAppSignalId(const QString& value);
 
 		QString caption() const;
 		void setCaption(const QString& value);
@@ -57,7 +62,8 @@ namespace TrendLib
 		// Data
 		//
 	private:
-		QString m_signalId;
+		QString m_signalId;			// CustomSignalID
+		QString m_appSignalId;		// AppSignalID, starts from # for app data
 		QString m_caption;
 		QString m_equipmentId;
 
@@ -79,7 +85,7 @@ namespace TrendLib
 		TrendSignalSet();
 
 		bool addSignal(const TrendSignalParam& signal);
-		void removeSignal(QString signalId);
+		void removeSignal(QString appSignalId);
 
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;

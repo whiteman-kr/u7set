@@ -74,7 +74,8 @@ SOURCES += main.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/CircularLogger.cpp \
     MonitorView.cpp \
-    MonitorTrends.cpp
+    MonitorTrends.cpp \
+    DialogChooseTrendSignals.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -113,14 +114,16 @@ HEADERS  += \
     ../lib/HostAddressPort.h \
     ../lib/CircularLogger.h \
     MonitorView.h \
-    MonitorTrends.h
+    MonitorTrends.h \
+    DialogChooseTrendSignals.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogSignalInfo.ui \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
-    DialogColumns.ui
+    DialogColumns.ui \
+    DialogChooseTrendSignals.ui
 
 
 # Optimization flags

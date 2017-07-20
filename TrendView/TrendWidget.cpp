@@ -108,7 +108,7 @@ namespace TrendLib
 
 			if (m_restart != true)
 			{
-				qDebug() << "Trend draw time " << timeMeasures.elapsed();
+				qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
 				emit renderedImage(m_image);
 			}
 

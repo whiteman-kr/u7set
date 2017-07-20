@@ -25,6 +25,12 @@ public:
 	explicit MonitorTrendsWidget(QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
+protected:
+	virtual void signalsButton() override;
+
+	// Data
+	//
+private:
 };
 
 #endif // MONITORTRENDS_H

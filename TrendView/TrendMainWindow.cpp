@@ -55,6 +55,7 @@ namespace TrendLib
 		connect(m_timeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeComboCurrentIndexChanged);
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
+		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
 		setMinimumSize(500, 300);
 		restoreWindowState();
@@ -85,45 +86,45 @@ namespace TrendLib
 		//								RGB(0xFF, 0x00, 0x00), RGB(0x00, 0x00, 0xFF), RGB(0x00, 0x00, 0x00) };
 
 
-		TrendLib::TrendSignalParam s1;
-		s1.setSignalId("ASIGNAL001");
-		s1.setCaption("ATrend Signal 001");
-		s1.setType(E::SignalType::Analog);
-		s1.setLowLimit(10.0);
-		s1.setHighLimit(105.0);
-		s1.setColor(qRgb(0x80, 0x00, 0x00));
+//		TrendLib::TrendSignalParam s1;
+//		s1.setSignalId("ASIGNAL001");
+//		s1.setCaption("ATrend Signal 001");
+//		s1.setType(E::SignalType::Analog);
+//		s1.setLowLimit(10.0);
+//		s1.setHighLimit(105.0);
+//		s1.setColor(qRgb(0x80, 0x00, 0x00));
 
-		TrendLib::TrendSignalParam s11;
-		s11.setSignalId("ASIGNAL011");
-		s11.setCaption("ATren Signal 011");
-		s11.setType(E::SignalType::Analog);
-		s11.setLowLimit(400.0);
-		s11.setHighLimit(25000.0);
-		s11.setColor(qRgb(0x80, 0x00, 0x80));
+//		TrendLib::TrendSignalParam s11;
+//		s11.setSignalId("ASIGNAL011");
+//		s11.setCaption("ATren Signal 011");
+//		s11.setType(E::SignalType::Analog);
+//		s11.setLowLimit(400.0);
+//		s11.setHighLimit(25000.0);
+//		s11.setColor(qRgb(0x80, 0x00, 0x80));
 
-		TrendLib::TrendSignalParam s2;
-		s2.setSignalId("SIGNAL002");
-		s2.setCaption("Tren Signal 002");
-		s2.setType(E::SignalType::Discrete);
-		s2.setColor(qRgb(0x00, 0x80, 0x00));
+//		TrendLib::TrendSignalParam s2;
+//		s2.setSignalId("SIGNAL002");
+//		s2.setCaption("Tren Signal 002");
+//		s2.setType(E::SignalType::Discrete);
+//		s2.setColor(qRgb(0x00, 0x80, 0x00));
 
-		TrendLib::TrendSignalParam s3;
-		s3.setSignalId("SIGNAL003");
-		s3.setCaption("Tren Signal 003");
-		s3.setType(E::SignalType::Discrete);
-		s3.setColor(qRgb(0x00, 0x00, 0x80));
+//		TrendLib::TrendSignalParam s3;
+//		s3.setSignalId("SIGNAL003");
+//		s3.setCaption("Tren Signal 003");
+//		s3.setType(E::SignalType::Discrete);
+//		s3.setColor(qRgb(0x00, 0x00, 0x80));
 
-		TrendLib::TrendSignalParam s4;
-		s4.setSignalId("SIGNAL004");
-		s4.setCaption("Tren Signal 004");
-		s4.setType(E::SignalType::Discrete);
-		s4.setColor(qRgb(0x00, 0x80, 0x80));
+//		TrendLib::TrendSignalParam s4;
+//		s4.setSignalId("SIGNAL004");
+//		s4.setCaption("Tren Signal 004");
+//		s4.setType(E::SignalType::Discrete);
+//		s4.setColor(qRgb(0x00, 0x80, 0x80));
 
-		m_signalSet.addSignal(s1);
-		m_signalSet.addSignal(s2);
-		m_signalSet.addSignal(s3);
-		m_signalSet.addSignal(s4);
-		m_signalSet.addSignal(s11);
+//		m_signalSet.addSignal(s1);
+//		m_signalSet.addSignal(s2);
+//		m_signalSet.addSignal(s3);
+//		m_signalSet.addSignal(s4);
+//		m_signalSet.addSignal(s11);
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -158,6 +159,18 @@ namespace TrendLib
 		}
 	}
 
+	void TrendMainWindow::updateWidget()
+	{
+		if (m_trendWidget == nullptr)
+		{
+			assert(m_trendWidget);
+			return;
+		}
+
+		m_trendWidget->updateWidget();
+		return;
+	}
+
 	void TrendMainWindow::createToolBar()
 	{
 		m_toolBar = new QToolBar(this);
@@ -175,7 +188,7 @@ namespace TrendLib
 
 		// Time ComboBox
 		//
-		QLabel* intervalLabel = new QLabel("Interval:");
+		QLabel* intervalLabel = new QLabel("  Interval: ");
 		intervalLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(intervalLabel);
 
@@ -196,7 +209,7 @@ namespace TrendLib
 
 		// Lane Count
 		//
-		QLabel* lanesLabel = new QLabel("Lanes:");
+		QLabel* lanesLabel = new QLabel("  Lanes: ");
 		lanesLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(lanesLabel);
 
@@ -212,7 +225,7 @@ namespace TrendLib
 
 		// View Type
 		//
-		QLabel* viewLabel = new QLabel("View:");
+		QLabel* viewLabel = new QLabel("  View: ");
 		viewLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(viewLabel);
 
@@ -222,6 +235,13 @@ namespace TrendLib
 		m_toolBar->addWidget(m_viewCombo);
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
+		// Signals
+		//
+		m_toolBar->addSeparator();
+
+		m_signalsButton = new QPushButton("Signals");
+		m_toolBar->addWidget(m_signalsButton);
 
 		return;
 	}
@@ -255,6 +275,16 @@ namespace TrendLib
 		return;
 	}
 
+	TrendSignalSet& TrendMainWindow::signalSet()
+	{
+		return m_signalSet;
+	}
+
+	const TrendSignalSet& TrendMainWindow::signalSet() const
+	{
+		return m_signalSet;
+	}
+
 	void TrendMainWindow::closeEvent(QCloseEvent* e)
 	{
 		saveWindowState();
@@ -270,6 +300,12 @@ namespace TrendLib
 	void TrendMainWindow::showEvent(QShowEvent*)
 	{
 
+	}
+
+	void TrendMainWindow::signalsButton()
+	{
+		// Override in derived class to set signals
+		//
 	}
 
 	void TrendMainWindow::actionOpenTriggered()

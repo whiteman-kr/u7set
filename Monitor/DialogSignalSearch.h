@@ -13,8 +13,8 @@ class DialogSignalSearch : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogSignalSearch(QWidget *parent = 0);
-	~DialogSignalSearch();
+	explicit DialogSignalSearch(QWidget* parent);
+	virtual ~DialogSignalSearch();
 
 private slots:
 	void on_editSignalID_textEdited(const QString &arg1);
@@ -29,8 +29,7 @@ private:
 	void search();
 
 private:
-	Ui::DialogSignalSearch *ui;
-
+	Ui::DialogSignalSearch* ui;
 	static QString m_signalId;
 
 	std::vector<AppSignalParam> m_signals;
