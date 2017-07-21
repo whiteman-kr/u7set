@@ -5,12 +5,10 @@
 #include "../lib/TimeStamp.h"
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
-
+#include "../lib/SocketIO.h"
 
 struct ArchRequest
 {
-	static const int MAX_SIGNALS = 32;
-
 	TimeType timeType = TimeType::System;
 
 	qint64 startTime = 0;
@@ -18,7 +16,9 @@ struct ArchRequest
 
 	int hashesCount = 0;
 
-	Hash signalHashes[MAX_SIGNALS];
+	Hash signalHashes[ARCH_REQUEST_MAX_SIGNALS];
+
+	quint32 requestID = 0;
 };
 
 typedef Queue<ArchRequest> ArchRequestQueue;

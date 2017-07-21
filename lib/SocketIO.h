@@ -357,6 +357,8 @@ const quint32 ARCHS_GET_APP_SIGNALS_STATES_START = 0x1701;
 const quint32 ARCHS_GET_APP_SIGNALS_STATES_NEXT = 0x1702;
 const quint32 ARCHS_GET_APP_SIGNALS_STATES_CANCEL = 0x1703;
 
+const int ARCH_REQUEST_MAX_SIGNALS = 32;
+
 // Getting application signals Units
 //
 const quint32 ADS_GET_UNITS = 0x1500;
@@ -376,7 +378,7 @@ enum class NetworkError
 	UnknownTuningClientID,
 	UnknownSignalHash,
 	InternalError,
-	SignalHashesInArchRequestExceed,
+	ArchRequestSignalsExceed,
 	UnknownArchRequestID,
 };
 

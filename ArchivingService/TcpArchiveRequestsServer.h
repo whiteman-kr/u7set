@@ -4,6 +4,32 @@
 
 #include "../Proto/network.pb.h"
 #include "../Proto/serialization.pb.h"
+#include "../lib/TimeStamp.h"
+
+#include "ArchRequestThread.h"
+
+
+struct ArchRequestContext
+{
+	TimeType timeType = TimeType::System;
+
+	qint64 startTime = 0;
+	qint64 endTime = 0;
+
+	int hashesCount = 0;
+
+	Hash signalHashes[ARCH_REQUEST_MAX_SIGNALS];
+
+	quint32 requestID = 0;
+
+	int totalStates = 0;
+	int sentStatesStates = 0;
+	int statesInLastPart = 0;
+};
+
+
+typedef std::shared_ptr<ArchRequestContext> ArchRequestContextShared;
+
 
 class TcpArchiveRequestsServer : public Tcp::Server
 {

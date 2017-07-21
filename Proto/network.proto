@@ -420,7 +420,7 @@ message GetAppSignalStatesFromArchiveStartRequest
     optional sfixed64 startTime = 3;
     optional sfixed64 endTime = 4;
 
-    repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to ArchRequest::MAX_SIGNALS (32)
+    repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
 }
 
 message GetAppSignalStatesFromArchiveStartReply
