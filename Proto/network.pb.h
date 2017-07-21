@@ -77,8 +77,12 @@ class TuningSignalsApply;
 class TuningSignalsApplyReply;
 class SaveAppSignalsStatesToArchiveRequest;
 class SaveAppSignalsStatesToArchiveReply;
-class GetSignalStatesFromArchiveRequest;
-class GetSignalStatesFromArchiveReply;
+class GetAppSignalStatesFromArchiveStartRequest;
+class GetAppSignalStatesFromArchiveStartReply;
+class GetAppSignalStatesFromArchiveNextRequest;
+class GetAppSignalStatesFromArchiveNextReply;
+class GetAppSignalStatesFromArchiveCancelRequest;
+class GetAppSignalStatesFromArchiveCancelReply;
 
 // ===================================================================
 
@@ -5033,14 +5037,14 @@ class SaveAppSignalsStatesToArchiveReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class GetSignalStatesFromArchiveRequest : public ::google::protobuf::Message {
+class GetAppSignalStatesFromArchiveStartRequest : public ::google::protobuf::Message {
  public:
-  GetSignalStatesFromArchiveRequest();
-  virtual ~GetSignalStatesFromArchiveRequest();
+  GetAppSignalStatesFromArchiveStartRequest();
+  virtual ~GetAppSignalStatesFromArchiveStartRequest();
 
-  GetSignalStatesFromArchiveRequest(const GetSignalStatesFromArchiveRequest& from);
+  GetAppSignalStatesFromArchiveStartRequest(const GetAppSignalStatesFromArchiveStartRequest& from);
 
-  inline GetSignalStatesFromArchiveRequest& operator=(const GetSignalStatesFromArchiveRequest& from) {
+  inline GetAppSignalStatesFromArchiveStartRequest& operator=(const GetAppSignalStatesFromArchiveStartRequest& from) {
     CopyFrom(from);
     return *this;
   }
@@ -5054,17 +5058,17 @@ class GetSignalStatesFromArchiveRequest : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetSignalStatesFromArchiveRequest& default_instance();
+  static const GetAppSignalStatesFromArchiveStartRequest& default_instance();
 
-  void Swap(GetSignalStatesFromArchiveRequest* other);
+  void Swap(GetAppSignalStatesFromArchiveStartRequest* other);
 
   // implements Message ----------------------------------------------
 
-  GetSignalStatesFromArchiveRequest* New() const;
+  GetAppSignalStatesFromArchiveStartRequest* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetSignalStatesFromArchiveRequest& from);
-  void MergeFrom(const GetSignalStatesFromArchiveRequest& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveStartRequest& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveStartRequest& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -5132,7 +5136,7 @@ class GetSignalStatesFromArchiveRequest : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
       mutable_signalhashes();
 
-  // @@protoc_insertion_point(class_scope:Network.GetSignalStatesFromArchiveRequest)
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveStartRequest)
  private:
   inline void set_has_clientequipmentid();
   inline void clear_has_clientequipmentid();
@@ -5159,18 +5163,18 @@ class GetSignalStatesFromArchiveRequest : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetSignalStatesFromArchiveRequest* default_instance_;
+  static GetAppSignalStatesFromArchiveStartRequest* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class GetSignalStatesFromArchiveReply : public ::google::protobuf::Message {
+class GetAppSignalStatesFromArchiveStartReply : public ::google::protobuf::Message {
  public:
-  GetSignalStatesFromArchiveReply();
-  virtual ~GetSignalStatesFromArchiveReply();
+  GetAppSignalStatesFromArchiveStartReply();
+  virtual ~GetAppSignalStatesFromArchiveStartReply();
 
-  GetSignalStatesFromArchiveReply(const GetSignalStatesFromArchiveReply& from);
+  GetAppSignalStatesFromArchiveStartReply(const GetAppSignalStatesFromArchiveStartReply& from);
 
-  inline GetSignalStatesFromArchiveReply& operator=(const GetSignalStatesFromArchiveReply& from) {
+  inline GetAppSignalStatesFromArchiveStartReply& operator=(const GetAppSignalStatesFromArchiveStartReply& from) {
     CopyFrom(from);
     return *this;
   }
@@ -5184,17 +5188,17 @@ class GetSignalStatesFromArchiveReply : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const GetSignalStatesFromArchiveReply& default_instance();
+  static const GetAppSignalStatesFromArchiveStartReply& default_instance();
 
-  void Swap(GetSignalStatesFromArchiveReply* other);
+  void Swap(GetAppSignalStatesFromArchiveStartReply* other);
 
   // implements Message ----------------------------------------------
 
-  GetSignalStatesFromArchiveReply* New() const;
+  GetAppSignalStatesFromArchiveStartReply* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetSignalStatesFromArchiveReply& from);
-  void MergeFrom(const GetSignalStatesFromArchiveReply& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveStartReply& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveStartReply& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -5224,31 +5228,219 @@ class GetSignalStatesFromArchiveReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // optional int32 timeType = 2;
-  inline bool has_timetype() const;
-  inline void clear_timetype();
-  static const int kTimeTypeFieldNumber = 2;
-  inline ::google::protobuf::int32 timetype() const;
-  inline void set_timetype(::google::protobuf::int32 value);
+  // optional uint32 requestID = 2;
+  inline bool has_requestid() const;
+  inline void clear_requestid();
+  static const int kRequestIDFieldNumber = 2;
+  inline ::google::protobuf::uint32 requestid() const;
+  inline void set_requestid(::google::protobuf::uint32 value);
 
-  // optional sfixed64 startTime = 3;
-  inline bool has_starttime() const;
-  inline void clear_starttime();
-  static const int kStartTimeFieldNumber = 3;
-  inline ::google::protobuf::int64 starttime() const;
-  inline void set_starttime(::google::protobuf::int64 value);
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveStartReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_requestid();
+  inline void clear_has_requestid();
 
-  // optional sfixed64 endTime = 4;
-  inline bool has_endtime() const;
-  inline void clear_endtime();
-  static const int kEndTimeFieldNumber = 4;
-  inline ::google::protobuf::int64 endtime() const;
-  inline void set_endtime(::google::protobuf::int64 value);
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  // repeated .Proto.AppSignalState appSignalStates = 5;
+  ::google::protobuf::int32 error_;
+  ::google::protobuf::uint32 requestid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStatesFromArchiveStartReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStatesFromArchiveNextRequest : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStatesFromArchiveNextRequest();
+  virtual ~GetAppSignalStatesFromArchiveNextRequest();
+
+  GetAppSignalStatesFromArchiveNextRequest(const GetAppSignalStatesFromArchiveNextRequest& from);
+
+  inline GetAppSignalStatesFromArchiveNextRequest& operator=(const GetAppSignalStatesFromArchiveNextRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStatesFromArchiveNextRequest& default_instance();
+
+  void Swap(GetAppSignalStatesFromArchiveNextRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStatesFromArchiveNextRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveNextRequest& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveNextRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 requestID = 1;
+  inline bool has_requestid() const;
+  inline void clear_requestid();
+  static const int kRequestIDFieldNumber = 1;
+  inline ::google::protobuf::uint32 requestid() const;
+  inline void set_requestid(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveNextRequest)
+ private:
+  inline void set_has_requestid();
+  inline void clear_has_requestid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 requestid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStatesFromArchiveNextRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStatesFromArchiveNextReply();
+  virtual ~GetAppSignalStatesFromArchiveNextReply();
+
+  GetAppSignalStatesFromArchiveNextReply(const GetAppSignalStatesFromArchiveNextReply& from);
+
+  inline GetAppSignalStatesFromArchiveNextReply& operator=(const GetAppSignalStatesFromArchiveNextReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStatesFromArchiveNextReply& default_instance();
+
+  void Swap(GetAppSignalStatesFromArchiveNextReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStatesFromArchiveNextReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveNextReply& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveNextReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional uint32 requestID = 2;
+  inline bool has_requestid() const;
+  inline void clear_requestid();
+  static const int kRequestIDFieldNumber = 2;
+  inline ::google::protobuf::uint32 requestid() const;
+  inline void set_requestid(::google::protobuf::uint32 value);
+
+  // optional int32 totalStatesCount = 3;
+  inline bool has_totalstatescount() const;
+  inline void clear_totalstatescount();
+  static const int kTotalStatesCountFieldNumber = 3;
+  inline ::google::protobuf::int32 totalstatescount() const;
+  inline void set_totalstatescount(::google::protobuf::int32 value);
+
+  // optional int32 sentStatesCount = 4;
+  inline bool has_sentstatescount() const;
+  inline void clear_sentstatescount();
+  static const int kSentStatesCountFieldNumber = 4;
+  inline ::google::protobuf::int32 sentstatescount() const;
+  inline void set_sentstatescount(::google::protobuf::int32 value);
+
+  // optional int32 statesInPartCount = 5;
+  inline bool has_statesinpartcount() const;
+  inline void clear_statesinpartcount();
+  static const int kStatesInPartCountFieldNumber = 5;
+  inline ::google::protobuf::int32 statesinpartcount() const;
+  inline void set_statesinpartcount(::google::protobuf::int32 value);
+
+  // optional bool isLastPart = 6;
+  inline bool has_islastpart() const;
+  inline void clear_islastpart();
+  static const int kIsLastPartFieldNumber = 6;
+  inline bool islastpart() const;
+  inline void set_islastpart(bool value);
+
+  // repeated .Proto.AppSignalState appSignalStates = 7;
   inline int appsignalstates_size() const;
   inline void clear_appsignalstates();
-  static const int kAppSignalStatesFieldNumber = 5;
+  static const int kAppSignalStatesFieldNumber = 7;
   inline const ::Proto::AppSignalState& appsignalstates(int index) const;
   inline ::Proto::AppSignalState* mutable_appsignalstates(int index);
   inline ::Proto::AppSignalState* add_appsignalstates();
@@ -5257,34 +5449,204 @@ class GetSignalStatesFromArchiveReply : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
       mutable_appsignalstates();
 
-  // @@protoc_insertion_point(class_scope:Network.GetSignalStatesFromArchiveReply)
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveNextReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
-  inline void set_has_timetype();
-  inline void clear_has_timetype();
-  inline void set_has_starttime();
-  inline void clear_has_starttime();
-  inline void set_has_endtime();
-  inline void clear_has_endtime();
+  inline void set_has_requestid();
+  inline void clear_has_requestid();
+  inline void set_has_totalstatescount();
+  inline void clear_has_totalstatescount();
+  inline void set_has_sentstatescount();
+  inline void clear_has_sentstatescount();
+  inline void set_has_statesinpartcount();
+  inline void clear_has_statesinpartcount();
+  inline void set_has_islastpart();
+  inline void clear_has_islastpart();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 error_;
-  ::google::protobuf::int32 timetype_;
-  ::google::protobuf::int64 starttime_;
-  ::google::protobuf::int64 endtime_;
+  ::google::protobuf::uint32 requestid_;
+  ::google::protobuf::int32 totalstatescount_;
+  ::google::protobuf::int32 sentstatescount_;
+  ::google::protobuf::int32 statesinpartcount_;
+  bool islastpart_;
   ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
   friend void protobuf_ShutdownFile_network_2eproto();
 
   void InitAsDefaultInstance();
-  static GetSignalStatesFromArchiveReply* default_instance_;
+  static GetAppSignalStatesFromArchiveNextReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStatesFromArchiveCancelRequest : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStatesFromArchiveCancelRequest();
+  virtual ~GetAppSignalStatesFromArchiveCancelRequest();
+
+  GetAppSignalStatesFromArchiveCancelRequest(const GetAppSignalStatesFromArchiveCancelRequest& from);
+
+  inline GetAppSignalStatesFromArchiveCancelRequest& operator=(const GetAppSignalStatesFromArchiveCancelRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStatesFromArchiveCancelRequest& default_instance();
+
+  void Swap(GetAppSignalStatesFromArchiveCancelRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStatesFromArchiveCancelRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveCancelRequest& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveCancelRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 requestID = 1;
+  inline bool has_requestid() const;
+  inline void clear_requestid();
+  static const int kRequestIDFieldNumber = 1;
+  inline ::google::protobuf::uint32 requestid() const;
+  inline void set_requestid(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveCancelRequest)
+ private:
+  inline void set_has_requestid();
+  inline void clear_has_requestid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 requestid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStatesFromArchiveCancelRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStatesFromArchiveCancelReply : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStatesFromArchiveCancelReply();
+  virtual ~GetAppSignalStatesFromArchiveCancelReply();
+
+  GetAppSignalStatesFromArchiveCancelReply(const GetAppSignalStatesFromArchiveCancelReply& from);
+
+  inline GetAppSignalStatesFromArchiveCancelReply& operator=(const GetAppSignalStatesFromArchiveCancelReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStatesFromArchiveCancelReply& default_instance();
+
+  void Swap(GetAppSignalStatesFromArchiveCancelReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStatesFromArchiveCancelReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStatesFromArchiveCancelReply& from);
+  void MergeFrom(const GetAppSignalStatesFromArchiveCancelReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveCancelReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 error_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStatesFromArchiveCancelReply* default_instance_;
 };
 // ===================================================================
 
@@ -10352,56 +10714,56 @@ inline void SaveAppSignalsStatesToArchiveReply::set_error(::google::protobuf::in
 
 // -------------------------------------------------------------------
 
-// GetSignalStatesFromArchiveRequest
+// GetAppSignalStatesFromArchiveStartRequest
 
 // optional string clientEquipmentID = 1;
-inline bool GetSignalStatesFromArchiveRequest::has_clientequipmentid() const {
+inline bool GetAppSignalStatesFromArchiveStartRequest::has_clientequipmentid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetSignalStatesFromArchiveRequest::set_has_clientequipmentid() {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_has_clientequipmentid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_has_clientequipmentid() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_clientequipmentid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_clientequipmentid() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_clientequipmentid() {
   if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_->clear();
   }
   clear_has_clientequipmentid();
 }
-inline const ::std::string& GetSignalStatesFromArchiveRequest::clientequipmentid() const {
+inline const ::std::string& GetAppSignalStatesFromArchiveStartRequest::clientequipmentid() const {
   return *clientequipmentid_;
 }
-inline void GetSignalStatesFromArchiveRequest::set_clientequipmentid(const ::std::string& value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_clientequipmentid(const ::std::string& value) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(value);
 }
-inline void GetSignalStatesFromArchiveRequest::set_clientequipmentid(const char* value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_clientequipmentid(const char* value) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(value);
 }
-inline void GetSignalStatesFromArchiveRequest::set_clientequipmentid(const char* value, size_t size) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_clientequipmentid(const char* value, size_t size) {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   clientequipmentid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* GetSignalStatesFromArchiveRequest::mutable_clientequipmentid() {
+inline ::std::string* GetAppSignalStatesFromArchiveStartRequest::mutable_clientequipmentid() {
   set_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     clientequipmentid_ = new ::std::string;
   }
   return clientequipmentid_;
 }
-inline ::std::string* GetSignalStatesFromArchiveRequest::release_clientequipmentid() {
+inline ::std::string* GetAppSignalStatesFromArchiveStartRequest::release_clientequipmentid() {
   clear_has_clientequipmentid();
   if (clientequipmentid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -10411,7 +10773,7 @@ inline ::std::string* GetSignalStatesFromArchiveRequest::release_clientequipment
     return temp;
   }
 }
-inline void GetSignalStatesFromArchiveRequest::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_allocated_clientequipmentid(::std::string* clientequipmentid) {
   if (clientequipmentid_ != &::google::protobuf::internal::kEmptyString) {
     delete clientequipmentid_;
   }
@@ -10425,211 +10787,381 @@ inline void GetSignalStatesFromArchiveRequest::set_allocated_clientequipmentid(:
 }
 
 // optional int32 timeType = 2;
-inline bool GetSignalStatesFromArchiveRequest::has_timetype() const {
+inline bool GetAppSignalStatesFromArchiveStartRequest::has_timetype() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void GetSignalStatesFromArchiveRequest::set_has_timetype() {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_has_timetype() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_has_timetype() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_timetype() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_timetype() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_timetype() {
   timetype_ = 0;
   clear_has_timetype();
 }
-inline ::google::protobuf::int32 GetSignalStatesFromArchiveRequest::timetype() const {
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveStartRequest::timetype() const {
   return timetype_;
 }
-inline void GetSignalStatesFromArchiveRequest::set_timetype(::google::protobuf::int32 value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_timetype(::google::protobuf::int32 value) {
   set_has_timetype();
   timetype_ = value;
 }
 
 // optional sfixed64 startTime = 3;
-inline bool GetSignalStatesFromArchiveRequest::has_starttime() const {
+inline bool GetAppSignalStatesFromArchiveStartRequest::has_starttime() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void GetSignalStatesFromArchiveRequest::set_has_starttime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_has_starttime() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_has_starttime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_starttime() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_starttime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_starttime() {
   starttime_ = GOOGLE_LONGLONG(0);
   clear_has_starttime();
 }
-inline ::google::protobuf::int64 GetSignalStatesFromArchiveRequest::starttime() const {
+inline ::google::protobuf::int64 GetAppSignalStatesFromArchiveStartRequest::starttime() const {
   return starttime_;
 }
-inline void GetSignalStatesFromArchiveRequest::set_starttime(::google::protobuf::int64 value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_starttime(::google::protobuf::int64 value) {
   set_has_starttime();
   starttime_ = value;
 }
 
 // optional sfixed64 endTime = 4;
-inline bool GetSignalStatesFromArchiveRequest::has_endtime() const {
+inline bool GetAppSignalStatesFromArchiveStartRequest::has_endtime() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GetSignalStatesFromArchiveRequest::set_has_endtime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_has_endtime() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_has_endtime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_endtime() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void GetSignalStatesFromArchiveRequest::clear_endtime() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_endtime() {
   endtime_ = GOOGLE_LONGLONG(0);
   clear_has_endtime();
 }
-inline ::google::protobuf::int64 GetSignalStatesFromArchiveRequest::endtime() const {
+inline ::google::protobuf::int64 GetAppSignalStatesFromArchiveStartRequest::endtime() const {
   return endtime_;
 }
-inline void GetSignalStatesFromArchiveRequest::set_endtime(::google::protobuf::int64 value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_endtime(::google::protobuf::int64 value) {
   set_has_endtime();
   endtime_ = value;
 }
 
 // repeated uint64 signalHashes = 5;
-inline int GetSignalStatesFromArchiveRequest::signalhashes_size() const {
+inline int GetAppSignalStatesFromArchiveStartRequest::signalhashes_size() const {
   return signalhashes_.size();
 }
-inline void GetSignalStatesFromArchiveRequest::clear_signalhashes() {
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_signalhashes() {
   signalhashes_.Clear();
 }
-inline ::google::protobuf::uint64 GetSignalStatesFromArchiveRequest::signalhashes(int index) const {
+inline ::google::protobuf::uint64 GetAppSignalStatesFromArchiveStartRequest::signalhashes(int index) const {
   return signalhashes_.Get(index);
 }
-inline void GetSignalStatesFromArchiveRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::set_signalhashes(int index, ::google::protobuf::uint64 value) {
   signalhashes_.Set(index, value);
 }
-inline void GetSignalStatesFromArchiveRequest::add_signalhashes(::google::protobuf::uint64 value) {
+inline void GetAppSignalStatesFromArchiveStartRequest::add_signalhashes(::google::protobuf::uint64 value) {
   signalhashes_.Add(value);
 }
 inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
-GetSignalStatesFromArchiveRequest::signalhashes() const {
+GetAppSignalStatesFromArchiveStartRequest::signalhashes() const {
   return signalhashes_;
 }
 inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
-GetSignalStatesFromArchiveRequest::mutable_signalhashes() {
+GetAppSignalStatesFromArchiveStartRequest::mutable_signalhashes() {
   return &signalhashes_;
 }
 
 // -------------------------------------------------------------------
 
-// GetSignalStatesFromArchiveReply
+// GetAppSignalStatesFromArchiveStartReply
 
 // optional int32 error = 1 [default = 0];
-inline bool GetSignalStatesFromArchiveReply::has_error() const {
+inline bool GetAppSignalStatesFromArchiveStartReply::has_error() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void GetSignalStatesFromArchiveReply::set_has_error() {
+inline void GetAppSignalStatesFromArchiveStartReply::set_has_error() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_has_error() {
+inline void GetAppSignalStatesFromArchiveStartReply::clear_has_error() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_error() {
+inline void GetAppSignalStatesFromArchiveStartReply::clear_error() {
   error_ = 0;
   clear_has_error();
 }
-inline ::google::protobuf::int32 GetSignalStatesFromArchiveReply::error() const {
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveStartReply::error() const {
   return error_;
 }
-inline void GetSignalStatesFromArchiveReply::set_error(::google::protobuf::int32 value) {
+inline void GetAppSignalStatesFromArchiveStartReply::set_error(::google::protobuf::int32 value) {
   set_has_error();
   error_ = value;
 }
 
-// optional int32 timeType = 2;
-inline bool GetSignalStatesFromArchiveReply::has_timetype() const {
+// optional uint32 requestID = 2;
+inline bool GetAppSignalStatesFromArchiveStartReply::has_requestid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void GetSignalStatesFromArchiveReply::set_has_timetype() {
+inline void GetAppSignalStatesFromArchiveStartReply::set_has_requestid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_has_timetype() {
+inline void GetAppSignalStatesFromArchiveStartReply::clear_has_requestid() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_timetype() {
-  timetype_ = 0;
-  clear_has_timetype();
+inline void GetAppSignalStatesFromArchiveStartReply::clear_requestid() {
+  requestid_ = 0u;
+  clear_has_requestid();
 }
-inline ::google::protobuf::int32 GetSignalStatesFromArchiveReply::timetype() const {
-  return timetype_;
+inline ::google::protobuf::uint32 GetAppSignalStatesFromArchiveStartReply::requestid() const {
+  return requestid_;
 }
-inline void GetSignalStatesFromArchiveReply::set_timetype(::google::protobuf::int32 value) {
-  set_has_timetype();
-  timetype_ = value;
+inline void GetAppSignalStatesFromArchiveStartReply::set_requestid(::google::protobuf::uint32 value) {
+  set_has_requestid();
+  requestid_ = value;
 }
 
-// optional sfixed64 startTime = 3;
-inline bool GetSignalStatesFromArchiveReply::has_starttime() const {
+// -------------------------------------------------------------------
+
+// GetAppSignalStatesFromArchiveNextRequest
+
+// optional uint32 requestID = 1;
+inline bool GetAppSignalStatesFromArchiveNextRequest::has_requestid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextRequest::set_has_requestid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveNextRequest::clear_has_requestid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveNextRequest::clear_requestid() {
+  requestid_ = 0u;
+  clear_has_requestid();
+}
+inline ::google::protobuf::uint32 GetAppSignalStatesFromArchiveNextRequest::requestid() const {
+  return requestid_;
+}
+inline void GetAppSignalStatesFromArchiveNextRequest::set_requestid(::google::protobuf::uint32 value) {
+  set_has_requestid();
+  requestid_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStatesFromArchiveNextReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetAppSignalStatesFromArchiveNextReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveNextReply::error() const {
+  return error_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional uint32 requestID = 2;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_requestid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_requestid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_requestid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_requestid() {
+  requestid_ = 0u;
+  clear_has_requestid();
+}
+inline ::google::protobuf::uint32 GetAppSignalStatesFromArchiveNextReply::requestid() const {
+  return requestid_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_requestid(::google::protobuf::uint32 value) {
+  set_has_requestid();
+  requestid_ = value;
+}
+
+// optional int32 totalStatesCount = 3;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_totalstatescount() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void GetSignalStatesFromArchiveReply::set_has_starttime() {
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_totalstatescount() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_has_starttime() {
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_totalstatescount() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_starttime() {
-  starttime_ = GOOGLE_LONGLONG(0);
-  clear_has_starttime();
+inline void GetAppSignalStatesFromArchiveNextReply::clear_totalstatescount() {
+  totalstatescount_ = 0;
+  clear_has_totalstatescount();
 }
-inline ::google::protobuf::int64 GetSignalStatesFromArchiveReply::starttime() const {
-  return starttime_;
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveNextReply::totalstatescount() const {
+  return totalstatescount_;
 }
-inline void GetSignalStatesFromArchiveReply::set_starttime(::google::protobuf::int64 value) {
-  set_has_starttime();
-  starttime_ = value;
+inline void GetAppSignalStatesFromArchiveNextReply::set_totalstatescount(::google::protobuf::int32 value) {
+  set_has_totalstatescount();
+  totalstatescount_ = value;
 }
 
-// optional sfixed64 endTime = 4;
-inline bool GetSignalStatesFromArchiveReply::has_endtime() const {
+// optional int32 sentStatesCount = 4;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_sentstatescount() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GetSignalStatesFromArchiveReply::set_has_endtime() {
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_sentstatescount() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_has_endtime() {
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_sentstatescount() {
   _has_bits_[0] &= ~0x00000008u;
 }
-inline void GetSignalStatesFromArchiveReply::clear_endtime() {
-  endtime_ = GOOGLE_LONGLONG(0);
-  clear_has_endtime();
+inline void GetAppSignalStatesFromArchiveNextReply::clear_sentstatescount() {
+  sentstatescount_ = 0;
+  clear_has_sentstatescount();
 }
-inline ::google::protobuf::int64 GetSignalStatesFromArchiveReply::endtime() const {
-  return endtime_;
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveNextReply::sentstatescount() const {
+  return sentstatescount_;
 }
-inline void GetSignalStatesFromArchiveReply::set_endtime(::google::protobuf::int64 value) {
-  set_has_endtime();
-  endtime_ = value;
+inline void GetAppSignalStatesFromArchiveNextReply::set_sentstatescount(::google::protobuf::int32 value) {
+  set_has_sentstatescount();
+  sentstatescount_ = value;
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 5;
-inline int GetSignalStatesFromArchiveReply::appsignalstates_size() const {
+// optional int32 statesInPartCount = 5;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_statesinpartcount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_statesinpartcount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_statesinpartcount() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_statesinpartcount() {
+  statesinpartcount_ = 0;
+  clear_has_statesinpartcount();
+}
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveNextReply::statesinpartcount() const {
+  return statesinpartcount_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_statesinpartcount(::google::protobuf::int32 value) {
+  set_has_statesinpartcount();
+  statesinpartcount_ = value;
+}
+
+// optional bool isLastPart = 6;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_islastpart() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_islastpart() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_islastpart() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_islastpart() {
+  islastpart_ = false;
+  clear_has_islastpart();
+}
+inline bool GetAppSignalStatesFromArchiveNextReply::islastpart() const {
+  return islastpart_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_islastpart(bool value) {
+  set_has_islastpart();
+  islastpart_ = value;
+}
+
+// repeated .Proto.AppSignalState appSignalStates = 7;
+inline int GetAppSignalStatesFromArchiveNextReply::appsignalstates_size() const {
   return appsignalstates_.size();
 }
-inline void GetSignalStatesFromArchiveReply::clear_appsignalstates() {
+inline void GetAppSignalStatesFromArchiveNextReply::clear_appsignalstates() {
   appsignalstates_.Clear();
 }
-inline const ::Proto::AppSignalState& GetSignalStatesFromArchiveReply::appsignalstates(int index) const {
+inline const ::Proto::AppSignalState& GetAppSignalStatesFromArchiveNextReply::appsignalstates(int index) const {
   return appsignalstates_.Get(index);
 }
-inline ::Proto::AppSignalState* GetSignalStatesFromArchiveReply::mutable_appsignalstates(int index) {
+inline ::Proto::AppSignalState* GetAppSignalStatesFromArchiveNextReply::mutable_appsignalstates(int index) {
   return appsignalstates_.Mutable(index);
 }
-inline ::Proto::AppSignalState* GetSignalStatesFromArchiveReply::add_appsignalstates() {
+inline ::Proto::AppSignalState* GetAppSignalStatesFromArchiveNextReply::add_appsignalstates() {
   return appsignalstates_.Add();
 }
 inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
-GetSignalStatesFromArchiveReply::appsignalstates() const {
+GetAppSignalStatesFromArchiveNextReply::appsignalstates() const {
   return appsignalstates_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
-GetSignalStatesFromArchiveReply::mutable_appsignalstates() {
+GetAppSignalStatesFromArchiveNextReply::mutable_appsignalstates() {
   return &appsignalstates_;
+}
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStatesFromArchiveCancelRequest
+
+// optional uint32 requestID = 1;
+inline bool GetAppSignalStatesFromArchiveCancelRequest::has_requestid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveCancelRequest::set_has_requestid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveCancelRequest::clear_has_requestid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveCancelRequest::clear_requestid() {
+  requestid_ = 0u;
+  clear_has_requestid();
+}
+inline ::google::protobuf::uint32 GetAppSignalStatesFromArchiveCancelRequest::requestid() const {
+  return requestid_;
+}
+inline void GetAppSignalStatesFromArchiveCancelRequest::set_requestid(::google::protobuf::uint32 value) {
+  set_has_requestid();
+  requestid_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStatesFromArchiveCancelReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetAppSignalStatesFromArchiveCancelReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveCancelReply::error() const {
+  return error_;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
 }
 
 

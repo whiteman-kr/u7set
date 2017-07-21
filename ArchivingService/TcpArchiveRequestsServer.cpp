@@ -14,8 +14,8 @@ void TcpArchiveRequestsServer::processRequest(quint32 requestID, const char* req
 {
     switch(requestID)
     {
-    case ARCHS_GET_APP_SIGNALS_STATES:
-		onGetSignalStatesFromArchive(requestData, requestDataSize);
+	case ARCHS_GET_APP_SIGNALS_STATES_START:
+		onGetSignalStatesFromArchiveStart(requestData, requestDataSize);
 		break;
 
     default:
@@ -33,7 +33,7 @@ void TcpArchiveRequestsServer::onServerThreadFinished()
 	DEBUG_LOG_MSG(m_logger, "TcpArchiveRequestsServer thread finished");
 }
 
-void TcpArchiveRequestsServer::onGetSignalStatesFromArchive(const char* requestData, quint32 requestDataSize)
+void TcpArchiveRequestsServer::onGetSignalStatesFromArchiveStart(const char* requestData, quint32 requestDataSize)
 {
 	bool result = m_getSignalStatesRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
 
@@ -48,9 +48,9 @@ void TcpArchiveRequestsServer::onGetSignalStatesFromArchive(const char* requestD
 
 	m_getSignalStatesReply.set_error(static_cast<int>(NetworkError::Success));
 
-	m_getSignalStatesReply.set_timetype(m_getSignalStatesRequest.timetype());
+/*	m_getSignalStatesReply.set_timetype(m_getSignalStatesRequest.timetype());
 	m_getSignalStatesReply.set_starttime(m_getSignalStatesRequest.starttime());
-	m_getSignalStatesReply.set_endtime(m_getSignalStatesRequest.endtime());
+	m_getSignalStatesReply.set_endtime(m_getSignalStatesRequest.endtime());*/
 
 	sendReply(m_getSignalStatesReply);
 }

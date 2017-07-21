@@ -17,13 +17,17 @@ private:
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
 
-    void onGetSignalStatesFromArchive(const char* requestData, quint32 requestDataSize);
+	void onGetSignalStatesFromArchiveStart(const char* requestData, quint32 requestDataSize);
+
+	//void
 
 private:
     CircularLoggerShared m_logger;
 
-    Network::GetSignalStatesFromArchiveRequest m_getSignalStatesRequest;
-    Network::GetSignalStatesFromArchiveReply m_getSignalStatesReply;
+	int m_nextRequestNo = 1;
+
+	Network::GetAppSignalStatesFromArchiveStartRequest m_getSignalStatesRequest;
+	Network::GetAppSignalStatesFromArchiveStartReply m_getSignalStatesReply;
 };
 
 

@@ -353,7 +353,9 @@ const quint32 ARCHS_SAVE_APP_SIGNALS_STATES = 0x1601;
 
 // Monitor (and other clients) and ArchivingService communications, Port PORT_ARCHIVING_SERVICE_CLIENT_REQUEST
 //
-const quint32 ARCHS_GET_APP_SIGNALS_STATES = 0x1701;
+const quint32 ARCHS_GET_APP_SIGNALS_STATES_START = 0x1701;
+const quint32 ARCHS_GET_APP_SIGNALS_STATES_NEXT = 0x1702;
+const quint32 ARCHS_GET_APP_SIGNALS_STATES_CANCEL = 0x1703;
 
 // Getting application signals Units
 //
@@ -374,7 +376,8 @@ enum class NetworkError
 	UnknownTuningClientID,
 	UnknownSignalHash,
 	InternalError,
-	SignalHashesInArchRequestExceed
+	SignalHashesInArchRequestExceed,
+	UnknownArchRequestID,
 };
 
 

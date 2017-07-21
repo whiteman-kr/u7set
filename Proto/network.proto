@@ -407,7 +407,9 @@ message SaveAppSignalsStatesToArchiveReply
     optional int32 error = 1 [default = 0];
 }
 
-message GetSignalStatesFromArchiveRequest
+//
+
+message GetAppSignalStatesFromArchiveStartRequest
 {
     optional string clientEquipmentID = 1;
     optional int32 timeType = 2;			// enum TimeType values:
@@ -421,18 +423,50 @@ message GetSignalStatesFromArchiveRequest
     repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to ArchRequest::MAX_SIGNALS (32)
 }
 
-
-message GetSignalStatesFromArchiveReply
+message GetAppSignalStatesFromArchiveStartReply
 {
     optional int32 error = 1 [default = 0];
 
-    optional int32 timeType = 2;			// enum TimeType values
-
-    optional sfixed64 startTime = 3;
-    optional sfixed64 endTime = 4;
-
-    repeated Proto.AppSignalState appSignalStates = 5;
+    optional uint32 requestID = 2;
 }
+
+//
+
+message GetAppSignalStatesFromArchiveNextRequest
+{
+    optional uint32 requestID = 1;
+}
+
+message GetAppSignalStatesFromArchiveNextReply
+{
+    optional int32 error = 1 [default = 0];
+
+    optional uint32 requestID = 2;
+
+    optional int32 totalStatesCount = 3;
+
+    optional int32 sentStatesCount = 4;
+
+    optional int32 statesInPartCount = 5;
+
+    optional bool isLastPart = 6;
+
+    repeated Proto.AppSignalState appSignalStates = 7;
+}
+
+//
+
+message GetAppSignalStatesFromArchiveCancelRequest
+{
+    optional uint32 requestID = 1;
+}
+
+message GetAppSignalStatesFromArchiveCancelReply
+{
+    optional int32 error = 1 [default = 0];
+}
+
+
 
 
 

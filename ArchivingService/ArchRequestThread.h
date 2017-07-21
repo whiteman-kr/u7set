@@ -4,6 +4,7 @@
 #include "../lib/CircularLogger.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/Hash.h"
+#include "../lib/Queue.h"
 
 
 struct ArchRequest
@@ -19,6 +20,8 @@ struct ArchRequest
 
 	Hash signalHashes[MAX_SIGNALS];
 };
+
+typedef Queue<ArchRequest> ArchRequestQueue;
 
 
 class ArchRequestThreadWorker : public SimpleThreadWorker
