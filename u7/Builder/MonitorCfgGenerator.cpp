@@ -130,186 +130,208 @@ namespace Builder
 
 			xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
 
+			// AppDataService
 			//
-			// AppDataServiceID1(2)
-			//
-			QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok).trimmed();
+			ok = writeAppDataServiceSection(xmlWriter);
 			if (ok == false)
 			{
 				return false;
 			}
 
-			if (appDataServiceId1.isEmpty() == true)
-			{
-				QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID1 is invalid")
-								   .arg(m_software->equipmentIdTemplate());
-
-				m_log->writeError(errorStr);
-				writeErrorSection(xmlWriter, errorStr);
-				return false;
-			}
-
+			// ArchiveService
 			//
-			// AppDataServiceID2
-			//
-			QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok).trimmed();
+			ok = writeArchiveServiceSection(xmlWriter);
 			if (ok == false)
 			{
 				return false;
 			}
-
-			if (appDataServiceId2.isEmpty() == true)
-			{
-				QString errorStr = tr("Monitor configuration error %1, property DataAquisitionServiceID2 is invalid")
-								   .arg(m_software->equipmentIdTemplate());
-
-				m_log->writeError(errorStr);
-				writeErrorSection(xmlWriter, errorStr);
-				return false;
-			}
-
-			//
-			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
-			//
-			Hardware::Software* dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
-			Hardware::Software* dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
-
-			if (dasObject1 == nullptr)
-			{
-				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId1);
-
-				m_log->writeError(errorStr);
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-				return false;
-			}
-
-			if (dasObject2 == nullptr)
-			{
-				QString errorStr = tr("Object %1 is not found").arg(appDataServiceId2);
-
-				m_log->writeError(errorStr);
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-				return false;
-			}
-
-			AppDataServiceSettings dasSettings1;
-			dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
-
-			AppDataServiceSettings dasSettings2;
-			dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
-
-			// Get ip addresses and ports, write them to configurations
-			//
-			{
-				xmlWriter.writeStartElement("DataAquisitionService");
-				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-					{
-						xmlWriter.writeEndElement();
-					});
-
-				// --
-				//
-				xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
-				xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
-
-				xmlWriter.writeAttribute("ip1", dasSettings1.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port1", QString::number(dasSettings1.clientRequestIP.port()));
-				xmlWriter.writeAttribute("ip2", dasSettings2.clientRequestIP.address().toString());
-				xmlWriter.writeAttribute("port2", QString::number(dasSettings2.clientRequestIP.port()));
-			}	// DataAquisitionService
-
-
-			//
-			// Archive Service Settings
-			//
-
-//			// ArchiveServiceStrID1
-//			//
-//			QString asStrID1 = getObjectProperty<QString>(m_software->strId(), "ArchiveServiceStrID1", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			if (asStrID1.isEmpty() == true)
-//			{
-//				QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceStrID1 is invalid")
-//								   .arg(m_software->strId());
-
-//				m_log->writeError(errorStr);
-//				writeErrorSection(xmlWriter, errorStr);
-//				return false;
-//			}
-
-//			// ArchiveServiceStrID2
-//			//
-//			QString asStrID2 = getObjectProperty<QString>(m_software->strId(), "ArchiveServiceStrID2", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			if (asStrID2.isEmpty() == true)
-//			{
-//				QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceStrID2 is invalid")
-//								   .arg(m_software->strId());
-
-//				m_log->writeError(errorStr);
-//				writeErrorSection(xmlWriter, errorStr);
-//				return false;
-//			}
-
-//			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
-//			//
-//			QString clientRequestIP1 = getObjectProperty<QString>(dacStrID1, "ClientRequestIP", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			QString clientRequestPort1 = getObjectProperty<QString>(dacStrID1, "ClientRequestPort", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			// DataAquisitionServiceStrID1->ClientRequestIP, ClientRequestPort
-//			//
-//			QString clientRequestIP2 = getObjectProperty<QString>(dacStrID2, "ClientRequestIP", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			QString clientRequestPort2 = getObjectProperty<QString>(dacStrID2, "ClientRequestPort", &ok).trimmed();
-//			if (ok == false)
-//			{
-//				return false;
-//			}
-
-//			// Get ip addresses and ports, write them to configurations
-//			//
-//			{
-//				xmlWriter.writeStartElement("DataAquisitionService");
-//				std::shared_ptr<int*> writeEndDataAquisitionService(nullptr, [&xmlWriter](void*)
-//					{
-//						xmlWriter.writeEndElement();
-//					});
-
-//				// --
-//				//
-//				xmlWriter.writeAttribute("StrID1", dacStrID1);
-//				xmlWriter.writeAttribute("StrID2", dacStrID2);
-
-//				xmlWriter.writeAttribute("ip1", clientRequestIP1);
-//				xmlWriter.writeAttribute("port1", clientRequestPort1);
-//				xmlWriter.writeAttribute("ip2", clientRequestIP2);
-//				xmlWriter.writeAttribute("port2", clientRequestPort2);
-//			}	// DataAquisitionService
-
 
 		} // Settings
 
+
+		return true;
+	}
+
+	bool MonitorCfgGenerator::writeAppDataServiceSection(QXmlStreamWriter& xmlWriter)
+	{
+		bool ok = false;
+
+		// AppDataServiceID1(2)
+		//
+		QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (appDataServiceId1.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID1 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// AppDataServiceID2
+		//
+		QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (appDataServiceId2.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property AppDataServiceID2 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// AppDataServiceStrID1->ClientRequestIP, ClientRequestPort
+		//
+		Hardware::Software* dasObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId1));
+		Hardware::Software* dasObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(appDataServiceId2));
+
+		if (dasObject1 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(appDataServiceId1);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		if (dasObject2 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(appDataServiceId2);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		AppDataServiceSettings dasSettings1;
+		dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
+
+		AppDataServiceSettings dasSettings2;
+		dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
+
+		// AppDataService -- Get ip addresses and ports, write them to configurations
+		//
+		{
+			xmlWriter.writeStartElement("AppDataService");
+			std::shared_ptr<int*> writeEndElementService(nullptr, [&xmlWriter](void*)
+				{
+					xmlWriter.writeEndElement();
+				});
+
+			// --
+			//
+			xmlWriter.writeAttribute("AppDataServiceID1", appDataServiceId1);
+			xmlWriter.writeAttribute("AppDataServiceID2", appDataServiceId2);
+
+			xmlWriter.writeAttribute("ip1", dasSettings1.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port1", QString::number(dasSettings1.clientRequestIP.port()));
+			xmlWriter.writeAttribute("ip2", dasSettings2.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port2", QString::number(dasSettings2.clientRequestIP.port()));
+		}	// AppDataService
+
+		return true;
+	}
+
+	bool MonitorCfgGenerator::writeArchiveServiceSection(QXmlStreamWriter& xmlWriter)
+	{
+		bool ok = true;
+
+		// ArchiveServiceID1(2)
+		//
+		QString archiveServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID1", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (archiveServiceId1.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceID1 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// ArchiveServiceID2
+		//
+		QString archiveServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID2", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (archiveServiceId2.isEmpty() == true)
+		{
+			QString errorStr = tr("Monitor configuration error %1, property ArchiveServiceID2 is invalid")
+							   .arg(m_software->equipmentIdTemplate());
+
+			m_log->writeError(errorStr);
+			writeErrorSection(xmlWriter, errorStr);
+			return false;
+		}
+
+		// ArchiveServiceID1(2)->ClientRequestIP, ClientRequestPort
+		//
+		Hardware::Software* archiveServiceObject1 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId1));
+		Hardware::Software* archiveServiceObject2 = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(archiveServiceId2));
+
+		if (archiveServiceObject1 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(archiveServiceId1);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		if (archiveServiceObject2 == nullptr)
+		{
+			QString errorStr = tr("Object %1 is not found").arg(archiveServiceId2);
+
+			m_log->writeError(errorStr);
+			writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+			return false;
+		}
+
+		ArchivingServiceSettings archiveServiceSettings1;
+		archiveServiceSettings1.readFromDevice(archiveServiceObject1, m_log);
+
+		ArchivingServiceSettings archiveServiceSettings2;
+		archiveServiceSettings2.readFromDevice(archiveServiceObject2, m_log);
+
+		// ArchiveService -- Get ip addresses and ports, write them to configurations
+		//
+		{
+			xmlWriter.writeStartElement("ArchiveService");
+			std::shared_ptr<int*> writeEndElement(nullptr, [&xmlWriter](void*)
+			{
+				xmlWriter.writeEndElement();
+			});
+
+			// --
+			//
+			xmlWriter.writeAttribute("ArchiveServiceID1", archiveServiceId1);
+			xmlWriter.writeAttribute("ArchiveServiceID2", archiveServiceId2);
+
+			xmlWriter.writeAttribute("ip1", archiveServiceSettings1.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port1", QString::number(archiveServiceSettings1.clientRequestIP.port()));
+			xmlWriter.writeAttribute("ip2", archiveServiceSettings2.clientRequestIP.address().toString());
+			xmlWriter.writeAttribute("port2", QString::number(archiveServiceSettings2.clientRequestIP.port()));
+		}	// ArchiveService
 
 		return true;
 	}

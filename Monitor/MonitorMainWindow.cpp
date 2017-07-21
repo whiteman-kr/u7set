@@ -648,7 +648,7 @@ void MonitorMainWindow::slot_trends()
 	if (trendToActivate.isEmpty() == true)
 	{
 		ConfigSettings conf = m_configController.configuration();
-		MonitorTrends::startTrendApp(conf.ads1.ip(), conf.ads1.port(), conf.ads2.ip(), conf.ads2.port(), this);
+		MonitorTrends::startTrendApp(conf.appDataService1.ip(), conf.appDataService1.port(), conf.appDataService2.ip(), conf.appDataService2.port(), this);
 	}
 	else
 	{

@@ -2,12 +2,13 @@
 #define TRENDSIGNAL_H
 
 #include <array>
+#include <bitset>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
 namespace TrendLib
 {
-	struct TrendStateIten
+	struct TrendStateItem
 	{
 		qint64	system;
 		qint64 local;
@@ -18,7 +19,19 @@ namespace TrendLib
 
 	struct TrendStateRecord
 	{
-		std::array<TrendStateIten, 512>  m_states;
+		std::array<TrendStateItem, 512>  states;
+	};
+
+	struct OneHourData
+	{
+		bool requested = false;
+		std::vector<TrendStateRecord> data;
+	};
+
+	struct OneDayData
+	{
+		QDate date;
+		std::array<OneHourData, 24> hours;
 	};
 
 	class TrendSignalParam
@@ -71,12 +84,11 @@ namespace TrendLib
 
 		double m_lowLimit = 0;
 		double m_highLimit = 1.0;
-
 		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
 
-		std::vector<std::shared_ptr<TrendStateRecord>> m_records;
+		std::list<OneDayData> m_days;			// Archive data
 	};
 
 	class TrendSignalSet
