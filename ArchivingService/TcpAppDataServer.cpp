@@ -20,6 +20,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 {
 	switch(requestID)
 	{
+	case ARCHS_CONNECTION_ALIVE:
+		sendReply();
+		break;
+
 	case ARCHS_SAVE_APP_SIGNALS_STATES:
 		onSaveAppSignalsStatesToArchive(requestData, requestDataSize);
 		break;
@@ -62,6 +66,16 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 	m_saveStatesReply.set_error(TO_INT(NetworkError::Success));
 
 	sendReply(m_saveStatesReply);
+}
+
+void TcpAppDataServer::onConnection()
+{
+	qDebug() << C_STR(QString(tr("TcpAppDataServer connected")));
+}
+
+void TcpAppDataServer::onDisconnection()
+{
+	qDebug() << C_STR(QString(tr("TcpAppDataServer disconnected")));
 }
 
 

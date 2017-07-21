@@ -14,7 +14,7 @@ ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
 											   char** argv,
 											   const VersionInfo& versionInfo,
 											   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(ServiceType::AppDataService, serviceName, argc, argv, versionInfo, logger),
+	ServiceWorker(ServiceType::ArchivingService, serviceName, argc, argv, versionInfo, logger),
 	m_logger(logger),
 	m_saveStatesQueue(1024 * 1024)
 {

@@ -13,7 +13,8 @@ TcpArchiveClient::TcpArchiveClient(int channel,
 	m_channel(channel),
 	m_logger(logger),
 	m_signalStatesQueue(signalStatesQueue),
-	m_timer(this)
+	m_timer(this),
+	m_connectionKeepAliveTimer(this)
 {
 }
 
@@ -23,6 +24,9 @@ void TcpArchiveClient::processReply(quint32 requestID, const char* replyData, qu
 	{
 	case ARCHS_SAVE_APP_SIGNALS_STATES:
 		onSaveAppSignalsStatesReply(replyData, replyDataSize);
+		break;
+
+	case ARCHS_CONNECTION_ALIVE:
 		break;
 
 	default:
@@ -36,10 +40,16 @@ void TcpArchiveClient::onClientThreadStarted()
 								arg(m_channel + 1).arg(serverAddressPort(0).addressPortStr()));
 
 	connect(&m_timer, &QTimer::timeout, this, &TcpArchiveClient::onTimer);
+	connect(&m_connectionKeepAliveTimer, &QTimer::timeout, this, &TcpArchiveClient::onConnectionKeepAliveTimer);
 	connect(&m_signalStatesQueue, &AppSignalStatesQueue::queueNotEmpty, this, &TcpArchiveClient::onSignalStatesQueueIsNotEmpty);
 
 	m_timer.setInterval(10);
 	m_timer.start();
+
+	setWatchdogTimerTimeout(10000);
+
+	m_connectionKeepAliveTimer.setSingleShot(true);
+	m_connectionKeepAliveTimer.start(5000);
 }
 
 void TcpArchiveClient::onClientThreadFinished()
@@ -102,6 +112,8 @@ void TcpArchiveClient::sendSignalStatesToArchiveRequest()
 
 	sendRequest(ARCHS_SAVE_APP_SIGNALS_STATES, request);
 
+	m_connectionKeepAliveTimer.start(5000);
+
 	qDebug() << "Send SaveSignalsToArchive count = " << count;
 }
 
@@ -131,6 +143,16 @@ void TcpArchiveClient::onSaveAppSignalsStatesReply(const char* replyData, quint3
 void TcpArchiveClient::onTimer()
 {
 	sendSignalStatesToArchiveRequest();
+}
+
+void TcpArchiveClient::onConnectionKeepAliveTimer()
+{
+	if (isClearToSendRequest() == true)
+	{
+		sendRequest(ARCHS_CONNECTION_ALIVE);
+
+		m_connectionKeepAliveTimer.start(5000);
+	}
 }
 
 void TcpArchiveClient::onSignalStatesQueueIsNotEmpty()

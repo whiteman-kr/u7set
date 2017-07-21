@@ -174,7 +174,7 @@ namespace Tcp
 
 	void SocketWorker::restartWatchdogTimer()
 	{
-		if (m_watchdogTimerEnable)
+		if (m_watchdogTimerEnable == true)
 		{
 			m_watchdogTimer.setSingleShot(true);
 			m_watchdogTimer.start(m_watchdogTimerTimeout);
@@ -393,6 +393,13 @@ namespace Tcp
 
 		qDebug() << C_STR(QString(tr("Socket connected with %1 (descriptor = %2)")).
 						  arg(peerAddr().addressStr()).
+						  arg(m_tcpSocket->socketDescriptor()));
+	}
+
+
+	void SocketWorker::onConnection()
+	{
+		qDebug() << C_STR(QString(tr("Socket connected (descriptor = %1)")).
 						  arg(m_tcpSocket->socketDescriptor()));
 	}
 

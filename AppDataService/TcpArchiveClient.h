@@ -30,6 +30,7 @@ private:
 
 private slots:
 	void onTimer();
+	void onConnectionKeepAliveTimer();
 	void onSignalStatesQueueIsNotEmpty();
 
 private:
@@ -40,6 +41,7 @@ private:
 	AppSignalStatesQueue& m_signalStatesQueue;
 
 	QTimer m_timer;
+	QTimer m_connectionKeepAliveTimer;
 
 	qint64 m_saveAppSignalsStateErrorReplyCount = 0;
 };

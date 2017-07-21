@@ -170,7 +170,7 @@ namespace Tcp
 		void closeConnection();
 
 		virtual void onInitConnection();
-		virtual void onConnection() {}
+		virtual void onConnection();
 		virtual void onDisconnection();
 
 		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
