@@ -32,9 +32,11 @@ protected:
 
 struct ConfigSettings
 {
-	QString startSchemaId;				// Start Schema ID
-	ConfigConnection ads1;				// Data Aquisition Service connection params
-	ConfigConnection ads2;				// Data Aquisition Service connection params
+	QString startSchemaId;					// Start Schema ID
+	ConfigConnection appDataService1;
+	ConfigConnection appDataService2;
+	ConfigConnection archiveService1;
+	ConfigConnection archiveService2;
 	QString globalScript;
 
 	QString errorMessage;				// Parsing error message, empty if no errors

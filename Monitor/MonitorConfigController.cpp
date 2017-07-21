@@ -356,8 +356,8 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	//
 	qDebug() << "New configuration arrived";
 	qDebug() << "StartSchemaID: " << readSettings.startSchemaId;
-	qDebug() << "ADS1 (id, ip, port): " << readSettings.ads1.equipmentId() << ", " << readSettings.ads1.ip() << ", " << readSettings.ads1.port();
-	qDebug() << "ADS2 (id, ip, port): " << readSettings.ads2.equipmentId() << ", " << readSettings.ads2.ip() << ", " << readSettings.ads2.port();
+	qDebug() << "ADS1 (id, ip, port): " << readSettings.appDataService1.equipmentId() << ", " << readSettings.appDataService1.ip() << ", " << readSettings.appDataService1.port();
+	qDebug() << "ADS2 (id, ip, port): " << readSettings.appDataService2.equipmentId() << ", " << readSettings.appDataService2.ip() << ", " << readSettings.appDataService2.port();
 
 
 	// Emit signal to inform everybody about new configuration
@@ -452,14 +452,14 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 		}
 	}
 
-	// Get DataAquisitionService data
+	// Get AppDataService data
 	//
 	{
-		QDomNodeList dasNodes = settingsElement.elementsByTagName("DataAquisitionService");
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("AppDataService");
 
 		if (dasNodes.isEmpty() == true)
 		{
-			outSetting->errorMessage += tr("Cannot find DataAquisitionService tag %1\n");
+			outSetting->errorMessage += tr("Cannot find AppDataService tag %1\n");
 			return false;
 		}
 		else
@@ -474,52 +474,39 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 			QString dasIp2 = dasXmlElement.attribute("ip2");
 			int dasPort2 = dasXmlElement.attribute("port2").toInt();
 
-			outSetting->ads1 = ConfigConnection(dasId1, dasIp1, dasPort1);
-			outSetting->ads2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+			outSetting->appDataService1 = ConfigConnection(dasId1, dasIp1, dasPort1);
+			outSetting->appDataService2 = ConfigConnection(dasId2, dasIp2, dasPort2);
+		}
+	}
+
+	// Get ArchiveService data
+	//
+	{
+		QDomNodeList dasNodes = settingsElement.elementsByTagName("ArchiveService");
+
+		if (dasNodes.isEmpty() == true)
+		{
+			outSetting->errorMessage += tr("Cannot find ArchiveService tag %1\n");
+			return false;
+		}
+		else
+		{
+			QDomElement dasXmlElement = dasNodes.at(0).toElement();
+
+			QString asId1 = dasXmlElement.attribute("AppDataServiceID1");
+			QString asIp1 = dasXmlElement.attribute("ip1");
+			int asPort1 = dasXmlElement.attribute("port1").toInt();
+
+			QString asId2 = dasXmlElement.attribute("AppDataServiceID2");
+			QString asIp2 = dasXmlElement.attribute("ip2");
+			int asPort2 = dasXmlElement.attribute("port2").toInt();
+
+			outSetting->archiveService1 = ConfigConnection(asId1, asIp1, asPort1);
+			outSetting->archiveService2 = ConfigConnection(asId2, asIp2, asPort2);
 		}
 	}
 
 	return outSetting->errorMessage.isEmpty();
-
-//		if (xmlReader.isStartElement() == true && tagName == "DataAquisitionService")
-//		{
-//			QString dasStrId1 = xmlReader.attributes().value("StrID1").toString();
-//			QString dasStrId2 = xmlReader.attributes().value("StrID2").toString();
-
-//			QString dasIp1 = xmlReader.attributes().value("ip1").toString();
-//			QString dasIp2 = xmlReader.attributes().value("ip2").toString();
-
-//			int dasPort1 = xmlReader.attributes().value("port1").toInt();
-//			int dasPort2 = xmlReader.attributes().value("port2").toInt();
-
-//			QString logString1 = QString("DataAcquisitionService1 StrID: %1, ip: %2, port: %3")
-//								 .arg(dasStrId1)
-//								 .arg(dasIp1)
-//								 .arg(dasPort1);
-
-//			qDebug() << logString1;
-
-//			QString logString2 = QString("DataAcquisitionService2 StrID: %1, ip: %2, port: %3")
-//								 .arg(dasStrId2)
-//								 .arg(dasIp2)
-//								 .arg(dasPort2);
-
-//			qDebug() << logString2;
-
-//			// Save data
-//			//
-//			outSetting->das1 = ConfigConnection(dasStrId1, dasIp1, dasPort1);
-//			outSetting->das2 = ConfigConnection(dasStrId2, dasIp2, dasPort2);;
-
-//			xmlReader.skipCurrentElement();
-//			continue;
-//		}
-
-//		outSetting->errorMessage += QString("Unknown xml tag %1\n").arg(tagName);
-//		xmlReader.skipCurrentElement();
-//	}
-
-//	return outSetting->errorMessage.isEmpty();
 }
 
 

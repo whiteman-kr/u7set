@@ -15,7 +15,12 @@ namespace Builder
 
 	protected:
 		bool writeMonitorSettings();
+
+		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
+		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
+
 		void writeErrorSection(QXmlStreamWriter& xmlWriter, QString error);
+
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);
