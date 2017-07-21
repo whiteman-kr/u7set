@@ -418,7 +418,7 @@ message GetSignalStatesFromArchiveRequest
     optional sfixed64 startTime = 3;
     optional sfixed64 endTime = 4;
 
-    repeated uint64 signalHashes = 5;
+    repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to ArchRequest::MAX_SIGNALS (32)
 }
 
 

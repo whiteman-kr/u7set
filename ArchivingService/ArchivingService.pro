@@ -92,7 +92,8 @@ SOURCES += \
     TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
     ArchWriteThread.cpp \
-    TcpArchiveRequestsServer.cpp
+    TcpArchiveRequestsServer.cpp \
+    ArchRequestThread.cpp
 
 HEADERS += \
     version.h \
@@ -129,7 +130,8 @@ HEADERS += \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \
     ArchWriteThread.h \
-    TcpArchiveRequestsServer.h
+    TcpArchiveRequestsServer.h \
+    ArchRequestThread.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -374,6 +374,7 @@ enum class NetworkError
 	UnknownTuningClientID,
 	UnknownSignalHash,
 	InternalError,
+	SignalHashesInArchRequestExceed
 };
 
 
