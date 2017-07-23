@@ -1418,23 +1418,24 @@ void protobuf_AddDesc_network_2eproto() {
     "ArchiveRequest\022\031\n\021clientEquipmentID\030\001 \001("
     "\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.AppSi"
     "gnalState\"6\n\"SaveAppSignalsStatesToArchi"
-    "veReply\022\020\n\005error\030\001 \001(\005:\0010\"\222\001\n)GetAppSign"
+    "veReply\022\020\n\005error\030\001 \001(\005:\0010\"\233\001\n)GetAppSign"
     "alStatesFromArchiveStartRequest\022\031\n\021clien"
-    "tEquipmentID\030\001 \001(\t\022\020\n\010timeType\030\002 \001(\005\022\021\n\t"
-    "startTime\030\003 \001(\020\022\017\n\007endTime\030\004 \001(\020\022\024\n\014sign"
-    "alHashes\030\005 \003(\004\"N\n\'GetAppSignalStatesFrom"
-    "ArchiveStartReply\022\020\n\005error\030\001 \001(\005:\0010\022\021\n\tr"
-    "equestID\030\002 \001(\r\"=\n(GetAppSignalStatesFrom"
-    "ArchiveNextRequest\022\021\n\trequestID\030\001 \001(\r\"\337\001"
-    "\n&GetAppSignalStatesFromArchiveNextReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\022\021\n\trequestID\030\002 \001(\r\022\030\n"
-    "\020totalStatesCount\030\003 \001(\005\022\027\n\017sentStatesCou"
-    "nt\030\004 \001(\005\022\031\n\021statesInPartCount\030\005 \001(\005\022\022\n\ni"
-    "sLastPart\030\006 \001(\010\022.\n\017appSignalStates\030\007 \003(\013"
-    "2\025.Proto.AppSignalState\"\?\n*GetAppSignalS"
-    "tatesFromArchiveCancelRequest\022\021\n\trequest"
-    "ID\030\001 \001(\r\"<\n(GetAppSignalStatesFromArchiv"
-    "eCancelReply\022\020\n\005error\030\001 \001(\005:\0010", 6110);
+    "tEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022"
+    "\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\001"
+    "0\022\024\n\014signalHashes\030\005 \003(\004\"Q\n\'GetAppSignalS"
+    "tatesFromArchiveStartReply\022\020\n\005error\030\001 \001("
+    "\005:\0010\022\024\n\trequestID\030\002 \001(\r:\0010\"@\n(GetAppSign"
+    "alStatesFromArchiveNextRequest\022\024\n\treques"
+    "tID\030\001 \001(\r:\0010\"\362\001\n&GetAppSignalStatesFromA"
+    "rchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\024\n\treq"
+    "uestID\030\002 \001(\r:\0010\022\033\n\020totalStatesCount\030\003 \001("
+    "\005:\0010\022\032\n\017sentStatesCount\030\004 \001(\005:\0010\022\034\n\021stat"
+    "esInPartCount\030\005 \001(\005:\0010\022\031\n\nisLastPart\030\006 \001"
+    "(\010:\005false\022.\n\017appSignalStates\030\007 \003(\0132\025.Pro"
+    "to.AppSignalState\"B\n*GetAppSignalStatesF"
+    "romArchiveCancelRequest\022\024\n\trequestID\030\001 \001"
+    "(\r:\0010\"<\n(GetAppSignalStatesFromArchiveCa"
+    "ncelReply\022\020\n\005error\030\001 \001(\005:\0010", 6147);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -15920,7 +15921,7 @@ GetAppSignalStatesFromArchiveStartRequest::GetAppSignalStatesFromArchiveStartReq
 void GetAppSignalStatesFromArchiveStartRequest::SharedCtor() {
   _cached_size_ = 0;
   clientequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  timetype_ = 0;
+  timetype_ = 1;
   starttime_ = GOOGLE_LONGLONG(0);
   endtime_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -15966,7 +15967,7 @@ void GetAppSignalStatesFromArchiveStartRequest::Clear() {
         clientequipmentid_->clear();
       }
     }
-    timetype_ = 0;
+    timetype_ = 1;
     starttime_ = GOOGLE_LONGLONG(0);
     endtime_ = GOOGLE_LONGLONG(0);
   }
@@ -15997,7 +15998,7 @@ bool GetAppSignalStatesFromArchiveStartRequest::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 timeType = 2;
+      // optional int32 timeType = 2 [default = 1];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16013,7 +16014,7 @@ bool GetAppSignalStatesFromArchiveStartRequest::MergePartialFromCodedStream(
         break;
       }
 
-      // optional sfixed64 startTime = 3;
+      // optional sfixed64 startTime = 3 [default = 0];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
@@ -16029,7 +16030,7 @@ bool GetAppSignalStatesFromArchiveStartRequest::MergePartialFromCodedStream(
         break;
       }
 
-      // optional sfixed64 endTime = 4;
+      // optional sfixed64 endTime = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
@@ -16094,17 +16095,17 @@ void GetAppSignalStatesFromArchiveStartRequest::SerializeWithCachedSizes(
       1, this->clientequipmentid(), output);
   }
 
-  // optional int32 timeType = 2;
+  // optional int32 timeType = 2 [default = 1];
   if (has_timetype()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->timetype(), output);
   }
 
-  // optional sfixed64 startTime = 3;
+  // optional sfixed64 startTime = 3 [default = 0];
   if (has_starttime()) {
     ::google::protobuf::internal::WireFormatLite::WriteSFixed64(3, this->starttime(), output);
   }
 
-  // optional sfixed64 endTime = 4;
+  // optional sfixed64 endTime = 4 [default = 0];
   if (has_endtime()) {
     ::google::protobuf::internal::WireFormatLite::WriteSFixed64(4, this->endtime(), output);
   }
@@ -16133,17 +16134,17 @@ void GetAppSignalStatesFromArchiveStartRequest::SerializeWithCachedSizes(
         1, this->clientequipmentid(), target);
   }
 
-  // optional int32 timeType = 2;
+  // optional int32 timeType = 2 [default = 1];
   if (has_timetype()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->timetype(), target);
   }
 
-  // optional sfixed64 startTime = 3;
+  // optional sfixed64 startTime = 3 [default = 0];
   if (has_starttime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(3, this->starttime(), target);
   }
 
-  // optional sfixed64 endTime = 4;
+  // optional sfixed64 endTime = 4 [default = 0];
   if (has_endtime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteSFixed64ToArray(4, this->endtime(), target);
   }
@@ -16172,19 +16173,19 @@ int GetAppSignalStatesFromArchiveStartRequest::ByteSize() const {
           this->clientequipmentid());
     }
 
-    // optional int32 timeType = 2;
+    // optional int32 timeType = 2 [default = 1];
     if (has_timetype()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->timetype());
     }
 
-    // optional sfixed64 startTime = 3;
+    // optional sfixed64 startTime = 3 [default = 0];
     if (has_starttime()) {
       total_size += 1 + 8;
     }
 
-    // optional sfixed64 endTime = 4;
+    // optional sfixed64 endTime = 4 [default = 0];
     if (has_endtime()) {
       total_size += 1 + 8;
     }
@@ -16370,7 +16371,7 @@ bool GetAppSignalStatesFromArchiveStartReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional uint32 requestID = 2;
+      // optional uint32 requestID = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16409,7 +16410,7 @@ void GetAppSignalStatesFromArchiveStartReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   if (has_requestid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->requestid(), output);
   }
@@ -16427,7 +16428,7 @@ void GetAppSignalStatesFromArchiveStartReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   if (has_requestid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->requestid(), target);
   }
@@ -16450,7 +16451,7 @@ int GetAppSignalStatesFromArchiveStartReply::ByteSize() const {
           this->error());
     }
 
-    // optional uint32 requestID = 2;
+    // optional uint32 requestID = 2 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
@@ -16600,7 +16601,7 @@ bool GetAppSignalStatesFromArchiveNextRequest::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional uint32 requestID = 1;
+      // optional uint32 requestID = 1 [default = 0];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16633,7 +16634,7 @@ bool GetAppSignalStatesFromArchiveNextRequest::MergePartialFromCodedStream(
 
 void GetAppSignalStatesFromArchiveNextRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   if (has_requestid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->requestid(), output);
   }
@@ -16646,7 +16647,7 @@ void GetAppSignalStatesFromArchiveNextRequest::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* GetAppSignalStatesFromArchiveNextRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   if (has_requestid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->requestid(), target);
   }
@@ -16662,7 +16663,7 @@ int GetAppSignalStatesFromArchiveNextRequest::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional uint32 requestID = 1;
+    // optional uint32 requestID = 1 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
@@ -16840,7 +16841,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional uint32 requestID = 2;
+      // optional uint32 requestID = 2 [default = 0];
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16856,7 +16857,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 totalStatesCount = 3;
+      // optional int32 totalStatesCount = 3 [default = 0];
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16872,7 +16873,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 sentStatesCount = 4;
+      // optional int32 sentStatesCount = 4 [default = 0];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16888,7 +16889,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 statesInPartCount = 5;
+      // optional int32 statesInPartCount = 5 [default = 0];
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16904,7 +16905,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool isLastPart = 6;
+      // optional bool isLastPart = 6 [default = false];
       case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -16958,27 +16959,27 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   if (has_requestid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->requestid(), output);
   }
 
-  // optional int32 totalStatesCount = 3;
+  // optional int32 totalStatesCount = 3 [default = 0];
   if (has_totalstatescount()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->totalstatescount(), output);
   }
 
-  // optional int32 sentStatesCount = 4;
+  // optional int32 sentStatesCount = 4 [default = 0];
   if (has_sentstatescount()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->sentstatescount(), output);
   }
 
-  // optional int32 statesInPartCount = 5;
+  // optional int32 statesInPartCount = 5 [default = 0];
   if (has_statesinpartcount()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->statesinpartcount(), output);
   }
 
-  // optional bool isLastPart = 6;
+  // optional bool isLastPart = 6 [default = false];
   if (has_islastpart()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->islastpart(), output);
   }
@@ -17002,27 +17003,27 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   if (has_requestid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->requestid(), target);
   }
 
-  // optional int32 totalStatesCount = 3;
+  // optional int32 totalStatesCount = 3 [default = 0];
   if (has_totalstatescount()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->totalstatescount(), target);
   }
 
-  // optional int32 sentStatesCount = 4;
+  // optional int32 sentStatesCount = 4 [default = 0];
   if (has_sentstatescount()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->sentstatescount(), target);
   }
 
-  // optional int32 statesInPartCount = 5;
+  // optional int32 statesInPartCount = 5 [default = 0];
   if (has_statesinpartcount()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->statesinpartcount(), target);
   }
 
-  // optional bool isLastPart = 6;
+  // optional bool isLastPart = 6 [default = false];
   if (has_islastpart()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->islastpart(), target);
   }
@@ -17052,35 +17053,35 @@ int GetAppSignalStatesFromArchiveNextReply::ByteSize() const {
           this->error());
     }
 
-    // optional uint32 requestID = 2;
+    // optional uint32 requestID = 2 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->requestid());
     }
 
-    // optional int32 totalStatesCount = 3;
+    // optional int32 totalStatesCount = 3 [default = 0];
     if (has_totalstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->totalstatescount());
     }
 
-    // optional int32 sentStatesCount = 4;
+    // optional int32 sentStatesCount = 4 [default = 0];
     if (has_sentstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->sentstatescount());
     }
 
-    // optional int32 statesInPartCount = 5;
+    // optional int32 statesInPartCount = 5 [default = 0];
     if (has_statesinpartcount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->statesinpartcount());
     }
 
-    // optional bool isLastPart = 6;
+    // optional bool isLastPart = 6 [default = false];
     if (has_islastpart()) {
       total_size += 1 + 1;
     }
@@ -17254,7 +17255,7 @@ bool GetAppSignalStatesFromArchiveCancelRequest::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional uint32 requestID = 1;
+      // optional uint32 requestID = 1 [default = 0];
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -17287,7 +17288,7 @@ bool GetAppSignalStatesFromArchiveCancelRequest::MergePartialFromCodedStream(
 
 void GetAppSignalStatesFromArchiveCancelRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   if (has_requestid()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->requestid(), output);
   }
@@ -17300,7 +17301,7 @@ void GetAppSignalStatesFromArchiveCancelRequest::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* GetAppSignalStatesFromArchiveCancelRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   if (has_requestid()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->requestid(), target);
   }
@@ -17316,7 +17317,7 @@ int GetAppSignalStatesFromArchiveCancelRequest::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional uint32 requestID = 1;
+    // optional uint32 requestID = 1 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(

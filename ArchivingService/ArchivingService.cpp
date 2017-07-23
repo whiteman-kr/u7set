@@ -25,7 +25,6 @@ ArchivingServiceWorker::~ArchivingServiceWorker()
 {
 }
 
-
 ServiceWorker* ArchivingServiceWorker::createInstance() const
 {
 	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(serviceName(), argc(), argv(), versionInfo(), m_logger);
@@ -35,13 +34,11 @@ ServiceWorker* ArchivingServiceWorker::createInstance() const
 	return archServiceWorker;
 }
 
-
 void ArchivingServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
 	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
 	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
 }
-
 
 void ArchivingServiceWorker::initCmdLineParser()
 {
@@ -79,7 +76,6 @@ void ArchivingServiceWorker::initialize()
 	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker initialized")));
 }
 
-
 void ArchivingServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
@@ -91,7 +87,6 @@ void ArchivingServiceWorker::shutdown()
 	DEBUG_LOG_MSG(m_logger, QString(tr("ArchivingServiceWorker stoped")));
 }
 
-
 void ArchivingServiceWorker::runCfgLoaderThread()
 {
 	m_cfgLoaderThread = new CfgLoaderThread(m_equipmentID, 1,m_cfgServiceIP1, m_cfgServiceIP2, false, nullptr, E::SoftwareType::ArchiveService, 0, 1, USED_SERVER_COMMIT_NUMBER);
@@ -101,7 +96,6 @@ void ArchivingServiceWorker::runCfgLoaderThread()
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
 }
-
 
 void ArchivingServiceWorker::stopCfgLoaderThread()
 {
@@ -113,35 +107,39 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 	}
 }
 
-
 void ArchivingServiceWorker::clearConfiguration()
 {
-	stopArchiveRequestsServerThread();
-	stopAppDataServerThread();
+	stopTcpArchiveRequestsServerThread();
+	stopTcpDataServerThread();
+	stopArchRequestThread();
 	stopArchWriteThread();
 
 	m_archSignals.clear();
 }
-
 
 void ArchivingServiceWorker::applyNewConfiguration()
 {
 	m_projectID = m_cfgLoaderThread->buildInfo().project;
 
 	runArchWriteThread();
-	runAppDataServerThread();
-	runArchiveRequestsServerThread();
+	runArchRequestThread();
+	runTcpAppDataServerThread();
+	runTcpArchRequestsServerThread();
 }
 
 void ArchivingServiceWorker::runArchWriteThread()
 {
+	assert(m_archWriteThread == nullptr);
+
 	m_archWriteThread = new ArchWriteThread(m_projectID, m_saveStatesQueue, m_archSignals, m_logger);
 
 	m_archWriteThread->start();
 }
 
-void ArchivingServiceWorker::runAppDataServerThread()
+void ArchivingServiceWorker::runTcpAppDataServerThread()
 {
+	assert(m_tcpAppDataServerThread == nullptr);
+
 	TcpAppDataServer* server = new TcpAppDataServer(m_saveStatesQueue);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, m_logger);
@@ -149,15 +147,31 @@ void ArchivingServiceWorker::runAppDataServerThread()
 	m_tcpAppDataServerThread->start();
 }
 
-void ArchivingServiceWorker::runArchiveRequestsServerThread()
+void ArchivingServiceWorker::runTcpArchRequestsServerThread()
 {
-	TcpArchiveRequestsServer* server = new TcpArchiveRequestsServer(m_logger);
+	assert(m_tcpArchiveRequestsServerThread == nullptr);
+
+	if (m_archRequestThread == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	TcpArchRequestsServer* server = new TcpArchRequestsServer(*m_archRequestThread, m_logger);
 
 	m_tcpArchiveRequestsServerThread = new TcpArchiveRequestsServerThread(m_cfgSettings.clientRequestIP,
 																		  server,
 																		  m_logger);
-
 	m_tcpArchiveRequestsServerThread->start();
+}
+
+void ArchivingServiceWorker::runArchRequestThread()
+{
+	assert(m_archRequestThread == nullptr);
+
+	m_archRequestThread = new ArchRequestThread(m_projectID, m_logger);
+
+	m_archRequestThread->start();
 }
 
 void ArchivingServiceWorker::stopArchWriteThread()
@@ -170,7 +184,7 @@ void ArchivingServiceWorker::stopArchWriteThread()
 	}
 }
 
-void ArchivingServiceWorker::stopAppDataServerThread()
+void ArchivingServiceWorker::stopTcpDataServerThread()
 {
 	if (m_tcpAppDataServerThread != nullptr)
 	{
@@ -180,13 +194,23 @@ void ArchivingServiceWorker::stopAppDataServerThread()
 	}
 }
 
-void ArchivingServiceWorker::stopArchiveRequestsServerThread()
+void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
 {
 	if (m_tcpArchiveRequestsServerThread != nullptr)
 	{
 		m_tcpArchiveRequestsServerThread->quitAndWait();
 		delete m_tcpArchiveRequestsServerThread;
 		m_tcpArchiveRequestsServerThread = nullptr;
+	}
+}
+
+void ArchivingServiceWorker::stopArchRequestThread()
+{
+	if (m_archRequestThread != nullptr)
+	{
+		m_archRequestThread->quitAndWait();
+		delete m_archRequestThread;
+		m_archRequestThread = nullptr;
 	}
 }
 
@@ -207,7 +231,6 @@ bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 
 	return result;
 }
-
 
 bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 {
@@ -313,18 +336,6 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		{
 			initArchSignalsMap(fileData);
 		}
-
-/*		result = true;
-
-		if (bfi.ID == CFG_FILE_ID_DATA_SOURCES)
-		{
-			result &= readDataSources(fileData);			// fill m_appDataSources
-		}
-
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
-		{
-			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
-		}*/
 
 		if (result == true)
 		{

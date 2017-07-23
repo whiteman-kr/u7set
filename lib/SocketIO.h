@@ -382,6 +382,8 @@ enum class NetworkError
 	InternalError,
 	ArchRequestSignalsExceed,
 	UnknownArchRequestID,
+	PreviousArchRequestIsNotFinished,			// use ARCHS_GET_APP_SIGNALS_STATES_CANCEL to finish requests
+	ArchRequestInProgress,
 };
 
 

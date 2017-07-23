@@ -5103,21 +5103,21 @@ class GetAppSignalStatesFromArchiveStartRequest : public ::google::protobuf::Mes
   inline ::std::string* release_clientequipmentid();
   inline void set_allocated_clientequipmentid(::std::string* clientequipmentid);
 
-  // optional int32 timeType = 2;
+  // optional int32 timeType = 2 [default = 1];
   inline bool has_timetype() const;
   inline void clear_timetype();
   static const int kTimeTypeFieldNumber = 2;
   inline ::google::protobuf::int32 timetype() const;
   inline void set_timetype(::google::protobuf::int32 value);
 
-  // optional sfixed64 startTime = 3;
+  // optional sfixed64 startTime = 3 [default = 0];
   inline bool has_starttime() const;
   inline void clear_starttime();
   static const int kStartTimeFieldNumber = 3;
   inline ::google::protobuf::int64 starttime() const;
   inline void set_starttime(::google::protobuf::int64 value);
 
-  // optional sfixed64 endTime = 4;
+  // optional sfixed64 endTime = 4 [default = 0];
   inline bool has_endtime() const;
   inline void clear_endtime();
   static const int kEndTimeFieldNumber = 4;
@@ -5228,7 +5228,7 @@ class GetAppSignalStatesFromArchiveStartReply : public ::google::protobuf::Messa
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   inline bool has_requestid() const;
   inline void clear_requestid();
   static const int kRequestIDFieldNumber = 2;
@@ -5313,7 +5313,7 @@ class GetAppSignalStatesFromArchiveNextRequest : public ::google::protobuf::Mess
 
   // accessors -------------------------------------------------------
 
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   inline bool has_requestid() const;
   inline void clear_requestid();
   static const int kRequestIDFieldNumber = 1;
@@ -5402,35 +5402,35 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // optional uint32 requestID = 2;
+  // optional uint32 requestID = 2 [default = 0];
   inline bool has_requestid() const;
   inline void clear_requestid();
   static const int kRequestIDFieldNumber = 2;
   inline ::google::protobuf::uint32 requestid() const;
   inline void set_requestid(::google::protobuf::uint32 value);
 
-  // optional int32 totalStatesCount = 3;
+  // optional int32 totalStatesCount = 3 [default = 0];
   inline bool has_totalstatescount() const;
   inline void clear_totalstatescount();
   static const int kTotalStatesCountFieldNumber = 3;
   inline ::google::protobuf::int32 totalstatescount() const;
   inline void set_totalstatescount(::google::protobuf::int32 value);
 
-  // optional int32 sentStatesCount = 4;
+  // optional int32 sentStatesCount = 4 [default = 0];
   inline bool has_sentstatescount() const;
   inline void clear_sentstatescount();
   static const int kSentStatesCountFieldNumber = 4;
   inline ::google::protobuf::int32 sentstatescount() const;
   inline void set_sentstatescount(::google::protobuf::int32 value);
 
-  // optional int32 statesInPartCount = 5;
+  // optional int32 statesInPartCount = 5 [default = 0];
   inline bool has_statesinpartcount() const;
   inline void clear_statesinpartcount();
   static const int kStatesInPartCountFieldNumber = 5;
   inline ::google::protobuf::int32 statesinpartcount() const;
   inline void set_statesinpartcount(::google::protobuf::int32 value);
 
-  // optional bool isLastPart = 6;
+  // optional bool isLastPart = 6 [default = false];
   inline bool has_islastpart() const;
   inline void clear_islastpart();
   static const int kIsLastPartFieldNumber = 6;
@@ -5540,7 +5540,7 @@ class GetAppSignalStatesFromArchiveCancelRequest : public ::google::protobuf::Me
 
   // accessors -------------------------------------------------------
 
-  // optional uint32 requestID = 1;
+  // optional uint32 requestID = 1 [default = 0];
   inline bool has_requestid() const;
   inline void clear_requestid();
   static const int kRequestIDFieldNumber = 1;
@@ -10786,7 +10786,7 @@ inline void GetAppSignalStatesFromArchiveStartRequest::set_allocated_clientequip
   }
 }
 
-// optional int32 timeType = 2;
+// optional int32 timeType = 2 [default = 1];
 inline bool GetAppSignalStatesFromArchiveStartRequest::has_timetype() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -10797,7 +10797,7 @@ inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_timetype() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void GetAppSignalStatesFromArchiveStartRequest::clear_timetype() {
-  timetype_ = 0;
+  timetype_ = 1;
   clear_has_timetype();
 }
 inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveStartRequest::timetype() const {
@@ -10808,7 +10808,7 @@ inline void GetAppSignalStatesFromArchiveStartRequest::set_timetype(::google::pr
   timetype_ = value;
 }
 
-// optional sfixed64 startTime = 3;
+// optional sfixed64 startTime = 3 [default = 0];
 inline bool GetAppSignalStatesFromArchiveStartRequest::has_starttime() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -10830,7 +10830,7 @@ inline void GetAppSignalStatesFromArchiveStartRequest::set_starttime(::google::p
   starttime_ = value;
 }
 
-// optional sfixed64 endTime = 4;
+// optional sfixed64 endTime = 4 [default = 0];
 inline bool GetAppSignalStatesFromArchiveStartRequest::has_endtime() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -10903,7 +10903,7 @@ inline void GetAppSignalStatesFromArchiveStartReply::set_error(::google::protobu
   error_ = value;
 }
 
-// optional uint32 requestID = 2;
+// optional uint32 requestID = 2 [default = 0];
 inline bool GetAppSignalStatesFromArchiveStartReply::has_requestid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -10929,7 +10929,7 @@ inline void GetAppSignalStatesFromArchiveStartReply::set_requestid(::google::pro
 
 // GetAppSignalStatesFromArchiveNextRequest
 
-// optional uint32 requestID = 1;
+// optional uint32 requestID = 1 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextRequest::has_requestid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -10977,7 +10977,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_error(::google::protobuf
   error_ = value;
 }
 
-// optional uint32 requestID = 2;
+// optional uint32 requestID = 2 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_requestid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -10999,7 +10999,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_requestid(::google::prot
   requestid_ = value;
 }
 
-// optional int32 totalStatesCount = 3;
+// optional int32 totalStatesCount = 3 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_totalstatescount() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -11021,7 +11021,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_totalstatescount(::googl
   totalstatescount_ = value;
 }
 
-// optional int32 sentStatesCount = 4;
+// optional int32 sentStatesCount = 4 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_sentstatescount() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -11043,7 +11043,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_sentstatescount(::google
   sentstatescount_ = value;
 }
 
-// optional int32 statesInPartCount = 5;
+// optional int32 statesInPartCount = 5 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_statesinpartcount() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -11065,7 +11065,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_statesinpartcount(::goog
   statesinpartcount_ = value;
 }
 
-// optional bool isLastPart = 6;
+// optional bool isLastPart = 6 [default = false];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_islastpart() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -11116,7 +11116,7 @@ GetAppSignalStatesFromArchiveNextReply::mutable_appsignalstates() {
 
 // GetAppSignalStatesFromArchiveCancelRequest
 
-// optional uint32 requestID = 1;
+// optional uint32 requestID = 1 [default = 0];
 inline bool GetAppSignalStatesFromArchiveCancelRequest::has_requestid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }

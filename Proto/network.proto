@@ -412,13 +412,13 @@ message SaveAppSignalsStatesToArchiveReply
 message GetAppSignalStatesFromArchiveStartRequest
 {
     optional string clientEquipmentID = 1;
-    optional int32 timeType = 2;			// enum TimeType values:
+    optional int32 timeType = 2 [default = 1];		// enum TimeType values:
                                                         // 0 - plant time
 							// 1 - system time
 							// 2 - local time
 							// 3 - archive id
-    optional sfixed64 startTime = 3;
-    optional sfixed64 endTime = 4;
+    optional sfixed64 startTime = 3 [default = 0];
+    optional sfixed64 endTime = 4 [default = 0];
 
     repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
 }
@@ -427,29 +427,29 @@ message GetAppSignalStatesFromArchiveStartReply
 {
     optional int32 error = 1 [default = 0];
 
-    optional uint32 requestID = 2;
+    optional uint32 requestID = 2 [default = 0];
 }
 
 //
 
 message GetAppSignalStatesFromArchiveNextRequest
 {
-    optional uint32 requestID = 1;
+    optional uint32 requestID = 1 [default = 0];
 }
 
 message GetAppSignalStatesFromArchiveNextReply
 {
     optional int32 error = 1 [default = 0];
 
-    optional uint32 requestID = 2;
+    optional uint32 requestID = 2 [default = 0];
 
-    optional int32 totalStatesCount = 3;
+    optional int32 totalStatesCount = 3 [default = 0];
 
-    optional int32 sentStatesCount = 4;
+    optional int32 sentStatesCount = 4 [default = 0];
 
-    optional int32 statesInPartCount = 5;
+    optional int32 statesInPartCount = 5 [default = 0];
 
-    optional bool isLastPart = 6;
+    optional bool isLastPart = 6 [default = false];
 
     repeated Proto.AppSignalState appSignalStates = 7;
 }
@@ -458,7 +458,7 @@ message GetAppSignalStatesFromArchiveNextReply
 
 message GetAppSignalStatesFromArchiveCancelRequest
 {
-    optional uint32 requestID = 1;
+    optional uint32 requestID = 1 [default = 0];
 }
 
 message GetAppSignalStatesFromArchiveCancelReply
