@@ -11,17 +11,18 @@ typedef QHash<Hash, bool> ArchSignals;
 class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
+	enum SignalStatesTableType
+	{
+		LongTerm,
+		ShortTerm
+	};
+
 	ArchWriteThreadWorker(const QString& projectID,
 						  AppSignalStatesQueue& saveStatesQueue,
 						  const ArchSignals& archSignals,
 						  CircularLoggerShared logger);
 
 private:
-	enum SignalStatesTableType
-	{
-		LongTerm,
-		ShortTerm
-	};
 
 	void onThreadStarted() override;
 	void onThreadFinished() override;
@@ -41,7 +42,7 @@ private:
 	void appendTable(const QString& tableName, SignalStatesTableType tableType);
 	bool createTableIfNotExists(Hash signalHash, bool isAnalogSignal);
 	bool createSignalStatesTable(Hash signalHash, SignalStatesTableType tableType);
-	QString getTableName(Hash signalHash, SignalStatesTableType tableType);
+	static QString getTableName(Hash signalHash, SignalStatesTableType tableType);
 
 	void disconnectFromDb();
 
@@ -79,6 +80,8 @@ private:
 	qint64 m_saveErrors = 0;
 
 	Times m_lastTime;
+
+	friend class ArchRequestThreadWorker;
 };
 
 

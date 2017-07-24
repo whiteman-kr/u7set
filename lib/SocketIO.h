@@ -386,11 +386,12 @@ enum class NetworkError
 enum class ArchiveError
 {
 	Success = 100,
-	ArchRequestInProgress,						// normal state, no error!
 
 	ArchRequestSignalsExceed,
 	UnknownArchRequestID,
 	PreviousArchRequestIsNotFinished,			// use ARCHS_GET_APP_SIGNALS_STATES_CANCEL to finish requests
+	DbConnectionError,
+	ExecQueryError,
 };
 
 

@@ -112,7 +112,7 @@ CREATE TYPE appsignalstate AS
    writeInShortTermArchiveOnly boolean);
 
 
-CREATE OR REPLACE FUNCTION saveAppSignalStatesArray(appSignalStates AppSignalState[])
+CREATE OR REPLACE FUNCTION public.saveappsignalstatesarray(appsignalstates appsignalstate[])
   RETURNS bigint AS
 $BODY$
 DECLARE
@@ -139,20 +139,18 @@ BEGIN
 
                         -- test if set smoothAperture flag only
 
-                        IF state.writeInShortTermArchiveOnly = TRUE THEN
-			        RETURN archid;
+                        IF state.writeInShortTermArchiveOnly = FALSE THEN
+
+                                -- write analog signal state in long term table
+
+                                longTermTable = concat('lt_', hashHex);
+
+                                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+				        'VALUES (%L,%L,%L,%L,%L,%L)',
+					longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
 			END IF;
 
-                        -- write analog signal state in long term table
-
-                        longTermTable = concat('lt_', hashHex);
-
-                        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
-			        'VALUES (%L,%L,%L,%L,%L,%L)',
-				longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
-
-                        RETURN archid;
-		ELSE
+                ELSE
 		        -- discrete signal states is writes in long term table only
 
                         longTermTable = concat('lt_', hashHex);
@@ -162,10 +160,11 @@ BEGIN
                         EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
 			        'VALUES (%L,%L,%L,%L,%L,%L)',
 				longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
-
-                        RETURN archid;
 		END IF;
 	END LOOP;
+
+        RETURN archid;
 END
 $BODY$
- LANGUAGE plpgsql;
+  LANGUAGE plpgsql VOLATILE
+  COST 100;

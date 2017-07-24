@@ -31,7 +31,8 @@ private:
 	ArchRequestThread& m_archRequestThread;
 	CircularLoggerShared m_logger;
 
-	int m_nextRequestNo = 1;
+	static QMutex m_requestNoMutex;
+	static quint32 m_nextRequestNo;
 
 	ArchRequestContextShared m_currentRequest;
 };

@@ -546,7 +546,9 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 		return;
 	}
 
-	if (m_saveStatesQueue.size() < 1000)
+	const int MAX_STATES_IN_QUERY = 2000;
+
+	if (m_saveStatesQueue.size() < MAX_STATES_IN_QUERY)
 	{
 		return;
 	}
@@ -561,10 +563,7 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 
 	QString	arrayStr;
 
-	arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
-
-//	QString format1("row(%1::bigint,%2::bigint,%3::bigint,%4::bigint,%5::double precision,%6::integer,%7,%8)::AppSignalState");
-//	QString format2(",row(%1::bigint,%2::bigint,%3::bigint,%4::bigint,%5::double precision,%6::integer,%7,%8)::AppSignalState");
+	//arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
 
 	QString format1("row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
 	QString format2(",row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
@@ -642,11 +641,12 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 
 		count++;
 	}
-	while(count < 1000);
+	while(count < MAX_STATES_IN_QUERY);
 
 	if (toWriteCount > 0)
 	{
 		saveAppSignalStatesArrayToArchive(arrayStr);
+		//DEBUG_LOG_MSG(m_logger, arrayStr);
 	}
 
 	if (toWriteCount != 0)
@@ -712,6 +712,7 @@ bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arr
 
 	if (result == false)
 	{
+		assert(false);
 		DEBUG_LOG_ERR(m_logger, query.lastError().text());
 		m_db.close();
 		return false;

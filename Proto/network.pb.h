@@ -5436,38 +5436,45 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   inline ::google::protobuf::uint32 requestid() const;
   inline void set_requestid(::google::protobuf::uint32 value);
 
-  // optional int32 totalStatesCount = 4 [default = 0];
+  // optional bool dataReady = 4 [default = false];
+  inline bool has_dataready() const;
+  inline void clear_dataready();
+  static const int kDataReadyFieldNumber = 4;
+  inline bool dataready() const;
+  inline void set_dataready(bool value);
+
+  // optional int32 totalStatesCount = 5 [default = 0];
   inline bool has_totalstatescount() const;
   inline void clear_totalstatescount();
-  static const int kTotalStatesCountFieldNumber = 4;
+  static const int kTotalStatesCountFieldNumber = 5;
   inline ::google::protobuf::int32 totalstatescount() const;
   inline void set_totalstatescount(::google::protobuf::int32 value);
 
-  // optional int32 sentStatesCount = 5 [default = 0];
+  // optional int32 sentStatesCount = 6 [default = 0];
   inline bool has_sentstatescount() const;
   inline void clear_sentstatescount();
-  static const int kSentStatesCountFieldNumber = 5;
+  static const int kSentStatesCountFieldNumber = 6;
   inline ::google::protobuf::int32 sentstatescount() const;
   inline void set_sentstatescount(::google::protobuf::int32 value);
 
-  // optional int32 statesInPartCount = 6 [default = 0];
+  // optional int32 statesInPartCount = 7 [default = 0];
   inline bool has_statesinpartcount() const;
   inline void clear_statesinpartcount();
-  static const int kStatesInPartCountFieldNumber = 6;
+  static const int kStatesInPartCountFieldNumber = 7;
   inline ::google::protobuf::int32 statesinpartcount() const;
   inline void set_statesinpartcount(::google::protobuf::int32 value);
 
-  // optional bool isLastPart = 7 [default = false];
+  // optional bool isLastPart = 8 [default = false];
   inline bool has_islastpart() const;
   inline void clear_islastpart();
-  static const int kIsLastPartFieldNumber = 7;
+  static const int kIsLastPartFieldNumber = 8;
   inline bool islastpart() const;
   inline void set_islastpart(bool value);
 
-  // repeated .Proto.AppSignalState appSignalStates = 8;
+  // repeated .Proto.AppSignalState appSignalStates = 9;
   inline int appsignalstates_size() const;
   inline void clear_appsignalstates();
-  static const int kAppSignalStatesFieldNumber = 8;
+  static const int kAppSignalStatesFieldNumber = 9;
   inline const ::Proto::AppSignalState& appsignalstates(int index) const;
   inline ::Proto::AppSignalState* mutable_appsignalstates(int index);
   inline ::Proto::AppSignalState* add_appsignalstates();
@@ -5484,6 +5491,8 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   inline void clear_has_archerror();
   inline void set_has_requestid();
   inline void clear_has_requestid();
+  inline void set_has_dataready();
+  inline void clear_has_dataready();
   inline void set_has_totalstatescount();
   inline void clear_has_totalstatescount();
   inline void set_has_sentstatescount();
@@ -5500,12 +5509,13 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   ::google::protobuf::uint32 requestid_;
   ::google::protobuf::int32 totalstatescount_;
   ::google::protobuf::int32 sentstatescount_;
-  ::google::protobuf::int32 statesinpartcount_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
+  bool dataready_;
   bool islastpart_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
+  ::google::protobuf::int32 statesinpartcount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -11105,15 +11115,37 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_requestid(::google::prot
   requestid_ = value;
 }
 
-// optional int32 totalStatesCount = 4 [default = 0];
-inline bool GetAppSignalStatesFromArchiveNextReply::has_totalstatescount() const {
+// optional bool dataReady = 4 [default = false];
+inline bool GetAppSignalStatesFromArchiveNextReply::has_dataready() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GetAppSignalStatesFromArchiveNextReply::set_has_totalstatescount() {
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_dataready() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void GetAppSignalStatesFromArchiveNextReply::clear_has_totalstatescount() {
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_dataready() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_dataready() {
+  dataready_ = false;
+  clear_has_dataready();
+}
+inline bool GetAppSignalStatesFromArchiveNextReply::dataready() const {
+  return dataready_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_dataready(bool value) {
+  set_has_dataready();
+  dataready_ = value;
+}
+
+// optional int32 totalStatesCount = 5 [default = 0];
+inline bool GetAppSignalStatesFromArchiveNextReply::has_totalstatescount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_totalstatescount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_totalstatescount() {
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_totalstatescount() {
   totalstatescount_ = 0;
@@ -11127,15 +11159,15 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_totalstatescount(::googl
   totalstatescount_ = value;
 }
 
-// optional int32 sentStatesCount = 5 [default = 0];
+// optional int32 sentStatesCount = 6 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_sentstatescount() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_sentstatescount() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_sentstatescount() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_sentstatescount() {
   sentstatescount_ = 0;
@@ -11149,15 +11181,15 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_sentstatescount(::google
   sentstatescount_ = value;
 }
 
-// optional int32 statesInPartCount = 6 [default = 0];
+// optional int32 statesInPartCount = 7 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_statesinpartcount() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_statesinpartcount() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_statesinpartcount() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_statesinpartcount() {
   statesinpartcount_ = 0;
@@ -11171,15 +11203,15 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_statesinpartcount(::goog
   statesinpartcount_ = value;
 }
 
-// optional bool isLastPart = 7 [default = false];
+// optional bool isLastPart = 8 [default = false];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_islastpart() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_islastpart() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_islastpart() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_islastpart() {
   islastpart_ = false;
@@ -11193,7 +11225,7 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_islastpart(bool value) {
   islastpart_ = value;
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 8;
+// repeated .Proto.AppSignalState appSignalStates = 9;
 inline int GetAppSignalStatesFromArchiveNextReply::appsignalstates_size() const {
   return appsignalstates_.size();
 }

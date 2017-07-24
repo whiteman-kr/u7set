@@ -1011,10 +1011,11 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextRequest));
   GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(46);
-  static const int GetAppSignalStatesFromArchiveNextReply_offsets_[8] = {
+  static const int GetAppSignalStatesFromArchiveNextReply_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, error_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, archerror_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, requestid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, dataready_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, totalstatescount_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, sentstatescount_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, statesinpartcount_),
@@ -1431,18 +1432,18 @@ void protobuf_AddDesc_network_2eproto() {
     "StartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
     "r\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(Ge"
     "tAppSignalStatesFromArchiveNextRequest\022\024"
-    "\n\trequestID\030\001 \001(\r:\0010\"\212\002\n&GetAppSignalSta"
+    "\n\trequestID\030\001 \001(\r:\0010\"\244\002\n&GetAppSignalSta"
     "tesFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\001"
     "0\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003"
-    " \001(\r:\0010\022\033\n\020totalStatesCount\030\004 \001(\005:\0010\022\032\n\017"
-    "sentStatesCount\030\005 \001(\005:\0010\022\034\n\021statesInPart"
-    "Count\030\006 \001(\005:\0010\022\031\n\nisLastPart\030\007 \001(\010:\005fals"
-    "e\022.\n\017appSignalStates\030\010 \003(\0132\025.Proto.AppSi"
-    "gnalState\"B\n*GetAppSignalStatesFromArchi"
-    "veCancelRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"T\n"
-    "(GetAppSignalStatesFromArchiveCancelRepl"
-    "y\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003"
-    "100", 6243);
+    " \001(\r:\0010\022\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020tot"
+    "alStatesCount\030\005 \001(\005:\0010\022\032\n\017sentStatesCoun"
+    "t\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010"
+    "\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017appSignal"
+    "States\030\t \003(\0132\025.Proto.AppSignalState\"B\n*G"
+    "etAppSignalStatesFromArchiveCancelReques"
+    "t\022\024\n\trequestID\030\001 \001(\r:\0010\"T\n(GetAppSignalS"
+    "tatesFromArchiveCancelReply\022\020\n\005error\030\001 \001"
+    "(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100", 6269);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -16832,6 +16833,7 @@ void GetAppSignalStatesFromArchiveNextRequest::Swap(GetAppSignalStatesFromArchiv
 const int GetAppSignalStatesFromArchiveNextReply::kErrorFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kArchErrorFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kRequestIDFieldNumber;
+const int GetAppSignalStatesFromArchiveNextReply::kDataReadyFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kTotalStatesCountFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kSentStatesCountFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kStatesInPartCountFieldNumber;
@@ -16858,6 +16860,7 @@ void GetAppSignalStatesFromArchiveNextReply::SharedCtor() {
   error_ = 0;
   archerror_ = 100;
   requestid_ = 0u;
+  dataready_ = false;
   totalstatescount_ = 0;
   sentstatescount_ = 0;
   statesinpartcount_ = 0;
@@ -16900,6 +16903,7 @@ void GetAppSignalStatesFromArchiveNextReply::Clear() {
     error_ = 0;
     archerror_ = 100;
     requestid_ = 0u;
+    dataready_ = false;
     totalstatescount_ = 0;
     sentstatescount_ = 0;
     statesinpartcount_ = 0;
@@ -16959,12 +16963,28 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_totalStatesCount;
+        if (input->ExpectTag(32)) goto parse_dataReady;
         break;
       }
 
-      // optional int32 totalStatesCount = 4 [default = 0];
+      // optional bool dataReady = 4 [default = false];
       case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_dataReady:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &dataready_)));
+          set_has_dataready();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_totalStatesCount;
+        break;
+      }
+
+      // optional int32 totalStatesCount = 5 [default = 0];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_totalStatesCount:
@@ -16975,12 +16995,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_sentStatesCount;
+        if (input->ExpectTag(48)) goto parse_sentStatesCount;
         break;
       }
 
-      // optional int32 sentStatesCount = 5 [default = 0];
-      case 5: {
+      // optional int32 sentStatesCount = 6 [default = 0];
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_sentStatesCount:
@@ -16991,12 +17011,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_statesInPartCount;
+        if (input->ExpectTag(56)) goto parse_statesInPartCount;
         break;
       }
 
-      // optional int32 statesInPartCount = 6 [default = 0];
-      case 6: {
+      // optional int32 statesInPartCount = 7 [default = 0];
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_statesInPartCount:
@@ -17007,12 +17027,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_isLastPart;
+        if (input->ExpectTag(64)) goto parse_isLastPart;
         break;
       }
 
-      // optional bool isLastPart = 7 [default = false];
-      case 7: {
+      // optional bool isLastPart = 8 [default = false];
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_isLastPart:
@@ -17023,12 +17043,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(66)) goto parse_appSignalStates;
+        if (input->ExpectTag(74)) goto parse_appSignalStates;
         break;
       }
 
-      // repeated .Proto.AppSignalState appSignalStates = 8;
-      case 8: {
+      // repeated .Proto.AppSignalState appSignalStates = 9;
+      case 9: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_appSignalStates:
@@ -17037,7 +17057,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(66)) goto parse_appSignalStates;
+        if (input->ExpectTag(74)) goto parse_appSignalStates;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -17075,30 +17095,35 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->requestid(), output);
   }
 
-  // optional int32 totalStatesCount = 4 [default = 0];
+  // optional bool dataReady = 4 [default = false];
+  if (has_dataready()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->dataready(), output);
+  }
+
+  // optional int32 totalStatesCount = 5 [default = 0];
   if (has_totalstatescount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->totalstatescount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->totalstatescount(), output);
   }
 
-  // optional int32 sentStatesCount = 5 [default = 0];
+  // optional int32 sentStatesCount = 6 [default = 0];
   if (has_sentstatescount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->sentstatescount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->sentstatescount(), output);
   }
 
-  // optional int32 statesInPartCount = 6 [default = 0];
+  // optional int32 statesInPartCount = 7 [default = 0];
   if (has_statesinpartcount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->statesinpartcount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->statesinpartcount(), output);
   }
 
-  // optional bool isLastPart = 7 [default = false];
+  // optional bool isLastPart = 8 [default = false];
   if (has_islastpart()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->islastpart(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->islastpart(), output);
   }
 
-  // repeated .Proto.AppSignalState appSignalStates = 8;
+  // repeated .Proto.AppSignalState appSignalStates = 9;
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      8, this->appsignalstates(i), output);
+      9, this->appsignalstates(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -17124,31 +17149,36 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->requestid(), target);
   }
 
-  // optional int32 totalStatesCount = 4 [default = 0];
+  // optional bool dataReady = 4 [default = false];
+  if (has_dataready()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->dataready(), target);
+  }
+
+  // optional int32 totalStatesCount = 5 [default = 0];
   if (has_totalstatescount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->totalstatescount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->totalstatescount(), target);
   }
 
-  // optional int32 sentStatesCount = 5 [default = 0];
+  // optional int32 sentStatesCount = 6 [default = 0];
   if (has_sentstatescount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->sentstatescount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->sentstatescount(), target);
   }
 
-  // optional int32 statesInPartCount = 6 [default = 0];
+  // optional int32 statesInPartCount = 7 [default = 0];
   if (has_statesinpartcount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->statesinpartcount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->statesinpartcount(), target);
   }
 
-  // optional bool isLastPart = 7 [default = false];
+  // optional bool isLastPart = 8 [default = false];
   if (has_islastpart()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->islastpart(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->islastpart(), target);
   }
 
-  // repeated .Proto.AppSignalState appSignalStates = 8;
+  // repeated .Proto.AppSignalState appSignalStates = 9;
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        8, this->appsignalstates(i), target);
+        9, this->appsignalstates(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -17183,34 +17213,39 @@ int GetAppSignalStatesFromArchiveNextReply::ByteSize() const {
           this->requestid());
     }
 
-    // optional int32 totalStatesCount = 4 [default = 0];
+    // optional bool dataReady = 4 [default = false];
+    if (has_dataready()) {
+      total_size += 1 + 1;
+    }
+
+    // optional int32 totalStatesCount = 5 [default = 0];
     if (has_totalstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->totalstatescount());
     }
 
-    // optional int32 sentStatesCount = 5 [default = 0];
+    // optional int32 sentStatesCount = 6 [default = 0];
     if (has_sentstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->sentstatescount());
     }
 
-    // optional int32 statesInPartCount = 6 [default = 0];
+    // optional int32 statesInPartCount = 7 [default = 0];
     if (has_statesinpartcount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->statesinpartcount());
     }
 
-    // optional bool isLastPart = 7 [default = false];
+    // optional bool isLastPart = 8 [default = false];
     if (has_islastpart()) {
       total_size += 1 + 1;
     }
 
   }
-  // repeated .Proto.AppSignalState appSignalStates = 8;
+  // repeated .Proto.AppSignalState appSignalStates = 9;
   total_size += 1 * this->appsignalstates_size();
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     total_size +=
@@ -17254,6 +17289,9 @@ void GetAppSignalStatesFromArchiveNextReply::MergeFrom(const GetAppSignalStatesF
     if (from.has_requestid()) {
       set_requestid(from.requestid());
     }
+    if (from.has_dataready()) {
+      set_dataready(from.dataready());
+    }
     if (from.has_totalstatescount()) {
       set_totalstatescount(from.totalstatescount());
     }
@@ -17292,6 +17330,7 @@ void GetAppSignalStatesFromArchiveNextReply::Swap(GetAppSignalStatesFromArchiveN
     std::swap(error_, other->error_);
     std::swap(archerror_, other->archerror_);
     std::swap(requestid_, other->requestid_);
+    std::swap(dataready_, other->dataready_);
     std::swap(totalstatescount_, other->totalstatescount_);
     std::swap(sentstatescount_, other->sentstatescount_);
     std::swap(statesinpartcount_, other->statesinpartcount_);

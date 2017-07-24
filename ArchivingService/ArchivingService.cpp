@@ -169,7 +169,7 @@ void ArchivingServiceWorker::runArchRequestThread()
 {
 	assert(m_archRequestThread == nullptr);
 
-	m_archRequestThread = new ArchRequestThread(m_projectID, m_logger);
+	m_archRequestThread = new ArchRequestThread(m_projectID, m_archSignals, m_logger);
 
 	m_archRequestThread->start();
 }
