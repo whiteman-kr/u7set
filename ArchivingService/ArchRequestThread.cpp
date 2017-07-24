@@ -81,7 +81,7 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 
 	m_db.setHostName("127.0.0.1");
 	m_db.setPort(5432);
-	m_db.setDatabaseName(projectArchiveDbName());
+	m_db.setDatabaseName(m_projectID);
 	m_db.setUserName("u7arch");
 	m_db.setPassword("arch876436");
 
@@ -90,7 +90,7 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
-		return;
+		return false;
 	}
 
 	return result;

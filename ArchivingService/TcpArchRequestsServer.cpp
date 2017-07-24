@@ -59,7 +59,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (m_currentRequest != nullptr)
 	{
-		reply.set_error(static_cast<int>(NetworkError::PreviousArchRequestIsNotFinished));
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::PreviousArchRequestIsNotFinished));
 		sendReply(reply);
 		return;
 	}
@@ -74,7 +75,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	if (requestSignalsCount > ARCH_REQUEST_MAX_SIGNALS)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchRequestSignalsExceed));
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::ArchRequestSignalsExceed));
 		sendReply(reply);
 		return;
 	}
@@ -125,14 +127,16 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	if (m_currentRequest == nullptr || m_currentRequest->requestID() != request.requestid())
 	{
-		reply.set_error(static_cast<int>(NetworkError::UnknownArchRequestID));
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
 		sendReply(reply);
 		return;
 	}
 
 	if (m_currentRequest->isDataReady() == false)
 	{
-		reply.set_error(static_cast<int>(NetworkError::ArchRequestInProgress));
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::ArchRequestInProgress));
 		sendReply(reply);
 		return;
 	}
@@ -168,7 +172,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 
 	if (m_currentRequest == nullptr || m_currentRequest->requestID() != request.requestid())
 	{
-		reply.set_error(static_cast<int>(NetworkError::UnknownArchRequestID));
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
 		sendReply(reply);
 		return;
 	}
