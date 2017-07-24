@@ -944,8 +944,9 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveRequest));
   SaveAppSignalsStatesToArchiveReply_descriptor_ = file->message_type(42);
-  static const int SaveAppSignalsStatesToArchiveReply_offsets_[1] = {
+  static const int SaveAppSignalsStatesToArchiveReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SaveAppSignalsStatesToArchiveReply, archerror_),
   };
   SaveAppSignalsStatesToArchiveReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -978,8 +979,9 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveStartRequest));
   GetAppSignalStatesFromArchiveStartReply_descriptor_ = file->message_type(44);
-  static const int GetAppSignalStatesFromArchiveStartReply_offsets_[2] = {
+  static const int GetAppSignalStatesFromArchiveStartReply_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, archerror_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartReply, requestid_),
   };
   GetAppSignalStatesFromArchiveStartReply_reflection_ =
@@ -1009,8 +1011,9 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveNextRequest));
   GetAppSignalStatesFromArchiveNextReply_descriptor_ = file->message_type(46);
-  static const int GetAppSignalStatesFromArchiveNextReply_offsets_[7] = {
+  static const int GetAppSignalStatesFromArchiveNextReply_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, archerror_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, requestid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, totalstatescount_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveNextReply, sentstatescount_),
@@ -1045,8 +1048,9 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(GetAppSignalStatesFromArchiveCancelRequest));
   GetAppSignalStatesFromArchiveCancelReply_descriptor_ = file->message_type(48);
-  static const int GetAppSignalStatesFromArchiveCancelReply_offsets_[1] = {
+  static const int GetAppSignalStatesFromArchiveCancelReply_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, error_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveCancelReply, archerror_),
   };
   GetAppSignalStatesFromArchiveCancelReply_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1417,25 +1421,28 @@ void protobuf_AddDesc_network_2eproto() {
     "error\030\001 \001(\005:\0010\"q\n$SaveAppSignalsStatesTo"
     "ArchiveRequest\022\031\n\021clientEquipmentID\030\001 \001("
     "\t\022.\n\017appSignalStates\030\002 \003(\0132\025.Proto.AppSi"
-    "gnalState\"6\n\"SaveAppSignalsStatesToArchi"
-    "veReply\022\020\n\005error\030\001 \001(\005:\0010\"\233\001\n)GetAppSign"
-    "alStatesFromArchiveStartRequest\022\031\n\021clien"
-    "tEquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022"
-    "\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\001"
-    "0\022\024\n\014signalHashes\030\005 \003(\004\"Q\n\'GetAppSignalS"
-    "tatesFromArchiveStartReply\022\020\n\005error\030\001 \001("
-    "\005:\0010\022\024\n\trequestID\030\002 \001(\r:\0010\"@\n(GetAppSign"
-    "alStatesFromArchiveNextRequest\022\024\n\treques"
-    "tID\030\001 \001(\r:\0010\"\362\001\n&GetAppSignalStatesFromA"
-    "rchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010\022\024\n\treq"
-    "uestID\030\002 \001(\r:\0010\022\033\n\020totalStatesCount\030\003 \001("
-    "\005:\0010\022\032\n\017sentStatesCount\030\004 \001(\005:\0010\022\034\n\021stat"
-    "esInPartCount\030\005 \001(\005:\0010\022\031\n\nisLastPart\030\006 \001"
-    "(\010:\005false\022.\n\017appSignalStates\030\007 \003(\0132\025.Pro"
-    "to.AppSignalState\"B\n*GetAppSignalStatesF"
-    "romArchiveCancelRequest\022\024\n\trequestID\030\001 \001"
-    "(\r:\0010\"<\n(GetAppSignalStatesFromArchiveCa"
-    "ncelReply\022\020\n\005error\030\001 \001(\005:\0010", 6147);
+    "gnalState\"N\n\"SaveAppSignalsStatesToArchi"
+    "veReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002"
+    " \001(\005:\003100\"\233\001\n)GetAppSignalStatesFromArch"
+    "iveStartRequest\022\031\n\021clientEquipmentID\030\001 \001"
+    "(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001"
+    "(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010\022\024\n\014signalHashe"
+    "s\030\005 \003(\004\"i\n\'GetAppSignalStatesFromArchive"
+    "StartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchErro"
+    "r\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(Ge"
+    "tAppSignalStatesFromArchiveNextRequest\022\024"
+    "\n\trequestID\030\001 \001(\r:\0010\"\212\002\n&GetAppSignalSta"
+    "tesFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\001"
+    "0\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003"
+    " \001(\r:\0010\022\033\n\020totalStatesCount\030\004 \001(\005:\0010\022\032\n\017"
+    "sentStatesCount\030\005 \001(\005:\0010\022\034\n\021statesInPart"
+    "Count\030\006 \001(\005:\0010\022\031\n\nisLastPart\030\007 \001(\010:\005fals"
+    "e\022.\n\017appSignalStates\030\010 \003(\0132\025.Proto.AppSi"
+    "gnalState\"B\n*GetAppSignalStatesFromArchi"
+    "veCancelRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"T\n"
+    "(GetAppSignalStatesFromArchiveCancelRepl"
+    "y\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003"
+    "100", 6243);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -15690,6 +15697,7 @@ void SaveAppSignalsStatesToArchiveRequest::Swap(SaveAppSignalsStatesToArchiveReq
 
 #ifndef _MSC_VER
 const int SaveAppSignalsStatesToArchiveReply::kErrorFieldNumber;
+const int SaveAppSignalsStatesToArchiveReply::kArchErrorFieldNumber;
 #endif  // !_MSC_VER
 
 SaveAppSignalsStatesToArchiveReply::SaveAppSignalsStatesToArchiveReply()
@@ -15709,6 +15717,7 @@ SaveAppSignalsStatesToArchiveReply::SaveAppSignalsStatesToArchiveReply(const Sav
 void SaveAppSignalsStatesToArchiveReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
+  archerror_ = 100;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -15745,6 +15754,7 @@ SaveAppSignalsStatesToArchiveReply* SaveAppSignalsStatesToArchiveReply::New() co
 void SaveAppSignalsStatesToArchiveReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
+    archerror_ = 100;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -15764,6 +15774,22 @@ bool SaveAppSignalsStatesToArchiveReply::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &error_)));
           set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_archError;
+        break;
+      }
+
+      // optional int32 archError = 2 [default = 100];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_archError:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &archerror_)));
+          set_has_archerror();
         } else {
           goto handle_uninterpreted;
         }
@@ -15794,6 +15820,11 @@ void SaveAppSignalsStatesToArchiveReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->archerror(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -15805,6 +15836,11 @@ void SaveAppSignalsStatesToArchiveReply::SerializeWithCachedSizes(
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->archerror(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -15823,6 +15859,13 @@ int SaveAppSignalsStatesToArchiveReply::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->error());
+    }
+
+    // optional int32 archError = 2 [default = 100];
+    if (has_archerror()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->archerror());
     }
 
   }
@@ -15855,6 +15898,9 @@ void SaveAppSignalsStatesToArchiveReply::MergeFrom(const SaveAppSignalsStatesToA
     if (from.has_error()) {
       set_error(from.error());
     }
+    if (from.has_archerror()) {
+      set_archerror(from.archerror());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -15879,6 +15925,7 @@ bool SaveAppSignalsStatesToArchiveReply::IsInitialized() const {
 void SaveAppSignalsStatesToArchiveReply::Swap(SaveAppSignalsStatesToArchiveReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
+    std::swap(archerror_, other->archerror_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -16287,6 +16334,7 @@ void GetAppSignalStatesFromArchiveStartRequest::Swap(GetAppSignalStatesFromArchi
 
 #ifndef _MSC_VER
 const int GetAppSignalStatesFromArchiveStartReply::kErrorFieldNumber;
+const int GetAppSignalStatesFromArchiveStartReply::kArchErrorFieldNumber;
 const int GetAppSignalStatesFromArchiveStartReply::kRequestIDFieldNumber;
 #endif  // !_MSC_VER
 
@@ -16307,6 +16355,7 @@ GetAppSignalStatesFromArchiveStartReply::GetAppSignalStatesFromArchiveStartReply
 void GetAppSignalStatesFromArchiveStartReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
+  archerror_ = 100;
   requestid_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -16344,6 +16393,7 @@ GetAppSignalStatesFromArchiveStartReply* GetAppSignalStatesFromArchiveStartReply
 void GetAppSignalStatesFromArchiveStartReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
+    archerror_ = 100;
     requestid_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -16367,12 +16417,28 @@ bool GetAppSignalStatesFromArchiveStartReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_requestID;
+        if (input->ExpectTag(16)) goto parse_archError;
         break;
       }
 
-      // optional uint32 requestID = 2 [default = 0];
+      // optional int32 archError = 2 [default = 100];
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_archError:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &archerror_)));
+          set_has_archerror();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_requestID;
+        break;
+      }
+
+      // optional uint32 requestID = 3 [default = 0];
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_requestID:
@@ -16410,9 +16476,14 @@ void GetAppSignalStatesFromArchiveStartReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // optional uint32 requestID = 2 [default = 0];
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->archerror(), output);
+  }
+
+  // optional uint32 requestID = 3 [default = 0];
   if (has_requestid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->requestid(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->requestid(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -16428,9 +16499,14 @@ void GetAppSignalStatesFromArchiveStartReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // optional uint32 requestID = 2 [default = 0];
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->archerror(), target);
+  }
+
+  // optional uint32 requestID = 3 [default = 0];
   if (has_requestid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->requestid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->requestid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -16451,7 +16527,14 @@ int GetAppSignalStatesFromArchiveStartReply::ByteSize() const {
           this->error());
     }
 
-    // optional uint32 requestID = 2 [default = 0];
+    // optional int32 archError = 2 [default = 100];
+    if (has_archerror()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->archerror());
+    }
+
+    // optional uint32 requestID = 3 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
@@ -16488,6 +16571,9 @@ void GetAppSignalStatesFromArchiveStartReply::MergeFrom(const GetAppSignalStates
     if (from.has_error()) {
       set_error(from.error());
     }
+    if (from.has_archerror()) {
+      set_archerror(from.archerror());
+    }
     if (from.has_requestid()) {
       set_requestid(from.requestid());
     }
@@ -16515,6 +16601,7 @@ bool GetAppSignalStatesFromArchiveStartReply::IsInitialized() const {
 void GetAppSignalStatesFromArchiveStartReply::Swap(GetAppSignalStatesFromArchiveStartReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
+    std::swap(archerror_, other->archerror_);
     std::swap(requestid_, other->requestid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
@@ -16743,6 +16830,7 @@ void GetAppSignalStatesFromArchiveNextRequest::Swap(GetAppSignalStatesFromArchiv
 
 #ifndef _MSC_VER
 const int GetAppSignalStatesFromArchiveNextReply::kErrorFieldNumber;
+const int GetAppSignalStatesFromArchiveNextReply::kArchErrorFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kRequestIDFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kTotalStatesCountFieldNumber;
 const int GetAppSignalStatesFromArchiveNextReply::kSentStatesCountFieldNumber;
@@ -16768,6 +16856,7 @@ GetAppSignalStatesFromArchiveNextReply::GetAppSignalStatesFromArchiveNextReply(c
 void GetAppSignalStatesFromArchiveNextReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
+  archerror_ = 100;
   requestid_ = 0u;
   totalstatescount_ = 0;
   sentstatescount_ = 0;
@@ -16809,6 +16898,7 @@ GetAppSignalStatesFromArchiveNextReply* GetAppSignalStatesFromArchiveNextReply::
 void GetAppSignalStatesFromArchiveNextReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
+    archerror_ = 100;
     requestid_ = 0u;
     totalstatescount_ = 0;
     sentstatescount_ = 0;
@@ -16837,12 +16927,28 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_requestID;
+        if (input->ExpectTag(16)) goto parse_archError;
         break;
       }
 
-      // optional uint32 requestID = 2 [default = 0];
+      // optional int32 archError = 2 [default = 100];
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_archError:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &archerror_)));
+          set_has_archerror();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_requestID;
+        break;
+      }
+
+      // optional uint32 requestID = 3 [default = 0];
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_requestID:
@@ -16853,12 +16959,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(24)) goto parse_totalStatesCount;
+        if (input->ExpectTag(32)) goto parse_totalStatesCount;
         break;
       }
 
-      // optional int32 totalStatesCount = 3 [default = 0];
-      case 3: {
+      // optional int32 totalStatesCount = 4 [default = 0];
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_totalStatesCount:
@@ -16869,12 +16975,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_sentStatesCount;
+        if (input->ExpectTag(40)) goto parse_sentStatesCount;
         break;
       }
 
-      // optional int32 sentStatesCount = 4 [default = 0];
-      case 4: {
+      // optional int32 sentStatesCount = 5 [default = 0];
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_sentStatesCount:
@@ -16885,12 +16991,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(40)) goto parse_statesInPartCount;
+        if (input->ExpectTag(48)) goto parse_statesInPartCount;
         break;
       }
 
-      // optional int32 statesInPartCount = 5 [default = 0];
-      case 5: {
+      // optional int32 statesInPartCount = 6 [default = 0];
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_statesInPartCount:
@@ -16901,12 +17007,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_isLastPart;
+        if (input->ExpectTag(56)) goto parse_isLastPart;
         break;
       }
 
-      // optional bool isLastPart = 6 [default = false];
-      case 6: {
+      // optional bool isLastPart = 7 [default = false];
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_isLastPart:
@@ -16917,12 +17023,12 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(58)) goto parse_appSignalStates;
+        if (input->ExpectTag(66)) goto parse_appSignalStates;
         break;
       }
 
-      // repeated .Proto.AppSignalState appSignalStates = 7;
-      case 7: {
+      // repeated .Proto.AppSignalState appSignalStates = 8;
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_appSignalStates:
@@ -16931,7 +17037,7 @@ bool GetAppSignalStatesFromArchiveNextReply::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(58)) goto parse_appSignalStates;
+        if (input->ExpectTag(66)) goto parse_appSignalStates;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -16959,35 +17065,40 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
-  // optional uint32 requestID = 2 [default = 0];
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->archerror(), output);
+  }
+
+  // optional uint32 requestID = 3 [default = 0];
   if (has_requestid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->requestid(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->requestid(), output);
   }
 
-  // optional int32 totalStatesCount = 3 [default = 0];
+  // optional int32 totalStatesCount = 4 [default = 0];
   if (has_totalstatescount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->totalstatescount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->totalstatescount(), output);
   }
 
-  // optional int32 sentStatesCount = 4 [default = 0];
+  // optional int32 sentStatesCount = 5 [default = 0];
   if (has_sentstatescount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->sentstatescount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->sentstatescount(), output);
   }
 
-  // optional int32 statesInPartCount = 5 [default = 0];
+  // optional int32 statesInPartCount = 6 [default = 0];
   if (has_statesinpartcount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->statesinpartcount(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->statesinpartcount(), output);
   }
 
-  // optional bool isLastPart = 6 [default = false];
+  // optional bool isLastPart = 7 [default = false];
   if (has_islastpart()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->islastpart(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->islastpart(), output);
   }
 
-  // repeated .Proto.AppSignalState appSignalStates = 7;
+  // repeated .Proto.AppSignalState appSignalStates = 8;
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      7, this->appsignalstates(i), output);
+      8, this->appsignalstates(i), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -17003,36 +17114,41 @@ void GetAppSignalStatesFromArchiveNextReply::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
   }
 
-  // optional uint32 requestID = 2 [default = 0];
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->archerror(), target);
+  }
+
+  // optional uint32 requestID = 3 [default = 0];
   if (has_requestid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->requestid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->requestid(), target);
   }
 
-  // optional int32 totalStatesCount = 3 [default = 0];
+  // optional int32 totalStatesCount = 4 [default = 0];
   if (has_totalstatescount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->totalstatescount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->totalstatescount(), target);
   }
 
-  // optional int32 sentStatesCount = 4 [default = 0];
+  // optional int32 sentStatesCount = 5 [default = 0];
   if (has_sentstatescount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->sentstatescount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->sentstatescount(), target);
   }
 
-  // optional int32 statesInPartCount = 5 [default = 0];
+  // optional int32 statesInPartCount = 6 [default = 0];
   if (has_statesinpartcount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->statesinpartcount(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->statesinpartcount(), target);
   }
 
-  // optional bool isLastPart = 6 [default = false];
+  // optional bool isLastPart = 7 [default = false];
   if (has_islastpart()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->islastpart(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->islastpart(), target);
   }
 
-  // repeated .Proto.AppSignalState appSignalStates = 7;
+  // repeated .Proto.AppSignalState appSignalStates = 8;
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        7, this->appsignalstates(i), target);
+        8, this->appsignalstates(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -17053,41 +17169,48 @@ int GetAppSignalStatesFromArchiveNextReply::ByteSize() const {
           this->error());
     }
 
-    // optional uint32 requestID = 2 [default = 0];
+    // optional int32 archError = 2 [default = 100];
+    if (has_archerror()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->archerror());
+    }
+
+    // optional uint32 requestID = 3 [default = 0];
     if (has_requestid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->requestid());
     }
 
-    // optional int32 totalStatesCount = 3 [default = 0];
+    // optional int32 totalStatesCount = 4 [default = 0];
     if (has_totalstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->totalstatescount());
     }
 
-    // optional int32 sentStatesCount = 4 [default = 0];
+    // optional int32 sentStatesCount = 5 [default = 0];
     if (has_sentstatescount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->sentstatescount());
     }
 
-    // optional int32 statesInPartCount = 5 [default = 0];
+    // optional int32 statesInPartCount = 6 [default = 0];
     if (has_statesinpartcount()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->statesinpartcount());
     }
 
-    // optional bool isLastPart = 6 [default = false];
+    // optional bool isLastPart = 7 [default = false];
     if (has_islastpart()) {
       total_size += 1 + 1;
     }
 
   }
-  // repeated .Proto.AppSignalState appSignalStates = 7;
+  // repeated .Proto.AppSignalState appSignalStates = 8;
   total_size += 1 * this->appsignalstates_size();
   for (int i = 0; i < this->appsignalstates_size(); i++) {
     total_size +=
@@ -17124,6 +17247,9 @@ void GetAppSignalStatesFromArchiveNextReply::MergeFrom(const GetAppSignalStatesF
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_error()) {
       set_error(from.error());
+    }
+    if (from.has_archerror()) {
+      set_archerror(from.archerror());
     }
     if (from.has_requestid()) {
       set_requestid(from.requestid());
@@ -17164,6 +17290,7 @@ bool GetAppSignalStatesFromArchiveNextReply::IsInitialized() const {
 void GetAppSignalStatesFromArchiveNextReply::Swap(GetAppSignalStatesFromArchiveNextReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
+    std::swap(archerror_, other->archerror_);
     std::swap(requestid_, other->requestid_);
     std::swap(totalstatescount_, other->totalstatescount_);
     std::swap(sentstatescount_, other->sentstatescount_);
@@ -17397,6 +17524,7 @@ void GetAppSignalStatesFromArchiveCancelRequest::Swap(GetAppSignalStatesFromArch
 
 #ifndef _MSC_VER
 const int GetAppSignalStatesFromArchiveCancelReply::kErrorFieldNumber;
+const int GetAppSignalStatesFromArchiveCancelReply::kArchErrorFieldNumber;
 #endif  // !_MSC_VER
 
 GetAppSignalStatesFromArchiveCancelReply::GetAppSignalStatesFromArchiveCancelReply()
@@ -17416,6 +17544,7 @@ GetAppSignalStatesFromArchiveCancelReply::GetAppSignalStatesFromArchiveCancelRep
 void GetAppSignalStatesFromArchiveCancelReply::SharedCtor() {
   _cached_size_ = 0;
   error_ = 0;
+  archerror_ = 100;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -17452,6 +17581,7 @@ GetAppSignalStatesFromArchiveCancelReply* GetAppSignalStatesFromArchiveCancelRep
 void GetAppSignalStatesFromArchiveCancelReply::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     error_ = 0;
+    archerror_ = 100;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -17471,6 +17601,22 @@ bool GetAppSignalStatesFromArchiveCancelReply::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &error_)));
           set_has_error();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_archError;
+        break;
+      }
+
+      // optional int32 archError = 2 [default = 100];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_archError:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &archerror_)));
+          set_has_archerror();
         } else {
           goto handle_uninterpreted;
         }
@@ -17501,6 +17647,11 @@ void GetAppSignalStatesFromArchiveCancelReply::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->error(), output);
   }
 
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->archerror(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -17512,6 +17663,11 @@ void GetAppSignalStatesFromArchiveCancelReply::SerializeWithCachedSizes(
   // optional int32 error = 1 [default = 0];
   if (has_error()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->error(), target);
+  }
+
+  // optional int32 archError = 2 [default = 100];
+  if (has_archerror()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->archerror(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -17530,6 +17686,13 @@ int GetAppSignalStatesFromArchiveCancelReply::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->error());
+    }
+
+    // optional int32 archError = 2 [default = 100];
+    if (has_archerror()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->archerror());
     }
 
   }
@@ -17562,6 +17725,9 @@ void GetAppSignalStatesFromArchiveCancelReply::MergeFrom(const GetAppSignalState
     if (from.has_error()) {
       set_error(from.error());
     }
+    if (from.has_archerror()) {
+      set_archerror(from.archerror());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -17586,6 +17752,7 @@ bool GetAppSignalStatesFromArchiveCancelReply::IsInitialized() const {
 void GetAppSignalStatesFromArchiveCancelReply::Swap(GetAppSignalStatesFromArchiveCancelReply* other) {
   if (other != this) {
     std::swap(error_, other->error_);
+    std::swap(archerror_, other->archerror_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

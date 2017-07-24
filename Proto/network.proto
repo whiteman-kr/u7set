@@ -405,6 +405,8 @@ message SaveAppSignalsStatesToArchiveRequest
 message SaveAppSignalsStatesToArchiveReply
 {
     optional int32 error = 1 [default = 0];
+
+    optional int32 archError = 2 [default = 100];
 }
 
 //
@@ -427,7 +429,9 @@ message GetAppSignalStatesFromArchiveStartReply
 {
     optional int32 error = 1 [default = 0];
 
-    optional uint32 requestID = 2 [default = 0];
+    optional int32 archError = 2 [default = 100];
+
+    optional uint32 requestID = 3 [default = 0];
 }
 
 //
@@ -441,17 +445,19 @@ message GetAppSignalStatesFromArchiveNextReply
 {
     optional int32 error = 1 [default = 0];
 
-    optional uint32 requestID = 2 [default = 0];
+    optional int32 archError = 2 [default = 100];
 
-    optional int32 totalStatesCount = 3 [default = 0];
+    optional uint32 requestID = 3 [default = 0];
 
-    optional int32 sentStatesCount = 4 [default = 0];
+    optional int32 totalStatesCount = 4 [default = 0];
 
-    optional int32 statesInPartCount = 5 [default = 0];
+    optional int32 sentStatesCount = 5 [default = 0];
 
-    optional bool isLastPart = 6 [default = false];
+    optional int32 statesInPartCount = 6 [default = 0];
 
-    repeated Proto.AppSignalState appSignalStates = 7;
+    optional bool isLastPart = 7 [default = false];
+
+    repeated Proto.AppSignalState appSignalStates = 8;
 }
 
 //
@@ -464,6 +470,8 @@ message GetAppSignalStatesFromArchiveCancelRequest
 message GetAppSignalStatesFromArchiveCancelReply
 {
     optional int32 error = 1 [default = 0];
+
+    optional int32 archError = 2 [default = 100];
 }
 
 

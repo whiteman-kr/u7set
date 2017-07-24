@@ -74,11 +74,15 @@ private:
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
 
+	bool tryConnectToDatabase();
+
 	void onNewRequest(ArchRequestContextShared context);
 
 private:
 	QString m_projectID;
 	CircularLoggerShared m_logger;
+
+	QSqlDatabase m_db;				// project archive database
 
 	QMutex m_requestContextsMutex;
 
