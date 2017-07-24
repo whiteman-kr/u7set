@@ -216,6 +216,12 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 
 DialogConnections::~DialogConnections()
 {
+	if (m_connections != nullptr)
+	{
+		delete m_connections;
+		m_connections = nullptr;
+	}
+
 	theSettings.m_connectionEditorWindowPos = pos();
 	theSettings.m_connectionEditorWindowGeometry = saveGeometry();
 	theSettings.m_connectionEditorSplitterState = m_splitter->saveState();

@@ -125,23 +125,21 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 
 	// Set up lexer
 	//
-	QsciLexer* lexer = nullptr;
-
 	if (codeType == CodeType::Cpp)
 	{
-		lexer = new QsciLexerCPP();
+		m_lexer = new QsciLexerCPP();
 	}
 
 	if (codeType == CodeType::Xml)
 	{
-		lexer = new QsciLexerXML();
+		m_lexer = new QsciLexerXML();
 	}
 
-	if (lexer != nullptr)
+	if (m_lexer != nullptr)
 	{
-		lexer->setDefaultFont(f);
+		m_lexer->setDefaultFont(f);
 		m_textEdit->setFont(f);
-		m_textEdit->setLexer(lexer);
+		m_textEdit->setLexer(m_lexer);
 	}
 
 	// Set up margins
@@ -161,6 +159,15 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	m_textEdit->setAutoIndent(true);
 
 	connect(m_textEdit, &QsciScintilla::textChanged, this, &PropertyTextEditor::textChanged);
+}
+
+CodeEditor::~CodeEditor()
+{
+	if (m_lexer != nullptr)
+	{
+		delete m_lexer;
+		m_lexer = nullptr;
+	}
 }
 
 bool CodeEditor::eventFilter(QObject* obj, QEvent* event)

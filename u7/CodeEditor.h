@@ -49,6 +49,7 @@ class CodeEditor : public ExtWidgets::PropertyTextEditor
 	Q_OBJECT
 public:
 	CodeEditor(CodeType codeType, QWidget* parent);
+	~CodeEditor();
 
 	virtual void setText(const QString& text);
 
@@ -67,6 +68,7 @@ protected:
 
 private:
 	QsciScintilla* m_textEdit = nullptr;
+	QsciLexer* m_lexer = nullptr;
 
 	QWidget* m_parent = nullptr;
 
