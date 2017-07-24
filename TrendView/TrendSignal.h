@@ -24,14 +24,21 @@ namespace TrendLib
 
 	struct OneHourData
 	{
-		bool requested = false;
+		enum class State
+		{
+			NoData,
+			Requested,
+			Received
+		};
+
+		State state = State::NoData;
 		std::vector<TrendStateRecord> data;
 	};
 
-	struct OneDayData
+	struct TrendArchive
 	{
-		QDate date;
-		std::array<OneHourData, 24> hours;
+		QString appSignalId;
+		std::map<TimeStamp, OneHourData> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
 	};
 
 	class TrendSignalParam
@@ -87,29 +94,32 @@ namespace TrendLib
 		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
-
-		std::list<OneDayData> m_days;			// Archive data
 	};
 
-	class TrendSignalSet
+	class TrendSignalSet : public QObject
 	{
+		Q_OBJECT
 	public:
 		TrendSignalSet();
 
+	public:
 		bool addSignal(const TrendSignalParam& signal);
 		void removeSignal(QString appSignalId);
 
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;
 
-		TrendSignalParam signalParam() const;
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<OneHourData>* outData);
+
+	signals:
+		void requestData(QString appSignalId, TimeStamp hourToRequest);
 
 	private:
 		mutable QMutex m_paramMutex;
 		std::list<TrendSignalParam> m_signalParams;
 
-//		mutable QMutex m_stateMutex;
-//		std::map<QString, TrendSignalSates> m_signalStates;
+		mutable QMutex m_archiveMutex;
+		std::map<QString, TrendArchive> m_archive;
 	};
 
 }

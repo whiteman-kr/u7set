@@ -6,6 +6,7 @@
 #include "../lib/DbController.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/PropertyObject.h"
+#include "../lib/TimeStamp.h"
 #include "Builder/OptoModule.h"
 #include "version.h"
 #include "LogicModule.h"
@@ -122,9 +123,12 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<std::vector<int>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<E::SignalType>();
+	qRegisterMetaType<TimeStamp>();
+	qRegisterMetaType<TimeSpan>();
 
     qmlRegisterType<QJsVariantList>();
     qmlRegisterType<Hardware::OptoPort>();
+
 
     // Start database communication thread
 	//

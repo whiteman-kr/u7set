@@ -11,6 +11,8 @@ enum class TimeType
 	ArchiveId
 };
 
+// TimeStamp
+//
 struct TimeStamp
 {
 	qint64 timeStamp = 0;
@@ -18,6 +20,7 @@ struct TimeStamp
 	// --
 	//
 	TimeStamp() = default;
+	TimeStamp(const TimeStamp&) = default;
 	explicit TimeStamp(qint64 value) : timeStamp(value)
 	{
 	}
@@ -25,16 +28,55 @@ struct TimeStamp
 	{
 	}
 
+	TimeStamp& operator=(const TimeStamp& src) = default;
+
 	QDateTime toDateTime() const
 	{
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC);
 	}
+
+
+	bool operator> (const TimeStamp& value) const
+	{
+		return this->timeStamp > value.timeStamp;
+	}
+
+	bool operator>= (const TimeStamp& value) const
+	{
+		return this->timeStamp >= value.timeStamp;
+	}
+
+	bool operator< (const TimeStamp& value) const
+	{
+		return this->timeStamp < value.timeStamp;
+	}
+
+	bool operator<= (const TimeStamp& value) const
+	{
+		return this->timeStamp <= value.timeStamp;
+	}
+
+	bool operator== (const TimeStamp& value) const
+	{
+		return this->timeStamp == value.timeStamp;
+	}
+
+	bool operator!= (const TimeStamp& value) const
+	{
+		return this->timeStamp != value.timeStamp;
+	}
 };
 
+Q_DECLARE_METATYPE(TimeStamp)
+
+// TimeSpan
+//
 struct TimeSpan
 {
 	qint64 timeSpan = 0;			// milliseconds
 };
+
+Q_DECLARE_METATYPE(TimeSpan)
 
 
 // Time literals converts to ms

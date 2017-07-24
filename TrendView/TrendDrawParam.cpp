@@ -72,7 +72,7 @@ namespace TrendLib
 
 	QDateTime TrendDrawParam::startTime() const
 	{
-		return QDateTime::fromMSecsSinceEpoch(m_startTimeStamp.timeStamp);
+		return m_startTimeStamp.toDateTime();
 	}
 
 	void TrendDrawParam::setStartTime(const QDateTime& value)

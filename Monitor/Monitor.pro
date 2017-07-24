@@ -75,7 +75,8 @@ SOURCES += main.cpp \
     ../lib/CircularLogger.cpp \
     MonitorView.cpp \
     MonitorTrends.cpp \
-    DialogChooseTrendSignals.cpp
+    DialogChooseTrendSignals.cpp \
+    TrendTcpClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -115,7 +116,8 @@ HEADERS  += \
     ../lib/CircularLogger.h \
     MonitorView.h \
     MonitorTrends.h \
-    DialogChooseTrendSignals.h
+    DialogChooseTrendSignals.h \
+    TrendTcpClient.h
 
 FORMS    += \
     DialogSettings.ui \

@@ -31,7 +31,7 @@ public:
 	virtual ~TcpSignalClient();
 
 protected:
-	void timerEvent(QTimerEvent *event);
+	virtual void timerEvent(QTimerEvent* event) override;
 
 public:
 	virtual void onClientThreadStarted() override;
