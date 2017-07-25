@@ -100,8 +100,7 @@ namespace Tcp
 		std::shared_ptr<ConnectionState> m_state;
 
 		mutable QMutex m_stateMutex;
-
-		QMutex m_mutex;
+		mutable QMutex m_mutex;
 
 		QTimer m_watchdogTimer;
 		int m_watchdogTimerTimeout = 5000;			// ms
