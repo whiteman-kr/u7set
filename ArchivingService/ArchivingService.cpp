@@ -13,9 +13,10 @@ ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
 											   int& argc,
 											   char** argv,
 											   const VersionInfo& versionInfo,
-											   std::shared_ptr<CircularLogger> logger) :
+											   CircularLoggerShared logger) :
 	ServiceWorker(ServiceType::ArchivingService, serviceName, argc, argv, versionInfo, logger),
 	m_logger(logger),
+	m_archive(logger),
 	m_saveStatesQueue(1024 * 1024)
 {
 }
@@ -114,12 +115,14 @@ void ArchivingServiceWorker::clearConfiguration()
 	stopArchRequestThread();
 	stopArchWriteThread();
 
-	m_archSignals.clear();
+	m_archive.clear();
 }
 
 void ArchivingServiceWorker::applyNewConfiguration()
 {
 	m_projectID = m_cfgLoaderThread->buildInfo().project;
+
+	m_archive.setProject(m_projectID);
 
 	runArchWriteThread();
 	runArchRequestThread();
@@ -131,7 +134,9 @@ void ArchivingServiceWorker::runArchWriteThread()
 {
 	assert(m_archWriteThread == nullptr);
 
-	m_archWriteThread = new ArchWriteThread(m_projectID, m_saveStatesQueue, m_archSignals, m_logger);
+	m_archWriteThread = new ArchWriteThread(m_archive,
+											m_saveStatesQueue,
+											m_logger);
 
 	m_archWriteThread->start();
 }
@@ -169,7 +174,7 @@ void ArchivingServiceWorker::runArchRequestThread()
 {
 	assert(m_archRequestThread == nullptr);
 
-	m_archRequestThread = new ArchRequestThread(m_projectID, m_archSignals, m_logger);
+	m_archRequestThread = new ArchRequestThread(m_archive, m_logger);
 
 	m_archRequestThread->start();
 }
@@ -281,21 +286,20 @@ bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 		return false;
 	}
 
-	m_archSignals.clear();
-
 	int count = msg.archsignals_size();
+
+	m_archive.initArchSignals(count);
 
 	for(int i = 0; i < count; i++)
 	{
-		const Proto::ArchSignal& archSignal = msg.archsignals(i);
+		const Proto::ArchSignal& protoArchSignal = msg.archsignals(i);
 
-		if (m_archSignals.contains(archSignal.hash()) == true)
-		{
-			assert(false);
-			continue;
-		}
+		ArchSignal archSignal;
 
-		m_archSignals.insert(archSignal.hash(), archSignal.isanalog());
+		archSignal.hash = protoArchSignal.hash();
+		archSignal.isAnalog = protoArchSignal.isanalog();
+
+		m_archive.appendArchSignal(QString::fromStdString(protoArchSignal.appsignalid()), archSignal);
 	}
 
 	return true;

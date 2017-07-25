@@ -9,6 +9,10 @@
 #include "../lib/Queue.h"
 #include "../lib/SocketIO.h"
 
+#include "../Proto/network.pb.h"
+
+#include "Archive.h"
+
 class TcpArchRequestsServer;
 
 struct ArchRequestParam
@@ -44,6 +48,8 @@ public:
 
 	ArchiveError archError() const { return m_archError; }
 
+	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
+
 private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
@@ -59,6 +65,7 @@ private:
 	const Hash* signalHashes() const { return m_param.signalHashes; }
 
 	bool executeQuery(CircularLoggerShared& logger);
+	void getNextData();
 
 private:
 	ArchRequestParam m_param;
@@ -73,6 +80,8 @@ private:
 	int m_totalStates = 0;
 	int m_sentStates = 0;
 
+	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
+
 	friend class ArchRequestThreadWorker;
 };
 
@@ -84,13 +93,16 @@ class ArchRequestThreadWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ArchRequestThreadWorker(const QString& projectID, const QHash<Hash, bool>& archSignals, CircularLoggerShared& logger);
+	ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param);
 	void finalizeRequest(quint32 requestID);
 
+	void getNextData(ArchRequestContextShared context);
+
 signals:
 	void newRequest(ArchRequestContextShared context);
+	void getNextDataSignal(quint32 requestID);
 
 private:
 	virtual void onThreadStarted() override;
@@ -98,10 +110,13 @@ private:
 
 	bool tryConnectToDatabase();
 
-	void onNewRequest(ArchRequestContextShared context);
 	bool createQueryStr(ArchRequestContextShared context, QString& queryStr);
 
 	QString getCmpField(TimeType timeType);
+
+private slots:
+	void onNewRequest(ArchRequestContextShared context);
+	void onGetNextData(quint32 requestID);
 
 private:
 	static const char* FIELD_PLANT_TIME;
@@ -111,7 +126,7 @@ private:
 	static const char* FIELD_VALUE;
 	static const char* FIELD_FLAGS;
 
-	QString m_projectID;
+	Archive& m_archive;
 	CircularLoggerShared m_logger;
 
 	QSqlDatabase* m_db = nullptr;				// project archive database
@@ -123,18 +138,18 @@ private:
 	QQueue<ArchRequestContextShared> m_newRequests;
 
 	ArchRequestContextShared m_currentRequest;
-
-	const QHash<Hash, bool>& m_archSignals;
 };
 
 
 class ArchRequestThread : public SimpleThread
 {
 public:
-	ArchRequestThread(const QString &projectID, const QHash<Hash, bool>& archSignals, CircularLoggerShared& logger);
+	ArchRequestThread(Archive& archive, CircularLoggerShared& logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param);
 	void finalizeRequest(quint32 requestID);
+
+	void getNextData(ArchRequestContextShared context);
 
 private:
 	ArchRequestThreadWorker* m_worker = nullptr;
