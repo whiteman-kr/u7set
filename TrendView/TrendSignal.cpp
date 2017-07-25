@@ -191,18 +191,83 @@ namespace TrendLib
 		return result;
 	}
 
-	TrendSignalParam TrendSignalSet::signalParam() const
+	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<OneHourData>* outData)
 	{
-		QMutexLocker locker(&m_paramMutex);
-
-		for (const TrendSignalParam& s : m_signalParams)
+		if (outData == nullptr ||
+			from > to)
 		{
-			if (s.isDiscrete() == true)
-			{
-				return s;
-			}
+			assert(outData);
+			assert(from <= to);
+			return false;
 		}
 
-		return TrendSignalParam();
+		// Find Signal
+		//
+		{
+			QMutexLocker locker(&m_archiveMutex);
+
+			auto archiveIt = m_archive.find(appSignalId);
+			if (archiveIt == m_archive.end())
+			{
+				auto emplaceResult = m_archive.emplace(appSignalId, TrendArchive());
+				archiveIt = emplaceResult.first;
+			}
+
+			TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
+
+			// Round from/to to 1hour
+			//
+			TimeStamp fromTimeStamp((from.toMSecsSinceEpoch() / 1_hour) * 1_hour);
+			TimeStamp toTimeStamp((to.toMSecsSinceEpoch() / 1_hour) * 1_hour + (to.toMSecsSinceEpoch() % 1_hour == 0 ? 0 : 1_hour));
+
+			//QDateTime roundedToHourFrom = fromTimeStamp.toDateTime();
+			//QDateTime roundedToHourTo = toTimeStamp.toDateTime();
+
+			qDebug() << "Requested for trend data, appSignalID: " << appSignalId;
+			qDebug() << "\tRequested from " << from << ", rounded to " << fromTimeStamp.toDateTime();
+			qDebug() << "\tRequested to " << to << ", rounded to " << toTimeStamp.toDateTime();
+
+			// --
+			//
+			for (TimeStamp archHour = fromTimeStamp; archHour <= toTimeStamp; archHour.timeStamp += 1_hour)
+			{
+				if (archHour.toDateTime().time().minute() != 0 ||
+					archHour.toDateTime().time().second() != 0 ||
+					archHour.toDateTime().time().msec() != 0)
+				{
+					assert(archHour.toDateTime().time().minute() == 0);
+					assert(archHour.toDateTime().time().second() == 0);
+					assert(archHour.toDateTime().time().msec() == 0);
+					return false;
+				}
+
+				OneHourData& hourData = archive.m_hours[archHour];		// Get hour data, insert if there is no such record
+
+				switch (hourData.state)
+				{
+				case OneHourData::State::NoData:
+					// No data, request data from archive
+					//
+					emit requestData(appSignalId, archHour);
+					break;
+				case OneHourData::State::Requested:
+					// Data already requested, wait for it, so just do nothing
+					//
+					break;
+				case OneHourData::State::Received:
+					// Data requested and received, pass it to the result
+					//
+					outData->push_back(hourData);
+					break;
+				default:
+					assert(false);
+					return false;
+				}
+			}
+
+		}	// QMutexLocker locker(&m_archiveMutex);
+
+		return true;
 	}
+
 }

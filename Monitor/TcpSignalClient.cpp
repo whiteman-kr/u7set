@@ -3,12 +3,12 @@
 #include "version.h"
 
 TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::Monitor, theSettings.instanceStrId(), 0, 1, USED_SERVER_COMMIT_NUMBER),
+	Tcp::Client(serverAddressPort1, serverAddressPort2, E::SoftwareType::Monitor, theSettings.instanceStrId(), -1, -1, -1),
 	m_cfgController(configController)
 {
 	assert(m_cfgController);
 
-	qDebug() << "TcpSignalClient::TcpSignalClient(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)";
+	qDebug() << "TcpSignalClient::TcpSignalClient(...)";
 
 	m_startStateTimerId = startTimer(theSettings.requestTimeInterval());
 }
@@ -455,10 +455,14 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
 {
-	HostAddressPort h1 = configuration.appDataService1.address();
-	HostAddressPort h2 = configuration.appDataService2.address();
+	HostAddressPort s1 = configuration.appDataService1.address();
+	HostAddressPort s2 = configuration.appDataService2.address();
 
-	setServers(h1, h2, true);
+	if (serverAddressPort(0) == s1 ||
+		serverAddressPort(1) != s2)
+	{
+		setServers(s1, s2, true);
+	}
 
 	return;
 }

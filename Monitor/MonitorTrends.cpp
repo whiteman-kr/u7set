@@ -33,9 +33,10 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(QString ads1ip, int ads1port, QString ads2ip, int ads2port, QWidget* parent)
+bool MonitorTrends::startTrendApp(MonitorConfigController* configController, QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(configController, parent);
+
 	window->show();
 
 	return false;
@@ -54,8 +55,10 @@ void MonitorTrends::unregisterTrendWindow(QString name)
 }
 
 
-MonitorTrendsWidget::MonitorTrendsWidget(QWidget* parent) :
-	TrendLib::TrendMainWindow(parent)
+MonitorTrendsWidget::MonitorTrendsWidget(MonitorConfigController* configController, QWidget* parent) :
+	TrendLib::TrendMainWindow(parent),
+	m_archiveService1(configController->configuration().archiveService1),
+	m_archiveService2(configController->configuration().archiveService2)
 {
 static int no = 1;
 	QString trendName = QString("Monitor Trends %1").arg(no++);
@@ -63,12 +66,29 @@ static int no = 1;
 
 	setWindowTitle(trendName);
 
+	// Communication thread
+	//
+	m_tcpClient =  new TrendTcpClient(configController);
+
+	m_tcpClientThread = new SimpleThread(m_tcpClient);
+	m_tcpClientThread->start();
+
+	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_tcpClient, &TrendTcpClient::slot_requestData);
+
+	//connect(m_tcpClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
+	//connect(m_tcpClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
+
 	return;
 }
 
 MonitorTrendsWidget::~MonitorTrendsWidget()
 {
 	MonitorTrends::unregisterTrendWindow(this->windowTitle());
+
+	m_tcpClientThread->quitAndWait(10000);
+	delete m_tcpClientThread;
+
+	return;
 }
 
 void MonitorTrendsWidget::signalsButton()
@@ -163,3 +183,23 @@ static int stdColorIndex = 0;
 
 	return;
 }
+
+//const ConfigConnection& MonitorTrendsWidget::archiveService1() const
+//{
+//	return m_archiveService1;
+//}
+
+//void MonitorTrendsWidget::setArchiveService1(const ConfigConnection& config)
+//{
+//	m_archiveService1 = config;
+//}
+
+//const ConfigConnection& MonitorTrendsWidget::archiveService2() const
+//{
+//	return m_archiveService2;
+//}
+
+//void MonitorTrendsWidget::setArchiveService2(const ConfigConnection& config)
+//{
+//	m_archiveService2 = config;
+//}

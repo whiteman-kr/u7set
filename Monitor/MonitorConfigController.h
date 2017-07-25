@@ -11,10 +11,11 @@
 
 class ConfigConnection
 {
-	ConfigConnection() {}
-
 public:
+	ConfigConnection() = default;
+	ConfigConnection(const ConfigConnection&) = default;
 	ConfigConnection(QString EquipmentId, QString ipAddress, int port);
+	ConfigConnection& operator=(const ConfigConnection&) = default;
 
 	QString equipmentId() const;
 	QString ip() const;
@@ -23,9 +24,9 @@ public:
 	HostAddressPort address() const;
 
 protected:
-	QString m_equipmentId;
-	QString m_ip;
-	int m_port;
+	QString m_equipmentId = "UNKNOWN";
+	QString m_ip = "127.0.0.1";
+	int m_port = 0;
 
 	friend struct ConfigSettings;
 };
@@ -100,7 +101,7 @@ private:
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 
 	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
-	ConfigSettings m_configuration = ConfigSettings();
+	ConfigSettings m_configuration;
 };
 
 #endif // MONITORCONFIGTHREAD_H

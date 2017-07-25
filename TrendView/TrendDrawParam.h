@@ -1,5 +1,6 @@
 #ifndef DRAWPARAM_H
 #define DRAWPARAM_H
+#include "../lib/TimeStamp.h"
 
 namespace TrendLib
 {

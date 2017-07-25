@@ -63,6 +63,16 @@ HostAddressPort& HostAddressPort::operator=(const HostAddressPort &other)
 	return *this;
 }
 
+bool HostAddressPort::operator==(const HostAddressPort &other)
+{
+	return m_hostAddress == other.m_hostAddress && m_port == other.m_port;
+}
+
+bool HostAddressPort::operator!=(const HostAddressPort &other)
+{
+	return m_hostAddress != other.m_hostAddress && m_port != other.m_port;
+}
+
 
 void HostAddressPort::setAddress(quint32 ip4Addr)
 {

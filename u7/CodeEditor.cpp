@@ -1,9 +1,6 @@
 #include "CodeEditor.h"
 #include "Settings.h"
 
-#include "../QScintilla/Qt4Qt5/Qsci/qscilexercpp.h"
-#include "../QScintilla/Qt4Qt5/Qsci/qscilexerxml.h"
-
 //
 // DialogFindReplace
 //
@@ -125,21 +122,17 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 
 	// Set up lexer
 	//
+	m_lexerCpp.setDefaultFont(f);
+	m_lexerXml.setDefaultFont(f);
+
 	if (codeType == CodeType::Cpp)
 	{
-		m_lexer = new QsciLexerCPP();
+		m_textEdit->setLexer(&m_lexerCpp);
 	}
 
 	if (codeType == CodeType::Xml)
 	{
-		m_lexer = new QsciLexerXML();
-	}
-
-	if (m_lexer != nullptr)
-	{
-		m_lexer->setDefaultFont(f);
-		m_textEdit->setFont(f);
-		m_textEdit->setLexer(m_lexer);
+		m_textEdit->setLexer(&m_lexerXml);
 	}
 
 	// Set up margins
@@ -152,9 +145,11 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 	else
 	{
 		m_textEdit->setMargins(0);
-		m_textEdit->setFont(f);
 	}
 
+	//
+
+	m_textEdit->setFont(f);
 	m_textEdit->setTabWidth(4);
 	m_textEdit->setAutoIndent(true);
 
@@ -163,11 +158,6 @@ CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
 
 CodeEditor::~CodeEditor()
 {
-	if (m_lexer != nullptr)
-	{
-		delete m_lexer;
-		m_lexer = nullptr;
-	}
 }
 
 bool CodeEditor::eventFilter(QObject* obj, QEvent* event)

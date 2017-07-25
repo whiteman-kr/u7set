@@ -402,6 +402,12 @@ namespace TrendLib
 
 		// Draw trend
 		//
+		std::list<OneHourData> outData;
+
+		QDateTime startTime = drawParam.startTime();
+		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+		bool requestOk = m_signalSet->getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
 
 		return;
 	}
