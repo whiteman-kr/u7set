@@ -10351,20 +10351,35 @@ class ArchSignal : public ::google::protobuf::Message {
   inline bool isanalog() const;
   inline void set_isanalog(bool value);
 
+  // required string appSignalID = 3;
+  inline bool has_appsignalid() const;
+  inline void clear_appsignalid();
+  static const int kAppSignalIDFieldNumber = 3;
+  inline const ::std::string& appsignalid() const;
+  inline void set_appsignalid(const ::std::string& value);
+  inline void set_appsignalid(const char* value);
+  inline void set_appsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalid();
+  inline ::std::string* release_appsignalid();
+  inline void set_allocated_appsignalid(::std::string* appsignalid);
+
   // @@protoc_insertion_point(class_scope:Proto.ArchSignal)
  private:
   inline void set_has_hash();
   inline void clear_has_hash();
   inline void set_has_isanalog();
   inline void clear_has_isanalog();
+  inline void set_has_appsignalid();
+  inline void clear_has_appsignalid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 hash_;
+  ::std::string* appsignalid_;
   bool isanalog_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -25420,6 +25435,76 @@ inline bool ArchSignal::isanalog() const {
 inline void ArchSignal::set_isanalog(bool value) {
   set_has_isanalog();
   isanalog_ = value;
+}
+
+// required string appSignalID = 3;
+inline bool ArchSignal::has_appsignalid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ArchSignal::set_has_appsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ArchSignal::clear_has_appsignalid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ArchSignal::clear_appsignalid() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalid_->clear();
+  }
+  clear_has_appsignalid();
+}
+inline const ::std::string& ArchSignal::appsignalid() const {
+  return *appsignalid_;
+}
+inline void ArchSignal::set_appsignalid(const ::std::string& value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ArchSignal::set_appsignalid(const char* value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ArchSignal::set_appsignalid(const char* value, size_t size) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ArchSignal::mutable_appsignalid() {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  return appsignalid_;
+}
+inline ::std::string* ArchSignal::release_appsignalid() {
+  clear_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalid_;
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ArchSignal::set_allocated_appsignalid(::std::string* appsignalid) {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
+  if (appsignalid) {
+    set_has_appsignalid();
+    appsignalid_ = appsignalid;
+  } else {
+    clear_has_appsignalid();
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

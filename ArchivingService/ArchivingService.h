@@ -6,6 +6,7 @@
 #include "../lib/Queue.h"
 
 #include "TcpAppDataServer.h"
+#include "Archive.h"
 #include "ArchWriteThread.h"
 #include "TcpArchRequestsServer.h"
 #include "ArchRequestThread.h"
@@ -84,5 +85,5 @@ private:
 
 	AppSignalStatesQueue m_saveStatesQueue;
 
-	ArchSignals m_archSignals;
+	Archive m_archive;
 };

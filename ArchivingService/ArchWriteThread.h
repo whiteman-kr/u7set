@@ -6,20 +6,14 @@
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
 
-typedef QHash<Hash, bool> ArchSignals;
+#include "Archive.h"
+
 
 class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
-	enum SignalStatesTableType
-	{
-		LongTerm,
-		ShortTerm
-	};
-
-	ArchWriteThreadWorker(const QString& projectID,
+	ArchWriteThreadWorker(Archive& archive,
 						  AppSignalStatesQueue& saveStatesQueue,
-						  const ArchSignals& archSignals,
 						  CircularLoggerShared logger);
 
 private:
@@ -33,16 +27,14 @@ private:
 
 	bool initDatabase();
 	bool upgradeDatabase();
+	bool checkAndCreateTables();
 
 	int getDatabaseVersion();
 	bool updateVersion(const QString& reasone);
 
-	bool getSignalsTablesList();
+	bool getExistingTables(QHash<QString, QString>& existingTables);
 
-	void appendTable(const QString& tableName, SignalStatesTableType tableType);
-	bool createTableIfNotExists(Hash signalHash, bool isAnalogSignal);
-	bool createSignalStatesTable(Hash signalHash, SignalStatesTableType tableType);
-	static QString getTableName(Hash signalHash, SignalStatesTableType tableType);
+	bool createTable(const QString& tableName, Archive::TableType tableType);
 
 	void disconnectFromDb();
 
@@ -50,28 +42,18 @@ private:
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
 
-	QString projectArchiveDbName();
-
 private slots:
 	void onTimer();
 	void onSaveStatesQueueIsNotEmpty();
 
 private:
-	QString m_projectID;
+	Archive& m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
-	const ArchSignals& m_archSignals;
 	CircularLoggerShared m_logger;
 
 	QTimer m_timer;
 
-	static const char* ARCH_DB_PREFIX;
-	static const char* LONG_TERM_TABLE_PREFIX;
-	static const char* SHORT_TERM_TABLE_PREFIX;
-
 	QSqlDatabase m_db;				// project archive database
-
-	QHash<Hash, QString> m_longTermTables;
-	QHash<Hash, QString> m_shortTermTables;
 
 	static const StringPair m_upgradeFiles[];
 
@@ -88,9 +70,8 @@ private:
 class ArchWriteThread : public SimpleThread
 {
 public:
-	ArchWriteThread(const QString& projectID,
+	ArchWriteThread(Archive& archive,
 					AppSignalStatesQueue& saveStatesQueue,
-					const ArchSignals& archSignals,
 					CircularLoggerShared logger);
 };
 

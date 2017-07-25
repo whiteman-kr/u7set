@@ -1686,9 +1686,10 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
   ArchSignal_descriptor_ = file->message_type(70);
-  static const int ArchSignal_offsets_[2] = {
+  static const int ArchSignal_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, appsignalid_),
   };
   ArchSignal_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -2366,15 +2367,15 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDescrip"
     "tionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006lab"
     "els\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030"
-    "\027 \003(\0132\013.Proto.Uuid\",\n\nArchSignal\022\014\n\004hash"
-    "\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\"5\n\013ArchSignals\022"
-    "&\n\013archSignals\030\001 \003(\0132\021.Proto.ArchSignal*"
-    "3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
-    "\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005"
-    "Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006"
-    "Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022"
-    "\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float"
-    "\020\002", 13522);
+    "\027 \003(\0132\013.Proto.Uuid\"A\n\nArchSignal\022\014\n\004hash"
+    "\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID\030"
+    "\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003("
+    "\0132\021.Proto.ArchSignal*3\n\nSchemaUnit\022\013\n\007Di"
+    "splay\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Con"
+    "nectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001"
+    "*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discret"
+    "e\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n"
+    "\tSignedInt\020\001\022\t\n\005Float\020\002", 13543);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -33872,6 +33873,7 @@ void SchemaDetails::Swap(SchemaDetails* other) {
 #ifndef _MSC_VER
 const int ArchSignal::kHashFieldNumber;
 const int ArchSignal::kIsAnalogFieldNumber;
+const int ArchSignal::kAppSignalIDFieldNumber;
 #endif  // !_MSC_VER
 
 ArchSignal::ArchSignal()
@@ -33892,6 +33894,7 @@ void ArchSignal::SharedCtor() {
   _cached_size_ = 0;
   hash_ = GOOGLE_ULONGLONG(0);
   isanalog_ = false;
+  appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -33900,6 +33903,9 @@ ArchSignal::~ArchSignal() {
 }
 
 void ArchSignal::SharedDtor() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -33929,6 +33935,11 @@ void ArchSignal::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     hash_ = GOOGLE_ULONGLONG(0);
     isanalog_ = false;
+    if (has_appsignalid()) {
+      if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+        appsignalid_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -33967,6 +33978,23 @@ bool ArchSignal::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(26)) goto parse_appSignalID;
+        break;
+      }
+
+      // required string appSignalID = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_appSignalID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_appsignalid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->appsignalid().data(), this->appsignalid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -33999,6 +34027,15 @@ void ArchSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->isanalog(), output);
   }
 
+  // required string appSignalID = 3;
+  if (has_appsignalid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->appsignalid().data(), this->appsignalid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      3, this->appsignalid(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -34015,6 +34052,16 @@ void ArchSignal::SerializeWithCachedSizes(
   // required bool isAnalog = 2;
   if (has_isanalog()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->isanalog(), target);
+  }
+
+  // required string appSignalID = 3;
+  if (has_appsignalid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->appsignalid().data(), this->appsignalid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->appsignalid(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -34038,6 +34085,13 @@ int ArchSignal::ByteSize() const {
     // required bool isAnalog = 2;
     if (has_isanalog()) {
       total_size += 1 + 1;
+    }
+
+    // required string appSignalID = 3;
+    if (has_appsignalid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->appsignalid());
     }
 
   }
@@ -34073,6 +34127,9 @@ void ArchSignal::MergeFrom(const ArchSignal& from) {
     if (from.has_isanalog()) {
       set_isanalog(from.isanalog());
     }
+    if (from.has_appsignalid()) {
+      set_appsignalid(from.appsignalid());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -34090,7 +34147,7 @@ void ArchSignal::CopyFrom(const ArchSignal& from) {
 }
 
 bool ArchSignal::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
 
   return true;
 }
@@ -34099,6 +34156,7 @@ void ArchSignal::Swap(ArchSignal* other) {
   if (other != this) {
     std::swap(hash_, other->hash_);
     std::swap(isanalog_, other->isanalog_);
+    std::swap(appsignalid_, other->appsignalid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

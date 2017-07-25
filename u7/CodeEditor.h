@@ -2,6 +2,8 @@
 #define IDEPROPERTYEDITOR_H
 
 #include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
+#include "../QScintilla/Qt4Qt5/Qsci/qscilexercpp.h"
+#include "../QScintilla/Qt4Qt5/Qsci/qscilexerxml.h"
 
 #include "../lib/PropertyEditor.h"
 
@@ -68,7 +70,8 @@ protected:
 
 private:
 	QsciScintilla* m_textEdit = nullptr;
-	QsciLexer* m_lexer = nullptr;
+	QsciLexerCPP m_lexerCpp;
+	QsciLexerXML m_lexerXml;
 
 	QWidget* m_parent = nullptr;
 

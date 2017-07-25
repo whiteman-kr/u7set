@@ -1192,6 +1192,7 @@ message ArchSignal
 {
     required uint64 hash = 1;
     required bool isAnalog = 2;
+    required string appSignalID = 3;
 }
 
 

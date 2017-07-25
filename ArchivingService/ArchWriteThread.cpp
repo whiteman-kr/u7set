@@ -3,23 +3,17 @@
 
 #include <chrono>
 
-const char* ArchWriteThreadWorker::ARCH_DB_PREFIX = "u7arch_";
-const char* ArchWriteThreadWorker::LONG_TERM_TABLE_PREFIX = "lt_";
-const char* ArchWriteThreadWorker::SHORT_TERM_TABLE_PREFIX = "st_";
-
 const StringPair ArchWriteThreadWorker::m_upgradeFiles[] =
 {
 	StringPair(":/Upgrade0001.sql", "Initial upgrade"),
 };
 
 
-ArchWriteThreadWorker::ArchWriteThreadWorker(const QString& projectID,
+ArchWriteThreadWorker::ArchWriteThreadWorker(Archive& archive,
 											 AppSignalStatesQueue& saveStatesQueue,
-											 const ArchSignals &archSignals,
 											 CircularLoggerShared logger) :
-	m_projectID(projectID),
+	m_archive(archive),
 	m_saveStatesQueue(saveStatesQueue),
-	m_archSignals(archSignals),
 	m_logger(logger),
 	m_timer(this)
 {
@@ -102,7 +96,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 
 	m_db.setHostName("127.0.0.1");
 	m_db.setPort(5432);
-	m_db.setDatabaseName(projectArchiveDbName());
+	m_db.setDatabaseName(m_archive.dbName());
 	m_db.setUserName("u7arch");
 	m_db.setPassword("arch876436");
 
@@ -119,9 +113,9 @@ void ArchWriteThreadWorker::tryConnectToDb()
 		initDatabase();
 	}
 
-	upgradeDatabase();
+	result &= upgradeDatabase();
 
-	getSignalsTablesList();
+	result &= checkAndCreateTables();
 }
 
 bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
@@ -132,10 +126,10 @@ bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
 		return false;
 	}
 
-	QString projectArchDbName = projectArchiveDbName();
+	QString dbName = m_archive.dbName();
 
 	QString queryStr = QString("SELECT datname FROM pg_database WHERE datname = '%1' ORDER BY datname;").
-			arg(projectArchDbName);
+			arg(dbName);
 
 	QSqlQuery query(db);
 
@@ -152,14 +146,14 @@ bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
 	{
 		QString databaseName = query.value(0).toString();
 
-		if (databaseName == projectArchDbName)
+		if (databaseName == dbName)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Archive database '%1' is exists").arg(projectArchDbName));
+			DEBUG_LOG_MSG(m_logger, QString("Archive database '%1' is exists").arg(dbName));
 			return true;
 		}
 	}
 
-	DEBUG_LOG_WRN(m_logger, QString("Archive database '%1' is not exists").arg(projectArchDbName));
+	DEBUG_LOG_WRN(m_logger, QString("Archive database '%1' is not exists").arg(dbName));
 
 	return false;
 }
@@ -172,10 +166,10 @@ bool ArchWriteThreadWorker::createDatabase(QSqlDatabase& db)
 		return false;
 	}
 
-	QString projectArchDbName = projectArchiveDbName();
+	QString dbName = m_archive.dbName();
 
 	QString queryStr = QString("CREATE DATABASE %1 WITH ENCODING = 'UTF8' CONNECTION LIMIT = -1;").
-							arg(projectArchDbName);
+							arg(dbName);
 
 	QSqlQuery query(db);
 
@@ -188,7 +182,7 @@ bool ArchWriteThreadWorker::createDatabase(QSqlDatabase& db)
 		return false;
 	}
 
-	DEBUG_LOG_MSG(m_logger, QString("Archive database '%1' is successful created").arg(projectArchDbName));
+	DEBUG_LOG_MSG(m_logger, QString("Archive database '%1' is successful created").arg(dbName));
 
 	return true;
 }
@@ -271,6 +265,118 @@ bool ArchWriteThreadWorker::upgradeDatabase()
 	return true;
 }
 
+bool ArchWriteThreadWorker::checkAndCreateTables()
+{
+	QHash<QString, QString> existingTables;
+
+	bool result = getExistingTables(existingTables);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	const QHash<Hash, ArchSignal>& archSignals = m_archive.archSignals();
+
+	QHashIterator<Hash, ArchSignal> i(archSignals);
+
+	QString tableName;
+
+	int createdTablesCount = 0;
+	int creationErrorCount = 0;
+
+	while(i.hasNext() == true)
+	{
+		i.next();
+
+		Hash signalHash = i.key();
+		const ArchSignal& archSignal = i.value();
+
+		bool stTableExists = false;
+		bool ltTableExists = false;
+
+		if (archSignal.isAnalog == true)
+		{
+			// analog signal should have table st_*
+			//
+			tableName = m_archive.getTableName(signalHash, Archive::TableType::ShortTerm);
+
+			if (existingTables.contains(tableName) == false)
+			{
+				bool res = createTable(tableName, Archive::TableType::ShortTerm);
+
+				if (res == true)
+				{
+					createdTablesCount++;
+
+					stTableExists = true;
+				}
+				else
+				{
+					creationErrorCount++;
+				}
+			}
+			else
+			{
+				stTableExists = true;
+			}
+
+			if (stTableExists)
+			{
+				m_archive.appendExistingTable(tableName);
+			}
+		}
+
+		// analog and discrete signals should have table  lt_*
+		//
+		tableName = m_archive.getTableName(signalHash, Archive::TableType::LongTerm);
+
+		if (existingTables.contains(tableName) == false)
+		{
+			bool res = createTable(tableName, Archive::TableType::LongTerm);
+
+			if (res == true)
+			{
+				createdTablesCount++;
+
+				ltTableExists = true;
+			}
+			else
+			{
+				creationErrorCount++;
+			}
+		}
+		else
+		{
+			ltTableExists = true;
+		}
+
+		if (ltTableExists)
+		{
+			m_archive.appendExistingTable(tableName);
+		}
+
+		if (archSignal.isAnalog == true)
+		{
+			m_archive.setCanReadWriteSignal(archSignal.hash, stTableExists && ltTableExists);
+		}
+		else
+		{
+			m_archive.setCanReadWriteSignal(archSignal.hash, ltTableExists);
+		}
+	}
+
+	if (createdTablesCount > 0)
+	{
+		DEBUG_LOG_MSG(m_logger, QString("Tables has been created: %1").arg(createdTablesCount));
+	}
+
+	if (creationErrorCount > 0)
+	{
+		DEBUG_LOG_ERR(m_logger, QString("Tables creation errors: %1").arg(createdTablesCount));
+	}
+}
+
 int ArchWriteThreadWorker::getDatabaseVersion()
 {
 	QString queryStr = QString("SELECT MAX(versionId) FROM version;");
@@ -315,7 +421,7 @@ bool ArchWriteThreadWorker::updateVersion(const QString& reasone)
 	return true;
 }
 
-bool ArchWriteThreadWorker::getSignalsTablesList()
+bool ArchWriteThreadWorker::getExistingTables(QHash<QString, QString>& existingTables)
 {
 	if (m_db.isOpen() == false)
 	{
@@ -323,8 +429,7 @@ bool ArchWriteThreadWorker::getSignalsTablesList()
 		return false;
 	}
 
-	m_longTermTables.clear();
-	m_shortTermTables.clear();
+	existingTables.clear();
 
 	QString queryStr = QString(	"SELECT table_name "
 								"FROM information_schema.tables "
@@ -348,86 +453,22 @@ bool ArchWriteThreadWorker::getSignalsTablesList()
 
 		tableName = tableName.toLower();
 
-		if (tableName.startsWith(LONG_TERM_TABLE_PREFIX) == true)
-		{
-			appendTable(tableName, SignalStatesTableType::LongTerm);
-			continue;
-		}
-
-		if (tableName.startsWith(SHORT_TERM_TABLE_PREFIX) == true)
-		{
-			appendTable(tableName, SignalStatesTableType::ShortTerm);
-			continue;
-		}
-
-		assert(false);
+		existingTables.insert(tableName, tableName);
 	}
 
 	return true;
 }
 
-void ArchWriteThreadWorker::appendTable(const QString& tableName, SignalStatesTableType tableType)
-{
-	QString hashStr = tableName.mid(3);			// crop tableName after 'lt_' or 'st_';
-
-	bool result = false;
-
-	Hash signalHash = hashStr.toULongLong(&result, 16);
-
-	if (result == false)
-	{
-		assert(false);
-		return;
-	}
-
-	switch(tableType)
-	{
-	case SignalStatesTableType::LongTerm:
-		m_longTermTables.insert(signalHash, tableName);
-		break;
-
-	case SignalStatesTableType::ShortTerm:
-		m_shortTermTables.insert(signalHash, tableName);
-		break;
-
-	default:
-		assert(false);
-	}
-}
-
-bool ArchWriteThreadWorker::createTableIfNotExists(Hash signalHash, bool isAnalogSignal)
-{
-	bool result = true;
-
-	if (m_longTermTables.contains(signalHash) == false)
-	{
-		result &= createSignalStatesTable(signalHash, SignalStatesTableType::LongTerm);
-	}
-
-	if (isAnalogSignal == true)
-	{
-		// short term tables is creates for analog signals only
-		//
-		if (m_shortTermTables.contains(signalHash) == false)
-		{
-			result &= createSignalStatesTable(signalHash, SignalStatesTableType::ShortTerm);
-		}
-	}
-
-	return result;
-}
-
-bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalStatesTableType tableType)
+bool ArchWriteThreadWorker::createTable(const QString& tableName, Archive::TableType tableType)
 {
 	if (m_db.isOpen() == false)
 	{
 		return false;
 	}
 
-	QString tableName = getTableName(signalHash, tableType);
-
 	if (tableName.isEmpty() == true)
 	{
+		assert(false);
 		return false;
 	}
 
@@ -435,8 +476,8 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 
 	switch(tableType)
 	{
-	case SignalStatesTableType::LongTerm:
-		queryStr = QString("CREATE TABLE public.%1 ("
+	case Archive::TableType::LongTerm:
+		queryStr = QString("CREATE TABLE IF NOT EXISTS public.%1 ("
 							"archid bigint NOT NULL, "
 							"planttime bigint, "
 							"systime bigint, "
@@ -447,9 +488,9 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 							"WITH (OIDS=FALSE);").arg(tableName);
 		break;
 
-	case SignalStatesTableType::ShortTerm:
+	case Archive::TableType::ShortTerm:
 
-		queryStr = QString("CREATE TABLE public.%1 ("
+		queryStr = QString("CREATE TABLE IF NOT EXISTS  public.%1 ("
 							"archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass), "
 							"planttime bigint, "
 							"systime bigint, "
@@ -476,55 +517,10 @@ bool ArchWriteThreadWorker::createSignalStatesTable(Hash signalHash, SignalState
 		return false;
 	}
 
-	// table is created successfully
-
-	switch(tableType)
-	{
-	case SignalStatesTableType::LongTerm:
-		m_longTermTables.insert(signalHash, tableName);
-		break;
-
-	case SignalStatesTableType::ShortTerm:
-		m_shortTermTables.insert(signalHash, tableName);
-		break;
-
-	default:
-		assert(false);
-	}
-
-	DEBUG_LOG_MSG(m_logger, QString("Archive table '%1' is successful created").arg(tableName));
+	// DEBUG_LOG_MSG(m_logger, QString("Archive table '%1' is successful created").arg(tableName));
 
 	return true;
 }
-
-QString ArchWriteThreadWorker::getTableName(Hash signalHash, SignalStatesTableType tableType)
-{
-	QString tableName;
-
-	switch(tableType)
-	{
-	case SignalStatesTableType::LongTerm:
-		tableName = LONG_TERM_TABLE_PREFIX;
-		break;
-
-	case SignalStatesTableType::ShortTerm:
-		tableName = SHORT_TERM_TABLE_PREFIX;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	if (tableName.isEmpty() == true)
-	{
-		return tableName;
-	}
-
-	tableName += QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false);
-
-	return tableName;
-}
-
 
 void ArchWriteThreadWorker::disconnectFromDb()
 {
@@ -579,19 +575,11 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 			break;
 		}
 
-		if (m_archSignals.contains(state.hash) == false)
+		ArchSignal archSignal = m_archive.getArchSignal(state.hash);
+
+		if (archSignal.canReadWrite == false)
 		{
-			assert(false);
-			count++;
-			continue;
-		}
-
-		bool isAnalogSignal = m_archSignals.value(state.hash);
-
-		res = createTableIfNotExists(state.hash, isAnalogSignal);
-
-		if (res == false)
-		{
+			QString appSignalID = m_archive.getSignalID(state.hash);
 			count++;
 			continue;
 		}
@@ -621,7 +609,7 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
-					arg(isAnalogSignal == true ? "TRUE" : "FALSE").
+					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
 					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
 		}
 		else
@@ -633,7 +621,7 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
-					arg(isAnalogSignal == true ? "TRUE" : "FALSE").
+					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
 					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE"));
 		}
 
@@ -722,15 +710,6 @@ bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arr
 }
 
 
-QString ArchWriteThreadWorker::projectArchiveDbName()
-{
-	QString dbName = QString(ARCH_DB_PREFIX) + m_projectID;
-
-	dbName = dbName.toLower();
-
-	return dbName;
-}
-
 void ArchWriteThreadWorker::onTimer()
 {
 	if (m_db.isOpen() == false)
@@ -746,12 +725,13 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 	writeStatesToArchive();
 }
 
-ArchWriteThread::ArchWriteThread(const QString& projectID,
+ArchWriteThread::ArchWriteThread(Archive& archive,
 								 AppSignalStatesQueue& saveStatesQueue,
-								 const ArchSignals& archSignals,
 								 CircularLoggerShared logger)
 {
-	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(projectID, saveStatesQueue, archSignals, logger);
+	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(archive,
+															  saveStatesQueue,
+															  logger);
 
 	addWorker(worker);
 }
