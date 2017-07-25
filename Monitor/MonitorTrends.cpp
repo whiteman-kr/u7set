@@ -66,6 +66,23 @@ static int no = 1;
 
 	setWindowTitle(trendName);
 
+	// Status bar
+	//
+	QStatusBar* sb = statusBar();
+	assert(sb);
+
+	m_statusBarTextLabel = new QLabel(sb);
+	m_statusBarQueueSizeLabel = new QLabel(sb);
+	m_statusBarNetworkRequestsLabel = new QLabel(sb);
+	m_statusBarServerLabel = new QLabel(sb);
+	m_statusBarConnectionStateLabel = new QLabel(sb);
+
+	sb->addWidget(m_statusBarTextLabel, 1);
+	sb->addWidget(m_statusBarQueueSizeLabel, 0);
+	sb->addWidget(m_statusBarNetworkRequestsLabel, 0);
+	sb->addWidget(m_statusBarServerLabel, 0);
+	sb->addWidget(m_statusBarConnectionStateLabel, 0);
+
 	// Communication thread
 	//
 	m_tcpClient =  new TrendTcpClient(configController);
@@ -74,9 +91,16 @@ static int no = 1;
 	m_tcpClientThread->start();
 
 	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_tcpClient, &TrendTcpClient::slot_requestData);
+	connect(m_tcpClient, &TrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
+	connect(m_tcpClient, &TrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
 
 	//connect(m_tcpClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
 	//connect(m_tcpClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
+
+
+	// --
+	//
+	startTimer(100);
 
 	return;
 }
@@ -87,6 +111,30 @@ MonitorTrendsWidget::~MonitorTrendsWidget()
 
 	m_tcpClientThread->quitAndWait(10000);
 	delete m_tcpClientThread;
+
+	return;
+}
+
+void MonitorTrendsWidget::timerEvent(QTimerEvent*)
+{
+	QStatusBar* sb = statusBar();
+	assert(sb);
+
+	m_statusBarTextLabel->setText(m_tcpClient->m_statRequestDescription);
+	m_statusBarQueueSizeLabel->setText(QString(" Queue size: %1 ").arg(m_tcpClient->m_statRequestQueueSize));
+	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ").arg(m_tcpClient->m_statTcpRequestCount).arg(m_tcpClient->m_statTcpReplyCount));
+	HostAddressPort server = m_tcpClient->currentServerAddressPort();
+	m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
+
+	if (m_tcpClient->isConnected() == true)
+	{
+		m_statusBarConnectionStateLabel->setText(" Connected ");
+	}
+	else
+	{
+		m_statusBarConnectionStateLabel->setText(" No connection ");
+	}
+
 
 	return;
 }

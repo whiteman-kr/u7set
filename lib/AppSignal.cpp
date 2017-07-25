@@ -99,7 +99,6 @@ void AppSignalState::save(Proto::AppSignalState* protoState)
 Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 {
 	m_hash = protoState.hash();
-
 	assert(m_hash != 0);
 
 	m_value = protoState.value();

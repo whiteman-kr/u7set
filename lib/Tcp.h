@@ -443,6 +443,7 @@ namespace Tcp
 
 		QString equipmentID() const { return m_equipmentID; }
 
+		HostAddressPort currentServerAddressPort();
 		HostAddressPort serverAddressPort(int serverIndex);
 		int selectedServerIndex() { return m_selectedServerIndex; }
 

@@ -229,6 +229,20 @@ namespace TrendLib
 
 		painter->drawRect(insideRect);
 
+		// Draw Time grid
+		//
+		drawTimeGrid(painter, rect, insideRect, drawParam);
+
+		// --
+		//
+
+		return;
+	}
+
+	void RenderThread::drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam)
+	{
+		double dpiX = drawParam.dpiX();
+
 		// Calc time grid
 		//
 		static const std::array<qint64, 25> possibleTimeGridIntervals = {100_ms, 200_ms, 250_ms, 500_ms,
@@ -357,11 +371,6 @@ namespace TrendLib
 				drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
 			}
 		}
-
-		// --
-		//
-
-		return;
 	}
 
 	void RenderThread::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
@@ -398,16 +407,90 @@ namespace TrendLib
 
 		QRectF textBoundRect;
 		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
-		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
 
 		// Draw trend
 		//
-		std::list<OneHourData> outData;
+		std::list<std::shared_ptr<OneHourData>> outData;
 
 		QDateTime startTime = drawParam.startTime();
 		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
 
 		bool requestOk = m_signalSet->getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
+
+		if (requestOk == false)
+		{
+			return;
+		}
+
+		QPen linePen(Qt::PenStyle::DashLine);
+		linePen.setCosmetic(true);
+		linePen.setColor(signal.color());
+		painter->setPen(linePen);
+
+		QVector<QPointF> lines;
+		//TrendStateRecord lastRecord;
+
+		TimeStamp startTimeStamp = drawParam.startTimeStamp();
+		qint64 duration = drawParam.duration();
+
+		double yPos0 = rect.bottom() - textBoundRect.height() / 2.0;
+		double yPos1 = rect.top() + textBoundRect.height() / 2.0 ;
+
+		double lastX = 0;
+		double lastY = 0;
+
+		for (std::shared_ptr<OneHourData> hour : outData)
+		{
+			const std::vector<TrendStateRecord>& data = hour->data;
+
+			for (const TrendStateRecord& record : data)
+			{
+				for (const TrendStateItem& state : record.states)
+				{
+					if (state.isValid() == false &&
+						lines.isEmpty() == false)
+					{
+						painter->drawLines(lines);
+						lines.clear();
+						continue;
+					}
+
+					TimeStamp ct = state.system;
+
+					double x = timeToPixel(ct, rect, startTimeStamp, duration);
+					double y = (state.value == 0) ? yPos0 : yPos1;
+
+					if (lines.isEmpty() == true)
+					{
+						lines.push_back(QPointF(x, y));
+
+						lastX = x;
+						lastY = y;
+					}
+					else
+					{
+						if (lastY == y)
+						{
+							lines.push_back(QPointF(x, y));
+						}
+						else
+						{
+							lines.push_back(QPointF(x, lastY));
+							lines.push_back(QPointF(x, y));
+						}
+
+						lastX = x;
+						lastY = y;
+					}
+				}
+			}
+		}
+
+		if (lines.size() >= 2)
+		{
+			painter->drawLines(lines);
+		}
 
 		return;
 	}
@@ -416,6 +499,24 @@ namespace TrendLib
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
+
+		// Draw units (0, 1) on the left side of rect
+		//
+//		painter->setPen(signal.color());
+
+//		QRectF textBoundRect;
+//		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
+//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+		// Draw trend
+		//
+		std::list<std::shared_ptr<OneHourData>> outData;
+
+		QDateTime startTime = drawParam.startTime();
+		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+		bool requestOk = m_signalSet->getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
+
 		return;
 	}
 

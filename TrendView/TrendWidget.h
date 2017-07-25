@@ -19,6 +19,7 @@ namespace TrendLib
 
 	private:
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
+		void drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam);
 
 		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
 		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);

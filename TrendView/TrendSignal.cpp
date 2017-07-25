@@ -191,7 +191,7 @@ namespace TrendLib
 		return result;
 	}
 
-	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<OneHourData>* outData)
+	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData>>* outData)
 	{
 		if (outData == nullptr ||
 			from > to)
@@ -220,12 +220,9 @@ namespace TrendLib
 			TimeStamp fromTimeStamp((from.toMSecsSinceEpoch() / 1_hour) * 1_hour);
 			TimeStamp toTimeStamp((to.toMSecsSinceEpoch() / 1_hour) * 1_hour + (to.toMSecsSinceEpoch() % 1_hour == 0 ? 0 : 1_hour));
 
-			//QDateTime roundedToHourFrom = fromTimeStamp.toDateTime();
-			//QDateTime roundedToHourTo = toTimeStamp.toDateTime();
-
-			qDebug() << "Requested for trend data, appSignalID: " << appSignalId;
-			qDebug() << "\tRequested from " << from << ", rounded to " << fromTimeStamp.toDateTime();
-			qDebug() << "\tRequested to " << to << ", rounded to " << toTimeStamp.toDateTime();
+//			qDebug() << "Requested for trend data, appSignalID: " << appSignalId;
+//			qDebug() << "\tRequested from " << from << ", rounded to " << fromTimeStamp.toDateTime();
+//			qDebug() << "\tRequested to " << to << ", rounded to " << toTimeStamp.toDateTime();
 
 			// --
 			//
@@ -241,17 +238,26 @@ namespace TrendLib
 					return false;
 				}
 
-				OneHourData& hourData = archive.m_hours[archHour];		// Get hour data, insert if there is no such record
+				std::shared_ptr<OneHourData>& hourData = archive.m_hours[archHour];		// Get hour data, insert if there is no such record
+																						// hourData is REFERENCE, it's important as shared_ptr can be changed
 
-				switch (hourData.state)
+				if (hourData == nullptr)
+				{
+					// hourData just was created in call "archive.m_hours[archHour]"
+					//
+					hourData = std::make_shared<OneHourData>();
+				}
+
+				switch (hourData->state)
 				{
 				case OneHourData::State::NoData:
 					// No data, request data from archive
 					//
 					emit requestData(appSignalId, archHour);
+					hourData->state = OneHourData::State::Requested;
 					break;
 				case OneHourData::State::Requested:
-					// Data already requested, wait for it, so just do nothing
+					// Data already requested, wait for it, just do nothing
 					//
 					break;
 				case OneHourData::State::Received:
@@ -268,6 +274,103 @@ namespace TrendLib
 		}	// QMutexLocker locker(&m_archiveMutex);
 
 		return true;
+	}
+
+	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data)
+	{
+		// Ignore data if there is no such signal in SignalParams
+		// Probably it was requested but later signal was excluded
+		//
+		{
+			QMutexLocker paramLocker(&m_paramMutex);
+			auto it = std::find_if(m_signalParams.begin(), m_signalParams.end(),
+								   [appSignalId](const TrendSignalParam& p)
+								   {
+										return p.appSignalId() == appSignalId;
+								   });
+
+			if (it == m_signalParams.end())
+			{
+				return;
+			}
+		}
+
+		// Find Signal
+		//
+		QMutexLocker locker(&m_archiveMutex);
+
+		auto archiveIt = m_archive.find(appSignalId);
+		if (archiveIt == m_archive.end())
+		{
+			auto emplaceResult = m_archive.emplace(appSignalId, TrendArchive());
+			archiveIt = emplaceResult.first;
+		}
+
+		TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
+
+		// --
+		//
+		if (requestedHour.toDateTime().time().minute() != 0 ||
+			requestedHour.toDateTime().time().second() != 0 ||
+			requestedHour.toDateTime().time().msec() != 0)
+		{
+			assert(requestedHour.toDateTime().time().minute() == 0);
+			assert(requestedHour.toDateTime().time().second() == 0);
+			assert(requestedHour.toDateTime().time().msec() == 0);
+			return;
+		}
+
+		archive.m_hours[requestedHour] = data;
+
+		return;
+	}
+
+	void TrendSignalSet::slot_requestError(QString appSignalId, TimeStamp requestedHour)
+	{
+		// Ignore data if there is no such signal in SignalParams
+		// Probably it was requested but later signal was excluded
+		//
+		{
+			QMutexLocker paramLocker(&m_paramMutex);
+			auto it = std::find_if(m_signalParams.begin(), m_signalParams.end(),
+								   [appSignalId](const TrendSignalParam& p)
+								   {
+										return p.appSignalId() == appSignalId;
+								   });
+
+			if (it == m_signalParams.end())
+			{
+				return;
+			}
+		}
+
+		// Find Signal
+		//
+		QMutexLocker locker(&m_archiveMutex);
+
+		auto archiveIt = m_archive.find(appSignalId);
+		if (archiveIt == m_archive.end())
+		{
+			return;
+		}
+
+		TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
+
+		// --
+		//
+		if (requestedHour.toDateTime().time().minute() != 0 ||
+			requestedHour.toDateTime().time().second() != 0 ||
+			requestedHour.toDateTime().time().msec() != 0)
+		{
+			assert(requestedHour.toDateTime().time().minute() == 0);
+			assert(requestedHour.toDateTime().time().second() == 0);
+			assert(requestedHour.toDateTime().time().msec() == 0);
+			return;
+		}
+
+		archive.m_hours.erase(requestedHour);
+
+		return;
 	}
 
 }

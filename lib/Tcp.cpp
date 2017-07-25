@@ -1049,6 +1049,11 @@ namespace Tcp
 		selectServer1(reconnect);
 	}
 
+	HostAddressPort Client::currentServerAddressPort()
+	{
+		return m_selectedServer;
+	}
+
 	HostAddressPort Client::serverAddressPort(int serverIndex)
 	{
 		if (serverIndex < 0 || serverIndex > 1)

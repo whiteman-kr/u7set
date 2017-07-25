@@ -246,6 +246,11 @@ namespace TrendLib
 		return;
 	}
 
+	QStatusBar* TrendMainWindow::statusBar()
+	{
+		return ui->statusBar;
+	}
+
 	void TrendMainWindow::saveWindowState()
 	{
 		theSettings.m_mainWindowPos = pos();

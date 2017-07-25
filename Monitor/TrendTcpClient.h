@@ -5,6 +5,7 @@
 #include "../lib/Hash.h"
 #include "../lib/TimeStamp.h"
 #include "../Proto/network.pb.h"
+#include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
 
 class TrendTcpClient : public Tcp::Client
@@ -37,23 +38,19 @@ protected:
 	void requestNext();
 	void processNext(const QByteArray& data);
 
-//	void requestSignalParam(int startIndex);
-//	void processSignalParam(const QByteArray& data);
-
-//	void requestUnits();
-//	void processUnits(const QByteArray& data);
-
-//	void requestSignalState(int startIndex);
-//	void processSignalState(const QByteArray& data);
-
 public slots:
 	void slot_requestData(QString appSignalId, TimeStamp hourToRequest);
 
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
+signals:
+	void dataReady(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data);
+	void requestError(QString appSignalId, TimeStamp requestedHour);
+
 private:
-	int m_timerId = 0;
+	int m_periodicTimerId = 0;
+
 	MonitorConfigController* m_cfgController = nullptr;
 
 	struct RequestQueue
@@ -65,15 +62,28 @@ private:
 	std::queue<RequestQueue> m_queue;
 
 private:
+	bool requestInProgress = false;
 	RequestQueue m_currentRequest;
 	Hash m_currentSignalHash = 0;
 	int m_currentRequestId = 0;
+
+	std::shared_ptr<TrendLib::OneHourData> m_receivedData;
 
 	Network::GetAppSignalStatesFromArchiveStartRequest m_startRequest;
 	Network::GetAppSignalStatesFromArchiveStartReply m_startReply;
 
 	Network::GetAppSignalStatesFromArchiveNextRequest m_nextRequest;
 	Network::GetAppSignalStatesFromArchiveNextReply m_nextReply;
+
+	QTime m_startRequestTime;
+
+	// Statisctics and state variables
+	//
+public:
+	QString m_statRequestDescription = 0;
+	volatile int m_statRequestQueueSize = 0;
+	volatile int m_statTcpRequestCount = 0;
+	volatile int m_statTcpReplyCount = 0;
 };
 
 #endif // TRENDTCPCLIENT_H
