@@ -77,7 +77,7 @@ private:
 
 	DbController* m_db = nullptr;
 
-	Hardware::ConnectionStorage* m_connections = nullptr;
+	Hardware::ConnectionStorage m_connections;
 
     QMenu* m_popupMenu = nullptr;
     QAction* m_addAction = nullptr;
