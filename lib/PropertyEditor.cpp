@@ -665,6 +665,7 @@ namespace ExtWidgets
 
 		m_lineEdit = new QLineEdit(parent);
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
+		connect(m_lineEdit, &QLineEdit::textEdited, this, &QtMultiTextEdit::onTextEdited);
 
 		if (m_userType == QVariant::String && p->validator().isEmpty() == true && p->password() == false)
 		{
@@ -790,6 +791,13 @@ namespace ExtWidgets
 		}
 	}
 
+	void QtMultiTextEdit::onTextEdited(const QString &text)
+	{
+		Q_UNUSED(text);
+		m_textEdited = true;
+
+	}
+
 	void QtMultiTextEdit::onEditingFinished()
 	{
 		if (m_escape == true)
@@ -797,12 +805,13 @@ namespace ExtWidgets
 			return;
 		}
 
+		if (m_textEdited == false)
+		{
+			return;
+		}
+
 		m_lineEdit->blockSignals(true);
 
-/*		if (m_lineEdit->text() != m_oldValue)
-		{
-			   emit valueChanged(m_lineEdit->text());
-		}*/
 		switch (m_userType)
 		{
 		case QVariant::String:
@@ -853,6 +862,8 @@ namespace ExtWidgets
 		}
 
         m_lineEdit->blockSignals(false);
+
+		m_textEdited = false;
 	}
 
 	//
