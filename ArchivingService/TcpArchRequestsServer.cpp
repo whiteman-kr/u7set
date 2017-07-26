@@ -118,9 +118,10 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize)
 {
 	Network::GetAppSignalStatesFromArchiveNextRequest request;
-	Network::GetAppSignalStatesFromArchiveNextReply reply;
 
 	bool result = request.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+
+	Network::GetAppSignalStatesFromArchiveNextReply reply;
 
 	if (result == false)
 	{
@@ -142,6 +143,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 	{
 		reply.set_error(static_cast<int>(NetworkError::Success));
 		reply.set_archerror(static_cast<int>(ArchiveError::Success));
+		reply.set_requestid(m_currentRequest->requestID());
 		reply.set_dataready(false);
 		sendReply(reply);
 		return;
@@ -161,20 +163,19 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		return;
 	}
 
-	reply.set_error(static_cast<int>(NetworkError::Success));
-	reply.set_dataready(true);
+	Network::GetAppSignalStatesFromArchiveNextReply& nextReply = m_currentRequest->getNextReply();
 
-	reply.set_requestid(m_currentRequest->requestID());
+	sendReply(nextReply);
 
-	reply.set_totalstatescount(m_currentRequest->totalStates());
-	reply.set_sentstatescount(m_currentRequest->sentStates());
-
-	reply.set_statesinpartcount(0);
-	reply.set_islastpart(true);
-
-	//repeated Proto.AppSignalState appSignalStates = 7;
-
-	sendReply(reply);
+	if (nextReply.islastpart() == false)
+	{
+		m_archRequestThread.getNextData(m_currentRequest);
+	}
+	else
+	{
+		m_archRequestThread.finalizeRequest(m_currentRequest->requestID());
+		m_currentRequest.reset();
+	}
 }
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* requestData, quint32 requestDataSize)

@@ -19,6 +19,7 @@ namespace TrendLib
 
 	private:
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
+		void drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam);
 
 		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
 		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
@@ -37,12 +38,9 @@ namespace TrendLib
 		TrendSignalSet* m_signalSet = nullptr;
 
 		QMutex m_mutex;
-		QWaitCondition m_condition;
-
 		TrendDrawParam m_drawParam;
 
-		bool m_restart = false;
-		volatile bool m_abort = false;
+		bool m_newJob = false;
 
 		// Draw cache
 		//

@@ -52,6 +52,8 @@ namespace Tcp
 
 	void SocketWorker::createSocket()
 	{
+		AUTO_LOCK(m_mutex)
+
 		deleteSocket();
 
 		m_tcpSocket = new QTcpSocket;
@@ -361,9 +363,10 @@ namespace Tcp
 
 	bool SocketWorker::isConnected() const
 	{
+		AUTO_LOCK(m_mutex)
+
 		if (m_tcpSocket == nullptr)
 		{
-			assert(false);
 			return false;
 		}
 
@@ -1047,6 +1050,11 @@ namespace Tcp
 		m_serversAddressPort[1] = serverAddressPort2;
 
 		selectServer1(reconnect);
+	}
+
+	HostAddressPort Client::currentServerAddressPort()
+	{
+		return m_selectedServer;
 	}
 
 	HostAddressPort Client::serverAddressPort(int serverIndex)

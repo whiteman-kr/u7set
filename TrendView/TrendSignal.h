@@ -3,6 +3,7 @@
 
 #include <array>
 #include <bitset>
+#include <memory>
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
@@ -10,16 +11,31 @@ namespace TrendLib
 {
 	struct TrendStateItem
 	{
-		qint64	system;
-		qint64 local;
-		qint64 lant;
+		TimeStamp system;
+		TimeStamp local;
+		TimeStamp plant;
 		qint32 flags;
 		double value;
+
+		TrendStateItem(const AppSignalState& state) :
+			system(state.m_time.system),
+			local(state.m_time.local),
+			plant(state.m_time.plant),
+			flags(state.m_flags.all),
+			value(state.m_value)
+		{
+		}
+
+		bool isValid() const
+		{
+			return (flags & 0x000001);
+		}
 	};
 
 	struct TrendStateRecord
 	{
-		std::array<TrendStateItem, 512>  states;
+		std::vector<TrendStateItem> states;
+		static const size_t recomendedSize = 512;
 	};
 
 	struct OneHourData
@@ -38,7 +54,7 @@ namespace TrendLib
 	struct TrendArchive
 	{
 		QString appSignalId;
-		std::map<TimeStamp, OneHourData> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
+		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
 	};
 
 	class TrendSignalParam
@@ -109,7 +125,11 @@ namespace TrendLib
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;
 
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<OneHourData>* outData);
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData> >* outData);
+
+	public slots:
+		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data);
+		void slot_requestError(QString appSignalId, TimeStamp requestedHour);
 
 	signals:
 		void requestData(QString appSignalId, TimeStamp hourToRequest);
@@ -121,7 +141,8 @@ namespace TrendLib
 		mutable QMutex m_archiveMutex;
 		std::map<QString, TrendArchive> m_archive;
 	};
-
 }
+
+Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::OneHourData>)
 
 #endif // TRENDSIGNAL_H

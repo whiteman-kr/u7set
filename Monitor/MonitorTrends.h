@@ -28,14 +28,11 @@ public:
 	virtual ~MonitorTrendsWidget();
 
 protected:
+	virtual void timerEvent(QTimerEvent* event) override;
+
 	virtual void signalsButton() override;
 
 public:
-//	const ConfigConnection& archiveService1() const;
-//	void setArchiveService1(const ConfigConnection& config);
-
-//	const ConfigConnection& archiveService2() const;
-//	void setArchiveService2(const ConfigConnection& config);
 
 	// Data
 	//
@@ -45,6 +42,20 @@ private:
 
 	TrendTcpClient* m_tcpClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
+
+	enum  StatusBarColumns
+	{
+		SB_Text,
+		SB_QueueSize,
+		SB_NetworkRequests,
+		SB_NetworkRellies,
+	};
+
+	QLabel* m_statusBarTextLabel = nullptr;
+	QLabel* m_statusBarQueueSizeLabel = nullptr;
+	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
+	QLabel* m_statusBarServerLabel = nullptr;
+	QLabel* m_statusBarConnectionStateLabel = nullptr;
 };
 
 #endif // MONITORTRENDS_H

@@ -32,6 +32,8 @@ namespace TrendLib
 	protected:
 		void createToolBar();
 
+		QStatusBar* statusBar();
+
 		void saveWindowState();
 		void restoreWindowState();
 

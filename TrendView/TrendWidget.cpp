@@ -14,28 +14,28 @@ namespace TrendLib
 
 	RenderThread::~RenderThread()
 	{
-		m_mutex.lock();
-		m_abort = true;
-		m_condition.wakeOne();
-		m_mutex.unlock();
+		requestInterruption();
 
-		wait(5000);
+		bool ok = wait(5000);
+		if (ok == false)
+		{
+			qDebug() << "TREND RENDER THREAD IS NOT FINISHED, IT WILL BE TERMINATED!!!";
+			terminate();
+		}
+
+		return;
 	}
 
 	void RenderThread::render(const TrendDrawParam& drawParam)
 	{
 		QMutexLocker locker(&m_mutex);
 
-		this->m_drawParam = drawParam;
+		m_drawParam = drawParam;
+		m_newJob = true;
 
 		if (isRunning() == false)
 		{
 			start(QThread::NormalPriority);
-		}
-		else
-		{
-			m_restart = true;
-			m_condition.wakeOne();
 		}
 
 		return;
@@ -45,9 +45,22 @@ namespace TrendLib
 	{
 		do
 		{
+			QThread::msleep(5);
+
+			if (m_newJob == false)
+			{
+				continue;
+			}
+
+			// Start new job
+			//
 			m_mutex.lock();
 			TrendDrawParam drawParam = m_drawParam;
 			m_mutex.unlock();
+
+			// Set m_newJob to false, so it can be raised again while current drawing in progress
+			//
+			m_newJob = false;
 
 			// All drawing are done in inches
 			//
@@ -91,6 +104,11 @@ namespace TrendLib
 
 			for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
 			{
+				if (isInterruptionRequested() == true)
+				{
+					break;
+				}
+
 				QRectF laneRect;
 
 				laneRect.setLeft(laneMargin);
@@ -106,21 +124,12 @@ namespace TrendLib
 				startTime = startTime.addMSecs(drawParam.duration());
 			}
 
-			if (m_restart != true)
-			{
-				qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
-				emit renderedImage(m_image);
-			}
+			static int DrawImageCounter = 0;
+			qDebug() << "DrawImageCounter " << ++DrawImageCounter << ", trend draw time: " << timeMeasures.elapsed() << " ms";
 
-			m_mutex.lock();
-			if (m_restart == false)
-			{
-				m_condition.wait(&m_mutex);
-			}
-			m_restart = false;
-			m_mutex.unlock();
+			emit renderedImage(m_image);
 		}
-		while (m_abort == false);
+		while (isInterruptionRequested() == false);
 
 		return;
 	}
@@ -228,6 +237,20 @@ namespace TrendLib
 		painter->setBrush(Qt::BrushStyle::NoBrush);
 
 		painter->drawRect(insideRect);
+
+		// Draw Time grid
+		//
+		drawTimeGrid(painter, rect, insideRect, drawParam);
+
+		// --
+		//
+
+		return;
+	}
+
+	void RenderThread::drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam)
+	{
+		double dpiX = drawParam.dpiX();
 
 		// Calc time grid
 		//
@@ -357,11 +380,6 @@ namespace TrendLib
 				drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
 			}
 		}
-
-		// --
-		//
-
-		return;
 	}
 
 	void RenderThread::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor)
@@ -398,16 +416,95 @@ namespace TrendLib
 
 		QRectF textBoundRect;
 		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
-		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
 
 		// Draw trend
 		//
-		std::list<OneHourData> outData;
+		std::list<std::shared_ptr<OneHourData>> outData;
 
 		QDateTime startTime = drawParam.startTime();
 		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
 
 		bool requestOk = m_signalSet->getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
+
+		if (requestOk == false)
+		{
+			return;
+		}
+
+		QPen linePen;
+		linePen.setCosmetic(true);
+		linePen.setColor(signal.color());
+		painter->setPen(linePen);
+
+		QVector<QPointF> lines;
+		//TrendStateRecord lastRecord;
+
+		TimeStamp startTimeStamp = drawParam.startTimeStamp();
+		qint64 duration = drawParam.duration();
+
+		double yPos0 = rect.bottom() - textBoundRect.height() / 2.0;
+		double yPos1 = rect.top() + textBoundRect.height() / 2.0 ;
+
+		double lastX = 0;
+		double lastY = 0;
+
+		for (std::shared_ptr<OneHourData> hour : outData)
+		{
+			const std::vector<TrendStateRecord>& data = hour->data;
+
+			for (const TrendStateRecord& record : data)
+			{
+				for (const TrendStateItem& state : record.states)
+				{
+					TimeStamp ct = state.local;
+
+					//qDebug() << ct.toDateTime() << ", value " << state.value << ", flags" << state.flags;
+
+					if (state.isValid() == false &&
+						lines.isEmpty() == false)
+					{
+						QPolygonF pf(lines);
+						painter->drawPolyline(lines);
+						lines.clear();
+						continue;
+					}
+
+					double x = timeToPixel(ct, rect, startTimeStamp, duration);
+					double y = (state.value == 0) ? yPos0 : yPos1;
+
+					if (lines.isEmpty() == true)
+					{
+						lines.push_back(QPointF(x, y));
+
+						lastX = x;
+						lastY = y;
+					}
+					else
+					{
+						if (lastY == y)
+						{
+							lines.push_back(QPointF(x, y));
+						}
+						else
+						{
+							lines.push_back(QPointF(x, lastY));
+							lines.push_back(QPointF(x, y));
+						}
+
+						lastX = x;
+						lastY = y;
+					}
+				}
+			}
+		}
+
+		if (lines.size() >= 2)
+		{
+			QPolygonF pf(lines);
+			painter->drawPolyline(lines);
+			lines.clear();
+		}
 
 		return;
 	}
@@ -416,6 +513,24 @@ namespace TrendLib
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
+
+		// Draw units (0, 1) on the left side of rect
+		//
+//		painter->setPen(signal.color());
+
+//		QRectF textBoundRect;
+//		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
+//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+		// Draw trend
+		//
+		std::list<std::shared_ptr<OneHourData>> outData;
+
+		QDateTime startTime = drawParam.startTime();
+		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+		bool requestOk = m_signalSet->getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
+
 		return;
 	}
 

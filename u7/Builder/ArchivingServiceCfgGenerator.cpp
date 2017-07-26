@@ -68,6 +68,7 @@ namespace Builder
 
 				archSignal->set_hash(calcHash(s.appSignalID()));
 				archSignal->set_isanalog(s.isAnalog());
+				archSignal->set_appsignalid(s.appSignalID().toStdString());
 			}
 		}
 

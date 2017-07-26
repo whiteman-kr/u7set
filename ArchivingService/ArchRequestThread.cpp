@@ -52,15 +52,80 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 		DEBUG_LOG_ERR(logger, m_query->lastError().text());
 		return false;
 	}
-	else
-	{
-		int t = time.elapsed();
 
-		DEBUG_LOG_MSG(logger, QString("Query execution time = %1").arg(t));
-	}
+	int t = time.elapsed();
+
+	DEBUG_LOG_MSG(logger, QString("Query execution time = %1").arg(t));
+
+	m_totalStates = m_query->size();
+	m_sentStates = 0;
+	m_dataReady = false;
+
+	m_reply.set_error(static_cast<int>(NetworkError::Success));
+	m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
+	m_reply.set_requestid(m_param.requestID);
+	m_reply.set_dataready(false);
+	m_reply.set_totalstatescount(m_totalStates);
+	m_reply.set_sentstatescount(m_sentStates);
+	m_reply.set_statesinpartcount(0);
+	m_reply.set_islastpart(false);
+
+	m_reply.clear_appsignalstates();
 
 	return result;
 }
+
+void ArchRequestContext::getNextData()
+{
+	TEST_PTR_RETURN(m_query);
+
+//	assert(m_query->isValid() == true);
+
+	int count = 0;
+
+	m_reply.clear_appsignalstates();
+
+	bool hasNextRecord = false;
+
+	do
+	{
+		hasNextRecord = m_query->next();
+
+		if (hasNextRecord == false)
+		{
+			break;
+		}
+
+		qint64 archid = m_query->value(0).toLongLong();
+		qint64 plantTime = m_query->value(1).toLongLong();
+		qint64 systemTime = m_query->value(2).toLongLong();
+		qint64 localTime = m_query->value(3).toLongLong();
+		double value = m_query->value(4).toDouble();
+		qint32 flags = m_query->value(5).toInt();
+		quint64 hash = m_query->value(6).toULongLong();
+
+		Proto::AppSignalState* state = m_reply.add_appsignalstates();
+
+		state->set_archiveid(archid);
+		state->set_planttime(plantTime);
+		state->set_systemtime(systemTime);
+		state->set_localtime(localTime);
+		state->set_value(value);
+		state->set_flags(flags);
+		state->set_hash(hash);
+
+		count++;
+	}
+	while(count < ARCH_REQUEST_MAX_STATES);
+
+	m_reply.set_sentstatescount(m_reply.sentstatescount() + count);
+	m_reply.set_statesinpartcount(count);
+	m_reply.set_dataready(true);
+	m_reply.set_islastpart(!hasNextRecord);
+
+	m_dataReady = true;
+}
+
 
 const char* ArchRequestThreadWorker::FIELD_PLANT_TIME = "plantTime";
 const char* ArchRequestThreadWorker::FIELD_SYSTEM_TIME = "sysTime";
@@ -69,9 +134,8 @@ const char* ArchRequestThreadWorker::FIELD_ARCH_ID = "archID";
 const char* ArchRequestThreadWorker::FIELD_VALUE = "val";
 const char* ArchRequestThreadWorker::FIELD_FLAGS = "flags";
 
-ArchRequestThreadWorker::ArchRequestThreadWorker(const QString& projectID, const QHash<Hash, bool>& archSignals, CircularLoggerShared& logger) :
-	m_projectID(projectID),
-	m_archSignals(archSignals),
+ArchRequestThreadWorker::ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger) :
+	m_archive(archive),
 	m_logger(logger)
 {
 	qRegisterMetaType<ArchRequestContextShared>("ArchRequestContextShared");
@@ -121,35 +185,25 @@ void ArchRequestThreadWorker::finalizeRequest(quint32 requestID)
 	m_requestContexts.remove(requestID);
 }
 
+void ArchRequestThreadWorker::getNextData(ArchRequestContextShared context)
+{
+	TEST_PTR_RETURN(context);
+
+	context->setDataReady(false);
+
+	emit getNextDataSignal(context->requestID());
+}
+
 void ArchRequestThreadWorker::onThreadStarted()
 {
 	connect(this, &ArchRequestThreadWorker::newRequest, this, &ArchRequestThreadWorker::onNewRequest);
+	connect(this, &ArchRequestThreadWorker::getNextDataSignal, this, &ArchRequestThreadWorker::onGetNextData);
 
 	DEBUG_LOG_MSG(m_logger, QString("ArchRequestThreadWorker is started"));
-
-	Qt::HANDLE h = QThread::currentThreadId();
 
 	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QPSQL", "readArchConnection"));
 
 	tryConnectToDatabase();
-
-	// CODE_FOR_DEBUG
-
-//	ArchRequestParam param;
-
-//	param.timeType = TimeType::ArchiveId;
-
-//	param.startTime = 39;
-//	param.endTime = 129500;
-
-//	param.signalHashesCount = 2;
-
-//	param.signalHashes[0] = 0xf8214123bc1e4f9d;
-//	param.signalHashes[1] = 0xf8214a17eb8566a4;
-
-//	startNewRequest(param);
-
-	// CODE_FOR_DEBUG
 }
 
 void ArchRequestThreadWorker::onThreadFinished()
@@ -168,7 +222,7 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 
 	m_db->setHostName("127.0.0.1");
 	m_db->setPort(5432);
-	m_db->setDatabaseName("u7arch_" + m_projectID);
+	m_db->setDatabaseName(m_archive.dbName());
 	m_db->setUserName("u7arch");
 	m_db->setPassword("arch876436");
 
@@ -181,51 +235,6 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 	}
 
 	return result;
-}
-
-void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
-{
-	// execute request to archive DB
-	//
-	TEST_PTR_RETURN(context);
-
-	bool result = tryConnectToDatabase();
-
-	if (result == false)
-	{
-		context->setArchError(ArchiveError::DbConnectionError);
-		context->setDataReady(true);
-		return;
-	}
-
-	QString queryStr;
-
-	result = createQueryStr(context, queryStr);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	result = context->createQuery(*m_db, queryStr);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	result = context->executeQuery(m_logger);
-
-	if (result == false)
-	{
-		context->setArchError(ArchiveError::ExecQueryError);
-		context->setDataReady(true);
-	}
-	else
-	{
-		context->setArchError(ArchiveError::Success);
-		context->setDataReady(true);
-	}
 }
 
 bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, QString& queryStr)
@@ -244,19 +253,21 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 
 	int count = 0;
 
+	const QHash<Hash, ArchSignal>& archSignals = m_archive.archSignals();
+
 	for(int i = 0; i < signalHashesCount; i++)
 	{
 		Hash signalHash = signalHashes[i];
 
-		if (m_archSignals.contains(signalHash) == false)
+		if (archSignals.contains(signalHash) == false)
 		{
 			assert(false);
 			continue;
 		}
 
-		bool isAnalog = m_archSignals.contains(signalHash);
+		const ArchSignal& archSignal = archSignals.value(signalHash);
 
-		for(int i = 0; i < (isAnalog == true ? 2 : 1); i++)
+		for(int i = 0; i < (archSignal.isAnalog == true ? 2 : 1); i++)
 		{
 			QString tableName;
 
@@ -264,25 +275,27 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 			{
 				// get long term table name
 				//
-				tableName = ArchWriteThreadWorker::getTableName(signalHash, ArchWriteThreadWorker::SignalStatesTableType::LongTerm);
+				tableName = m_archive.getTableName(signalHash, Archive::TableType::LongTerm);
 			}
 			else
 			{
 				// get short term table name
 				//
-				tableName = ArchWriteThreadWorker::getTableName(signalHash, ArchWriteThreadWorker::SignalStatesTableType::ShortTerm);
+				tableName = m_archive.getTableName(signalHash, Archive::TableType::ShortTerm);
 			}
 
 			QString formatStr;
 
 			if (count == 0)
 			{
-				formatStr = QString("SELECT %1, %2, %3, %4, %5, %6 FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
+				formatStr = QString("SELECT %1, %2, %3, %4, %5, %6, %7::bigint AS hash FROM %8 WHERE %9 >= %10 AND %9 <= %11 ");
 			}
 			else
 			{
-				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6 FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
+				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6, %7::bigint AS hash FROM %8 WHERE %9 >= %10 AND %9 <= %11 ");
 			}
+
+			qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);
 
 			queryStr.append(QString(formatStr).
 							arg(FIELD_ARCH_ID).
@@ -291,6 +304,7 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 							arg(FIELD_LOCAL_TIME).
 							arg(FIELD_VALUE).
 							arg(FIELD_FLAGS).
+							arg(signedSignalHash).
 							arg(tableName).
 							arg(cmpField).
 							arg(context->startTime()).
@@ -332,11 +346,70 @@ QString ArchRequestThreadWorker::getCmpField(TimeType timeType)
 	return cmpField;
 }
 
+void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
+{
+	// execute request to archive DB
+	//
+	TEST_PTR_RETURN(context);
+
+	bool result = tryConnectToDatabase();
+
+	if (result == false)
+	{
+		context->setArchError(ArchiveError::DbConnectionError);
+		context->setDataReady(true);
+		return;
+	}
+
+	QString queryStr;
+
+	result = createQueryStr(context, queryStr);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	result = context->createQuery(*m_db, queryStr);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	result = context->executeQuery(m_logger);
+
+	if (result == false)
+	{
+		context->setArchError(ArchiveError::ExecQueryError);
+		context->setDataReady(true);
+		return;
+	}
+
+	context->setArchError(ArchiveError::Success);
+
+	context->getNextData();
+}
+
+void ArchRequestThreadWorker::onGetNextData(quint32 requestID)
+{
+	ArchRequestContextShared context = m_requestContexts.value(requestID, ArchRequestContextShared());
+
+	if (context == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	context->getNextData();
+}
+
+
 //
 
-ArchRequestThread::ArchRequestThread(const QString& projectID, const QHash<Hash, bool>& archSignals, CircularLoggerShared& logger)
+ArchRequestThread::ArchRequestThread(Archive& archive, CircularLoggerShared& logger)
 {
-	m_worker = new ArchRequestThreadWorker(projectID, archSignals, logger);
+	m_worker = new ArchRequestThreadWorker(archive, logger);
 
 	addWorker(m_worker);
 }
@@ -350,4 +423,11 @@ void ArchRequestThread::finalizeRequest(quint32 requestID)
 {
 	return m_worker->finalizeRequest(requestID);
 }
+
+
+void ArchRequestThread::getNextData(ArchRequestContextShared context)
+{
+	m_worker->getNextData(context);
+}
+
 
