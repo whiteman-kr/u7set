@@ -295,6 +295,8 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6, %7::bigint AS hash FROM %8 WHERE %9 >= %10 AND %9 <= %11 ");
 			}
 
+			qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);
+
 			queryStr.append(QString(formatStr).
 							arg(FIELD_ARCH_ID).
 							arg(FIELD_PLANT_TIME).
@@ -302,7 +304,7 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 							arg(FIELD_LOCAL_TIME).
 							arg(FIELD_VALUE).
 							arg(FIELD_FLAGS).
-							arg(signalHash).
+							arg(signedSignalHash).
 							arg(tableName).
 							arg(cmpField).
 							arg(context->startTime()).
