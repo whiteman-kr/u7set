@@ -14,28 +14,28 @@ namespace TrendLib
 
 	RenderThread::~RenderThread()
 	{
-		m_mutex.lock();
-		m_abort = true;
-		m_condition.wakeOne();
-		m_mutex.unlock();
+		requestInterruption();
 
-		wait(5000);
+		bool ok = wait(5000);
+		if (ok == false)
+		{
+			qDebug() << "TREND RENDER THREAD IS NOT FINISHED, IT WILL BE TERMINATED!!!";
+			terminate();
+		}
+
+		return;
 	}
 
 	void RenderThread::render(const TrendDrawParam& drawParam)
 	{
 		QMutexLocker locker(&m_mutex);
 
-		this->m_drawParam = drawParam;
+		m_drawParam = drawParam;
+		m_newJob = true;
 
 		if (isRunning() == false)
 		{
 			start(QThread::NormalPriority);
-		}
-		else
-		{
-			m_restart = true;
-			m_condition.wakeOne();
 		}
 
 		return;
@@ -45,9 +45,22 @@ namespace TrendLib
 	{
 		do
 		{
+			QThread::msleep(5);
+
+			if (m_newJob == false)
+			{
+				continue;
+			}
+
+			// Start new job
+			//
 			m_mutex.lock();
 			TrendDrawParam drawParam = m_drawParam;
 			m_mutex.unlock();
+
+			// Set m_newJob to false, so it can be raised again while current drawing in progress
+			//
+			m_newJob = false;
 
 			// All drawing are done in inches
 			//
@@ -91,6 +104,11 @@ namespace TrendLib
 
 			for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
 			{
+				if (isInterruptionRequested() == true)
+				{
+					break;
+				}
+
 				QRectF laneRect;
 
 				laneRect.setLeft(laneMargin);
@@ -106,21 +124,12 @@ namespace TrendLib
 				startTime = startTime.addMSecs(drawParam.duration());
 			}
 
-			if (m_restart != true)
-			{
-				qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
-				emit renderedImage(m_image);
-			}
+			static int DrawImageCounter = 0;
+			qDebug() << "DrawImageCounter " << ++DrawImageCounter << ", trend draw time: " << timeMeasures.elapsed() << " ms";
 
-			m_mutex.lock();
-			if (m_restart == false)
-			{
-				m_condition.wait(&m_mutex);
-			}
-			m_restart = false;
-			m_mutex.unlock();
+			emit renderedImage(m_image);
 		}
-		while (m_abort == false);
+		while (isInterruptionRequested() == false);
 
 		return;
 	}
