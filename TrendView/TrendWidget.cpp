@@ -423,7 +423,7 @@ namespace TrendLib
 			return;
 		}
 
-		QPen linePen(Qt::PenStyle::DashLine);
+		QPen linePen;
 		linePen.setCosmetic(true);
 		linePen.setColor(signal.color());
 		painter->setPen(linePen);
@@ -448,15 +448,18 @@ namespace TrendLib
 			{
 				for (const TrendStateItem& state : record.states)
 				{
+					TimeStamp ct = state.local;
+
+					//qDebug() << ct.toDateTime() << ", value " << state.value << ", flags" << state.flags;
+
 					if (state.isValid() == false &&
 						lines.isEmpty() == false)
 					{
-						painter->drawLines(lines);
+						QPolygonF pf(lines);
+						painter->drawPolyline(lines);
 						lines.clear();
 						continue;
 					}
-
-					TimeStamp ct = state.system;
 
 					double x = timeToPixel(ct, rect, startTimeStamp, duration);
 					double y = (state.value == 0) ? yPos0 : yPos1;
@@ -489,7 +492,9 @@ namespace TrendLib
 
 		if (lines.size() >= 2)
 		{
-			painter->drawLines(lines);
+			QPolygonF pf(lines);
+			painter->drawPolyline(lines);
+			lines.clear();
 		}
 
 		return;

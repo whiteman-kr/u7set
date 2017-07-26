@@ -132,9 +132,8 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 	}
 	else
 	{
-		m_statusBarConnectionStateLabel->setText(" No connection ");
+		m_statusBarConnectionStateLabel->setText(" NoConnection ");
 	}
-
 
 	return;
 }
