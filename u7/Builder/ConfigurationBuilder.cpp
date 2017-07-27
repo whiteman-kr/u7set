@@ -242,7 +242,7 @@ namespace Builder
 			lmReportData.append(s + "\r\n");
 		}
 
-		if (buildResultWriter.addFile("Reports", "lmJumpers.txt", lmReportData) == false)
+		if (buildResultWriter.addFile("Reports", "lmJumpers.txt", lmReportData) == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save lmJumpers.txt file!"));
 			return false;
@@ -403,12 +403,12 @@ namespace Builder
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mcb", data) == false)
+			if (buildResultWriter.addFile(path, fileName + ".mcb", data) == nullptr)
 			{
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == false)
+			if (buildResultWriter.addFile(path, fileName + ".mct", f.log()) == nullptr)
 			{
 				return false;
 			}
