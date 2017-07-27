@@ -127,6 +127,18 @@ void TrendSlider::setValue(const TimeStamp& value)
 	return;
 }
 
+void TrendSlider::setValueShiftMinMax(const TimeStamp& val)
+{
+	m_value = val.timeStamp;
+
+	m_max = qMax(m_max, m_value);
+	m_min = qMin(m_min, m_value);
+
+	emit paramsChanged(m_value, m_min, m_max, m_singleStep, m_pageStep);
+
+	return;
+}
+
 TimeStamp TrendSlider::max() const
 {
 	return TimeStamp(m_max);

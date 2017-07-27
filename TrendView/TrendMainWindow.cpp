@@ -29,7 +29,7 @@ namespace TrendLib
 
 		// TrendWidget
 		//
-		m_trendWidget = new TrendLib::TrendWidget(&m_signalSet);
+		m_trendWidget = new TrendLib::TrendWidget(this);
 		layout->addWidget(m_trendWidget, 0, 0);
 
 		m_trendWidget->setView(static_cast<TrendLib::TrendView>(theSettings.m_viewType));
@@ -80,6 +80,7 @@ namespace TrendLib
 		// --
 		//
 		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
+		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -141,14 +142,14 @@ namespace TrendLib
 		s7.setType(E::SignalType::Discrete);
 		s7.setColor(qRgb(0x00, 0x80, 0x80));
 
-		m_signalSet.addSignal(s1);
-		m_signalSet.addSignal(s2);
-		m_signalSet.addSignal(s3);
-		m_signalSet.addSignal(s4);
-		m_signalSet.addSignal(s5);
-		m_signalSet.addSignal(s6);
-		m_signalSet.addSignal(s7);
-		m_signalSet.addSignal(s11);
+		signalSet().addSignal(s1);
+		signalSet().addSignal(s2);
+		signalSet().addSignal(s3);
+		signalSet().addSignal(s4);
+		signalSet().addSignal(s5);
+		signalSet().addSignal(s6);
+		signalSet().addSignal(s7);
+		signalSet().addSignal(s11);
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -304,16 +305,6 @@ namespace TrendLib
 		return;
 	}
 
-	TrendSignalSet& TrendMainWindow::signalSet()
-	{
-		return m_signalSet;
-	}
-
-	const TrendSignalSet& TrendMainWindow::signalSet() const
-	{
-		return m_signalSet;
-	}
-
 	void TrendMainWindow::closeEvent(QCloseEvent* e)
 	{
 		saveWindowState();
@@ -433,6 +424,21 @@ namespace TrendLib
 		m_trendWidget->setStartTime(value);
 		m_trendWidget->updateWidget();
 		return;
+	}
+
+	void TrendMainWindow::startTimeChanged(TimeStamp value)
+	{
+		m_trendSlider->setValueShiftMinMax(value);
+	}
+
+	TrendLib::TrendSignalSet& TrendMainWindow::signalSet()
+	{
+		return m_trendWidget->signalSet();
+	}
+
+	const TrendLib::TrendSignalSet& TrendMainWindow::signalSet() const
+	{
+		return m_trendWidget->signalSet();
 	}
 
 }

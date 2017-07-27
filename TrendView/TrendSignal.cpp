@@ -191,7 +191,7 @@ namespace TrendLib
 		return result;
 	}
 
-	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData>>* outData)
+	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
 			from > to)

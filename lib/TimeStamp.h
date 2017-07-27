@@ -65,6 +65,12 @@ struct TimeStamp
 	{
 		return this->timeStamp != value.timeStamp;
 	}
+
+	TimeStamp& operator+ (const TimeStamp& value)
+	{
+		this->timeStamp += value.timeStamp;
+		return *this;
+	}
 };
 
 Q_DECLARE_METATYPE(TimeStamp)

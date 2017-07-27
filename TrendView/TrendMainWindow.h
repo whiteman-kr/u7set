@@ -37,9 +37,6 @@ namespace TrendLib
 		void saveWindowState();
 		void restoreWindowState();
 
-		TrendSignalSet& signalSet();
-		const TrendSignalSet& signalSet() const;
-
 		// Events
 		//
 	protected:
@@ -62,6 +59,13 @@ namespace TrendLib
 		void laneCountComboCurrentIndexChanged(int index);
 
 		void sliderValueChanged(TimeStamp value);
+		void startTimeChanged(TimeStamp value);
+
+		// Proprties
+		//
+	public:
+		TrendLib::TrendSignalSet& signalSet();
+		const TrendLib::TrendSignalSet& signalSet() const;
 
 	private:
 		Ui::TrendsMainWindow *ui;
@@ -72,7 +76,6 @@ namespace TrendLib
 		QComboBox* m_lanesCombo = nullptr;
 		QPushButton* m_signalsButton = nullptr;
 
-		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendWidget* m_trendWidget = nullptr;
 		TrendSlider* m_trendSlider = nullptr;
 

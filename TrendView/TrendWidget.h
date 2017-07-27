@@ -1,9 +1,7 @@
 #ifndef TRENDVIEW_H
 #define TRENDVIEW_H
 
-#include <QWaitCondition>
-#include "TrendSignal.h"
-#include "TrendDrawParam.h"
+#include "Trend.h"
 
 namespace TrendLib
 {
@@ -12,21 +10,11 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit RenderThread(TrendSignalSet* signalSet, QObject* parent = 0);
+		explicit RenderThread(Trend* trend, QObject* parent = 0);
 		virtual ~RenderThread();
 
+	public:
 		void render(const TrendDrawParam& drawParam);
-
-	private:
-		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam);
-		void drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam);
-
-		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
-		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
-		void drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor);
-
-		static double timeToPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
-		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 
 	signals:
 		void renderedImage(const QImage& image);
@@ -35,7 +23,7 @@ namespace TrendLib
 		virtual void run() override;
 
 	private:
-		TrendSignalSet* m_signalSet = nullptr;
+		Trend* m_trend = nullptr;
 
 		QMutex m_mutex;
 		TrendDrawParam m_drawParam;
@@ -53,20 +41,41 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		TrendWidget(TrendSignalSet* signalSet, QWidget* parent = nullptr);
+		explicit TrendWidget(QWidget* parent = nullptr);
 		virtual ~TrendWidget();
 
 	public:
 		void updateWidget();
 
+		// Events
+		//
 	protected:
-		virtual void paintEvent(QPaintEvent* event);
-		virtual void resizeEvent(QResizeEvent*);
+		virtual void paintEvent(QPaintEvent* event) override;
+		virtual void resizeEvent(QResizeEvent*) override;
 
+		virtual void mousePressEvent(QMouseEvent* event) override;
+		virtual void mouseReleaseEvent(QMouseEvent* event) override;
+		virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+		// Methods
+		//
+	protected:
+
+		// --
+		//
 	protected slots:
 		void updatePixmap(const QImage& image);
 
+		// Signals
+	signals:
+		void startTimeChanged(TimeStamp startTime);
+
+		// Properties
+		//
 	public:
+		TrendLib::TrendSignalSet& signalSet();
+		const TrendLib::TrendSignalSet& signalSet() const;
+
 		TrendView view() const;
 		void setView(TrendView value);
 
@@ -80,8 +89,13 @@ namespace TrendLib
 		RenderThread m_thread;
 		QPixmap m_pixmap;
 
-		TrendSignalSet* m_signalSet;
+		Trend m_trend;
 		TrendDrawParam m_drawParam;
+
+		// Mouse scroll vaiables
+		//
+		TimeStamp m_mouseScrollInitialTime;
+		QPoint m_mouseScrollInitialMousePos;
 	};
 }
 

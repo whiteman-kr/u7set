@@ -125,21 +125,21 @@ namespace TrendLib
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;
 
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData> >* outData);
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData> >* outData) const;
 
 	public slots:
 		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data);
 		void slot_requestError(QString appSignalId, TimeStamp requestedHour);
 
 	signals:
-		void requestData(QString appSignalId, TimeStamp hourToRequest);
+		void requestData(QString appSignalId, TimeStamp hourToRequest) const;
 
 	private:
 		mutable QMutex m_paramMutex;
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		std::map<QString, TrendArchive> m_archive;
+		mutable std::map<QString, TrendArchive> m_archive;
 	};
 }
 

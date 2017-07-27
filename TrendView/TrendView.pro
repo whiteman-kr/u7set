@@ -33,7 +33,8 @@ SOURCES += \
     TrendDrawParam.cpp \
     TrendSlider.cpp \
     TrendSettings.cpp \
-    TrendMainWindow.cpp
+    TrendMainWindow.cpp \
+    Trend.cpp
 
 HEADERS += \
     Stable.h \
@@ -43,7 +44,8 @@ HEADERS += \
     ../lib/TimeStamp.h \
     TrendSlider.h \
     TrendSettings.h \
-    TrendMainWindow.h
+    TrendMainWindow.h \
+    Trend.h
 
 unix {
     target.path = /usr/lib

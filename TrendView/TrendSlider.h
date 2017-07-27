@@ -30,6 +30,7 @@ public slots:
 public:
 	TimeStamp value() const;
 	void setValue(const TimeStamp& val);
+	void setValueShiftMinMax(const TimeStamp& val);
 
 	TimeStamp max() const;
 	void setMax(const TimeStamp& value);
