@@ -10279,7 +10279,7 @@ function(videoItemFblElement, afbElement)
 				<Category>TypeConvertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
