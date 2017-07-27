@@ -170,7 +170,7 @@ namespace Builder
 				return false;
 			}
 
-			if (buildResultWriter.addFile(path, fileName + ".tub", data) == false)
+			if (buildResultWriter.addFile(path, fileName + ".tub", data) == nullptr)
 			{
 				return false;
 			}
