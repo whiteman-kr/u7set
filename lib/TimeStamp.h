@@ -11,6 +11,8 @@ enum class TimeType
 	ArchiveId
 };
 
+Q_DECLARE_METATYPE(TimeType)
+
 // TimeStamp
 //
 struct TimeStamp

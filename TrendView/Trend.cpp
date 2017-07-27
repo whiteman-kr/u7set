@@ -315,7 +315,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
+	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/) const
 	{
 		assert(painter);
 		assert(signal.isDiscrete() == true);
@@ -328,13 +328,14 @@ namespace TrendLib
 		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);	// Get bound rect, for understaning text height
 		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
 
-
 		// Draw trend
 		//
-		std::list<std::shared_ptr<OneHourData>> outData;
+		TimeType timeType = drawParam.timeType();
 
 		QDateTime startTime = drawParam.startTime();
 		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+		std::list<std::shared_ptr<OneHourData>> outData;
 
 		bool requestOk = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
 
@@ -368,14 +369,24 @@ namespace TrendLib
 			{
 				for (const TrendStateItem& state : record.states)
 				{
-					TimeStamp ct = state.local;
+					TimeStamp ct;
 
-					//qDebug() << ct.toDateTime() << ", value " << state.value << ", flags" << state.flags;
+					switch (timeType)
+					{
+					case TimeType::Local:	ct = state.local;	break;
+					case TimeType::System:	ct = state.system;	break;
+					case TimeType::Plant:	ct = state.plant;	break;
+					default:
+						assert(false);
+						ct = state.local;
+						break;
+					}
 
+					// Break line if it is not valid point
+					//
 					if (state.isValid() == false &&
 						lines.isEmpty() == false)
 					{
-						QPolygonF pf(lines);
 						painter->drawPolyline(lines);
 						lines.clear();
 						continue;

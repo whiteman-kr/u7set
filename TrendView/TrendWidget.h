@@ -82,6 +82,9 @@ namespace TrendLib
 		int laneCount() const;
 		void setLaneCount(int value);
 
+		TimeType timeType() const;
+		void setTimeType(TimeType value);
+
 		void setStartTime(const TimeStamp& startTime);
 		void setDuration(qint64 interval);
 

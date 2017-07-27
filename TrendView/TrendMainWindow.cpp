@@ -33,6 +33,7 @@ namespace TrendLib
 		layout->addWidget(m_trendWidget, 0, 0);
 
 		m_trendWidget->setView(static_cast<TrendLib::TrendView>(theSettings.m_viewType));
+		m_trendWidget->setTimeType(static_cast<TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
 		// Slider Widged
@@ -55,6 +56,7 @@ namespace TrendLib
 		connect(m_timeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeComboCurrentIndexChanged);
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
+		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
 		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
 		setMinimumSize(500, 300);
@@ -261,11 +263,29 @@ namespace TrendLib
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
+		// Tyme Type
+		//
+		QLabel* timeTypeLabel = new QLabel("  Time Type: ");
+		timeTypeLabel->setAlignment(Qt::AlignCenter);
+		m_toolBar->addWidget(timeTypeLabel);
+
+		m_timeTypeCombo = new QComboBox(m_toolBar);
+		m_timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(TimeType::Local));
+		m_timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(TimeType::System));
+		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(TimeType::Plant));
+		m_toolBar->addWidget(m_timeTypeCombo);
+
+		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+
+		// Add stretecher
+		//
+		QWidget* empty = new QWidget();
+		empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+		m_toolBar->addWidget(empty);
+
 		// Signals
 		//
-		m_toolBar->addSeparator();
-
-		m_signalsButton = new QPushButton("Signals");
+		m_signalsButton = new QPushButton("Signals...");
 		m_toolBar->addWidget(m_signalsButton);
 
 		return;
@@ -284,6 +304,7 @@ namespace TrendLib
 
 		theSettings.m_viewType = m_viewCombo->currentIndex();
 		theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
+		theSettings.m_timeType = m_timeTypeCombo->currentIndex();
 
 		theSettings.writeUserScope();
 		return;
@@ -297,6 +318,8 @@ namespace TrendLib
 
 		assert(m_viewCombo);
 		m_viewCombo->setCurrentIndex(theSettings.m_viewType);
+
+		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeType);
 
 		// Ensure widget is visible
 		//
@@ -414,6 +437,15 @@ namespace TrendLib
 	{
 		int laneCount = m_lanesCombo->itemData(index).value<int>();
 		m_trendWidget->setLaneCount(laneCount);
+
+		m_trendWidget->updateWidget();
+		return;
+	}
+
+	void TrendMainWindow::timeTypeComboCurrentIndexChanged(int index)
+	{
+		TimeType timeType = m_timeTypeCombo->itemData(index).value<TimeType>();
+		m_trendWidget->setTimeType(timeType);
 
 		m_trendWidget->updateWidget();
 		return;

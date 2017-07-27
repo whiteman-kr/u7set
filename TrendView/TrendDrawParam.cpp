@@ -45,6 +45,16 @@ namespace TrendLib
 		m_view = value;
 	}
 
+	TimeType TrendDrawParam::timeType() const
+	{
+		return m_timeType;
+	}
+
+	void TrendDrawParam::setTimeType(TimeType value)
+	{
+		m_timeType = value;
+	}
+
 	int TrendDrawParam::laneCount() const
 	{
 		return m_laneCount;

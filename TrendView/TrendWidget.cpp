@@ -256,6 +256,16 @@ namespace TrendLib
 		m_drawParam.setLaneCount(value);
 	}
 
+	TimeType TrendWidget::timeType() const
+	{
+		return m_drawParam.timeType();
+	}
+
+	void TrendWidget::setTimeType(TimeType value)
+	{
+		m_drawParam.setTimeType(value);
+	}
+
 	void TrendWidget::setStartTime(const TimeStamp& startTime)
 	{
 		m_drawParam.setStartTimeStamp(startTime);

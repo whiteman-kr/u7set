@@ -10,6 +10,7 @@ namespace TrendLib
 		Overlapped
 	};
 }
+
 Q_DECLARE_METATYPE(TrendLib::TrendView)
 
 namespace TrendLib
@@ -29,6 +30,9 @@ namespace TrendLib
 
 		TrendView view() const;
 		void setView(TrendView value);
+
+		TimeType timeType() const;
+		void setTimeType(TimeType value);
 
 		int laneCount() const;
 		void setLaneCount(int value);
@@ -53,6 +57,7 @@ namespace TrendLib
 		int m_dpiY = 96;
 
 		TrendView m_view = TrendView::Separated;
+		TimeType m_timeType = TimeType::Local;
 		int m_laneCount = 1;
 
 		QColor m_backgroundColor = {qRgb(0xE0, 0xE0, 0xE0)};
