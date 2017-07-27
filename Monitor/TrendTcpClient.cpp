@@ -149,7 +149,8 @@ void TrendTcpClient::requestStart()
 
 	m_startRequest.Clear();
 	m_startRequest.set_clientequipmentid(theSettings.instanceStrId().toStdString());
-	m_startRequest.set_timetype(1);						// 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
+
+	m_startRequest.set_timetype(static_cast<int>(m_currentRequest.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
 	m_startRequest.set_starttime(m_currentRequest.hourToRequest.timeStamp);
 	m_startRequest.set_endtime(m_currentRequest.hourToRequest.timeStamp + 1_hour);
 	m_startRequest.add_signalhashes(m_currentSignalHash);
@@ -171,7 +172,7 @@ void TrendTcpClient::processStart(const QByteArray& data)
 
 	if (ok == false)
 	{
-		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest);
+		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
 		assert(ok);
@@ -185,7 +186,7 @@ void TrendTcpClient::processStart(const QByteArray& data)
 
 	if (error != 0)
 	{
-		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest);
+		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
 
 		qDebug() << "RECEIVED ERROR:   TrendTcpClient::processStart, error = " << error
@@ -223,7 +224,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	{
 		assert(ok);
 
-		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest);
+		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
 
 		resetRequestCycle();
@@ -237,7 +238,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	{
 		assert(m_currentRequestId == m_nextReply.requestid());
 
-		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest);
+		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
 
 		qDebug() << "TrendTcpClient::processNext, wrong RequestID, expected " << m_currentRequestId
@@ -249,7 +250,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 
 	if (error != 0)
 	{
-		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest);
+		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
 
 		qDebug() << "ERROR: TrendTcpClient::processNext, AppSignalID = " << m_currentRequest.appSignalId
@@ -327,7 +328,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 
 		m_receivedData->state = TrendLib::OneHourData::State::Received;
 
-		emit dataReady(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_receivedData);
+		emit dataReady(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType, m_receivedData);
 
 		requestInProgress = false;			// END OF REQUEST COMMUNICATION!
 		m_receivedData.reset();
@@ -344,7 +345,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	return;
 }
 
-void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest)
+void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType)
 {
 	//qDebug() << "TrendTcpClient::slot_requestData, AppSignalID = " << appSignalId << ", Time = " << hourToRequest.toDateTime();
 
@@ -352,6 +353,7 @@ void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToReque
 
 	request.appSignalId = appSignalId;
 	request.hourToRequest = hourToRequest;
+	request.timeType = timeType;
 
 	m_queue.push(request);
 

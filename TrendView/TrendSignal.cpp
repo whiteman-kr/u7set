@@ -191,7 +191,7 @@ namespace TrendLib
 		return result;
 	}
 
-	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData>>* outData) const
+	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
 			from > to)
@@ -206,10 +206,21 @@ namespace TrendLib
 		{
 			QMutexLocker locker(&m_archiveMutex);
 
-			auto archiveIt = m_archive.find(appSignalId);
-			if (archiveIt == m_archive.end())
+			std::map<QString, TrendArchive>* m_archive = nullptr;
+			switch (timeType)
 			{
-				auto emplaceResult = m_archive.emplace(appSignalId, TrendArchive());
+			case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+			case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+			case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+			default:
+				assert(false);
+				return false;
+			}
+
+			auto archiveIt = m_archive->find(appSignalId);
+			if (archiveIt == m_archive->end())
+			{
+				auto emplaceResult = m_archive->emplace(appSignalId, TrendArchive());
 				archiveIt = emplaceResult.first;
 			}
 
@@ -253,7 +264,7 @@ namespace TrendLib
 				case OneHourData::State::NoData:
 					// No data, request data from archive
 					//
-					emit requestData(appSignalId, archHour);
+					emit requestData(appSignalId, archHour, timeType);
 					hourData->state = OneHourData::State::Requested;
 					break;
 				case OneHourData::State::Requested:
@@ -276,7 +287,12 @@ namespace TrendLib
 		return true;
 	}
 
-	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data)
+	void clearStates()
+	{
+
+	}
+
+	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
 	{
 		// Ignore data if there is no such signal in SignalParams
 		// Probably it was requested but later signal was excluded
@@ -299,10 +315,21 @@ namespace TrendLib
 		//
 		QMutexLocker locker(&m_archiveMutex);
 
-		auto archiveIt = m_archive.find(appSignalId);
-		if (archiveIt == m_archive.end())
+		std::map<QString, TrendArchive>* m_archive = nullptr;
+		switch (timeType)
 		{
-			auto emplaceResult = m_archive.emplace(appSignalId, TrendArchive());
+		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		default:
+			assert(false);
+			return;
+		}
+
+		auto archiveIt = m_archive->find(appSignalId);
+		if (archiveIt == m_archive->end())
+		{
+			auto emplaceResult = m_archive->emplace(appSignalId, TrendArchive());
 			archiveIt = emplaceResult.first;
 		}
 
@@ -325,7 +352,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::slot_requestError(QString appSignalId, TimeStamp requestedHour)
+	void TrendSignalSet::slot_requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType)
 	{
 		// Ignore data if there is no such signal in SignalParams
 		// Probably it was requested but later signal was excluded
@@ -348,8 +375,19 @@ namespace TrendLib
 		//
 		QMutexLocker locker(&m_archiveMutex);
 
-		auto archiveIt = m_archive.find(appSignalId);
-		if (archiveIt == m_archive.end())
+		std::map<QString, TrendArchive>* m_archive = nullptr;
+		switch (timeType)
+		{
+		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		default:
+			assert(false);
+			return;
+		}
+
+		auto archiveIt = m_archive->find(appSignalId);
+		if (archiveIt == m_archive->end())
 		{
 			return;
 		}

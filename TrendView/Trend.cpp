@@ -303,19 +303,34 @@ namespace TrendLib
 		QString signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
 		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip);
 
+		// Get signal data
+		//
+		QDateTime startTime = drawParam.startTime();
+		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+		std::list<std::shared_ptr<OneHourData>> signalData;
+
+		bool requestResult = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, drawParam.timeType(), &signalData);
+		if (requestResult == false)
+		{
+			signalData.clear();
+		}
+
+		// Draw signal trend
+		//
 		if (signal.isDiscrete() == true)
 		{
-			drawDiscrete(painter, signal, rect, drawParam, backColor);
+			drawDiscrete(painter, signal, rect, drawParam, backColor, signalData);
 		}
 		else
 		{
-			drawAnalog(painter, signal, rect, drawParam, backColor);
+			drawAnalog(painter, signal, rect, drawParam, backColor, signalData);
 		}
 
 		return;
 	}
 
-	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/) const
+	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData> >& signalData) const
 	{
 		assert(painter);
 		assert(signal.isDiscrete() == true);
@@ -332,25 +347,12 @@ namespace TrendLib
 		//
 		TimeType timeType = drawParam.timeType();
 
-		QDateTime startTime = drawParam.startTime();
-		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
-
-		std::list<std::shared_ptr<OneHourData>> outData;
-
-		bool requestOk = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
-
-		if (requestOk == false)
-		{
-			return;
-		}
-
 		QPen linePen;
 		linePen.setCosmetic(true);
 		linePen.setColor(signal.color());
 		painter->setPen(linePen);
 
 		QVector<QPointF> lines;
-		//TrendStateRecord lastRecord;
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -361,7 +363,7 @@ namespace TrendLib
 		double lastX = 0;
 		double lastY = 0;
 
-		for (std::shared_ptr<OneHourData> hour : outData)
+		for (std::shared_ptr<OneHourData> hour : signalData)
 		{
 			const std::vector<TrendStateRecord>& data = hour->data;
 
@@ -431,7 +433,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
+	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData> >& signalData) const
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
@@ -446,12 +448,6 @@ namespace TrendLib
 
 		// Draw trend
 		//
-		std::list<std::shared_ptr<OneHourData>> outData;
-
-		QDateTime startTime = drawParam.startTime();
-		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
-
-		bool requestOk = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, &outData);
 
 		return;
 	}

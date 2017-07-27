@@ -125,21 +125,23 @@ namespace TrendLib
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;
 
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, std::list<std::shared_ptr<OneHourData> >* outData) const;
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
 
 	public slots:
-		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, std::shared_ptr<TrendLib::OneHourData> data);
-		void slot_requestError(QString appSignalId, TimeStamp requestedHour);
+		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+		void slot_requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType);
 
 	signals:
-		void requestData(QString appSignalId, TimeStamp hourToRequest) const;
+		void requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType) const;
 
 	private:
 		mutable QMutex m_paramMutex;
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		mutable std::map<QString, TrendArchive> m_archive;
+		mutable std::map<QString, TrendArchive> m_archiveLocalTime;
+		mutable std::map<QString, TrendArchive> m_archiveSystemTime;
+		mutable std::map<QString, TrendArchive> m_archivePlantTime;
 	};
 }
 
