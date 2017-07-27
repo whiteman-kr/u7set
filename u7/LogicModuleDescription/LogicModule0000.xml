@@ -61,6 +61,7 @@
 		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"/>
 		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="4"		VersionOpIndex="28"/>
 		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="1"		VersionOpIndex="22"/>
+		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
 	</AFBImplementation>
 	<AFBL>
 		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0004">
@@ -10271,5 +10272,217 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
+
+		<AFB id="#tconv_16si_16si_v1"       Caption="tconv_16si_16si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 16-bit little-endian to 16-bit big endian and back</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="1" Size="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="4" Size="16"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+ 
+		<AFB id="#tconv_si_si_v1"       Caption="tconv_si_si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 32-bit little-endian to 32-bit big endian and back</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 32-bit signed int to floating point</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>3</Value>
+					<Default>3</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+ 
+		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from floating point to 32-bit signed int</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" DataFormat="UnsignedInt" OpIndex="7" Size="1"/>
+				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" DataFormat="UnsignedInt" OpIndex="8" Size="1"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" DataFormat="UnsignedInt" OpIndex="9" Size="1"/>            
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>4</Value>
+					<Default>4</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}						
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}						
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
 	</AFBL>
 </LogicModule>
