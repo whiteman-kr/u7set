@@ -23,6 +23,7 @@ protected:
 	virtual void paintEvent(QPaintEvent*event) override;
 
 public slots:
+	void setTimeClicked();
 	void lineLeftClicked();
 	void lineRightClicked();
 	void sliderRailChanged(qint64 newValue);
@@ -51,6 +52,7 @@ private:
 	qint64 m_singleStep = 1000;
 	qint64 m_pageStep = 10000;
 
+	QPushButton* m_setTimeButton = nullptr;
 	QPushButton* m_lineLeftButton = nullptr;
 	QPushButton* m_lineRightButton = nullptr;
 	TrendSliderRailSubcontrol* m_railSubcontrol = nullptr;

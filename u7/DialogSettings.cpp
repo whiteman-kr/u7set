@@ -10,8 +10,8 @@ DialogSettings::DialogSettings(QWidget *parent) :
 	ui->setupUi(this);
 
 	setWindowFlags((windowFlags() &
-				   ~Qt::WindowMinimizeButtonHint &
-				   ~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	return;

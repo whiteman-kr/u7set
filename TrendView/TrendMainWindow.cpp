@@ -7,7 +7,7 @@
 namespace TrendLib
 {
 
-	TrendMainWindow::TrendMainWindow(QWidget *parent) :
+	TrendMainWindow::TrendMainWindow(QWidget* parent) :
 		QMainWindow(parent),
 		ui(new Ui::TrendsMainWindow)
 	{
@@ -60,11 +60,14 @@ namespace TrendLib
 		setMinimumSize(500, 300);
 		restoreWindowState();
 
-		// Init Slider with some params from ToolBar
+		// Init Slider with some params from ToolBar, connect signals before setting min/max/current time
 		//
-		QDateTime now = QDateTime::currentDateTime();
+		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
+		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
 
-		TimeStamp ts(now.toMSecsSinceEpoch() + now.offsetFromUtc() * 1000);		//	toMSecsSinceEpoch resturn system time, aso add offsetFromUtc (offsetFromUtc is in seconds)
+		// --
+		//
+		TimeStamp ts(QDateTime::currentDateTime());
 		ts.timeStamp -= 1_hour * theSettings.m_laneCount;
 
 		m_trendSlider->setMin(ts);
@@ -77,10 +80,6 @@ namespace TrendLib
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
 
-		// --
-		//
-		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
-		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -229,6 +228,7 @@ namespace TrendLib
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
+		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours));
 		m_timeCombo->setCurrentIndex(6);
 		m_toolBar->addWidget(m_timeCombo);
 

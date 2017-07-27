@@ -1,9 +1,12 @@
 #include "TrendSlider.h"
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QDateTimeEdit>
+#include <QDialogButtonBox>
 
 TrendSlider::TrendSlider()
 {
+	m_setTimeButton = new QPushButton(QChar(0x25B2), this);
 	m_lineLeftButton = new QPushButton(QChar(0x25C4), this);
 	m_lineRightButton = new QPushButton(QChar(0x25BA), this);
 	m_railSubcontrol = new TrendSliderRailSubcontrol(this);
@@ -17,16 +20,19 @@ TrendSlider::TrendSlider()
 	layout->setMargin(1);
 	layout->setSpacing(1);
 
+	layout->addWidget(m_setTimeButton);
 	layout->addWidget(m_lineLeftButton);
 	layout->addWidget(m_railSubcontrol);
 	layout->addWidget(m_lineRightButton);
 
 	setLayout(layout);
 
+	m_setTimeButton->setMaximumSize(QSize(m_setTimeButton->height(), m_setTimeButton->height()));
 	m_lineLeftButton->setMaximumSize(QSize(m_lineLeftButton->height(), m_lineLeftButton->height()));
 	m_lineRightButton->setMaximumSize(QSize(m_lineRightButton->height(), m_lineRightButton->height()));
 	m_railSubcontrol->setMaximumHeight(m_lineRightButton->height() - 2);
 
+	connect(m_setTimeButton, &QPushButton::clicked, this, &TrendSlider::setTimeClicked);
 	connect(m_lineLeftButton, &QPushButton::clicked, this, &TrendSlider::lineLeftClicked);
 	connect(m_lineRightButton, &QPushButton::clicked, this, &TrendSlider::lineRightClicked);
 	connect(m_railSubcontrol, &TrendSliderRailSubcontrol::valueChanged, this, &TrendSlider::sliderRailChanged);
@@ -54,6 +60,54 @@ void TrendSlider::paintEvent(QPaintEvent* /*event*/)
 
 //	QString text = "XX:XX:XX 17.01.2017";
 //	p.drawText(sliderRect, Qt::AlignCenter, text, &sliderRect);
+
+	return;
+}
+
+void TrendSlider::setTimeClicked()
+{
+	QDateEdit* dateEdit = new QDateEdit(TimeStamp(m_value).toDateTime().date());
+	dateEdit->setCalendarPopup(true);
+
+	QTimeEdit* timeEdit = new QTimeEdit(TimeStamp(m_value).toDateTime().time());
+	timeEdit->setDisplayFormat("hh:mm:ss");
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QDialog d(qobject_cast<QWidget*>(this->parent()));
+
+	d.setWindowTitle(tr("Set Time"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	layout->addWidget(dateEdit);
+	layout->addWidget(timeEdit);
+	layout->addWidget(buttonBox);
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QDateTime dt;
+		dt.setDate(dateEdit->date());
+		dt.setTime(timeEdit->time());
+
+		qDebug() << "Selected time: " << dt;
+
+		TimeStamp ts(dt);
+
+		setValueShiftMinMax(ts);
+		emit valueChanged(ts);
+	}
 
 	return;
 }
