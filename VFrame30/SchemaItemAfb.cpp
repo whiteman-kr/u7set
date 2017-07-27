@@ -125,17 +125,19 @@ namespace VFrame30
 								break;
 
 							case E::DataFormat::Float:
+								paramValue.setNum(a.toDouble(), 'g', precision());
 
-								paramValue.setNum(a.toDouble(), 'f', precision());
-
-								while(paramValue.endsWith('0'))
+								if (paramValue.size() > 2)
 								{
-									paramValue.chop(1);
-								}
+									while(paramValue.endsWith('0'))
+									{
+										paramValue.chop(1);
+									}
 
-								if (paramValue.endsWith('.'))
-								{
-									paramValue.chop(1);
+									if (paramValue.endsWith('.'))
+									{
+										paramValue.chop(1);
+									}
 								}
 								break;
 

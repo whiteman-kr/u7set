@@ -165,7 +165,7 @@ namespace VFrame30
 				text = QString::number(intValue());
 				break;
 			case ConstType::FloatType:
-				text = QString::number(floatValue(), 'f', precision());
+				text = QString::number(floatValue(), 'g', precision());
 				break;
 			default:
 				assert(false);
