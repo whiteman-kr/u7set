@@ -247,6 +247,7 @@ namespace ExtWidgets
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
+		void onTextEdited(const QString &text);
 		void onEditingFinished();
 
 	signals:
@@ -264,6 +265,8 @@ namespace ExtWidgets
 
 		bool m_escape = false;
 		QVariant m_oldValue;
+
+		bool m_textEdited = false;
 
 		std::shared_ptr<Property> m_property;
 		int m_userType = 0;

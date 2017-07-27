@@ -44,8 +44,8 @@
 		<AFBComponent Caption="CTUD"		OpCode="5"	ImpVersion="106"	VersionOpIndex="11"/>
 		<AFBComponent Caption="MAJ"			OpCode="6"	ImpVersion="105"	VersionOpIndex="21"/>
 		<AFBComponent Caption="SRSST"		OpCode="7"	ImpVersion="104"	VersionOpIndex="5"/>
-		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="38"/>
-		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="102"	VersionOpIndex="19"/>
+		<AFBComponent Caption="BCOD"		OpCode="8"	ImpVersion="103"	VersionOpIndex="37"/>
+		<AFBComponent Caption="BDEC"		OpCode="9"	ImpVersion="103"	VersionOpIndex="37"/>
 		<AFBComponent Caption="BCOMP"		OpCode="10"	ImpVersion="110"	VersionOpIndex="12"/>
 		<AFBComponent Caption="DAMPER"		OpCode="11"	ImpVersion="108"	VersionOpIndex="21"/>		<!-- 	OpIndex 19 as in BDEC  !!!!!-->
 		<AFBComponent Caption="MEM"			OpCode="12"	ImpVersion="5"		VersionOpIndex="44"/>		<!-- 	ImpVersion="0" OpIndex="44 -->
@@ -61,6 +61,7 @@
 		<AFBComponent Caption="POL"			OpCode="25"	ImpVersion="3"		VersionOpIndex="31"/>
 		<AFBComponent Caption="DER"			OpCode="26"	ImpVersion="4"		VersionOpIndex="28"/>
 		<AFBComponent Caption="MISMATCH"	OpCode="27"	ImpVersion="1"		VersionOpIndex="22"/>
+		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
 	</AFBImplementation>
 	<AFBL>
 		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0004">
@@ -2324,7 +2325,7 @@ function(videoItemFblElement, afbElement)
 		
 		<AFB id="#cod_bus_v1"          Caption="cod_bus"          Version="1.0003">
 			<Properties>
-				<Description>Binary Coder Block analyses input signals state strictly inorder in 32 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
+				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
 				<OpCode>8</OpCode>
 				<HasRam>false</HasRam>				
@@ -3404,7 +3405,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dec_v1"          Caption="dec"          Version="1.0004">
+		<AFB id="#dec_v1"          Caption="dec"          Version="1.0005">
 			<Properties>				
 				<Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
 				<Category>Logic</Category>
@@ -3414,35 +3415,236 @@ function(videoItemFblElement, afbElement)
 				<MinWidth>14</MinWidth>
 			</Properties>
 			<Inputs>
-				<Pin OpName="i_number" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="0" Size="32"/>
+				<Pin OpName="i_number" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
 			</Inputs>
 			<Outputs>
-				<Pin OpName="o_1_oprd" Caption="out_1" Type="Discrete" OpIndex="3" Size="1"/>
-				<Pin OpName="o_2_oprd" Caption="out_2" Type="Discrete" OpIndex="4" Size="1"/>
-				<Pin OpName="o_3_oprd" Caption="out_3" Type="Discrete" OpIndex="5" Size="1"/>
-				<Pin OpName="o_4_oprd" Caption="out_4" Type="Discrete" OpIndex="6" Size="1"/>
-				<Pin OpName="o_5_oprd" Caption="out_5" Type="Discrete" OpIndex="7" Size="1"/>
-				<Pin OpName="o_6_oprd" Caption="out_6" Type="Discrete" OpIndex="8" Size="1"/>
-				<Pin OpName="o_7_oprd" Caption="out_7" Type="Discrete" OpIndex="9" Size="1"/>
-				<Pin OpName="o_8_oprd" Caption="out_8" Type="Discrete" OpIndex="10" Size="1"/>
-				<Pin OpName="o_9_oprd" Caption="out_9" Type="Discrete" OpIndex="11" Size="1"/>
-				<Pin OpName="o_10_oprd" Caption="out_10" Type="Discrete" OpIndex="12" Size="1"/>
-				<Pin OpName="o_11_oprd" Caption="out_11" Type="Discrete" OpIndex="13" Size="1"/>
-				<Pin OpName="o_12_oprd" Caption="out_12" Type="Discrete" OpIndex="14" Size="1"/>
-				<Pin OpName="o_13_oprd" Caption="out_13" Type="Discrete" OpIndex="15" Size="1"/>
-				<Pin OpName="o_14_oprd" Caption="out_14" Type="Discrete" OpIndex="16" Size="1"/>
-				<Pin OpName="o_15_oprd" Caption="out_15" Type="Discrete" OpIndex="17" Size="1"/>
-				<Pin OpName="o_16_oprd" Caption="out_16" Type="Discrete" OpIndex="18" Size="1"/>
+				<Pin OpName="o_1_oprd" Caption="out_1" Type="Discrete" OpIndex="4" Size="1"/>
+				<Pin OpName="o_2_oprd" Caption="out_2" Type="Discrete" OpIndex="5" Size="1"/>
+				<Pin OpName="o_3_oprd" Caption="out_3" Type="Discrete" OpIndex="6" Size="1"/>
+				<Pin OpName="o_4_oprd" Caption="out_4" Type="Discrete" OpIndex="7" Size="1"/>
+				<Pin OpName="o_5_oprd" Caption="out_5" Type="Discrete" OpIndex="8" Size="1"/>
+				<Pin OpName="o_6_oprd" Caption="out_6" Type="Discrete" OpIndex="9" Size="1"/>
+				<Pin OpName="o_7_oprd" Caption="out_7" Type="Discrete" OpIndex="10" Size="1"/>
+				<Pin OpName="o_8_oprd" Caption="out_8" Type="Discrete" OpIndex="11" Size="1"/>
+				<Pin OpName="o_9_oprd" Caption="out_9" Type="Discrete" OpIndex="12" Size="1"/>
+				<Pin OpName="o_10_oprd" Caption="out_10" Type="Discrete" OpIndex="13" Size="1"/>
+				<Pin OpName="o_11_oprd" Caption="out_11" Type="Discrete" OpIndex="14" Size="1"/>
+				<Pin OpName="o_12_oprd" Caption="out_12" Type="Discrete" OpIndex="15" Size="1"/>
+				<Pin OpName="o_13_oprd" Caption="out_13" Type="Discrete" OpIndex="16" Size="1"/>
+				<Pin OpName="o_14_oprd" Caption="out_14" Type="Discrete" OpIndex="17" Size="1"/>
+				<Pin OpName="o_15_oprd" Caption="out_15" Type="Discrete" OpIndex="18" Size="1"/>
+				<Pin OpName="o_16_oprd" Caption="out_16" Type="Discrete" OpIndex="19" Size="1"/>
+				<Pin OpName="o_17_oprd" Caption="out_17" Type="Discrete" OpIndex="20" Size="1"/>
+				<Pin OpName="o_18_oprd" Caption="out_18" Type="Discrete" OpIndex="21" Size="1"/>
+				<Pin OpName="o_19_oprd" Caption="out_19" Type="Discrete" OpIndex="22" Size="1"/>
+				<Pin OpName="o_20_oprd" Caption="out_20" Type="Discrete" OpIndex="23" Size="1"/>
+				<Pin OpName="o_21_oprd" Caption="out_21" Type="Discrete" OpIndex="24" Size="1"/>
+				<Pin OpName="o_22_oprd" Caption="out_22" Type="Discrete" OpIndex="25" Size="1"/>
+				<Pin OpName="o_23_oprd" Caption="out_23" Type="Discrete" OpIndex="26" Size="1"/>
+				<Pin OpName="o_24_oprd" Caption="out_24" Type="Discrete" OpIndex="27" Size="1"/>
+				<Pin OpName="o_25_oprd" Caption="out_25" Type="Discrete" OpIndex="28" Size="1"/>
+				<Pin OpName="o_26_oprd" Caption="out_26" Type="Discrete" OpIndex="29" Size="1"/>
+				<Pin OpName="o_27_oprd" Caption="out_27" Type="Discrete" OpIndex="30" Size="1"/>
+				<Pin OpName="o_28_oprd" Caption="out_28" Type="Discrete" OpIndex="31" Size="1"/>
+				<Pin OpName="o_29_oprd" Caption="out_29" Type="Discrete" OpIndex="32" Size="1"/>
+				<Pin OpName="o_30_oprd" Caption="out_30" Type="Discrete" OpIndex="33" Size="1"/>
+				<Pin OpName="o_31_oprd" Caption="out_31" Type="Discrete" OpIndex="34" Size="1"/>
+				<Pin OpName="o_32_oprd" Caption="out_32" Type="Discrete" OpIndex="35" Size="1"/>
 			</Outputs>
 			<Params>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+						<Value>1</Value>
+						<Default>1</Default>
+						<LowLimit>1</LowLimit>
+						<HighLimit>2</HighLimit>
+						<Script>
+							<Changed></Changed>
+						</Script>
+				</Param>
+				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>32</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 			</Params>
 			<CommonScript>
-		<Library>
-		</Library>
+				<Library>
+				function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OutputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 1)
+	{
+		count = 1;
+	}
+	if (count &gt; 32)
+	{
+		count = 32;
+	}
+
+	var opIndex = 4;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbSignal != null)
+		{
+			var caption = afbSignal.jsCaption();
+			var type = afbSignal.jsType();
+			var operandIndex = afbSignal.operandIndex();
+			var size = afbSignal.size();
+			videoItemFblElement.addOutputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
 				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
+		
+		<AFB id="#dec_bus_v1"          Caption="dec_bus"          Version="1.0001">
+			<Properties>				
+				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
+				<Category>Logic</Category>
+				<OpCode>9</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_number" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_1_oprd" Caption="out_1" Type="Discrete" OpIndex="4" Size="1"/>
+				<Pin OpName="o_2_oprd" Caption="out_2" Type="Discrete" OpIndex="5" Size="1"/>
+				<Pin OpName="o_3_oprd" Caption="out_3" Type="Discrete" OpIndex="6" Size="1"/>
+				<Pin OpName="o_4_oprd" Caption="out_4" Type="Discrete" OpIndex="7" Size="1"/>
+				<Pin OpName="o_5_oprd" Caption="out_5" Type="Discrete" OpIndex="8" Size="1"/>
+				<Pin OpName="o_6_oprd" Caption="out_6" Type="Discrete" OpIndex="9" Size="1"/>
+				<Pin OpName="o_7_oprd" Caption="out_7" Type="Discrete" OpIndex="10" Size="1"/>
+				<Pin OpName="o_8_oprd" Caption="out_8" Type="Discrete" OpIndex="11" Size="1"/>
+				<Pin OpName="o_9_oprd" Caption="out_9" Type="Discrete" OpIndex="12" Size="1"/>
+				<Pin OpName="o_10_oprd" Caption="out_10" Type="Discrete" OpIndex="13" Size="1"/>
+				<Pin OpName="o_11_oprd" Caption="out_11" Type="Discrete" OpIndex="14" Size="1"/>
+				<Pin OpName="o_12_oprd" Caption="out_12" Type="Discrete" OpIndex="15" Size="1"/>
+				<Pin OpName="o_13_oprd" Caption="out_13" Type="Discrete" OpIndex="16" Size="1"/>
+				<Pin OpName="o_14_oprd" Caption="out_14" Type="Discrete" OpIndex="17" Size="1"/>
+				<Pin OpName="o_15_oprd" Caption="out_15" Type="Discrete" OpIndex="18" Size="1"/>
+				<Pin OpName="o_16_oprd" Caption="out_16" Type="Discrete" OpIndex="19" Size="1"/>
+				<Pin OpName="o_17_oprd" Caption="out_17" Type="Discrete" OpIndex="20" Size="1"/>
+				<Pin OpName="o_18_oprd" Caption="out_18" Type="Discrete" OpIndex="21" Size="1"/>
+				<Pin OpName="o_19_oprd" Caption="out_19" Type="Discrete" OpIndex="22" Size="1"/>
+				<Pin OpName="o_20_oprd" Caption="out_20" Type="Discrete" OpIndex="23" Size="1"/>
+				<Pin OpName="o_21_oprd" Caption="out_21" Type="Discrete" OpIndex="24" Size="1"/>
+				<Pin OpName="o_22_oprd" Caption="out_22" Type="Discrete" OpIndex="25" Size="1"/>
+				<Pin OpName="o_23_oprd" Caption="out_23" Type="Discrete" OpIndex="26" Size="1"/>
+				<Pin OpName="o_24_oprd" Caption="out_24" Type="Discrete" OpIndex="27" Size="1"/>
+				<Pin OpName="o_25_oprd" Caption="out_25" Type="Discrete" OpIndex="28" Size="1"/>
+				<Pin OpName="o_26_oprd" Caption="out_26" Type="Discrete" OpIndex="29" Size="1"/>
+				<Pin OpName="o_27_oprd" Caption="out_27" Type="Discrete" OpIndex="30" Size="1"/>
+				<Pin OpName="o_28_oprd" Caption="out_28" Type="Discrete" OpIndex="31" Size="1"/>
+				<Pin OpName="o_29_oprd" Caption="out_29" Type="Discrete" OpIndex="32" Size="1"/>
+				<Pin OpName="o_30_oprd" Caption="out_30" Type="Discrete" OpIndex="33" Size="1"/>
+				<Pin OpName="o_31_oprd" Caption="out_31" Type="Discrete" OpIndex="34" Size="1"/>
+				<Pin OpName="o_32_oprd" Caption="out_32" Type="Discrete" OpIndex="35" Size="1"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+						<Value>2</Value>
+						<Default>2</Default>
+						<LowLimit>1</LowLimit>
+						<HighLimit>2</HighLimit>
+						<Script>
+							<Changed></Changed>
+						</Script>
+				</Param>
+				<Param OpName="i_conf_y" Caption="OutputCount" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="true" Type="Analog" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>32</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+				function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OutputCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 1)
+	{
+		count = 1;
+	}
+	if (count &gt; 32)
+	{
+		count = 32;
+	}
+
+	var opIndex = 4;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbSignal != null)
+		{
+			var caption = afbSignal.jsCaption();
+			var type = afbSignal.jsType();
+			var operandIndex = afbSignal.operandIndex();
+			var size = afbSignal.size();
+			videoItemFblElement.addOutputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
 		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0008">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
@@ -10070,5 +10272,217 @@ function(videoItemFblElement, afbElement)
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
+
+		<AFB id="#tconv_16si_16si_v1"       Caption="tconv_16si_16si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 16-bit little-endian to 16-bit big endian and back</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="1" Size="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="4" Size="16"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Default>1</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+ 
+		<AFB id="#tconv_si_si_v1"       Caption="tconv_si_si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 32-bit little-endian to 32-bit big endian and back</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from 32-bit signed int to floating point</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="SignedInt" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>3</Value>
+					<Default>3</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+ 
+		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0001">
+			<Properties>
+				<Description>Type convertor block from floating point to 32-bit signed int</Description>
+				<Category>TypeConvertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" DataFormat="UnsignedInt" OpIndex="7" Size="1"/>
+				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" DataFormat="UnsignedInt" OpIndex="8" Size="1"/>
+				<Pin OpName="o_nan" Caption="nan" Type="Discrete" DataFormat="UnsignedInt" OpIndex="9" Size="1"/>            
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>4</Value>
+					<Default>4</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+				<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}						
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}						
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+	
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
 	</AFBL>
 </LogicModule>

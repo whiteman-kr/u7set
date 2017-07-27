@@ -79,8 +79,9 @@ namespace Afb
 		POL = 25,
 		DER = 26,
 		MISMATCH = 27,
+		TCONV = 28,
 		First = LOGIC,
-		Last = MISMATCH,
+		Last = TCONV,
 	};
 
 	//
