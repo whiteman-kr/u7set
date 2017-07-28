@@ -144,8 +144,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("BusEditor/pos", m_busEditorWindowPos);
 	s.setValue("BusEditor/geometry", m_busEditorWindowGeometry);
-	s.setValue("BusEditor/splitter", m_busEditorSplitterState);
-	s.setValue("BusEditor/pePos", m_busEditorPeWindowPos);
+	s.setValue("BusEditor/mainSplitter", m_busEditorMainSplitterState);
+	s.setValue("BusEditor/rightSplitter", m_busEditorRightSplitterState);
+	s.setValue("BusEditor/busPropertySplitter", m_busEditorPropertySplitterPosition);
 	s.setValue("BusEditor/peGeometry", m_busEditorPeWindowGeometry);
 	s.setValue("BusEditor/peSplitterPos", m_busEditorPeSplitterPosition);
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
@@ -223,7 +224,15 @@ void Settings::loadUserScope()
 	//
 	m_busEditorWindowPos = s.value("BusEditor/pos", QPoint(-1, -1)).toPoint();
 	m_busEditorWindowGeometry = s.value("BusEditor/geometry").toByteArray();
-	m_busEditorSplitterState = s.value("BusEditor/splitter").toByteArray();
+	m_busEditorMainSplitterState = s.value("BusEditor/mainSplitter").toByteArray();
+	m_busEditorRightSplitterState = s.value("BusEditor/rightSplitter").toByteArray();
+
+	m_busEditorPropertySplitterPosition = s.value("BusEditor/busPropertySplitter").toInt();
+	if (m_busEditorPropertySplitterPosition < 150)
+	{
+		m_busEditorPropertySplitterPosition = 150;
+	}
+
 	m_busEditorPeWindowPos = s.value("BusEditor/pePos", QPoint(-1, -1)).toPoint();
 	m_busEditorPeWindowGeometry = s.value("BusEditor/peGeometry").toByteArray();
 	m_busEditorPeSplitterPosition = s.value("BusEditor/peSplitterPos").toInt();

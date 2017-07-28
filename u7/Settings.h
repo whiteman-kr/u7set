@@ -142,7 +142,10 @@ public:
 	// Bus Editor
 	QPoint m_busEditorWindowPos;
 	QByteArray m_busEditorWindowGeometry;
-	QByteArray m_busEditorSplitterState;
+	QByteArray m_busEditorMainSplitterState;
+	QByteArray m_busEditorRightSplitterState;
+	int m_busEditorPropertySplitterPosition = 100;
+
 	QPoint m_busEditorPeWindowPos;
 	QByteArray m_busEditorPeWindowGeometry;
 	int m_busEditorPeSplitterPosition = 0;

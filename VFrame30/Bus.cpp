@@ -257,7 +257,15 @@ namespace VFrame30
 	//
 	Bus::Bus()
 	{
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, Bus::busTypeId, Bus::setBusTypeId);
 		setUuid(QUuid::createUuid());
+	}
+
+
+	Bus::Bus(const Bus& src):
+		Bus()
+	{
+		*this = src;
 	}
 
 	bool Bus::load(const QByteArray& data, QString* errorMessage)

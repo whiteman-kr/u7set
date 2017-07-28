@@ -10,20 +10,6 @@
 #include <QMessageBox>
 #include <QItemDelegate>
 
-class DialogBusEditorDelegate: public QItemDelegate
-{
-	Q_OBJECT
-
-public:
-	DialogBusEditorDelegate(QObject *parent);
-	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-
-private:
-	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-};
-
-
 class DialogBusEditor : public QDialog
 {
 	Q_OBJECT
@@ -35,6 +21,7 @@ private slots:
 
 	void onAdd();
 	void onRemove();
+	void onClone();
 	void onCheckOut();
 	void onCheckIn();
 	void onUndo();
@@ -47,10 +34,11 @@ private slots:
 	void onSignalUp();
 	void onSignalDown();
 
-	void onSignalItemDoubleClicked(QTreeWidgetItem *item, int column);
+	void onSignalItemDoubleClicked(QTreeWidgetItem* item, int column);
 
-	void onBusItemChanged(QTreeWidgetItem *item, int column);
-	void onBusItemSelectionChanged();
+	void onBusPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	void onBusSelectionChanged();
 	void onBusCustomContextMenuRequested(const QPoint& pos);
 	void onBusSortIndicatorChanged(int column, Qt::SortOrder order);
 
@@ -63,15 +51,17 @@ protected:
 
 private:
 	void fillBusList();
+	void fillBusProperties();
 	void fillBusSignals();
 
 	bool addBus(VFrame30::Bus bus);
 
 	void updateButtonsEnableState();
 	void updateBusTreeItemText(QTreeWidgetItem* item);
+	void updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus& bus);
 	void updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal);
 
-	VFrame30::Bus* getCurrentBus(QUuid* uuid);
+	VFrame30::Bus* getCurrentBus(QUuid* uuid = nullptr);
 
 	bool saveBus(const QUuid& busUuid);
 
@@ -79,13 +69,16 @@ private:
 	BusStorage m_busses = nullptr;
 	DbController* m_db = nullptr;
 
-	QSplitter* m_splitter = nullptr;
+	QSplitter* m_mainSplitter = nullptr;
+	QSplitter* m_rightSplitter = nullptr;
 
 	QTreeWidget* m_busTree = nullptr;
+
+	ExtWidgets::PropertyEditor* m_busPropertyEditor = nullptr;
+
 	QTreeWidget* m_signalsTree = nullptr;
 
 	QPushButton* m_buttonAdd = nullptr;
-	QPushButton* m_buttonRemove = nullptr;
 	QPushButton* m_buttonCheckOut = nullptr;
 	QPushButton* m_buttonCheckIn = nullptr;
 	QPushButton* m_buttonUndo = nullptr;
@@ -95,6 +88,7 @@ private:
 	QMenu* m_popupMenu = nullptr;
 	QAction* m_addAction = nullptr;
 	QAction* m_removeAction = nullptr;
+	QAction* m_cloneAction = nullptr;
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoAction = nullptr;
