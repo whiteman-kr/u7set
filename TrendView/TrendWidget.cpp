@@ -139,8 +139,11 @@ namespace TrendLib
 
 	void TrendWidget::mousePressEvent(QMouseEvent* event)
 	{
+		int laneIndex = -1;
+		TimeStamp timeStamp;
 		QPoint mousePos = event->pos();
-		Trend::MouseOn mouseOn = m_trend.mouseIsOver(mousePos, m_drawParam);
+
+		Trend::MouseOn mouseOn = mouseIsOver(mousePos, &laneIndex, &timeStamp);
 
 		if (event->button() == Qt::LeftButton)
 		{
@@ -162,7 +165,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendWidget::mouseReleaseEvent(QMouseEvent* event)
+	void TrendWidget::mouseReleaseEvent(QMouseEvent* /*event*/)
 	{
 		if (QWidget::mouseGrabber() == this)
 		{
@@ -176,8 +179,11 @@ namespace TrendLib
 	{
 		if (QWidget::mouseGrabber() == nullptr)
 		{
+			int laneIndex = -1;
+			TimeStamp timeStamp;
 			QPoint mousePos = event->pos();
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(mousePos, m_drawParam);
+
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(mousePos, m_drawParam, &laneIndex, &timeStamp);
 
 			QCursor cursor = Qt::ArrowCursor;
 
@@ -217,6 +223,11 @@ namespace TrendLib
 		return;
 	}
 
+	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp)
+	{
+		return m_trend.mouseIsOver(mousePos, m_drawParam, outLaneIndex, timeStamp);
+	}
+
 	void TrendWidget::updatePixmap(const QImage& image)
 	{
 		m_pixmap = QPixmap::fromImage(image);
@@ -233,6 +244,16 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& TrendWidget::signalSet() const
 	{
 		return m_trend.signalSet();
+	}
+
+	TrendLib::Trend& TrendWidget::trend()
+	{
+		return m_trend;
+	}
+
+	const TrendLib::Trend& TrendWidget::trend() const
+	{
+		return m_trend;
 	}
 
 	TrendView TrendWidget::view() const

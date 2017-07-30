@@ -59,6 +59,9 @@ namespace TrendLib
 
 		// Methods
 		//
+	public:
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp);
+
 	protected:
 
 		// --
@@ -75,6 +78,9 @@ namespace TrendLib
 	public:
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
+
+		TrendLib::Trend& trend();
+		const TrendLib::Trend& trend() const;
 
 		TrendView view() const;
 		void setView(TrendView value);

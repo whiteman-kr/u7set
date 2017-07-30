@@ -82,6 +82,12 @@ namespace TrendLib
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
 
+		// Contect Menu
+		//
+		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
+
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -410,6 +416,36 @@ namespace TrendLib
 		return;
 	}
 
+	void TrendMainWindow::actionAddRuller()
+	{
+		int laneIndex = -1;
+		TimeStamp timeStamp;
+		QPoint mousePos = mapFromGlobal(QCursor::pos());
+
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp);
+
+		if (mouseOn != Trend::MouseOn::InsideTrendArea)
+		{
+			return;
+		}
+
+		qDebug() << "Add trend ruller on pos " << timeStamp.toDateTime();
+
+		TrendRuller ruller(timeStamp);
+		trend().addRuller(ruller);
+
+		return;
+	}
+
+	void TrendMainWindow::actionDeleteRuller()
+	{
+
+	}
+
+	void TrendMainWindow::actionRullerProperties()
+	{
+
+	}
 
 	void TrendMainWindow::timeComboCurrentIndexChanged(int /*index*/)
 	{
@@ -463,6 +499,34 @@ namespace TrendLib
 		m_trendSlider->setValueShiftMinMax(value);
 	}
 
+	void TrendMainWindow::contextMenuRequested(const QPoint& pos)
+	{
+		QMenu menu(this);
+
+		QAction* addRullerAction = menu.addAction(tr("Add Ruller"));
+		connect(addRullerAction, &QAction::triggered, this, &TrendMainWindow::actionAddRuller);
+
+		QAction* deleteRullerAction = menu.addAction(tr("Delete Ruller"));
+		deleteRullerAction->setEnabled(false);
+		connect(deleteRullerAction, &QAction::triggered, this, &TrendMainWindow::actionDeleteRuller);
+
+		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));
+		rullerPropertiesAction->setEnabled(false);
+		connect(rullerPropertiesAction, &QAction::triggered, this, &TrendMainWindow::actionRullerProperties);
+
+		menu.addSeparator();
+		QAction* chooseView = menu.addAction(tr("Choose View..."));
+		chooseView->setEnabled(false);		// Not implemented yet
+
+		menu.addSeparator();
+		QAction* signalAction = menu.addAction(tr("Signals..."));
+		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+		menu.exec(mapToGlobal(pos));
+
+		return;
+	}
+
 	TrendLib::TrendSignalSet& TrendMainWindow::signalSet()
 	{
 		return m_trendWidget->signalSet();
@@ -471,6 +535,16 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& TrendMainWindow::signalSet() const
 	{
 		return m_trendWidget->signalSet();
+	}
+
+	TrendLib::Trend& TrendMainWindow::trend()
+	{
+		return m_trendWidget->trend();
+	}
+
+	const TrendLib::Trend& TrendMainWindow::trend() const
+	{
+		return m_trendWidget->trend();
 	}
 
 }

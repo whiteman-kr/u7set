@@ -1,11 +1,28 @@
 #include "Trend.h"
+#include "QPainter"
 
 namespace TrendLib
 {
 
 	Trend::Trend()
 	{
+		m_rullers.reserve(32);
+	}
 
+	void Trend::addRuller(const TrendLib::TrendRuller& ruller)
+	{
+		m_rullers.push_back(ruller);
+	}
+
+	void Trend::deleteRuller(const TimeStamp& rullerTimeStamp)
+	{
+		auto it = std::remove_if(m_rullers.begin(), m_rullers.end(),
+								[&rullerTimeStamp](TrendRuller& ruller)
+								{
+									return ruller.timeStamp() == rullerTimeStamp;
+								});
+		m_rullers.erase(it);
+		return;
 	}
 
 	void Trend::draw(QImage* image, const TrendDrawParam& drawParam) const
@@ -297,11 +314,16 @@ namespace TrendLib
 		assert(painter);
 
 		painter->fillRect(rect, backColor);
-
+		// --
+		//
 		painter->setPen(signal.color());
+
+		painter->setClipRect(rect);		// Set clipo region, as SignalID and caption can fo out of drawArea
 
 		QString signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
 		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip);
+
+		painter->setClipping(false);	// Restore clip region
 
 		// Get signal data
 		//
@@ -342,6 +364,10 @@ namespace TrendLib
 		QRectF textBoundRect;
 		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);	// Get bound rect, for understaning text height
 		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+		// Set clip region
+		//
+		painter->setClipRect(rect);
 
 		// Draw trend
 		//
@@ -430,24 +456,17 @@ namespace TrendLib
 			lines.clear();
 		}
 
+		// Reset clipping
+		//
+		painter->setClipping(false);
+
 		return;
 	}
 
-	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData> >& signalData) const
+	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& /*rect*/, const TrendDrawParam& /*drawParam*/, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& /*signalData*/) const
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
-
-		// Draw units (0, 1) on the left side of rect
-		//
-//		painter->setPen(signal.color());
-
-//		QRectF textBoundRect;
-//		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
-//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
-
-		// Draw trend
-		//
 
 		return;
 	}
@@ -520,8 +539,19 @@ namespace TrendLib
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime) const
 	{
+		if (outLaneIndex == nullptr ||
+			outTime == nullptr)
+		{
+			assert(outLaneIndex);
+			assert(outTime);
+			return Trend::MouseOn::Outside;
+		}
+
+		*outLaneIndex = -1;
+		*outTime = TimeStamp();
+
 		QRect rect = drawParam.rect();
 
 		QPointF pos(static_cast<double>(mousePos.x()) / static_cast<double>(drawParam.dpiX()),		// Transform mousePos to inches, as everything for drawing is done in inches
@@ -546,10 +576,23 @@ namespace TrendLib
 
 				if (trendArea.contains(pos) == true)
 				{
+					// Calc time
+					//
+					qint64 startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
+					double coef = drawParam.duration() / trendArea.width();
+					qint64 timeOffset = static_cast<qint64>((pos.x() - trendArea.left()) * coef);
+
+					outTime->timeStamp = startLaneTime + timeOffset;
+
+					// --
+					//
+					*outLaneIndex = laneIndex;
+
 					return MouseOn::InsideTrendArea;
 				}
 				else
 				{
+					*outLaneIndex = laneIndex;
 					return MouseOn::OutsideTrendArea;
 				}
 			}
@@ -557,6 +600,7 @@ namespace TrendLib
 
 		// --
 		//
+		*outLaneIndex = -1;
 		return MouseOn::Outside;		// Can be frame beetween lanes
 	}
 
@@ -571,7 +615,7 @@ namespace TrendLib
 		return rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
 	}
 
-	TimeStamp Trend::pixelToTime(int pos, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
+	TimeStamp Trend::pixelToTime(int /*pos*/, const TrendDrawParam& /*drawParam*/)
 	{
 		// To do
 		//
@@ -638,6 +682,16 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& Trend::signalSet() const
 	{
 		return m_signalSet;
+	}
+
+	std::vector<TrendLib::TrendRuller>& Trend::rullers()
+	{
+		return m_rullers;
+	}
+
+	const std::vector<TrendLib::TrendRuller>& Trend::rullers() const
+	{
+		return m_rullers;
 	}
 
 }

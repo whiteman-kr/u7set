@@ -3,7 +3,7 @@
 
 #include "TrendSignal.h"
 #include "TrendDrawParam.h"
-
+#include "TrendRuller.h"
 
 namespace TrendLib
 {
@@ -16,6 +16,11 @@ namespace TrendLib
 		// Methods
 		//
 	public:
+
+		// Rullers
+		//
+		void addRuller(const TrendLib::TrendRuller& ruller);
+		void deleteRuller(const TimeStamp& rullerTimeStamp);
 
 		// Draw methods
 		//
@@ -46,11 +51,11 @@ namespace TrendLib
 			OnRuller,			// Over ruller
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
-		static TimeStamp pixelToTime(int pos, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
+		static TimeStamp pixelToTime(int pos, const TrendDrawParam& drawParam);
 
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 
@@ -60,8 +65,12 @@ namespace TrendLib
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
+		std::vector<TrendLib::TrendRuller>& rullers();
+		const std::vector<TrendLib::TrendRuller>& rullers() const;
+
 	private:
 		TrendLib::TrendSignalSet m_signalSet;
+		std::vector<TrendLib::TrendRuller> m_rullers;
 	};
 
 }
