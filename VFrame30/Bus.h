@@ -58,10 +58,21 @@ namespace VFrame30
 	//
 	// Bus
 	//
-	class VFRAME30LIBSHARED_EXPORT Bus
+	class VFRAME30LIBSHARED_EXPORT Bus : public PropertyObject
 	{
 	public:
 		Bus();
+		Bus(const Bus& src);
+		Bus& operator= (const Bus& src)
+		{
+			if (this != &src)
+			{
+				this->m_uuid = src.m_uuid;
+				this->m_busTypeId = src.m_busTypeId;
+				this->m_busSignals = src.m_busSignals;
+			}
+			return *this;
+		}
 
 		bool load(const QByteArray& data, QString* errorMessage);
 		bool save(QByteArray* data) const;
