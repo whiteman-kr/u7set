@@ -145,12 +145,10 @@ public:
 	QByteArray m_busEditorMainSplitterState;
 	QByteArray m_busEditorRightSplitterState;
 	int m_busEditorPropertySplitterPosition = 100;
-
-	QPoint m_busEditorPeWindowPos;
-	QByteArray m_busEditorPeWindowGeometry;
-	int m_busEditorPeSplitterPosition = 0;
-	int m_busEditorSortColumn;
-	Qt::SortOrder m_busEditorSortOrder;
+	QSize m_busEditorPeWindowSize;
+	int m_busEditorPeSplitterPosition = 100;
+	int m_busEditorSortColumn = 0;
+	Qt::SortOrder m_busEditorSortOrder = Qt::AscendingOrder;
 
 
 	// CreateSchema dialog

@@ -46,6 +46,7 @@ private slots:
 	void onSignalCustomContextMenuRequested(const QPoint& pos);
 
 protected:
+	virtual void keyPressEvent(QKeyEvent *evt);
 	virtual void closeEvent(QCloseEvent* e);
 	virtual void reject();
 
@@ -82,7 +83,6 @@ private:
 	QPushButton* m_buttonCheckOut = nullptr;
 	QPushButton* m_buttonCheckIn = nullptr;
 	QPushButton* m_buttonUndo = nullptr;
-	QPushButton* m_buttonRefresh = nullptr;
 	QPushButton* m_btnClose = nullptr;
 
 	QMenu* m_popupMenu = nullptr;

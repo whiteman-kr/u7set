@@ -33,6 +33,8 @@ private:
 
 	bool m_readOnly = false;
 
+	QDialogButtonBox* m_buttonBox = nullptr;
+
     ExtWidgets::PropertyEditor* pe = nullptr;
 
 };

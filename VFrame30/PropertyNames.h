@@ -126,6 +126,7 @@ namespace VFrame30
 		static const QString signalSource;
 
 		static const QString busTypeId;
+		static const QString busTypeFileName;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;
