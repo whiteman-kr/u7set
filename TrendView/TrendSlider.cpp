@@ -1,15 +1,19 @@
 #include "TrendSlider.h"
+#include <QPainter>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
 
-TrendSlider::TrendSlider()
+TrendSlider::TrendSlider(TrendLib::TrendRullerSet* rullerSet) :
+	m_rullerSet(rullerSet)
 {
+	assert(m_rullerSet);
+
 	m_setTimeButton = new QPushButton(QChar(0x25B2), this);
 	m_lineLeftButton = new QPushButton(QChar(0x25C4), this);
 	m_lineRightButton = new QPushButton(QChar(0x25BA), this);
-	m_railSubcontrol = new TrendSliderRailSubcontrol(this);
+	m_railSubcontrol = new TrendSliderRailSubcontrol(this, m_rullerSet);
 
 	m_lineLeftButton->setAutoRepeat(true);
 	m_lineLeftButton->setAutoRepeatInterval(50);
@@ -36,30 +40,6 @@ TrendSlider::TrendSlider()
 	connect(m_lineLeftButton, &QPushButton::clicked, this, &TrendSlider::lineLeftClicked);
 	connect(m_lineRightButton, &QPushButton::clicked, this, &TrendSlider::lineRightClicked);
 	connect(m_railSubcontrol, &TrendSliderRailSubcontrol::valueChanged, this, &TrendSlider::sliderRailChanged);
-
-	return;
-}
-
-void TrendSlider::paintEvent(QPaintEvent* /*event*/)
-{
-//	// This calls the base class's paint calls
-//	//
-//	QScrollBar::paintEvent(event);
-
-//	// The following is painted on top of it
-//	//
-//	QStyleOptionSlider opt;
-//	initStyleOption(&opt);
-//	opt.dialWrapping = true;
-//	opt.subControls = QStyle::SC_ScrollBarSlider;
-
-//	QPainter p(this);
-//	p.setPen(QPen(Qt::black, 0));
-
-//	QRect sliderRect = style()->proxy()->subControlRect(QStyle::ComplexControl::CC_ScrollBar, &opt, QStyle::SC_ScrollBarSlider, this);
-
-//	QString text = "XX:XX:XX 17.01.2017";
-//	p.drawText(sliderRect, Qt::AlignCenter, text, &sliderRect);
 
 	return;
 }
@@ -241,10 +221,23 @@ void TrendSlider::setPageStep(qint64 ms)
 	return;
 }
 
-TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider) :
-	m_trendSlider(threndSlider)
+qint64 TrendSlider::laneDuartion() const
+{
+	return m_laneDuartion;
+}
+
+void TrendSlider::setLaneDuration(qint64 ms)
+{
+	m_laneDuartion = ms;
+	update();
+}
+
+TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRullerSet* rullerSet) :
+	m_trendSlider(threndSlider),
+	m_rullerSet(rullerSet)
 {
 	assert(m_trendSlider);
+	assert(m_rullerSet);
 
 	connect(m_trendSlider, &TrendSlider::paramsChanged, this, &TrendSliderRailSubcontrol::paramsChanged);
 
@@ -400,6 +393,7 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 	{
 		m_lastDrawHover = false;
 	}
+
 	// Draw text
 	//
 	p.setPen(QPen(Qt::black, 0));
@@ -414,6 +408,29 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 		update();
 	}
 
+	// Draw rullers
+	//
+	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x80)), 0, Qt::PenStyle::DashLine);
+	p.setPen(rullerPen);
+
+	TimeStamp minTimeStamp(m_min);
+	TimeStamp maxTimeStamp(m_max + m_trendSlider->laneDuartion());
+	qint64 duration = maxTimeStamp.timeStamp - minTimeStamp.timeStamp;
+	double k = static_cast<double>(this->rect().width()) / static_cast<double>(duration);
+
+	std::vector<TrendLib::TrendRuller> rullers = m_rullerSet->getRullers(minTimeStamp, maxTimeStamp);
+
+	for (const TrendLib::TrendRuller& ruller : rullers)
+	{
+		double x = rect().left() + k * (ruller.timeStamp().timeStamp - m_min);
+		qDebug() << x;
+
+		p.drawLine(QPointF(x, rect().top()),
+				   QPointF(x, rect().bottom()));
+	}
+
+	// --
+	//
 
 	return;
 }

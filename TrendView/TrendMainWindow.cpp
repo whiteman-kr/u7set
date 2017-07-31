@@ -38,7 +38,7 @@ namespace TrendLib
 
 		// Slider Widged
 		//
-		m_trendSlider = new TrendSlider;
+		m_trendSlider = new TrendSlider(&m_trendWidget->rullerSet());
 
 		layout->setRowStretch(0, 1);
 		layout->addWidget(m_trendSlider, 1, 0);
@@ -81,6 +81,8 @@ namespace TrendLib
 		qint64 t = m_timeCombo->currentData().value<qint64>();
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
+
+		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
 
 		// Contect Menu
 		//
@@ -473,6 +475,7 @@ namespace TrendLib
 
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
+		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
 
 		m_trendWidget->setDuration(t);
 		m_trendWidget->updateWidget();
@@ -493,6 +496,9 @@ namespace TrendLib
 	{
 		int laneCount = m_lanesCombo->itemData(index).value<int>();
 		m_trendWidget->setLaneCount(laneCount);
+
+		qint64 t = m_timeCombo->currentData().value<qint64>();
+		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
 
 		m_trendWidget->updateWidget();
 		return;
@@ -519,13 +525,19 @@ namespace TrendLib
 		m_trendSlider->setValueShiftMinMax(value);
 	}
 
-	void TrendMainWindow::contextMenuRequested(const QPoint& pos)
+	void TrendMainWindow::contextMenuRequested(const QPoint& /*pos*/)
 	{
 		int outLaneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
+		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
 
 		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
+
+		if (mouseOn != Trend::MouseOn::InsideTrendArea)
+		{
+			return;
+		}
 
 		QMenu menu(this);
 
@@ -560,7 +572,7 @@ namespace TrendLib
 		QAction* signalAction = menu.addAction(tr("Signals..."));
 		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
 
-		menu.exec(mapToGlobal(pos));
+		menu.exec(QCursor::pos());
 
 		return;
 	}

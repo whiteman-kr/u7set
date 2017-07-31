@@ -196,6 +196,16 @@ namespace TrendLib
 	{
 		event->accept();
 
+		if (m_mouseAction == MouseAction::MoveRuller)
+		{
+			// This will call slider update
+			//
+			if (dynamic_cast<QWidget*>(parent()) != nullptr)
+			{
+				dynamic_cast<QWidget*>(parent())->update();
+			}
+		}
+
 		m_mouseAction = MouseAction::None;
 		releaseMouse();
 
@@ -245,9 +255,9 @@ namespace TrendLib
 				QApplication::overrideCursor()->shape() != newCursorShape)
 			{
 				QApplication::setOverrideCursor(newCursorShape);
-				QApplication::processEvents();						// Mus be called manually to set cursor
+				QApplication::processEvents();			// Must be called manually to set cursor
 
-				update();						// Update rullers
+				update();								// Update rullers
 			}
 
 			return;
