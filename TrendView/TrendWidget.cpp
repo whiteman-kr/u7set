@@ -202,11 +202,14 @@ namespace TrendLib
 		if (event->button() == Qt::LeftButton)
 		{
 			QApplication::setOverrideCursor(Qt::ArrowCursor);
+			QApplication::processEvents();						// Mus be called manually to set cursor
+
 			mouseMoveEvent(event);		// To set cursor
 		}
 		else
 		{
 			QApplication::setOverrideCursor(Qt::ArrowCursor);
+			QApplication::processEvents();						// Mus be called manually to set cursor
 		}
 
 		return;
@@ -242,6 +245,8 @@ namespace TrendLib
 				QApplication::overrideCursor()->shape() != newCursorShape)
 			{
 				QApplication::setOverrideCursor(newCursorShape);
+				QApplication::processEvents();						// Mus be called manually to set cursor
+
 				update();						// Update rullers
 			}
 
@@ -308,6 +313,12 @@ namespace TrendLib
 	{
 		return m_trend.mouseIsOver(mousePos, m_drawParam, outLaneIndex, timeStamp, rullerIndex);
 	}
+
+	void TrendWidget::resetRullerHighlight()
+	{
+		m_pixmapDrawParam.resetHightlightRullerIndex();
+	}
+
 
 	void TrendWidget::updatePixmap(const QImage& image, TrendDrawParam drawParam)
 	{

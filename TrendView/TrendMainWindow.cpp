@@ -439,12 +439,30 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionDeleteRuller(QPoint mousePos)
+	void TrendMainWindow::actionDeleteRuller(int rullerIndex)
 	{
+		if (rullerIndex == -1)
+		{
+			assert(rullerIndex);
+			return;
+		}
 
+		if (rullerIndex < 0 ||
+			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		{
+			assert(false);
+			return;
+		}
+
+		trend().rullerSet().deleteRuller(trend().rullerSet().at(rullerIndex).timeStamp());
+		m_trendWidget->resetRullerHighlight();
+
+		update();
+
+		return;
 	}
 
-	void TrendMainWindow::actionRullerProperties(QPoint mousePos)
+	void TrendMainWindow::actionRullerProperties(QPoint /*mousePos*/)
 	{
 
 	}
@@ -503,6 +521,12 @@ namespace TrendLib
 
 	void TrendMainWindow::contextMenuRequested(const QPoint& pos)
 	{
+		int outLaneIndex = -1;
+		int rullerIndex = -1;
+		TimeStamp timeStamp;
+
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
+
 		QMenu menu(this);
 
 		QAction* addRullerAction = menu.addAction(tr("Add Ruller"));
@@ -513,11 +537,11 @@ namespace TrendLib
 				});
 
 		QAction* deleteRullerAction = menu.addAction(tr("Delete Ruller"));
-		deleteRullerAction->setEnabled(false);
+		deleteRullerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
 		connect(deleteRullerAction, &QAction::triggered, this,
-				[&pos, this]()
+				[rullerIndex, this]()
 				{
-					this->TrendMainWindow::actionDeleteRuller(pos);
+					this->TrendMainWindow::actionDeleteRuller(rullerIndex);
 				});
 
 		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));

@@ -63,6 +63,8 @@ namespace TrendLib
 	public:
 		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex);
 
+		void resetRullerHighlight();
+
 	protected:
 
 		// --

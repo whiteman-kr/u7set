@@ -54,7 +54,7 @@ namespace TrendLib
 		void actionAboutTriggered();
 
 		void actionAddRuller(QPoint mousePos);
-		void actionDeleteRuller(QPoint mousePos);
+		void actionDeleteRuller(int rullerIndex);
 		void actionRullerProperties(QPoint mousePos);
 
 		void timeComboCurrentIndexChanged(int index);
