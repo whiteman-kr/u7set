@@ -10273,10 +10273,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tconv_16si_16si_v1"       Caption="tconv_16si_16si"       Version="1.0001">
+		<AFB id="#swap_endian_16si_16si_v1"       Caption="swap_endian_16si_16si"       Version="1.0001">
 			<Properties>
-				<Description>Type convertor block from 16-bit little-endian to 16-bit big endian and back</Description>
-				<Category>TypeConvertor</Category>
+				<Description>Converts 16-bit little-endian to 16-bit big endian and back</Description>
+				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>true</InternalUse>
@@ -10307,10 +10307,10 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#tconv_si_si_v1"       Caption="tconv_si_si"       Version="1.0001">
+		<AFB id="#swap_endian_si_si_v1"       Caption="swap_endian_si_si"       Version="1.0001">
 			<Properties>
-				<Description>Type convertor block from 32-bit little-endian to 32-bit big endian and back</Description>
-				<Category>TypeConvertor</Category>
+				<Description>Converts little-endian to big endian and back</Description>
+				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10341,10 +10341,44 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
+		<AFB id="#swap_endian_fp_fp_v1"       Caption="swap_endian_fp_fp"       Version="1.0001">
+			<Properties>
+				<Description>Converts little-endian to big endian and back</Description>
+				<Category>Convertor</Category>
+				<OpCode>28</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>36</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Analog" DataFormat="Float" OpIndex="2" Size="32"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Analog" DataFormat="Float" OpIndex="5" Size="32"/>
+			</Outputs>
+			<Params>            
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>1</LowLimit>
+					<HighLimit>4</HighLimit>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>            
+			</Params>
+			<CommonScript>
+				<Library>
+				</Library>
+				<AfterCreation>
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
 		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0001">
 			<Properties>
-				<Description>Type convertor block from 32-bit signed int to floating point</Description>
-				<Category>TypeConvertor</Category>
+				<Description>Type convertor block from signed int to floating point</Description>
+				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
@@ -10377,8 +10411,8 @@ function(videoItemFblElement, afbElement)
  
 		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0001">
 			<Properties>
-				<Description>Type convertor block from floating point to 32-bit signed int</Description>
-				<Category>TypeConvertor</Category>
+				<Description>Type convertor block from floating point to signed int</Description>
+				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
