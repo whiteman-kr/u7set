@@ -416,13 +416,13 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionAddRuller()
+	void TrendMainWindow::actionAddRuller(QPoint mousePos)
 	{
 		int laneIndex = -1;
+		int rullerIndex = -1;
 		TimeStamp timeStamp;
-		QPoint mousePos = mapFromGlobal(QCursor::pos());
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
@@ -432,17 +432,19 @@ namespace TrendLib
 		qDebug() << "Add trend ruller on pos " << timeStamp.toDateTime();
 
 		TrendRuller ruller(timeStamp);
-		trend().addRuller(ruller);
+		trend().rullerSet().addRuller(ruller);
+
+		update();
 
 		return;
 	}
 
-	void TrendMainWindow::actionDeleteRuller()
+	void TrendMainWindow::actionDeleteRuller(QPoint mousePos)
 	{
 
 	}
 
-	void TrendMainWindow::actionRullerProperties()
+	void TrendMainWindow::actionRullerProperties(QPoint mousePos)
 	{
 
 	}
@@ -504,15 +506,27 @@ namespace TrendLib
 		QMenu menu(this);
 
 		QAction* addRullerAction = menu.addAction(tr("Add Ruller"));
-		connect(addRullerAction, &QAction::triggered, this, &TrendMainWindow::actionAddRuller);
+		connect(addRullerAction, &QAction::triggered, this,
+				[&pos, this]()
+				{
+					this->TrendMainWindow::actionAddRuller(pos);
+				});
 
 		QAction* deleteRullerAction = menu.addAction(tr("Delete Ruller"));
 		deleteRullerAction->setEnabled(false);
-		connect(deleteRullerAction, &QAction::triggered, this, &TrendMainWindow::actionDeleteRuller);
+		connect(deleteRullerAction, &QAction::triggered, this,
+				[&pos, this]()
+				{
+					this->TrendMainWindow::actionDeleteRuller(pos);
+				});
 
 		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));
 		rullerPropertiesAction->setEnabled(false);
-		connect(rullerPropertiesAction, &QAction::triggered, this, &TrendMainWindow::actionRullerProperties);
+		connect(rullerPropertiesAction, &QAction::triggered, this,
+				[&pos, this]()
+				{
+					this->TrendMainWindow::actionRullerProperties(pos);
+				});
 
 		menu.addSeparator();
 		QAction* chooseView = menu.addAction(tr("Choose View..."));

@@ -6,23 +6,6 @@ namespace TrendLib
 
 	Trend::Trend()
 	{
-		m_rullers.reserve(32);
-	}
-
-	void Trend::addRuller(const TrendLib::TrendRuller& ruller)
-	{
-		m_rullers.push_back(ruller);
-	}
-
-	void Trend::deleteRuller(const TimeStamp& rullerTimeStamp)
-	{
-		auto it = std::remove_if(m_rullers.begin(), m_rullers.end(),
-								[&rullerTimeStamp](TrendRuller& ruller)
-								{
-									return ruller.timeStamp() == rullerTimeStamp;
-								});
-		m_rullers.erase(it);
-		return;
 	}
 
 	void Trend::draw(QImage* image, const TrendDrawParam& drawParam) const
@@ -41,15 +24,7 @@ namespace TrendLib
 		image->fill(Qt::white);
 
 		QPainter painter(image);
-		painter.setRenderHint(QPainter::Antialiasing, true);
-		painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-		//--
-		//
-		painter.resetTransform();
-
-		painter.translate(0.5, 0.5);
-		painter.scale(drawParam.dpiX(), drawParam.dpiY());
+		adjustPainter(&painter, drawParam.dpiX(), drawParam.dpiY());
 
 		// --
 		//
@@ -463,10 +438,88 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& /*rect*/, const TrendDrawParam& /*drawParam*/, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& /*signalData*/) const
+	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& /*rect*/, const TrendDrawParam& drawParam, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& /*signalData*/) const
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
+
+		return;
+	}
+
+	void Trend::drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const
+	{
+		if (painter == nullptr)
+		{
+			assert(painter);
+			return;
+		}
+
+		adjustPainter(painter, drawParam.dpiX(), drawParam.dpiY());
+
+		double dpiX = static_cast<double>(drawParam.dpiX());
+
+		QPen rullerPen(Qt::PenStyle::DashLine);
+		rullerPen.setCosmetic(true);
+		rullerPen.setColor(qRgb(0x00, 0x00, 0xC0));
+		painter->setPen(rullerPen);
+
+
+		int selectedRullerIndex = drawParam.hightlightRullerIndex();
+		TimeStamp selectedRullerTime;
+
+		if (/*selectedRullerIndex != -1 &&*/
+			selectedRullerIndex >= 0 &&
+			selectedRullerIndex < static_cast<int>(rullerSet().rullers().size()))
+		{
+			selectedRullerTime = rullerSet().rullers()[selectedRullerIndex].timeStamp();
+		}
+
+		for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
+		{
+			TimeStamp startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
+			TimeStamp finishLaneTime = startLaneTime.timeStamp + drawParam.duration();
+
+			TrendDrawParam laneDrawParam = drawParam;
+			laneDrawParam.setStartTimeStamp(startLaneTime);
+
+			QRectF laneRect = calcLaneRect(laneIndex, laneDrawParam);
+			QRectF trendAreaRect = calcTrendArea(laneRect, laneDrawParam);
+
+			std::vector<TrendRuller> laneRullers = rullerSet().getRullers(startLaneTime, finishLaneTime);
+
+			for (const TrendRuller& r : laneRullers)
+			{
+				double k = static_cast<double>(trendAreaRect.width()) / static_cast<double>(drawParam.duration());
+				double x = trendAreaRect.left() + k * static_cast<double>(r.timeStamp().timeStamp - startLaneTime.timeStamp);
+				x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
+
+				painter->drawLine(QPointF(x, trendAreaRect.top()),
+								  QPointF(x, trendAreaRect.bottom()));
+
+				if (r.timeStamp() == selectedRullerTime)
+				{
+					x = static_cast<double>(x * dpiX + 1) / dpiX;
+
+					painter->drawLine(QPointF(x, trendAreaRect.top()),
+									  QPointF(x, trendAreaRect.bottom()));
+				}
+			}
+		}
+
+		return;
+	}
+
+	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY) const
+	{
+		assert(painter);
+
+		painter->setRenderHint(QPainter::Antialiasing, true);
+		painter->setRenderHint(QPainter::TextAntialiasing, true);
+
+		painter->resetTransform();
+
+		painter->translate(0.5, 0.5);
+		painter->scale(dpiX, dpiY);
 
 		return;
 	}
@@ -539,17 +592,20 @@ namespace TrendLib
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex) const
 	{
 		if (outLaneIndex == nullptr ||
-			outTime == nullptr)
+			outTime == nullptr ||
+			rullerIndex == nullptr)
 		{
 			assert(outLaneIndex);
 			assert(outTime);
+			assert(rullerIndex);
 			return Trend::MouseOn::Outside;
 		}
 
 		*outLaneIndex = -1;
+		*rullerIndex = -1;
 		*outTime = TimeStamp();
 
 		QRect rect = drawParam.rect();
@@ -581,13 +637,31 @@ namespace TrendLib
 					qint64 startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
 					double coef = drawParam.duration() / trendArea.width();
 					qint64 timeOffset = static_cast<qint64>((pos.x() - trendArea.left()) * coef);
+					TimeStamp posTime = startLaneTime + timeOffset;
 
-					outTime->timeStamp = startLaneTime + timeOffset;
+					*outTime = posTime;
+					*outLaneIndex = laneIndex;
+
+					// Check if pos OnRuller
+					//
+					qint64 deltaTime = static_cast<qint64>(coef * 1.0 / 32.0);
+					const std::vector<TrendRuller>& rullers = rullerSet().rullers();
+					int ri = 0;
+
+					for (const TrendRuller& ruller : rullers)
+					{
+						if (posTime >= TimeStamp(ruller.timeStamp().timeStamp - deltaTime) &&
+							posTime <= TimeStamp(ruller.timeStamp().timeStamp + deltaTime))
+						{
+							*rullerIndex = ri;
+							return MouseOn::OnRuller;
+						}
+
+						ri++;
+					}
 
 					// --
 					//
-					*outLaneIndex = laneIndex;
-
 					return MouseOn::InsideTrendArea;
 				}
 				else
@@ -684,14 +758,14 @@ namespace TrendLib
 		return m_signalSet;
 	}
 
-	std::vector<TrendLib::TrendRuller>& Trend::rullers()
+	TrendLib::TrendRullerSet& Trend::rullerSet()
 	{
-		return m_rullers;
+		return m_rullerSet;
 	}
 
-	const std::vector<TrendLib::TrendRuller>& Trend::rullers() const
+	const TrendLib::TrendRullerSet& Trend::rullerSet() const
 	{
-		return m_rullers;
+		return m_rullerSet;
 	}
 
 }

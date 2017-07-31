@@ -42,4 +42,67 @@ namespace TrendLib
 		m_showSignalValues = value;
 	}
 
+	//
+	// TrendRullerSet
+	//
+	TrendRullerSet::TrendRullerSet()
+	{
+		m_rullers.reserve(16);
+	}
+
+	void TrendRullerSet::addRuller(const TrendLib::TrendRuller& ruller)
+	{
+		qDebug() << "Add trend ruller " << ruller.timeStamp().toDateTime();
+
+		m_rullers.push_back(ruller);
+	}
+
+	void TrendRullerSet::deleteRuller(const TimeStamp& rullerTimeStamp)
+	{
+		auto it = std::remove_if(m_rullers.begin(), m_rullers.end(),
+								[&rullerTimeStamp](TrendRuller& ruller)
+								{
+									return ruller.timeStamp() == rullerTimeStamp;
+								});
+		m_rullers.erase(it);
+		return;
+	}
+
+	std::vector<TrendLib::TrendRuller> TrendRullerSet::getRullers(const TimeStamp& startTime, const TimeStamp& finishTime) const
+	{
+		std::vector<TrendLib::TrendRuller> result;
+		result.reserve(8);
+
+		for (const TrendLib::TrendRuller& r : m_rullers)
+		{
+			if (r.timeStamp() >= startTime && r.timeStamp() <= finishTime)
+			{
+				result.push_back(r);
+			}
+		}
+
+		return result;
+	}
+
+	std::vector<TrendLib::TrendRuller>& TrendRullerSet::rullers()
+	{
+		return m_rullers;
+	}
+
+	const std::vector<TrendLib::TrendRuller>& TrendRullerSet::rullers() const
+	{
+		return m_rullers;
+	}
+
+	TrendLib::TrendRuller& TrendRullerSet::at(int index)
+	{
+		return m_rullers.at(index);
+	}
+
+	const TrendLib::TrendRuller& TrendRullerSet::at(int index) const
+	{
+		return m_rullers.at(index);
+	}
+
+
 }

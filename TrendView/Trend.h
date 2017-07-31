@@ -17,11 +17,6 @@ namespace TrendLib
 		//
 	public:
 
-		// Rullers
-		//
-		void addRuller(const TrendLib::TrendRuller& ruller);
-		void deleteRuller(const TimeStamp& rullerTimeStamp);
-
 		// Draw methods
 		//
 		void draw(QImage* image, const TrendDrawParam& drawParam) const;
@@ -32,6 +27,10 @@ namespace TrendLib
 		void drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const;
 		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 		void drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+
+		void drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const;
+
+		void adjustPainter(QPainter* painter, int dpiX, int dpiY) const;
 
 	public:
 		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
@@ -47,11 +46,11 @@ namespace TrendLib
 		{
 			Outside,			// Outside any posible rect
 			OutsideTrendArea,	// Outside lane but in the rect
-			InsideTrendArea,		// Inside lane rectangle
+			InsideTrendArea,	// Inside lane rectangle
 			OnRuller,			// Over ruller
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
@@ -65,12 +64,12 @@ namespace TrendLib
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
 
-		std::vector<TrendLib::TrendRuller>& rullers();
-		const std::vector<TrendLib::TrendRuller>& rullers() const;
+		TrendLib::TrendRullerSet& rullerSet();
+		const TrendLib::TrendRullerSet& rullerSet() const;
 
 	private:
 		TrendLib::TrendSignalSet m_signalSet;
-		std::vector<TrendLib::TrendRuller> m_rullers;
+		TrendLib::TrendRullerSet m_rullerSet;
 	};
 
 }

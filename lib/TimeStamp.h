@@ -23,7 +23,7 @@ struct TimeStamp
 	//
 	TimeStamp() = default;
 	TimeStamp(const TimeStamp&) = default;
-	explicit TimeStamp(qint64 value) : timeStamp(value)
+	TimeStamp(qint64 value) : timeStamp(value)
 	{
 	}
 	explicit TimeStamp(const QDateTime& dateTime) : timeStamp(dateTime.toMSecsSinceEpoch() + dateTime.offsetFromUtc() * 1000)
@@ -66,12 +66,6 @@ struct TimeStamp
 	bool operator!= (const TimeStamp& value) const
 	{
 		return this->timeStamp != value.timeStamp;
-	}
-
-	TimeStamp& operator+ (const TimeStamp& value)
-	{
-		this->timeStamp += value.timeStamp;
-		return *this;
 	}
 };
 

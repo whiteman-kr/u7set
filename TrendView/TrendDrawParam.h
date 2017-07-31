@@ -51,6 +51,10 @@ namespace TrendLib
 		quint64 duration() const;
 		void setDuration(qint64 value);
 
+		int hightlightRullerIndex() const;
+		void setHightlightRullerIndex(int value);
+		void resetHightlightRullerIndex();
+
 	private:
 		QRect m_rect;
 		int m_dpiX = 96;
@@ -65,6 +69,8 @@ namespace TrendLib
 
 		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
 		qint64 m_duration = 1_hour;
+
+		int m_highlightRullerIndex = -1;
 	};
 }
 

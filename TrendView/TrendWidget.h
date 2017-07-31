@@ -2,6 +2,7 @@
 #define TRENDVIEW_H
 
 #include "Trend.h"
+#include "TrendRuller.h"
 
 namespace TrendLib
 {
@@ -17,7 +18,7 @@ namespace TrendLib
 		void render(const TrendDrawParam& drawParam);
 
 	signals:
-		void renderedImage(const QImage& image);
+		void renderedImage(const QImage& image, TrendDrawParam drawParam);
 
 	protected:
 		virtual void run() override;
@@ -60,14 +61,14 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp);
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex);
 
 	protected:
 
 		// --
 		//
 	protected slots:
-		void updatePixmap(const QImage& image);
+		void updatePixmap(const QImage& image, TrendDrawParam drawParam);
 
 		// Signals
 	signals:
@@ -78,6 +79,9 @@ namespace TrendLib
 	public:
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
+
+		TrendLib::TrendRullerSet& rullerSet();
+		const TrendLib::TrendRullerSet& rullerSet() const;
 
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
@@ -97,14 +101,29 @@ namespace TrendLib
 	private:
 		RenderThread m_thread;
 		QPixmap m_pixmap;
+		TrendDrawParam m_pixmapDrawParam;			// DrawParmas whcih was used to generate m_pixmap;
 
 		Trend m_trend;
 		TrendDrawParam m_drawParam;
 
-		// Mouse scroll vaiables
+		enum class MouseAction
+		{
+			None,
+			Scroll,
+			MoveRuller,
+			SelectView
+		};
+
+		MouseAction m_mouseAction = MouseAction::None;
+
+		// MouseScroll/RullerMove/... vaiables
 		//
 		TimeStamp m_mouseScrollInitialTime;
 		QPoint m_mouseScrollInitialMousePos;
+
+		int m_rullerMoveRullerIndex = -1;
+		QPoint m_rullerMoveInitialMousePos;
+		TimeStamp m_rullerMoveInitialTimeStamp;
 	};
 }
 
