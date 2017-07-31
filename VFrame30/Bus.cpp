@@ -258,6 +258,9 @@ namespace VFrame30
 	Bus::Bus()
 	{
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busTypeId, true, Bus::busTypeId, Bus::setBusTypeId);
+		auto fileNameProp = ADD_PROPERTY_GETTER(QString, PropertyNames::busTypeFileName, true, Bus::fileName);
+		fileNameProp->setExpert(true);
+
 		setUuid(QUuid::createUuid());
 	}
 
@@ -404,6 +407,17 @@ namespace VFrame30
 //		*data = doc.toByteArray();
 		return true;
 	}
+
+	QString Bus::fileName() const
+	{
+		return m_fileName;
+	}
+
+	void Bus::setFileName(const QString& value)
+	{
+		m_fileName = value;
+	}
+
 
 	QString Bus::busTypeId() const
 	{

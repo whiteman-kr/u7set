@@ -70,6 +70,7 @@ namespace VFrame30
 				this->m_uuid = src.m_uuid;
 				this->m_busTypeId = src.m_busTypeId;
 				this->m_busSignals = src.m_busSignals;
+				this->m_fileName = src.m_fileName;
 			}
 			return *this;
 		}
@@ -80,6 +81,9 @@ namespace VFrame30
 	public:
 		QUuid uuid() const;
 		void setUuid(const QUuid& uuid);
+
+		QString fileName() const;
+		void setFileName(const QString& value);
 
 		QString busTypeId() const;
 		void setBusTypeId(const QString& value);
@@ -97,6 +101,7 @@ namespace VFrame30
 
 	private:
 		QUuid m_uuid;
+		QString m_fileName;
 		QString m_busTypeId = "BUSTYPEID";
 		std::vector<BusSignal> m_busSignals;
 	};
