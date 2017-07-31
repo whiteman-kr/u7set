@@ -698,6 +698,29 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 
 	VFrame30::BusSignal bs(type);
 
+	bool ok = false;
+
+	QString signalName = QInputDialog::getText(this, tr("Add Signal"),
+										 tr("Enter signal name:"), QLineEdit::Normal,
+										 tr("name"), &ok);
+
+	if (ok == false || signalName.isEmpty() == true)
+	{
+		return;
+	}
+
+	bs.setName(signalName);
+
+	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
+	for (const VFrame30::BusSignal& checkBs : busSignals)
+	{
+		if (checkBs.name() == bs.name())
+		{
+			QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(bs.name()));
+			return;
+		}
+	}
+
 	bus->addSignal(bs);
 
 	QTreeWidgetItem* item = new QTreeWidgetItem();
@@ -774,11 +797,41 @@ void DialogBusEditor::onSignalEdit()
 
 		for (int i = 0; i < editIndexes.size(); i++)
 		{
-			int signalIndex = editIndexes[i];
+			int editIndex = editIndexes[i];
 
-			busSignals[signalIndex] = *(dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
+			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
+			if (editSignal == nullptr)
+			{
+				assert(editSignal);
+				return;
+			}
 
-			updateSignalsTreeItemText(selectedItems[i], busSignals[signalIndex]);
+			// Check for duplicate signal names
+			//
+
+			bool duplicateNames = false;
+
+			for (int j = 0; j < busSignals.size(); j++)
+			{
+				if (editIndex != j && busSignals[j].name() == editSignal->name())
+				{
+					QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(busSignals[j].name()));
+					duplicateNames = true;
+					break;
+				}
+			}
+
+			if (duplicateNames == true)
+			{
+				continue;
+			}
+
+			// Update the signal
+			//
+
+			busSignals[editIndex] = *editSignal;
+
+			updateSignalsTreeItemText(selectedItems[i], busSignals[editIndex]);
 		}
 
 		bus->setBusSignals(busSignals);
