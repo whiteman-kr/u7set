@@ -393,6 +393,8 @@ enum class ArchiveError
 	PreviousArchRequestIsNotFinished,			// use ARCHS_GET_APP_SIGNALS_STATES_CANCEL to finish requests
 	DbConnectionError,
 	ExecQueryError,
+	NoSignals,
+	BuildQueryError,
 };
 
 
