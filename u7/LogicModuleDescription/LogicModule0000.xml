@@ -10273,7 +10273,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#swap_endian_16si_16si_v1"       Caption="swap_endian_16si_16si"       Version="1.0001">
+		<AFB id="#swap_endian_16si_v1"       Caption="swap_endian_16si"       Version="1.0001">
 			<Properties>
 				<Description>Converts 16-bit little-endian to 16-bit big endian and back</Description>
 				<Category>Convertor</Category>
@@ -10307,13 +10307,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#swap_endian_si_si_v1"       Caption="swap_endian_si_si"       Version="1.0001">
+		<AFB id="#swap_endian_si_v1"       Caption="swap_endian_si"       Version="1.0001">
 			<Properties>
 				<Description>Converts little-endian to big endian and back</Description>
 				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
@@ -10341,13 +10341,13 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#swap_endian_fp_fp_v1"       Caption="swap_endian_fp_fp"       Version="1.0001">
+		<AFB id="#swap_endian_fp_v1"       Caption="swap_endian_fp"       Version="1.0001">
 			<Properties>
 				<Description>Converts little-endian to big endian and back</Description>
 				<Category>Convertor</Category>
 				<OpCode>28</OpCode>
 				<HasRam>false</HasRam>
-				<InternalUse>false</InternalUse>
+				<InternalUse>true</InternalUse>
 				<MinWidth>36</MinWidth>
 			</Properties>
 			<Inputs>
