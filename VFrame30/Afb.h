@@ -126,6 +126,7 @@ namespace Afb
 		void setSize(int value);
 
 		E::ByteOrder byteOrder() const;
+		void setByteOrder(E::ByteOrder value);
 
 		bool isAnalog() const;
 		bool isDiscrete() const;
@@ -141,6 +142,7 @@ private:
 		E::DataFormat m_dataFormat = E::DataFormat::UnsignedInt;
 		int m_operandIndex = 0;
 		int m_size = 0;
+		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};
@@ -156,7 +158,7 @@ private:
 		// Methods
 		//
 	public:
-		void update(const E::SignalType& type, const E::DataFormat dataFormat, const QVariant& lowLimit, const QVariant& highLimit);
+		void update(const E::SignalType& type, const E::DataFormat dataFormat, E::ByteOrder byteOrder, const QVariant& lowLimit, const QVariant& highLimit);
 
 		// Serialization
 		//
@@ -204,6 +206,9 @@ private:
 		int size() const;
 		void setSize(int value);
 
+		E::ByteOrder byteOrder() const;
+		void setByteOrder(E::ByteOrder value);
+
 		bool instantiator() const;
 		void setInstantiator(bool value);
 
@@ -224,6 +229,7 @@ private:
 		bool m_visible;
 		E::SignalType m_type;		// Param type
 		E::DataFormat m_dataFormat;
+		E::ByteOrder m_byteOrder;
 		bool m_instantiator;
 		bool m_user;
 		QString m_changedScript;
