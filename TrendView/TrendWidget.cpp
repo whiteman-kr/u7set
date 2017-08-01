@@ -295,19 +295,27 @@ namespace TrendLib
 					assert(m_rullerMoveRullerIndex != -1);
 					assert(m_rullerMoveRullerIndex >= 0 && m_rullerMoveRullerIndex < static_cast<int>(rullerSet().rullers().size()));
 
-					QRectF laneRect = m_trend.calcLaneRect(0, m_drawParam);
+					int laneHeight = rect().height() / laneCount();
+					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
+
+					QRectF laneRect = m_trend.calcLaneRect(laneIndex, m_drawParam);
 					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
 					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
 
-					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
-					QPointF mouseOffset = m_rullerMoveInitialMousePos - event->pos();
+					qint64 laneStartTime = m_drawParam.startTimeStamp().timeStamp + m_drawParam.duration() * laneIndex;
 
-					TimeStamp ts(m_rullerMoveInitialTimeStamp.timeStamp - static_cast<qint64>(mouseOffset.x() * coefx));
+					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
+
+					int mouseOffset = event->pos().x() - trendAreaRectPixels.left();
+					mouseOffset = qBound<int>(1, mouseOffset, trendAreaRectPixels.width());
+
+					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
 
 					TrendRuller& mutableRuller = rullerSet().rullers().at(m_rullerMoveRullerIndex);
 					mutableRuller.setTimeStamp(ts);
 
 					update();
+
 				}
 				break;
 			default:

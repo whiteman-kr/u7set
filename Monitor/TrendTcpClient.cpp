@@ -73,11 +73,13 @@ void TrendTcpClient::onConnection()
 void TrendTcpClient::onDisconnection()
 {
 	qDebug() << "TrendTcpClient::onDisconnection";
+	requestInProgress = false;
 }
 
 void TrendTcpClient::onReplyTimeout()
 {
 	qDebug() << "TrendTcpClient::onReplyTimeout()";
+	requestInProgress = false;
 }
 
 void TrendTcpClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -292,6 +294,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 
 	// --
 	//
+	qDebug() << "TrendTcpClient::processNext, stateCount " << stateCount;
 	for (int i = 0; i < stateCount; i++)
 	{
 		const ::Proto::AppSignalState& stateMessage = m_nextReply.appsignalstates(i);

@@ -313,7 +313,7 @@ namespace TrendLib
 
 		theSettings.m_viewType = m_viewCombo->currentIndex();
 		theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
-		theSettings.m_timeType = m_timeTypeCombo->currentIndex();
+		theSettings.m_timeTypeIndex = m_timeTypeCombo->currentIndex();
 
 		theSettings.writeUserScope();
 		return;
@@ -328,7 +328,7 @@ namespace TrendLib
 		assert(m_viewCombo);
 		m_viewCombo->setCurrentIndex(theSettings.m_viewType);
 
-		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeType);
+		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
 		//
@@ -509,6 +509,7 @@ namespace TrendLib
 	{
 		TimeType timeType = m_timeTypeCombo->itemData(index).value<TimeType>();
 		m_trendWidget->setTimeType(timeType);
+		theSettings.m_timeType = static_cast<int>(timeType);
 
 		m_trendWidget->updateWidget();
 		return;
