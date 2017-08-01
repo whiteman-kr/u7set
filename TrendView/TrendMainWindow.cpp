@@ -227,6 +227,7 @@ namespace TrendLib
 		m_toolBar->addWidget(intervalLabel);
 
 		m_timeCombo = new QComboBox(m_toolBar);
+		m_timeCombo->addItem(tr("2 sec"), QVariant::fromValue(2_sec));
 		m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
 		m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
 		m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
@@ -238,7 +239,7 @@ namespace TrendLib
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
-		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours));
+		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours * 7));
 		m_timeCombo->setCurrentIndex(6);
 		m_toolBar->addWidget(m_timeCombo);
 
@@ -534,7 +535,8 @@ namespace TrendLib
 
 		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
 
-		if (mouseOn != Trend::MouseOn::InsideTrendArea)
+		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
+			mouseOn != Trend::MouseOn::OnRuller)
 		{
 			return;
 		}

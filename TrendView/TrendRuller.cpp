@@ -19,7 +19,7 @@ namespace TrendLib
 
 	void TrendRuller::setTimeStamp(const TimeStamp& value)
 	{
-		m_timeStamp = value;
+		m_timeStamp = (value.timeStamp / 5) * 5;
 	}
 
 	bool TrendRuller::isShowRuller() const
@@ -52,9 +52,10 @@ namespace TrendLib
 
 	void TrendRullerSet::addRuller(const TrendLib::TrendRuller& ruller)
 	{
-		qDebug() << "Add trend ruller " << ruller.timeStamp().toDateTime();
+		TrendLib::TrendRuller r = ruller;
+		r.setTimeStamp(ruller.timeStamp().timeStamp - ruller.timeStamp().timeStamp % 5);
 
-		m_rullers.push_back(ruller);
+		m_rullers.push_back(r);
 	}
 
 	void TrendRullerSet::deleteRuller(const TimeStamp& rullerTimeStamp)

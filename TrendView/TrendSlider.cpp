@@ -410,7 +410,7 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 
 	// Draw rullers
 	//
-	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x80)), 0, Qt::PenStyle::DashLine);
+	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x60)), 0, Qt::PenStyle::DashLine);
 	p.setPen(rullerPen);
 
 	TimeStamp minTimeStamp(m_min);
@@ -423,7 +423,6 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 	for (const TrendLib::TrendRuller& ruller : rullers)
 	{
 		double x = rect().left() + k * (ruller.timeStamp().timeStamp - m_min);
-		qDebug() << x;
 
 		p.drawLine(QPointF(x, rect().top()),
 				   QPointF(x, rect().bottom()));
