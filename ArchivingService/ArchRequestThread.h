@@ -67,7 +67,10 @@ private:
 	TimeType timeType() const { return m_param.timeType; }
 
 	qint64 startTime() const { return m_param.startTime; }
+	QString startTimeStr() const { return TimeStamp(m_param.startTime).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
+
 	qint64 endTime() const { return m_param.endTime; }
+	QString endTimeStr() const { return TimeStamp(m_param.endTime).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
 
 	int signalHashesCount() const { return m_param.signalHashesCount; }
 	const Hash* signalHashes() const { return m_param.signalHashes; }

@@ -127,5 +127,29 @@ bool Archive::tableIsExists(const QString& tableName)
 }
 
 
+QString Archive::timeTypeStr(TimeType timeType)
+{
+	switch(timeType)
+	{
+	case TimeType::Plant:
+		return QString("Plant");
+
+	case TimeType::System:
+		return QString("System");
+
+	case TimeType::Local:
+		return QString("Local");
+
+	case TimeType::ArchiveId:
+		return QString("ArchiveId");
+
+	default:
+		assert(false);
+	}
+
+	return QString("???");
+}
+
+
 
 

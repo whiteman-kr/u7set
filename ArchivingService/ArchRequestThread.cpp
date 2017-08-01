@@ -109,6 +109,8 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 
 	m_reply.clear_appsignalstates();
 
+	DEBUG_LOG_MSG(logger, QString("Request result %1 records").arg(m_totalStates));
+
 	return result;
 }
 
@@ -387,6 +389,15 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 	// execute request to archive DB
 	//
 	TEST_PTR_RETURN(context);
+
+	TimeStamp start(context->startTime());
+	TimeStamp end(context->endTime());
+
+	DEBUG_LOG_MSG(m_logger, QString("Request: timeType = %1, start = %2, end = %3, signals = %4").
+				  arg(Archive::timeTypeStr(context->timeType())).
+				  arg(start.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(end.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(context->signalCount()));
 
 	bool result = tryConnectToDatabase();
 
