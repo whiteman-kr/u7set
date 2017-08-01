@@ -612,6 +612,12 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
 	ui->tableView->setSortingEnabled(true);
 
+	int fontHeight = fontMetrics().height() + 4;
+
+	QHeaderView *verticalHeader = ui->tableView->verticalHeader();
+	verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+	verticalHeader->setDefaultSectionSize(fontHeight);
+
 	connect(ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogSignalSnapshot::sortIndicatorChanged);
 
 	ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
