@@ -63,7 +63,12 @@ namespace TrendLib
 		TrendSignalParam();
 		TrendSignalParam(const AppSignalParam& appSignal);
 
-		// Proprties
+		// Methods
+		//
+	public:
+		AppSignalParam toAppSignalParam() const;
+
+		// Properties
 		//
 	public:
 		QString signalId() const;
@@ -122,6 +127,7 @@ namespace TrendLib
 		bool addSignal(const TrendSignalParam& signal);
 		void removeSignal(QString appSignalId);
 
+		std::vector<TrendSignalParam> trendSignals() const;
 		std::vector<TrendSignalParam> analogSignals() const;
 		std::vector<TrendSignalParam> discreteSignals() const;
 

@@ -19,6 +19,22 @@ namespace TrendLib
 	{
 	}
 
+	AppSignalParam TrendSignalParam::toAppSignalParam() const
+	{
+		AppSignalParam result;
+
+		result.setCustomSignalId(m_signalId);
+		result.setAppSignalId(m_appSignalId);
+		result.setCaption(m_caption);
+		result.setEquipmentId(m_equipmentId);
+		result.setType(m_type);
+		result.setLowEngineeringUnits(m_lowLimit);
+		result.setHighEngineeringUnits(m_highLimit);
+		result.setUnit(m_unit);
+
+		return result;
+	}
+
 	QString TrendSignalParam::signalId() const
 	{
 		return m_signalId;
@@ -153,6 +169,21 @@ namespace TrendLib
 			});
 
 		return;
+	}
+
+	std::vector<TrendSignalParam> TrendSignalSet::trendSignals() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		std::vector<TrendSignalParam> result;
+		result.reserve(m_signalParams.size());
+
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			result.push_back(s);
+		}
+
+		return result;
 	}
 
 	std::vector<TrendSignalParam> TrendSignalSet::analogSignals() const

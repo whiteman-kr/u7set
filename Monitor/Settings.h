@@ -81,6 +81,7 @@ public:
 	int m_signalSnapshotSortColumn = 0;
 	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
 
+	QStringList m_trendSignalsDialogFilterCompleter;
 
 private:
 	mutable QMutex m_mutex;

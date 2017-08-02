@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "../lib/AppSignalManager.h"
+#include "../TrendView/TrendSignal.h"
 
 namespace Ui {
 	class DialogChooseTrendSignals;
@@ -13,7 +14,7 @@ class DialogChooseTrendSignals : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogChooseTrendSignals(QWidget* parent);
+	DialogChooseTrendSignals(std::vector<TrendLib::TrendSignalParam>& trendSignals, QWidget* parent);
 	virtual ~DialogChooseTrendSignals();
 
 	std::vector<AppSignalParam> acceptedSignals() const;
@@ -33,7 +34,8 @@ private slots:
 	void on_removeSignalButton_clicked();
 	void on_removeAllSignalsButton_clicked();
 
-	void on_filterEdit_textChanged(const QString &arg1);
+	void on_filterEdit_textChanged(const QString &arg);
+	void on_filterEdit_editingFinished();
 
 	void on_filteredSignals_doubleClicked(const QModelIndex &index);
 	void slot_filteredSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -45,6 +47,7 @@ private slots:
 
 private:
 	Ui::DialogChooseTrendSignals* ui;
+	QCompleter* m_filterCompleter = nullptr;
 
 	std::vector<AppSignalParam> m_acceptedSignals;
 };
