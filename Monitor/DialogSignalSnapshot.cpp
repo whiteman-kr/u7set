@@ -647,7 +647,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
 	ui->comboMaskType->blockSignals(false);
 
-	connect(ui->editMask, &QLineEdit::textEdited, [=](){m_completer->complete();});
+	connect(ui->editMask, &QLineEdit::textEdited, [this](){m_completer->complete();});
 	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), ui->editMask, &QLineEdit::setText);
 
 	connect(theMonitorMainWindow, &MonitorMainWindow::signalParamAndUnitsArrived, this, &DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived);
