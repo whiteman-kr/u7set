@@ -285,7 +285,7 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 	int createdTablesCount = 0;
 	int creationErrorCount = 0;
 
-	while(i.hasNext() == true)
+	while(i.hasNext() == true && quitRequested() == false)
 	{
 		i.next();
 
