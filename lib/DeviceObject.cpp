@@ -2930,6 +2930,11 @@ R"DELIM({
 		return moduleFamily() == FamilyType::LM;
 	}
 
+	bool DeviceModule::isFSCConfigurationModule() const
+	{
+		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB;
+	}
+
 	bool DeviceModule::isOptoModule() const
 	{
 		return moduleFamily() == FamilyType::OCM;

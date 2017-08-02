@@ -1822,7 +1822,7 @@ void EquipmentView::addPresetToConfiguration(const DbFileInfo& fileInfo)
 	{
 		Hardware::DeviceModule* module = device->toModule();
 
-		if (module != nullptr && module->moduleFamily() == Hardware::DeviceModule::LM)
+		if (module != nullptr && module->isFSCConfigurationModule() == true)
 		{
 			// Get susbsystems
 			//

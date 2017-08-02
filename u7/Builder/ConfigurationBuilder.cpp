@@ -99,10 +99,54 @@ namespace Builder
 		LOG_MESSAGE(m_log, "");
 		LOG_MESSAGE(m_log, tr("Generating modules configurations"));
 
+		int subsystemsCount = m_subsystems->count();
+
+		// Check if logic modules have unknown subsystems
+		//
+		for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
+		{
+			Hardware::DeviceModule* lm = *it;
+			if (lm == nullptr)
+			{
+				assert(lm);
+				return false;
+			}
+
+			if (lm->propertyExists("SubsystemID") == false)
+			{
+				m_log->errCFG3000("SubsystemID", lm->equipmentId());
+				return false;
+			}
+
+			QString subsystemID = lm->propertyValue("SubsystemID").toString();
+
+			bool subsystemFound = false;
+
+			for (int i = 0; i < subsystemsCount; i++)
+			{
+				std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+				if (subsystem == nullptr)
+				{
+					assert(subsystem);
+					return false;
+				}
+
+				if (subsystem->subsystemId() == subsystemID)
+				{
+					subsystemFound = true;
+					break;
+				}
+			}
+
+			if (subsystemFound == false)
+			{
+				m_log->errCFG3001(subsystemID, lm->equipmentId());
+				return false;
+			}
+		}
+
 		// Find Logic modules for each subsystem and execute configuration script for each subsystem
 		//
-
-		int subsystemsCount = m_subsystems->count();
 
 		for (int i = 0; i < subsystemsCount; i++)
 		{

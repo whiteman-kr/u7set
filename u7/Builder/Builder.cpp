@@ -211,6 +211,22 @@ namespace Builder
 			{
 				break;
 			}
+
+			std::vector<Hardware::DeviceModule*> fscModules;
+			findFSCConfigurationModules(equipmentSet.root(), &fscModules);
+
+			LmDescriptionSet fscDescriptions;
+
+			ok = true;
+			for (Hardware::DeviceModule* lm : fscModules)
+			{
+				ok &= loadLogicModuleDescription(&db, lm, &fscDescriptions);
+			}
+
+			if (ok == false)
+			{
+				break;
+			}
 			else
 			{
 				LOG_SUCCESS(m_log, tr("Ok"));
@@ -318,7 +334,7 @@ namespace Builder
 			LOG_EMPTY_LINE(m_log);
 			LOG_MESSAGE(m_log, tr("Module configurations compilation"));
 
-            ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), lmModules, &lmDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
+			ConfigurationBuilder cfgBuilder(this, &db, equipmentSet.root(), fscModules, &fscDescriptions, &signalSet, &subsystems, &opticModuleStorage, m_log,
                                                buildWriter.buildInfo().id, lastChangesetId, debug(), projectName(), projectUserName());
 
 			ok = cfgBuilder.build(buildWriter);
@@ -499,6 +515,39 @@ namespace Builder
 		return;
 	}
 
+	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
+	{
+		if (object == nullptr ||
+			out == nullptr)
+		{
+			assert(object);
+			assert(out);
+			return;
+		}
+
+		for (int i = 0; i < object->childrenCount(); i++)
+		{
+			Hardware::DeviceObject* child = object->child(i);
+
+			if (child->deviceType() == Hardware::DeviceType::Module)
+			{
+				Hardware::DeviceModule* module = dynamic_cast<Hardware::DeviceModule*>(child);
+
+				if (module->isFSCConfigurationModule() == true)
+				{
+					out->push_back(module);
+				}
+			}
+
+			if (child->deviceType() < Hardware::DeviceType::Module)
+			{
+				findFSCConfigurationModules(child, out);
+			}
+		}
+
+		return;
+	}
+
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
 	{
 		if (device == nullptr)
@@ -583,7 +632,7 @@ namespace Builder
 			for (const Hardware::DeviceModule* lm : logicMoudles)
 			{
 				assert(lm);
-				assert(lm->isLogicModule() == true);
+				assert(lm->isFSCConfigurationModule() == true);
 
 				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
 				if (lmSubsystemIdProp == nullptr)
