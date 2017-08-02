@@ -71,6 +71,9 @@ bool BusStorage::load(QString* errorMessage)
 		}
 
 		setFileInfo(bus.uuid(), *f);
+
+		bus.setFileName(f->fileName());
+
 		add(bus.uuid(), bus);
 	}
 
@@ -87,20 +90,26 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	VFrame30::Bus bus = get(uuid);
+	VFrame30::Bus* bus = getPtr(uuid);
+	if (bus == nullptr)
+	{
+		assert(bus);
+		return false;
+	}
+
 	QByteArray data;
 
-	bool ok = bus.save(&data);
+	bool ok = bus->save(&data);
 
 	if (ok == false)
 	{
-		*errorMessage = QString("Error saving bus %1 to xml.").arg(bus.busTypeId());
+		*errorMessage = QString("Error saving bus %1 to xml.").arg(bus->busTypeId());
 		return false;
 	}
 
 	// save to db
 	//
-	DbFileInfo fi = fileInfo(bus.uuid());
+	DbFileInfo fi = fileInfo(bus->uuid());
 
 	if (fi.isNull() == true)
 	{
@@ -108,7 +117,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		//
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		QString fileName = QString("bustype-%1.%2").arg(bus.uuid().toString()).arg(BusFileExtension);
+		QString fileName = QString("bustype-%1.%2").arg(bus->uuid().toString()).arg(BusFileExtension);
 		fileName = fileName.remove('{');
 		fileName = fileName.remove('}');
 
@@ -123,7 +132,8 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 			return false;
 		}
 
-		setFileInfo(bus.uuid(), *file);
+		setFileInfo(uuid, *file);
+		bus->setFileName(file->fileName());
 	}
 	else
 	{
@@ -152,7 +162,8 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 			return false;
 		}
 
-		setFileInfo(bus.uuid(), *file);
+		setFileInfo(uuid, *file);
+		bus->setFileName(file->fileName());
 	}
 
 	return true;

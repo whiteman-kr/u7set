@@ -1,11 +1,11 @@
 #include "Trend.h"
+#include "QPainter"
 
 namespace TrendLib
 {
 
 	Trend::Trend()
 	{
-
 	}
 
 	void Trend::draw(QImage* image, const TrendDrawParam& drawParam) const
@@ -24,15 +24,7 @@ namespace TrendLib
 		image->fill(Qt::white);
 
 		QPainter painter(image);
-		painter.setRenderHint(QPainter::Antialiasing, true);
-		painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-		//--
-		//
-		painter.resetTransform();
-
-		painter.translate(0.5, 0.5);
-		painter.scale(drawParam.dpiX(), drawParam.dpiY());
+		adjustPainter(&painter, drawParam.dpiX(), drawParam.dpiY());
 
 		// --
 		//
@@ -297,11 +289,16 @@ namespace TrendLib
 		assert(painter);
 
 		painter->fillRect(rect, backColor);
-
+		// --
+		//
 		painter->setPen(signal.color());
+
+		painter->setClipRect(rect);		// Set clipo region, as SignalID and caption can fo out of drawArea
 
 		QString signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
 		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip);
+
+		painter->setClipping(false);	// Restore clip region
 
 		// Get signal data
 		//
@@ -342,6 +339,10 @@ namespace TrendLib
 		QRectF textBoundRect;
 		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);	// Get bound rect, for understaning text height
 		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+		// Set clip region
+		//
+		painter->setClipRect(rect);
 
 		// Draw trend
 		//
@@ -430,24 +431,235 @@ namespace TrendLib
 			lines.clear();
 		}
 
+		// Reset clipping
+		//
+		painter->setClipping(false);
+
 		return;
 	}
 
-	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData> >& signalData) const
+	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& /*rect*/, const TrendDrawParam& /*drawParam*/, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& /*signalData*/) const
 	{
 		assert(painter);
 		assert(signal.isAnalog() == true);
 
-		// Draw units (0, 1) on the left side of rect
-		//
-//		painter->setPen(signal.color());
+		return;
+	}
 
-//		QRectF textBoundRect;
-//		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);
-//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+	void Trend::drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const
+	{
+		if (painter == nullptr)
+		{
+			assert(painter);
+			return;
+		}
 
-		// Draw trend
+		adjustPainter(painter, drawParam.dpiX(), drawParam.dpiY());
+
+		double dpiX = static_cast<double>(drawParam.dpiX());
+		double dpiY = static_cast<double>(drawParam.dpiY());
+
+		// Prepare drawing resources
 		//
+		QPen rullerPen(Qt::PenStyle::DashLine);
+		rullerPen.setCosmetic(true);
+		rullerPen.setColor(qRgb(0x00, 0x00, 0xC0));
+
+		QPen distancePen(Qt::PenStyle::SolidLine);
+		distancePen.setCosmetic(true);
+		distancePen.setColor(qRgb(0x00, 0x00, 0xC0));
+
+		QBrush backgroundBrush(drawParam.backgroundColor());
+		painter->setBrush(backgroundBrush);
+
+		// --
+		//
+		int selectedRullerIndex = drawParam.hightlightRullerIndex();
+		TimeStamp selectedRullerTime;
+
+		if (/*selectedRullerIndex != -1 &&*/
+			selectedRullerIndex >= 0 &&
+			selectedRullerIndex < static_cast<int>(rullerSet().rullers().size()))
+		{
+			selectedRullerTime = rullerSet().rullers()[selectedRullerIndex].timeStamp();
+		}
+
+		for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
+		{
+			TimeStamp startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
+			TimeStamp finishLaneTime = startLaneTime.timeStamp + drawParam.duration();
+
+			TrendDrawParam laneDrawParam = drawParam;
+			laneDrawParam.setStartTimeStamp(startLaneTime);
+
+			QRectF laneRect = calcLaneRect(laneIndex, laneDrawParam);
+			QRectF trendAreaRect = calcTrendArea(laneRect, laneDrawParam);
+
+			//std::vector<TrendRuller> laneRullers = rullerSet().getRullers(startLaneTime, finishLaneTime);
+
+			std::vector<TrendRuller> laneRullers = rullerSet().rullers();
+			std::sort(laneRullers.begin(), laneRullers.end(),
+				[](const TrendRuller& r1, const TrendRuller& r2)
+				{
+					return r1.timeStamp() < r2.timeStamp();
+				});
+
+			// Calc ruller timestamp text width
+			//
+			QRectF timeStampBoundRect;
+			drawText(painter, " 00:00:00.000 ", QRectF(), drawParam, Qt::AlignCenter, &timeStampBoundRect);
+
+			double rullerTextTop = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0 - timeStampBoundRect.height() / 2.0;
+			double rullerTextHeight = timeStampBoundRect.height();
+
+			// Draw ruller line
+			//
+			painter->setClipRect(laneRect);
+
+			double k = static_cast<double>(trendAreaRect.width()) / static_cast<double>(drawParam.duration());	// K is coefficient
+
+			for (size_t i = 0; i < laneRullers.size(); i++)
+			{
+				//QRectF textBoundRect;
+				const TrendRuller& r = laneRullers[i];
+
+				if (r.timeStamp() < startLaneTime)
+				{
+					continue;
+				}
+
+				double x = trendAreaRect.left() + k * static_cast<double>(r.timeStamp().timeStamp - startLaneTime.timeStamp);
+				x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
+
+				if (r.timeStamp() <= finishLaneTime)
+				{
+					painter->setPen(rullerPen);
+
+					painter->drawLine(QPointF(x, trendAreaRect.top()),
+									  QPointF(x, trendAreaRect.bottom()));
+
+					if (r.timeStamp() == selectedRullerTime)
+					{
+						double xx = static_cast<double>(x * dpiX + 1) / dpiX;
+
+						painter->drawLine(QPointF(xx, trendAreaRect.top()),
+										  QPointF(xx, trendAreaRect.bottom()));
+					}
+
+					// Draw ruller timestamp
+					//
+					QString text = r.timeStamp().toDateTime().toString(" hh:mm:ss.zzz ");
+					QRectF textRect(x - timeStampBoundRect.width() / 2.0,
+									rullerTextTop,
+									timeStampBoundRect.width(),
+									rullerTextHeight);
+
+					painter->fillRect(textRect, backgroundBrush);
+					drawText(painter, text, textRect, drawParam, Qt::AlignCenter);
+				}
+
+				// Draw disctance between rullers
+				//
+				if (i > 0)
+				{
+					// There is a previouse ruller, draw distance to it
+					//
+					const TrendRuller& prevRuller = laneRullers[i - 1];
+
+					double prevRullerX = trendAreaRect.left() + k * static_cast<double>(prevRuller.timeStamp().timeStamp - startLaneTime.timeStamp);
+					if (prevRullerX < trendAreaRect.left())
+					{
+						prevRullerX = trendAreaRect.left();
+					}
+					else
+					{
+						prevRullerX += timeStampBoundRect.width() / 2.0;
+					}
+
+					x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
+					if (r.timeStamp() > finishLaneTime)
+					{
+						x = trendAreaRect.right();
+					}
+					else
+					{
+						x -= timeStampBoundRect.width() / 2.0;
+					}
+
+					double y = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0;
+					y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Ajust x to look nice (not blurred)
+
+					if (prevRullerX < x)
+					{
+						painter->setPen(distancePen);
+						painter->drawLine(QPointF(prevRullerX, y),
+										  QPointF(x, y));
+					}
+
+					// Draw distance between rullers
+					//
+					qint64 rullersDistance = r.timeStamp().timeStamp - prevRuller.timeStamp().timeStamp;
+					int msecs = rullersDistance % 1_ms;
+					int secs = (rullersDistance / 1_ms) % 60;
+					int mins = (rullersDistance / 1_min) % 60;
+					int hours = (rullersDistance / 1_hour) % 60;
+					int days = (rullersDistance / 1_day) % 24;
+
+					QString distanceText;
+
+					if (days > 0)
+					{
+						distanceText = QString::asprintf(" %1dd, %02d:%02d:%02d.%03d ", days, hours, mins, secs, msecs);
+					}
+					else
+					{
+						distanceText = QString::asprintf(" %02d:%02d:%02d.%03d ", hours, mins, secs, msecs);
+					}
+
+					QRectF distanceTextBoundRect;
+					drawText(painter, distanceText, distanceTextBoundRect, drawParam, Qt::AlignCenter, &distanceTextBoundRect);		// Get bound rect
+
+					if (distanceTextBoundRect.width() + distanceTextBoundRect.height() / 2 < x - prevRullerX)
+					{
+						QRectF distanceTextRect;
+						distanceTextRect.setLeft(prevRullerX + (x - prevRullerX) / 2.0 - distanceTextBoundRect.width() / 2.0);
+						distanceTextRect.setTop(rullerTextTop);
+						distanceTextRect.setWidth(distanceTextBoundRect.width());
+						distanceTextRect.setHeight(distanceTextBoundRect.height());
+
+						painter->fillRect(distanceTextRect, backgroundBrush);
+						drawText(painter, distanceText, distanceTextRect, drawParam, Qt::AlignCenter);			// Draw distanmce bewtween rullers
+					}
+				}
+
+				if (r.timeStamp() > finishLaneTime)
+				{
+					// Break here, not in the begining of the loop
+					// We need to draw this (of lane) ruller, to draw distance to the perv ruller
+					//
+					break;
+				}
+			}
+		}
+
+		// Reset clipping
+		//
+		painter->setClipping(false);
+
+		return;
+	}
+
+	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY) const
+	{
+		assert(painter);
+
+		painter->setRenderHint(QPainter::Antialiasing, true);
+		painter->setRenderHint(QPainter::TextAntialiasing, true);
+
+		painter->resetTransform();
+
+		painter->translate(0.5, 0.5);
+		painter->scale(dpiX, dpiY);
 
 		return;
 	}
@@ -486,7 +698,7 @@ namespace TrendLib
 		QRectF insideRect;
 
 		insideRect.setLeft(laneRect.left() + 6.0/8.0);
-		insideRect.setTop(laneRect.top() + 1.0/8.0);
+		insideRect.setTop(laneRect.top() + 1.0/5.0);
 		insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
 		insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 2.0/8.0);
 
@@ -520,8 +732,22 @@ namespace TrendLib
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex) const
 	{
+		if (outLaneIndex == nullptr ||
+			outTime == nullptr ||
+			rullerIndex == nullptr)
+		{
+			assert(outLaneIndex);
+			assert(outTime);
+			assert(rullerIndex);
+			return Trend::MouseOn::Outside;
+		}
+
+		*outLaneIndex = -1;
+		*rullerIndex = -1;
+		*outTime = TimeStamp();
+
 		QRect rect = drawParam.rect();
 
 		QPointF pos(static_cast<double>(mousePos.x()) / static_cast<double>(drawParam.dpiX()),		// Transform mousePos to inches, as everything for drawing is done in inches
@@ -546,10 +772,41 @@ namespace TrendLib
 
 				if (trendArea.contains(pos) == true)
 				{
+					// Calc time
+					//
+					qint64 startLaneTime = drawParam.startTimeStamp().timeStamp + laneIndex * drawParam.duration();
+					double coef = drawParam.duration() / trendArea.width();
+					qint64 timeOffset = static_cast<qint64>((pos.x() - trendArea.left()) * coef);
+					TimeStamp posTime = startLaneTime + timeOffset;
+
+					*outTime = posTime;
+					*outLaneIndex = laneIndex;
+
+					// Check if pos OnRuller
+					//
+					qint64 deltaTime = static_cast<qint64>(coef * 1.0 / 32.0);
+					const std::vector<TrendRuller>& rullers = rullerSet().rullers();
+					int ri = 0;
+
+					for (const TrendRuller& ruller : rullers)
+					{
+						if (posTime >= TimeStamp(ruller.timeStamp().timeStamp - deltaTime) &&
+							posTime <= TimeStamp(ruller.timeStamp().timeStamp + deltaTime))
+						{
+							*rullerIndex = ri;
+							return MouseOn::OnRuller;
+						}
+
+						ri++;
+					}
+
+					// --
+					//
 					return MouseOn::InsideTrendArea;
 				}
 				else
 				{
+					*outLaneIndex = laneIndex;
 					return MouseOn::OutsideTrendArea;
 				}
 			}
@@ -557,6 +814,7 @@ namespace TrendLib
 
 		// --
 		//
+		*outLaneIndex = -1;
 		return MouseOn::Outside;		// Can be frame beetween lanes
 	}
 
@@ -571,7 +829,7 @@ namespace TrendLib
 		return rect.left() + (rect.width() / duration) * (time.timeStamp - startTime.timeStamp);
 	}
 
-	TimeStamp Trend::pixelToTime(int pos, const QRectF& rect, const TimeStamp& startTime, qint64 duration)
+	TimeStamp Trend::pixelToTime(int /*pos*/, const TrendDrawParam& /*drawParam*/)
 	{
 		// To do
 		//
@@ -638,6 +896,16 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& Trend::signalSet() const
 	{
 		return m_signalSet;
+	}
+
+	TrendLib::TrendRullerSet& Trend::rullerSet()
+	{
+		return m_rullerSet;
+	}
+
+	const TrendLib::TrendRullerSet& Trend::rullerSet() const
+	{
+		return m_rullerSet;
 	}
 
 }

@@ -274,6 +274,7 @@ namespace Builder
 		bool calculate_POL_paramValues();
 		bool calculate_DER_paramValues();
 		bool calculate_MISMATCH_paramValues();
+		bool calculate_TCONV_paramValues();
 
 		//
 

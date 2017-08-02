@@ -4,6 +4,19 @@
 #include "ArchRequestThread.h"
 
 
+ArchRequestParam::ArchRequestParam()
+{
+	clearSignalHashes();
+}
+
+void ArchRequestParam::clearSignalHashes()
+{
+	memset(signalHashes, 0, sizeof(signalHashes));
+	signalHashesCount = 0;
+}
+
+//
+
 ArchRequestContext::ArchRequestContext(const ArchRequestParam& param) :
 	m_param(param)
 {
@@ -18,7 +31,33 @@ ArchRequestContext::~ArchRequestContext()
 	}
 }
 
-bool ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
+void ArchRequestContext::checkSignalsHashes(const Archive& arch)
+{
+	QVector<Hash> existingHashes;
+
+	const QHash<Hash, ArchSignal>& archSignals = arch.archSignals();
+
+	for(int i = 0; i < m_param.signalHashesCount; i++)
+	{
+		Hash signalHash = m_param.signalHashes[i];
+
+		if (archSignals.contains(signalHash) == true)
+		{
+			existingHashes.append(signalHash);
+		}
+	}
+
+	m_param.clearSignalHashes();
+
+	for(int i = 0; i < existingHashes.count(); i++)
+	{
+		m_param.signalHashes[i] = existingHashes[i];
+	}
+
+	m_param.signalHashesCount = existingHashes.count();
+}
+
+void ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
 {
 	assert(db.isOpen() == true);
 	assert(m_query == nullptr);
@@ -26,8 +65,6 @@ bool ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
 	m_query  = new QSqlQuery(db);
 
 	m_queryStr = queryStr;
-
-	return true;
 }
 
 bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
@@ -71,6 +108,8 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 	m_reply.set_islastpart(false);
 
 	m_reply.clear_appsignalstates();
+
+	DEBUG_LOG_MSG(logger, QString("Request result %1 records").arg(m_totalStates));
 
 	return result;
 }
@@ -125,7 +164,6 @@ void ArchRequestContext::getNextData()
 
 	m_dataReady = true;
 }
-
 
 const char* ArchRequestThreadWorker::FIELD_PLANT_TIME = "plantTime";
 const char* ArchRequestThreadWorker::FIELD_SYSTEM_TIME = "sysTime";
@@ -261,7 +299,7 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 
 		if (archSignals.contains(signalHash) == false)
 		{
-			assert(false);
+			DEBUG_LOG_ERR(m_logger, QString("Unknown signal hash %1 in archive request").arg(signalHash));
 			continue;
 		}
 
@@ -352,11 +390,29 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 	//
 	TEST_PTR_RETURN(context);
 
+	TimeStamp start(context->startTime());
+	TimeStamp end(context->endTime());
+
+	DEBUG_LOG_MSG(m_logger, QString("Request: timeType = %1, start = %2, end = %3, signals = %4").
+				  arg(Archive::timeTypeStr(context->timeType())).
+				  arg(start.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(end.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(context->signalCount()));
+
 	bool result = tryConnectToDatabase();
 
 	if (result == false)
 	{
 		context->setArchError(ArchiveError::DbConnectionError);
+		context->setDataReady(true);
+		return;
+	}
+
+	context->checkSignalsHashes(m_archive);
+
+	if (context->signalCount() == 0)
+	{
+		context->setArchError(ArchiveError::NoSignals);
 		context->setDataReady(true);
 		return;
 	}
@@ -367,15 +423,12 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 
 	if (result == false)
 	{
+		context->setArchError(ArchiveError::BuildQueryError);
+		context->setDataReady(true);
 		return;
 	}
 
-	result = context->createQuery(*m_db, queryStr);
-
-	if (result == false)
-	{
-		return;
-	}
+	context->createQuery(*m_db, queryStr);
 
 	result = context->executeQuery(m_logger);
 
@@ -403,7 +456,6 @@ void ArchRequestThreadWorker::onGetNextData(quint32 requestID)
 
 	context->getNextData();
 }
-
 
 //
 

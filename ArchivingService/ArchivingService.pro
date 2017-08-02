@@ -133,7 +133,8 @@ HEADERS += \
     ArchWriteThread.h \
     ArchRequestThread.h \
     TcpArchRequestsServer.h \
-    Archive.h
+    Archive.h \
+    ../lib/TimeStamp.h
 
 include(../qtservice/src/qtservice.pri)
 

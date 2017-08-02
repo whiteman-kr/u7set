@@ -714,14 +714,28 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return result;
 	}
 
-	const QStringList& SchemaItemSignal::appSignalIdList() const
+	QStringList SchemaItemSignal::appSignalIdList() const
 	{
-		return m_appSignalIds;
+		QStringList result;
+		result.reserve(m_appSignalIds.size());
+
+		for (const QString& s : m_appSignalIds)
+		{
+			result.push_back(s.trimmed());
+		}
+
+		return result;
 	}
 
 	void SchemaItemSignal::setAppSignalIds(const QString& s)
 	{
 		m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+
+		for (QString& s : m_appSignalIds)
+		{
+			s = s.trimmed();
+		}
+
 		adjustHeight();
 		return;
 	}

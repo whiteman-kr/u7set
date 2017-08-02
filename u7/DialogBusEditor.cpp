@@ -79,24 +79,22 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_buttonCheckOut = new QPushButton(tr("Check Out"));
 	m_buttonCheckIn = new QPushButton(tr("Check In"));
 	m_buttonUndo = new QPushButton(tr("Undo"));
-	m_buttonRefresh = new QPushButton(tr("Refresh"));
 
 	leftButtonsLayout->addWidget(m_buttonAdd);
 	leftButtonsLayout->addWidget(m_buttonCheckOut);
 	leftButtonsLayout->addWidget(m_buttonCheckIn);
 	leftButtonsLayout->addWidget(m_buttonUndo);
-	leftButtonsLayout->addWidget(m_buttonRefresh);
 	leftButtonsLayout->addStretch();
 
 	connect(m_buttonAdd, &QPushButton::clicked, this, &DialogBusEditor::onAdd);
 	connect(m_buttonCheckOut, &QPushButton::clicked, this, &DialogBusEditor::onCheckOut);
 	connect(m_buttonCheckIn, &QPushButton::clicked, this, &DialogBusEditor::onCheckIn);
 	connect(m_buttonUndo, &QPushButton::clicked, this, &DialogBusEditor::onUndo);
-	connect(m_buttonRefresh, &QPushButton::clicked, this, &DialogBusEditor::onRefresh);
 
 	// m_busPropertyEditor
 
 	m_busPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	m_busPropertyEditor->setExpertMode(theSettings.isExpertMode());
 
 	connect(m_busPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogBusEditor::onBusPropertiesChanged);
 
@@ -305,12 +303,8 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 		m_mainSplitter->restoreState(theSettings.m_busEditorMainSplitterState);
 		m_rightSplitter->restoreState(theSettings.m_busEditorRightSplitterState);
 		m_busPropertyEditor->setSplitterPosition(theSettings.m_busEditorPropertySplitterPosition);
-	}
 
-	if (theSettings.m_busEditorPeWindowPos.x() != -1 && theSettings.m_busEditorPeWindowPos.y() != -1)
-	{
-		m_propEditorDialog->move(theSettings.m_busEditorPeWindowPos);
-		m_propEditorDialog->restoreGeometry(theSettings.m_busEditorPeWindowGeometry);
+		m_propEditorDialog->resize(theSettings.m_busEditorPeWindowSize);
 		m_propEditorDialog->setSplitterPosition(theSettings.m_busEditorPeSplitterPosition);
 	}
 	else
@@ -318,7 +312,6 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 		int w = 300;
 		int h = 400;
 
-		m_propEditorDialog->move(qApp->desktop()->width() / 2 - w / 2, qApp->desktop()->height() / 2 - h / 2 );
 		m_propEditorDialog->resize(w, h);
 	}
 
@@ -333,8 +326,7 @@ DialogBusEditor::~DialogBusEditor()
 	theSettings.m_busEditorRightSplitterState = m_rightSplitter->saveState();
 	theSettings.m_busEditorPropertySplitterPosition = m_busPropertyEditor->splitterPosition();
 
-	theSettings.m_busEditorPeWindowPos = m_propEditorDialog->pos();
-	theSettings.m_busEditorPeWindowGeometry = m_propEditorDialog->saveGeometry();
+	theSettings.m_busEditorPeWindowSize = m_propEditorDialog->size();
 
 	theSettings.m_busEditorPeSplitterPosition = m_propEditorDialog->splitterPosition();
 
@@ -356,6 +348,17 @@ void DialogBusEditor::onAdd()
 	if (ok == false || busTypeId.isEmpty() == true)
 	{
 		return;
+	}
+
+	int count = m_busses.count();
+	for (int i = 0; i < count; i++)
+	{
+		const VFrame30::Bus& bus = m_busses.get(i);
+		if (bus.busTypeId() == busTypeId)
+		{
+			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
+			return;
+		}
 	}
 
 	bus.setUuid(QUuid::createUuid());
@@ -454,10 +457,22 @@ void DialogBusEditor::onClone()
 		return;
 	}
 
+	int count = m_busses.count();
+	for (int i = 0; i < count; i++)
+	{
+		const VFrame30::Bus& bus = m_busses.get(i);
+		if (bus.busTypeId() == busTypeId)
+		{
+			QMessageBox::critical(this, qAppName(), tr("A bus with specified type ID already exists!"));
+			return;
+		}
+	}
+
 	cloneBus.setUuid(QUuid::createUuid());
 	cloneBus.setBusTypeId(busTypeId);
 
 	addBus(cloneBus);
+
 }
 
 void DialogBusEditor::onCheckOut()
@@ -683,6 +698,29 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 
 	VFrame30::BusSignal bs(type);
 
+	bool ok = false;
+
+	QString signalName = QInputDialog::getText(this, tr("Add Signal"),
+										 tr("Enter signal name:"), QLineEdit::Normal,
+										 tr("name"), &ok);
+
+	if (ok == false || signalName.isEmpty() == true)
+	{
+		return;
+	}
+
+	bs.setName(signalName);
+
+	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
+	for (const VFrame30::BusSignal& checkBs : busSignals)
+	{
+		if (checkBs.name() == bs.name())
+		{
+			QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(bs.name()));
+			return;
+		}
+	}
+
 	bus->addSignal(bs);
 
 	QTreeWidgetItem* item = new QTreeWidgetItem();
@@ -759,11 +797,41 @@ void DialogBusEditor::onSignalEdit()
 
 		for (int i = 0; i < editIndexes.size(); i++)
 		{
-			int signalIndex = editIndexes[i];
+			int editIndex = editIndexes[i];
 
-			busSignals[signalIndex] = *(dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
+			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[i].get()));
+			if (editSignal == nullptr)
+			{
+				assert(editSignal);
+				return;
+			}
 
-			updateSignalsTreeItemText(selectedItems[i], busSignals[signalIndex]);
+			// Check for duplicate signal names
+			//
+
+			bool duplicateNames = false;
+
+			for (int j = 0; j < busSignals.size(); j++)
+			{
+				if (editIndex != j && busSignals[j].name() == editSignal->name())
+				{
+					QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(busSignals[j].name()));
+					duplicateNames = true;
+					break;
+				}
+			}
+
+			if (duplicateNames == true)
+			{
+				continue;
+			}
+
+			// Update the signal
+			//
+
+			busSignals[editIndex] = *editSignal;
+
+			updateSignalsTreeItemText(selectedItems[i], busSignals[editIndex]);
 		}
 
 		bus->setBusSignals(busSignals);
@@ -948,6 +1016,15 @@ void DialogBusEditor::onSignalItemDoubleClicked(QTreeWidgetItem* item, int colum
 	}
 }
 
+void DialogBusEditor::keyPressEvent(QKeyEvent *evt)
+{
+	if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+	{
+		return;
+	}
+	QDialog::keyPressEvent(evt);
+}
+
 void DialogBusEditor::closeEvent(QCloseEvent* e)
 {
 	e->accept();
@@ -960,6 +1037,7 @@ void DialogBusEditor::reject()
 
 void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	bool refillPropeties = false;
 
 	for (const std::shared_ptr<PropertyObject>& object : objects)
 	{
@@ -968,6 +1046,26 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 		{
 			assert(editBus);
 			return;
+		}
+
+		bool alreadyExists = false;
+
+		int count = m_busses.count();
+		for (int i = 0; i < count; i++)
+		{
+			const VFrame30::Bus& bus = m_busses.get(i);
+			if (bus.busTypeId() == editBus->busTypeId() && bus.uuid() != editBus->uuid())
+			{
+				QMessageBox::critical(this, qAppName(), tr("A bus with type ID '%1' already exists!").arg(bus.busTypeId()));
+				alreadyExists = true;
+				break;
+			}
+		}
+
+		if (alreadyExists == true)
+		{
+			refillPropeties = true;
+			continue;
 		}
 
 		for (QTreeWidgetItem* item : m_busTree->selectedItems())
@@ -990,6 +1088,11 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 				saveBus(uuid);
 			}
 		}
+	}
+
+	if (refillPropeties == true)
+	{
+		fillBusProperties();
 	}
 
 	return;
@@ -1174,6 +1277,8 @@ bool DialogBusEditor::addBus(VFrame30::Bus bus)
 	m_busTree->setCurrentItem(item);
 	m_busTree->clearSelection();
 	item->setSelected(true);
+
+	fillBusProperties();
 
 	return true;
 }

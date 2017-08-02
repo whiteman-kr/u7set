@@ -11,6 +11,8 @@ namespace TrendLib
 		: QThread(parent),
 		m_trend(trend)
 	{
+		qRegisterMetaType<TrendLib::TrendDrawParam>("TrendDrawParam");
+
 		assert(m_trend);
 	}
 
@@ -78,7 +80,7 @@ namespace TrendLib
 			//
 			m_trend->draw(&m_image, drawParam);
 
-			emit renderedImage(m_image);
+			emit renderedImage(m_image, drawParam);
 		}
 		while (isInterruptionRequested() == false);
 
@@ -110,10 +112,10 @@ namespace TrendLib
 	void TrendWidget::paintEvent(QPaintEvent*)
 	{
 		QPainter painter(this);
-		painter.fillRect(rect(), Qt::white);
 
 		if (m_pixmap.isNull() == true)
 		{
+			painter.fillRect(rect(), Qt::white);
 			painter.setPen(Qt::black);
 			painter.drawText(rect(), Qt::AlignCenter, tr("Rendering initial image, please wait..."));
 			return;
@@ -129,6 +131,10 @@ namespace TrendLib
 
 		painter.drawPixmap(0, 0, m_pixmap);
 
+		// Draw rullers
+		//
+		trend().drawRullers(&painter, m_pixmapDrawParam);
+
 		return;
 	}
 
@@ -139,15 +145,39 @@ namespace TrendLib
 
 	void TrendWidget::mousePressEvent(QMouseEvent* event)
 	{
-		QPoint mousePos = event->pos();
-		Trend::MouseOn mouseOn = m_trend.mouseIsOver(mousePos, m_drawParam);
+		m_mouseAction = MouseAction::None;
+
+		int laneIndex = -1;
+		int rullerIndex = -1;
+		TimeStamp timeStamp;
+
+		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex);
 
 		if (event->button() == Qt::LeftButton)
 		{
+			if (mouseOn == Trend::MouseOn::OnRuller)
+			{
+				if (rullerIndex == -1)
+				{
+					assert(rullerIndex != -1);
+					return;
+				}
+
+				m_rullerMoveRullerIndex = rullerIndex;
+				m_rullerMoveInitialMousePos = event->pos();
+
+				m_rullerMoveInitialTimeStamp = rullerSet().rullers().at(rullerIndex).timeStamp();
+
+				m_mouseAction = MouseAction::MoveRuller;
+				this->grabMouse();
+			}
+
 			if (mouseOn == Trend::MouseOn::InsideTrendArea)
 			{
 				m_mouseScrollInitialTime = m_drawParam.startTimeStamp();
 				m_mouseScrollInitialMousePos = event->pos();
+
+				m_mouseAction = MouseAction::Scroll;
 				this->grabMouse();
 			}
 
@@ -164,9 +194,32 @@ namespace TrendLib
 
 	void TrendWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
-		if (QWidget::mouseGrabber() == this)
+		event->accept();
+
+		if (m_mouseAction == MouseAction::MoveRuller)
 		{
-			releaseMouse();
+			// This will call slider update
+			//
+			if (dynamic_cast<QWidget*>(parent()) != nullptr)
+			{
+				dynamic_cast<QWidget*>(parent())->update();
+			}
+		}
+
+		m_mouseAction = MouseAction::None;
+		releaseMouse();
+
+		if (event->button() == Qt::LeftButton)
+		{
+			QApplication::setOverrideCursor(Qt::ArrowCursor);
+			QApplication::processEvents();						// Mus be called manually to set cursor
+
+			mouseMoveEvent(event);		// To set cursor
+		}
+		else
+		{
+			QApplication::setOverrideCursor(Qt::ArrowCursor);
+			QApplication::processEvents();						// Mus be called manually to set cursor
 		}
 
 		return;
@@ -174,52 +227,120 @@ namespace TrendLib
 
 	void TrendWidget::mouseMoveEvent(QMouseEvent* event)
 	{
-		if (QWidget::mouseGrabber() == nullptr)
-		{
-			QPoint mousePos = event->pos();
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(mousePos, m_drawParam);
+		event->accept();
 
-			QCursor cursor = Qt::ArrowCursor;
+		if (m_mouseAction == MouseAction::None)
+		{
+			int laneIndex = -1;
+			int rullerIndex = -1;
+			TimeStamp timeStamp;
+
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_drawParam, &laneIndex, &timeStamp, &rullerIndex);
+
+			Qt::CursorShape newCursorShape = Qt::ArrowCursor;
 
 			switch (mouseOn)
 			{
-			case Trend::MouseOn::Outside:			cursor = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::OutsideTrendArea:	cursor = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::InsideTrendArea:	cursor = Qt::PointingHandCursor;break;
+			case Trend::MouseOn::Outside:			newCursorShape = Qt::ArrowCursor;		break;
+			case Trend::MouseOn::OutsideTrendArea:	newCursorShape = Qt::ArrowCursor;		break;
+			case Trend::MouseOn::InsideTrendArea:	newCursorShape = Qt::PointingHandCursor;break;
+			case Trend::MouseOn::OnRuller:			newCursorShape = Qt::SplitHCursor;		break;
 			default:
 				assert(false);
 			}
 
-			setCursor(cursor);
+			m_pixmapDrawParam.setHightlightRullerIndex(rullerIndex);
+
+			if (QApplication::overrideCursor() == nullptr ||
+				QApplication::overrideCursor()->shape() != newCursorShape)
+			{
+				QApplication::setOverrideCursor(newCursorShape);
+				QApplication::processEvents();			// Must be called manually to set cursor
+
+				update();								// Update rullers
+			}
+
 			return;
 		}
 
 		if (QWidget::mouseGrabber() == this)
 		{
-			// Scroll area with a mouse mode
-			//
-			QRectF laneRect = m_trend.calcLaneRect(0, m_drawParam);
-			QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
-			QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
+			switch (m_mouseAction)
+			{
+			case MouseAction::None:
+				assert(false);
+				break;
+			case MouseAction::Scroll:
+				{
+					// Scroll area with a mouse mode
+					//
+					QRectF laneRect = m_trend.calcLaneRect(0, m_drawParam);
+					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
+					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
 
-			double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
+					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
 
-			QPointF mouseOffset = m_mouseScrollInitialMousePos - event->pos();
+					QPointF mouseOffset = m_mouseScrollInitialMousePos - event->pos();
 
-			TimeStamp ts(m_mouseScrollInitialTime.timeStamp + static_cast<qint64>(mouseOffset.x() * coefx));
-			m_drawParam.setStartTimeStamp(ts);
+					TimeStamp ts(m_mouseScrollInitialTime.timeStamp + static_cast<qint64>(mouseOffset.x() * coefx));
+					m_drawParam.setStartTimeStamp(ts);
 
-			updateWidget();
+					updateWidget();
 
-			emit startTimeChanged(ts);
+					emit startTimeChanged(ts);
+				}
+				break;
+			case MouseAction::MoveRuller:
+				{
+					assert(m_rullerMoveRullerIndex != -1);
+					assert(m_rullerMoveRullerIndex >= 0 && m_rullerMoveRullerIndex < static_cast<int>(rullerSet().rullers().size()));
+
+					int laneHeight = rect().height() / laneCount();
+					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
+
+					QRectF laneRect = m_trend.calcLaneRect(laneIndex, m_drawParam);
+					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
+					QRectF trendAreaRectPixels = Trend::inchRectToPixelRect(trenAreaRect, m_drawParam);
+
+					qint64 laneStartTime = m_drawParam.startTimeStamp().timeStamp + m_drawParam.duration() * laneIndex;
+
+					double coefx = m_drawParam.duration() / trendAreaRectPixels.width();
+
+					int mouseOffset = event->pos().x() - trendAreaRectPixels.left();
+					mouseOffset = qBound<int>(1, mouseOffset, trendAreaRectPixels.width());
+
+					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
+
+					TrendRuller& mutableRuller = rullerSet().rullers().at(m_rullerMoveRullerIndex);
+					mutableRuller.setTimeStamp(ts);
+
+					update();
+				}
+				break;
+			default:
+				assert(false);
+				break;
+			}
 		}
 
 		return;
 	}
 
-	void TrendWidget::updatePixmap(const QImage& image)
+	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex)
+	{
+		return m_trend.mouseIsOver(mousePos, m_drawParam, outLaneIndex, timeStamp, rullerIndex);
+	}
+
+	void TrendWidget::resetRullerHighlight()
+	{
+		m_pixmapDrawParam.resetHightlightRullerIndex();
+	}
+
+
+	void TrendWidget::updatePixmap(const QImage& image, TrendDrawParam drawParam)
 	{
 		m_pixmap = QPixmap::fromImage(image);
+		m_pixmapDrawParam = drawParam;
 
 		update();
 		return;
@@ -233,6 +354,26 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& TrendWidget::signalSet() const
 	{
 		return m_trend.signalSet();
+	}
+
+	TrendLib::TrendRullerSet& TrendWidget::rullerSet()
+	{
+		return m_trend.rullerSet();
+	}
+
+	const TrendLib::TrendRullerSet& TrendWidget::rullerSet() const
+	{
+		return m_trend.rullerSet();
+	}
+
+	TrendLib::Trend& TrendWidget::trend()
+	{
+		return m_trend;
+	}
+
+	const TrendLib::Trend& TrendWidget::trend() const
+	{
+		return m_trend;
 	}
 
 	TrendView TrendWidget::view() const

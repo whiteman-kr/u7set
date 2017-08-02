@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0001">
+	<FlashMemory>
+		<AppLogicFrameCount>256</AppLogicFrameCount>
+		<AppLogicFrameSize>1016</AppLogicFrameSize>
+		<ConfigFrameCount>256</ConfigFrameCount>
+		<ConfigFrameSize>1016</ConfigFrameSize>
+		<TuningFrameCount>256</TuningFrameCount>
+		<TuningFrameSize>1016</TuningFrameSize>		
+	</FlashMemory>
+	<Memory>
+		<AppDataOffset>57782</AppDataOffset>
+		<AppDataSize>2</AppDataSize>
+		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
+		<AppLogicBitDataSize>256</AppLogicBitDataSize>
+		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>;
+		<AppLogicWordDataSize>3570</AppLogicWordDataSize>;
+		<ModuleDataOffset>0</ModuleDataOffset>
+		<ModuleDataSize>2560</ModuleDataSize>
+		<TuningDataOffset>46336</TuningDataOffset>
+		<TuningDataSize>7620</TuningDataSize>
+		<TxDiagDataOffset>57526</TxDiagDataOffset>
+		<TxDiagDataSize>176</TxDiagDataSize>
+	</Memory>
+	<LogicUnit>
+		<ALPPhaseTime>2500</ALPPhaseTime>
+		<ClockFrequency>96000000</ClockFrequency>
+		<CycleDuration>5000</CycleDuration>
+		<IDRPhaseTime>1000</IDRPhaseTime>
+	</LogicUnit>
+	<OptoInterface>
+		<OptoPortCount>3</OptoPortCount>
+		<OptoPortAppDataOffset>0</OptoPortAppDataOffset>
+		<OptoPortAppDataSize>2560</OptoPortAppDataSize>		
+		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
+		<OptoPortDataSize>2560</OptoPortDataSize>
+	</OptoInterface>
+	
+	<AFBImplementation/>
+	<AFBL/>
+</LogicModule>

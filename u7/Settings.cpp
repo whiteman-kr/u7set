@@ -147,7 +147,7 @@ void Settings::writeUserScope() const
 	s.setValue("BusEditor/mainSplitter", m_busEditorMainSplitterState);
 	s.setValue("BusEditor/rightSplitter", m_busEditorRightSplitterState);
 	s.setValue("BusEditor/busPropertySplitter", m_busEditorPropertySplitterPosition);
-	s.setValue("BusEditor/peGeometry", m_busEditorPeWindowGeometry);
+	s.setValue("BusEditor/peSize", m_busEditorPeWindowSize);
 	s.setValue("BusEditor/peSplitterPos", m_busEditorPeSplitterPosition);
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
 	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
@@ -233,8 +233,7 @@ void Settings::loadUserScope()
 		m_busEditorPropertySplitterPosition = 150;
 	}
 
-	m_busEditorPeWindowPos = s.value("BusEditor/pePos", QPoint(-1, -1)).toPoint();
-	m_busEditorPeWindowGeometry = s.value("BusEditor/peGeometry").toByteArray();
+	m_busEditorPeWindowSize = s.value("BusEditor/peSize").toSize();
 	m_busEditorPeSplitterPosition = s.value("BusEditor/peSplitterPos").toInt();
 	if (m_busEditorPeSplitterPosition < 150)
 	{

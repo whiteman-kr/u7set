@@ -604,6 +604,11 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
+			for (QString& col : columns)
+			{
+				col = col.trimmed();
+			}
+
 
 			QString strVersion(columns[0]);
 			bool ok = false;
@@ -2923,6 +2928,11 @@ R"DELIM({
 	bool DeviceModule::isLogicModule() const
 	{
 		return moduleFamily() == FamilyType::LM;
+	}
+
+	bool DeviceModule::isFSCConfigurationModule() const
+	{
+		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB;
 	}
 
 	bool DeviceModule::isOptoModule() const

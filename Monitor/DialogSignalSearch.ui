@@ -31,19 +31,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTreeWidget" name="signalsTree">
-       <property name="rootIsDecorated">
-        <bool>false</bool>
-       </property>
-       <attribute name="headerVisible">
-        <bool>true</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
-      </widget>
+      <widget class="QTableView" name="tableView"/>
      </item>
      <item>
       <widget class="QLabel" name="labelFound">

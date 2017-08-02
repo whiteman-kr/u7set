@@ -8,16 +8,16 @@
 PropertyEditorDialog::PropertyEditorDialog(QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &PropertyEditorDialog::onOk);
-    connect(buttonBox, &QDialogButtonBox::rejected, this, &PropertyEditorDialog::reject);
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &PropertyEditorDialog::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &PropertyEditorDialog::reject);
 
     pe = new ExtWidgets::PropertyEditor(this);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(pe);
-    mainLayout->addWidget(buttonBox);
+	mainLayout->addWidget(m_buttonBox);
     setLayout(mainLayout);
 }
 
@@ -44,6 +44,8 @@ void PropertyEditorDialog::setObject(std::shared_ptr<PropertyObject> object)
 void PropertyEditorDialog::setReadOnly(bool readOnly)
 {
 	m_readOnly = readOnly;
+
+	m_buttonBox->button(QDialogButtonBox::Ok)->setEnabled(m_readOnly == false);
 
 	pe->setReadOnly(readOnly);
 }
@@ -75,7 +77,6 @@ void PropertyEditorDialog::onOk()
 {
 	if (pe->readOnly() == true)
 	{
-		accept();
 		return;
 	}
 

@@ -176,6 +176,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0158.sql", "Upgrade to version 158, In module presets Module temperature has ADC range 0-400"},
 	{":/DatabaseUpgrade/Upgrade0159.sql", "Upgrade to version 159, Update Memory settings in module presets, changes in CfgService preset"},
 	{":/DatabaseUpgrade/Upgrade0160.sql", "Upgrade to version 160, AFB elements dec, cod and tconv update"},
+	{":/DatabaseUpgrade/Upgrade0161.sql", "Upgrade to version 161, AFB elements tconv update"},
+	{":/DatabaseUpgrade/Upgrade0162.sql", "Upgrade to version 162, AFB elements"},
 };
 
 

@@ -120,4 +120,19 @@ namespace TrendLib
 		}
 	}
 
+	int TrendDrawParam::hightlightRullerIndex() const
+	{
+		return m_highlightRullerIndex;
+	}
+
+	void TrendDrawParam::setHightlightRullerIndex(int value)
+	{
+		m_highlightRullerIndex = value;
+	}
+
+	void TrendDrawParam::resetHightlightRullerIndex()
+	{
+		m_highlightRullerIndex = -1;
+	}
+
 }

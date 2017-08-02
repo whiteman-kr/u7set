@@ -138,6 +138,10 @@ namespace Builder
 			result = calculate_MISMATCH_paramValues();
 			break;
 
+		case Afb::AfbType::TCONV:			// opcode 28
+			result = calculate_TCONV_paramValues();
+			break;
+
 		default:
 			// Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
 			//
@@ -1803,4 +1807,44 @@ namespace Builder
 
 		return true;
 	}
+
+	bool AppFb::calculate_TCONV_paramValues()
+	{
+		m_runTime = 0;
+
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+
+		// i_conf must have value from 1 to 4
+		//
+
+		quint32  i_conf_value = i_conf.unsignedIntValue();
+
+		switch(i_conf_value)
+		{
+		case 1:
+		case 2:
+			m_runTime = 3;
+			break;
+
+		case 3:
+		case 4:
+			m_runTime = 7;
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			return false;
+		}
+
+		return true;
+	}
+
 }
