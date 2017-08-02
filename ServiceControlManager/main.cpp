@@ -1,5 +1,8 @@
 #include "MainWindow.h"
-#include <QtSingleApplication>
+#include <QApplication>
+#include <QSystemSemaphore>
+#include <QSharedMemory>
+#include <QMessageBox>
 #include <QTranslator>
 #include <QSettings>
 #include <stdlib.h>
@@ -9,19 +12,46 @@
 #include "../lib/SocketIO.h"
 
 
+const char* const semaphoreString = "ServiceControlManagerSemaphore";
+const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
+
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	QtSingleApplication a(argc, argv);
+	QApplication a(argc, argv);
 
-    if (a.isRunning())
-    {
-        a.sendMessage("");
-        return 0;
-    }
+	QSystemSemaphore semaphore(semaphoreString, 1);
+	bool isAlreadyRunning = false;
+	semaphore.acquire();
+
+	// For Linux: Clearing memory if previosly program crashed (pointer counter should be actual after releasing QSharedMemory)
+	{
+		QSharedMemory sharedMemory(sharedMemoryString);
+		sharedMemory.attach();
+	}
+
+	QSharedMemory sharedMemory(sharedMemoryString);
+	if (sharedMemory.attach())
+	{
+		isAlreadyRunning = true;
+	}
+	else
+	{
+		sharedMemory.create(1);
+		isAlreadyRunning = false;
+	}
+
+	semaphore.release();
+
+	if (isAlreadyRunning)
+	{
+		QMessageBox::information(nullptr, "Attention", "Another instance of ServiceControlManager is already running, check tray please");
+		return 0;
+	}
 
     bool closeToTray = false;
     QString trayParam = "--tray";
@@ -61,7 +91,6 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
-    w.connect(&a, &QtSingleApplication::messageReceived, &w, &MainWindow::openEditor);
     w.showMaximized();
 
 	atexit(google::protobuf::ShutdownProtobufLibrary);

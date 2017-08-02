@@ -410,13 +410,16 @@ namespace Tcp
 
 	FileServer::FileServer(const QString& rootFolder, std::shared_ptr<CircularLogger> logger) :
 		m_logger(logger),
-		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData))
+		m_reply(*reinterpret_cast<GetFileReply*>(m_replyData)),
+		m_transmitionFilesTimer(this)
 	{
 		m_rootFolder = QDir::fromNativeSeparators(rootFolder);
 		m_file.setParent(this);
 
 		m_reply.clear();
 		m_fileData = m_replyData + sizeof(GetFileReply);
+
+		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state->isActual = true; });
 	}
 
 
@@ -459,10 +462,14 @@ namespace Tcp
 		{
 		case RQID_GET_FILE_START:
 			sendFirstFilePart(QString::fromUtf8(requestData, requestDataSize));
+
+			restartTransmitionFilesTimer();
 			break;
 
 		case RQID_GET_FILE_NEXT:
 			sendNextFilePart();
+
+			restartTransmitionFilesTimer();
 			break;
 
 		default:
@@ -566,6 +573,15 @@ namespace Tcp
 
 			init();
 		}
+	}
+
+	void FileServer::restartTransmitionFilesTimer()
+	{
+		m_state->isActual = false;
+
+		m_transmitionFilesTimer.stop();
+
+		m_transmitionFilesTimer.start(3 * 1000);
 	}
 
 }

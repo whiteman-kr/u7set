@@ -17,6 +17,7 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	stateTableView->horizontalHeader()->setDefaultSectionSize(250);
 	stateTableView->horizontalHeader()->setStretchLastSection(true);
+	stateTableView->horizontalHeader()->setHighlightSections(false);
 
 	stateTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	stateTableView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -40,23 +41,27 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	clientsTableView->horizontalHeader()->setDefaultSectionSize(150);
 	clientsTableView->horizontalHeader()->setStretchLastSection(true);
+	clientsTableView->horizontalHeader()->setHighlightSections(false);
 
 	clientsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	clientsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	clientsTableView->setAlternatingRowColors(true);
 
-	m_clientsTabModel = new QStandardItemModel(0, 7, this);
+	m_clientsTabModel = new QStandardItemModel(0, 8, this);
 	clientsTableView->setModel(m_clientsTabModel);
 
 	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
-	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Equipment ID");
-	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "IPv4");
-	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "Connection time");
-	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Uptime");
-	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "State");
-	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Packet counter");
+	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
+	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
+	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "IPv4");
+	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "Connection time");
+	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection uptime");
+	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "State");
+	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Packet counter");
 
-	clientsTableView->setColumnWidth(0, 250);
+	clientsTableView->setColumnWidth(0, 200);
+	clientsTableView->setColumnWidth(1, 100);
+	clientsTableView->setColumnWidth(2, 200);
 
 	addTab(clientsTableView, "Clients");
 
@@ -67,6 +72,7 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	buildInfoTableView->horizontalHeader()->setDefaultSectionSize(250);
 	buildInfoTableView->horizontalHeader()->setStretchLastSection(true);
+	buildInfoTableView->horizontalHeader()->setHighlightSections(false);
 
 	buildInfoTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	buildInfoTableView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -90,6 +96,7 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(quint32 ip, int portIndex
 
 	settingsTableView->horizontalHeader()->setDefaultSectionSize(250);
 	settingsTableView->horizontalHeader()->setStretchLastSection(true);
+	settingsTableView->horizontalHeader()->setHighlightSections(false);
 
 	settingsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	settingsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -265,29 +272,32 @@ void ConfigurationServiceWidget::updateClients()
 		const Network::ConfigurationServiceClientInfo& ci = cs.clients(i);
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
-								   E::valueToString<E::SoftwareType>(ci.softwaretype()) + QString(" v%1.%2.%3")
+								   E::valueToString<E::SoftwareType>(ci.softwaretype()));
+
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1),
+								   QString("%1.%2.%3")
 								   .arg(ci.majorversion())
 								   .arg(ci.minorversion())
 								   .arg(ci.commitno()));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1), QString::fromStdString(ci.equipmentid()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(ci.equipmentid()));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QHostAddress(ci.ip()).toString());
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QHostAddress(ci.ip()).toString());
 
 		quint64 uptime = ci.uptime();
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
 
-		int ms = uptime % 1000; uptime /= 1000;
+		uptime /= 1000;
 		int s = uptime % 60; uptime /= 60;
 		int m = uptime % 60; uptime /= 60;
 		int h = uptime % 24; uptime /= 24;
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QString("(%1d %2:%3:%4.%5)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')).arg(ms, 3, 10, QChar('0')));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), ci.isactual() ? "Actual" : "Non actual");
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), ci.isactual() ? "Actual" : "Non actual");
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), static_cast<qint64>(ci.replyquantity()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), static_cast<qint64>(ci.replyquantity()));
 	}
 }
 

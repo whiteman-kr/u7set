@@ -322,6 +322,26 @@ public:
 
 		return result;
 	}
+
+	// Check if enum containes value
+	//
+	template <typename ENUM_TYPE>
+	static bool containes(int value)
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		int keyCount = me.keyCount();
+		for (int i = 0; i < keyCount; i++)
+		{
+			if (me.value(i) == value)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 

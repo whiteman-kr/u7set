@@ -179,6 +179,8 @@ namespace Tcp
 		void sendFirstFilePart(const QString& fileName);
 		void sendNextFilePart();
 
+		void restartTransmitionFilesTimer();
+
 	private:
 		std::shared_ptr<CircularLogger> m_logger;
 
@@ -186,6 +188,8 @@ namespace Tcp
 		char* m_fileData = nullptr;
 
 		char m_replyData[sizeof(GetFileReply) + FILE_PART_SIZE];
+
+		QTimer m_transmitionFilesTimer;
 	};
 
 }
