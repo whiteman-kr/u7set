@@ -1,6 +1,10 @@
 #include "TrendMainWindow.h"
 #include "ui_TrendsMainWindow.h"
+#include <QDialog>
+#include <QLabel>
 #include <QGridLayout>
+#include <QDateEdit>
+#include <QTimeEdit>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 
@@ -465,9 +469,62 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionRullerProperties(QPoint /*mousePos*/)
+	void TrendMainWindow::actionRullerProperties(int rullerIndex)
 	{
+		if (rullerIndex == -1)
+		{
+			assert(rullerIndex);
+			return;
+		}
 
+		if (rullerIndex < 0 ||
+			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		{
+			assert(false);
+			return;
+		}
+
+		TrendRuller& mutableRuller = trend().rullerSet().at(rullerIndex);
+
+		QDialog d(this);
+		d.setWindowTitle(tr("Ruller Properties"));
+		d.setWindowFlags((d.windowFlags() &
+						~Qt::WindowMinimizeButtonHint &
+						~Qt::WindowMaximizeButtonHint &
+						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+		QGridLayout* layout = new QGridLayout(&d);
+
+		QLabel* dateLabel = new QLabel(tr("Date:"));
+		QLabel* timeLabel = new QLabel(tr("Time:"));
+
+		QDateEdit* dateEdit = new QDateEdit(mutableRuller.timeStamp().toDate());
+		dateEdit->setCalendarPopup(true);
+
+		QTimeEdit* timeEdit = new QTimeEdit(mutableRuller.timeStamp().toTime());
+		timeEdit->setDisplayFormat("hh:mm:ss");
+
+		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+		layout->addWidget(dateLabel, 0, 0);
+		layout->addWidget(dateEdit, 0, 1);
+
+		layout->addWidget(timeLabel, 1, 0);
+		layout->addWidget(timeEdit, 1, 1);
+		layout->addWidget(buttonBox, 2, 0, 2, 1);
+
+		d.setLayout(layout);
+
+		int dialogResult = d.exec();
+
+		if (dialogResult ==  QDialog::Accepted)
+		{
+
+		}
+
+		update();
+
+		return;
 	}
 
 	void TrendMainWindow::timeComboCurrentIndexChanged(int /*index*/)
@@ -560,11 +617,11 @@ namespace TrendLib
 				});
 
 		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));
-		rullerPropertiesAction->setEnabled(false);
+		rullerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
 		connect(rullerPropertiesAction, &QAction::triggered, this,
-				[&pos, this]()
+				[rullerIndex, this]()
 				{
-					this->TrendMainWindow::actionRullerProperties(pos);
+					this->TrendMainWindow::actionRullerProperties(rullerIndex);
 				});
 
 		menu.addSeparator();

@@ -37,6 +37,16 @@ struct TimeStamp
 		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC);
 	}
 
+	QDate toDate() const
+	{
+		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).date();
+	}
+
+	QTime toTime() const
+	{
+		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).time();
+	}
+
 
 	bool operator> (const TimeStamp& value) const
 	{

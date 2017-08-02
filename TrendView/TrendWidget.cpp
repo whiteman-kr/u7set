@@ -315,7 +315,6 @@ namespace TrendLib
 					mutableRuller.setTimeStamp(ts);
 
 					update();
-
 				}
 				break;
 			default:
