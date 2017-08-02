@@ -249,6 +249,7 @@ namespace Afb
 		m_dataFormat = that.m_dataFormat;
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
+		m_byteOrder = that.m_byteOrder;
 
 		return *this;
 	}
@@ -374,6 +375,30 @@ namespace Afb
 
 		m_size= xmlElement.attribute(QLatin1String("Size")).toInt();
 
+		// ByteOrder
+		//
+		if (xmlElement.hasAttribute(QLatin1String("ByteOrder")) == true)
+		{
+			QString byteOrderAttribute = xmlElement.attribute(QLatin1String("ByteOrder"));
+
+			if (byteOrderAttribute.compare(QLatin1String("LittleEndian"), Qt::CaseInsensitive) == 0)
+			{
+				m_byteOrder = E::ByteOrder::LittleEndian;
+			}
+			else
+			{
+				if (byteOrderAttribute.compare(QLatin1String("BigEndian"), Qt::CaseInsensitive) == 0)
+				{
+					m_byteOrder = E::ByteOrder::BigEndian;
+				}
+				else
+				{
+					*errorMessage = QString("Unknown ByteOrder %1. Pin %2").arg(byteOrderAttribute).arg(m_caption);
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 
@@ -410,6 +435,10 @@ namespace Afb
 		// Size
 		//
 		element->setAttribute(QLatin1String("Size"), m_size);
+
+		// ByteOrder
+		//
+		element->setAttribute(QLatin1String("ByteOrder"), E::valueToString(m_byteOrder));
 
 		return true;
 	}
@@ -486,7 +515,12 @@ namespace Afb
 
 	E::ByteOrder AfbSignal::byteOrder() const
 	{
-		return E::ByteOrder::BigEndian;			// consider that all AfbSignals is in BigEndian format
+		return m_byteOrder;
+	}
+
+	void AfbSignal::setByteOrder(E::ByteOrder value)
+	{
+		m_byteOrder = value;
 	}
 
 	bool AfbSignal::isAnalog() const
@@ -509,6 +543,7 @@ namespace Afb
 		m_visible(true),
 		m_type(E::SignalType::Analog),
 		m_dataFormat(E::DataFormat::UnsignedInt),
+		m_byteOrder(E::ByteOrder::BigEndian),
 		m_instantiator(false),
 		m_user(false),
 		m_operandIndex(0),
@@ -521,11 +556,11 @@ namespace Afb
 		m_highLimit = 0;
 	}
 
-	void AfbParam::update(const E::SignalType& type, const E::DataFormat dataFormat, const QVariant &lowLimit, const QVariant &highLimit)
+	void AfbParam::update(const E::SignalType& type, const E::DataFormat dataFormat, E::ByteOrder byteOrder, const QVariant &lowLimit, const QVariant &highLimit)
 	{
-
 		m_type = type;
 		m_dataFormat = dataFormat;
+		m_byteOrder = byteOrder,
 		m_lowLimit = lowLimit;
 		m_highLimit = highLimit;
 
@@ -851,6 +886,31 @@ namespace Afb
 			}
 		}
 
+		// ByteOrder
+		//
+		if (xmlElement.hasAttribute(QLatin1String("ByteOrder")) == true)
+		{
+			QString byteOrderAttribute = xmlElement.attribute(QLatin1String("ByteOrder"));
+
+			if (byteOrderAttribute.compare(QLatin1String("LittleEndian"), Qt::CaseInsensitive) == 0)
+			{
+				m_byteOrder = E::ByteOrder::LittleEndian;
+			}
+			else
+			{
+				if (byteOrderAttribute.compare(QLatin1String("BigEndian"), Qt::CaseInsensitive) == 0)
+				{
+					m_byteOrder = E::ByteOrder::BigEndian;
+				}
+				else
+				{
+					*errorMessage = QString("Unknown ByteOrder %1. Pin %2").arg(byteOrderAttribute).arg(m_caption);
+					return false;
+				}
+			}
+		}
+
+
 		// Section <Value>
 		//
 		std::function<QVariant(QString, E::SignalType, E::DataFormat)> valToDataFormat =
@@ -1037,6 +1097,10 @@ namespace Afb
 		// DataFormat
 		//
 		xmlElement->setAttribute(QLatin1String("DataFormat"), E::valueToString(m_dataFormat));
+
+		// ByteOrder
+		//
+		xmlElement->setAttribute(QLatin1String("ByteOrder"), E::valueToString(m_byteOrder));
 
 		// Sections "Values"
 		//
@@ -1248,6 +1312,16 @@ namespace Afb
 	void AfbParam::setSize(int value)
 	{
 		m_size = value;
+	}
+
+	E::ByteOrder AfbParam::byteOrder() const
+	{
+		return m_byteOrder;
+	}
+
+	void AfbParam::setByteOrder(E::ByteOrder value)
+	{
+		m_byteOrder = value;
 	}
 
 	bool AfbParam::instantiator() const
@@ -1969,7 +2043,7 @@ namespace Afb
 
 			if (found != m_params.end())
 			{
-				found->update(p.type(), p.dataFormat(), p.lowLimit(), p.highLimit());
+				found->update(p.type(), p.dataFormat(), p.byteOrder(), p.lowLimit(), p.highLimit());
 				newParams.push_back(*found);
 			}
 			else

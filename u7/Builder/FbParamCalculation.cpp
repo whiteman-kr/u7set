@@ -1822,15 +1822,27 @@ namespace Builder
 
 		// i_conf must have value from 1 to 4
 		//
-		if (i_conf.unsignedIntValue() < 1 || i_conf.unsignedIntValue() > 4)
+
+		quint32  i_conf_value = i_conf.unsignedIntValue();
+
+		switch(i_conf_value)
 		{
+		case 1:
+		case 2:
+			m_runTime = 3;
+			break;
+
+		case 3:
+		case 4:
+			m_runTime = 7;
+			break;
+
+		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
 			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
 			return false;
 		}
-
-		m_runTime = 4;
 
 		return true;
 	}

@@ -604,6 +604,11 @@ namespace Hardware
 
 			QStringList columns = r.split(';');
 
+			for (QString& col : columns)
+			{
+				col = col.trimmed();
+			}
+
 
 			QString strVersion(columns[0]);
 			bool ok = false;
