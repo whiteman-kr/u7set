@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QGridLayout>
+#include <QDialogButtonBox>
 #include <QDateEdit>
 #include <QTimeEdit>
 #include "TrendSettings.h"
@@ -484,6 +485,8 @@ namespace TrendLib
 			return;
 		}
 
+		// --
+		//
 		TrendRuller& mutableRuller = trend().rullerSet().at(rullerIndex);
 
 		QDialog d(this);
@@ -502,27 +505,38 @@ namespace TrendLib
 		dateEdit->setCalendarPopup(true);
 
 		QTimeEdit* timeEdit = new QTimeEdit(mutableRuller.timeStamp().toTime());
-		timeEdit->setDisplayFormat("hh:mm:ss");
+		timeEdit->setDisplayFormat("hh:mm:ss.zzz");
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+		connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+		connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+		// --
+		//
 		layout->addWidget(dateLabel, 0, 0);
 		layout->addWidget(dateEdit, 0, 1);
 
 		layout->addWidget(timeLabel, 1, 0);
 		layout->addWidget(timeEdit, 1, 1);
-		layout->addWidget(buttonBox, 2, 0, 2, 1);
+		layout->addWidget(buttonBox, 2, 0, 1, 2);
 
 		d.setLayout(layout);
 
+		// --
+		//
 		int dialogResult = d.exec();
 
 		if (dialogResult ==  QDialog::Accepted)
 		{
+			QDateTime newDateTime;
+			newDateTime.setDate(dateEdit->date());
+			newDateTime.setTime(timeEdit->time());
 
+			TimeStamp ts(newDateTime);
+			mutableRuller.setTimeStamp(ts);
+
+			update();
 		}
-
-		update();
 
 		return;
 	}
