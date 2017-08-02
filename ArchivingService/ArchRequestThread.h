@@ -17,6 +17,10 @@ class TcpArchRequestsServer;
 
 struct ArchRequestParam
 {
+	ArchRequestParam();
+
+	void clearSignalHashes();
+
 	// params from ARCHS_GET_APP_SIGNALS_STATES_START request
 	//
 	TimeType timeType = TimeType::System;
@@ -40,11 +44,15 @@ public:
 	ArchRequestContext(const ArchRequestParam& param);
 	~ArchRequestContext();
 
+	void checkSignalsHashes(const Archive& arch);
+
 	quint32 requestID() const { return m_param.requestID; }
 	bool isDataReady() const { return m_dataReady; }
 
 	int totalStates() const { return m_totalStates; }
 	int sentStates() const { return m_sentStates; }
+
+	int signalCount() const { return m_param.signalHashesCount; }
 
 	ArchiveError archError() const { return m_archError; }
 
@@ -54,18 +62,23 @@ private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
 
-	bool createQuery(QSqlDatabase& db, const QString& queryStr);
+	void createQuery(QSqlDatabase& db, const QString& queryStr);
 
 	TimeType timeType() const { return m_param.timeType; }
 
 	qint64 startTime() const { return m_param.startTime; }
+	QString startTimeStr() const { return TimeStamp(m_param.startTime).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
+
 	qint64 endTime() const { return m_param.endTime; }
+	QString endTimeStr() const { return TimeStamp(m_param.endTime).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
 
 	int signalHashesCount() const { return m_param.signalHashesCount; }
 	const Hash* signalHashes() const { return m_param.signalHashes; }
 
 	bool executeQuery(CircularLoggerShared& logger);
 	void getNextData();
+
+	void clearSignalHashes();
 
 private:
 	ArchRequestParam m_param;

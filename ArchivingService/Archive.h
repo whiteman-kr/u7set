@@ -3,6 +3,7 @@
 #include <QHash>
 
 #include "../lib/Hash.h"
+#include "../lib/TimeStamp.h"
 #include "../lib/CircularLogger.h"
 
 struct ArchSignal
@@ -47,6 +48,8 @@ public:
 
 	void appendExistingTable(const QString& tableName);
 	bool tableIsExists(const QString& tableName);
+
+	static QString timeTypeStr(TimeType timeType);
 
 private:
 	static const char* ARCH_DB_PREFIX;
