@@ -4991,7 +4991,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0006">
+		<AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0007">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5022,6 +5022,30 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
 					<Script>
 						<Changed>
 function(videoItemFblElement, afbElement)
@@ -5075,19 +5099,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}
 		
-	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
-	
-	var max = afbElement.getAfbSignalByCaption("max");
-	if (max != null)
-	{
-		videoItemFblElement.addOutputSignal(max.jsCaption(), max.jsType(), max.operandIndex(), max.size());
-	}
-	
-	var min = afbElement.getAfbSignalByCaption("min");
-	if (min != null)
-	{
-		videoItemFblElement.addOutputSignal(min.jsCaption(), min.jsType(), min.operandIndex(), min.size());
-	}
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");	
+	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
 
 	videoItemFblElement.adjustHeight();
 
@@ -5103,7 +5117,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0005">
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0006">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -5130,6 +5144,30 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
+				<Param OpName="OutMax" Caption="OutMax" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="OutMin" Caption="OutMin" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>0</Value>
+					<Default>0</Default>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
 				<Param OpName="i_lim_max" Caption="LimMax" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>100</Value>
 					<Default>0</Default>
@@ -5150,8 +5188,44 @@ function(videoItemFblElement, afbElement)
 				</Param>                        
 			</Params>
 			<CommonScript>
-				<Library></Library>
-				<AfterCreation></AfterCreation>
+				<Library>
+function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+{
+	var show = videoItemFblElement.getParamBoolValue(paramName);
+	if (show == true)
+	{
+		var s = afbElement.getAfbSignalByCaption(signalCaption);
+		if (s != null)
+		{
+			videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+		}	
+	}
+}
+
+function createOutputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeOutputSignals();
+	
+	var out = afbElement.getAfbSignalByCaption("out");
+	if (out != null)
+	{
+		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+	}
+	
+	createOutput(videoItemFblElement, afbElement, "OutMax", "max");
+	createOutput(videoItemFblElement, afbElement, "OutMin", "min");
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createOutputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
