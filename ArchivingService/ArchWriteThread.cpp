@@ -285,7 +285,7 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 	int createdTablesCount = 0;
 	int creationErrorCount = 0;
 
-	while(i.hasNext() == true)
+	while(i.hasNext() == true && quitRequested() == false)
 	{
 		i.next();
 
@@ -373,8 +373,11 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 
 	if (creationErrorCount > 0)
 	{
-		DEBUG_LOG_ERR(m_logger, QString("Tables creation errors: %1").arg(createdTablesCount));
+		DEBUG_LOG_ERR(m_logger, QString("Tables creation errors: %1").arg(creationErrorCount));
+		return false;
 	}
+
+	return true;
 }
 
 int ArchWriteThreadWorker::getDatabaseVersion()

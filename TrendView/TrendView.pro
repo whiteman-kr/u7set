@@ -34,7 +34,8 @@ SOURCES += \
     TrendSlider.cpp \
     TrendSettings.cpp \
     TrendMainWindow.cpp \
-    Trend.cpp
+    Trend.cpp \
+    TrendRuller.cpp
 
 HEADERS += \
     Stable.h \
@@ -45,7 +46,8 @@ HEADERS += \
     TrendSlider.h \
     TrendSettings.h \
     TrendMainWindow.h \
-    Trend.h
+    Trend.h \
+    TrendRuller.h
 
 unix {
     target.path = /usr/lib

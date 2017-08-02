@@ -1,6 +1,10 @@
 #include "TrendMainWindow.h"
 #include "ui_TrendsMainWindow.h"
+#include <QDialog>
+#include <QLabel>
 #include <QGridLayout>
+#include <QDateEdit>
+#include <QTimeEdit>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 
@@ -38,7 +42,7 @@ namespace TrendLib
 
 		// Slider Widged
 		//
-		m_trendSlider = new TrendSlider;
+		m_trendSlider = new TrendSlider(&m_trendWidget->rullerSet());
 
 		layout->setRowStretch(0, 1);
 		layout->addWidget(m_trendSlider, 1, 0);
@@ -81,6 +85,14 @@ namespace TrendLib
 		qint64 t = m_timeCombo->currentData().value<qint64>();
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
+
+		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
+
+		// Contect Menu
+		//
+		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
 
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -219,6 +231,7 @@ namespace TrendLib
 		m_toolBar->addWidget(intervalLabel);
 
 		m_timeCombo = new QComboBox(m_toolBar);
+		m_timeCombo->addItem(tr("2 sec"), QVariant::fromValue(2_sec));
 		m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
 		m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
 		m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
@@ -230,7 +243,7 @@ namespace TrendLib
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
-		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours));
+		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours * 7));
 		m_timeCombo->setCurrentIndex(6);
 		m_toolBar->addWidget(m_timeCombo);
 
@@ -304,7 +317,7 @@ namespace TrendLib
 
 		theSettings.m_viewType = m_viewCombo->currentIndex();
 		theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
-		theSettings.m_timeType = m_timeTypeCombo->currentIndex();
+		theSettings.m_timeTypeIndex = m_timeTypeCombo->currentIndex();
 
 		theSettings.writeUserScope();
 		return;
@@ -319,7 +332,7 @@ namespace TrendLib
 		assert(m_viewCombo);
 		m_viewCombo->setCurrentIndex(theSettings.m_viewType);
 
-		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeType);
+		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
 
 		// Ensure widget is visible
 		//
@@ -410,6 +423,109 @@ namespace TrendLib
 		return;
 	}
 
+	void TrendMainWindow::actionAddRuller(QPoint mousePos)
+	{
+		int laneIndex = -1;
+		int rullerIndex = -1;
+		TimeStamp timeStamp;
+
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex);
+
+		if (mouseOn != Trend::MouseOn::InsideTrendArea)
+		{
+			return;
+		}
+
+		qDebug() << "Add trend ruller on pos " << timeStamp.toDateTime();
+
+		TrendRuller ruller(timeStamp);
+		trend().rullerSet().addRuller(ruller);
+
+		update();
+
+		return;
+	}
+
+	void TrendMainWindow::actionDeleteRuller(int rullerIndex)
+	{
+		if (rullerIndex == -1)
+		{
+			assert(rullerIndex);
+			return;
+		}
+
+		if (rullerIndex < 0 ||
+			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		{
+			assert(false);
+			return;
+		}
+
+		trend().rullerSet().deleteRuller(trend().rullerSet().at(rullerIndex).timeStamp());
+		m_trendWidget->resetRullerHighlight();
+
+		update();
+
+		return;
+	}
+
+	void TrendMainWindow::actionRullerProperties(int rullerIndex)
+	{
+		if (rullerIndex == -1)
+		{
+			assert(rullerIndex);
+			return;
+		}
+
+		if (rullerIndex < 0 ||
+			rullerIndex >= static_cast<int>(trend().rullerSet().rullers().size()))
+		{
+			assert(false);
+			return;
+		}
+
+		TrendRuller& mutableRuller = trend().rullerSet().at(rullerIndex);
+
+		QDialog d(this);
+		d.setWindowTitle(tr("Ruller Properties"));
+		d.setWindowFlags((d.windowFlags() &
+						~Qt::WindowMinimizeButtonHint &
+						~Qt::WindowMaximizeButtonHint &
+						~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+		QGridLayout* layout = new QGridLayout(&d);
+
+		QLabel* dateLabel = new QLabel(tr("Date:"));
+		QLabel* timeLabel = new QLabel(tr("Time:"));
+
+		QDateEdit* dateEdit = new QDateEdit(mutableRuller.timeStamp().toDate());
+		dateEdit->setCalendarPopup(true);
+
+		QTimeEdit* timeEdit = new QTimeEdit(mutableRuller.timeStamp().toTime());
+		timeEdit->setDisplayFormat("hh:mm:ss");
+
+		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+		layout->addWidget(dateLabel, 0, 0);
+		layout->addWidget(dateEdit, 0, 1);
+
+		layout->addWidget(timeLabel, 1, 0);
+		layout->addWidget(timeEdit, 1, 1);
+		layout->addWidget(buttonBox, 2, 0, 2, 1);
+
+		d.setLayout(layout);
+
+		int dialogResult = d.exec();
+
+		if (dialogResult ==  QDialog::Accepted)
+		{
+
+		}
+
+		update();
+
+		return;
+	}
 
 	void TrendMainWindow::timeComboCurrentIndexChanged(int /*index*/)
 	{
@@ -417,6 +533,7 @@ namespace TrendLib
 
 		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
 		m_trendSlider->setPageStep(t);
+		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
 
 		m_trendWidget->setDuration(t);
 		m_trendWidget->updateWidget();
@@ -438,6 +555,9 @@ namespace TrendLib
 		int laneCount = m_lanesCombo->itemData(index).value<int>();
 		m_trendWidget->setLaneCount(laneCount);
 
+		qint64 t = m_timeCombo->currentData().value<qint64>();
+		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
+
 		m_trendWidget->updateWidget();
 		return;
 	}
@@ -446,6 +566,7 @@ namespace TrendLib
 	{
 		TimeType timeType = m_timeTypeCombo->itemData(index).value<TimeType>();
 		m_trendWidget->setTimeType(timeType);
+		theSettings.m_timeType = static_cast<int>(timeType);
 
 		m_trendWidget->updateWidget();
 		return;
@@ -463,6 +584,59 @@ namespace TrendLib
 		m_trendSlider->setValueShiftMinMax(value);
 	}
 
+	void TrendMainWindow::contextMenuRequested(const QPoint& /*pos*/)
+	{
+		int outLaneIndex = -1;
+		int rullerIndex = -1;
+		TimeStamp timeStamp;
+		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
+
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
+
+		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
+			mouseOn != Trend::MouseOn::OnRuller)
+		{
+			return;
+		}
+
+		QMenu menu(this);
+
+		QAction* addRullerAction = menu.addAction(tr("Add Ruller"));
+		connect(addRullerAction, &QAction::triggered, this,
+				[&pos, this]()
+				{
+					this->TrendMainWindow::actionAddRuller(pos);
+				});
+
+		QAction* deleteRullerAction = menu.addAction(tr("Delete Ruller"));
+		deleteRullerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
+		connect(deleteRullerAction, &QAction::triggered, this,
+				[rullerIndex, this]()
+				{
+					this->TrendMainWindow::actionDeleteRuller(rullerIndex);
+				});
+
+		QAction* rullerPropertiesAction = menu.addAction(tr("Ruller Properties..."));
+		rullerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuller);
+		connect(rullerPropertiesAction, &QAction::triggered, this,
+				[rullerIndex, this]()
+				{
+					this->TrendMainWindow::actionRullerProperties(rullerIndex);
+				});
+
+		menu.addSeparator();
+		QAction* chooseView = menu.addAction(tr("Choose View..."));
+		chooseView->setEnabled(false);		// Not implemented yet
+
+		menu.addSeparator();
+		QAction* signalAction = menu.addAction(tr("Signals..."));
+		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
+
+		menu.exec(QCursor::pos());
+
+		return;
+	}
+
 	TrendLib::TrendSignalSet& TrendMainWindow::signalSet()
 	{
 		return m_trendWidget->signalSet();
@@ -471,6 +645,16 @@ namespace TrendLib
 	const TrendLib::TrendSignalSet& TrendMainWindow::signalSet() const
 	{
 		return m_trendWidget->signalSet();
+	}
+
+	TrendLib::Trend& TrendMainWindow::trend()
+	{
+		return m_trendWidget->trend();
+	}
+
+	const TrendLib::Trend& TrendMainWindow::trend() const
+	{
+		return m_trendWidget->trend();
 	}
 
 }

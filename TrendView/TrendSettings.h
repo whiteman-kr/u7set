@@ -38,6 +38,7 @@ namespace TrendLib
 
 		int m_viewType = 0;
 		int m_laneCount = 0;
+		int m_timeTypeIndex = 0;
 		int m_timeType = 0;
 
 	private:

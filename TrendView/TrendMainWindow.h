@@ -3,8 +3,7 @@
 
 #include <QMainWindow>
 #include "TrendSlider.h"
-#include "../TrendView/TrendSignal.h"
-#include "../TrendView/TrendDrawParam.h"
+#include "../TrendView/Trend.h"
 
 namespace Ui
 {
@@ -54,6 +53,10 @@ namespace TrendLib
 		void actionExitTriggered();
 		void actionAboutTriggered();
 
+		void actionAddRuller(QPoint mousePos);
+		void actionDeleteRuller(int rullerIndex);
+		void actionRullerProperties(int rullerIndex);
+
 		void timeComboCurrentIndexChanged(int index);
 		void viewComboCurrentIndexChanged(int index);
 		void laneCountComboCurrentIndexChanged(int index);
@@ -62,11 +65,16 @@ namespace TrendLib
 		void sliderValueChanged(TimeStamp value);
 		void startTimeChanged(TimeStamp value);
 
+		void contextMenuRequested(const QPoint& pos);
+
 		// Proprties
 		//
 	public:
 		TrendLib::TrendSignalSet& signalSet();
 		const TrendLib::TrendSignalSet& signalSet() const;
+
+		TrendLib::Trend& trend();
+		const TrendLib::Trend& trend() const;
 
 	private:
 		Ui::TrendsMainWindow *ui;
