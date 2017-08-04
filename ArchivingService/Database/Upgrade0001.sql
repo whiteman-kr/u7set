@@ -1,20 +1,23 @@
 CREATE SEQUENCE archid_seq INCREMENT BY 1 CACHE 1;
 
-CREATE TABLE minutesmarks
+CREATE TABLE timemarks
 (
-  archid bigint NOT NULL,
+  archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass),
   planttime bigint,
   systime bigint,
   loctime bigint,
-  CONSTRAINT minutesmarks_pkey PRIMARY KEY (archid)
+  servertime bigint,
+  CONSTRAINT timemarks_pkey PRIMARY KEY (archid)
 )
 WITH (
   OIDS=FALSE
 );
 
-CREATE INDEX systimeindex ON minutesmarks (systime ASC);
-CREATE INDEX loctimeindex ON minutesmarks (loctime ASC);
-CREATE INDEX planttimeindex ON minutesmarks (planttime ASC);
+CREATE INDEX planttime_idx ON timemarks (planttime ASC);
+CREATE INDEX systime_idx ON timemarks (systime ASC);
+CREATE INDEX loctime_idx ON timemarks (loctime ASC);
+CREATE INDEX servertime_idx ON timemarks (servertime ASC);
+
 
 CREATE OR REPLACE FUNCTION int64hex(val bigint)
   RETURNS text AS

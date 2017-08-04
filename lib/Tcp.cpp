@@ -307,7 +307,7 @@ namespace Tcp
 			return -1;
 		}
 
-		m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
+		// m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
 
 		addSentBytes(size);
 

@@ -144,6 +144,11 @@ public:
 	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_PORT;
 	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK;
 
+	class Db
+	{
+		HostAddressPort host;
+	};
+
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;

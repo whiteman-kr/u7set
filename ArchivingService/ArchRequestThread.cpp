@@ -57,6 +57,17 @@ void ArchRequestContext::checkSignalsHashes(const Archive& arch)
 	m_param.signalHashesCount = existingHashes.count();
 }
 
+Hash ArchRequestContext::signalHash(int index)
+{
+	if (index < 0 || index >= ARCH_REQUEST_MAX_SIGNALS)
+	{
+		assert(false);
+		return -1;
+	}
+
+	return m_param.signalHashes[index];
+}
+
 void ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
 {
 	assert(db.isOpen() == true);
@@ -142,6 +153,15 @@ void ArchRequestContext::getNextData()
 		double value = m_query->value(4).toDouble();
 		qint32 flags = m_query->value(5).toInt();
 		quint64 hash = m_query->value(6).toULongLong();
+
+		if (prevTime > localTime)
+		{
+			assert(false);
+		}
+		else
+		{
+			prevTime = localTime;
+		}
 
 		Proto::AppSignalState* state = m_reply.add_appsignalstates();
 
@@ -277,6 +297,9 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 
 bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, QString& queryStr)
 {
+
+//SELECT archid FROM timemarks WHERE systime < 1501754760132 ORDER BY systime DESC LIMIT 1;
+
 	TEST_PTR_RETURN_FALSE(context);
 
 	QString cmpField = getCmpField(context->timeType());
@@ -352,6 +375,11 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 		}
 	}
 
+	if (queryStr.isEmpty() == false)
+	{
+		queryStr.append(QString("ORDER BY %1").arg(cmpField));
+	}
+
 	return true;
 }
 
@@ -393,7 +421,9 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 	TimeStamp start(context->startTime());
 	TimeStamp end(context->endTime());
 
-	DEBUG_LOG_MSG(m_logger, QString("Request: timeType = %1, start = %2, end = %3, signals = %4").
+	DEBUG_LOG_MSG(m_logger, QString("Request: ID = %1, signal = %2, timeType = %3, start = %4, end = %5, signals = %6").
+				  arg(context->requestID()).
+				  arg(m_archive.getSignalID(context->signalHash(0))).
 				  arg(Archive::timeTypeStr(context->timeType())).
 				  arg(start.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
 				  arg(end.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
