@@ -510,7 +510,7 @@ void AppSignalParam::setSpreadTolerance(double value)
 	m_spreadTolerance = value;
 }
 
-bool AppSignalParam::enableTuning()
+bool AppSignalParam::enableTuning() const
 {
 	return m_enableTuning;
 }
