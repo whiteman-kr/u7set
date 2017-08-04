@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QGridLayout>
+#include <QDialogButtonBox>
 #include <QDateEdit>
 #include <QTimeEdit>
 #include "TrendSettings.h"
@@ -103,66 +104,64 @@ namespace TrendLib
 		//								RGB(0xFF, 0x00, 0x00), RGB(0x00, 0x00, 0xFF), RGB(0x00, 0x00, 0x00) };
 
 
-		TrendLib::TrendSignalParam s1;
-		s1.setSignalId("ASIGNAL001");
-		s1.setCaption("ATrend Signal 001");
-		s1.setType(E::SignalType::Analog);
-		s1.setLowLimit(10.0);
-		s1.setHighLimit(105.0);
-		s1.setColor(qRgb(0x80, 0x00, 0x00));
+//		TrendLib::TrendSignalParam s1;
+//		s1.setSignalId("ASIGNAL001");
+//		s1.setAppSignalId("#ASIGNAL001");
+//		s1.setCaption("ATrend Signal 001");
+//		s1.setType(E::SignalType::Analog);
+//		s1.setLowLimit(10.0);
+//		s1.setHighLimit(105.0);
+//		s1.setColor(qRgb(0x80, 0x00, 0x00));
 
-		TrendLib::TrendSignalParam s11;
-		s11.setSignalId("ASIGNAL011");
-		s11.setCaption("ATren Signal 011");
-		s11.setType(E::SignalType::Analog);
-		s11.setLowLimit(400.0);
-		s11.setHighLimit(25000.0);
-		s11.setColor(qRgb(0x80, 0x00, 0x80));
+//		TrendLib::TrendSignalParam s11;
+//		s11.setSignalId("ASIGNAL011");
+//		s11.setAppSignalId("#ASIGNAL011");
+//		s11.setCaption("ATren Signal 011");
+//		s11.setType(E::SignalType::Analog);
+//		s11.setLowLimit(400.0);
+//		s11.setHighLimit(25000.0);
+//		s11.setColor(qRgb(0x80, 0x00, 0x80));
 
-		TrendLib::TrendSignalParam s2;
-		s2.setSignalId("SIGNAL002");
-		s2.setCaption("Tren Signal 002");
-		s2.setType(E::SignalType::Discrete);
-		s2.setColor(qRgb(0x00, 0x80, 0x00));
+//		TrendLib::TrendSignalParam s2;
+//		s2.setSignalId("SIGNAL002");
+//		s2.setAppSignalId("#SIGNAL002");
+//		s2.setCaption("Tren Signal 002");
+//		s2.setType(E::SignalType::Discrete);
+//		s2.setColor(qRgb(0x00, 0x80, 0x00));
 
-		TrendLib::TrendSignalParam s3;
-		s3.setSignalId("SIGNAL003");
-		s3.setCaption("Tren Signal 003");
-		s3.setType(E::SignalType::Discrete);
-		s3.setColor(qRgb(0x00, 0x00, 0x80));
+//		TrendLib::TrendSignalParam s3;
+//		s3.setSignalId("SIGNAL003");
+//		s3.setAppSignalId("#SIGNAL003");
+//		s3.setCaption("Tren Signal 003");
+//		s3.setType(E::SignalType::Discrete);
+//		s3.setColor(qRgb(0x00, 0x00, 0x80));
 
-		TrendLib::TrendSignalParam s4;
-		s4.setSignalId("SIGNAL004");
-		s4.setCaption("Tren Signal 004");
-		s4.setType(E::SignalType::Discrete);
-		s4.setColor(qRgb(0x00, 0x80, 0x80));
+//		TrendLib::TrendSignalParam s4;
+//		s4.setSignalId("SIGNAL004");
+//		s4.setAppSignalId("#SIGNAL004");
+//		s4.setCaption("Tren Signal 004");
+//		s4.setType(E::SignalType::Discrete);
+//		s4.setColor(qRgb(0x00, 0x80, 0x80));
 
-		TrendLib::TrendSignalParam s5;
-		s5.setSignalId("SIGNAL005");
-		s5.setCaption("Tren Signal 005");
-		s5.setType(E::SignalType::Discrete);
-		s5.setColor(qRgb(0x00, 0x80, 0x80));
+//		TrendLib::TrendSignalParam s6;
+//		s6.setSignalId("SIGNAL006");
+//		s6.setCaption("Tren Signal 006");
+//		s6.setType(E::SignalType::Discrete);
+//		s6.setColor(qRgb(0x00, 0x80, 0x80));
 
-		TrendLib::TrendSignalParam s6;
-		s6.setSignalId("SIGNAL006");
-		s6.setCaption("Tren Signal 006");
-		s6.setType(E::SignalType::Discrete);
-		s6.setColor(qRgb(0x00, 0x80, 0x80));
+//		TrendLib::TrendSignalParam s7;
+//		s7.setSignalId("SIGNAL007");
+//		s7.setCaption("Tren Signal 007");
+//		s7.setType(E::SignalType::Discrete);
+//		s7.setColor(qRgb(0x00, 0x80, 0x80));
 
-		TrendLib::TrendSignalParam s7;
-		s7.setSignalId("SIGNAL007");
-		s7.setCaption("Tren Signal 007");
-		s7.setType(E::SignalType::Discrete);
-		s7.setColor(qRgb(0x00, 0x80, 0x80));
-
-		signalSet().addSignal(s1);
-		signalSet().addSignal(s2);
-		signalSet().addSignal(s3);
-		signalSet().addSignal(s4);
-		signalSet().addSignal(s5);
-		signalSet().addSignal(s6);
-		signalSet().addSignal(s7);
-		signalSet().addSignal(s11);
+//		signalSet().addSignal(s1);
+//		signalSet().addSignal(s2);
+//		signalSet().addSignal(s3);
+//		signalSet().addSignal(s4);
+////		signalSet().addSignal(s6);
+////		signalSet().addSignal(s7);
+//		signalSet().addSignal(s11);
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -484,6 +483,8 @@ namespace TrendLib
 			return;
 		}
 
+		// --
+		//
 		TrendRuller& mutableRuller = trend().rullerSet().at(rullerIndex);
 
 		QDialog d(this);
@@ -502,27 +503,38 @@ namespace TrendLib
 		dateEdit->setCalendarPopup(true);
 
 		QTimeEdit* timeEdit = new QTimeEdit(mutableRuller.timeStamp().toTime());
-		timeEdit->setDisplayFormat("hh:mm:ss");
+		timeEdit->setDisplayFormat("hh:mm:ss.zzz");
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+		connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+		connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+		// --
+		//
 		layout->addWidget(dateLabel, 0, 0);
 		layout->addWidget(dateEdit, 0, 1);
 
 		layout->addWidget(timeLabel, 1, 0);
 		layout->addWidget(timeEdit, 1, 1);
-		layout->addWidget(buttonBox, 2, 0, 2, 1);
+		layout->addWidget(buttonBox, 2, 0, 1, 2);
 
 		d.setLayout(layout);
 
+		// --
+		//
 		int dialogResult = d.exec();
 
 		if (dialogResult ==  QDialog::Accepted)
 		{
+			QDateTime newDateTime;
+			newDateTime.setDate(dateEdit->date());
+			newDateTime.setTime(timeEdit->time());
 
+			TimeStamp ts(newDateTime);
+			mutableRuller.setTimeStamp(ts);
+
+			update();
 		}
-
-		update();
 
 		return;
 	}

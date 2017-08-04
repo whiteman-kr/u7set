@@ -140,7 +140,11 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 void MonitorTrendsWidget::signalsButton()
 {
-	DialogChooseTrendSignals dialog(this);
+	std::vector<TrendLib::TrendSignalParam> trendSignals = signalSet().trendSignals();
+
+	// --
+	//
+	DialogChooseTrendSignals dialog(trendSignals, this);
 	
 	int result = dialog.exec();
 	

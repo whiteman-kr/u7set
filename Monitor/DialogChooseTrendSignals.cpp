@@ -1,11 +1,18 @@
 #include "DialogChooseTrendSignals.h"
 #include "ui_DialogChooseTrendSignals.h"
+#include "Settings.h"
 
-DialogChooseTrendSignals::DialogChooseTrendSignals(QWidget* parent) :
+DialogChooseTrendSignals::DialogChooseTrendSignals(std::vector<TrendLib::TrendSignalParam>& trendSignals, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseTrendSignals)
 {
 	ui->setupUi(this);
+
+	// Set filter completer
+	//
+	m_filterCompleter = new QCompleter(theSettings.m_trendSignalsDialogFilterCompleter, this);
+	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	ui->filterEdit->setCompleter(m_filterCompleter);
 
 	// --
 	//
@@ -34,6 +41,14 @@ DialogChooseTrendSignals::DialogChooseTrendSignals(QWidget* parent) :
 
 	ui->filteredSignals->header()->resizeSection(1, ui->filteredSignals->header()->sectionSizeHint(1));		// 1 is TypeColumn (A/D)
 	ui->trendSignals->header()->resizeSection(1 , ui->trendSignals->header()->sectionSizeHint(1));			// 1 is TypeColumn (A/D)
+
+	// Fill added signals
+	//
+	for (TrendLib::TrendSignalParam& trendSignal : trendSignals)
+	{
+		AppSignalParam appSignal = trendSignal.toAppSignalParam();
+		addSignal(appSignal);
+	}
 
 	return;
 }
@@ -239,9 +254,35 @@ void DialogChooseTrendSignals::on_removeAllSignalsButton_clicked()
 	return;
 }
 
-void DialogChooseTrendSignals::on_filterEdit_textChanged(const QString& /*arg1*/)
+void DialogChooseTrendSignals::on_filterEdit_textChanged(const QString& /*arg*/)
 {
 	fillSignalList();
+}
+
+
+void DialogChooseTrendSignals::on_filterEdit_editingFinished()
+{
+	QString arg = ui->filterEdit->text();
+
+	if (theSettings.m_trendSignalsDialogFilterCompleter.contains(arg) == false)
+	{
+		theSettings.m_trendSignalsDialogFilterCompleter << arg;
+
+		while (theSettings.m_trendSignalsDialogFilterCompleter.size() > 1000)
+		{
+			theSettings.m_trendSignalsDialogFilterCompleter.pop_front();
+		}
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
+		assert(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(theSettings.m_trendSignalsDialogFilterCompleter);
+		}
+	}
+
+	return;
 }
 
 void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
@@ -516,4 +557,6 @@ AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 
 	return m_signals[signalIndex];
 }
+
+
 

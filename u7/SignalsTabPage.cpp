@@ -339,6 +339,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				}
 				s.setAppSignalID(strId);
 			}
+			break;
 		}
 		break;
 		case SC_EXT_STR_ID:
@@ -352,6 +353,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				}
 				s.setCustomAppSignalID(strId);
 			}
+			break;
 		}
 		case SC_NAME: if (le) s.setCaption(le->text()); break;
 		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text()); break;

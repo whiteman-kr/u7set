@@ -72,6 +72,8 @@ namespace Builder
 
 		void findLmModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 
+		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
+
 		// Expand Devices StrId
 		//
 		bool expandDeviceStrId(Hardware::DeviceObject* device);

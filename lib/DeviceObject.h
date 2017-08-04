@@ -475,7 +475,8 @@ namespace Hardware
 			OCM = 0x1700,
 			MPS17 = 0x5100,
 			BVK4 = 0x5300,
-			BP336 = 0x5500
+			BP336 = 0x5500,
+			BVB = 0x5600
 		};
 		Q_ENUM(FamilyType)
 
@@ -519,6 +520,7 @@ namespace Hardware
 		bool isInputModule() const;
 		bool isOutputModule() const;
 		bool isLogicModule() const;
+		bool isFSCConfigurationModule() const;
 		bool isOptoModule() const;
 
 		// Data
