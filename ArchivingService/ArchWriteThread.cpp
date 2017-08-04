@@ -297,6 +297,8 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 	int createdTablesCount = 0;
 	int creationErrorCount = 0;
 
+	int ctr = 0;
+
 	while(i.hasNext() == true && quitRequested() == false)
 	{
 		i.next();
@@ -375,6 +377,13 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		else
 		{
 			m_archive.setCanReadWriteSignal(archSignal.hash, ltTableExists);
+		}
+
+		if (createdTablesCount - ctr >= 500)
+		{
+			DEBUG_LOG_MSG(m_logger, QString("Tables created: %1").arg(createdTablesCount));
+
+			ctr = createdTablesCount;
 		}
 	}
 
@@ -576,8 +585,8 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 
 	//arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
 
-	QString format1("row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
-	QString format2(",row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
+	QString format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
+	QString format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
 
 	do
 	{
@@ -622,7 +631,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 					arg(bigintHash).
 					arg(state.time.plant.timeStamp).
 					arg(state.time.system.timeStamp).
-					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
 					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
@@ -634,7 +642,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 					arg(bigintHash).
 					arg(state.time.plant.timeStamp).
 					arg(state.time.system.timeStamp).
-					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
 					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
@@ -716,7 +723,7 @@ bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arr
 
 	if (result == false)
 	{
-		assert(false);
+		//assert(false);
 		DEBUG_LOG_ERR(m_logger, query.lastError().text());
 		m_db.close();
 		return false;

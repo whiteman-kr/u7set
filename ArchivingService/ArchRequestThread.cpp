@@ -152,9 +152,9 @@ void ArchRequestContext::getNextData()
 		qint64 plantTime = m_query->value(1).toLongLong();
 		qint64 systemTime = m_query->value(2).toLongLong();
 		qint64 localTime = systemTime + offset;
-		double value = m_query->value(4).toDouble();
-		qint32 flags = m_query->value(5).toInt();
-		quint64 hash = m_query->value(6).toULongLong();
+		double value = m_query->value(3).toDouble();
+		qint32 flags = m_query->value(4).toInt();
+		quint64 hash = m_query->value(5).toULongLong();
 
 		if (prevTime > localTime)
 		{
@@ -313,7 +313,7 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 	}
 
 	qint64 startTime = context->startTime();
-	qint64 endTime = context->startTime();
+	qint64 endTime = context->endTime();
 
 	if (timeType == TimeType::Local)
 	{

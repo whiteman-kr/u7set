@@ -132,7 +132,7 @@ BEGIN
                         -- write analog signal state in short term table
 
                         EXECUTE format('INSERT INTO %I (plantTime, sysTime, val, flags)'
-			        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
+			        'VALUES (%L,%L,%L,%L) RETURNING %I',
 				shortTermTable, state.plantTime, state.sysTime, state.val, state.flags, 'archid')
 			INTO archid;
 
@@ -145,7 +145,7 @@ BEGIN
                                 longTermTable = concat('lt_', hashHex);
 
                                 EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
-				        'VALUES (%L,%L,%L,%L,%L,%L)',
+				        'VALUES (%L,%L,%L,%L,%L)',
 					longTermTable, archid, state.plantTime, state.sysTime, state.val, state.flags);
 			END IF;
 
@@ -157,7 +157,7 @@ BEGIN
                         archid = nextval('archid_seq'::regclass);
 
                         EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
-			        'VALUES (%L,%L,%L,%L,%L,%L)',
+			        'VALUES (%L,%L,%L,%L,%L)',
 				longTermTable, archid, state.plantTime, state.sysTime, state.val, state.flags);
 		END IF;
 	END LOOP;

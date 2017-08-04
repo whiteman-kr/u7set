@@ -13,7 +13,7 @@ private:
 	public:
 		Channel();
 
-		void setTime(quint64 time);
+		void setTime(qint64 time);
 
 		qint64 time() const { return m_time; }
 
@@ -22,12 +22,11 @@ private:
 		qint64 m_errNomono = 0;				//	nonmonotonicity errors count
 	};
 
-	static const int CHANNELS_COUNT = 4;
+	static const int CHANNELS_COUNT = 3;
 
 	static const int CHANNEL_PLANT = 0;
 	static const int CHANNEL_SYSTEM = 1;
-	static const int CHANNEL_LOCAL = 2;
-	static const int CHANNEL_SERVER = 3;			// system time of archive server
+	static const int CHANNEL_SERVER = 2;			// system time of archive server
 
 public:
 	TimeFilter();
