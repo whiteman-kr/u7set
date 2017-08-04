@@ -204,7 +204,7 @@ public:
 	double spreadTolerance();
 	void setSpreadTolerance(double value);
 
-	Q_INVOKABLE bool enableTuning();
+	Q_INVOKABLE bool enableTuning() const;
 	void setEnableTuning(bool value);
 
 	Q_INVOKABLE double tuningDefaultValue() const;
