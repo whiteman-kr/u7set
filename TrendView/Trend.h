@@ -32,6 +32,8 @@ namespace TrendLib
 
 		void adjustPainter(QPainter* painter, int dpiX, int dpiY) const;
 
+		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
+
 	public:
 		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
 		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam);
@@ -54,7 +56,7 @@ namespace TrendLib
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
-		static TimeStamp pixelToTime(int pos, const TrendDrawParam& drawParam);
+		static double valueToScaledPixel(double value, const QRectF& rect, double lowLimit, double highLimit);
 
 		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendDrawParam& drawParam, int flags, QRectF* boundingRect = nullptr);
 

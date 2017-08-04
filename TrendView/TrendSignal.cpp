@@ -13,8 +13,10 @@ namespace TrendLib
 		m_caption(appSignal.caption()),
 		m_equipmentId(appSignal.equipmentId()),
 		m_type(appSignal.type()),
-		m_lowLimit(appSignal.lowEngineeringUnits()),
 		m_highLimit(appSignal.highEngineeringUnits()),
+		m_lowLimit(appSignal.lowEngineeringUnits()),
+		m_viewHighLimit(appSignal.highEngineeringUnits()),
+		m_viewLowLimit(appSignal.lowEngineeringUnits()),
 		m_unit(appSignal.unit())
 	{
 	}
@@ -28,8 +30,8 @@ namespace TrendLib
 		result.setCaption(m_caption);
 		result.setEquipmentId(m_equipmentId);
 		result.setType(m_type);
-		result.setLowEngineeringUnits(m_lowLimit);
 		result.setHighEngineeringUnits(m_highLimit);
+		result.setLowEngineeringUnits(m_lowLimit);
 		result.setUnit(m_unit);
 
 		return result;
@@ -95,6 +97,16 @@ namespace TrendLib
 		m_type = value;
 	}
 
+	double TrendSignalParam::highLimit() const
+	{
+		return m_highLimit;
+	}
+
+	void TrendSignalParam::setHighLimit(double value)
+	{
+		m_highLimit = value;
+	}
+
 	double TrendSignalParam::lowLimit() const
 	{
 		return m_lowLimit;
@@ -105,13 +117,24 @@ namespace TrendLib
 		m_lowLimit = value;
 	}
 
-	double TrendSignalParam::highLimit() const
+	double TrendSignalParam::viewHighLimit() const
 	{
-		return m_highLimit;
+		return m_viewHighLimit;
 	}
-	void TrendSignalParam::setHighLimit(double value)
+
+	void TrendSignalParam::setViewHighLimit(double value)
 	{
-		m_highLimit = value;
+		m_viewHighLimit = value;
+	}
+
+	double TrendSignalParam::viewLowLimit() const
+	{
+		return m_viewLowLimit;
+	}
+
+	void TrendSignalParam::setViewLowLimit(double value)
+	{
+		m_viewLowLimit = value;
 	}
 
 	QString TrendSignalParam::unit() const

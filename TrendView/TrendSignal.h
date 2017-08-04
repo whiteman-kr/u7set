@@ -30,6 +30,19 @@ namespace TrendLib
 		{
 			return (flags & 0x000001);
 		}
+
+		const TimeStamp& getTime(const TimeType& timeType) const
+		{
+			switch (timeType)
+			{
+			case TimeType::Local:	return this->local;
+			case TimeType::System:	return this->system;
+			case TimeType::Plant:	return this->plant;
+			default:
+				assert(false);
+				return this->local;
+			}
+		}
 	};
 
 	struct TrendStateRecord
@@ -88,11 +101,17 @@ namespace TrendLib
 		E::SignalType type() const;
 		void setType(E::SignalType value);
 
+		double highLimit() const;
+		void setHighLimit(double value);
+
 		double lowLimit() const;
 		void setLowLimit(double value);
 
-		double highLimit() const;
-		void setHighLimit(double value);
+		double viewHighLimit() const;
+		void setViewHighLimit(double value);
+
+		double viewLowLimit() const;
+		void setViewLowLimit(double value);
 
 		QString unit() const;
 		void setUnit(const QString& value);
@@ -103,15 +122,19 @@ namespace TrendLib
 		// Data
 		//
 	private:
-		QString m_signalId;			// CustomSignalID
-		QString m_appSignalId;		// AppSignalID, starts from # for app data
+		QString m_signalId;				// CustomSignalID
+		QString m_appSignalId;			// AppSignalID, starts from # for app data
 		QString m_caption;
 		QString m_equipmentId;
 
 		E::SignalType m_type = E::SignalType::Analog;
 
-		double m_lowLimit = 0;
 		double m_highLimit = 1.0;
+		double m_lowLimit = 0;
+
+		double m_viewHighLimit = 1.0;	// Current view limits for the signals
+		double m_viewLowLimit = 0;
+
 		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
