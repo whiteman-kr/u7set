@@ -739,11 +739,10 @@ bool ArchWriteThreadWorker::writeTimeMark()
 
 	m_timeFilter.getTimes(times, serverTime);
 
-	QString queryStr = QString("INSERT INTO timemarks (planttime, systime, loctime, servertime) "
-							   "VALUES (%1::bigint, %2::bigint, %3::bigint, %4::bigint);").
+	QString queryStr = QString("INSERT INTO timemarks (planttime, systime, servertime) "
+							   "VALUES (%1::bigint, %2::bigint, %3::bigint);").
 							arg(times.plant.timeStamp).
 							arg(times.system.timeStamp).
-							arg(times.local.timeStamp).
 							arg(serverTime);
 
 	QSqlQuery query(m_db);

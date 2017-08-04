@@ -5,7 +5,6 @@ CREATE TABLE timemarks
   archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass),
   planttime bigint,
   systime bigint,
-  loctime bigint,
   servertime bigint,
   CONSTRAINT timemarks_pkey PRIMARY KEY (archid)
 )
@@ -15,7 +14,6 @@ WITH (
 
 CREATE INDEX planttime_idx ON timemarks (planttime ASC);
 CREATE INDEX systime_idx ON timemarks (systime ASC);
-CREATE INDEX loctime_idx ON timemarks (loctime ASC);
 CREATE INDEX servertime_idx ON timemarks (servertime ASC);
 
 
@@ -45,7 +43,6 @@ $BODY$
 CREATE OR REPLACE FUNCTION saveAppSignalState(signalHash bigint,
                                               plantTime bigint,
 					      sysTime bigint,
-					      locTime bigint,
 					      val double precision,
 					      flags integer,
 					      isAnalogSignal boolean,
@@ -66,9 +63,9 @@ BEGIN
 
                 -- write analog signal state in short term table
 
-                EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, val, flags)'
+                EXECUTE format('INSERT INTO %I (plantTime, sysTime, val, flags)'
 		        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
-			shortTermTable, plantTime, sysTime, locTime, val, flags, 'archid')
+			shortTermTable, plantTime, sysTime, val, flags, 'archid')
 		INTO archid;
 
                 -- test if set smoothAperture flag only
@@ -81,9 +78,9 @@ BEGIN
 
                 longTermTable = concat('lt_', hashHex);
 
-                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
 		        'VALUES (%L,%L,%L,%L,%L,%L)',
-			longTermTable, archid, plantTime, sysTime, locTime, val, flags);
+			longTermTable, archid, plantTime, sysTime, val, flags);
 
                 RETURN archid;
 	ELSE
@@ -93,9 +90,9 @@ BEGIN
 
                 archid = nextval('archid_seq'::regclass);
 
-                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
 		        'VALUES (%L,%L,%L,%L,%L,%L)',
-			longTermTable, archid, plantTime, sysTime, locTime, val, flags);
+			longTermTable, archid, plantTime, sysTime, val, flags);
 
                 RETURN archid;
 	END IF;
@@ -108,7 +105,6 @@ CREATE TYPE appsignalstate AS
    (signalHash bigint,
    plantTime bigint,
    sysTime bigint,
-   locTime bigint,
    val double precision,
    flags integer,
    isAnalogSignal boolean,
@@ -135,9 +131,9 @@ BEGIN
 
                         -- write analog signal state in short term table
 
-                        EXECUTE format('INSERT INTO %I (plantTime, sysTime, locTime, val, flags)'
+                        EXECUTE format('INSERT INTO %I (plantTime, sysTime, val, flags)'
 			        'VALUES (%L,%L,%L,%L,%L) RETURNING %I',
-				shortTermTable, state.plantTime, state.sysTime, state.locTime, state.val, state.flags, 'archid')
+				shortTermTable, state.plantTime, state.sysTime, state.val, state.flags, 'archid')
 			INTO archid;
 
                         -- test if set smoothAperture flag only
@@ -148,9 +144,9 @@ BEGIN
 
                                 longTermTable = concat('lt_', hashHex);
 
-                                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+                                EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
 				        'VALUES (%L,%L,%L,%L,%L,%L)',
-					longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
+					longTermTable, archid, state.plantTime, state.sysTime, state.val, state.flags);
 			END IF;
 
                 ELSE
@@ -160,9 +156,9 @@ BEGIN
 
                         archid = nextval('archid_seq'::regclass);
 
-                        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, locTime, val, flags)'
+                        EXECUTE format('INSERT INTO %I (archid, plantTime, sysTime, val, flags)'
 			        'VALUES (%L,%L,%L,%L,%L,%L)',
-				longTermTable, archid, state.plantTime, state.sysTime, state.locTime, state.val, state.flags);
+				longTermTable, archid, state.plantTime, state.sysTime, state.val, state.flags);
 		END IF;
 	END LOOP;
 

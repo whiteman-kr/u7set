@@ -137,6 +137,8 @@ void ArchRequestContext::getNextData()
 
 	bool hasNextRecord = false;
 
+	quint64 offset = Archive::localTimeOffsetFromUtc();
+
 	do
 	{
 		hasNextRecord = m_query->next();
@@ -149,7 +151,7 @@ void ArchRequestContext::getNextData()
 		qint64 archid = m_query->value(0).toLongLong();
 		qint64 plantTime = m_query->value(1).toLongLong();
 		qint64 systemTime = m_query->value(2).toLongLong();
-		qint64 localTime = m_query->value(3).toLongLong();
+		qint64 localTime = systemTime + offset;
 		double value = m_query->value(4).toDouble();
 		qint32 flags = m_query->value(5).toInt();
 		quint64 hash = m_query->value(6).toULongLong();
@@ -187,7 +189,6 @@ void ArchRequestContext::getNextData()
 
 const char* ArchRequestThreadWorker::FIELD_PLANT_TIME = "plantTime";
 const char* ArchRequestThreadWorker::FIELD_SYSTEM_TIME = "sysTime";
-const char* ArchRequestThreadWorker::FIELD_LOCAL_TIME = "locTime";
 const char* ArchRequestThreadWorker::FIELD_ARCH_ID = "archID";
 const char* ArchRequestThreadWorker::FIELD_VALUE = "val";
 const char* ArchRequestThreadWorker::FIELD_FLAGS = "flags";
@@ -302,11 +303,26 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 
 	TEST_PTR_RETURN_FALSE(context);
 
-	QString cmpField = getCmpField(context->timeType());
+	TimeType timeType = context->timeType();
+
+	QString cmpField = getCmpField(timeType);
 
 	if (cmpField.isEmpty() == true)
 	{
 		return false;
+	}
+
+	qint64 startTime = context->startTime();
+	qint64 endTime = context->startTime();
+
+	if (timeType == TimeType::Local)
+	{
+		// translate local time to system time
+		//
+		qint64 offset = Archive::localTimeOffsetFromUtc();
+
+		startTime -= offset;
+		endTime -= offset;
 	}
 
 	int signalHashesCount = context->signalHashesCount();
@@ -349,11 +365,11 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 
 			if (count == 0)
 			{
-				formatStr = QString("SELECT %1, %2, %3, %4, %5, %6, %7::bigint AS hash FROM %8 WHERE %9 >= %10 AND %9 <= %11 ");
+				formatStr = QString("SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
 			}
 			else
 			{
-				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6, %7::bigint AS hash FROM %8 WHERE %9 >= %10 AND %9 <= %11 ");
+				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %9 <= %10 ");
 			}
 
 			qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);
@@ -362,14 +378,13 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 							arg(FIELD_ARCH_ID).
 							arg(FIELD_PLANT_TIME).
 							arg(FIELD_SYSTEM_TIME).
-							arg(FIELD_LOCAL_TIME).
 							arg(FIELD_VALUE).
 							arg(FIELD_FLAGS).
 							arg(signedSignalHash).
 							arg(tableName).
 							arg(cmpField).
-							arg(context->startTime()).
-							arg(context->endTime()));
+							arg(startTime).
+							arg(endTime));
 
 			count++;
 		}
@@ -394,11 +409,8 @@ QString ArchRequestThreadWorker::getCmpField(TimeType timeType)
 		break;
 
 	case TimeType::System:
+	case TimeType::Local:						// local time search also use systemtime field
 		cmpField = FIELD_SYSTEM_TIME;
-		break;
-
-	case TimeType::Local:
-		cmpField = FIELD_LOCAL_TIME;
 		break;
 
 	case TimeType::ArchiveId:

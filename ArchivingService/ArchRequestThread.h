@@ -141,7 +141,6 @@ private slots:
 private:
 	static const char* FIELD_PLANT_TIME;
 	static const char* FIELD_SYSTEM_TIME;
-	static const char* FIELD_LOCAL_TIME;
 	static const char* FIELD_ARCH_ID;
 	static const char* FIELD_VALUE;
 	static const char* FIELD_FLAGS;

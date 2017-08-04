@@ -151,5 +151,15 @@ QString Archive::timeTypeStr(TimeType timeType)
 }
 
 
+qint64 Archive::localTimeOffsetFromUtc()
+{
+	QDateTime local(QDateTime::currentDateTime());
+
+	qint64 offset = local.offsetFromUtc() * 1000;
+
+	return offset;
+}
+
+
 
 
