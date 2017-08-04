@@ -873,10 +873,10 @@ std::shared_ptr<LogicModule> LogicModuleSet::get(const Hardware::DeviceModule* l
 std::shared_ptr<LogicModule> LogicModuleSet::get(Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
-		logicModule->isLogicModule() == false)
+		logicModule->isFSCConfigurationModule() == false)
 	{
 		assert(logicModule);
-		assert(logicModule->isLogicModule());
+		assert(logicModule->isFSCConfigurationModule());
 		return std::shared_ptr<LogicModule>();
 	}
 

@@ -5,6 +5,167 @@
 #include "Stable.h"
 #include "Settings.h"
 
+AppSignalParamIndexSorter::AppSignalParamIndexSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
+	m_appSignalParamVec(appSignalParamVec),
+	m_sortColumn(sortColumn),
+	m_sortOrder(sortOrder)
+{
+	if (appSignalParamVec == nullptr)
+	{
+		assert(appSignalParamVec);
+	}
+}
+
+bool AppSignalParamIndexSorter::sortFunction(int index1, int index2, const AppSignalParamIndexSorter* pThis)
+{
+	if (m_appSignalParamVec == nullptr)
+	{
+		assert(m_appSignalParamVec);
+		return index1 < index2;
+	}
+
+	if (index1 < 0 || index1 >= pThis->m_appSignalParamVec->size() ||
+			index2 < 0 || index2 >= pThis->m_appSignalParamVec->size())
+	{
+		assert(false);
+		return index1 < index2;
+	}
+
+	const AppSignalParam& o1 = (*pThis->m_appSignalParamVec)[index1];
+	const AppSignalParam& o2 = (*pThis->m_appSignalParamVec)[index2];
+
+	switch (m_sortColumn)
+	{
+	case Columns::SignalID:
+		{
+			v1 = o1.customSignalId();
+			v2 = o2.customSignalId();
+		}
+		break;
+	case Columns::AppSignalID:
+		{
+			v1 = o1.appSignalId();
+			v2 = o2.appSignalId();
+		}
+		break;
+	case Columns::EquipmentID:
+		{
+			v1 = o1.equipmentId();
+			v2 = o2.equipmentId();
+		}
+		break;
+	case Columns::Caption:
+		{
+			v1 = o1.caption();
+			v2 = o2.caption();
+		}
+		break;
+
+	case Columns::Channel:
+		{
+			v1 = static_cast<int>(o1.channel());
+			v2 = static_cast<int>(o2.channel());
+		}
+		break;
+
+	case Columns::Type:
+		{
+			if (o1.isDiscrete() == true || o2.isDiscrete() == true)
+			{
+				v1 = static_cast<int>(o1.inOutType());
+				v2 = static_cast<int>(o2.inOutType());
+				break;
+			}
+
+			if (o1.type() == o2.type())
+			{
+				if (o1.analogSignalFormat() == o2.analogSignalFormat())
+				{
+					v1 = static_cast<int>(o1.inOutType());
+					v2 = static_cast<int>(o2.inOutType());
+				}
+				else
+				{
+					v1 = static_cast<int>(o1.analogSignalFormat());
+					v2 = static_cast<int>(o2.analogSignalFormat());
+				}
+			}
+			else
+			{
+				v1 = static_cast<int>(o1.type());
+				v2 = static_cast<int>(o2.type());
+			}
+		}
+		break;
+
+	case Columns::Units:
+		{
+			v1 = o1.unit();
+			v2 = o2.unit();
+		}
+		break;
+
+	case Columns::LowValidRange:
+		{
+			v1 = o1.lowValidRange();
+			v2 = o2.lowValidRange();
+		}
+		break;
+
+	case Columns::HighValidRange:
+		{
+			v1 = o1.highValidRange();
+			v2 = o2.highValidRange();
+		}
+		break;
+
+	case Columns::LowEngineeringUnits:
+		{
+			v1 = o1.lowEngineeringUnits();
+			v2 = o2.lowEngineeringUnits();
+		}
+		break;
+
+	case Columns::HighEngineeringUnits:
+		{
+			v1 = o1.highEngineeringUnits();
+			v2 = o2.highEngineeringUnits();
+		}
+		break;
+
+	case Columns::EnableTuning:
+		{
+			v1 = o1.enableTuning();
+			v2 = o2.enableTuning();
+		}
+		break;
+
+	case Columns::TuningDefaultValue:
+		{
+			v1 = o1.tuningDefaultValue();
+			v2 = o2.tuningDefaultValue();
+		}
+		break;
+
+	default:
+		{
+			assert(false);
+			v1 = index1;
+			v2 = index2;
+		}
+	}
+
+	if (v1 == v2)
+	{
+		return index1 < index2;
+	}
+
+	if (m_sortOrder == Qt::AscendingOrder)
+		return v1 < v2;
+	else
+		return v1 > v2;
+}
+
 //
 // SignalSearchItemModel
 //
@@ -223,6 +384,34 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 	ui->editSignalID->setPlaceholderText(tr("Enter SignalID here"));
 
 	m_signals = theSignals.signalList();
+
+	// Sort m_signals by SignalId
+	//
+
+	int signalsCount = static_cast<int>(m_signals.size());
+
+	std::vector<int> signalsIndexVector;	// Index vector for m_signals
+	signalsIndexVector.resize(signalsCount);
+
+	for (int i = 0; i < signalsCount; i++)
+	{
+		signalsIndexVector[i] = i;
+	}
+
+	std::sort(signalsIndexVector.begin(), signalsIndexVector.end(), AppSignalParamIndexSorter(&m_signals));
+
+	std::vector<AppSignalParam> sortedSignals;
+	sortedSignals.resize(signalsCount);
+
+	for (int i = 0; i < signalsCount; i++)
+	{
+		sortedSignals[i] = m_signals[signalsIndexVector[i]];
+	}
+
+	m_signals.swap(sortedSignals);
+
+	//
+
 
 	search();
 }

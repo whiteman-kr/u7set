@@ -47,6 +47,8 @@ namespace Tcp
 		int minorVersion;
 		int commitNo;
 
+		bool isActual = false;
+
 		void dump();
 	};
 

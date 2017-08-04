@@ -72,6 +72,11 @@ void CfgControlServer::sendClientList()
 
 	for(const std::shared_ptr<const Tcp::ConnectionState>& state : m_connectionStates)
 	{
+		if (!E::containes<E::SoftwareType>(TO_INT(state->softwareType)))
+		{
+			continue;
+		}
+
 		Network::ConfigurationServiceClientInfo* i = message.add_clients();
 
 		i->set_softwaretype(TO_INT(state->softwareType));
@@ -85,7 +90,7 @@ void CfgControlServer::sendClientList()
 		i->set_ip(state->peerAddr.address32());
 
 		i->set_uptime(QDateTime::currentMSecsSinceEpoch() - state->startTime);
-		i->set_isactual(false);
+		i->set_isactual(state->isActual);
 		i->set_replyquantity(state->replyCount);
 	}
 

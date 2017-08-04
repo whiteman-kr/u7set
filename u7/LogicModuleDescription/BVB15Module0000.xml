@@ -36,8 +36,6 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 	</OptoInterface>
 	
-	<AFBImplementation>
-	</AFBImplementation>
-	<AFBL>
-	</AFBL>
+	<AFBImplementation/>
+	<AFBL/>
 </LogicModule>

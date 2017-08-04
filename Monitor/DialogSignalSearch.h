@@ -5,8 +5,53 @@
 #include <QDialog>
 
 namespace Ui {
-class DialogSignalSearch;
+	class DialogSignalSearch;
 }
+
+class AppSignalParamIndexSorter	// later move this class to some library file, it can be used in other cases
+{
+public:
+
+	enum class Columns
+	{
+		SignalID = 0,
+		AppSignalID,
+		Caption,
+		EquipmentID,
+
+		Channel,
+		Type,
+		Units,
+
+		LowValidRange,
+		HighValidRange,
+
+		LowEngineeringUnits,
+		HighEngineeringUnits,
+
+		EnableTuning,
+		TuningDefaultValue
+	};
+
+	AppSignalParamIndexSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn = Columns::SignalID, Qt::SortOrder sortOrder = Qt::AscendingOrder);
+
+	bool operator()(int index1, int index2)
+	{
+		return sortFunction(index1, index2, this);
+	}
+
+	bool sortFunction(int index1, int index2, const AppSignalParamIndexSorter* pThis);
+
+private:
+	Columns m_sortColumn = Columns::SignalID;
+
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+
+	std::vector<AppSignalParam>* m_appSignalParamVec = nullptr;
+
+	QVariant v1;
+	QVariant v2;
+};
 
 class SignalSearchItemModel : public QAbstractItemModel
 {
