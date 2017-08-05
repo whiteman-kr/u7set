@@ -7,10 +7,18 @@
 #include "../lib/TimeStamp.h"
 #include "Types.h"
 
+
+struct AppSignalParamMimeType
+{
+	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
+};
+
+
 namespace Proto
 {
 	class AppSignalState;
 	class AppSignalParam;
+	class AppSignalParamSet;
 }
 
 
@@ -254,5 +262,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)
-
-

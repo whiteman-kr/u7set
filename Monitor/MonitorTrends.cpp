@@ -190,44 +190,10 @@ void MonitorTrendsWidget::signalsButton()
 
 	// Add new signals
 	//
-	for (const AppSignalParam signal : acceptedSignals)
+	for (const AppSignalParam& signal : acceptedSignals)
 	{
-		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
-						[&signal](const TrendLib::TrendSignalParam& trendSignal)
-						{
-							return trendSignal.appSignalId() == signal.appSignalId();
-						});
-
-		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
-						[&signal](const TrendLib::TrendSignalParam& trendSignal)
-						{
-							return trendSignal.appSignalId() == signal.appSignalId();
-						});
-
-		if (dit != discreteSignals.end() ||
-			ait != analogSignals.end())
-		{
-			continue;
-		}
-
-static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
-								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
-
-static int stdColorIndex = 0;
-
-
-		TrendLib::TrendSignalParam trendSignal(signal);
-		trendSignal.setColor(StdColors[stdColorIndex]);
-
-		signalSet().addSignal(trendSignal);
-
-		// --
-		//
-		stdColorIndex ++;
-		if (stdColorIndex >= sizeof(StdColors) / sizeof(StdColors[0]))
-		{
-			stdColorIndex = 0;
-		}
+		TrendLib::TrendSignalParam tsp(signal);
+		addSignal(tsp, false);
 	}
 
 	updateWidget();

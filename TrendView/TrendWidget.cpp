@@ -153,7 +153,7 @@ namespace TrendLib
 
 		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex);
 
-		if (event->button() == Qt::LeftButton)
+		if (event->buttons().testFlag(Qt::LeftButton) == true)
 		{
 			if (mouseOn == Trend::MouseOn::OnRuller)
 			{
@@ -184,7 +184,7 @@ namespace TrendLib
 			return;
 		}
 
-		if (event->button() == Qt::RightButton)
+		if (event->buttons().testFlag(Qt::RightButton) == true)
 		{
 			return;
 		}
@@ -209,17 +209,14 @@ namespace TrendLib
 		m_mouseAction = MouseAction::None;
 		releaseMouse();
 
-		if (event->button() == Qt::LeftButton)
+		if (event->buttons().testFlag(Qt::LeftButton) == false)
 		{
-			QApplication::setOverrideCursor(Qt::ArrowCursor);
-			QApplication::processEvents();						// Mus be called manually to set cursor
-
+			unsetCursor();
 			mouseMoveEvent(event);		// To set cursor
 		}
 		else
 		{
-			QApplication::setOverrideCursor(Qt::ArrowCursor);
-			QApplication::processEvents();						// Mus be called manually to set cursor
+			unsetCursor();
 		}
 
 		return;
@@ -227,8 +224,6 @@ namespace TrendLib
 
 	void TrendWidget::mouseMoveEvent(QMouseEvent* event)
 	{
-		event->accept();
-
 		if (m_mouseAction == MouseAction::None)
 		{
 			int laneIndex = -1;
@@ -251,13 +246,18 @@ namespace TrendLib
 
 			m_pixmapDrawParam.setHightlightRullerIndex(rullerIndex);
 
-			if (QApplication::overrideCursor() == nullptr ||
-				QApplication::overrideCursor()->shape() != newCursorShape)
+			if (newCursorShape == Qt::ArrowCursor)
 			{
-				QApplication::setOverrideCursor(newCursorShape);
-				QApplication::processEvents();			// Must be called manually to set cursor
-
-				update();								// Update rullers
+				this->unsetCursor();
+				update();
+			}
+			else
+			{
+				if (this->cursor().shape() != newCursorShape)
+				{
+					this->setCursor(newCursorShape);
+					update();
+				}
 			}
 
 			return;
@@ -323,6 +323,7 @@ namespace TrendLib
 			}
 		}
 
+		event->accept();
 		return;
 	}
 

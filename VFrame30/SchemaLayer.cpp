@@ -180,6 +180,26 @@ namespace VFrame30
 		}
 	}
 
+	template<typename SchemaItemType>
+	std::shared_ptr<SchemaItemType> SchemaLayer::getItemUnderPointByType(QPointF point) const
+	{
+		double x = point.x();
+		double y = point.y();
+
+		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+
+			if (qobject_cast<ItemType>(item.get()) != nullptr &&
+				item->IsIntersectPoint(x, y) == true)
+			{
+				return std::dynamic_pointer_cast<SchemaItemType>(item);
+			}
+		}
+
+		return std::shared_ptr<SchemaItem>();
+	}
+
 	std::shared_ptr<SchemaItem> SchemaLayer::getItemUnderPoint(QPointF point, QString className) const
 	{
 		double x = point.x();

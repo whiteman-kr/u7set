@@ -1,6 +1,8 @@
 #include "../lib/AppSignal.h"
 #include "../Proto/serialization.pb.h"
 
+const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSiagnalParamSet
+
 
 QDateTime Times::systemToDateTime() const
 {

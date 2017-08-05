@@ -28,6 +28,9 @@ namespace TrendLib
 		void ensureVisible();
 		void updateWidget();
 
+		bool addSignals(const std::vector<TrendSignalParam>& trendSignals, bool redraw);
+		bool addSignal(const TrendSignalParam& trendSignal, bool redraw);
+
 	protected:
 		void createToolBar();
 
@@ -42,6 +45,9 @@ namespace TrendLib
 		virtual void closeEvent(QCloseEvent*e) override;
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void showEvent(QShowEvent*) override;
+
+		virtual void dragEnterEvent(QDragEnterEvent* event) override;
+		virtual void dropEvent(QDropEvent* event) override;
 
 	protected slots:
 		virtual void signalsButton();

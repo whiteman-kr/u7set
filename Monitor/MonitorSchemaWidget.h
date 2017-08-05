@@ -30,6 +30,9 @@ public:
 protected:
 	void createActions();
 
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsUnderCursor(const QPoint& pos);
 
 	// Methods
@@ -101,6 +104,8 @@ private:
 
 	std::list<SchemaHistoryItem> m_backHistory;
 	std::list<SchemaHistoryItem> m_forwardHistory;
+
+	QPoint m_dragStartPosition;							// For drag and drop
 };
 
 

@@ -8,6 +8,7 @@
 #include <QTimeEdit>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
+#include "../Proto/serialization.pb.h"
 
 namespace TrendLib
 {
@@ -19,7 +20,10 @@ namespace TrendLib
 		ui->setupUi(this);
 
 		setAttribute(Qt::WA_DeleteOnClose);
+		setAcceptDrops(true);
 
+		// --
+		//
 		QWidget* centarlWidget = new QWidget;
 		setCentralWidget(centarlWidget);
 
@@ -208,6 +212,75 @@ namespace TrendLib
 		return;
 	}
 
+	bool TrendMainWindow::addSignals(const std::vector<TrendLib::TrendSignalParam>& trendSignals, bool redraw)
+	{
+		bool ok = true;
+		for (const TrendLib::TrendSignalParam& tsp : trendSignals)
+		{
+			ok &= addSignal(tsp, false);
+		}
+
+		if (redraw == true)
+		{
+			updateWidget();
+		}
+
+		return ok;
+	}
+
+	bool TrendMainWindow::addSignal(const TrendLib::TrendSignalParam& trendSignal, bool redraw)
+	{
+		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
+
+		if (discreteSignals.size() + analogSignals.size() > 12)
+		{
+			return false;
+		}
+
+		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
+						[&trendSignal](const TrendLib::TrendSignalParam& t)
+						{
+							return t.appSignalId() == trendSignal.appSignalId();
+						});
+
+		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
+						[&trendSignal](const TrendLib::TrendSignalParam& t)
+						{
+							return t.appSignalId() == trendSignal.appSignalId();
+						});
+
+		if (dit != discreteSignals.end() ||
+			ait != analogSignals.end())
+		{
+			return false;
+		}
+
+static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
+								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
+static int stdColorIndex = 0;
+
+		TrendLib::TrendSignalParam tsp(trendSignal);
+
+		tsp.setColor(StdColors[stdColorIndex]);
+		signalSet().addSignal(tsp);
+
+		// --
+		//
+		stdColorIndex ++;
+		if (stdColorIndex >= sizeof(StdColors) / sizeof(StdColors[0]))
+		{
+			stdColorIndex = 0;
+		}
+
+		if (redraw == true)
+		{
+			updateWidget();
+		}
+
+		return true;
+	}
+
 	void TrendMainWindow::createToolBar()
 	{
 		m_toolBar = new QToolBar(this);
@@ -349,12 +422,62 @@ namespace TrendLib
 
 	void TrendMainWindow::timerEvent(QTimerEvent*)
 	{
-
 	}
 
 	void TrendMainWindow::showEvent(QShowEvent*)
 	{
+	}
 
+	void TrendMainWindow::dragEnterEvent(QDragEnterEvent* event)
+	{
+		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+		{
+			event->acceptProposedAction();
+		}
+
+		return;
+	}
+
+	void TrendMainWindow::dropEvent(QDropEvent* event)
+	{
+		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+		{
+			assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+			event->setDropAction(Qt::DropAction::IgnoreAction);
+			event->accept();
+			return;
+		}
+
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalParamSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		{
+			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				TrendSignalParam tsp(appSignalParam);
+				addSignal(tsp, false);
+			}
+		}
+
+		updateWidget();
+
+		return;
 	}
 
 	void TrendMainWindow::signalsButton()
