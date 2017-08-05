@@ -41,105 +41,132 @@
       <number>10</number>
      </property>
      <property name="leftMargin">
-      <number>10</number>
+      <number>5</number>
      </property>
      <property name="topMargin">
-      <number>10</number>
+      <number>5</number>
      </property>
      <property name="rightMargin">
-      <number>10</number>
+      <number>5</number>
      </property>
      <property name="bottomMargin">
-      <number>10</number>
+      <number>5</number>
      </property>
      <item>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string>Signal</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout" rowstretch="0,0" columnstretch="0,1,0,0">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="editCustomAppID">
-            <property name="font">
-             <font>
-              <pointsize>8</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="editCaption">
-            <property name="font">
-             <font>
-              <pointsize>8</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QLineEdit" name="editSignalType">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Channel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Caption</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>SignalD</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="editChannel">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>Signal Type</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
+      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0" columnstretch="0,1,0,0">
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="editCustomAppID">
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="editSignalType">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabelAppSignalDragAndDrop" name="signalIdLabel">
+         <property name="text">
+          <string>SignalD</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="signalTypeLabel">
+         <property name="text">
+          <string>Signal Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabelAppSignalDragAndDrop" name="captionLabel">
+         <property name="text">
+          <string>Caption</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="equipmentLabel">
+         <property name="text">
+          <string>Equipment</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="editCaption">
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="editEquipment">
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="channeLabel">
+         <property name="text">
+          <string>Channel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="editChannel">
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QTabWidget" name="tabWidget">
@@ -234,7 +261,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_15">
+        <widget class="QLabel" name="flagsLabel">
          <property name="geometry">
           <rect>
            <x>20</x>
@@ -257,7 +284,7 @@
           </rect>
          </property>
         </widget>
-        <widget class="QLabel" name="label_18">
+        <widget class="QLabel" name="localTimeLable">
          <property name="geometry">
           <rect>
            <x>20</x>
@@ -267,10 +294,10 @@
           </rect>
          </property>
          <property name="text">
-          <string>Local Time</string>
+          <string>System Time</string>
          </property>
         </widget>
-        <widget class="QLabel" name="label_19">
+        <widget class="QLabel" name="plantTimeLabel">
          <property name="geometry">
           <rect>
            <x>340</x>
@@ -360,6 +387,24 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QLabelAppSignalDragAndDrop</class>
+   <extends>QLabel</extends>
+   <header location="global">DialogSignalInfo.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>editCustomAppID</tabstop>
+  <tabstop>editCaption</tabstop>
+  <tabstop>editEquipment</tabstop>
+  <tabstop>editSignalType</tabstop>
+  <tabstop>editChannel</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>editLocalTime</tabstop>
+  <tabstop>editPlantTime</tabstop>
+  <tabstop>treeProperties</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

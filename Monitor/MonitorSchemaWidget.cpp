@@ -78,7 +78,7 @@ void MonitorSchemaWidget::createActions()
 
 void MonitorSchemaWidget::mousePressEvent(QMouseEvent* event)
 {
-	if (event->buttons().testFlag(Qt::LeftButton) == false)
+	if (event->buttons().testFlag(Qt::LeftButton) == true)
 	{
 		m_dragStartPosition = event->pos();
 		VFrame30::BaseSchemaWidget::mousePressEvent(event);
@@ -108,9 +108,7 @@ void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 
 	// Try to start drag and drop
 	//
-
-//	bool ok = MousePosToDocPoint(event->pos(), &docPoint);
-	QPointF docPos = widgetPointToDocument(event->pos());
+	QPointF docPos = widgetPointToDocument(m_dragStartPosition);
 
 	std::shared_ptr<VFrame30::SchemaItem> schemaItem;
 
@@ -465,7 +463,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 
 	if (ok == true)
 	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(theMonitorMainWindow, signal);
+		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
 		dsi->show();
 	}
 	else

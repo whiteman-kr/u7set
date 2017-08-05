@@ -2,6 +2,7 @@
 #define DIALOGSIGNALINFO_H
 
 #include <QDialog>
+#include <QLabel>
 #include "../lib/AppSignalManager.h"
 
 namespace Ui {
@@ -24,12 +25,13 @@ private:
 	AppSignalStateFlags m_flags;
 };
 
+
 class DialogSignalInfo : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogSignalInfo(QWidget *parent, const AppSignalParam& signal);
+	DialogSignalInfo(const AppSignalParam& signal, QWidget* parent);
 	~DialogSignalInfo();
 
 public:
@@ -67,7 +69,23 @@ private:
 	ViewType m_viewType = ViewType::Dec;
 
 	int m_currentFontSize = 20;
+};
 
+class QLabelAppSignalDragAndDrop : public QLabel
+{
+public:
+	explicit QLabelAppSignalDragAndDrop(QWidget* parent = nullptr);
+
+public:
+	void setAppSignal(const AppSignalParam& signal);
+
+protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+	AppSignalParam m_appSignalParam;
+	QPoint m_dragStartPosition;
 };
 
 #endif // DIALOGSIGNALINFO_H

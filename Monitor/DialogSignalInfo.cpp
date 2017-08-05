@@ -1,9 +1,9 @@
 #include "DialogSignalInfo.h"
-#include "ui_DialogSignalInfo.h"
-#include "../lib/Types.h"
 #include <QPainter>
 #include <QClipboard>
-
+#include "ui_DialogSignalInfo.h"
+#include "../lib/Types.h"
+#include "../Proto/serialization.pb.h"
 
 //
 //
@@ -110,7 +110,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 //
 //
 
-DialogSignalInfo::DialogSignalInfo(QWidget *parent, const AppSignalParam& signal) :
+DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
 	m_signal(signal)
@@ -123,6 +123,12 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const AppSignalParam& signal
 	QString str;
 
 	m_precision = signal.precision();
+
+	// signalIdLabel and captionLabel are promoted to QLabelAppSignalDragAndDrop
+	// tu support Drag and Drop Operation (drag part)
+	//
+	ui->signalIdLabel->setAppSignal(signal);
+	ui->captionLabel->setAppSignal(signal);
 
 	// Fill main signal information
 	//
@@ -142,6 +148,7 @@ DialogSignalInfo::DialogSignalInfo(QWidget *parent, const AppSignalParam& signal
 
 	ui->editCustomAppID->setText(m_signal.customSignalId());
 	ui->editCaption->setText(m_signal.caption());
+	ui->editEquipment->setText(m_signal.equipmentId());
 
 	str = E::valueToString<E::SignalType>(m_signal.type());
 	if (m_signal.isAnalog())
@@ -523,6 +530,7 @@ void DialogSignalInfo::contextMenu(QPoint pos)
 	menu.addAction(separator2);
 
 	// Copy
+	//
 	QAction* actionCopy = new QAction(tr("Copy"), &menu);
 
 	auto f = [this]() -> void
@@ -535,7 +543,72 @@ void DialogSignalInfo::contextMenu(QPoint pos)
 
 	menu.addAction(actionCopy);
 
+	// --
 	//
 	menu.exec(mapToGlobal(pos));
 
+	return;
+}
+
+
+QLabelAppSignalDragAndDrop::QLabelAppSignalDragAndDrop(QWidget* parent) :
+	QLabel(parent)
+{
+}
+
+void QLabelAppSignalDragAndDrop::setAppSignal(const AppSignalParam& signal)
+{
+	m_appSignalParam = signal;
+}
+
+void QLabelAppSignalDragAndDrop::mousePressEvent(QMouseEvent* event)
+{
+	if (event->button() == Qt::LeftButton)
+	{
+		m_dragStartPosition = event->pos();
+	}
+
+	return;
+}
+
+void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
+{
+	if (event->buttons().testFlag(Qt::LeftButton) == false)
+	{
+		return;
+	}
+
+	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+	{
+		return;
+	}
+
+	// Save signals to protobufer
+	//
+	::Proto::AppSignalParamSet protoSetMessage;
+	::Proto::AppSignalParam* protoSignalMessage = protoSetMessage.add_items();
+	m_appSignalParam.save(protoSignalMessage);
+
+	QByteArray data;
+	data.resize(protoSetMessage.ByteSize());
+
+	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
+
+	// --
+	//
+	if (data.isEmpty() == false)
+	{
+		QDrag* drag = new QDrag(this);
+		QMimeData* mimeData = new QMimeData;
+
+		mimeData->setData(AppSignalParamMimeType::value, data);
+		drag->setMimeData(mimeData);
+
+		drag->exec(Qt::CopyAction);
+
+		qDebug() << "Start drag for " << m_appSignalParam.appSignalId();
+		qDebug() << "Drag and drop data buffer size " << data.size();
+	}
+
+	return;
 }
