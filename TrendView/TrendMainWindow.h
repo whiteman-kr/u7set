@@ -26,7 +26,6 @@ namespace TrendLib
 		//
 	public:
 		void ensureVisible();
-		void updateWidget();
 
 		bool addSignals(const std::vector<TrendSignalParam>& trendSignals, bool redraw);
 		bool addSignal(const TrendSignalParam& trendSignal, bool redraw);
@@ -51,6 +50,7 @@ namespace TrendLib
 
 	protected slots:
 		virtual void signalsButton();
+		void updateWidget();
 
 	private slots:
 		void actionOpenTriggered();
@@ -58,6 +58,7 @@ namespace TrendLib
 		void actionPrintTriggered();
 		void actionExitTriggered();
 		void actionAboutTriggered();
+		void actionRefreshTriggered();
 
 		void actionAddRuller(QPoint mousePos);
 		void actionDeleteRuller(int rullerIndex);
@@ -91,6 +92,8 @@ namespace TrendLib
 		QComboBox* m_lanesCombo = nullptr;
 		QComboBox* m_timeTypeCombo = nullptr;
 		QPushButton* m_signalsButton = nullptr;
+
+		QAction* m_refreshAction = nullptr;
 
 		TrendLib::TrendWidget* m_trendWidget = nullptr;
 		TrendSlider* m_trendSlider = nullptr;

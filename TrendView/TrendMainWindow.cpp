@@ -93,12 +93,17 @@ namespace TrendLib
 
 		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
 
+		// Refresh Action
+		//
+		m_refreshAction = new QAction(tr("Refresh"), this);
+		m_refreshAction->setShortcut(QKeySequence::Refresh);
+		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
+		addAction(m_refreshAction);
+
 		// Contect Menu
 		//
 		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-
 		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
-
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -198,18 +203,6 @@ namespace TrendLib
 		{
 			resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
 		}
-	}
-
-	void TrendMainWindow::updateWidget()
-	{
-		if (m_trendWidget == nullptr)
-		{
-			assert(m_trendWidget);
-			return;
-		}
-
-		m_trendWidget->updateWidget();
-		return;
 	}
 
 	bool TrendMainWindow::addSignals(const std::vector<TrendLib::TrendSignalParam>& trendSignals, bool redraw)
@@ -486,6 +479,18 @@ static int stdColorIndex = 0;
 		//
 	}
 
+	void TrendMainWindow::updateWidget()
+	{
+		if (m_trendWidget == nullptr)
+		{
+			assert(m_trendWidget);
+			return;
+		}
+
+		m_trendWidget->updateWidget();
+		return;
+	}
+
 	void TrendMainWindow::actionOpenTriggered()
 	{
 		// todo
@@ -541,6 +546,16 @@ static int stdColorIndex = 0;
 		msgBox.setText(text.join('\n'));
 
 		msgBox.exec();
+
+		return;
+	}
+
+	void TrendMainWindow::actionRefreshTriggered()
+	{
+		qDebug() << "Refresh trend data (clear)";
+		signalSet().clear(m_trendWidget->timeType());
+
+		updateWidget();
 
 		return;
 	}
@@ -762,6 +777,9 @@ static int stdColorIndex = 0;
 		menu.addSeparator();
 		QAction* chooseView = menu.addAction(tr("Choose View..."));
 		chooseView->setEnabled(false);		// Not implemented yet
+
+		assert(m_refreshAction);
+		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
 
 		menu.addSeparator();
 		QAction* signalAction = menu.addAction(tr("Signals..."));
