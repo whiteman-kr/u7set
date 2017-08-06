@@ -48,6 +48,8 @@ namespace TrendLib
 	public:
 		void updateWidget();
 
+		bool saveImageToFile(QString fileName) const;
+
 		// Events
 		//
 	protected:

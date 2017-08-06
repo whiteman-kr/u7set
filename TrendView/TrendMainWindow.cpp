@@ -4,8 +4,10 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 #include <QDateEdit>
 #include <QTimeEdit>
+#include <QFileDialog>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "../Proto/serialization.pb.h"
@@ -500,9 +502,46 @@ static int stdColorIndex = 0;
 
 	void TrendMainWindow::actionSaveTriggered()
 	{
-		// todo
-		//
-		//assert(false);
+		QString fileName = QFileDialog::getSaveFileName(this,
+														tr("Save File"),
+														"untitled.u7trend",
+														tr("Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)"));
+
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		QFileInfo fileInfo(fileName);
+		QString extension = fileInfo.completeSuffix();
+
+		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
+		{
+			return;
+		}
+
+		if (extension.compare(QLatin1String("png"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("bmp"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("jpg"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("jpeg"), Qt::CaseInsensitive) == 0)
+		{
+			bool ok = m_trendWidget->saveImageToFile(fileName);
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Writing file error. File %1").arg(fileName));
+			}
+
+			return;
+		}
+
+		if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
+		{
+			return;
+		}
+
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+
+		return;
 	}
 
 	void TrendMainWindow::actionPrintTriggered()

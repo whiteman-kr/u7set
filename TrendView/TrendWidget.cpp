@@ -109,6 +109,21 @@ namespace TrendLib
 		m_thread.render(m_drawParam);
 	}
 
+	bool TrendWidget::saveImageToFile(QString fileName) const
+	{
+		QPixmap pixmap = m_pixmap;
+		TrendDrawParam drawParam = m_pixmapDrawParam;
+
+		{
+			QPainter p(&pixmap);
+			m_trend.drawRullers(&p, drawParam);
+		}
+
+		bool ok = pixmap.save(fileName, nullptr, -1);
+
+		return ok;
+	}
+
 	void TrendWidget::paintEvent(QPaintEvent*)
 	{
 		QPainter painter(this);
