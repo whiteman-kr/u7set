@@ -49,7 +49,7 @@ namespace TrendLib
 		void updateWidget();
 
 		bool saveImageToFile(QString fileName) const;
-		bool saveToPdf(QString fileName) const;
+		bool saveToPdf(QString fileName, const QPageLayout& pageLayout) const;
 
 		// Events
 		//

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core widgets svg gui
+QT       += core widgets svg gui printsupport
 
 TARGET = TrendView
 TEMPLATE = lib

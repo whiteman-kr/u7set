@@ -125,13 +125,16 @@ namespace TrendLib
 		return ok;
 	}
 
-	bool TrendWidget::saveToPdf(QString fileName) const
+	bool TrendWidget::saveToPdf(QString fileName, const QPageLayout& pageLayout) const
 	{
 		QPdfWriter pdfWriter(fileName);
-		pdfWriter.setTitle("Trends");
 
-		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
-		pdfWriter.setPageOrientation(QPageLayout::Landscape);
+		pdfWriter.setTitle("Trends");
+		pdfWriter.setPageLayout(pageLayout);
+
+		//pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+		//pdfWriter.setPageOrientation(QPageLayout::Landscape);
+
 		pdfWriter.pageLayout().setUnits(QPageLayout::Inch);
 
 		TrendDrawParam drawParam = m_drawParam;

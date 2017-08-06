@@ -8,6 +8,8 @@
 #include <QDateEdit>
 #include <QTimeEdit>
 #include <QFileDialog>
+#include <QPageSetupDialog>
+#include <QPrinter>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "../Proto/serialization.pb.h"
@@ -536,7 +538,24 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
 		{
-			m_trendWidget->saveToPdf(fileName);
+static QPageLayout lastAcceptedPageLayout;
+
+			QPageSetupDialog pageSetupDialog(this);
+
+			if (lastAcceptedPageLayout.isValid() == true)
+			{
+				pageSetupDialog.printer()->setPageLayout(lastAcceptedPageLayout);
+			}
+
+			int result = pageSetupDialog.exec();
+			QPrinter* pagePrinter = pageSetupDialog.printer();
+
+			if (result == QDialog::Accepted)
+			{
+				lastAcceptedPageLayout = pagePrinter->pageLayout();
+				m_trendWidget->saveToPdf(fileName, lastAcceptedPageLayout);
+			}
+
 			return;
 		}
 
