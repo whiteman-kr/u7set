@@ -8,8 +8,9 @@
 #include <QDateEdit>
 #include <QTimeEdit>
 #include <QFileDialog>
-#include <QPageSetupDialog>
-#include <QPrinter>
+#include <QPageSize>
+#include <QPageLayout>
+#include <QComboBox>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "../Proto/serialization.pb.h"
@@ -538,22 +539,70 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
 		{
-static QPageLayout lastAcceptedPageLayout;
+			// Select paper size
+			//
+static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
+static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
 
-			QPageSetupDialog pageSetupDialog(this);
+			QDialog d(this);
 
-			if (lastAcceptedPageLayout.isValid() == true)
+			d.setWindowTitle(tr("Page Setup"));
+			d.setWindowFlags((d.windowFlags() &
+							~Qt::WindowMinimizeButtonHint &
+							~Qt::WindowMaximizeButtonHint &
+							~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+			QLabel* pageSizeLabel = new  QLabel(tr("Page Size"));
+
+			QComboBox* pageSizeCombo = new QComboBox;
+			pageSizeCombo->addItem(QLatin1String("A0"),  QVariant::fromValue(QPageSize::A0));
+			pageSizeCombo->addItem(QLatin1String("A1"),  QVariant::fromValue(QPageSize::A1));
+			pageSizeCombo->addItem(QLatin1String("A2"),  QVariant::fromValue(QPageSize::A2));
+			pageSizeCombo->addItem(QLatin1String("A3"),  QVariant::fromValue(QPageSize::A3));
+			pageSizeCombo->addItem(QLatin1String("A4"),  QVariant::fromValue(QPageSize::A4));
+			pageSizeCombo->addItem(QLatin1String("A5"),  QVariant::fromValue(QPageSize::A5));
+			pageSizeCombo->addItem(QLatin1String("Letter"),  QVariant::fromValue(QPageSize::Letter));
+			pageSizeCombo->addItem(QLatin1String("AnsiA"),  QVariant::fromValue(QPageSize::AnsiA));
+			pageSizeCombo->addItem(QLatin1String("AnsiB"),  QVariant::fromValue(QPageSize::AnsiB));
+			pageSizeCombo->addItem(QLatin1String("AnsiC"),  QVariant::fromValue(QPageSize::AnsiC));
+			pageSizeCombo->addItem(QLatin1String("AnsiD"),  QVariant::fromValue(QPageSize::AnsiD));
+			pageSizeCombo->addItem(QLatin1String("AnsiE"),  QVariant::fromValue(QPageSize::AnsiE));
+			int psi = pageSizeCombo->findData(QVariant::fromValue(m_defaultPageSize));
+			if (psi != -1)
 			{
-				pageSetupDialog.printer()->setPageLayout(lastAcceptedPageLayout);
+				pageSizeCombo->setCurrentIndex(psi);
 			}
 
-			int result = pageSetupDialog.exec();
-			QPrinter* pagePrinter = pageSetupDialog.printer();
+			QLabel* orientationLabel = new  QLabel(tr("Orientation"));
 
+			QComboBox* orientationCombo = new QComboBox;
+			orientationCombo->addItem(tr("Portrait"),  QVariant::fromValue(QPageLayout::Portrait));
+			orientationCombo->addItem(tr("Lanscape"),  QVariant::fromValue(QPageLayout::Landscape));
+			int poi = orientationCombo->findData(QVariant::fromValue(m_defaultPageOrientation));
+			if (poi != -1)
+			{
+				orientationCombo->setCurrentIndex(poi);
+			}
+
+			QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+			connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+			connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+			QGridLayout* layout = new QGridLayout;
+			layout->addWidget(pageSizeLabel, 0, 0);
+			layout->addWidget(pageSizeCombo, 0, 1);
+			layout->addWidget(orientationLabel, 1, 0);
+			layout->addWidget(orientationCombo, 1, 1);
+			layout->addWidget(buttonBox, 2, 0, 1, 2);
+			d.setLayout(layout);
+
+			int result = d.exec();
 			if (result == QDialog::Accepted)
 			{
-				lastAcceptedPageLayout = pagePrinter->pageLayout();
-				m_trendWidget->saveToPdf(fileName, lastAcceptedPageLayout);
+				m_defaultPageSize = pageSizeCombo->currentData().value<QPageSize::PageSizeId>();
+				m_defaultPageOrientation = orientationCombo->currentData().value<QPageLayout::Orientation>();
+
+				m_trendWidget->saveToPdf(fileName, m_defaultPageSize, m_defaultPageOrientation);
 			}
 
 			return;

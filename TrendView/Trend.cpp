@@ -272,6 +272,11 @@ namespace TrendLib
 			}
 		}
 
+		// Draw text, time and date
+		//
+		QRectF textClipRect(rect.left(), insideRect.bottom(), rect.width(), rect.bottom() - insideRect.bottom());
+		painter->setClipRect(textClipRect);
+
 		painter->setPen(Qt::black);
 		QString lastDateText;
 		for (const PosTimePair& p : timeGridPos)
@@ -290,6 +295,13 @@ namespace TrendLib
 				drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
 			}
 		}
+
+		painter->setClipping(false);
+
+		// --
+		//
+
+		return;
 	}
 
 	void Trend::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
@@ -1039,7 +1051,7 @@ namespace TrendLib
 		insideRect.setLeft(laneRect.left() + 6.0/8.0);
 		insideRect.setTop(laneRect.top() + 1.0/5.0);
 		insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
-		insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 2.0/8.0);
+		insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 0.3);
 
 		// Ajust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
 		//
