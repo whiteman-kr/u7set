@@ -3,6 +3,7 @@
 #include <QPaintEngine>
 #include <QPainter>
 #include <QWidget>
+#include <QPdfWriter>
 #include <QMouseEvent>
 
 namespace TrendLib
@@ -68,7 +69,7 @@ namespace TrendLib
 
 			if (m_image.size() != drawParam.rect().size())
 			{
-				QSize pixelSize = drawParam.rect().size();
+				QSize pixelSize = drawParam.rect().size().toSize();
 				qDebug() << "Create new trend image with size " << pixelSize;
 				qDebug() << "dpiX = " << drawParam.dpiX();
 				qDebug() << "dpiY = " << drawParam.dpiY();
@@ -122,6 +123,38 @@ namespace TrendLib
 		bool ok = pixmap.save(fileName, nullptr, -1);
 
 		return ok;
+	}
+
+	bool TrendWidget::saveToPdf(QString fileName) const
+	{
+		QPdfWriter pdfWriter(fileName);
+		pdfWriter.setTitle("Trends");
+
+		pdfWriter.setPageSize(QPageSize(QPageSize::A4));
+		pdfWriter.setPageOrientation(QPageLayout::Landscape);
+		pdfWriter.pageLayout().setUnits(QPageLayout::Inch);
+
+		TrendDrawParam drawParam = m_drawParam;
+
+		QRectF rc(pdfWriter.pageLayout().paintRect(QPageLayout::Inch));
+		double resolution = pdfWriter.resolution();
+
+		QRectF drawRect(rc.left() * resolution,
+						rc.top() * resolution,
+						rc.width() * resolution,
+						rc.height() * resolution);
+
+		drawParam.setRect(drawRect);
+		drawParam.setDpi(resolution, resolution);
+
+		// --
+		//
+		QPainter p(&pdfWriter);
+
+		m_trend.draw(&p, drawParam, true);
+		m_trend.drawRullers(&p, drawParam);
+
+		return true;
 	}
 
 	void TrendWidget::paintEvent(QPaintEvent*)

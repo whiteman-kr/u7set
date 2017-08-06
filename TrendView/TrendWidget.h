@@ -49,6 +49,7 @@ namespace TrendLib
 		void updateWidget();
 
 		bool saveImageToFile(QString fileName) const;
+		bool saveToPdf(QString fileName) const;
 
 		// Events
 		//

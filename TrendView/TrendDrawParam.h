@@ -21,8 +21,8 @@ namespace TrendLib
 		TrendDrawParam();
 
 	public:
-		QRect rect() const;
-		void setRect(const QRect& value);
+		QRectF rect() const;
+		void setRect(const QRectF& value);
 
 		int dpiX() const;
 		int dpiY() const;
@@ -55,8 +55,10 @@ namespace TrendLib
 		void setHightlightRullerIndex(int value);
 		void resetHightlightRullerIndex();
 
+		double cosmeticPenWidth() const;
+
 	private:
-		QRect m_rect;
+		QRectF m_rect;
 		int m_dpiX = 96;
 		int m_dpiY = 96;
 
@@ -71,6 +73,8 @@ namespace TrendLib
 		qint64 m_duration = 1_hour;
 
 		int m_highlightRullerIndex = -1;
+
+		double m_cosmeticPenWidth = 0;
 	};
 }
 

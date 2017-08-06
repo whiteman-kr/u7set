@@ -165,6 +165,11 @@ namespace TrendLib
 	{
 		QMutexLocker locker(&m_paramMutex);
 
+		if (m_signalParams.size() >= 12)
+		{
+			return false;
+		}
+
 		auto foundIt = std::find_if(m_signalParams.begin(), m_signalParams.end(),
 			[&signal](const TrendSignalParam& s)
 			{

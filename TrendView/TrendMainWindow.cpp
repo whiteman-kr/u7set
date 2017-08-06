@@ -536,6 +536,7 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
 		{
+			m_trendWidget->saveToPdf(fileName);
 			return;
 		}
 

@@ -7,12 +7,12 @@ namespace TrendLib
 	{
 	}
 
-	QRect TrendDrawParam::rect() const
+	QRectF TrendDrawParam::rect() const
 	{
 		return m_rect;
 	}
 
-	void TrendDrawParam::setRect(const QRect& value)
+	void TrendDrawParam::setRect(const QRectF& value)
 	{
 		m_rect = value;
 		return;
@@ -32,6 +32,16 @@ namespace TrendLib
 	{
 		m_dpiX = dpiX;
 		m_dpiY = dpiY;
+
+		if (m_dpiX >= 600)
+		{
+			m_cosmeticPenWidth = 1.0 / 128.0;
+		}
+		else
+		{
+			m_cosmeticPenWidth = 0;
+		}
+
 		return;
 	}
 
@@ -133,6 +143,11 @@ namespace TrendLib
 	void TrendDrawParam::resetHightlightRullerIndex()
 	{
 		m_highlightRullerIndex = -1;
+	}
+
+	double TrendDrawParam::cosmeticPenWidth() const
+	{
+		return m_cosmeticPenWidth;
 	}
 
 }
