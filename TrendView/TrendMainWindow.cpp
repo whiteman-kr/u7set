@@ -83,6 +83,10 @@ namespace TrendLib
 		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
 		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
 
+		// On click on signal description
+		//
+		connect(m_trendWidget, &TrendWidget::showSignalProperties, this, &TrendMainWindow::signalProperties);
+
 		// --
 		//
 		TimeStamp ts(QDateTime::currentDateTime());
@@ -701,8 +705,9 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
+		QString outSignalId;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
@@ -876,8 +881,9 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
 		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
+		QString outSignalId;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignalId);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
 			mouseOn != Trend::MouseOn::OnRuller)

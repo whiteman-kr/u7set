@@ -61,6 +61,7 @@ namespace TrendLib
 			//
 			m_mutex.lock();
 			TrendDrawParam drawParam = m_drawParam;
+			drawParam.signalDescriptionRect().clear();
 			m_mutex.unlock();
 
 			// Set m_newJob to false, so it can be raised again while current drawing in progress
@@ -70,10 +71,6 @@ namespace TrendLib
 			if (m_image.size() != drawParam.rect().size())
 			{
 				QSize pixelSize = drawParam.rect().size().toSize();
-				qDebug() << "Create new trend image with size " << pixelSize;
-				qDebug() << "dpiX = " << drawParam.dpiX();
-				qDebug() << "dpiY = " << drawParam.dpiY();
-
 				m_image = QImage(pixelSize, QImage::Format_RGB32);
 			}
 
@@ -198,8 +195,9 @@ namespace TrendLib
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
+		QString outSignalId;
 
-		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex);
+		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
 
 		if (event->buttons().testFlag(Qt::LeftButton) == true)
 		{
@@ -218,6 +216,17 @@ namespace TrendLib
 
 				m_mouseAction = MouseAction::MoveRuller;
 				this->grabMouse();
+			}
+
+			if (mouseOn == Trend::MouseOn::OnSignalDescription)
+			{
+				if (outSignalId.isEmpty() == true)
+				{
+					assert(outSignalId.isEmpty() == false);
+					return;
+				}
+
+				emit showSignalProperties(outSignalId);
 			}
 
 			if (mouseOn == Trend::MouseOn::InsideTrendArea)
@@ -277,17 +286,19 @@ namespace TrendLib
 			int laneIndex = -1;
 			int rullerIndex = -1;
 			TimeStamp timeStamp;
+			QString onSignalId;
 
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_drawParam, &laneIndex, &timeStamp, &rullerIndex);
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rullerIndex, &onSignalId);
 
 			Qt::CursorShape newCursorShape = Qt::ArrowCursor;
 
 			switch (mouseOn)
 			{
-			case Trend::MouseOn::Outside:			newCursorShape = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::OutsideTrendArea:	newCursorShape = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::InsideTrendArea:	newCursorShape = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::OnRuller:			newCursorShape = Qt::SplitHCursor;		break;
+			case Trend::MouseOn::Outside:				newCursorShape = Qt::ArrowCursor;			break;
+			case Trend::MouseOn::OutsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
+			case Trend::MouseOn::InsideTrendArea:		newCursorShape = Qt::ArrowCursor;			break;
+			case Trend::MouseOn::OnSignalDescription:	newCursorShape = Qt::PointingHandCursor;	break;
+			case Trend::MouseOn::OnRuller:				newCursorShape = Qt::SplitHCursor;			break;
 			default:
 				assert(false);
 			}
@@ -375,9 +386,9 @@ namespace TrendLib
 		return;
 	}
 
-	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex)
+	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, QString* outSignalId)
 	{
-		return m_trend.mouseIsOver(mousePos, m_drawParam, outLaneIndex, timeStamp, rullerIndex);
+		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rullerIndex, outSignalId);
 	}
 
 	void TrendWidget::resetRullerHighlight()

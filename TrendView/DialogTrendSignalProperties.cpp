@@ -15,14 +15,26 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 
 	ui->typeEdit->setText(E::valueToString<E::SignalType>(m_trendSignal.type()));
 
-	ui->unitsEdit->setText(m_trendSignal.unit());
-	ui->limitsEdit->setText(
-		tr("%1 - %2")
-			.arg(QString::number(m_trendSignal.lowLimit()))
-			.arg(QString::number(m_trendSignal.highLimit())));
+	if (m_trendSignal.type() == E::SignalType::Analog)
+	{
+		ui->unitsEdit->setText(m_trendSignal.unit());
+		ui->limitsEdit->setText(
+			tr("%1 - %2")
+				.arg(QString::number(m_trendSignal.lowLimit()))
+				.arg(QString::number(m_trendSignal.highLimit())));
 
-	ui->viewHighEdit->setText(QString::number(m_trendSignal.viewHighLimit()));
-	ui->viewLowEdit->setText(QString::number(m_trendSignal.viewLowLimit()));
+		ui->viewHighEdit->setText(QString::number(m_trendSignal.viewHighLimit()));
+		ui->viewLowEdit->setText(QString::number(m_trendSignal.viewLowLimit()));
+	}
+
+	if (m_trendSignal.type() == E::SignalType::Discrete)
+	{
+		ui->limitsEdit->setText(tr("0 - 1"));
+		ui->viewHighEdit->setText(QString::number(1));
+		ui->viewLowEdit->setText(QString::number(0));
+		ui->viewHighEdit->setReadOnly(true);
+		ui->viewLowEdit->setReadOnly(true);
+	}
 
 	ui->colorWidget->setColor(trendSignal.color());
 
@@ -55,8 +67,8 @@ void DialogTrendSignalProperties::accept()
 		ui->viewLowEdit->setFocus();
 	}
 
-	m_trendSignal.setViewHighLimit(viewHighValue);
-	m_trendSignal.setViewLowLimit(viewLowValue);
+	m_trendSignal.setViewHighLimit(qMax(viewHighValue, viewLowValue));
+	m_trendSignal.setViewLowLimit(qMin(viewHighValue, viewLowValue));
 	m_trendSignal.setColor(ui->colorWidget->color());
 
 	QDialog::accept();

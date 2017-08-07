@@ -64,7 +64,7 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex);
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, QString* outSignalId);
 
 		void resetRullerHighlight();
 
@@ -78,6 +78,7 @@ namespace TrendLib
 		// Signals
 	signals:
 		void startTimeChanged(TimeStamp startTime);
+		void showSignalProperties(QString appSignalId);
 
 		// Properties
 		//

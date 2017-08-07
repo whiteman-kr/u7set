@@ -57,6 +57,9 @@ namespace TrendLib
 
 		double cosmeticPenWidth() const;
 
+		std::vector<std::pair<QString, QRectF>>& signalDescriptionRect();
+		std::vector<std::pair<QString, QRectF>>& signalDescriptionRect() const;
+
 	private:
 		QRectF m_rect;
 		int m_dpiX = 96;
@@ -75,6 +78,8 @@ namespace TrendLib
 		int m_highlightRullerIndex = -1;
 
 		double m_cosmeticPenWidth = 0;
+
+		mutable std::vector<std::pair<QString, QRectF>> m_signalDescriptionRect;		// Keeps signal description Rect, which is filled while draw trend, in inches.
 	};
 }
 
