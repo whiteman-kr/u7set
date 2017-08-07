@@ -53,6 +53,8 @@ namespace TrendLib
 		void updateWidget();
 
 	private slots:
+		void signalProperties(QString appSignalId);
+
 		void actionOpenTriggered();
 		void actionSaveTriggered();
 		void actionPrintTriggered();

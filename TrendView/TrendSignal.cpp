@@ -199,7 +199,44 @@ namespace TrendLib
 		return;
 	}
 
-	std::vector<TrendSignalParam> TrendSignalSet::trendSignals() const
+	TrendLib::TrendSignalParam TrendSignalSet::signalParam(const QString& appSignalId, bool* ok) const
+	{
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+
+		QMutexLocker locker(&m_paramMutex);
+
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (s.appSignalId() == appSignalId)
+			{
+				*ok = true;
+				return s;
+			}
+		}
+
+		return TrendLib::TrendSignalParam();
+	}
+
+	bool TrendSignalSet::setSignalParam(const TrendLib::TrendSignalParam& signalParam)
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		for (TrendSignalParam& s : m_signalParams)
+		{
+			if (s.appSignalId() == signalParam.appSignalId())
+			{
+				s = signalParam;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	std::vector<TrendLib::TrendSignalParam> TrendSignalSet::trendSignals() const
 	{
 		QMutexLocker locker(&m_paramMutex);
 
@@ -214,7 +251,7 @@ namespace TrendLib
 		return result;
 	}
 
-	std::vector<TrendSignalParam> TrendSignalSet::analogSignals() const
+	std::vector<TrendLib::TrendSignalParam> TrendSignalSet::analogSignals() const
 	{
 		QMutexLocker locker(&m_paramMutex);
 
@@ -232,7 +269,7 @@ namespace TrendLib
 		return result;
 	}
 
-	std::vector<TrendSignalParam> TrendSignalSet::discreteSignals() const
+	std::vector<TrendLib::TrendSignalParam> TrendSignalSet::discreteSignals() const
 	{
 		QMutexLocker locker(&m_paramMutex);
 

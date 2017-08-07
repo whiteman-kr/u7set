@@ -286,7 +286,7 @@ namespace TrendLib
 			{
 			case Trend::MouseOn::Outside:			newCursorShape = Qt::ArrowCursor;		break;
 			case Trend::MouseOn::OutsideTrendArea:	newCursorShape = Qt::ArrowCursor;		break;
-			case Trend::MouseOn::InsideTrendArea:	newCursorShape = Qt::PointingHandCursor;break;
+			case Trend::MouseOn::InsideTrendArea:	newCursorShape = Qt::ArrowCursor;		break;
 			case Trend::MouseOn::OnRuller:			newCursorShape = Qt::SplitHCursor;		break;
 			default:
 				assert(false);

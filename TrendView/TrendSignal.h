@@ -150,9 +150,12 @@ namespace TrendLib
 		bool addSignal(const TrendSignalParam& signal);
 		void removeSignal(QString appSignalId);
 
-		std::vector<TrendSignalParam> trendSignals() const;
-		std::vector<TrendSignalParam> analogSignals() const;
-		std::vector<TrendSignalParam> discreteSignals() const;
+		TrendLib::TrendSignalParam signalParam(const QString& appSignalId, bool* ok) const;
+		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data
+
+		std::vector<TrendLib::TrendSignalParam> trendSignals() const;
+		std::vector<TrendLib::TrendSignalParam> analogSignals() const;
+		std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
 
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
 

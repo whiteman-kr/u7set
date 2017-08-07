@@ -1151,6 +1151,9 @@ namespace TrendLib
 						ri++;
 					}
 
+					// Check if pos on signal description
+					//
+
 					// --
 					//
 					return MouseOn::InsideTrendArea;

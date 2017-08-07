@@ -13,6 +13,8 @@
 #include <QComboBox>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
+#include "TrendSignal.h"
+#include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
 
 namespace TrendLib
@@ -496,6 +498,32 @@ static int stdColorIndex = 0;
 		return;
 	}
 
+	void TrendMainWindow::signalProperties(QString appSignalId)
+	{
+		qDebug() << "Show signal " << appSignalId << " properties";
+
+		bool ok = false;
+		TrendLib::TrendSignalParam signal = signalSet().signalParam(appSignalId, &ok);
+
+		if (ok == false)
+		{
+			assert(ok);		// Signal must be in signal set
+			return;
+		}
+
+		DialogTrendSignalProperties d(signal, this);
+
+		bool result = d.exec();
+		if (result == QDialog::Accepted)
+		{
+			ok = signalSet().setSignalParam(d.trendSignal());
+			assert(ok);
+			updateWidget();
+		}
+
+		return;
+	}
+
 	void TrendMainWindow::actionOpenTriggered()
 	{
 		// todo
@@ -890,6 +918,33 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
 
 		menu.addSeparator();
+
+		std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+		QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
+		signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
+
+		for (const TrendLib::TrendSignalParam& s : discrets)
+		{
+			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+			connect(signalPropertiesAction, &QAction::triggered, this,
+					[this, s]()
+					{
+						signalProperties(s.appSignalId());
+					});
+		}
+
+		for (const TrendLib::TrendSignalParam& s : analogs)
+		{
+			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+			connect(signalPropertiesAction, &QAction::triggered, this,
+					[this, s]()
+					{
+						signalProperties(s.appSignalId());
+					});
+		}
+
 		QAction* signalAction = menu.addAction(tr("Signals..."));
 		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
 
