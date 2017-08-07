@@ -39,11 +39,11 @@ void ArchWriteThreadWorker::onThreadFinished()
 	DEBUG_LOG_MSG(m_logger, "ArchWriteThread is finished");
 }
 
-void ArchWriteThreadWorker::tryConnectToDb()
+bool ArchWriteThreadWorker::tryConnectToDb()
 {
 	if (m_db.isOpen() == true)
 	{
-		return;
+		return true;
 	}
 
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "infoArchConnection");
@@ -51,7 +51,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 	if (db.lastError().isValid() == true)
 	{
 		DEBUG_LOG_ERR(m_logger, db.lastError().text());
-		return;
+		return false;
 	}
 
 	db.setHostName("127.0.0.1");
@@ -65,7 +65,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
-		return;
+		return false;
 	}
 
 	bool dbJustCreated = false;
@@ -76,7 +76,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 
 		if (res == false)
 		{
-			return;
+			return false;
 		}
 
 		dbJustCreated = true;
@@ -91,7 +91,7 @@ void ArchWriteThreadWorker::tryConnectToDb()
 	if (m_db.lastError().isValid() == true)
 	{
 		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
-		return;
+		return false;
 	}
 
 	m_db.setHostName("127.0.0.1");
@@ -105,17 +105,29 @@ void ArchWriteThreadWorker::tryConnectToDb()
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
-		return;
+		return false;
 	}
 
 	if (dbJustCreated == true)
 	{
-		initDatabase();
+		result = initDatabase();
+
+		if (result == false)
+		{
+			return false;
+		}
 	}
 
-	result &= upgradeDatabase();
+	result = upgradeDatabase();
 
-	result &= checkAndCreateTables();
+	if (result == false)
+	{
+		return false;
+	}
+
+	result = checkAndCreateTables();
+
+	return result;
 }
 
 bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
@@ -285,6 +297,8 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 	int createdTablesCount = 0;
 	int creationErrorCount = 0;
 
+	int ctr = 0;
+
 	while(i.hasNext() == true && quitRequested() == false)
 	{
 		i.next();
@@ -363,6 +377,13 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		else
 		{
 			m_archive.setCanReadWriteSignal(archSignal.hash, ltTableExists);
+		}
+
+		if (createdTablesCount - ctr >= 500)
+		{
+			DEBUG_LOG_MSG(m_logger, QString("Tables created: %1").arg(createdTablesCount));
+
+			ctr = createdTablesCount;
 		}
 	}
 
@@ -533,7 +554,7 @@ void ArchWriteThreadWorker::disconnectFromDb()
 	}
 }
 
-void ArchWriteThreadWorker::writeStatesToArchive()
+void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 {
 	if (m_db.isOpen() == false)
 	{
@@ -547,7 +568,7 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 
 	const int MAX_STATES_IN_QUERY = 2000;
 
-	if (m_saveStatesQueue.size() < MAX_STATES_IN_QUERY)
+	if (writeNow == false && m_saveStatesQueue.size() < MAX_STATES_IN_QUERY)
 	{
 		return;
 	}
@@ -564,8 +585,8 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 
 	//arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
 
-	QString format1("row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
-	QString format2(",row(%1,%2,%3,%4,%5,%6,%7,%8)::AppSignalState");
+	QString format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
+	QString format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
 
 	do
 	{
@@ -582,10 +603,11 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 
 		if (archSignal.canReadWrite == false)
 		{
-			QString appSignalID = m_archive.getSignalID(state.hash);
 			count++;
 			continue;
 		}
+
+		m_timeFilter.setTimes(state.time);
 
 /*
  *		res = saveAppSignalStateToArchive(state, isAnalogSignal);
@@ -609,7 +631,6 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 					arg(bigintHash).
 					arg(state.time.plant.timeStamp).
 					arg(state.time.system.timeStamp).
-					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
 					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
@@ -621,7 +642,6 @@ void ArchWriteThreadWorker::writeStatesToArchive()
 					arg(bigintHash).
 					arg(state.time.plant.timeStamp).
 					arg(state.time.system.timeStamp).
-					arg(state.time.local.timeStamp).
 					arg(state.value).
 					arg(state.flags.all).
 					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
@@ -703,7 +723,7 @@ bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arr
 
 	if (result == false)
 	{
-		assert(false);
+		//assert(false);
 		DEBUG_LOG_ERR(m_logger, query.lastError().text());
 		m_db.close();
 		return false;
@@ -713,19 +733,72 @@ bool ArchWriteThreadWorker::saveAppSignalStatesArrayToArchive(const QString& arr
 }
 
 
+bool ArchWriteThreadWorker::writeTimeMark()
+{
+	if (m_db.isOpen() == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	Times times;
+	qint64 serverTime;
+
+	m_timeFilter.getTimes(times, serverTime);
+
+	QString queryStr = QString("INSERT INTO timemarks (planttime, systime, servertime) "
+							   "VALUES (%1::bigint, %2::bigint, %3::bigint);").
+							arg(times.plant.timeStamp).
+							arg(times.system.timeStamp).
+							arg(serverTime);
+
+	QSqlQuery query(m_db);
+
+	bool result = query.exec(queryStr);
+
+	if (result == false)
+	{
+		assert(false);
+		DEBUG_LOG_ERR(m_logger, query.lastError().text());
+		m_db.close();
+		return false;
+	}
+
+	return true;
+}
+
+
 void ArchWriteThreadWorker::onTimer()
 {
 	if (m_db.isOpen() == false)
 	{
-		tryConnectToDb();
+		bool res = tryConnectToDb();
+
+		if (res == false)
+		{
+			return;
+		}
 	}
 
-	writeStatesToArchive();
+	QTime t = QTime::currentTime();
+
+	int currMinute = t.minute();
+	int currSecond = t.second();
+
+	bool writeNow = (currSecond % 10) == 0 ? true : false;
+
+	writeStatesToArchive(writeNow);
+
+	if (currMinute != m_prevMinute)
+	{
+		m_prevMinute = currMinute;
+		writeTimeMark();
+	}
 }
 
 void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 {
-	writeStatesToArchive();
+	writeStatesToArchive(false);
 }
 
 ArchWriteThread::ArchWriteThread(Archive& archive,

@@ -1394,7 +1394,7 @@ bool SignalSet::contains(const QString& appSignalID)
 		return false;
 	}
 
-	return m_strID2IndexMap.contains(appSignalID);
+	return m_strID2IndexMap.contains(appSignalID.trimmed());
 }
 
 
@@ -1406,7 +1406,7 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 		return nullptr;
 	}
 
-	int index = m_strID2IndexMap.value(appSignalID, -1);
+	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
 
 	if (index == -1)
 	{

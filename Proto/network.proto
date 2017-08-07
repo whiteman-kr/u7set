@@ -445,7 +445,7 @@ message GetAppSignalStatesFromArchiveNextReply
     optional int32 archError = 2 [default = 100];
     optional uint32 requestID = 3 [default = 0];
     optional bool dataReady = 4 [default = false];
-    optional int32 totalStatesCount = 5 [default = 0];
+    optional int32 totalStatesCount = 5 [default = 0];		// The actual number of transmitted states can be less than totalStatesCount
     optional int32 sentStatesCount = 6 [default = 0];
     optional int32 statesInPartCount = 7 [default = 0];
     optional bool isLastPart = 8 [default = false];

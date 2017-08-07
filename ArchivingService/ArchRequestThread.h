@@ -58,6 +58,8 @@ public:
 
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
+	Hash signalHash(int index);
+
 private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
@@ -96,6 +98,11 @@ private:
 	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 
 	friend class ArchRequestThreadWorker;
+
+	// debug!!!
+
+	qint64 prevTime = 0;
+
 };
 
 typedef std::shared_ptr<ArchRequestContext> ArchRequestContextShared;
@@ -134,7 +141,6 @@ private slots:
 private:
 	static const char* FIELD_PLANT_TIME;
 	static const char* FIELD_SYSTEM_TIME;
-	static const char* FIELD_LOCAL_TIME;
 	static const char* FIELD_ARCH_ID;
 	static const char* FIELD_VALUE;
 	static const char* FIELD_FLAGS;

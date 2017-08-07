@@ -5,6 +5,7 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
+#include "TimeFilter.h"
 
 #include "Archive.h"
 
@@ -21,7 +22,7 @@ private:
 	void onThreadStarted() override;
 	void onThreadFinished() override;
 
-	void tryConnectToDb();
+	bool tryConnectToDb();
 	bool databaseIsExists(QSqlDatabase& db);
 	bool createDatabase(QSqlDatabase& db);
 
@@ -38,9 +39,11 @@ private:
 
 	void disconnectFromDb();
 
-	void writeStatesToArchive();
+	void writeStatesToArchive(bool writeNow);
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
+
+	bool writeTimeMark();
 
 private slots:
 	void onTimer();
@@ -61,7 +64,11 @@ private:
 
 	qint64 m_saveErrors = 0;
 
+	TimeFilter m_timeFilter;
+
 	Times m_lastTime;
+
+	int m_prevMinute = -1;
 
 	friend class ArchRequestThreadWorker;
 };

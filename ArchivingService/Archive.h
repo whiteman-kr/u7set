@@ -51,6 +51,8 @@ public:
 
 	static QString timeTypeStr(TimeType timeType);
 
+	static qint64 localTimeOffsetFromUtc();
+
 private:
 	static const char* ARCH_DB_PREFIX;
 	static const char* LONG_TERM_TABLE_PREFIX;

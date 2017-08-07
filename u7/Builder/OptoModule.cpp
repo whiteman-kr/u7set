@@ -574,6 +574,11 @@ namespace Hardware
 
 		if (m_rxRawDataSizeW == 0 && m_rxSignals.count() == 0)
 		{
+			if (manualSettings() == true)
+			{
+				m_rxDataSizeW = m_manualRxSizeW;
+			}
+
 			return true;
 		}
 
@@ -659,7 +664,7 @@ namespace Hardware
 
 		if (manualSettings() == true)
 		{
-			if (m_rxUsedDataSizeW > m_manualTxSizeW)
+			if (m_rxUsedDataSizeW > m_manualRxSizeW)
 			{
 				LOG_MESSAGE(m_log, QString(tr("Port %1: rxIdSizeW = %2, rxRawDataSizeW = %3, rxAnalogSignalsSizeW = %4, rxDiscreteSignalsSizeW = %5")).
 									arg(m_equipmentID).arg(TX_DATA_ID_SIZE_W).arg(m_txRawDataSizeW).arg(m_txAnalogSignalsSizeW).arg(m_txDiscreteSignalsSizeW));
@@ -671,7 +676,7 @@ namespace Hardware
 				return false;
 			}
 
-			m_rxDataSizeW = m_manualTxSizeW;
+			m_rxDataSizeW = m_manualRxSizeW;
 		}
 		else
 		{
