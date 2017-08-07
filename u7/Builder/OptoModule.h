@@ -372,8 +372,9 @@ namespace Hardware
 
 		bool init(DeviceModule* module, LogicModule* lmDescription, Builder::IssueLogger* log);
 
-		bool isLM();
-		bool isOCM();
+		bool isLmOrBvb();
+		bool isOcm();
+		bool isBvb();
 
 		QString equipmentID() const { return m_equipmentID; }
 		const DeviceModule* deviceModule() const { return m_deviceModule; }
@@ -518,6 +519,8 @@ namespace Hardware
 		Q_INVOKABLE Hardware::OptoPort* jsGetOptoPort(const QString& optoPortID);
 
 		bool isSerialRxSignalExists(const QString& lmID, const QString& appSignalID);
+
+		bool initBvbModules();
 
 	private:
 		bool addModule(DeviceModule* module);

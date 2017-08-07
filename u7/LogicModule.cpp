@@ -337,10 +337,10 @@ bool LogicModule::loadAfbs(const QDomElement& element, QString* errorMessage)
 QString LogicModule::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
-		logicModule->isLogicModule() == false)
+		logicModule->isFSCConfigurationModule() == false)
 	{
 		assert(logicModule);
-		assert(logicModule->isLogicModule());
+		assert(logicModule->isFSCConfigurationModule());
 		return QString();
 	}
 
@@ -846,10 +846,10 @@ std::shared_ptr<LogicModule> LogicModuleSet::get(QString fileName)
 std::shared_ptr<LogicModule> LogicModuleSet::get(const Hardware::DeviceModule* logicModule) const
 {
 	if (logicModule == nullptr ||
-		logicModule->isLogicModule() == false)
+		logicModule->isFSCConfigurationModule() == false)
 	{
 		assert(logicModule);
-		assert(logicModule->isLogicModule());
+		assert(logicModule->isFSCConfigurationModule());
 		return std::shared_ptr<LogicModule>();
 	}
 

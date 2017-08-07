@@ -692,6 +692,7 @@ namespace Tcp
 
 		if (messageSize > TCP_MAX_DATA_SIZE)
 		{
+			assert(false);
 			return false;
 		}
 

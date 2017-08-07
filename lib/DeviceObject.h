@@ -522,6 +522,7 @@ namespace Hardware
 		bool isLogicModule() const;
 		bool isFSCConfigurationModule() const;
 		bool isOptoModule() const;
+		bool isBvb() const;
 
 		// Data
 		//

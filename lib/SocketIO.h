@@ -360,7 +360,7 @@ const quint32 ARCHS_GET_APP_SIGNALS_STATES_NEXT = 0x1702;
 const quint32 ARCHS_GET_APP_SIGNALS_STATES_CANCEL = 0x1703;
 
 const int ARCH_REQUEST_MAX_SIGNALS = 32;
-const int ARCH_REQUEST_MAX_STATES = 10000;
+const int ARCH_REQUEST_MAX_STATES = 65000;
 
 // Getting application signals Units
 //

@@ -270,7 +270,7 @@ namespace Builder
 				}
 			}
 
-			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &lmDescriptions, m_log);
+			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &fscDescriptions, m_log);
 
 			//
 			// Loading BusTypes
