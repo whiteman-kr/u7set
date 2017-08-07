@@ -79,7 +79,7 @@
   </action>
   <action name="actionPrint">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="TrendView.qrc">
@@ -92,7 +92,7 @@
     <string>Ctrl+P</string>
    </property>
    <property name="visible">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
  </widget>

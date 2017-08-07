@@ -4,6 +4,8 @@
 #include "Trend.h"
 #include "TrendRuller.h"
 
+class QPrinter;
+
 namespace TrendLib
 {
 	class RenderThread : public QThread
@@ -50,6 +52,7 @@ namespace TrendLib
 
 		bool saveImageToFile(QString fileName) const;
 		bool saveToPdf(QString fileName, QPageSize::PageSizeId pageSize, QPageLayout::Orientation pageOrientation) const;
+		bool print(QPrinter* printer) const;
 
 		// Events
 		//

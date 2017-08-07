@@ -8,6 +8,8 @@
 #include <QDateEdit>
 #include <QTimeEdit>
 #include <QFileDialog>
+#include <QPrintDialog>
+#include <QPrinter>
 #include <QPageSize>
 #include <QPageLayout>
 #include <QComboBox>
@@ -648,9 +650,45 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 
 	void TrendMainWindow::actionPrintTriggered()
 	{
-		// todo
-		//
-		//assert(false);
+static QPageLayout lastPageLayout;
+static int lastResolution = -1;
+static bool lastFullPage = false;
+static int lastCopyCount = false;
+
+		QPrintDialog d(this);
+
+		d.setOption(QAbstractPrintDialog::PrintToFile, true);
+		d.setOption(QAbstractPrintDialog::PrintSelection, false);
+		d.setOption(QAbstractPrintDialog::PrintPageRange, false);
+		d.setOption(QAbstractPrintDialog::PrintShowPageSize, false);
+		d.setOption(QAbstractPrintDialog::PrintCollateCopies, false);
+		d.setOption(QAbstractPrintDialog::PrintCurrentPage, false);
+
+		if (lastPageLayout.isValid() == true)
+		{
+			d.printer()->setPageLayout(lastPageLayout);
+			d.printer()->setResolution(lastResolution);
+			d.printer()->setFullPage(lastFullPage);
+			d.printer()->setCopyCount(lastCopyCount);
+		}
+
+		int result = d.exec();
+
+		if (result == QDialog::Accepted)
+		{
+			QPrinter* printer = d.printer();
+
+			lastPageLayout = printer->pageLayout();
+			lastResolution = printer->resolution();
+			lastFullPage = printer->fullPage();
+			lastCopyCount = printer->copyCount();
+
+			// Print
+			//
+			m_trendWidget->print(printer);
+		}
+
+		return;
 	}
 
 	void TrendMainWindow::actionExitTriggered()

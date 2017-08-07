@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <QPaintEngine>
 #include <QPainter>
+#include <QPrinter>
 #include <QWidget>
 #include <QPdfWriter>
 #include <QMouseEvent>
@@ -150,6 +151,56 @@ namespace TrendLib
 
 		m_trend.draw(&p, drawParam, true);
 		m_trend.drawRullers(&p, drawParam);
+
+		return true;
+	}
+
+	bool TrendWidget::print(QPrinter* printer) const
+	{
+		if (printer == nullptr ||
+			printer->isValid() == false)
+		{
+			assert(printer);
+			return false;
+		}
+
+		QPainter painter;
+
+		bool ok = painter.begin(printer);
+		if (ok == false)
+		{
+			assert(ok);
+			return false;
+		}
+
+		// Prepare DrawParam
+		//
+		TrendDrawParam drawParam = m_drawParam;
+
+		QRectF rc(printer->pageLayout().paintRect(QPageLayout::Inch));
+		double resolution = printer->resolution();
+
+		QRectF drawRect(rc.left() * resolution,
+						rc.top() * resolution,
+						rc.width() * resolution,
+						rc.height() * resolution);
+
+		drawParam.setRect(drawRect);
+		drawParam.setDpi(resolution, resolution);
+
+		// Draw to printer
+		//
+		m_trend.draw(&painter, drawParam, true);
+		m_trend.drawRullers(&painter, drawParam);
+
+		// Finish printing
+		//
+		ok = painter.end();
+		if (ok == false)
+		{
+			assert(ok);
+			return false;
+		}
 
 		return true;
 	}
