@@ -76,6 +76,127 @@ void MonitorSchemaWidget::createActions()
 
 }
 
+void MonitorSchemaWidget::mousePressEvent(QMouseEvent* event)
+{
+	if (event->buttons().testFlag(Qt::LeftButton) == true)
+	{
+		m_dragStartPosition = event->pos();
+		VFrame30::BaseSchemaWidget::mousePressEvent(event);
+	}
+	else
+	{
+		VFrame30::BaseSchemaWidget::mousePressEvent(event);
+	}
+}
+
+void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
+{
+	if (event->buttons().testFlag(Qt::LeftButton) == false)
+	{
+		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
+		return;
+	}
+
+
+	// Left button is pressed, is this start of drag and drop
+	//
+	if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+	{
+		VFrame30::BaseSchemaWidget::mouseMoveEvent(event);
+		return;
+	}
+
+	// Try to start drag and drop
+	//
+	QPointF docPos = widgetPointToDocument(m_dragStartPosition);
+
+	std::shared_ptr<VFrame30::SchemaItem> schemaItem;
+
+	for (auto layer : schema()->Layers)
+	{
+		if (layer->compile() == false)
+		{
+			continue;
+		}
+
+		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInput"));
+		if (schemaItem != nullptr)
+		{
+			break;
+		}
+
+		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemOutput"));
+		if (schemaItem != nullptr)
+		{
+			break;
+		}
+
+		schemaItem = layer->getItemUnderPoint(docPos, QLatin1String("VFrame30::SchemaItemInOut"));
+		break;
+	}
+
+	if (schemaItem == nullptr)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItemSignal> schemaItemSignal = std::dynamic_pointer_cast<VFrame30::SchemaItemSignal>(schemaItem);
+	if (schemaItemSignal == nullptr)
+	{
+		assert(schemaItemSignal);
+		return;
+	}
+
+	// Save signals to protobufer
+	//
+	::Proto::AppSignalParamSet protoSetMessage;
+	QStringList appSignalIds = schemaItemSignal->appSignalIdList();
+
+	for (QString id : appSignalIds)
+	{
+		bool ok = false;
+		AppSignalParam signalParam = theSignals.signalParam(id, &ok);
+		if (ok == false)
+		{
+			continue;
+		}
+
+		assert(signalParam.appSignalId() == id);
+
+		::Proto::AppSignalParam* protoSignalMessage = protoSetMessage.add_items();
+		signalParam.save(protoSignalMessage);
+	}
+
+	if (protoSetMessage.items_size() == 0)
+	{
+		return;
+	}
+
+	QByteArray data;
+	data.resize(protoSetMessage.ByteSize());
+
+	protoSetMessage.SerializeToArray(data.data(), protoSetMessage.ByteSize());
+
+	// --
+	//
+	if (data.isEmpty() == false)
+	{
+		QDrag* drag = new QDrag(this);
+		QMimeData* mimeData = new QMimeData;
+
+		mimeData->setData(AppSignalParamMimeType::value, data);
+		drag->setMimeData(mimeData);
+
+		drag->exec(Qt::CopyAction);
+
+		qDebug() << "Start drag for " << appSignalIds;
+		qDebug() << "Drag and drop data buffer size " << data.size();
+	}
+
+	return;
+}
+
+
 std::vector<std::shared_ptr<VFrame30::SchemaItem>> MonitorSchemaWidget::itemsUnderCursor(const QPoint& pos)
 {
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
@@ -342,12 +463,12 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 
 	if (ok == true)
 	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(theMonitorMainWindow, signal);
+		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
 		dsi->show();
 	}
 	else
 	{
-		QMessageBox::critical(this, tr("Error"), tr("No information about this signal!"));
+		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
 	}
 
 	return;

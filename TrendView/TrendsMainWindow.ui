@@ -78,6 +78,9 @@
    </property>
   </action>
   <action name="actionPrint">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="TrendView.qrc">
      <normaloff>:/TrendImages/Images/Print.svg</normaloff>:/TrendImages/Images/Print.svg</iconset>
@@ -87,6 +90,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

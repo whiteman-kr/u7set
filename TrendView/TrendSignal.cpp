@@ -165,6 +165,11 @@ namespace TrendLib
 	{
 		QMutexLocker locker(&m_paramMutex);
 
+		if (m_signalParams.size() >= 12)
+		{
+			return false;
+		}
+
 		auto foundIt = std::find_if(m_signalParams.begin(), m_signalParams.end(),
 			[&signal](const TrendSignalParam& s)
 			{
@@ -341,9 +346,27 @@ namespace TrendLib
 		return true;
 	}
 
-	void clearStates()
+	void TrendSignalSet::clear(TimeType timeType)
 	{
+		QMutexLocker locker(&m_archiveMutex);
 
+		switch (timeType)
+		{
+		case TimeType::Local:
+			m_archiveLocalTime.clear();
+			break;
+		case TimeType::System:
+			m_archiveSystemTime.clear();
+			break;
+		case TimeType::Plant:
+			m_archivePlantTime.clear();
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		return;
 	}
 
 	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)

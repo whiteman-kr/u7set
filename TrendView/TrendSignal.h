@@ -156,6 +156,8 @@ namespace TrendLib
 
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
 
+		void clear(TimeType timeType);
+
 	public slots:
 		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 		void slot_requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType);

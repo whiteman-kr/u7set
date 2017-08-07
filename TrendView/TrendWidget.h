@@ -48,6 +48,9 @@ namespace TrendLib
 	public:
 		void updateWidget();
 
+		bool saveImageToFile(QString fileName) const;
+		bool saveToPdf(QString fileName, QPageSize::PageSizeId pageSize, QPageLayout::Orientation pageOrientation) const;
+
 		// Events
 		//
 	protected:

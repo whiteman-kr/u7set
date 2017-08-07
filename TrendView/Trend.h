@@ -20,6 +20,7 @@ namespace TrendLib
 		// Draw methods
 		//
 		void draw(QImage* image, const TrendDrawParam& drawParam) const;
+		void draw(QPainter* painter, const TrendDrawParam& drawParam, bool needAdjustPainter) const;
 
 		void drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam) const;
 		void drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam) const;

@@ -40,6 +40,9 @@ namespace VFrame30
 		void ConnectionMapPosInc(SchemaPoint pinPos);
 		int GetPinPosConnectinCount(SchemaPoint pinPos, SchemaUnit unit) const;
 
+		template<typename SchemaItemType>
+		std::shared_ptr<SchemaItemType> getItemUnderPointByType(QPointF point) const;		// This will work only inside VFrame30 :(
+
 		std::shared_ptr<SchemaItem> getItemUnderPoint(QPointF point, QString className = "") const;
 		std::list<std::shared_ptr<SchemaItem>> getItemListInRectangle(const QRectF& rect) const;
 

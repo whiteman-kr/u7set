@@ -19,12 +19,28 @@ namespace TrendLib
 		QTime timeMeasures;
 		timeMeasures.start();
 
-		// --
-		//
 		image->fill(Qt::white);
 
+		// --
+		//
 		QPainter painter(image);
-		adjustPainter(&painter, drawParam.dpiX(), drawParam.dpiY());
+
+		draw(&painter, drawParam, true);
+
+		// --
+		//
+		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+		return;
+	}
+
+	void Trend::draw(QPainter* painter, const TrendDrawParam& drawParam, bool needAdjustPainter) const
+	{
+		assert(painter);
+
+		if (needAdjustPainter == true)
+		{
+			adjustPainter(painter, drawParam.dpiX(), drawParam.dpiY());
+		}
 
 		// --
 		//
@@ -42,14 +58,11 @@ namespace TrendLib
 
 			QRectF laneRect = calcLaneRect(laneIndex, drawParam);
 
-			drawLane(&painter, laneRect, laneDrawParam);			// Draw whole lane
+			drawLane(painter, laneRect, laneDrawParam);			// Draw whole lane
 
 			startTime = startTime.addMSecs(laneDrawParam.duration());
 		}
 
-		// --
-		//
-		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
 		return;
 	}
 
@@ -131,11 +144,8 @@ namespace TrendLib
 
 		// Draw insideRect
 		//
-		QPen insideRectPen;
-		insideRectPen.setCosmetic(true);
-		insideRectPen.setColor(Qt::darkGray);
+		QPen insideRectPen(Qt::darkGray, drawParam.cosmeticPenWidth(), Qt::SolidLine);
 		painter->setPen(insideRectPen);
-
 		painter->setBrush(Qt::BrushStyle::NoBrush);
 
 		painter->drawRect(insideRect);
@@ -235,9 +245,7 @@ namespace TrendLib
 
 		// Draw time grid
 		//
-		QPen timeGridPen(Qt::PenStyle::DashLine);
-		timeGridPen.setCosmetic(true);
-		timeGridPen.setColor(Qt::lightGray);
+		QPen timeGridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(timeGridPen);
 
 		QDate lastDate;
@@ -264,6 +272,11 @@ namespace TrendLib
 			}
 		}
 
+		// Draw text, time and date
+		//
+		QRectF textClipRect(rect.left(), insideRect.bottom(), rect.width(), rect.bottom() - insideRect.bottom());
+		painter->setClipRect(textClipRect);
+
 		painter->setPen(Qt::black);
 		QString lastDateText;
 		for (const PosTimePair& p : timeGridPos)
@@ -282,6 +295,13 @@ namespace TrendLib
 				drawText(painter, dateText, dateTextRect, drawParam, Qt::AlignCenter);
 			}
 		}
+
+		painter->setClipping(false);
+
+		// --
+		//
+
+		return;
 	}
 
 	void Trend::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
@@ -370,9 +390,7 @@ namespace TrendLib
 		//
 		TimeType timeType = drawParam.timeType();
 
-		QPen linePen;
-		linePen.setCosmetic(true);
-		linePen.setColor(signal.color());
+		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
 		painter->setPen(linePen);
 
 		static const int recomendedSize = 8192;
@@ -558,9 +576,7 @@ namespace TrendLib
 
 		// Draw time grid
 		//
-		QPen gridPen(Qt::PenStyle::DashLine);
-		gridPen.setCosmetic(true);
-		gridPen.setColor(Qt::lightGray);
+		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
 
 		std::vector<std::pair<double, double>> grids;		// first: y pos, second: value
@@ -612,9 +628,7 @@ namespace TrendLib
 		//
 		TimeType timeType = drawParam.timeType();
 
-		QPen linePen;
-		linePen.setCosmetic(true);
-		linePen.setColor(signal.color());
+		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
 		painter->setPen(linePen);
 
 		static const int recomendedSize = 8192;
@@ -745,13 +759,8 @@ namespace TrendLib
 
 		// Prepare drawing resources
 		//
-		QPen rullerPen(Qt::PenStyle::DashLine);
-		rullerPen.setCosmetic(true);
-		rullerPen.setColor(qRgb(0x00, 0x00, 0xC0));
-
-		QPen distancePen(Qt::PenStyle::SolidLine);
-		distancePen.setCosmetic(true);
-		distancePen.setColor(qRgb(0x00, 0x00, 0xC0));
+		QPen rullerPen(QBrush(qRgb(0x00, 0x00, 0xC0)), drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
+		QPen distancePen(QBrush(qRgb(0x00, 0x00, 0xC0)), drawParam.cosmeticPenWidth(), Qt::PenStyle::SolidLine);
 
 		QBrush backgroundBrush(drawParam.backgroundColor());
 		painter->setBrush(backgroundBrush);
@@ -1042,7 +1051,7 @@ namespace TrendLib
 		insideRect.setLeft(laneRect.left() + 6.0/8.0);
 		insideRect.setTop(laneRect.top() + 1.0/5.0);
 		insideRect.setWidth(laneRect.width() - insideRect.left() - 2.0/8.0);
-		insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 2.0/8.0);
+		insideRect.setHeight(laneRect.height() - (insideRect.top() - laneRect.top()) - 0.3);
 
 		// Ajust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
 		//
@@ -1090,7 +1099,7 @@ namespace TrendLib
 		*rullerIndex = -1;
 		*outTime = TimeStamp();
 
-		QRect rect = drawParam.rect();
+		QRectF rect = drawParam.rect();
 
 		QPointF pos(static_cast<double>(mousePos.x()) / static_cast<double>(drawParam.dpiX()),		// Transform mousePos to inches, as everything for drawing is done in inches
 					static_cast<double>(mousePos.y()) / static_cast<double>(drawParam.dpiY()));

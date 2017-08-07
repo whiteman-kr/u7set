@@ -4,10 +4,16 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QDialogButtonBox>
+#include <QMessageBox>
 #include <QDateEdit>
 #include <QTimeEdit>
+#include <QFileDialog>
+#include <QPageSize>
+#include <QPageLayout>
+#include <QComboBox>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
+#include "../Proto/serialization.pb.h"
 
 namespace TrendLib
 {
@@ -19,7 +25,10 @@ namespace TrendLib
 		ui->setupUi(this);
 
 		setAttribute(Qt::WA_DeleteOnClose);
+		setAcceptDrops(true);
 
+		// --
+		//
 		QWidget* centarlWidget = new QWidget;
 		setCentralWidget(centarlWidget);
 
@@ -89,12 +98,17 @@ namespace TrendLib
 
 		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
 
+		// Refresh Action
+		//
+		m_refreshAction = new QAction(tr("Refresh"), this);
+		m_refreshAction->setShortcut(QKeySequence::Refresh);
+		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
+		addAction(m_refreshAction);
+
 		// Contect Menu
 		//
 		setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-
 		connect(this, &QWidget::customContextMenuRequested, this, &TrendMainWindow::contextMenuRequested);
-
 
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		// DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -196,16 +210,73 @@ namespace TrendLib
 		}
 	}
 
-	void TrendMainWindow::updateWidget()
+	bool TrendMainWindow::addSignals(const std::vector<TrendLib::TrendSignalParam>& trendSignals, bool redraw)
 	{
-		if (m_trendWidget == nullptr)
+		bool ok = true;
+		for (const TrendLib::TrendSignalParam& tsp : trendSignals)
 		{
-			assert(m_trendWidget);
-			return;
+			ok &= addSignal(tsp, false);
 		}
 
-		m_trendWidget->updateWidget();
-		return;
+		if (redraw == true)
+		{
+			updateWidget();
+		}
+
+		return ok;
+	}
+
+	bool TrendMainWindow::addSignal(const TrendLib::TrendSignalParam& trendSignal, bool redraw)
+	{
+		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
+
+		if (discreteSignals.size() + analogSignals.size() > 12)
+		{
+			return false;
+		}
+
+		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
+						[&trendSignal](const TrendLib::TrendSignalParam& t)
+						{
+							return t.appSignalId() == trendSignal.appSignalId();
+						});
+
+		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
+						[&trendSignal](const TrendLib::TrendSignalParam& t)
+						{
+							return t.appSignalId() == trendSignal.appSignalId();
+						});
+
+		if (dit != discreteSignals.end() ||
+			ait != analogSignals.end())
+		{
+			return false;
+		}
+
+static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
+								  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
+static int stdColorIndex = 0;
+
+		TrendLib::TrendSignalParam tsp(trendSignal);
+
+		tsp.setColor(StdColors[stdColorIndex]);
+		signalSet().addSignal(tsp);
+
+		// --
+		//
+		stdColorIndex ++;
+		if (stdColorIndex >= sizeof(StdColors) / sizeof(StdColors[0]))
+		{
+			stdColorIndex = 0;
+		}
+
+		if (redraw == true)
+		{
+			updateWidget();
+		}
+
+		return true;
 	}
 
 	void TrendMainWindow::createToolBar()
@@ -349,18 +420,80 @@ namespace TrendLib
 
 	void TrendMainWindow::timerEvent(QTimerEvent*)
 	{
-
 	}
 
 	void TrendMainWindow::showEvent(QShowEvent*)
 	{
+	}
 
+	void TrendMainWindow::dragEnterEvent(QDragEnterEvent* event)
+	{
+		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+		{
+			event->acceptProposedAction();
+		}
+
+		return;
+	}
+
+	void TrendMainWindow::dropEvent(QDropEvent* event)
+	{
+		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+		{
+			assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+			event->setDropAction(Qt::DropAction::IgnoreAction);
+			event->accept();
+			return;
+		}
+
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalParamSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		{
+			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				TrendSignalParam tsp(appSignalParam);
+				addSignal(tsp, false);
+			}
+		}
+
+		updateWidget();
+
+		return;
 	}
 
 	void TrendMainWindow::signalsButton()
 	{
 		// Override in derived class to set signals
 		//
+	}
+
+	void TrendMainWindow::updateWidget()
+	{
+		if (m_trendWidget == nullptr)
+		{
+			assert(m_trendWidget);
+			return;
+		}
+
+		m_trendWidget->updateWidget();
+		return;
 	}
 
 	void TrendMainWindow::actionOpenTriggered()
@@ -372,9 +505,112 @@ namespace TrendLib
 
 	void TrendMainWindow::actionSaveTriggered()
 	{
-		// todo
-		//
-		//assert(false);
+		QString fileName = QFileDialog::getSaveFileName(this,
+														tr("Save File"),
+														"untitled.u7trend",
+														tr("Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)"));
+
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		QFileInfo fileInfo(fileName);
+		QString extension = fileInfo.completeSuffix();
+
+		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
+		{
+			return;
+		}
+
+		if (extension.compare(QLatin1String("png"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("bmp"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("jpg"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("jpeg"), Qt::CaseInsensitive) == 0)
+		{
+			bool ok = m_trendWidget->saveImageToFile(fileName);
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Writing file error. File %1").arg(fileName));
+			}
+
+			return;
+		}
+
+		if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
+		{
+			// Select paper size
+			//
+static QPageSize::PageSizeId m_defaultPageSize = QPageSize::A3;
+static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientation::Landscape;
+
+			QDialog d(this);
+
+			d.setWindowTitle(tr("Page Setup"));
+			d.setWindowFlags((d.windowFlags() &
+							~Qt::WindowMinimizeButtonHint &
+							~Qt::WindowMaximizeButtonHint &
+							~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+			QLabel* pageSizeLabel = new  QLabel(tr("Page Size"));
+
+			QComboBox* pageSizeCombo = new QComboBox;
+			pageSizeCombo->addItem(QLatin1String("A0"),  QVariant::fromValue(QPageSize::A0));
+			pageSizeCombo->addItem(QLatin1String("A1"),  QVariant::fromValue(QPageSize::A1));
+			pageSizeCombo->addItem(QLatin1String("A2"),  QVariant::fromValue(QPageSize::A2));
+			pageSizeCombo->addItem(QLatin1String("A3"),  QVariant::fromValue(QPageSize::A3));
+			pageSizeCombo->addItem(QLatin1String("A4"),  QVariant::fromValue(QPageSize::A4));
+			pageSizeCombo->addItem(QLatin1String("A5"),  QVariant::fromValue(QPageSize::A5));
+			pageSizeCombo->addItem(QLatin1String("Letter"),  QVariant::fromValue(QPageSize::Letter));
+			pageSizeCombo->addItem(QLatin1String("AnsiA"),  QVariant::fromValue(QPageSize::AnsiA));
+			pageSizeCombo->addItem(QLatin1String("AnsiB"),  QVariant::fromValue(QPageSize::AnsiB));
+			pageSizeCombo->addItem(QLatin1String("AnsiC"),  QVariant::fromValue(QPageSize::AnsiC));
+			pageSizeCombo->addItem(QLatin1String("AnsiD"),  QVariant::fromValue(QPageSize::AnsiD));
+			pageSizeCombo->addItem(QLatin1String("AnsiE"),  QVariant::fromValue(QPageSize::AnsiE));
+			int psi = pageSizeCombo->findData(QVariant::fromValue(m_defaultPageSize));
+			if (psi != -1)
+			{
+				pageSizeCombo->setCurrentIndex(psi);
+			}
+
+			QLabel* orientationLabel = new  QLabel(tr("Orientation"));
+
+			QComboBox* orientationCombo = new QComboBox;
+			orientationCombo->addItem(tr("Portrait"),  QVariant::fromValue(QPageLayout::Portrait));
+			orientationCombo->addItem(tr("Lanscape"),  QVariant::fromValue(QPageLayout::Landscape));
+			int poi = orientationCombo->findData(QVariant::fromValue(m_defaultPageOrientation));
+			if (poi != -1)
+			{
+				orientationCombo->setCurrentIndex(poi);
+			}
+
+			QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+			connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+			connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+			QGridLayout* layout = new QGridLayout;
+			layout->addWidget(pageSizeLabel, 0, 0);
+			layout->addWidget(pageSizeCombo, 0, 1);
+			layout->addWidget(orientationLabel, 1, 0);
+			layout->addWidget(orientationCombo, 1, 1);
+			layout->addWidget(buttonBox, 2, 0, 1, 2);
+			d.setLayout(layout);
+
+			int result = d.exec();
+			if (result == QDialog::Accepted)
+			{
+				m_defaultPageSize = pageSizeCombo->currentData().value<QPageSize::PageSizeId>();
+				m_defaultPageOrientation = orientationCombo->currentData().value<QPageLayout::Orientation>();
+
+				m_trendWidget->saveToPdf(fileName, m_defaultPageSize, m_defaultPageOrientation);
+			}
+
+			return;
+		}
+
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+
+		return;
 	}
 
 	void TrendMainWindow::actionPrintTriggered()
@@ -418,6 +654,16 @@ namespace TrendLib
 		msgBox.setText(text.join('\n'));
 
 		msgBox.exec();
+
+		return;
+	}
+
+	void TrendMainWindow::actionRefreshTriggered()
+	{
+		qDebug() << "Refresh trend data (clear)";
+		signalSet().clear(m_trendWidget->timeType());
+
+		updateWidget();
 
 		return;
 	}
@@ -639,6 +885,9 @@ namespace TrendLib
 		menu.addSeparator();
 		QAction* chooseView = menu.addAction(tr("Choose View..."));
 		chooseView->setEnabled(false);		// Not implemented yet
+
+		assert(m_refreshAction);
+		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
 
 		menu.addSeparator();
 		QAction* signalAction = menu.addAction(tr("Signals..."));

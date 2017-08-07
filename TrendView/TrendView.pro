@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core widgets svg gui
+QT       += core widgets svg gui printsupport
 
 TARGET = TrendView
 TEMPLATE = lib
@@ -59,3 +59,16 @@ RESOURCES += \
 
 FORMS += \
     TrendsMainWindow.ui
+
+
+#protobuf
+#
+win32 {
+    LIBS += -L$$DESTDIR -lprotobuf
+
+    INCLUDEPATH += ./../Protobuf
+}
+unix {
+    LIBS += -lprotobuf
+}
+

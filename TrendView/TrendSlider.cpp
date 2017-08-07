@@ -410,23 +410,23 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 
 	// Draw rullers
 	//
-	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x60)), 0, Qt::PenStyle::DashLine);
-	p.setPen(rullerPen);
+//	QPen rullerPen(QBrush(QColor(0x00, 0x00, 0xC0, 0x60)), 0, Qt::PenStyle::DashLine);
+//	p.setPen(rullerPen);
 
-	TimeStamp minTimeStamp(m_min);
-	TimeStamp maxTimeStamp(m_max + m_trendSlider->laneDuartion());
-	qint64 duration = maxTimeStamp.timeStamp - minTimeStamp.timeStamp;
-	double k = static_cast<double>(this->rect().width()) / static_cast<double>(duration);
+//	TimeStamp minTimeStamp(m_min);
+//	TimeStamp maxTimeStamp(m_max + m_trendSlider->laneDuartion());
+//	qint64 duration = maxTimeStamp.timeStamp - minTimeStamp.timeStamp;
+//	double k = static_cast<double>(this->rect().width()) / static_cast<double>(duration);
 
-	std::vector<TrendLib::TrendRuller> rullers = m_rullerSet->getRullers(minTimeStamp, maxTimeStamp);
+//	std::vector<TrendLib::TrendRuller> rullers = m_rullerSet->getRullers(minTimeStamp, maxTimeStamp);
 
-	for (const TrendLib::TrendRuller& ruller : rullers)
-	{
-		double x = rect().left() + k * (ruller.timeStamp().timeStamp - m_min);
+//	for (const TrendLib::TrendRuller& ruller : rullers)
+//	{
+//		double x = rect().left() + k * (ruller.timeStamp().timeStamp - m_min);
 
-		p.drawLine(QPointF(x, rect().top()),
-				   QPointF(x, rect().bottom()));
-	}
+//		p.drawLine(QPointF(x, rect().top()),
+//				   QPointF(x, rect().bottom()));
+//	}
 
 	// --
 	//
