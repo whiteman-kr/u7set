@@ -337,6 +337,11 @@ namespace Builder
 			return false;
 		}
 
+		if (m_optoModuleStorage->initBvbModules() == false)
+		{
+			return false;
+		}
+
 		return true;
 	}
 
@@ -691,13 +696,13 @@ namespace Builder
 
 			list.append(delim);
 
-			if (module->isLM())
+			if (module->isLmOrBvb())
 			{
-				str = QString(tr("Opto module LM %1")).arg(module->equipmentID());
+				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
 			}
 			else
 			{
-				if (module->isOCM())
+				if (module->isOcm())
 				{
 					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
 				}

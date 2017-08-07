@@ -369,7 +369,7 @@ bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, Q
 			}
 			else
 			{
-				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %9 <= %10 ");
+				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
 			}
 
 			qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);

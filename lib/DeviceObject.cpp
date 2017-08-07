@@ -2940,6 +2940,12 @@ R"DELIM({
 		return moduleFamily() == FamilyType::OCM;
 	}
 
+	bool DeviceModule::isBvb() const
+	{
+		return moduleFamily() == FamilyType::BVB;
+	}
+
+
 	//
 	//
 	// DeviceController

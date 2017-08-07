@@ -122,7 +122,7 @@ namespace Hardware
 
 		m_optoModuleID = module->equipmentIdTemplate();
 
-		const DeviceModule* lm = DeviceHelper::getAssociatedLM(m_controller);
+		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
 
 		if (lm == nullptr)
 		{
@@ -170,7 +170,7 @@ namespace Hardware
 
 		Address16 addr(validitySignal->valueOffset(), validitySignal->valueBit());
 
-		if (module->isLogicModule() == true)
+		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
 			addr.addWord(lmDescription->memory().m_txDiagDataOffset);
 		}
@@ -1084,7 +1084,7 @@ namespace Hardware
 
 	bool OptoPort::calculatePortRawDataSize(OptoModuleStorage* optoStorage)
 	{
-		const DeviceModule* lm = DeviceHelper::getAssociatedLM(m_controller);
+		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
 
 		if (optoStorage == nullptr || lm == nullptr)
 		{
@@ -1276,10 +1276,12 @@ namespace Hardware
 			return BAD_ADDRESS;
 		}
 
-		if (module->isLM())
+		if (module->isLmOrBvb() == true)
 		{
 			return module->optoInterfaceDataOffset() + (m_portNo - 1) * module->optoPortAppDataSize() + m_txBufAddress;
 		}
+
+		assert(module->isOcm() == true);
 
 		return module->optoInterfaceDataOffset() + m_txBufAddress;
 	}
@@ -1300,10 +1302,12 @@ namespace Hardware
 			return BAD_ADDRESS;
 		}
 
-		if (module->isLM() == true)
+		if (module->isLmOrBvb() == true)
 		{
 			return module->optoInterfaceDataOffset() + (m_portNo - 1) * module->optoPortAppDataSize() + m_rxBufAddress;
 		}
+
+		assert(module->isOcm() == true);
 
 		return module->optoInterfaceDataOffset() + m_rxBufAddress;
 	}
@@ -1787,7 +1791,7 @@ namespace Hardware
 
 		bool result = true;
 
-		if (module->isLogicModule() == true)
+		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
 			m_optoInterfaceDataOffset = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
 			m_optoPortDataSize = m_lmDescription->optoInterface().m_optoPortDataSize;
@@ -1813,7 +1817,7 @@ namespace Hardware
 
 		// set actual OptoInterfaceDataOffset for OCM module according to place of module
 		//
-		if (isOCM() == true)
+		if (isOcm() == true)
 		{
 			// OCM's OptoPortDataSize property (m_optoPortDataSize) is equal to LM's ModuleDataSize property
 			//
@@ -1874,16 +1878,16 @@ namespace Hardware
 			return false;
 		}
 
-		if (isLM() == true)
+		if (isLmOrBvb() == true)
 		{
 			m_lmID = module->equipmentIdTemplate();
 			m_lm = module;
 		}
 		else
 		{
-			assert(isOCM() == true);
+			assert(isOcm() == true);
 
-			const DeviceModule* lm = DeviceHelper::getAssociatedLM(module);
+			const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(module);
 
 			if (lm == nullptr)
 			{
@@ -1901,7 +1905,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoModule::isLM()
+	bool OptoModule::isLmOrBvb()
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -1909,10 +1913,10 @@ namespace Hardware
 			return false;
 		}
 
-		return m_deviceModule->moduleFamily() == DeviceModule::FamilyType::LM;
+		return m_deviceModule->isLogicModule() || m_deviceModule->isBvb();
 	}
 
-	bool OptoModule::isOCM()
+	bool OptoModule::isOcm()
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -1921,6 +1925,17 @@ namespace Hardware
 		}
 
 		return m_deviceModule->moduleFamily() == DeviceModule::FamilyType::OCM;
+	}
+
+	bool OptoModule::isBvb()
+	{
+		if (m_deviceModule == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return m_deviceModule->isBvb();
 	}
 
 	void OptoModule::getSerialPorts(QList<OptoPortShared>& serialPortsList)
@@ -1961,7 +1976,7 @@ namespace Hardware
 	{
 		bool result = true;
 
-		if (isLM() == true)
+		if (isLmOrBvb() == true)
 		{
 			// calculate tx buffers absolute addresses for ports of LM module
 			//
@@ -2027,7 +2042,7 @@ namespace Hardware
 			return result;
 		}
 
-		if (isOCM() == true)
+		if (isOcm() == true)
 		{
 			// calculate tx addresses for ports of OCM module
 			//
@@ -2162,7 +2177,7 @@ namespace Hardware
 	{
 		bool result = true;
 
-		if (isLM() == true)
+		if (isLmOrBvb() == true)
 		{
 			// calculate rx addresses for ports of LM module
 			//
@@ -2206,7 +2221,7 @@ namespace Hardware
 			return true;
 		}
 
-		if (isOCM() == true)
+		if (isOcm() == true)
 		{
 			// calculate rx addresses for ports of OCM module
 			//
@@ -2527,14 +2542,6 @@ namespace Hardware
 
 		if (connection->isSinglePort() == true)
 		{
-			if (optoModule->isLM() == true)
-			{
-				// LM's port '%1' can't work in RS232/485 mode (connection '%2').
-				//
-				m_log->errALC5020(connection->port1EquipmentID(), connectionID);
-				return false;
-			}
-
 			bool res = optoPort1->initSettings(connection);
 
 			if (res == false)
@@ -2542,7 +2549,7 @@ namespace Hardware
 				return false;
 			}
 
-			LOG_MESSAGE(m_log, QString(tr("Serial RS232/485 connection '%1' ID = %2... Ok")).
+			LOG_MESSAGE(m_log, QString(tr("Single port connection '%1' ID = %2... Ok")).
 							arg(connectionID).arg(linkID));
 		}
 		else
@@ -3153,6 +3160,24 @@ namespace Hardware
 		return false;
 	}
 
+	bool OptoModuleStorage::initBvbModules()
+	{
+		bool result = true;
+
+		for(OptoModuleShared module : m_modules)
+		{
+			if (module->isBvb() == false)
+			{
+				continue;
+			}
+
+			result &= module->calculateTxBufAddresses();
+			result &= module->calculateRxBufAddresses();
+		}
+
+		return result;
+	}
+
 	bool OptoModuleStorage::addModule(DeviceModule* module)
 	{
 		if (module == nullptr)
@@ -3163,7 +3188,8 @@ namespace Hardware
 		}
 
 		if (module->isLogicModule() != true &&
-			module->isOptoModule() != true)
+			module->isOptoModule() != true &&
+			module->isBvb() != true)
 		{
 			// this is not opto-module
 			//
@@ -3174,7 +3200,7 @@ namespace Hardware
 		//
 		assert(m_lmDescriptionSet);
 
-		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLM(module);
+		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmOrBvb(module);
 
 		if (chassisLm == nullptr)
 		{

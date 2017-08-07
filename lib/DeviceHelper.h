@@ -52,9 +52,11 @@ public:
 	static Hardware::DeviceController* getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
 
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
-	static const Hardware::DeviceModule* getLM(const Hardware::DeviceChassis* chassis);
+	static const Hardware::DeviceModule* getLm(const Hardware::DeviceChassis* chassis);
+	static const Hardware::DeviceModule* getLmOrBvb(const Hardware::DeviceChassis* chassis);
 
-	static const Hardware::DeviceModule* getAssociatedLM(const Hardware::DeviceObject* object);
+	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
+	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
 
 	static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
 	static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
