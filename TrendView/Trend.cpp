@@ -27,9 +27,7 @@ namespace TrendLib
 
 		draw(&painter, drawParam, true);
 
-		// --
-		//
-		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+		//qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
 		return;
 	}
 
@@ -59,6 +57,14 @@ namespace TrendLib
 			QRectF laneRect = calcLaneRect(laneIndex, drawParam);
 
 			drawLane(painter, laneRect, laneDrawParam);			// Draw whole lane
+
+			// As laneDrawParam is a copy of drawParam, we need to copy from
+			// laneDrawParam to drawParam vector signalDescriptionRect
+			//
+			drawParam.signalDescriptionRect().insert(
+						drawParam.signalDescriptionRect().end(),
+						laneDrawParam.signalDescriptionRect().begin(),
+						laneDrawParam.signalDescriptionRect().end());
 
 			startTime = startTime.addMSecs(laneDrawParam.duration());
 		}
@@ -338,7 +344,12 @@ namespace TrendLib
 			}
 		}
 
-		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip);
+		QRectF testDesctriptionBoundRect;
+		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip, &testDesctriptionBoundRect);
+
+		auto a = std::make_pair(signal.appSignalId(), testDesctriptionBoundRect);
+		std::vector<std::pair<QString, QRectF>>& b = drawParam.signalDescriptionRect();
+		b.push_back(a);
 
 		painter->setClipping(false);	// Restore clip region
 
@@ -549,7 +560,7 @@ namespace TrendLib
 			{
 				gridValue = possibleGridIntervals[i] * pow;
 
-				double y = valueToScaledPixel(gridValue, rect, lowLimit, highLimit);
+				double y = valueToScaledPixel(lowLimit + gridValue, rect, lowLimit, highLimit);
 				if (rect.bottom() - y >= minInchInterval)
 				{
 					// gridValue contains found suitable value for grid
@@ -658,7 +669,6 @@ namespace TrendLib
 					if (state.isValid() == false &&
 						lines.isEmpty() == false)
 					{
-						//painter->drawPolyline(lines);
 						drawPolyline(painter, lines, rect);
 						lines.clear();
 						continue;
@@ -666,6 +676,13 @@ namespace TrendLib
 
 					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
 					double y = valueToScaledPixel(state.value, rect, lowLimit, highLimit);
+
+//					if (x < lastX)
+//					{
+//						qDebug() << "Error";
+//						assert(x >= lastX);
+//						continue;
+//					}
 
 					if (lines.isEmpty() == true)
 					{
@@ -713,7 +730,6 @@ namespace TrendLib
 
 				if (lines.size() >= recomendedSize)
 				{
-					//painter->drawPolyline(lines);
 					drawPolyline(painter, lines, rect);
 					lines.clear();
 				}
@@ -732,7 +748,6 @@ namespace TrendLib
 
 		if (lines.size() >= 2)
 		{
-			//painter->drawPolyline(lines);
 			drawPolyline(painter, lines, rect);
 			lines.clear();
 		}
@@ -1083,21 +1098,24 @@ namespace TrendLib
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex, QString* outSignalId) const
 	{
 		if (outLaneIndex == nullptr ||
 			outTime == nullptr ||
-			rullerIndex == nullptr)
+			rullerIndex == nullptr ||
+			outSignalId == nullptr)
 		{
 			assert(outLaneIndex);
 			assert(outTime);
 			assert(rullerIndex);
+			assert(outSignalId);
 			return Trend::MouseOn::Outside;
 		}
 
 		*outLaneIndex = -1;
 		*rullerIndex = -1;
 		*outTime = TimeStamp();
+		outSignalId->clear();
 
 		QRectF rect = drawParam.rect();
 
@@ -1149,6 +1167,17 @@ namespace TrendLib
 						}
 
 						ri++;
+					}
+
+					// Check if pos on signal description
+					//
+					for (const std::pair<QString, QRectF>& p : drawParam.signalDescriptionRect())
+					{
+						if (p.second.contains(pos) == true)
+						{
+							*outSignalId = p.first;
+							return MouseOn::OnSignalDescription;
+						}
 					}
 
 					// --

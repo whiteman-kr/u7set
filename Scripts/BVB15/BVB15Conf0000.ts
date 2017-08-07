@@ -516,12 +516,12 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = " + uartId + "\r\n");
 	ptr += 2;
 
-	//var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
-	//if (hashString == "")
-	//{
-	//		return false;
-	//}
-	//confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
+	var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
+	if (hashString == "")
+	{
+			return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
 	//Hash (UniqueID) will be counted later
 	ptr += 8;
 
@@ -768,7 +768,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 				if (s == 1)	// this is Diag
 				{
 					serviceIP[s] = 0xc0a815fe;	//	192.168.21.254
-					servicePort[s] = 13352;
+					servicePort[s] = 13323;
 				}
 
 				if (serviceIP[s] != 0 && servicePort[s] != 0) {
@@ -837,7 +837,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 
 	// create UniqueID
 	//
-	var startFrame: number = configStartFrames + configFrameCount * (LMNumber - 1);
+	/*var startFrame: number = configStartFrames + configFrameCount * (LMNumber - 1);
 
 	var uniqueID: number = 0;
 
@@ -847,7 +847,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		uniqueID ^= crc;
 	}
 
-	confFirmware.jsSetUniqueID(LMNumber, uniqueID);
+	confFirmware.jsSetUniqueID(LMNumber, uniqueID);*/
 
 	return true;
 }

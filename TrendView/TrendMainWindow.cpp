@@ -13,6 +13,8 @@
 #include <QComboBox>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
+#include "TrendSignal.h"
+#include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
 
 namespace TrendLib
@@ -80,6 +82,10 @@ namespace TrendLib
 		//
 		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
 		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
+
+		// On click on signal description
+		//
+		connect(m_trendWidget, &TrendWidget::showSignalProperties, this, &TrendMainWindow::signalProperties);
 
 		// --
 		//
@@ -307,6 +313,7 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
 		m_timeCombo->addItem(tr("1 min"), QVariant::fromValue(1_min));
 		m_timeCombo->addItem(tr("5 min"), QVariant::fromValue(5_min));
+		m_timeCombo->addItem(tr("10 min"), QVariant::fromValue(10_min));
 		m_timeCombo->addItem(tr("30 min"), QVariant::fromValue(30_min));
 		m_timeCombo->addItem(tr("1 hour"), QVariant::fromValue(1_hour));
 		m_timeCombo->addItem(tr("3 hour"), QVariant::fromValue(3_hours));
@@ -314,7 +321,7 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
 		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours * 7));
-		m_timeCombo->setCurrentIndex(6);
+		m_timeCombo->setCurrentIndex(7);
 		m_toolBar->addWidget(m_timeCombo);
 
 		// Lane Count
@@ -496,6 +503,32 @@ static int stdColorIndex = 0;
 		return;
 	}
 
+	void TrendMainWindow::signalProperties(QString appSignalId)
+	{
+		qDebug() << "Show signal " << appSignalId << " properties";
+
+		bool ok = false;
+		TrendLib::TrendSignalParam signal = signalSet().signalParam(appSignalId, &ok);
+
+		if (ok == false)
+		{
+			assert(ok);		// Signal must be in signal set
+			return;
+		}
+
+		DialogTrendSignalProperties d(signal, this);
+
+		bool result = d.exec();
+		if (result == QDialog::Accepted)
+		{
+			ok = signalSet().setSignalParam(d.trendSignal());
+			assert(ok);
+			updateWidget();
+		}
+
+		return;
+	}
+
 	void TrendMainWindow::actionOpenTriggered()
 	{
 		// todo
@@ -673,8 +706,9 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
+		QString outSignalId;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
@@ -848,8 +882,9 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
 		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
+		QString outSignalId;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignalId);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
 			mouseOn != Trend::MouseOn::OnRuller)
@@ -890,6 +925,33 @@ static QPageLayout::Orientation m_defaultPageOrientation = QPageLayout::Orientat
 		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
 
 		menu.addSeparator();
+
+		std::vector<TrendLib::TrendSignalParam> discrets = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+		QMenu* signalPropsMenu = menu.addMenu(tr("Signals Properties"));
+		signalPropsMenu->setEnabled(discrets.size() + analogs.size() > 0);
+
+		for (const TrendLib::TrendSignalParam& s : discrets)
+		{
+			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+			connect(signalPropertiesAction, &QAction::triggered, this,
+					[this, s]()
+					{
+						signalProperties(s.appSignalId());
+					});
+		}
+
+		for (const TrendLib::TrendSignalParam& s : analogs)
+		{
+			QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
+			connect(signalPropertiesAction, &QAction::triggered, this,
+					[this, s]()
+					{
+						signalProperties(s.appSignalId());
+					});
+		}
+
 		QAction* signalAction = menu.addAction(tr("Signals..."));
 		connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
 

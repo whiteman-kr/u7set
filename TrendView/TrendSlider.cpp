@@ -44,6 +44,11 @@ TrendSlider::TrendSlider(TrendLib::TrendRullerSet* rullerSet) :
 	return;
 }
 
+bool TrendSlider::isTimeInRange(const TimeStamp& value) const
+{
+	return value >= m_min && value <= m_max;
+}
+
 void TrendSlider::setTimeClicked()
 {
 	QDateEdit* dateEdit = new QDateEdit(TimeStamp(m_value).toDateTime().date());

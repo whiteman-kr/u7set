@@ -29,10 +29,14 @@ public:
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
-
 	virtual void signalsButton() override;
 
 public:
+
+	// Slots
+	//
+protected slots:
+	void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 
 	// Data
 	//

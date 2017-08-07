@@ -53,6 +53,8 @@ namespace TrendLib
 		void updateWidget();
 
 	private slots:
+		void signalProperties(QString appSignalId);
+
 		void actionOpenTriggered();
 		void actionSaveTriggered();
 		void actionPrintTriggered();
@@ -95,6 +97,7 @@ namespace TrendLib
 
 		QAction* m_refreshAction = nullptr;
 
+	protected:
 		TrendLib::TrendWidget* m_trendWidget = nullptr;
 		TrendSlider* m_trendSlider = nullptr;
 

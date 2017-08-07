@@ -50,10 +50,11 @@ namespace TrendLib
 			Outside,			// Outside any posible rect
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
+			OnSignalDescription,// Over Signal Description (id +  caption)
 			OnRuller,			// Over ruller
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, QString* outSignalId) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);

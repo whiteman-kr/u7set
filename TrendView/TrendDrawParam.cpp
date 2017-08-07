@@ -150,4 +150,14 @@ namespace TrendLib
 		return m_cosmeticPenWidth;
 	}
 
+	std::vector<std::pair<QString, QRectF>>& TrendDrawParam::signalDescriptionRect()
+	{
+		return m_signalDescriptionRect;
+	}
+
+	std::vector<std::pair<QString, QRectF>>& TrendDrawParam::signalDescriptionRect() const
+	{
+		return m_signalDescriptionRect;
+	}
+
 }

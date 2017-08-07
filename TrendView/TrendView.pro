@@ -35,7 +35,8 @@ SOURCES += \
     TrendSettings.cpp \
     TrendMainWindow.cpp \
     Trend.cpp \
-    TrendRuller.cpp
+    TrendRuller.cpp \
+    DialogTrendSignalProperties.cpp
 
 HEADERS += \
     Stable.h \
@@ -47,7 +48,8 @@ HEADERS += \
     TrendSettings.h \
     TrendMainWindow.h \
     Trend.h \
-    TrendRuller.h
+    TrendRuller.h \
+    DialogTrendSignalProperties.h
 
 unix {
     target.path = /usr/lib
@@ -58,7 +60,8 @@ RESOURCES += \
     TrendView.qrc
 
 FORMS += \
-    TrendsMainWindow.ui
+    TrendsMainWindow.ui \
+    DialogTrendSignalProperties.ui
 
 
 #protobuf
