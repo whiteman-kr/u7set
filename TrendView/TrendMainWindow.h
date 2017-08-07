@@ -97,6 +97,7 @@ namespace TrendLib
 
 		QAction* m_refreshAction = nullptr;
 
+	protected:
 		TrendLib::TrendWidget* m_trendWidget = nullptr;
 		TrendSlider* m_trendSlider = nullptr;
 

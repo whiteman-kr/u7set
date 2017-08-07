@@ -16,6 +16,13 @@ class TrendSlider : public QWidget
 public:
 	TrendSlider(TrendLib::TrendRullerSet* rullerSet);
 
+	// Method
+	//
+public:
+	bool isTimeInRange(const TimeStamp& value) const;
+
+	// Signals and slots
+	//
 signals:
 	void valueChanged(TimeStamp value);
 	void paramsChanged(qint64 value, qint64 min, qint64 max, qint64 singleStep, qint64 pageStep);
@@ -26,6 +33,8 @@ public slots:
 	void lineRightClicked();
 	void sliderRailChanged(qint64 newValue);
 
+	// Properties
+	//
 public:
 	TimeStamp value() const;
 	void setValue(const TimeStamp& val);

@@ -1,5 +1,6 @@
 #include "MonitorTrends.h"
 #include "DialogChooseTrendSignals.h"
+#include "../TrendView/TrendWidget.h"
 
 std::map<QString, MonitorTrendsWidget*> MonitorTrends::m_trendsList;
 
@@ -94,10 +95,10 @@ static int no = 1;
 	connect(m_tcpClient, &TrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
 	connect(m_tcpClient, &TrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
 
+	connect(m_tcpClient, &TrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+
 	//connect(m_tcpClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
 	//connect(m_tcpClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
-
-
 	// --
 	//
 	startTimer(100);
@@ -201,22 +202,17 @@ void MonitorTrendsWidget::signalsButton()
 	return;
 }
 
-//const ConfigConnection& MonitorTrendsWidget::archiveService1() const
-//{
-//	return m_archiveService1;
-//}
+void MonitorTrendsWidget::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
+{
+	assert(m_trendWidget);
+	assert(m_trendSlider);
 
-//void MonitorTrendsWidget::setArchiveService1(const ConfigConnection& config)
-//{
-//	m_archiveService1 = config;
-//}
+	if (timeType != m_trendWidget->timeType() ||
+		m_trendSlider->isTimeInRange(requestedHour) == false)
+	{
+		return;
+	}
 
-//const ConfigConnection& MonitorTrendsWidget::archiveService2() const
-//{
-//	return m_archiveService2;
-//}
-
-//void MonitorTrendsWidget::setArchiveService2(const ConfigConnection& config)
-//{
-//	m_archiveService2 = config;
-//}
+	m_trendWidget->updateWidget();
+	return;
+}

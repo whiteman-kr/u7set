@@ -371,6 +371,18 @@ namespace TrendLib
 					// Data requested and received, pass it to the result
 					//
 					outData->push_back(hourData);
+					// Debug
+					//
+//					qDebug() << "Found data for hour " << archHour.toDateTime();
+//					qDebug() << "\t Has TrendStateRecord(s): " << hourData->data.size();
+//					for (const auto& r : hourData->data)
+//					{
+//						qDebug() << "\t\t Has states: " << r.states.size();
+//						if (r.states.size() != 0)
+//						{
+//							qDebug() << "\t\t\t First state: " << r.states[0].getTime(timeType).toDateTime();
+//						}
+//					}
 					break;
 				default:
 					assert(false);

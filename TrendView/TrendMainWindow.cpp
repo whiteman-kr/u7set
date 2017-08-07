@@ -313,6 +313,7 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("30 sec"), QVariant::fromValue(30_sec));
 		m_timeCombo->addItem(tr("1 min"), QVariant::fromValue(1_min));
 		m_timeCombo->addItem(tr("5 min"), QVariant::fromValue(5_min));
+		m_timeCombo->addItem(tr("10 min"), QVariant::fromValue(10_min));
 		m_timeCombo->addItem(tr("30 min"), QVariant::fromValue(30_min));
 		m_timeCombo->addItem(tr("1 hour"), QVariant::fromValue(1_hour));
 		m_timeCombo->addItem(tr("3 hour"), QVariant::fromValue(3_hours));
@@ -320,7 +321,7 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
 		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours * 7));
-		m_timeCombo->setCurrentIndex(6);
+		m_timeCombo->setCurrentIndex(7);
 		m_toolBar->addWidget(m_timeCombo);
 
 		// Lane Count

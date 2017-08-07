@@ -27,9 +27,7 @@ namespace TrendLib
 
 		draw(&painter, drawParam, true);
 
-		// --
-		//
-		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+		//qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
 		return;
 	}
 
@@ -671,7 +669,6 @@ namespace TrendLib
 					if (state.isValid() == false &&
 						lines.isEmpty() == false)
 					{
-						//painter->drawPolyline(lines);
 						drawPolyline(painter, lines, rect);
 						lines.clear();
 						continue;
@@ -679,6 +676,13 @@ namespace TrendLib
 
 					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
 					double y = valueToScaledPixel(state.value, rect, lowLimit, highLimit);
+
+//					if (x < lastX)
+//					{
+//						qDebug() << "Error";
+//						assert(x >= lastX);
+//						continue;
+//					}
 
 					if (lines.isEmpty() == true)
 					{
@@ -726,7 +730,6 @@ namespace TrendLib
 
 				if (lines.size() >= recomendedSize)
 				{
-					//painter->drawPolyline(lines);
 					drawPolyline(painter, lines, rect);
 					lines.clear();
 				}
@@ -745,7 +748,6 @@ namespace TrendLib
 
 		if (lines.size() >= 2)
 		{
-			//painter->drawPolyline(lines);
 			drawPolyline(painter, lines, rect);
 			lines.clear();
 		}
