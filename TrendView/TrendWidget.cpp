@@ -211,7 +211,7 @@ namespace TrendLib
 
 		if (m_pixmap.isNull() == true)
 		{
-			painter.fillRect(rect(), Qt::white);
+			painter.fillRect(rect(), m_drawParam.backgroundColor());
 			painter.setPen(Qt::black);
 			painter.drawText(rect(), Qt::AlignCenter, tr("Rendering initial image, please wait..."));
 			return;
@@ -221,7 +221,8 @@ namespace TrendLib
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
-			painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
+			painter.fillRect(rect(), m_drawParam.backgroundColor());
+			painter.drawPixmap(m_pixmap.rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
 
@@ -518,9 +519,20 @@ namespace TrendLib
 		m_drawParam.setTimeType(value);
 	}
 
+	TimeStamp TrendWidget::startTime() const
+	{
+		TimeStamp ts(m_drawParam.startTime());
+		return ts;
+	}
+
 	void TrendWidget::setStartTime(const TimeStamp& startTime)
 	{
 		m_drawParam.setStartTimeStamp(startTime);
+	}
+
+	qint64 TrendWidget::duration() const
+	{
+		return m_drawParam.duration();
 	}
 
 	void TrendWidget::setDuration(qint64 interval)

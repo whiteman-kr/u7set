@@ -104,7 +104,10 @@ namespace TrendLib
 		TimeType timeType() const;
 		void setTimeType(TimeType value);
 
+		TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);
+
+		qint64 duration() const;
 		void setDuration(qint64 interval);
 
 	private:

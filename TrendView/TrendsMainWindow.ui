@@ -95,6 +95,18 @@
     <bool>true</bool>
    </property>
   </action>
+  <action name="actionAutoScale">
+   <property name="icon">
+    <iconset resource="TrendView.qrc">
+     <normaloff>:/TrendImages/Images/AutoScale.svg</normaloff>:/TrendImages/Images/AutoScale.svg</iconset>
+   </property>
+   <property name="text">
+    <string>AutoScale</string>
+   </property>
+   <property name="toolTip">
+    <string>Autoscale signal trend to visible area</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

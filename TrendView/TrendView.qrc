@@ -8,5 +8,6 @@
         <file>Images/Trends.svg</file>
         <file>Images/ZoomIn.svg</file>
         <file>Images/ZoomOut.svg</file>
+        <file>Images/AutoScale.svg</file>
     </qresource>
 </RCC>

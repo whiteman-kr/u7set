@@ -68,6 +68,7 @@ namespace TrendLib
 		connect(ui->actionPrint, &QAction::triggered, this, &TrendMainWindow::actionPrintTriggered);
 		connect(ui->actionExit, &QAction::triggered, this, &TrendMainWindow::actionExitTriggered);
 		connect(ui->actionAbout, &QAction::triggered, this, &TrendMainWindow::actionAboutTriggered);
+		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
 
 		createToolBar();
 
@@ -355,7 +356,7 @@ static int stdColorIndex = 0;
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
-		// Tyme Type
+		// Time Type
 		//
 		QLabel* timeTypeLabel = new QLabel("  Time Type: ");
 		timeTypeLabel->setAlignment(Qt::AlignCenter);
@@ -367,7 +368,12 @@ static int stdColorIndex = 0;
 		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(TimeType::Plant));
 		m_toolBar->addWidget(m_timeTypeCombo);
 
-		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
+		// 	AutoScale
+		//
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(ui->actionAutoScale);
+
+		m_toolBar->addSeparator();
 
 		// Add stretecher
 		//
@@ -379,6 +385,10 @@ static int stdColorIndex = 0;
 		//
 		m_signalsButton = new QPushButton("Signals...");
 		m_toolBar->addWidget(m_signalsButton);
+
+		// --
+		//
+		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
 		return;
 	}
@@ -736,6 +746,82 @@ static int lastCopyCount = false;
 
 		updateWidget();
 
+		return;
+	}
+
+	void TrendMainWindow::actionAutoSclaeTriggered()
+	{
+		qDebug() << "Autoscale trend";
+
+		std::vector<TrendLib::TrendSignalParam> analogs = signalSet().analogSignals();
+
+		QDateTime startTime = m_trendWidget->startTime().toDateTime();
+		QDateTime finishTime = TimeStamp(m_trendWidget->startTime().timeStamp + m_trendWidget->duration()).toDateTime();
+
+		qint64 startTimeValue = m_trendWidget->startTime().timeStamp;
+		qint64 finishTimeValue = m_trendWidget->startTime().timeStamp + m_trendWidget->duration();
+
+		TimeType timeType = m_trendWidget->timeType();
+
+		for (TrendLib::TrendSignalParam& ts : analogs)
+		{
+			std::list<std::shared_ptr<OneHourData>> signalData;
+			signalSet().getExistingTrendData(ts.appSignalId(), startTime, finishTime, timeType, &signalData);
+
+			double minValue = 0;
+			double maxValue = 0;
+			bool firstValue = true;
+
+			for (std::shared_ptr<OneHourData> hour : signalData)
+			{
+				const std::vector<TrendStateRecord>& data = hour->data;
+				for (const TrendStateRecord& record : data)
+				{
+					for (const TrendStateItem& state : record.states)
+					{
+						if (state.isValid() == false)
+						{
+							continue;
+						}
+
+						TimeStamp ct = state.getTime(timeType);
+
+						if (ct.timeStamp < startTimeValue)
+						{
+							continue;
+						}
+
+						if (ct.timeStamp > finishTimeValue)
+						{
+							break;
+						}
+
+						if (firstValue == true)
+						{
+							firstValue = false;
+							minValue = state.value;
+							maxValue = state.value;
+							continue;
+						}
+
+						minValue = qMin(minValue, state.value);
+						maxValue = qMax(maxValue, state.value);
+					}	// for (const TrendStateItem& state : record.states)
+				}
+			}
+
+			if (firstValue == false)
+			{
+				// Set limits and update param
+				//
+				ts.setViewLowLimit(minValue - (maxValue - minValue) * 0.10);
+				ts.setViewHighLimit(maxValue + (maxValue - minValue) * 0.10);
+
+				signalSet().setSignalParam(ts);
+			}
+		}
+
+		updateWidget();
 		return;
 	}
 
