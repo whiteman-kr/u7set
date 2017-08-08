@@ -43,10 +43,16 @@ void TcpArchRequestsServer::onServerThreadStarted()
 void TcpArchRequestsServer::onServerThreadFinished()
 {
 	DEBUG_LOG_MSG(m_logger, "TcpArchiveRequestsServer thread finished");
+
+	finalizeCurrentRequest();
 }
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* requestData, quint32 requestDataSize)
 {
+	QTime startTime;
+
+	startTime.start();
+
 	Network::GetAppSignalStatesFromArchiveStartRequest request;
 	Network::GetAppSignalStatesFromArchiveStartReply reply;
 
@@ -112,7 +118,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	param.requestID = newRequestID;
 
-	m_currentRequest = m_archRequestThread.startNewRequest(param);
+	m_currentRequest = m_archRequestThread.startNewRequest(param, startTime);
 }
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize)
@@ -145,6 +151,9 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		reply.set_archerror(static_cast<int>(ArchiveError::Success));
 		reply.set_requestid(m_currentRequest->requestID());
 		reply.set_dataready(false);
+/*		DEBUG_LOG_MSG(m_logger, QString("RequestID %1: send next reply, no data ready (elapsed %2)").
+					  arg(m_currentRequest->requestID()).
+					  arg(m_currentRequest->timeElapsed()));*/
 		sendReply(reply);
 		return;
 	}
@@ -167,9 +176,10 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	sendReply(nextReply);
 
-	DEBUG_LOG_MSG(m_logger, QString("Send next reply: requestID = %1, states count = %2").
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: send next reply, states = %2 (elapsed %3)").
 				  arg(m_currentRequest->requestID()).
-				  arg(nextReply.statesinpartcount()))
+				  arg(nextReply.statesinpartcount()).
+				  arg(m_currentRequest->timeElapsed()));
 
 	if (nextReply.islastpart() == false)
 	{
@@ -177,8 +187,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 	}
 	else
 	{
-		m_archRequestThread.finalizeRequest(m_currentRequest->requestID());
-		m_currentRequest.reset();
+		finalizeCurrentRequest();
 	}
 }
 
@@ -207,9 +216,21 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 	reply.set_error(static_cast<int>(NetworkError::Success));
 	sendReply(reply);
 
+	finalizeCurrentRequest();
+}
+
+void TcpArchRequestsServer::finalizeCurrentRequest()
+{
+	if (m_currentRequest == nullptr)
+	{
+		return;
+	}
+
+	quint32 requestID = m_currentRequest->requestID();
+
 	m_currentRequest.reset();
 
-	m_archRequestThread.finalizeRequest(request.requestid());
+	m_archRequestThread.finalizeRequest(requestID);
 }
 
 quint32 TcpArchRequestsServer::getNewRequestID()

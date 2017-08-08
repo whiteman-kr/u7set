@@ -17,8 +17,10 @@ void ArchRequestParam::clearSignalHashes()
 
 //
 
-ArchRequestContext::ArchRequestContext(const ArchRequestParam& param) :
-	m_param(param)
+ArchRequestContext::ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger) :
+	m_param(param),
+	m_time(startTime),
+	m_logger(logger)
 {
 }
 
@@ -75,6 +77,8 @@ void ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
 
 	m_query  = new QSqlQuery(db);
 
+	m_query->setForwardOnly(true);
+
 	m_queryStr = queryStr;
 }
 
@@ -89,10 +93,6 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 		return false;
 	}
 
-	QTime time;
-
-	time.start();
-
 	bool result = m_query->exec(m_queryStr);
 
 	if (result == false)
@@ -100,10 +100,6 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 		DEBUG_LOG_ERR(logger, m_query->lastError().text());
 		return false;
 	}
-
-	int t = time.elapsed();
-
-	DEBUG_LOG_MSG(logger, QString("Query execution time = %1").arg(t));
 
 	m_totalStates = m_query->size();
 	m_sentStates = 0;
@@ -120,7 +116,7 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 
 	m_reply.clear_appsignalstates();
 
-	DEBUG_LOG_MSG(logger, QString("Request result %1 records").arg(m_totalStates));
+	DEBUG_LOG_MSG(logger, QString("RequestID %1: result %2 records").arg(m_param.requestID).arg(m_totalStates));
 
 	return result;
 }
@@ -128,8 +124,6 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 void ArchRequestContext::getNextData()
 {
 	TEST_PTR_RETURN(m_query);
-
-//	assert(m_query->isValid() == true);
 
 	int count = 0;
 
@@ -156,15 +150,6 @@ void ArchRequestContext::getNextData()
 		qint32 flags = m_query->value(4).toInt();
 		quint64 hash = m_query->value(5).toULongLong();
 
-		if (prevTime > localTime)
-		{
-			assert(false);
-		}
-		else
-		{
-			prevTime = localTime;
-		}
-
 		Proto::AppSignalState* state = m_reply.add_appsignalstates();
 
 		state->set_archiveid(archid);
@@ -185,6 +170,8 @@ void ArchRequestContext::getNextData()
 	m_reply.set_islastpart(!hasNextRecord);
 
 	m_dataReady = true;
+
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: next data read (elapsed %2)").arg(requestID()).arg(timeElapsed()))
 }
 
 const char* ArchRequestThreadWorker::FIELD_PLANT_TIME = "plantTime";
@@ -200,7 +187,7 @@ ArchRequestThreadWorker::ArchRequestThreadWorker(Archive& archive, CircularLogge
 	qRegisterMetaType<ArchRequestContextShared>("ArchRequestContextShared");
 }
 
-ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestParam &param)
+ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestParam &param, const QTime& startTime)
 {
 	// function should be called in context of param.archRequestServer thread!
 	//
@@ -218,7 +205,7 @@ ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestPar
 		return nullptr;
 	}
 
-	ArchRequestContextShared context = std::make_shared<ArchRequestContext>(param);
+	ArchRequestContextShared context = std::make_shared<ArchRequestContext>(param, startTime, m_logger);
 
 	context->setDataReady(false);
 
@@ -430,10 +417,13 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 	//
 	TEST_PTR_RETURN(context);
 
+	DEBUG_LOG_MSG(m_logger, QString("-----------------------------------------------------------------"));
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: start processing (elapsed %2)").arg(context->requestID()).arg(context->timeElapsed()));
+
 	TimeStamp start(context->startTime());
 	TimeStamp end(context->endTime());
 
-	DEBUG_LOG_MSG(m_logger, QString("Request: ID = %1, signal = %2, timeType = %3, start = %4, end = %5, signals = %6").
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: %2, time = %3, start = %4, end = %5, signals = %6").
 				  arg(context->requestID()).
 				  arg(m_archive.getSignalID(context->signalHash(0))).
 				  arg(Archive::timeTypeStr(context->timeType())).
@@ -483,6 +473,8 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 
 	context->setArchError(ArchiveError::Success);
 
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: query executed (elapsed %2)").arg(context->requestID()).arg(context->timeElapsed()))
+
 	context->getNextData();
 }
 
@@ -508,9 +500,9 @@ ArchRequestThread::ArchRequestThread(Archive& archive, CircularLoggerShared& log
 	addWorker(m_worker);
 }
 
-ArchRequestContextShared ArchRequestThread::startNewRequest(ArchRequestParam& param)
+ArchRequestContextShared ArchRequestThread::startNewRequest(ArchRequestParam& param, const QTime& startTime)
 {
-	return m_worker->startNewRequest(param);
+	return m_worker->startNewRequest(param, startTime);
 }
 
 void ArchRequestThread::finalizeRequest(quint32 requestID)

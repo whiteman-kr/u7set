@@ -33,13 +33,13 @@ namespace Tcp
 		m_mutex(QMutex::Recursive),
 		m_watchdogTimer(this)
 	{
-		m_dataBuffer = new char[TCP_MAX_DATA_SIZE];
+		m_receiveDataBuffer = new char[TCP_MAX_DATA_SIZE];
 	}
 
 
 	SocketWorker::~SocketWorker()
 	{
-		delete [] m_dataBuffer;
+		delete [] m_receiveDataBuffer;
 	}
 
 	void SocketWorker::onThreadStarted()
@@ -58,12 +58,13 @@ namespace Tcp
 
 		m_tcpSocket = new QTcpSocket;
 
-		m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, 0);
+		m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, QVariant(1));
 
 		connect(m_tcpSocket, &QTcpSocket::stateChanged, this, &SocketWorker::onSocketStateChanged);
 		connect(m_tcpSocket, &QTcpSocket::connected, this, &SocketWorker::onSocketConnected);
 		connect(m_tcpSocket, &QTcpSocket::disconnected, this, &SocketWorker::onSocketDisconnected);
 		connect(m_tcpSocket, &QTcpSocket::readyRead, this, &SocketWorker::onSocketReadyRead);
+		connect(m_tcpSocket, &QTcpSocket::bytesWritten, this, &SocketWorker::onSocketBytesWritten);
 	}
 
 
@@ -153,6 +154,10 @@ namespace Tcp
 		}
 	}
 
+	void SocketWorker::onSocketBytesWritten()
+	{
+		m_bytesWritten = true;
+	}
 
 	void SocketWorker::onWatchdogTimerTimeout()
 	{
@@ -275,7 +280,7 @@ namespace Tcp
 			return 0;
 		}
 
-		int bytesRead = m_tcpSocket->read(m_dataBuffer + m_readDataSize, bytesToRead);
+		int bytesRead = m_tcpSocket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
 
 		m_readDataSize += bytesRead;
 
@@ -300,14 +305,20 @@ namespace Tcp
 			return -1;
 		}
 
+		//assert(m_bytesWritten == true);
+
 		qint64 written = m_tcpSocket->write(data, size);
+
+		qDebug() << "Socket written bytes  =" << written;
 
 		if (written == -1)
 		{
 			return -1;
 		}
 
-		// m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
+		m_bytesWritten = false;
+
+		//m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);
 
 		addSentBytes(size);
 
@@ -600,7 +611,7 @@ namespace Tcp
 		{
 			Network::TcpClientIntroduceMyself message;
 
-			bool result = message.ParseFromArray(m_dataBuffer, m_header.dataSize);
+			bool result = message.ParseFromArray(m_receiveDataBuffer, m_header.dataSize);
 
 			if (result == false)
 			{
@@ -618,7 +629,7 @@ namespace Tcp
 		}
 		else
 		{
-			processRequest(m_header.id, m_dataBuffer, m_header.dataSize);
+			processRequest(m_header.id, m_receiveDataBuffer, m_header.dataSize);
 		}
 	}
 
@@ -1178,7 +1189,7 @@ namespace Tcp
 		case Header::Type::Ack:
 			restartReplyTimeoutTimer();
 
-			onAck(m_header.id, m_dataBuffer, m_header.dataSize);
+			onAck(m_header.id, m_receiveDataBuffer, m_header.dataSize);
 
 			m_readState = ReadState::WaitingForHeader;
 
@@ -1197,7 +1208,7 @@ namespace Tcp
 			}
 			else
 			{
-				processReply(m_header.id, m_dataBuffer, m_header.dataSize);
+				processReply(m_header.id, m_receiveDataBuffer, m_header.dataSize);
 			}
 
 			break;
@@ -1337,6 +1348,8 @@ namespace Tcp
 			assert(false);
 			return false;
 		}
+
+		qDebug() << "Send request" << requestID;
 
 		addRequest();
 

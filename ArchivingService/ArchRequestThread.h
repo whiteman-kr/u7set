@@ -41,7 +41,7 @@ struct ArchRequestParam
 class ArchRequestContext
 {
 public:
-	ArchRequestContext(const ArchRequestParam& param);
+	ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
 	~ArchRequestContext();
 
 	void checkSignalsHashes(const Archive& arch);
@@ -59,6 +59,8 @@ public:
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
 	Hash signalHash(int index);
+
+	int timeElapsed() const { return m_time.elapsed(); }
 
 private:
 	void setArchError(ArchiveError err) { m_archError = err; }
@@ -84,6 +86,8 @@ private:
 
 private:
 	ArchRequestParam m_param;
+	QTime m_time;
+	CircularLoggerShared m_logger;
 
 	QSqlQuery* m_query = nullptr;
 	QString m_queryStr;
@@ -99,10 +103,6 @@ private:
 
 	friend class ArchRequestThreadWorker;
 
-	// debug!!!
-
-	qint64 prevTime = 0;
-
 };
 
 typedef std::shared_ptr<ArchRequestContext> ArchRequestContextShared;
@@ -115,7 +115,7 @@ class ArchRequestThreadWorker : public SimpleThreadWorker
 public:
 	ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger);
 
-	ArchRequestContextShared startNewRequest(ArchRequestParam& param);
+	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime &startTime);
 	void finalizeRequest(quint32 requestID);
 
 	void getNextData(ArchRequestContextShared context);
@@ -165,7 +165,7 @@ class ArchRequestThread : public SimpleThread
 public:
 	ArchRequestThread(Archive& archive, CircularLoggerShared& logger);
 
-	ArchRequestContextShared startNewRequest(ArchRequestParam& param);
+	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime& startTime);
 	void finalizeRequest(quint32 requestID);
 
 	void getNextData(ArchRequestContextShared context);

@@ -116,8 +116,10 @@ namespace Tcp
 
 		//
 
+		bool m_bytesWritten = true;
+
 		Header m_header;
-		char* m_dataBuffer = nullptr;
+		char* m_receiveDataBuffer = nullptr;
 
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
 
@@ -154,6 +156,7 @@ namespace Tcp
 		void onSocketConnected();
 		void onSocketDisconnected();
 		void onSocketReadyRead();
+		void onSocketBytesWritten();
 
 	protected slots:
 		virtual void onWatchdogTimerTimeout();
