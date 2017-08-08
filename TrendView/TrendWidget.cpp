@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <QPaintEngine>
 #include <QPainter>
+#include <QPrinter>
 #include <QWidget>
 #include <QPdfWriter>
 #include <QMouseEvent>
@@ -154,13 +155,63 @@ namespace TrendLib
 		return true;
 	}
 
+	bool TrendWidget::print(QPrinter* printer) const
+	{
+		if (printer == nullptr ||
+			printer->isValid() == false)
+		{
+			assert(printer);
+			return false;
+		}
+
+		QPainter painter;
+
+		bool ok = painter.begin(printer);
+		if (ok == false)
+		{
+			assert(ok);
+			return false;
+		}
+
+		// Prepare DrawParam
+		//
+		TrendDrawParam drawParam = m_drawParam;
+
+		QRectF rc(printer->pageLayout().paintRect(QPageLayout::Inch));
+		double resolution = printer->resolution();
+
+		QRectF drawRect(rc.left() * resolution,
+						rc.top() * resolution,
+						rc.width() * resolution,
+						rc.height() * resolution);
+
+		drawParam.setRect(drawRect);
+		drawParam.setDpi(resolution, resolution);
+
+		// Draw to printer
+		//
+		m_trend.draw(&painter, drawParam, true);
+		m_trend.drawRullers(&painter, drawParam);
+
+		// Finish printing
+		//
+		ok = painter.end();
+		if (ok == false)
+		{
+			assert(ok);
+			return false;
+		}
+
+		return true;
+	}
+
 	void TrendWidget::paintEvent(QPaintEvent*)
 	{
 		QPainter painter(this);
 
 		if (m_pixmap.isNull() == true)
 		{
-			painter.fillRect(rect(), Qt::white);
+			painter.fillRect(rect(), m_drawParam.backgroundColor());
 			painter.setPen(Qt::black);
 			painter.drawText(rect(), Qt::AlignCenter, tr("Rendering initial image, please wait..."));
 			return;
@@ -170,7 +221,8 @@ namespace TrendLib
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
-			painter.drawPixmap(rect(), m_pixmap, m_pixmap.rect());
+			painter.fillRect(rect(), m_drawParam.backgroundColor());
+			painter.drawPixmap(m_pixmap.rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
 
@@ -467,9 +519,20 @@ namespace TrendLib
 		m_drawParam.setTimeType(value);
 	}
 
+	TimeStamp TrendWidget::startTime() const
+	{
+		TimeStamp ts(m_drawParam.startTime());
+		return ts;
+	}
+
 	void TrendWidget::setStartTime(const TimeStamp& startTime)
 	{
 		m_drawParam.setStartTimeStamp(startTime);
+	}
+
+	qint64 TrendWidget::duration() const
+	{
+		return m_drawParam.duration();
 	}
 
 	void TrendWidget::setDuration(qint64 interval)
