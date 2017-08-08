@@ -159,7 +159,7 @@ namespace Builder
 
 			std::vector<Hardware::DeviceModule*> subsystemModules;
 
-			LogicModule* logicModuleDescription = nullptr;
+			std::vector<LogicModule*> subsystemModulesDescriptions;
 
 			for (auto it = m_lmModules.begin(); it != m_lmModules.end(); it++)
 			{
@@ -198,13 +198,9 @@ namespace Builder
 						return false;
 					}
 
-					if (logicModuleDescription == nullptr)
+					if (std::find(subsystemModulesDescriptions.begin(), subsystemModulesDescriptions.end(), description) == subsystemModulesDescriptions.end())
 					{
-						logicModuleDescription = description;
-					}
-					else
-					{
-						assert(description == logicModuleDescription);
+						subsystemModulesDescriptions.push_back(description);
 					}
 				}
 			}
@@ -214,15 +210,18 @@ namespace Builder
 				continue;
 			}
 
-			if (logicModuleDescription == nullptr)
+			if (subsystemModulesDescriptions.empty() == true)
 			{
 				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, Logic Modules descriptions for subsystem %2 is undefined!").arg(__FUNCTION__).arg(subsystem->caption()));
 				return false;
 			}
 
-			if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
+			for (LogicModule* logicModuleDescription : subsystemModulesDescriptions)
 			{
-				return false;
+				if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
+				{
+					return false;
+				}
 			}
 		}
 

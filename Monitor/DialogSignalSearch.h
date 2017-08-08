@@ -8,7 +8,7 @@ namespace Ui {
 	class DialogSignalSearch;
 }
 
-class AppSignalParamIndexSorter	// later move this class to some library file, it can be used in other cases
+class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {
 public:
 
@@ -33,14 +33,14 @@ public:
 		TuningDefaultValue
 	};
 
-	AppSignalParamIndexSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn = Columns::SignalID, Qt::SortOrder sortOrder = Qt::AscendingOrder);
+	SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn = Columns::SignalID, Qt::SortOrder sortOrder = Qt::AscendingOrder);
 
 	bool operator()(int index1, int index2)
 	{
 		return sortFunction(index1, index2, this);
 	}
 
-	bool sortFunction(int index1, int index2, const AppSignalParamIndexSorter* pThis);
+	bool sortFunction(int index1, int index2, const SignalSearchSorter* pThis);
 
 private:
 	Columns m_sortColumn = Columns::SignalID;

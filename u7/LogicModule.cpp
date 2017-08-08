@@ -900,6 +900,6 @@ std::shared_ptr<LogicModule> LogicModuleSet::get(Hardware::DeviceModule* logicMo
 QString LogicModuleSet::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	assert(logicModule);
-	assert(logicModule->isLogicModule());
+	assert(logicModule->isFSCConfigurationModule());
 	return LogicModule::lmDescriptionFile(logicModule);
 }

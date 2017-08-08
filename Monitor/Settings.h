@@ -77,7 +77,7 @@ public:
 	QVector<int> m_signalSnapshotColumns;
 	int m_signalSnapshotSignalType = 0;
 	QStringList m_signalSnapshotMaskList;
-	DialogSignalSnapshot::MaskType m_signalSnapshotMaskType = DialogSignalSnapshot::MaskType::AppSignalId;
+	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
 	int m_signalSnapshotSortColumn = 0;
 	Qt::SortOrder m_signalSnapshotSortOrder = Qt::AscendingOrder;
 
