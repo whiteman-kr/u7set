@@ -40,6 +40,8 @@ private:
 	void disconnectFromDb();
 
 	void writeStatesToArchive(bool writeNow);
+	void appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr);
+
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
 
@@ -53,6 +55,9 @@ private:
 	Archive& m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
+
+	static QString m_format1;
+	static QString m_format2;
 
 	QTimer m_timer;
 

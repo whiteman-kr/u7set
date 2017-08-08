@@ -12,6 +12,7 @@ struct ArchSignal
 
 	Hash hash = 0;
 	bool isAnalog = false;
+	bool isInitialized = false;
 
 	//
 
@@ -52,6 +53,8 @@ public:
 	static QString timeTypeStr(TimeType timeType);
 
 	static qint64 localTimeOffsetFromUtc();
+
+	void setSignalInitialized(Hash signalHash, bool initilaized);
 
 private:
 	static const char* ARCH_DB_PREFIX;

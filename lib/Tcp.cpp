@@ -309,7 +309,7 @@ namespace Tcp
 
 		qint64 written = m_tcpSocket->write(data, size);
 
-		qDebug() << "Socket written bytes  =" << written;
+		//qDebug() << "Socket written bytes  =" << written;
 
 		if (written == -1)
 		{

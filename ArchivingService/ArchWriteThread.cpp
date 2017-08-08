@@ -9,6 +9,10 @@ const StringPair ArchWriteThreadWorker::m_upgradeFiles[] =
 };
 
 
+QString ArchWriteThreadWorker::m_format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
+QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
+
+
 ArchWriteThreadWorker::ArchWriteThreadWorker(Archive& archive,
 											 AppSignalStatesQueue& saveStatesQueue,
 											 CircularLoggerShared logger) :
@@ -566,14 +570,12 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		return;
 	}
 
-	const int MAX_STATES_IN_QUERY = 2000;
+	const int MAX_STATES_IN_QUERY = 1000;
 
 	if (writeNow == false && m_saveStatesQueue.size() < MAX_STATES_IN_QUERY)
 	{
 		return;
 	}
-
-	int count = 0;
 
 	int toWriteCount = 0;
 
@@ -582,11 +584,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 	t.start();
 
 	QString	arrayStr;
-
-	//arrayStr.reserve(2000000);		// reserve 2 000 000, usual arrayStr size is ~1 500 000
-
-	QString format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
-	QString format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
 
 	do
 	{
@@ -603,56 +600,48 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 
 		if (archSignal.canReadWrite == false)
 		{
-			count++;
 			continue;
 		}
 
-		m_timeFilter.setTimes(state.time);
+		//m_timeFilter.setTimes(state.time);
 
-/*
- *		res = saveAppSignalStateToArchive(state, isAnalogSignal);
-
-		if (res == false)
+		if (archSignal.isInitialized == false)
 		{
-			m_saveErrors++;
+			if (state.flags.valid == 1)
+			{
+				// first received state is valid,
+				// write invalid point at time offset -1 ms from received state
+				//
+				state.flags.valid = 0;
+				state.time.plant.timeStamp--;
+				state.time.system.timeStamp--;
+				state.time.local.timeStamp--;
+
+				appendToArray(state, archSignal.isAnalog, arrayStr);
+
+				// returns previous values of state fields
+				//
+				state.flags.valid = 1;
+				state.time.plant.timeStamp++;
+				state.time.system.timeStamp++;
+				state.time.local.timeStamp++;
+			}
+			else
+			{
+				// if received state is not valid,
+				// the below call of appendToArray(state, archSignal.isAnalog, arrayStr) is writes an invalid point and
+				// signal also can be assigned as initialized
+				//
+			}
+
+			m_archive.setSignalInitialized(state.hash, true);
 		}
-		else
-		{
-			written++;
-		} */
 
-		qint64 bigintHash = *reinterpret_cast<qint64*>(&state.hash);
-
-		bool writeToShortTimeArchiveOnly = state.flags.hasShortTermArchivingReasonOnly();
-
-		if (toWriteCount == 0)
-		{
-			arrayStr = QString(format1).
-					arg(bigintHash).
-					arg(state.time.plant.timeStamp).
-					arg(state.time.system.timeStamp).
-					arg(state.value).
-					arg(state.flags.all).
-					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
-					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
-		}
-		else
-		{
-			arrayStr.append(QString(format2).
-					arg(bigintHash).
-					arg(state.time.plant.timeStamp).
-					arg(state.time.system.timeStamp).
-					arg(state.value).
-					arg(state.flags.all).
-					arg(archSignal.isAnalog == true ? "TRUE" : "FALSE").
-					arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE"));
-		}
+		appendToArray(state, archSignal.isAnalog, arrayStr);
 
 		toWriteCount++;
-
-		count++;
 	}
-	while(count < MAX_STATES_IN_QUERY);
+	while(toWriteCount < MAX_STATES_IN_QUERY);
 
 	if (toWriteCount > 0)
 	{
@@ -665,6 +654,36 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		int time = t.elapsed();
 
 		qDebug() << "Write states " << toWriteCount << "time " << time << "(per write =" << double(time) / toWriteCount << ")";
+	}
+}
+
+void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr)
+{
+	qint64 bigintHash = *reinterpret_cast<const qint64*>(&state.hash);
+
+	bool writeToShortTimeArchiveOnly = state.flags.hasShortTermArchivingReasonOnly();
+
+	if (arrayStr.isEmpty() == true)
+	{
+		arrayStr = QString(m_format1).
+				arg(bigintHash).
+				arg(state.time.plant.timeStamp).
+				arg(state.time.system.timeStamp).
+				arg(state.value).
+				arg(state.flags.all).
+				arg(isAnalog == true ? "TRUE" : "FALSE").
+				arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
+	}
+	else
+	{
+		arrayStr.append(QString(m_format2).
+				arg(bigintHash).
+				arg(state.time.plant.timeStamp).
+				arg(state.time.system.timeStamp).
+				arg(state.value).
+				arg(state.flags.all).
+				arg(isAnalog == true ? "TRUE" : "FALSE").
+				arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE"));
 	}
 }
 

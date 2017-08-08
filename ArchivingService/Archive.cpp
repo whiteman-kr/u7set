@@ -161,5 +161,17 @@ qint64 Archive::localTimeOffsetFromUtc()
 }
 
 
+void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
+{
+	if (m_archSignals.contains(signalHash) == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_archSignals[signalHash].isInitialized = initilaized;
+}
+
+
 
 
