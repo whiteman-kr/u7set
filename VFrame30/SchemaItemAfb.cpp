@@ -127,7 +127,9 @@ namespace VFrame30
 							case E::DataFormat::Float:
 								paramValue.setNum(a.toDouble(), 'g', precision());
 
-								if (paramValue.size() > 2)
+								if (paramValue.contains(QChar('.')) == true &&
+									paramValue.contains(QChar('e')) == false &&
+									paramValue.size() > 2)
 								{
 									while(paramValue.endsWith('0'))
 									{
