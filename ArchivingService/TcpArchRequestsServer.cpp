@@ -167,6 +167,10 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 
 	sendReply(nextReply);
 
+	DEBUG_LOG_MSG(m_logger, QString("Send next reply: requestID = %1, states count = %2").
+				  arg(m_currentRequest->requestID()).
+				  arg(nextReply.statesinpartcount()))
+
 	if (nextReply.islastpart() == false)
 	{
 		m_archRequestThread.getNextData(m_currentRequest);
