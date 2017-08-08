@@ -297,16 +297,14 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 		return 0;
 	}
 
-	int found = 0;
-
-	result->clear();
-	result->reserve(appSignalHashes.size());
-
 	QMutexLocker l(&m_statesMutex);
+
+	int found = 0;
 
 	for (const Hash& signalHash : appSignalHashes)
 	{
 		AppSignalState state;
+
 		state.m_flags.valid = false;
 
 		auto foundState = m_signalStates.find(signalHash);
@@ -319,8 +317,6 @@ int AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std:
 
 		result->push_back(state);
 	}
-
-	assert(appSignalHashes.size() == result->size());
 
 	return found;
 }

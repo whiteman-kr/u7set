@@ -5,7 +5,7 @@
 #include "Stable.h"
 #include "Settings.h"
 
-AppSignalParamIndexSorter::AppSignalParamIndexSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
+SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec, Columns sortColumn, Qt::SortOrder sortOrder):
 	m_appSignalParamVec(appSignalParamVec),
 	m_sortColumn(sortColumn),
 	m_sortOrder(sortOrder)
@@ -16,7 +16,7 @@ AppSignalParamIndexSorter::AppSignalParamIndexSorter(std::vector<AppSignalParam>
 	}
 }
 
-bool AppSignalParamIndexSorter::sortFunction(int index1, int index2, const AppSignalParamIndexSorter* pThis)
+bool SignalSearchSorter::sortFunction(int index1, int index2, const SignalSearchSorter* pThis)
 {
 	if (m_appSignalParamVec == nullptr)
 	{
@@ -398,7 +398,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 		signalsIndexVector[i] = i;
 	}
 
-	std::sort(signalsIndexVector.begin(), signalsIndexVector.end(), AppSignalParamIndexSorter(&m_signals));
+	std::sort(signalsIndexVector.begin(), signalsIndexVector.end(), SignalSearchSorter(&m_signals));
 
 	std::vector<AppSignalParam> sortedSignals;
 	sortedSignals.resize(signalsCount);
