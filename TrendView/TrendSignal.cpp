@@ -287,6 +287,85 @@ namespace TrendLib
 		return result;
 	}
 
+	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
+	{
+		// Get already reqquested and received (o read form file) data
+		// Don't request any data if it is not present
+		//
+		if (outData == nullptr ||
+			from > to)
+		{
+			assert(outData);
+			assert(from <= to);
+			return false;
+		}
+
+		// Find Signal
+		//
+		QMutexLocker locker(&m_archiveMutex);
+
+		std::map<QString, TrendArchive>* m_archive = nullptr;
+		switch (timeType)
+		{
+		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		default:
+			assert(false);
+			return false;
+		}
+
+		auto archiveIt = m_archive->find(appSignalId);
+		if (archiveIt == m_archive->end())
+		{
+			return false;
+		}
+
+		TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
+
+		// Round from/to to 1hour
+		//
+		TimeStamp fromTimeStamp((from.toMSecsSinceEpoch() / 1_hour) * 1_hour);
+		TimeStamp toTimeStamp((to.toMSecsSinceEpoch() / 1_hour) * 1_hour + (to.toMSecsSinceEpoch() % 1_hour == 0 ? 0 : 1_hour));
+
+//		qDebug() << "getExistingTrendData for appSignalID: " << appSignalId;
+//		qDebug() << "\tAsk data from " << from << ", rounded to " << fromTimeStamp.toDateTime();
+//		qDebug() << "\tAsk data to  " << to << ", rounded to " << toTimeStamp.toDateTime();
+
+		// --
+		//
+		for (TimeStamp archHour = fromTimeStamp; archHour < toTimeStamp; archHour.timeStamp += 1_hour)
+		{
+			if (archHour.toDateTime().time().minute() != 0 ||
+				archHour.toDateTime().time().second() != 0 ||
+				archHour.toDateTime().time().msec() != 0)
+			{
+				assert(archHour.toDateTime().time().minute() == 0);
+				assert(archHour.toDateTime().time().second() == 0);
+				assert(archHour.toDateTime().time().msec() == 0);
+				return false;
+			}
+
+			auto archHourIt = archive.m_hours.find(archHour);
+
+			if (archHourIt == archive.m_hours.end())
+			{
+				continue;
+			}
+
+			std::shared_ptr<OneHourData> hourData = archHourIt->second;
+			if (hourData == nullptr)
+			{
+				assert(hourData);
+				continue;
+			}
+
+			outData->push_back(hourData);		// Request state does not matter
+		}
+
+		return true;
+	}
+
 	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
@@ -333,7 +412,7 @@ namespace TrendLib
 
 			// --
 			//
-			for (TimeStamp archHour = fromTimeStamp; archHour <= toTimeStamp; archHour.timeStamp += 1_hour)
+			for (TimeStamp archHour = fromTimeStamp; archHour < toTimeStamp; archHour.timeStamp += 1_hour)
 			{
 				if (archHour.toDateTime().time().minute() != 0 ||
 					archHour.toDateTime().time().second() != 0 ||

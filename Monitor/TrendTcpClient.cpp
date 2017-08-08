@@ -141,8 +141,8 @@ void TrendTcpClient::requestStart()
 		return;
 	}
 
-	m_currentRequest = m_queue.front();
-	m_queue.pop();
+	m_currentRequest = m_queue.back();	// THESE TWO LINES MUST BE IN CONSISTENCY!!!!
+	m_queue.pop_back();					// Take the last one, let's assume it is shown now and more important
 
 	m_statTcpRequestCount ++;
 	requestInProgress = true;
@@ -358,7 +358,19 @@ void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToReque
 	request.hourToRequest = hourToRequest;
 	request.timeType = timeType;
 
-	m_queue.push(request);
+	// Check if such request already in the queue
+	//
+	for (const RequestQueue& rq : m_queue)
+	{
+		if (rq == request)
+		{
+			return;
+		}
+	}
+
+	// Add request to the queue
+	//
+	m_queue.push_back(request);
 
 	return;
 }

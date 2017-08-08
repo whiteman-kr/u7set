@@ -58,9 +58,16 @@ private:
 		QString appSignalId;
 		TimeStamp hourToRequest;
 		TimeType timeType;
+
+		bool operator== (const RequestQueue& r) const
+		{
+			return	this->appSignalId == r.appSignalId &&
+					this->hourToRequest == r.hourToRequest &&
+					this->timeType == r.timeType;
+		}
 	};
 
-	std::queue<RequestQueue> m_queue;
+	std::list<RequestQueue> m_queue;
 
 private:
 	bool requestInProgress = false;

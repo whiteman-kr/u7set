@@ -11,61 +11,32 @@ namespace Ui {
 class DialogSignalSnapshot;
 }
 
-typedef std::pair<Hash, AppSignalState> SnapshotItem;
+class SignalSnapshotModel;
 
-class SnapshotItemModel;
-
-class SnapshotItemSorter
+class SignalSnapshotSorter
 {
 public:
-	  SnapshotItemSorter(int column, Qt::SortOrder order, SnapshotItemModel* model);
+	  SignalSnapshotSorter(int column, SignalSnapshotModel* model);
 
-	  bool operator()(const SnapshotItem& o1, const SnapshotItem& o2) const
+	  bool operator()(int index1, int index2) const
 	  {
-		  return sortFunction(o1, o2, m_column, m_order);
+		  return sortFunction(index1, index2);
 	  }
 
-	  bool sortFunction(const SnapshotItem& o1, const SnapshotItem& o2, int column, Qt::SortOrder order) const;
+	  bool sortFunction(int index1, int index2) const;
 
 private:
 	  int m_column = -1;
 
-	  Qt::SortOrder m_order = Qt::AscendingOrder;
-
-	  SnapshotItemModel* m_model = nullptr;
+	  SignalSnapshotModel* m_model = nullptr;
 };
 
 
-class SnapshotItemModel : public QAbstractItemModel
+class SignalSnapshotModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
-public:
-	SnapshotItemModel(QObject *parent);
-
-public:
-
-	std::vector<int> columnsIndexes() const;
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
-
-	int columnIndex(int index) const;
-	QStringList columnsNames() const;
-
-	Hash signalHash(int index) const;
-
-	AppSignalParam signalParam(Hash hash, bool* found) const;
-
-	void setSignals(std::vector<SnapshotItem>* signalsTable);
-
-	void updateStates(int from, int to);
-
-	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-	void sort(int column, Qt::SortOrder order) override;
+	friend class SignalSnapshotSorter;
 
 public:
 
@@ -82,12 +53,10 @@ public:
 		LocalTime,
 		PlantTime,
 		Value,
-		Valid,
-		//Underflow,
-		//Overflow,
+		Valid
 	};
 
-	enum class TypeFilter
+	enum class SignalType
 	{
 		All = 0,
 		AnalogInput,
@@ -95,6 +64,52 @@ public:
 		DiscreteInput,
 		DiscreteOutput
 	};
+
+	enum class MaskType
+	{
+		All,
+		AppSignalId,
+		CustomAppSignalId,
+		EquipmentId
+	};
+
+public:
+	SignalSnapshotModel(QObject *parent);
+
+public:
+	// Properties
+
+	std::vector<int> columnsIndexes() const;
+	void setColumnsIndexes(std::vector<int> columnsIndexes);
+
+	int columnIndex(int index) const;
+	QStringList columnsNames() const;
+
+	// Overrides
+
+	QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+
+	// Operations
+
+	void setSignalType(SignalType type);
+
+	void setMasks(const QStringList& masks);
+
+	void setSchemaAppSignals(std::set<QString> schemaAppSignals);
+
+	void fillSignals();
+
+	void updateStates(int from, int to);
+
+	void sort(int column, Qt::SortOrder order) override;
+
+	AppSignalParam signalParam(int rowIndex, bool* found);
+
+	AppSignalState signalState(int rowIndex, bool* found);
 
 protected:
 	QModelIndex parent(const QModelIndex &index) const override;
@@ -105,11 +120,24 @@ protected:
 
 private:
 
-	std::vector<std::pair<Hash, AppSignalState>> m_signalsTable;
-
 	QStringList m_columnsNames;
 	std::vector<int> m_columnsIndexes;
 
+	// Model data
+
+	std::vector<AppSignalParam> m_allSignals;
+
+	std::vector<AppSignalState> m_allStates;
+
+	std::vector<int> m_filteredSignals;
+
+	// Filtering parameters
+
+	SignalType m_signalType = SignalType::All;
+
+	QStringList m_masks;
+
+	std::set<QString> m_schemaAppSignals;
 };
 
 class DialogSignalSnapshot : public QDialog
@@ -154,20 +182,9 @@ private:
 
 	void maskChanged();
 
-	void fillSignals();
-
 	void fillSchemas();
 
-public:
-
-
-	enum class MaskType
-	{
-		All,
-		AppSignalId,
-		CustomAppSignalId,
-		EquipmentId
-	};
+	void fillSignals();
 
 private:
 
@@ -175,21 +192,11 @@ private:
 
 	QCompleter* m_completer = nullptr;
 
-	SnapshotItemModel *m_model = nullptr;
+	SignalSnapshotModel *m_model = nullptr;
 
 	MonitorConfigController* m_configController = nullptr;
 
 	int m_updateStateTimerId = -1;
-
-	// Dialog data
-
-	std::vector<Hash> m_signalsHashes;
-
-	// Filtering parameters
-
-	SnapshotItemModel::TypeFilter m_signalType = SnapshotItemModel::TypeFilter::All;
-
-	QStringList m_strIdMasks;
 };
 
 #endif // DIALOGSIGNALSNAPSHOT_H

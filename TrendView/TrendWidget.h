@@ -4,6 +4,8 @@
 #include "Trend.h"
 #include "TrendRuller.h"
 
+class QPrinter;
+
 namespace TrendLib
 {
 	class RenderThread : public QThread
@@ -50,6 +52,7 @@ namespace TrendLib
 
 		bool saveImageToFile(QString fileName) const;
 		bool saveToPdf(QString fileName, QPageSize::PageSizeId pageSize, QPageLayout::Orientation pageOrientation) const;
+		bool print(QPrinter* printer) const;
 
 		// Events
 		//
@@ -101,7 +104,10 @@ namespace TrendLib
 		TimeType timeType() const;
 		void setTimeType(TimeType value);
 
+		TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);
+
+		qint64 duration() const;
 		void setDuration(qint64 interval);
 
 	private:
