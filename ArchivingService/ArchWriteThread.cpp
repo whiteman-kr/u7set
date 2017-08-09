@@ -13,9 +13,11 @@ QString ArchWriteThreadWorker::m_format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalSt
 QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
 
 
-ArchWriteThreadWorker::ArchWriteThreadWorker(Archive& archive,
+ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
+											 Archive& archive,
 											 AppSignalStatesQueue& saveStatesQueue,
 											 CircularLoggerShared logger) :
+	m_dbHost(dbHost),
 	m_archive(archive),
 	m_saveStatesQueue(saveStatesQueue),
 	m_logger(logger),
@@ -58,8 +60,8 @@ bool ArchWriteThreadWorker::tryConnectToDb()
 		return false;
 	}
 
-	db.setHostName("127.0.0.1");
-	db.setPort(5432);
+	db.setHostName(m_dbHost.addressStr());
+	db.setPort(m_dbHost.port());
 	db.setDatabaseName("postgres");
 	db.setUserName("u7arch");
 	db.setPassword("arch876436");
@@ -98,8 +100,8 @@ bool ArchWriteThreadWorker::tryConnectToDb()
 		return false;
 	}
 
-	m_db.setHostName("127.0.0.1");
-	m_db.setPort(5432);
+	m_db.setHostName(m_dbHost.addressStr());
+	m_db.setPort(m_dbHost.port());
 	m_db.setDatabaseName(m_archive.dbName());
 	m_db.setUserName("u7arch");
 	m_db.setPassword("arch876436");
@@ -820,11 +822,13 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 	writeStatesToArchive(false);
 }
 
-ArchWriteThread::ArchWriteThread(Archive& archive,
+ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
+								 Archive& archive,
 								 AppSignalStatesQueue& saveStatesQueue,
 								 CircularLoggerShared logger)
 {
-	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(archive,
+	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(dbHost,
+															  archive,
 															  saveStatesQueue,
 															  logger);
 

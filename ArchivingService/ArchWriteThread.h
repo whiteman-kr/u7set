@@ -5,6 +5,8 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
+#include "../lib/HostAddressPort.h"
+
 #include "TimeFilter.h"
 
 #include "Archive.h"
@@ -13,7 +15,8 @@
 class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
-	ArchWriteThreadWorker(Archive& archive,
+	ArchWriteThreadWorker(const HostAddressPort& dbHost,
+						  Archive& archive,
 						  AppSignalStatesQueue& saveStatesQueue,
 						  CircularLoggerShared logger);
 
@@ -52,6 +55,8 @@ private slots:
 	void onSaveStatesQueueIsNotEmpty();
 
 private:
+	HostAddressPort m_dbHost;
+
 	Archive& m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
@@ -82,7 +87,8 @@ private:
 class ArchWriteThread : public SimpleThread
 {
 public:
-	ArchWriteThread(Archive& archive,
+	ArchWriteThread(const HostAddressPort& dbHost,
+					Archive& archive,
 					AppSignalStatesQueue& saveStatesQueue,
 					CircularLoggerShared logger);
 };
