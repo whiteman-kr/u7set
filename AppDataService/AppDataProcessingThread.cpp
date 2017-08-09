@@ -26,12 +26,20 @@ void AppDataProcessingWorker::onThreadStarted()
 {
 	connect(&m_rupDataQueue, &RupDataQueue::queueNotEmpty, this, &AppDataProcessingWorker::slot_rupDataQueueIsNotEmpty);
 	qDebug() << "Processing thread started" << m_number;
+
+	initAutoArchiving();
 }
 
 
 void AppDataProcessingWorker::onThreadFinished()
 {
 	qDebug() << "Processing thread finished" << m_number;
+}
+
+
+void AppDataProcessingWorker::initAutoArchiving()
+{
+
 }
 
 
@@ -77,6 +85,8 @@ void AppDataProcessingWorker::parseRupData()
 		return;
 	}
 
+	int autoArchivingGroup = sourceParseInfo->getAutoArchivingGroup(m_rupData.time.system.timeStamp);
+
 	quint32 validity = 0;
 	double value = 0;
 	bool result = true;
@@ -112,7 +122,7 @@ void AppDataProcessingWorker::parseRupData()
 			continue;
 		}
 
-		bool hasArchivingReason = signalState->setState(m_rupData.time, validity, value);
+		bool hasArchivingReason = signalState->setState(m_rupData.time, validity, value, autoArchivingGroup);
 
 		if (hasArchivingReason == true)
 		{

@@ -46,7 +46,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 
-bool AppSignalStateEx::setState(Times time, quint32 validity, double value)
+bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int autoArchivingGroup)
 {
 	// update current state
 	//
@@ -131,6 +131,13 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value)
 		}
 	}
 
+	if (m_autoArchivingGroup == autoArchivingGroup)
+	{
+		m_current.flags.autoPoint = 1;
+
+//		qDebug() << "Auto " << m_signal->appSignalID();
+	}
+
 	bool hasArchivingReason = m_current.flags.hasArchivingReason();
 
 	if (hasArchivingReason == true)
@@ -147,6 +154,7 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value)
 Hash AppSignalStateEx::hash() const
 {
 	assert(m_current.hash == m_stored.hash);
+	assert(m_current.hash != 0);
 
 	return m_current.hash;
 }
@@ -161,6 +169,19 @@ QString AppSignalStateEx::appSignalID() const
 	}
 
 	return m_signal->appSignalID();
+}
+
+
+void AppSignalStateEx::setAutoArchivingGroup(int groupsCount)
+{
+	if (groupsCount == 0)
+	{
+		m_autoArchivingGroup = -2;
+	}
+	else
+	{
+		m_autoArchivingGroup = static_cast<int>(hash() % groupsCount);
+	}
 }
 
 
@@ -279,6 +300,13 @@ bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 }
 
 
+void AppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
+{
+	for(int i = 0; i < m_size; i++)
+	{
+		m_appSignalState[i].setAutoArchivingGroup(autoArchivingGroupsCount);
+	}
+}
 
 // -------------------------------------------------------------------------------
 //

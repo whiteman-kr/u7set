@@ -29,6 +29,8 @@ private:
 	double m_absRoughAperture = 0;
 	double m_absSmoothAperture = 0;
 
+	int m_autoArchivingGroup = -2;
+
 	Signal* m_signal = nullptr;
 	int m_index = 0;
 
@@ -36,7 +38,7 @@ public:
 	AppSignalStateEx();
 
 	void setSignalParams(int index, Signal* signal);
-	bool setState(Times time, quint32 validity, double value);
+	bool setState(Times time, quint32 validity, double value, int autoArchivingGroup);
 
 	void invalidate() { m_current.flags.all = 0; }
 
@@ -48,6 +50,8 @@ public:
 
 	const SimpleAppSignalState& current() const { return m_current; }
 	const SimpleAppSignalState& stored() const { return m_stored; }
+
+	void setAutoArchivingGroup(int groupsCount);
 };
 
 
@@ -76,6 +80,8 @@ public:
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
 	bool getStoredState(Hash hash, AppSignalState& state) const;
+
+	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 };
 
 

@@ -22,6 +22,8 @@ private:
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
 
+	void initAutoArchiving();
+
 	void parseRupData();
 	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
 	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
@@ -48,7 +50,8 @@ private:
 class AppDataProcessingThread : public SimpleThread
 {
 public:
- AppDataProcessingThread(int number, RupDataQueue& rupDataQueue,
+ AppDataProcessingThread(	int number,
+							RupDataQueue& rupDataQueue,
 							const SourceParseInfoMap& sourceParseInfoMap,
 							AppSignalStates& signalStates,
 							AppSignalStatesQueue& signalStatesQueue);
