@@ -5331,6 +5331,52 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initOutputModulesMemory()
 	{
+		// init LM's outputs memory area
+		//
+		Hardware::DeviceController* lmOutsController = DeviceHelper::getChildControllerBySuffix(m_lm, "_CTRLOUT", m_log);
+
+		if (lmOutsController == nullptr)
+		{
+			return false;
+		}
+
+		Hardware::DeviceObject* lmOut1Object = DeviceHelper::getChildDeviceObjectBySuffix(lmOutsController, "_OUT01", m_log);
+		Hardware::DeviceObject* lmOut6Object = DeviceHelper::getChildDeviceObjectBySuffix(lmOutsController, "_OUT06", m_log);
+
+		if (lmOut1Object == nullptr || lmOut6Object == nullptr)
+		{
+			return false;
+		}
+
+		Hardware::DeviceSignal* lmOut1 = lmOut1Object->toSignal();
+		Hardware::DeviceSignal* lmOut6 = lmOut6Object->toSignal();
+
+		if (lmOut1 == nullptr || lmOut6 == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (lmOut1->valueOffset() != lmOut6->valueOffset())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		int lmOutsMemoryOffset = m_lmDescription->memory().m_appDataOffset + lmOut1->valueOffset();
+
+		m_code.comment("Init LM's output signals memory");
+		m_code.newLine();
+
+		Command cmd;
+
+		cmd.movConst(lmOutsMemoryOffset, 0);
+		m_code.append(cmd);
+
+		m_code.newLine();
+
+		// init output modules memory
+		//
 		bool firstModule = true;
 
 		for(Module& module : m_modules)
@@ -5347,8 +5393,6 @@ namespace Builder
 
 				firstModule = false;
 			}
-
-			Command cmd;
 
 			cmd.setMem(module.moduleDataOffset, 0, module.rxDataSize);
 			cmd.setComment(QString("place %1 module %2").arg(module.place).arg(getModuleFamilyTypeStr(module.familyType())));

@@ -1066,6 +1066,27 @@ namespace Builder
 				  .arg(archServiceID));
 	}
 
+	/// IssueCode: CFG3025
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't find child controller with suffix '%1' in object '%2'
+	///
+	/// Parameters:
+	///         %1 Suffix
+	///         %2 Object ID
+	///
+	/// Description:
+	///			Occurs if cant't find child controller with certain suffix in parent object.
+	///
+	void IssueLogger::errCFG3025(QString suffix, QString objectID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3025,
+				  tr("Can't find child controller with suffix '%1' in object '%2'.")
+				  .arg(suffix)
+				  .arg(objectID));
+	}
 
 	// ALP			Application Logic Parsing				4000-4999
 	//

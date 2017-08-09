@@ -8,6 +8,24 @@
 
 class AppDataProcessingWorker : public SimpleThreadWorker
 {
+public:
+	AppDataProcessingWorker(int number,
+							RupDataQueue& rupDataQueue,
+							const SourceParseInfoMap& sourceParseInfoMap,
+							AppSignalStates& signalStates,
+							AppSignalStatesQueue& signalStatesQueue);
+
+public slots:
+	void slot_rupDataQueueIsNotEmpty();
+
+private:
+	virtual void onThreadStarted() override;
+	virtual void onThreadFinished() override;
+
+	void parseRupData();
+	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
+	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
+
 private:
 	int m_number = 0;
 	RupDataQueue& m_rupDataQueue;
@@ -24,25 +42,6 @@ private:
 	quint64 m_valueParsingErrorCount = 0;
 	quint64 m_validityParsingErrorCount = 0;
 	quint64 m_badSignalStateIndexCount = 0;
-
-	//
-
-	virtual void onThreadStarted() override;
-	virtual void onThreadFinished() override;
-
-	void parseRupData();
-	bool getDoubleValue(const SignalParseInfo& parseInfo, double& value);
-	bool getValidity(const SignalParseInfo& parseInfo, quint32& validity);
-
-public:
-	AppDataProcessingWorker(int number,
-							RupDataQueue& rupDataQueue,
-							const SourceParseInfoMap& sourceParseInfoMap,
-							AppSignalStates& signalStates,
-							AppSignalStatesQueue& signalStatesQueue);
-
-public slots:
-	void slot_rupDataQueueIsNotEmpty();
 };
 
 
