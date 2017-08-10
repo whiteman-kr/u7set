@@ -68,6 +68,8 @@ private:
 
 	QSqlDatabase m_db;				// project archive database
 
+	bool m_firstState = true;
+
 	static const StringPair m_upgradeFiles[];
 
 	//

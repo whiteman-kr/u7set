@@ -73,6 +73,7 @@ public:
 	bool createGetSignalStatesQueryStr(const Archive& archive);
 
 	bool executeQuery(const Archive& archive, QSqlDatabase& db, CircularLoggerShared& logger);
+	bool initArchId(QSqlDatabase& db, CircularLoggerShared& logger);
 
 	void getNextData();
 
@@ -113,6 +114,9 @@ private:
 	qint64 m_expandedRequestEndTime = 0;
 
 	QString m_cmpField;
+
+	qint64 m_startArchID = 0;
+	qint64 m_endArchID = 0;
 
 	//
 

@@ -29,7 +29,7 @@ public:
 	};
 
 	static const int TIME_1S = 1000;								// 1000 millisecond
-	static const int TIME_TO_EXPAND_REQUEST = 65 * TIME_1S;			// 65 seconds
+	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
 
 	static const char* FIELD_PLANT_TIME;
 	static const char* FIELD_SYSTEM_TIME;

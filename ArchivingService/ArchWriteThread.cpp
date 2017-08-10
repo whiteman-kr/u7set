@@ -546,7 +546,14 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			state.flags.smoothAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
 		}
 
-		//m_timeFilter.setTimes(state.time);
+		m_timeFilter.setTimes(state.time);
+
+		if (m_firstState == true)
+		{
+			writeTimeMark();
+
+			m_firstState = false;
+		}
 
 		if (archSignal.isInitialized == false)
 		{
@@ -741,7 +748,7 @@ void ArchWriteThreadWorker::onTimer()
 	int currMinute = t.minute();
 	int currSecond = t.second();
 
-	bool writeNow = (currSecond % 10) == 0 ? true : false;
+	bool writeNow = (currSecond % 5) == 0 ? true : false;
 
 	writeStatesToArchive(writeNow);
 
