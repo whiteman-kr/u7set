@@ -119,6 +119,14 @@ namespace TrendLib
 		QColor color() const;
 		void setColor(const QColor& value);
 
+		// Temporary variables properties
+		//
+		int tempSignalIndex() const;
+		void setTempSignalIndex(int value);
+
+		QRectF tempDrawRect() const;
+		void setTempDrawRect(const QRectF& value);
+
 		// Data
 		//
 	private:
@@ -138,6 +146,12 @@ namespace TrendLib
 		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
+
+		// Temporary variables used in drawing
+		//
+	private:
+		int m_tempSignalIndex;		// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
+		QRectF m_tempDrawRect;		// Draw signal area
 	};
 
 	class TrendSignalSet : public QObject

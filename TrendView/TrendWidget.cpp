@@ -211,7 +211,7 @@ namespace TrendLib
 
 		if (m_pixmap.isNull() == true)
 		{
-			painter.fillRect(rect(), m_drawParam.backgroundColor());
+			painter.fillRect(rect(), m_drawParam.backColor1st());
 			painter.setPen(Qt::black);
 			painter.drawText(rect(), Qt::AlignCenter, tr("Rendering initial image, please wait..."));
 			return;
@@ -221,7 +221,7 @@ namespace TrendLib
 		{
 			// New pixmap is not ready yet, scale the current one
 			//
-			painter.fillRect(rect(), m_drawParam.backgroundColor());
+			painter.fillRect(rect(), m_drawParam.backColor1st());
 			painter.drawPixmap(m_pixmap.rect(), m_pixmap, m_pixmap.rect());
 			return;
 		}
