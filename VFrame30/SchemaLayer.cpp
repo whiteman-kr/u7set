@@ -190,7 +190,7 @@ namespace VFrame30
 		{
 			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
 
-			if (qobject_cast<ItemType>(item.get()) != nullptr &&
+			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
 				item->IsIntersectPoint(x, y) == true)
 			{
 				return std::dynamic_pointer_cast<SchemaItemType>(item);

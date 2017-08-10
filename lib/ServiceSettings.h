@@ -63,11 +63,15 @@ private:
 	static const char* PROP_CLIENT_REQUEST_PORT;
 	static const char* PROP_CLIENT_REQUEST_NETMASK;
 
+	static const char* PROP_AUTO_ARCHIVE_INTERVAL;
+
 public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
 	AppDataServiceChannel appDataServiceChannel[DATA_CHANNEL_COUNT];
+
+	int autoArchiveInterval = 5;
 
 	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
@@ -144,10 +148,8 @@ public:
 	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_PORT;
 	static const char* PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK;
 
-	class Db
-	{
-		HostAddressPort host;
-	};
+	static const char* PROP_ARCHIVE_DB_HOST_IP;
+	static const char* PROP_ARCHIVE_DB_HOST_PORT;
 
 public:
 	HostAddressPort clientRequestIP;
@@ -158,6 +160,8 @@ public:
 
 	HostAddressPort diagDataServiceRequestIP;
 	QHostAddress diagDataServiceRequestNetmask;
+
+	HostAddressPort dbHost = HostAddressPort("127.0.0.1", 5432);
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);

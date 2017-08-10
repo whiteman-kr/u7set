@@ -9,13 +9,17 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannel::AppDataChannel(int channel, const HostAddressPort& dataReceivingIP, AppSignalStatesQueue& signalStatesQueue) :
-	m_dataType(DataSource::DataType::App),
+AppDataChannel::AppDataChannel(int channel,
+							   const HostAddressPort& dataReceivingIP,
+							   AppSignalStatesQueue& signalStatesQueue,
+							   int autoArchivingGroupsCount) :
 	m_channel(channel),
 	m_dataReceivingIP(dataReceivingIP),
+	m_signalStatesQueue(signalStatesQueue),
+	m_autoArchivingGroupsCount(autoArchivingGroupsCount),
+	m_dataType(DataSource::DataType::App),
 	m_rupDataQueue(500),
-	m_timer1s(this),
-	m_signalStatesQueue(signalStatesQueue)
+	m_timer1s(this)
 {
 }
 
@@ -51,7 +55,7 @@ void AppDataChannel::prepare(AppSignals& appSignals, AppSignalStates* signalStat
 			continue;
 		}
 
-		SourceSignalsParseInfo* sourceParseInfo = new SourceSignalsParseInfo();
+		SourceSignalsParseInfo* sourceParseInfo = new SourceSignalsParseInfo(m_autoArchivingGroupsCount);
 
 		// scan signals associated with DataSource
 		//
@@ -217,7 +221,7 @@ void AppDataChannel::invalidateDataSourceSignals(quint32 dataSourceIP, qint64 cu
 			continue;
 		}
 
-		signalState->setState(time, AppSignalState::INVALID, 0);
+		signalState->setState(time, AppSignalState::INVALID, 0, NO_AUTOARCHIVING_GROUP);
 	}
 
 	HostAddressPort addr(dataSourceIP, 0);
@@ -309,9 +313,12 @@ void AppDataChannel::onSocketReadyRead()
 //
 // -------------------------------------------------------------------------------
 
-AppDataChannelThread::AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP, AppSignalStatesQueue& signalStatesQueue)
+AppDataChannelThread::AppDataChannelThread(int channel,
+										   const HostAddressPort& dataRecievingIP,
+										   AppSignalStatesQueue& signalStatesQueue,
+										   int autoArchivingGroupsCount)
 {
-	m_appDataChannel = new AppDataChannel(channel, dataRecievingIP, signalStatesQueue);
+	m_appDataChannel = new AppDataChannel(channel, dataRecievingIP, signalStatesQueue, autoArchivingGroupsCount);
 	addWorker(m_appDataChannel);
 }
 

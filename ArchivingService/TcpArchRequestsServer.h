@@ -25,6 +25,8 @@ private:
 	void onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize);
 	void onGetSignalStatesFromArchiveCancel(const char* requestData, quint32 requestDataSize);
 
+	void finalizeCurrentRequest();
+
 	quint32 getNewRequestID();
 
 private:

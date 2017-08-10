@@ -5,6 +5,8 @@
 #include "../lib/SimpleThread.h"
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
+#include "../lib/HostAddressPort.h"
+
 #include "TimeFilter.h"
 
 #include "Archive.h"
@@ -13,7 +15,8 @@
 class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
-	ArchWriteThreadWorker(Archive& archive,
+	ArchWriteThreadWorker(const HostAddressPort& dbHost,
+						  Archive& archive,
 						  AppSignalStatesQueue& saveStatesQueue,
 						  CircularLoggerShared logger);
 
@@ -40,6 +43,8 @@ private:
 	void disconnectFromDb();
 
 	void writeStatesToArchive(bool writeNow);
+	void appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr);
+
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
 
@@ -50,9 +55,14 @@ private slots:
 	void onSaveStatesQueueIsNotEmpty();
 
 private:
+	HostAddressPort m_dbHost;
+
 	Archive& m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
+
+	static QString m_format1;
+	static QString m_format2;
 
 	QTimer m_timer;
 
@@ -77,7 +87,8 @@ private:
 class ArchWriteThread : public SimpleThread
 {
 public:
-	ArchWriteThread(Archive& archive,
+	ArchWriteThread(const HostAddressPort& dbHost,
+					Archive& archive,
 					AppSignalStatesQueue& saveStatesQueue,
 					CircularLoggerShared logger);
 };

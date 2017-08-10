@@ -100,6 +100,8 @@ private:
 
 	AppDataServiceSettings m_cfgSettings;
 
+	int m_autoArchivingGroupsCount = 0;
+
 	UnitList m_unitInfo;
 
 	AppSignals m_appSignals;

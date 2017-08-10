@@ -1,5 +1,6 @@
 #include "Trend.h"
 #include "QPainter"
+#include <cfloat>
 
 namespace TrendLib
 {

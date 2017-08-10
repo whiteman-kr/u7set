@@ -32,7 +32,7 @@ void AppSignalStateFlags::clearReasonsFlags()
 	smoothAperture = 0;
 }
 
-bool AppSignalStateFlags::hasArchivingReason()
+bool AppSignalStateFlags::hasArchivingReason() const
 {
 	return	validityChange == 1 ||
 			autoPoint == 1 ||
@@ -40,14 +40,13 @@ bool AppSignalStateFlags::hasArchivingReason()
 			smoothAperture == 1;
 }
 
-bool AppSignalStateFlags::hasShortTermArchivingReasonOnly()
+bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 {
 	return	validityChange == 0 &&
 			autoPoint == 0 &&
 			roughAperture == 0 &&
 			smoothAperture == 1;
 }
-
 
 Hash AppSignalState::hash() const
 {

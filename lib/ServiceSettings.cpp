@@ -153,6 +153,7 @@ const char* AppDataServiceSettings::SECTION_NAME = "Settings";
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_IP = "ClientRequestIP";
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_PORT = "ClientRequestPort";
 const char* AppDataServiceSettings::PROP_CLIENT_REQUEST_NETMASK = "ClientRequestNetmask";
+const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
 
 
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
@@ -207,6 +208,10 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 		log->wrnCFG3024(software->equipmentIdTemplate(), archServiceID[DATA_CHANNEL_1]);
 	}
 
+	//
+
+	result &= DeviceHelper::getIntProperty(software, PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, log);
+
 	return result;
 }
 
@@ -225,11 +230,12 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 		appDataServiceChannel[channel].writeToXml(xml, channel);
 	}
 
+	xml.writeIntElement(PROP_AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+
 	xml.writeEndElement();	// </Settings>
 
 	return result;
 }
-
 
 bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 {
@@ -250,6 +256,15 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	{
 		result &= appDataServiceChannel[channel].readFromXml(xml, channel);
 	}
+
+	result &= xml.findElement(PROP_AUTO_ARCHIVE_INTERVAL);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readIntElement(PROP_AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval);
 
 	return result;
 }
@@ -597,6 +612,9 @@ const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_IP = "DiagD
 const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_PORT = "DiagDataServiceRequestPort";
 const char* ArchivingServiceSettings::PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK = "DiagDataServiceRequestNetmask";
 
+const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_IP = "ArchiveDatabaseHostIP";
+const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_PORT = "ArchiveDatabaseHostPort";
+
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -639,6 +657,16 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	diagDataServiceRequestIP = HostAddressPort(diagDataServiceRequestIPStr, diagDataServiceRequestPort);
 	diagDataServiceRequestNetmask.setAddress(diagDataServiceNetmaskStr);
 
+	//
+
+	QString dbHostIP;
+	int dbHostPort = 0;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_ARCHIVE_DB_HOST_IP, &dbHostIP, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_DB_HOST_PORT, &dbHostPort, log);
+
+	dbHost = HostAddressPort(dbHostIP, dbHostPort);
+
 	return result;
 }
 
@@ -657,6 +685,8 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	xml.writeHostAddressPort(PROP_DIAG_DATA_SERVICE_REQUEST_IP, PROP_DIAG_DATA_SERVICE_REQUEST_PORT, diagDataServiceRequestIP);
 	xml.writeHostAddress(PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK, diagDataServiceRequestNetmask);
+
+	xml.writeHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, dbHost);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -683,6 +713,8 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddressPort(PROP_DIAG_DATA_SERVICE_REQUEST_IP, PROP_DIAG_DATA_SERVICE_REQUEST_PORT, &diagDataServiceRequestIP);
 	result &= xml.readHostAddress(PROP_DIAG_DATA_SERVICE_REQUEST_NETMASK, &diagDataServiceRequestNetmask);
+
+	result &= xml.readHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, &dbHost);
 
 	return result;
 }
