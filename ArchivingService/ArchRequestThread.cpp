@@ -22,14 +22,56 @@ ArchRequestContext::ArchRequestContext(const ArchRequestParam& param, const QTim
 	m_time(startTime),
 	m_logger(logger)
 {
+	m_localTimeOffset = Archive::localTimeOffsetFromUtc();
+
+	m_requestTimeType = param.timeType;
+
+	switch(m_requestTimeType)
+	{
+	case TimeType::Plant:
+	case TimeType::System:
+	case TimeType::ArchiveId:
+
+		m_requestStartTime = param.startTime;
+		m_requestEndTime = param.endTime;
+
+		break;
+
+	case TimeType::Local:
+		{
+			// convert local time to system time
+			//
+			m_requestStartTime = param.startTime - m_localTimeOffset;
+			m_requestEndTime = param.endTime - m_localTimeOffset;
+
+			m_requestTimeType = TimeType::System;
+		}
+		break;
+
+	default:
+		assert(false);
+	}
+
+	// expand request time on 65 seconds from both sides
+	//
+	m_expandedRequestStartTime = m_requestStartTime - Archive::TIME_TO_EXPAND_REQUEST;
+
+	if (m_expandedRequestStartTime < 0)
+	{
+		m_expandedRequestStartTime = 0;
+	}
+
+	m_expandedRequestEndTime = m_requestEndTime + Archive::TIME_TO_EXPAND_REQUEST;
+
+	m_cmpField = Archive::getCmpField(m_requestTimeType);
 }
 
 ArchRequestContext::~ArchRequestContext()
 {
-	if (m_query != nullptr)
+	if (m_statesQuery != nullptr)
 	{
-		delete m_query;
-		m_query = nullptr;
+		delete m_statesQuery;
+		m_statesQuery = nullptr;
 	}
 }
 
@@ -70,38 +112,109 @@ Hash ArchRequestContext::signalHash(int index)
 	return m_param.signalHashes[index];
 }
 
-void ArchRequestContext::createQuery(QSqlDatabase& db, const QString& queryStr)
+bool ArchRequestContext::createGetSignalStatesQueryStr(const Archive& archive)
 {
-	assert(db.isOpen() == true);
-	assert(m_query == nullptr);
 
-	m_query  = new QSqlQuery(db);
+//SELECT archid FROM timemarks WHERE systime < 1501754760132 ORDER BY systime DESC LIMIT 1;
 
-	m_query->setForwardOnly(true);
+	m_statesQueryStr.clear();
 
-	m_queryStr = queryStr;
+	int signalHashesCount = m_param.signalHashesCount;
+
+	const QHash<Hash, ArchSignal>& archSignals = archive.archSignals();
+
+	QString formatStr0 = QString("SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
+
+	QString formatStrOthers = QString("UNION ALL SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
+
+	int count = 0;
+
+	for(int i = 0; i < signalHashesCount; i++)
+	{
+		Hash signalHash = m_param.signalHashes[i];
+
+		if (archSignals.contains(signalHash) == false)
+		{
+			DEBUG_LOG_ERR(m_logger, QString("Unknown signal hash %1 in archive request").arg(signalHash));
+			continue;
+		}
+
+		QString tableName = archive.getTableName(signalHash);
+
+		QString& formatStr = formatStr0;
+
+		if (count > 0)
+		{
+			formatStr = formatStrOthers;
+		}
+
+		qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);
+
+		m_statesQueryStr.append(QString(formatStr).
+										arg(Archive::FIELD_ARCH_ID).
+										arg(Archive::FIELD_PLANT_TIME).
+										arg(Archive::FIELD_SYSTEM_TIME).
+										arg(Archive::FIELD_VALUE).
+										arg(Archive::FIELD_FLAGS).
+										arg(signedSignalHash).
+										arg(tableName).
+										arg(m_cmpField).
+										arg(m_requestStartTime).
+										arg(m_requestEndTime));
+
+		count++;
+	}
+
+	if (m_statesQueryStr.isEmpty() == false)
+	{
+		if (signalHashesCount == 1)
+		{
+			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
+		}
+		else
+		{
+			m_statesQueryStr.append(QString("ORDER BY %1").arg(m_cmpField));
+		}
+	}
+
+	return true;
 }
 
-bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
+bool ArchRequestContext::executeQuery(const Archive& archive, QSqlDatabase& db, CircularLoggerShared& logger)
 {
 	TEST_PTR_RETURN_FALSE(logger);
-	TEST_PTR_RETURN_FALSE(m_query);
 
-	if (m_queryStr.isEmpty() == true)
+	assert(db.isOpen() == true);
+	assert(m_statesQuery == nullptr);
+
+	bool res = createGetSignalStatesQueryStr(archive);
+
+	if (res == false)
+	{
+		return false;
+	}
+
+	if (m_statesQueryStr.isEmpty() == true)
 	{
 		assert(false);
 		return false;
 	}
 
-	bool result = m_query->exec(m_queryStr);
+	m_statesQuery = new QSqlQuery(db);
+
+	m_statesQuery->setForwardOnly(true);
+
+	DEBUG_LOG_MSG(logger, QString("Execute: %1").arg(m_statesQueryStr));
+
+	bool result = m_statesQuery->exec(m_statesQueryStr);
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(logger, m_query->lastError().text());
+		DEBUG_LOG_ERR(logger, m_statesQuery->lastError().text());
 		return false;
 	}
 
-	m_totalStates = m_query->size();
+	m_totalStates = m_statesQuery->size();
 	m_sentStates = 0;
 	m_dataReady = false;
 
@@ -123,7 +236,7 @@ bool ArchRequestContext::executeQuery(CircularLoggerShared& logger)
 
 void ArchRequestContext::getNextData()
 {
-	TEST_PTR_RETURN(m_query);
+	TEST_PTR_RETURN(m_statesQuery);
 
 	int count = 0;
 
@@ -131,24 +244,59 @@ void ArchRequestContext::getNextData()
 
 	bool hasNextRecord = false;
 
-	quint64 offset = Archive::localTimeOffsetFromUtc();
-
 	do
 	{
-		hasNextRecord = m_query->next();
+		hasNextRecord = m_statesQuery->next();
 
 		if (hasNextRecord == false)
 		{
 			break;
 		}
 
-		qint64 archid = m_query->value(0).toLongLong();
-		qint64 plantTime = m_query->value(1).toLongLong();
-		qint64 systemTime = m_query->value(2).toLongLong();
-		qint64 localTime = systemTime + offset;
-		double value = m_query->value(3).toDouble();
-		qint32 flags = m_query->value(4).toInt();
-		quint64 hash = m_query->value(5).toULongLong();
+		qint64 archid = m_statesQuery->value(0).toLongLong();
+		qint64 plantTime = m_statesQuery->value(1).toLongLong();
+		qint64 systemTime = m_statesQuery->value(2).toLongLong();
+
+		bool skipRecord = false;
+
+		switch(m_requestTimeType)
+		{
+		case TimeType::ArchiveId:
+			if (archid < m_requestStartTime || archid > m_requestEndTime)
+			{
+				skipRecord = true;
+			}
+			break;
+
+		case TimeType::Plant:
+			if (plantTime < m_requestStartTime || plantTime > m_requestEndTime)
+			{
+				skipRecord = true;
+			}
+			break;
+
+		case TimeType::System:
+			if (systemTime < m_requestStartTime || systemTime > m_requestEndTime)
+			{
+				skipRecord = true;
+			}
+			break;
+
+		default:
+			// no other times can't be in m_requestTimeType!
+			assert(false);
+		}
+
+		if (skipRecord == true)
+		{
+			continue;
+		}
+
+		qint64 localTime = systemTime + m_localTimeOffset;
+
+		double value = m_statesQuery->value(3).toDouble();
+		qint32 flags = m_statesQuery->value(4).toInt();
+		quint64 hash = m_statesQuery->value(5).toULongLong();
 
 		Proto::AppSignalState* state = m_reply.add_appsignalstates();
 
@@ -173,12 +321,6 @@ void ArchRequestContext::getNextData()
 
 	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: next data read (elapsed %2)").arg(requestID()).arg(timeElapsed()))
 }
-
-const char* ArchRequestThreadWorker::FIELD_PLANT_TIME = "plantTime";
-const char* ArchRequestThreadWorker::FIELD_SYSTEM_TIME = "sysTime";
-const char* ArchRequestThreadWorker::FIELD_ARCH_ID = "archID";
-const char* ArchRequestThreadWorker::FIELD_VALUE = "val";
-const char* ArchRequestThreadWorker::FIELD_FLAGS = "flags";
 
 ArchRequestThreadWorker::ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger) :
 	m_archive(archive),
@@ -283,133 +425,6 @@ bool ArchRequestThreadWorker::tryConnectToDatabase()
 	return result;
 }
 
-bool ArchRequestThreadWorker::createQueryStr(ArchRequestContextShared context, QString& queryStr)
-{
-
-//SELECT archid FROM timemarks WHERE systime < 1501754760132 ORDER BY systime DESC LIMIT 1;
-
-	TEST_PTR_RETURN_FALSE(context);
-
-	TimeType timeType = context->timeType();
-
-	QString cmpField = getCmpField(timeType);
-
-	if (cmpField.isEmpty() == true)
-	{
-		return false;
-	}
-
-	qint64 startTime = context->startTime();
-	qint64 endTime = context->endTime();
-
-	if (timeType == TimeType::Local)
-	{
-		// translate local time to system time
-		//
-		qint64 offset = Archive::localTimeOffsetFromUtc();
-
-		startTime -= offset;
-		endTime -= offset;
-	}
-
-	int signalHashesCount = context->signalHashesCount();
-	const Hash* signalHashes = context->signalHashes();
-
-	int count = 0;
-
-	const QHash<Hash, ArchSignal>& archSignals = m_archive.archSignals();
-
-	for(int i = 0; i < signalHashesCount; i++)
-	{
-		Hash signalHash = signalHashes[i];
-
-		if (archSignals.contains(signalHash) == false)
-		{
-			DEBUG_LOG_ERR(m_logger, QString("Unknown signal hash %1 in archive request").arg(signalHash));
-			continue;
-		}
-
-		const ArchSignal& archSignal = archSignals.value(signalHash);
-
-		for(int i = 0; i < (archSignal.isAnalog == true ? 2 : 1); i++)
-		{
-			QString tableName;
-
-			if (i == 0)
-			{
-				// get long term table name
-				//
-				tableName = m_archive.getTableName(signalHash, Archive::TableType::LongTerm);
-			}
-			else
-			{
-				// get short term table name
-				//
-				tableName = m_archive.getTableName(signalHash, Archive::TableType::ShortTerm);
-			}
-
-			QString formatStr;
-
-			if (count == 0)
-			{
-				formatStr = QString("SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
-			}
-			else
-			{
-				formatStr = QString("UNION DISTINCT SELECT %1, %2, %3, %4, %5, %6::bigint AS hash FROM %7 WHERE %8 >= %9 AND %8 <= %10 ");
-			}
-
-			qint64 signedSignalHash = *reinterpret_cast<qint64*>(&signalHash);
-
-			queryStr.append(QString(formatStr).
-							arg(FIELD_ARCH_ID).
-							arg(FIELD_PLANT_TIME).
-							arg(FIELD_SYSTEM_TIME).
-							arg(FIELD_VALUE).
-							arg(FIELD_FLAGS).
-							arg(signedSignalHash).
-							arg(tableName).
-							arg(cmpField).
-							arg(startTime).
-							arg(endTime));
-
-			count++;
-		}
-	}
-
-	if (queryStr.isEmpty() == false)
-	{
-		queryStr.append(QString("ORDER BY %1").arg(cmpField));
-	}
-
-	return true;
-}
-
-QString ArchRequestThreadWorker::getCmpField(TimeType timeType)
-{
-	QString cmpField;
-
-	switch(timeType)
-	{
-	case TimeType::Plant:
-		cmpField = FIELD_PLANT_TIME;
-		break;
-
-	case TimeType::System:
-	case TimeType::Local:						// local time search also use systemtime field
-		cmpField = FIELD_SYSTEM_TIME;
-		break;
-
-	case TimeType::ArchiveId:
-		cmpField = FIELD_ARCH_ID;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	return cmpField;
-}
 
 void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 {
@@ -449,20 +464,7 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 		return;
 	}
 
-	QString queryStr;
-
-	result = createQueryStr(context, queryStr);
-
-	if (result == false)
-	{
-		context->setArchError(ArchiveError::BuildQueryError);
-		context->setDataReady(true);
-		return;
-	}
-
-	context->createQuery(*m_db, queryStr);
-
-	result = context->executeQuery(m_logger);
+	result = context->executeQuery(m_archive, *m_db, m_logger);
 
 	if (result == false)
 	{

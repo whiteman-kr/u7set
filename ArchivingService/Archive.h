@@ -28,6 +28,15 @@ public:
 		ShortTerm
 	};
 
+	static const int TIME_1S = 1000;								// 1000 millisecond
+	static const int TIME_TO_EXPAND_REQUEST = 65 * TIME_1S;			// 65 seconds
+
+	static const char* FIELD_PLANT_TIME;
+	static const char* FIELD_SYSTEM_TIME;
+	static const char* FIELD_ARCH_ID;
+	static const char* FIELD_VALUE;
+	static const char* FIELD_FLAGS;
+
 public:
 	Archive(CircularLoggerShared logger);
 
@@ -43,7 +52,7 @@ public:
 	void setCanReadWriteSignal(Hash signalHash, bool canWrite);
 
 	QString dbName();
-	QString getTableName(Hash signalHash, Archive::TableType tableType);
+	static QString getTableName(Hash signalHash);
 
 	const QHash<Hash, ArchSignal>& archSignals() const { return m_archSignals; }
 
@@ -53,6 +62,8 @@ public:
 	static QString timeTypeStr(TimeType timeType);
 
 	static qint64 localTimeOffsetFromUtc();
+
+	static QString getCmpField(TimeType timeType);
 
 	void setSignalInitialized(Hash signalHash, bool initilaized);
 

@@ -1,8 +1,12 @@
 #include "Archive.h"
 
 const char* Archive::ARCH_DB_PREFIX = "u7arch_";
-const char* Archive::LONG_TERM_TABLE_PREFIX = "lt_";
-const char* Archive::SHORT_TERM_TABLE_PREFIX = "st_";
+
+const char* Archive::FIELD_PLANT_TIME = "plantTime";
+const char* Archive::FIELD_SYSTEM_TIME = "sysTime";
+const char* Archive::FIELD_ARCH_ID = "archID";
+const char* Archive::FIELD_VALUE = "val";
+const char* Archive::FIELD_FLAGS = "flags";
 
 
 Archive::Archive(CircularLoggerShared logger) :
@@ -82,8 +86,10 @@ QString Archive::dbName()
 	return dbName;
 }
 
-QString Archive::getTableName(Hash signalHash, Archive::TableType tableType)
+QString Archive::getTableName(Hash signalHash)
 {
+	return QString("z_%1").arg(QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false));
+/*
 	QString tableName;
 
 	switch(tableType)
@@ -107,7 +113,7 @@ QString Archive::getTableName(Hash signalHash, Archive::TableType tableType)
 
 	tableName += QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false);
 
-	return tableName;
+	return tableName;*/
 }
 
 void Archive::appendExistingTable(const QString& tableName)
@@ -125,7 +131,6 @@ bool Archive::tableIsExists(const QString& tableName)
 {
 	return m_existingTables.contains(tableName);
 }
-
 
 QString Archive::timeTypeStr(TimeType timeType)
 {
@@ -160,6 +165,31 @@ qint64 Archive::localTimeOffsetFromUtc()
 	return offset;
 }
 
+QString Archive::getCmpField(TimeType timeType)
+{
+	QString cmpField;
+
+	switch(timeType)
+	{
+	case TimeType::Plant:
+		cmpField = FIELD_PLANT_TIME;
+		break;
+
+	case TimeType::System:
+	case TimeType::Local:						// local time search also use systemtime field in requests
+		cmpField = FIELD_SYSTEM_TIME;
+		break;
+
+	case TimeType::ArchiveId:
+		cmpField = FIELD_ARCH_ID;
+		break;
+
+	default:
+		assert(false);
+	}
+
+	return cmpField;
+}
 
 void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
 {

@@ -62,6 +62,20 @@ public:
 
 	int timeElapsed() const { return m_time.elapsed(); }
 
+	TimeType requestTimeType() const { return m_requestTimeType; }
+
+	qint64 requestStartTime() const { return m_requestStartTime; }
+	qint64 requestEndTime() const { return m_requestEndTime; }
+
+	qint64 expandedRequestStartTime() const { return m_expandedRequestStartTime; }
+	qint64 expandedRequestEndTime() const { return m_expandedRequestEndTime; }
+
+	bool createGetSignalStatesQueryStr(const Archive& archive);
+
+	bool executeQuery(const Archive& archive, QSqlDatabase& db, CircularLoggerShared& logger);
+
+	void getNextData();
+
 private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
@@ -79,9 +93,6 @@ private:
 	int signalHashesCount() const { return m_param.signalHashesCount; }
 	const Hash* signalHashes() const { return m_param.signalHashes; }
 
-	bool executeQuery(CircularLoggerShared& logger);
-	void getNextData();
-
 	void clearSignalHashes();
 
 private:
@@ -89,8 +100,24 @@ private:
 	QTime m_time;
 	CircularLoggerShared m_logger;
 
-	QSqlQuery* m_query = nullptr;
-	QString m_queryStr;
+	//
+
+	qint64 m_localTimeOffset = 0;
+
+	TimeType m_requestTimeType = TimeType::System;
+
+	qint64 m_requestStartTime = 0;
+	qint64 m_requestEndTime = 0;
+
+	qint64 m_expandedRequestStartTime = 0;
+	qint64 m_expandedRequestEndTime = 0;
+
+	QString m_cmpField;
+
+	//
+
+	QSqlQuery* m_statesQuery = nullptr;
+	QString m_statesQueryStr;
 
 	ArchiveError m_archError = ArchiveError::Success;
 
@@ -130,21 +157,11 @@ private:
 
 	bool tryConnectToDatabase();
 
-	bool createQueryStr(ArchRequestContextShared context, QString& queryStr);
-
-	QString getCmpField(TimeType timeType);
-
 private slots:
 	void onNewRequest(ArchRequestContextShared context);
 	void onGetNextData(quint32 requestID);
 
 private:
-	static const char* FIELD_PLANT_TIME;
-	static const char* FIELD_SYSTEM_TIME;
-	static const char* FIELD_ARCH_ID;
-	static const char* FIELD_VALUE;
-	static const char* FIELD_FLAGS;
-
 	Archive& m_archive;
 	CircularLoggerShared m_logger;
 

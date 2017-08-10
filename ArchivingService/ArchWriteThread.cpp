@@ -9,8 +9,8 @@ const StringPair ArchWriteThreadWorker::m_upgradeFiles[] =
 };
 
 
-QString ArchWriteThreadWorker::m_format1("row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
-QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5,%6,%7)::AppSignalState");
+QString ArchWriteThreadWorker::m_format1("row(%1,%2,%3,%4,%5)::AppSignalState");
+QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5)::AppSignalState");
 
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
@@ -312,54 +312,19 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		Hash signalHash = i.key();
 		const ArchSignal& archSignal = i.value();
 
-		bool stTableExists = false;
-		bool ltTableExists = false;
+		bool tableIsExists = false;
 
-		if (archSignal.isAnalog == true)
-		{
-			// analog signal should have table st_*
-			//
-			tableName = m_archive.getTableName(signalHash, Archive::TableType::ShortTerm);
-
-			if (existingTables.contains(tableName) == false)
-			{
-				bool res = createTable(tableName, Archive::TableType::ShortTerm);
-
-				if (res == true)
-				{
-					createdTablesCount++;
-
-					stTableExists = true;
-				}
-				else
-				{
-					creationErrorCount++;
-				}
-			}
-			else
-			{
-				stTableExists = true;
-			}
-
-			if (stTableExists)
-			{
-				m_archive.appendExistingTable(tableName);
-			}
-		}
-
-		// analog and discrete signals should have table  lt_*
-		//
-		tableName = m_archive.getTableName(signalHash, Archive::TableType::LongTerm);
+		tableName = m_archive.getTableName(signalHash);
 
 		if (existingTables.contains(tableName) == false)
 		{
-			bool res = createTable(tableName, Archive::TableType::LongTerm);
+			bool res = createTable(tableName);
 
 			if (res == true)
 			{
 				createdTablesCount++;
 
-				ltTableExists = true;
+				tableIsExists = true;
 			}
 			else
 			{
@@ -368,22 +333,15 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		}
 		else
 		{
-			ltTableExists = true;
+			tableIsExists = true;
 		}
 
-		if (ltTableExists)
+		if (tableIsExists == true)
 		{
 			m_archive.appendExistingTable(tableName);
 		}
 
-		if (archSignal.isAnalog == true)
-		{
-			m_archive.setCanReadWriteSignal(archSignal.hash, stTableExists && ltTableExists);
-		}
-		else
-		{
-			m_archive.setCanReadWriteSignal(archSignal.hash, ltTableExists);
-		}
+		m_archive.setCanReadWriteSignal(archSignal.hash, tableIsExists);
 
 		if (createdTablesCount - ctr >= 500)
 		{
@@ -463,8 +421,8 @@ bool ArchWriteThreadWorker::getExistingTables(QHash<QString, QString>& existingT
 
 	QString queryStr = QString(	"SELECT table_name "
 								"FROM information_schema.tables "
-								"WHERE table_schema = 'public' AND (table_name LIKE 'lt\\_%' OR table_name LIKE 'st\\_%') "
-								"ORDER BY table_schema,table_name");
+								"WHERE table_schema = 'public' AND (table_name LIKE 'z\\_%') "
+								"ORDER BY table_name");
 
 	QSqlQuery query(m_db);
 
@@ -489,7 +447,7 @@ bool ArchWriteThreadWorker::getExistingTables(QHash<QString, QString>& existingT
 	return true;
 }
 
-bool ArchWriteThreadWorker::createTable(const QString& tableName, Archive::TableType tableType)
+bool ArchWriteThreadWorker::createTable(const QString& tableName)
 {
 	if (m_db.isOpen() == false)
 	{
@@ -504,23 +462,7 @@ bool ArchWriteThreadWorker::createTable(const QString& tableName, Archive::Table
 
 	QString queryStr;
 
-	switch(tableType)
-	{
-	case Archive::TableType::LongTerm:
-		queryStr = QString("CREATE TABLE IF NOT EXISTS public.%1 ("
-							"archid bigint NOT NULL, "
-							"planttime bigint, "
-							"systime bigint, "
-							"loctime bigint, "
-							"val double precision, "
-							"flags integer, "
-							"CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
-							"WITH (OIDS=FALSE);").arg(tableName);
-		break;
-
-	case Archive::TableType::ShortTerm:
-
-		queryStr = QString("CREATE TABLE IF NOT EXISTS  public.%1 ("
+	queryStr = QString("CREATE TABLE IF NOT EXISTS  public.%1 ("
 							"archid bigint NOT NULL DEFAULT nextval('archid_seq'::regclass), "
 							"planttime bigint, "
 							"systime bigint, "
@@ -529,13 +471,6 @@ bool ArchWriteThreadWorker::createTable(const QString& tableName, Archive::Table
 							"flags integer, "
 							"CONSTRAINT %1_pkey PRIMARY KEY (archid)) "
 							"WITH (OIDS=FALSE);").arg(tableName);
-		break;
-
-	default:
-		assert(false);
-		return false;
-	}
-
 	QSqlQuery query(m_db);
 
 	bool result = query.exec(queryStr);
@@ -605,6 +540,12 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			continue;
 		}
 
+		if (archSignal.isAnalog == false && state.flags.smoothAperture == 1)
+		{
+			assert(false);
+			state.flags.smoothAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
+		}
+
 		//m_timeFilter.setTimes(state.time);
 
 		if (archSignal.isInitialized == false)
@@ -619,7 +560,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 				state.time.system.timeStamp--;
 				state.time.local.timeStamp--;
 
-				appendToArray(state, archSignal.isAnalog, arrayStr);
+				appendToArray(state, arrayStr);
 
 				// returns previous values of state fields
 				//
@@ -639,7 +580,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			m_archive.setSignalInitialized(state.hash, true);
 		}
 
-		appendToArray(state, archSignal.isAnalog, arrayStr);
+		appendToArray(state, arrayStr);
 
 		toWriteCount++;
 	}
@@ -659,11 +600,9 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 	}
 }
 
-void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr)
+void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, QString& arrayStr)
 {
 	qint64 bigintHash = *reinterpret_cast<const qint64*>(&state.hash);
-
-	bool writeToShortTimeArchiveOnly = state.flags.hasShortTermArchivingReasonOnly();
 
 	if (arrayStr.isEmpty() == true)
 	{
@@ -672,9 +611,7 @@ void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, boo
 				arg(state.time.plant.timeStamp).
 				arg(state.time.system.timeStamp).
 				arg(state.value).
-				arg(state.flags.all).
-				arg(isAnalog == true ? "TRUE" : "FALSE").
-				arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE");
+				arg(state.flags.all);
 	}
 	else
 	{
@@ -683,9 +620,7 @@ void ArchWriteThreadWorker::appendToArray(const SimpleAppSignalState& state, boo
 				arg(state.time.plant.timeStamp).
 				arg(state.time.system.timeStamp).
 				arg(state.value).
-				arg(state.flags.all).
-				arg(isAnalog == true ? "TRUE" : "FALSE").
-				arg(writeToShortTimeArchiveOnly == true ? "TRUE" : "FALSE"));
+				arg(state.flags.all));
 	}
 }
 

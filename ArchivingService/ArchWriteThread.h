@@ -38,12 +38,12 @@ private:
 
 	bool getExistingTables(QHash<QString, QString>& existingTables);
 
-	bool createTable(const QString& tableName, Archive::TableType tableType);
+	bool createTable(const QString& tableName);
 
 	void disconnectFromDb();
 
 	void writeStatesToArchive(bool writeNow);
-	void appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr);
+	void appendToArray(const SimpleAppSignalState& state, QString& arrayStr);
 
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);

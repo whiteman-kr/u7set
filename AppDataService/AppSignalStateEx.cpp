@@ -90,8 +90,8 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int 
 				{
 					if (m_current.value != m_stored.value)
 					{
-						m_current.flags.smoothAperture = 1;
-						m_current.flags.roughAperture = 1;
+						m_current.flags.smoothAperture = 0;		// its important!
+						m_current.flags.roughAperture = 1;		//
 					}
 				}
 				else

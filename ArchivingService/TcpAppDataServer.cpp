@@ -61,7 +61,7 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 		m_saveStatesQueue.push(&state);
 	}
 
-	qDebug() << "Receive " << statesCount << " states to save";
+	//qDebug() << "Receive " << statesCount << " states to save";
 
 	m_saveStatesReply.set_error(TO_INT(NetworkError::Success));
 
