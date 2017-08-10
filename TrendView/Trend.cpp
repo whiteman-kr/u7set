@@ -73,11 +73,11 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawLane(QPainter* painter, const QRectF& rect, const TrendDrawParam& drawParam) const
+	void Trend::drawLane(QPainter* painter, const QRectF& laneRect, const TrendDrawParam& drawParam) const
 	{
-		painter->setBrush(drawParam.backgroundColor());
+		painter->setBrush(drawParam.backColor1st());
 		painter->setPen(Qt::PenStyle::NoPen);
-		painter->drawRect(rect);
+		painter->drawRect(laneRect);
 
 		// Calc InsideRect
 		// +-------------------------------+
@@ -86,67 +86,205 @@ namespace TrendLib
 		// |  +---------------------------+|
 		// +-------------------------------+
 		//
-		QRectF insideRect = calcTrendArea(rect, drawParam);
+		QRectF insideRect = calcTrendArea(laneRect, drawParam);
 
-		// Draw trend in separate mode
+		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
+		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
+
+		// Calc signals rects, calculates rect will be written to discretes/analogs
 		//
-		std::vector<TrendSignalParam> discreteSignals = signalSet().discreteSignals();
-		std::vector<TrendSignalParam> analogSignals = signalSet().analogSignals();
+		calcSignalRects(painter, insideRect, drawParam, &discretes, &analogs);
 
-		if (drawParam.view() == TrendView::Separated)
+		// Draw backgrounds
+		//
+		drawBackground(painter, insideRect, drawParam, discretes, analogs);
+
+		// Draw Time grid
+		//
+		drawTimeGrid(painter, laneRect, insideRect, drawParam);
+
+		// Draw vertical scale, signal id and caption
+		//
+		drawSignalsDecor(painter, laneRect, drawParam, discretes, analogs);
+
+		// Draw signal trend
+		//
+		for (const TrendSignalParam& signal : discretes)
 		{
-			const double discreteSignalHeight = 5.0 / 8.0;		// of inch
+			drawSignalTrend(painter, signal, drawParam);
+		}
 
-			double y = insideRect.top();
+		for (const TrendSignalParam& signal : analogs)
+		{
+			drawSignalTrend(painter, signal, drawParam);
+		}
 
-			QColor signalBackColor = drawParam.backgroundColor();
+		return;
 
-			for (const TrendSignalParam& s : discreteSignals)
+//		double y = insideRect.top();
+//		QColor signalBackColor = drawParam.backgroundColor();
+
+//		// Draw discrete signals is the same for both modes (TrendView::Separated/TrendView::Overlapped)
+//		//
+//		for (int signalIndex = 0; signalIndex < static_cast<int>(discreteSignals.size()); signalIndex++)
+//		{
+//			const TrendSignalParam& s = discreteSignals[signalIndex];
+
+//			QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
+//			y += discreteSignalHeight;
+
+//			if (signalRect.top() >= insideRect.bottom())
+//			{
+//				break;
+//			}
+
+//			if (signalRect.bottom() > insideRect.bottom())
+//			{
+//				signalRect.setBottom(insideRect.bottom());
+//			}
+
+//			signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
+//			painter->fillRect(signalRect, signalBackColor);
+
+//			drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
+//		}
+
+//		// Specific drawing for analog signals
+//		//
+//		if (drawParam.view() == TrendView::Separated)
+//		{
+//			const double analogSignalsHeight = qMax((insideRect.bottom() - y) / analogSignals.size(), discreteSignalHeight);
+
+//			for (int signalIndex = 0; signalIndex < static_cast<int>(analogSignals.size()); signalIndex++)
+//			{
+//				const TrendSignalParam& s = analogSignals[signalIndex];
+
+//				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
+//				y += analogSignalsHeight;
+
+//				if (signalRect.top() >= insideRect.bottom())
+//				{
+//					break;
+//				}
+
+//				if (signalRect.bottom() > insideRect.bottom())
+//				{
+//					signalRect.setBottom(insideRect.bottom());
+//				}
+
+//				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
+//				painter->fillRect(signalRect, signalBackColor);
+
+//				drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
+//			}
+//		}
+
+//		if (drawParam.view() == TrendView::Overlapped &&
+//			y < insideRect.bottom())
+//		{
+//			const double analogSignalsHeight = qMax(insideRect.bottom() - y, discreteSignalHeight);
+//			QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
+
+//			if (signalRect.bottom() > insideRect.bottom())
+//			{
+//				signalRect.setBottom(insideRect.bottom());
+//			}
+
+//			signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
+//			painter->fillRect(signalRect, signalBackColor);
+
+//			for (int signalIndex = 0; signalIndex < static_cast<int>(analogSignals.size()); signalIndex++)
+//			{
+//				const TrendSignalParam& s = analogSignals[signalIndex];
+
+//				drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
+//			}
+//		}
+
+//		// Draw insideRect
+//		//
+//		QPen insideRectPen(Qt::darkGray, drawParam.cosmeticPenWidth(), Qt::SolidLine);
+//		painter->setPen(insideRectPen);
+//		painter->setBrush(Qt::BrushStyle::NoBrush);
+
+//		painter->drawRect(insideRect);
+
+
+		return;
+	}
+
+	void Trend::drawBackground(QPainter* painter,
+							   const QRectF& insideRect,
+							   const TrendDrawParam& drawParam,
+							   const std::vector<TrendSignalParam>& discretes,
+							   const std::vector<TrendSignalParam>& analogs) const
+	{
+		assert(painter);
+		painter->setClipping(false);
+
+		QRectF lastDiscreteRect;
+
+		// Draw discrete signals is the same for both modes (TrendView::Separated/TrendView::Overlapped)
+		//
+		QColor signalBackColor = drawParam.backColor1st();
+
+		for (const TrendSignalParam& ts: discretes)
+		{
+			QRectF signalRect = ts.tempDrawRect();
+			lastDiscreteRect = signalRect;
+			if (signalRect.isNull() == true)
 			{
-				QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
-				y += discreteSignalHeight;
-
-				if (signalRect.top() >= insideRect.bottom())
-				{
-					break;
-				}
-
-				if (signalRect.bottom() > insideRect.bottom())
-				{
-					signalRect.setBottom(insideRect.bottom());
-				}
-
-				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
-
-				drawSignal(painter, s, signalRect, drawParam, signalBackColor);
+				break;
 			}
 
-			const double analogSignalsSignalHeight = qMax((insideRect.bottom() - y) / analogSignals.size(), discreteSignalHeight);
+			signalBackColor = (signalBackColor == drawParam.backColor1st()) ? drawParam.backColor2nd() : drawParam.backColor1st();
+			painter->fillRect(signalRect, signalBackColor);
+		}
 
-			for (const TrendSignalParam& s : analogSignals)
+		// Specific drawing for analog signals
+		//
+		assert(drawParam.view() == TrendView::Separated ||
+			   drawParam.view() == TrendView::Overlapped);
+
+		if (analogs.empty() == true &&
+			lastDiscreteRect.isEmpty() == false)
+		{
+			// Draw backgorund in switched color, it is just nice to separate discretes from empty area
+			//
+
+			QRectF blankArea(lastDiscreteRect.bottomLeft(),
+							 insideRect.bottomRight());
+
+			signalBackColor = (signalBackColor == drawParam.backColor1st()) ? drawParam.backColor2nd() : drawParam.backColor1st();
+			painter->fillRect(blankArea, signalBackColor);
+		}
+
+		if (drawParam.view() == TrendView::Separated  &&
+			analogs.empty() == false)
+		{
+			for (const TrendSignalParam& ts : analogs)
 			{
-				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsSignalHeight};
-				y += analogSignalsSignalHeight;
-
-				if (signalRect.top() >= insideRect.bottom())
+				QRectF signalRect = ts.tempDrawRect();
+				if (signalRect.isNull() == true)
 				{
 					break;
 				}
 
-				if (signalRect.bottom() > insideRect.bottom())
-				{
-					signalRect.setBottom(insideRect.bottom());
-				}
-
-				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
-
-				drawSignal(painter, s, signalRect, drawParam, signalBackColor);
+				signalBackColor = (signalBackColor == drawParam.backColor1st()) ? drawParam.backColor2nd() : drawParam.backColor1st();
+				painter->fillRect(signalRect, signalBackColor);
 			}
 		}
 
-		if (drawParam.view() == TrendView::Overlapped)
+		if (drawParam.view() == TrendView::Overlapped &&
+			analogs.empty() == false)
 		{
+			QRectF signalRect = analogs.front().tempDrawRect();
 
+			if (signalRect.isNull() == false)
+			{
+				signalBackColor = (signalBackColor == drawParam.backColor1st()) ? drawParam.backColor2nd() : drawParam.backColor1st();
+				painter->fillRect(signalRect, signalBackColor);
+			}
 		}
 
 		// Draw insideRect
@@ -157,28 +295,27 @@ namespace TrendLib
 
 		painter->drawRect(insideRect);
 
-		// Draw Time grid
-		//
-		drawTimeGrid(painter, rect, insideRect, drawParam);
-
-		// --
-		//
-
 		return;
 	}
 
-	void Trend::drawTimeGrid(QPainter* painter, const QRectF& rect, const QRectF& insideRect, const TrendDrawParam& drawParam) const
+	void Trend::drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendDrawParam& drawParam) const
 	{
 		double dpiX = drawParam.dpiX();
 
 		// Calc time grid
 		//
-		static const std::array<qint64, 25> possibleTimeGridIntervals = {100_ms, 200_ms, 250_ms, 500_ms,
+		static const std::array<qint64, 29> possibleTimeGridIntervals = {10_ms, 20_ms, 25_ms, 50_ms,
+																		 100_ms, 200_ms, 250_ms, 500_ms,
 																		 1_sec, 2_sec, 5_sec, 10_sec, 15_sec, 20_sec, 30_sec,
 																		 1_min, 90_sec, 2_min, 5_min, 10_min, 15_min, 20_min, 30_min,
 																		 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours};
 
-		double minTimeInterval = 3.0/4.0;	// 3/4 in -- minimum inches interval
+		QRectF boundRect;
+		QString estimatedString = (drawParam.duration() < static_cast<quint64>(10_sec)) ? "HH:MM:SS.XXX" : "HH:MM:SS";
+		drawText(painter, estimatedString, QRectF(), drawParam, Qt::AlignCenter, &boundRect);
+
+		double minTimeInterval = boundRect.width() * 1.33;
+		//double minTimeInterval = 3.0/4.0;	// 3/4 in -- minimum inches interval
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -281,7 +418,7 @@ namespace TrendLib
 
 		// Draw text, time and date
 		//
-		QRectF textClipRect(rect.left(), insideRect.bottom(), rect.width(), rect.bottom() - insideRect.bottom());
+		QRectF textClipRect(laneRect.left(), insideRect.bottom(), laneRect.width(), laneRect.bottom() - insideRect.bottom());
 		painter->setClipRect(textClipRect);
 
 		painter->setPen(Qt::black);
@@ -291,8 +428,8 @@ namespace TrendLib
 			QString timeText = p.timeStamp.toDateTime().toString(timeGridInterval < 1_sec ? "hh:mm:ss.zzz" : "hh:mm:ss");
 			QString dateText = p.timeStamp.toDateTime().toString("dd.MM.yyyy");
 
-			QRectF timeTextRect(p.x - 2.0, insideRect.bottom(), 4.0, (rect.bottom() - insideRect.bottom()) / 2.0);
-			QRectF dateTextRect(p.x - 2.0, timeTextRect.bottom(), 4.0, (rect.bottom() - insideRect.bottom()) / 2.0);
+			QRectF timeTextRect(p.x - 2.0, insideRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
+			QRectF dateTextRect(p.x - 2.0, timeTextRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
 
 			drawText(painter, timeText, timeTextRect, drawParam, Qt::AlignCenter);
 
@@ -311,229 +448,140 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawSignal(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
+	void Trend::drawSignalsDecor(QPainter* painter,
+								 const QRectF& laneRect,
+								 const TrendDrawParam& drawParam,
+								 const std::vector<TrendSignalParam>& discretes,
+								 const std::vector<TrendSignalParam>& analogs) const
 	{
 		assert(painter);
+		painter->setClipRect(laneRect);
 
-		painter->fillRect(rect, backColor);
-		// --
+		// Draw DISCRETE signal id, caption and scale ("0", "1")
 		//
-		painter->setPen(signal.color());
-
-		// Set clipo region, as SignalID and caption can fo out of drawArea
-		//
-		painter->setClipRect(rect);
-
-		// --
-		//
-		QString signalText;
-
-		if (signal.isDiscrete() == true)
+		for (const TrendSignalParam& ts: discretes)
 		{
-			signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
-		}
-
-		if (signal.isAnalog() == true)
-		{
-			if (signal.unit().isEmpty() == true)
+			QRectF signalRect = ts.tempDrawRect();
+			if (signalRect.isNull() == true)
 			{
-				signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
+				break;
 			}
-			else
+
+			QString signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
+
+			painter->setPen(ts.color());
+
+			QRectF testDesctriptionBoundRect;
+			drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
+
+			auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
+			drawParam.signalDescriptionRect().push_back(scr);
+
+			// Draw scale 0/1 for discretes
+			//
+			QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
+
+			drawText(painter, "0 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignBottom);
+			drawText(painter, "1 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignTop);
+		}
+
+		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
+		//
+		assert(drawParam.view() == TrendView::Separated ||
+			   drawParam.view() == TrendView::Overlapped);
+
+		if (drawParam.view() == TrendView::Separated  &&
+			analogs.empty() == false)
+		{
+			for (const TrendSignalParam& ts : analogs)
 			{
-				signalText = QString("  %1 - %2, %3").arg(signal.signalId()).arg(signal.caption()).arg(signal.unit());
-			}
-		}
-
-		QRectF testDesctriptionBoundRect;
-		drawText(painter, signalText, rect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip, &testDesctriptionBoundRect);
-
-		auto a = std::make_pair(signal.appSignalId(), testDesctriptionBoundRect);
-		std::vector<std::pair<QString, QRectF>>& b = drawParam.signalDescriptionRect();
-		b.push_back(a);
-
-		painter->setClipping(false);	// Restore clip region
-
-		// Get signal data
-		//
-		QDateTime startTime = drawParam.startTime();
-		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
-
-		std::list<std::shared_ptr<OneHourData>> signalData;
-
-		bool requestResult = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, drawParam.timeType(), &signalData);
-		if (requestResult == false)
-		{
-			signalData.clear();
-		}
-
-		// Draw signal trend
-		//
-		if (signal.isDiscrete() == true)
-		{
-			drawDiscrete(painter, signal, rect, drawParam, backColor, signalData);
-		}
-		else
-		{
-			drawAnalog(painter, signal, rect, drawParam, backColor, signalData);
-		}
-
-		return;
-	}
-
-	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData> >& signalData) const
-	{
-		assert(painter);
-		assert(signal.isDiscrete() == true);
-
-		// Draw units (0, 1) on the left side of rect
-		//
-		painter->setPen(signal.color());
-
-		QRectF textBoundRect;
-		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);	// Get bound rect, for understaning text height
-		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
-
-		// Set clip region
-		//
-		painter->setClipRect(rect);
-
-		// Draw trend
-		//
-		TimeType timeType = drawParam.timeType();
-
-		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
-		painter->setPen(linePen);
-
-		static const int recomendedSize = 8192;
-		QVector<QPointF> lines;
-		lines.reserve(recomendedSize);
-
-		TimeStamp startTimeStamp = drawParam.startTimeStamp();
-		qint64 duration = drawParam.duration();
-
-		double dpiY = drawParam.dpiY();
-
-		double yPos0 = rect.bottom() - textBoundRect.height() / 2.0;
-		double yPos1 = rect.top() + textBoundRect.height() * 1.1;
-		yPos0 = static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
-		yPos1 = static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
-
-		double rectRight = rect.right();
-
-		double lastX = 0;
-		double lastY = 0;
-
-		for (std::shared_ptr<OneHourData> hour : signalData)
-		{
-			const std::vector<TrendStateRecord>& data = hour->data;
-
-			for (const TrendStateRecord& record : data)
-			{
-				for (const TrendStateItem& state : record.states)
+				QRectF signalRect = ts.tempDrawRect();
+				if (signalRect.isNull() == true)
 				{
-					TimeStamp ct = state.getTime(timeType);
-
-					// Break line if it is not valid point
-					//
-					if (state.isValid() == false &&
-						lines.isEmpty() == false)
-					{
-						painter->drawPolyline(lines);
-						lines.clear();
-						continue;
-					}
-
-					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
-					double y = (state.value == 0) ? yPos0 : yPos1;
-
-					if (lines.isEmpty() == true)
-					{
-						lines.push_back(QPointF(x, y));
-
-						lastX = x;
-						lastY = y;
-					}
-					else
-					{
-						if (x != lastX || y != lastY)		// If prev point the same, don't add this point
-						{
-							if (lastY == y)
-							{
-								if (lines.size() > 1)
-								{
-									// Just extend the last line
-									//
-									lines.back().rx() = x;
-								}
-								else
-								{
-									lines.push_back(QPointF(x, y));
-								}
-							}
-							else
-							{
-								// Create another curve on line
-								//
-								lines.push_back(QPointF(lastX, y));
-								lines.push_back(QPointF(x, y));
-							}
-
-							lastX = x;
-							lastY = y;
-						}
-					}
-
-					if (lastX >= rectRight)
-					{
-						break;		// end of drawing
-					}
-
-				}	// for (const TrendStateItem& state : record.states)
-
-				if (lines.size() >= recomendedSize)
-				{
-					//painter->drawPolyline(lines);
-					drawPolyline(painter, lines, rect);
-					lines.clear();
+					break;
 				}
 
-				if (lastX >= rectRight)
+				QString signalText;
+				if (ts.unit().isEmpty() == true)
 				{
-					break;		// end of drawing
+					signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
 				}
-			}
+				else
+				{
+					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
+				}
 
-			if (lastX >= rectRight)
-			{
-				break;		// end of drawing
+				painter->setPen(ts.color());
+
+				QRectF testDesctriptionBoundRect;
+				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
+
+				auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
+				drawParam.signalDescriptionRect().push_back(scr);
+
+				// Draw horizontal grid and scale
+				//
+				drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, ts);
 			}
 		}
 
-		if (lines.size() >= 2)
-		{
-			painter->drawPolyline(lines);
-			lines.clear();
-		}
-
-		// Reset clipping
+		// Draw ANALOG signal id, caption and scale for TrendView::Overlapped mode
 		//
+		if (drawParam.view() == TrendView::Overlapped  &&
+			analogs.empty() == false)
+		{
+			QRectF signalRect = analogs.front().tempDrawRect();
+
+			for (const TrendSignalParam& ts : analogs)
+			{
+				QString signalText;
+				if (ts.unit().isEmpty() == true)
+				{
+					signalText = QString("  %1 - %2").arg(ts.signalId()).arg(ts.caption());
+				}
+				else
+				{
+					signalText = QString("  %1 - %2, %3").arg(ts.signalId()).arg(ts.caption()).arg(ts.unit());
+				}
+
+				painter->setPen(ts.color());
+
+				QRectF testDesctriptionBoundRect;
+				drawText(painter, signalText, signalRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
+
+				auto scr = std::make_pair(ts.appSignalId(), testDesctriptionBoundRect);
+				drawParam.signalDescriptionRect().push_back(scr);
+
+				// Shift rect
+				//
+				signalRect.setTop(testDesctriptionBoundRect.bottom() + testDesctriptionBoundRect.height() * 1.2);
+			}
+		}
+
+//		// --
+//		//
 		painter->setClipping(false);
 
 		return;
 	}
 
-	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	void Trend::drawAnalogSignalsGridSeparateMode(QPainter* painter,
+												  const QRectF& laneRect,
+												  const TrendDrawParam& drawParam,
+												  const TrendSignalParam& signal) const
 	{
 		assert(painter);
-		assert(signal.isAnalog() == true);
+		painter->setClipping(false);
 
-		// Set clip region
-		//
-		//painter->setClipRect(rect);
+		QRectF signalRect = signal.tempDrawRect();
+		QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
 
-		// Draw scale and grid
-		//
+		if (signalRect.isEmpty() == true ||
+			scaleAreaRect.isEmpty() == true)
+		{
+			return;
+		}
+
 		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
 		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
 
@@ -561,8 +609,8 @@ namespace TrendLib
 			{
 				gridValue = possibleGridIntervals[i] * pow;
 
-				double y = valueToScaledPixel(lowLimit + gridValue, rect, lowLimit, highLimit);
-				if (rect.bottom() - y >= minInchInterval)
+				double y = valueToScaledPixel(lowLimit + gridValue, signalRect, lowLimit, highLimit);
+				if (signalRect.bottom() - y >= minInchInterval)
 				{
 					// gridValue contains found suitable value for grid
 					//
@@ -586,7 +634,7 @@ namespace TrendLib
 			return;
 		}
 
-		// Draw time grid
+		// Draw horz grids
 		//
 		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		painter->setPen(gridPen);
@@ -598,17 +646,17 @@ namespace TrendLib
 		{
 			double value = lowGriddedValue + i * gridValue;
 
-			double y = valueToScaledPixel(value, rect, lowLimit, highLimit);
+			double y = valueToScaledPixel(value, signalRect, lowLimit, highLimit);
 			y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
 
-			if (y < rect.top() ||
-				y > rect.bottom())
+			if (y < signalRect.top() ||
+				y > signalRect.bottom())
 			{
 				continue;
 			}
 
-			painter->drawLine(QPointF(rect.left(), y),
-							  QPointF(rect.right(), y));
+			painter->drawLine(QPointF(signalRect.left(), y),
+							  QPointF(signalRect.right(), y));
 
 			grids.emplace_back(y, value);
 		}
@@ -621,26 +669,91 @@ namespace TrendLib
 		drawText(painter, "0", QRectF(), drawParam, Qt::AlignCenter, &boundTextRect);
 		double textHeight = boundTextRect.height();
 
+		painter->setClipRect(scaleAreaRect);
+
 		for (const std::pair<double, double>& p : grids)
 		{
 			double y = p.first;
 			double value = p.second;
 
-			QRectF textRect(rect.left(), y - textHeight / 2.0, 0, textHeight);
+			QRectF textRect(scaleAreaRect.left(), y - textHeight / 2.0, scaleAreaRect.width(), textHeight);
+
+			if (textRect.top() < scaleAreaRect.top() ||
+				textRect.bottom() > scaleAreaRect.bottom())
+			{
+				continue;
+			}
 
 			QString text = QString(" %1 ").arg(QString::number(value, 'g'));
-			drawText(painter, text, textRect, drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
+
+		painter->setClipping(false);
+		return;
+	}
+
+	void Trend::drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam) const
+	{
+		assert(painter);
+
+		QRectF signalRect = signal.tempDrawRect();
+		if (signalRect.isEmpty() == true)
+		{
+			return;
+		}
+
+		// Get signal data
+		//
+		TimeStamp requestStartTime(drawParam.startTimeStamp().timeStamp - 1_hour);
+		TimeStamp requestFinishTime(drawParam.startTimeStamp().timeStamp + drawParam.duration() + 2_hours);
+
+		QDateTime startTime = requestStartTime.toDateTime();
+		QDateTime finishTime = requestFinishTime.toDateTime();
+
+		std::list<std::shared_ptr<OneHourData>> signalData;
+
+		bool requestResult = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, drawParam.timeType(), &signalData);
+		if (requestResult == false)
+		{
+			signalData.clear();
+		}
+
+		// --
+		//
+		if (signal.isDiscrete() == true)
+		{
+			drawSignalTrendDiscrete(painter, signal, drawParam, signalData);
+		}
+
+		if (signal.isAnalog() == true)
+		{
+			drawSignalTrendAnalog(painter, signal, drawParam, signalData);
+		}
+
+		// --
+		//
+		return;
+	}
+
+	void Trend::drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	{
+		assert(painter);
+		assert(signal.isDiscrete() == true);
+
+		QRectF signalRect = signal.tempDrawRect();
 
 		// Set clip region
 		//
-		painter->setClipRect(rect);
+		painter->setClipRect(signalRect);
 
 		// Draw trend
 		//
+		QRectF textBoundRect;
+		drawText(painter, "0", textBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop, &textBoundRect);
+
 		TimeType timeType = drawParam.timeType();
 
-		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
+		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
 		painter->setPen(linePen);
 
 		static const int recomendedSize = 8192;
@@ -650,10 +763,156 @@ namespace TrendLib
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
 
-		double rectRight = rect.right();
+		double dpiY = drawParam.dpiY();
+
+		double yPos0 = signalRect.bottom() - textBoundRect.height() / 2.0;
+		double yPos1 = signalRect.top() + textBoundRect.height() * 1.1;
+		yPos0 = static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
+		yPos1 = static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
+
+		double rectRight = signalRect.right();
 
 		double lastX = 0;
 		double lastY = 0;
+
+		//int pointIndex = 0;
+
+		for (std::shared_ptr<OneHourData> hour : signalData)
+		{
+			const std::vector<TrendStateRecord>& data = hour->data;
+
+			for (const TrendStateRecord& record : data)
+			{
+				for (const TrendStateItem& state : record.states)
+				{
+					TimeStamp ct = state.getTime(timeType);
+
+					// Break line if it is not valid point
+					//
+					if (state.isValid() == false &&
+						lines.isEmpty() == false)
+					{
+						drawPolyline(painter, lines, signalRect);
+						lines.clear();
+						continue;
+					}
+
+					double x = timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
+					double y = (state.value == 0) ? yPos0 : yPos1;
+
+//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
+//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
+//					qDebug() << "DEBUG: Discrete draw pointIndex: " << pointIndex;
+//					pointIndex ++;
+
+					if (lines.isEmpty() == true)
+					{
+						lines.push_back(QPointF(x, y));
+
+						lastX = x;
+						lastY = y;
+					}
+					else
+					{
+						if (x != lastX || y != lastY)		// If prev point the same, don't add this point
+						{
+							if (lastY == y)
+							{
+								lines.push_back(QPointF(x, y));
+							}
+							else
+							{
+								lines.push_back(QPointF(x, lastY));
+								lines.push_back(QPointF(x, y));
+							}
+
+							lastX = x;
+							lastY = y;
+						}
+					}
+
+					if (lastX >= rectRight)
+					{
+						break;		// end of drawing
+					}
+
+				}	// for (const TrendStateItem& state : record.states)
+
+				if (lines.size() >= recomendedSize)
+				{
+					drawPolyline(painter, lines, signalRect);
+					lines.clear();
+				}
+
+				if (lastX >= rectRight)
+				{
+					break;		// end of drawing
+				}
+			}
+
+			if (lastX >= rectRight)
+			{
+				break;		// end of drawing
+			}
+		}
+
+		if (lines.size() >= 2)
+		{
+			drawPolyline(painter, lines, signalRect);
+			lines.clear();
+		}
+
+		// Reset clipping
+		//
+		painter->setClipping(false);
+
+		return;
+	}
+
+	void Trend::drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	{
+		assert(painter);
+		assert(signal.isAnalog() == true);
+
+		QRectF signalRect = signal.tempDrawRect();
+
+		// Set clip region
+		//
+		painter->setClipRect(signalRect);
+
+		painter->setRenderHint(QPainter::Antialiasing, false);
+
+		// Draw trend
+		//
+		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
+		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+
+		double delta = highLimit - lowLimit;
+		if (delta <= DBL_MIN)
+		{
+			// Divide by 0 possible
+			//
+			return;
+		}
+
+		TimeType timeType = drawParam.timeType();
+
+		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
+		painter->setPen(linePen);
+
+static const int recomendedSize = 8192;
+		QVector<QPointF> lines;
+		lines.reserve(recomendedSize);
+
+		TimeStamp startTimeStamp = drawParam.startTimeStamp();
+		qint64 duration = drawParam.duration();
+
+		double rectRight = signalRect.right();
+
+		double lastX = 0;
+		double lastY = 0;
+
+//		int pointIndex = 0;
 
 		for (std::shared_ptr<OneHourData> hour : signalData)
 		{
@@ -670,20 +929,18 @@ namespace TrendLib
 					if (state.isValid() == false &&
 						lines.isEmpty() == false)
 					{
-						drawPolyline(painter, lines, rect);
+						drawPolyline(painter, lines, signalRect);
 						lines.clear();
 						continue;
 					}
 
-					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
-					double y = valueToScaledPixel(state.value, rect, lowLimit, highLimit);
+					double x = timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
+					double y = valueToScaledPixel(state.value, signalRect, lowLimit, highLimit);
 
-//					if (x < lastX)
-//					{
-//						qDebug() << "Error";
-//						assert(x >= lastX);
-//						continue;
-//					}
+//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
+//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
+//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex << ", Flags: " << state.flags << ", value: " << state.value;
+//					pointIndex ++;
 
 					if (lines.isEmpty() == true)
 					{
@@ -697,7 +954,8 @@ namespace TrendLib
 						{
 							if (lastY == y)
 							{
-								if (lines.size() > 1)
+								if (lines.size() >= 2 &&
+									lines[lines.size() - 2].y() == lastY)
 								{
 									// Just extend the last line
 									//
@@ -712,7 +970,7 @@ namespace TrendLib
 							{
 								// Create another curve on line
 								//
-								lines.push_back(QPointF(lastX, y));
+								lines.push_back(QPointF(x, lastY));
 								lines.push_back(QPointF(x, y));
 							}
 
@@ -726,13 +984,14 @@ namespace TrendLib
 					{
 						break;		// end of drawing
 					}
-
 				} // for (const TrendStateItem& state : record.states)
 
 				if (lines.size() >= recomendedSize)
 				{
-					drawPolyline(painter, lines, rect);
+					drawPolyline(painter, lines, signalRect);
+					QPointF lastPoint = lines.back();
 					lines.clear();
+					lines.push_back(lastPoint);
 				}
 
 				if (lastX >= rectRight)
@@ -749,15 +1008,488 @@ namespace TrendLib
 
 		if (lines.size() >= 2)
 		{
-			drawPolyline(painter, lines, rect);
-			lines.clear();
+			drawPolyline(painter, lines, signalRect);
 		}
 
 		// Reset clipping
 		//
 		painter->setClipping(false);
 
+		painter->setRenderHint(QPainter::Antialiasing, true);
 		return;
+	}
+
+	void Trend::drawSignal(QPainter* painter, const TrendSignalParam& signal, int signalIndex, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const
+	{
+//		assert(painter);
+
+//		// --
+//		//
+//		painter->setPen(signal.color());
+
+//		// Set clipo region, as SignalID and caption can fo out of drawArea
+//		//
+//		painter->setClipRect(rect);
+
+//		// --
+//		//
+//		QString signalText;
+//		QRectF testDesctriptionBoundRect = QRectF(rect.topLeft(), rect.topLeft());
+
+//		if (signal.isDiscrete() == true)
+//		{
+//			signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
+
+//			drawText(painter, signalText, testDesctriptionBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine  | Qt::TextDontClip, &testDesctriptionBoundRect);
+//		}
+
+//		if (signal.isAnalog() == true)
+//		{
+//			if (signal.unit().isEmpty() == true)
+//			{
+//				signalText = QString("  %1 - %2").arg(signal.signalId()).arg(signal.caption());
+//			}
+//			else
+//			{
+//				signalText = QString("  %1 - %2, %3").arg(signal.signalId()).arg(signal.caption()).arg(signal.unit());
+//			}
+
+//			drawText(painter, signalText, testDesctriptionBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine, &testDesctriptionBoundRect);
+
+//			// Shift rect taking signaIndex for Overlapped mode
+//			//
+//			if (drawParam.view() == TrendView::Overlapped)
+//			{
+//				testDesctriptionBoundRect.setTop(testDesctriptionBoundRect.top() + testDesctriptionBoundRect.height() * 1.5 * signalIndex);
+//			}
+
+//			drawText(painter, signalText, testDesctriptionBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine | Qt::TextDontClip, &testDesctriptionBoundRect);
+//		}
+
+//		auto a = std::make_pair(signal.appSignalId(), testDesctriptionBoundRect);
+//		std::vector<std::pair<QString, QRectF>>& b = drawParam.signalDescriptionRect();
+//		b.push_back(a);
+
+//		painter->setClipping(false);	// Restore clip region
+
+//		// Get signal data
+//		//
+//		QDateTime startTime = drawParam.startTime();
+//		QDateTime finishTime = TimeStamp(drawParam.startTimeStamp().timeStamp + drawParam.duration()).toDateTime();
+
+//		std::list<std::shared_ptr<OneHourData>> signalData;
+
+//		bool requestResult = signalSet().getTrendData(signal.appSignalId(), startTime, finishTime, drawParam.timeType(), &signalData);
+//		if (requestResult == false)
+//		{
+//			signalData.clear();
+//		}
+
+//		// Draw signal trend
+//		//
+//		if (signal.isDiscrete() == true)
+//		{
+//			drawDiscrete(painter, signal, rect, drawParam, backColor, signalData);
+//		}
+//		else
+//		{
+//			drawAnalog(painter, signal, signalIndex, rect, drawParam, backColor, signalData);
+//		}
+
+		return;
+	}
+
+	void Trend::drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData> >& signalData) const
+	{
+//		assert(painter);
+//		assert(signal.isDiscrete() == true);
+
+//		// Draw units (0, 1) on the left side of rect
+//		//
+//		painter->setPen(signal.color());
+
+//		QRectF textBoundRect;
+//		drawText(painter, "0 ", QRectF(rect.left(), rect.bottom(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignBottom | Qt::TextDontClip, &textBoundRect);	// Get bound rect, for understaning text height
+//		drawText(painter, "1 ", QRectF(rect.left(), rect.top() + textBoundRect.height(), 0, 0), drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+
+//		// Set clip region
+//		//
+//		painter->setClipRect(rect);
+
+//		// Draw trend
+//		//
+//		TimeType timeType = drawParam.timeType();
+
+//		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
+//		painter->setPen(linePen);
+
+//		static const int recomendedSize = 8192;
+//		QVector<QPointF> lines;
+//		lines.reserve(recomendedSize);
+
+//		TimeStamp startTimeStamp = drawParam.startTimeStamp();
+//		qint64 duration = drawParam.duration();
+
+//		double dpiY = drawParam.dpiY();
+
+//		double yPos0 = rect.bottom() - textBoundRect.height() / 2.0;
+//		double yPos1 = rect.top() + textBoundRect.height() * 1.1;
+//		yPos0 = static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
+//		yPos1 = static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
+
+//		double rectRight = rect.right();
+
+//		double lastX = 0;
+//		double lastY = 0;
+
+//		for (std::shared_ptr<OneHourData> hour : signalData)
+//		{
+//			const std::vector<TrendStateRecord>& data = hour->data;
+
+//			for (const TrendStateRecord& record : data)
+//			{
+//				for (const TrendStateItem& state : record.states)
+//				{
+//					TimeStamp ct = state.getTime(timeType);
+
+//					// Break line if it is not valid point
+//					//
+//					if (state.isValid() == false &&
+//						lines.isEmpty() == false)
+//					{
+//						painter->drawPolyline(lines);
+//						lines.clear();
+//						continue;
+//					}
+
+//					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
+//					double y = (state.value == 0) ? yPos0 : yPos1;
+
+//					if (lines.isEmpty() == true)
+//					{
+//						lines.push_back(QPointF(x, y));
+
+//						lastX = x;
+//						lastY = y;
+//					}
+//					else
+//					{
+//						if (x != lastX || y != lastY)		// If prev point the same, don't add this point
+//						{
+//							if (lastY == y)
+//							{
+//								if (lines.size() > 1)
+//								{
+//									// Just extend the last line
+//									//
+//									lines.back().rx() = x;
+//								}
+//								else
+//								{
+//									lines.push_back(QPointF(x, y));
+//								}
+//							}
+//							else
+//							{
+//								// Create another curve on line
+//								//
+//								lines.push_back(QPointF(x, lastY));
+//								lines.push_back(QPointF(x, y));
+//							}
+
+//							lastX = x;
+//							lastY = y;
+//						}
+//					}
+
+//					if (lastX >= rectRight)
+//					{
+//						break;		// end of drawing
+//					}
+
+//				}	// for (const TrendStateItem& state : record.states)
+
+//				if (lines.size() >= recomendedSize)
+//				{
+//					//painter->drawPolyline(lines);
+//					drawPolyline(painter, lines, rect);
+//					lines.clear();
+//				}
+
+//				if (lastX >= rectRight)
+//				{
+//					break;		// end of drawing
+//				}
+//			}
+
+//			if (lastX >= rectRight)
+//			{
+//				break;		// end of drawing
+//			}
+//		}
+
+//		if (lines.size() >= 2)
+//		{
+//			painter->drawPolyline(lines);
+//			lines.clear();
+//		}
+
+//		// Reset clipping
+//		//
+//		painter->setClipping(false);
+
+		return;
+	}
+
+	void Trend::drawAnalog(QPainter* painter, const TrendSignalParam& signal, int signalIndex, const QRectF& rect, const TrendDrawParam& drawParam, QColor /*backColor*/, const std::list<std::shared_ptr<OneHourData>>& signalData) const
+	{
+//		assert(painter);
+//		assert(signal.isAnalog() == true);
+
+//		// Set clip region
+//		//
+//		//painter->setClipRect(rect);
+
+//		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
+//		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+
+//		double delta = highLimit - lowLimit;
+//		if (delta <= DBL_MIN)
+//		{
+//			// Divide by 0 possible
+//			//
+//			return;
+//		}
+
+//		// Draw scale and grid
+//		//
+//		drawAnalogTimeGrid(painter, signal, signalIndex, rect, drawParam);
+
+//		// Set clip region
+//		//
+//		painter->setClipRect(rect);
+
+//		// Draw trend
+//		//
+//		TimeType timeType = drawParam.timeType();
+
+//		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
+//		painter->setPen(linePen);
+
+//		static const int recomendedSize = 8192;
+//		QVector<QPointF> lines;
+//		lines.reserve(recomendedSize);
+
+//		TimeStamp startTimeStamp = drawParam.startTimeStamp();
+//		qint64 duration = drawParam.duration();
+
+//		double rectRight = rect.right();
+
+//		double lastX = 0;
+//		double lastY = 0;
+
+//		for (std::shared_ptr<OneHourData> hour : signalData)
+//		{
+//			const std::vector<TrendStateRecord>& data = hour->data;
+
+//			for (const TrendStateRecord& record : data)
+//			{
+//				for (const TrendStateItem& state : record.states)
+//				{
+//					const TimeStamp& ct = state.getTime(timeType);
+
+//					// Break line if it is not valid point
+//					//
+//					if (state.isValid() == false &&
+//						lines.isEmpty() == false)
+//					{
+//						drawPolyline(painter, lines, rect);
+//						lines.clear();
+//						continue;
+//					}
+
+//					double x = timeToScaledPixel(ct, rect, startTimeStamp, duration);
+//					double y = valueToScaledPixel(state.value, rect, lowLimit, highLimit);
+
+//					if (lines.isEmpty() == true)
+//					{
+//						lines.push_back(QPointF(x, y));
+//						lastX = x;
+//						lastY = y;
+//					}
+//					else
+//					{
+//						if (x != lastX || y != lastY)		// If prev point the same, don't add this point
+//						{
+//							if (lastY == y)
+//							{
+//								if (lines.size() > 1)
+//								{
+//									// Just extend the last line
+//									//
+//									lines.back().rx() = x;
+//								}
+//								else
+//								{
+//									lines.push_back(QPointF(x, y));
+//								}
+//							}
+//							else
+//							{
+//								// Create another curve on line
+//								//
+//								lines.push_back(QPointF(x, lastY));
+//								lines.push_back(QPointF(x, y));
+//							}
+
+//							lastX = x;
+//							lastY = y;
+//						}
+
+//					}
+
+//					if (lastX >= rectRight)
+//					{
+//						break;		// end of drawing
+//					}
+
+//				} // for (const TrendStateItem& state : record.states)
+
+//				if (lines.size() >= recomendedSize)
+//				{
+//					drawPolyline(painter, lines, rect);
+//					lines.clear();
+//				}
+
+//				if (lastX >= rectRight)
+//				{
+//					break;		// end of drawing
+//				}
+//			}	// for (const TrendStateRecord& record : data)
+
+//			if (lastX >= rectRight)
+//			{
+//				break;		// end of drawing
+//			}
+//		}
+
+//		if (lines.size() >= 2)
+//		{
+//			drawPolyline(painter, lines, rect);
+//			lines.clear();
+//		}
+
+//		// Reset clipping
+//		//
+//		painter->setClipping(false);
+
+		return;
+	}
+
+	void Trend::drawAnalogTimeGrid(QPainter* painter,
+								   const TrendSignalParam& signal,
+								   int signalIndex,
+								   const QRectF& rect,
+								   const TrendDrawParam& drawParam) const
+	{
+//		double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
+//		double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+
+//		double delta = highLimit - lowLimit;
+//		if (delta <= DBL_MIN)
+//		{
+//			// Divide by 0 possible
+//			//
+//			return;
+//		}
+
+//		double dpiY = drawParam.dpiY();
+
+//		// Calc vert grid
+//		//
+//		static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5};
+
+//		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
+//		double gridValue = 1.0;
+
+//		double pow = 1e-30;
+//		for (int mult = 0; mult <= 60; mult++, pow *= 10.0)
+//		{
+//			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
+//			{
+//				gridValue = possibleGridIntervals[i] * pow;
+
+//				double y = valueToScaledPixel(lowLimit + gridValue, rect, lowLimit, highLimit);
+//				if (rect.bottom() - y >= minInchInterval)
+//				{
+//					// gridValue contains found suitable value for grid
+//					//
+//					//qDebug() << "GridValue " << gridValue << ", distance in inches " << rect.bottom() - y ;
+//					mult = 1000000;		// To break outer loop
+//					break;
+//				}
+//			}
+//		}
+
+//		// Align gridValue
+//		//
+//		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
+//		int gridCount = static_cast<int>(delta / gridValue) + 2;
+
+//		if (gridCount < 0 || gridCount > 100)
+//		{
+//			// Something wrong
+//			//
+//			assert(false);
+//			return;
+//		}
+
+//		// Draw time grid
+//		//
+//		QPen gridPen(Qt::lightGray, drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
+//		painter->setPen(gridPen);
+
+//		std::vector<std::pair<double, double>> grids;		// first: y pos, second: value
+//		grids.reserve(gridCount);
+
+//		for (int i = 0; i < gridCount; i++)
+//		{
+//			double value = lowGriddedValue + i * gridValue;
+
+//			double y = valueToScaledPixel(value, rect, lowLimit, highLimit);
+//			y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Align to DPI
+
+//			if (y < rect.top() ||
+//				y > rect.bottom())
+//			{
+//				continue;
+//			}
+
+//			painter->drawLine(QPointF(rect.left(), y),
+//							  QPointF(rect.right(), y));
+
+//			grids.emplace_back(y, value);
+//		}
+
+//		// Draw grid values
+//		//
+//		painter->setPen(signal.color());
+
+//		QRectF boundTextRect;
+//		drawText(painter, "0", QRectF(), drawParam, Qt::AlignCenter, &boundTextRect);
+//		double textHeight = boundTextRect.height();
+
+//		for (const std::pair<double, double>& p : grids)
+//		{
+//			double y = p.first;
+//			double value = p.second;
+
+//			QRectF textRect(rect.left(), y - textHeight / 2.0, 0, textHeight);
+
+//			QString text = QString(" %1 ").arg(QString::number(value, 'g'));
+//			drawText(painter, text, textRect, drawParam, Qt::AlignRight | Qt::AlignVCenter | Qt::TextDontClip);
+//		}
+
 	}
 
 	void Trend::drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const
@@ -778,7 +1510,7 @@ namespace TrendLib
 		QPen rullerPen(QBrush(qRgb(0x00, 0x00, 0xC0)), drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
 		QPen distancePen(QBrush(qRgb(0x00, 0x00, 0xC0)), drawParam.cosmeticPenWidth(), Qt::PenStyle::SolidLine);
 
-		QBrush backgroundBrush(drawParam.backgroundColor());
+		QBrush backgroundBrush(drawParam.backColor1st());
 		painter->setBrush(backgroundBrush);
 
 		// --
@@ -1031,6 +1763,94 @@ namespace TrendLib
 		return;
 	}
 
+	void Trend::calcSignalRects(QPainter* painter,
+									const QRectF& insideRect,
+									const TrendDrawParam& drawParam,
+									std::vector<TrendSignalParam>* discretes,
+									std::vector<TrendSignalParam>* analogs) const
+	{
+		assert(painter);
+		assert(discretes);
+		assert(analogs);
+
+		double y = insideRect.top();
+
+		for (TrendSignalParam& ts : *discretes)
+		{
+			QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
+			y += discreteSignalHeight;
+
+			if (signalRect.top() >= insideRect.bottom())
+			{
+				signalRect = QRectF();		// Null rect
+			}
+
+			if (signalRect.bottom() > insideRect.bottom())
+			{
+				signalRect.setBottom(insideRect.bottom());
+			}
+
+			// Save calcultaed rect to TrendSignal
+			//
+			ts.setTempDrawRect(signalRect);
+		}
+
+		if (drawParam.view() == TrendView::Separated &&
+			analogs->empty() == false)
+		{
+			const double analogSignalsHeight = qMax((insideRect.bottom() - y) / analogs->size(), discreteSignalHeight);
+
+			for (TrendSignalParam& ts : *analogs)
+			{
+				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
+				y += analogSignalsHeight;
+
+				if (signalRect.top() >= insideRect.bottom())
+				{
+					signalRect = QRectF();		// Null rect
+				}
+
+				if (signalRect.bottom() > insideRect.bottom())
+				{
+					signalRect.setBottom(insideRect.bottom());
+				}
+
+				// Save calcultaed rect to TrendSignal
+				//
+				ts.setTempDrawRect(signalRect);
+			}
+		}
+
+		if (drawParam.view() == TrendView::Overlapped  &&
+			analogs->empty() == false)
+		{
+			const double analogSignalsHeight = qMax(insideRect.bottom() - y, discreteSignalHeight);
+			QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
+
+			if (signalRect.top() >= insideRect.bottom())
+			{
+				signalRect = QRectF();		// Null rect
+			}
+
+			if (signalRect.bottom() > insideRect.bottom())
+			{
+				signalRect.setBottom(insideRect.bottom());
+			}
+
+			for (TrendSignalParam& ts : *analogs)
+			{
+				// Save calcultaed rect to TrendSignal
+				//
+				ts.setTempDrawRect(signalRect);
+			}
+		}
+
+		assert(drawParam.view() == TrendView::Separated ||
+			   drawParam.view() == TrendView::Overlapped);
+
+		return;
+	}
+
 	QRectF Trend::calcLaneRect(int laneIndex, const TrendDrawParam& drawParam)
 	{
 		QSizeF inchSize(static_cast<double>(drawParam.rect().size().width()) / static_cast<double>(drawParam.dpiX()),
@@ -1077,6 +1897,26 @@ namespace TrendLib
 		insideRect.setHeight(static_cast<double>(static_cast<int>(insideRect.height() * dpiY)) / dpiY);
 
 		return insideRect;
+	}
+
+	QRectF Trend::calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect)
+	{
+		// +------------laneRect------------+
+		// | R +---------------------------+|
+		// | e |                           ||
+		// | s |        SignalRect         ||
+		// | u |                           ||
+		// | l |                           ||
+		// | t +---------------------------+|
+		// | . |                           ||
+		// | . |                           ||
+		// | . +---------------------------+|
+		// +--------------------------------+
+		//
+		QRectF result(QPointF(laneRect.left(), signalRect.top()),
+					  QPointF(signalRect.left(), signalRect.bottom()));
+
+		return result;
 	}
 
 	QRect Trend::inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam)
