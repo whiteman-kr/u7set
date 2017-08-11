@@ -8,7 +8,7 @@ class TuningClientFilterEditor : public TuningFilterEditor
 {
 public:
 
-	explicit TuningClientFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
+	explicit TuningClientFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 									  std::vector<int>& signalsTableColumnWidth, std::vector<int>& presetsTreeColumnWidth,
 									  QPoint pos,
 									  QByteArray geometry,

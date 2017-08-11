@@ -2,12 +2,12 @@
 #include "MainWindow.h"
 
 
-TuningClientFilterEditor::TuningClientFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
+TuningClientFilterEditor::TuningClientFilterEditor(TuningSignalManager* tuningSignalManager, TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 												   std::vector<int>& signalsTableColumnWidth, std::vector<int>& presetsTreeColumnWidth,
 												   QPoint pos,
 												   QByteArray geometry,
 												   QWidget* parent):
-	TuningFilterEditor(filterStorage, objects, showAutomatic, signalsTableColumnWidth, presetsTreeColumnWidth, pos, geometry, parent),
+	TuningFilterEditor(filterStorage, objects, signalsTableColumnWidth, presetsTreeColumnWidth, pos, geometry, parent),
 	m_tuningSignalManager(tuningSignalManager)
 {
 	assert(tuningSignalManager);

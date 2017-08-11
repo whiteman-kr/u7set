@@ -5,13 +5,12 @@
 //
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 									   std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth,
 									   QPoint pos,
 									   QByteArray geometry,
 									   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_showAutomatic(showAutomatic),
 	m_filterStorage(filterStorage),
 	m_signals(objects),
 	m_signalsTableColumnWidth(signalsTableColumnWidth),
@@ -67,7 +66,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 			return;
 		}
 
-		if (f->automatic() && m_showAutomatic == false)
+		if (f->isSourceUser() == false)
 		{
 			continue;
 		}
@@ -575,7 +574,7 @@ void TuningFilterEditor::addChildTreeObjects(const std::shared_ptr<TuningFilter>
 			continue;
 		}
 
-		if (f->automatic() && m_showAutomatic == false)
+		if (f->isSourceUser() == false)
 		{
 			continue;
 		}
@@ -619,14 +618,14 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 	}
 
 	QStringList l;
-	if (filter->automatic() == true)
+	/*if (f->isSource() == false)
 	{
 		l << filter->caption() + tr(" <AUTO>");
 	}
 	else
-	{
-		l << filter->caption();
-	}
+	{*/
+	l << filter->caption();
+	//}
 	l.append(tr("Preset"));
 
 	int i = 0;
@@ -752,7 +751,7 @@ void TuningFilterEditor::on_m_editPreset_clicked()
 		return;
 	}
 
-	bool readOnly = editFilter->automatic();
+	bool readOnly = false;//editFilter->automatic();
 
 	PropertyEditorDialog d(this);
 
