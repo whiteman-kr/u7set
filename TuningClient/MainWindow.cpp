@@ -52,22 +52,22 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	// Global connections
 
+
+
+	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningSignalManager::slot_serversArrived);
+
+	connect(&m_configController, &ConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
+	connect(&m_configController, &ConfigController::schemasDetailsArrived, this, &MainWindow::slot_schemasDetailsUpdated, Qt::DirectConnection);
+	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningSignalManager::slot_signalsUpdated, Qt::DirectConnection);
 	connect(&m_configController, &ConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
-	connect(&m_configController, &ConfigController::signalsArrived, m_objectManager, &TuningSignalManager::slot_signalsUpdated);
-	connect(&m_configController, &ConfigController::serversArrived, m_objectManager, &TuningSignalManager::slot_serversArrived,
-			Qt::QueuedConnection);
-	connect(&m_configController, &ConfigController::filtersArrived, &m_filterStorage, &TuningFilterStorage::slot_filtersUpdated,
-			Qt::QueuedConnection);
-	connect(&m_configController, &ConfigController::schemasDetailsArrived, &m_filterStorage, &TuningFilterStorage::slot_schemasDetailsUpdated,
-			Qt::QueuedConnection);
+
 	connect(&m_configController, &ConfigController::globalScriptArrived, this, &MainWindow::slot_schemasGlobalScriptArrived,
 			Qt::QueuedConnection);
-
 	// Load user filters
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, false) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, TuningFilter::FilterSource::User) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -288,7 +288,7 @@ void MainWindow::createWorkspace(const TuningSignalStorage* objects)
 
 	// Update automatic filters
 
-	m_filterStorage.removeAutomaticFilters();
+	m_filterStorage.removeFilters(TuningFilter::FilterSource::Automatic);
 
 	m_filterStorage.createAutomaticFilters(objects, theConfigSettings.filterBySchema, theConfigSettings.filterByEquipment, m_objectManager->tuningSourcesEquipmentIds());
 
@@ -390,6 +390,32 @@ void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumn
 	theSettings.m_presetEditorGeometry = geometry;
 }
 
+void MainWindow::slot_projectFiltersUpdated(QByteArray data)
+{
+	QString errorStr;
+
+
+	m_filterStorage.removeFilters(TuningFilter::FilterSource::Project);
+
+	if (m_filterStorage.load(data, &errorStr, TuningFilter::FilterSource::Project) == false)
+	{
+		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
+		theLogFile->writeError(completeErrorMessage);
+	}
+
+}
+
+void MainWindow::slot_schemasDetailsUpdated(QByteArray data)
+{
+	QString errorStr;
+
+	if (m_filterStorage.loadSchemasDetails(data, &errorStr) == false)
+	{
+		QString completeErrorMessage = QObject::tr("Schemas Details file loading error: %1").arg(errorStr);
+		theLogFile->writeError(completeErrorMessage);
+	}
+}
+
 void MainWindow::slot_schemasGlobalScriptArrived(QByteArray data)
 {
 	m_globalScript = data.toStdString().c_str();
@@ -409,11 +435,9 @@ void MainWindow::runPresetEditor()
 
 	TuningClientFilterStorage editFilters = m_filterStorage;
 
-	bool editAutomatic = false;
-
 	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
-	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects, editAutomatic,
+	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects,
 							   theSettings.m_presetEditorSignalsTableColumnWidth,
 							   theSettings.m_presetEditorPresetsTreeColumnWidth,
 							   theSettings.m_presetEditorPos,
