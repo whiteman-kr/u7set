@@ -15,7 +15,7 @@ message TrendStateRecord
     repeated TrendStateItem states = 3;
 }
 
-message TrendArchiveHour
+message TrendArchiveHour				//  Reflected to c++ struct OneHourData
 {
     optional fixed64 time_stamp = 2;
 	optional int32 state = 3;			// enum OneHourData::State
@@ -25,8 +25,7 @@ message TrendArchiveHour
 message TrendArchive
 {
     optional string app_signal_id = 2;
-
-    repeated TrendArchiveHour hours = 10;
+	repeated TrendArchiveHour hours = 10;
 }
 
 message TrendSignalParam

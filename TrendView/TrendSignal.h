@@ -7,6 +7,16 @@
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
+namespace Proto
+{
+	class TrendStateItem;
+	class TrendStateRecord;
+	class TrendArchiveHour;
+	class TrendArchive;
+	class TrendSignalParam;
+	class TrendSignalSet;
+}
+
 namespace TrendLib
 {
 	struct TrendStateItem
@@ -18,6 +28,7 @@ namespace TrendLib
 		qint32 flags;
 		double value;
 
+		TrendStateItem() = default;
 		TrendStateItem(const AppSignalState& state) :
 			system(state.m_time.system),
 			local(state.m_time.local),
@@ -44,12 +55,22 @@ namespace TrendLib
 				return this->local;
 			}
 		}
+
+		// Serialization
+		//
+		bool save(Proto::TrendStateItem* message) const;
+		bool load(const Proto::TrendStateItem& message);
 	};
 
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t recomendedSize = 512;
+		static const size_t recomendedSize = 1024;
+
+		// Serialization
+		//
+		bool save(Proto::TrendStateRecord* message) const;
+		bool load(const Proto::TrendStateRecord& message);
 	};
 
 	struct OneHourData
@@ -63,12 +84,22 @@ namespace TrendLib
 
 		State state = State::NoData;
 		std::vector<TrendStateRecord> data;
+
+		// Serialization
+		//
+		bool save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const;
+		bool load(const Proto::TrendArchiveHour& message);
 	};
 
 	struct TrendArchive
 	{
-		QString appSignalId;
+		QString appSignalId;		// This fiels is not filled in. Don't use it now
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
+
+		// Serialization
+		//
+		bool save(QString mapAppSignalId, Proto::TrendArchive* message) const;
+		bool load(const Proto::TrendArchive& message);
 	};
 
 	class TrendSignalParam
@@ -76,6 +107,10 @@ namespace TrendLib
 	public:
 		TrendSignalParam();
 		TrendSignalParam(const AppSignalParam& appSignal);
+
+	public:
+		bool save(Proto::TrendSignalParam* message) const;
+		bool load(const Proto::TrendSignalParam& message);
 
 		// Methods
 		//
@@ -157,8 +192,13 @@ namespace TrendLib
 	class TrendSignalSet : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		TrendSignalSet();
+
+	public:
+		bool save(::Proto::TrendSignalSet* message) const;
+		bool load(const ::Proto::TrendSignalSet& message);
 
 	public:
 		bool addSignal(const TrendSignalParam& signal);

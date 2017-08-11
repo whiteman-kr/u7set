@@ -54,6 +54,9 @@ namespace TrendLib
 		virtual ~TrendWidget();
 
 	public:
+		bool save(QString fileName, QString* errorMessage) const;
+		bool load(QString fileName, QString* errorMessage);
+
 		bool save(::Proto::TrendWidget* message) const;
 		bool load(const ::Proto::TrendWidget& message);
 

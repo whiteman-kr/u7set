@@ -1,5 +1,6 @@
 #include "TrendWidget.h"
 #include <cstdlib>
+#include <fstream>
 #include <QPaintEngine>
 #include <QPainter>
 #include <QPrinter>
@@ -99,6 +100,80 @@ namespace TrendLib
 
 	TrendWidget::~TrendWidget()
 	{
+	}
+
+	bool TrendWidget::save(QString fileName, QString* errorMessage) const
+	{
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
+
+		std::string fnstr(fileName.toStdString());
+
+		std::fstream output(fnstr, std::ios::out | std::ios::binary);
+		if (output.is_open() == false || output.bad() == true)
+		{
+			*errorMessage = strerror(errno);
+			return false;
+		}
+
+		::Proto::TrendWidget message;
+		bool ok = save(&message);
+
+		if (ok == false)
+		{
+			*errorMessage = tr("Serialize trend structure error.");
+			return false;
+		}
+
+		ok = message.SerializeToOstream(&output);
+
+		if (ok == false)
+		{
+			*errorMessage = tr("Serialize data to file error. ") + strerror(errno);
+			return false;
+		}
+
+		return ok;
+	}
+
+	bool TrendWidget::load(QString fileName, QString* errorMessage)
+	{
+		if (errorMessage == nullptr)
+		{
+			assert(errorMessage);
+			return false;
+		}
+
+		std::string fnstr(fileName.toStdString());
+
+		std::fstream input(fnstr, std::ios::in | std::ios::binary);
+		if (input.is_open() == false || input.bad() == true)
+		{
+			*errorMessage = strerror(errno);
+			return false;
+		}
+
+		::Proto::TrendWidget message;
+		bool ok = message.ParseFromIstream(&input);
+		if (ok == false)
+		{
+			*errorMessage = tr("Parse trend file error. ") + strerror(errno);
+			return false;
+		}
+
+		ok = load(message);
+		if (ok == false)
+		{
+			*errorMessage = tr("Read trend data structure error.");
+			return false;
+		}
+
+		message.Clear();
+
+		return ok;
 	}
 
 	bool TrendWidget::save(::Proto::TrendWidget* message) const

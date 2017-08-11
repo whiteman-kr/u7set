@@ -269,7 +269,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	{
 		// Data not ready yet, request next part one more time
 		//
-		//QThread::msleep(theSettings.requestTimeInterval());
+		QThread::msleep(5);
 		requestNext();
 		return;
 	}
@@ -327,6 +327,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	//
 	if (m_nextReply.islastpart() == true)
 	{
+		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
 		assert(m_receivedData);
 
 		m_receivedData->state = TrendLib::OneHourData::State::Received;

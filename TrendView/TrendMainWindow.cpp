@@ -542,9 +542,66 @@ static int stdColorIndex = 0;
 
 	void TrendMainWindow::actionOpenTriggered()
 	{
-		// todo
+		QString fileName = QFileDialog::getOpenFileName(this,
+														tr("Open Trend File"),
+														".",
+														tr("Trend (*.u7trend);;All Files (*.*)"));
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		assert(m_trendWidget);
+
+		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+		QApplication::processEvents();
+
+		QString errorMessage;
+		bool ok = m_trendWidget->load(fileName, &errorMessage);
+
+		QApplication::restoreOverrideCursor();
+		QApplication::processEvents();
+
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Loading trend error: %1\n").arg(errorMessage));
+			return;
+		}
+
+		// Set UI items to loaded state
+		// start time, interval, +lanes, +view mode, time type
 		//
-		//assert(false);
+		m_trendSlider->setValue(m_trendWidget->startTime());
+
+		int index = m_lanesCombo->findData(QVariant::fromValue(m_trendWidget->laneCount()));
+		if (index != -1)
+		{
+			m_lanesCombo->setCurrentIndex(index);
+		}
+
+		index = m_viewCombo->findData(QVariant::fromValue(m_trendWidget->viewMode()));
+		if (index != -1)
+		{
+			m_viewCombo->setCurrentIndex(index);
+		}
+
+		index = m_timeTypeCombo->findData(QVariant::fromValue(m_trendWidget->timeType()));
+		if (index != -1)
+		{
+			m_timeTypeCombo->setCurrentIndex(index);
+		}
+
+		index = m_timeCombo->findData(QVariant::fromValue(m_trendWidget->duration()));
+		if (index != -1)
+		{
+			m_timeCombo->setCurrentIndex(index);
+		}
+
+		QApplication::processEvents();
+
+		updateWidget();
+
+		return;
 	}
 
 	void TrendMainWindow::actionSaveTriggered()
@@ -564,6 +621,28 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
+			assert(m_trendWidget);
+
+			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+			QApplication::processEvents();
+
+			QTime timer;
+			timer.start();
+
+			QString errorMessage;
+			bool ok = m_trendWidget->save(fileName, &errorMessage);
+
+			qDebug() << "Save trend to file: " << fileName << ", result: " << ok << ", elapsed time: " << timer.elapsed();
+
+			QApplication::restoreOverrideCursor();
+			QApplication::processEvents();
+
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Saving trend error: %1\n").arg(errorMessage));
+				return;
+			}
+
 			return;
 		}
 

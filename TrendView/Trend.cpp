@@ -20,7 +20,7 @@ namespace TrendLib
 
 		bool ok = true;
 
-		//ok &= m_signalSet.save(message->mutable_signal_set());
+		ok &= m_signalSet.save(message->mutable_signal_set());
 		ok &= m_rullerSet.save(message->mutable_ruller_set());
 
 		return ok;
@@ -36,7 +36,7 @@ namespace TrendLib
 
 		bool ok = true;
 
-		//ok &= m_signalSet.load(message.signal_set());
+		ok &= m_signalSet.load(message.signal_set());
 		ok &= m_rullerSet.load(message.ruller_set());
 
 		return true;
@@ -153,97 +153,6 @@ namespace TrendLib
 		}
 
 		return;
-
-//		double y = insideRect.top();
-//		QColor signalBackColor = drawParam.backgroundColor();
-
-//		// Draw discrete signals is the same for both modes (TrendView::Separated/TrendView::Overlapped)
-//		//
-//		for (int signalIndex = 0; signalIndex < static_cast<int>(discreteSignals.size()); signalIndex++)
-//		{
-//			const TrendSignalParam& s = discreteSignals[signalIndex];
-
-//			QRectF signalRect = {insideRect.left(), y, insideRect.width(), discreteSignalHeight};
-//			y += discreteSignalHeight;
-
-//			if (signalRect.top() >= insideRect.bottom())
-//			{
-//				break;
-//			}
-
-//			if (signalRect.bottom() > insideRect.bottom())
-//			{
-//				signalRect.setBottom(insideRect.bottom());
-//			}
-
-//			signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
-//			painter->fillRect(signalRect, signalBackColor);
-
-//			drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
-//		}
-
-//		// Specific drawing for analog signals
-//		//
-//		if (drawParam.view() == TrendView::Separated)
-//		{
-//			const double analogSignalsHeight = qMax((insideRect.bottom() - y) / analogSignals.size(), discreteSignalHeight);
-
-//			for (int signalIndex = 0; signalIndex < static_cast<int>(analogSignals.size()); signalIndex++)
-//			{
-//				const TrendSignalParam& s = analogSignals[signalIndex];
-
-//				QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
-//				y += analogSignalsHeight;
-
-//				if (signalRect.top() >= insideRect.bottom())
-//				{
-//					break;
-//				}
-
-//				if (signalRect.bottom() > insideRect.bottom())
-//				{
-//					signalRect.setBottom(insideRect.bottom());
-//				}
-
-//				signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
-//				painter->fillRect(signalRect, signalBackColor);
-
-//				drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
-//			}
-//		}
-
-//		if (drawParam.view() == TrendView::Overlapped &&
-//			y < insideRect.bottom())
-//		{
-//			const double analogSignalsHeight = qMax(insideRect.bottom() - y, discreteSignalHeight);
-//			QRectF signalRect = {insideRect.left(), y, insideRect.width(), analogSignalsHeight};
-
-//			if (signalRect.bottom() > insideRect.bottom())
-//			{
-//				signalRect.setBottom(insideRect.bottom());
-//			}
-
-//			signalBackColor = (signalBackColor == drawParam.laneBackgroundColor()) ? drawParam.backgroundColor() : drawParam.laneBackgroundColor();
-//			painter->fillRect(signalRect, signalBackColor);
-
-//			for (int signalIndex = 0; signalIndex < static_cast<int>(analogSignals.size()); signalIndex++)
-//			{
-//				const TrendSignalParam& s = analogSignals[signalIndex];
-
-//				drawSignal(painter, s, signalIndex, signalRect, drawParam, signalBackColor);
-//			}
-//		}
-
-//		// Draw insideRect
-//		//
-//		QPen insideRectPen(Qt::darkGray, drawParam.cosmeticPenWidth(), Qt::SolidLine);
-//		painter->setPen(insideRectPen);
-//		painter->setBrush(Qt::BrushStyle::NoBrush);
-
-//		painter->drawRect(insideRect);
-
-
-		return;
 	}
 
 	void Trend::drawBackground(QPainter* painter,
@@ -347,8 +256,7 @@ namespace TrendLib
 		QString estimatedString = (drawParam.duration() < static_cast<quint64>(10_sec)) ? "HH:MM:SS.XXX" : "HH:MM:SS";
 		drawText(painter, estimatedString, QRectF(), drawParam, Qt::AlignCenter, &boundRect);
 
-		double minTimeInterval = boundRect.width() * 1.33;
-		//double minTimeInterval = 3.0/4.0;	// 3/4 in -- minimum inches interval
+		double minTimeInterval = boundRect.width() * 1.4;
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -651,7 +559,6 @@ namespace TrendLib
 				{
 					// gridValue contains found suitable value for grid
 					//
-					//qDebug() << "GridValue " << gridValue << ", distance in inches " << rect.bottom() - y ;
 					mult = 1000000;		// To break outer loop
 					break;
 				}
@@ -789,7 +696,6 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 				{
 					// gridValue contains found suitable value for grid
 					//
-					//qDebug() << "GridValue " << gridValue << ", distance in inches " << rect.bottom() - y ;
 					mult = 1000000;		// To break outer loop
 					break;
 				}
@@ -1300,8 +1206,7 @@ static const int recomendedSize = 8192;
 		int selectedRullerIndex = drawParam.hightlightRullerIndex();
 		TimeStamp selectedRullerTime;
 
-		if (/*selectedRullerIndex != -1 &&*/
-			selectedRullerIndex >= 0 &&
+		if (selectedRullerIndex >= 0 &&
 			selectedRullerIndex < static_cast<int>(rullerSet().rullers().size()))
 		{
 			selectedRullerTime = rullerSet().rullers()[selectedRullerIndex].timeStamp();
@@ -1317,8 +1222,6 @@ static const int recomendedSize = 8192;
 
 			QRectF laneRect = calcLaneRect(laneIndex, laneDrawParam);
 			QRectF trendAreaRect = calcTrendArea(laneRect, laneDrawParam);
-
-			//std::vector<TrendRuller> laneRullers = rullerSet().getRullers(startLaneTime, finishLaneTime);
 
 			std::vector<TrendRuller> laneRullers = rullerSet().rullers();
 			std::sort(laneRullers.begin(), laneRullers.end(),
@@ -1343,7 +1246,6 @@ static const int recomendedSize = 8192;
 
 			for (size_t i = 0; i < laneRullers.size(); i++)
 			{
-				//QRectF textBoundRect;
 				const TrendRuller& r = laneRullers[i];
 
 				if (r.timeStamp() < startLaneTime)
