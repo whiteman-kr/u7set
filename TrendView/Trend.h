@@ -5,6 +5,11 @@
 #include "TrendDrawParam.h"
 #include "TrendRuller.h"
 
+namespace Proto
+{
+	class Trend;
+}
+
 namespace TrendLib
 {
 
@@ -17,6 +22,12 @@ namespace TrendLib
 		//
 	public:
 
+		// Serialization
+		//
+		bool save(::Proto::Trend* message) const;
+		bool load(const ::Proto::Trend& message);
+
+	public:
 		// Draw methods
 		//
 		void draw(QImage* image, const TrendDrawParam& drawParam) const;
@@ -109,7 +120,7 @@ namespace TrendLib
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRullerSet m_rullerSet;
 
-		const double discreteSignalHeight = 5.0 / 8.0;		// of inch
+		const double discreteSignalHeight = 5.0 / 8.0;		// if inches
 	};
 
 }

@@ -14,6 +14,7 @@ namespace TrendLib
 		TimeStamp system;
 		TimeStamp local;
 		TimeStamp plant;
+		qint64 archiveIndex;
 		qint32 flags;
 		double value;
 
@@ -101,6 +102,9 @@ namespace TrendLib
 		E::SignalType type() const;
 		void setType(E::SignalType value);
 
+		QString unit() const;
+		void setUnit(const QString& value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -112,9 +116,6 @@ namespace TrendLib
 
 		double viewLowLimit() const;
 		void setViewLowLimit(double value);
-
-		QString unit() const;
-		void setUnit(const QString& value);
 
 		QColor color() const;
 		void setColor(const QColor& value);
@@ -136,14 +137,13 @@ namespace TrendLib
 		QString m_equipmentId;
 
 		E::SignalType m_type = E::SignalType::Analog;
+		QString m_unit;
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
 		double m_viewHighLimit = 1.0;	// Current view limits for the signals
 		double m_viewLowLimit = 0;
-
-		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
 

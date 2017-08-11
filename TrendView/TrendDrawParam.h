@@ -2,6 +2,12 @@
 #define DRAWPARAM_H
 #include "../lib/TimeStamp.h"
 
+namespace Proto
+{
+	class TrendParam;
+}
+
+
 namespace TrendLib
 {
 	enum class TrendViewMode
@@ -19,6 +25,10 @@ namespace TrendLib
 	{
 	public:
 		TrendDrawParam();
+
+	public:
+		bool save(::Proto::TrendParam* message) const;
+		bool load(const ::Proto::TrendParam& message);
 
 	public:
 		QRectF rect() const;
@@ -77,7 +87,6 @@ namespace TrendLib
 		qint64 m_duration = 1_hour;
 
 		int m_highlightRullerIndex = -1;
-
 		double m_cosmeticPenWidth = 0;
 
 		mutable std::vector<std::pair<QString, QRectF>> m_signalDescriptionRect;		// Keeps signal description Rect, which is filled while draw trend, in inches.

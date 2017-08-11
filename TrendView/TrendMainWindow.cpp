@@ -50,7 +50,7 @@ namespace TrendLib
 		m_trendWidget = new TrendLib::TrendWidget(this);
 		layout->addWidget(m_trendWidget, 0, 0);
 
-		m_trendWidget->setView(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
+		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
 		m_trendWidget->setTimeType(static_cast<TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
@@ -967,7 +967,7 @@ static int lastCopyCount = false;
 	void TrendMainWindow::viewComboCurrentIndexChanged(int index)
 	{
 		TrendLib::TrendViewMode view = m_viewCombo->itemData(index).value<TrendLib::TrendViewMode>();
-		m_trendWidget->setView(view);
+		m_trendWidget->setViewMode(view);
 
 		m_trendWidget->updateWidget();
 		return;

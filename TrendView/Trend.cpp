@@ -1,12 +1,45 @@
 #include "Trend.h"
-#include "QPainter"
+#include <QPainter>
 #include <cfloat>
+#include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
 
 	Trend::Trend()
 	{
+	}
+
+	bool Trend::save(::Proto::Trend* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		//ok &= m_signalSet.save(message->mutable_signal_set());
+		ok &= m_rullerSet.save(message->mutable_ruller_set());
+
+		return ok;
+	}
+
+	bool Trend::load(const ::Proto::Trend& message)
+	{
+		if (message.IsInitialized() == false)
+		{
+			assert(message.IsInitialized());
+			return false;
+		}
+
+		bool ok = true;
+
+		//ok &= m_signalSet.load(message.signal_set());
+		ok &= m_rullerSet.load(message.ruller_set());
+
+		return true;
 	}
 
 	void Trend::draw(QImage* image, const TrendDrawParam& drawParam) const

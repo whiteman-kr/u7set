@@ -6,6 +6,12 @@
 
 class QPrinter;
 
+namespace Proto
+{
+	class TrendWidget;
+}
+
+
 namespace TrendLib
 {
 	class RenderThread : public QThread
@@ -46,6 +52,10 @@ namespace TrendLib
 	public:
 		explicit TrendWidget(QWidget* parent = nullptr);
 		virtual ~TrendWidget();
+
+	public:
+		bool save(::Proto::TrendWidget* message) const;
+		bool load(const ::Proto::TrendWidget& message);
 
 	public:
 		void updateWidget();
@@ -95,8 +105,8 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		TrendViewMode view() const;
-		void setView(TrendViewMode value);
+		TrendViewMode viewMode() const;
+		void setViewMode(TrendViewMode value);
 
 		int laneCount() const;
 		void setLaneCount(int value);

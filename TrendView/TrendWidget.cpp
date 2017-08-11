@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QPdfWriter>
 #include <QMouseEvent>
+#include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
@@ -98,6 +99,45 @@ namespace TrendLib
 
 	TrendWidget::~TrendWidget()
 	{
+	}
+
+	bool TrendWidget::save(::Proto::TrendWidget* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		::Proto::Trend* trendMessage = message->mutable_trend();
+		ok &= m_trend.save(trendMessage);
+
+		::Proto::TrendParam* trendParamMessage = message->mutable_trend_param();
+		ok &= m_drawParam.save(trendParamMessage);
+
+		return ok;
+	}
+
+	bool TrendWidget::load(const ::Proto::TrendWidget& message)
+	{
+		if (message.IsInitialized() == false ||
+			message.has_trend() == false ||
+			message.has_trend_param() == false)
+		{
+			assert(message.IsInitialized());
+			assert(message.has_trend());
+			assert(message.has_trend_param());
+			return false;
+		}
+
+		bool ok = true;
+
+		ok &= m_trend.load(message.trend());
+		ok &= m_drawParam.load(message.trend_param());
+
+		return ok;
 	}
 
 	void TrendWidget::updateWidget()
@@ -488,12 +528,12 @@ namespace TrendLib
 		return m_trend;
 	}
 
-	TrendViewMode TrendWidget::view() const
+	TrendViewMode TrendWidget::viewMode() const
 	{
 		return m_drawParam.viewMode();
 	}
 
-	void TrendWidget::setView(TrendViewMode value)
+	void TrendWidget::setViewMode(TrendViewMode value)
 	{
 		m_drawParam.setViewMode(value);
 		return;

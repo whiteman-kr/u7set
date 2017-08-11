@@ -13,11 +13,11 @@ namespace TrendLib
 		m_caption(appSignal.caption()),
 		m_equipmentId(appSignal.equipmentId()),
 		m_type(appSignal.type()),
+		m_unit(appSignal.unit()),
 		m_highLimit(appSignal.highEngineeringUnits()),
 		m_lowLimit(appSignal.lowEngineeringUnits()),
 		m_viewHighLimit(appSignal.highEngineeringUnits()),
-		m_viewLowLimit(appSignal.lowEngineeringUnits()),
-		m_unit(appSignal.unit())
+		m_viewLowLimit(appSignal.lowEngineeringUnits())
 	{
 	}
 
@@ -30,9 +30,9 @@ namespace TrendLib
 		result.setCaption(m_caption);
 		result.setEquipmentId(m_equipmentId);
 		result.setType(m_type);
+		result.setUnit(m_unit);
 		result.setHighEngineeringUnits(m_highLimit);
 		result.setLowEngineeringUnits(m_lowLimit);
-		result.setUnit(m_unit);
 
 		return result;
 	}
@@ -97,6 +97,16 @@ namespace TrendLib
 		m_type = value;
 	}
 
+	QString TrendSignalParam::unit() const
+	{
+		return m_unit;
+	}
+
+	void TrendSignalParam::setUnit(const QString& value)
+	{
+		m_unit = value;
+	}
+
 	double TrendSignalParam::highLimit() const
 	{
 		return m_highLimit;
@@ -135,16 +145,6 @@ namespace TrendLib
 	void TrendSignalParam::setViewLowLimit(double value)
 	{
 		m_viewLowLimit = value;
-	}
-
-	QString TrendSignalParam::unit() const
-	{
-		return m_unit;
-	}
-
-	void TrendSignalParam::setUnit(const QString& value)
-	{
-		m_unit = value;
 	}
 
 	QColor TrendSignalParam::color() const

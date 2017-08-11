@@ -1,12 +1,94 @@
 package Proto;
 
-
-message TrendParams
+message TrendStateItem
 {
-    optional int32 viewMode = 2 [default = 0];		//
+    optional fixed64 time_system = 2;
+	optional fixed64 time_local = 3;
+	optional fixed64 time_plant = 4;
+	optional int64 archive_index = 5 [default = 0];
+	optional int32 flags = 8;
+	optional double value = 12;
+}
+
+message TrendStateRecord
+{
+    repeated TrendStateItem states = 3;
+}
+
+message TrendArchiveHour
+{
+    optional fixed64 time_stamp = 2;
+	optional int32 state = 3;			// enum OneHourData::State
+	repeated TrendStateRecord records = 4;
+}
+
+message TrendArchive
+{
+    optional string app_signal_id = 2;
+
+    repeated TrendArchiveHour hours = 10;
+}
+
+message TrendSignalParam
+{
+    optional string signal_id = 2;
+	optional string app_signal_id = 3;
+	optional string caption = 4;
+	optional string equipment_id = 5;
+
+    optional int32 type = 10;				// enum E::SignalType
+	optional string unit = 11;
+
+    optional double high_limit = 20;
+	optional double low_limit = 21;
+	optional double view_high_limit = 31;
+	optional double view_low_limit = 32;
+
+    optional uint32 color = 40;
+}
+
+message TrendSignalSet
+{
+    repeated TrendSignalParam signal_params = 2;
+
+    repeated TrendArchive archive_local_time= 10;
+	repeated TrendArchive archive_system_time= 11;
+	repeated TrendArchive archive_plant_time= 12;
+}
+
+message TrendRuller
+{
+    optional fixed64 time_stamp = 2;
+	optional bool show = 3 [default = true];
+	optional bool show_signal_values = 4 [default = true];
+}
+
+message TrendRullerSet
+{
+    repeated TrendRuller rullers = 2;
 }
 
 message Trend
 {
-    optional TrendParams trend_params = 1;
+    optional TrendSignalSet signal_set = 2;
+	optional TrendRullerSet ruller_set = 3;
+}
+
+message TrendParam
+{
+    optional int32 view_mode = 2 [default = 0];		// enum TrendViewMode::Separated, TrendViewMode::Overlapped
+	optional int32 time_type = 3 [default = 2];		// enum TimeType::Plant, TimeType::System, TimeType::Local
+	optional int32 lane_count = 4 [default = 1];
+
+    optional fixed64 start_time = 50;
+	optional int64 duration = 51;
+
+    optional uint32 back_color_1st = 70;
+	optional uint32 back_color_2nd = 71;
+}
+
+message TrendWidget
+{
+    optional Trend trend = 2;
+	optional TrendParam trend_param = 3;
 }
