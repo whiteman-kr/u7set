@@ -488,14 +488,14 @@ namespace TrendLib
 		return m_trend;
 	}
 
-	TrendView TrendWidget::view() const
+	TrendViewMode TrendWidget::view() const
 	{
-		return m_drawParam.view();
+		return m_drawParam.viewMode();
 	}
 
-	void TrendWidget::setView(TrendView value)
+	void TrendWidget::setView(TrendViewMode value)
 	{
-		m_drawParam.setView(value);
+		m_drawParam.setViewMode(value);
 		return;
 	}
 

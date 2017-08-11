@@ -75,3 +75,6 @@ unix {
     LIBS += -lprotobuf
 }
 
+DISTFILES += \
+    ../Proto/trends.proto
+

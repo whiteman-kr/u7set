@@ -45,14 +45,14 @@ namespace TrendLib
 		return;
 	}
 
-	TrendView TrendDrawParam::view() const
+	TrendViewMode TrendDrawParam::viewMode() const
 	{
-		return m_view;
+		return m_viewMode;
 	}
 
-	void TrendDrawParam::setView(TrendView value)
+	void TrendDrawParam::setViewMode(TrendViewMode value)
 	{
-		m_view = value;
+		m_viewMode = value;
 	}
 
 	TimeType TrendDrawParam::timeType() const

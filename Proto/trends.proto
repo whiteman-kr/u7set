@@ -1,0 +1,12 @@
+package Proto;
+
+
+message TrendParams
+{
+    optional int32 viewMode = 2 [default = 0];		//
+}
+
+message Trend
+{
+    optional TrendParams trend_params = 1;
+}

@@ -321,6 +321,12 @@ namespace TrendLib
 		return result;
 	}
 
+	size_t TrendSignalSet::analogSignalsCount() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+		return m_signalParams.size();
+	}
+
 	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		// Get already reqquested and received (o read form file) data

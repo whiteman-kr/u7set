@@ -4,14 +4,14 @@
 
 namespace TrendLib
 {
-	enum class TrendView
+	enum class TrendViewMode
 	{
 		Separated,
 		Overlapped
 	};
 }
 
-Q_DECLARE_METATYPE(TrendLib::TrendView)
+Q_DECLARE_METATYPE(TrendLib::TrendViewMode)
 
 namespace TrendLib
 {
@@ -28,8 +28,8 @@ namespace TrendLib
 		int dpiY() const;
 		void setDpi(int dpiX, int dpiY);
 
-		TrendView view() const;
-		void setView(TrendView value);
+		TrendViewMode viewMode() const;
+		void setViewMode(TrendViewMode value);
 
 		TimeType timeType() const;
 		void setTimeType(TimeType value);
@@ -66,7 +66,7 @@ namespace TrendLib
 		int m_dpiX = 96;
 		int m_dpiY = 96;
 
-		TrendView m_view = TrendView::Separated;
+		TrendViewMode m_viewMode = TrendViewMode::Separated;
 		TimeType m_timeType = TimeType::Local;
 		int m_laneCount = 1;
 

@@ -95,8 +95,8 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		TrendView view() const;
-		void setView(TrendView value);
+		TrendViewMode view() const;
+		void setView(TrendViewMode value);
 
 		int laneCount() const;
 		void setLaneCount(int value);
