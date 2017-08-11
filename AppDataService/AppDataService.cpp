@@ -496,6 +496,8 @@ void AppDataServiceWorker::createAndInitSignalStates()
 	}
 
 	m_signalStates.buidlHash2State();
+
+	m_signalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
 }
 
 
@@ -516,6 +518,8 @@ void AppDataServiceWorker::clearConfiguration()
 
 void AppDataServiceWorker::applyNewConfiguration()
 {
+	m_autoArchivingGroupsCount = m_cfgSettings.autoArchiveInterval * 60;
+
 	resizeAppSignalEventsQueue();
 
 	createAndInitSignalStates();
@@ -556,7 +560,8 @@ void AppDataServiceWorker::initDataChannelThreads()
 		//
 		m_appDataChannelThread[channel] = new AppDataChannelThread(channel,
 						m_cfgSettings.appDataServiceChannel[channel].appDataReceivingIP,
-						m_signalStatesQueue);
+						m_signalStatesQueue,
+						m_autoArchivingGroupsCount);
 
 		// add AppDataSources to channel
 		//

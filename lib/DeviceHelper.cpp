@@ -174,6 +174,12 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 
 Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log)
 {
+	if (device == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
 	Hardware::DeviceObject* deviceObject = getChildDeviceObjectBySuffix(device, suffix, log);
 
 	if (deviceObject == nullptr)
@@ -181,7 +187,19 @@ Hardware::DeviceController* DeviceHelper::getChildControllerBySuffix(const Hardw
 		return nullptr;
 	}
 
-	return deviceObject->toController();
+	Hardware::DeviceController* deviceController = deviceObject->toController();
+
+	if (deviceController != nullptr)
+	{
+		return deviceController;
+	}
+
+	if (log != nullptr)
+	{
+		log->errCFG3025(suffix, device->equipmentIdTemplate());
+	}
+
+	return nullptr;
 }
 
 Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const Hardware::DeviceModule* module, Builder::IssueLogger* log)

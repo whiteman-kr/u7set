@@ -157,6 +157,31 @@ namespace TrendLib
 		m_color = value;
 	}
 
+	int TrendSignalParam::tempSignalIndex() const
+	{
+		return 	m_tempSignalIndex;
+	}
+
+	void TrendSignalParam::setTempSignalIndex(int value)
+	{
+		m_tempSignalIndex = value;
+	}
+
+	QRectF TrendSignalParam::tempDrawRect() const
+	{
+		return m_tempDrawRect;
+	}
+
+	void TrendSignalParam::setTempDrawRect(const QRectF& value)
+	{
+		m_tempDrawRect = value;
+	}
+
+	//
+	//
+	//			TrendSignalSet
+	//
+	//
 	TrendSignalSet::TrendSignalSet()
 	{
 	}
@@ -243,9 +268,12 @@ namespace TrendLib
 		std::vector<TrendSignalParam> result;
 		result.reserve(m_signalParams.size());
 
+		int index = 0;
 		for (const TrendSignalParam& s : m_signalParams)
 		{
 			result.push_back(s);
+			result.back().setTempSignalIndex(index);
+			index++;
 		}
 
 		return result;
@@ -258,11 +286,14 @@ namespace TrendLib
 		std::vector<TrendSignalParam> result;
 		result.reserve(m_signalParams.size());
 
+		int index = 0;
 		for (const TrendSignalParam& s : m_signalParams)
 		{
 			if (s.isAnalog() == true)
 			{
 				result.push_back(s);
+				result.back().setTempSignalIndex(index);
+				index++;
 			}
 		}
 
@@ -276,11 +307,14 @@ namespace TrendLib
 		std::vector<TrendSignalParam> result;
 		result.reserve(m_signalParams.size());
 
+		int index = 0;
 		for (const TrendSignalParam& s : m_signalParams)
 		{
 			if (s.isDiscrete() == true)
 			{
 				result.push_back(s);
+				result.back().setTempSignalIndex(index);
+				index++;
 			}
 		}
 

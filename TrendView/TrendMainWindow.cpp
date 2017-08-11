@@ -323,7 +323,6 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
-		m_timeCombo->addItem(tr("7 days"), QVariant::fromValue(24_hours * 7));
 		m_timeCombo->setCurrentIndex(7);
 		m_toolBar->addWidget(m_timeCombo);
 
@@ -814,8 +813,16 @@ static int lastCopyCount = false;
 			{
 				// Set limits and update param
 				//
-				ts.setViewLowLimit(minValue - (maxValue - minValue) * 0.10);
-				ts.setViewHighLimit(maxValue + (maxValue - minValue) * 0.10);
+				if (fabs(maxValue - minValue) <= DBL_MIN)
+				{
+					ts.setViewLowLimit(minValue - 1.0);
+					ts.setViewHighLimit(maxValue + 1.0);
+				}
+				else
+				{
+					ts.setViewLowLimit(minValue - (maxValue - minValue) * 0.10);
+					ts.setViewHighLimit(maxValue + (maxValue - minValue) * 0.10);
+				}
 
 				signalSet().setSignalParam(ts);
 			}

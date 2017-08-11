@@ -136,6 +136,7 @@ namespace Builder
         void errCFG3022(QString objectID, QString propertyName);							// Property '%1.%2' is empty.
 		void errCFG3023(QString objectID, QString propertyName);							// Property '%1.%2' conversion error.
 		void wrnCFG3024(QString appDataServiceID, QString archServiceID);					// Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
+		void errCFG3025(QString suffix, QString objectID);									// Can't find child controller with suffix '%1' in object '%2'
 
 		// ALP			Application Logic Parsing				4000-4999
 		//

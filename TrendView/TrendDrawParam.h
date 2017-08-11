@@ -37,10 +37,11 @@ namespace TrendLib
 		int laneCount() const;
 		void setLaneCount(int value);
 
-		QColor backgroundColor() const;
-		void setBackgroundColor(const QColor& value);
+		QColor backColor1st() const;
+		void setBackColor1st(const QColor& value);
 
-		QColor laneBackgroundColor() const;
+		QColor backColor2nd() const;
+		void setBackColor2nd(const QColor& value);
 
 		QDateTime startTime() const;
 		void setStartTime(const QDateTime& value);
@@ -69,8 +70,8 @@ namespace TrendLib
 		TimeType m_timeType = TimeType::Local;
 		int m_laneCount = 1;
 
-		QColor m_backgroundColor = {qRgb(0xE0, 0xE0, 0xE0)};
-		QColor m_laneBackgroundColor = {qRgb(0xEA, 0xEA, 0xEA)};
+		QColor m_backColor1st = {qRgb(0xE0, 0xE0, 0xE0)};
+		QColor m_backColor2nd = {qRgb(0xEA, 0xEA, 0xEA)};
 
 		TimeStamp m_startTimeStamp = TimeStamp{QDateTime::currentDateTime().toMSecsSinceEpoch() - 1_hour};
 		qint64 m_duration = 1_hour;

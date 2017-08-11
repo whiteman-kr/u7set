@@ -407,7 +407,7 @@ bool XmlReadHelper::readIntElement(const QString& elementName, int* value)
 		return false;
 	}
 
-		if (name() != elementName)
+	if (name() != elementName)
 	{
 		return false;
 	}

@@ -75,19 +75,24 @@ namespace TrendLib
 		m_laneCount = value;
 	}
 
-	QColor TrendDrawParam::backgroundColor() const
+	QColor TrendDrawParam::backColor1st() const
 	{
-		return m_backgroundColor;
+		return m_backColor1st;
 	}
 
-	void TrendDrawParam::setBackgroundColor(const QColor& value)
+	void TrendDrawParam::setBackColor1st(const QColor& value)
 	{
-		m_backgroundColor = value;
+		m_backColor1st = value;
 	}
 
-	QColor TrendDrawParam::laneBackgroundColor() const
+	QColor TrendDrawParam::backColor2nd() const
 	{
-		return m_laneBackgroundColor;
+		return m_backColor2nd;
+	}
+
+	void TrendDrawParam::setBackColor2nd(const QColor& value)
+	{
+		m_backColor2nd = value;
 	}
 
 	QDateTime TrendDrawParam::startTime() const

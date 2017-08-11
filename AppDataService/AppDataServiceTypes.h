@@ -6,11 +6,14 @@
 
 
 
-const int	NO_INDEX = -1;
+const int NO_INDEX = -1;
+const int NO_AUTOARCHIVING_GROUP = -1;
+const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
 
 
 struct SignalParseInfo
 {
+public:
 	Address16 valueAddr;
 	Address16 validityAddr;
 
@@ -28,7 +31,20 @@ struct SignalParseInfo
 };
 
 
-typedef QVector<SignalParseInfo> SourceSignalsParseInfo;
+class SourceSignalsParseInfo : public QVector<SignalParseInfo>
+{
+public:
+	SourceSignalsParseInfo(int autoArchivingGroupsCount);
+
+	int getAutoArchivingGroup(qint64 currentSysTime);
+
+private:
+	static const int TIME_1S = 1000;
+
+	int m_autoArchivingGroupsCount = 0;
+	qint64 m_lastAutoArchivingTime = 0;
+	int m_lastAutoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
+};
 
 
 class SourceParseInfoMap : public QHash<quint32, SourceSignalsParseInfo*>

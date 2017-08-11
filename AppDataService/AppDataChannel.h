@@ -13,7 +13,10 @@
 class AppDataChannel : public SimpleThreadWorker
 {
 public:
-	AppDataChannel(int channel, const HostAddressPort& dataReceivingIP, AppSignalStatesQueue& signalStatesQueue);
+	AppDataChannel(int channel,
+				   const HostAddressPort& dataReceivingIP,
+				   AppSignalStatesQueue& signalStatesQueue,
+				   int autoArchivingGroupsCount);
 	virtual ~AppDataChannel();
 
 	void prepare(AppSignals& appSignals, AppSignalStates* signalStates);
@@ -43,6 +46,7 @@ private:
 	HostAddressPort m_dataReceivingIP;
 	HashedVector<quint32, AppDataSource*> m_appDataSources;			// allocated and freed in AppDataService
 	HashedVector<quint32, quint32> m_unknownDataSources;
+	int m_autoArchivingGroupsCount = 0;
 
 	// AppDataChannel sockets
 	//
@@ -72,7 +76,10 @@ private:
 	AppDataChannel* m_appDataChannel = nullptr;
 
 public:
-	AppDataChannelThread(int channel, const HostAddressPort& dataRecievingIP, AppSignalStatesQueue& signalStatesQueue);
+	AppDataChannelThread(int channel,
+						 const HostAddressPort& dataRecievingIP,
+						 AppSignalStatesQueue& signalStatesQueue,
+						 int autoArchivingGroupsCount);
 
 	void prepare(AppSignals &appSignals, AppSignalStates *signalStates);
 	void addDataSource(AppDataSource* appDataSource);

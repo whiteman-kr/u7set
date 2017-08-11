@@ -134,7 +134,8 @@ void ArchivingServiceWorker::runArchWriteThread()
 {
 	assert(m_archWriteThread == nullptr);
 
-	m_archWriteThread = new ArchWriteThread(m_archive,
+	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
+											m_archive,
 											m_saveStatesQueue,
 											m_logger);
 
