@@ -100,6 +100,16 @@ namespace TrendLib
 
 	TrendWidget::~TrendWidget()
 	{
+		m_thread.requestInterruption();
+		bool finished = m_thread.wait(10000);
+
+		if (finished == false)
+		{
+			qDebug() << "Force thread termination TrendLib::RenderThread";
+			m_thread.terminate();
+		}
+
+		return;
 	}
 
 	bool TrendWidget::save(QString fileName, QString* errorMessage) const
@@ -110,17 +120,18 @@ namespace TrendLib
 			return false;
 		}
 
-		std::string fnstr(fileName.toStdString());
+		QFile file(fileName);
 
-		std::fstream output(fnstr, std::ios::out | std::ios::binary);
-		if (output.is_open() == false || output.bad() == true)
+		bool ok = file.open(QIODevice::WriteOnly);
+		if (ok == false)
 		{
-			*errorMessage = strerror(errno);
-			return false;
+			*errorMessage = file.errorString();
 		}
 
+		// Serialize to protobuf
+		//
 		::Proto::TrendWidget message;
-		bool ok = save(&message);
+		ok = save(&message);
 
 		if (ok == false)
 		{
@@ -128,11 +139,28 @@ namespace TrendLib
 			return false;
 		}
 
-		ok = message.SerializeToOstream(&output);
+		// Compress data and save to file
+		//
+		std::string serializedString;
+		serializedString.reserve(message.ByteSize());
 
+		ok = message.SerializeToString(&serializedString);
 		if (ok == false)
 		{
-			*errorMessage = tr("Serialize data to file error. ") + strerror(errno);
+			*errorMessage = tr("Serialize message to string error.");
+			return false;
+		}
+
+		// The bytes are not copied!!!, keep serializedString alive
+		//
+		QByteArray ba = QByteArray::fromRawData(serializedString.data(), static_cast<int>(serializedString.size()));
+		QByteArray compressedData = qCompress(ba, 3);
+
+		int written = file.write(compressedData);
+
+		if (written != compressedData.size())
+		{
+			*errorMessage = tr("Write file error. ") + file.errorString();
 			return false;
 		}
 
@@ -147,17 +175,28 @@ namespace TrendLib
 			return false;
 		}
 
-		std::string fnstr(fileName.toStdString());
+		// Read compressed data
+		//
+		QFile file(fileName);
 
-		std::fstream input(fnstr, std::ios::in | std::ios::binary);
-		if (input.is_open() == false || input.bad() == true)
+		bool ok = file.open(QIODevice::ReadOnly);
+		if (ok == false)
 		{
-			*errorMessage = strerror(errno);
-			return false;
+			*errorMessage = file.errorString();
 		}
 
+		QByteArray ba = file.readAll();
+
+		// Uncompress data
+		//
+		QByteArray uncommpressedData = qUncompress(ba);
+
+		// Deserialize
+		//
 		::Proto::TrendWidget message;
-		bool ok = message.ParseFromIstream(&input);
+
+		ok = message.ParseFromArray(uncommpressedData.constData(), uncommpressedData.size());
+
 		if (ok == false)
 		{
 			*errorMessage = tr("Parse trend file error. ") + strerror(errno);
@@ -170,8 +209,6 @@ namespace TrendLib
 			*errorMessage = tr("Read trend data structure error.");
 			return false;
 		}
-
-		message.Clear();
 
 		return ok;
 	}

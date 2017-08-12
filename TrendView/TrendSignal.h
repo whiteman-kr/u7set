@@ -19,20 +19,20 @@ namespace Proto
 
 namespace TrendLib
 {
-	struct TrendStateItem
+#pragma pack(push, 1)
+	struct TrendStateItem_v1
 	{
-		TimeStamp system;
-		TimeStamp local;
-		TimeStamp plant;
-		qint64 archiveIndex;
+		qint64 system;
+		qint64 local;
+		qint64 plant;
 		qint32 flags;
 		double value;
 
-		TrendStateItem() = default;
-		TrendStateItem(const AppSignalState& state) :
-			system(state.m_time.system),
-			local(state.m_time.local),
-			plant(state.m_time.plant),
+		TrendStateItem_v1() = default;
+		TrendStateItem_v1(const AppSignalState& state) :
+			system(state.m_time.system.timeStamp),
+			local(state.m_time.local.timeStamp),
+			plant(state.m_time.plant.timeStamp),
 			flags(state.m_flags.all),
 			value(state.m_value)
 		{
@@ -55,12 +55,10 @@ namespace TrendLib
 				return this->local;
 			}
 		}
-
-		// Serialization
-		//
-		bool save(Proto::TrendStateItem* message) const;
-		bool load(const Proto::TrendStateItem& message);
 	};
+#pragma pack(pop)
+
+	using TrendStateItem = TrendStateItem_v1;
 
 	struct TrendStateRecord
 	{

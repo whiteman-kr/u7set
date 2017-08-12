@@ -33,7 +33,6 @@ void  protobuf_AddDesc_trends_2eproto();
 void protobuf_AssignDesc_trends_2eproto();
 void protobuf_ShutdownFile_trends_2eproto();
 
-class TrendStateItem;
 class TrendStateRecord;
 class TrendArchiveHour;
 class TrendArchive;
@@ -46,138 +45,6 @@ class TrendParam;
 class TrendWidget;
 
 // ===================================================================
-
-class TrendStateItem : public ::google::protobuf::Message {
- public:
-  TrendStateItem();
-  virtual ~TrendStateItem();
-
-  TrendStateItem(const TrendStateItem& from);
-
-  inline TrendStateItem& operator=(const TrendStateItem& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const TrendStateItem& default_instance();
-
-  void Swap(TrendStateItem* other);
-
-  // implements Message ----------------------------------------------
-
-  TrendStateItem* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TrendStateItem& from);
-  void MergeFrom(const TrendStateItem& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional fixed64 time_system = 2;
-  inline bool has_time_system() const;
-  inline void clear_time_system();
-  static const int kTimeSystemFieldNumber = 2;
-  inline ::google::protobuf::uint64 time_system() const;
-  inline void set_time_system(::google::protobuf::uint64 value);
-
-  // optional fixed64 time_local = 3;
-  inline bool has_time_local() const;
-  inline void clear_time_local();
-  static const int kTimeLocalFieldNumber = 3;
-  inline ::google::protobuf::uint64 time_local() const;
-  inline void set_time_local(::google::protobuf::uint64 value);
-
-  // optional fixed64 time_plant = 4;
-  inline bool has_time_plant() const;
-  inline void clear_time_plant();
-  static const int kTimePlantFieldNumber = 4;
-  inline ::google::protobuf::uint64 time_plant() const;
-  inline void set_time_plant(::google::protobuf::uint64 value);
-
-  // optional int64 archive_index = 5 [default = 0];
-  inline bool has_archive_index() const;
-  inline void clear_archive_index();
-  static const int kArchiveIndexFieldNumber = 5;
-  inline ::google::protobuf::int64 archive_index() const;
-  inline void set_archive_index(::google::protobuf::int64 value);
-
-  // optional int32 flags = 8;
-  inline bool has_flags() const;
-  inline void clear_flags();
-  static const int kFlagsFieldNumber = 8;
-  inline ::google::protobuf::int32 flags() const;
-  inline void set_flags(::google::protobuf::int32 value);
-
-  // optional double value = 12;
-  inline bool has_value() const;
-  inline void clear_value();
-  static const int kValueFieldNumber = 12;
-  inline double value() const;
-  inline void set_value(double value);
-
-  // @@protoc_insertion_point(class_scope:Proto.TrendStateItem)
- private:
-  inline void set_has_time_system();
-  inline void clear_has_time_system();
-  inline void set_has_time_local();
-  inline void clear_has_time_local();
-  inline void set_has_time_plant();
-  inline void clear_has_time_plant();
-  inline void set_has_archive_index();
-  inline void clear_has_archive_index();
-  inline void set_has_flags();
-  inline void clear_has_flags();
-  inline void set_has_value();
-  inline void clear_has_value();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::google::protobuf::uint64 time_system_;
-  ::google::protobuf::uint64 time_local_;
-  ::google::protobuf::uint64 time_plant_;
-  ::google::protobuf::int64 archive_index_;
-  double value_;
-  ::google::protobuf::int32 flags_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
-
-  friend void  protobuf_AddDesc_trends_2eproto();
-  friend void protobuf_AssignDesc_trends_2eproto();
-  friend void protobuf_ShutdownFile_trends_2eproto();
-
-  void InitAsDefaultInstance();
-  static TrendStateItem* default_instance_;
-};
-// -------------------------------------------------------------------
 
 class TrendStateRecord : public ::google::protobuf::Message {
  public:
@@ -233,24 +100,26 @@ class TrendStateRecord : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .Proto.TrendStateItem states = 3;
-  inline int states_size() const;
-  inline void clear_states();
-  static const int kStatesFieldNumber = 3;
-  inline const ::Proto::TrendStateItem& states(int index) const;
-  inline ::Proto::TrendStateItem* mutable_states(int index);
-  inline ::Proto::TrendStateItem* add_states();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendStateItem >&
-      states() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendStateItem >*
-      mutable_states();
+  // optional bytes states_raw_buffer_v1 = 4;
+  inline bool has_states_raw_buffer_v1() const;
+  inline void clear_states_raw_buffer_v1();
+  static const int kStatesRawBufferV1FieldNumber = 4;
+  inline const ::std::string& states_raw_buffer_v1() const;
+  inline void set_states_raw_buffer_v1(const ::std::string& value);
+  inline void set_states_raw_buffer_v1(const char* value);
+  inline void set_states_raw_buffer_v1(const void* value, size_t size);
+  inline ::std::string* mutable_states_raw_buffer_v1();
+  inline ::std::string* release_states_raw_buffer_v1();
+  inline void set_allocated_states_raw_buffer_v1(::std::string* states_raw_buffer_v1);
 
   // @@protoc_insertion_point(class_scope:Proto.TrendStateRecord)
  private:
+  inline void set_has_states_raw_buffer_v1();
+  inline void clear_has_states_raw_buffer_v1();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::TrendStateItem > states_;
+  ::std::string* states_raw_buffer_v1_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
@@ -1324,167 +1193,76 @@ class TrendWidget : public ::google::protobuf::Message {
 
 // ===================================================================
 
-// TrendStateItem
-
-// optional fixed64 time_system = 2;
-inline bool TrendStateItem::has_time_system() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void TrendStateItem::set_has_time_system() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void TrendStateItem::clear_has_time_system() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void TrendStateItem::clear_time_system() {
-  time_system_ = GOOGLE_ULONGLONG(0);
-  clear_has_time_system();
-}
-inline ::google::protobuf::uint64 TrendStateItem::time_system() const {
-  return time_system_;
-}
-inline void TrendStateItem::set_time_system(::google::protobuf::uint64 value) {
-  set_has_time_system();
-  time_system_ = value;
-}
-
-// optional fixed64 time_local = 3;
-inline bool TrendStateItem::has_time_local() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void TrendStateItem::set_has_time_local() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void TrendStateItem::clear_has_time_local() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void TrendStateItem::clear_time_local() {
-  time_local_ = GOOGLE_ULONGLONG(0);
-  clear_has_time_local();
-}
-inline ::google::protobuf::uint64 TrendStateItem::time_local() const {
-  return time_local_;
-}
-inline void TrendStateItem::set_time_local(::google::protobuf::uint64 value) {
-  set_has_time_local();
-  time_local_ = value;
-}
-
-// optional fixed64 time_plant = 4;
-inline bool TrendStateItem::has_time_plant() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void TrendStateItem::set_has_time_plant() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void TrendStateItem::clear_has_time_plant() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void TrendStateItem::clear_time_plant() {
-  time_plant_ = GOOGLE_ULONGLONG(0);
-  clear_has_time_plant();
-}
-inline ::google::protobuf::uint64 TrendStateItem::time_plant() const {
-  return time_plant_;
-}
-inline void TrendStateItem::set_time_plant(::google::protobuf::uint64 value) {
-  set_has_time_plant();
-  time_plant_ = value;
-}
-
-// optional int64 archive_index = 5 [default = 0];
-inline bool TrendStateItem::has_archive_index() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void TrendStateItem::set_has_archive_index() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void TrendStateItem::clear_has_archive_index() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void TrendStateItem::clear_archive_index() {
-  archive_index_ = GOOGLE_LONGLONG(0);
-  clear_has_archive_index();
-}
-inline ::google::protobuf::int64 TrendStateItem::archive_index() const {
-  return archive_index_;
-}
-inline void TrendStateItem::set_archive_index(::google::protobuf::int64 value) {
-  set_has_archive_index();
-  archive_index_ = value;
-}
-
-// optional int32 flags = 8;
-inline bool TrendStateItem::has_flags() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
-}
-inline void TrendStateItem::set_has_flags() {
-  _has_bits_[0] |= 0x00000010u;
-}
-inline void TrendStateItem::clear_has_flags() {
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline void TrendStateItem::clear_flags() {
-  flags_ = 0;
-  clear_has_flags();
-}
-inline ::google::protobuf::int32 TrendStateItem::flags() const {
-  return flags_;
-}
-inline void TrendStateItem::set_flags(::google::protobuf::int32 value) {
-  set_has_flags();
-  flags_ = value;
-}
-
-// optional double value = 12;
-inline bool TrendStateItem::has_value() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void TrendStateItem::set_has_value() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void TrendStateItem::clear_has_value() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void TrendStateItem::clear_value() {
-  value_ = 0;
-  clear_has_value();
-}
-inline double TrendStateItem::value() const {
-  return value_;
-}
-inline void TrendStateItem::set_value(double value) {
-  set_has_value();
-  value_ = value;
-}
-
-// -------------------------------------------------------------------
-
 // TrendStateRecord
 
-// repeated .Proto.TrendStateItem states = 3;
-inline int TrendStateRecord::states_size() const {
-  return states_.size();
+// optional bytes states_raw_buffer_v1 = 4;
+inline bool TrendStateRecord::has_states_raw_buffer_v1() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TrendStateRecord::clear_states() {
-  states_.Clear();
+inline void TrendStateRecord::set_has_states_raw_buffer_v1() {
+  _has_bits_[0] |= 0x00000001u;
 }
-inline const ::Proto::TrendStateItem& TrendStateRecord::states(int index) const {
-  return states_.Get(index);
+inline void TrendStateRecord::clear_has_states_raw_buffer_v1() {
+  _has_bits_[0] &= ~0x00000001u;
 }
-inline ::Proto::TrendStateItem* TrendStateRecord::mutable_states(int index) {
-  return states_.Mutable(index);
+inline void TrendStateRecord::clear_states_raw_buffer_v1() {
+  if (states_raw_buffer_v1_ != &::google::protobuf::internal::kEmptyString) {
+    states_raw_buffer_v1_->clear();
+  }
+  clear_has_states_raw_buffer_v1();
 }
-inline ::Proto::TrendStateItem* TrendStateRecord::add_states() {
-  return states_.Add();
+inline const ::std::string& TrendStateRecord::states_raw_buffer_v1() const {
+  return *states_raw_buffer_v1_;
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::TrendStateItem >&
-TrendStateRecord::states() const {
-  return states_;
+inline void TrendStateRecord::set_states_raw_buffer_v1(const ::std::string& value) {
+  set_has_states_raw_buffer_v1();
+  if (states_raw_buffer_v1_ == &::google::protobuf::internal::kEmptyString) {
+    states_raw_buffer_v1_ = new ::std::string;
+  }
+  states_raw_buffer_v1_->assign(value);
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::TrendStateItem >*
-TrendStateRecord::mutable_states() {
-  return &states_;
+inline void TrendStateRecord::set_states_raw_buffer_v1(const char* value) {
+  set_has_states_raw_buffer_v1();
+  if (states_raw_buffer_v1_ == &::google::protobuf::internal::kEmptyString) {
+    states_raw_buffer_v1_ = new ::std::string;
+  }
+  states_raw_buffer_v1_->assign(value);
+}
+inline void TrendStateRecord::set_states_raw_buffer_v1(const void* value, size_t size) {
+  set_has_states_raw_buffer_v1();
+  if (states_raw_buffer_v1_ == &::google::protobuf::internal::kEmptyString) {
+    states_raw_buffer_v1_ = new ::std::string;
+  }
+  states_raw_buffer_v1_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* TrendStateRecord::mutable_states_raw_buffer_v1() {
+  set_has_states_raw_buffer_v1();
+  if (states_raw_buffer_v1_ == &::google::protobuf::internal::kEmptyString) {
+    states_raw_buffer_v1_ = new ::std::string;
+  }
+  return states_raw_buffer_v1_;
+}
+inline ::std::string* TrendStateRecord::release_states_raw_buffer_v1() {
+  clear_has_states_raw_buffer_v1();
+  if (states_raw_buffer_v1_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = states_raw_buffer_v1_;
+    states_raw_buffer_v1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void TrendStateRecord::set_allocated_states_raw_buffer_v1(::std::string* states_raw_buffer_v1) {
+  if (states_raw_buffer_v1_ != &::google::protobuf::internal::kEmptyString) {
+    delete states_raw_buffer_v1_;
+  }
+  if (states_raw_buffer_v1) {
+    set_has_states_raw_buffer_v1();
+    states_raw_buffer_v1_ = states_raw_buffer_v1;
+  } else {
+    clear_has_states_raw_buffer_v1();
+    states_raw_buffer_v1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

@@ -1,30 +1,9 @@
 #include "TrendSignal.h"
+#include <type_traits>
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
-
-	bool TrendStateItem::save(Proto::TrendStateItem* message) const
-	{
-		//message->set_time_system(system.timeStamp);
-		message->set_time_local(local.timeStamp);
-		//message->set_time_plant(plant.timeStamp);
-		//message->set_archive_index(archiveIndex);
-		message->set_flags(flags);
-		message->set_value(value);
-		return true;
-	}
-
-	bool TrendStateItem::load(const Proto::TrendStateItem& message)
-	{
-		//system = message.time_system();
-		local = message.time_local();
-		//plant = message.time_plant();
-		//archiveIndex = message.archive_index();
-		flags = message.flags();
-		value = message.value();
-		return true;
-	}
 
 	bool TrendStateRecord::save(Proto::TrendStateRecord* message) const
 	{
@@ -36,11 +15,10 @@ namespace TrendLib
 
 		bool ok = true;
 
-		message->mutable_states()->Reserve(static_cast<int>(states.size()));
-		for (const TrendStateItem& state : states)
-		{
-			ok &= state.save(message->add_states());
-		}
+		// Saving TrendStateItem_v1
+		//
+		static_assert(std::is_same<std::vector<TrendStateItem>::value_type, TrendStateItem_v1>::value, "Expepcted TrendStateItem_v1");
+		message->set_states_raw_buffer_v1(reinterpret_cast<const char*>(states.data()), states.size() * sizeof(TrendStateItem_v1));
 
 		return ok;
 	}
@@ -49,16 +27,15 @@ namespace TrendLib
 	{
 		bool ok = true;
 
-		int stateCount = message.states_size();
+		// Loading TrendStateItem_v1
+		//
+		assert(message.states_raw_buffer_v1().size() % sizeof(TrendStateItem_v1) == 0);
+		size_t stateCount = message.states_raw_buffer_v1().size() / sizeof(TrendStateItem_v1);
 
 		states.clear();
-		states.reserve(stateCount);
+		states.resize(stateCount);
 
-		for (int i = 0; i < stateCount; i++)
-		{
-			states.emplace_back();
-			ok &= states.back().load(message.states(i));
-		}
+		memcpy(states.data(), message.states_raw_buffer_v1().data(), message.states_raw_buffer_v1().size());
 
 		return ok;
 	}
@@ -374,6 +351,7 @@ namespace TrendLib
 	//
 	TrendSignalSet::TrendSignalSet()
 	{
+		static_assert(std::is_trivial<TrendStateItem>::value, "TrendStateItem must be trivial as it is stored in bytearray");
 	}
 
 	bool TrendSignalSet::save(::Proto::TrendSignalSet* message) const

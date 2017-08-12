@@ -1,18 +1,8 @@
 package Proto;
 
-message TrendStateItem
-{
-    optional fixed64 time_system = 2;
-	optional fixed64 time_local = 3;
-	optional fixed64 time_plant = 4;
-	optional int64 archive_index = 5 [default = 0];
-	optional int32 flags = 8;
-	optional double value = 12;
-}
-
 message TrendStateRecord
 {
-    repeated TrendStateItem states = 3;
+    optional bytes states_raw_buffer_v1 = 4;	// Version 1
 }
 
 message TrendArchiveHour				//  Reflected to c++ struct OneHourData

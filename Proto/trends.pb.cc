@@ -31,9 +31,6 @@ namespace Proto {
 
 namespace {
 
-const ::google::protobuf::Descriptor* TrendStateItem_descriptor_ = NULL;
-const ::google::protobuf::internal::GeneratedMessageReflection*
-  TrendStateItem_reflection_ = NULL;
 const ::google::protobuf::Descriptor* TrendStateRecord_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   TrendStateRecord_reflection_ = NULL;
@@ -74,29 +71,9 @@ void protobuf_AssignDesc_trends_2eproto() {
     ::google::protobuf::DescriptorPool::generated_pool()->FindFileByName(
       "trends.proto");
   GOOGLE_CHECK(file != NULL);
-  TrendStateItem_descriptor_ = file->message_type(0);
-  static const int TrendStateItem_offsets_[6] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, time_system_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, time_local_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, time_plant_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, archive_index_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, flags_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, value_),
-  };
-  TrendStateItem_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      TrendStateItem_descriptor_,
-      TrendStateItem::default_instance_,
-      TrendStateItem_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateItem, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(TrendStateItem));
-  TrendStateRecord_descriptor_ = file->message_type(1);
+  TrendStateRecord_descriptor_ = file->message_type(0);
   static const int TrendStateRecord_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateRecord, states_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendStateRecord, states_raw_buffer_v1_),
   };
   TrendStateRecord_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -109,7 +86,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendStateRecord));
-  TrendArchiveHour_descriptor_ = file->message_type(2);
+  TrendArchiveHour_descriptor_ = file->message_type(1);
   static const int TrendArchiveHour_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendArchiveHour, time_stamp_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendArchiveHour, state_),
@@ -126,7 +103,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendArchiveHour));
-  TrendArchive_descriptor_ = file->message_type(3);
+  TrendArchive_descriptor_ = file->message_type(2);
   static const int TrendArchive_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendArchive, app_signal_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendArchive, hours_),
@@ -142,7 +119,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendArchive));
-  TrendSignalParam_descriptor_ = file->message_type(4);
+  TrendSignalParam_descriptor_ = file->message_type(3);
   static const int TrendSignalParam_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, signal_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalParam, app_signal_id_),
@@ -167,7 +144,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendSignalParam));
-  TrendSignalSet_descriptor_ = file->message_type(5);
+  TrendSignalSet_descriptor_ = file->message_type(4);
   static const int TrendSignalSet_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalSet, signal_params_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendSignalSet, archive_local_time_),
@@ -185,7 +162,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendSignalSet));
-  TrendRuller_descriptor_ = file->message_type(6);
+  TrendRuller_descriptor_ = file->message_type(5);
   static const int TrendRuller_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, time_stamp_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRuller, show_),
@@ -202,7 +179,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendRuller));
-  TrendRullerSet_descriptor_ = file->message_type(7);
+  TrendRullerSet_descriptor_ = file->message_type(6);
   static const int TrendRullerSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendRullerSet, rullers_),
   };
@@ -217,7 +194,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendRullerSet));
-  Trend_descriptor_ = file->message_type(8);
+  Trend_descriptor_ = file->message_type(7);
   static const int Trend_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Trend, signal_set_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Trend, ruller_set_),
@@ -233,7 +210,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Trend));
-  TrendParam_descriptor_ = file->message_type(9);
+  TrendParam_descriptor_ = file->message_type(8);
   static const int TrendParam_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, view_mode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendParam, time_type_),
@@ -254,7 +231,7 @@ void protobuf_AssignDesc_trends_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TrendParam));
-  TrendWidget_descriptor_ = file->message_type(10);
+  TrendWidget_descriptor_ = file->message_type(9);
   static const int TrendWidget_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendWidget, trend_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TrendWidget, trend_param_),
@@ -283,8 +260,6 @@ inline void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    TrendStateItem_descriptor_, &TrendStateItem::default_instance());
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TrendStateRecord_descriptor_, &TrendStateRecord::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     TrendArchiveHour_descriptor_, &TrendArchiveHour::default_instance());
@@ -309,8 +284,6 @@ void protobuf_RegisterTypes(const ::std::string&) {
 }  // namespace
 
 void protobuf_ShutdownFile_trends_2eproto() {
-  delete TrendStateItem::default_instance_;
-  delete TrendStateItem_reflection_;
   delete TrendStateRecord::default_instance_;
   delete TrendStateRecord_reflection_;
   delete TrendArchiveHour::default_instance_;
@@ -340,43 +313,38 @@ void protobuf_AddDesc_trends_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\014trends.proto\022\005Proto\"\205\001\n\016TrendStateItem"
-    "\022\023\n\013time_system\030\002 \001(\006\022\022\n\ntime_local\030\003 \001("
-    "\006\022\022\n\ntime_plant\030\004 \001(\006\022\030\n\rarchive_index\030\005"
-    " \001(\003:\0010\022\r\n\005flags\030\010 \001(\005\022\r\n\005value\030\014 \001(\001\"9\n"
-    "\020TrendStateRecord\022%\n\006states\030\003 \003(\0132\025.Prot"
-    "o.TrendStateItem\"_\n\020TrendArchiveHour\022\022\n\n"
-    "time_stamp\030\002 \001(\006\022\r\n\005state\030\003 \001(\005\022(\n\007recor"
-    "ds\030\004 \003(\0132\027.Proto.TrendStateRecord\"M\n\014Tre"
-    "ndArchive\022\025\n\rapp_signal_id\030\002 \001(\t\022&\n\005hour"
-    "s\030\n \003(\0132\027.Proto.TrendArchiveHour\"\346\001\n\020Tre"
-    "ndSignalParam\022\021\n\tsignal_id\030\002 \001(\t\022\025\n\rapp_"
-    "signal_id\030\003 \001(\t\022\017\n\007caption\030\004 \001(\t\022\024\n\014equi"
-    "pment_id\030\005 \001(\t\022\014\n\004type\030\n \001(\005\022\014\n\004unit\030\013 \001"
-    "(\t\022\022\n\nhigh_limit\030\024 \001(\001\022\021\n\tlow_limit\030\025 \001("
-    "\001\022\027\n\017view_high_limit\030\037 \001(\001\022\026\n\016view_low_l"
-    "imit\030  \001(\001\022\r\n\005color\030( \001(\r\"\324\001\n\016TrendSigna"
-    "lSet\022.\n\rsignal_params\030\002 \003(\0132\027.Proto.Tren"
-    "dSignalParam\022/\n\022archive_local_time\030\n \003(\013"
-    "2\023.Proto.TrendArchive\0220\n\023archive_system_"
-    "time\030\013 \003(\0132\023.Proto.TrendArchive\022/\n\022archi"
-    "ve_plant_time\030\014 \003(\0132\023.Proto.TrendArchive"
-    "\"W\n\013TrendRuller\022\022\n\ntime_stamp\030\002 \001(\006\022\022\n\004s"
-    "how\030\003 \001(\010:\004true\022 \n\022show_signal_values\030\004 "
-    "\001(\010:\004true\"5\n\016TrendRullerSet\022#\n\007rullers\030\002"
-    " \003(\0132\022.Proto.TrendRuller\"]\n\005Trend\022)\n\nsig"
-    "nal_set\030\002 \001(\0132\025.Proto.TrendSignalSet\022)\n\n"
-    "ruller_set\030\003 \001(\0132\025.Proto.TrendRullerSet\""
-    "\245\001\n\nTrendParam\022\024\n\tview_mode\030\002 \001(\005:\0010\022\024\n\t"
-    "time_type\030\003 \001(\005:\0012\022\025\n\nlane_count\030\004 \001(\005:\001"
-    "1\022\022\n\nstart_time\0302 \001(\006\022\020\n\010duration\0303 \001(\003\022"
-    "\026\n\016back_color_1st\030F \001(\r\022\026\n\016back_color_2n"
-    "d\030G \001(\r\"R\n\013TrendWidget\022\033\n\005trend\030\002 \001(\0132\014."
-    "Proto.Trend\022&\n\013trend_param\030\003 \001(\0132\021.Proto"
-    ".TrendParam", 1331);
+    "\n\014trends.proto\022\005Proto\"0\n\020TrendStateRecor"
+    "d\022\034\n\024states_raw_buffer_v1\030\004 \001(\014\"_\n\020Trend"
+    "ArchiveHour\022\022\n\ntime_stamp\030\002 \001(\006\022\r\n\005state"
+    "\030\003 \001(\005\022(\n\007records\030\004 \003(\0132\027.Proto.TrendSta"
+    "teRecord\"M\n\014TrendArchive\022\025\n\rapp_signal_i"
+    "d\030\002 \001(\t\022&\n\005hours\030\n \003(\0132\027.Proto.TrendArch"
+    "iveHour\"\346\001\n\020TrendSignalParam\022\021\n\tsignal_i"
+    "d\030\002 \001(\t\022\025\n\rapp_signal_id\030\003 \001(\t\022\017\n\007captio"
+    "n\030\004 \001(\t\022\024\n\014equipment_id\030\005 \001(\t\022\014\n\004type\030\n "
+    "\001(\005\022\014\n\004unit\030\013 \001(\t\022\022\n\nhigh_limit\030\024 \001(\001\022\021\n"
+    "\tlow_limit\030\025 \001(\001\022\027\n\017view_high_limit\030\037 \001("
+    "\001\022\026\n\016view_low_limit\030  \001(\001\022\r\n\005color\030( \001(\r"
+    "\"\324\001\n\016TrendSignalSet\022.\n\rsignal_params\030\002 \003"
+    "(\0132\027.Proto.TrendSignalParam\022/\n\022archive_l"
+    "ocal_time\030\n \003(\0132\023.Proto.TrendArchive\0220\n\023"
+    "archive_system_time\030\013 \003(\0132\023.Proto.TrendA"
+    "rchive\022/\n\022archive_plant_time\030\014 \003(\0132\023.Pro"
+    "to.TrendArchive\"W\n\013TrendRuller\022\022\n\ntime_s"
+    "tamp\030\002 \001(\006\022\022\n\004show\030\003 \001(\010:\004true\022 \n\022show_s"
+    "ignal_values\030\004 \001(\010:\004true\"5\n\016TrendRullerS"
+    "et\022#\n\007rullers\030\002 \003(\0132\022.Proto.TrendRuller\""
+    "]\n\005Trend\022)\n\nsignal_set\030\002 \001(\0132\025.Proto.Tre"
+    "ndSignalSet\022)\n\nruller_set\030\003 \001(\0132\025.Proto."
+    "TrendRullerSet\"\245\001\n\nTrendParam\022\024\n\tview_mo"
+    "de\030\002 \001(\005:\0010\022\024\n\ttime_type\030\003 \001(\005:\0012\022\025\n\nlan"
+    "e_count\030\004 \001(\005:\0011\022\022\n\nstart_time\0302 \001(\006\022\020\n\010"
+    "duration\0303 \001(\003\022\026\n\016back_color_1st\030F \001(\r\022\026"
+    "\n\016back_color_2nd\030G \001(\r\"R\n\013TrendWidget\022\033\n"
+    "\005trend\030\002 \001(\0132\014.Proto.Trend\022&\n\013trend_para"
+    "m\030\003 \001(\0132\021.Proto.TrendParam", 1186);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "trends.proto", &protobuf_RegisterTypes);
-  TrendStateItem::default_instance_ = new TrendStateItem();
   TrendStateRecord::default_instance_ = new TrendStateRecord();
   TrendArchiveHour::default_instance_ = new TrendArchiveHour();
   TrendArchive::default_instance_ = new TrendArchive();
@@ -387,7 +355,6 @@ void protobuf_AddDesc_trends_2eproto() {
   Trend::default_instance_ = new Trend();
   TrendParam::default_instance_ = new TrendParam();
   TrendWidget::default_instance_ = new TrendWidget();
-  TrendStateItem::default_instance_->InitAsDefaultInstance();
   TrendStateRecord::default_instance_->InitAsDefaultInstance();
   TrendArchiveHour::default_instance_->InitAsDefaultInstance();
   TrendArchive::default_instance_->InitAsDefaultInstance();
@@ -411,407 +378,7 @@ struct StaticDescriptorInitializer_trends_2eproto {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int TrendStateItem::kTimeSystemFieldNumber;
-const int TrendStateItem::kTimeLocalFieldNumber;
-const int TrendStateItem::kTimePlantFieldNumber;
-const int TrendStateItem::kArchiveIndexFieldNumber;
-const int TrendStateItem::kFlagsFieldNumber;
-const int TrendStateItem::kValueFieldNumber;
-#endif  // !_MSC_VER
-
-TrendStateItem::TrendStateItem()
-  : ::google::protobuf::Message() {
-  SharedCtor();
-}
-
-void TrendStateItem::InitAsDefaultInstance() {
-}
-
-TrendStateItem::TrendStateItem(const TrendStateItem& from)
-  : ::google::protobuf::Message() {
-  SharedCtor();
-  MergeFrom(from);
-}
-
-void TrendStateItem::SharedCtor() {
-  _cached_size_ = 0;
-  time_system_ = GOOGLE_ULONGLONG(0);
-  time_local_ = GOOGLE_ULONGLONG(0);
-  time_plant_ = GOOGLE_ULONGLONG(0);
-  archive_index_ = GOOGLE_LONGLONG(0);
-  flags_ = 0;
-  value_ = 0;
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-}
-
-TrendStateItem::~TrendStateItem() {
-  SharedDtor();
-}
-
-void TrendStateItem::SharedDtor() {
-  if (this != default_instance_) {
-  }
-}
-
-void TrendStateItem::SetCachedSize(int size) const {
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-}
-const ::google::protobuf::Descriptor* TrendStateItem::descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return TrendStateItem_descriptor_;
-}
-
-const TrendStateItem& TrendStateItem::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_trends_2eproto();
-  return *default_instance_;
-}
-
-TrendStateItem* TrendStateItem::default_instance_ = NULL;
-
-TrendStateItem* TrendStateItem::New() const {
-  return new TrendStateItem;
-}
-
-void TrendStateItem::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    time_system_ = GOOGLE_ULONGLONG(0);
-    time_local_ = GOOGLE_ULONGLONG(0);
-    time_plant_ = GOOGLE_ULONGLONG(0);
-    archive_index_ = GOOGLE_LONGLONG(0);
-    flags_ = 0;
-    value_ = 0;
-  }
-  ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
-}
-
-bool TrendStateItem::MergePartialFromCodedStream(
-    ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
-  ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional fixed64 time_system = 2;
-      case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_FIXED64>(
-                 input, &time_system_)));
-          set_has_time_system();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(25)) goto parse_time_local;
-        break;
-      }
-
-      // optional fixed64 time_local = 3;
-      case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_time_local:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_FIXED64>(
-                 input, &time_local_)));
-          set_has_time_local();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(33)) goto parse_time_plant;
-        break;
-      }
-
-      // optional fixed64 time_plant = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_time_plant:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_FIXED64>(
-                 input, &time_plant_)));
-          set_has_time_plant();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(40)) goto parse_archive_index;
-        break;
-      }
-
-      // optional int64 archive_index = 5 [default = 0];
-      case 5: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_archive_index:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &archive_index_)));
-          set_has_archive_index();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(64)) goto parse_flags;
-        break;
-      }
-
-      // optional int32 flags = 8;
-      case 8: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_flags:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &flags_)));
-          set_has_flags();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(97)) goto parse_value;
-        break;
-      }
-
-      // optional double value = 12;
-      case 12: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-         parse_value:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &value_)));
-          set_has_value();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectAtEnd()) return true;
-        break;
-      }
-
-      default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
-        }
-        DO_(::google::protobuf::internal::WireFormat::SkipField(
-              input, tag, mutable_unknown_fields()));
-        break;
-      }
-    }
-  }
-  return true;
-#undef DO_
-}
-
-void TrendStateItem::SerializeWithCachedSizes(
-    ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional fixed64 time_system = 2;
-  if (has_time_system()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFixed64(2, this->time_system(), output);
-  }
-
-  // optional fixed64 time_local = 3;
-  if (has_time_local()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFixed64(3, this->time_local(), output);
-  }
-
-  // optional fixed64 time_plant = 4;
-  if (has_time_plant()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFixed64(4, this->time_plant(), output);
-  }
-
-  // optional int64 archive_index = 5 [default = 0];
-  if (has_archive_index()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(5, this->archive_index(), output);
-  }
-
-  // optional int32 flags = 8;
-  if (has_flags()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->flags(), output);
-  }
-
-  // optional double value = 12;
-  if (has_value()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(12, this->value(), output);
-  }
-
-  if (!unknown_fields().empty()) {
-    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
-        unknown_fields(), output);
-  }
-}
-
-::google::protobuf::uint8* TrendStateItem::SerializeWithCachedSizesToArray(
-    ::google::protobuf::uint8* target) const {
-  // optional fixed64 time_system = 2;
-  if (has_time_system()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFixed64ToArray(2, this->time_system(), target);
-  }
-
-  // optional fixed64 time_local = 3;
-  if (has_time_local()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFixed64ToArray(3, this->time_local(), target);
-  }
-
-  // optional fixed64 time_plant = 4;
-  if (has_time_plant()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFixed64ToArray(4, this->time_plant(), target);
-  }
-
-  // optional int64 archive_index = 5 [default = 0];
-  if (has_archive_index()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(5, this->archive_index(), target);
-  }
-
-  // optional int32 flags = 8;
-  if (has_flags()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->flags(), target);
-  }
-
-  // optional double value = 12;
-  if (has_value()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(12, this->value(), target);
-  }
-
-  if (!unknown_fields().empty()) {
-    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
-        unknown_fields(), target);
-  }
-  return target;
-}
-
-int TrendStateItem::ByteSize() const {
-  int total_size = 0;
-
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional fixed64 time_system = 2;
-    if (has_time_system()) {
-      total_size += 1 + 8;
-    }
-
-    // optional fixed64 time_local = 3;
-    if (has_time_local()) {
-      total_size += 1 + 8;
-    }
-
-    // optional fixed64 time_plant = 4;
-    if (has_time_plant()) {
-      total_size += 1 + 8;
-    }
-
-    // optional int64 archive_index = 5 [default = 0];
-    if (has_archive_index()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
-          this->archive_index());
-    }
-
-    // optional int32 flags = 8;
-    if (has_flags()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->flags());
-    }
-
-    // optional double value = 12;
-    if (has_value()) {
-      total_size += 1 + 8;
-    }
-
-  }
-  if (!unknown_fields().empty()) {
-    total_size +=
-      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
-        unknown_fields());
-  }
-  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
-  _cached_size_ = total_size;
-  GOOGLE_SAFE_CONCURRENT_WRITES_END();
-  return total_size;
-}
-
-void TrendStateItem::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  const TrendStateItem* source =
-    ::google::protobuf::internal::dynamic_cast_if_available<const TrendStateItem*>(
-      &from);
-  if (source == NULL) {
-    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
-  } else {
-    MergeFrom(*source);
-  }
-}
-
-void TrendStateItem::MergeFrom(const TrendStateItem& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_time_system()) {
-      set_time_system(from.time_system());
-    }
-    if (from.has_time_local()) {
-      set_time_local(from.time_local());
-    }
-    if (from.has_time_plant()) {
-      set_time_plant(from.time_plant());
-    }
-    if (from.has_archive_index()) {
-      set_archive_index(from.archive_index());
-    }
-    if (from.has_flags()) {
-      set_flags(from.flags());
-    }
-    if (from.has_value()) {
-      set_value(from.value());
-    }
-  }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
-}
-
-void TrendStateItem::CopyFrom(const ::google::protobuf::Message& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void TrendStateItem::CopyFrom(const TrendStateItem& from) {
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool TrendStateItem::IsInitialized() const {
-
-  return true;
-}
-
-void TrendStateItem::Swap(TrendStateItem* other) {
-  if (other != this) {
-    std::swap(time_system_, other->time_system_);
-    std::swap(time_local_, other->time_local_);
-    std::swap(time_plant_, other->time_plant_);
-    std::swap(archive_index_, other->archive_index_);
-    std::swap(flags_, other->flags_);
-    std::swap(value_, other->value_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
-}
-
-::google::protobuf::Metadata TrendStateItem::GetMetadata() const {
-  protobuf_AssignDescriptorsOnce();
-  ::google::protobuf::Metadata metadata;
-  metadata.descriptor = TrendStateItem_descriptor_;
-  metadata.reflection = TrendStateItem_reflection_;
-  return metadata;
-}
-
-
-// ===================================================================
-
-#ifndef _MSC_VER
-const int TrendStateRecord::kStatesFieldNumber;
+const int TrendStateRecord::kStatesRawBufferV1FieldNumber;
 #endif  // !_MSC_VER
 
 TrendStateRecord::TrendStateRecord()
@@ -830,6 +397,7 @@ TrendStateRecord::TrendStateRecord(const TrendStateRecord& from)
 
 void TrendStateRecord::SharedCtor() {
   _cached_size_ = 0;
+  states_raw_buffer_v1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -838,6 +406,9 @@ TrendStateRecord::~TrendStateRecord() {
 }
 
 void TrendStateRecord::SharedDtor() {
+  if (states_raw_buffer_v1_ != &::google::protobuf::internal::kEmptyString) {
+    delete states_raw_buffer_v1_;
+  }
   if (this != default_instance_) {
   }
 }
@@ -864,7 +435,13 @@ TrendStateRecord* TrendStateRecord::New() const {
 }
 
 void TrendStateRecord::Clear() {
-  states_.Clear();
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_states_raw_buffer_v1()) {
+      if (states_raw_buffer_v1_ != &::google::protobuf::internal::kEmptyString) {
+        states_raw_buffer_v1_->clear();
+      }
+    }
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -875,17 +452,15 @@ bool TrendStateRecord::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .Proto.TrendStateItem states = 3;
-      case 3: {
+      // optional bytes states_raw_buffer_v1 = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_states:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_states()));
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->mutable_states_raw_buffer_v1()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_states;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -908,10 +483,10 @@ bool TrendStateRecord::MergePartialFromCodedStream(
 
 void TrendStateRecord::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .Proto.TrendStateItem states = 3;
-  for (int i = 0; i < this->states_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->states(i), output);
+  // optional bytes states_raw_buffer_v1 = 4;
+  if (has_states_raw_buffer_v1()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      4, this->states_raw_buffer_v1(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -922,11 +497,11 @@ void TrendStateRecord::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* TrendStateRecord::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .Proto.TrendStateItem states = 3;
-  for (int i = 0; i < this->states_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteMessageNoVirtualToArray(
-        3, this->states(i), target);
+  // optional bytes states_raw_buffer_v1 = 4;
+  if (has_states_raw_buffer_v1()) {
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
+        4, this->states_raw_buffer_v1(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -939,14 +514,15 @@ void TrendStateRecord::SerializeWithCachedSizes(
 int TrendStateRecord::ByteSize() const {
   int total_size = 0;
 
-  // repeated .Proto.TrendStateItem states = 3;
-  total_size += 1 * this->states_size();
-  for (int i = 0; i < this->states_size(); i++) {
-    total_size +=
-      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->states(i));
-  }
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional bytes states_raw_buffer_v1 = 4;
+    if (has_states_raw_buffer_v1()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::BytesSize(
+          this->states_raw_buffer_v1());
+    }
 
+  }
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -972,7 +548,11 @@ void TrendStateRecord::MergeFrom(const ::google::protobuf::Message& from) {
 
 void TrendStateRecord::MergeFrom(const TrendStateRecord& from) {
   GOOGLE_CHECK_NE(&from, this);
-  states_.MergeFrom(from.states_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_states_raw_buffer_v1()) {
+      set_states_raw_buffer_v1(from.states_raw_buffer_v1());
+    }
+  }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
 
@@ -995,7 +575,7 @@ bool TrendStateRecord::IsInitialized() const {
 
 void TrendStateRecord::Swap(TrendStateRecord* other) {
   if (other != this) {
-    states_.Swap(&other->states_);
+    std::swap(states_raw_buffer_v1_, other->states_raw_buffer_v1_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
