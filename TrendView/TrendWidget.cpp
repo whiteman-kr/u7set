@@ -384,6 +384,30 @@ namespace TrendLib
 		//
 		trend().drawRullers(&painter, m_pixmapDrawParam);
 
+		// Draw select view area
+		//
+		if (m_mouseAction == MouseAction::SelectViewSelectSecondPoint)
+		{
+			Trend::adjustPainter(&painter, m_pixmapDrawParam.dpiX(), m_pixmapDrawParam.dpiY());
+
+			QRectF selectionRect(m_startSelectViewPoint, m_finishSelectViewPoint);
+			selectionRect = selectionRect.normalized();
+
+			selectionRect = selectionRect.intersected(m_selectViewAreaSignal.tempDrawRect()).normalized();
+
+			if (selectionRect.isEmpty() == false)
+			{
+				//painter.fillRect(m_allowedSelectViewArea, Qt::blue);
+
+				QPen p(Qt::blue, 0, Qt::DashLine, Qt::PenCapStyle::RoundCap);
+
+				painter.setBrush(Qt::NoBrush);
+				painter.setPen(p);
+
+				painter.drawRect(selectionRect);
+			}
+		}
+
 		return;
 	}
 
@@ -394,7 +418,13 @@ namespace TrendLib
 
 	void TrendWidget::mousePressEvent(QMouseEvent* event)
 	{
-		m_mouseAction = MouseAction::None;
+		int analogsCount = signalSet().analogSignalsCount();
+		int discretesCount = signalSet().discretesSignalsCount();
+
+		if (analogsCount + discretesCount == 0)
+		{
+			return;
+		}
 
 		int laneIndex = -1;
 		int rullerIndex = -1;
@@ -402,6 +432,40 @@ namespace TrendLib
 		QString outSignalId;
 
 		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
+
+		if (m_mouseAction == MouseAction::SelectViewStart &&
+			(mouseOn == Trend::MouseOn::InsideTrendArea ||
+			 mouseOn == Trend::MouseOn::OnSignalDescription ||
+			 mouseOn == Trend::MouseOn::OnRuller))
+		{
+			if (event->buttons().testFlag(Qt::LeftButton) == false)
+			{
+				// Cancel action
+				//
+				unsetCursor();
+				m_mouseAction = MouseAction::None;
+				update();
+				return;
+			}
+
+			initSelectViewArea(event->pos(), laneIndex);
+
+			m_mouseAction = MouseAction::SelectViewSelectSecondPoint;
+
+			grabMouse();
+			return;
+		}
+
+		if (m_mouseAction == MouseAction::SelectViewSelectSecondPoint)
+		{
+			unsetCursor();
+			m_mouseAction = MouseAction::None;
+			update();
+			releaseMouse();
+			return;
+		}
+
+		m_mouseAction = MouseAction::None;
 
 		if (event->buttons().testFlag(Qt::LeftButton) == true)
 		{
@@ -456,6 +520,23 @@ namespace TrendLib
 	void TrendWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
 		event->accept();
+
+		if (m_mouseAction == MouseAction::SelectViewSelectSecondPoint)
+		{
+			selectViewArea(event->pos());
+
+			releaseMouse();
+			unsetCursor();
+
+			m_mouseAction = MouseAction::None;
+			updateWidget();
+			return;
+		}
+
+		if (m_mouseAction == MouseAction::MoveRuller)
+		{
+
+		}
 
 		if (m_mouseAction == MouseAction::MoveRuller)
 		{
@@ -580,6 +661,13 @@ namespace TrendLib
 					update();
 				}
 				break;
+			case MouseAction::SelectViewSelectSecondPoint:
+				{
+					m_finishSelectViewPoint = Trend::pixelPointToInchPoint(event->pos(), m_drawParam);
+					update();
+				}
+				break;
+
 			default:
 				assert(false);
 				break;
@@ -600,6 +688,160 @@ namespace TrendLib
 		m_pixmapDrawParam.resetHightlightRullerIndex();
 	}
 
+	void TrendWidget::initSelectViewArea(QPoint pos, int laneIndex)
+	{
+		assert(laneIndex != -1);
+
+		m_selectViewLaneIndex = laneIndex;
+
+		QRectF laneRect = Trend::calcLaneRect(laneIndex, m_drawParam);
+
+		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
+		QRectF trendArea = Trend::calcTrendArea(laneRect, m_drawParam, analogsCount);
+
+		m_startSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_drawParam);
+		m_finishSelectViewPoint = m_startSelectViewPoint;
+
+		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
+		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
+
+		Trend::calcSignalRects(trendArea, m_drawParam, &discretes, &analogs);
+
+		for (const TrendSignalParam& tsp : discretes)
+		{
+			if (tsp.tempDrawRect().contains(m_startSelectViewPoint) == true)
+			{
+				m_selectViewAreaSignal = tsp;
+				return;
+			}
+		}
+
+		for (const TrendSignalParam& tsp : analogs)
+		{
+			if (tsp.tempDrawRect().contains(m_startSelectViewPoint) == true)
+			{
+				m_selectViewAreaSignal = tsp;
+				return;
+			}
+		}
+
+		// --
+		//
+
+		return;
+	}
+
+	void TrendWidget::selectViewArea(QPoint pos)
+	{
+		// Scale time
+		//
+		m_finishSelectViewPoint = Trend::pixelPointToInchPoint(pos, m_drawParam);
+
+		double left = qMin(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
+		double right = qMax(m_startSelectViewPoint.x(), m_finishSelectViewPoint.x());
+
+		if (fabs(right - left) * m_drawParam.dpiX() <= 1)
+		{
+			// Value is way too small
+			//
+			return;
+		}
+
+		// Calc time
+		//
+		QRectF signalRect = m_selectViewAreaSignal.tempDrawRect();
+
+		qint64 startLaneTime = m_drawParam.startTimeStamp().timeStamp + m_selectViewLaneIndex * m_drawParam.duration();
+		double coef = m_drawParam.duration() / signalRect.width();
+
+		qint64 leftTime = startLaneTime + static_cast<qint64>((left - signalRect.left()) * coef);
+		qint64 rightTime = startLaneTime + static_cast<qint64>((right - signalRect.left()) * coef);
+
+		// Set new values to controls and draw param
+		//
+		m_drawParam.setStartTimeStamp(leftTime);
+		m_drawParam.setDuration(rightTime - leftTime);
+
+		emit startTimeChanged(leftTime);
+		emit durationChanged(rightTime - leftTime);
+
+		// Scale vertical area (only for analogs)
+		//
+
+		if (m_selectViewAreaSignal.isAnalog() == true)
+		{
+			std::vector<TrendSignalParam> analogs;
+
+			if (viewMode() == TrendLib::TrendViewMode::Overlapped)
+			{
+				analogs = signalSet().analogSignals();
+				std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
+
+				// Analogs does not have calculated trend rect
+				//
+				QRectF laneRect = Trend::calcLaneRect(m_selectViewLaneIndex, m_drawParam);
+
+				int analogsCount = static_cast<int>(analogs.size());
+				QRectF trendArea = Trend::calcTrendArea(laneRect, m_drawParam, analogsCount);
+
+				Trend::calcSignalRects(trendArea, m_drawParam, &discretes, &analogs);  // calc rects
+			}
+			else
+			{
+
+				analogs.push_back(m_selectViewAreaSignal);
+			}
+
+			double top = qMin(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
+			double bottom = qMax(m_startSelectViewPoint.y(), m_finishSelectViewPoint.y());
+
+			if (fabs(bottom - top) * m_drawParam.dpiY() <= 1)
+			{
+				// Value is way too small
+				//
+				return;
+			}
+
+			for (TrendSignalParam& tsp : analogs)
+			{
+				// Calc time
+				//
+				QRectF signalRect = tsp.tempDrawRect();
+
+				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
+				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
+
+				if (fabs(highLimit - lowLimit) <= DBL_MIN)
+				{
+					// Div by zero possible
+					//
+					continue;
+				}
+
+				double coef = (highLimit - lowLimit) / signalRect.height();
+
+				qint64 newHighLimit = lowLimit + (signalRect.bottom() - top) * coef;
+				qint64 newLowLimit = lowLimit + (signalRect.bottom() - bottom) * coef;
+
+				tsp.setViewLowLimit(newLowLimit);
+				tsp.setViewHighLimit(newHighLimit);
+
+				signalSet().setSignalParam(tsp);
+			}
+		}
+
+		return;
+	}
+
+	void TrendWidget::startSelectionViewArea()
+	{
+		m_mouseAction = MouseAction::SelectViewStart;
+		unsetCursor();
+
+		setCursor(Qt::CrossCursor);
+
+		return;
+	}
 
 	void TrendWidget::updatePixmap(const QImage& image, TrendDrawParam drawParam)
 	{

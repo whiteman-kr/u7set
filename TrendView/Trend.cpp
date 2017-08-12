@@ -6,6 +6,8 @@
 namespace TrendLib
 {
 
+	const double Trend::discreteSignalHeight = 5.0 / 8.0;		// if inches
+
 	Trend::Trend()
 	{
 	}
@@ -126,7 +128,7 @@ namespace TrendLib
 
 		// Calc signals rects, calculates rect will be written to discretes/analogs
 		//
-		calcSignalRects(painter, insideRect, drawParam, &discretes, &analogs);
+		calcSignalRects(insideRect, drawParam, &discretes, &analogs);
 
 		// Draw backgrounds
 		//
@@ -1374,7 +1376,7 @@ static const int recomendedSize = 8192;
 		return;
 	}
 
-	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY) const
+	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY)
 	{
 		assert(painter);
 
@@ -1447,13 +1449,11 @@ static const int recomendedSize = 8192;
 		return;
 	}
 
-	void Trend::calcSignalRects(QPainter* painter,
-									const QRectF& insideRect,
-									const TrendDrawParam& drawParam,
-									std::vector<TrendSignalParam>* discretes,
-									std::vector<TrendSignalParam>* analogs) const
+	void Trend::calcSignalRects(const QRectF& insideRect,
+								const TrendDrawParam& drawParam,
+								std::vector<TrendSignalParam>* discretes,
+								std::vector<TrendSignalParam>* analogs)
 	{
-		assert(painter);
 		assert(discretes);
 		assert(analogs);
 
@@ -1556,10 +1556,14 @@ static const int recomendedSize = 8192;
 
 	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const
 	{
+		int analogsCount = static_cast<int>(signalSet().analogSignalsCount());
+		return Trend::calcTrendArea(laneRect, drawParam, analogsCount);
+	}
+
+	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, int analogSignalCount)
+	{
 		double dpiX = drawParam.dpiX();
 		double dpiY = drawParam.dpiY();
-
-		size_t analogSignalCount = signalSet().analogSignalsCount();
 
 		// Calc InsideRect(trendArea)
 		// +-------------------------------+
@@ -1644,6 +1648,20 @@ static const int recomendedSize = 8192;
 					  static_cast<double>(rect.width()) / static_cast<double>(drawParam.dpiX()),
 					  static_cast<double>(rect.height()) / static_cast<double>(drawParam.dpiY()));
 
+		return result;
+	}
+
+	QPoint Trend::inchPointToPixelPoint(const QPointF& point, const TrendDrawParam& drawParam)
+	{
+		QPoint result(static_cast<int>(point.x() * drawParam.dpiX()),
+					  static_cast<int>(point.y() * drawParam.dpiY()));
+		return result;
+	}
+
+	QPointF Trend::pixelPointToInchPoint(const QPoint& point, const TrendDrawParam& drawParam)
+	{
+		QPointF result(static_cast<double>(point.x()) / static_cast<double>(drawParam.dpiX()),
+					   static_cast<double>(point.y()) / static_cast<double>(drawParam.dpiY()));
 		return result;
 	}
 

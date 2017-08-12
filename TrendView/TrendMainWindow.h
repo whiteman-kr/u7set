@@ -73,7 +73,9 @@ namespace TrendLib
 		void timeTypeComboCurrentIndexChanged(int index);
 
 		void sliderValueChanged(TimeStamp value);
+
 		void startTimeChanged(TimeStamp value);
+		void durationChanged(qint64 value);
 
 		void contextMenuRequested(const QPoint& pos);
 

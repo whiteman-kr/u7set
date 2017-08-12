@@ -43,7 +43,7 @@ namespace TrendLib
 			return (flags & 0x000001);
 		}
 
-		const TimeStamp& getTime(const TimeType& timeType) const
+		TimeStamp getTime(const TimeType& timeType) const
 		{
 			switch (timeType)
 			{
@@ -209,7 +209,8 @@ namespace TrendLib
 		std::vector<TrendLib::TrendSignalParam> analogSignals() const;
 		std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
 
-		size_t analogSignalsCount() const;
+		int discretesSignalsCount() const;
+		int analogSignalsCount() const;
 
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;

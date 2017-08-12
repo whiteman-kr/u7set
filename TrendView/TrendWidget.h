@@ -85,15 +85,21 @@ namespace TrendLib
 		void resetRullerHighlight();
 
 	protected:
+		void initSelectViewArea(QPoint pos, int laneIndex);
+		void selectViewArea(QPoint pos);
 
-		// --
+		// slots
 		//
+	public slots:
+		void startSelectionViewArea();
+
 	protected slots:
 		void updatePixmap(const QImage& image, TrendDrawParam drawParam);
 
 		// Signals
 	signals:
 		void startTimeChanged(TimeStamp startTime);
+		void durationChanged(qint64 duration);
 		void showSignalProperties(QString appSignalId);
 
 		// Properties
@@ -136,7 +142,8 @@ namespace TrendLib
 			None,
 			Scroll,
 			MoveRuller,
-			SelectView
+			SelectViewStart,
+			SelectViewSelectSecondPoint
 		};
 
 		MouseAction m_mouseAction = MouseAction::None;
@@ -149,6 +156,11 @@ namespace TrendLib
 		int m_rullerMoveRullerIndex = -1;
 		QPoint m_rullerMoveInitialMousePos;
 		TimeStamp m_rullerMoveInitialTimeStamp;
+
+		QPointF m_startSelectViewPoint;
+		QPointF m_finishSelectViewPoint;
+		int m_selectViewLaneIndex;
+		TrendSignalParam m_selectViewAreaSignal;
 	};
 }
 

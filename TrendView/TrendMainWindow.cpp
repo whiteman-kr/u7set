@@ -85,6 +85,7 @@ namespace TrendLib
 		//
 		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
 		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
+		connect(m_trendWidget, &TrendWidget::durationChanged, this, &TrendMainWindow::durationChanged);
 
 		// On click on signal description
 		//
@@ -310,6 +311,8 @@ static int stdColorIndex = 0;
 		m_toolBar->addWidget(intervalLabel);
 
 		m_timeCombo = new QComboBox(m_toolBar);
+		m_timeCombo->setDuplicatesEnabled(false);
+
 		m_timeCombo->addItem(tr("2 sec"), QVariant::fromValue(2_sec));
 		m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
 		m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
@@ -1031,14 +1034,25 @@ static int lastCopyCount = false;
 
 	void TrendMainWindow::timeComboCurrentIndexChanged(int /*index*/)
 	{
-		qint64 t = m_timeCombo->currentData().value<qint64>();
+		QVariant v = m_timeCombo->currentData();
 
-		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
-		m_trendSlider->setPageStep(t);
-		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
+		if (v.isValid() && v.type() == QVariant::LongLong)
+		{
+			qint64 t = v.value<qint64>();
 
-		m_trendWidget->setDuration(t);
-		m_trendWidget->updateWidget();
+			m_trendSlider->setSingleStep(t / singleStepSliderDivider);
+			m_trendSlider->setPageStep(t);
+			m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
+
+			m_trendWidget->setDuration(t);
+			m_trendWidget->updateWidget();
+		}
+
+		int customIndex = m_timeCombo->findText(tr("Custom"));
+		if (customIndex != -1)
+		{
+			m_timeCombo->removeItem(customIndex);
+		}
 
 		return;
 	}
@@ -1086,8 +1100,28 @@ static int lastCopyCount = false;
 		m_trendSlider->setValueShiftMinMax(value);
 	}
 
+	void TrendMainWindow::durationChanged(qint64 value)
+	{
+		m_trendSlider->setLaneDuration(value);
+
+		m_trendSlider->setSingleStep(value / singleStepSliderDivider);
+		m_trendSlider->setPageStep(value);
+
+		m_timeCombo->blockSignals(true);		// Block changes, as tr("Custom") is deleting there
+
+		m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		m_timeCombo->setCurrentText(tr("Custom"));
+
+		m_timeCombo->blockSignals(false);
+
+		return;
+	}
+
 	void TrendMainWindow::contextMenuRequested(const QPoint& /*pos*/)
 	{
+		int analogsCount = signalSet().analogSignalsCount();
+		int discretesCount = signalSet().discretesSignalsCount();
+
 		int outLaneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
@@ -1128,8 +1162,9 @@ static int lastCopyCount = false;
 				});
 
 		menu.addSeparator();
-		QAction* chooseView = menu.addAction(tr("Choose View..."));
-		chooseView->setEnabled(false);		// Not implemented yet
+		QAction* chooseView = menu.addAction(tr("Select View..."));
+		chooseView->setEnabled(analogsCount + discretesCount > 0);
+		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
 
 		assert(m_refreshAction);
 		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);

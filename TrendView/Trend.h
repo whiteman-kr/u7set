@@ -69,23 +69,26 @@ namespace TrendLib
 
 		void drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const;
 
-		void adjustPainter(QPainter* painter, int dpiX, int dpiY) const;
+		static void adjustPainter(QPainter* painter, int dpiX, int dpiY);
 
 		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
 
 	public:
-		void calcSignalRects(QPainter* painter,
-							 const QRectF& insideRect,
+		static void calcSignalRects(const QRectF& insideRect,
 							 const TrendDrawParam& drawParam,
 							 std::vector<TrendSignalParam>* discretes,
-							 std::vector<TrendSignalParam>* analogs) const;
+							 std::vector<TrendSignalParam>* analogs);
 
 		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const;
+		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, int analogSignalCount);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
 
 		static QRect inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam);
 		static QRectF pixelRectToInchRect(const QRect& rect, const TrendDrawParam& drawParam);
+
+		static QPoint inchPointToPixelPoint(const QPointF& point, const TrendDrawParam& drawParam);
+		static QPointF pixelPointToInchPoint(const QPoint& point, const TrendDrawParam& drawParam);
 
 		// Service methods
 		//
@@ -120,7 +123,7 @@ namespace TrendLib
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRullerSet m_rullerSet;
 
-		const double discreteSignalHeight = 5.0 / 8.0;		// if inches
+		const static double discreteSignalHeight;// = 5.0 / 8.0;		// if inches
 	};
 
 }

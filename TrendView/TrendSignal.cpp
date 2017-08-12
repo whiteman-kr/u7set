@@ -609,10 +609,36 @@ namespace TrendLib
 		return result;
 	}
 
-	size_t TrendSignalSet::analogSignalsCount() const
+	int TrendSignalSet::discretesSignalsCount() const
 	{
 		QMutexLocker locker(&m_paramMutex);
-		return m_signalParams.size();
+
+		int count = 0;
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (s.isDiscrete() == true)
+			{
+				count ++;
+			}
+		}
+
+		return count;
+	}
+
+	int TrendSignalSet::analogSignalsCount() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		int count = 0;
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (s.isAnalog() == true)
+			{
+				count ++;
+			}
+		}
+
+		return count;
 	}
 
 	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
