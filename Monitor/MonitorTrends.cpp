@@ -34,9 +34,20 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(MonitorConfigController* configController, QWidget* parent)
+bool MonitorTrends::startTrendApp(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent)
 {
 	MonitorTrendsWidget* window = new MonitorTrendsWidget(configController, parent);
+
+	std::vector<TrendLib::TrendSignalParam> trendSignals;
+	trendSignals.reserve(appSignals.size());
+
+	for (const AppSignalParam& appSignal : appSignals)
+	{
+		TrendLib::TrendSignalParam tsp(appSignal);
+		trendSignals.push_back(tsp);
+	}
+
+	window->addSignals(trendSignals, true);
 
 	window->show();
 

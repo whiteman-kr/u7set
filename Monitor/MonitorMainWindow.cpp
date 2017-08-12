@@ -145,6 +145,11 @@ void MonitorMainWindow::showEvent(QShowEvent*)
 	return;
 }
 
+void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
+{
+	MonitorTrends::startTrendApp(&m_configController, appSignals, this);
+}
+
 void MonitorMainWindow::saveWindowState()
 {
 	theSettings.m_mainWindowPos = pos();
@@ -303,6 +308,7 @@ void MonitorMainWindow::createActions()
 	m_trendsAction = new QAction(tr("Trends"), this);
 	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
 	m_trendsAction->setEnabled(true);
+	m_trendsAction->setData(QVariant("IAmIndependentTrend"));	// This is required to find this action in MonitorToolBar for drag and drop
 	connect(m_trendsAction, &QAction::triggered, this, &MonitorMainWindow::slot_trends);
 
 	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
@@ -376,7 +382,7 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new QToolBar(this);
+	m_toolBar = new MonitorToolBar(this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
 	m_toolBar->setMovable(false);
@@ -647,7 +653,8 @@ void MonitorMainWindow::slot_trends()
 	//
 	if (trendToActivate.isEmpty() == true)
 	{
-		MonitorTrends::startTrendApp(&m_configController, this);
+		std::vector<AppSignalParam> appSignals;
+		MonitorTrends::startTrendApp(&m_configController, appSignals, this);
 	}
 	else
 	{
@@ -842,3 +849,121 @@ void SchemaListWidget::slot_indexChanged(int /*index*/)
 
 	return;
 }
+
+MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
+	QToolBar(tittle, parent)
+{
+	setAcceptDrops(true);
+}
+
+MonitorToolBar::MonitorToolBar(QWidget* parent) :
+	QToolBar(parent)
+{
+	setAcceptDrops(true);
+}
+
+void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+	QList<QAction*> allActions = actions();
+
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+		if (d.isValid() &&
+			d.type() == QVariant::String &&
+			d.toString() == QLatin1String("IAmIndependentTrend"))
+		{
+			trendActionWidget = widgetForAction(a);
+			trendActionWidget->setAcceptDrops(true);
+			break;
+		}
+	}
+
+	if (trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void MonitorToolBar::dropEvent(QDropEvent* event)
+{
+	// Find Trend action
+	//
+	QWidget* trendActionWidget = nullptr;
+	QAction* trendAction = nullptr;
+	QList<QAction*> allActions = actions();
+
+	for (QAction* a : allActions)
+	{
+		QVariant d = a->data();
+		if (d.isValid() &&
+			d.type() == QVariant::String &&
+			d.toString() == QLatin1String("IAmIndependentTrend"))
+		{
+			trendAction = a;
+			trendActionWidget = widgetForAction(trendAction);
+			break;
+		}
+	}
+
+	if (trendAction != nullptr &&
+		trendActionWidget != nullptr &&
+		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		// Lets assume parent isMaonitorMainWindow
+		//
+		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
+		if (m == nullptr)
+		{
+			assert(m);
+			return;
+		}
+
+		// Load data from drag and drop
+		//
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalParamSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(protoSetMessage.items_size());
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		{
+			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				appSignals.push_back(appSignalParam);
+			}
+		}
+
+		if (appSignals.empty() == false)
+		{
+			m->showTrends(appSignals);
+		}
+	}
+
+	return;
+}
+
