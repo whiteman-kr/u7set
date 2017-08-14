@@ -326,7 +326,12 @@ static int stdColorIndex = 0;
 		m_timeCombo->addItem(tr("6 hour"), QVariant::fromValue(6_hours));
 		m_timeCombo->addItem(tr("12 hour"), QVariant::fromValue(12_hours));
 		m_timeCombo->addItem(tr("24 hour"), QVariant::fromValue(24_hours));
-		m_timeCombo->setCurrentIndex(7);
+
+		int currentDuartionIndex = 8;
+
+		m_timeCombo->setCurrentIndex(currentDuartionIndex);
+		m_trendWidget->setLaneDuration(m_timeCombo->itemData(currentDuartionIndex).toLongLong());
+
 		m_toolBar->addWidget(m_timeCombo);
 
 		// Lane Count
@@ -1044,7 +1049,7 @@ static int lastCopyCount = false;
 			m_trendSlider->setPageStep(t);
 			m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
 
-			m_trendWidget->setDuration(t);
+			m_trendWidget->setLaneDuration(t);
 			m_trendWidget->updateWidget();
 		}
 

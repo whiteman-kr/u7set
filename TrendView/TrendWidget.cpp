@@ -438,7 +438,8 @@ namespace TrendLib
 			 mouseOn == Trend::MouseOn::OnSignalDescription ||
 			 mouseOn == Trend::MouseOn::OnRuller))
 		{
-			if (event->buttons().testFlag(Qt::LeftButton) == false)
+			if (event->buttons().testFlag(Qt::LeftButton) == false &&
+				event->buttons().testFlag(Qt::MiddleButton) == false)
 			{
 				// Cancel action
 				//
@@ -496,7 +497,11 @@ namespace TrendLib
 
 				emit showSignalProperties(outSignal.appSignalId());
 			}
+		}
 
+		if (event->buttons().testFlag(Qt::LeftButton) == true ||
+			event->buttons().testFlag(Qt::MiddleButton) == true)
+		{
 			if (mouseOn == Trend::MouseOn::InsideTrendArea)
 			{
 				m_mouseScrollInitialTime = m_drawParam.startTimeStamp();
@@ -554,7 +559,8 @@ namespace TrendLib
 		m_mouseAction = MouseAction::None;
 		releaseMouse();
 
-		if (event->buttons().testFlag(Qt::LeftButton) == false)
+		if (event->buttons().testFlag(Qt::LeftButton) == false &&
+			event->buttons().testFlag(Qt::MiddleButton) == false)
 		{
 			unsetCursor();
 			mouseMoveEvent(event);		// To set cursor
@@ -725,6 +731,136 @@ namespace TrendLib
 		return;
 	}
 
+	void TrendWidget::wheelEvent(QWheelEvent* event)
+	{
+		// While midButton is pressed, this is move mode, don't change zoom
+		//
+		if (event->buttons().testFlag(Qt::MidButton))
+		{
+			return;
+		}
+
+		int numDegrees = event->delta() / 8;
+		int numSteps = numDegrees / 15;
+
+		if (numSteps == 0)
+		{
+			event->ignore();
+			return;
+		}
+
+		bool needUpdateWidget = false;
+
+		// Calc time
+		//
+		if (event->modifiers().testFlag(Qt::AltModifier) == false)
+		{
+			qint64 startTime = m_drawParam.startTimeStamp().timeStamp;
+
+			qint64 oldDuration = m_drawParam.duration();
+			qint64 newLaneDuration = oldDuration;
+
+			if (numSteps < 0)
+			{
+				newLaneDuration = oldDuration * 1.1;
+				startTime -= (newLaneDuration - oldDuration) / 2.0;
+			}
+			else
+			{
+				newLaneDuration = oldDuration * 0.9;
+				startTime += (oldDuration - newLaneDuration) / 2.0;
+			}
+
+			// Set new values to controls and draw param
+			//
+			m_drawParam.setLaneDuration(newLaneDuration);		// This func can limit value
+
+			if (m_drawParam.duration() != oldDuration)
+			{
+				m_drawParam.setStartTimeStamp(startTime);
+
+				emit startTimeChanged(startTime);
+				emit durationChanged(newLaneDuration);
+
+				needUpdateWidget = true;
+			}
+		}
+
+		if (event->modifiers().testFlag(Qt::AltModifier) == true)
+		{
+			// Scale analog signals
+			//
+			std::vector<TrendSignalParam> signalsToScale;
+
+			if (m_drawParam.viewMode() == TrendViewMode::Overlapped)
+			{
+				// Scale all analog signals
+				//
+				signalsToScale = signalSet().analogSignals();
+			}
+
+			if (m_drawParam.viewMode() == TrendViewMode::Separated)
+			{
+				// Scale analog signal where is mouse now
+				//
+				int laneIndex = -1;
+				int rullerIndex = -1;
+				TimeStamp timeStamp;
+				TrendSignalParam trendSignal;
+
+				Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &trendSignal);
+
+				if (mouseOn != Trend::MouseOn::OutsideTrendArea &&
+					mouseOn != Trend::MouseOn::Outside &&
+					trendSignal.appSignalId().isEmpty() == false &&
+					trendSignal.isAnalog() == true)
+				{
+					signalsToScale.push_back(trendSignal);
+				}
+			}
+
+			// Scale view area
+			//
+			for (TrendSignalParam tsp : signalsToScale)
+			{
+				double h = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
+				double l = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
+
+				if (fabs(h - l) < DBL_MIN)
+				{
+					continue;
+				}
+
+				if (numSteps > 0)
+				{
+					h = h - (h - l) * 0.1;
+					l = l + (h - l) * 0.1;
+				}
+				else
+				{
+					h = h + (h - l) * 0.1;
+					l = l - (h - l) * 0.1;
+				}
+
+				tsp.setViewHighLimit(h);
+				tsp.setViewLowLimit(l);
+
+				signalSet().setSignalParam(tsp);
+				needUpdateWidget = true;
+			}
+		}
+
+		// --
+		//
+		if (needUpdateWidget == true)
+		{
+			updateWidget();
+		}
+
+		event->accept();
+		return;
+	}
+
 	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* onSignal)
 	{
 		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rullerIndex, onSignal);
@@ -807,7 +943,7 @@ namespace TrendLib
 		// Set new values to controls and draw param
 		//
 		m_drawParam.setStartTimeStamp(leftTime);
-		m_drawParam.setDuration(rightTime - leftTime);
+		m_drawParam.setLaneDuration(rightTime - leftTime);
 
 		emit startTimeChanged(leftTime);
 		emit durationChanged(rightTime - leftTime);
@@ -976,9 +1112,9 @@ namespace TrendLib
 		return m_drawParam.duration();
 	}
 
-	void TrendWidget::setDuration(qint64 interval)
+	void TrendWidget::setLaneDuration(qint64 interval)
 	{
-		m_drawParam.setDuration(interval);
+		m_drawParam.setLaneDuration(interval);
 	}
 
 }

@@ -76,6 +76,7 @@ namespace TrendLib
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
+		virtual void wheelEvent(QWheelEvent* event) override;
 
 		// Methods
 		//
@@ -127,7 +128,7 @@ namespace TrendLib
 		void setStartTime(const TimeStamp& startTime);
 
 		qint64 duration() const;
-		void setDuration(qint64 interval);
+		void setLaneDuration(qint64 interval);
 
 	private:
 		RenderThread m_thread;

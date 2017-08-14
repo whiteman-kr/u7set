@@ -162,13 +162,13 @@ namespace TrendLib
 		return m_duration;
 	}
 
-	void TrendDrawParam::setDuration(qint64 value)
+	void TrendDrawParam::setLaneDuration(qint64 value)
 	{
 		m_duration = value;
 
-		if (m_duration < 2_sec)
+		if (m_duration < 500_ms)
 		{
-			m_duration = 2_sec;
+			m_duration = 500_ms;
 		}
 
 		if (m_duration > 24_hours)
