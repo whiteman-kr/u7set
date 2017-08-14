@@ -5,6 +5,11 @@
 #include "TrendDrawParam.h"
 #include "TrendRuller.h"
 
+namespace Proto
+{
+	class Trend;
+}
+
 namespace TrendLib
 {
 
@@ -17,6 +22,12 @@ namespace TrendLib
 		//
 	public:
 
+		// Serialization
+		//
+		bool save(::Proto::Trend* message) const;
+		bool load(const ::Proto::Trend& message);
+
+	public:
 		// Draw methods
 		//
 		void draw(QImage* image, const TrendDrawParam& drawParam) const;
@@ -46,39 +57,38 @@ namespace TrendLib
 											   const TrendDrawParam& drawParam,
 											   const TrendSignalParam& signal) const;
 
+		void drawAnalogSignalsGridOverlappedMode(QPainter* painter,
+												 const QRectF& laneRect,
+												 const TrendDrawParam& drawParam,
+												 const std::vector<TrendSignalParam>& analogs) const;
+
 		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam) const;
 		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendDrawParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
-		void drawSignal(QPainter* painter, const TrendSignalParam& signal, int signalIndex, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor) const;
-		void drawDiscrete(QPainter* painter, const TrendSignalParam& signal, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
-
-		void drawAnalog(QPainter* painter, const TrendSignalParam& signal, int signalIndex, const QRectF& rect, const TrendDrawParam& drawParam, QColor backColor, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
-		void drawAnalogTimeGrid(QPainter* painter,
-								const TrendSignalParam& signal,
-								int signalIndex,
-								const QRectF& rect,
-								const TrendDrawParam& drawParam) const;
-
 		void drawRullers(QPainter* painter, const TrendDrawParam& drawParam) const;
+		TrendStateItem rullerSignalState(const TrendRuller& ruller, QString appSignalId, TimeType timeType) const;
 
-		void adjustPainter(QPainter* painter, int dpiX, int dpiY) const;
+		static void adjustPainter(QPainter* painter, int dpiX, int dpiY);
 
 		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
 
 	public:
-		void calcSignalRects(QPainter* painter,
-							 const QRectF& insideRect,
+		static void calcSignalRects(const QRectF& insideRect,
 							 const TrendDrawParam& drawParam,
 							 std::vector<TrendSignalParam>* discretes,
-							 std::vector<TrendSignalParam>* analogs) const;
+							 std::vector<TrendSignalParam>* analogs);
 
 		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
-		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam);
+		QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const;
+		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, size_t analogSignalCount);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
 
 		static QRect inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam);
 		static QRectF pixelRectToInchRect(const QRect& rect, const TrendDrawParam& drawParam);
+
+		static QPoint inchPointToPixelPoint(const QPointF& point, const TrendDrawParam& drawParam);
+		static QPointF pixelPointToInchPoint(const QPoint& point, const TrendDrawParam& drawParam);
 
 		// Service methods
 		//
@@ -92,7 +102,7 @@ namespace TrendLib
 			OnRuller,			// Over ruller
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, QString* outSignalId) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, TrendSignalParam* outSignal) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);
@@ -113,7 +123,7 @@ namespace TrendLib
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRullerSet m_rullerSet;
 
-		const double discreteSignalHeight = 5.0 / 8.0;		// of inch
+		const static double discreteSignalHeight;// = 5.0 / 8.0;		// if inches
 	};
 
 }

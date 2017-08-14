@@ -7,23 +7,44 @@
 #include "../lib/Types.h"
 #include "../lib/AppSignal.h"
 
+namespace Proto
+{
+	class TrendStateItem;
+	class TrendStateRecord;
+	class TrendArchiveHour;
+	class TrendArchive;
+	class TrendSignalParam;
+	class TrendSignalSet;
+}
+
 namespace TrendLib
 {
-	struct TrendStateItem
+#pragma pack(push, 1)
+	struct TrendStateItem_v1
 	{
-		TimeStamp system;
-		TimeStamp local;
-		TimeStamp plant;
+		qint64 system;
+		qint64 local;
+		qint64 plant;
 		qint32 flags;
 		double value;
 
-		TrendStateItem(const AppSignalState& state) :
-			system(state.m_time.system),
-			local(state.m_time.local),
-			plant(state.m_time.plant),
+		TrendStateItem_v1() = default;
+		TrendStateItem_v1(const AppSignalState& state) :
+			system(state.m_time.system.timeStamp),
+			local(state.m_time.local.timeStamp),
+			plant(state.m_time.plant.timeStamp),
 			flags(state.m_flags.all),
 			value(state.m_value)
 		{
+		}
+
+		void clear()
+		{
+			system = 0;
+			local = 0;
+			plant = 0;
+			flags = 0;
+			value = 0;
 		}
 
 		bool isValid() const
@@ -31,7 +52,7 @@ namespace TrendLib
 			return (flags & 0x000001);
 		}
 
-		const TimeStamp& getTime(const TimeType& timeType) const
+		TimeStamp getTime(const TimeType& timeType) const
 		{
 			switch (timeType)
 			{
@@ -44,11 +65,19 @@ namespace TrendLib
 			}
 		}
 	};
+#pragma pack(pop)
+
+	using TrendStateItem = TrendStateItem_v1;
 
 	struct TrendStateRecord
 	{
 		std::vector<TrendStateItem> states;
-		static const size_t recomendedSize = 512;
+		static const size_t recomendedSize = 1024;
+
+		// Serialization
+		//
+		bool save(Proto::TrendStateRecord* message) const;
+		bool load(const Proto::TrendStateRecord& message);
 	};
 
 	struct OneHourData
@@ -62,12 +91,22 @@ namespace TrendLib
 
 		State state = State::NoData;
 		std::vector<TrendStateRecord> data;
+
+		// Serialization
+		//
+		bool save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const;
+		bool load(const Proto::TrendArchiveHour& message);
 	};
 
 	struct TrendArchive
 	{
-		QString appSignalId;
+		QString appSignalId;		// This fiels is not filled in. Don't use it now
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;			// Key is rounded to hour (like 9:00, 14:00, ...)
+
+		// Serialization
+		//
+		bool save(QString mapAppSignalId, Proto::TrendArchive* message) const;
+		bool load(const Proto::TrendArchive& message);
 	};
 
 	class TrendSignalParam
@@ -75,6 +114,10 @@ namespace TrendLib
 	public:
 		TrendSignalParam();
 		TrendSignalParam(const AppSignalParam& appSignal);
+
+	public:
+		bool save(Proto::TrendSignalParam* message) const;
+		bool load(const Proto::TrendSignalParam& message);
 
 		// Methods
 		//
@@ -101,6 +144,9 @@ namespace TrendLib
 		E::SignalType type() const;
 		void setType(E::SignalType value);
 
+		QString unit() const;
+		void setUnit(const QString& value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -112,9 +158,6 @@ namespace TrendLib
 
 		double viewLowLimit() const;
 		void setViewLowLimit(double value);
-
-		QString unit() const;
-		void setUnit(const QString& value);
 
 		QColor color() const;
 		void setColor(const QColor& value);
@@ -136,14 +179,13 @@ namespace TrendLib
 		QString m_equipmentId;
 
 		E::SignalType m_type = E::SignalType::Analog;
+		QString m_unit;
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
 		double m_viewHighLimit = 1.0;	// Current view limits for the signals
 		double m_viewLowLimit = 0;
-
-		QString m_unit;
 
 		QColor m_color = qRgb(0, 0, 0);
 
@@ -157,8 +199,13 @@ namespace TrendLib
 	class TrendSignalSet : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		TrendSignalSet();
+
+	public:
+		bool save(::Proto::TrendSignalSet* message) const;
+		bool load(const ::Proto::TrendSignalSet& message);
 
 	public:
 		bool addSignal(const TrendSignalParam& signal);
@@ -170,6 +217,9 @@ namespace TrendLib
 		std::vector<TrendLib::TrendSignalParam> trendSignals() const;
 		std::vector<TrendLib::TrendSignalParam> analogSignals() const;
 		std::vector<TrendLib::TrendSignalParam> discreteSignals() const;
+
+		int discretesSignalsCount() const;
+		int analogSignalsCount() const;
 
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;

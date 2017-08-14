@@ -1,4 +1,5 @@
 #include "TrendRuller.h"
+#include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
@@ -10,6 +11,30 @@ namespace TrendLib
 	TrendRuller::TrendRuller(TimeStamp& timeStamp) :
 		m_timeStamp(timeStamp)
 	{
+	}
+
+	bool TrendRuller::save(::Proto::TrendRuller* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		message->set_time_stamp(m_timeStamp.timeStamp);
+		message->set_show(m_showRuller);
+		message->set_show_signal_values(m_showSignalValues);
+
+		return true;
+	}
+
+	bool TrendRuller::load(const ::Proto::TrendRuller& message)
+	{
+		m_timeStamp.timeStamp = message.time_stamp();
+		m_showRuller = message.show();
+		m_showSignalValues = message.show_signal_values();
+
+		return true;
 	}
 
 	TimeStamp TrendRuller::timeStamp() const
@@ -49,6 +74,48 @@ namespace TrendLib
 	{
 		m_rullers.reserve(16);
 	}
+
+
+	bool TrendRullerSet::save(::Proto::TrendRullerSet* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		for (const TrendLib::TrendRuller& ruller : m_rullers)
+		{
+			ok &= ruller.save(message->add_rullers());
+		}
+
+		return ok;
+	}
+
+	bool TrendRullerSet::load(const ::Proto::TrendRullerSet& message)
+	{
+		if (message.IsInitialized() == false)
+		{
+			assert(message.IsInitialized());
+			return false;
+		}
+
+		bool ok = true;
+
+		m_rullers.clear();
+		m_rullers.reserve(message.rullers().size());
+
+		for (int i = 0; i < message.rullers().size(); i++)
+		{
+			TrendRuller r;
+			ok &= r.load(message.rullers(i));
+		}
+
+		return ok;
+	}
+
 
 	void TrendRullerSet::addRuller(const TrendLib::TrendRuller& ruller)
 	{

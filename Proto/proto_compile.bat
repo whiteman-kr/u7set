@@ -4,12 +4,11 @@ echo Compile Protobuf file serialization.proto
 
 call ..\Protobuf\protoc.exe --cpp_out=. serialization.proto
 
-if %ERRORLEVEL% == 0 goto :next
+if %ERRORLEVEL% == 0 goto :next1
 echo @
 echo ERRORS encountered during execution. Exited with status: %errorlevel%
 goto :endoffile
-
-:next
+:next1
 move /Y serialization.pb.cc body.pb.cc
 copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a serialization.pb.cc /b
 del body.pb.cc
@@ -19,5 +18,12 @@ call ..\Protobuf\protoc.exe --cpp_out=. network.proto
 move /Y network.pb.cc body.pb.cc
 copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a network.pb.cc /b
 del body.pb.cc
+
+echo Compile Protobuf file trends.proto 
+call ..\Protobuf\protoc.exe --cpp_out=. trends.proto
+move /Y trends.pb.cc body.pb.cc
+copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a trends.pb.cc /b
+del body.pb.cc
+
 
 :endoffile

@@ -50,7 +50,7 @@ namespace TrendLib
 		m_trendWidget = new TrendLib::TrendWidget(this);
 		layout->addWidget(m_trendWidget, 0, 0);
 
-		m_trendWidget->setView(static_cast<TrendLib::TrendView>(theSettings.m_viewType));
+		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
 		m_trendWidget->setTimeType(static_cast<TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
@@ -85,6 +85,7 @@ namespace TrendLib
 		//
 		connect(m_trendSlider, &TrendSlider::valueChanged, this, &TrendMainWindow::sliderValueChanged);
 		connect(m_trendWidget, &TrendWidget::startTimeChanged, this, &TrendMainWindow::startTimeChanged);
+		connect(m_trendWidget, &TrendWidget::durationChanged, this, &TrendMainWindow::durationChanged);
 
 		// On click on signal description
 		//
@@ -310,6 +311,8 @@ static int stdColorIndex = 0;
 		m_toolBar->addWidget(intervalLabel);
 
 		m_timeCombo = new QComboBox(m_toolBar);
+		m_timeCombo->setDuplicatesEnabled(false);
+
 		m_timeCombo->addItem(tr("2 sec"), QVariant::fromValue(2_sec));
 		m_timeCombo->addItem(tr("5 sec"), QVariant::fromValue(5_sec));
 		m_timeCombo->addItem(tr("10 sec"), QVariant::fromValue(10_sec));
@@ -349,8 +352,8 @@ static int stdColorIndex = 0;
 		m_toolBar->addWidget(viewLabel);
 
 		m_viewCombo = new QComboBox(m_toolBar);
-		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(TrendLib::TrendView::Separated));
-		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(TrendLib::TrendView::Overlapped));
+		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(TrendLib::TrendViewMode::Separated));
+		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(TrendLib::TrendViewMode::Overlapped));
 		m_toolBar->addWidget(m_viewCombo);
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
@@ -542,9 +545,66 @@ static int stdColorIndex = 0;
 
 	void TrendMainWindow::actionOpenTriggered()
 	{
-		// todo
+		QString fileName = QFileDialog::getOpenFileName(this,
+														tr("Open Trend File"),
+														".",
+														tr("Trend (*.u7trend);;All Files (*.*)"));
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		assert(m_trendWidget);
+
+		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+		QApplication::processEvents();
+
+		QString errorMessage;
+		bool ok = m_trendWidget->load(fileName, &errorMessage);
+
+		QApplication::restoreOverrideCursor();
+		QApplication::processEvents();
+
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Loading trend error: %1\n").arg(errorMessage));
+			return;
+		}
+
+		// Set UI items to loaded state
+		// start time, interval, +lanes, +view mode, time type
 		//
-		//assert(false);
+		m_trendSlider->setValue(m_trendWidget->startTime());
+
+		int index = m_lanesCombo->findData(QVariant::fromValue(m_trendWidget->laneCount()));
+		if (index != -1)
+		{
+			m_lanesCombo->setCurrentIndex(index);
+		}
+
+		index = m_viewCombo->findData(QVariant::fromValue(m_trendWidget->viewMode()));
+		if (index != -1)
+		{
+			m_viewCombo->setCurrentIndex(index);
+		}
+
+		index = m_timeTypeCombo->findData(QVariant::fromValue(m_trendWidget->timeType()));
+		if (index != -1)
+		{
+			m_timeTypeCombo->setCurrentIndex(index);
+		}
+
+		index = m_timeCombo->findData(QVariant::fromValue(m_trendWidget->duration()));
+		if (index != -1)
+		{
+			m_timeCombo->setCurrentIndex(index);
+		}
+
+		QApplication::processEvents();
+
+		updateWidget();
+
+		return;
 	}
 
 	void TrendMainWindow::actionSaveTriggered()
@@ -564,6 +624,28 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
+			assert(m_trendWidget);
+
+			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+			QApplication::processEvents();
+
+			QTime timer;
+			timer.start();
+
+			QString errorMessage;
+			bool ok = m_trendWidget->save(fileName, &errorMessage);
+
+			qDebug() << "Save trend to file: " << fileName << ", result: " << ok << ", elapsed time: " << timer.elapsed();
+
+			QApplication::restoreOverrideCursor();
+			QApplication::processEvents();
+
+			if (ok == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Saving trend error: %1\n").arg(errorMessage));
+				return;
+			}
+
 			return;
 		}
 
@@ -837,9 +919,9 @@ static int lastCopyCount = false;
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
-		QString outSignalId;
+		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
@@ -952,22 +1034,33 @@ static int lastCopyCount = false;
 
 	void TrendMainWindow::timeComboCurrentIndexChanged(int /*index*/)
 	{
-		qint64 t = m_timeCombo->currentData().value<qint64>();
+		QVariant v = m_timeCombo->currentData();
 
-		m_trendSlider->setSingleStep(t / singleStepSliderDivider);
-		m_trendSlider->setPageStep(t);
-		m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
+		if (v.isValid() && v.type() == QVariant::LongLong)
+		{
+			qint64 t = v.value<qint64>();
 
-		m_trendWidget->setDuration(t);
-		m_trendWidget->updateWidget();
+			m_trendSlider->setSingleStep(t / singleStepSliderDivider);
+			m_trendSlider->setPageStep(t);
+			m_trendSlider->setLaneDuration(t * m_trendWidget->laneCount());
+
+			m_trendWidget->setDuration(t);
+			m_trendWidget->updateWidget();
+		}
+
+		int customIndex = m_timeCombo->findText(tr("Custom"));
+		if (customIndex != -1)
+		{
+			m_timeCombo->removeItem(customIndex);
+		}
 
 		return;
 	}
 
 	void TrendMainWindow::viewComboCurrentIndexChanged(int index)
 	{
-		TrendLib::TrendView view = m_viewCombo->itemData(index).value<TrendLib::TrendView>();
-		m_trendWidget->setView(view);
+		TrendLib::TrendViewMode view = m_viewCombo->itemData(index).value<TrendLib::TrendViewMode>();
+		m_trendWidget->setViewMode(view);
 
 		m_trendWidget->updateWidget();
 		return;
@@ -1007,15 +1100,35 @@ static int lastCopyCount = false;
 		m_trendSlider->setValueShiftMinMax(value);
 	}
 
+	void TrendMainWindow::durationChanged(qint64 value)
+	{
+		m_trendSlider->setLaneDuration(value);
+
+		m_trendSlider->setSingleStep(value / singleStepSliderDivider);
+		m_trendSlider->setPageStep(value);
+
+		m_timeCombo->blockSignals(true);		// Block changes, as tr("Custom") is deleting there
+
+		m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		m_timeCombo->setCurrentText(tr("Custom"));
+
+		m_timeCombo->blockSignals(false);
+
+		return;
+	}
+
 	void TrendMainWindow::contextMenuRequested(const QPoint& /*pos*/)
 	{
+		int analogsCount = signalSet().analogSignalsCount();
+		int discretesCount = signalSet().discretesSignalsCount();
+
 		int outLaneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
 		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
-		QString outSignalId;
+		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignalId);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
 			mouseOn != Trend::MouseOn::OnRuller)
@@ -1049,8 +1162,9 @@ static int lastCopyCount = false;
 				});
 
 		menu.addSeparator();
-		QAction* chooseView = menu.addAction(tr("Choose View..."));
-		chooseView->setEnabled(false);		// Not implemented yet
+		QAction* chooseView = menu.addAction(tr("Select View..."));
+		chooseView->setEnabled(analogsCount + discretesCount > 0);
+		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
 
 		assert(m_refreshAction);
 		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);

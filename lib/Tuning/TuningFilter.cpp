@@ -199,7 +199,7 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_ID = That.m_ID;
 	m_caption = That.m_caption;
 
-	m_automatic = That.m_automatic;
+	m_source = That.m_source;
 
 	m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
 	m_equipmentIDMasks = That.m_equipmentIDMasks;
@@ -226,7 +226,7 @@ TuningFilter::~TuningFilter()
 
 }
 
-bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
+bool TuningFilter::load(QXmlStreamReader& reader, FilterSource source)
 {
 	if (isRoot() == false)
 	{
@@ -355,12 +355,12 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
 
 				std::shared_ptr<TuningFilter> of = std::make_shared<TuningFilter>(filterType);
 
-				if (of->load(reader, automatic) == false)
+				if (of->load(reader, source) == false)
 				{
 					return false;
 				}
 
-				of->setAutomatic(automatic);
+				of->setSourceType(source);
 
 				addChild(of);
 
@@ -378,7 +378,7 @@ bool TuningFilter::load(QXmlStreamReader& reader, bool automatic)
 
 bool TuningFilter::save(QXmlStreamWriter& writer) const
 {
-	if (automatic() == true)
+	if (isSourceUser() == false)
 	{
 		return true;
 	}
@@ -465,16 +465,31 @@ void TuningFilter::setCaption(const QString& value)
 	m_caption = value;
 }
 
-bool TuningFilter::automatic() const
+bool TuningFilter::isSourceProject() const
 {
-	return m_automatic;
+	return m_source == FilterSource::Project;
 }
 
-void TuningFilter::setAutomatic(bool value)
+bool TuningFilter::isSourceAutomatic() const
 {
-	m_automatic = value;
+	return m_source == FilterSource::Automatic;
 }
 
+bool TuningFilter::isSourceUser() const
+{
+	return m_source == FilterSource::User;
+}
+
+TuningFilter::FilterSource TuningFilter::sourceType() const
+{
+	return m_source;
+}
+
+
+void TuningFilter::setSourceType(FilterSource value)
+{
+	m_source = value;
+}
 
 QString TuningFilter::customAppSignalIDMask() const
 {
@@ -801,7 +816,7 @@ void TuningFilter::removeAllChildren()
 
 }
 
-void TuningFilter::removeAutomaticChildren()
+void TuningFilter::removeChildren(FilterSource sourceType)
 {
 	std::vector<std::shared_ptr<TuningFilter>> childFiltersCopy;
 
@@ -813,7 +828,7 @@ void TuningFilter::removeAutomaticChildren()
 	{
 		std::shared_ptr<TuningFilter>& filter =* it;
 
-		if (filter->automatic() == false)
+		if (filter->sourceType() != sourceType)
 		{
 			m_childFilters.push_back(filter);
 		}
@@ -1053,7 +1068,7 @@ TuningFilterStorage::TuningFilterStorage(const TuningFilterStorage& That)
 	*this = That;
 }
 
-bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, bool automatic)
+bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, TuningFilter::FilterSource source)
 {
 	if (errorCode == nullptr)
 	{
@@ -1076,11 +1091,11 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, bool
 
 	QByteArray data = f.readAll();
 
-	return load(data, errorCode, automatic);
+	return load(data, errorCode, source);
 
 }
 
-bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, bool automatic)
+bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source)
 {
 	if (errorCode == nullptr)
 	{
@@ -1126,7 +1141,7 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, bool 
 
 		if (tagName == "Root")
 		{
-			if (m_root->load(reader, automatic) == false)
+			if (m_root->load(reader, source) == false)
 			{
 				*errorCode = reader.errorString();
 				return false;
@@ -1232,7 +1247,7 @@ std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
 
 	QString errorMsg;
 
-	bool ok = clipboardStorage.load(data, &errorMsg, false);
+	bool ok = clipboardStorage.load(data, &errorMsg, TuningFilter::FilterSource::User);
 	if (ok == false)
 	{
 		return nullptr;
@@ -1299,7 +1314,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofSchema->setID("%AUTOFILTER%_SCHEMA");
 		ofSchema->setCaption(QObject::tr("Schemas"));
-		ofSchema->setAutomatic(true);
+		ofSchema->setSourceType(TuningFilter::FilterSource::Automatic);
 
 		for (const VFrame30::SchemaDetails& schemasDetails : m_schemasDetails)
 		{
@@ -1331,7 +1346,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 
 			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
 			ofTs->setCaption(schemasDetails.m_caption);
-			ofTs->setAutomatic(true);
+			ofTs->setSourceType(TuningFilter::FilterSource::Automatic);
 
 			ofSchema->addChild(ofTs);
 		}
@@ -1348,7 +1363,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
 		ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption(QObject::tr("Equipment"));
-		ofEquipment->setAutomatic(true);
+		ofEquipment->setSourceType(TuningFilter::FilterSource::Automatic);
 
 		for (const QString& ts : tuningSourcesEquipmentIds)
 		{
@@ -1356,7 +1371,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
-			ofTs->setAutomatic(true);
+			ofTs->setSourceType(TuningFilter::FilterSource::Automatic);
 
 			ofEquipment->addChild(ofTs);
 		}
@@ -1365,9 +1380,9 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 	}
 }
 
-void TuningFilterStorage::removeAutomaticFilters()
+void TuningFilterStorage::removeFilters(TuningFilter::FilterSource sourceType)
 {
-	m_root->removeAutomaticChildren();
+	m_root->removeChildren(sourceType);
 
 }
 
@@ -1404,29 +1419,6 @@ void TuningFilterStorage::checkSignals(const TuningSignalStorage* objects, bool&
 		QMessageBox::warning(parentWidget, qApp->applicationName(), QObject::tr("%1 signals have been removed.").arg(removedCounter));
 	}
 
-}
-
-void TuningFilterStorage::slot_filtersUpdated(QByteArray data)
-{
-	QString errorStr;
-
-	if (load(data, &errorStr, true) == false)
-	{
-		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
-		writeLogError(completeErrorMessage);
-	}
-
-}
-
-void TuningFilterStorage::slot_schemasDetailsUpdated(QByteArray data)
-{
-	QString errorStr;
-
-	if (loadSchemasDetails(data, &errorStr) == false)
-	{
-		QString completeErrorMessage = QObject::tr("Schemas Details file loading error: %1").arg(errorStr);
-		writeLogError(completeErrorMessage);
-	}
 }
 
 void TuningFilterStorage::writeLogError(const QString& message)

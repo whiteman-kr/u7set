@@ -6,6 +6,12 @@
 
 class QPrinter;
 
+namespace Proto
+{
+	class TrendWidget;
+}
+
+
 namespace TrendLib
 {
 	class RenderThread : public QThread
@@ -48,6 +54,13 @@ namespace TrendLib
 		virtual ~TrendWidget();
 
 	public:
+		bool save(QString fileName, QString* errorMessage) const;
+		bool load(QString fileName, QString* errorMessage);
+
+		bool save(::Proto::TrendWidget* message) const;
+		bool load(const ::Proto::TrendWidget& message);
+
+	public:
 		void updateWidget();
 
 		bool saveImageToFile(QString fileName) const;
@@ -67,20 +80,26 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, QString* outSignalId);
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* outSignalId);
 
 		void resetRullerHighlight();
 
 	protected:
+		void initSelectViewArea(QPoint pos, int laneIndex);
+		void selectViewArea(QPoint pos);
 
-		// --
+		// slots
 		//
+	public slots:
+		void startSelectionViewArea();
+
 	protected slots:
 		void updatePixmap(const QImage& image, TrendDrawParam drawParam);
 
 		// Signals
 	signals:
 		void startTimeChanged(TimeStamp startTime);
+		void durationChanged(qint64 duration);
 		void showSignalProperties(QString appSignalId);
 
 		// Properties
@@ -95,8 +114,8 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		TrendView view() const;
-		void setView(TrendView value);
+		TrendViewMode viewMode() const;
+		void setViewMode(TrendViewMode value);
 
 		int laneCount() const;
 		void setLaneCount(int value);
@@ -123,7 +142,8 @@ namespace TrendLib
 			None,
 			Scroll,
 			MoveRuller,
-			SelectView
+			SelectViewStart,
+			SelectViewSelectSecondPoint
 		};
 
 		MouseAction m_mouseAction = MouseAction::None;
@@ -132,10 +152,17 @@ namespace TrendLib
 		//
 		TimeStamp m_mouseScrollInitialTime;
 		QPoint m_mouseScrollInitialMousePos;
+		TrendSignalParam m_mouseScrollSignal;
+		std::vector<TrendSignalParam> m_mouseScrollAnalogSignals;
 
 		int m_rullerMoveRullerIndex = -1;
 		QPoint m_rullerMoveInitialMousePos;
 		TimeStamp m_rullerMoveInitialTimeStamp;
+
+		QPointF m_startSelectViewPoint;
+		QPointF m_finishSelectViewPoint;
+		int m_selectViewLaneIndex;
+		TrendSignalParam m_selectViewAreaSignal;
 	};
 }
 

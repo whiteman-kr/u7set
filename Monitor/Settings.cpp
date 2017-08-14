@@ -72,7 +72,7 @@ void Settings::writeUserScope() const
 	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
 	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
 	s.setValue("DialogSignalSnapshot/columns", QVariant::fromValue<QList<int>>(m_signalSnapshotColumns.toList()));
-	s.setValue("DialogSignalSnapshot/type", m_signalSnapshotSignalType);
+    s.setValue("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType));
 	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
 
 	s.setValue("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType));
@@ -99,7 +99,7 @@ void Settings::loadUserScope()
 	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
 	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
 	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").value<QList<int>>().toVector();
-	m_signalSnapshotSignalType = s.value("DialogSignalSnapshot/type").toInt();
+    m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType)).toInt());
 	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 	m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
 	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();

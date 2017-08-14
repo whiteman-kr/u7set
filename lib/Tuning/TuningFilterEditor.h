@@ -13,7 +13,7 @@ class TuningFilterEditor : public QDialog
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects, bool showAutomatic,
+	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 								std::vector<int>& signalsTableColumnWidth, std::vector<int>& presetsTreeColumnWidth,
 								QPoint pos,
 								QByteArray geometry,

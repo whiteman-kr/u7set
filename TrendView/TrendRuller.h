@@ -3,6 +3,12 @@
 #include <vector>
 #include "../lib/TimeStamp.h"
 
+namespace Proto
+{
+	class TrendRuller;
+	class TrendRullerSet;
+}
+
 namespace TrendLib
 {
 	class TrendRuller
@@ -10,6 +16,10 @@ namespace TrendLib
 	public:
 		TrendRuller();
 		TrendRuller(TimeStamp& timeStamp);
+
+	public:
+		bool save(::Proto::TrendRuller* message) const;
+		bool load(const ::Proto::TrendRuller& message);
 
 		// Properties
 		//
@@ -33,6 +43,10 @@ namespace TrendLib
 	{
 	public:
 		TrendRullerSet();
+
+	public:
+		bool save(::Proto::TrendRullerSet* message) const;
+		bool load(const ::Proto::TrendRullerSet& message);
 
 	public:
 		void addRuller(const TrendLib::TrendRuller& ruller);

@@ -69,6 +69,14 @@ public:
 	};
 	Q_ENUM(FilterType)
 
+	enum class FilterSource
+	{
+		Project,
+		Automatic,
+		User
+	};
+	Q_ENUM(FilterSource)
+
 	enum class SignalType
 	{
 		All,
@@ -85,7 +93,7 @@ public:
 
 	TuningFilter& operator= (const TuningFilter& That);
 
-	bool load(QXmlStreamReader& reader, bool automatic);
+	bool load(QXmlStreamReader& reader, FilterSource source);
 	bool save(QXmlStreamWriter& writer) const;
 
 	bool match(const AppSignalParam& object, bool checkValues) const;
@@ -103,8 +111,12 @@ public:
 	QString caption() const;
 	void setCaption(const QString& value);
 
-	bool automatic() const;
-	void setAutomatic(bool value);
+	bool isSourceProject() const;
+	bool isSourceAutomatic() const;
+	bool isSourceUser() const;
+
+	FilterSource sourceType() const;
+	void setSourceType(FilterSource value);
 
 	FilterType filterType() const;
 	void setFilterType(FilterType value);
@@ -166,7 +178,7 @@ public:
 	bool removeChild(const QString& ID);
 
 	void removeAllChildren();
-	void removeAutomaticChildren();
+	void removeChildren(FilterSource sourceType);
 
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
@@ -182,7 +194,7 @@ private:
 	QString m_ID;
 	QString m_caption;
 
-	bool m_automatic = false;
+	FilterSource m_source = FilterSource::User;
 
 	FilterType m_filterType = FilterType::Tree;
 	SignalType m_signalType = SignalType::All;
@@ -230,9 +242,9 @@ public:
 
 	// Serialization
 
-	bool load(const QByteArray& data, QString* errorCode, bool automatic);
+	bool load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source);
 
-	bool load(const QString& fileName, QString* errorCode, bool automatic);
+	bool load(const QString& fileName, QString* errorCode, TuningFilter::FilterSource source);
 	bool save(const QString& fileName, QString* errorMsg);
 
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);
@@ -248,7 +260,7 @@ public:
 
 	void createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
 
-	void removeAutomaticFilters();
+	void removeFilters(TuningFilter::FilterSource sourceType);
 
 	void checkSignals(const TuningSignalStorage* objects, bool& removedNotFound, QWidget* parentWidget);
 
@@ -257,10 +269,6 @@ protected:
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
-
-public slots:
-	void slot_filtersUpdated(QByteArray data);
-	void slot_schemasDetailsUpdated(QByteArray data);
 
 
 public:

@@ -6,6 +6,7 @@
 #include "TcpSignalClient.h"
 
 class MonitorCentralWidget;
+class MonitorToolBar;
 class SchemaListWidget;
 class QLabel;
 class QComboBox;
@@ -28,8 +29,9 @@ protected:
 	// Public methods
 	//
 public:
-
 	static QString getInstanceKey();
+
+	void showTrends(const std::vector<AppSignalParam>& appSignals);
 
 	// Protected methods
 	//
@@ -134,7 +136,7 @@ private:
 
 	// Controls
 	//
-	QToolBar* m_toolBar = nullptr;
+	MonitorToolBar* m_toolBar = nullptr;
 
 	SchemaListWidget* m_schemaListWidget = nullptr;
 
@@ -167,6 +169,20 @@ private:
 
 	QLabel* m_label = nullptr;
 	QComboBox* m_comboBox = nullptr;
+};
+
+class MonitorToolBar : public QToolBar
+{
+	Q_OBJECT
+
+public:
+	explicit MonitorToolBar(const QString &tittle, QWidget *parent = Q_NULLPTR);
+	explicit MonitorToolBar(QWidget *parent = Q_NULLPTR);
+
+protected:
+	virtual void dragEnterEvent(QDragEnterEvent *event) override;
+	virtual void dropEvent(QDropEvent* event) override;
+
 };
 
 extern MonitorMainWindow* theMonitorMainWindow;

@@ -1,10 +1,52 @@
 #include "TrendDrawParam.h"
+#include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
 
 	TrendDrawParam::TrendDrawParam()
 	{
+	}
+
+	bool TrendDrawParam::save(::Proto::TrendParam* message) const
+	{
+		if (message == nullptr)
+		{
+			return false;
+		}
+
+		message->set_view_mode(static_cast<int>(m_viewMode));
+		message->set_time_type(static_cast<int>(m_timeType));
+		message->set_lane_count(m_laneCount);
+
+		message->set_start_time(m_startTimeStamp.timeStamp);
+		message->set_duration(m_duration);
+
+		message->set_back_color_1st(m_backColor1st.rgb());
+		message->set_back_color_2nd(m_backColor2nd.rgb());
+
+		return true;
+	}
+
+	bool TrendDrawParam::load(const ::Proto::TrendParam& message)
+	{
+		if (message.IsInitialized() == false)
+		{
+			assert(message.IsInitialized());
+			return false;
+		}
+
+		m_viewMode = static_cast<TrendViewMode>(message.view_mode());
+		m_timeType = static_cast<TimeType>(message.time_type());
+		m_laneCount = message.lane_count();
+
+		m_startTimeStamp.timeStamp = message.start_time();
+		m_duration = message.duration();
+
+		m_backColor1st = QColor::fromRgb(message.back_color_1st());
+		m_backColor2nd = QColor::fromRgb(message.back_color_2nd());
+
+		return true;
 	}
 
 	QRectF TrendDrawParam::rect() const
@@ -45,14 +87,14 @@ namespace TrendLib
 		return;
 	}
 
-	TrendView TrendDrawParam::view() const
+	TrendViewMode TrendDrawParam::viewMode() const
 	{
-		return m_view;
+		return m_viewMode;
 	}
 
-	void TrendDrawParam::setView(TrendView value)
+	void TrendDrawParam::setViewMode(TrendViewMode value)
 	{
-		m_view = value;
+		m_viewMode = value;
 	}
 
 	TimeType TrendDrawParam::timeType() const

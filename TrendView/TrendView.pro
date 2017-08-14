@@ -36,7 +36,8 @@ SOURCES += \
     TrendMainWindow.cpp \
     Trend.cpp \
     TrendRuller.cpp \
-    DialogTrendSignalProperties.cpp
+    DialogTrendSignalProperties.cpp \
+    ../Proto/trends.pb.cc
 
 HEADERS += \
     Stable.h \
@@ -49,7 +50,8 @@ HEADERS += \
     TrendMainWindow.h \
     Trend.h \
     TrendRuller.h \
-    DialogTrendSignalProperties.h
+    DialogTrendSignalProperties.h \
+    ../Proto/trends.pb.h
 
 unix {
     target.path = /usr/lib
@@ -74,4 +76,7 @@ win32 {
 unix {
     LIBS += -lprotobuf
 }
+
+DISTFILES += \
+    ../Proto/trends.proto
 

@@ -1,7 +1,128 @@
 #include "TrendSignal.h"
+#include <type_traits>
+#include "../Proto/trends.pb.h"
 
 namespace TrendLib
 {
+
+	bool TrendStateRecord::save(Proto::TrendStateRecord* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		// Saving TrendStateItem_v1
+		//
+		static_assert(std::is_same<std::vector<TrendStateItem>::value_type, TrendStateItem_v1>::value, "Expepcted TrendStateItem_v1");
+		message->set_states_raw_buffer_v1(reinterpret_cast<const char*>(states.data()), states.size() * sizeof(TrendStateItem_v1));
+
+		return ok;
+	}
+
+	bool TrendStateRecord::load(const Proto::TrendStateRecord& message)
+	{
+		bool ok = true;
+
+		// Loading TrendStateItem_v1
+		//
+		assert(message.states_raw_buffer_v1().size() % sizeof(TrendStateItem_v1) == 0);
+		size_t stateCount = message.states_raw_buffer_v1().size() / sizeof(TrendStateItem_v1);
+
+		states.clear();
+		states.resize(stateCount);
+
+		memcpy(states.data(), message.states_raw_buffer_v1().data(), message.states_raw_buffer_v1().size());
+
+		return ok;
+	}
+
+	bool OneHourData::save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		message->set_time_stamp(timeStamp.timeStamp);
+		message->set_state(static_cast<int>(state));
+
+		message->mutable_records()->Reserve(static_cast<int>(data.size()));
+		for (const TrendStateRecord& record : data)
+		{
+			ok &= record.save(message->add_records());
+		}
+
+		return ok;
+	}
+
+	bool OneHourData::load(const Proto::TrendArchiveHour& message)
+	{
+		bool ok = true;
+
+		// message.time_stamp() -- is not read jere, it is required on one level lower, in TrendArchive as a key to map
+		state = static_cast<OneHourData::State>(message.state());
+
+		data.clear();
+		data.reserve(message.records_size());
+
+		for (int i = 0; i < message.records_size(); i++)
+		{
+			data.emplace_back();
+			ok &= data.back().load(message.records(i));
+		}
+
+		return ok;
+	}
+
+	bool TrendArchive::save(QString mapAppSignalId, Proto::TrendArchive* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		//message->set_app_signal_id(mapAppSignalId.toStdString());
+		message->set_app_signal_id(mapAppSignalId.toStdString());
+
+		for (std::pair<TimeStamp, std::shared_ptr<OneHourData>> p : m_hours)
+		{
+			ok &= p.second->save(p.first, message->add_hours());
+		}
+
+		return ok;
+	}
+
+	bool TrendArchive::load(const Proto::TrendArchive& message)
+	{
+		bool ok = true;
+
+		appSignalId = QString::fromStdString(message.app_signal_id());
+
+		m_hours.clear();
+		for (int i = 0; i < message.hours_size(); i++)
+		{
+			const ::Proto::TrendArchiveHour& messageHour = message.hours(i);
+
+			TimeStamp ts(messageHour.time_stamp());
+
+			auto hodit = m_hours.emplace(ts, std::make_shared<OneHourData>());
+
+			std::shared_ptr<OneHourData>& hourData = hodit.first->second;
+			ok &= hourData->load(messageHour);
+		}
+
+		return ok;
+	}
 
 	TrendSignalParam::TrendSignalParam()
 	{
@@ -13,11 +134,11 @@ namespace TrendLib
 		m_caption(appSignal.caption()),
 		m_equipmentId(appSignal.equipmentId()),
 		m_type(appSignal.type()),
+		m_unit(appSignal.unit()),
 		m_highLimit(appSignal.highEngineeringUnits()),
 		m_lowLimit(appSignal.lowEngineeringUnits()),
 		m_viewHighLimit(appSignal.highEngineeringUnits()),
-		m_viewLowLimit(appSignal.lowEngineeringUnits()),
-		m_unit(appSignal.unit())
+		m_viewLowLimit(appSignal.lowEngineeringUnits())
 	{
 	}
 
@@ -30,11 +151,57 @@ namespace TrendLib
 		result.setCaption(m_caption);
 		result.setEquipmentId(m_equipmentId);
 		result.setType(m_type);
+		result.setUnit(m_unit);
 		result.setHighEngineeringUnits(m_highLimit);
 		result.setLowEngineeringUnits(m_lowLimit);
-		result.setUnit(m_unit);
 
 		return result;
+	}
+
+	bool TrendSignalParam::save(::Proto::TrendSignalParam* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		message->set_signal_id(m_signalId.toStdString());
+		message->set_app_signal_id(m_appSignalId.toStdString());
+		message->set_caption(m_caption.toStdString());
+		message->set_equipment_id(m_equipmentId.toStdString());
+
+		message->set_type(static_cast<int>(m_type));
+		message->set_unit(m_unit.toStdString());
+
+		message->set_high_limit(m_highLimit);
+		message->set_low_limit(m_lowLimit);
+		message->set_view_high_limit(m_viewHighLimit);
+		message->set_view_low_limit(m_viewLowLimit);
+
+		message->set_color(m_color.rgb());
+
+		return true;
+	}
+
+	bool TrendSignalParam::load(const ::Proto::TrendSignalParam& message)
+	{
+		m_signalId = QString::fromStdString(message.signal_id());
+		m_appSignalId = QString::fromStdString(message.app_signal_id());
+		m_caption = QString::fromStdString(message.caption());
+		m_equipmentId = QString::fromStdString(message.equipment_id());
+
+		m_type = static_cast<E::SignalType>(message.type());
+		m_unit = QString::fromStdString(message.unit());
+
+		m_highLimit = message.high_limit();
+		m_lowLimit = message.low_limit();
+		m_viewHighLimit = message.view_high_limit();
+		m_viewLowLimit = message.view_low_limit();
+
+		m_color = QColor::fromRgb(message.color());
+
+		return true;
 	}
 
 	QString TrendSignalParam::signalId() const
@@ -97,6 +264,16 @@ namespace TrendLib
 		m_type = value;
 	}
 
+	QString TrendSignalParam::unit() const
+	{
+		return m_unit;
+	}
+
+	void TrendSignalParam::setUnit(const QString& value)
+	{
+		m_unit = value;
+	}
+
 	double TrendSignalParam::highLimit() const
 	{
 		return m_highLimit;
@@ -137,16 +314,6 @@ namespace TrendLib
 		m_viewLowLimit = value;
 	}
 
-	QString TrendSignalParam::unit() const
-	{
-		return m_unit;
-	}
-
-	void TrendSignalParam::setUnit(const QString& value)
-	{
-		m_unit = value;
-	}
-
 	QColor TrendSignalParam::color() const
 	{
 		return m_color;
@@ -184,6 +351,127 @@ namespace TrendLib
 	//
 	TrendSignalSet::TrendSignalSet()
 	{
+		static_assert(std::is_trivial<TrendStateItem>::value, "TrendStateItem must be trivial as it is stored in bytearray");
+	}
+
+	bool TrendSignalSet::save(::Proto::TrendSignalSet* message) const
+	{
+		if (message == nullptr)
+		{
+			assert(message);
+			return false;
+		}
+
+		bool ok = true;
+
+		// Scope for locking m_paramMutex
+		//
+		{
+			QMutexLocker l(&m_paramMutex);
+			for (const TrendSignalParam& p : m_signalParams)
+			{
+				ok &= p.save(message->add_signal_params());
+			}
+		}
+
+		// Scope for locking m_archiveMutex
+		//
+		{
+			QMutexLocker l(&m_archiveMutex);
+
+			for (const std::pair<QString, TrendArchive>& p : m_archiveLocalTime)
+			{
+				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_local_time();
+				ok &= p.second.save(p.first, messageTrenaArchive);
+			}
+
+			for (const std::pair<QString, TrendArchive>& p : m_archiveSystemTime)
+			{
+				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_system_time();
+				ok &= p.second.save(p.first, messageTrenaArchive);
+			}
+
+			for (const std::pair<QString, TrendArchive>& p : m_archivePlantTime)
+			{
+				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_plant_time();
+				ok &= p.second.save(p.first, messageTrenaArchive);
+			}
+		}
+
+		return ok;
+	}
+
+	bool TrendSignalSet::load(const ::Proto::TrendSignalSet& message)
+	{
+		bool ok = true;
+
+		// Scope for locking m_paramMutex
+		//
+		{
+			QMutexLocker l(&m_paramMutex);
+
+			m_signalParams.clear();
+			for (int i = 0; i < message.signal_params_size(); i++)
+			{
+				TrendSignalParam tsp;
+
+				bool loadTspOk = tsp.load(message.signal_params(i));
+				ok &= loadTspOk;
+
+				if (loadTspOk == true)
+				{
+					m_signalParams.push_back(tsp);
+				}
+			}
+		}
+
+		// Scope for locking m_archiveMutex
+		//
+		{
+			QMutexLocker l(&m_archiveMutex);
+
+			m_archiveLocalTime.clear();
+			m_archiveSystemTime.clear();
+			m_archivePlantTime.clear();
+
+			for (int i = 0; i < message.archive_local_time_size(); i++)
+			{
+				const ::Proto::TrendArchive& messageArchive = message.archive_local_time(i);
+
+				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
+
+				auto itp = m_archiveLocalTime.emplace(appSingalId, TrendArchive());
+
+				TrendArchive& ta = itp.first->second;
+				ok &= ta.load(messageArchive);
+			}
+
+			for (int i = 0; i < message.archive_system_time_size(); i++)
+			{
+				const ::Proto::TrendArchive& messageArchive = message.archive_system_time(i);
+
+				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
+
+				auto itp = m_archiveSystemTime.emplace(appSingalId, TrendArchive());
+
+				TrendArchive& ta = itp.first->second;
+				ok &= ta.load(messageArchive);
+			}
+
+			for (int i = 0; i < message.archive_plant_time_size(); i++)
+			{
+				const ::Proto::TrendArchive& messageArchive = message.archive_plant_time(i);
+
+				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
+
+				auto itp = m_archivePlantTime.emplace(appSingalId, TrendArchive());
+
+				TrendArchive& ta = itp.first->second;
+				ok &= ta.load(messageArchive);
+			}
+		}
+
+		return ok;
 	}
 
 	bool TrendSignalSet::addSignal(const TrendSignalParam& signal)
@@ -319,6 +607,38 @@ namespace TrendLib
 		}
 
 		return result;
+	}
+
+	int TrendSignalSet::discretesSignalsCount() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		int count = 0;
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (s.isDiscrete() == true)
+			{
+				count ++;
+			}
+		}
+
+		return count;
+	}
+
+	int TrendSignalSet::analogSignalsCount() const
+	{
+		QMutexLocker locker(&m_paramMutex);
+
+		int count = 0;
+		for (const TrendSignalParam& s : m_signalParams)
+		{
+			if (s.isAnalog() == true)
+			{
+				count ++;
+			}
+		}
+
+		return count;
 	}
 
 	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const

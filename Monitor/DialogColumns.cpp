@@ -13,6 +13,12 @@ DialogColumns::DialogColumns(QWidget *parent, const QStringList& columnsNames, c
 
 	for (int i : columnsIndexes)
 	{
+        if (i >= static_cast<int>(columnsNames.size()))
+        {
+            assert(false);
+            continue;
+        }
+
 		QListWidgetItem* item = new QListWidgetItem(columnsNames.at(i));
 		item->setData(Qt::UserRole, i);
 

@@ -67,7 +67,7 @@ public:
 
 	enum class MaskType
 	{
-		All,
+        All = 0,
 		AppSignalId,
 		CustomAppSignalId,
 		EquipmentId

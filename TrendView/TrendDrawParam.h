@@ -2,16 +2,22 @@
 #define DRAWPARAM_H
 #include "../lib/TimeStamp.h"
 
+namespace Proto
+{
+	class TrendParam;
+}
+
+
 namespace TrendLib
 {
-	enum class TrendView
+	enum class TrendViewMode
 	{
 		Separated,
 		Overlapped
 	};
 }
 
-Q_DECLARE_METATYPE(TrendLib::TrendView)
+Q_DECLARE_METATYPE(TrendLib::TrendViewMode)
 
 namespace TrendLib
 {
@@ -21,6 +27,10 @@ namespace TrendLib
 		TrendDrawParam();
 
 	public:
+		bool save(::Proto::TrendParam* message) const;
+		bool load(const ::Proto::TrendParam& message);
+
+	public:
 		QRectF rect() const;
 		void setRect(const QRectF& value);
 
@@ -28,8 +38,8 @@ namespace TrendLib
 		int dpiY() const;
 		void setDpi(int dpiX, int dpiY);
 
-		TrendView view() const;
-		void setView(TrendView value);
+		TrendViewMode viewMode() const;
+		void setViewMode(TrendViewMode value);
 
 		TimeType timeType() const;
 		void setTimeType(TimeType value);
@@ -66,7 +76,7 @@ namespace TrendLib
 		int m_dpiX = 96;
 		int m_dpiY = 96;
 
-		TrendView m_view = TrendView::Separated;
+		TrendViewMode m_viewMode = TrendViewMode::Separated;
 		TimeType m_timeType = TimeType::Local;
 		int m_laneCount = 1;
 
@@ -77,7 +87,6 @@ namespace TrendLib
 		qint64 m_duration = 1_hour;
 
 		int m_highlightRullerIndex = -1;
-
 		double m_cosmeticPenWidth = 0;
 
 		mutable std::vector<std::pair<QString, QRectF>> m_signalDescriptionRect;		// Keeps signal description Rect, which is filled while draw trend, in inches.

@@ -11,7 +11,7 @@ class MonitorTrends
 public:
 	static std::vector<QString> getTrendsList();
 	static bool activateTrendWindow(QString trendName);
-	static bool startTrendApp(MonitorConfigController* configController, QWidget* parent);
+	static bool startTrendApp(MonitorConfigController* configController, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
 
 	static void registerTrendWindow(QString name, MonitorTrendsWidget* window);
 	static void unregisterTrendWindow(QString name);

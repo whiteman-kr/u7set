@@ -180,7 +180,7 @@ function module_bvb15_1_statistics(builder, module, confCollection, log, subsyst
         var LMNumber = module.jsPropertyInt("LMNumber");
         var frameSize = logicModuleDescription.FlashMemory_ConfigFrameSize;
         var frameCount = logicModuleDescription.FlashMemory_ConfigFrameCount;
-        var uartId = 0x0102; // Check it !!!!
+        var uartId = 0x1604; // Check it !!!!
         var ssKeyValue = subsystemStorage.ssKey(subSysID);
         if (ssKeyValue == -1) {
             log.errCFG3001(subSysID, module.jsPropertyString("EquipmentID"));
@@ -230,7 +230,7 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
         log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 78, 65535, module.jsPropertyString("EquipmentID"));
         return false;
     }
-    var uartId = 0x0102;
+    var uartId = 0x1604;
     var appWordsCount = module.jsPropertyInt("AppLANDataSize");
     var diagWordsCount = logicModuleDescription.Memory_TxDiagDataSize;
     var ssKeyValue = subsystemStorage.ssKey(subSysID);
@@ -240,8 +240,8 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
     }
     var maxLMNumber = 62; // Can be changed!
     var configStartFrames = 2;
-    var configFrameCount = 19; // number of frames in each configuration
-    var ioModulesMaxCount = 14;
+    var configFrameCount = 4; // number of frames in each configuration
+    //var ioModulesMaxCount: number = 14;
     if (LMNumber < 1 || LMNumber > maxLMNumber) {
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
