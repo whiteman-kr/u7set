@@ -16,7 +16,7 @@ class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
 	ArchWriteThreadWorker(const HostAddressPort& dbHost,
-						  Archive& archive,
+						  ArchiveShared archive,
 						  AppSignalStatesQueue& saveStatesQueue,
 						  CircularLoggerShared logger);
 
@@ -38,12 +38,12 @@ private:
 
 	bool getExistingTables(QHash<QString, QString>& existingTables);
 
-	bool createTable(const QString& tableName, Archive::TableType tableType);
+	bool createTable(const QString& tableName);
 
 	void disconnectFromDb();
 
 	void writeStatesToArchive(bool writeNow);
-	void appendToArray(const SimpleAppSignalState& state, bool isAnalog, QString& arrayStr);
+	void appendToArray(const SimpleAppSignalState& state, QString& arrayStr);
 
 	bool saveAppSignalStateToArchive(SimpleAppSignalState& state, bool isAnalogSignal);
 	bool saveAppSignalStatesArrayToArchive(const QString& arrayStr);
@@ -57,7 +57,7 @@ private slots:
 private:
 	HostAddressPort m_dbHost;
 
-	Archive& m_archive;
+	ArchiveShared m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
 
@@ -67,6 +67,8 @@ private:
 	QTimer m_timer;
 
 	QSqlDatabase m_db;				// project archive database
+
+	bool m_firstState = true;
 
 	static const StringPair m_upgradeFiles[];
 
@@ -88,7 +90,7 @@ class ArchWriteThread : public SimpleThread
 {
 public:
 	ArchWriteThread(const HostAddressPort& dbHost,
-					Archive& archive,
+					ArchiveShared archive,
 					AppSignalStatesQueue& saveStatesQueue,
 					CircularLoggerShared logger);
 };

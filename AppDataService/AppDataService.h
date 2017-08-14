@@ -81,7 +81,6 @@ private:
 
 	void resizeAppSignalEventsQueue();
 
-
 private:
 	static const char* const SETTING_EQUIPMENT_ID;
 	static const char* const SETTING_CFG_SERVICE_IP1;

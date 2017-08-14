@@ -36,24 +36,28 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void clearConfiguration();
-	void applyNewConfiguration();
+	void runAllThreads();
+	void stopAllThread();
+
+	void createArchive();
+	void deleteArchive();
 
 	void runArchWriteThread();
-	void runTcpAppDataServerThread();
-	void runTcpArchRequestsServerThread();
-	void runArchRequestThread();
-
 	void stopArchWriteThread();
-	void stopTcpDataServerThread();
+
+	void runTcpAppDataServerThread();
+	void stopTcpAppDataServerThread();
+
+	void runTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
+
+	void runArchRequestThread();
 	void stopArchRequestThread();
 
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
 
 	bool initArchSignalsMap(const QByteArray& fileData);
-
 
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -85,5 +89,5 @@ private:
 
 	AppSignalStatesQueue m_saveStatesQueue;
 
-	Archive m_archive;
+	ArchiveShared m_archive;
 };

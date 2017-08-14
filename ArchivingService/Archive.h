@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QHash>
+#include <QMutex>
+#include <QSqlDatabase>
 
 #include "../lib/Hash.h"
+#include "../lib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/CircularLogger.h"
 
@@ -22,17 +25,27 @@ struct ArchSignal
 class Archive
 {
 public:
-	enum TableType
+	static const int TIME_1S = 1000;								// 1000 millisecond
+	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
+
+	static const char* FIELD_PLANT_TIME;
+	static const char* FIELD_SYSTEM_TIME;
+	static const char* FIELD_ARCH_ID;
+	static const char* FIELD_VALUE;
+	static const char* FIELD_FLAGS;
+
+	enum DbType
 	{
-		LongTerm,
-		ShortTerm
+		Postgres,
+		WriteArchive,
+		ReadArchive
 	};
 
 public:
-	Archive(CircularLoggerShared logger);
+	Archive(const QString& projectID, const HostAddressPort& dbHost, CircularLoggerShared logger);
+	~Archive();
 
-	void clear();
-	void setProject(const QString& projectID) { m_projectID = projectID; }
+	bool openDatabase(DbType dbType, QSqlDatabase& destDb);
 
 	void initArchSignals(int count);
 	void appendArchSignal(const QString& appSignalID, const ArchSignal& archSignal);
@@ -42,8 +55,9 @@ public:
 	bool canReadWriteSignal(Hash signalHash);
 	void setCanReadWriteSignal(Hash signalHash, bool canWrite);
 
-	QString dbName();
-	QString getTableName(Hash signalHash, Archive::TableType tableType);
+	QString postgresDatabaseName();
+	QString archiveDatabaseName();
+	static QString getTableName(Hash signalHash);
 
 	const QHash<Hash, ArchSignal>& archSignals() const { return m_archSignals; }
 
@@ -54,16 +68,27 @@ public:
 
 	static qint64 localTimeOffsetFromUtc();
 
+	static QString getCmpField(TimeType timeType);
+
 	void setSignalInitialized(Hash signalHash, bool initilaized);
+
+private:
+	void clear();
+
+	QSqlDatabase getDatabase(DbType dbType);
+	void removeDatabases();
 
 private:
 	static const char* ARCH_DB_PREFIX;
 	static const char* LONG_TERM_TABLE_PREFIX;
 	static const char* SHORT_TERM_TABLE_PREFIX;
 
-
 private:
+	HostAddressPort m_dbHost;
 	CircularLoggerShared m_logger;
+
+	QString m_dbUser;
+	QString m_dbPassword;
 
 	QString m_projectID;
 
@@ -72,4 +97,8 @@ private:
 	QHash<QString, QString> m_existingTables;
 
 	QHash<Hash, QString> m_signalIDs;
+
+	QMutex m_dbMutex;
 };
+
+typedef std::shared_ptr<Archive> ArchiveShared;
