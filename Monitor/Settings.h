@@ -75,7 +75,7 @@ public:
 	QPoint m_signalSnapshotPos;
 	QByteArray m_signalSnapshotGeometry;
 	QVector<int> m_signalSnapshotColumns;
-	int m_signalSnapshotSignalType = 0;
+    SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
 	QStringList m_signalSnapshotMaskList;
 	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
 	int m_signalSnapshotSortColumn = 0;
