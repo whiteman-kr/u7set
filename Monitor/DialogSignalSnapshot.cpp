@@ -186,10 +186,22 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	}
 	else
 	{
-		m_columnsIndexes.clear();
-		m_columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
+        std::vector<int> columnsIndexes;
 
-		m_columnsIndexes = theSettings.m_signalSnapshotColumns.toStdVector();
+        columnsIndexes.clear();
+        columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
+        columnsIndexes = theSettings.m_signalSnapshotColumns.toStdVector();
+
+        m_columnsIndexes.clear();
+        m_columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
+
+        for (int c : columnsIndexes)
+        {
+            if (c < static_cast<int>(m_columnsNames.size()))
+            {
+                m_columnsIndexes.push_back(c);
+            }
+        }
 	}
 
 	// Copy signals to model
@@ -448,7 +460,7 @@ void SignalSnapshotModel::updateStates(int from, int to)
 
 	if (count != requestHashes.size() || count != requestStates.size())
 	{
-		assert(false);
+        //assert(false);
 		return;
 	}
 
@@ -698,7 +710,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			}
 
 		default:
-			assert(false);
+            return QString();
 		}
 
 		return QVariant();
@@ -718,6 +730,12 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 		}
 
 		int displayIndex = m_columnsIndexes[section];
+
+        if (displayIndex < 0 || displayIndex >= static_cast<int>(m_columnsNames.size()))
+        {
+            return "???";
+        }
+
 		return m_columnsNames.at(displayIndex);
 	}
 
@@ -754,14 +772,14 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	// Table view setup
 	//
 
-	ui->tableView->setModel(m_model);
-	ui->tableView->verticalHeader()->hide();
+    ui->tableView->setModel(m_model);
+    ui->tableView->verticalHeader()->hide();
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
 	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
-	ui->tableView->setSortingEnabled(true);
+    ui->tableView->setSortingEnabled(true);
 
 	int fontHeight = fontMetrics().height() + 4;
 
@@ -783,7 +801,16 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->typeCombo->addItem(tr("Analog Output signals"), static_cast<int>(SignalSnapshotModel::SignalType::AnalogOutput));
 	ui->typeCombo->addItem(tr("Discrete Input signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteInput));
 	ui->typeCombo->addItem(tr("Discrete Output signals"), static_cast<int>(SignalSnapshotModel::SignalType::DiscreteOutput));
-	ui->typeCombo->setCurrentIndex(theSettings.m_signalSnapshotSignalType);
+
+    if (theSettings.m_signalSnapshotSignalType >= SignalSnapshotModel::SignalType::All && theSettings.m_signalSnapshotSignalType < SignalSnapshotModel::SignalType::DiscreteOutput)
+    {
+        ui->typeCombo->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotSignalType));
+    }
+    else
+    {
+        ui->typeCombo->setCurrentIndex(0);
+    }
+
 	ui->typeCombo->blockSignals(false);
 
 	// Schemas setup
@@ -804,7 +831,14 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->comboMaskType->addItem("AppSignalID");
 	ui->comboMaskType->addItem("CustomAppSignalID");
 	ui->comboMaskType->addItem("EquipmentID");
-	ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
+    if (theSettings.m_signalSnapshotMaskType >= SignalSnapshotModel::MaskType::All && theSettings.m_signalSnapshotMaskType <= SignalSnapshotModel::MaskType::EquipmentId)
+    {
+        ui->comboMaskType->setCurrentIndex(static_cast<int>(theSettings.m_signalSnapshotMaskType));
+    }
+    else
+    {
+        ui->comboMaskType->setCurrentIndex(0);
+    }
 	ui->comboMaskType->blockSignals(false);
 
 	connect(ui->editMask, &QLineEdit::textEdited, [this](){m_completer->complete();});
@@ -889,7 +923,6 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 	Q_UNUSED(result);
 
 	theSettings.m_signalSnapshotColumns = QVector<int>::fromStdVector(m_model->columnsIndexes());
-	theSettings.m_signalSnapshotSignalType = ui->typeCombo->currentIndex();
 
 	// Save window position
 	//
@@ -1058,9 +1091,8 @@ void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
 
 void DialogSignalSnapshot::on_typeCombo_currentIndexChanged(int index)
 {
-	Q_UNUSED(index);
-
-	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(ui->typeCombo->currentData().toInt()));
+    m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(index));
+    theSettings.m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(index);
 
 	fillSignals();
 }
