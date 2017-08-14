@@ -38,6 +38,15 @@ namespace TrendLib
 		{
 		}
 
+		void clear()
+		{
+			system = 0;
+			local = 0;
+			plant = 0;
+			flags = 0;
+			value = 0;
+		}
+
 		bool isValid() const
 		{
 			return (flags & 0x000001);

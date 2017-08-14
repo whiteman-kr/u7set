@@ -1195,6 +1195,11 @@ static const int recomendedSize = 8192;
 		double dpiX = static_cast<double>(drawParam.dpiX());
 		double dpiY = static_cast<double>(drawParam.dpiY());
 
+		TimeType timeType = drawParam.timeType();
+
+		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
+		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
+
 		// Prepare drawing resources
 		//
 		QPen rullerPen(QBrush(qRgb(0x00, 0x00, 0xC0)), drawParam.cosmeticPenWidth(), Qt::PenStyle::DashLine);
@@ -1225,6 +1230,8 @@ static const int recomendedSize = 8192;
 			QRectF laneRect = calcLaneRect(laneIndex, laneDrawParam);
 			QRectF trendAreaRect = calcTrendArea(laneRect, laneDrawParam);
 
+			calcSignalRects(trendAreaRect, drawParam, &discretes, &analogs);
+
 			std::vector<TrendRuller> laneRullers = rullerSet().rullers();
 			std::sort(laneRullers.begin(), laneRullers.end(),
 				[](const TrendRuller& r1, const TrendRuller& r2)
@@ -1248,24 +1255,24 @@ static const int recomendedSize = 8192;
 
 			for (size_t i = 0; i < laneRullers.size(); i++)
 			{
-				const TrendRuller& r = laneRullers[i];
+				const TrendRuller& ruller = laneRullers[i];
 
-				if (r.timeStamp() < startLaneTime)
+				if (ruller.timeStamp() < startLaneTime)
 				{
 					continue;
 				}
 
-				double x = trendAreaRect.left() + k * static_cast<double>(r.timeStamp().timeStamp - startLaneTime.timeStamp);
+				double x = trendAreaRect.left() + k * static_cast<double>(ruller.timeStamp().timeStamp - startLaneTime.timeStamp);
 				x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
 
-				if (r.timeStamp() <= finishLaneTime)
+				if (ruller.timeStamp() <= finishLaneTime)
 				{
 					painter->setPen(rullerPen);
 
 					painter->drawLine(QPointF(x, trendAreaRect.top()),
 									  QPointF(x, trendAreaRect.bottom()));
 
-					if (r.timeStamp() == selectedRullerTime)
+					if (ruller.timeStamp() == selectedRullerTime)
 					{
 						double xx = static_cast<double>(x * dpiX + 1) / dpiX;
 
@@ -1275,7 +1282,7 @@ static const int recomendedSize = 8192;
 
 					// Draw ruller timestamp
 					//
-					QString text = r.timeStamp().toDateTime().toString(" hh:mm:ss.zzz ");
+					QString text = ruller.timeStamp().toDateTime().toString(" hh:mm:ss.zzz ");
 					QRectF textRect(x - timeStampBoundRect.width() / 2.0,
 									rullerTextTop,
 									timeStampBoundRect.width(),
@@ -1303,29 +1310,29 @@ static const int recomendedSize = 8192;
 						prevRullerX += timeStampBoundRect.width() / 2.0;
 					}
 
-					x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
-					if (r.timeStamp() > finishLaneTime)
+					double xx = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Ajust x to look nice (not blurred)
+					if (ruller.timeStamp() > finishLaneTime)
 					{
-						x = trendAreaRect.right();
+						xx = trendAreaRect.right();
 					}
 					else
 					{
-						x -= timeStampBoundRect.width() / 2.0;
+						xx -= timeStampBoundRect.width() / 2.0;
 					}
 
 					double y = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0;
 					y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY;		// Ajust x to look nice (not blurred)
 
-					if (prevRullerX < x)
+					if (prevRullerX < xx)
 					{
 						painter->setPen(distancePen);
 						painter->drawLine(QPointF(prevRullerX, y),
-										  QPointF(x, y));
+										  QPointF(xx, y));
 					}
 
 					// Draw distance between rullers
 					//
-					qint64 rullersDistance = r.timeStamp().timeStamp - prevRuller.timeStamp().timeStamp;
+					qint64 rullersDistance = ruller.timeStamp().timeStamp - prevRuller.timeStamp().timeStamp;
 					int msecs = rullersDistance % 1000_ms;
 					int secs = (rullersDistance / 1_sec) % 60;
 					int mins = (rullersDistance / 1_min) % 60;
@@ -1346,10 +1353,10 @@ static const int recomendedSize = 8192;
 					QRectF distanceTextBoundRect;
 					drawText(painter, distanceText, distanceTextBoundRect, drawParam, Qt::AlignCenter, &distanceTextBoundRect);		// Get bound rect
 
-					if (distanceTextBoundRect.width() + distanceTextBoundRect.height() / 2 < x - prevRullerX)
+					if (distanceTextBoundRect.width() + distanceTextBoundRect.height() / 2 < xx - prevRullerX)
 					{
 						QRectF distanceTextRect;
-						distanceTextRect.setLeft(prevRullerX + (x - prevRullerX) / 2.0 - distanceTextBoundRect.width() / 2.0);
+						distanceTextRect.setLeft(prevRullerX + (xx - prevRullerX) / 2.0 - distanceTextBoundRect.width() / 2.0);
 						distanceTextRect.setTop(rullerTextTop);
 						distanceTextRect.setWidth(distanceTextBoundRect.width());
 						distanceTextRect.setHeight(distanceTextBoundRect.height());
@@ -1359,14 +1366,133 @@ static const int recomendedSize = 8192;
 					}
 				}
 
-				if (r.timeStamp() > finishLaneTime)
+				if (ruller.timeStamp() > finishLaneTime)
 				{
 					// Break here, not in the begining of the loop
 					// We need to draw this (of lane) ruller, to draw distance to the perv ruller
 					//
 					break;
 				}
-			}
+
+				// Draw signals values on the ruller
+				//
+				if (ruller.timeStamp() >= startLaneTime &&
+					ruller.timeStamp() <= finishLaneTime)
+				{
+					QBrush fillRectBrush(drawParam.backColor2nd());
+
+					// Join two vectors discretes + analogs
+					// x: calculated pos for ruller
+					//
+					std::vector<TrendSignalParam> allSignals;
+					allSignals.reserve(discretes.size() + analogs.size());
+					allSignals.insert(allSignals.end(), discretes.begin(), discretes.end());
+					allSignals.insert(allSignals.end(), analogs.begin(), analogs.end());
+
+					for (const TrendSignalParam& trendSignal : allSignals)
+					{
+						QRectF signalRect = trendSignal.tempDrawRect();
+
+						if (signalRect.height() <= DBL_MIN)
+						{
+							continue;
+						}
+
+						TrendStateItem state = rullerSignalState(ruller, trendSignal.appSignalId(), timeType);
+
+						QString str;
+						if (state.isValid() == false)
+						{
+							str = "?";
+						}
+						else
+						{
+							str = QString::number(state.value, 'g');
+						}
+
+						double highLimit = qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
+						double lowLimit = qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
+
+						if (fabs(highLimit - lowLimit) <= DBL_MIN)
+						{
+							continue;
+						}
+
+						double k = (highLimit - lowLimit) / signalRect.height();
+						double y = (state.value - lowLimit) / k;
+
+						// Get text bounding rect
+						//
+						QRectF boundRect;
+						drawText(painter, str, boundRect, drawParam, Qt::AlignRight | Qt::AlignBottom, &boundRect);
+
+						// Calc pos and draw filled rect and text
+						//
+						QRectF drawRect;
+						if (state.isValid() == false)
+						{
+							// Draw in the middle of signal rect
+							//
+							drawRect.setLeft(x + 2.0 / dpiX);
+							drawRect.setTop(signalRect.top() + signalRect.height() / 2.0 - boundRect.height() / 2.0);
+
+							drawRect.setHeight(boundRect.height() * 1.1);
+							drawRect.setWidth(boundRect.width() * 2);
+						}
+						else
+						{
+							if (trendSignal.isAnalog() == true)
+							{
+								drawRect.setLeft(x + 2.0 / dpiX);
+								drawRect.setTop(signalRect.bottom() - y - boundRect.height() / 2.0);
+
+								drawRect.setHeight(boundRect.height() * 1.1);
+								drawRect.setWidth(boundRect.width() * 1.2);
+
+								if (drawRect.top() < signalRect.top())
+								{
+									drawRect.moveTop(signalRect.top());
+								}
+
+								if (drawRect.bottom() > signalRect.bottom())
+								{
+									drawRect.setTop(signalRect.bottom() - drawRect.height());
+								}
+							}
+							else
+							{
+								drawRect.setLeft(x + 2.0 / dpiX);
+
+								if (state.value <= DBL_MIN)
+								{
+									// 0
+									//
+									drawRect.setTop(signalRect.bottom() - boundRect.height() * 1.6);
+								}
+								else
+								{
+									// 1
+									//
+									drawRect.setTop(signalRect.top());
+								}
+
+								drawRect.setHeight(boundRect.height());
+								drawRect.setWidth(boundRect.width() * 1.2);
+							}
+						}
+
+						drawRect = signalRect.intersected(drawRect);
+
+						if (drawRect.isEmpty() == false)
+						{
+							painter->fillRect(drawRect, fillRectBrush);
+
+							painter->setPen(trendSignal.color());
+							drawText(painter, str, drawRect, drawParam, Qt::AlignCenter);
+						}
+					}	// End of draw signal values on the ruller
+				}
+			}	// for (size_t i = 0; i < laneRullers.size(); i++)
 		}
 
 		// Reset clipping
@@ -1374,6 +1500,62 @@ static const int recomendedSize = 8192;
 		painter->setClipping(false);
 
 		return;
+	}
+
+	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, TimeType timeType) const
+	{
+		TimeStamp rullerTime = ruller.timeStamp();
+
+		// Getting data whitout requesting if it is not present
+		//
+		std::list<std::shared_ptr<OneHourData>> signalData;
+		signalSet().getExistingTrendData(appSignalId, rullerTime.toDateTime(), rullerTime.toDateTime(), timeType, &signalData);
+
+		// Look for state at point ruller.timeStamp
+		//
+		TrendStateItem lastState;
+		lastState.clear();
+
+		for (const std::shared_ptr<OneHourData>& h : signalData)
+		{
+			const std::vector<TrendStateRecord>& records = h->data;
+
+			for (const TrendStateRecord& record : records)
+			{
+				const std::vector<TrendStateItem>& states = record.states;
+
+				if (states.back().getTime(timeType) < rullerTime)
+				{
+					lastState = states.back();
+					continue;	// to next record
+				}
+
+				for (const TrendStateItem& state : states)
+				{
+					TimeStamp ts = state.getTime(timeType);
+					if (ts >= rullerTime)
+					{
+						// Got it, we need to return prev point.
+						// if currnet state not valid, then we assume last state is not valid also
+						//
+						if (state.isValid() == false)
+						{
+							return state;
+						}
+						else
+						{
+							return lastState;
+						}
+					}
+
+					lastState = state;
+				}
+			}
+		}
+
+		TrendStateItem nonValid;
+		nonValid.clear();
+		return nonValid;
 	}
 
 	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY)
