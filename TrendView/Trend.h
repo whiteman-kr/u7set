@@ -81,7 +81,7 @@ namespace TrendLib
 
 		static QRectF calcLaneRect(int laneIndex, const TrendDrawParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam) const;
-		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, int analogSignalCount);
+		static QRectF calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, size_t analogSignalCount);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
 
 		static QRect inchRectToPixelRect(const QRectF& rect, const TrendDrawParam& drawParam);
@@ -102,7 +102,7 @@ namespace TrendLib
 			OnRuller,			// Over ruller
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, QString* outSignalId) const;
+		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rullerIndex, TrendSignalParam* outSignal) const;
 
 	public:
 		static double timeToScaledPixel(const TimeStamp& time, const QRectF& rect, const TimeStamp& startTime, qint64 duration);

@@ -429,9 +429,9 @@ namespace TrendLib
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
-		QString outSignalId;
+		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
+		Trend::MouseOn mouseOn = mouseIsOver(event->pos(), &laneIndex, &timeStamp, &rullerIndex, &outSignal);
 
 		if (m_mouseAction == MouseAction::SelectViewStart &&
 			(mouseOn == Trend::MouseOn::InsideTrendArea ||
@@ -488,19 +488,22 @@ namespace TrendLib
 
 			if (mouseOn == Trend::MouseOn::OnSignalDescription)
 			{
-				if (outSignalId.isEmpty() == true)
+				if (outSignal.appSignalId().isEmpty() == true)
 				{
-					assert(outSignalId.isEmpty() == false);
+					assert(outSignal.appSignalId().isEmpty() == false);
 					return;
 				}
 
-				emit showSignalProperties(outSignalId);
+				emit showSignalProperties(outSignal.appSignalId());
 			}
 
 			if (mouseOn == Trend::MouseOn::InsideTrendArea)
 			{
 				m_mouseScrollInitialTime = m_drawParam.startTimeStamp();
 				m_mouseScrollInitialMousePos = event->pos();
+				m_mouseScrollSignal = outSignal;								// tempDrawRect already calculated
+
+				m_mouseScrollAnalogSignals = signalSet().analogSignals();		// tempDrawRect is not calculated
 
 				m_mouseAction = MouseAction::Scroll;
 				this->grabMouse();
@@ -571,9 +574,9 @@ namespace TrendLib
 			int laneIndex = -1;
 			int rullerIndex = -1;
 			TimeStamp timeStamp;
-			QString onSignalId;
+			TrendSignalParam onSignal;
 
-			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rullerIndex, &onSignalId);
+			Trend::MouseOn mouseOn = m_trend.mouseIsOver(event->pos(), m_pixmapDrawParam, &laneIndex, &timeStamp, &rullerIndex, &onSignal);
 
 			Qt::CursorShape newCursorShape = Qt::ArrowCursor;
 
@@ -616,7 +619,7 @@ namespace TrendLib
 				break;
 			case MouseAction::Scroll:
 				{
-					// Scroll area with a mouse mode
+					// Scroll time with a mouse mode
 					//
 					QRectF laneRect = m_trend.calcLaneRect(0, m_drawParam);
 					QRectF trenAreaRect = m_trend.calcTrendArea(laneRect, m_drawParam);	// TrendArea in inches
@@ -628,6 +631,50 @@ namespace TrendLib
 
 					TimeStamp ts(m_mouseScrollInitialTime.timeStamp + static_cast<qint64>(mouseOffset.x() * coefx));
 					m_drawParam.setStartTimeStamp(ts);
+
+					// Scroll vertical area
+					//
+					if (event->modifiers().testFlag(Qt::AltModifier) == true)
+					{
+						std::vector<TrendSignalParam> analogsToShift;
+
+						if (m_drawParam.viewMode() == TrendViewMode::Separated)
+						{
+							analogsToShift.push_back(m_mouseScrollSignal);		// signalRect is calculated
+						}
+						else
+						{
+							analogsToShift = m_mouseScrollAnalogSignals;		// signalRect is not calculated yet
+							auto discretes = signalSet().discreteSignals();
+
+							Trend::calcSignalRects(trenAreaRect, m_drawParam, &discretes, &analogsToShift);
+						}
+
+						for (const TrendSignalParam& trendSignal : analogsToShift)
+						{
+							double highLimit = qMax(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
+							double lowLimit = qMin(trendSignal.viewHighLimit(), trendSignal.viewLowLimit());
+
+							QRectF signalRect = trendSignal.tempDrawRect();
+
+							if (fabs(highLimit - lowLimit) > DBL_MIN &&
+								signalRect.height() > DBL_MIN)
+							{
+								double dy = mouseOffset.y() / m_drawParam.dpiY();
+								double k = (highLimit - lowLimit) / signalRect.height();
+
+								highLimit -= dy * k;
+								lowLimit -= dy * k;
+
+								TrendSignalParam tsp = trendSignal;
+
+								tsp.setViewHighLimit(highLimit);
+								tsp.setViewLowLimit(lowLimit);
+
+								signalSet().setSignalParam(tsp);
+							}
+						}
+					}
 
 					updateWidget();
 
@@ -678,9 +725,9 @@ namespace TrendLib
 		return;
 	}
 
-	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, QString* outSignalId)
+	Trend::MouseOn TrendWidget::mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* onSignal)
 	{
-		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rullerIndex, outSignalId);
+		return m_trend.mouseIsOver(mousePos, m_pixmapDrawParam, outLaneIndex, timeStamp, rullerIndex, onSignal);
 	}
 
 	void TrendWidget::resetRullerHighlight()

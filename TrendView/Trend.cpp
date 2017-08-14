@@ -1742,7 +1742,7 @@ static const int recomendedSize = 8192;
 		return Trend::calcTrendArea(laneRect, drawParam, analogsCount);
 	}
 
-	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, int analogSignalCount)
+	QRectF Trend::calcTrendArea(const QRectF& laneRect, const TrendDrawParam& drawParam, size_t analogSignalCount)
 	{
 		double dpiX = drawParam.dpiX();
 		double dpiY = drawParam.dpiY();
@@ -1847,27 +1847,25 @@ static const int recomendedSize = 8192;
 		return result;
 	}
 
-	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex, QString* outSignalId) const
+	Trend::MouseOn Trend::mouseIsOver(QPoint mousePos, const TrendDrawParam& drawParam, int* outLaneIndex, TimeStamp* outTime, int* rullerIndex, TrendSignalParam* outSignal) const
 	{
 		if (outLaneIndex == nullptr ||
 			outTime == nullptr ||
 			rullerIndex == nullptr ||
-			outSignalId == nullptr)
+			outSignal == nullptr)
 		{
 			assert(outLaneIndex);
 			assert(outTime);
 			assert(rullerIndex);
-			assert(outSignalId);
+			assert(outSignal);
 			return Trend::MouseOn::Outside;
 		}
 
 		*outLaneIndex = -1;
 		*rullerIndex = -1;
 		*outTime = TimeStamp();
-		outSignalId->clear();
 
 		QRectF rect = drawParam.rect();
-
 		QPointF pos(static_cast<double>(mousePos.x()) / static_cast<double>(drawParam.dpiX()),		// Transform mousePos to inches, as everything for drawing is done in inches
 					static_cast<double>(mousePos.y()) / static_cast<double>(drawParam.dpiY()));
 
@@ -1900,6 +1898,29 @@ static const int recomendedSize = 8192;
 					*outTime = posTime;
 					*outLaneIndex = laneIndex;
 
+					auto discretes = signalSet().discreteSignals();
+					auto analogs = signalSet().analogSignals();
+
+					calcSignalRects(trendArea, drawParam, &discretes, &analogs);
+
+					for (const TrendSignalParam& tsp : discretes)
+					{
+						if (tsp.tempDrawRect().contains(pos) == true)
+						{
+							*outSignal = tsp;
+							break;
+						}
+					}
+
+					for (const TrendSignalParam& tsp : analogs)
+					{
+						if (tsp.tempDrawRect().contains(pos) == true)
+						{
+							*outSignal = tsp;
+							break;
+						}
+					}
+
 					// Check if pos OnRuller
 					//
 					qint64 deltaTime = static_cast<qint64>(coef * 1.0 / 32.0);
@@ -1924,7 +1945,26 @@ static const int recomendedSize = 8192;
 					{
 						if (p.second.contains(pos) == true)
 						{
-							*outSignalId = p.first;
+							QString signalId = p.first;
+
+							for (const TrendSignalParam& tsp : discretes)
+							{
+								if (tsp.appSignalId() == signalId)
+								{
+									*outSignal = tsp;
+									break;
+								}
+							}
+
+							for (const TrendSignalParam& tsp : analogs)
+							{
+								if (tsp.appSignalId() == signalId)
+								{
+									*outSignal = tsp;
+									break;
+								}
+							}
+
 							return MouseOn::OnSignalDescription;
 						}
 					}

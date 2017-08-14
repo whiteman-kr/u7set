@@ -919,9 +919,9 @@ static int lastCopyCount = false;
 		int laneIndex = -1;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
-		QString outSignalId;
+		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignalId);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rullerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea)
 		{
@@ -1126,9 +1126,9 @@ static int lastCopyCount = false;
 		int rullerIndex = -1;
 		TimeStamp timeStamp;
 		QPoint pos = m_trendWidget->mapFromGlobal(QCursor::pos());
-		QString outSignalId;
+		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignalId);
+		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rullerIndex, &outSignal);
 
 		if (mouseOn != Trend::MouseOn::InsideTrendArea &&
 			mouseOn != Trend::MouseOn::OnRuller)

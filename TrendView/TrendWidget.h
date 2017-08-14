@@ -80,7 +80,7 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, QString* outSignalId);
+		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rullerIndex, TrendSignalParam* outSignalId);
 
 		void resetRullerHighlight();
 
@@ -152,6 +152,8 @@ namespace TrendLib
 		//
 		TimeStamp m_mouseScrollInitialTime;
 		QPoint m_mouseScrollInitialMousePos;
+		TrendSignalParam m_mouseScrollSignal;
+		std::vector<TrendSignalParam> m_mouseScrollAnalogSignals;
 
 		int m_rullerMoveRullerIndex = -1;
 		QPoint m_rullerMoveInitialMousePos;
