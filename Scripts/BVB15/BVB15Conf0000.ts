@@ -344,7 +344,7 @@ function module_bvb15_1_statistics(builder: Builder, module: DeviceObject, confC
 		var frameSize: number = logicModuleDescription.FlashMemory_ConfigFrameSize;
 		var frameCount: number = logicModuleDescription.FlashMemory_ConfigFrameCount;
 
-		var uartId: number = 0x0102;                   // Check it !!!!
+		var uartId: number = 0x1604;                   // Check it !!!!
 
 		var ssKeyValue: number = subsystemStorage.ssKey(subSysID);
 		if (ssKeyValue == -1) {
@@ -409,7 +409,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 		return false;
 	}
 
-	var uartId: number = 0x0102;
+	var uartId: number = 0x1604;
 
 	var appWordsCount: number = module.jsPropertyInt("AppLANDataSize");
 	var diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
@@ -422,7 +422,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 
 	var maxLMNumber: number = 62;               // Can be changed!
 	var configStartFrames: number = 2;
-	var configFrameCount: number = 19;          // number of frames in each configuration
+	var configFrameCount: number = 4;          // number of frames in each configuration
 	//var ioModulesMaxCount: number = 14;
 
 	if (LMNumber < 1 || LMNumber > maxLMNumber) {
