@@ -316,6 +316,8 @@ namespace Tcp
 			return -1;
 		}
 
+		// m_tcpSocket->flush();
+
 		m_bytesWritten = false;
 
 		//m_tcpSocket->waitForBytesWritten(TCP_BYTES_WRITTEN_TIMEOUT);

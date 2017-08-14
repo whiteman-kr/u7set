@@ -596,14 +596,9 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 	if (toWriteCount > 0)
 	{
 		saveAppSignalStatesArrayToArchive(arrayStr);
-		//DEBUG_LOG_MSG(m_logger, arrayStr);
-	}
 
-	if (toWriteCount != 0)
-	{
-		int time = t.elapsed();
-
-		qDebug() << "Write states " << toWriteCount << "time " << time << "(per write =" << double(time) / toWriteCount << ")";
+//		int time = t.elapsed();
+//		qDebug() << "Write states " << toWriteCount << "time " << time << "(per write =" << double(time) / toWriteCount << ")";
 	}
 }
 

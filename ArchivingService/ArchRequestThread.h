@@ -72,16 +72,14 @@ public:
 
 	bool createGetSignalStatesQueryStr(const Archive& archive);
 
-	bool executeQuery(const Archive& archive, QSqlDatabase& db, CircularLoggerShared& logger);
-	bool initArchId(QSqlDatabase& db, CircularLoggerShared& logger);
+	bool executeSatesRequest(const Archive& archive, QSqlDatabase& db);
+	bool initArchId(QSqlDatabase& db);
 
-	void getNextData();
+	void getNextStates();
 
 private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
-
-	void createQuery(QSqlDatabase& db, const QString& queryStr);
 
 	TimeType timeType() const { return m_param.timeType; }
 
@@ -94,7 +92,8 @@ private:
 	int signalHashesCount() const { return m_param.signalHashesCount; }
 	const Hash* signalHashes() const { return m_param.signalHashes; }
 
-	void clearSignalHashes();
+	bool execQuery(QSqlDatabase& db, const QString& queryStr);
+	bool execQuery(QSqlQuery& query, const QString& queryStr);
 
 private:
 	ArchRequestParam m_param;
