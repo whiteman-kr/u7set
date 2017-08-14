@@ -524,9 +524,9 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 	createAndInitSignalStates();
 
-	runTcpArchiveClientThreads();
-
 	initDataChannelThreads();
+
+	runTcpArchiveClientThreads();
 
 	runDataChannelThreads();
 

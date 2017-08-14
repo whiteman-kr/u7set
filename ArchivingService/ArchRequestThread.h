@@ -44,7 +44,7 @@ public:
 	ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
 	~ArchRequestContext();
 
-	void checkSignalsHashes(const Archive& arch);
+	void checkSignalsHashes(ArchiveShared arch);
 
 	quint32 requestID() const { return m_param.requestID; }
 	bool isDataReady() const { return m_dataReady; }
@@ -70,9 +70,9 @@ public:
 	qint64 expandedRequestStartTime() const { return m_expandedRequestStartTime; }
 	qint64 expandedRequestEndTime() const { return m_expandedRequestEndTime; }
 
-	bool createGetSignalStatesQueryStr(const Archive& archive);
+	bool createGetSignalStatesQueryStr(ArchiveShared archive);
 
-	bool executeSatesRequest(const Archive& archive, QSqlDatabase& db);
+	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase& db);
 	bool initArchId(QSqlDatabase& db);
 
 	void getNextStates();
@@ -143,7 +143,7 @@ class ArchRequestThreadWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
-	ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger);
+	ArchRequestThreadWorker(ArchiveShared archive, CircularLoggerShared& logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime &startTime);
 	void finalizeRequest(quint32 requestID);
@@ -151,8 +151,9 @@ public:
 	void getNextData(ArchRequestContextShared context);
 
 signals:
-	void newRequest(ArchRequestContextShared context);
+	void newRequestSignal(quint32 requestID);
 	void getNextDataSignal(quint32 requestID);
+	void finalizeRequestSignal(quint32 requestID);
 
 private:
 	virtual void onThreadStarted() override;
@@ -161,14 +162,15 @@ private:
 	bool tryConnectToDatabase();
 
 private slots:
-	void onNewRequest(ArchRequestContextShared context);
+	void onNewRequest(quint32 requestID);
 	void onGetNextData(quint32 requestID);
+	void onFinalizeRequest(quint32 requestID);
 
 private:
-	Archive& m_archive;
+	ArchiveShared m_archive;
 	CircularLoggerShared m_logger;
 
-	QSqlDatabase* m_db = nullptr;				// project archive database
+	QSqlDatabase m_db;
 
 	QMutex m_requestContextsMutex;
 
@@ -183,7 +185,7 @@ private:
 class ArchRequestThread : public SimpleThread
 {
 public:
-	ArchRequestThread(Archive& archive, CircularLoggerShared& logger);
+	ArchRequestThread(ArchiveShared archive, CircularLoggerShared& logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime& startTime);
 	void finalizeRequest(quint32 requestID);

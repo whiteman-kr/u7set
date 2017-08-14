@@ -16,7 +16,7 @@ class ArchWriteThreadWorker : public SimpleThreadWorker
 {
 public:
 	ArchWriteThreadWorker(const HostAddressPort& dbHost,
-						  Archive& archive,
+						  ArchiveShared archive,
 						  AppSignalStatesQueue& saveStatesQueue,
 						  CircularLoggerShared logger);
 
@@ -57,7 +57,7 @@ private slots:
 private:
 	HostAddressPort m_dbHost;
 
-	Archive& m_archive;
+	ArchiveShared m_archive;
 	AppSignalStatesQueue& m_saveStatesQueue;
 	CircularLoggerShared m_logger;
 
@@ -90,7 +90,7 @@ class ArchWriteThread : public SimpleThread
 {
 public:
 	ArchWriteThread(const HostAddressPort& dbHost,
-					Archive& archive,
+					ArchiveShared archive,
 					AppSignalStatesQueue& saveStatesQueue,
 					CircularLoggerShared logger);
 };

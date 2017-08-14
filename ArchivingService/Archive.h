@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QHash>
+#include <QMutex>
+#include <QSqlDatabase>
 
 #include "../lib/Hash.h"
+#include "../lib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/CircularLogger.h"
 
@@ -22,12 +25,6 @@ struct ArchSignal
 class Archive
 {
 public:
-	enum TableType
-	{
-		LongTerm,
-		ShortTerm
-	};
-
 	static const int TIME_1S = 1000;								// 1000 millisecond
 	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
 
@@ -37,11 +34,18 @@ public:
 	static const char* FIELD_VALUE;
 	static const char* FIELD_FLAGS;
 
-public:
-	Archive(CircularLoggerShared logger);
+	enum DbType
+	{
+		Postgres,
+		WriteArchive,
+		ReadArchive
+	};
 
-	void clear();
-	void setProject(const QString& projectID) { m_projectID = projectID; }
+public:
+	Archive(const QString& projectID, const HostAddressPort& dbHost, CircularLoggerShared logger);
+	~Archive();
+
+	bool openDatabase(DbType dbType, QSqlDatabase& destDb);
 
 	void initArchSignals(int count);
 	void appendArchSignal(const QString& appSignalID, const ArchSignal& archSignal);
@@ -51,7 +55,8 @@ public:
 	bool canReadWriteSignal(Hash signalHash);
 	void setCanReadWriteSignal(Hash signalHash, bool canWrite);
 
-	QString dbName();
+	QString postgresDatabaseName();
+	QString archiveDatabaseName();
 	static QString getTableName(Hash signalHash);
 
 	const QHash<Hash, ArchSignal>& archSignals() const { return m_archSignals; }
@@ -68,13 +73,22 @@ public:
 	void setSignalInitialized(Hash signalHash, bool initilaized);
 
 private:
+	void clear();
+
+	QSqlDatabase getDatabase(DbType dbType);
+	void removeDatabases();
+
+private:
 	static const char* ARCH_DB_PREFIX;
 	static const char* LONG_TERM_TABLE_PREFIX;
 	static const char* SHORT_TERM_TABLE_PREFIX;
 
-
 private:
+	HostAddressPort m_dbHost;
 	CircularLoggerShared m_logger;
+
+	QString m_dbUser;
+	QString m_dbPassword;
 
 	QString m_projectID;
 
@@ -83,4 +97,8 @@ private:
 	QHash<QString, QString> m_existingTables;
 
 	QHash<Hash, QString> m_signalIDs;
+
+	QMutex m_dbMutex;
 };
+
+typedef std::shared_ptr<Archive> ArchiveShared;

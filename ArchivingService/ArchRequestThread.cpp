@@ -88,11 +88,11 @@ ArchRequestContext::~ArchRequestContext()
 	}
 }
 
-void ArchRequestContext::checkSignalsHashes(const Archive& arch)
+void ArchRequestContext::checkSignalsHashes(ArchiveShared arch)
 {
 	QVector<Hash> existingHashes;
 
-	const QHash<Hash, ArchSignal>& archSignals = arch.archSignals();
+	const QHash<Hash, ArchSignal>& archSignals = arch->archSignals();
 
 	for(int i = 0; i < m_param.signalHashesCount; i++)
 	{
@@ -125,13 +125,13 @@ Hash ArchRequestContext::signalHash(int index)
 	return m_param.signalHashes[index];
 }
 
-bool ArchRequestContext::createGetSignalStatesQueryStr(const Archive& archive)
+bool ArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 {
 	m_statesQueryStr.clear();
 
 	int signalHashesCount = m_param.signalHashesCount;
 
-	const QHash<Hash, ArchSignal>& archSignals = archive.archSignals();
+	const QHash<Hash, ArchSignal>& archSignals = archive->archSignals();
 
 	QString formatStr0 = QString("SELECT %1, %2, %3, %4, %5 AS hash FROM %6 WHERE %7 >= %8::bigint AND %7 <= %9::bigint ");
 
@@ -155,7 +155,7 @@ bool ArchRequestContext::createGetSignalStatesQueryStr(const Archive& archive)
 			continue;
 		}
 
-		QString tableName = archive.getTableName(signalHash);
+		QString tableName = archive->getTableName(signalHash);
 
 		QString& formatStr = formatStr0;
 
@@ -212,7 +212,7 @@ bool ArchRequestContext::createGetSignalStatesQueryStr(const Archive& archive)
 	return true;
 }
 
-bool ArchRequestContext::executeSatesRequest(const Archive& archive, QSqlDatabase& db)
+bool ArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase& db)
 {
 	assert(db.isOpen() == true);
 	assert(m_statesQuery == nullptr);
@@ -495,11 +495,10 @@ bool ArchRequestContext::execQuery(QSqlQuery& query, const QString& queryStr)
 //
 // ---------------------------------------------------------------------------------------------
 
-ArchRequestThreadWorker::ArchRequestThreadWorker(Archive& archive, CircularLoggerShared& logger) :
+ArchRequestThreadWorker::ArchRequestThreadWorker(ArchiveShared archive, CircularLoggerShared& logger) :
 	m_archive(archive),
 	m_logger(logger)
 {
-	qRegisterMetaType<ArchRequestContextShared>("ArchRequestContextShared");
 }
 
 ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestParam &param, const QTime& startTime)
@@ -526,24 +525,14 @@ ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestPar
 
 	m_requestContexts.insert(param.requestID, context);
 
-	emit newRequest(context);
+	emit newRequestSignal(param.requestID);
 
 	return context;
 }
 
 void ArchRequestThreadWorker::finalizeRequest(quint32 requestID)
 {
-	// function should be called in context of param.archRequestServer thread!
-	//
-	AUTO_LOCK(m_requestContextsMutex);
-
-	if (m_requestContexts.contains(requestID) == false)
-	{
-		assert(false);
-		return;
-	}
-
-	m_requestContexts.remove(requestID);
+	emit finalizeRequestSignal(requestID);
 }
 
 void ArchRequestThreadWorker::getNextData(ArchRequestContextShared context)
@@ -557,12 +546,11 @@ void ArchRequestThreadWorker::getNextData(ArchRequestContextShared context)
 
 void ArchRequestThreadWorker::onThreadStarted()
 {
-	connect(this, &ArchRequestThreadWorker::newRequest, this, &ArchRequestThreadWorker::onNewRequest);
+	connect(this, &ArchRequestThreadWorker::newRequestSignal, this, &ArchRequestThreadWorker::onNewRequest);
 	connect(this, &ArchRequestThreadWorker::getNextDataSignal, this, &ArchRequestThreadWorker::onGetNextData);
+	connect(this, &ArchRequestThreadWorker::finalizeRequestSignal, this, &ArchRequestThreadWorker::onFinalizeRequest);
 
 	DEBUG_LOG_MSG(m_logger, QString("ArchRequestThreadWorker is started"));
-
-	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QPSQL", "readArchConnection"));
 
 	tryConnectToDatabase();
 }
@@ -574,33 +562,25 @@ void ArchRequestThreadWorker::onThreadFinished()
 
 bool ArchRequestThreadWorker::tryConnectToDatabase()
 {
-	TEST_PTR_RETURN_FALSE(m_db);
-
-	if (m_db->isOpen() == true)
+	if (m_db.isOpen() == true)
 	{
 		return true;
 	}
 
-	m_db->setHostName("127.0.0.1");
-	m_db->setPort(5432);
-	m_db->setDatabaseName(m_archive.dbName());
-	m_db->setUserName("u7arch");
-	m_db->setPassword("arch876436");
-
-	bool result = m_db->open();
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(m_logger, m_db->lastError().text());
-		return false;
-	}
+	bool result = m_archive->openDatabase(Archive::DbType::ReadArchive, m_db);
 
 	return result;
 }
 
 
-void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
+void ArchRequestThreadWorker::onNewRequest(quint32 requestID)
 {
+	m_requestContextsMutex.lock();
+
+	ArchRequestContextShared context = 	m_requestContexts.value(requestID, nullptr);
+
+	m_requestContextsMutex.unlock();
+
 	// execute request to archive DB
 	//
 	TEST_PTR_RETURN(context);
@@ -613,7 +593,7 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 
 	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: %2, time = %3, start = %4, end = %5, signals = %6").
 				  arg(context->requestID()).
-				  arg(m_archive.getSignalID(context->signalHash(0))).
+				  arg(m_archive->getSignalID(context->signalHash(0))).
 				  arg(Archive::timeTypeStr(context->timeType())).
 				  arg(start.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
 				  arg(end.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
@@ -637,7 +617,7 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 		return;
 	}
 
-	result = context->executeSatesRequest(m_archive, *m_db);
+	result = context->executeSatesRequest(m_archive, m_db);
 
 	if (result == false)
 	{
@@ -655,7 +635,11 @@ void ArchRequestThreadWorker::onNewRequest(ArchRequestContextShared context)
 
 void ArchRequestThreadWorker::onGetNextData(quint32 requestID)
 {
-	ArchRequestContextShared context = m_requestContexts.value(requestID, ArchRequestContextShared());
+	m_requestContextsMutex.lock();
+
+	ArchRequestContextShared context = m_requestContexts.value(requestID, nullptr);
+
+	m_requestContextsMutex.unlock();
 
 	if (context == nullptr)
 	{
@@ -666,6 +650,19 @@ void ArchRequestThreadWorker::onGetNextData(quint32 requestID)
 	context->getNextStates();
 }
 
+void ArchRequestThreadWorker::onFinalizeRequest(quint32 requestID)
+{
+	AUTO_LOCK(m_requestContextsMutex);
+
+	if (m_requestContexts.contains(requestID) == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_requestContexts.remove(requestID);
+}
+
 
 // ---------------------------------------------------------------------------------------------
 //
@@ -673,7 +670,7 @@ void ArchRequestThreadWorker::onGetNextData(quint32 requestID)
 //
 // ---------------------------------------------------------------------------------------------
 
-ArchRequestThread::ArchRequestThread(Archive& archive, CircularLoggerShared& logger)
+ArchRequestThread::ArchRequestThread(ArchiveShared archive, CircularLoggerShared& logger)
 {
 	m_worker = new ArchRequestThreadWorker(archive, logger);
 

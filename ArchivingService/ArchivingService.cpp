@@ -16,7 +16,6 @@ ArchivingServiceWorker::ArchivingServiceWorker(const QString& serviceName,
 											   CircularLoggerShared logger) :
 	ServiceWorker(ServiceType::ArchivingService, serviceName, argc, argv, versionInfo, logger),
 	m_logger(logger),
-	m_archive(logger),
 	m_saveStatesQueue(1024 * 1024)
 {
 }
@@ -81,7 +80,7 @@ void ArchivingServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-	clearConfiguration();
+	stopAllThread();
 
 	stopCfgLoaderThread();
 
@@ -108,26 +107,32 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 	}
 }
 
-void ArchivingServiceWorker::clearConfiguration()
+void ArchivingServiceWorker::runAllThreads()
 {
-	stopTcpArchiveRequestsServerThread();
-	stopTcpDataServerThread();
-	stopArchRequestThread();
-	stopArchWriteThread();
-
-	m_archive.clear();
-}
-
-void ArchivingServiceWorker::applyNewConfiguration()
-{
-	m_projectID = m_cfgLoaderThread->buildInfo().project;
-
-	m_archive.setProject(m_projectID);
-
 	runArchWriteThread();
 	runArchRequestThread();
 	runTcpAppDataServerThread();
 	runTcpArchRequestsServerThread();
+}
+
+void ArchivingServiceWorker::stopAllThread()
+{
+	stopTcpArchiveRequestsServerThread();
+	stopTcpAppDataServerThread();
+	stopArchRequestThread();
+	stopArchWriteThread();
+}
+
+void ArchivingServiceWorker::createArchive()
+{
+	assert(m_archive == nullptr);
+
+	m_archive = std::make_shared<Archive>(m_projectID, m_cfgSettings.dbHost, m_logger);
+}
+
+void ArchivingServiceWorker::deleteArchive()
+{
+	m_archive.reset();
 }
 
 void ArchivingServiceWorker::runArchWriteThread()
@@ -142,6 +147,16 @@ void ArchivingServiceWorker::runArchWriteThread()
 	m_archWriteThread->start();
 }
 
+void ArchivingServiceWorker::stopArchWriteThread()
+{
+	if (m_archWriteThread != nullptr)
+	{
+		m_archWriteThread->quitAndWait();
+		delete m_archWriteThread;
+		m_archWriteThread = nullptr;
+	}
+}
+
 void ArchivingServiceWorker::runTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
@@ -151,6 +166,16 @@ void ArchivingServiceWorker::runTcpAppDataServerThread()
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, m_logger);
 
 	m_tcpAppDataServerThread->start();
+}
+
+void ArchivingServiceWorker::stopTcpAppDataServerThread()
+{
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->quitAndWait();
+		delete m_tcpAppDataServerThread;
+		m_tcpAppDataServerThread = nullptr;
+	}
 }
 
 void ArchivingServiceWorker::runTcpArchRequestsServerThread()
@@ -171,35 +196,6 @@ void ArchivingServiceWorker::runTcpArchRequestsServerThread()
 	m_tcpArchiveRequestsServerThread->start();
 }
 
-void ArchivingServiceWorker::runArchRequestThread()
-{
-	assert(m_archRequestThread == nullptr);
-
-	m_archRequestThread = new ArchRequestThread(m_archive, m_logger);
-
-	m_archRequestThread->start();
-}
-
-void ArchivingServiceWorker::stopArchWriteThread()
-{
-	if (m_archWriteThread != nullptr)
-	{
-		m_archWriteThread->quitAndWait();
-		delete m_archWriteThread;
-		m_archWriteThread = nullptr;
-	}
-}
-
-void ArchivingServiceWorker::stopTcpDataServerThread()
-{
-	if (m_tcpAppDataServerThread != nullptr)
-	{
-		m_tcpAppDataServerThread->quitAndWait();
-		delete m_tcpAppDataServerThread;
-		m_tcpAppDataServerThread = nullptr;
-	}
-}
-
 void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
 {
 	if (m_tcpArchiveRequestsServerThread != nullptr)
@@ -208,6 +204,15 @@ void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
 		delete m_tcpArchiveRequestsServerThread;
 		m_tcpArchiveRequestsServerThread = nullptr;
 	}
+}
+
+void ArchivingServiceWorker::runArchRequestThread()
+{
+	assert(m_archRequestThread == nullptr);
+
+	m_archRequestThread = new ArchRequestThread(m_archive, m_logger);
+
+	m_archRequestThread->start();
 }
 
 void ArchivingServiceWorker::stopArchRequestThread()
@@ -289,7 +294,7 @@ bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 
 	int count = msg.archsignals_size();
 
-	m_archive.initArchSignals(count);
+	m_archive->initArchSignals(count);
 
 	for(int i = 0; i < count; i++)
 	{
@@ -300,7 +305,7 @@ bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 		archSignal.hash = protoArchSignal.hash();
 		archSignal.isAnalog = protoArchSignal.isanalog();
 
-		m_archive.appendArchSignal(QString::fromStdString(protoArchSignal.appsignalid()), archSignal);
+		m_archive->appendArchSignal(QString::fromStdString(protoArchSignal.appsignalid()), archSignal);
 	}
 
 	return true;
@@ -315,7 +320,9 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		return;
 	}
 
-	clearConfiguration();
+	stopAllThread();
+
+	deleteArchive();
 
 	bool result = readConfiguration(configurationXmlData);
 
@@ -323,6 +330,10 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 	{
 		return;
 	}
+
+	m_projectID = m_cfgLoaderThread->buildInfo().project;
+
+	createArchive();
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{
@@ -355,7 +366,7 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 
 	if (result == true)
 	{
-		applyNewConfiguration();
+		runAllThreads();
 	}
 }
 

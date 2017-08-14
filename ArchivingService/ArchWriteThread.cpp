@@ -14,7 +14,7 @@ QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5)::AppSignalState")
 
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
-											 Archive& archive,
+											 ArchiveShared archive,
 											 AppSignalStatesQueue& saveStatesQueue,
 											 CircularLoggerShared logger) :
 	m_dbHost(dbHost),
@@ -52,25 +52,12 @@ bool ArchWriteThreadWorker::tryConnectToDb()
 		return true;
 	}
 
-	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "infoArchConnection");
+	QSqlDatabase db;
 
-	if (db.lastError().isValid() == true)
-	{
-		DEBUG_LOG_ERR(m_logger, db.lastError().text());
-		return false;
-	}
-
-	db.setHostName(m_dbHost.addressStr());
-	db.setPort(m_dbHost.port());
-	db.setDatabaseName("postgres");
-	db.setUserName("u7arch");
-	db.setPassword("arch876436");
-
-	bool result = db.open();
+	bool result = m_archive->openDatabase(Archive::DbType::Postgres, db);
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
 		return false;
 	}
 
@@ -88,29 +75,12 @@ bool ArchWriteThreadWorker::tryConnectToDb()
 		dbJustCreated = true;
 	}
 
-	db.close();		// close connection to 'postgress' database
-
 	// open connection to projectArchive database
 
-	m_db = QSqlDatabase::addDatabase("QPSQL", "writeArchConnection");
-
-	if (m_db.lastError().isValid() == true)
-	{
-		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
-		return false;
-	}
-
-	m_db.setHostName(m_dbHost.addressStr());
-	m_db.setPort(m_dbHost.port());
-	m_db.setDatabaseName(m_archive.dbName());
-	m_db.setUserName("u7arch");
-	m_db.setPassword("arch876436");
-
-	result = m_db.open();
+	result = m_archive->openDatabase(Archive::DbType::WriteArchive, m_db);
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(m_logger, m_db.lastError().text());
 		return false;
 	}
 
@@ -144,9 +114,9 @@ bool ArchWriteThreadWorker::databaseIsExists(QSqlDatabase& db)
 		return false;
 	}
 
-	QString dbName = m_archive.dbName();
+	QString dbName = m_archive->archiveDatabaseName();
 
-	QString queryStr = QString("SELECT datname FROM pg_database WHERE datname = '%1' ORDER BY datname;").
+	QString queryStr = QString("SELECT datname FROM pg_database WHERE datname = '%1';").
 			arg(dbName);
 
 	QSqlQuery query(db);
@@ -184,7 +154,7 @@ bool ArchWriteThreadWorker::createDatabase(QSqlDatabase& db)
 		return false;
 	}
 
-	QString dbName = m_archive.dbName();
+	QString dbName = m_archive->archiveDatabaseName();
 
 	QString queryStr = QString("CREATE DATABASE %1 WITH ENCODING = 'UTF8' CONNECTION LIMIT = -1;").
 							arg(dbName);
@@ -294,7 +264,7 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		return false;
 	}
 
-	const QHash<Hash, ArchSignal>& archSignals = m_archive.archSignals();
+	const QHash<Hash, ArchSignal>& archSignals = m_archive->archSignals();
 
 	QHashIterator<Hash, ArchSignal> i(archSignals);
 
@@ -314,7 +284,7 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 
 		bool tableIsExists = false;
 
-		tableName = m_archive.getTableName(signalHash);
+		tableName = m_archive->getTableName(signalHash);
 
 		if (existingTables.contains(tableName) == false)
 		{
@@ -338,10 +308,10 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 
 		if (tableIsExists == true)
 		{
-			m_archive.appendExistingTable(tableName);
+			m_archive->appendExistingTable(tableName);
 		}
 
-		m_archive.setCanReadWriteSignal(archSignal.hash, tableIsExists);
+		m_archive->setCanReadWriteSignal(archSignal.hash, tableIsExists);
 
 		if (createdTablesCount - ctr >= 500)
 		{
@@ -533,7 +503,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			break;
 		}
 
-		ArchSignal archSignal = m_archive.getArchSignal(state.hash);
+		ArchSignal archSignal = m_archive->getArchSignal(state.hash);
 
 		if (archSignal.canReadWrite == false)
 		{
@@ -584,7 +554,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 				//
 			}
 
-			m_archive.setSignalInitialized(state.hash, true);
+			m_archive->setSignalInitialized(state.hash, true);
 		}
 
 		appendToArray(state, arrayStr);
@@ -597,8 +567,10 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 	{
 		saveAppSignalStatesArrayToArchive(arrayStr);
 
-//		int time = t.elapsed();
-//		qDebug() << "Write states " << toWriteCount << "time " << time << "(per write =" << double(time) / toWriteCount << ")";
+		int time = t.elapsed();
+		qDebug() << C_STR(QString("Write states %1 time %2 (per state %3)").
+						  arg(toWriteCount).arg(time).arg(double(time) / toWriteCount));
+
 	}
 }
 
@@ -760,7 +732,7 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 }
 
 ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
-								 Archive& archive,
+								 ArchiveShared archive,
 								 AppSignalStatesQueue& saveStatesQueue,
 								 CircularLoggerShared logger)
 {
