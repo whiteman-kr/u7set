@@ -4129,6 +4129,12 @@ void EquipmentTabPage::setActionState()
 			m_addAppSignal->setEnabled(true);
 			m_addAppSignal->setVisible(true);
 		}
+
+		if (module != nullptr && module->isOptoModule())
+		{
+			m_addAppSignal->setEnabled(true);
+			m_addAppSignal->setVisible(true);
+		}
 	}
 
 	// Add AppLogic Schema to LM
