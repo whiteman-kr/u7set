@@ -216,10 +216,20 @@ namespace Builder
 		}
 
 		AppDataServiceSettings dasSettings1;
-		dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
+
+		ok = dasSettings1.readFromDevice(m_equipment, dasObject1, m_log);
+		if (ok == false)
+		{
+			return false;
+		}
 
 		AppDataServiceSettings dasSettings2;
-		dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
+
+		ok = dasSettings2.readFromDevice(m_equipment, dasObject2, m_log);
+		if (ok == false)
+		{
+			return false;
+		}
 
 		// AppDataService -- Get ip addresses and ports, write them to configurations
 		//

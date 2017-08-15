@@ -837,7 +837,7 @@ void MainWindow::showAbout()
 
 	label = new QLabel(&aboutDialog);
 	label->setIndent(10);
-	label->setText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and SCADA software configuration.<br>");
+	label->setText(qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>");
 	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
 	label->setWordWrap(true);
 	vl->addWidget(label);

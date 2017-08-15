@@ -129,7 +129,7 @@ namespace Builder
 										ComparatorStorage* comparatorStorage,
 										BuildResultWriter* buildResultWriter);
 
-		// Generate SCADA software configurations
+		// Generate MATS software configurations
 		//
 		bool generateSoftwareConfiguration(DbController* db,
 											Hardware::SubsystemStorage* subsystems,

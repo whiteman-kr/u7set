@@ -2101,7 +2101,7 @@ namespace Builder
 
 			bool res = createFbForAnalogInputSignalConversion(*s, appItem);
 
-			if (res = true)
+			if (res == true)
 			{
 				AppFb* appFb = createAppFb(appItem);
 
@@ -2129,7 +2129,7 @@ namespace Builder
 
 			bool res = createFbForAnalogOutputSignalConversion(*s, appItem);
 
-			if (res = true)
+			if (res == true)
 			{
 				AppFb* appFb = createAppFb(appItem);
 
@@ -2314,7 +2314,9 @@ namespace Builder
 
 		if (deviceObject == nullptr)
 		{
-			assert(false);
+			// Application signal '%1' is bound to unknown device object '%2'.
+			//
+			m_log->errALC5013(signal.appSignalID(), signal.equipmentID());
 			return false;
 		}
 
@@ -2322,7 +2324,9 @@ namespace Builder
 
 		if (deviceSignal == nullptr)
 		{
-			assert(false);
+			// Input/output application signal '%1' should be bound to equipment signal.
+			//
+			m_log->errALC5091(signal.appSignalID());
 			return false;
 		}
 
@@ -2421,11 +2425,13 @@ namespace Builder
 		assert(signal.isOutput());
 		assert(signal.equipmentID().isEmpty() == false);
 
-		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.appSignalID());
+		Hardware::DeviceObject* deviceObject = m_equipmentSet->deviceObject(signal.equipmentID());
 
 		if (deviceObject == nullptr)
 		{
-			assert(false);
+			// Application signal '%1' is bound to unknown device object '%2'.
+			//
+			m_log->errALC5013(signal.appSignalID(), signal.equipmentID());
 			return false;
 		}
 
@@ -2433,7 +2439,9 @@ namespace Builder
 
 		if (deviceSignal == nullptr)
 		{
-			assert(false);
+			// Input/output application signal '%1' should be bound to equipment signal.
+			//
+			m_log->errALC5091(signal.appSignalID());
 			return false;
 		}
 

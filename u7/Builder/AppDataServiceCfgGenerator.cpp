@@ -51,9 +51,9 @@ namespace Builder
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		dasSettings.writeToXml(xml);
+		result = dasSettings.writeToXml(xml);
 
-		return true;
+		return result;
 	}
 
 	bool AppDataServiceCfgGenerator::writeAppSignalsXml()
