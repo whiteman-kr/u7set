@@ -2355,6 +2355,44 @@ namespace Hardware
 		return false;
 	}
 
+	bool OptoModule::calculateTxSignalsAddresses()
+	{
+		assert(isBvb() == true);
+
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= port->calculateTxSignalsAddresses();
+		}
+
+		return result;
+	}
+
+	bool OptoModule::copyOpticalPortsTxInRxSignals()
+	{
+		assert(isBvb() == true);
+
+		bool result = true;
+
+		for(OptoPortShared& port : m_ports)
+		{
+			if (port == nullptr)
+			{
+				ASSERT_RETURN_FALSE;
+			}
+
+			result &= port->copyOpticalPortsTxInRxSignals();
+		}
+
+		return result;
+	}
+
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
 	{
 		int count = ports.count();
@@ -3160,7 +3198,7 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoModuleStorage::initBvbModules()
+	bool OptoModuleStorage::processBvbModules()
 	{
 		bool result = true;
 
@@ -3171,7 +3209,9 @@ namespace Hardware
 				continue;
 			}
 
+			result &= module->calculateTxSignalsAddresses();
 			result &= module->calculateTxBufAddresses();
+			result &= module->copyOpticalPortsTxInRxSignals();
 			result &= module->calculateRxBufAddresses();
 		}
 

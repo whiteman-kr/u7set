@@ -401,6 +401,9 @@ namespace Hardware
 
 		bool isSerialRxSignalExists(const QString& appSignalID);
 
+		bool calculateTxSignalsAddresses();
+		bool copyOpticalPortsTxInRxSignals();
+
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
 
@@ -520,7 +523,7 @@ namespace Hardware
 
 		bool isSerialRxSignalExists(const QString& lmID, const QString& appSignalID);
 
-		bool initBvbModules();
+		bool processBvbModules();
 
 	private:
 		bool addModule(DeviceModule* module);
