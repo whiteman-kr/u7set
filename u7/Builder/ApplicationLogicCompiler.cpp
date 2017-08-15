@@ -14,7 +14,6 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-
 	IssueLogger* ApplicationLogicCompiler::m_log = nullptr;
 
 
@@ -57,25 +56,10 @@ namespace Builder
 		}
 	}
 
-
 	ApplicationLogicCompiler::~ApplicationLogicCompiler()
 	{
 		clear();
 	}
-
-
-	void ApplicationLogicCompiler::clear()
-	{
-		for(ModuleLogicCompiler* mc : m_moduleCompilers)
-		{
-			delete mc;
-		}
-
-		m_moduleCompilers.clear();
-
-		m_log = nullptr;
-	}
-
 
 	bool ApplicationLogicCompiler::run()
 	{
@@ -110,6 +94,7 @@ namespace Builder
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
+			&ApplicationLogicCompiler::processBvbModules,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeSerialDataXml,
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
@@ -144,7 +129,6 @@ namespace Builder
 		return result;
 	}
 
-
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
 		if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -155,6 +139,78 @@ namespace Builder
 		return false;
 	}
 
+	bool ApplicationLogicCompiler::findLMs()
+	{
+		// find all logic modules (LMs) in project
+		// fills m_lm vector
+		//
+		m_lm.clear();
+
+		findLM(m_deviceRoot);
+
+		if (m_lm.count() == 0)
+		{
+			LOG_MESSAGE(m_log, tr("Logic modules (LMs) not found!"));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
+		}
+
+		return true;
+	}
+
+	void ApplicationLogicCompiler::findLM(Hardware::DeviceObject* startFromDevice)
+	{
+		// find logic modules (LMs), recursive
+		//
+		if (startFromDevice == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__));
+			assert(false);
+			return;
+		}
+
+		if (startFromDevice->deviceType() == Hardware::DeviceType::Signal)
+		{
+			return;
+		}
+
+		if (startFromDevice->deviceType() == Hardware::DeviceType::Module)
+		{
+			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
+
+			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
+			{
+				Hardware::DeviceObject* parent = startFromDevice->parent();
+
+				if (parent != nullptr)
+				{
+					if (parent->deviceType() == Hardware::DeviceType::Chassis)
+					{
+						// LM must be installed in the chassis
+						//
+						m_lm.append(reinterpret_cast<Hardware::DeviceModule*>(startFromDevice));
+					}
+					else
+					{
+						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate()));
+					}
+				}
+			}
+
+			return;
+		}
+
+		int childrenCount = startFromDevice->childrenCount();
+
+		for(int i = 0; i < childrenCount; i++)
+		{
+			Hardware::DeviceObject* device = startFromDevice->child(i);
+
+			findLM(device);
+		}
+	}
 
 	bool ApplicationLogicCompiler::checkAppSignals()
 	{
@@ -307,7 +363,6 @@ namespace Builder
 		return result;
 	}
 
-
 	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
 	{
 		if (m_optoModuleStorage == nullptr ||
@@ -337,14 +392,8 @@ namespace Builder
 			return false;
 		}
 
-		if (m_optoModuleStorage->initBvbModules() == false)
-		{
-			return false;
-		}
-
 		return true;
 	}
-
 
 	bool ApplicationLogicCompiler::checkLmIpAddresses()
 	{
@@ -454,82 +503,6 @@ namespace Builder
 		return result;
 	}
 
-
-	// find all logic modules (LMs) in project
-	// fills m_lm vector
-	//
-	bool ApplicationLogicCompiler::findLMs()
-	{
-		m_lm.clear();
-
-		findLM(m_deviceRoot);
-
-		if (m_lm.count() == 0)
-		{
-			LOG_MESSAGE(m_log, tr("Logic modules (LMs) not found!"));
-		}
-		else
-		{
-			LOG_MESSAGE(m_log, QString(tr("Found logic modules (LMs): %1")).arg(m_lm.count()));
-		}
-
-		return true;
-	}
-
-
-	// find logic modules (LMs), recursive
-	//
-	void ApplicationLogicCompiler::findLM(Hardware::DeviceObject* startFromDevice)
-	{
-		if (startFromDevice == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("%1: DeviceObject null pointer!")).arg(__FUNCTION__));
-			assert(false);
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Signal)
-		{
-			return;
-		}
-
-		if (startFromDevice->deviceType() == Hardware::DeviceType::Module)
-		{
-			Hardware::DeviceModule* module = reinterpret_cast<Hardware::DeviceModule*>(startFromDevice);
-
-			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM)
-			{
-				Hardware::DeviceObject* parent = startFromDevice->parent();
-
-				if (parent != nullptr)
-				{
-					if (parent->deviceType() == Hardware::DeviceType::Chassis)
-					{
-						// LM must be installed in the chassis
-						//
-						m_lm.append(reinterpret_cast<Hardware::DeviceModule*>(startFromDevice));
-					}
-					else
-					{
-						LOG_WARNING_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 is not installed in the chassis")).arg(module->equipmentIdTemplate()));
-					}
-				}
-			}
-
-			return;
-		}
-
-		int childrenCount = startFromDevice->childrenCount();
-
-		for(int i = 0; i < childrenCount; i++)
-		{
-			Hardware::DeviceObject* device = startFromDevice->child(i);
-
-			findLM(device);
-		}
-	}
-
-
 	bool ApplicationLogicCompiler::compileModulesLogicsPass1()
 	{
 		LOG_EMPTY_LINE(m_log);
@@ -557,6 +530,79 @@ namespace Builder
 		return result;
 	}
 
+	bool ApplicationLogicCompiler::processBvbModules()
+	{
+		return m_optoModuleStorage->processBvbModules();
+	}
+
+	bool ApplicationLogicCompiler::compileModulesLogicsPass2()
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Application logic compiler pass #2...")));
+
+		// second compiler pass
+		//
+		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		{
+			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
+
+			if (moduleCompiler == nullptr)
+			{
+				assert(false);
+				result = false;
+				break;
+			}
+
+			result &= moduleCompiler->pass2();
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
+	{
+		if (m_resultWriter == nullptr)
+		{
+			ASSERT_RETURN_FALSE
+		}
+
+		bool result = true;
+
+		int metadataFieldsVersion = 0;
+
+		QStringList metadataFields;
+
+		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
+
+		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount,metadataFieldsVersion, metadataFields);
+
+		if (multichannelFile != nullptr)
+		{
+			QByteArray binCode;
+
+			appLogicCode.getBinCode(binCode);
+
+			std::vector<QVariantList> metadata;
+
+			appLogicCode.getAsmMetadata(metadata);
+
+			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, uniqueID, binCode, metadata);
+		}
+		else
+		{
+			result = false;
+		}
+
+		return result;
+	}
 
 	bool ApplicationLogicCompiler::writeSerialDataXml()
 	{
@@ -664,74 +710,6 @@ namespace Builder
 		return true;
 	}
 
-
-	bool ApplicationLogicCompiler::writeOptoModulesReport()
-	{
-		QVector<Hardware::OptoModuleShared> modules;
-
-		m_optoModuleStorage->getOptoModulesSorted(modules);
-
-		int count = modules.count();
-
-		if (count == 0)
-		{
-			return true;
-		}
-
-		QStringList list;
-
-		QString delim = "--------------------------------------------------------------------";
-
-		QString str;
-
-		for(int i = 0; i < count; i++)
-		{
-			Hardware::OptoModuleShared module = modules[i];
-
-			if (module == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			list.append(delim);
-
-			if (module->isLmOrBvb())
-			{
-				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
-			}
-			else
-			{
-				if (module->isOcm())
-				{
-					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-
-			list.append(str);
-			list.append(delim);
-			list.append("");
-
-			// write module's opto ports information
-			//
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
-			{
-				port->writeInfo(list);
-			}
-		}
-
-		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
-
-		return true;
-	}
-
-
 	bool ApplicationLogicCompiler::writeOptoVhdFiles()
 	{
 		int count = m_connections->count();
@@ -779,7 +757,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool ApplicationLogicCompiler::writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort)
 	{
@@ -967,79 +944,71 @@ namespace Builder
 		return true;
 	}
 
-
-
-
-	bool ApplicationLogicCompiler::compileModulesLogicsPass2()
+	bool ApplicationLogicCompiler::writeOptoModulesReport()
 	{
-		bool result = true;
+		QVector<Hardware::OptoModuleShared> modules;
 
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Application logic compiler pass #2...")));
+		m_optoModuleStorage->getOptoModulesSorted(modules);
 
-		// second compiler pass
-		//
-		for(int i = 0; i < m_moduleCompilers.count(); i++)
+		int count = modules.count();
+
+		if (count == 0)
 		{
-			ModuleLogicCompiler* moduleCompiler = m_moduleCompilers[i];
+			return true;
+		}
 
-			if (moduleCompiler == nullptr)
+		QStringList list;
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		for(int i = 0; i < count; i++)
+		{
+			Hardware::OptoModuleShared module = modules[i];
+
+			if (module == nullptr)
 			{
 				assert(false);
-				result = false;
-				break;
+				continue;
 			}
 
-			result &= moduleCompiler->pass2();
+			list.append(delim);
 
-			if (isBuildCancelled() == true)
+			if (module->isLmOrBvb())
 			{
-				result = false;
-				break;
+				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
+			}
+			else
+			{
+				if (module->isOcm())
+				{
+					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
+				}
+				else
+				{
+					assert(false);
+				}
+			}
+
+			list.append(str);
+			list.append(delim);
+			list.append("");
+
+			// write module's opto ports information
+			//
+			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
+
+			for(const Hardware::OptoPortShared& port : ports)
+			{
+				port->writeInfo(list);
 			}
 		}
 
-		return result;
+		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
+
+		return true;
 	}
-
-
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode)
-	{
-		if (m_resultWriter == nullptr)
-		{
-			ASSERT_RETURN_FALSE
-		}
-
-		bool result = true;
-
-		int metadataFieldsVersion = 0;
-
-		QStringList metadataFields;
-
-		appLogicCode.getAsmMetadataFields(metadataFields, &metadataFieldsVersion);
-
-		MultichannelFile* multichannelFile = m_resultWriter->createMutichannelFile(subsystemID, subsystemKey, lmEquipmentID, lmCaption, frameSize, frameCount,metadataFieldsVersion, metadataFields);
-
-		if (multichannelFile != nullptr)
-		{
-			QByteArray binCode;
-
-			appLogicCode.getBinCode(binCode);
-
-			std::vector<QVariantList> metadata;
-
-			appLogicCode.getAsmMetadata(metadata);
-
-			result &= multichannelFile->setChannelData(lmNumber, frameSize, frameCount, uniqueID, binCode, metadata);
-		}
-		else
-		{
-			result = false;
-		}
-
-		return result;
-	}
-
 
 	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const
 	{
@@ -1047,6 +1016,17 @@ namespace Builder
 		return *m_lmDescriptions;
 	}
 
+	void ApplicationLogicCompiler::clear()
+	{
+		for(ModuleLogicCompiler* mc : m_moduleCompilers)
+		{
+			delete mc;
+		}
+
+		m_moduleCompilers.clear();
+
+		m_log = nullptr;
+	}
 
 }
 

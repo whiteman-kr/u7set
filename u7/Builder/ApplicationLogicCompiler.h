@@ -48,6 +48,7 @@ namespace Builder
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
+		bool processBvbModules();
 		bool compileModulesLogicsPass2();
 
 		bool writeBinCodeForLm(QString subsystemID, int subsystemKey, QString lmEquipmentID, QString lmCaption, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, ApplicationLogicCode& appLogicCode);

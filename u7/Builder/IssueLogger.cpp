@@ -4005,6 +4005,27 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5091
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Input/output application signal '%1' should be bound to equipment signal.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Specified output application signal should be bound to equipment signal. Check signals EquipmentID property.
+	///
+	void IssueLogger::errALC5091(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5091,
+				  QString(tr("Input/output application signal '%1' should be bound to equipment signal.")).
+					arg(appSignalID));
+	}
+
+
 	/// IssueCode: ALC5186
 	///
 	/// IssueType: Error
