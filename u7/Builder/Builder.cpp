@@ -351,7 +351,7 @@ namespace Builder
 			generateLmsUniqueID(buildWriter, tuningBuilder, cfgBuilder, lmModules, lmsUniqueIdMap);
 
 			//
-			// Generate SCADA software configurations
+			// Generate MATS software configurations
 			//
 			ok = generateSoftwareConfiguration(&db, &subsystems, &equipmentSet, &signalSet, &tuningDataStorage, lmsUniqueIdMap, &buildWriter);
 

@@ -18,6 +18,7 @@
 #include "TrendSignal.h"
 #include "DialogTrendSignalProperties.h"
 #include "../Proto/serialization.pb.h"
+#include <cfloat>
 
 namespace TrendLib
 {

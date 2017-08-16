@@ -1813,6 +1813,26 @@ void SignalsTabPage::closeEvent(QCloseEvent* e)
 	e->accept();
 }
 
+void SignalsTabPage::keyPressEvent(QKeyEvent* e)
+{
+	if(e->type() == QKeyEvent::KeyPress && e->matches(QKeySequence::Copy))
+	{
+		QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+		if (selection.count() == 0)
+		{
+			QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+		}
+		QString selectedSignalIds;
+		for (int i = 0; i < selection.count(); i++)
+		{
+			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			selectedSignalIds.append(m_signalsModel->signal(row).appSignalID() + "\n");
+		}
+
+		QApplication::clipboard()->setText(selectedSignalIds);
+	}
+}
+
 void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
