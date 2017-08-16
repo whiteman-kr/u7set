@@ -8,6 +8,7 @@
 #include <QPdfWriter>
 #include <QMouseEvent>
 #include "../Proto/trends.pb.h"
+#include <cfloat>
 
 namespace TrendLib
 {
