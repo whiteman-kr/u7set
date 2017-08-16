@@ -502,7 +502,7 @@ static QVariant staticQVariant;
 			setValue(presetProperty->value());
 		}
 
-		// Do not copy m_getter/m_setter, because the are binded to their own object instances
+		// Do not copy m_getter/m_setter, because they are binded to their own object instances
 		//
 		return;
 	}

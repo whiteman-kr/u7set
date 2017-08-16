@@ -193,7 +193,8 @@ SOURCES +=\
     ../lib/CsvFile.cpp \
     Builder/AppItems.cpp \
     DialogBusEditor.cpp \
-    BusStorage.cpp
+    BusStorage.cpp \
+    Forms/DialogUpdateFromPreset.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -325,7 +326,8 @@ HEADERS  += \
     Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
-    BusStorage.h
+    BusStorage.h \
+    Forms/DialogUpdateFromPreset.h
 
 FORMS    += \
     CreateProjectDialog.ui \
