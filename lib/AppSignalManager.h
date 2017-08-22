@@ -73,8 +73,8 @@ public:
 	AppSignalState signalState(Hash signalHash, bool* found) const;
 	AppSignalState signalState(const QString& appSignalId, bool* found) const;
 
-	int signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result) const;
-	int signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result) const;
+	void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
+	void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
 
 private:
 	mutable QMutex m_unitsMutex;

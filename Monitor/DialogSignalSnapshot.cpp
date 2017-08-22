@@ -456,11 +456,13 @@ void SignalSnapshotModel::updateStates(int from, int to)
 		requestHashes.push_back(m_allSignals[index].hash());
 	}
 
-	int count = theSignals.signalState(requestHashes, &requestStates);
+	int found = 0;
 
-	if (count != requestHashes.size() || count != requestStates.size())
+	theSignals.signalState(requestHashes, &requestStates, &found);
+
+	if (requestHashes.size() != requestStates.size())
 	{
-        //assert(false);
+		assert(false);
 		return;
 	}
 
