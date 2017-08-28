@@ -522,9 +522,11 @@ void TuningModelClient::slot_setAll()
 			continue;
 }
 
-			float scalePercent = std::fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
+			//float scalePercent = std::fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
 
-			if (fabs(o.param.tuningDefaultValue() - o.state.editValue()) > scalePercent)
+			double epsilon = std::numeric_limits<double>::epsilon();
+
+			if (std::fabs(o.param.tuningDefaultValue() - o.state.editValue()) > epsilon)
 	{
 			o.state.onEditValue(o.param.tuningDefaultValue());
 }
