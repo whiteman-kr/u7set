@@ -1125,17 +1125,16 @@ void EquipmentModel::reset()
 
 void EquipmentModel::projectOpened()
 {
-	beginResetModel();
-
-	if (dbController()->isProjectOpened() == true)
-	{
-		m_configuration->fileInfo().setFileId(dbController()->hcFileId());
-		m_preset->fileInfo().setFileId(dbController()->hpFileId());
-	}
-	else
+	if (dbController()->isProjectOpened() == false)
 	{
 		assert(dbController()->isProjectOpened() == true);
+		return;
 	}
+
+	beginResetModel();
+
+	m_configuration->fileInfo().setFileId(dbController()->hcFileId());
+	m_preset->fileInfo().setFileId(dbController()->hpFileId());
 
 	// Fill user list
 	//

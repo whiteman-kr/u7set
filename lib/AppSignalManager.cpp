@@ -265,22 +265,24 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 
 	QMutexLocker l(&m_statesMutex);
 
-	AppSignalState result;
-	result.m_flags.valid = false;
-
 	auto foundState = m_signalStates.find(signalHash);
-
-	if (foundState != m_signalStates.end())
-	{
-		result = foundState->second;
-	}
 
 	if (found != nullptr)
 	{
 		*found = !(foundState == m_signalStates.end());
 	}
 
-	return result;
+	if (foundState != m_signalStates.end())
+	{
+		return foundState->second;
+	}
+	else
+	{
+		AppSignalState result;
+		result.m_flags.valid = false;
+
+		return result;
+	}
 }
 
 AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
@@ -303,25 +305,28 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 
 	for (const Hash& signalHash : appSignalHashes)
 	{
-		AppSignalState state;
-
-		state.m_flags.valid = false;
-
 		auto foundState = m_signalStates.find(signalHash);
 
 		if (foundState != m_signalStates.end())
 		{
-			state = foundState->second;
+			result->push_back(foundState->second);
 			foundCount ++;
 		}
+		else
+		{
+			AppSignalState state;				// Non valid state, hash will be 0 or something like UNDEFINED
+			state.m_flags.valid = false;
 
-		result->push_back(state);
+			result->push_back(state);
+		}
 	}
 
 	if (found != nullptr)
 	{
 		*found = foundCount;
 	}
+
+	return;
 }
 
 void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
@@ -342,6 +347,7 @@ void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std
 	}
 
 	signalState(appSignalHashes, result, found);
+	return;
 }
 
 
