@@ -259,6 +259,7 @@ protected:
 	//
 protected:
 	virtual void closeEvent(QCloseEvent*) override;
+	virtual void keyPressEvent(QKeyEvent *e) override;
 
 signals:
 	void setSignalActionsVisibility(bool state);

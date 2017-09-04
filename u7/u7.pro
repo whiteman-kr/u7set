@@ -117,7 +117,6 @@ SOURCES +=\
     Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
     Subsystem.cpp \
-    ChooseAfbDialog.cpp \
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
@@ -166,7 +165,7 @@ SOURCES +=\
     DialogSettingsConfigurator.cpp \
     Builder/ArchivingServiceCfgGenerator.cpp \
     Builder/TuningClientCfgGenerator.cpp \
-    ChooseUfbDialog.cpp \
+    Forms/ChooseUfbDialog.cpp \
     Builder/ModulesRawData.cpp \
     Builder/BdfFile.cpp \
     SchemaListModel.cpp \
@@ -193,7 +192,9 @@ SOURCES +=\
     ../lib/CsvFile.cpp \
     Builder/AppItems.cpp \
     DialogBusEditor.cpp \
-    BusStorage.cpp
+    BusStorage.cpp \
+    Forms/DialogUpdateFromPreset.cpp \
+    Forms/ChooseAfbDialog.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -244,7 +245,7 @@ HEADERS  += \
     DialogSubsystemListEditor.h \
     ../lib/Types.h \
     Subsystem.h \
-    ChooseAfbDialog.h \
+    Forms/ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
     ../lib/DataSource.h \
     ../lib/SocketIO.h \
@@ -294,7 +295,7 @@ HEADERS  += \
     DialogSettingsConfigurator.h \
     Builder/ArchivingServiceCfgGenerator.h \
     Builder/TuningClientCfgGenerator.h \
-    ChooseUfbDialog.h \
+    Forms/ChooseUfbDialog.h \
     ../lib/LmLimits.h \
     Builder/ModulesRawData.h \
     Builder/BdfFile.h \
@@ -325,7 +326,10 @@ HEADERS  += \
     Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
-    BusStorage.h
+    BusStorage.h \
+    Forms/DialogUpdateFromPreset.h \
+    Forms/ChooseAfbDialog.h \
+    Forms/ChooseAfbDialog.h
 
 FORMS    += \
     CreateProjectDialog.ui \
@@ -335,7 +339,7 @@ FORMS    += \
     UserManagementDialog.ui \
     CheckInDialog.ui \
     DialogSubsystemListEditor.ui \
-    ChooseAfbDialog.ui \
+    Forms/ChooseAfbDialog.ui \
     EquipmentVcsDialog.ui \
     CreateSchemaDialog.ui \
     SchemaLayersDialog.ui \
@@ -343,7 +347,7 @@ FORMS    += \
     SchemaItemPropertiesDialog.ui \
     DialogChoosePreset.ui \
     DialogSettingsConfigurator.ui \
-    ChooseUfbDialog.ui \
+    Forms/ChooseUfbDialog.ui \
     Forms/SelectChangesetDialog.ui \
     Forms/FileHistoryDialog.ui \
     Forms/ChangesetDetailsDialog.ui \

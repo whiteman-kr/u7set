@@ -47,19 +47,17 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
 
     setLayout(vLayout);
 
-    // connect signals and slots
+	connect(m_cancelButton, &QPushButton::clicked, this, &ProgressDialog::reject);
 
-    connect(this, &QDialog::rejected, this, &ProgressDialog::cancel);
-    connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+	m_timerId = startTimer(10);
 
-
-    startTimer(10);
+	return;
 }
 
-void ProgressDialog::ShowProgressDialog(QWidget* parent, const QString& description, DbProgress* progress)
+void ProgressDialog::showProgressDialog(QWidget* parent, const QString& description, DbProgress* progress)
 {
-    // do not show the dialog if the process completes in showDialogDelayMs milliseconds
-
+	// Do not show the dialog if the process completes in showDialogDelayMs ms
+	//
     const int showDialogDelayMs = 200;
 
     QTime endTime = QTime::currentTime().addMSecs(showDialogDelayMs);
@@ -75,12 +73,17 @@ void ProgressDialog::ShowProgressDialog(QWidget* parent, const QString& descript
 
     ProgressDialog progressDialog(parent, description, progress);
     progressDialog.exec();
+
+	assert(progress->completed() == true);
+
+	return;
 }
 
-
-void ProgressDialog::cancel()
+void ProgressDialog::reject()
 {
-    m_progress->setCancel(true);
+	m_progress->setCancel(true);	// DbWorker must set Completed to finish work, the dialog will be closed in timerEvent
+	m_cancelButton->setEnabled(false);
+	return;
 }
 
 void ProgressDialog::timerEvent(QTimerEvent*)
@@ -92,8 +95,15 @@ void ProgressDialog::timerEvent(QTimerEvent*)
         accept();
     }
 
-    m_label->setText(m_description + QString(" - %1%").arg(m_progress->value()));
-    m_progressBar->setValue(m_progress->value());
+	if (m_progress->wasCanceled() == true)
+	{
+		m_label->setText(m_description + QString(" - Waiting for cancelling..."));
+	}
+	else
+	{
+		m_label->setText(m_description + QString(" - %1%").arg(m_progress->value()));
+		m_progressBar->setValue(m_progress->value());
+	}
 
     return;
 }
