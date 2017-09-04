@@ -2,14 +2,15 @@
 #include "Schema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include <QPainter>
 
 namespace VFrame30
 {
 	SchemaItemAfb::SchemaItemAfb(void) :
 		SchemaItemAfb(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This contructor can be called while serialization,
+		// Object will be created and serailizartion will initialize all the members
 		//
 	}
 
@@ -42,7 +43,7 @@ namespace VFrame30
 	{
 	}
 
-	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const
+	void SchemaItemAfb::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -54,7 +55,7 @@ namespace VFrame30
 
 		// Draw rect and pins
 		//
-		FblItemRect::Draw(drawParam, schema, pLayer);
+		FblItemRect::Draw(drawParam, schema, layer);
 
 		// Draw other
 		//
@@ -180,6 +181,289 @@ namespace VFrame30
 		p->setPen(textColor());
 		DrawHelper::drawText(p, smallFont, itemUnit(), text, r, Qt::AlignLeft | Qt::AlignBottom);
 
+		return;
+	}
+
+	void SchemaItemAfb::drawAfbHelp(QPainter* painter, const QRect& drawRect) const
+	{
+		if (painter == nullptr ||
+			drawRect.isEmpty() == true)
+		{
+			assert(painter);
+			return;
+		}
+
+		auto drawTextFunc =
+			[](QPainter* p, const QRectF rect, QString text, int flags)
+			{
+				p->save();
+				p->resetMatrix();
+
+				QRectF textRect(rect.left() * p->device()->physicalDpiX(),
+								   rect.top() * p->device()->physicalDpiY(),
+								   rect.width() * p->device()->physicalDpiX(),
+								   rect.height() * p->device()->physicalDpiY());
+
+				p->drawText(textRect, flags, text);
+				p->restore();
+			};
+
+		auto pinTypeText =
+			[](E::SignalType type, E::DataFormat dataFormat) -> QString
+			{
+				QString result = "UNK";
+
+				switch (type)
+				{
+				case  E::SignalType::Analog:
+					switch(dataFormat)
+					{
+					case E::DataFormat::UnsignedInt:	result = "UINT";		break;
+					case E::DataFormat::SignedInt:		result = "SINT";		break;
+					case E::DataFormat::Float:			result = "FLOAT";		break;
+					default:
+						assert(false);
+					}
+					break;
+				case  E::SignalType::Discrete:
+					result = "DISCR";
+					break;
+				case  E::SignalType::Bus:
+					result = "BUS";
+					break;
+				default:
+					assert(false);
+					break;
+				}
+
+				return result;
+			};
+
+		QPainter* p = painter;
+
+		const Afb::AfbElement& afb = afbElement();
+
+		// set DPI independent draw
+		//
+		p->scale(p->device()->physicalDpiX(), p->device()->physicalDpiY());
+
+		const double intend = 1.0 / 4.0;
+		const double pinWdith = 2.0 / 4.0;
+		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->physicalDpiY() * 1.25;
+		const double typeWidth = 2.0 / 4.0;
+
+		QRectF rect(static_cast<double>(drawRect.left()) / p->device()->physicalDpiX(),
+					static_cast<double>(drawRect.top()) / p->device()->physicalDpiY(),
+					static_cast<double>(drawRect.width()) / p->device()->physicalDpiX(),
+					static_cast<double>(drawRect.height()) / p->device()->physicalDpiY());
+
+		// --
+		//
+		QPen pen(lineColor());
+		pen.setWidth(0);
+		p->setPen(pen);
+
+		QRectF itemRect(rect.left() + intend + pinWdith,
+						rect.top() + intend,
+						rect.width() - (intend + pinWdith) * 2.0,
+						pinHeight * qMax(inputsCount(), outputsCount()));
+
+		if (itemRect.width() < 1.5)
+		{
+			itemRect.setWidth(1.5);
+		}
+
+		p->drawRect(itemRect);
+
+		p->drawLine(QPointF(itemRect.left() + typeWidth, itemRect.top()),
+					QPointF(itemRect.left() + typeWidth, itemRect.bottom()));
+
+		p->drawLine(QPointF(itemRect.right() - typeWidth, itemRect.top()),
+					QPointF(itemRect.right() - typeWidth, itemRect.bottom()));
+
+		// Draw caption
+		//
+		QRectF captionRect(itemRect.left(),
+							0,
+							itemRect.width(),
+							intend);
+
+		drawTextFunc(p, captionRect, afb.caption(), Qt::AlignCenter | Qt::TextDontClip);
+
+		// Draw input pins
+		//
+		const std::vector<AfbPin>& inputPins = inputs();
+		double pinY = intend + pinHeight / 2.0;
+
+		for (const AfbPin& input : inputPins)
+		{
+			// Drawing pin
+			//
+			p->drawLine(QPointF(intend, pinY),
+						QPointF(itemRect.left(), pinY));
+
+			// Draw pin text
+			//
+			QRectF pinTextRect(intend,
+							   pinY - pinHeight,
+							   pinWdith,
+							   pinHeight);
+
+			drawTextFunc(p, pinTextRect, input.caption() + " ", Qt::AlignRight | Qt::AlignBaseline | Qt::TextDontClip);
+
+			// Draw pin type
+			//
+			const std::vector<Afb::AfbSignal>& afbInputs = afb.inputSignals();
+			for (const Afb::AfbSignal& afbPin : afbInputs)
+			{
+				if (afbPin.caption() == input.caption())
+				{
+					QRectF pinTypeRect(itemRect.left(),
+									   pinY - pinHeight / 2.0,
+									   typeWidth,
+									   pinHeight);
+
+					QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+
+					drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
+					break;
+				}
+			}
+
+			// --
+			//
+			pinY += pinHeight;
+
+			if (pinY > itemRect.bottom())
+			{
+				break;
+			}
+		}
+
+		// Draw output pins
+		//
+		const std::vector<AfbPin>& outputPins = outputs();
+		pinY = intend + pinHeight / 2.0;
+
+		for (const AfbPin& out : outputPins)
+		{
+			// Drawing pin
+			//
+			p->drawLine(QPointF(itemRect.right(), pinY),
+						QPointF(itemRect.right() + pinWdith, pinY));
+
+			// Draw pin text
+			//
+			QRectF pinTextRect(itemRect.right(),
+							   pinY - pinHeight,
+							   pinWdith,
+							   pinHeight);
+
+			drawTextFunc(p, pinTextRect, " " + out.caption(), Qt::AlignLeft | Qt::AlignBaseline | Qt::TextDontClip);
+
+			// Draw pin type
+			//
+			const std::vector<Afb::AfbSignal>& afbOuts = afb.outputSignals();
+			for (const Afb::AfbSignal& afbPin : afbOuts)
+			{
+				if (afbPin.caption() == out.caption())
+				{
+					QRectF pinTypeRect(itemRect.right() - typeWidth,
+									   pinY - pinHeight / 2.0,
+									   typeWidth,
+									   pinHeight);
+
+					QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+
+					drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
+					break;
+				}
+			}
+
+			// --
+			//
+			pinY += pinHeight;
+
+			if (pinY > itemRect.bottom())
+			{
+				break;
+			}
+		}
+
+		// Draw params
+		//
+		double paramY = itemRect.bottom();
+
+		std::vector<Afb::AfbParam> sortedParams = params();
+		sortedParams.erase(
+					std::remove_if(sortedParams.begin(), sortedParams.end(), [](const Afb::AfbParam& p){	return p.user() == false;	})
+						, sortedParams.end());
+
+		if (sortedParams.empty() == false)
+		{
+			QRectF paramRect(intend, paramY, rect.width() - intend * 2, pinHeight);
+			drawTextFunc(p, paramRect, "Params:", Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip);
+
+			paramY += pinHeight;
+		}
+
+		std::sort(sortedParams.begin(), sortedParams.end(),
+				[](const Afb::AfbParam& p1, const Afb::AfbParam& p2)
+				{
+					return p1.caption() < p2.caption();
+				});
+
+		for (const Afb::AfbParam& param : sortedParams)
+		{
+			if (param.user() == false)		// Actually it was already filtered in erase/remove_if
+			{
+				continue;
+			}
+
+			QRectF paramRect(intend, paramY, rect.width() - intend * 2, pinHeight);
+
+			QString str;
+			if (param.isAnalog() == true)
+			{
+				QString typeStr = pinTypeText(param.type(), param.dataFormat());
+
+				if (param.units().isEmpty() == false)
+				{
+					str = QString("%1, %2: %3 (%4 - %5), %6")
+						  .arg(param.caption())
+						  .arg(param.units())
+						  .arg(param.value().toString())
+						  .arg(param.lowLimit().toString())
+						  .arg(param.highLimit().toString())
+						  .arg(typeStr);
+				}
+				else
+				{
+					str = QString("%1: %2 (%3 - %4), %5")
+						  .arg(param.caption())
+						  .arg(param.value().toString())
+						  .arg(param.lowLimit().toString())
+						  .arg(param.highLimit().toString())
+						  .arg(typeStr);
+				}
+			}
+			else
+			{
+				assert(param.isDiscrete() == true);
+
+				str = QString("%1: %2")
+					  .arg(param.caption())
+					  .arg(param.value().toString());
+			}
+
+			drawTextFunc(p, paramRect, str, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip);
+
+			paramY += pinHeight;
+		}
+
+		// --
+		//
+		p->resetTransform();
 		return;
 	}
 
@@ -754,3 +1038,4 @@ namespace VFrame30
 		return;
 	}
 }
+

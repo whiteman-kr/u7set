@@ -231,6 +231,7 @@ public:
 protected:
 	void createActions();
 
+	virtual bool event(QEvent* e) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;
 
 	// Set corresponding to the current situation and user actions context menu
@@ -458,6 +459,7 @@ private:
 
 	// Temporary and state variables
 	//
+	std::shared_ptr<VFrame30::SchemaItem> m_toolTipItem;
 
 	//Qt::MouseButtons m_mousePressedButtons;
 
