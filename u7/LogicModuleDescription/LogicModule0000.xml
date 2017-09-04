@@ -1686,7 +1686,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0006">
+		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0007">
 			<Properties>								
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1739,7 +1739,7 @@ function(videoItemFblElement, afbElement)
 						<Changed></Changed>
 					</Script>
 				</Param>
-				<Param OpName="OutNaN" Caption="OutNan" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -1777,7 +1777,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 		videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
 	}	
 	
-	createOutput(videoItemFblElement, afbElement, "OutNan", "nan");
+	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
 
@@ -6531,7 +6531,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0005">
+		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0006">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6597,6 +6597,7 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
+					<Units>%</Units>
 				</Param>
 				<Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
@@ -6781,7 +6782,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0006">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0007">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6843,6 +6844,7 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
+					<Units>%</Units>
 				</Param>
 				<Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
@@ -9933,7 +9935,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0006">
+		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0007">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -9958,6 +9960,7 @@ function(videoItemFblElement, afbElement)
 					<Script>
 						<Changed></Changed>
 					</Script>
+					<Units>ms</Units>
 				</Param>
 				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
 					<Value>2</Value>
@@ -9966,8 +9969,7 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed></Changed>
-					</Script>
-					<Units>ms</Units>
+					</Script>					
 				</Param>
 			</Params>
 			<CommonScript>
