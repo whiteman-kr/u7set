@@ -8,6 +8,7 @@
 #include "MonitorSchemaWidget.h"
 #include "DialogSignalSearch.h"
 #include "DialogSignalSnapshot.h"
+#include "MonitorArchive.h"
 #include "MonitorTrends.h"
 #include "../VFrame30/Schema.h"
 
@@ -305,6 +306,12 @@ void MonitorMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
 
+	m_archiveAction = new QAction(tr("Archive"), this);
+	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
+	m_archiveAction->setEnabled(true);
+	m_archiveAction->setData(QVariant("IAmIndependentArchive"));	// This is required to find this action in MonitorToolBar for drag and drop
+	connect(m_archiveAction, &QAction::triggered, this, &MonitorMainWindow::slot_archive);
+
 	m_trendsAction = new QAction(tr("Trends"), this);
 	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
 	m_trendsAction->setEnabled(true);
@@ -355,7 +362,10 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_historyBack );
 
 	viewMenu->addSeparator();
+	viewMenu->addAction(m_archiveAction);
 	viewMenu->addAction(m_trendsAction);
+
+	viewMenu->addSeparator();
 	viewMenu->addAction(m_signalSnapshotAction);
 	viewMenu->addAction(m_findSignalAction);
 
@@ -405,7 +415,10 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_historyForward);
 
 	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_archiveAction);
 	m_toolBar->addAction(m_trendsAction);
+
+	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
 
@@ -585,6 +598,83 @@ void MonitorMainWindow::checkMonitorSingleInstance()
 			}
 		}
 	}
+}
+
+void MonitorMainWindow::slot_archive()
+{
+	qDebug() << "";
+	qDebug() << Q_FUNC_INFO;
+
+	// Get Archive list
+	//
+	std::vector<QString> archives = MonitorArchive::getArchiveList();
+
+	// Choose window
+	//
+	QString archiveWindowToActivate;
+
+	if (archives.empty() == true)
+	{
+		archiveWindowToActivate.clear();	// if archiveWindowToActivate is empty, then create new ArchiveWidget
+	}
+	else
+	{
+		QMenu menu;
+
+		QAction* newArchiveAction = menu.addAction("New Window...");
+		newArchiveAction->setData(QVariant::fromValue<int>(-1));		// Data -1 means, create new widget
+
+		menu.addSeparator();
+
+		for (size_t i = 0; i < archives.size(); i++)
+		{
+			QAction* a = menu.addAction(archives[i]);
+			assert(a);
+
+			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in archives vector
+		}
+
+		QAction* triggeredAction = menu.exec(QCursor::pos());
+		if (triggeredAction == nullptr)
+		{
+			return;
+		}
+
+		QVariant data = triggeredAction->data();
+
+		bool ok = false;
+		size_t archiveIndex = data.toInt(&ok);
+
+		if (archiveIndex == -1)
+		{
+			archiveWindowToActivate.clear();	// if trendToActivate is empty, then create new trend
+		}
+		else
+		{
+			if (ok == false || archiveIndex < 0 || archiveIndex >= archives.size())
+			{
+				assert(ok == true);
+				assert(archiveIndex >= 0 && archiveIndex < archives.size());
+				return;
+			}
+
+			archiveWindowToActivate = archives.at(archiveIndex);
+		}
+	}
+
+	// Start new trend or activate chosen one
+	//
+	if (archiveWindowToActivate.isEmpty() == true)
+	{
+		std::vector<AppSignalParam> appSignals;
+		MonitorArchive::startNewWidget(&m_configController, appSignals, this);
+	}
+	else
+	{
+		MonitorArchive::activateWindow(archiveWindowToActivate);
+	}
+
+	return;
 }
 
 void MonitorMainWindow::slot_trends()

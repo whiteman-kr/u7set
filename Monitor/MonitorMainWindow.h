@@ -64,7 +64,9 @@ protected slots:
 
 	// slots
 protected:
+	void slot_archive();
 	void slot_trends();
+
 	void slot_signalSnapshot();
 	void slot_findSignal();
 	void slot_historyChanged(bool enableBack, bool enableForward);
@@ -125,7 +127,9 @@ private:
 	QAction* m_historyBack = nullptr;
 	QAction* m_historyForward = nullptr;
 
+	QAction* m_archiveAction = nullptr;
 	QAction* m_trendsAction = nullptr;
+
 	QAction* m_signalSnapshotAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 

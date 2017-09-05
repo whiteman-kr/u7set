@@ -106,7 +106,8 @@ SOURCES += main.cpp \
     MonitorView.cpp \
     MonitorTrends.cpp \
     DialogChooseTrendSignals.cpp \
-    TrendTcpClient.cpp
+    TrendTcpClient.cpp \
+    MonitorArchive.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -147,7 +148,8 @@ HEADERS  += \
     MonitorView.h \
     MonitorTrends.h \
     DialogChooseTrendSignals.h \
-    TrendTcpClient.h
+    TrendTcpClient.h \
+    MonitorArchive.h
 
 FORMS    += \
     DialogSettings.ui \
