@@ -218,6 +218,8 @@ namespace Builder
 		int sizeW() const;
 
 		void calcCrc5();
+
+		void clear();
 	};
 
 
