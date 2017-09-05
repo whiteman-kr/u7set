@@ -1180,7 +1180,11 @@ void LinearityMeasurement::updateMeasureArray(int limitType, Measurement* pMeasu
 		return;
 	}
 
-	LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
+	LinearityMeasurement* pLinearityMeasureItem = dynamic_cast <LinearityMeasurement*> (pMeasurement);
+	if (pLinearityMeasureItem == nullptr)
+	{
+		return;
+	}
 
 	m_measureCount = pLinearityMeasureItem->measureCount();
 
@@ -1205,7 +1209,11 @@ void LinearityMeasurement::updateAdditionalParam(Measurement* pMeasurement)
 		return;
 	}
 
-	LinearityMeasurement* pLinearityMeasureItem = static_cast <LinearityMeasurement*> (pMeasurement);
+	LinearityMeasurement* pLinearityMeasureItem = dynamic_cast <LinearityMeasurement*> (pMeasurement);
+	if (pLinearityMeasureItem == nullptr)
+	{
+		return;
+	}
 
 	for(int a = 0; a < MEASURE_ADDITIONAL_PARAM_COUNT; a++)
 	{
@@ -1479,8 +1487,8 @@ int MeasureBase::load(int measureType)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_IN_ELECTRIC, pSubMeasure);	break;
 						case SQL_TABLE_LINEARITY_20_PH:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_PHYSICAL, pSubMeasure);		break;
-						case SQL_TABLE_LINEARITY_ADD_VAL:		static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);						break;
-						case SQL_TABLE_COMPARATOR_HYSTERESIS:	static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);							break;
+						case SQL_TABLE_LINEARITY_ADD_VAL:		static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);								break;
+						case SQL_TABLE_COMPARATOR_HYSTERESIS:	static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);									break;
 					}
 
 					break;
@@ -1690,7 +1698,7 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 			{
 				case MEASURE_TYPE_LINEARITY:
 					{
-						LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*>(pMeasurement);
+						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
 						if (pLinearityMeasurement == nullptr)
 						{
 							break;
@@ -1712,7 +1720,9 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 					break;
 
 				case MEASURE_TYPE_COMPARATOR:
-					static_cast<ComparatorMeasurement*> (pMeasurement);
+
+					// dynamic_cast<ComparatorMeasurement*> (pMeasurement); for future realese
+
 					break;
 
 				default:
