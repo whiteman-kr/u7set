@@ -43,7 +43,7 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 	if (m_progressEnabled == true)
 	{
 		assert(isGuiThread == true);
-		ProgressDialog::ShowProgressDialog(parentWidget, description, this);
+		ProgressDialog::showProgressDialog(parentWidget, description, this);
 	}
 	else
 	{
@@ -57,28 +57,32 @@ bool DbProgress::run(QWidget* parentWidget, const QString& description)
 	{
 		if (isGuiThread == true)
 		{
+			qDebug() << errorMessage();
+
 #ifndef Q_CONSOLE_APP
 			QMessageBox mb(parentWidget);
 			mb.setText(errorMessage());
 			mb.exec();
-#else
-			qDebug() << errorMessage();
 #endif
 		}
 
 		return false;
 	}
 
-	if (completeMessage().isEmpty() == false && isGuiThread == true)
+	if (completeMessage().isEmpty() == false &&
+		isGuiThread == true)
 	{
-		QMessageBox mb;
+		qDebug() << completeMessage();
+
+#ifndef Q_CONSOLE_APP
+		QMessageBox mb(parentWidget);
 		mb.setText(completeMessage());
 		mb.exec();
+#endif
 	}
 
 	return true;
 }
-
 
 DbProgress::~DbProgress()
 {
@@ -105,7 +109,7 @@ bool DbProgress::wasCanceled() const
 void DbProgress::setCancel(bool value)
 {
 	QMutexLocker l(&m_mutex);
-	 m_cancel = value;
+	m_cancel = value;
 }
 
 QString DbProgress::currentOperation() const

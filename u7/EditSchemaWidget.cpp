@@ -3,13 +3,14 @@
 #include <QClipboard>
 #include <QCompleter>
 #include <QMimeData>
+#include <QToolTip>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "SchemaPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
 #include "SchemaItemPropertiesDialog.h"
-#include "ChooseAfbDialog.h"
-#include "ChooseUfbDialog.h"
+#include "./Forms/ChooseAfbDialog.h"
+#include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
 #include "Connection.h"
@@ -2604,6 +2605,45 @@ void EditSchemaWidget::createActions()
 	return;
 }
 
+bool EditSchemaWidget::event(QEvent* e)
+{
+	if (e->type() == QEvent::ToolTip &&
+		m_toolTipItem != nullptr &&
+		m_toolTipItem->isSchemaItemAfb() == true)
+	{
+		std::shared_ptr<VFrame30::SchemaItemAfb> afbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(m_toolTipItem);
+
+		QImage image(QSize(3 * this->physicalDpiX(), 3 * physicalDpiY()), QImage::Format_RGB32);		// size 3x3 inches
+		image.fill(Qt::white);
+
+		image.setDotsPerMeterX(1000.0 / 25.4 * this->physicalDpiX());
+		image.setDotsPerMeterY(1000.0 / 25.4 * this->physicalDpiY());
+
+		QPainter painter;
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+		painter.begin(&image);
+		afbItem->drawAfbHelp(&painter, QRect(0, 0, image.width(), image.height()));
+		painter.end();
+
+		QByteArray data;
+		QBuffer buffer(&data);
+		image.save(&buffer, "PNG", 100);
+
+		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
+					   .arg(QString(data.toBase64()))
+					   .arg(image.size().height())
+					   .arg(image.size().width());
+
+		setToolTip(html);
+
+		return VFrame30::BaseSchemaWidget::event(e);
+	}
+
+	return VFrame30::BaseSchemaWidget::event(e);
+}
+
 void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 {
 	switch (e->key())
@@ -4669,6 +4709,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 {
 	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
+	m_toolTipItem.reset();
 
 	for (size_t i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
 	{
@@ -4685,7 +4726,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 	//
 	int movingEdgePointIndex = -1;
 
-	// Частные случаи установки курсора
+	// Setting cursor specific cases
 	//
 	if (mouseState() == MouseState::None)
 	{
@@ -4697,7 +4738,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 
 		if (selectedItems().empty() == true)
 		{
-			auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
+			std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
 
 			// Если элемент не выделен, то его можно только перемещать
 			//
@@ -4705,13 +4746,14 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				editSchemaView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == SchemaItemAction::MoveItem)
 			{
 				setCursor(Qt::SizeAllCursor);
+				m_toolTipItem = itemUnderPoint;
 				return;
 			}
 		}
 
-		for (auto si = editSchemaView()->selectedItems().begin(); si != editSchemaView()->selectedItems().end(); ++si)
+		for (std::shared_ptr<VFrame30::SchemaItem> si : editSchemaView()->selectedItems())
 		{
-			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si->get(), docPos, &movingEdgePointIndex);
+			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si.get(), docPos, &movingEdgePointIndex);
 
 			if (possibleAction != SchemaItemAction::NoAction)
 			{
@@ -4740,6 +4782,10 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				{
 				case SchemaItemAction::MoveItem:
 					setCursor(Qt::SizeAllCursor);
+					if (editSchemaView()->selectedItems().size() == 1)
+					{
+						m_toolTipItem = si;
+					}
 					return;
 				case SchemaItemAction::MoveStartLinePoint:
 					setCursor(Qt::SizeAllCursor);

@@ -95,7 +95,6 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
     ../lib/AppSignalManager.h \
-    ../lib/DeviceObject.h \
     ../lib/HostAddressPort.h \
     ../lib/Factory.h \
     ../lib/Tuning/TuningController.h \
@@ -151,7 +150,6 @@ SOURCES += \
     ../lib/ProtoSerialization.cpp \
     ../lib/Types.cpp \
     ../lib/AppSignalManager.cpp \
-    ../lib/DeviceObject.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/Tuning/TuningController.cpp \
     ../lib/AppSignal.cpp \

@@ -5,7 +5,12 @@
 #include "../VFrame30/Afb.h"
 
 namespace Ui {
-class ChooseAfbDialog;
+	class ChooseAfbDialog;
+}
+
+namespace VFrame30
+{
+	class SchemaItemAfb;
 }
 
 class ChooseAfbDialog : public QDialog
@@ -46,6 +51,20 @@ private:
 	static Qt::SortOrder m_lastSortOrder;
 
     static QString AllCategoryName;
+};
+
+class AfbHelpWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+	AfbHelpWidget(QWidget* parent = nullptr);
+	virtual void paintEvent(QPaintEvent* e) override;
+
+	void setAfb(std::shared_ptr<Afb::AfbElement> afb);
+
+private:
+	std::shared_ptr<VFrame30::SchemaItemAfb> m_afb;
 };
 
 #endif // CHOOSEAFBDIALOG_H

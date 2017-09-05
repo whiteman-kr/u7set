@@ -1,6 +1,7 @@
 #include "Stable.h"
 #include "ChooseAfbDialog.h"
 #include "ui_ChooseAfbDialog.h"
+#include "../VFrame30/SchemaItemAfb.h"
 
 int ChooseAfbDialog::m_lastSelectedIndex = -1;
 QString ChooseAfbDialog::AllCategoryName = "All";
@@ -12,7 +13,6 @@ ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbEleme
 	ui(new Ui::ChooseAfbDialog)
 {
 	ui->setupUi(this);
-
 
 	for (std::shared_ptr<Afb::AfbElement> e : elements)
 	{
@@ -241,6 +241,8 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 		ui->labelDescription->setPlainText("");
 
 		ui->btnOk->setEnabled(false);
+
+		ui->afbHelpWidget->setAfb(nullptr);
 	}
 	else
 	{
@@ -251,6 +253,8 @@ void ChooseAfbDialog::on_m_afbTree_itemSelectionChanged()
 		}
 
 		std::shared_ptr<Afb::AfbElement> e = m_elements[selectedIndex];
+
+		ui->afbHelpWidget->setAfb(e);
 
         ui->labelCaption->setText(e->caption() + tr(", version ") + e->version());
 		ui->labelDescription->setPlainText(e->description());
@@ -272,4 +276,43 @@ void ChooseAfbDialog::on_editQuickSearch_textEdited(const QString &arg1)
     Q_UNUSED(arg1);
 
     fillTree();
+}
+
+
+AfbHelpWidget::AfbHelpWidget(QWidget* parent) :
+	QWidget(parent)
+{
+}
+
+
+void AfbHelpWidget::paintEvent(QPaintEvent* e)
+{
+	QPainter p(this);
+	p.fillRect(e->rect(), Qt::white);
+
+	if (m_afb == nullptr)
+	{
+		return;
+	}
+
+	m_afb->drawAfbHelp(&p, rect());
+
+	return;
+}
+
+void AfbHelpWidget::setAfb(std::shared_ptr<Afb::AfbElement> afb)
+{
+	if (afb == nullptr)
+	{
+		m_afb.reset();
+	}
+	else
+	{
+		QString errorMessage;
+		m_afb = std::make_shared<VFrame30::SchemaItemAfb>(VFrame30::SchemaUnit::Display, *afb, &errorMessage);
+	}
+
+	update();
+
+	return;
 }

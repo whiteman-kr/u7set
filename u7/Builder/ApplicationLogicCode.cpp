@@ -206,6 +206,54 @@ namespace Builder
 		return LmCommand::getSizeW(cmdCode);
 	}
 
+	void CommandCode::calcCrc5()
+	{
+		opCode.CRC5 = 0;
+
+		const int DATA_SIZE = 64;
+		const int CRC_SIZE = 5;
+		const int BIT_COUNT = DATA_SIZE - CRC_SIZE;
+
+		const quint64 UPPER_BIT = 0x8000000000000000ll;
+
+		const quint64 POLYNOM = 0x05ll << BIT_COUNT;
+
+		quint64 crc5  =  0x1fll << BIT_COUNT;
+
+		quint64 data = 0;
+
+		data |= word1;
+		data <<= SIZE_16BIT;
+
+		data |= word2;
+		data <<= SIZE_16BIT;
+
+		data |= word3;
+		data <<= SIZE_16BIT;
+
+		data |= word4;
+
+		for(int i = 0; i < DATA_SIZE; i++)
+		{
+			if (((data ^ crc5) & UPPER_BIT) != 0)
+			{
+				crc5 <<= 1;
+				crc5 ^= POLYNOM;
+			}
+			else
+			{
+				crc5 <<= 1;
+			}
+
+			data <<= 1;
+		}
+
+		// Shift back into position
+		crc5 >>= BIT_COUNT;
+
+		opCode.CRC5 = crc5;
+	}
+
 
 	QString CommandCode::getFbTypeStr() const
 	{
@@ -214,7 +262,6 @@ namespace Builder
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		//return Afb::AfbType::toText(getFbType());
 	}
-
 
 	void CommandCode::setConstFloat(float floatValue)
 	{
@@ -241,7 +288,6 @@ namespace Builder
 		m_const.int32Value = int32Value;
 		m_constDataFormat = E::DataFormat::SignedInt;
 	}
-
 
 	qint32 CommandCode::getConstInt32() const
 	{
@@ -964,6 +1010,8 @@ namespace Builder
 		int cmdSizeW = sizeW();
 
 		m_binCode.resize(cmdSizeW * sizeof(quint16));
+
+		m_code.calcCrc5();
 
 		for(int i = 0; i < cmdSizeW; i++)
 		{

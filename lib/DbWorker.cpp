@@ -180,6 +180,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0162.sql", "Upgrade to version 162, AFB elements"},
 	{":/DatabaseUpgrade/Upgrade0163.sql", "Upgrade to version 163, LM Configuration script was updated"},
 	{":/DatabaseUpgrade/Upgrade0164.sql", "Upgrade to version 164, Changes in ArchiveService and AppDataService presets"},
+	{":/DatabaseUpgrade/Upgrade0165.sql", "Upgrade to version 165, AFBL Library was updated"},
 };
 
 

@@ -2146,7 +2146,7 @@ bool DbController::waitForComplete(QWidget* parentWidget, const QString& descrip
 {
 	bool result = m_progress.run(parentWidget, description);
 
-	if (result == false || m_progress.hasError())
+	if (result == false || m_progress.hasError() == true)
 	{
 		m_lastError = m_progress.errorMessage();
 	}

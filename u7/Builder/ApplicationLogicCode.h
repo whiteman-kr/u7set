@@ -216,6 +216,8 @@ namespace Builder
 		E::DataFormat constDataFormat() const { return m_constDataFormat; }
 
 		int sizeW() const;
+
+		void calcCrc5();
 	};
 
 
