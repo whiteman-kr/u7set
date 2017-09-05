@@ -103,7 +103,7 @@ public:
 	// Signals management
 	//
 	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getSignals(SignalSet* signalSet, QWidget* parentWidget);
+	bool getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
@@ -197,7 +197,7 @@ signals:
 	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
-	void signal_getSignals(SignalSet* signalSet);
+	void signal_getSignals(SignalSet* signalSet, bool excludeDeleted);
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);

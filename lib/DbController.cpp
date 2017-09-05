@@ -1445,7 +1445,7 @@ bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 }
 
 
-bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
+bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget)
 {
 	if (signalSet == nullptr)
 	{
@@ -1462,7 +1462,7 @@ bool DbController::getSignals(SignalSet* signalSet, QWidget* parentWidget)
 		return false;
 	}
 
-	emit signal_getSignals(signalSet);
+	emit signal_getSignals(signalSet, excludeDeleted);
 
 	ok = waitForComplete(parentWidget, tr("Reading signals"));
 
