@@ -7398,6 +7398,13 @@ class DeviceModule : public ::google::protobuf::Message {
   inline ::std::string* release_rawdatadescription();
   inline void set_allocated_rawdatadescription(::std::string* rawdatadescription);
 
+  // optional int32 customModuleFamily = 5 [default = 0];
+  inline bool has_custommodulefamily() const;
+  inline void clear_custommodulefamily();
+  static const int kCustomModuleFamilyFieldNumber = 5;
+  inline ::google::protobuf::int32 custommodulefamily() const;
+  inline void set_custommodulefamily(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
   inline void set_has_typeobsolete();
@@ -7408,6 +7415,8 @@ class DeviceModule : public ::google::protobuf::Message {
   inline void clear_has_moduletype();
   inline void set_has_rawdatadescription();
   inline void clear_has_rawdatadescription();
+  inline void set_has_custommodulefamily();
+  inline void clear_has_custommodulefamily();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -7415,9 +7424,10 @@ class DeviceModule : public ::google::protobuf::Message {
   ::google::protobuf::int32 typeobsolete_;
   ::google::protobuf::int32 moduletype_;
   ::std::string* rawdatadescription_;
+  ::google::protobuf::int32 custommodulefamily_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20443,6 +20453,28 @@ inline void DeviceModule::set_allocated_rawdatadescription(::std::string* rawdat
     clear_has_rawdatadescription();
     rawdatadescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional int32 customModuleFamily = 5 [default = 0];
+inline bool DeviceModule::has_custommodulefamily() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DeviceModule::set_has_custommodulefamily() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DeviceModule::clear_has_custommodulefamily() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DeviceModule::clear_custommodulefamily() {
+  custommodulefamily_ = 0;
+  clear_has_custommodulefamily();
+}
+inline ::google::protobuf::int32 DeviceModule::custommodulefamily() const {
+  return custommodulefamily_;
+}
+inline void DeviceModule::set_custommodulefamily(::google::protobuf::int32 value) {
+  set_has_custommodulefamily();
+  custommodulefamily_ = value;
 }
 
 // -------------------------------------------------------------------

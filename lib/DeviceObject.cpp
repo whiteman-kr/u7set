@@ -2748,10 +2748,14 @@ R"DELIM({
 		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
 		rawDataDescrProp->setExpert(true);
 
+		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily)
+		customFamilyTypeProp->setExpert(true);
+
 		familyTypeProp->setUpdateFromPreset(true);
 		moduleVersionProp->setUpdateFromPreset(true);
 		configScriptProp->setUpdateFromPreset(true);
 		rawDataDescrProp->setUpdateFromPreset(true);
+		customFamilyTypeProp->setUpdateFromPreset(true);
 	}
 
 	DeviceModule::~DeviceModule()
@@ -2773,6 +2777,7 @@ R"DELIM({
 		Proto::DeviceModule* moduleMessage = message->mutable_deviceobject()->mutable_module();
 
 		moduleMessage->set_moduletype(static_cast<int>(m_type));
+		moduleMessage->set_custommodulefamily(m_customModuleFamily);
 		moduleMessage->set_configurationscript(m_configurationScript.toStdString());
 		moduleMessage->set_rawdatadescription(m_rawDataDescription.toStdString());
 
@@ -2824,6 +2829,8 @@ R"DELIM({
 			}
 		}
 
+		m_customModuleFamily = modulemessage.custommodulefamily();
+
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
 
@@ -2836,14 +2843,19 @@ R"DELIM({
 	}
 
 
+	int DeviceModule::jsModuleFamily() const
+	{
+		if (moduleFamily() == FamilyType::OTHER)
+		{
+			return customModuleFamily();
+		}
+
+		return static_cast<int>(m_type & 0xFF00);
+	}
+
 	DeviceModule::FamilyType DeviceModule::moduleFamily() const
 	{
 		return static_cast<DeviceModule::FamilyType>(m_type & 0xFF00);
-	}
-
-	int DeviceModule::jsModuleFamily() const
-	{
-		return static_cast<int>(m_type & 0xFF00);
 	}
 
 	void DeviceModule::setModuleFamily(DeviceModule::FamilyType value)
@@ -2855,6 +2867,16 @@ R"DELIM({
 		tmp &= 0xFF00;
 
 		m_type = (m_type & 0x00FF) | tmp;
+	}
+
+	int DeviceModule::customModuleFamily() const
+	{
+		return m_customModuleFamily;
+	}
+
+	void DeviceModule::setCustomModuleFamily(int value)
+	{
+		m_customModuleFamily = value;
 	}
 
 	int DeviceModule::moduleVersion() const
@@ -2914,7 +2936,6 @@ R"DELIM({
 				family == FamilyType::DIM ||
 				family == FamilyType::AIFM ||
 				family == FamilyType::MPS17;
-				//family == FamilyType::BVK4;
 	}
 
 	bool DeviceModule::isOutputModule() const
