@@ -939,7 +939,7 @@ int QtServiceBase::installService()
 		QString account;
 		QString password;
 
-		if (d_ptr->args.size() > 2)
+/*		if (d_ptr->args.size() > 2)
 		{
 			account = d_ptr->args.at(2);
 		}
@@ -947,7 +947,9 @@ int QtServiceBase::installService()
 		if (d_ptr->args.size() > 3)
 		{
 			password = d_ptr->args.at(3);
-		}
+		}*/
+
+		setStartupType(QtServiceController::StartupType::AutoStartup);
 
 		if (d_ptr->install(account, password) == false)
 		{

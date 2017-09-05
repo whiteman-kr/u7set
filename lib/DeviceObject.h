@@ -500,9 +500,13 @@ namespace Hardware
 		// Properties
 		//
 	public:
-		FamilyType moduleFamily() const;
 		Q_INVOKABLE int jsModuleFamily() const;
+
+		FamilyType moduleFamily() const;
 		void setModuleFamily(FamilyType value);
+
+		int customModuleFamily() const;
+		void setCustomModuleFamily(int value);
 
 		Q_INVOKABLE int moduleVersion() const;
 		void setModuleVersion(int value);
@@ -530,6 +534,8 @@ namespace Hardware
 		static const DeviceType m_deviceType = DeviceType::Module;
 
 		uint16_t m_type = 0;	// high byte is family type, low byte is module version
+
+		uint16_t m_customModuleFamily = 0;
 
 		QString m_configurationScript;
 		QString m_rawDataDescription;
