@@ -871,7 +871,7 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, tr("Loading application logic signals"));
 
-		bool result = db->getSignals(signalSet, nullptr);
+		bool result = db->getSignals(signalSet, true, nullptr);
 
 		if (result == false)
 		{

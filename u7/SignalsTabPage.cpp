@@ -948,7 +948,7 @@ void SignalsModel::loadSignals()
 	dbController()->getUnits(&m_unitInfo, m_parentWindow);
 	*Signal::unitList = m_unitInfo;
 
-	if (!dbController()->getSignals(&m_signalSet, m_parentWindow))
+	if (!dbController()->getSignals(&m_signalSet, false, m_parentWindow))
 	{
 		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}

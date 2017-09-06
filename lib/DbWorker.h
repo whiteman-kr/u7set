@@ -133,7 +133,7 @@ public slots:
     // Signal management
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
-    void slot_getSignals(SignalSet* signalSet);
+	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
 

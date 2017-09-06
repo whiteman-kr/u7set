@@ -3849,7 +3849,7 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 }
 
 
-void DbWorker::slot_getSignals(SignalSet* signalSet)
+void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 {
 	AUTO_COMPLETE
 
@@ -3918,6 +3918,12 @@ void DbWorker::slot_getSignals(SignalSet* signalSet)
 		Signal* s = new Signal;
 
 		getSignalData(q, *s);
+
+		if (excludeDeleted == true && s->instanceAction() == VcsItemAction::Deleted)
+		{
+			delete s;
+			continue;
+		}
 
 		signalSet->append(s->ID(), s);
 	}

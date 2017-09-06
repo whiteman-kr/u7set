@@ -6594,6 +6594,12 @@ namespace Builder
 			}
 		}
 
+/*
+ * Generation of binary representation of tuning frames data
+ *
+ * removed to decrease size of *.tun files (issue RPCT-1601)
+ *
+ *
 		QByteArray data;
 
 		m_tuningData->getTuningData(&data);
@@ -6648,10 +6654,9 @@ namespace Builder
 				file.append(s);
 			}
 		}
-
+*/
 		bool result = m_resultWriter->addFile(subsystemID, QString("%1-%2.tun").
 										 arg(lmCaption).arg(lmNumber), file);
-
 		return result;
 	}
 
