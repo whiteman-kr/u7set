@@ -92,6 +92,7 @@ public:
 	QPoint m_archiveWindowPos;
 	QByteArray m_archiveWindowGeometry;
 	QByteArray m_archiveWindowState;
+	QStringList m_archiveSignalsDialogFilterCompleter;
 
 private:
 	mutable QMutex m_mutex;

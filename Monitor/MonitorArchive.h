@@ -35,7 +35,7 @@ public:
 	// Events
 	//
 protected:
-	virtual void closeEvent(QCloseEvent*e) override;
+	virtual void closeEvent(QCloseEvent *e) override;
 //	virtual void timerEvent(QTimerEvent* event) override;
 //	virtual void showEvent(QShowEvent*) override;
 
@@ -46,12 +46,10 @@ protected:
 	void saveWindowState();
 	void restoreWindowState();
 
-//	void signalsButton();
-
-
-//	// Slots
-//	//
-//protected slots:
+	// Slots
+	//
+protected slots:
+	void signalsButton();
 //	//void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
 
 	// Data

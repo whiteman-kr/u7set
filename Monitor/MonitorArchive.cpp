@@ -1,5 +1,6 @@
 #include "MonitorArchive.h"
 #include "Settings.h"
+#include "DialogChooseArchiveSignals.h"
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;
 
@@ -116,6 +117,10 @@ static int no = 1;
 
 	setStatusBar(m_statusBar);
 
+	// --
+	//
+	connect(m_signalsButton, &QPushButton::clicked, this, &MonitorArchiveWidget::signalsButton);
+
 	// Communication thread
 	//
 	//m_tcpClient = new TrendTcpClient(configController);
@@ -218,6 +223,26 @@ void MonitorArchiveWidget::restoreWindowState()
 	// --
 	//
 	ensureVisible();
+
+	return;
+}
+
+void MonitorArchiveWidget::signalsButton()
+{
+	std::vector<AppSignalParam> appSignals = m_appSignals;
+
+	// --
+	//
+	DialogChooseArchiveSignals dialog(appSignals, this);
+
+	int result = dialog.exec();
+
+	if (result == QDialog::Rejected)
+	{
+		return;
+	}
+
+	m_appSignals = dialog.acceptedSignals();
 
 	return;
 }

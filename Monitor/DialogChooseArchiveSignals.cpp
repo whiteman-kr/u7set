@@ -1,16 +1,16 @@
-#include "DialogChooseTrendSignals.h"
-#include "ui_DialogChooseTrendSignals.h"
+#include "DialogChooseArchiveSignals.h"
+#include "ui_DialogChooseArchiveSignals.h"
 #include "Settings.h"
 
-DialogChooseTrendSignals::DialogChooseTrendSignals(std::vector<TrendLib::TrendSignalParam>& trendSignals, QWidget* parent) :
+DialogChooseArchiveSignals::DialogChooseArchiveSignals(std::vector<AppSignalParam>& appSignals, QWidget* parent) :
 	QDialog(parent),
-	ui(new Ui::DialogChooseTrendSignals)
+	ui(new Ui::DialogChooseArchiveSignals)
 {
 	ui->setupUi(this);
 
 	// Set filter completer
 	//
-	m_filterCompleter = new QCompleter(theSettings.m_trendSignalsDialogFilterCompleter, this);
+	m_filterCompleter = new QCompleter(theSettings.m_archiveSignalsDialogFilterCompleter, this);
 	m_filterCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	ui->filterEdit->setCompleter(m_filterCompleter);
 
@@ -21,9 +21,9 @@ DialogChooseTrendSignals::DialogChooseTrendSignals(std::vector<TrendLib::TrendSi
 	headerLabels << "Type";
 	headerLabels << "Caption";
 
-	ui->trendSignals->setHeaderLabels(headerLabels);
+	ui->archiveSignals->setHeaderLabels(headerLabels);
 
-	FilteredTrendSignalsModel* model = new FilteredTrendSignalsModel(theSignals.signalList(), ui->filteredSignals);
+	FilteredArchiveSignalsModel* model = new FilteredArchiveSignalsModel(theSignals.signalList(), ui->filteredSignals);
 	ui->filteredSignals->setModel(model);
 
 	// --
@@ -32,40 +32,39 @@ DialogChooseTrendSignals::DialogChooseTrendSignals(std::vector<TrendLib::TrendSi
 
 	// --
 	//
-	connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_filteredSignalsSelectionChanged);
-	connect(ui->trendSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_trendSignalsSelectionChanged);
+	connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseArchiveSignals::slot_filteredSignalsSelectionChanged);
+	connect(ui->archiveSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged);
 
 	// --
 	// --
 	disableControls();
 
 	ui->filteredSignals->header()->resizeSection(1, ui->filteredSignals->header()->sectionSizeHint(1));		// 1 is TypeColumn (A/D)
-	ui->trendSignals->header()->resizeSection(1 , ui->trendSignals->header()->sectionSizeHint(1));			// 1 is TypeColumn (A/D)
+	ui->archiveSignals->header()->resizeSection(1 , ui->archiveSignals->header()->sectionSizeHint(1));			// 1 is TypeColumn (A/D)
 
 	// Fill added signals
 	//
-	for (TrendLib::TrendSignalParam& trendSignal : trendSignals)
+	for (AppSignalParam& appSignal : appSignals)
 	{
-		AppSignalParam appSignal = trendSignal.toAppSignalParam();
 		addSignal(appSignal);
 	}
 
 	return;
 }
 
-DialogChooseTrendSignals::~DialogChooseTrendSignals()
+DialogChooseArchiveSignals::~DialogChooseArchiveSignals()
 {
 	delete ui;
 }
 
-std::vector<AppSignalParam> DialogChooseTrendSignals::acceptedSignals() const
+std::vector<AppSignalParam> DialogChooseArchiveSignals::acceptedSignals() const
 {
 	return m_acceptedSignals;
 }
 
-void DialogChooseTrendSignals::fillSignalList()
+void DialogChooseArchiveSignals::fillSignalList()
 {
-	FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
+	FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	assert(model);
 
 	model->filterSignals(ui->filterEdit->text());
@@ -73,20 +72,20 @@ void DialogChooseTrendSignals::fillSignalList()
 	return;
 }
 
-void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
+void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 {
 //	QString signalId = std::get<0>(signal);
 //	QString type = std::get<1>(signal);
 //	QString caption = std::get<2>(signal);
 
-	if (trendSignalsHasSignalId(signal.customSignalId()) == true)
+	if (archiveSignalsHasSignalId(signal.customSignalId()) == true)
 	{
-		// SignaID already presnt in TrenSignals
+		// SignaID already presnt in ArchiveSignals
 		//
 		return;
 	}
 
-	if (ui->trendSignals->topLevelItemCount() >= 12)
+	if (ui->archiveSignals->topLevelItemCount() >= 12)
 	{
 		QMessageBox::critical(this, qAppName(), tr("The maximum number of signals reached."));
 		return;
@@ -107,40 +106,40 @@ void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 	itemData << signalType;
 	itemData << signal.caption();
 
-	QTreeWidgetItem* item = new QTreeWidgetItem(ui->trendSignals, itemData);
+	QTreeWidgetItem* item = new QTreeWidgetItem(ui->archiveSignals, itemData);
 	item->setData(0, Qt::UserRole, QVariant::fromValue(signal));
 
-	ui->trendSignals->addTopLevelItem(item);
+	ui->archiveSignals->addTopLevelItem(item);
 
-	ui->trendSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
+	ui->archiveSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
 
 	disableControls();
 
 	return;
 }
 
-void DialogChooseTrendSignals::removeSelectedSignal()
+void DialogChooseArchiveSignals::removeSelectedSignal()
 {
-	assert(ui->trendSignals);
+	assert(ui->archiveSignals);
 
-	QModelIndex currentIndex = ui->trendSignals->currentIndex();
+	QModelIndex currentIndex = ui->archiveSignals->currentIndex();
 
 	if (currentIndex.isValid() == true)
 	{
-		ui->trendSignals->takeTopLevelItem(currentIndex.row());
+		ui->archiveSignals->takeTopLevelItem(currentIndex.row());
 	}
 
 	disableControls();
 	return;
 }
 
-bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
+bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(QString signalId)
 {
-	int itemCount = ui->trendSignals->topLevelItemCount();
+	int itemCount = ui->archiveSignals->topLevelItemCount();
 
 	for (int i = 0; i < itemCount; i++)
 	{
-		QTreeWidgetItem* item = ui->trendSignals->topLevelItem(i);
+		QTreeWidgetItem* item = ui->archiveSignals->topLevelItem(i);
 		assert(item);
 
 		if (item->text(0) == signalId)
@@ -152,12 +151,12 @@ bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
 	return false;
 }
 
-void DialogChooseTrendSignals::disableControls()
+void DialogChooseArchiveSignals::disableControls()
 {
 	assert(ui->filteredSignals);
-	assert(ui->trendSignals);
+	assert(ui->archiveSignals);
 
-	const FilteredTrendSignalsModel* fileterModel = dynamic_cast<const FilteredTrendSignalsModel*>(ui->filteredSignals->model());
+	const FilteredArchiveSignalsModel* fileterModel = dynamic_cast<const FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	if (fileterModel == nullptr)
 	{
 		assert(fileterModel != nullptr);
@@ -178,7 +177,7 @@ void DialogChooseTrendSignals::disableControls()
 		if (index.isValid() == true)
 		{
 			const AppSignalParam signal = fileterModel->signalByRow(index.row());
-			enableAddButton = !trendSignalsHasSignalId(signal.customSignalId());
+			enableAddButton = !archiveSignalsHasSignalId(signal.customSignalId());
 		}
 		else
 		{
@@ -189,7 +188,7 @@ void DialogChooseTrendSignals::disableControls()
 	// Remove Signal Button
 	//
 	{
-		QModelIndex index = ui->trendSignals->currentIndex();
+		QModelIndex index = ui->archiveSignals->currentIndex();
 
 		if (index.isValid() == false ||
 			index.row() < 0)
@@ -205,7 +204,7 @@ void DialogChooseTrendSignals::disableControls()
 	// Remove All Signals Button
 	//
 	{
-		enableRemoveAll = ui->trendSignals->topLevelItemCount() > 0;
+		enableRemoveAll = ui->archiveSignals->topLevelItemCount() > 0;
 	}
 
 
@@ -218,7 +217,7 @@ void DialogChooseTrendSignals::disableControls()
 	return;
 }
 
-void DialogChooseTrendSignals::on_addSignalButton_clicked()
+void DialogChooseArchiveSignals::on_addSignalButton_clicked()
 {
 	QModelIndex index = ui->filteredSignals->currentIndex();
 	if (index.isValid() == false)
@@ -226,11 +225,11 @@ void DialogChooseTrendSignals::on_addSignalButton_clicked()
 		return;
 	}
 
-	const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
+	const FilteredArchiveSignalsModel* model = dynamic_cast<const FilteredArchiveSignalsModel*>(index.model());
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+		assert(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -240,37 +239,37 @@ void DialogChooseTrendSignals::on_addSignalButton_clicked()
 	return;
 }
 
-void DialogChooseTrendSignals::on_removeSignalButton_clicked()
+void DialogChooseArchiveSignals::on_removeSignalButton_clicked()
 {
 	removeSelectedSignal();
 }
 
-void DialogChooseTrendSignals::on_removeAllSignalsButton_clicked()
+void DialogChooseArchiveSignals::on_removeAllSignalsButton_clicked()
 {
-	ui->trendSignals->clear();
+	ui->archiveSignals->clear();
 
 	disableControls();
 
 	return;
 }
 
-void DialogChooseTrendSignals::on_filterEdit_textChanged(const QString& /*arg*/)
+void DialogChooseArchiveSignals::on_filterEdit_textChanged(const QString& /*arg*/)
 {
 	fillSignalList();
 }
 
 
-void DialogChooseTrendSignals::on_filterEdit_editingFinished()
+void DialogChooseArchiveSignals::on_filterEdit_editingFinished()
 {
 	QString arg = ui->filterEdit->text();
 
-	if (theSettings.m_trendSignalsDialogFilterCompleter.contains(arg) == false)
+	if (theSettings.m_archiveSignalsDialogFilterCompleter.contains(arg) == false)
 	{
-		theSettings.m_trendSignalsDialogFilterCompleter << arg;
+		theSettings.m_archiveSignalsDialogFilterCompleter << arg;
 
-		while (theSettings.m_trendSignalsDialogFilterCompleter.size() > 1000)
+		while (theSettings.m_archiveSignalsDialogFilterCompleter.size() > 1000)
 		{
-			theSettings.m_trendSignalsDialogFilterCompleter.pop_front();
+			theSettings.m_archiveSignalsDialogFilterCompleter.pop_front();
 		}
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
@@ -278,25 +277,25 @@ void DialogChooseTrendSignals::on_filterEdit_editingFinished()
 
 		if (completerModel != nullptr)
 		{
-			completerModel->setStringList(theSettings.m_trendSignalsDialogFilterCompleter);
+			completerModel->setStringList(theSettings.m_archiveSignalsDialogFilterCompleter);
 		}
 	}
 
 	return;
 }
 
-void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
+void DialogChooseArchiveSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
 {
 	if (index.isValid() == false)
 	{
 		return;
 	}
 
-	const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
+	const FilteredArchiveSignalsModel* model = dynamic_cast<const FilteredArchiveSignalsModel*>(index.model());
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+		assert(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -306,49 +305,25 @@ void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelInde
 	return;
 }
 
-void DialogChooseTrendSignals::slot_filteredSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void DialogChooseArchiveSignals::slot_filteredSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
 	disableControls();
 }
 
-void DialogChooseTrendSignals::on_trendSignals_doubleClicked(const QModelIndex& /*index*/)
+void DialogChooseArchiveSignals::on_archiveSignals_doubleClicked(const QModelIndex& /*index*/)
 {
 	removeSelectedSignal();
 }
 
-void DialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
 	disableControls();
 }
 
-void DialogChooseTrendSignals::on_buttonBox_accepted()
-{
-	m_acceptedSignals.reserve(ui->trendSignals->topLevelItemCount());
-
-	for (int i = 0; i < ui->trendSignals->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* treeItem = ui->trendSignals->topLevelItem(i);
-		assert(treeItem);
-
-		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
-
-		assert(signalVariant.isNull() == false);
-		assert(signalVariant.isValid() == true);
-
-		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
-
-		assert(signalParam.customSignalId() == treeItem->text(0));
-
-		m_acceptedSignals.push_back(signalParam);
-	}
-
-	return;
-}
-
 //
-//		FilteredTrendSignalsModel
+//	FilteredArchiveSignalsModel
 //
-FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignalParam>& signalss, QObject* parent)
+FilteredArchiveSignalsModel::FilteredArchiveSignalsModel(const std::vector<AppSignalParam>& signalss, QObject* parent)
 	: QAbstractTableModel(parent),
 	m_signals(signalss)
 {
@@ -397,17 +372,41 @@ FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignal
 
 }
 
-int FilteredTrendSignalsModel::rowCount(const QModelIndex& /*parent*/) const
+void DialogChooseArchiveSignals::on_buttonBox_accepted()
+{
+	m_acceptedSignals.reserve(ui->archiveSignals->topLevelItemCount());
+
+	for (int i = 0; i < ui->archiveSignals->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* treeItem = ui->archiveSignals->topLevelItem(i);
+		assert(treeItem);
+
+		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
+
+		assert(signalVariant.isNull() == false);
+		assert(signalVariant.isValid() == true);
+
+		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
+
+		assert(signalParam.customSignalId() == treeItem->text(0));
+
+		m_acceptedSignals.push_back(signalParam);
+	}
+
+	return;
+}
+
+int FilteredArchiveSignalsModel::rowCount(const QModelIndex& /*parent*/) const
 {
 	return static_cast<int>(m_signalIndexes.size());
 }
 
-int FilteredTrendSignalsModel::columnCount(const QModelIndex& /*parent*/) const
+int FilteredArchiveSignalsModel::columnCount(const QModelIndex& /*parent*/) const
 {
 	return 3;	// Columns: SignalID, Typem Caption
 }
 
-QVariant FilteredTrendSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
 	if (role == Qt::DisplayRole)
 	{
@@ -428,7 +427,7 @@ QVariant FilteredTrendSignalsModel::headerData(int section, Qt::Orientation orie
 	return QVariant();
 }
 
-QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) const
+QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
@@ -483,7 +482,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 	return QVariant();
 }
 
-void FilteredTrendSignalsModel::filterSignals(QString filter)
+void FilteredArchiveSignalsModel::filterSignals(QString filter)
 {
 	beginResetModel();
 
@@ -542,7 +541,7 @@ void FilteredTrendSignalsModel::filterSignals(QString filter)
 	return;
 }
 
-AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
+AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
 {
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{

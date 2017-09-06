@@ -85,6 +85,8 @@ void Settings::writeUserScope() const
 	s.setValue("ArchiveWindow/geometry", m_archiveWindowGeometry);
 	s.setValue("ArchiveWindow/state", m_archiveWindowState);
 
+	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
+
 	return;
 }
 void Settings::loadUserScope()
