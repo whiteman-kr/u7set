@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>963</width>
-    <height>561</height>
+    <width>757</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,53 +20,82 @@
    <string>Archive Signals</string>
   </property>
   <layout class="QGridLayout" name="gridLayout3">
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
-    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0" rowminimumheight="0,0,0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,3,1,1,1,1">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="removeSignalButton">
-       <property name="text">
-        <string>&lt;</string>
+     <item row="1" column="4">
+      <widget class="QDateEdit" name="startDateEdit">
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::UpDownArrows</enum>
+       </property>
+       <property name="showGroupSeparator" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="currentSection">
+        <enum>QDateTimeEdit::MonthSection</enum>
+       </property>
+       <property name="displayFormat">
+        <string>MM/dd/yyyy</string>
+       </property>
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+       <property name="timeSpec">
+        <enum>Qt::UTC</enum>
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
-      <widget class="QPushButton" name="addSignalButton">
+     <item row="1" column="0">
+      <widget class="QLabel" name="signalTypeLabel">
        <property name="text">
-        <string>&gt;</string>
+        <string>Signal Type</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
-      <widget class="QPushButton" name="removeAllSignalsButton">
+     <item row="3" column="3">
+      <widget class="QLabel" name="timeTypeLabel">
        <property name="text">
-        <string>&lt;&lt;</string>
+        <string>Request Time Type</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="2" column="3">
+      <widget class="QLabel" name="endTimeLabel">
+       <property name="text">
+        <string>Request End Time</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="filterLabel">
+       <property name="text">
+        <string>Filter</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
       <widget class="QLineEdit" name="filterEdit">
        <property name="placeholderText">
         <string>Start type SignalID</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="5" column="2">
-      <spacer name="verticalSpacer2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2">
       <spacer name="verticalSpacer1">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -79,14 +108,83 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="filterLabel">
+     <item row="2" column="0">
+      <widget class="QLabel" name="schemaLabel">
        <property name="text">
-        <string>Filter</string>
+        <string>Schema</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="3" rowspan="7">
+     <item row="5" column="0" rowspan="7" colspan="2">
+      <widget class="QTreeView" name="filteredSignals">
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>false</bool>
+       </property>
+       <property name="sortingEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="headerHidden">
+        <bool>false</bool>
+       </property>
+       <property name="expandsOnDoubleClick">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="startTimeLabel">
+       <property name="text">
+        <string>Request Start Time</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="2">
+      <widget class="QPushButton" name="removeSignalButton">
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="2">
+      <widget class="QPushButton" name="removeAllSignalsButton">
+       <property name="text">
+        <string>&lt;&lt;</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QPushButton" name="addSignalButton">
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="2">
+      <spacer name="verticalSpacer2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="signalTypeCombo"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="schemaCombo"/>
+     </item>
+     <item row="1" column="5">
+      <widget class="QTimeEdit" name="startTimeEdit"/>
+     </item>
+     <item row="5" column="3" rowspan="7" colspan="3">
       <widget class="QTreeWidget" name="archiveSignals">
        <property name="rootIsDecorated">
         <bool>false</bool>
@@ -118,45 +216,51 @@
        </column>
       </widget>
      </item>
-     <item row="1" column="0" rowspan="7" colspan="2">
-      <widget class="QTreeView" name="filteredSignals">
-       <property name="rootIsDecorated">
-        <bool>false</bool>
+     <item row="3" column="4" colspan="2">
+      <widget class="QComboBox" name="timeTypeCombo"/>
+     </item>
+     <item row="2" column="4">
+      <widget class="QDateEdit" name="endDateEdit">
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::UpDownArrows</enum>
        </property>
-       <property name="itemsExpandable">
-        <bool>false</bool>
+       <property name="showGroupSeparator" stdset="0">
+        <bool>true</bool>
        </property>
-       <property name="sortingEnabled">
-        <bool>false</bool>
+       <property name="currentSection">
+        <enum>QDateTimeEdit::MonthSection</enum>
        </property>
-       <property name="headerHidden">
-        <bool>false</bool>
+       <property name="displayFormat">
+        <string>MM/dd/yyyy</string>
        </property>
-       <property name="expandsOnDoubleClick">
-        <bool>false</bool>
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+       <property name="timeSpec">
+        <enum>Qt::UTC</enum>
        </property>
       </widget>
      </item>
+     <item row="2" column="5">
+      <widget class="QTimeEdit" name="endTimeEdit"/>
+     </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
  <tabstops>
+  <tabstop>signalTypeCombo</tabstop>
+  <tabstop>schemaCombo</tabstop>
   <tabstop>filterEdit</tabstop>
   <tabstop>filteredSignals</tabstop>
   <tabstop>addSignalButton</tabstop>
   <tabstop>removeSignalButton</tabstop>
   <tabstop>removeAllSignalsButton</tabstop>
+  <tabstop>startDateEdit</tabstop>
+  <tabstop>startTimeEdit</tabstop>
+  <tabstop>endDateEdit</tabstop>
+  <tabstop>endTimeEdit</tabstop>
+  <tabstop>timeTypeCombo</tabstop>
   <tabstop>archiveSignals</tabstop>
  </tabstops>
  <resources/>
@@ -168,8 +272,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>255</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -184,8 +288,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>323</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

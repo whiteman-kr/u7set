@@ -1,6 +1,5 @@
 #include "MonitorArchive.h"
 #include "Settings.h"
-#include "DialogChooseArchiveSignals.h"
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;
 
@@ -64,7 +63,8 @@ void MonitorArchive::unregisterWindow(QString name)
 MonitorArchiveWidget::MonitorArchiveWidget(MonitorConfigController* configController, QWidget* parent) :
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_archiveService1(configController->configuration().archiveService1),
-	m_archiveService2(configController->configuration().archiveService2)
+	m_archiveService2(configController->configuration().archiveService2),
+	m_schemasDetais(configController->schemasDetails())
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -116,6 +116,16 @@ static int no = 1;
 	m_statusBar->addWidget(m_statusBarConnectionStateLabel, 0);
 
 	setStatusBar(m_statusBar);
+
+	// --
+	//
+	m_selectSignalsResult.timeType = static_cast<TimeType>(theSettings.m_archiveTimeType);
+
+	m_selectSignalsResult.requestEndTime = TimeStamp(QDateTime::currentDateTime());
+	m_selectSignalsResult.requestStartTime = m_selectSignalsResult.requestEndTime.timeStamp - 1_hour;
+
+	m_selectSignalsResult.signalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
+	m_selectSignalsResult.schemaId.clear();
 
 	// --
 	//
@@ -203,10 +213,6 @@ void MonitorArchiveWidget::saveWindowState()
 	theSettings.m_archiveWindowGeometry = saveGeometry();
 	theSettings.m_archiveWindowState = saveState();
 
-	//theSettings.m_viewType = m_viewCombo->currentIndex();
-	//theSettings.m_laneCount = m_lanesCombo->currentIndex() + 1;
-	//theSettings.m_timeTypeIndex = m_timeTypeCombo->currentIndex();
-
 	theSettings.writeUserScope();
 }
 
@@ -216,12 +222,6 @@ void MonitorArchiveWidget::restoreWindowState()
 	restoreGeometry(theSettings.m_archiveWindowGeometry);
 	restoreState(theSettings.m_archiveWindowState);
 
-//	assert(m_viewCombo);
-//	m_viewCombo->setCurrentIndex(theSettings.m_viewType);
-//	m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
-
-	// --
-	//
 	ensureVisible();
 
 	return;
@@ -233,7 +233,7 @@ void MonitorArchiveWidget::signalsButton()
 
 	// --
 	//
-	DialogChooseArchiveSignals dialog(appSignals, this);
+	DialogChooseArchiveSignals dialog(appSignals, m_schemasDetais, m_selectSignalsResult, this);
 
 	int result = dialog.exec();
 
@@ -242,7 +242,11 @@ void MonitorArchiveWidget::signalsButton()
 		return;
 	}
 
-	m_appSignals = dialog.acceptedSignals();
+	m_selectSignalsResult = dialog.accpetedResult();
+
+	theSettings.m_archiveTimeType = static_cast<int>(m_selectSignalsResult.timeType);
+
+	m_appSignals = m_selectSignalsResult.acceptedSignals;
 
 	return;
 }

@@ -2,6 +2,7 @@
 #define MONITORARCHIVE_H
 
 #include "MonitorConfigController.h"
+#include "DialogChooseArchiveSignals.h"
 
 class MonitorArchiveWidget;
 
@@ -59,6 +60,7 @@ private:
 	ConfigConnection m_archiveService2;
 
 	std::vector<AppSignalParam> m_appSignals;
+	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
 
 //	ArchiveTcpClient* m_tcpClient = nullptr;
 //	std::unique_ptr<SimpleThread> m_tcpClientThread;
@@ -82,6 +84,8 @@ private:
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
+
+	DialogChooseArchiveSignals::Result m_selectSignalsResult;
 };
 
 
