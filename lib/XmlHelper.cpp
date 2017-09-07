@@ -58,18 +58,15 @@ void XmlWriteHelper::writeEndElement()
 	m_xmlWriter->writeEndElement();
 }
 
-
 void XmlWriteHelper::writeStringAttribute(const QString& name, const QString& value)
 {
 	m_xmlWriter->writeAttribute(name, value);
 }
 
-
 void XmlWriteHelper::writeIntAttribute(const QString& name, int value)
 {
 	m_xmlWriter->writeAttribute(name, QString::number(value));
 }
-
 
 void XmlWriteHelper::writeBoolAttribute(const QString& name, bool value)
 {
@@ -112,8 +109,6 @@ void XmlWriteHelper::writeUInt32Attribute(const QString& name, quint32 value, bo
 	}
 }
 
-
-
 void XmlWriteHelper::writeDoubleAttribute(const QString& name, double value)
 {
 	writeStringAttribute(name, QString::number(value));
@@ -129,11 +124,15 @@ void XmlWriteHelper::writeFloatAttribute(const QString& name, float value)
 	writeStringAttribute(name, QString::number(value));
 }
 
+void XmlWriteHelper::writeString(const QString& str)
+{
+	m_xmlWriter->writeCharacters(str);
+}
+
 void XmlWriteHelper::writeStringElement(const QString& name, const QString& value)
 {
 	m_xmlWriter->writeTextElement(name, value);
 }
-
 
 void XmlWriteHelper::writeIntElement(const QString& name, int value)
 {

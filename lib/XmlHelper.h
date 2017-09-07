@@ -33,6 +33,7 @@ public:
 	void writeDoubleAttribute(const QString& name, double value);
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
+	void writeString(const QString& str);
 
 	void writeStringElement(const QString& name, const QString& value);
 	void writeIntElement(const QString& name, int value);
