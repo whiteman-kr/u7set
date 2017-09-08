@@ -21,21 +21,20 @@ DataFormatList::DataFormatList()
 //
 // --------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<UnitList> Signal::unitList = std::make_shared<UnitList>();
+std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
 
 Signal::Signal()
 {
 }
 
-
-Signal::~Signal()
+Signal::Signal(const Signal& s)
 {
+	*this = s;
 }
-
 
 Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 {
-	if (deviceSignal.isDiagSignal())
+	if (deviceSignal.isDiagSignal() == true)
 	{
 		assert(false);
 		return;
@@ -92,76 +91,47 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	setDataSize(m_signalType, m_analogSignalFormat);
 }
 
-
-Signal& Signal::operator =(const Signal& signal)
+Signal::~Signal()
 {
-	m_ID = signal.m_ID;
-	m_signalGroupID = signal.m_signalGroupID;
-	m_signalInstanceID = signal.m_signalInstanceID;
-	m_changesetID = signal.m_changesetID;
-	m_checkedOut = signal.m_checkedOut;
-	m_userID = signal.m_userID;
-	m_channel = signal.m_channel;
-	m_signalType = signal.m_signalType;
-	m_created = signal.m_created;
-	m_deleted = signal.m_deleted;
-	m_instanceCreated = signal.m_instanceCreated;
-	m_instanceAction = signal.m_instanceAction;
-
-	m_appSignalID = signal.m_appSignalID;
-	m_hash = signal.m_hash;
-
-	m_customAppSignalID = signal.m_customAppSignalID;
-	m_caption = signal.m_caption;
-	m_analogSignalFormat = signal.m_analogSignalFormat;
-	m_dataSize = signal.m_dataSize;
-	m_lowADC = signal.m_lowADC;
-	m_highADC = signal.m_highADC;
-	m_lowEngeneeringUnits = signal.m_lowEngeneeringUnits;
-	m_highEngeneeringUnits = signal.m_highEngeneeringUnits;
-	m_unitID = signal.m_unitID;
-	m_lowValidRange = signal.m_lowValidRange;
-	m_highValidRange = signal.m_highValidRange;
-	m_unbalanceLimit = signal.m_unbalanceLimit;
-	m_inputLowLimit = signal.m_inputLowLimit;
-	m_inputHighLimit = signal.m_inputHighLimit;
-	m_inputUnitID = signal.m_inputUnitID;
-	m_inputSensorType = signal.m_inputSensorType;
-	m_outputLowLimit = signal.m_outputLowLimit;
-	m_outputHighLimit = signal.m_outputHighLimit;
-	m_outputUnitID = signal.m_outputUnitID;
-	m_outputMode = signal.m_outputMode;
-	m_outputSensorType = signal.m_outputSensorType;
-	m_acquire = signal.m_acquire;
-	m_calculated = signal.m_calculated;
-	m_normalState = signal.m_normalState;
-	m_decimalPlaces = signal.m_decimalPlaces;
-	m_roughAperture = signal.m_roughAperture;
-	m_adaptiveAperture = signal.m_adaptiveAperture;
-	m_inOutType = signal.m_inOutType;
-	m_equipmentID = signal.m_equipmentID;
-	m_filteringTime = signal.m_filteringTime;
-	m_spreadTolerance = signal.m_spreadTolerance;
-	m_byteOrder = signal.m_byteOrder;
-	m_enableTuning = signal.m_enableTuning;
-	m_tuningDefaultValue = signal.m_tuningDefaultValue;
-
-	m_ualAddr = signal.m_ualAddr;
-	m_regValueAddr = signal.m_regValueAddr;
-	m_regValidityAddr = signal.m_regValidityAddr;
-	m_tuningAddr = signal.m_tuningAddr;
-
-	m_lm = signal.m_lm;
-
-	return *this;
 }
 
+void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
+{
+	switch(signalType)
+	{
+	case E::SignalType::Discrete:
+		m_dataSize = DISCRETE_SIZE;
+		break;
+
+	case E::SignalType::Analog:
+
+		switch(dataFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			m_dataSize = FLOAT32_SIZE;
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			m_dataSize = SIGNED_INT32_SIZE;
+			break;
+
+		default:
+			assert(false);		// unknown data format
+		}
+
+		break;
+
+	default:
+		assert(false);		// unknown signal type
+	}
+}
 
 E::DataFormat Signal::dataFormat() const
 {
 	switch(m_signalType)
 	{
 	case E::SignalType::Discrete:
+
 		return E::DataFormat::UnsignedInt;
 
 	case E::SignalType::Analog:
@@ -179,9 +149,81 @@ E::DataFormat Signal::dataFormat() const
 			return E::DataFormat::UnsignedInt;
 		}
 
+		break;
+
 	default:
 		assert(false);
 		return E::DataFormat::UnsignedInt;
+	}
+}
+
+bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const
+{
+	if (m_signalType != signalType)
+	{
+		return false;
+	}
+
+	if (m_byteOrder != byteOrder)
+	{
+		return false;
+	}
+
+	if (m_signalType == E::SignalType::Analog)
+	{
+		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 &&
+			(dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE))
+		{
+			return true;
+		}
+
+		if (m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32 &&
+			(dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	if (m_signalType == E::SignalType::Discrete)
+	{
+		if (size == DISCRETE_SIZE)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	assert(false);
+	return false;
+}
+
+bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
+{
+	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
+}
+
+void Signal::initCalculatedProperties()
+{
+	m_hash = calcHash(m_appSignalID);
+
+	if (isAnalog() == true)
+	{
+		if (m_unitList != nullptr)
+		{
+			m_unitStr = m_unitList->value(m_unitID, "???");
+		}
+		else
+		{
+			assert(false);
+			m_unitStr = "???";
+		}
+	}
+	else
+	{
+		m_unitStr.clear();
 	}
 }
 
@@ -192,6 +234,11 @@ void Signal::resetAddresses()
 	m_ualAddr.reset();
 	m_regValueAddr.reset();
 	m_regValidityAddr.reset();
+}
+
+QString Signal::regValueAddrStr() const
+{
+	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(bool))
@@ -476,7 +523,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "Calculated", &Signal::setCalculated);
 	serializeField(attr, "NormalState", &Signal::setNormalState);
 	serializeField(attr, "DecimalPlaces", &Signal::setDecimalPlaces);
-	serializeField(attr, "Aperture", &Signal::setAperture);
+	serializeField(attr, "Aperture", &Signal::setRoughAperture);
 	serializeField(attr, "InOutType", &Signal::setInOutType);
 	serializeField(attr, "DeviceStrID", &Signal::setEquipmentID);
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
@@ -485,191 +532,6 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "RamAddr", &Signal::setUalAddr);
 	serializeField(attr, "RegAddr", &Signal::setRegValueAddr);
 }
-
-
-// for DeviceSignal.dataFormat conversion
-//
-/*
-void Signal::setAnalogSignalFormat(E::DataFormat dataFormat)
-{
-	//	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
-
-	if (dataFormat == E::DataFormat::UnsignedInt)
-	{
-		dataFormat = E::DataFormat::SignedInt;
-	}
-
-	// values of corresponding members of enums E::AppSignalDataFormat and E::DataFormat are equal!
-	//
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(dataFormat);
-}*/
-
-
-void Signal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
-{
-	if (signalType == E::SignalType::Discrete)
-	{
-		m_dataSize = DISCRETE_SIZE;
-	}
-	else
-	{
-		if (signalType == E::SignalType::Analog)
-		{
-			switch(dataFormat)
-			{
-			case E::AnalogAppSignalFormat::Float32:
-				m_dataSize = FLOAT32_SIZE;
-				break;
-
-			case E::AnalogAppSignalFormat::SignedInt32:
-				m_dataSize = SIGNED_INT32_SIZE;
-				break;
-
-			default:
-				assert(false);		// unknown data format
-			}
-		}
-		else
-		{
-			assert(false);			// unknown signal type
-		}
-	}
-}
-
-
-SignalSet::SignalSet()
-{
-}
-
-SignalSet::~SignalSet()
-{
-	clear();
-}
-
-
-void SignalSet::clear()
-{
-	SignalPtrOrderedHash::clear();
-
-	m_groupSignals.clear();
-	m_strID2IndexMap.clear();
-}
-
-
-void SignalSet::append(const int& signalID, Signal *signal)
-{
-	SignalPtrOrderedHash::append(signalID, signal);
-
-	m_groupSignals.insert(signal->signalGroupID(), signalID);
-}
-
-
-void SignalSet::remove(const int& signalID)
-{
-	Signal signal = value(signalID);
-
-	SignalPtrOrderedHash::remove(signalID);
-
-	m_groupSignals.remove(signal.signalGroupID(), signalID);
-}
-
-
-void SignalSet::removeAt(const int index)
-{
-	const Signal& signal = SignalPtrOrderedHash::operator [](index);
-
-	int signalGroupID = signal.signalGroupID();
-	int signalID = signal.ID();
-
-	SignalPtrOrderedHash::removeAt(index);
-
-	m_groupSignals.remove(signalGroupID, signalID);
-}
-
-
-QVector<int> SignalSet::getChannelSignalsID(const Signal& signal)
-{
-	return getChannelSignalsID(signal.signalGroupID());
-}
-
-
-QVector<int> SignalSet::getChannelSignalsID(int signalGroupID)
-{
-	QVector<int> channelSignalsID;
-
-	QList<int> signalsID = m_groupSignals.values(signalGroupID);
-
-	int signalCount = signalsID.count();
-
-	for(int i = 0; i< signalCount; i++)
-	{
-		channelSignalsID.append(signalsID.at(i));
-	}
-
-	return channelSignalsID;
-}
-
-
-void SignalSet::reserve(int n)
-{
-	SignalPtrOrderedHash::reserve(n);
-	m_groupSignals.reserve(n);
-}
-
-
-void SignalSet::resetAddresses()
-{
-	int signalCount = count();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		(*this)[i].resetAddresses();
-	}
-}
-
-
-void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
-{
-	QXmlStreamReader applicationSignalsReader;
-	QFile file(filePath);
-
-	if (file.open(QIODevice::ReadOnly))
-	{
-		DataFormatList dataFormatInfo;
-		applicationSignalsReader.setDevice(&file);
-
-		while (!applicationSignalsReader.atEnd())
-		{
-			QXmlStreamReader::TokenType token = applicationSignalsReader.readNext();
-
-			switch (token)
-			{
-			case QXmlStreamReader::StartElement:
-			{
-				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
-				if (applicationSignalsReader.name() == "Unit")
-				{
-					unitInfo.append(attr.value("ID").toInt(), attr.value("Name").toString());
-				}
-				if (applicationSignalsReader.name() == "Signal")
-				{
-					Signal* pSignal = new Signal;
-					pSignal->serializeFields(attr, dataFormatInfo, unitInfo);
-					signalSet.append(pSignal->ID(), pSignal);
-				}
-				break;
-			}
-			default:
-				continue;
-			}
-		}
-		if (applicationSignalsReader.hasError())
-		{
-			qDebug() << "Parse applicationSignals.xml error";
-		}
-	}
-}
-
 
 void Signal::writeToXml(XmlWriteHelper& xml)
 {
@@ -707,7 +569,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeBoolAttribute("Calculated", calculated());
 	xml.writeIntAttribute("NormalState", normalState());
 	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
-	xml.writeDoubleAttribute("Aperture", aperture());
+	xml.writeDoubleAttribute("Aperture", roughAperture());
 	xml.writeIntAttribute("InOutType", inOutTypeInt());
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
 	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
@@ -778,11 +640,11 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
 	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
 
-    result &= xml.readIntAttribute("InputUnitID", &intValue);
-    m_inputUnitID = static_cast<E::InputUnit>(intValue);
+	result &= xml.readIntAttribute("InputUnitID", &intValue);
+	m_inputUnitID = static_cast<E::InputUnit>(intValue);
 
-    result &= xml.readIntAttribute("InputSensorID", &intValue);
-    m_inputSensorType = static_cast<E::SensorType>(intValue);
+	result &= xml.readIntAttribute("InputSensorID", &intValue);
+	m_inputSensorType = static_cast<E::SensorType>(intValue);
 
 	result &= xml.readDoubleAttribute("OutputLowLimit", &m_outputLowLimit);
 	result &= xml.readDoubleAttribute("OutputHighLimit", &m_outputHighLimit);
@@ -791,8 +653,8 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("OutputMode", &intValue);
 	m_outputMode = static_cast<E::OutputMode>(intValue);
 
-    result &= xml.readIntAttribute("OutputSensorID", &intValue);
-    m_outputSensorType = static_cast<E::SensorType>(intValue);
+	result &= xml.readIntAttribute("OutputSensorID", &intValue);
+	m_outputSensorType = static_cast<E::SensorType>(intValue);
 
 	result &= xml.readBoolAttribute("Acquire", &m_acquire);
 	result &= xml.readBoolAttribute("Calculated", &m_calculated);
@@ -848,7 +710,6 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 
 	return result;
 }
-
 
 void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 {
@@ -1072,12 +933,12 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_inputunitid())
 	{
-        m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
+		m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
 	}
 
 	if (s->has_inputsensorid())
 	{
-        m_inputSensorType = static_cast<E::SensorType>(s->inputsensorid());
+		m_inputSensorType = static_cast<E::SensorType>(s->inputsensorid());
 	}
 
 	if (s->has_outputlowlimit())
@@ -1102,7 +963,7 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 
 	if (s->has_outputsensorid())
 	{
-        m_outputSensorType = static_cast<E::SensorType>(s->outputsensorid());
+		m_outputSensorType = static_cast<E::SensorType>(s->outputsensorid());
 	}
 
 	if (s->has_acquire())
@@ -1253,9 +1114,9 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 
 	message->set_unitid(m_unitID);
 
-	if (unitList != nullptr && unitList->contains(m_unitID))
+	if (unitList() != nullptr && unitList()->contains(m_unitID) == true)
 	{
-		message->set_unit(unitList->value(m_unitID).toStdString());
+		message->set_unit(unitList()->value(m_unitID).toStdString());
 	}
 	else
 	{
@@ -1289,61 +1150,24 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 }
 
 
-bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const
+// for DeviceSignal.dataFormat conversion
+//
+/*
+void Signal::setAnalogSignalFormat(E::DataFormat dataFormat)
 {
-	if (m_signalType != signalType)
+	//	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
+
+	if (dataFormat == E::DataFormat::UnsignedInt)
 	{
-		return false;
+		dataFormat = E::DataFormat::SignedInt;
 	}
 
-	if (m_byteOrder != byteOrder)
-	{
-		return false;
-	}
-
-	if (m_signalType == E::SignalType::Analog)
-	{
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 &&
-			(dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE))
-		{
-			return true;
-		}
-
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-			(dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE))
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	if (m_signalType == E::SignalType::Discrete)
-	{
-		if (size == DISCRETE_SIZE)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	assert(false);
-	return false;
-}
+	// values of corresponding members of enums E::AppSignalDataFormat and E::DataFormat are equal!
+	//
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(dataFormat);
+}*/
 
 
-bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
-{
-	return isCompatibleFormat(sa16.signalType(), sa16.dataFormat(), sa16.dataSize(), sa16.byteOrder());
-}
-
-
-
-QString Signal::regValueAddrStr() const
-{
-	return QString("(reg %1:%2)").arg(regValueAddr().offset()).arg(regValueAddr().bit());
-}
 
 
 // --------------------------------------------------------------------------------------------------------
@@ -1351,6 +1175,29 @@ QString Signal::regValueAddrStr() const
 // SignalSet class implementation
 //
 // --------------------------------------------------------------------------------------------------------
+
+SignalSet::SignalSet()
+{
+}
+
+SignalSet::~SignalSet()
+{
+	clear();
+}
+
+void SignalSet::clear()
+{
+	SignalPtrOrderedHash::clear();
+
+	m_groupSignals.clear();
+	m_strID2IndexMap.clear();
+}
+
+void SignalSet::reserve(int n)
+{
+	SignalPtrOrderedHash::reserve(n);
+	m_groupSignals.reserve(n);
+}
 
 void SignalSet::buildID2IndexMap()
 {
@@ -1385,7 +1232,6 @@ bool SignalSet::ID2IndexMapIsEmpty()
 	return m_strID2IndexMap.isEmpty();
 }
 
-
 bool SignalSet::contains(const QString& appSignalID)
 {
 	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
@@ -1396,7 +1242,6 @@ bool SignalSet::contains(const QString& appSignalID)
 
 	return m_strID2IndexMap.contains(appSignalID.trimmed());
 }
-
 
 Signal* SignalSet::getSignal(const QString& appSignalID)
 {
@@ -1415,3 +1260,125 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 
 	return &(*this)[index];
 }
+
+bool SignalSet::expandBusSignals()
+{
+	return false;
+}
+
+void SignalSet::initCalculatedSignalsProperties()
+{
+	int signalsCount = count();
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		Signal& s = (*this)[i];
+
+		s.initCalculatedProperties();
+	}
+}
+
+void SignalSet::append(const int& signalID, Signal *signal)
+{
+	SignalPtrOrderedHash::append(signalID, signal);
+
+	m_groupSignals.insert(signal->signalGroupID(), signalID);
+}
+
+void SignalSet::remove(const int& signalID)
+{
+	Signal signal = value(signalID);
+
+	SignalPtrOrderedHash::remove(signalID);
+
+	m_groupSignals.remove(signal.signalGroupID(), signalID);
+}
+
+void SignalSet::removeAt(const int index)
+{
+	const Signal& signal = SignalPtrOrderedHash::operator [](index);
+
+	int signalGroupID = signal.signalGroupID();
+	int signalID = signal.ID();
+
+	SignalPtrOrderedHash::removeAt(index);
+
+	m_groupSignals.remove(signalGroupID, signalID);
+}
+
+
+QVector<int> SignalSet::getChannelSignalsID(const Signal& signal) const
+{
+	return getChannelSignalsID(signal.signalGroupID());
+}
+
+QVector<int> SignalSet::getChannelSignalsID(int signalGroupID) const
+{
+	QVector<int> channelSignalsID;
+
+	QList<int> signalsID = m_groupSignals.values(signalGroupID);
+
+	int signalCount = signalsID.count();
+
+	for(int i = 0; i< signalCount; i++)
+	{
+		channelSignalsID.append(signalsID.at(i));
+	}
+
+	return channelSignalsID;
+}
+
+void SignalSet::resetAddresses()
+{
+	int signalCount = count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		(*this)[i].resetAddresses();
+	}
+}
+
+//
+
+void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
+{
+	QXmlStreamReader applicationSignalsReader;
+	QFile file(filePath);
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		DataFormatList dataFormatInfo;
+		applicationSignalsReader.setDevice(&file);
+
+		while (!applicationSignalsReader.atEnd())
+		{
+			QXmlStreamReader::TokenType token = applicationSignalsReader.readNext();
+
+			switch (token)
+			{
+			case QXmlStreamReader::StartElement:
+			{
+				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
+				if (applicationSignalsReader.name() == "Unit")
+				{
+					unitInfo.append(attr.value("ID").toInt(), attr.value("Name").toString());
+				}
+				if (applicationSignalsReader.name() == "Signal")
+				{
+					Signal* pSignal = new Signal;
+					pSignal->serializeFields(attr, dataFormatInfo, unitInfo);
+					signalSet.append(pSignal->ID(), pSignal);
+				}
+				break;
+			}
+			default:
+				continue;
+			}
+		}
+		if (applicationSignalsReader.hasError())
+		{
+			qDebug() << "Parse applicationSignals.xml error";
+		}
+	}
+}
+

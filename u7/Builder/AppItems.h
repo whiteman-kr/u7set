@@ -341,8 +341,8 @@ namespace Builder
 
 		QUuid guid() const;
 
-		const Address16& ualAddr() const { return m_signal->ualAddr(); }
-		const Address16& regBufAddr() const { return m_signal->regBufAddr(); }
+		Address16 ualAddr() const { return m_signal->ualAddr(); }
+		Address16 regBufAddr() const { return m_signal->regBufAddr(); }
 
 		E::SignalType signalType() const { return m_signal->signalType(); }
 		E::AnalogAppSignalFormat analogSignalFormat() const { return m_signal->analogSignalFormat(); }

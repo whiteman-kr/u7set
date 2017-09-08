@@ -44,7 +44,8 @@ void SignalProperties::initProperties()
 	static const QString acquireCaption("Acquire");
 	static const QString normalStateCaption("NormalState");
 	static const QString decimalPlacesCaption("DecimalPlaces");
-	static const QString apertureCaption("Aperture");
+	static const QString roughApertureCaption("RoughAperture");
+	static const QString smoothApertureCaption("SmoothAperture");
 	static const QString adaptiveApertureCaption("AdaptiveAperture");
 	static const QString filteringTimeCaption("FilteringTime");
 	static const QString spreadToleranceCaption("SpreadTolerance");
@@ -154,7 +155,7 @@ void SignalProperties::initProperties()
 		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
 		outputModePropetry->setCategory(signalProcessingCategory);
 
-		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList, Signal::unitID, Signal::setUnitID, m_signal);
+		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList(), Signal::unitID, Signal::setUnitID, m_signal);
 		unitProperty->setCategory(dataFormatCategory);
 
 		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
@@ -164,8 +165,11 @@ void SignalProperties::initProperties()
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto apertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, apertureCaption, true, Signal::aperture, Signal::setAperture, m_signal);
-		apertureProperty->setCategory(onlineMonitoringSystemCategory);
+		auto roughApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, roughApertureCaption, true, Signal::roughAperture, Signal::setRoughAperture, m_signal);
+		roughApertureProperty->setCategory(onlineMonitoringSystemCategory);
+
+		auto smoothApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, smoothApertureCaption, true, Signal::smoothAperture, Signal::setSmoothAperture, m_signal);
+		smoothApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
 		adaptiveApertureProperty->setCategory(onlineMonitoringSystemCategory);

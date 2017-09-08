@@ -36,6 +36,8 @@ public:
 	virtual void removeAt(const int index);
 
 	const VALUE value(const KEY& key) const;
+	const VALUE value(const KEY& key, const VALUE& defaultValue) const;
+
 	const KEY key(const VALUE& value) const;
 
 	const KEY keyAt(const int index) const;
@@ -172,7 +174,7 @@ void OrderedHash<KEY, VALUE>::removeAt(const int index)
 template <typename KEY, typename VALUE>
 const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 {
-	if (m_keyToIndex.contains(key))
+	if (m_keyToIndex.contains(key) == true)
 	{
 		int valueIndex = m_keyToIndex[key];
 		return QVector<QPair<KEY, VALUE>>::at(valueIndex).second;
@@ -181,6 +183,20 @@ const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key) const
 	assert(false);
 
 	return VALUE();
+}
+
+template <typename KEY, typename VALUE>
+const VALUE OrderedHash<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const
+{
+	if (m_keyToIndex.contains(key) == true)
+	{
+		int valueIndex = m_keyToIndex[key];
+		return QVector<QPair<KEY, VALUE>>::at(valueIndex).second;
+	}
+
+	assert(false);
+
+	return defaultValue;
 }
 
 

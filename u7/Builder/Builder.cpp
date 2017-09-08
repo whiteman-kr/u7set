@@ -881,7 +881,7 @@ namespace Builder
 			return false;
 		}
 
-		result = db->getUnits(Signal::unitList.get(), nullptr);
+		result = db->getUnits(Signal::unitList().get(), nullptr);
 
 		if (result == false)
 		{
@@ -904,7 +904,14 @@ namespace Builder
 
 		LOG_SUCCESS(m_log, tr("Ok"));
 
+		if (signalSet->expandBusSignals() == false)
+		{
+			LOG_WARNING_OBSOLETE(m_log, "", "SignalsSet->expandBusSignals() is not implemented!");
+		}
+
 		signalSet->buildID2IndexMap();
+
+		signalSet->initCalculatedSignalsProperties();
 
 		return true;
 	}

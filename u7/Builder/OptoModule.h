@@ -68,7 +68,7 @@ namespace Hardware
 		void setType(TxRxSignal::Type t) { m_type = t; }
 
 		Address16 addrInBuf() const { return m_addrInBuf; }
-		void setAddrInBuf(Address16& addr);
+		void setAddrInBuf(const Address16 &addr);
 
 		E::SignalType signalType() const { return m_signalType; }
 		E::DataFormat dataFormat() const { return m_dataFormat; }

@@ -5,6 +5,7 @@
 #include "../../lib/DeviceObject.h"
 #include "Connection.h"
 #include "../../lib/Crc.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -36,9 +37,12 @@ namespace Builder
 		{
 			if ((*m_signalSet)[i].equipmentID() == equpmentID)
 			{
-				QObject* c = &(*m_signalSet)[i];
-				QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
-				return c;
+				SignalProperties* sp = new SignalProperties((*m_signalSet)[i]);
+				return sp;
+
+				//QObject* c = &(*m_signalSet)[i];
+				//QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+				//return c;
 			}
 		}
 		return nullptr;

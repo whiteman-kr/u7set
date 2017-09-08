@@ -80,7 +80,7 @@ namespace Hardware
 	}
 
 
-	void TxRxSignal::setAddrInBuf(Address16& addr)
+	void TxRxSignal::setAddrInBuf(const Address16& addr)
 	{
 		m_addrInBuf = addr;
 	}

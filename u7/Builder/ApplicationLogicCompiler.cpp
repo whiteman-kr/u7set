@@ -318,7 +318,7 @@ namespace Builder
 					result = false;
 				}
 
-				if (s.aperture() <= 0)
+				if (s.roughAperture() <= 0 || s.smoothAperture() <= 0)
 				{
 					m_log->errALC5090(s.appSignalID());
 					result = false;
@@ -896,7 +896,7 @@ namespace Builder
 		str = QString("\tsignal in_data : std_logic_vector(%1-1 downto 0);").arg(inBusWidth);
 		list.append(str);
 
-		str = QString("begin").arg(inPortID).arg(inPortID);
+		str = QString("begin");
 		list.append(str);
 
 		str = QString("\tin_data <= %1;\n").arg(outPortID);
