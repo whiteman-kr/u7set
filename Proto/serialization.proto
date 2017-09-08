@@ -990,73 +990,99 @@ message Address16
 
 message AppSignal
 {
-    optional int32 ID = 1;
-    optional int32 signalGroupID = 2;
-    optional int32 signalInstanceID = 3;
-    optional int32 changesetID = 4;
-    optional bool checkedOut = 5;
-    optional int32 userID = 6;
-    optional int32 subsystemChannel = 7;
-    optional int32 type = 8;			   // analog or discrete
-    optional int64 created = 9;
-    optional bool deleted = 10;
-    optional int64 instanceCreated = 11;
-    optional int32 instanceAction = 12;
-    optional string appSignalID = 13;
-    optional string customAppSignalID = 14;
-    optional string caption = 15;
-    optional int32 dataFormat = 16;
-    optional int32 dataSize = 17;
-    optional int32 lowADC = 18;
-    optional int32 highADC = 19;
-    optional double lowEngeneeringUnits = 20;
-    optional double highEngeneeringUnits = 21;
-    optional int32 unitID = 22;
-    optional double adjustment = 23;
-    optional double lowValidRange = 24;
-    optional double highValidRange = 25;
-    optional double unbalanceLimit = 26;
-    optional double inputLowLimit = 27;
-    optional double inputHighLimit = 28;
-    optional int32 inputUnitID = 29;
-    optional int32 inputSensorID = 30;
-    optional double outputLowLimit = 31;
-    optional double outputHighLimit = 32;
-    optional int32 outputUnitID = 33;
-    optional int32 outputMode = 34;
-    optional int32 outputSensorID = 35;
-    optional bool acquire = 36;
-    optional bool calculated = 37;
-    optional int32 normalState = 38;
-    optional int32 decimalPlaces = 39;
-    optional double aperture = 40;
-    optional int32 inOutType = 41;
-    optional string equipmentID = 42;
-    optional double filteringTime = 43;
-    optional double spreadTolerance = 44;
-    optional int32 byteOrder = 45;
+    // Signal identificators
 
-    optional bool enableTuning = 46;
-    optional float tuningDefaultValue = 47;
-    optional float tuningLowBound = 48;
-    optional float tuningHighBound = 49;
+    optional string appSignalID = 1;
+    optional string customAppSignalID = 2;
+    optional string caption = 3;
+    optional string equipmentID = 4;
+    optional string busTypeID = 5;
+    optional int32 channel = 6 [default = 0];
 
-    optional uint64 hash = 50;
+    // Signal type
 
-    optional string busTypeID = 51;
-    optional bool adaptiveAperture = 52;
+    optional int32 signalType = 16 [default = 1];		// E::SignalType::Discrete
+    optional int32 inOutType = 17 [default = 2];		// E::SignalInOutType::Internal
 
-    optional int32 regValueAddrOffset = 200;
-    optional int32 regValueAddrBit = 201;
+    // Signal format
 
-    optional int32 regValidityAddrOffset = 202;
-    optional int32 regValidityAddrBit = 203;
+    optional int32 dataSize = 21 [default = 0];
+    optional int32 byteOrder = 22 [default = 1];		// E::ByteOrder::BigEndian
+    optional int32 analogSignalFormat = 23 [default = 1];	// E::AnalogSignalFormat::SignedInt32
 
-    optional int32 ioBufferAddrOffset = 204;
-    optional int32 ioBufferAddrBit = 205;
+    // Analog signal properties
 
-    optional int32 ramAddrOffset = 206;
-    optional int32 ramAddrBit = 207;
+    optional int32 unitID = 31 [default = 1];			// NO_UNIT_ID
+    optional int32 lowADC = 32 [default = 0];
+    optional int32 highADC = 33 [default = 0];
+    optional double lowEngeneeringUnits = 34 [default = 0];
+    optional double highEngeneeringUnits = 35 [default = 0];
+    optional double lowValidRange = 36 [default = 0];
+    optional double highValidRange = 37 [default = 0];
+    optional double filteringTime = 38 [default = 0];
+    optional double spreadTolerance = 39 [default = 0];
+
+    // Analog input signal properties
+
+    optional double inputLowLimit = 51 [default = 0];
+    optional double inputHighLimit = 52 [default = 0];
+    optional int32 inputUnitID = 53 [default = 1];		// NO_UNIT_ID
+    optional int32 inputSensorType = 54 [default = 0];
+
+    // Analog output signal properties
+
+    optional double outputLowLimit = 61 [default = 0];
+    optional double outputHighLimit = 62 [default = 0];
+    optional int32 outputUnitID = 63 [default = 1];		// NO_UNIT_ID
+    optional int32 outputMode = 64 [default = 0];		// E::OutputMode::Plus0_Plus5_V
+    optional int32 outputSensorType = 65 [default = 0];
+
+    // Tuning signal properties
+
+    optional bool enableTuning = 71 [default = false];
+    optional float tuningDefaultValue = 72 [default = 0];
+    optional float tuningLowBound = 73 [default = 0];
+    optional float tuningHighBound = 74 [default = 0];
+
+    // Signal properties for MATS
+
+    optional bool acquire = 81 [default = false];
+    optional bool calculated = 82 [default = false];
+    optional int32 normalState = 83 [default = 0];
+    optional int32 decimalPlaces = 84 [default = 2];
+    optional double roughAperture = 85 [default = 1];
+    optional double smoothAperture = 86 [default = 0.5];
+    optional bool adaptiveAperture = 87 [default = false];
+
+    // Signal fields from database
+
+    optional int32 ID = 101 [default = -1];
+    optional int32 signalGroupID = 102 [default = -1];
+    optional int32 signalInstanceID = 103 [default = -1];
+    optional int32 changesetID = 104 [default = -1];
+    optional bool checkedOut = 105 [default = false];
+    optional int32 userID = 106 [default = -1];
+    optional int64 created = 107 [default = 0];
+    optional bool deleted = 108 [default = false];
+    optional int64 instanceCreated = 109 [default = 0];
+    optional int32 instanceAction = 110 [default = 0];			// VcsItemActionType::Unknown
+
+    // Signal properties calculated in compile-time
+
+    optional uint64 hash = 116 [default = 0];
+    optional string unitStr = 117;
+
+    optional Address16 ioBufAddr = 118;
+    optional Address16 tuningAddr = 119;
+    optional Address16 ualAddr = 120;
+    optional Address16 regBufAddr = 121;
+    optional Address16 regValueAddr = 122;
+    optional Address16 regValidityAddr = 123;
+}
+
+message AppSignalSet
+{
+    repeated AppSignal items = 1;
 }
 
 

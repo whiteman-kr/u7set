@@ -509,7 +509,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	//serializeField(attr, "Adjustment", &Signal::setAdjustment);
 	serializeField(attr, "LowValidRange", &Signal::setLowValidRange);
 	serializeField(attr, "HighValidRange", &Signal::setHighValidRange);
-	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
+//	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
 	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
 	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
     serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
@@ -555,7 +555,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("UnitID", unitID());
 	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
 	xml.writeDoubleAttribute("HighValidRange", highValidRange());
-	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
+//	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
 	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
 	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
 	xml.writeIntAttribute("InputUnitID", inputUnitID());
@@ -636,7 +636,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("UnitID", &m_unitID);
 	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
 	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
-	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
+//	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
 	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
 	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
 
@@ -711,13 +711,79 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	return result;
 }
 
-void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
+void Signal::serializeTo(Proto::AppSignal* s) const
 {
 	if (s == nullptr)
 	{
 		assert(false);
 		return;
 	}
+
+	// Signal identificators
+
+	s->set_appsignalid(m_appSignalID.toStdString());
+	s->set_customappsignalid(m_customAppSignalID.toStdString());
+	s->set_caption(m_caption.toStdString());
+	s->set_equipmentid(m_equipmentID.toStdString());
+	s->set_bustypeid(m_busTypeID.toStdString());
+	s->set_channel(TO_INT(m_channel));
+
+	// Signal type
+
+	s->set_signaltype(TO_INT(m_signalType));
+	s->set_inouttype(TO_INT(m_inOutType));
+
+	// Signal format
+
+	s->set_datasize(m_dataSize);
+	s->set_byteorder(TO_INT(m_byteOrder));
+	s->set_analogsignalformat(TO_INT(m_analogSignalFormat));
+	s->set_unitid(m_unitID);
+
+	// Analog signal properties
+
+	s->set_lowadc(m_lowADC);
+	s->set_highadc(m_highADC);
+	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
+	s->set_highengeneeringunits(m_highEngeneeringUnits);
+	s->set_lowvalidrange(m_lowValidRange);
+	s->set_highvalidrange(m_highValidRange);
+	s->set_filteringtime(m_filteringTime);
+	s->set_spreadtolerance(m_spreadTolerance);
+
+	// Analog input signal properties
+
+	s->set_inputlowlimit(m_inputLowLimit);
+	s->set_inputhighlimit(m_inputHighLimit);
+	s->set_inputunitid(m_inputUnitID);
+	s->set_inputsensortype(m_inputSensorType);
+
+	// Analog output signal properties
+
+	s->set_outputlowlimit(m_outputLowLimit);
+	s->set_outputhighlimit(m_outputHighLimit);
+	s->set_outputunitid(m_outputUnitID);
+	s->set_outputmode(m_outputMode);
+	s->set_outputsensortype(m_outputSensorType);
+
+	// Tuning signal properties
+
+	s->set_enabletuning(m_enableTuning);
+	s->set_tuningdefaultvalue(m_tuningDefaultValue);
+	s->set_tuninglowbound(m_tuningLowBound);
+	s->set_tuninghighbound(m_tuningHighBound);
+
+	// Signal properties for MATS
+
+	s->set_acquire(m_acquire);
+	s->set_calculated(m_calculated);
+	s->set_normalstate(m_normalState);
+	s->set_decimalplaces(m_decimalPlaces);
+	s->set_roughaperture(m_roughAperture);
+	s->set_smoothaperture(m_roughAperture);
+	s->set_adaptiveaperture(m_adaptiveAperture);
+
+	// Signal fields from database
 
 	s->set_id(m_ID);
 	s->set_signalgroupid(m_signalGroupID);
@@ -725,70 +791,37 @@ void Signal::serializeToProtoAppSignal(Proto::AppSignal* s) const
 	s->set_changesetid(m_changesetID);
 	s->set_checkedout(m_checkedOut);
 	s->set_userid(m_userID);
-	s->set_subsystemchannel(TO_INT(m_channel));
-	s->set_type(m_signalType);
 	s->set_created(m_created.toMSecsSinceEpoch());
 	s->set_deleted(m_deleted);
 	s->set_instancecreated(m_instanceCreated.toMSecsSinceEpoch());
 	s->set_instanceaction(m_instanceAction.toInt());
-	s->set_appsignalid(m_appSignalID.toStdString());
-	s->set_customappsignalid(m_customAppSignalID.toStdString());
-	s->set_caption(m_caption.toStdString());
-	s->set_dataformat(static_cast<::google::protobuf::int32>(m_analogSignalFormat));
-	s->set_datasize(m_dataSize);
-	s->set_lowadc(m_lowADC);
-	s->set_highadc(m_highADC);
-	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
-	s->set_highengeneeringunits(m_highEngeneeringUnits);
-	s->set_unitid(m_unitID);
-	s->set_lowvalidrange(m_lowValidRange);
-	s->set_highvalidrange(m_highValidRange);
-	s->set_unbalancelimit(m_unbalanceLimit);
-	s->set_inputlowlimit(m_inputLowLimit);
-	s->set_inputhighlimit(m_inputHighLimit);
-	s->set_inputunitid(m_inputUnitID);
-	s->set_inputsensorid(m_inputSensorType);
-	s->set_outputlowlimit(m_outputLowLimit);
-	s->set_outputhighlimit(m_outputHighLimit);
-	s->set_outputunitid(m_outputUnitID);
-	s->set_outputmode(m_outputMode);
-	s->set_outputsensorid(m_outputSensorType);
-	s->set_acquire(m_acquire);
-	s->set_calculated(m_calculated);
-	s->set_normalstate(m_normalState);
-	s->set_decimalplaces(m_decimalPlaces);
-	s->set_aperture(m_roughAperture);
-	s->set_inouttype(TO_INT(m_inOutType));
-	s->set_equipmentid(m_equipmentID.toStdString());
-	s->set_filteringtime(m_filteringTime);
-	s->set_spreadtolerance(m_spreadTolerance);
-	s->set_byteorder(TO_INT(m_byteOrder));
 
-	s->set_enabletuning(m_enableTuning);
-	s->set_tuningdefaultvalue(m_tuningDefaultValue);
-	s->set_tuninglowbound(m_tuningLowBound);
-	s->set_tuninghighbound(m_tuningHighBound);
+	// Signal properties calculated in compile-time
 
 	s->set_hash(calcHash(m_appSignalID));
+	s->set_unitstr(m_unitStr.toStdString());
 
-	s->set_bustypeid(m_busTypeID.toStdString());
-	s->set_adaptiveaperture(m_adaptiveAperture);
+	s->mutable_iobufaddr()->set_offset(m_ioBufAddr.offset());
+	s->mutable_iobufaddr()->set_bit(m_ioBufAddr.bit());
 
-	s->set_regvalueaddroffset(m_regValueAddr.offset());
-	s->set_regvalueaddrbit(m_regValueAddr.bit());
+	s->mutable_tuningaddr()->set_offset(m_tuningAddr.offset());
+	s->mutable_tuningaddr()->set_bit(m_tuningAddr.bit());
 
-	s->set_regvalidityaddroffset(m_regValidityAddr.offset());
-	s->set_regvalidityaddrbit(m_regValidityAddr.bit());
+	s->mutable_ualaddr()->set_offset(m_ualAddr.offset());
+	s->mutable_ualaddr()->set_bit(m_ualAddr.bit());
 
-	s->set_iobufferaddroffset(m_ioBufAddr.offset());
-	s->set_iobufferaddrbit(m_ioBufAddr.bit());
+	s->mutable_regbufaddr()->set_offset(m_regBufAddr.offset());
+	s->mutable_regbufaddr()->set_bit(m_regBufAddr.bit());
 
-	s->set_ramaddroffset(m_ualAddr.offset());
-	s->set_ramaddrbit(m_ualAddr.bit());
+	s->mutable_regvalueaddr()->set_offset(m_regValueAddr.offset());
+	s->mutable_regvalueaddr()->set_bit(m_regValueAddr.bit());
+
+	s->mutable_regvalidityaddr()->set_offset(m_regValidityAddr.offset());
+	s->mutable_regvalidityaddr()->set_bit(m_regValidityAddr.bit());
 }
 
 
-void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
+void Signal::serializeFrom(const Proto::AppSignal* s)
 {
 	if (s == nullptr)
 	{
@@ -796,302 +829,109 @@ void Signal::serializeFromProtoAppSignal(const Proto::AppSignal* s)
 		return;
 	}
 
-	if (s->has_id())
-	{
-		m_ID = s->id();
-	}
+	// Signal identificators
 
-	if (s->has_signalgroupid())
-	{
-		m_signalGroupID = s->signalgroupid();
-	}
+	m_appSignalID = QString::fromStdString(s->appsignalid());
+	m_customAppSignalID = QString::fromStdString(s->customappsignalid());
+	m_caption = QString::fromStdString(s->caption());
+	m_equipmentID = QString::fromStdString(s->equipmentid());
+	m_busTypeID = QString::fromStdString(s->bustypeid());
+	m_channel = static_cast<E::Channel>(s->channel());
 
-	if (s->has_signalinstanceid())
-	{
-		m_signalInstanceID = s->signalinstanceid();
-	}
+	// Signal type
 
-	if (s->has_changesetid())
-	{
-		m_changesetID = s->changesetid();
-	}
+	m_signalType = static_cast<E::SignalType>(s->signaltype());
+	m_inOutType = static_cast<E::SignalInOutType>(s->inouttype());
 
-	if (s->has_checkedout())
-	{
-		m_checkedOut = s->checkedout();
-	}
+	// Signal format
 
-	if (s->has_userid())
-	{
-		m_userID = s->userid();
-	}
+	m_dataSize = s->datasize();
+	m_byteOrder = static_cast<E::ByteOrder>(s->byteorder());
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s->analogsignalformat());
 
-	if (s->has_subsystemchannel())
-	{
-		m_channel = static_cast<E::Channel>(s->subsystemchannel());
-	}
+	// Analog signal properties
 
-	if (s->has_type())
-	{
-		m_signalType = static_cast<E::SignalType>(s->type());
-	}
+	m_unitID = s->unitid();
+	m_lowADC = s->lowadc();
+	m_highADC = s->highadc();
+	m_lowEngeneeringUnits = s->lowengeneeringunits();
+	m_highEngeneeringUnits = s->highengeneeringunits();
+	m_lowValidRange = s->lowvalidrange();
+	m_highValidRange = s->highvalidrange();
+	m_filteringTime = s->filteringtime();
+	m_spreadTolerance = s->spreadtolerance();
 
-	if (s->has_created())
-	{
-		m_created.setMSecsSinceEpoch(s->created());
-	}
+	// Analog input signal properties
 
-	if (s->has_deleted())
-	{
-		m_deleted = s->deleted();
-	}
+	m_inputLowLimit = s->inputlowlimit();
+	m_inputHighLimit = s->inputhighlimit();
+	m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
+	m_inputSensorType = static_cast<E::SensorType>(s->inputsensortype());
 
-	if (s->has_instancecreated())
-	{
-		m_instanceCreated.setMSecsSinceEpoch(s->instancecreated());
-	}
+	// Analog output signal properties
 
-	if (s->has_instanceaction())
-	{
-		m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s->instanceaction());
-	}
+	m_outputLowLimit = s->outputlowlimit();
+	m_outputHighLimit = s->outputhighlimit();
+	m_outputUnitID = s->outputunitid();
+	m_outputMode = static_cast<E::OutputMode>(s->outputmode());
+	m_outputSensorType = static_cast<E::SensorType>(s->outputsensortype());
 
-	if (s->has_appsignalid())
-	{
-		m_appSignalID = QString::fromStdString(s->appsignalid());
-	}
+	// Tuning signal properties
 
-	if (s->has_customappsignalid())
-	{
-		m_customAppSignalID = QString::fromStdString(s->customappsignalid());
-	}
+	m_enableTuning = s->enabletuning();
+	m_tuningDefaultValue = s->tuningdefaultvalue();
+	m_tuningLowBound = s->tuninglowbound();
+	m_tuningHighBound = s->tuninghighbound();
 
-	if (s->has_caption())
-	{
-		m_caption = QString::fromStdString(s->caption());
-	}
+	//	Signal properties for MATS
 
-	if(s->has_dataformat())
-	{
-		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s->dataformat());
-	}
+	m_acquire = s->acquire();
+	m_calculated = s->calculated();
+	m_normalState = s->normalstate();
+	m_decimalPlaces = s->decimalplaces();
+	m_roughAperture = s->roughaperture();
+	m_smoothAperture = s->smoothaperture();
+	m_adaptiveAperture = s->adaptiveaperture();
 
-	if (s->has_datasize())
-	{
-		m_dataSize = s->datasize();
-	}
+	// Signal fields from database
 
-	if (s->has_lowadc())
-	{
-		m_lowADC = s->lowadc();
-	}
+	m_ID = s->id();
+	m_signalGroupID = s->signalgroupid();
+	m_signalInstanceID = s->signalinstanceid();
+	m_changesetID = s->changesetid();
+	m_checkedOut = s->checkedout();
+	m_userID = s->userid();
+	m_created.setMSecsSinceEpoch(s->created());
+	m_deleted = s->deleted();
+	m_instanceCreated.setMSecsSinceEpoch(s->instancecreated());
+	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s->instanceaction());
 
-	if (s->has_highadc())
-	{
-		m_highADC = s->highadc();
-	}
+	// Signal properties calculated in compile-time
 
-	if (s->has_lowengeneeringunits())
-	{
-		m_lowEngeneeringUnits = s->lowengeneeringunits();
-	}
+	m_hash = s->hash();
+	m_unitStr = QString::fromStdString(s->unitstr());
 
-	if (s->has_highengeneeringunits())
-	{
-		m_highEngeneeringUnits = s->highengeneeringunits();
-	}
+	m_ioBufAddr.setOffset(s->iobufaddr().offset());
+	m_ioBufAddr.setBit(s->iobufaddr().bit());
 
-	if (s->has_unitid())
-	{
-		m_unitID = s->unitid();
-	}
+	m_tuningAddr.setOffset(s->tuningaddr().offset());
+	m_tuningAddr.setBit(s->tuningaddr().bit());
 
-	if (s->has_lowvalidrange())
-	{
-		m_lowValidRange = s->lowvalidrange();
-	}
+	m_ualAddr.setOffset(s->ualaddr().offset());
+	m_ualAddr.setBit(s->ualaddr().bit());
 
-	if (s->has_highvalidrange())
-	{
-		m_highValidRange = s->highvalidrange();
-	}
+	m_regBufAddr.setOffset(s->regbufaddr().offset());
+	m_regBufAddr.setBit(s->regbufaddr().bit());
 
-	if (s->has_unbalancelimit())
-	{
-		m_unbalanceLimit = s->unbalancelimit();
-	}
+	m_regValueAddr.setOffset(s->regvalueaddr().offset());
+	m_regValueAddr.setBit(s->regvalueaddr().bit());
 
-	if (s->has_inputlowlimit())
-	{
-		m_inputLowLimit = s->inputlowlimit();
-	}
-
-	if (s->has_inputhighlimit())
-	{
-		m_inputHighLimit = s->inputhighlimit();
-	}
-
-	if (s->has_inputunitid())
-	{
-		m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
-	}
-
-	if (s->has_inputsensorid())
-	{
-		m_inputSensorType = static_cast<E::SensorType>(s->inputsensorid());
-	}
-
-	if (s->has_outputlowlimit())
-	{
-		m_outputLowLimit = s->outputlowlimit();
-	}
-
-	if (s->has_outputhighlimit())
-	{
-		m_outputHighLimit = s->outputhighlimit();
-	}
-
-	if (s->has_outputunitid())
-	{
-		m_outputUnitID = s->outputunitid();
-	}
-
-	if (s->has_outputmode())
-	{
-		m_outputMode = static_cast<E::OutputMode>(s->outputmode());
-	}
-
-	if (s->has_outputsensorid())
-	{
-		m_outputSensorType = static_cast<E::SensorType>(s->outputsensorid());
-	}
-
-	if (s->has_acquire())
-	{
-		m_acquire = s->acquire();
-	}
-
-	if (s->has_calculated())
-	{
-		m_calculated = s->calculated();
-	}
-
-	if (s->has_normalstate())
-	{
-		m_normalState = s->normalstate();
-	}
-
-	if (s->has_decimalplaces())
-	{
-		m_decimalPlaces = s->decimalplaces();
-	}
-
-	if (s->has_aperture())
-	{
-		m_roughAperture = s->aperture();
-	}
-
-	if (s->has_inouttype())
-	{
-		m_inOutType = static_cast<E::SignalInOutType>(s->inouttype());
-	}
-
-	if (s->has_equipmentid())
-	{
-		m_equipmentID = QString::fromStdString(s->equipmentid());
-	}
-
-	if (s->has_filteringtime())
-	{
-		m_filteringTime = s->filteringtime();
-	}
-
-	if (s->has_spreadtolerance())
-	{
-		m_spreadTolerance = s->spreadtolerance();
-	}
-
-	if (s->has_byteorder())
-	{
-		m_byteOrder = static_cast<E::ByteOrder>(s->byteorder());
-	}
-
-	if (s->has_enabletuning())
-	{
-		m_enableTuning = s->enabletuning();
-	}
-
-	if (s->has_tuningdefaultvalue())
-	{
-		m_tuningDefaultValue = s->tuningdefaultvalue();
-	}
-
-	if (s->has_tuninglowbound())
-	{
-		m_tuningLowBound = s->tuninglowbound();
-	}
-
-	if (s->has_tuninghighbound())
-	{
-		m_tuningHighBound = s->tuninghighbound();
-	}
-
-	if (s->has_hash())
-	{
-		m_hash = s->hash();
-	}
-
-	if (s->has_bustypeid())
-	{
-		m_busTypeID = QString::fromStdString(s->bustypeid());
-	}
-
-	if (s->has_adaptiveaperture())
-	{
-		m_adaptiveAperture = s->adaptiveaperture();
-	}
-
-	if (s->has_regvalueaddroffset())
-	{
-		m_regValueAddr.setOffset(s->regvalueaddroffset());
-	}
-
-	if (s->has_regvalueaddrbit())
-	{
-		m_regValueAddr.setBit(s->regvalueaddrbit());
-	}
-
-	if (s->has_regvalidityaddroffset())
-	{
-		m_regValidityAddr.setOffset(s->regvalidityaddroffset());
-	}
-
-	if (s->has_regvalidityaddrbit())
-	{
-		m_regValidityAddr.setBit(s->regvalidityaddrbit());
-	}
-
-	if (s->has_iobufferaddroffset())
-	{
-		m_ioBufAddr.setOffset(s->iobufferaddroffset());
-	}
-
-	if (s->has_iobufferaddrbit())
-	{
-		m_ioBufAddr.setBit(s->iobufferaddrbit());
-	}
-
-	if (s->has_ramaddroffset())
-	{
-		m_ualAddr.setOffset(s->ramaddroffset());
-	}
-
-	if (s->has_ramaddrbit())
-	{
-		m_ualAddr.setBit(s->ramaddrbit());
-	}
+	m_regValidityAddr.setOffset(s->regvalidityaddr().offset());
+	m_regValidityAddr.setBit(s->regvalidityaddr().bit());
 }
 
+
+/*
 void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const
 {
 	if (message == nullptr)
@@ -1148,27 +988,7 @@ void Signal::serializeToProtoAppSignalParam(Proto::AppSignalParam* message) cons
 
 	return;
 }
-
-
-// for DeviceSignal.dataFormat conversion
-//
-/*
-void Signal::setAnalogSignalFormat(E::DataFormat dataFormat)
-{
-	//	assert(dataFormat == E::DataFormat::Float || dataFormat == E::DataFormat::SignedInt);
-
-	if (dataFormat == E::DataFormat::UnsignedInt)
-	{
-		dataFormat = E::DataFormat::SignedInt;
-	}
-
-	// values of corresponding members of enums E::AppSignalDataFormat and E::DataFormat are equal!
-	//
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(dataFormat);
-}*/
-
-
-
+*/
 
 // --------------------------------------------------------------------------------------------------------
 //

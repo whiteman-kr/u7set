@@ -3438,6 +3438,9 @@ void GetAppSignalReply::CopyFrom(const GetAppSignalReply& from) {
 
 bool GetAppSignalReply::IsInitialized() const {
 
+  for (int i = 0; i < appsignals_size(); i++) {
+    if (!this->appsignals(i).IsInitialized()) return false;
+  }
   return true;
 }
 

@@ -158,9 +158,9 @@ void SignalProperties::initProperties()
 		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList(), Signal::unitID, Signal::setUnitID, m_signal);
 		unitProperty->setCategory(dataFormatCategory);
 
-		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
+/*		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
 		m_propertiesDependentOnPrecision.push_back(unbalanceLimitProperty);
-		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);
+		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);*/
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);

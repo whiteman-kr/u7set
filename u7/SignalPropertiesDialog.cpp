@@ -485,7 +485,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/unitID", signal.unitID());
 	settings.setValue("SignalsTabPage/LastEditedSignal/lowValidRange", signal.lowValidRange());
 	settings.setValue("SignalsTabPage/LastEditedSignal/highValidRange", signal.highValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/unbalanceLimit", signal.unbalanceLimit());
+//	settings.setValue("SignalsTabPage/LastEditedSignal/unbalanceLimit", signal.unbalanceLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputLowLimit", signal.inputLowLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputHighLimit", signal.inputHighLimit());
 	settings.setValue("SignalsTabPage/LastEditedSignal/inputUnitID", signal.inputUnitID());

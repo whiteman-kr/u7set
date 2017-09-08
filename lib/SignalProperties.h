@@ -33,7 +33,7 @@ public:
 	Q_INVOKABLE int unitID() const { return m_signal.unitID(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
-	Q_INVOKABLE double unbalanceLimit() const { return m_signal.unbalanceLimit(); }
+//	Q_INVOKABLE double unbalanceLimit() const { return m_signal.unbalanceLimit(); }
 	Q_INVOKABLE double inputLowLimit() const { return m_signal.inputLowLimit(); }
 	Q_INVOKABLE double inputHighLimit() const { return m_signal.inputHighLimit(); }
 	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.inputUnitID());}

@@ -194,10 +194,10 @@ public:
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 
+	// Analog signal properties
+
 	int unitID() const { return m_unitID; }
 	void setUnitID(int unitID) { m_unitID = unitID; }
-
-	// Analog signal properties
 
 	int lowADC() const { return m_lowADC; }
 	void setLowADC(int lowADC) { m_lowADC = lowADC; }
@@ -297,9 +297,6 @@ public:
 	bool adaptiveAperture() const { return m_adaptiveAperture; }
 	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
 
-	double unbalanceLimit() const { return m_unbalanceLimit; }
-	void setUnbalanceLimit(double unbalanceLimit) { m_unbalanceLimit = unbalanceLimit; }
-
 	// Signal fields from database
 
 	int ID() const { return m_ID; }
@@ -370,10 +367,10 @@ public:
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 
-	void serializeToProtoAppSignal(Proto::AppSignal* s) const;
-	void serializeFromProtoAppSignal(const Proto::AppSignal* s);
+	void serializeTo(Proto::AppSignal* s) const;
+	void serializeFrom(const Proto::AppSignal* s);
 
-	void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
+	//void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -418,10 +415,11 @@ private:
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
 							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
-	int m_unitID = NO_UNIT_ID;                                      // physical units of signal (kg, mm, Pa ...)
 
 	// Analog signal properties
 	//
+	int m_unitID = NO_UNIT_ID;                                      // physical units of signal (kg, mm, Pa ...)
+
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
 
@@ -465,7 +463,6 @@ private:
 	double m_roughAperture = 1;
 	double m_smoothAperture = 0.5;
 	bool m_adaptiveAperture = false;
-	double m_unbalanceLimit = 0;			// ??? can delete
 
 	// Signal fields from database
 	//
@@ -502,6 +499,8 @@ private:
 
 	Address16 m_regValueAddr;				// signal Value address in FSC data packet
 	Address16 m_regValidityAddr;			// signal Validity address in FSC data packet
+
+	//
 
 	bool m_needConversion = false;
 

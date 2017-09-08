@@ -291,7 +291,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.highEngeneeringUnits())); break;
 		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.lowValidRange())); break;
 		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.highValidRange())); break;
-		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
+//		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.roughAperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
 		case SC_SPREAD_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spreadTolerance())); break;
@@ -368,7 +368,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_HIGH_LIMIT: if (le) s.setHighEngeneeringUnits(le->text().toDouble()); break;
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
-		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
+//		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
 		case SC_APERTURE: if (le) s.setRoughAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
@@ -743,7 +743,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DROP_LIMIT: return signal.lowValidRange();
 					case SC_EXCESS_LIMIT: return signal.highValidRange();
-					case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
+//					case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
 					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
@@ -885,7 +885,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_UNIT: signal.setUnitID(value.toInt()); break;
 			case SC_DROP_LIMIT: signal.setLowValidRange(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setHighValidRange(value.toDouble()); break;
-			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
+//			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
 			case SC_OUTPUT_MODE: signal.setOutputMode(static_cast<E::OutputMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
@@ -1129,7 +1129,7 @@ void SignalsModel::addSignal()
 	}
 	signal.setLowValidRange(settings.value("SignalsTabPage/LastEditedSignal/lowValidRange").toDouble());
 	signal.setHighValidRange(settings.value("SignalsTabPage/LastEditedSignal/highValidRange").toDouble());
-	signal.setUnbalanceLimit(settings.value("SignalsTabPage/LastEditedSignal/unbalanceLimit").toDouble());
+//	signal.setUnbalanceLimit(settings.value("SignalsTabPage/LastEditedSignal/unbalanceLimit").toDouble());
 
 	signal.setInputLowLimit(settings.value("SignalsTabPage/LastEditedSignal/inputLowLimit").toDouble());
 	signal.setInputHighLimit(settings.value("SignalsTabPage/LastEditedSignal/inputHighLimit").toDouble());
