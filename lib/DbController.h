@@ -49,9 +49,12 @@ public:
 
 	// File management
 	//
+	bool isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget);
+
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
 
+	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
@@ -163,8 +166,12 @@ signals:
 	void signal_updateUser(DbUser user);
 	void signal_getUserList(std::vector<DbUser>* out);
 
+	bool signal_isFileExists(QString fileName, int parentId, int* fileId);
+
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
-	void signal_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
+	void signal_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
+	void signal_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
 	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
