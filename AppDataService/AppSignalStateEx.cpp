@@ -26,8 +26,8 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 
 	m_isDiscreteSignal = signal->isDiscrete();
 
-	m_roughAperture = signal->roughAperture();
-	m_smoothAperture = signal->smoothAperture();
+	m_roughAperture = signal->coarseAperture();
+	m_smoothAperture = signal->fineAperture();
 
 	m_lowLimit = signal->lowEngeneeringUnits();
 	m_highLimit = signal->highEngeneeringUnits();

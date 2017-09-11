@@ -475,7 +475,7 @@ static int stdColorIndex = 0;
 
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
-		::Proto::AppSignalParamSet protoSetMessage;
+		::Proto::AppSignalSet protoSetMessage;
 		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
 
 		if (ok == false)
@@ -486,9 +486,9 @@ static int stdColorIndex = 0;
 
 		// Parse data
 		//
-		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 		{
-			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
 			AppSignalParam appSignalParam;
 			ok = appSignalParam.load(appSignalMessage);

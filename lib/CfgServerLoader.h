@@ -97,6 +97,8 @@ private:
 	{
 		QString pathFileName;
 		QString etalonMD5;
+		bool needUncompress = false;
+
 		bool isAutoRequest = false;
 		bool isTestCfgRequest = false;						// does matter only for configuration.xml file request
 		QByteArray* fileData = nullptr;						// sets for manual requests only
@@ -166,9 +168,9 @@ private:
 
 	void readSavedConfiguration();
 
-	bool readCfgFile(const QString& pathFileName, QByteArray* fileData);
+	bool readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress);
 
-	bool readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5);
+	bool readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5, bool needDecompress);
 	bool isCfgFileIsExists(const QString& filePathName, const QString& etalonMd5);
 
 	void configurationChanged();

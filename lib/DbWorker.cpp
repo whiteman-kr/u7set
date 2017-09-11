@@ -4107,8 +4107,8 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setCalculated(q.value(35).toBool());
 	s.setNormalState(q.value(36).toInt());
 	s.setDecimalPlaces(q.value(37).toInt());
-	s.setRoughAperture(q.value(38).toDouble());
-	s.setSmoothAperture(q.value(38).toDouble());			// !!!!
+	s.setCoarseAperture(q.value(38).toDouble());
+	s.setFineAperture(q.value(38).toDouble());			// !!!!
 	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
 	s.setEquipmentID(q.value(40).toString());
     s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));               // since version 35 of database
@@ -4170,7 +4170,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(toSqlBoolean(s.calculated()))
 	.arg(s.normalState())
 	.arg(s.decimalPlaces())
-	.arg(s.roughAperture())
+	.arg(s.coarseAperture())
 	.arg(TO_INT(s.inOutType()))
 	.arg(toSqlStr(s.equipmentID()))
 	.arg(s.outputMode())						// since version 35 of database

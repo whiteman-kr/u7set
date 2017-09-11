@@ -149,7 +149,7 @@ void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 
 	// Save signals to protobufer
 	//
-	::Proto::AppSignalParamSet protoSetMessage;
+	::Proto::AppSignalSet protoSetMessage;
 	QStringList appSignalIds = schemaItemSignal->appSignalIdList();
 
 	for (QString id : appSignalIds)
@@ -163,11 +163,11 @@ void MonitorSchemaWidget::mouseMoveEvent(QMouseEvent* event)
 
 		assert(signalParam.appSignalId() == id);
 
-		::Proto::AppSignalParam* protoSignalMessage = protoSetMessage.add_items();
+		::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
 		signalParam.save(protoSignalMessage);
 	}
 
-	if (protoSetMessage.items_size() == 0)
+	if (protoSetMessage.appsignal_size() == 0)
 	{
 		return;
 	}

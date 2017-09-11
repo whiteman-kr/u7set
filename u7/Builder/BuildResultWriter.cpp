@@ -18,13 +18,14 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
+	BuildFile::BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
 	{
 		m_fileName = removeHeadTailSeparator(fileName);
 
 		m_info.pathFileName = constructPathFileName(subDir, fileName);
 		m_info.ID = id;
 		m_info.tag = tag;
+		m_info.compressed = compress;
 	}
 
 
@@ -184,7 +185,16 @@ namespace Builder
 			return false;
 		}
 
-		qint64 written = m_file.write(data);
+		qint64 written = 0;
+
+		if (m_info.compressed == true)
+		{
+			written = m_file.write(qCompress(data));
+		}
+		else
+		{
+			written = m_file.write(data);
+		}
 
 		if (written == -1)
 		{
@@ -207,11 +217,24 @@ namespace Builder
 			return false;
 		}
 
-		QTextStream textStream(&m_file);
+		QByteArray data;
+
+		QTextStream textStream(&data);
 
 		textStream << dataString;
 
 		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
 
 		m_file.close();
 
@@ -226,7 +249,9 @@ namespace Builder
 			return false;
 		}
 
-		QTextStream textStream(&m_file);
+		QByteArray data;
+
+		QTextStream textStream(&data);
 
 		for(auto string : stringList)
 		{
@@ -234,6 +259,17 @@ namespace Builder
 		}
 
 		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
 
 		m_file.close();
 
@@ -745,12 +781,11 @@ namespace Builder
 		return result;
 	}
 
-
-	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag)
+	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
 	{
 		assert(fileName.isEmpty() == false);
 
-		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag, compress);
 
 		QString pathFileName = buildFile->pathFileName();
 
@@ -788,27 +823,27 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", data);
+		return addFile(subDir, fileName, "", "", data, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& dataString, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", dataString);
+		return addFile(subDir, fileName, "", "", dataString, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress)
 	{
-		return addFile(subDir, fileName, "", "", stringList);
+		return addFile(subDir, fileName, "", "", stringList, compress);
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -827,9 +862,9 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -848,9 +883,9 @@ namespace Builder
 	}
 
 
-	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList)
+	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList, bool compress)
 	{
-		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag);
+		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
 
 		if (buildFile == nullptr)
 		{
@@ -867,7 +902,6 @@ namespace Builder
 
 		return buildFile;
 	}
-
 
 	bool BuildResultWriter::writeConfigurationXmlFiles()
 	{

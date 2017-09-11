@@ -17,8 +17,8 @@ struct AppSignalParamMimeType
 namespace Proto
 {
 	class AppSignalState;
-	class AppSignalParam;
-	class AppSignalParamSet;
+	class AppSignal;
+	class AppSignalSet;
 }
 
 
@@ -133,8 +133,8 @@ class AppSignalParam
 public:
 	AppSignalParam();
 
-	bool load(const ::Proto::AppSignalParam& message);
-	void save(::Proto::AppSignalParam* message) const;
+	bool load(const Proto::AppSignal &message);
+	void save(::Proto::AppSignal* message) const;
 
 	// Properties
 	//
@@ -254,7 +254,8 @@ private:
 	E::SensorType m_outputSensorType = E::SensorType::NoSensorType;	// electric sensor type for output range (was created for m_outputMode)
 
 	int m_precision = 2;
-	double m_aperture = 1;
+	double m_coarseAperture = 1;
+	double m_fineAperture = 0.5;
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 	bool m_enableTuning = false;

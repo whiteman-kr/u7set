@@ -160,11 +160,11 @@ AppSignalParam::AppSignalParam()
 {
 }
 
-bool AppSignalParam::load(const ::Proto::AppSignalParam& message)
+bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
 	m_hash = message.hash();
 	m_appSignalId = QString::fromStdString(message.appsignalid());
-	m_customSignalId = QString::fromStdString(message.customsignalid());
+	m_customSignalId = QString::fromStdString(message.customappsignalid());
 	m_caption = QString::fromStdString(message.caption());
 	m_equipmentId = QString::fromStdString(message.equipmentid());
 
@@ -193,8 +193,9 @@ bool AppSignalParam::load(const ::Proto::AppSignalParam& message)
 	m_outputMode = static_cast<E::OutputMode>(message.outputmode());
 	m_outputSensorType = static_cast<E::SensorType>(message.outputsensortype());
 
-	m_precision = message.precision();
-	m_aperture = message.aperture();
+	m_precision = message.decimalplaces();
+	m_coarseAperture = message.coarseaperture();
+	m_fineAperture = message.fineaperture();
 	m_filteringTime = message.filteringtime();
 	m_spreadTolerance = message.spreadtolerance();
 	m_enableTuning = message.enabletuning();
@@ -203,7 +204,7 @@ bool AppSignalParam::load(const ::Proto::AppSignalParam& message)
 	return true;
 }
 
-void AppSignalParam::save(Proto::AppSignalParam* message) const
+void AppSignalParam::save(::Proto::AppSignal *message) const
 {
 	if (message == nullptr)
 	{
@@ -213,7 +214,7 @@ void AppSignalParam::save(Proto::AppSignalParam* message) const
 
 	message->set_hash(m_hash);
 	message->set_appsignalid(m_appSignalId.toStdString());
-	message->set_customsignalid(m_customSignalId.toStdString());
+	message->set_customappsignalid(m_customSignalId.toStdString());
 	message->set_caption(m_caption.toStdString());
 	message->set_equipmentid(m_equipmentId.toStdString());
 
@@ -242,8 +243,9 @@ void AppSignalParam::save(Proto::AppSignalParam* message) const
 	message->set_outputmode(m_outputMode);
 	message->set_outputsensortype(m_outputSensorType);
 
-	message->set_precision(m_precision);
-	message->set_aperture(m_aperture);
+	message->set_decimalplaces(m_precision);
+	message->set_coarseaperture(m_coarseAperture);
+	message->set_fineaperture(m_fineAperture);
 	message->set_filteringtime(m_filteringTime);
 	message->set_spreadtolerance(m_spreadTolerance);
 	message->set_enabletuning(m_enableTuning);
@@ -483,12 +485,12 @@ void AppSignalParam::setPrecision(int value)
 
 double AppSignalParam::aperture()
 {
-	return m_aperture;
+	return m_coarseAperture;
 }
 
 void AppSignalParam::setAperture(double value)
 {
-	m_aperture = value;
+	m_coarseAperture = value;
 }
 
 double AppSignalParam::filteringTime()

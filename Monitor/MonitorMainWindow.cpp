@@ -931,7 +931,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		//
 		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
 
-		::Proto::AppSignalParamSet protoSetMessage;
+		::Proto::AppSignalSet protoSetMessage;
 		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
 
 		if (ok == false)
@@ -941,13 +941,13 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		}
 
 		std::vector<AppSignalParam> appSignals;
-		appSignals.reserve(protoSetMessage.items_size());
+		appSignals.reserve(protoSetMessage.appsignal_size());
 
 		// Parse data
 		//
-		for (int i = 0; i < protoSetMessage.items_size(); i++)
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
 		{
-			const ::Proto::AppSignalParam& appSignalMessage = protoSetMessage.items(i);
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
 
 			AppSignalParam appSignalParam;
 			ok = appSignalParam.load(appSignalMessage);

@@ -987,6 +987,16 @@ message Address16
     required int32 bit = 2 [default = -1];
 }
 
+message Unit
+{
+    required int32 id = 1 [default = 0];
+    required string caption = 2;
+}
+
+message UnitSet
+{
+    repeated Unit unit = 1;
+}
 
 message AppSignal
 {
@@ -1050,8 +1060,8 @@ message AppSignal
     optional bool calculated = 82 [default = false];
     optional int32 normalState = 83 [default = 0];
     optional int32 decimalPlaces = 84 [default = 2];
-    optional double roughAperture = 85 [default = 1];
-    optional double smoothAperture = 86 [default = 0.5];
+    optional double coarseAperture = 85 [default = 1];
+    optional double fineAperture = 86 [default = 0.5];
     optional bool adaptiveAperture = 87 [default = false];
 
     // Signal fields from database
@@ -1070,7 +1080,7 @@ message AppSignal
     // Signal properties calculated in compile-time
 
     optional uint64 hash = 116 [default = 0];
-    optional string unitStr = 117;
+    optional string unit = 117;
 
     optional Address16 ioBufAddr = 118;
     optional Address16 tuningAddr = 119;
@@ -1082,7 +1092,7 @@ message AppSignal
 
 message AppSignalSet
 {
-    repeated AppSignal items = 1;
+    repeated AppSignal appSignal = 1;
 }
 
 
@@ -1099,6 +1109,7 @@ message AppSignalState
     optional sfixed64 archiveId = 7 [default = -1];
 }
 
+/*
 message AppSignalParam
 {
     //optional int32 reserved = 1 [default = 0];		// reserved for future use (can be version)
@@ -1145,6 +1156,8 @@ message AppSignalParamSet
 {                       
     repeated AppSignalParam items = 1;
 }
+
+*/
 
 message Connection
 {
@@ -1226,4 +1239,20 @@ message ArchSignal
 message ArchSignals
 {
     repeated ArchSignal archSignals = 1;
+}
+
+
+//
+
+message ProtoFile
+{
+    required bool compressed = 1 [default = false];
+
+    required int32 size = 2 [default = 0];
+    required int32 compressedSize = 3 [default = 0];
+
+    requred bytes data = 4;
+
+    optional string format = 5;
+    optional string description = 6;
 }

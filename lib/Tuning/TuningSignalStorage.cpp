@@ -24,7 +24,7 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 
 	m_signalsMap.clear();
 
-	::Proto::AppSignalParamSet set;
+	::Proto::AppSignalSet set;
 	bool result = set.ParseFromArray(data.data(), data.size());
 
 	if (result == false)
@@ -36,11 +36,11 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 
 	// Read signals
 	//
-	for (int i = 0; i < set.items_size(); i++)
+	for (int i = 0; i < set.appsignal_size(); i++)
 	{
 		std::shared_ptr<AppSignalParam> asp = std::make_shared<AppSignalParam>();
 
-		if (asp->load(set.items(i)) == false)
+		if (asp->load(set.appsignal(i)) == false)
 		{
 			assert(false);
 			*errorCode = QObject::tr("Failed to load tuning signal #%1 from file.").arg(i);

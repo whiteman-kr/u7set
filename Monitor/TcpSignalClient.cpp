@@ -310,9 +310,9 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		return;
 	}
 
-	for (int i = 0; i < m_getSignalParamReply.appsignalparams_size(); i++)
+	for (int i = 0; i < m_getSignalParamReply.appsignals_size(); i++)
 	{
-		const ::Proto::AppSignalParam& protoSignal = m_getSignalParamReply.appsignalparams(i);
+		const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignals(i);
 
 		AppSignalParam s;
 		s.load(protoSignal);

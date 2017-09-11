@@ -585,8 +585,8 @@ void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
 
 	// Save signals to protobufer
 	//
-	::Proto::AppSignalParamSet protoSetMessage;
-	::Proto::AppSignalParam* protoSignalMessage = protoSetMessage.add_items();
+	::Proto::AppSignalSet protoSetMessage;
+	::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
 	m_appSignalParam.save(protoSignalMessage);
 
 	QByteArray data;

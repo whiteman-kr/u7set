@@ -499,8 +499,8 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
 	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());
 	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
-	settings.setValue("SignalsTabPage/LastEditedSignal/roughAperture", signal.roughAperture());
-	settings.setValue("SignalsTabPage/LastEditedSignal/smoothAperture", signal.smoothAperture());
+	settings.setValue("SignalsTabPage/LastEditedSignal/roughAperture", signal.coarseAperture());
+	settings.setValue("SignalsTabPage/LastEditedSignal/smoothAperture", signal.fineAperture());
 	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
 	settings.setValue("SignalsTabPage/LastEditedSignal/spreadTolerance", signal.spreadTolerance());
 	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());

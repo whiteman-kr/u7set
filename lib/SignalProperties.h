@@ -47,7 +47,7 @@ public:
 	Q_INVOKABLE bool calculated() const { return m_signal.calculated(); }
 	Q_INVOKABLE int normalState() const { return m_signal.normalState(); }
 	Q_INVOKABLE int decimalPlaces() const { return m_signal.decimalPlaces(); }
-	Q_INVOKABLE double aperture() const { return m_signal.roughAperture(); }
+	Q_INVOKABLE double aperture() const { return m_signal.coarseAperture(); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_signal.inOutType(); }
 	Q_INVOKABLE QString equipmentID() const { return m_signal.equipmentID(); }
 	Q_INVOKABLE double filteringTime() const { return m_signal.filteringTime(); }

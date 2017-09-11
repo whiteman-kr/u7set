@@ -165,10 +165,10 @@ void SignalProperties::initProperties()
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto roughApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, roughApertureCaption, true, Signal::roughAperture, Signal::setRoughAperture, m_signal);
+		auto roughApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, roughApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
 		roughApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto smoothApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, smoothApertureCaption, true, Signal::smoothAperture, Signal::setSmoothAperture, m_signal);
+		auto smoothApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, smoothApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
 		smoothApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);

@@ -25,6 +25,8 @@ namespace Builder
 	{
 		Q_OBJECT
 
+	public:
+
 	private:
 		QString m_fileName;			// filename only, like "filename.xml"
 
@@ -37,7 +39,7 @@ namespace Builder
 		static QString removeHeadTailSeparator(const QString& str);
 
 	protected:
-		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
+		BuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
 
 		bool open(const BuildResult& buildResult, bool textMode, IssueLogger* log);
 
@@ -183,7 +185,7 @@ namespace Builder
 		QMap<QString, QString> m_buildFileIDMap;
 
 	private:
-		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag);
+		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
 
 		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
@@ -196,13 +198,13 @@ namespace Builder
 		bool start(DbController *db, IssueLogger* log, bool release, int changesetID);
 		bool finish();
 
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QStringList& stringList);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& dataString, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress = false);
 
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString);
-		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString, bool compress = false);
+		BuildFile* addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList, bool compress = false);
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 

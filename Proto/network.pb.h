@@ -607,17 +607,17 @@ class GetAppSignalParamReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Proto.AppSignalParam appSignalParams = 2;
-  inline int appsignalparams_size() const;
-  inline void clear_appsignalparams();
-  static const int kAppSignalParamsFieldNumber = 2;
-  inline const ::Proto::AppSignalParam& appsignalparams(int index) const;
-  inline ::Proto::AppSignalParam* mutable_appsignalparams(int index);
-  inline ::Proto::AppSignalParam* add_appsignalparams();
-  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >&
-      appsignalparams() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >*
-      mutable_appsignalparams();
+  // repeated .Proto.AppSignal appSignals = 2;
+  inline int appsignals_size() const;
+  inline void clear_appsignals();
+  static const int kAppSignalsFieldNumber = 2;
+  inline const ::Proto::AppSignal& appsignals(int index) const;
+  inline ::Proto::AppSignal* mutable_appsignals(int index);
+  inline ::Proto::AppSignal* add_appsignals();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >&
+      appsignals() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >*
+      mutable_appsignals();
 
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalParamReply)
  private:
@@ -626,7 +626,7 @@ class GetAppSignalParamReply : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam > appsignalparams_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal > appsignals_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
@@ -5970,29 +5970,29 @@ inline void GetAppSignalParamReply::set_error(::google::protobuf::int32 value) {
   error_ = value;
 }
 
-// repeated .Proto.AppSignalParam appSignalParams = 2;
-inline int GetAppSignalParamReply::appsignalparams_size() const {
-  return appsignalparams_.size();
+// repeated .Proto.AppSignal appSignals = 2;
+inline int GetAppSignalParamReply::appsignals_size() const {
+  return appsignals_.size();
 }
-inline void GetAppSignalParamReply::clear_appsignalparams() {
-  appsignalparams_.Clear();
+inline void GetAppSignalParamReply::clear_appsignals() {
+  appsignals_.Clear();
 }
-inline const ::Proto::AppSignalParam& GetAppSignalParamReply::appsignalparams(int index) const {
-  return appsignalparams_.Get(index);
+inline const ::Proto::AppSignal& GetAppSignalParamReply::appsignals(int index) const {
+  return appsignals_.Get(index);
 }
-inline ::Proto::AppSignalParam* GetAppSignalParamReply::mutable_appsignalparams(int index) {
-  return appsignalparams_.Mutable(index);
+inline ::Proto::AppSignal* GetAppSignalParamReply::mutable_appsignals(int index) {
+  return appsignals_.Mutable(index);
 }
-inline ::Proto::AppSignalParam* GetAppSignalParamReply::add_appsignalparams() {
-  return appsignalparams_.Add();
+inline ::Proto::AppSignal* GetAppSignalParamReply::add_appsignals() {
+  return appsignals_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >&
-GetAppSignalParamReply::appsignalparams() const {
-  return appsignalparams_;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >&
+GetAppSignalParamReply::appsignals() const {
+  return appsignals_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalParam >*
-GetAppSignalParamReply::mutable_appsignalparams() {
-  return &appsignalparams_;
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignal >*
+GetAppSignalParamReply::mutable_appsignals() {
+  return &appsignals_;
 }
 
 // -------------------------------------------------------------------

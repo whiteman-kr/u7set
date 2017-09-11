@@ -432,7 +432,7 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	// Write signals
 	//
 
-	::Proto::AppSignalParamSet tuningSet;
+	::Proto::AppSignalSet tuningSet;
 
 	int signalsCount = m_signalSet->count();
 
@@ -475,8 +475,8 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 		}
 
 
-		::Proto::AppSignalParam* aspMessage = tuningSet.add_items();
-		s.serializeToProtoAppSignalParam(aspMessage);
+		::Proto::AppSignal* aspMessage = tuningSet.add_appsignal();
+		s.serializeTo(aspMessage);
 	}
 
 	// Write number of signals

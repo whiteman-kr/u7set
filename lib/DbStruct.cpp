@@ -18,7 +18,7 @@ const char* const McFileName = "MC";					// Module Configuration
 const char* const ConnectionsFileName = "CONNECTIONS";	// Connections
 const char* const BusTypesFileName = "BUSTYPES";		// BustTypes
 
-const char* const AlFileExtension = "als";				// Application Logic schema file extnesion
+const char* const AlFileExtension = "als";				// Application Logic schema file extension
 const char* const AlTemplExtension = "templ_als";		// Application Logic schema template file extnesion
 
 const char* const UfbFileExtension = "ufb";				// User Functional Block schema file extnesion
@@ -33,6 +33,8 @@ const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema templa
 const char* const OclFileExtension = "ocl";				// (Optical) Connection Link
 const char* const BusFileExtension = "xml";				// Bus type
 
+const char* const AppSignalFileExtension = "asg";		// Application signal file extention (::Proto::AppSignal message)
+const char* const AppSignalSetFileExtension = "asgs";	// Application signals set file extention (::Proto::AppSignalSet message)
 //
 //
 //	VcsState

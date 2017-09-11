@@ -100,6 +100,8 @@ namespace Builder
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
+			&ApplicationLogicCompiler::writeUnitsFile,
+			&ApplicationLogicCompiler::writeAppSignalSetFile,
 		};
 
 		bool result = true;
@@ -318,7 +320,7 @@ namespace Builder
 					result = false;
 				}
 
-				if (s.roughAperture() <= 0 || s.smoothAperture() <= 0)
+				if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
 				{
 					m_log->errALC5090(s.appSignalID());
 					result = false;
@@ -1008,6 +1010,80 @@ namespace Builder
 		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
 
 		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeUnitsFile()
+	{
+		UnitListShared unitList = Signal::unitList();
+
+		if (unitList == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		::Proto::UnitSet protoUnitSet;
+
+		// fill units
+		//
+		for(int i = 0; i < unitList->size(); i++)
+		{
+			int unitID = unitList->keyAt(i);
+			QString unitCaption = unitList->valueAt(i);
+
+			::Proto::Unit* protoUnit = protoUnitSet.add_unit();
+
+			protoUnit->set_id(unitID);
+			protoUnit->set_caption(unitCaption.toStdString());
+		}
+
+		int dataSize = protoUnitSet.ByteSize();
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoUnitSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* unitSetFile = m_resultWriter->addFile("Common", QString("Units.proto"), "UNIT_SET", "", data);
+
+		return unitSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeAppSignalSetFile()
+	{
+		if (m_signals == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		::Proto::AppSignalSet protoAppSignalSet;
+
+		// fill signals
+		//
+		int signalCount = m_signals->count();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			const Signal& s = (*m_signals)[i];
+
+			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
+
+			s.serializeTo(protoAppSignal);
+		}
+
+		int dataSize = protoAppSignalSet.ByteSize();
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* appSignalSetFile = m_resultWriter->addFile("Common", QString("AppSignals.asgs"), "APP_SIGNAL_SET", "", data, true);
+
+		return appSignalSetFile != nullptr;
 	}
 
 	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const

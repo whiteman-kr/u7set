@@ -40,7 +40,7 @@ message GetAppSignalParamRequest
 message GetAppSignalParamReply
 {
 	optional int32 error = 1 [default = 0];
-	repeated Proto.AppSignalParam appSignalParams = 2;			// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
+	repeated Proto.AppSignal appSignals = 2;				// Limited to ADS_GET_APP_SIGNAL_PARAM_MAX (500)
 }
 
 // Get class Signal

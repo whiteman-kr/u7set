@@ -288,11 +288,11 @@ public:
 	int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
 
-	double roughAperture() const { return m_roughAperture; }
-	void setRoughAperture(double aperture) { m_roughAperture = aperture; }
+	double coarseAperture() const { return m_coarseAperture; }
+	void setCoarseAperture(double aperture) { m_coarseAperture = aperture; }
 
-	double smoothAperture() const { return m_smoothAperture; }
-	void setSmoothAperture(double aperture) { m_smoothAperture = aperture; }
+	double fineAperture() const { return m_fineAperture; }
+	void setFineAperture(double aperture) { m_fineAperture = aperture; }
 
 	bool adaptiveAperture() const { return m_adaptiveAperture; }
 	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
@@ -314,6 +314,9 @@ public:
 
 	Hash hash() const { assert(m_hash !=0); return m_hash; }
 	void setHash(Hash hash) { m_hash = hash; }
+
+	QString unit() const { return m_unit; }
+	void setUnit(const QString& unit) { m_unit = unit; }
 
 	static UnitListShared unitList() { return m_unitList; }
 
@@ -460,8 +463,8 @@ private:
 	bool m_calculated = false;
 	int m_normalState = 0;
 	int m_decimalPlaces = 2;
-	double m_roughAperture = 1;
-	double m_smoothAperture = 0.5;
+	double m_coarseAperture = 1;
+	double m_fineAperture = 0.5;
 	bool m_adaptiveAperture = false;
 
 	// Signal fields from database
@@ -483,7 +486,7 @@ private:
 
 	static UnitListShared m_unitList;
 
-	QString m_unitStr;
+	QString m_unit;
 
 	Address16 m_ioBufAddr;					// signal address in i/o modules buffers
 											// only for signals of input/output modules (input and output signals)

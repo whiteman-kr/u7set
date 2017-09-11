@@ -292,7 +292,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.lowValidRange())); break;
 		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.highValidRange())); break;
 //		case SC_UNBALANCE_LIMIT: if (le) le->setText(QString("%1").arg(s.unbalanceLimit())); break;
-		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.roughAperture())); break;
+		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.coarseAperture())); break;
 		case SC_FILTERING_TIME: if (le) le->setText(QString("%1").arg(s.filteringTime())); break;
 		case SC_SPREAD_TOLERANCE: if (le) le->setText(QString("%1").arg(s.spreadTolerance())); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
@@ -369,7 +369,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
 //		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
-		case SC_APERTURE: if (le) s.setRoughAperture(le->text().toDouble()); break;
+		case SC_APERTURE: if (le) s.setCoarseAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
@@ -752,7 +752,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_NORMAL_STATE: return signal.normalState();
 					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
-					case SC_APERTURE: return signal.roughAperture();
+					case SC_APERTURE: return signal.coarseAperture();
 					case SC_FILTERING_TIME: return signal.filteringTime();
 					case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
 					case SC_TUNING_DEFAULT_VALUE: return signal.tuningDefaultValue();
@@ -891,7 +891,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
 			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
-			case SC_APERTURE: signal.setRoughAperture(value.toDouble()); break;
+			case SC_APERTURE: signal.setCoarseAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
 			case SC_SPREAD_TOLERANCE: signal.setSpreadTolerance(value.toDouble()); break;
 			case SC_TUNING_DEFAULT_VALUE: signal.setTuningDefaultValue(value.toDouble()); break;
@@ -1151,8 +1151,8 @@ void SignalsModel::addSignal()
 	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());
 	signal.setNormalState(settings.value("SignalsTabPage/LastEditedSignal/normalState").toInt());
 	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
-	signal.setRoughAperture(settings.value("SignalsTabPage/LastEditedSignal/roughAperture").toDouble());
-	signal.setSmoothAperture(settings.value("SignalsTabPage/LastEditedSignal/smoothAperture").toDouble());
+	signal.setCoarseAperture(settings.value("SignalsTabPage/LastEditedSignal/roughAperture").toDouble());
+	signal.setFineAperture(settings.value("SignalsTabPage/LastEditedSignal/smoothAperture").toDouble());
 	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
 	signal.setSpreadTolerance(settings.value("SignalsTabPage/LastEditedSignal/spreadTolerance").toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);

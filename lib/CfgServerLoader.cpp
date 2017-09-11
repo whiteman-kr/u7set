@@ -219,7 +219,7 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 
 	emit signal_getFile(pathFileName, &localFileData);
 
-	if (wsh.wait(5000) == true)
+	if (wsh.wait(6000) == true)
 	{
 		*errorStr = getLastErrorStr();
 
@@ -450,9 +450,6 @@ void CfgLoader::startDownload()
 	slot_downloadFile(m_currentDownloadRequest.pathFileName);	// TcpFileTransfer::slot_downloadFile
 }
 
-
-
-
 void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 {
 	if (fileData == nullptr)
@@ -477,7 +474,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 		return;
 	}
 
-	if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5) == true)
+	if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5, m_cfgFilesInfo[fileName].compressed) == true)
 	{
 		qDebug() << "File " << fileName << " already exists, md5 = " << m_cfgFilesInfo[fileName].md5;
 
@@ -496,6 +493,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 	fdr.fileData = fileData;
 	fdr.errorCode = &m_lastError;
 	fdr.etalonMD5 = m_cfgFilesInfo[fileName].md5;
+	fdr.needUncompress = m_cfgFilesInfo[fileName].compressed;
 
 	m_downloadQueue.append(fdr);
 
@@ -584,7 +582,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 			}
 			else
 			{
-				if (readCfgFile(fileName, m_currentDownloadRequest.fileData) == false)
+				if (readCfgFile(fileName, m_currentDownloadRequest.fileData, m_currentDownloadRequest.needUncompress) == false)
 				{
 					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
 					setFileReady(true);
@@ -719,7 +717,7 @@ bool CfgLoader::readConfigurationXml()
 {
 	QByteArray fileData;
 
-	if (readCfgFile(m_configurationXmlPathFileName, &fileData) == false)
+	if (readCfgFile(m_configurationXmlPathFileName, &fileData, false) == false)
 	{
 		return false;
 	}
@@ -780,7 +778,7 @@ bool CfgLoader::readConfigurationXml()
 }
 
 
-bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData)
+bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress)
 {
 	if (fileData == nullptr)
 	{
@@ -796,7 +794,14 @@ bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData)
 		return false;
 	}
 
-	*fileData = file.readAll();
+	if (needUncompress == true)
+	{
+		*fileData = qUncompress(file.readAll());
+	}
+	else
+	{
+		*fileData = file.readAll();
+	}
 
 	file.close();
 
@@ -804,7 +809,7 @@ bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData)
 }
 
 
-bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5)
+bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5, bool needUncompress)
 {
 	if (fileData == nullptr)
 	{
@@ -836,6 +841,11 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 
 	if (md5Hash.resultStr() == etalonMd5)
 	{
+		if (needUncompress == true)
+		{
+			*fileData = qUncompress(*fileData);
+		}
+
 		return true;
 	}
 
