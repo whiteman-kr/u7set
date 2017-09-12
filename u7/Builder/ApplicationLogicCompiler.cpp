@@ -4,6 +4,8 @@
 #include "SoftwareCfgGenerator.h"
 #include "BdfFile.h"
 
+#include "../lib/ServiceSettings.h"
+
 
 namespace Builder
 {
@@ -1081,7 +1083,7 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = m_resultWriter->addFile("Common", QString("AppSignals.asgs"), "APP_SIGNAL_SET", "", data, true);
+		BuildFile* appSignalSetFile = m_resultWriter->addFile("Common", QString("AppSignals.asgs"), CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
 	}

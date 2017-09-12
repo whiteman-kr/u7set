@@ -371,7 +371,7 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 
 	void serializeTo(Proto::AppSignal* s) const;
-	void serializeFrom(const Proto::AppSignal* s);
+	void serializeFrom(const Proto::AppSignal &s);
 
 	//void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
 

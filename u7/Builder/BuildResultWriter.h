@@ -218,6 +218,8 @@ namespace Builder
 		IssueLogger* log() { return m_log; }
 
 		BuildFile* getBuildFile(const QString& pathFileName) const;
+		BuildFile* getBuildFileByID(const QString& buildFileID) const;
+
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		bool isDebug() const;

@@ -215,9 +215,9 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 
 	WaitForSignalHelper wsh(this, SIGNAL(signal_fileReady()));
 
-	QByteArray localFileData;
+	m_localFileData.clear();
 
-	emit signal_getFile(pathFileName, &localFileData);
+	emit signal_getFile(pathFileName, &m_localFileData);
 
 	if (wsh.wait(6000) == true)
 	{
@@ -225,7 +225,7 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 
 		if (errorStr->isEmpty())
 		{
-			fileData->swap(localFileData);
+			fileData->swap(m_localFileData);
 			return true;
 		}
 		else

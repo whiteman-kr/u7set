@@ -58,6 +58,33 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeAppSignalsXml()
 	{
+		// add link to signals set file
+		//
+		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(CFG_FILE_ID_APP_SIGNAL_SET);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);
+
+/*		// add link to units set file
+		//
+		buildFile = m_buildResultWriter->getBuildFileByID(CFG_FILE_ID_UNIT_SET);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);*/
+
+		return true;
+
+/*
+		//
+
 		UnitList unitInfo;
 		m_dbController->getUnits(&unitInfo, nullptr);
 
@@ -103,12 +130,6 @@ namespace Builder
 			}
 
 			bool hasWrongField = false;
-
-/*			if (!dataFormatInfo.contains(signal.dataFormatInt()))
-			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
-				hasWrongField = true;
-			}*/
 
 			if (!unitInfo.contains(signal.unitID()))
 			{
@@ -193,7 +214,7 @@ namespace Builder
 			return false;
 		}
 
-		m_cfgXml->addLinkToFile(buildFile);
+		m_cfgXml->addLinkToFile(buildFile);*/
 
 		return true;
 	}

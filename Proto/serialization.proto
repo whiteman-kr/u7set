@@ -1242,17 +1242,3 @@ message ArchSignals
 }
 
 
-//
-
-message ProtoFile
-{
-    required bool compressed = 1 [default = false];
-
-    required int32 size = 2 [default = 0];
-    required int32 compressedSize = 3 [default = 0];
-
-    requred bytes data = 4;
-
-    optional string format = 5;
-    optional string description = 6;
-}

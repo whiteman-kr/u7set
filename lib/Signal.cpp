@@ -839,113 +839,107 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 }
 
 
-void Signal::serializeFrom(const Proto::AppSignal* s)
+void Signal::serializeFrom(const Proto::AppSignal& s)
 {
-	if (s == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
 	// Signal identificators
 
-	m_appSignalID = QString::fromStdString(s->appsignalid());
-	m_customAppSignalID = QString::fromStdString(s->customappsignalid());
-	m_caption = QString::fromStdString(s->caption());
-	m_equipmentID = QString::fromStdString(s->equipmentid());
-	m_busTypeID = QString::fromStdString(s->bustypeid());
-	m_channel = static_cast<E::Channel>(s->channel());
+	m_appSignalID = QString::fromStdString(s.appsignalid());
+	m_customAppSignalID = QString::fromStdString(s.customappsignalid());
+	m_caption = QString::fromStdString(s.caption());
+	m_equipmentID = QString::fromStdString(s.equipmentid());
+	m_busTypeID = QString::fromStdString(s.bustypeid());
+	m_channel = static_cast<E::Channel>(s.channel());
 
 	// Signal type
 
-	m_signalType = static_cast<E::SignalType>(s->signaltype());
-	m_inOutType = static_cast<E::SignalInOutType>(s->inouttype());
+	m_signalType = static_cast<E::SignalType>(s.signaltype());
+	m_inOutType = static_cast<E::SignalInOutType>(s.inouttype());
 
 	// Signal format
 
-	m_dataSize = s->datasize();
-	m_byteOrder = static_cast<E::ByteOrder>(s->byteorder());
-	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s->analogsignalformat());
+	m_dataSize = s.datasize();
+	m_byteOrder = static_cast<E::ByteOrder>(s.byteorder());
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(s.analogsignalformat());
 
 	// Analog signal properties
 
-	m_unitID = s->unitid();
-	m_lowADC = s->lowadc();
-	m_highADC = s->highadc();
-	m_lowEngeneeringUnits = s->lowengeneeringunits();
-	m_highEngeneeringUnits = s->highengeneeringunits();
-	m_lowValidRange = s->lowvalidrange();
-	m_highValidRange = s->highvalidrange();
-	m_filteringTime = s->filteringtime();
-	m_spreadTolerance = s->spreadtolerance();
+	m_unitID = s.unitid();
+	m_lowADC = s.lowadc();
+	m_highADC = s.highadc();
+	m_lowEngeneeringUnits = s.lowengeneeringunits();
+	m_highEngeneeringUnits = s.highengeneeringunits();
+	m_lowValidRange = s.lowvalidrange();
+	m_highValidRange = s.highvalidrange();
+	m_filteringTime = s.filteringtime();
+	m_spreadTolerance = s.spreadtolerance();
 
 	// Analog input signal properties
 
-	m_inputLowLimit = s->inputlowlimit();
-	m_inputHighLimit = s->inputhighlimit();
-	m_inputUnitID = static_cast<E::InputUnit>(s->inputunitid());
-	m_inputSensorType = static_cast<E::SensorType>(s->inputsensortype());
+	m_inputLowLimit = s.inputlowlimit();
+	m_inputHighLimit = s.inputhighlimit();
+	m_inputUnitID = static_cast<E::InputUnit>(s.inputunitid());
+	m_inputSensorType = static_cast<E::SensorType>(s.inputsensortype());
 
 	// Analog output signal properties
 
-	m_outputLowLimit = s->outputlowlimit();
-	m_outputHighLimit = s->outputhighlimit();
-	m_outputUnitID = s->outputunitid();
-	m_outputMode = static_cast<E::OutputMode>(s->outputmode());
-	m_outputSensorType = static_cast<E::SensorType>(s->outputsensortype());
+	m_outputLowLimit = s.outputlowlimit();
+	m_outputHighLimit = s.outputhighlimit();
+	m_outputUnitID = s.outputunitid();
+	m_outputMode = static_cast<E::OutputMode>(s.outputmode());
+	m_outputSensorType = static_cast<E::SensorType>(s.outputsensortype());
 
 	// Tuning signal properties
 
-	m_enableTuning = s->enabletuning();
-	m_tuningDefaultValue = s->tuningdefaultvalue();
-	m_tuningLowBound = s->tuninglowbound();
-	m_tuningHighBound = s->tuninghighbound();
+	m_enableTuning = s.enabletuning();
+	m_tuningDefaultValue = s.tuningdefaultvalue();
+	m_tuningLowBound = s.tuninglowbound();
+	m_tuningHighBound = s.tuninghighbound();
 
 	//	Signal properties for MATS
 
-	m_acquire = s->acquire();
-	m_calculated = s->calculated();
-	m_normalState = s->normalstate();
-	m_decimalPlaces = s->decimalplaces();
-	m_coarseAperture = s->coarseaperture();
-	m_fineAperture = s->fineaperture();
-	m_adaptiveAperture = s->adaptiveaperture();
+	m_acquire = s.acquire();
+	m_calculated = s.calculated();
+	m_normalState = s.normalstate();
+	m_decimalPlaces = s.decimalplaces();
+	m_coarseAperture = s.coarseaperture();
+	m_fineAperture = s.fineaperture();
+	m_adaptiveAperture = s.adaptiveaperture();
 
 	// Signal fields from database
 
-	m_ID = s->id();
-	m_signalGroupID = s->signalgroupid();
-	m_signalInstanceID = s->signalinstanceid();
-	m_changesetID = s->changesetid();
-	m_checkedOut = s->checkedout();
-	m_userID = s->userid();
-	m_created.setMSecsSinceEpoch(s->created());
-	m_deleted = s->deleted();
-	m_instanceCreated.setMSecsSinceEpoch(s->instancecreated());
-	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s->instanceaction());
+	m_ID = s.id();
+	m_signalGroupID = s.signalgroupid();
+	m_signalInstanceID = s.signalinstanceid();
+	m_changesetID = s.changesetid();
+	m_checkedOut = s.checkedout();
+	m_userID = s.userid();
+	m_created.setMSecsSinceEpoch(s.created());
+	m_deleted = s.deleted();
+	m_instanceCreated.setMSecsSinceEpoch(s.instancecreated());
+	m_instanceAction = static_cast<VcsItemAction::VcsItemActionType>(s.instanceaction());
 
 	// Signal properties calculated in compile-time
 
-	m_hash = s->hash();
-	m_unit = QString::fromStdString(s->unit());
+	m_hash = s.hash();
+	m_unit = QString::fromStdString(s.unit());
 
-	m_ioBufAddr.setOffset(s->iobufaddr().offset());
-	m_ioBufAddr.setBit(s->iobufaddr().bit());
+	m_ioBufAddr.setOffset(s.iobufaddr().offset());
+	m_ioBufAddr.setBit(s.iobufaddr().bit());
 
-	m_tuningAddr.setOffset(s->tuningaddr().offset());
-	m_tuningAddr.setBit(s->tuningaddr().bit());
+	m_tuningAddr.setOffset(s.tuningaddr().offset());
+	m_tuningAddr.setBit(s.tuningaddr().bit());
 
-	m_ualAddr.setOffset(s->ualaddr().offset());
-	m_ualAddr.setBit(s->ualaddr().bit());
+	m_ualAddr.setOffset(s.ualaddr().offset());
+	m_ualAddr.setBit(s.ualaddr().bit());
 
-	m_regBufAddr.setOffset(s->regbufaddr().offset());
-	m_regBufAddr.setBit(s->regbufaddr().bit());
+	m_regBufAddr.setOffset(s.regbufaddr().offset());
+	m_regBufAddr.setBit(s.regbufaddr().bit());
 
-	m_regValueAddr.setOffset(s->regvalueaddr().offset());
-	m_regValueAddr.setBit(s->regvalueaddr().bit());
+	m_regValueAddr.setOffset(s.regvalueaddr().offset());
+	m_regValueAddr.setBit(s.regvalueaddr().bit());
 
-	m_regValidityAddr.setOffset(s->regvalidityaddr().offset());
-	m_regValidityAddr.setBit(s->regvalidityaddr().bit());
+	m_regValidityAddr.setOffset(s.regvalidityaddr().offset());
+	m_regValidityAddr.setBit(s.regvalidityaddr().bit());
 }
 
 

@@ -274,7 +274,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			result &= readDataSources(fileData);			// fill m_appDataSources
 		}
 
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNALS)
+		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
 		{
 			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
 		}
@@ -376,9 +376,38 @@ bool AppDataServiceWorker::readDataSources(QByteArray& fileData)
 
 bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 {
-	bool result = true;
+	::Proto::AppSignalSet signalSet;
 
-	XmlReadHelper xml(fileData);
+	bool result = signalSet.ParseFromArray(fileData.constData(), fileData.size());
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int signalCount = signalSet.appsignal_size();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
+
+		if (m_appSignals.contains(QString::fromStdString(appSignal.appsignalid())) == true)
+		{
+			assert(false);
+			continue;
+		}
+
+		Signal* s = new Signal;
+
+		s->serializeFrom(appSignal);
+
+		m_appSignals.insert(s->appSignalID(), s);
+	}
+
+	return true;
+
+
+/*	XmlReadHelper xml(fileData);
 
 	if (xml.findElement("Units") == false)
 	{
@@ -459,7 +488,7 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 	//quint64 time2 = QDateTime::currentMSecsSinceEpoch();
 	//qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
 
-	m_appSignals.buildHash2Signal();
+	m_appSignals.buildHash2Signal();*/
 
 	return result;
 }

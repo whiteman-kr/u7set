@@ -131,6 +131,8 @@ private:
 	QString m_configurationXmlPathFileName;
 	QString m_configurationXmlMd5;
 
+	QByteArray m_localFileData;
+
 	std::shared_ptr<CircularLogger> m_logger;
 
 	QList<FileDownloadRequest> m_downloadQueue;

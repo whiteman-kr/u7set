@@ -802,7 +802,6 @@ namespace Builder
 
 		m_buildFiles.insert(pathFileName, buildFile);
 
-
 		if (id.isEmpty() == false)
 		{
 			if (m_buildFileIDMap.contains(id))
@@ -1043,6 +1042,17 @@ namespace Builder
 		return nullptr;
 	}
 
+	BuildFile* BuildResultWriter::getBuildFileByID(const QString& buildFileID) const
+	{
+		QString buildFilePathName = m_buildFileIDMap.value(buildFileID, QString());
+
+		if (buildFilePathName.isEmpty() == true)
+		{
+			return nullptr;
+		}
+
+		return m_buildFiles.value(buildFilePathName, nullptr);
+	}
 
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
 	{
