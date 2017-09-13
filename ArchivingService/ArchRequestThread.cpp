@@ -205,7 +205,9 @@ bool ArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 		}
 		else
 		{
-			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
+			m_statesQueryStr.append(QString("ORDER BY %1").arg(m_cmpField));		// !!!
+
+//			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
 		}
 	}
 

@@ -97,6 +97,8 @@ void QueueBase::clear()
 {
 	AUTO_LOCK(m_mutex);
 
+	m_size = 0;
+
 	m_writeIndex.reset();
 	m_readIndex.reset();
 }
@@ -142,7 +144,9 @@ void QueueBase::resize(int newQueueSize)
 
 	delete [] m_buffer;
 
+	m_size = 0;
 	m_queueSize = newQueueSize;
+
 	m_buffer = new char [m_itemSize * m_queueSize];
 
 	m_writeIndex.setMaxValue(newQueueSize);
