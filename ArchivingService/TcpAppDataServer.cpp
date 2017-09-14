@@ -54,11 +54,28 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 
 	SimpleAppSignalState state;
 
+	// DEBUG
+	//Hash testHash = 0x612a4feb53b2378all;
+	//static qint64 prevSystemTime = 0;
+	// DEBUG
+
 	for(int i = 0; i < statesCount; i++)
 	{
 		state.load(m_saveStatesRequest.appsignalstates(i));
 
 		m_saveStatesQueue.push(&state);
+
+		// DEBUG
+/*		if (state.hash == testHash)
+		{
+			if (prevSystemTime > state.time.system.timeStamp)
+			{
+				assert(false);
+			}
+
+			prevSystemTime = state.time.system.timeStamp;
+		}*/
+		// DEBUG
 	}
 
 	//qDebug() << "Receive " << statesCount << " states to save";
