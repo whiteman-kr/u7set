@@ -119,6 +119,7 @@ namespace VFrame30
 		static const QString alignVert;
 
 		static const QString dataType;
+		static const QString units;
 
 		static const QString appSignalIDs;
 		static const QString appSignalId;
@@ -127,6 +128,21 @@ namespace VFrame30
 
 		static const QString busTypeId;
 		static const QString busTypeFileName;
+		static const QString busAutoSignalPlacemanet;
+		static const QString busManualBusSize;
+		static const QString busSignalId;
+		static const QString busInbusOffset;
+		static const QString busInbusDiscreteBitNo;
+		static const QString busInbusAnalogSize;
+		static const QString busInbusAnalogFormat;
+		static const QString busInbusAnalogByteOrder;
+		static const QString busAnalogLowLimit;
+		static const QString busAnalogHightLimit;
+		static const QString busInbusAnalogLowLimit;
+		static const QString busInbusAnalogHightLimit;
+
+		static const QString busSettingCategory;
+		static const QString busInbusSettingCategory;
 
 		static const QString behaviourCategory;
 		static const QString appearanceCategory;

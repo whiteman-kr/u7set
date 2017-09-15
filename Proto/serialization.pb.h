@@ -106,6 +106,8 @@ class SchemaDetailsSet;
 class SchemaDetails;
 class ArchSignal;
 class ArchSignals;
+class BusSignal;
+class Bus;
 
 enum SchemaUnit {
   Display = 0,
@@ -849,6 +851,15 @@ class Envelope : public ::google::protobuf::Message {
   inline ::Proto::SchemaDetailsSet* release_schemadetailsset();
   inline void set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* schemadetailsset);
 
+  // optional .Proto.Bus bus = 200;
+  inline bool has_bus() const;
+  inline void clear_bus();
+  static const int kBusFieldNumber = 200;
+  inline const ::Proto::Bus& bus() const;
+  inline ::Proto::Bus* mutable_bus();
+  inline ::Proto::Bus* release_bus();
+  inline void set_allocated_bus(::Proto::Bus* bus);
+
   // @@protoc_insertion_point(class_scope:Proto.Envelope)
  private:
   inline void set_has_classnamehash();
@@ -871,6 +882,8 @@ class Envelope : public ::google::protobuf::Message {
   inline void clear_has_connection();
   inline void set_has_schemadetailsset();
   inline void clear_has_schemadetailsset();
+  inline void set_has_bus();
+  inline void clear_has_bus();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -883,10 +896,11 @@ class Envelope : public ::google::protobuf::Message {
   ::Proto::Configuration* configuration_;
   ::Proto::Connection* connection_;
   ::Proto::SchemaDetailsSet* schemadetailsset_;
+  ::Proto::Bus* bus_;
   ::google::protobuf::uint32 classnamehash_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5963,17 +5977,14 @@ class SchemaItemBus : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 bustypehash() const;
   inline void set_bustypehash(::google::protobuf::uint64 value);
 
-  // optional string busTypeXml = 4;
-  inline bool has_bustypexml() const;
-  inline void clear_bustypexml();
-  static const int kBusTypeXmlFieldNumber = 4;
-  inline const ::std::string& bustypexml() const;
-  inline void set_bustypexml(const ::std::string& value);
-  inline void set_bustypexml(const char* value);
-  inline void set_bustypexml(const char* value, size_t size);
-  inline ::std::string* mutable_bustypexml();
-  inline ::std::string* release_bustypexml();
-  inline void set_allocated_bustypexml(::std::string* bustypexml);
+  // optional .Proto.Bus bus = 5;
+  inline bool has_bus() const;
+  inline void clear_bus();
+  static const int kBusFieldNumber = 5;
+  inline const ::Proto::Bus& bus() const;
+  inline ::Proto::Bus* mutable_bus();
+  inline ::Proto::Bus* release_bus();
+  inline void set_allocated_bus(::Proto::Bus* bus);
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemBus)
  private:
@@ -5981,14 +5992,14 @@ class SchemaItemBus : public ::google::protobuf::Message {
   inline void clear_has_bustypeid();
   inline void set_has_bustypehash();
   inline void clear_has_bustypehash();
-  inline void set_has_bustypexml();
-  inline void clear_has_bustypexml();
+  inline void set_has_bus();
+  inline void clear_has_bus();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* bustypeid_;
   ::google::protobuf::uint64 bustypehash_;
-  ::std::string* bustypexml_;
+  ::Proto::Bus* bus_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
@@ -10483,6 +10494,365 @@ class ArchSignals : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static ArchSignals* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class BusSignal : public ::google::protobuf::Message {
+ public:
+  BusSignal();
+  virtual ~BusSignal();
+
+  BusSignal(const BusSignal& from);
+
+  inline BusSignal& operator=(const BusSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const BusSignal& default_instance();
+
+  void Swap(BusSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  BusSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const BusSignal& from);
+  void MergeFrom(const BusSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string signalId = 1;
+  inline bool has_signalid() const;
+  inline void clear_signalid();
+  static const int kSignalIdFieldNumber = 1;
+  inline const ::std::string& signalid() const;
+  inline void set_signalid(const ::std::string& value);
+  inline void set_signalid(const char* value);
+  inline void set_signalid(const char* value, size_t size);
+  inline ::std::string* mutable_signalid();
+  inline ::std::string* release_signalid();
+  inline void set_allocated_signalid(::std::string* signalid);
+
+  // optional string caption = 2;
+  inline bool has_caption() const;
+  inline void clear_caption();
+  static const int kCaptionFieldNumber = 2;
+  inline const ::std::string& caption() const;
+  inline void set_caption(const ::std::string& value);
+  inline void set_caption(const char* value);
+  inline void set_caption(const char* value, size_t size);
+  inline ::std::string* mutable_caption();
+  inline ::std::string* release_caption();
+  inline void set_allocated_caption(::std::string* caption);
+
+  // optional int32 type = 3;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 3;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional string units = 4;
+  inline bool has_units() const;
+  inline void clear_units();
+  static const int kUnitsFieldNumber = 4;
+  inline const ::std::string& units() const;
+  inline void set_units(const ::std::string& value);
+  inline void set_units(const char* value);
+  inline void set_units(const char* value, size_t size);
+  inline ::std::string* mutable_units();
+  inline ::std::string* release_units();
+  inline void set_allocated_units(::std::string* units);
+
+  // optional int32 analogFormat = 10;
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 10;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
+  // optional int32 inbusOffset = 32;
+  inline bool has_inbusoffset() const;
+  inline void clear_inbusoffset();
+  static const int kInbusOffsetFieldNumber = 32;
+  inline ::google::protobuf::int32 inbusoffset() const;
+  inline void set_inbusoffset(::google::protobuf::int32 value);
+
+  // optional int32 inbusDiscreteBitNo = 40;
+  inline bool has_inbusdiscretebitno() const;
+  inline void clear_inbusdiscretebitno();
+  static const int kInbusDiscreteBitNoFieldNumber = 40;
+  inline ::google::protobuf::int32 inbusdiscretebitno() const;
+  inline void set_inbusdiscretebitno(::google::protobuf::int32 value);
+
+  // optional int32 inbusAnalogSize = 50;
+  inline bool has_inbusanalogsize() const;
+  inline void clear_inbusanalogsize();
+  static const int kInbusAnalogSizeFieldNumber = 50;
+  inline ::google::protobuf::int32 inbusanalogsize() const;
+  inline void set_inbusanalogsize(::google::protobuf::int32 value);
+
+  // optional int32 inbusAnalogFormat = 51;
+  inline bool has_inbusanalogformat() const;
+  inline void clear_inbusanalogformat();
+  static const int kInbusAnalogFormatFieldNumber = 51;
+  inline ::google::protobuf::int32 inbusanalogformat() const;
+  inline void set_inbusanalogformat(::google::protobuf::int32 value);
+
+  // optional int32 inbusAnalogByteOrder = 52;
+  inline bool has_inbusanalogbyteorder() const;
+  inline void clear_inbusanalogbyteorder();
+  static const int kInbusAnalogByteOrderFieldNumber = 52;
+  inline ::google::protobuf::int32 inbusanalogbyteorder() const;
+  inline void set_inbusanalogbyteorder(::google::protobuf::int32 value);
+
+  // optional double busAnalogLowLimit = 53;
+  inline bool has_busanaloglowlimit() const;
+  inline void clear_busanaloglowlimit();
+  static const int kBusAnalogLowLimitFieldNumber = 53;
+  inline double busanaloglowlimit() const;
+  inline void set_busanaloglowlimit(double value);
+
+  // optional double busAnalogHighLimit = 54;
+  inline bool has_busanaloghighlimit() const;
+  inline void clear_busanaloghighlimit();
+  static const int kBusAnalogHighLimitFieldNumber = 54;
+  inline double busanaloghighlimit() const;
+  inline void set_busanaloghighlimit(double value);
+
+  // optional double inbusAnalogLowLimit = 55;
+  inline bool has_inbusanaloglowlimit() const;
+  inline void clear_inbusanaloglowlimit();
+  static const int kInbusAnalogLowLimitFieldNumber = 55;
+  inline double inbusanaloglowlimit() const;
+  inline void set_inbusanaloglowlimit(double value);
+
+  // optional double inbusAnalogHighLimit = 56;
+  inline bool has_inbusanaloghighlimit() const;
+  inline void clear_inbusanaloghighlimit();
+  static const int kInbusAnalogHighLimitFieldNumber = 56;
+  inline double inbusanaloghighlimit() const;
+  inline void set_inbusanaloghighlimit(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.BusSignal)
+ private:
+  inline void set_has_signalid();
+  inline void clear_has_signalid();
+  inline void set_has_caption();
+  inline void clear_has_caption();
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_units();
+  inline void clear_has_units();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
+  inline void set_has_inbusoffset();
+  inline void clear_has_inbusoffset();
+  inline void set_has_inbusdiscretebitno();
+  inline void clear_has_inbusdiscretebitno();
+  inline void set_has_inbusanalogsize();
+  inline void clear_has_inbusanalogsize();
+  inline void set_has_inbusanalogformat();
+  inline void clear_has_inbusanalogformat();
+  inline void set_has_inbusanalogbyteorder();
+  inline void clear_has_inbusanalogbyteorder();
+  inline void set_has_busanaloglowlimit();
+  inline void clear_has_busanaloglowlimit();
+  inline void set_has_busanaloghighlimit();
+  inline void clear_has_busanaloghighlimit();
+  inline void set_has_inbusanaloglowlimit();
+  inline void clear_has_inbusanaloglowlimit();
+  inline void set_has_inbusanaloghighlimit();
+  inline void clear_has_inbusanaloghighlimit();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* signalid_;
+  ::std::string* caption_;
+  ::std::string* units_;
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 analogformat_;
+  ::google::protobuf::int32 inbusoffset_;
+  ::google::protobuf::int32 inbusdiscretebitno_;
+  ::google::protobuf::int32 inbusanalogsize_;
+  ::google::protobuf::int32 inbusanalogformat_;
+  double busanaloglowlimit_;
+  double busanaloghighlimit_;
+  double inbusanaloglowlimit_;
+  double inbusanaloghighlimit_;
+  ::google::protobuf::int32 inbusanalogbyteorder_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static BusSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Bus : public ::google::protobuf::Message {
+ public:
+  Bus();
+  virtual ~Bus();
+
+  Bus(const Bus& from);
+
+  inline Bus& operator=(const Bus& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Bus& default_instance();
+
+  void Swap(Bus* other);
+
+  // implements Message ----------------------------------------------
+
+  Bus* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Bus& from);
+  void MergeFrom(const Bus& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .Proto.Uuid uuid = 1;
+  inline bool has_uuid() const;
+  inline void clear_uuid();
+  static const int kUuidFieldNumber = 1;
+  inline const ::Proto::Uuid& uuid() const;
+  inline ::Proto::Uuid* mutable_uuid();
+  inline ::Proto::Uuid* release_uuid();
+  inline void set_allocated_uuid(::Proto::Uuid* uuid);
+
+  // optional string busTypeId = 2;
+  inline bool has_bustypeid() const;
+  inline void clear_bustypeid();
+  static const int kBusTypeIdFieldNumber = 2;
+  inline const ::std::string& bustypeid() const;
+  inline void set_bustypeid(const ::std::string& value);
+  inline void set_bustypeid(const char* value);
+  inline void set_bustypeid(const char* value, size_t size);
+  inline ::std::string* mutable_bustypeid();
+  inline ::std::string* release_bustypeid();
+  inline void set_allocated_bustypeid(::std::string* bustypeid);
+
+  // repeated .Proto.BusSignal busSignals = 3;
+  inline int bussignals_size() const;
+  inline void clear_bussignals();
+  static const int kBusSignalsFieldNumber = 3;
+  inline const ::Proto::BusSignal& bussignals(int index) const;
+  inline ::Proto::BusSignal* mutable_bussignals(int index);
+  inline ::Proto::BusSignal* add_bussignals();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal >&
+      bussignals() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal >*
+      mutable_bussignals();
+
+  // optional bool autoSignalPlacement = 10 [default = true];
+  inline bool has_autosignalplacement() const;
+  inline void clear_autosignalplacement();
+  static const int kAutoSignalPlacementFieldNumber = 10;
+  inline bool autosignalplacement() const;
+  inline void set_autosignalplacement(bool value);
+
+  // optional int32 manualBusSize = 11 [default = 0];
+  inline bool has_manualbussize() const;
+  inline void clear_manualbussize();
+  static const int kManualBusSizeFieldNumber = 11;
+  inline ::google::protobuf::int32 manualbussize() const;
+  inline void set_manualbussize(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.Bus)
+ private:
+  inline void set_has_uuid();
+  inline void clear_has_uuid();
+  inline void set_has_bustypeid();
+  inline void clear_has_bustypeid();
+  inline void set_has_autosignalplacement();
+  inline void clear_has_autosignalplacement();
+  inline void set_has_manualbussize();
+  inline void clear_has_manualbussize();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Proto::Uuid* uuid_;
+  ::std::string* bustypeid_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal > bussignals_;
+  bool autosignalplacement_;
+  ::google::protobuf::int32 manualbussize_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Bus* default_instance_;
+};
 // ===================================================================
 
 
@@ -11371,6 +11741,44 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
     set_has_schemadetailsset();
   } else {
     clear_has_schemadetailsset();
+  }
+}
+
+// optional .Proto.Bus bus = 200;
+inline bool Envelope::has_bus() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Envelope::set_has_bus() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Envelope::clear_has_bus() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Envelope::clear_bus() {
+  if (bus_ != NULL) bus_->::Proto::Bus::Clear();
+  clear_has_bus();
+}
+inline const ::Proto::Bus& Envelope::bus() const {
+  return bus_ != NULL ? *bus_ : *default_instance_->bus_;
+}
+inline ::Proto::Bus* Envelope::mutable_bus() {
+  set_has_bus();
+  if (bus_ == NULL) bus_ = new ::Proto::Bus;
+  return bus_;
+}
+inline ::Proto::Bus* Envelope::release_bus() {
+  clear_has_bus();
+  ::Proto::Bus* temp = bus_;
+  bus_ = NULL;
+  return temp;
+}
+inline void Envelope::set_allocated_bus(::Proto::Bus* bus) {
+  delete bus_;
+  bus_ = bus;
+  if (bus) {
+    set_has_bus();
+  } else {
+    clear_has_bus();
   }
 }
 
@@ -18154,73 +18562,41 @@ inline void SchemaItemBus::set_bustypehash(::google::protobuf::uint64 value) {
   bustypehash_ = value;
 }
 
-// optional string busTypeXml = 4;
-inline bool SchemaItemBus::has_bustypexml() const {
+// optional .Proto.Bus bus = 5;
+inline bool SchemaItemBus::has_bus() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void SchemaItemBus::set_has_bustypexml() {
+inline void SchemaItemBus::set_has_bus() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void SchemaItemBus::clear_has_bustypexml() {
+inline void SchemaItemBus::clear_has_bus() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void SchemaItemBus::clear_bustypexml() {
-  if (bustypexml_ != &::google::protobuf::internal::kEmptyString) {
-    bustypexml_->clear();
-  }
-  clear_has_bustypexml();
+inline void SchemaItemBus::clear_bus() {
+  if (bus_ != NULL) bus_->::Proto::Bus::Clear();
+  clear_has_bus();
 }
-inline const ::std::string& SchemaItemBus::bustypexml() const {
-  return *bustypexml_;
+inline const ::Proto::Bus& SchemaItemBus::bus() const {
+  return bus_ != NULL ? *bus_ : *default_instance_->bus_;
 }
-inline void SchemaItemBus::set_bustypexml(const ::std::string& value) {
-  set_has_bustypexml();
-  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
-    bustypexml_ = new ::std::string;
-  }
-  bustypexml_->assign(value);
+inline ::Proto::Bus* SchemaItemBus::mutable_bus() {
+  set_has_bus();
+  if (bus_ == NULL) bus_ = new ::Proto::Bus;
+  return bus_;
 }
-inline void SchemaItemBus::set_bustypexml(const char* value) {
-  set_has_bustypexml();
-  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
-    bustypexml_ = new ::std::string;
-  }
-  bustypexml_->assign(value);
+inline ::Proto::Bus* SchemaItemBus::release_bus() {
+  clear_has_bus();
+  ::Proto::Bus* temp = bus_;
+  bus_ = NULL;
+  return temp;
 }
-inline void SchemaItemBus::set_bustypexml(const char* value, size_t size) {
-  set_has_bustypexml();
-  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
-    bustypexml_ = new ::std::string;
-  }
-  bustypexml_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* SchemaItemBus::mutable_bustypexml() {
-  set_has_bustypexml();
-  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
-    bustypexml_ = new ::std::string;
-  }
-  return bustypexml_;
-}
-inline ::std::string* SchemaItemBus::release_bustypexml() {
-  clear_has_bustypexml();
-  if (bustypexml_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
+inline void SchemaItemBus::set_allocated_bus(::Proto::Bus* bus) {
+  delete bus_;
+  bus_ = bus;
+  if (bus) {
+    set_has_bus();
   } else {
-    ::std::string* temp = bustypexml_;
-    bustypexml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void SchemaItemBus::set_allocated_bustypexml(::std::string* bustypexml) {
-  if (bustypexml_ != &::google::protobuf::internal::kEmptyString) {
-    delete bustypexml_;
-  }
-  if (bustypexml) {
-    set_has_bustypexml();
-    bustypexml_ = bustypexml;
-  } else {
-    clear_has_bustypexml();
-    bustypexml_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_bus();
   }
 }
 
@@ -25566,6 +25942,643 @@ ArchSignals::archsignals() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::ArchSignal >*
 ArchSignals::mutable_archsignals() {
   return &archsignals_;
+}
+
+// -------------------------------------------------------------------
+
+// BusSignal
+
+// optional string signalId = 1;
+inline bool BusSignal::has_signalid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void BusSignal::set_has_signalid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void BusSignal::clear_has_signalid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void BusSignal::clear_signalid() {
+  if (signalid_ != &::google::protobuf::internal::kEmptyString) {
+    signalid_->clear();
+  }
+  clear_has_signalid();
+}
+inline const ::std::string& BusSignal::signalid() const {
+  return *signalid_;
+}
+inline void BusSignal::set_signalid(const ::std::string& value) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(value);
+}
+inline void BusSignal::set_signalid(const char* value) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(value);
+}
+inline void BusSignal::set_signalid(const char* value, size_t size) {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  signalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BusSignal::mutable_signalid() {
+  set_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    signalid_ = new ::std::string;
+  }
+  return signalid_;
+}
+inline ::std::string* BusSignal::release_signalid() {
+  clear_has_signalid();
+  if (signalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = signalid_;
+    signalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BusSignal::set_allocated_signalid(::std::string* signalid) {
+  if (signalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalid_;
+  }
+  if (signalid) {
+    set_has_signalid();
+    signalid_ = signalid;
+  } else {
+    clear_has_signalid();
+    signalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string caption = 2;
+inline bool BusSignal::has_caption() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void BusSignal::set_has_caption() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void BusSignal::clear_has_caption() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void BusSignal::clear_caption() {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    caption_->clear();
+  }
+  clear_has_caption();
+}
+inline const ::std::string& BusSignal::caption() const {
+  return *caption_;
+}
+inline void BusSignal::set_caption(const ::std::string& value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void BusSignal::set_caption(const char* value) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(value);
+}
+inline void BusSignal::set_caption(const char* value, size_t size) {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  caption_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BusSignal::mutable_caption() {
+  set_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    caption_ = new ::std::string;
+  }
+  return caption_;
+}
+inline ::std::string* BusSignal::release_caption() {
+  clear_has_caption();
+  if (caption_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = caption_;
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BusSignal::set_allocated_caption(::std::string* caption) {
+  if (caption_ != &::google::protobuf::internal::kEmptyString) {
+    delete caption_;
+  }
+  if (caption) {
+    set_has_caption();
+    caption_ = caption;
+  } else {
+    clear_has_caption();
+    caption_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 type = 3;
+inline bool BusSignal::has_type() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void BusSignal::set_has_type() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void BusSignal::clear_has_type() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void BusSignal::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 BusSignal::type() const {
+  return type_;
+}
+inline void BusSignal::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional string units = 4;
+inline bool BusSignal::has_units() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void BusSignal::set_has_units() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void BusSignal::clear_has_units() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void BusSignal::clear_units() {
+  if (units_ != &::google::protobuf::internal::kEmptyString) {
+    units_->clear();
+  }
+  clear_has_units();
+}
+inline const ::std::string& BusSignal::units() const {
+  return *units_;
+}
+inline void BusSignal::set_units(const ::std::string& value) {
+  set_has_units();
+  if (units_ == &::google::protobuf::internal::kEmptyString) {
+    units_ = new ::std::string;
+  }
+  units_->assign(value);
+}
+inline void BusSignal::set_units(const char* value) {
+  set_has_units();
+  if (units_ == &::google::protobuf::internal::kEmptyString) {
+    units_ = new ::std::string;
+  }
+  units_->assign(value);
+}
+inline void BusSignal::set_units(const char* value, size_t size) {
+  set_has_units();
+  if (units_ == &::google::protobuf::internal::kEmptyString) {
+    units_ = new ::std::string;
+  }
+  units_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* BusSignal::mutable_units() {
+  set_has_units();
+  if (units_ == &::google::protobuf::internal::kEmptyString) {
+    units_ = new ::std::string;
+  }
+  return units_;
+}
+inline ::std::string* BusSignal::release_units() {
+  clear_has_units();
+  if (units_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = units_;
+    units_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void BusSignal::set_allocated_units(::std::string* units) {
+  if (units_ != &::google::protobuf::internal::kEmptyString) {
+    delete units_;
+  }
+  if (units) {
+    set_has_units();
+    units_ = units;
+  } else {
+    clear_has_units();
+    units_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 analogFormat = 10;
+inline bool BusSignal::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void BusSignal::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void BusSignal::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void BusSignal::clear_analogformat() {
+  analogformat_ = 0;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 BusSignal::analogformat() const {
+  return analogformat_;
+}
+inline void BusSignal::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
+}
+
+// optional int32 inbusOffset = 32;
+inline bool BusSignal::has_inbusoffset() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void BusSignal::set_has_inbusoffset() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void BusSignal::clear_has_inbusoffset() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void BusSignal::clear_inbusoffset() {
+  inbusoffset_ = 0;
+  clear_has_inbusoffset();
+}
+inline ::google::protobuf::int32 BusSignal::inbusoffset() const {
+  return inbusoffset_;
+}
+inline void BusSignal::set_inbusoffset(::google::protobuf::int32 value) {
+  set_has_inbusoffset();
+  inbusoffset_ = value;
+}
+
+// optional int32 inbusDiscreteBitNo = 40;
+inline bool BusSignal::has_inbusdiscretebitno() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void BusSignal::set_has_inbusdiscretebitno() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void BusSignal::clear_has_inbusdiscretebitno() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void BusSignal::clear_inbusdiscretebitno() {
+  inbusdiscretebitno_ = 0;
+  clear_has_inbusdiscretebitno();
+}
+inline ::google::protobuf::int32 BusSignal::inbusdiscretebitno() const {
+  return inbusdiscretebitno_;
+}
+inline void BusSignal::set_inbusdiscretebitno(::google::protobuf::int32 value) {
+  set_has_inbusdiscretebitno();
+  inbusdiscretebitno_ = value;
+}
+
+// optional int32 inbusAnalogSize = 50;
+inline bool BusSignal::has_inbusanalogsize() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void BusSignal::set_has_inbusanalogsize() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void BusSignal::clear_has_inbusanalogsize() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void BusSignal::clear_inbusanalogsize() {
+  inbusanalogsize_ = 0;
+  clear_has_inbusanalogsize();
+}
+inline ::google::protobuf::int32 BusSignal::inbusanalogsize() const {
+  return inbusanalogsize_;
+}
+inline void BusSignal::set_inbusanalogsize(::google::protobuf::int32 value) {
+  set_has_inbusanalogsize();
+  inbusanalogsize_ = value;
+}
+
+// optional int32 inbusAnalogFormat = 51;
+inline bool BusSignal::has_inbusanalogformat() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void BusSignal::set_has_inbusanalogformat() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void BusSignal::clear_has_inbusanalogformat() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void BusSignal::clear_inbusanalogformat() {
+  inbusanalogformat_ = 0;
+  clear_has_inbusanalogformat();
+}
+inline ::google::protobuf::int32 BusSignal::inbusanalogformat() const {
+  return inbusanalogformat_;
+}
+inline void BusSignal::set_inbusanalogformat(::google::protobuf::int32 value) {
+  set_has_inbusanalogformat();
+  inbusanalogformat_ = value;
+}
+
+// optional int32 inbusAnalogByteOrder = 52;
+inline bool BusSignal::has_inbusanalogbyteorder() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void BusSignal::set_has_inbusanalogbyteorder() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void BusSignal::clear_has_inbusanalogbyteorder() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void BusSignal::clear_inbusanalogbyteorder() {
+  inbusanalogbyteorder_ = 0;
+  clear_has_inbusanalogbyteorder();
+}
+inline ::google::protobuf::int32 BusSignal::inbusanalogbyteorder() const {
+  return inbusanalogbyteorder_;
+}
+inline void BusSignal::set_inbusanalogbyteorder(::google::protobuf::int32 value) {
+  set_has_inbusanalogbyteorder();
+  inbusanalogbyteorder_ = value;
+}
+
+// optional double busAnalogLowLimit = 53;
+inline bool BusSignal::has_busanaloglowlimit() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void BusSignal::set_has_busanaloglowlimit() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void BusSignal::clear_has_busanaloglowlimit() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void BusSignal::clear_busanaloglowlimit() {
+  busanaloglowlimit_ = 0;
+  clear_has_busanaloglowlimit();
+}
+inline double BusSignal::busanaloglowlimit() const {
+  return busanaloglowlimit_;
+}
+inline void BusSignal::set_busanaloglowlimit(double value) {
+  set_has_busanaloglowlimit();
+  busanaloglowlimit_ = value;
+}
+
+// optional double busAnalogHighLimit = 54;
+inline bool BusSignal::has_busanaloghighlimit() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void BusSignal::set_has_busanaloghighlimit() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void BusSignal::clear_has_busanaloghighlimit() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void BusSignal::clear_busanaloghighlimit() {
+  busanaloghighlimit_ = 0;
+  clear_has_busanaloghighlimit();
+}
+inline double BusSignal::busanaloghighlimit() const {
+  return busanaloghighlimit_;
+}
+inline void BusSignal::set_busanaloghighlimit(double value) {
+  set_has_busanaloghighlimit();
+  busanaloghighlimit_ = value;
+}
+
+// optional double inbusAnalogLowLimit = 55;
+inline bool BusSignal::has_inbusanaloglowlimit() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void BusSignal::set_has_inbusanaloglowlimit() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void BusSignal::clear_has_inbusanaloglowlimit() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void BusSignal::clear_inbusanaloglowlimit() {
+  inbusanaloglowlimit_ = 0;
+  clear_has_inbusanaloglowlimit();
+}
+inline double BusSignal::inbusanaloglowlimit() const {
+  return inbusanaloglowlimit_;
+}
+inline void BusSignal::set_inbusanaloglowlimit(double value) {
+  set_has_inbusanaloglowlimit();
+  inbusanaloglowlimit_ = value;
+}
+
+// optional double inbusAnalogHighLimit = 56;
+inline bool BusSignal::has_inbusanaloghighlimit() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void BusSignal::set_has_inbusanaloghighlimit() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void BusSignal::clear_has_inbusanaloghighlimit() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void BusSignal::clear_inbusanaloghighlimit() {
+  inbusanaloghighlimit_ = 0;
+  clear_has_inbusanaloghighlimit();
+}
+inline double BusSignal::inbusanaloghighlimit() const {
+  return inbusanaloghighlimit_;
+}
+inline void BusSignal::set_inbusanaloghighlimit(double value) {
+  set_has_inbusanaloghighlimit();
+  inbusanaloghighlimit_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Bus
+
+// optional .Proto.Uuid uuid = 1;
+inline bool Bus::has_uuid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Bus::set_has_uuid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Bus::clear_has_uuid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Bus::clear_uuid() {
+  if (uuid_ != NULL) uuid_->::Proto::Uuid::Clear();
+  clear_has_uuid();
+}
+inline const ::Proto::Uuid& Bus::uuid() const {
+  return uuid_ != NULL ? *uuid_ : *default_instance_->uuid_;
+}
+inline ::Proto::Uuid* Bus::mutable_uuid() {
+  set_has_uuid();
+  if (uuid_ == NULL) uuid_ = new ::Proto::Uuid;
+  return uuid_;
+}
+inline ::Proto::Uuid* Bus::release_uuid() {
+  clear_has_uuid();
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = NULL;
+  return temp;
+}
+inline void Bus::set_allocated_uuid(::Proto::Uuid* uuid) {
+  delete uuid_;
+  uuid_ = uuid;
+  if (uuid) {
+    set_has_uuid();
+  } else {
+    clear_has_uuid();
+  }
+}
+
+// optional string busTypeId = 2;
+inline bool Bus::has_bustypeid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Bus::set_has_bustypeid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Bus::clear_has_bustypeid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Bus::clear_bustypeid() {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    bustypeid_->clear();
+  }
+  clear_has_bustypeid();
+}
+inline const ::std::string& Bus::bustypeid() const {
+  return *bustypeid_;
+}
+inline void Bus::set_bustypeid(const ::std::string& value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void Bus::set_bustypeid(const char* value) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(value);
+}
+inline void Bus::set_bustypeid(const char* value, size_t size) {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  bustypeid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Bus::mutable_bustypeid() {
+  set_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    bustypeid_ = new ::std::string;
+  }
+  return bustypeid_;
+}
+inline ::std::string* Bus::release_bustypeid() {
+  clear_has_bustypeid();
+  if (bustypeid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = bustypeid_;
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Bus::set_allocated_bustypeid(::std::string* bustypeid) {
+  if (bustypeid_ != &::google::protobuf::internal::kEmptyString) {
+    delete bustypeid_;
+  }
+  if (bustypeid) {
+    set_has_bustypeid();
+    bustypeid_ = bustypeid;
+  } else {
+    clear_has_bustypeid();
+    bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated .Proto.BusSignal busSignals = 3;
+inline int Bus::bussignals_size() const {
+  return bussignals_.size();
+}
+inline void Bus::clear_bussignals() {
+  bussignals_.Clear();
+}
+inline const ::Proto::BusSignal& Bus::bussignals(int index) const {
+  return bussignals_.Get(index);
+}
+inline ::Proto::BusSignal* Bus::mutable_bussignals(int index) {
+  return bussignals_.Mutable(index);
+}
+inline ::Proto::BusSignal* Bus::add_bussignals() {
+  return bussignals_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal >&
+Bus::bussignals() const {
+  return bussignals_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::BusSignal >*
+Bus::mutable_bussignals() {
+  return &bussignals_;
+}
+
+// optional bool autoSignalPlacement = 10 [default = true];
+inline bool Bus::has_autosignalplacement() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Bus::set_has_autosignalplacement() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Bus::clear_has_autosignalplacement() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Bus::clear_autosignalplacement() {
+  autosignalplacement_ = true;
+  clear_has_autosignalplacement();
+}
+inline bool Bus::autosignalplacement() const {
+  return autosignalplacement_;
+}
+inline void Bus::set_autosignalplacement(bool value) {
+  set_has_autosignalplacement();
+  autosignalplacement_ = value;
+}
+
+// optional int32 manualBusSize = 11 [default = 0];
+inline bool Bus::has_manualbussize() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Bus::set_has_manualbussize() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Bus::clear_has_manualbussize() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Bus::clear_manualbussize() {
+  manualbussize_ = 0;
+  clear_has_manualbussize();
+}
+inline ::google::protobuf::int32 Bus::manualbussize() const {
+  return manualbussize_;
+}
+inline void Bus::set_manualbussize(::google::protobuf::int32 value) {
+  set_has_manualbussize();
+  manualbussize_ = value;
 }
 
 

@@ -31,7 +31,7 @@ const char* const DvsFileExtension = "dvs";				// Diagnostics schema file extnes
 const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema template file extnesion
 
 const char* const OclFileExtension = "ocl";				// (Optical) Connection Link
-const char* const BusFileExtension = "xml";				// Bus type
+const char* const BusFileExtension = "bus_type";		// Bus type
 
 //
 //
@@ -512,6 +512,12 @@ void DbFileInfo::setDetails(const QString& value)
 //
 DbFile::DbFile() :
 	DbFileInfo()
+{
+}
+
+
+DbFile::DbFile(const DbFileInfo& fileInfo) :
+	DbFileInfo(fileInfo)
 {
 }
 

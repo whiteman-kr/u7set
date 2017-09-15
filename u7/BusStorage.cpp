@@ -63,7 +63,7 @@ bool BusStorage::load(QString* errorMessage)
 		VFrame30::Bus bus;
 		QString loadBusErrorMessage;
 
-		ok = bus.load(f->data(), &loadBusErrorMessage);
+		ok = bus.Load(f->data());
 		if (ok == false)
 		{
 			*errorMessage = QString("Load bus %1 error ").arg(f->fileName()) + loadBusErrorMessage;
@@ -99,7 +99,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	QByteArray data;
 
-	bool ok = bus->save(&data);
+	bool ok = bus->Save(data);
 
 	if (ok == false)
 	{

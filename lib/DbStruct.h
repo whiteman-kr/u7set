@@ -237,6 +237,7 @@ class DbFileInfo
 {
 public:
 	DbFileInfo();
+	DbFileInfo(const DbFileInfo& fileInfo) = default;
 	DbFileInfo(const DbFile& file);
 	virtual ~DbFileInfo();
 
@@ -321,6 +322,8 @@ class DbFile : public DbFileInfo
 {
 public:
 	DbFile();
+	DbFile(const DbFile& dbFile) = default;
+	DbFile(const DbFileInfo& fileInfo);
 
 	// Methods
 	//

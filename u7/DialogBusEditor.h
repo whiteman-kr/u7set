@@ -112,7 +112,6 @@ private:
 
 	QAction* m_analogAction = nullptr;
 	QAction* m_discreteAction = nullptr;
-	QAction* m_busAction = nullptr;
 
 	PropertyEditorDialog* m_propEditorDialog = nullptr;
 };
