@@ -106,7 +106,9 @@ SOURCES += main.cpp \
     MonitorView.cpp \
     MonitorTrends.cpp \
     DialogChooseTrendSignals.cpp \
-    TrendTcpClient.cpp
+    TrendTcpClient.cpp \
+    MonitorArchive.cpp \
+    DialogChooseArchiveSignals.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -147,7 +149,9 @@ HEADERS  += \
     MonitorView.h \
     MonitorTrends.h \
     DialogChooseTrendSignals.h \
-    TrendTcpClient.h
+    TrendTcpClient.h \
+    MonitorArchive.h \
+    DialogChooseArchiveSignals.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -155,7 +159,8 @@ FORMS    += \
     DialogSignalSearch.ui \
     DialogSignalSnapshot.ui \
     DialogColumns.ui \
-    DialogChooseTrendSignals.ui
+    DialogChooseTrendSignals.ui \
+    DialogChooseArchiveSignals.ui
 
 
 # Optimization flags

@@ -36,8 +36,12 @@ DbController::DbController() :
 	connect(this, &DbController::signal_updateUser, m_worker, &DbWorker::slot_updateUser);
 	connect(this, &DbController::signal_getUserList, m_worker, &DbWorker::slot_getUserList);
 
+	connect(this, &DbController::signal_isFileExists, m_worker, &DbWorker::slot_isFileExists);
+
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+
 	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
+	connect(this, &DbController::signal_getFilesInfo, m_worker, &DbWorker::slot_getFilesInfo);
 
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
@@ -440,6 +444,32 @@ bool DbController::updateUser(const DbUser& user, QWidget* parentWidget)
 	return result;
 }
 
+bool DbController::isFileExists(QString fileName, int parentId, int* fileId, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (fileId == nullptr)
+	{
+		assert(fileId != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_isFileExists(fileName, parentId, fileId);
+
+	bool result = waitForComplete(parentWidget, tr("Getting file information..."));
+	return result;
+}
+
 bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget)
 {
 	return getFileList(files, parentId, QString(), removeDeleted, parentWidget);
@@ -468,6 +498,32 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QSt
 	emit signal_getFileList(files, parentId, filter, removeDeleted);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileInfo(parentId, fileName, out);
+
+	bool result = waitForComplete(parentWidget, tr("Geting file info"));
 	return result;
 }
 
@@ -521,7 +577,7 @@ bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo
 
 	// Emit signal end wait for complete
 	//
-	emit signal_getFileInfo(fileIds, out);
+	emit signal_getFilesInfo(fileIds, out);
 
 	bool result = waitForComplete(parentWidget, tr("Geting files info"));
 	return result;

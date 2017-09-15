@@ -5203,7 +5203,7 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), QLatin1String(".xml"), true, this);
+	bool ok = db()->getFileList(&fileList, db()->busTypesFileId(), ::BusFileExtension, true, this);
 	if (ok == false)
 	{
 		return false;
@@ -5233,13 +5233,11 @@ bool EditSchemaWidget::loadBusses(std::vector<VFrame30::Bus>* out)
 		}
 
 		VFrame30::Bus bus;
-		QString errorMessage;
-
-		ok = bus.load(f->data(), &errorMessage);
+		ok = bus.Load(f->data());
 
 		if (ok == false)
 		{
-			QMessageBox::critical(this, qAppName(), "Parsing file " + f->fileName() + " error: " + errorMessage);
+			QMessageBox::critical(this, qAppName(), "Load file " + f->fileName() + " error.");
 			return false;
 		}
 
@@ -6821,7 +6819,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	//
 	std::vector<DbFileInfo> fileInfos;
 
-	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ".xml", true, this);
+	bool ok = db()->getFileList(&fileInfos, db()->busTypesFileId(), ::BusFileExtension, true, this);
 	if (ok == false)
 	{
 		return;
@@ -6844,12 +6842,12 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	for (std::shared_ptr<DbFile> f : files)
 	{
 		VFrame30::Bus bus;
-		QString errorMessage;
 
-		ok = bus.load(f->data(), &errorMessage);
+		ok = bus.Load(f->data());
+
 		if (ok == false)
 		{
-			QMessageBox::critical(this, qAppName(), QString("Error reading %1 file: %2").arg(f->fileName()).arg(errorMessage));
+			QMessageBox::critical(this, qAppName(), QString("Load bus error, file: %1").arg(f->fileName()));
 			continue;
 		}
 

@@ -32,7 +32,6 @@ message qvariant
 	optional bool boolValue = 5 [default = false];
 }
 
-
 //
 //
 // Unicode string
@@ -122,6 +121,8 @@ message Envelope
 	optional Configuration configuration = 103;		// VFrame30::Configuration
 	optional Connection connection = 104;			// Hardware::Connection
 	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
+
+    optional Bus bus = 200;							// VFrame30::Bus
 }
 
 
@@ -760,7 +761,7 @@ message SchemaItemBus
 {
     optional string busTypeId = 2;
 	optional fixed64 busTypeHash = 3;
-	optional string busTypeXml = 4;
+	optional Bus bus = 5;
 }
 
 //
@@ -1241,4 +1242,33 @@ message ArchSignals
     repeated ArchSignal archSignals = 1;
 }
 
+//
+// Busses
+//
+message BusSignal
+{
+    optional string signalId = 1;
+	optional string caption = 2;
+	optional int32 type = 3;
+	optional string units = 4;
+	optional int32 analogFormat = 10;
 
+    optional int32 inbusOffset = 32;
+	optional int32 inbusDiscreteBitNo = 40;
+	optional int32 inbusAnalogSize = 50;
+	optional int32 inbusAnalogFormat = 51;
+	optional int32 inbusAnalogByteOrder = 52;
+	optional double busAnalogLowLimit = 53;
+	optional double busAnalogHighLimit = 54;
+	optional double inbusAnalogLowLimit = 55;
+	optional double inbusAnalogHighLimit = 56;
+}
+
+message Bus
+{
+    optional Uuid uuid = 1;
+	optional string busTypeId = 2;
+	repeated BusSignal busSignals = 3;
+	optional bool autoSignalPlacement = 10 [default = true];
+	optional int32 manualBusSize = 11 [default = 0];
+}

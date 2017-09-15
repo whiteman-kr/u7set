@@ -36,15 +36,12 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 
 	m_analogAction = new QAction("Analog signal", this);
 	m_discreteAction = new QAction("Discrete signal", this);
-	m_busAction = new QAction("Bus signal", this);
 
 	connect(m_analogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
 	connect(m_discreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
-	connect(m_busAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Bus);});
 
 	m_addSignalMenu->addAction(m_analogAction);
 	m_addSignalMenu->addAction(m_discreteAction);
-	m_addSignalMenu->addAction(m_busAction);
 
 	// m_busTree
 	//
@@ -103,19 +100,17 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_signalsTree = new QTreeWidget();
 
 	l.clear();
-	l << tr("Name");
+	l << tr("SignalID");
 	l << tr("Type");
 	l << tr("Signal Format");
-	l << tr("BusTypeID");
 
 	m_signalsTree->setColumnCount(l.size());
 	m_signalsTree->setHeaderLabels(l);
 
 	il = 0;
-	m_signalsTree->setColumnWidth(il++, 140);
-	m_signalsTree->setColumnWidth(il++, 40);
-	m_signalsTree->setColumnWidth(il++, 40);
-	m_signalsTree->setColumnWidth(il++, 40);
+	m_signalsTree->setColumnWidth(il++, 150);
+	m_signalsTree->setColumnWidth(il++, 60);
+	m_signalsTree->setColumnWidth(il++, 50);
 
 	m_signalsTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_signalsTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -631,24 +626,27 @@ void DialogBusEditor::onUndo()
 		}
 		else
 		{
-			// read previous data from file
-
+			// Read previous data from file
+			//
 			std::shared_ptr<DbFile> file = nullptr;
 
 			DbFileInfo fi = m_busses.fileInfo(uuid);
 
 			bool ok = m_db->getLatestVersion(fi, &file, this);
+
 			if (ok == true && file != nullptr)
 			{
 				QByteArray data;
 				file->swapData(data);
 
 				VFrame30::Bus* bus = m_busses.getPtr(uuid);
+				assert(bus);
 
-				QString errorMessage;
-
-				if (bus != nullptr && bus->load(data, &errorMessage) == true)
+				if (bus != nullptr)
 				{
+					ok = bus->Load(data);		// Load restore version
+					assert(ok);
+
 					updateBusTreeItemText(item);
 					fillBusProperties();
 					fillBusSignals();
@@ -699,24 +697,27 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	VFrame30::BusSignal bs(type);
 
 	bool ok = false;
+	QString defaultSignalId = QString("SID%1").arg(bus->busSignals().size());
 
-	QString signalName = QInputDialog::getText(this, tr("Add Signal"),
-										 tr("Enter signal name:"), QLineEdit::Normal,
-										 tr("name"), &ok);
+	QString signalId = QInputDialog::getText(this, tr("Add Signal"),
+												  tr("Enter SignalID:"), QLineEdit::Normal,
+												  defaultSignalId, &ok);
+	signalId = signalId.trimmed();
 
-	if (ok == false || signalName.isEmpty() == true)
+	if (ok == false || signalId.isEmpty() == true)
 	{
 		return;
 	}
 
-	bs.setName(signalName);
+	bs.setSignalId(signalId);
+	bs.setCaption(signalId);
 
 	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
 	for (const VFrame30::BusSignal& checkBs : busSignals)
 	{
-		if (checkBs.name() == bs.name())
+		if (checkBs.signalId() == bs.signalId())
 		{
-			QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(bs.name()));
+			QMessageBox::critical(this, qAppName(), tr("A signal with SignalID '%1' already exists!").arg(bs.signalId()));
 			return;
 		}
 	}
@@ -806,22 +807,22 @@ void DialogBusEditor::onSignalEdit()
 				return;
 			}
 
-			// Check for duplicate signal names
+			// Check for duplicate SignalIDs
 			//
 
-			bool duplicateNames = false;
+			bool duplicateSignalIds = false;
 
 			for (int j = 0; j < busSignals.size(); j++)
 			{
-				if (editIndex != j && busSignals[j].name() == editSignal->name())
+				if (editIndex != j && busSignals[j].signalId() == editSignal->signalId())
 				{
-					QMessageBox::critical(this, qAppName(), tr("A signal with name '%1' already exists!").arg(busSignals[j].name()));
-					duplicateNames = true;
+					QMessageBox::critical(this, qAppName(), tr("A signal with SignalID '%1' already exists!").arg(busSignals[j].signalId()));
+					duplicateSignalIds = true;
 					break;
 				}
 			}
 
-			if (duplicateNames == true)
+			if (duplicateSignalIds == true)
 			{
 				continue;
 			}
@@ -874,7 +875,7 @@ void DialogBusEditor::onSignalRemove()
 
 	for (int i = static_cast<int>(indexesToDelete.size() - 1); i >= 0; i--)
 	{
-		bus->removeSignal(indexesToDelete[i]);
+		bus->removeSignalAt(indexesToDelete[i]);
 	}
 
 	fillBusSignals();
@@ -1081,6 +1082,7 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 
 			if (editBus->uuid() == listBus->uuid())
 			{
+				listBus->setAutoSignalPlacement(editBus->autoSignalPlacement());
 				listBus->setBusTypeId(editBus->busTypeId());
 
 				updateBusTreeItemText(item, *listBus);
@@ -1392,7 +1394,7 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 		return;
 	}
 
-	item->setText(0, signal.name());
+	item->setText(0, signal.signalId());
 	item->setText(1, E::valueToString<E::SignalType>(signal.type()));
 
 	if (signal.type() == E::SignalType::Analog)
@@ -1401,16 +1403,8 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 	}
 	else
 	{
+		assert(signal.type() == E::SignalType::Discrete);
 		item->setText(2, "");
-	}
-
-	if (signal.type() == E::SignalType::Bus)
-	{
-		item->setText(3, signal.busTypeId());
-	}
-	else
-	{
-		item->setText(3, "");
 	}
 
 	return;

@@ -81,6 +81,13 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogChooseTrendSignals/filter", m_trendSignalsDialogFilterCompleter);
 
+	s.setValue("ArchiveWindow/pos", m_archiveWindowPos);
+	s.setValue("ArchiveWindow/geometry", m_archiveWindowGeometry);
+	s.setValue("ArchiveWindow/state", m_archiveWindowState);
+	s.setValue("ArchiveWindow/timeType", m_archiveTimeType);
+
+	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -105,6 +112,12 @@ void Settings::loadUserScope()
 	m_signalSnapshotSortColumn = s.value("DialogSignalSnapshot/sortColumn", m_signalSnapshotSortColumn).toInt();
 	m_signalSnapshotSortOrder = static_cast<Qt::SortOrder>(s.value("DialogSignalSnapshot/sortOrder", m_signalSnapshotSortOrder).toInt());
 	m_trendSignalsDialogFilterCompleter = s.value("DialogChooseTrendSignals/filter").toStringList();
+
+	m_archiveWindowPos = s.value("ArchiveWindow/pos", QPoint(200, 200)).toPoint();
+	m_archiveWindowGeometry = s.value("ArchiveWindow/geometry").toByteArray();
+	m_archiveWindowState = s.value("ArchiveWindow/state").toByteArray();
+	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
+	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
 
 	return;
 }

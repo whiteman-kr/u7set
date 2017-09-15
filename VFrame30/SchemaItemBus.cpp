@@ -42,11 +42,10 @@ namespace VFrame30
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
 		busitem->set_bustypehash(m_busTypeHash);
 
-		QByteArray busXml;
-		m_bus.save(&busXml);
-		busitem->set_bustypexml(busXml.constData(), busXml.size());
+		Proto::Bus* busMessage = busitem->mutable_bus();
+		result &= m_bus.save(busMessage);
 
-		return true;
+		return result;
 	}
 
 	bool SchemaItemBus::LoadData(const Proto::Envelope& message)
@@ -70,10 +69,9 @@ namespace VFrame30
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
 		m_busTypeHash = busitem.bustypehash();
 
-		QByteArray xml = QByteArray::fromRawData(busitem.bustypexml().data(),
-												 static_cast<int>(busitem.bustypexml().size()));
-		QString erorrMessaage;
-		m_bus.load(xml, &erorrMessaage);
+
+		const Proto::Bus& busMessage = busitem.bus();
+		result &= m_bus.load(busMessage);
 
 		setBusPins(m_bus);
 
@@ -305,7 +303,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			addInput(-1, busSignal.name());
+			addInput(-1, busSignal.signalId());
 		}
 
 		adjustHeight();
@@ -536,7 +534,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : busType().busSignals())
 		{
-			QString propName = "ShowOut_" + busSignal.name();
+			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
 					[&propName](std::shared_ptr<Property> p)
@@ -547,7 +545,7 @@ namespace VFrame30
 			if (it == props.end())
 			{
 				assert(false);
-				addOutput(-1, busSignal.name());
+				addOutput(-1, busSignal.signalId());
 			}
 			else
 			{
@@ -558,7 +556,7 @@ namespace VFrame30
 				}
 				else
 				{
-					addOutput(-1, busSignal.name());
+					addOutput(-1, busSignal.signalId());
 				}
 			}
 		}
@@ -578,7 +576,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			QString propName = "ShowOut_" + busSignal.name();
+			QString propName = "ShowOut_" + busSignal.signalId();
 
 			auto it = std::find_if(props.begin(), props.end(),
 					[&propName](std::shared_ptr<Property> p)

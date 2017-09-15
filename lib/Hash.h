@@ -11,12 +11,26 @@ typedef quint64 Hash;
 inline Hash calcHash(const QString& str)
 {
 	Hash hash = 0;
-
 	const QChar* prt = str.constData();
 
 	while (prt->unicode())
 	{
 		hash += (hash << 5) + prt->unicode();
+		prt++;
+	}
+
+	return hash;
+}
+
+inline Hash calcHash(const QByteArray& data)
+{
+	Hash hash = 0;
+	const char* prt = data.constData();
+	int dataSize = data.size();
+
+	for (int i = 0; i < dataSize; ++i)
+	{
+		hash += (hash << 5) + *prt;
 		prt++;
 	}
 

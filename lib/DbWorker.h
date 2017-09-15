@@ -95,10 +95,13 @@ public slots:
 
     // File management
     //
+	void slot_isFileExists(QString fileName, int parentId, int* fileId);
+
     void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
     void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
 
-    void slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
+	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
     void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);

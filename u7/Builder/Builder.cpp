@@ -1098,7 +1098,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = db->getFileList(&fileList, db->busTypesFileId(), QLatin1String(".xml"), true, nullptr);
+		bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1133,9 +1133,7 @@ namespace Builder
 			}
 
 			VFrame30::Bus bus;
-			QString errorMessage;
-
-			ok = bus.load(f->data(), &errorMessage);
+			ok = bus.Load(f->data());
 			if (ok == false)
 			{
 				return false;

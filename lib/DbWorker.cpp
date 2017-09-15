@@ -181,6 +181,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0163.sql", "Upgrade to version 163, LM Configuration script was updated"},
 	{":/DatabaseUpgrade/Upgrade0164.sql", "Upgrade to version 164, Changes in ArchiveService and AppDataService presets"},
 	{":/DatabaseUpgrade/Upgrade0165.sql", "Upgrade to version 165, AFBL Library was updated"},
+	{":/DatabaseUpgrade/Upgrade0166.sql", "Upgrade to version 166, Implementing safe file functions"},
 };
 
 
@@ -2100,6 +2101,54 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	return;
 }
 
+void DbWorker::slot_isFileExists(QString fileName, int parentId, int* fileId)
+{
+	// Check parameters
+	//
+	if (fileId == nullptr)
+	{
+		assert(fileId != nullptr);
+		return;
+	}
+
+	*fileId = -1;
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM api.is_file_exists('%1', %2, '%3');")
+			.arg(sessionKey())
+			.arg(parentId)
+			.arg(fileName);
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Can't run query. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		*fileId = -1;			// Return NULL, file does not exist
+	}
+	else
+	{
+		*fileId = q.value(0).toInt();
+	}
+
+	return;
+}
+
 void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
 	// Init automitic varaiables
@@ -2167,7 +2216,61 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	return;
 }
 
-void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out)
+void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (out == nullptr)
+	{
+		assert(out != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		return;
+	}
+
+	QString request = QString("SELECT * FROM api.get_file_info('%1', %2, '%3');")
+			.arg(sessionKey())
+			.arg(parentId)
+			.arg(fileName);
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == false)
+	{
+		emitError(db, tr("File %1 not found, reply is empty.").arg(fileName));
+	}
+	else
+	{
+		db_dbFileInfo(q, out);
+	}
+
+	return;
+}
+
+void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out)
 {
 	// Init automitic varaiables
 	//
@@ -2198,8 +2301,8 @@ void DbWorker::slot_getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInf
 		return;
 	}
 
-	QString request = QString("SELECT * FROM get_file_info(%1, ARRAY[")
-			.arg(currentUser().userId());
+	QString request = QString("SELECT * FROM api.get_file_info('%1', ARRAY[")
+			.arg(sessionKey());
 
 	for (auto it = fileIds->begin(); it != fileIds->end(); ++it)
 	{
@@ -2707,8 +2810,8 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 		// request
 		//
-		QString request = QString("SELECT * FROM get_workcopy(%1, %2);")
-				.arg(currentUser().userId())
+		QString request = QString("SELECT * FROM api.get_workcopy('%1', %2);")
+				.arg(sessionKey())
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
@@ -2794,8 +2897,8 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 
 		// request
 		//
-		QString request = QString("SELECT * FROM set_workcopy(%1, %2, ")
-				.arg(currentUser().userId())
+		QString request = QString("SELECT * FROM api.set_workcopy('%1', %2, ")
+				.arg(sessionKey())
 				.arg(file->fileId());
 
 		QString data;

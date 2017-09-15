@@ -116,6 +116,7 @@ namespace VFrame30
 	const QString PropertyNames::alignVert("AlignVert");
 
 	const QString PropertyNames::dataType("DataType");
+	const QString PropertyNames::units("Units");
 
 	const QString PropertyNames::appSignalIDs("AppSignalIDs");
 	const QString PropertyNames::appSignalId("AppSignalID");
@@ -124,6 +125,22 @@ namespace VFrame30
 
 	const QString PropertyNames::busTypeId("BusTypeID");
 	const QString PropertyNames::busTypeFileName("FileName");
+	const QString PropertyNames::busAutoSignalPlacemanet("AutoSignalPlacement");
+	const QString PropertyNames::busManualBusSize("ManualBusSize");
+	const QString PropertyNames::busSignalId("SignalID");
+
+	const QString PropertyNames::busInbusOffset("Offset");
+	const QString PropertyNames::busInbusDiscreteBitNo("BitNo");
+	const QString PropertyNames::busInbusAnalogSize("Size");
+	const QString PropertyNames::busInbusAnalogFormat("Format");
+	const QString PropertyNames::busInbusAnalogByteOrder("ButeOrder");
+	const QString PropertyNames::busAnalogLowLimit("BusSignalLowLimit");
+	const QString PropertyNames::busAnalogHightLimit("BusSignalHighLimit");
+	const QString PropertyNames::busInbusAnalogLowLimit("InbusSignalLowLimit");
+	const QString PropertyNames::busInbusAnalogHightLimit("InbusSignalHighLimit");
+
+	const QString PropertyNames::busSettingCategory("Bus Settings");
+	const QString PropertyNames::busInbusSettingCategory("InBus Settings (Manual Signal Placement)");
 
 	const QString PropertyNames::behaviourCategory("Behaviour");
 	const QString PropertyNames::appearanceCategory("Appearance");

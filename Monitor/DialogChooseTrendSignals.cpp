@@ -316,6 +316,38 @@ void DialogChooseTrendSignals::on_trendSignals_doubleClicked(const QModelIndex& 
 	removeSelectedSignal();
 }
 
+void DialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+{
+	disableControls();
+}
+
+void DialogChooseTrendSignals::on_buttonBox_accepted()
+{
+	m_acceptedSignals.reserve(ui->trendSignals->topLevelItemCount());
+
+	for (int i = 0; i < ui->trendSignals->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* treeItem = ui->trendSignals->topLevelItem(i);
+		assert(treeItem);
+
+		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
+
+		assert(signalVariant.isNull() == false);
+		assert(signalVariant.isValid() == true);
+
+		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
+
+		assert(signalParam.customSignalId() == treeItem->text(0));
+
+		m_acceptedSignals.push_back(signalParam);
+	}
+
+	return;
+}
+
+//
+//		FilteredTrendSignalsModel
+//
 FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignalParam>& signalss, QObject* parent)
 	: QAbstractTableModel(parent),
 	m_signals(signalss)
@@ -363,35 +395,6 @@ FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignal
 		}
 	}
 
-}
-
-void DialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
-{
-	disableControls();
-}
-
-void DialogChooseTrendSignals::on_buttonBox_accepted()
-{
-	m_acceptedSignals.reserve(ui->trendSignals->topLevelItemCount());
-
-	for (int i = 0; i < ui->trendSignals->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* treeItem = ui->trendSignals->topLevelItem(i);
-		assert(treeItem);
-
-		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
-
-		assert(signalVariant.isNull() == false);
-		assert(signalVariant.isValid() == true);
-
-		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
-
-		assert(signalParam.customSignalId() == treeItem->text(0));
-
-		m_acceptedSignals.push_back(signalParam);
-	}
-
-	return;
 }
 
 int FilteredTrendSignalsModel::rowCount(const QModelIndex& /*parent*/) const
