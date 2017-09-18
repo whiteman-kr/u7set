@@ -33,6 +33,7 @@ namespace VFrame30
 			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::units, true, BusSignal::units, BusSignal::setUnits);
 			// Inbus settings (manual)
 			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusAnalogSize, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogSize, BusSignal::setInbusAnalogSize);
 			ADD_PROPERTY_GET_SET_CAT(E::DataFormat, PropertyNames::busInbusAnalogFormat, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogFormat, BusSignal::setInbusAnalogFormat);
 			ADD_PROPERTY_GET_SET_CAT(E::ByteOrder, PropertyNames::busInbusAnalogByteOrder, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogByteOrder, BusSignal::setInbusAnalogByteOrder);
@@ -44,7 +45,7 @@ namespace VFrame30
 		case E::SignalType::Discrete:
 			// Inbus settings (manual)
 			//
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusAnalogSize, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusAnalogSize, BusSignal::setInbusAnalogSize);
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusDiscreteBitNo, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusDiscreteBitNo, BusSignal::setInbusDiscreteBitNo);
 			break;
 		default:

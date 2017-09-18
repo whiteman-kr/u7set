@@ -31,6 +31,7 @@ namespace Builder
 								 AppLogicData* appLogicData,
 								 Tuning::TuningDataStorage* tuningDataStorage,
 								 ComparatorStorage* comparatorStorage,
+								 VFrame30::BusSet* busSet,
 								 BuildResultWriter* buildResultWriter,
 								 IssueLogger* log);
 
@@ -76,6 +77,7 @@ namespace Builder
 		AppLogicData* m_appLogicData = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorStorage* m_cmpStorage = nullptr;
+		const VFrame30::BusSet* m_busSet = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
 
