@@ -63,7 +63,7 @@ const char* Columns[] =
 	"EquipmentID",
 	"Caption",
 	"Channel",
-	"A/D",
+	"A/D/B",
 	"Normal\nstate",
 	"Acquire",
 	"Input-output\ntype",
@@ -776,7 +776,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_EXT_STR_ID: return signal.customAppSignalID();
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
-					case SC_TYPE: return QChar('D');
+					case SC_TYPE: return (signal.signalType() == E::SignalType::Discrete) ? QChar('D') : QChar('B');
 					case SC_ANALOG_DATA_FORMAT: return "";
 
 					case SC_DATA_SIZE: return signal.dataSize();
@@ -1151,8 +1151,8 @@ void SignalsModel::addSignal()
 	signal.setCalculated(settings.value("SignalsTabPage/LastEditedSignal/calculated").toBool());
 	signal.setNormalState(settings.value("SignalsTabPage/LastEditedSignal/normalState").toInt());
 	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
-	signal.setCoarseAperture(settings.value("SignalsTabPage/LastEditedSignal/roughAperture").toDouble());
-	signal.setFineAperture(settings.value("SignalsTabPage/LastEditedSignal/smoothAperture").toDouble());
+	signal.setCoarseAperture(settings.value("SignalsTabPage/LastEditedSignal/coarseAperture").toDouble());
+	signal.setFineAperture(settings.value("SignalsTabPage/LastEditedSignal/fineAperture").toDouble());
 	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
 	signal.setSpreadTolerance(settings.value("SignalsTabPage/LastEditedSignal/spreadTolerance").toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);

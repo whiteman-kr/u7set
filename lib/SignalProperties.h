@@ -4,6 +4,60 @@
 #include "PropertyObject.h"
 
 
+static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
+static const QString signalGroupIDCaption("SignalGroupID");
+static const QString signalInstanceIDCaption("SignalInstanceID");
+static const QString changesetIDCaption("ChangesetID");
+static const QString checkedOutCaption("CheckedOut");
+static const QString userIdCaption("UserID");
+static const QString channelCaption("Channel");
+static const QString createdCaption("Created");
+static const QString deletedCaption("Deleted");
+static const QString instanceCreatedCaption("InstanceCreated");
+//static const QString instanceActionCaption("InstanceAction");
+static const QString typeCaption("Type");
+static const QString inOutTypeCaption("InOutType");
+static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
+static const QString appSignalIDCaption("AppSignalID");
+static const QString customSignalIDCaption("CustomAppSignalID");
+static const QString busTypeIDCaption("BusTypeID");
+static const QString captionCaption("Caption");
+static const QString captionValidator("^.+$");
+static const QString analogDataFormatCaption("AnalogDataFormat");
+static const QString dataSizeCaption("DataSize");
+static const QString lowADCCaption("LowADC");
+static const QString highADCCaption("HighADC");
+static const QString lowDACCaption("LowDAC");
+static const QString highDACCaption("HighDAC");
+static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
+static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
+static const QString unitCaption("Unit");
+static const QString lowValidRangeCaption("LowValidRange");
+static const QString highValidRangeCaption("HighValidRange");
+static const QString unbalanceLimitCaption("UnbalanceLimit");
+static const QString outputModeCaption("OutputMode");
+static const QString acquireCaption("Acquire");
+static const QString normalStateCaption("NormalState");
+static const QString decimalPlacesCaption("DecimalPlaces");
+static const QString coarseApertureCaption("CoarseAperture");
+static const QString fineApertureCaption("FineAperture");
+static const QString adaptiveApertureCaption("AdaptiveAperture");
+static const QString filteringTimeCaption("FilteringTime");
+static const QString spreadToleranceCaption("SpreadTolerance");
+static const QString byteOrderCaption("ByteOrder");
+static const QString equipmentIDCaption("EquipmentID");
+static const QString enableTuningCaption("EnableTuning");
+static const QString tuningDefaultValueCaption("TuningDefaultValue");
+static const QString tuningLowBoundCaption("TuningLowBound");
+static const QString tuningHighBoundCaption("TuningHighBound");
+static const QString identificationCategory("1 Identification");
+static const QString signalTypeCategory("2 Signal type");
+static const QString dataFormatCategory("3 Data Format");
+static const QString signalProcessingCategory("4 Signal processing");
+static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
+static const QString tuningCategory("6 Tuning");
+
+
 class SignalProperties : public PropertyObject
 {
 	Q_OBJECT
