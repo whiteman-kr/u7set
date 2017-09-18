@@ -30,12 +30,12 @@ unix {
 #
 
 win32 {
-        CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
-        CONFIG(release, debug|release): DESTDIR = ../../bin/release
+        CONFIG(debug, debug|release): DESTDIR = ../bin/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin/release
 }
 unix {
-        CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
-        CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
+        CONFIG(debug, debug|release): DESTDIR = ../bin_unix/debug
+        CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
 
@@ -55,6 +55,8 @@ SOURCES += main.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/SocketIO.cpp  \
     ../../lib/Types.cpp \
+    ../../Proto/network.pb.cc \
+    ../../Proto/serialization.pb.cc \
     MultiThreadFileTest.cpp \
     MultiThreadSignalTests.cpp \
     PropertyObjectTests.cpp \
@@ -91,6 +93,8 @@ HEADERS += \
     ../../lib/SocketIO.h \
     ../../lib/PropertyObject.h \
     ../../lib/Types.h \
+    ../../Proto/network.pb.h \
+    ../../Proto/serialization.pb.h \
     MultiThreadFileTest.h \
     MultiThreadSignalTests.h \
     PropertyObjectTests.h \
@@ -118,16 +122,21 @@ unix:QMAKE_CXXFLAGS += -std=c++11
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
-
 #protobuf
 #
 win32 {
         LIBS += -L$$DESTDIR -lprotobuf
-        INCLUDEPATH += ./../../Protobuf
+        INCLUDEPATH += ./../Protobuf
 }
 unix {
 	LIBS += -lprotobuf
 }
+
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
+DISTFILES += \
+    ../Proto/network.proto \
+    ../Proto/serialization.proto
 
 RESOURCES += \
     ../../DatabaseUpgrade/DatabaseUpgrade.qrc

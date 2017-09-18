@@ -10,3 +10,5 @@ GetGitProjectVersion
 .svn
 .vscode
 Scripts/out
+Test/build-u7database*/**
+Test/bin/**
