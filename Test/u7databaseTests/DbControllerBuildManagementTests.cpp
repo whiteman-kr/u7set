@@ -77,7 +77,8 @@ void DbControllerBuildTests::buidProcessTest()
 
 	newSignal.setCaption("BuildTest");
 	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
+	newSignal.setCoarseAperture(1.3);
+	newSignal.setFineAperture(1.2);
 	newSignal.setAppSignalID("buildTestAppSignal");
 	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
 	newSignal.setCalculated(true);
@@ -100,7 +101,6 @@ void DbControllerBuildTests::buidProcessTest()
 	newSignal.setLowEngeneeringUnits(345.1);
 	newSignal.setLowValidRange(134.9);
 	newSignal.setNormalState(1234);
-	newSignal.setObjectName("buildTestObjectName");
 	newSignal.setOutputHighLimit(85678.5);
 	newSignal.setOutputLowLimit(12536.5);
 	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
@@ -109,7 +109,6 @@ void DbControllerBuildTests::buidProcessTest()
 //	newSignal.setReadOnly(false);
 	newSignal.setSpreadTolerance(35634.6);
 	newSignal.setSignalType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
 	newSignal.setUnitID(1);
 
 	signalsToAdd.push_back(newSignal);

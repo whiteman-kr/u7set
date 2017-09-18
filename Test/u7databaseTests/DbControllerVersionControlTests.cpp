@@ -66,11 +66,11 @@ void DbControllerVersionControlTests::isAnyCheckedOutTest()
 	bool ok = query.exec("SELECT * FROM add_file(1, 'isAnycheckedOutTest', 1, 'testtesttest', '{}')");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 
-	bool result = false;
+	int result = 0;
 
 	ok = m_dbController->isAnyCheckedOut(&result);
 	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
-	QVERIFY2 (result == true, qPrintable("Error: there are some checked out files, but function isAnyCheckedOut ignored it"));
+	QVERIFY2 (result == 0, qPrintable("Error: there are some checked out files, but function isAnyCheckedOut ignored it"));
 
 	db.close();
 }
