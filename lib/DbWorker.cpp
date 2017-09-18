@@ -182,6 +182,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0164.sql", "Upgrade to version 164, Changes in ArchiveService and AppDataService presets"},
 	{":/DatabaseUpgrade/Upgrade0165.sql", "Upgrade to version 165, AFBL Library was updated"},
 	{":/DatabaseUpgrade/Upgrade0166.sql", "Upgrade to version 166, Implementing safe file functions"},
+	{":/DatabaseUpgrade/Upgrade0167.sql", "Upgrade to version 167, Fixing error: Deleted but not checked-in file remains in the result of get_latest_file_tree_version"},
 };
 
 
