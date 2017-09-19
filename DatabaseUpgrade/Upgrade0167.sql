@@ -202,6 +202,7 @@ END
 $BODY$
 LANGUAGE plpgsql;
 
+
 CREATE OR REPLACE FUNCTION api.get_file_list(
     session_key text,
     parent_id integer,
@@ -381,3 +382,74 @@ BEGIN
 END
 $BODY$
 LANGUAGE plpgsql;
+
+
+
+DROP FUNCTION public.add_or_update_file(integer, text, text, text, bytea, text);
+
+CREATE OR REPLACE FUNCTION api.add_or_update_file(
+    session_key text,
+    full_parent_file_name text,
+    file_name text,
+    checkin_comment text,
+    file_data bytea,
+    details text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+	current_user_id integer;
+    parent_file_id integer;
+    file_id integer;
+    file_state objectstate;
+BEGIN
+	-- EXAMPLE: SELECT * FROM add_or_update_file($(S_e_s_s_i_o_n_K_e_y), '$root$/MC/', 'ModulesConfigurations.descr', 'Check in cooment', 'file content, can be binary', '{}');
+	--
+
+    -- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+	current_user_id := user_api.current_user_id(session_key);
+
+    -- get parent file id, exception will occur if it dows not exists
+    parent_file_id := get_file_id(current_user_id, full_parent_file_name);
+
+    -- get file_id id it exists
+    BEGIN
+        file_id := get_file_id(current_user_id, parent_file_id, file_name);
+    EXCEPTION WHEN OTHERS THEN
+        -- File does not exists or it is in state of creation (added by other user but was not checked in yet)
+    END;
+
+    IF (file_id IS NULL) THEN
+        -- try to add file (it will be checked out)
+		file_id	:= (SELECT id FROM add_file(current_user_id, file_name, parent_file_id, file_data, details));
+    ELSE
+		-- check out file if it was not yet
+		file_state := get_file_state(file_id);
+
+		IF (file_state.checkedout = FALSE) THEN
+			file_state := check_out(current_user_id, ARRAY[file_id]);
+
+			IF (file_state.checkedout = FALSE) THEN
+				RAISE EXCEPTION 'Check out error %', file_name;
+			END IF;
+
+		END IF;
+
+		IF (file_state.deleted = TRUE) THEN
+			RAISE EXCEPTION 'File %/% marked as deleted, cannot update file.', full_parent_file_name, file_name;
+		END IF;
+
+		-- set workcopy
+		PERFORM api.set_workcopy(session_key, file_id, file_data, details);
+    END IF;
+
+    -- check in
+    PERFORM check_in(current_user_id, ARRAY[file_id], checkin_comment);
+
+    RETURN file_id;
+END
+$BODY$
+LANGUAGE plpgsql;
+

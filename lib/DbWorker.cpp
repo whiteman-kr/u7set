@@ -908,7 +908,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 
-	getFileList_worker(&systemFiles, rootFileId(), "%", true);
+	getFileList_worker(&systemFiles, rootFileId(), "", true);
 
 	m_mutex.lock();
 	m_afblFileId = -1;
@@ -2587,7 +2587,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 
 		// request
 		//
-		QString request = QString("SELECT * FROM api.get_latest_file_version(%1, %2);")
+		QString request = QString("SELECT * FROM api.get_latest_file_version('%1', %2);")
 				.arg(sessionKey())
 				.arg(fi.fileId());
 
@@ -2744,7 +2744,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 
 	// request, result is a list of DbFile
 	//
-	QString request = QString("SELECT * FROM api.get_checked_out_files(%1, %2);")
+	QString request = QString("SELECT * FROM api.get_checked_out_files('%1', %2);")
 			.arg(sessionKey())
 			.arg(filesArray);
 

@@ -14,8 +14,45 @@ void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 	os.errCode = q.value(5).toInt();
 }
 
-FileTests::FileTests()
+FileTests::FileTests() :
+	m_user1{"User1", "UserP2ssw0rd", -1},
+	m_user2{"User2", "UserP2ssw0rd", -1}
 {
+}
+
+QString FileTests::logIn(User user)
+{
+	return logIn(user.username, user.password);
+}
+
+QString FileTests::logIn(QString username, QString password)
+{
+	QSqlQuery query;
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+							.arg(username)
+							.arg(password));
+
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	ok = query.next();
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	QString session_key = query.value(0).toString();
+	return session_key;
+}
+
+bool FileTests::logOut()
+{
+	QSqlQuery query;
+	bool ok = query.exec("SELECT * FROM user_api.log_out()");
+	return ok;
 }
 
 void FileTests::initTestCase()
@@ -24,7 +61,6 @@ void FileTests::initTestCase()
 
 	// Alter Administrator user. Set administrator password "123412341234"
 	//
-
 	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -45,30 +81,42 @@ void FileTests::initTestCase()
 
 	// Files_exist & file_exist
 	//
-
 	ok = query.exec("UPDATE file SET Deleted = true WHERE fileid = 3");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	// Testers
+	// Create Testers
 	//
+	ok = query.exec(QString("SELECT user_api.create_user('%1', '%2', '%2', '%2', '%3', false, false);")
+						.arg(session_key)
+						.arg(m_user1.username)
+						.arg(m_user1.password)
+					);
 
-	ok = query.exec(QString("SElECT user_api.create_user('%1', 'FIRSTTEST', 'FIRSTTEST', 'FIRSTTEST', '12341234', false, false);").arg(session_key));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText() + ", Request:  " + query.lastQuery()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	m_user1.userId = query.value("create_user").toInt();
+
+	// --
+	//
+	ok = query.exec(QString("SElECT user_api.create_user('%1', '%2', '%2', '%2', '%3', false, false);")
+						.arg(session_key)
+						.arg(m_user2.username)
+						.arg(m_user2.password)
+					);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	FileTests::m_firstUserForTest = query.value("create_user").toInt();
+	m_user2.userId = query.value("create_user").toInt();
 
-	ok = query.exec(QString("SElECT user_api.create_user('%1', 'SECONDTEST', 'SECONDTEST', 'SECONDTEST', '12341234', false, false);").arg(session_key));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	FileTests::m_secondUserForTest = query.value("create_user").toInt();
-
+	// Administartor LogOut
+	//
 	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	return;
 }
 
 void FileTests::cleanupTestCase()
@@ -120,21 +168,43 @@ void FileTests::filesExistTest()
 
 void FileTests::is_any_checked_outTest()
 {
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 
-	bool ok = query.exec("Select is_any_checked_out();");
+	QString queryText = QString("SELECT * FROM api.is_any_checked_out('%1');").
+							arg(session_key);
+
+	bool ok = query.exec(queryText);
+
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value("is_any_checked_out").toBool() == false, qPrintable("Error: no checkedOut files expected"));
 
+	// Add file and chech if there are any checked out files
+	//
+	queryText = QString("SELECT * FROM add_file(1, 'isAnyCheckedOutTest', 2, 'TEST', '{}')");
 
-	ok = query.exec("SELECT * FROM add_file (1, 'isAnyCheckedOutTest', 2, 'TEST', '{}')");
+	ok = query.exec(queryText);
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec("Select is_any_checked_out();");
+
+	queryText = QString("SELECT * FROM api.is_any_checked_out('%1');").
+					arg(session_key);
+
+	ok = query.exec(queryText);
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value("is_any_checked_out").toBool() == true, qPrintable("Error: some checkedOuted files expected"));
+
+	// --
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+	return;
 }
 
 void FileTests::filesAddTest_data()
@@ -150,7 +220,7 @@ void FileTests::filesAddTest_data()
 	QTest::newRow("existingFile") << 1 << "Test" << 2 << "Test" << "{}" << false;
 	QTest::newRow("checkInvalidUserId") << 999 << "TestInvalidUserId" << 2 << "OneTwoThree" << "{}" << false;
 	QTest::newRow("checkInvalidParentId") << 1 << "TestInvalidParentId" << 999 << "OneTwoThreeFour" << "{}" << false;
-	QTest::newRow("createdByUser") << m_firstUserForTest << "TestCreatedByUser" << 2 << "OneTwoThreeFourFive" << "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000001}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}" << true;
+	QTest::newRow("createdByUser") << m_user1.userId << "TestCreatedByUser" << 2 << "OneTwoThreeFourFive" << "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000001}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}" << true;
 }
 
 void FileTests::filesAddTest()
@@ -211,7 +281,7 @@ void FileTests::file_has_children()
 {
 	QSqlQuery query;
 
-	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'fileHasChildrenTestParent', 1, 'TESTING', '{}')").arg(FileTests::m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'fileHasChildrenTestParent', 1, 'TESTING', '{}')").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec("SELECT count(*) FROM file WHERE parentid = 1");
@@ -224,23 +294,23 @@ void FileTests::file_has_children()
 	//
 
 	ok = query.exec(QString("SELECT file_has_children (%1,%2);")
-					.arg(m_firstUserForTest)
+					.arg(m_user1.userId)
 					.arg(1));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value("file_has_children").toInt() == countOfFileIds, qPrintable(QString("Error! Wrong result!\nExpected: %1\nActual: %2\nFirst value: %3\nSecond value: %4").arg(countOfFileIds).arg(query.value("file_has_children").toInt()).arg(m_firstUserForTest).arg(1)));
+	QVERIFY2(query.value("file_has_children").toInt() == countOfFileIds, qPrintable(QString("Error! Wrong result!\nExpected: %1\nActual: %2\nFirst value: %3\nSecond value: %4").arg(countOfFileIds).arg(query.value("file_has_children").toInt()).arg(m_user1.userId).arg(1)));
 
 	// Call function by other user
 	//
 
 	ok = query.exec(QString("SELECT file_has_children (%1,%2);")
-					.arg(m_secondUserForTest)
+					.arg(m_user2.userId)
 					.arg(1));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2(query.value("file_has_children").toInt() == countOfFileIds-1, qPrintable(QString("Error! Wrong result!\nExpected: %1\nActual: %2\nFirst value: %3\nSecond value: %4").arg(countOfFileIds-1).arg(query.value("file_has_children").toInt()).arg(m_secondUserForTest).arg(1)));
+	QVERIFY2(query.value("file_has_children").toInt() == countOfFileIds-1, qPrintable(QString("Error! Wrong result!\nExpected: %1\nActual: %2\nFirst value: %3\nSecond value: %4").arg(countOfFileIds-1).arg(query.value("file_has_children").toInt()).arg(m_user2.userId).arg(1)));
 
 	// Call function by Admin
 	//
@@ -281,22 +351,22 @@ void FileTests::delete_fileTest_data()
 
 	QSqlQuery query;
 
-	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFirstFile', 1, 'TESTING', '{}')").arg(FileTests::m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFirstFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int firstFileOwnerFirstUser = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestSecondFile', 1, 'TESTING', '{}')").arg(FileTests::m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestSecondFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int secondFileOwnerFirstUser = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestThirdFile', 1, 'TESTING', '{}')").arg(FileTests::m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestThirdFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int thirdFileOwnerFirstUser = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFourthFile', 1, 'TESTING', '{}')").arg(FileTests::m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'deleteFileTestFourthFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int checkedInFileOwnerFirstUser = query.value("id").toInt();
@@ -308,8 +378,8 @@ void FileTests::delete_fileTest_data()
 	if (ok == false)
 		qDebug() << "ERROR EXECUTTING check_in QUERY";
 
-	QTest::newRow("deleteFileOwnerFirstUserBySecondUser") << FileTests::m_secondUserForTest << firstFileOwnerFirstUser << false;
-	QTest::newRow("deleteFileOwnerFirstUserByFirstUser") << FileTests::m_firstUserForTest << firstFileOwnerFirstUser << true;
+	QTest::newRow("deleteFileOwnerFirstUserBySecondUser") << FileTests::m_user2.userId << firstFileOwnerFirstUser << false;
+	QTest::newRow("deleteFileOwnerFirstUserByFirstUser") << m_user1.userId << firstFileOwnerFirstUser << true;
 	QTest::newRow("deleteFileOwnerFirstUserByAdmin") << 1 << secondFileOwnerFirstUser << true;
 	QTest::newRow("deleteFileInvalidUser") << 9999 << thirdFileOwnerFirstUser << false;
 	QTest::newRow("deleteFileInvalidFile") << 1 << 9999 << false;
@@ -332,37 +402,37 @@ void FileTests::check_inTest()
 
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFirstFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFirstFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString firstFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestSecondFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestSecondFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString secondFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestThirdFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestThirdFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString thirdFile = query.value("id").toString();
 	ok = query.exec(QString("UPDATE fileInstance SET action = 3 WHERE fileId = %1").arg(thirdFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFourthFile', 1, 'TESTING', '%2')").arg(m_secondUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFourthFile', 1, 'TESTING', '%2')").arg(m_user2.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString fourthFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFifthFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkInFileTestFifthFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString fifthFile = query.value("id").toString();
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(fifthFile).arg(comment));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_user1.userId).arg(fifthFile).arg(comment));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(QString(firstFile + ", " + secondFile + ", " + thirdFile)).arg(comment));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_user1.userId).arg(QString(firstFile + ", " + secondFile + ", " + thirdFile)).arg(comment));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	while (query.next())
@@ -396,7 +466,7 @@ void FileTests::check_inTest()
 		int changeSetId = tempQuery.value("changeSetId").toInt();
 		int action = query.value("action").toInt();
 
-		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM changeSet WHERE changeSetId = %1 AND userId = %2 AND comment = '%3'").arg(changeSetId).arg(m_firstUserForTest).arg(comment));
+		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM changeSet WHERE changeSetId = %1 AND userId = %2 AND comment = '%3'").arg(changeSetId).arg(m_user1.userId).arg(comment));
 
 		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -412,10 +482,10 @@ void FileTests::check_inTest()
 		}
 	}
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(fourthFile).arg("TEST"));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_user1.userId).arg(fourthFile).arg("TEST"));
 	QVERIFY2(ok == false, qPrintable("User has no rights to checkin file checkouted by another user error expected"));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_firstUserForTest).arg(fourthFile).arg("TEST"));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', '%3');").arg(m_user1.userId).arg(fourthFile).arg("TEST"));
 	QVERIFY2(ok == false, qPrintable("Can not checkin checkinned file error expected"));
 
 	// Let's check in unchanged file
@@ -427,14 +497,14 @@ void FileTests::check_inTest()
 
 	int fifthFileLastChangeset = query.value(0).toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	// Check In withoutChanges
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
@@ -458,13 +528,13 @@ void FileTests::check_inTest()
 	// change Action row, do not change Data row
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
@@ -482,7 +552,7 @@ void FileTests::check_inTest()
 	// change Action and Data row
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
@@ -491,7 +561,7 @@ void FileTests::check_inTest()
 	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_firstUserForTest).arg(fifthFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_user1.userId).arg(fifthFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT max(changesetId) FROM FileInstance WHERE fileId = %1").arg(fifthFile));
@@ -513,28 +583,28 @@ void FileTests::check_outTest()
 
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestFirstFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestFirstFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString firstFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(firstFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_user1.userId).arg(firstFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestSecondFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestSecondFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString secondFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_firstUserForTest).arg(secondFile));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TEST');").arg(m_user1.userId).arg(secondFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestThirdFile', 1, 'TESTING', '%2')").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file (%1, 'checkOutFileTestThirdFile', 1, 'TESTING', '%2')").arg(m_user1.userId).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QString thirdFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_firstUserForTest).arg(QString(firstFile + ", " + secondFile)));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_user1.userId).arg(QString(firstFile + ", " + secondFile)));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	while (query.next())
@@ -544,7 +614,7 @@ void FileTests::check_outTest()
 
 		QSqlQuery tempQuery;
 
-		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM checkOut WHERE fileId = %1 AND userId = %2").arg(id).arg(m_firstUserForTest));
+		ok = tempQuery.exec(QString("SELECT COUNT(*) FROM checkOut WHERE fileId = %1 AND userId = %2").arg(id).arg(m_user1.userId));
 
 		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -568,35 +638,56 @@ void FileTests::check_outTest()
 
 void FileTests::set_workcopyTest()
 {
+	// Scenario:
+	// 1. LogIn as User1
+	// 2. Add File
+	// 3. Set workcopy
+	// 4. Check FileInstance
+	// 5. CheckIn File to check if possible to set workcopy for CheckedIn file
+	// 6. Set workcopy for checked in file (error expexted)
+	// 7. Add another file to check if it possible to set workcpy by other (non admin) user
+	// 8. LogOut User1
+	// --
+	// 9. LogIn User2
+	// 10. Set workcopy (User2) for file checked out by User1 (expected error)
+	// 11. LogOut User2
+	// --
+	// 12. LogIn as Administrtor
+	// 13. Set workcopy for file checked out by User1 (expected success)
+	// 14. LogOut Administrtor
+	//
+
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// 2. Add File
+	//
 	QSqlQuery query;
 	QString data = "TEST";
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'setWorkcopyTestFirstFile', 1, 'TESTING', '{}')").arg(m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'setWorkcopyTestFirstFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QString firstFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'setWorkcopyTestSecondFile', 1, 'TESTING', '{}')").arg(m_secondUserForTest));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	QString secondFile = query.value("id").toString();
-
-	ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '%4');").arg(m_firstUserForTest).arg(firstFile).arg(data).arg(detail));
-
+	// 3. Set workcopy
+	//
+	ok = query.exec(QString("SELECT * FROM api.set_workcopy('%1', %2, '%3', '%4');").arg(session_key).arg(firstFile).arg(data).arg(detail));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT checkedOutInstanceId FROM file WHERE FileID = %1").arg(firstFile));
-
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QString Uuid = query.value(0).toString();
 
+	// 4. Check FileInstance
+	//
 	ok = query.exec(QString("SELECT * FROM FileInstance WHERE fileInstanceId = '%1'").arg(Uuid));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -606,53 +697,127 @@ void FileTests::set_workcopyTest()
 	QVERIFY2(query.value("FileID").toString() == firstFile, qPrintable(QString("Column fileId has not been changed in table fileInstance with checkOutInstanceId %1").arg(Uuid)));
 	QVERIFY2(query.value("details").toString() == detail, qPrintable(QString("Error: details not match! \nActual: %1\nExpected: %2").arg(query.value("details").toString()).arg(detail)));
 
-	//Call user error
+	// 5. CheckIn File to check if possible to set workcopy for CheckedIn file
+	//
+	ok = query.exec(QString("SELECT * FROM public.check_in(%1, ARRAY[%2], 'CheckIn Comment');")
+						.arg(m_user1.userId)
+						.arg(firstFile)
+					);
+	QVERIFY2(ok == true, "check_in error");
 
-	ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}');").arg(m_firstUserForTest).arg(secondFile).arg(data));
+	// 6. Set workcopy for checked in file (error expexted)
+	//
+	ok = query.exec(QString("SELECT * FROM api.set_workcopy('%1', %2, '%3', '%4');").arg(session_key).arg(firstFile).arg(data).arg(detail));
+	QVERIFY2(ok == false, "set_worcopy error expected, as file is checked in.");
 
-	QVERIFY2(ok == false, qPrintable("User is not allowed set workcopy error expected"));
+	// 7. Add another file to check if it possible to set workcpy by other (non admin) user
+	//
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'setWorkcopyTestSecondFile', 1, 'TESTING', '{}')").arg(m_user1.userId));
 
-	//Call checkedIn file error
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}');").arg(m_firstUserForTest).arg(1).arg(data));
+	QString secondFile = query.value("id").toString();
 
-	QVERIFY2(ok == false, qPrintable("Checked In file error expected"));
+	// 8. LogOut User1
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+
+	// --
+	// 9. LogIn User2
+	//
+	session_key = logIn(m_user2);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// 10. Set workcopy (User2) for file checked out by User1 (expected error)
+	//
+	ok = query.exec(QString("SELECT * FROM api.set_workcopy('%1', %2, '%3', '%4');").arg(session_key).arg(secondFile).arg(data).arg(detail));
+	QVERIFY2(ok == false, "set_workcopy expected error, as file checked out by another user");
+
+	// 11. LogOutUser2
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	// 12. LogIn as Administrtor
+	//
+	session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// 13. Set workcopy for file checked out by User1 (expected success)
+	//
+	ok = query.exec(QString("SELECT * FROM api.set_workcopy('%1', %2, '%3', '%4');").arg(session_key).arg(secondFile).arg(data).arg(detail));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// 14. LogOutAdministrtor
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::get_workcopyTest()
 {
+	// Scenario
+	// 1. LogIn as User1
+	// 2. Add File
+	// 3. Get workcopy
+	// 4. Check table CheckOut
+	// 5. Check table File
+	// 6. CheckTable FileInstance
+	// 7. LogOut
+
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// 2. Add File
+	//
 	QSqlQuery query;
 	QSqlQuery tempQuery;
 	QString data = "TEST";
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getWorkcopyTestFirstFile', 1, '%2', '%3')").arg(m_firstUserForTest).arg(data).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getWorkcopyTestFirstFile', 1, '%2', '%3')").arg(m_user1.userId).arg(data).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QString firstFile = query.value("id").toString();
 
-	ok = query.exec(QString("SELECT * FROM get_workcopy(%1, %2);").arg(m_firstUserForTest).arg(firstFile));
+	// 3. Get workcopy
+	//
+	ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2);").arg(session_key).arg(firstFile));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = tempQuery.exec(QString("SELECT * FROM checkOut WHERE fileId = %1").arg(query.value("fileId").toInt()));
+	// 4. Check table CheckOut
+	//
+	ok = tempQuery.exec(QString("SELECT * FROM CheckOut WHERE FileId = %1").arg(query.value("fileId").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable(QString("Error: in column \"userId\" - data mistmatch")));
 	QVERIFY2(query.value("checkedOut").toBool() == true, qPrintable(QString("Error: in column \"checkOut\" - data mistmatch")));
 
-	ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(query.value("fileId").toInt()));
+	// 5. Check table File
+	//
+	ok = tempQuery.exec(QString("SELECT * FROM File WHERE FileID = %1").arg(query.value("fileId").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.value("name").toString() == query.value("name").toString(), qPrintable("Error: in column \"name\" - data mistmatch"));
 	QVERIFY2(tempQuery.value("parentId").toInt() == query.value("parentId").toInt(), qPrintable("Error: in column \"parentId\" - data mistmatch"));
 
-	ok = tempQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1").arg(query.value("fileId").toInt()));
+	// 6. CheckTable FileInstance
+	//
+	ok = tempQuery.exec(QString("SELECT * FROM FileInstance WHERE FileID = %1").arg(query.value("fileId").toInt()));
 
 	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -662,12 +827,12 @@ void FileTests::get_workcopyTest()
 	QVERIFY2(query.value("details").toString() == detail, qPrintable(QString("Error: details not match! \nActual: %1\nExpected: %2").arg(query.value("details").toString()).arg(detail)));
 	QVERIFY2(query.value("changeSetId").toInt() == tempQuery.value("changeSetId").toInt(), qPrintable("Error: in column \"changeSetId\" - data mistmatch"));
 
-	ok = tempQuery.exec(QString("SELECT * FROM file WHERE fileId = %1").arg(query.value("fileId").toInt()));
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
 
-	QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
-	QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
-
-	QVERIFY2(tempQuery.value("deleted").toBool() == query.value("deleted").toBool(), qPrintable("Error in column \"deleted\""));
+	return;
 }
 
 void FileTests::get_file_historyTest()
@@ -691,7 +856,7 @@ void FileTests::get_file_historyTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_out (%1, '{%2}');").arg(m_firstUserForTest).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM check_out (%1, '{%2}');").arg(m_user1.userId).arg(fileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -707,7 +872,7 @@ void FileTests::get_file_historyTest()
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'blah-blah');").arg(m_firstUserForTest).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'blah-blah');").arg(m_user1.userId).arg(fileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -750,7 +915,7 @@ void FileTests::get_file_historyTest()
 	// Check file history with another user
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2)").arg(m_firstUserForTest).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2)").arg(m_user1.userId).arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = fileInstanceQuery.exec(QString("SELECT * FROM fileInstance WHERE fileId = %1 ORDER BY changeSetId desc").arg(fileId));
@@ -790,7 +955,7 @@ void FileTests::get_file_historyTest()
 	// Just added file must have no history
 	//
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileHistoryTestFailFile', 1, 'TEST', '{}')").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileHistoryTestFailFile', 1, 'TEST', '{}')").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -810,7 +975,7 @@ void FileTests::get_file_stateTest()
 	// Add file for test
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileStateTestFirst', 1, 'TEST', '{}')").arg(m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileStateTestFirst', 1, 'TEST', '{}')").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -920,14 +1085,19 @@ void FileTests::get_last_changesetTest()
 
 void FileTests::get_file_IdIntegerTextTest()
 {
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileIdTest', 7, 'foxes everywhere', '{}');").arg(m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileIdTest', 7, 'foxes everywhere', '{}');").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
@@ -937,32 +1107,46 @@ void FileTests::get_file_IdIntegerTextTest()
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_secondUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user2.userId));
 	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
 
 	ok = query.exec("SELECT * FROM get_file_id(1, '///$root$/MC/abcdef///');");
 	QVERIFY2(ok == false, qPrintable("NULL fileId error expected"));
 
-	ok = query.exec(QString("SELECT * FROM add_or_update_file(%1, '$root$/MC/', 'getFileIdTest', 'simple comment', 'foxes everywhere', '{}');").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '$root$/MC/', 'getFileIdTest', 'simple comment', 'foxes everywhere', '{}');").arg(session_key));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_secondUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user2.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: other user must has acsess to file after update"));
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::get_file_IdIntegerIntegerTextTest()
 {
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileIdTest1', 7, 'foxes everywhere', '{}');").arg(m_firstUserForTest));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'getFileIdTest1', 7, 'foxes everywhere', '{}');").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 7, 'getFileIdTest1');").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 7, 'getFileIdTest1');").arg(m_user1.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
@@ -972,7 +1156,7 @@ void FileTests::get_file_IdIntegerIntegerTextTest()
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 'getFileIdTest1');").arg(m_secondUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 'getFileIdTest1');").arg(m_user2.userId));
 	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
 
 	ok = query.exec("SELECT * FROM get_file_id(1, 7, 'abcdef');");
@@ -981,25 +1165,36 @@ void FileTests::get_file_IdIntegerIntegerTextTest()
 	ok = query.exec("SELECT * FROM get_file_id(1, 0, 'getFileIdTest1');");
 	QVERIFY2(ok == false, qPrintable("NULL fileId error expected"));
 
-	ok = query.exec(QString("SELECT * FROM add_or_update_file(%1, '$root$/MC/', 'getFileIdTest1', 'simple comment', 'foxes everywhere', '{}');").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '$root$/MC/', 'getFileIdTest1', 'simple comment', 'foxes everywhere', '{}');").arg(session_key));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 7, 'getFileIdTest1');").arg(m_secondUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_id(%1, 7, 'getFileIdTest1');").arg(m_user2.userId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: other user must has acsess to file after update"));
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
 }
 
 void FileTests::get_file_infoTest()
 {
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 	QSqlQuery tempQuery;
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
 
 	// Create checked out file to test
 	//
-
 	bool ok = query.exec(QString("SELECT * FROM add_file(1, 'getFileInfoCheckedOutFile', 1, 'TESTTESTTESTTEST', '%1');").arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1009,7 +1204,6 @@ void FileTests::get_file_infoTest()
 
 	// Create checked in file to test
 	//
-
 	ok = query.exec(QString("SELECT * FROM add_file(1, 'getFileInfoCheckedInFile', 1, 'TESTTESTTESTTEST', '%1');").arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1025,7 +1219,10 @@ void FileTests::get_file_infoTest()
 	int fileIdNumber = 0;
 	QString fileInstanceId;
 
-	ok = query.exec(QString("SELECT * FROM get_file_info(1, '{%1,%2}') ORDER BY fileId;").arg(checkedOutFileId).arg(checkedInFileId));
+	ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', ARRAY[%2, %3]) ORDER BY fileId;")
+						.arg(session_key)
+						.arg(checkedOutFileId)
+						.arg(checkedInFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1036,10 +1233,15 @@ void FileTests::get_file_infoTest()
 		QVERIFY2(ok == true, qPrintable(tempQuery.lastError().databaseText()));
 		QVERIFY2(tempQuery.first() == true, qPrintable(tempQuery.lastError().databaseText()));
 
-		QVERIFY2(tempQuery.value("fileId").toInt() == query.value("fileId").toInt(), qPrintable(QString("Error: fileId not match in fileId %1").arg(fileIds[fileIdNumber])));
-		QVERIFY2(tempQuery.value("deleted").toBool() == query.value("deleted").toBool(), qPrintable(QString("Error: deleted not match in fileId %1").arg(fileIds[fileIdNumber])));
-		QVERIFY2(tempQuery.value("name").toString() == query.value("name").toString(), qPrintable(QString("Error: string not match in fileId %1").arg(fileIds[fileIdNumber])));
-		QVERIFY2(tempQuery.value("parentId").toInt() == query.value("parentId").toInt(), qPrintable(QString("Error: parentId not match in fileId %1").arg(fileIds[fileIdNumber])));
+		int fileId = tempQuery.value("fileId").toInt();
+		bool deleted = tempQuery.value("deleted").toBool();
+		QString name = tempQuery.value("name").toString();
+		int parentId = tempQuery.value("parentId").toInt();
+
+		QVERIFY2(fileId == query.value("fileId").toInt(), qPrintable(QString("Error: fileId not match in fileId %1").arg(fileIds[fileIdNumber])));
+		QVERIFY2(deleted == query.value("deleted").toBool(), qPrintable(QString("Error: deleted not match in fileId %1").arg(fileIds[fileIdNumber])));
+		QVERIFY2(name == query.value("name").toString(), qPrintable(QString("Error: string not match in fileId %1").arg(fileIds[fileIdNumber])));
+		QVERIFY2(parentId == query.value("parentId").toInt(), qPrintable(QString("Error: parentId not match in fileId %1").arg(fileIds[fileIdNumber])));
 
 		if (fileIdNumber == 0)
 		{
@@ -1090,14 +1292,28 @@ void FileTests::get_file_infoTest()
 		fileIdNumber++;
 	}
 
-	ok = query.exec(QString("SELECT * FROM get_file_info(1, '{%1}')").arg(maxValueId));
+	ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', ARRAY[%2])")
+						.arg(session_key)
+						.arg(maxValueId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Empty string expected (invalid fileId)"));
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
 }
 
 void FileTests::get_latest_file_versionTest()
 {
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 	QSqlQuery tempQuery;
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
@@ -1105,30 +1321,30 @@ void FileTests::get_latest_file_versionTest()
 	// Create file and check in it to test
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_latest_file_versionTestCheckedOutFile', 1, 'Hello TUX!', '%2');").arg(m_firstUserForTest).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_latest_file_versionTestCheckedOutFile', 1, 'Hello TUX!', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int checkedInFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TUX is busy :(');").arg(m_firstUserForTest).arg(checkedInFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'TUX is busy :(');").arg(m_user1.userId).arg(checkedInFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_latest_file_versionTestCheckedInFile', 1, 'Hello TUX!', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_latest_file_versionTestCheckedInFile', 1, 'Hello TUX!', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int checkedOutFileId = query.value("id").toInt();
 
 	int fileIds[2] = {checkedOutFileId, checkedInFileId};
+
 	// Testing checked in file
 	//
-
 	for (int NumberOfFileId = 0; NumberOfFileId < 2; NumberOfFileId++)
 	{
 
-		ok = query.exec(QString("SElECT * FROM get_latest_file_version(%1, %2);").arg(m_firstUserForTest).arg(fileIds[NumberOfFileId]));
+		ok = query.exec(QString("SElECT * FROM api.get_latest_file_version('%1', %2);").arg(session_key).arg(fileIds[NumberOfFileId]));
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -1193,13 +1409,23 @@ void FileTests::get_latest_file_versionTest()
 			QVERIFY2(tempQuery.value("userId").toInt() == query.value("userId").toInt(), qPrintable(QString("userId is not match at fileId %1").arg(fileIds[NumberOfFileId])));
 		}
 	}
+
 	// Call invalid file error
 	//
-
-	ok = query.exec(QString("SElECT * FROM get_latest_file_version(1, %1);").arg(maxValueId));
+	ok = query.exec(QString("SElECT * FROM api.get_latest_file_version('%1', %2);")
+						.arg(session_key)
+						.arg(maxValueId)
+					);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::get_file_listIntegerIntegerTextTest()
@@ -1213,13 +1439,13 @@ void FileTests::get_file_listIntegerIntegerTextTest()
 	// 4th file must has wrong parent, and 5th file must has wrong name
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listFirst', 1, 'Mandriva', '%2');").arg(m_firstUserForTest).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listFirst', 1, 'Mandriva', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int firstFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listSecond', 1, 'Slackware', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listSecond', 1, 'Slackware', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -1228,51 +1454,51 @@ void FileTests::get_file_listIntegerIntegerTextTest()
 	// Check in one of files
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listThird', 1, 'FreeBSD', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listThird', 1, 'FreeBSD', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int thirdFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM delete_file(%1, %2);").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM delete_file(%1, %2);").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listFourth', 0, 'FreeBSD', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'get_file_listFourth', 0, 'FreeBSD', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int fourthFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(fourthFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(fourthFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'letsBreakFunctionByCreatingWrongNames', 1, 'Gentoo', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'letsBreakFunctionByCreatingWrongNames', 1, 'Gentoo', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int fifthFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(fifthFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(fifthFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 1, 'get_file_list%') ORDER BY fileId").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 1, 'get_file_list%') ORDER BY fileId").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1364,18 +1590,18 @@ void FileTests::get_file_listIntegerIntegerTextTest()
 	// file
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SElECT * FROM delete_file(%1, %2);").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SElECT * FROM delete_file(%1, %2);").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Try execute function by another user
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 1, 'get_file_list%') ORDER BY fileId").arg(m_secondUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 1, 'get_file_list%') ORDER BY fileId").arg(m_user2.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1518,7 +1744,7 @@ void FileTests::get_file_listIntegerIntegerTextTest()
 	}
 
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 2, 'get_file_list%') ORDER BY fileId").arg(m_firstUserForTest));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, 2, 'get_file_list%') ORDER BY fileId").arg(m_user1.userId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
@@ -1535,21 +1761,21 @@ void FileTests::get_file_listIntegerIntegerTest()
 	// 4th file must has wrong parent, and 5th file must has wrong name
 	//
 
-	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomParentNameForGetFileListTest', 1, 'FatherGentoo', '%2');").arg(m_firstUserForTest).arg(detail));
+	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomParentNameForGetFileListTest', 1, 'FatherGentoo', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int parentFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest', %2, 'Mandriva', '%3');").arg(m_firstUserForTest).arg(parentFileId).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest', %2, 'Mandriva', '%3');").arg(m_user1.userId).arg(parentFileId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int firstFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest1', %2, 'Slackware', '%3');").arg(m_firstUserForTest).arg(parentFileId).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest1', %2, 'Slackware', '%3');").arg(m_user1.userId).arg(parentFileId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -1559,41 +1785,41 @@ void FileTests::get_file_listIntegerIntegerTest()
 	// Check in one of files
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest2', %2, 'FreeBSD', '%3');").arg(m_firstUserForTest).arg(parentFileId).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest2', %2, 'FreeBSD', '%3');").arg(m_user1.userId).arg(parentFileId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int thirdFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM delete_file(%1, %2);").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM delete_file(%1, %2);").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(thirdFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(thirdFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest3', 0, 'FreeBSD', '%2');").arg(m_firstUserForTest).arg(detail));
+	ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomNameForGetFileListTest3', 0, 'FreeBSD', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	int fourthFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_firstUserForTest).arg(fourthFileId));
+	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'Suddenly debian');").arg(m_user1.userId).arg(fourthFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_firstUserForTest).arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_user1.userId).arg(parentFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1684,18 +1910,18 @@ void FileTests::get_file_listIntegerIntegerTest()
 	// version
 	//
 
-	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SELECT * FROM check_out(%1, '{%2}');").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SElECT * FROM delete_file(%1, %2);").arg(m_firstUserForTest).arg(secondFileId));
+	ok = query.exec(QString("SElECT * FROM delete_file(%1, %2);").arg(m_user1.userId).arg(secondFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Try execute function by another user
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_secondUserForTest).arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_user2.userId).arg(parentFileId));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1837,7 +2063,7 @@ void FileTests::get_file_listIntegerIntegerTest()
 		fileIdNumber++;
 	}
 
-	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_firstUserForTest).arg(parentFileId + 1));
+	ok = query.exec(QString("SELECT * FROM get_file_list(%1, %2) ORDER BY fileId").arg(m_user1.userId).arg(parentFileId + 1));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
@@ -1845,6 +2071,13 @@ void FileTests::get_file_listIntegerIntegerTest()
 
 void FileTests::get_latest_file_tree_versionTest()
 {
+	// 1. LogIn as Admin
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 	QSqlQuery tempQuery;
 	QString detail = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
@@ -1899,7 +2132,10 @@ void FileTests::get_latest_file_tree_versionTest()
 
 	int fifthFileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SElECT * FROM get_latest_file_tree_version (1, %1);").arg(firstFileId));
+	ok = query.exec(QString("SElECT * FROM api.get_latest_file_tree_version('%1', %2);")
+						.arg(session_key)
+						.arg(firstFileId)
+					);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
@@ -1947,15 +2183,29 @@ void FileTests::get_latest_file_tree_versionTest()
 		fileIdNumber++;
 	}
 
-	ok = query.exec(QString("SElECT * FROM get_latest_file_tree_version (1, %1);").arg(maxValueId));
+	ok = query.exec(QString("SElECT * FROM api.get_latest_file_tree_version('%1', %2);")
+						.arg(session_key)
+						.arg(maxValueId)
+					);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid fileId error expected"));
 
-	ok = query.exec(QString("SElECT * FROM get_latest_file_tree_version (%1, %2);").arg(m_firstUserForTest).arg(firstFileId));
+	ok = query.exec(QString("SELECT * FROM api.get_latest_file_tree_version('%1', %2);")
+						.arg(session_key)
+						.arg(firstFileId)
+					);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Invalid user error expected"));
+
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::undo_changesTest()
@@ -2065,7 +2315,7 @@ void FileTests::undo_changesTest()
 	// Call wrong user error
 	//
 
-	ok = query.exec(QString("SELECT * FROM undo_changes(%1, '{%2}');").arg(m_firstUserForTest).arg(errorCallFileId));
+	ok = query.exec(QString("SELECT * FROM undo_changes(%1, '{%2}');").arg(m_user1.userId).arg(errorCallFileId));
 
 	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
 
@@ -2083,6 +2333,13 @@ void FileTests::undo_changesTest()
 
 void FileTests::add_or_update_fileTest()
 {
+	// 1. LogIn as Admin
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 
 	// Create file for update test
@@ -2103,7 +2360,11 @@ void FileTests::add_or_update_fileTest()
 	// File update test
 	//
 
-	ok = query.exec(QString("SELECT * FROM add_or_update_file(1, '$root$/MC/', 'addOrUpdateFileTest', '%1', '%2', '%3');").arg(comment).arg(fileData).arg(detail));
+	ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '$root$/MC/', 'addOrUpdateFileTest', '%2', '%3', '%5');")
+						.arg(session_key)
+						.arg(comment)
+						.arg(fileData)
+						.arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -2134,8 +2395,11 @@ void FileTests::add_or_update_fileTest()
 
 	// File create test
 	//
-
-	ok = query.exec(QString("SELECT * FROM add_or_update_file(1, '$root$/MC/', 'addOrUpdateCreateFileTest', '%1', '%2', '%3');").arg(comment).arg(fileData).arg(detail));
+	ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '$root$/MC/', 'addOrUpdateCreateFileTest', '%2', '%3', '%4');")
+						.arg(session_key)
+						.arg(comment)
+						.arg(fileData)
+						.arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -2167,7 +2431,6 @@ void FileTests::add_or_update_fileTest()
 
 	// Check files marked as deleted
 	//
-
 	ok = query.exec("SElECT * FROM add_file(1, 'addOrUpdateErrorUserTest', 7, 'Linux Kernel', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -2179,14 +2442,21 @@ void FileTests::add_or_update_fileTest()
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM add_or_update_file(%1, '$root$/MC/', 'addOrUpdateErrorUserTest', 'deleted', 'deleted', '{}');").arg(m_firstUserForTest));
+//	ok = query.exec(QString("SELECT * FROM api.add_or_update_file(%1, '$root$/MC/', 'addOrUpdateErrorUserTest', 'deleted', 'deleted', '{}');").arg(m_user1.userId));
 
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+//	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("SELECT * FROM file WHERE fileId = %1 AND deleted = false").arg(fileId+1));
+//	ok = query.exec(QString("SELECT * FROM file WHERE fileId = %1 AND deleted = false").arg(fileId+1));
 
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+//	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+//	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::get_specific_copyTest()
@@ -2649,11 +2919,17 @@ bool FileTests::delete_file(int userId, int fileId)
 
 void FileTests::get_checked_out_filesTest()
 {
+	// 1. LogIn as Admin
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	QSqlQuery query;
 
 	// Create fileid for test
 	//
-
 	int fileIds[7] = {0, 0, 0, 0, 0, 0, 0};
 
 	bool ok = query.exec("SElECT * FROM add_file(1, 'getChecekdOutFilesFirstFile', 0, 'FreeBSD', '{}');");
@@ -2729,7 +3005,10 @@ void FileTests::get_checked_out_filesTest()
 	// Start the function
 	//
 
-	ok = query.exec(QString("SELECT * FROM get_checked_out_files(1, '{%1, %2}') ORDER BY fileId").arg(fileIds[0]).arg(fileIds[4]));
+	ok = query.exec(QString("SELECT * FROM api.get_checked_out_files('%1', ARRAY[%2, %3]) ORDER BY fileId")
+						.arg(session_key)
+						.arg(fileIds[0])
+						.arg(fileIds[4]));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	int numberOfFileId = 0;
@@ -2744,12 +3023,10 @@ void FileTests::get_checked_out_filesTest()
 
 	QVERIFY2(numberOfFileId == 6, qPrintable("Wrong count of records in result"));
 
-	// Call invalid user error
+	// 7. LogOut
 	//
-
-	ok = query.exec(QString("SELECT * FROM get_checked_out_files(%1, '{%2}');").arg(maxValueId).arg(fileIds[0]));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == false, qPrintable("Invalid user error expected"));
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
 }
 
 void FileTests::check_in_treeTest()

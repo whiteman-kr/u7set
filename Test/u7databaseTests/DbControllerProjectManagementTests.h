@@ -1,5 +1,6 @@
 #pragma once
 #include <QTest>
+#include <memory>
 #include "../../lib/DbController.h"
 
 class DbControllerProjectTests : public QObject
@@ -20,11 +21,11 @@ private slots:
 	void cleanupTestCase();
 
 private:
-	DbController *m_dbController;
+	std::unique_ptr<DbController> m_db;
 	int m_databaseVersion = -1;
-	QString m_databaseHost;
-	QString m_databaseName;
-	QString m_databaseUser;
-	QString m_adminPassword;
+	QString m_databaseHost = {"127.0.0.1"};
+	QString m_databaseName = {"dbcontrollertesting"};
+	QString m_databaseUser = {"u7"};
+	QString m_adminPassword = {"P2ssw0rd"};
 	int m_databasePort = 5432; // Current port by default. Not a magic number
 };
