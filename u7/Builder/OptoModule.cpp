@@ -756,7 +756,7 @@ namespace Hardware
 			m_rxSignals.insert(txSignal->appSignalID(), txSignal);
 		}
 
-		// copying tx to rx parameters
+		// copying Tx to Rx parameters
 		//
 		m_rxDataID = linkedPort->txDataID();
 		m_rxDataSizeW = linkedPort->txDataSizeW();
@@ -1319,8 +1319,6 @@ namespace Hardware
 		m_txRawDataSizeW = rawDataSizeW;
 
 		m_txRawDataSizeWIsCalculated = true;
-
-		// qDebug() << "Port " << C_STR(equipmentID()) << " raw data size " << m_txRawDataSizeW;
 	}
 
 	void OptoPort::writeInfo(QStringList& list) const
@@ -3211,6 +3209,18 @@ namespace Hardware
 
 			result &= module->calculateTxSignalsAddresses();
 			result &= module->calculateTxBufAddresses();
+		}
+
+		// Not unite this cycles!!!!
+		// calculateTxSignalsAddresses() must be called for ALL bvb modules before calling copyOpticalPortsTxInRxSignals()
+
+		for(OptoModuleShared module : m_modules)
+		{
+			if (module->isBvb() == false)
+			{
+				continue;
+			}
+
 			result &= module->copyOpticalPortsTxInRxSignals();
 			result &= module->calculateRxBufAddresses();
 		}
