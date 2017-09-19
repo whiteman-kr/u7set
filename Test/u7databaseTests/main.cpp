@@ -19,7 +19,7 @@
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
-const int DatabaseProjectVersion = 132;
+const int DatabaseProjectVersion = 167;
 
 const char* DatabaseHost = "127.0.0.1";
 const char* DatabaseUser = "u7";
@@ -58,8 +58,9 @@ int main(int argc, char *argv[])
 		ok = query.exec(QString("DROP DATABASE %1").arg(QString("u7_") + ProjectName));
 		if (ok == false)
 		{
-			qDebug() << "Error: " << query.lastError().databaseText();
-			assert(false);
+			qDebug() << "FAIL: " << query.lastError().databaseText();
+			QTest::qVerify(ok == true, "ok == true", qPrintable(query.lastError().databaseText()), __FILE__, __LINE__);
+			return 1;
 		}
 	}
 
@@ -180,11 +181,10 @@ int main(int argc, char *argv[])
 		int version = query.value(0).toInt();
 		if (version != DatabaseProjectVersion)
 		{
-			qDebug() << "Invalid database version, " << DatabaseProjectVersion << " required, current: " << version;
+			qDebug() << "Invalid database version, " << ::DatabaseProjectVersion << " required, current: " << version;
 			db.close();
 			throw 1;
 		}
-
 
 		UserTests userTests;
 		FileTests fileTests;
@@ -208,53 +208,65 @@ int main(int argc, char *argv[])
 
 		dbControllerProjectTests.setProjectVersion(DatabaseProjectVersion);
 
+		// Database User functions
+		//
 		int testResult;
 		testResult = QTest::qExec(&userTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " user test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
+		// Database File functions
+		//
 		testResult = QTest::qExec(&fileTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " file test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
+		// Database Signal functions
+		//
 		testResult = QTest::qExec(&signalTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " signal test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
+		// Database Other functions
+		//
 		testResult = QTest::qExec(&otherTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " other test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
+		// Database Project Property functions
+		//
 		testResult = QTest::qExec(&projectPropertyTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " project property test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " project property test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
+		// Property Obejct functions
+		//
 		testResult = QTest::qExec(&propertyObjectTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " propertyObject test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " propertyObject test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		db.close();
@@ -262,57 +274,57 @@ int main(int argc, char *argv[])
 		testResult = QTest::qExec(&dbControllerProjectTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerProject test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerUserTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerUser test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerFileTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerFile test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerFile test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerSignalTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerSignal test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerSignal test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerHardwareConfigurationTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerHardwareConfigurationTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerBuildTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerBuildTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerBuildTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		testResult = QTest::qExec(&dbControllerVersionTests, argc, argv);
 		if (testResult != 0)
 		{
-			qDebug() << testResult << " dbControllerVersionTests test(s) has been interrupted by error(s)";
-			db.close();
-			throw testResult;
+//			qDebug() << testResult << " dbControllerVersionTests test(s) has been interrupted by error(s)";
+//			db.close();
+//			throw testResult;
 		}
 
 		// Multi-thread testing

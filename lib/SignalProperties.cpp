@@ -10,56 +10,6 @@ SignalProperties::SignalProperties(Signal& signal) :
 
 void SignalProperties::initProperties()
 {
-	static const QString idCaption("ID");										// Optimization, to share one string among all Signal instances
-	static const QString signalGroupIDCaption("SignalGroupID");
-	static const QString signalInstanceIDCaption("SignalInstanceID");
-	static const QString changesetIDCaption("ChangesetID");
-	static const QString checkedOutCaption("CheckedOut");
-	static const QString userIdCaption("UserID");
-	static const QString channelCaption("Channel");
-	static const QString createdCaption("Created");
-	static const QString deletedCaption("Deleted");
-	static const QString instanceCreatedCaption("InstanceCreated");
-	//static const QString instanceActionCaption("InstanceAction");
-	static const QString typeCaption("Type");
-	static const QString inOutTypeCaption("InOutType");
-	static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
-	static const QString appSignalIDCaption("AppSignalID");
-	static const QString customSignalIDCaption("CustomAppSignalID");
-	static const QString captionCaption("Caption");
-	static const QString captionValidator("^.+$");
-	static const QString analogDataFormatCaption("AnalogDataFormat");
-	static const QString dataSizeCaption("DataSize");
-	static const QString lowADCCaption("LowADC");
-	static const QString highADCCaption("HighADC");
-	static const QString lowDACCaption("LowDAC");
-	static const QString highDACCaption("HighDAC");
-	static const QString lowEngeneeringUnitsCaption("LowEngeneeringUnits");
-	static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
-	static const QString unitCaption("Unit");
-	static const QString lowValidRangeCaption("LowValidRange");
-	static const QString highValidRangeCaption("HighValidRange");
-	static const QString unbalanceLimitCaption("UnbalanceLimit");
-	static const QString outputModeCaption("OutputMode");
-	static const QString acquireCaption("Acquire");
-	static const QString normalStateCaption("NormalState");
-	static const QString decimalPlacesCaption("DecimalPlaces");
-	static const QString roughApertureCaption("RoughAperture");
-	static const QString smoothApertureCaption("SmoothAperture");
-	static const QString adaptiveApertureCaption("AdaptiveAperture");
-	static const QString filteringTimeCaption("FilteringTime");
-	static const QString spreadToleranceCaption("SpreadTolerance");
-	static const QString byteOrderCaption("ByteOrder");
-	static const QString equipmentIDCaption("EquipmentID");
-	static const QString enableTuningCaption("EnableTuning");
-	static const QString tuningDefaultValueCaption("TuningDefaultValue");
-	static const QString identificationCategory("1 Identification");
-	static const QString signalTypeCategory("2 Signal type");
-	static const QString dataFormatCategory("3 Data Format");
-	static const QString signalProcessingCategory("4 Signal processing");
-	static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
-	static const QString tuningCategory("6 Tuning");
-
 	ADD_PROPERTY_GETTER_INDIRECT(int, idCaption, false, Signal::ID, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(int, signalGroupIDCaption, false, Signal::signalGroupID, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(int, signalInstanceIDCaption, false, Signal::signalInstanceID, m_signal);
@@ -86,6 +36,9 @@ void SignalProperties::initProperties()
 	extStrIdProperty->setValidator(cacheValidator);
 	extStrIdProperty->setCategory(identificationCategory);
 
+	auto busTypeIDProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, busTypeIDCaption, true, Signal::busTypeID, Signal::setBusTypeID, m_signal);
+	busTypeIDProperty->setCategory(identificationCategory);
+
 	auto nameProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, captionCaption, true, Signal::caption, Signal::setCaption, m_signal);
 	nameProperty->setValidator(captionValidator);
 	nameProperty->setCategory(identificationCategory);
@@ -99,6 +52,14 @@ void SignalProperties::initProperties()
 	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	m_propertiesDependentOnPrecision.push_back(tuningDefaultValueProperty);
 	tuningDefaultValueProperty->setCategory(tuningCategory);
+
+	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
+	m_propertiesDependentOnPrecision.push_back(tuningLowBoundProperty);
+	tuningLowBoundProperty->setCategory(tuningCategory);
+
+	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
+	m_propertiesDependentOnPrecision.push_back(tuningHighBoundProperty);
+	tuningHighBoundProperty->setCategory(tuningCategory);
 
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
 										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),
@@ -165,11 +126,11 @@ void SignalProperties::initProperties()
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto roughApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, roughApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
-		roughApertureProperty->setCategory(onlineMonitoringSystemCategory);
+		auto coarseApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, coarseApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
+		coarseApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
-		auto smoothApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, smoothApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
-		smoothApertureProperty->setCategory(onlineMonitoringSystemCategory);
+		auto fineApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, fineApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
+		fineApertureProperty->setCategory(onlineMonitoringSystemCategory);
 
 		auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
 		adaptiveApertureProperty->setCategory(onlineMonitoringSystemCategory);

@@ -2,14 +2,13 @@
 #include <QSql>
 #include <QSqlError>
 
-DbControllerProjectTests::DbControllerProjectTests()
+DbControllerProjectTests::DbControllerProjectTests() :
+	m_db(new DbController())
 {
-	m_dbController = new DbController();
+	m_db->setServerUsername(m_databaseUser);
+	m_db->setServerPassword(m_adminPassword);
 
-	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollertesting";
-	m_databaseUser = "u7";
-	m_adminPassword = "P2ssw0rd";
+	return;
 }
 
 void DbControllerProjectTests::setProjectVersion(int version)
@@ -26,7 +25,7 @@ void DbControllerProjectTests::initTestCase()
 	db.setPassword(m_adminPassword);
 	db.setDatabaseName("postgres");
 
-	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
+	QVERIFY2(db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
 	QSqlQuery query, tempQuery;
 
@@ -60,43 +59,41 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 
 	// Create, open, close, and delete simple database
 	//
-
-	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createProject(m_databaseName, m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (db.open() == true, qPrintable("Error: project has not been created! " + db.lastError().databaseText()));
 	db.close();
 
 	// Upgrade project
 	//
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
+	QVERIFY2 (m_db->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (m_dbController->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
-
-	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
+	QVERIFY2 (m_db->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_db->databaseVersion()).arg(m_databaseVersion)));
 
 	// Try open project twice
 	//
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
 	QVERIFY2 (ok == false, qPrintable("Error: Project already opened error exected"));
 
-	ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	// Try open project with invalid user
 	//
 
-	ok = m_dbController->openProject(m_databaseName, "TEST", m_adminPassword, 0);
+	ok = m_db->openProject(m_databaseName, "TEST", m_adminPassword, nullptr);
 	QVERIFY2 (ok == false, qPrintable("Error: wrong user error expected"));
 
 	// Try open project with invalid password
 	//
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", "testtesttest", 0);
+	ok = m_db->openProject(m_databaseName, "Administrator", "testtesttest", nullptr);
 	QVERIFY2 (ok == false, qPrintable("Error: wrong pass error expected"));
 
 	// Try open project with disabled user
@@ -117,19 +114,19 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = m_dbController->openProject(m_databaseName, "Tester", "TesterTester", 0);
+	ok = m_db->openProject(m_databaseName, "Tester", "TesterTester", nullptr);
 	QVERIFY2 (ok == false, qPrintable("Error: Disabled user"));
 
 	db.close();
 
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteProject (m_databaseName, m_adminPassword, true, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	// Do the same things, but now with backup
 	//
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->createProject(m_databaseName, m_adminPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (db.open() == true, qPrintable("Error: project has not been created! " + db.lastError().databaseText()));
 	db.close();
@@ -137,31 +134,33 @@ void DbControllerProjectTests::createOpenUpgradeCloseDeleteProject()
 	// Upgrade project
 	//
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, false, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, false, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (m_dbController->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
+	QVERIFY2 (m_db->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
 
-	QVERIFY2 (m_dbController->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_dbController->databaseVersion()).arg(m_databaseVersion)));
+	QVERIFY2 (m_db->databaseVersion() == m_databaseVersion, qPrintable(QString("Wrong database version. Actual: %1, Expected: %2 ").arg(m_db->databaseVersion()).arg(m_databaseVersion)));
 
-	ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->closeProject(nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, false, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteProject (m_databaseName, m_adminPassword, false, nullptr);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+
+	return;
 }
 
 void DbControllerProjectTests::getProjectListTest()
 {
-	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, false, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, false, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -185,19 +184,19 @@ void DbControllerProjectTests::getProjectListTest()
 		databasesFromServer.push_back(query.value(0).toString());
 	}
 
-	ok = m_dbController->getProjectList(&outputData, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getProjectList(&outputData, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	for (DbProject projectFromDb : outputData)
 	{
 		QVERIFY2(databasesFromServer.contains(projectFromDb.databaseName()), qPrintable("Error: function getProjectList() returned wrong database names!"));
 	}
 
-	ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteProject (m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 
 	db.close();
@@ -205,14 +204,14 @@ void DbControllerProjectTests::getProjectListTest()
 
 void DbControllerProjectTests::ProjectPropertyTest()
 {
-	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (m_dbController->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (m_db->currentProject().databaseName() == qPrintable("u7_" + m_databaseName), qPrintable("Error: openProject() function is not opened project"));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -228,8 +227,8 @@ void DbControllerProjectTests::ProjectPropertyTest()
 
 	QSqlQuery query;
 
-	ok = m_dbController->setProjectProperty(testPropertyName, testPropertyValue, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->setProjectProperty(testPropertyName, testPropertyValue, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM projectProperties WHERE name = '%1' AND value = '%2'").arg(testPropertyName).arg(testPropertyValue));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -238,80 +237,80 @@ void DbControllerProjectTests::ProjectPropertyTest()
 
 	QString propertyValueResult;
 
-	ok = m_dbController->getProjectProperty(testPropertyName, &propertyValueResult, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getProjectProperty(testPropertyName, &propertyValueResult, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2(propertyValueResult == testPropertyValue, qPrintable("Error: wrong property value returned!"));
 
-	ok = m_dbController->closeProject(0);
+	ok = m_db->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable("Error: can not close project"));
 
 	db.close();
 
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteProject (m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 }
 
 void DbControllerProjectTests::isProjectOpenedTest()
 {
-	bool ok = m_dbController->isProjectOpened();
+	bool ok = m_db->isProjectOpened();
 
 	QVERIFY2 (ok == false, qPrintable("Error: function returns, that project is opened, when it is NOT opened"));
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->isProjectOpened();
+	ok = m_db->isProjectOpened();
 
 	QVERIFY2 (ok == true, qPrintable("Error: function returns, that project is not opened, when it is opened"));
 
-	ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->deleteProject (m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteProject (m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 }
 
 void DbControllerProjectTests::connectionInfoTest()
 {
-	bool ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	// Host testing
 	//
 
-	QVERIFY2 (m_dbController->host() == m_databaseHost, qPrintable("Error: wrong host returned"));
-	m_dbController->setHost("0.0.0.0");
-	QVERIFY2 (m_dbController->host() == "0.0.0.0", qPrintable("Error: wrong host returned"));
-	m_dbController->setHost(m_databaseHost);
+	QVERIFY2 (m_db->host() == m_databaseHost, qPrintable("Error: wrong host returned"));
+	m_db->setHost("0.0.0.0");
+	QVERIFY2 (m_db->host() == "0.0.0.0", qPrintable("Error: wrong host returned"));
+	m_db->setHost(m_databaseHost);
 
 	// Port testing
 	//
 
-	QVERIFY2 (m_dbController->port() == m_databasePort, qPrintable("Error: wrong port returned"));
-	m_dbController->setPort(1234);
-	QVERIFY2 (m_dbController->port() == 1234, qPrintable("Error: wrong port returned"));
-	m_dbController->setPort(m_databasePort);
+	QVERIFY2 (m_db->port() == m_databasePort, qPrintable("Error: wrong port returned"));
+	m_db->setPort(1234);
+	QVERIFY2 (m_db->port() == 1234, qPrintable("Error: wrong port returned"));
+	m_db->setPort(m_databasePort);
 
 	// Server username testing
 	//
 
-	QVERIFY2 (m_dbController->serverUsername() == m_databaseUser, qPrintable("Error: wrong server username returned"));
-	m_dbController->setServerUsername("Tester");
-	QVERIFY2 (m_dbController->serverUsername() == "Tester", qPrintable("Error: wrong server username returned"));
-	m_dbController->setServerUsername(m_databaseUser);
+	QVERIFY2 (m_db->serverUsername() == m_databaseUser, qPrintable("Error: wrong server username returned"));
+	m_db->setServerUsername("Tester");
+	QVERIFY2 (m_db->serverUsername() == "Tester", qPrintable("Error: wrong server username returned"));
+	m_db->setServerUsername(m_databaseUser);
 
 	/*qDebug() << "Pass before: " << m_dbController->serverPassword();
 	m_dbController->setServerPassword("Test");
@@ -320,18 +319,18 @@ void DbControllerProjectTests::connectionInfoTest()
 	// Server pass test
 	//
 
-	QVERIFY2 (m_dbController->serverPassword() == "", qPrintable("Error: empty pass expected"));
-	m_dbController->setServerPassword("Test");
-	QVERIFY2 (m_dbController->serverPassword() == "Test", qPrintable("Error: \"Test\" pass expected"));
-	m_dbController->setServerPassword("");
+	QVERIFY2 (m_db->serverPassword() == "", qPrintable("Error: empty pass expected"));
+	m_db->setServerPassword("Test");
+	QVERIFY2 (m_db->serverPassword() == "Test", qPrintable("Error: \"Test\" pass expected"));
+	m_db->setServerPassword("");
 
 	// Current user testing
 	//
 
-	QVERIFY2 (m_dbController->currentUser().username() == "Administrator", qPrintable("Error: wrong current user returned"));
+	QVERIFY2 (m_db->currentUser().username() == "Administrator", qPrintable("Error: wrong current user returned"));
 
-	ok = m_dbController->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->closeProject(0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 }
 
 void DbControllerProjectTests::cleanupTestCase()

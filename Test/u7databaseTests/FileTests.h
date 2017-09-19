@@ -5,12 +5,24 @@
 
 struct ObjectState;
 
+struct User
+{
+	QString username;
+	QString password;
+	int userId;
+};
+
 class FileTests : public QObject
 {
 	Q_OBJECT
 
 public:
 	FileTests();
+
+protected:
+	QString logIn(User user);								// returns session_key
+	QString logIn(QString username, QString password);		// returns session_key
+	bool logOut();
 
 private slots:
 	void initTestCase();
@@ -51,8 +63,9 @@ public:
 	static bool add_file(int userId, QString fileName, int parentId, QString fileData, QString details);
 	static bool delete_file(int userId, int fileId);
 
-	int m_firstUserForTest = -1;
-	int m_secondUserForTest = -1;
+	User m_user1;
+	User m_user2;
+
 	static const int maxValueId = 9999999;
 
 private:

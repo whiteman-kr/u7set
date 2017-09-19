@@ -182,6 +182,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0164.sql", "Upgrade to version 164, Changes in ArchiveService and AppDataService presets"},
 	{":/DatabaseUpgrade/Upgrade0165.sql", "Upgrade to version 165, AFBL Library was updated"},
 	{":/DatabaseUpgrade/Upgrade0166.sql", "Upgrade to version 166, Implementing safe file functions"},
+	{":/DatabaseUpgrade/Upgrade0167.sql", "Upgrade to version 167, Fixing error: Deleted but not checked-in file remains in the result of get_latest_file_tree_version"},
 };
 
 
@@ -907,7 +908,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 
-	getFileList_worker(&systemFiles, rootFileId(), "%", true);
+	getFileList_worker(&systemFiles, rootFileId(), "", true);
 
 	m_mutex.lock();
 	m_afblFileId = -1;
@@ -2185,10 +2186,19 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	QSqlQuery q(db);
 	q.setForwardOnly(true);
 
-	q.prepare("SELECT * FROM get_file_list(:userid, :parentid, :filter);");
-	q.bindValue(":userid", currentUser().userId());
-	q.bindValue(":parentid", parentId);
-	q.bindValue(":filter", "%" + filter);
+	if (filter.isEmpty() == true)
+	{
+		q.prepare("SELECT * FROM api.get_file_list(:session_key, :parentid);");
+		q.bindValue(":session_key", sessionKey());
+		q.bindValue(":parentid", parentId);
+	}
+	else
+	{
+		q.prepare("SELECT * FROM api.get_file_list(:session_key, :parentid, :filter);");
+		q.bindValue(":session_key", sessionKey());
+		q.bindValue(":parentid", parentId);
+		q.bindValue(":filter", "%" + filter);
+	}
 
 	bool result = q.exec();
 
@@ -2577,8 +2587,8 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 
 		// request
 		//
-		QString request = QString("SELECT * FROM get_latest_file_version(%1, %2);")
-				.arg(currentUser().userId())
+		QString request = QString("SELECT * FROM api.get_latest_file_version('%1', %2);")
+				.arg(sessionKey())
 				.arg(fi.fileId());
 
 		QSqlQuery q(db);
@@ -2734,8 +2744,8 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 
 	// request, result is a list of DbFile
 	//
-	QString request = QString("SELECT * FROM get_checked_out_files(%1, %2);")
-			.arg(currentUser().userId())
+	QString request = QString("SELECT * FROM api.get_checked_out_files('%1', %2);")
+			.arg(sessionKey())
 			.arg(filesArray);
 
 	QSqlQuery q(db);

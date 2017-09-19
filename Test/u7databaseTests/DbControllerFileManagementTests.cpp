@@ -4,14 +4,9 @@
 #include <QFile>
 #include <QDebug>
 
-DbControllerFileTests::DbControllerFileTests()
+DbControllerFileTests::DbControllerFileTests() :
+	m_db(new DbController())
 {
-	m_dbController = new DbController();
-
-	m_databaseHost = "127.0.0.1";
-	m_databaseName = "dbcontrollerfiletesting";
-	m_databaseUser = "u7";
-	m_adminPassword = "P2ssw0rd";
 }
 
 void DbControllerFileTests::initTestCase()
@@ -41,22 +36,22 @@ void DbControllerFileTests::initTestCase()
 
 	db.close();
 
-	ok = m_dbController->createProject(m_databaseName, m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_dbController->lastError()));
+	ok = m_db->createProject(m_databaseName, m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
 
-	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
+	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
+	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
 }
 
 void DbControllerFileTests::getFileListTest()
 {
 	std::vector<DbFileInfo> files;
 
-	bool ok = m_dbController->getFileList(&files, 1, false, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->getFileList(&files, 1, false, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -117,8 +112,8 @@ void DbControllerFileTests::addFileTest()
 
 	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
 
-	bool ok = m_dbController->addFile(file, 1, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->addFile(file, 1, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -216,8 +211,8 @@ void DbControllerFileTests::addFilesTest()
 
 	files.push_back(file2);
 
-	bool ok = m_dbController->addFiles(&files, 1, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	bool ok = m_db->addFiles(&files, 1, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
 
@@ -326,8 +321,8 @@ void DbControllerFileTests::deleteFileTest()
 
 	buffFile.clearData();
 
-	ok = m_dbController->deleteFiles(&files, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteFiles(&files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM file WHERE name='%1' OR name='%2'").arg(fileTwoForSqlQuery).arg(fileOne));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -381,8 +376,8 @@ void DbControllerFileTests::deleteFileTest()
 
 	filesAnotherFunction.push_back(file2);
 
-	ok = m_dbController->deleteFiles(&filesAnotherFunction, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->deleteFiles(&filesAnotherFunction, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM file WHERE name='%1' OR name='%2'").arg(fileTwoForSqlQuery).arg(fileOne));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -412,8 +407,8 @@ void DbControllerFileTests::getFileInfo()
 
 	DbFileInfo fileInfo;
 
-	ok = m_dbController->getFileInfo(fileId, &fileInfo, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getFileInfo(fileId, &fileInfo, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM get_file_info(1, '{%1}')").arg(fileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -470,8 +465,8 @@ void DbControllerFileTests::checkInTest()
 
 	QString comment = "Testing function check_in of dbController with one file";
 
-	ok = m_dbController->checkIn(file1, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file1, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(firstFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -531,8 +526,8 @@ void DbControllerFileTests::checkInTest()
 	files.push_back(file1);
 	files.push_back(file2);
 
-	ok = m_dbController->checkIn(files, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(files, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileId = %1 OR fileId = %2").arg(firstFileId).arg(secondFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -577,8 +572,8 @@ void DbControllerFileTests::checkInTest()
 
 	comment = "Testing function check_in of dbController with file which name contains special symbols\\'\"";
 
-	ok = m_dbController->checkIn(file3, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file3, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(thirdFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -628,8 +623,8 @@ void DbControllerFileTests::checkInTest()
 	fileWithoutChanges.setDetails(instanceQuery.value("details").toString());
 	fileWithoutChanges.setFileId(query.value("fileId").toInt());
 
-	ok = m_dbController->checkIn(fileWithoutChanges, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(fileWithoutChanges, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT MAX(changesetId) from FileInstance WHERE FileId = %1").arg(fileWithoutChangesId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -642,8 +637,8 @@ void DbControllerFileTests::checkInTest()
 
 	QString wrongComment = "This comment must not exist!";
 
-	ok = m_dbController->checkIn(fileWithoutChanges, wrongComment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(fileWithoutChanges, wrongComment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT MAX(changesetId) from FileInstance WHERE FileId = %1").arg(fileWithoutChangesId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -705,11 +700,11 @@ void DbControllerFileTests::checkOutTest()
 
 	QString comment = "Testing function check_out of dbController";
 
-	ok = m_dbController->checkIn(file1, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file1, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file1, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file1, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(firstFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -745,11 +740,11 @@ void DbControllerFileTests::checkOutTest()
 	files.push_back(file1);
 	files.push_back(file2);
 
-	ok = m_dbController->checkIn(files, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(files, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(files, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(files, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM checkout WHERE fileId = %1 OR fileId = %2").arg(firstFileId).arg(secondFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -784,11 +779,11 @@ void DbControllerFileTests::checkOutTest()
 
 	comment = "Testing function check_out of dbController with special symbols";
 
-	ok = m_dbController->checkIn(file3, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file3, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file3, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file3, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT COUNT(*) FROM  checkout WHERE fileId = %1").arg(firstFileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -842,13 +837,13 @@ void DbControllerFileTests::fileHasChildrenTest()
 
 	QString comment = "ParentFile for test function fileHasChildren of dbController";
 
-	ok = m_dbController->checkIn(parentFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(parentFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	bool result;
 
-	ok = m_dbController->fileHasChildren(&result, parentFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->fileHasChildren(&result, parentFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (result == false, qPrintable("Error: function fileHasChildren from dbController returned wrong result (false expected)"));
 
@@ -874,11 +869,11 @@ void DbControllerFileTests::fileHasChildrenTest()
 
 	comment = "Testing function fileHasChildren of dbController";
 
-	ok = m_dbController->checkIn(childFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->fileHasChildren(&result, parentFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->fileHasChildren(&result, parentFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (result == true, qPrintable("Error: function fileHasChildren from dbController returned wrong result (true expected)"));
 
@@ -930,8 +925,8 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 
 	QString comment = "ParentFile for test function getCheckedoutFiles of dbController";
 
-	ok = m_dbController->checkIn(parentFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(parentFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM add_file(1, '%1', %2, 'LOL', '{}')").arg(firstChildFileForSql).arg(parentFileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -978,8 +973,8 @@ void DbControllerFileTests::getCheckedOutFilesTest()
 
 	vectorWithParentFile.push_back(parentFile);
 
-	ok = m_dbController->getCheckedOutFiles(&vectorWithParentFile, &result, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getCheckedOutFiles(&vectorWithParentFile, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2(result.size() == 2, qPrintable("Error: wrong amount of records in result"));
 
@@ -1034,32 +1029,32 @@ void DbControllerFileTests::getFileHistoryTest()
 
 	QString comment = "First file commit. I have no idea: what I must do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Second file commit. I still have no idea, what I must do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Third file commit. I have idea, what to do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2);").arg(m_dbController->currentUser().userId()).arg(fileId));
+	ok = query.exec(QString("SELECT * FROM get_file_history(%1, %2);").arg(m_db->currentUser().userId()).arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	std::vector<DbChangeset> result;
 
-	ok = m_dbController->getFileHistory(file, &result, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getFileHistory(file, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	while (query.next())
 	{
@@ -1121,27 +1116,27 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	QString comment = "First file commit. I have no idea: what I must do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Second file commit. I still have no idea, what I must do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Third file commit. I have idea, what to do";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->getLatestVersion(file, &singleFileOutput, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getLatestVersion(file, &singleFileOutput, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM get_latest_file_version (1, %1)").arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1176,24 +1171,24 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	comment = "First file commit. I have no idea: what I must do";
 
-	ok = m_dbController->checkIn(secondFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(secondFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Second file commit. I still have no idea, what I must do";
 
-	ok = m_dbController->checkIn(secondFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(secondFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Third file commit. I have idea, what to do";
 
-	ok = m_dbController->checkIn(secondFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	std::vector<DbFileInfo> files;
 	files.push_back(file);
@@ -1201,8 +1196,8 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	std::vector<std::shared_ptr<DbFile>> multiFileOutput;
 
-	ok = m_dbController->getLatestVersion(files, &multiFileOutput, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getLatestVersion(files, &multiFileOutput, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	for (std::shared_ptr<DbFile> buff : multiFileOutput)
 	{
@@ -1260,16 +1255,16 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	QString comment = "Parent file for GetLatestTreeVersionTest created";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Parent file for GetLatestTreeVersionTest updated";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	DbFileInfo childFile;
 
@@ -1299,19 +1294,19 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	comment = "Child file for GetLatestTreeVersionTest created";
 
-	ok = m_dbController->checkIn(childFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(childFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(childFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Child file for GetLatestTreeVersionTest updated";
 
-	ok = m_dbController->checkIn(childFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(childFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->getLatestTreeVersion(file, &result, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getLatestTreeVersion(file, &result, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (result.size() == 2, qPrintable ("Error: function getLatestTreeVersion returned wrong amount of files"));
 
@@ -1378,14 +1373,14 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	QString comment = "File for getWorkcopy test of dbController created";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->getWorkcopy(file, &result, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getWorkcopy(file, &result, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -1425,11 +1420,11 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	comment = "Second file for getWorkcopy test of dbController created";
 
-	ok = m_dbController->checkIn(secondFile, comment, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(secondFile, comment, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(secondFile, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(secondFile, 0);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
 	std::vector<DbFileInfo> files;
 	std::vector<std::shared_ptr<DbFile>> multipleResult;
@@ -1437,8 +1432,8 @@ void DbControllerFileTests::getWorkcopyTest()
 	files.push_back(file);
 	files.push_back(secondFile);
 
-	ok = m_dbController->getWorkcopy(files, &multipleResult, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getWorkcopy(files, &multipleResult, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QVERIFY2 (multipleResult.size() == files.size(), qPrintable("Error: wrong amount of records in vector from function result"));
 
@@ -1519,8 +1514,8 @@ void DbControllerFileTests::setWorkcopyTest()
 	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
 
 
-	ok = m_dbController->setWorkcopy(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->setWorkcopy(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1578,8 +1573,8 @@ void DbControllerFileTests::setWorkcopyTest()
 	files.push_back(file);
 	files.push_back(secondFile);
 
-	m_dbController->setWorkcopy(files, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	m_db->setWorkcopy(files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	for (std::shared_ptr<DbFile> buff : files)
 	{
@@ -1635,26 +1630,26 @@ void DbControllerFileTests::getSpecificCopyTest()
 
 	QString comment = "First checkIn for file from getSpecificCopy of dbController test";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	int lastChangesetId = 0;
 
-	ok = m_dbController->lastChangesetId(&lastChangesetId);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->lastChangesetId(&lastChangesetId);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	comment = comment.replace("First", "Second");
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	std::shared_ptr<DbFile> result(new DbFile);
 
-	ok = m_dbController->getSpecificCopy(file, lastChangesetId, &result, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getSpecificCopy(file, lastChangesetId, &result, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM get_specific_copy(1, %1, %2)").arg(fileId).arg(lastChangesetId));
 
@@ -1690,32 +1685,32 @@ void DbControllerFileTests::getSpecificCopyTest()
 
 	comment = "Checking in two files for getSpecificCopy of dbController test";
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	std::vector<DbFileInfo> files;
 
 	files.push_back(file);
 	files.push_back(secondFile);
 
-	ok = m_dbController->checkIn(files, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(files, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->lastChangesetId(&lastChangesetId);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->lastChangesetId(&lastChangesetId);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(secondFile, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(secondFile, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	comment = "Just for test check out second file in getSpecificCopy of dbController test";
 
-	ok = m_dbController->checkIn(secondFile, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(secondFile, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	std::vector<std::shared_ptr<DbFile>> out;
 
-	ok = m_dbController->getSpecificCopy(files, lastChangesetId, &out, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->getSpecificCopy(files, lastChangesetId, &out, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	for (std::shared_ptr<DbFile> buff : out)
 	{
@@ -1857,8 +1852,8 @@ void DbControllerFileTests::checkInTreeTest()
 	fileWithoutChanges.setDetails(instanceQuery.value("details").toString());
 	fileWithoutChanges.setFileId(query.value("fileId").toInt());
 
-	ok = m_dbController->checkIn(fileWithoutChanges, "Only one comment for chack_in_tree test", 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(fileWithoutChanges, "Only one comment for chack_in_tree test", 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT MAX(changesetId) FROM FileInstance WHERE FileId = %1").arg(fileId));
 
@@ -1880,8 +1875,8 @@ void DbControllerFileTests::checkInTreeTest()
 
 	QString comment = "Check for checkInTree";
 
-	ok = m_dbController->checkInTree(files, &out, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkInTree(files, &out, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	const int baseFileAmount = 5; // Amount of files in test
 	int currentFileNumber = 0;
@@ -1950,14 +1945,14 @@ void DbControllerFileTests::undoChangestest()
 
 	QString comment = "Wow, checkIn!";
 
-	ok = m_dbController->checkIn(file, comment, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkIn(file, comment, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = m_dbController->undoChanges(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->undoChanges(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM is_file_checkedout(%1)").arg(file.fileId()));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -1965,8 +1960,8 @@ void DbControllerFileTests::undoChangestest()
 
 	QVERIFY2(query.value(0).toBool() == false, qPrintable("Error: changes in checkedOut file was not been removed"));
 
-	ok = m_dbController->checkOut(file, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->checkOut(file, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	fileName = "SecondFileForUndoChangesTestOfDbController\\'\"";
 	fileForSql = "SecondFileForUndoChangesTestOfDbController\\''\"\"";
@@ -1995,8 +1990,8 @@ void DbControllerFileTests::undoChangestest()
 	files.push_back(file);
 	files.push_back(secondFile);
 
-	ok = m_dbController->undoChanges(files, 0);
-	QVERIFY2 (ok == true, qPrintable(m_dbController->lastError()));
+	ok = m_db->undoChanges(files, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	ok = query.exec(QString("SELECT * FROM file_exists(%1)").arg(secondFile.fileId()));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -2074,19 +2069,19 @@ void DbControllerFileTests::systemFilesTest()
 
 	hp = query.value("fileId").toInt();
 
-	QVERIFY2 (m_dbController->rootFileId() == 0, qPrintable("Error: root fileId must be 0, function returned wrong id"));
-	QVERIFY2 (m_dbController->afblFileId() == afbl, qPrintable("Error: Wrong AFBL id returned"));
-	QVERIFY2 (m_dbController->alFileId() == al, qPrintable("Error: Wrong AL id returned"));
-	QVERIFY2 (m_dbController->mcFileId() == mc, qPrintable("Error: Wrong MC id returned"));
-	QVERIFY2 (m_dbController->mvsFileId() == mvs, qPrintable("Error: Wrong MVS id returned"));
-	QVERIFY2 (m_dbController->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
-	QVERIFY2 (m_dbController->hcFileId() == hc, qPrintable("Error: Wrong HC id returned"));
-	QVERIFY2 (m_dbController->hpFileId() == hp, qPrintable("Error: Wrong HP id returned"));
+	QVERIFY2 (m_db->rootFileId() == 0, qPrintable("Error: root fileId must be 0, function returned wrong id"));
+	QVERIFY2 (m_db->afblFileId() == afbl, qPrintable("Error: Wrong AFBL id returned"));
+	QVERIFY2 (m_db->alFileId() == al, qPrintable("Error: Wrong AL id returned"));
+	QVERIFY2 (m_db->mcFileId() == mc, qPrintable("Error: Wrong MC id returned"));
+	QVERIFY2 (m_db->mvsFileId() == mvs, qPrintable("Error: Wrong MVS id returned"));
+	QVERIFY2 (m_db->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
+	QVERIFY2 (m_db->hcFileId() == hc, qPrintable("Error: Wrong HC id returned"));
+	QVERIFY2 (m_db->hpFileId() == hp, qPrintable("Error: Wrong HP id returned"));
 
 	std::vector<DbFileInfo> systemFiles;
 	QVector<int> fileIds;
 
-	systemFiles = m_dbController->systemFiles();
+	systemFiles = m_db->systemFiles();
 
 	for (DbFileInfo file : systemFiles)
 	{
@@ -2102,14 +2097,14 @@ void DbControllerFileTests::systemFilesTest()
 	QVERIFY2 (fileIds.contains(hc) == true, qPrintable("Error: systemFiles function has not added HC file to output!"));
 	QVERIFY2 (fileIds.contains(hp) == true, qPrintable("Error: systemFiles function has not added HP file to output!"));
 
-	QVERIFY2 (m_dbController->systemFileInfo("AFBL").fileId() == afbl, qPrintable("Error: function systemFileInfo returned wrong fileId"));
-	QVERIFY2 (m_dbController->systemFileInfo(hc).fileName() == "HC", qPrintable("Error: function systemFileInfo returned wrong fileName"));
+	QVERIFY2 (m_db->systemFileInfo("AFBL").fileId() == afbl, qPrintable("Error: function systemFileInfo returned wrong fileId"));
+	QVERIFY2 (m_db->systemFileInfo(hc).fileName() == "HC", qPrintable("Error: function systemFileInfo returned wrong fileName"));
 
 	ok = query.exec("SELECT * FROM add_file(1, 'systemFileName', 1, 'file_data', '{}')");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2 (m_dbController->systemFileInfo(query.value("id").toInt()).fileId() == -1, qPrintable("Error: -1 fileId expected"));
+	QVERIFY2 (m_db->systemFileInfo(query.value("id").toInt()).fileId() == -1, qPrintable("Error: -1 fileId expected"));
 
 	db.close();
 }
@@ -2121,6 +2116,6 @@ void DbControllerFileTests::cleanupTestCase()
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_dbController->deleteProject(m_databaseName, m_adminPassword, true, 0);
+	m_db->deleteProject(m_databaseName, m_adminPassword, true, 0);
 }
 
