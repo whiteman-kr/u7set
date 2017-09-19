@@ -216,7 +216,7 @@ namespace Builder
 
 			if (subsystemModulesDescriptions.empty() == true)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, Logic Modules descriptions for subsystem %2 is undefined!").arg(__FUNCTION__).arg(subsystem->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, Logic Modules descriptions for subsystem %2 is undefined!").arg(__FUNCTION__).arg(subsystem->caption()));
 				return false;
 			}
 
@@ -291,7 +291,7 @@ namespace Builder
 
 		if (buildResultWriter.addFile("Reports", "lmJumpers.txt", lmReportData) == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save lmJumpers.txt file!"));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save lmJumpers.txt file!"));
 			return false;
 		}
 
@@ -310,7 +310,7 @@ namespace Builder
 
 		if (ok == false || fileList.size() != 1)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 							   tr("Can't get file list and find module configuration description file '%1'").arg(logicModuleDescription->configurationStringFile()));
 			return false;
 		}
@@ -320,7 +320,7 @@ namespace Builder
 
 		if (ok == false || scriptFile == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 							   tr("Can't get module configuration description file %1").arg(logicModuleDescription->configurationStringFile()));
 			return false;
 		}
@@ -376,19 +376,19 @@ namespace Builder
 		QJSValue jsEval = m_jsEngine.evaluate(contents);
 		if (jsEval.isError() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(logicModuleDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Module configuration script '%1' evaluation failed at line %2: %3").arg(logicModuleDescription->configurationStringFile()).arg(jsEval.property("lineNumber").toInt()).arg(jsEval.toString()));
 			return false;
 		}
 
 		if (!m_jsEngine.globalObject().hasProperty("main"))
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Script has no \"main\" function"));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Script has no \"main\" function"));
 			return false;
 		}
 
 		if (!m_jsEngine.globalObject().property("main").isCallable())
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("\"main\" property of script is not callable"));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("\"main\" property of script is not callable"));
 			return false;
 		}
 
@@ -408,7 +408,7 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Uncaught exception while generating module configuration '%1': %2").arg(logicModuleDescription->configurationStringFile()).arg(jsResult.toString()));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Uncaught exception while generating module configuration '%1': %2").arg(logicModuleDescription->configurationStringFile()).arg(jsResult.toString()));
 			return false;
 		}
 
@@ -441,12 +441,12 @@ namespace Builder
 
 			if (path.isEmpty())
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 				return false;
 			}
 			if (fileName.isEmpty())
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
 				return false;
 			}
 
