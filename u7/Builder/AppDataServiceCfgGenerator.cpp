@@ -133,43 +133,43 @@ namespace Builder
 
 			if (!unitInfo.contains(signal.unitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (!unitInfo.contains(signal.inputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (!unitInfo.contains(signal.outputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
             if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
             if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
@@ -179,7 +179,7 @@ namespace Builder
 				case E::ByteOrder::BigEndian:
 					break;
 				default:
-					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
+					LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
 					hasWrongField = true;
 			}
 
@@ -244,49 +244,49 @@ namespace Builder
 
 			/*if (!dataFormatInfo.contains(signal.dataFormatInt()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong dataFormat field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}*/
 
 			if (!unitInfo.contains(signal.unitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong unitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (!unitInfo.contains(signal.inputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (!unitInfo.contains(signal.outputUnitID()))
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputUnitID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
             if (signal.inputSensorType() < 0 || signal.inputSensorType() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
             if (signal.outputSensorType() < 0 || signal.outputSensorType() >= SENSOR_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputSensorID field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (signal.outputMode() < 0 || signal.outputMode() >= OUTPUT_MODE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
 			if (TO_INT(signal.inOutType()) < 0 || TO_INT(signal.inOutType()) >= IN_OUT_TYPE_COUNT)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong inOutType field").arg(signal.appSignalID()));
 				hasWrongField = true;
 			}
 
@@ -296,7 +296,7 @@ namespace Builder
 				case E::ByteOrder::BigEndian:
 					break;
 				default:
-					LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
+					LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal %1 has wrong byteOrder field").arg(signal.appSignalID()));
 					hasWrongField = true;
 			}
 
@@ -512,7 +512,7 @@ namespace Builder
 
 		if (lm == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Not found LM with ID '%1'").arg(appDataSource.lmEquipmentID()));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Not found LM with ID '%1'").arg(appDataSource.lmEquipmentID()));
 			return false;
 		}
 
@@ -535,7 +535,7 @@ namespace Builder
 
 			if (device == nullptr)
 			{
-				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal '%1' bound with an unknown device '%2'").
+				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal '%1' bound with an unknown device '%2'").
 					arg(appSignal.appSignalID()).arg(appSignalEquipmentID));
 				continue;
 			}

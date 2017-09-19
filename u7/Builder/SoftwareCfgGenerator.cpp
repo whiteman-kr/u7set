@@ -66,7 +66,7 @@ namespace Builder
 
 		if (m_cfgXml == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Can't create 'configuration.xml' file for software %1")).
 					  arg(m_software->equipmentIdTemplate()));
 			return false;
@@ -296,7 +296,7 @@ namespace Builder
 		}
 		else
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build Logic Modules list")));
+			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build Logic Modules list")));
 		}
 
 		return result;
@@ -348,7 +348,7 @@ namespace Builder
 		}
 		else
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("Can't build software list")));
+			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("Can't build software list")));
 		}
 
 		return result;

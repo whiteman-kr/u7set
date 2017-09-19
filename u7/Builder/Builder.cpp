@@ -303,7 +303,9 @@ namespace Builder
 			Tuning::TuningDataStorage tuningDataStorage;
 			ComparatorStorage comparatorStorage;
 
-			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage, &connections, &signalSet, &lmDescriptions, &appLogicData, &tuningDataStorage, &comparatorStorage, &buildWriter);
+			ok = compileApplicationLogic(&subsystems, &equipmentSet, &opticModuleStorage,
+										 &connections, &signalSet, &lmDescriptions, &appLogicData,
+										 &tuningDataStorage, &comparatorStorage, &busSet, &buildWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1243,6 +1245,7 @@ namespace Builder
 													AppLogicData* appLogicData,
 													Tuning::TuningDataStorage* tuningDataStorage,
 													ComparatorStorage* comparatorStorage,
+													VFrame30::BusSet* busSet,
 													BuildResultWriter* buildResultWriter)
 	{
 		LOG_EMPTY_LINE(m_log);
@@ -1257,6 +1260,7 @@ namespace Builder
 												  appLogicData,
 												  tuningDataStorage,
 												  comparatorStorage,
+												  busSet,
 												  buildResultWriter,
 												  m_log);
 

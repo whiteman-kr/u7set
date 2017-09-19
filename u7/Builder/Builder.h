@@ -126,7 +126,7 @@ namespace Builder
 										LmDescriptionSet* lmDescriptions,
 										AppLogicData* appLogicData,
 										Tuning::TuningDataStorage* tuningDataStorage,
-										ComparatorStorage* comparatorStorage,
+										ComparatorStorage* comparatorStorage, VFrame30::BusSet *busSet,
 										BuildResultWriter* buildResultWriter);
 
 		// Generate MATS software configurations
