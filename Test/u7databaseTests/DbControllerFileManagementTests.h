@@ -10,6 +10,10 @@ class DbControllerFileTests : public QObject
 public:
 	DbControllerFileTests();
 
+protected:
+	QString logIn(QString username, QString password);		// returns session_key
+	bool logOut();
+
 private slots:
 	void initTestCase();
 	void getFileListTest();

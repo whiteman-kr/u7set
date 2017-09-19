@@ -8,13 +8,7 @@ class MultiThreadFileTest : public QThread
 {
 
 public:
-	MultiThreadFileTest(int number,
-					const char* dbHost,
-					const char* dbUser,
-					const char* dbUserPassword,
-					const char* name,
-					int amountOfFiles);
-
+	MultiThreadFileTest(int number, QString dbHost, QString dbUser, QString dbUserPassword, QString name, int amountOfFiles);
 	virtual ~MultiThreadFileTest();
 
 	virtual void run();

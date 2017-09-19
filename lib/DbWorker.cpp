@@ -2652,8 +2652,8 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	QTime timerObject;
 	timerObject.start();
 
-	QString request = QString("SELECT * FROM get_latest_file_tree_version(%1, %2);")
-			.arg(currentUser().userId())
+	QString request = QString("SELECT * FROM api.get_latest_file_tree_version('%1', %2);")
+			.arg(sessionKey())
 			.arg(parentFileInfo.fileId());
 
 	QSqlQuery q(db);
@@ -2672,7 +2672,6 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 //	qint64 memoryAllocationEllpased = 0;
 //	qint64 updateFileEllpased = 0;
 //	qint64 pushBackEllpased = 0;
-
 
 	while (q.next())
 	{

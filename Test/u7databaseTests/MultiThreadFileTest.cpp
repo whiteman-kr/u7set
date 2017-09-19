@@ -4,12 +4,7 @@
 #include <QDebug>
 #include <assert.h>
 
-MultiThreadFileTest::MultiThreadFileTest(int number,
-								 const char* dbHost,
-								 const char* dbUser,
-								 const char* dbUserPassword,
-								 const char* name,
-								 int amountOfFiles) :
+MultiThreadFileTest::MultiThreadFileTest(int number, QString dbHost, QString dbUser, QString dbUserPassword, QString name, int amountOfFiles) :
 	m_threadNumber(number),
 	m_databaseHost(dbHost),
 	m_databaseUser(dbUser),
@@ -17,10 +12,6 @@ MultiThreadFileTest::MultiThreadFileTest(int number,
 	m_projectName(name),
 	m_amountOfFileIds(amountOfFiles)
 {
-	assert(dbHost);
-	assert(dbUser);
-	assert(dbUserPassword);
-	assert(name);
 }
 
 MultiThreadFileTest::~MultiThreadFileTest()
@@ -32,7 +23,6 @@ void MultiThreadFileTest::run()
 {
 	// Create new database connection for thread to work with
 	//
-
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "fileThread_" + QString::number(m_threadNumber));
 
 	db.setHostName(m_databaseHost);
@@ -92,20 +82,13 @@ void MultiThreadFileTest::run()
 	QString session_key = query.value(0).toString();
 
 	ok = query.exec(QString("SELECT * FROM user_api.create_user('%1', '%2', '%3', '%4', '%5', false, false)")
-	                     .arg(session_key)
-						 .arg("fileThread_" + QString::number(m_threadNumber))
-						 .arg("fileThread_" + QString::number(m_threadNumber))
-						 .arg("fileThread_" + QString::number(m_threadNumber))
-						 .arg("fileThread_" + QString::number(m_threadNumber)));
+					.arg(session_key)
+					.arg("fileThread_" + QString::number(m_threadNumber))
+					.arg("fileThread_" + QString::number(m_threadNumber))
+					.arg("fileThread_" + QString::number(m_threadNumber))
+					.arg("fileThread_" + QString::number(m_threadNumber)));
 
 	ok = query.exec("SELECT * FROM user_api.log_out()");
-
-	if (ok == false)
-	{
-		qDebug() << query.lastError().databaseText();
-		this->terminate();
-	}
-
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
@@ -113,7 +96,6 @@ void MultiThreadFileTest::run()
 	}
 
 	ok = query.next();
-
 	if (ok == false)
 	{
 		qDebug() << query.lastError().databaseText();
@@ -122,7 +104,6 @@ void MultiThreadFileTest::run()
 
 	// Remember id of created user
 	//
-
 	int userId = query.value(0).toInt();
 	int fileNumber = 0;						// Value, that will count amount of files
 	int numberOfErrorsInWorkTest = 0;		// Number of errors, which can be occured in one test
@@ -130,7 +111,7 @@ void MultiThreadFileTest::run()
 
 	bool error = false;						// Value, that store info of error
 
-	std::vector<int> fileIds;	// Array of fileIds of created files
+	std::vector<int> fileIds;				// Array of fileIds of created files
 	fileIds.reserve(m_amountOfFileIds);
 
 	// Start add_file function testing
@@ -381,12 +362,12 @@ void MultiThreadFileTest::run()
 
 	for (int fileId : fileIds)
 	{
-		ok = query.exec(QString("SELECT * FROM set_workcopy(%1, %2, '%3', '{}')")
-						.arg(userId)
+		ok = query.exec(QString("SELECT * FROM api.set_workcopy('%1', %2, '%3', '{}')")
+						.arg(session_key)
 						.arg(fileId)
 						.arg(QString("fileThread_%1_fileId_%2 testingData")
-						.arg(m_threadNumber)
-						.arg(fileId)));
+							 .arg(m_threadNumber)
+							 .arg(fileId)));
 
 		if (ok == false)
 		{
@@ -419,8 +400,8 @@ void MultiThreadFileTest::run()
 
 	for (int fileId : fileIds)
 	{
-		bool ok = query.exec(QString("SELECT * FROM get_workcopy(%1, %2)")
-							 .arg(userId)
+		bool ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2)")
+							 .arg(session_key)
 							 .arg(fileId));
 
 		if (ok == false)
@@ -469,8 +450,8 @@ void MultiThreadFileTest::run()
 
 	for (int fileId : fileIds)
 	{
-		ok = query.exec(QString("SELECT * FROM get_file_info(%1, '{%2}')")
-						.arg(userId)
+		ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', '{%2}')")
+						.arg(session_key)
 						.arg(fileId));
 
 		if (ok == false)
@@ -499,8 +480,8 @@ void MultiThreadFileTest::run()
 
 	for (int fileId : fileIds)
 	{
-		ok = query.exec(QString("SELECT * FROM get_latest_file_version(%1, %2);")
-						.arg(userId)
+		ok = query.exec(QString("SELECT * FROM api.get_latest_file_version('%1', %2);")
+						.arg(session_key)
 						.arg(fileId));
 
 		if (ok == false)
@@ -556,7 +537,6 @@ void MultiThreadFileTest::run()
 
 	// Start is_file_checkedout() test
 	//
-
 	for (int fileId: fileIds)
 	{
 		ok = query.exec(QString("SELECT * FROM is_file_checkedOut(%1)").arg(fileId));

@@ -290,15 +290,13 @@ void DbControllerProjectTests::connectionInfoTest()
 
 	// Host testing
 	//
-
-	QVERIFY2 (m_db->host() == m_databaseHost, qPrintable("Error: wrong host returned"));
+	QVERIFY2(m_db->host() == m_databaseHost, qPrintable("Error: wrong host returned"));
 	m_db->setHost("0.0.0.0");
-	QVERIFY2 (m_db->host() == "0.0.0.0", qPrintable("Error: wrong host returned"));
+	QVERIFY2(m_db->host() == "0.0.0.0", qPrintable("Error: wrong host returned"));
 	m_db->setHost(m_databaseHost);
 
 	// Port testing
 	//
-
 	QVERIFY2 (m_db->port() == m_databasePort, qPrintable("Error: wrong port returned"));
 	m_db->setPort(1234);
 	QVERIFY2 (m_db->port() == 1234, qPrintable("Error: wrong port returned"));
@@ -306,10 +304,9 @@ void DbControllerProjectTests::connectionInfoTest()
 
 	// Server username testing
 	//
-
-	QVERIFY2 (m_db->serverUsername() == m_databaseUser, qPrintable("Error: wrong server username returned"));
+	QVERIFY2(m_db->serverUsername() == m_databaseUser, qPrintable("Error: wrong server username returned"));
 	m_db->setServerUsername("Tester");
-	QVERIFY2 (m_db->serverUsername() == "Tester", qPrintable("Error: wrong server username returned"));
+	QVERIFY2(m_db->serverUsername() == "Tester", qPrintable("Error: wrong server username returned"));
 	m_db->setServerUsername(m_databaseUser);
 
 	/*qDebug() << "Pass before: " << m_dbController->serverPassword();
@@ -319,18 +316,19 @@ void DbControllerProjectTests::connectionInfoTest()
 	// Server pass test
 	//
 
-	QVERIFY2 (m_db->serverPassword() == "", qPrintable("Error: empty pass expected"));
+	QVERIFY2(m_db->serverPassword() == m_adminPassword, qPrintable("Error: empty pass expected"));
 	m_db->setServerPassword("Test");
 	QVERIFY2 (m_db->serverPassword() == "Test", qPrintable("Error: \"Test\" pass expected"));
-	m_db->setServerPassword("");
+	m_db->setServerPassword(m_adminPassword);
 
 	// Current user testing
 	//
-
 	QVERIFY2 (m_db->currentUser().username() == "Administrator", qPrintable("Error: wrong current user returned"));
 
 	ok = m_db->closeProject(0);
 	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+
+	return;
 }
 
 void DbControllerProjectTests::cleanupTestCase()

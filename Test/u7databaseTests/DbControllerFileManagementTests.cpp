@@ -9,8 +9,41 @@ DbControllerFileTests::DbControllerFileTests() :
 {
 }
 
+QString DbControllerFileTests::logIn(QString username, QString password)
+{
+	QSqlQuery query;
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+							.arg(username)
+							.arg(password));
+
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	ok = query.next();
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	QString session_key = query.value(0).toString();
+	return session_key;
+}
+
+bool DbControllerFileTests::logOut()
+{
+	QSqlQuery query;
+	bool ok = query.exec("SELECT * FROM user_api.log_out()");
+	return ok;
+}
+
 void DbControllerFileTests::initTestCase()
 {
+	m_db->setServerUsername(m_databaseUser);
+	m_db->setServerPassword(m_adminPassword);
+
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 	db.setHostName(m_databaseHost);
@@ -86,35 +119,38 @@ void DbControllerFileTests::getFileListTest()
 
 void DbControllerFileTests::addFileTest()
 {
+	bool ok = true;
+
 	QString details = "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}";
-	QString name = "\'\"\\FileForAddFilesTest%\'\"\\";
+	QString testFileName = "TestFileName.txt";
 
 	std::shared_ptr<DbFile> file(new DbFile);
 	file.get()->setUserId(1);
 	file.get()->setParentId(1);
 	file.get()->setDetails(details);
 
-	QFile fileFromDisk(name);
-
-	if (fileFromDisk.exists())
+	QFile fileFromDisk(testFileName);
+	if (fileFromDisk.exists() == true)
 	{
-		QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+		ok = fileFromDisk.remove();
+		QVERIFY2(ok == true, qPrintable(tr("Can not remove old test file from disk, error: %1").arg(fileFromDisk.errorString())));
 	}
 
-	if (fileFromDisk.open(QIODevice::ReadWrite))
-	{
-		QVERIFY2 (fileFromDisk.write("Testing data"), qPrintable(QString("Can not create file to read from in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
-		fileFromDisk.close();
-	}
+	ok = fileFromDisk.open(QIODevice::ReadWrite);
+	QVERIFY2(ok == true, qPrintable(tr("Can not create file, error: %1").arg(fileFromDisk.errorString())));
 
-	file.get()->readFromDisk(name);
+	ok = fileFromDisk.write("Testing data");
+	QVERIFY2(ok == true, qPrintable(tr("Can not write file, error: %1").arg(fileFromDisk.errorString())));
 
+	fileFromDisk.close();
 
-	QVERIFY2 (fileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(fileFromDisk.errorString())));
+	file.get()->readFromDisk(testFileName);
 
-	bool ok = m_db->addFile(file, 1, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	ok = m_db->addFile(file, 1, nullptr);
+	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
+	// --
+	//
 	QSqlDatabase db = QSqlDatabase::database();
 
 	db.setHostName(m_databaseHost);
@@ -123,17 +159,18 @@ void DbControllerFileTests::addFileTest()
 	db.setDatabaseName("u7_" + m_databaseName);
 
 	QSqlQuery query;
-	QString nameForDb = name;
+	QString nameForDb = testFileName;
 	nameForDb.replace("\'","\'\'");
+
 	ok = query.exec(QString("SELECT * FROM file WHERE name = \'%1\'").arg(nameForDb));
-	QVERIFY2 (ok, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(ok, qPrintable(query.lastError().databaseText()));
 
 	ok = query.first();
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	QVERIFY2 (query.value("name").toString() == name, qPrintable("Error: file created by function addFile from DbController has wrong name"));
-	QVERIFY2 (query.value("parentId").toInt() == 1, qPrintable("Error: file created by function addFile from DbController has wrong parentId"));
-	QVERIFY2 (query.value("Deleted").toBool() == false, qPrintable("Error: file created by function addFile from DbController has wrong deleted flag"));
+	QVERIFY2(query.value("name").toString() == testFileName, qPrintable("Error: file created by function addFile from DbController has wrong name"));
+	QVERIFY2(query.value("parentId").toInt() == 1, qPrintable("Error: file created by function addFile from DbController has wrong parentId"));
+	QVERIFY2(query.value("Deleted").toBool() == false, qPrintable("Error: file created by function addFile from DbController has wrong deleted flag"));
 
 	QString fileInstanceId = query.value("checkedOutInstanceId").toString();
 
@@ -145,13 +182,16 @@ void DbControllerFileTests::addFileTest()
 
 	QVERIFY2 (query.value("details").toString() == details, qPrintable("Error: wrong detais after addFile function of DbController"));
 	db.close();
+
+	return;
 }
 
 void DbControllerFileTests::addFilesTest()
 {
+	bool ok = true;
 	QString details = "{}";
-	QString nameFirst = "\'\"\\FirstFileForAddFilesTest%\'\"\\";
-	QString nameSecond = "\'\"\\SuddenlySecondFileAddFilesTest%\'\"\\";
+	QString nameFirst = "FirstFileForAddFilesTest";
+	QString nameSecond = "SuddenlySecondFileAddFilesTest";
 
 	std::vector<std::shared_ptr<DbFile>> files;
 
@@ -164,14 +204,14 @@ void DbControllerFileTests::addFilesTest()
 
 	// Create and read data from first file
 	//
-
 	file1.get()->setUserId(1);
 	file1.get()->setParentId(1);
 	file1.get()->setDetails(details);
 
-	if (firstFileFromDisk.exists())
+	if (firstFileFromDisk.exists() == true)
 	{
-		QVERIFY2 (firstFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
+		ok = firstFileFromDisk.remove();
+		QVERIFY2(ok == true, qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
 	}
 
 	if (firstFileFromDisk.open(QIODevice::ReadWrite))
@@ -180,9 +220,10 @@ void DbControllerFileTests::addFilesTest()
 		firstFileFromDisk.close();
 	}
 
-	QVERIFY2 (file1.get()->readFromDisk(nameFirst), qPrintable("Can not read file (first)"));
+	ok = file1.get()->readFromDisk(nameFirst);
+	QVERIFY2(ok == true, qPrintable("Can not read file (first)"));
 
-	QVERIFY2 (firstFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
+	QVERIFY2(firstFileFromDisk.remove(), qPrintable(QString("Can not remove old test file from disk in function addFileTest of DbController tests: %1").arg(firstFileFromDisk.errorString())));
 
 	files.push_back(file1);
 
@@ -211,7 +252,7 @@ void DbControllerFileTests::addFilesTest()
 
 	files.push_back(file2);
 
-	bool ok = m_db->addFiles(&files, 1, 0);
+	ok = m_db->addFiles(&files, 1, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
 	QSqlDatabase db = QSqlDatabase::database();
@@ -396,7 +437,13 @@ void DbControllerFileTests::getFileInfo()
 	db.setDatabaseName("u7_" + m_databaseName);
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
+	// --
+	//
 	QString fileOne = "firstFile";
 
 	QSqlQuery query;
@@ -410,9 +457,12 @@ void DbControllerFileTests::getFileInfo()
 	ok = m_db->getFileInfo(fileId, &fileInfo, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_file_info(1, '{%1}')").arg(fileId));
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
+	ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', ARRAY[%2])")
+							.arg(session_key)
+							.arg(fileId));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	QVERIFY2(fileInfo.fileId() == query.value("fileId").toInt(), qPrintable("Wrong fileId returned by dbController function()"));
 	QVERIFY2(fileInfo.deleted() == query.value("deleted").toBool(), qPrintable("Wrong deleted flag returned by dbController function()"));
@@ -423,7 +473,16 @@ void DbControllerFileTests::getFileInfo()
 	QVERIFY2(fileInfo.userId() == query.value("userId").toInt(), qPrintable("Wrong userId returned by dbController function()"));
 	QVERIFY2(fileInfo.action().toInt() == query.value("action").toInt(), qPrintable("Wrong action returned by dbController function()"));
 	QVERIFY2(fileInfo.details() == query.value("details").toString(), qPrintable("Wrong details returned by dbController function()"));
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
+	return;
 }
 
 void DbControllerFileTests::checkInTest()
@@ -1087,6 +1146,13 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	DbFileInfo file;
 
 	QSqlQuery query, instanceQuery;
@@ -1138,7 +1204,10 @@ void DbControllerFileTests::getLatestFileVersionTest()
 	ok = m_db->getLatestVersion(file, &singleFileOutput, 0);
 	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_latest_file_version (1, %1)").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM api.get_latest_file_version('%1', %2)")
+					.arg(session_key)
+					.arg(fileId));
+
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -1201,15 +1270,25 @@ void DbControllerFileTests::getLatestFileVersionTest()
 
 	for (std::shared_ptr<DbFile> buff : multiFileOutput)
 	{
+		ok = query.exec(QString("SELECT * FROM api.get_latest_file_version('%1', %2)")
+							.arg(session_key)
+							.arg(buff.get()->fileId()));
 
-		ok = query.exec(QString("SELECT * FROM get_latest_file_version(1, %1)").arg(buff.get()->fileId()));
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 		QVERIFY2(query.value("changesetId").toInt() == buff.get()->changeset(), qPrintable ("Error: wrong changeset Id in get_latest_file function of DbController"));
 	}
 
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
+	return;
 }
 
 void DbControllerFileTests::getLatestTreeVersionTest()
@@ -1226,6 +1305,13 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	DbFileInfo file;
 
 	QSqlQuery query, instanceQuery;
@@ -1310,7 +1396,10 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 
 	QVERIFY2 (result.size() == 2, qPrintable ("Error: function getLatestTreeVersion returned wrong amount of files"));
 
-	ok = query.exec(QString("SELECT * FROM get_latest_file_tree_version(1, %1)").arg(parentFileId));
+	ok = query.exec(QString("SELECT * FROM api.get_latest_file_tree_version('%1', %2)")
+						.arg(session_key)
+						.arg(parentFileId));
+
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	while (query.next())
@@ -1328,6 +1417,13 @@ void DbControllerFileTests::getLatestTreeVersionTest()
 		QVERIFY2 (exist == true, qPrintable("Error: function getLatestTreeVersion returned wrong data!"));
 	}
 
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
 }
 
@@ -1344,8 +1440,14 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
-	DbFileInfo file;
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
+	// --
+	//
+	DbFileInfo file;
 	QSqlQuery query, instanceQuery;
 
 	QString fileName = "FirstFileForGetWorkcopyTestOfDbController\\'\"";
@@ -1382,7 +1484,10 @@ void DbControllerFileTests::getWorkcopyTest()
 	ok = m_db->getWorkcopy(file, &result, 0);
 	QVERIFY2(ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2)")
+						.arg(session_key)
+						.arg(fileId));
+
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -1439,7 +1544,10 @@ void DbControllerFileTests::getWorkcopyTest()
 
 	for (std::shared_ptr<DbFile> buff : multipleResult)
 	{
-		ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(buff.get()->fileId()));
+		ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2)")
+							.arg(session_key)
+							.arg(buff.get()->fileId()));
+
 		QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 		QVERIFY2 (query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -1451,7 +1559,15 @@ void DbControllerFileTests::getWorkcopyTest()
 		QVERIFY2 (buff.get()->parentId() == query.value("parentId").toInt(), qPrintable("Error: wrong file Id"));
 	}
 
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
+	return;
 }
 
 void DbControllerFileTests::setWorkcopyTest()
@@ -1465,6 +1581,13 @@ void DbControllerFileTests::setWorkcopyTest()
 
 	QVERIFY2 (db.open() == true, qPrintable(db.lastError().databaseText()));
 
+	// LogIn
+	//
+	QString session_key = logIn("Administrator", m_adminPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
 	std::shared_ptr<DbFile> file(new DbFile);
 	std::shared_ptr<DbFile> secondFile(new DbFile);
 
@@ -1517,7 +1640,10 @@ void DbControllerFileTests::setWorkcopyTest()
 	ok = m_db->setWorkcopy(file, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
 
-	ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(fileId));
+	ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2)")
+						.arg(session_key)
+						.arg(fileId));
+
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -1578,7 +1704,10 @@ void DbControllerFileTests::setWorkcopyTest()
 
 	for (std::shared_ptr<DbFile> buff : files)
 	{
-		ok = query.exec(QString("SELECT * FROM get_workcopy(1, %1)").arg(buff.get()->fileId()));
+		ok = query.exec(QString("SELECT * FROM api.get_workcopy('%1', %2)")
+							.arg(session_key)
+							.arg(buff.get()->fileId()));
+
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
@@ -1587,7 +1716,15 @@ void DbControllerFileTests::setWorkcopyTest()
 		QVERIFY2 (query.value("details").toString() == buff.get()->details(), qPrintable("Errpr: wrong details"));
 	}
 
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	// --
+	//
 	db.close();
+	return;
 }
 
 void DbControllerFileTests::getSpecificCopyTest()
