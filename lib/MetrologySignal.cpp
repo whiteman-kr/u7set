@@ -281,31 +281,35 @@ namespace Metrology
 		m_lowADC = signal.lowADC();
 		m_highADC = signal.highADC();
 
-		m_inputElectricLowLimit = signal.inputLowLimit();
-		m_inputElectricHighLimit = signal.inputHighLimit();
-		m_inputElectricUnitID = signal.inputUnitID();
-		m_inputElectricSensorType = signal.inputSensorType();
+		m_inputElectricLowLimit = signal.electricLowLimit();
+		m_inputElectricHighLimit = signal.electricHighLimit();
+		m_inputElectricUnitID = signal.electricUnit();
+		m_inputElectricSensorType = signal.sensorType();
 		m_inputElectricPrecision = 3;
 
 		m_inputPhysicalLowLimit = signal.lowEngeneeringUnits();
 		m_inputPhysicalHighLimit = signal.highEngeneeringUnits();
-		m_inputPhysicalUnitID = signal.unitID();
+
+		// WhiteMan m_inputPhysicalUnitID = signal.unitID();
+
 		m_inputPhysicalPrecision = signal.decimalPlaces();
 
 		switch(signal.outputMode())
 		{
-			case E::OutputMode::Plus0_Plus5_V:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::InputUnit::V;	break;
-			case E::OutputMode::Plus4_Plus20_mA:	m_outputElectricLowLimit = 4;	m_outputElectricHighLimit = 20;	m_outputElectricUnitID = E::InputUnit::mA;	break;
-			case E::OutputMode::Minus10_Plus10_V:	m_outputElectricLowLimit = -10;	m_outputElectricHighLimit = 10;	m_outputElectricUnitID = E::InputUnit::V;	break;
-			case E::OutputMode::Plus0_Plus5_mA:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::InputUnit::mA;	break;
+			case E::OutputMode::Plus0_Plus5_V:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::ElectricUnit::V;	break;
+			case E::OutputMode::Plus4_Plus20_mA:	m_outputElectricLowLimit = 4;	m_outputElectricHighLimit = 20;	m_outputElectricUnitID = E::ElectricUnit::mA;	break;
+			case E::OutputMode::Minus10_Plus10_V:	m_outputElectricLowLimit = -10;	m_outputElectricHighLimit = 10;	m_outputElectricUnitID = E::ElectricUnit::V;	break;
+			case E::OutputMode::Plus0_Plus5_mA:		m_outputElectricLowLimit = 0;	m_outputElectricHighLimit = 5;	m_outputElectricUnitID = E::ElectricUnit::mA;	break;
 			default:								assert(0);
 		}
-		m_outputElectricSensorType = signal.outputSensorType();
+
+		/* WhiteMan
+		 * m_outputElectricSensorType = signal.outputSensorType();
 		m_outputElectricPrecision = 3;
 
 		m_outputPhysicalLowLimit = signal.outputLowLimit();
 		m_outputPhysicalHighLimit = signal.outputHighLimit();
-		m_outputPhysicalUnitID = signal.outputUnitID();
+		m_outputPhysicalUnitID = signal.outputUnitID();*/
 		m_outputPhysicalPrecision = signal.decimalPlaces();
 
 		m_enableTuning = signal.enableTuning();
@@ -354,7 +358,7 @@ namespace Metrology
 		result &= xml.readDoubleAttribute("InputElectricLowLimit", &m_inputElectricLowLimit);
 		result &= xml.readDoubleAttribute("InputElectricHighLimit", &m_inputElectricHighLimit);
 		result &= xml.readIntAttribute("InputElectricUnitID", &type);
-		m_inputElectricUnitID = static_cast<E::InputUnit>(type);
+		m_inputElectricUnitID = static_cast<E::ElectricUnit>(type);
 		result &= xml.readIntAttribute("InputElectricSensorType", &type);
 		m_inputElectricSensorType = static_cast<E::SensorType>(type);
 		result &= xml.readIntAttribute("InputElectricPrecision", &m_inputElectricPrecision);
@@ -367,7 +371,7 @@ namespace Metrology
 		result &= xml.readDoubleAttribute("OutputElectricLowLimit", &m_outputElectricLowLimit);
 		result &= xml.readDoubleAttribute("OutputElectricHighLimit", &m_outputElectricHighLimit);
 		result &= xml.readIntAttribute("OutputElectricUnitID", &type);
-		m_outputElectricUnitID = static_cast<E::InputUnit>(type);
+		m_outputElectricUnitID = static_cast<E::ElectricUnit>(type);
 		result &= xml.readIntAttribute("OutputElectricSensorType", &type);
 		m_outputElectricSensorType = static_cast<E::SensorType>(type);
 		result &= xml.readIntAttribute("OutputElectricPrecision", &m_outputElectricPrecision);

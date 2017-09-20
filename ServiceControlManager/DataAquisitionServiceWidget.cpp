@@ -472,7 +472,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 				const AppSignalState& ass = m_clientSocket->signalStates()[row];
 				return ass.m_flags.valid ? tr("Yes") : tr("No");
 			}
-			case SC_UNIT: return m_clientSocket->unit(s.unitID());
+			case SC_UNIT: return s.unit();
 			default:
 				assert(false);
 		}

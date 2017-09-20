@@ -191,7 +191,7 @@ public:
 
 	double inputLowLimit() const;
 	double inputHighLimit() const;
-	E::InputUnit inputUnitId() const;
+	E::ElectricUnit inputUnitId() const;
 	E::SensorType inputSensorType() const;
 
 	double outputLowLimit() const;
@@ -234,7 +234,6 @@ private:
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-	int m_unitId = NO_UNIT_ID;
 	QString m_unit;
 
 	double m_lowValidRange = 0;
@@ -242,10 +241,10 @@ private:
 	double m_lowEngeneeringUnits = 0;
 	double m_highEngeneeringUnits = 100;
 
-	double m_inputLowLimit = 0;										// low electric value for input range
-	double m_inputHighLimit = 0;									// high electric value for input range
-	E::InputUnit m_inputUnitId = E::InputUnit::NoInputUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_inputSensorType = E::SensorType::NoSensorType;	// electric sensor type for input range (was created for m_inputUnitID)
+	double m_electricLowLimit = 0;										// low electric value for input range
+	double m_electricHighLimit = 0;									// high electric value for input range
+	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoInputUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
+	E::SensorType m_sensorType = E::SensorType::NoSensorType;	// electric sensor type for input range (was created for m_inputUnitID)
 
 	double m_outputLowLimit = 0;									// low physical value for output range
 	double m_outputHighLimit = 0;									// high physical value for output range

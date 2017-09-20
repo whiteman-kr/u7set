@@ -39,7 +39,7 @@ private:
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
 	bool					hasConnectedCalibrators();
 	bool					setCalibratorUnit();
-	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit);
+	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 
 	// function of measure
 	//

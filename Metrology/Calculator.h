@@ -8,7 +8,43 @@
 #include <QLineEdit>
 #include <QComboBox>
 
+#include "../lib/Types.h"
+
 // ==============================================================================================
+
+
+struct UnitSensorTypePair
+{
+	int unitID;
+	int sensorType;
+};
+
+const UnitSensorTypePair SensorTypeByUnit[] =
+{
+	// types of thermistors
+	//
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385 },
+
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1428 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1428 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1426 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1426 },
+
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
+
+	// types of thermocouple
+	//
+	{ E::ElectricUnit::mV, 	E::SensorType::mV_K_TXA },
+	{ E::ElectricUnit::mV, 	E::SensorType::mV_L_TXK },
+	{ E::ElectricUnit::mV, 	E::SensorType::mV_N_THH },
+};
+
+const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);
+
 
 class Calculator : public QDialog
 {

@@ -16,111 +16,39 @@ class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
 
-const char* const InOutTypeStr[] =
-{
-	"Input",
-	"Output",
-	"Internal"
-};
-
-const int IN_OUT_TYPE_COUNT = sizeof(InOutTypeStr) / sizeof(InOutTypeStr[0]);
-
-
 const char* const OutputModeStr[] =
 {
-    "0 .. 5 V",
-    "4 .. 20 mA",
-    "-10 .. 10 V",
-    "0 .. 5 mA",
+	"0 .. 5 V",
+	"4 .. 20 mA",
+	"-10 .. 10 V",
+	"0 .. 5 mA",
 };
 
 const int OUTPUT_MODE_COUNT = sizeof(OutputModeStr) / sizeof(OutputModeStr[0]);
 
-
-const int   NO_UNIT_ID = 1;
-
-struct Unit
-{
-    int ID;
-    QString nameEn;
-    QString nameRu;
-};
-
 const char* const SensorTypeStr[] =
 {
-    "Not used",
+	"Not used",
 
-    "Pt50 W=1.391",
-    "Pt100 W=1.391",
-    "Pt50 W=1.385",
-    "Pt100 W=1.385",
+	"Pt50 W=1.391",
+	"Pt100 W=1.391",
+	"Pt50 W=1.385",
+	"Pt100 W=1.385",
 
-    "Cu50 W=1.428",
-    "Cu100 W=1.428",
-    "Cu50 W=1.426",
-    "Cu100 W=1.426",
+	"Cu50 W=1.428",
+	"Cu100 W=1.428",
+	"Cu50 W=1.426",
+	"Cu100 W=1.426",
 
-    "Pt21",
-    "Cu23",
+	"Pt21",
+	"Cu23",
 
-    "K (TXA)",
-    "L (TXK)",
-    "N (THH)",
+	"K (TXA)",
+	"L (TXK)",
+	"N (THH)",
 };
 
-const int   SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
-
-
-struct UnitSensorTypePair
-{
-    int unitID;
-    int sensorType;
-};
-
-const UnitSensorTypePair SensorTypeByUnit[] =
-{
-    // types of thermistors
-    //
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385 },
-
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1428 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1428 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1426 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1426 },
-
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
-    { E::InputUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
-
-    // types of thermocouple
-    //
-    { E::InputUnit::mV, 	E::SensorType::mV_K_TXA },
-    { E::InputUnit::mV, 	E::SensorType::mV_L_TXK },
-    { E::InputUnit::mV, 	E::SensorType::mV_N_THH },
-};
-
-const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);
-
-
-struct DataFormatPair
-{
-	int ID;
-	QString name;
-};
-
-
-typedef OrderedHash<int, QString> UnitList;
-typedef std::shared_ptr<UnitList> UnitListShared;
-
-
-class DataFormatList : public OrderedHash<int, QString>
-{
-public:
-	DataFormatList();
-};
-
+const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
@@ -196,9 +124,6 @@ public:
 
 	// Analog signal properties
 
-	int unitID() const { return m_unitID; }
-	void setUnitID(int unitID) { m_unitID = unitID; }
-
 	int lowADC() const { return m_lowADC; }
 	void setLowADC(int lowADC) { m_lowADC = lowADC; }
 
@@ -223,40 +148,25 @@ public:
 	double spreadTolerance() const { return m_spreadTolerance; }
 	void setSpreadTolerance(double spreadTolerance) { m_spreadTolerance = spreadTolerance; }
 
-	// Analog input signal properties
+	// Analog input/output signal properties
 
-	double inputLowLimit() const { return m_inputLowLimit; }
-	void setInputLowLimit(double inputLowLimit) { m_inputLowLimit = inputLowLimit; }
+	double electricLowLimit() const { return m_electricLowLimit; }
+	void setElectricLowLimit(double electricLowLimit) { m_electricLowLimit = electricLowLimit; }
 
-	double inputHighLimit() const { return m_inputHighLimit; }
-	void setInputHighLimit(double inputHighLimit) { m_inputHighLimit = inputHighLimit; }
+	double electricHighLimit() const { return m_electricHighLimit; }
+	void setElectricHighLimit(double electricHighLimit) { m_electricHighLimit = electricHighLimit; }
 
-	E::InputUnit inputUnitID() const { return m_inputUnitID; }
-	int inputUnitIDInt() const { return TO_INT(m_inputUnitID); }
-	void setInputUnitID(E::InputUnit inputUnitID) { m_inputUnitID = inputUnitID; }
+	E::ElectricUnit electricUnit() const { return m_electricUnit; }
+	int inputUnitInt() const { return TO_INT(m_electricUnit); }
+	void setElectricUnit(E::ElectricUnit electricUnit) { m_electricUnit = electricUnit; }
 
-	E::SensorType inputSensorType() const { return m_inputSensorType; }
-	int inputSensorTypeInt() const { return TO_INT(m_inputSensorType); }
-	void setInputSensorType(E::SensorType inputSensorType) { m_inputSensorType = inputSensorType; }
-
-	// Analog output signal properties
-
-	double outputLowLimit() const { return m_outputLowLimit; }
-	void setOutputLowLimit(double outputLowLimit) { m_outputLowLimit = outputLowLimit; }
-
-	double outputHighLimit() const { return m_outputHighLimit; }
-	void setOutputHighLimit(double outputHighLimit) { m_outputHighLimit = outputHighLimit; }
-
-	int outputUnitID() const { return m_outputUnitID; }
-	void setOutputUnitID(int outputUnitID) { m_outputUnitID = outputUnitID; }
+	E::SensorType sensorType() const { return m_sensorType; }
+	int sensorTypeInt() const { return TO_INT(m_sensorType); }
+	void setSensorType(E::SensorType sensorType) { m_sensorType = sensorType; }
 
 	E::OutputMode outputMode() const { return m_outputMode; }
 	int outputModeInt() const { return TO_INT(m_outputMode); }
 	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
-
-	E::SensorType outputSensorType() const { return m_outputSensorType; }
-	int outputSensorTypeInt() const { return TO_INT(m_outputSensorType); }
-	void setOutputSensorType(E::SensorType outputSensorType) { m_outputSensorType = outputSensorType; }
 
 	// Tuning signal properties
 
@@ -278,12 +188,6 @@ public:
 	void setAcquire(bool acquire) { m_acquire = acquire; }
 
 	bool isAcquired() const { return m_acquire; }
-
-	bool calculated() const { return m_calculated; }
-	void setCalculated(bool calculated) { m_calculated = calculated; }
-
-	int normalState() const { return m_normalState; }
-	void setNormalState	(int normalState) { m_normalState = normalState; }
 
 	int decimalPlaces() const { return m_decimalPlaces; }
 	void setDecimalPlaces(int decimalPlaces) { m_decimalPlaces = decimalPlaces; }
@@ -317,8 +221,6 @@ public:
 
 	QString unit() const { return m_unit; }
 	void setUnit(const QString& unit) { m_unit = unit; }
-
-	static UnitListShared unitList() { return m_unitList; }
 
 	Address16 ioBufAddr() const { return m_ioBufAddr; }
 	void setIoBufAddr(const Address16& addr) { m_ioBufAddr = addr; }
@@ -356,16 +258,14 @@ public:
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const QString&));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::OutputMode));
-    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(E::InputUnit));
-    void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ElectricUnit));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder));
 	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(const Address16&));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::AnalogAppSignalFormat));
-	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int));
-	void serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int));
+	void serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::AnalogAppSignalFormat));
 
-	void serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList& unitInfo);
+	void serializeFields(const QXmlStreamAttributes& attr);
 
 	void writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
@@ -416,18 +316,19 @@ private:
 	//
 	int m_dataSize = 32;											// signal data size in bits
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
-	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
-							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
 
 	// Analog signal properties
 	//
-	int m_unitID = NO_UNIT_ID;                                      // physical units of signal (kg, mm, Pa ...)
+	E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
+							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
+
+	QString m_unit;
 
 	int m_lowADC = 0;
 	int m_highADC = 0xFFFF;
 
-	double m_lowEngeneeringUnits = 0;                               // low physical value for input range
-	double m_highEngeneeringUnits = 100;                            // high physical value for input range
+	double m_lowEngeneeringUnits = 0;								// low physical value for input range
+	double m_highEngeneeringUnits = 100;							// high physical value for input range
 
 	double m_lowValidRange = 0;
 	double m_highValidRange = 100;
@@ -435,20 +336,13 @@ private:
 	double m_filteringTime = 0.005;
 	double m_spreadTolerance = 2;
 
-	// Analog input signal properties
+	// Analog input/output signals properties
 	//
-	double m_inputLowLimit = 0;                                     // low electric value for input range
-	double m_inputHighLimit = 0;                                    // high electric value for input range
-	E::InputUnit m_inputUnitID = E::InputUnit::NoInputUnit;         // electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_inputSensorType = E::SensorType::NoSensorType;  // electric sensor type for input range (was created for m_inputUnitID)
-
-	// Analog output signal properties
-	//
-	double m_outputLowLimit = 0;                                    // low physical value for output range
-	double m_outputHighLimit = 0;                                   // high physical value for output range
-	int m_outputUnitID = NO_UNIT_ID;                                // physical unit for output range (kg, mm, Pa ...)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;      // output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensorType; // electric sensor type for output range (was created for m_outputMode)
+	double m_electricLowLimit = 0;										// low electric value for input range
+	double m_electricHighLimit = 0;										// high electric value for input range
+	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoInputUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+	E::SensorType m_sensorType = E::SensorType::NoSensorType;			// electric sensor type for input range (was created for m_inputUnitID)
+	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;			// output electric range (or mode ref. OutputModeStr[])
 
 	// Tuning signal properties
 	//
@@ -460,8 +354,6 @@ private:
 	// Signal properties for MATS
 	//
 	bool m_acquire = true;
-	bool m_calculated = false;
-	int m_normalState = 0;
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
@@ -483,10 +375,6 @@ private:
 	// Signal properties calculated in compile-time
 	//
 	Hash m_hash = 0;						// == calcHash(m_appSignalID)
-
-	static UnitListShared m_unitList;
-
-	QString m_unit;
 
 	Address16 m_ioBufAddr;					// signal address in i/o modules buffers
 											// only for signals of input/output modules (input and output signals)
@@ -549,4 +437,4 @@ private:
 };
 
 
-void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet);
+void SerializeSignalsFromXml(const QString& filePath, SignalSet& signalSet);

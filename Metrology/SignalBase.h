@@ -152,10 +152,6 @@ private:
 	//
 	RackBase				m_rackBase;
 
-	// all units that received form CgfSrv
-	//
-	UnitList				m_unitList;
-
 	// all signals that received form CgfSrv
 	//
 	mutable QMutex			m_signalMutex;
@@ -259,7 +255,6 @@ public:
 
 	// other bases
 	//
-	UnitList&				units() { return m_unitList; }						// units that received form CgfSrv
 	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
 	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
 

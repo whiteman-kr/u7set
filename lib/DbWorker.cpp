@@ -4203,22 +4203,22 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setHighADC(q.value(18).toInt());
 	s.setLowEngeneeringUnits(q.value(19).toDouble());
 	s.setHighEngeneeringUnits(q.value(20).toDouble());
-	s.setUnitID(q.value(21).toInt());
+	//s.setUnitID(q.value(21).toInt());
 	/*double tempAdjustment = */q.value(22).toDouble();
 	s.setLowValidRange(q.value(23).toDouble());
 	s.setHighValidRange(q.value(24).toDouble());
 //	s.setUnbalanceLimit(q.value(25).toDouble());
-	s.setInputLowLimit(q.value(26).toDouble());
-	s.setInputHighLimit(q.value(27).toDouble());
-    s.setInputUnitID(static_cast<E::InputUnit>(q.value(28).toInt()));
-    s.setInputSensorType(static_cast<E::SensorType>(q.value(29).toInt()));
-	s.setOutputLowLimit(q.value(30).toDouble());
-	s.setOutputHighLimit(q.value(31).toDouble());
-	s.setOutputUnitID(q.value(32).toInt());
-    s.setOutputSensorType(static_cast<E::SensorType>(q.value(33).toInt()));
+	s.setElectricLowLimit(q.value(26).toDouble());
+	s.setElectricHighLimit(q.value(27).toDouble());
+	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(28).toInt()));
+    s.setSensorType(static_cast<E::SensorType>(q.value(29).toInt()));
+//	s.setOutputLowLimit(q.value(30).toDouble());
+//	s.setOutputHighLimit(q.value(31).toDouble());
+//	s.setOutputUnitID(q.value(32).toInt());
+//    s.setOutputSensorType(static_cast<E::SensorType>(q.value(33).toInt()));
 	s.setAcquire(q.value(34).toBool());
-	s.setCalculated(q.value(35).toBool());
-	s.setNormalState(q.value(36).toInt());
+//	s.setCalculated(q.value(35).toBool());
+//	s.setNormalState(q.value(36).toInt());
 	s.setDecimalPlaces(q.value(37).toInt());
 	s.setCoarseAperture(q.value(38).toDouble());
 	s.setFineAperture(q.value(38).toDouble());			// !!!!
@@ -4242,7 +4242,7 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	QString str = QString(
 			"(%1,%2,%3,%4,%5,%6,%7,%8,'%9',%10,"
 			"'%11',%12,'%13','%14','%15',%16,%17,%18,%19,%20,"
-			"%21,%22,%23,%24,%25,%26,%27,%28,%29,%30,"
+			"%21,'%22',%23,%24,%25,%26,%27,%28,%29,%30,"
 			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
 			"'%41',%42,%43,%44,%45,%46,%47,%48,%49,'%50',%51)")
 	.arg(s.ID())
@@ -4266,22 +4266,22 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	.arg(s.highADC())
 	.arg(s.lowEngeneeringUnits())
 	.arg(s.highEngeneeringUnits())
-	.arg(s.unitID())
+	.arg(toSqlStr(s.unit()))
 	.arg(0.0)									// was Adjustment
 	.arg(s.lowValidRange())
 	.arg(s.highValidRange())
 	.arg(/*s.unbalanceLimit()*/0)
-	.arg(s.inputLowLimit())
-	.arg(s.inputHighLimit())
-	.arg(s.inputUnitID())
-	.arg(s.inputSensorType())
-	.arg(s.outputLowLimit())
-	.arg(s.outputHighLimit())
-	.arg(s.outputUnitID())
-	.arg(s.outputSensorType())
+	.arg(s.electricLowLimit())
+	.arg(s.electricHighLimit())
+	.arg(s.electricUnit())
+	.arg(s.sensorType())
+//	.arg(s.outputLowLimit())
+//	.arg(s.outputHighLimit())
+//	.arg(s.outputUnitID())
+//	.arg(s.outputSensorType())
 	.arg(toSqlBoolean(s.acquire()))
-	.arg(toSqlBoolean(s.calculated()))
-	.arg(s.normalState())
+//	.arg(toSqlBoolean(s.calculated()))
+//	.arg(s.normalState())
 	.arg(s.decimalPlaces())
 	.arg(s.coarseAperture())
 	.arg(TO_INT(s.inOutType()))
@@ -4467,153 +4467,6 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState&
 
 	return true;
 }
-
-
-void DbWorker::slot_getUnits(UnitList *units)
-{
-	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (units == nullptr)
-	{
-		assert(units != nullptr);
-		return;
-	}
-
-	units->clear();
-
-	// Operation
-	//
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
-
-	if (db.isOpen() == false)
-	{
-		emitError(db, tr("Cannot get units. Database connection is not opened."));
-		return;
-	}
-
-	// request
-	//
-	QString request = QString("SELECT * FROM get_units()");
-	QSqlQuery q(db);
-
-	bool result = q.exec(request);
-
-	if (result == false)
-	{
-		emitError(db, tr("Can't get units! Error: ") +  q.lastError().text());
-		return;
-	}
-
-	while(q.next() != false)
-	{
-		int unitID = q.value("unitid").toInt();
-		QString unitNameEn = q.value("unit_en").toString();
-
-		units->append(unitID, unitNameEn);
-	}
-}
-
-
-void DbWorker::slot_addUnit(QString unitEn, QString unitRu, int* newUnitID)
-{
-	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (newUnitID == nullptr)
-	{
-		assert(newUnitID != nullptr);
-		return;
-	}
-
-	*newUnitID = 0;
-
-	// Operation
-	//
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
-
-	if (db.isOpen() == false)
-	{
-		emitError(db, tr("Cannot add unit. Database connection is not opened."));
-		return;
-	}
-
-	// Log action
-	//
-	QString logMessage = QString("slot_addUnit: Unit %1").arg(unitEn);
-
-	addLogRecord(db, logMessage);
-
-	// request
-	//
-	QString request = QString("SELECT * FROM add_unit('%1','%2')").
-			arg(toSqlStr(unitEn)).arg(toSqlStr(unitRu));
-	QSqlQuery q(db);
-
-	bool result = q.exec(request);
-
-	if (result == false)
-	{
-		emitError(db, tr("Can't add unit! Error: ") +  q.lastError().text());
-		return;
-	}
-
-	while(q.next() != false)
-	{
-		*newUnitID = q.value(0).toInt();
-	}
-}
-
-
-void DbWorker::slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result)
-{
-	AUTO_COMPLETE
-
-	if (result == nullptr)
-	{
-		return;
-	}
-
-	*result = 0;
-
-	// Operation
-	//
-	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
-
-	if (db.isOpen() == false)
-	{
-		emitError(db, tr("Cannot update unit. Database connection is not opened."));
-		return;
-	}
-
-	// Log action
-	//
-	QString logMessage = QString("slot_updateUnit: UnitID %1, UnitEN %2").arg(unitID).arg(unitEn);
-
-	addLogRecord(db, logMessage);
-
-	// request
-	//
-	QString request = QString("SELECT * FROM update_unit(%1,'%2','%3')").
-			arg(unitID).arg(toSqlStr(unitEn)).arg(toSqlStr(unitRu));
-	QSqlQuery q(db);
-
-	bool res = q.exec(request);
-
-	if (res == false)
-	{
-		emitError(db, tr("Can't update unit! Error: ") +  q.lastError().text());
-		return;
-	}
-
-	while(q.next() != false)
-	{
-		*result = q.value(0).toInt();
-	}
-}
-
 
 void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates)
 {

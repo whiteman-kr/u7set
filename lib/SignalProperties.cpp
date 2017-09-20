@@ -116,13 +116,6 @@ void SignalProperties::initProperties()
 		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
 		outputModePropetry->setCategory(signalProcessingCategory);
 
-		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList(), Signal::unitID, Signal::setUnitID, m_signal);
-		unitProperty->setCategory(dataFormatCategory);
-
-/*		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
-		m_propertiesDependentOnPrecision.push_back(unbalanceLimitProperty);
-		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);*/
-
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
 
@@ -142,11 +135,6 @@ void SignalProperties::initProperties()
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime, m_signal);
 		filteringTimePropetry->setPrecision(6);
 		filteringTimePropetry->setCategory(signalProcessingCategory);
-	}
-	else
-	{
-		auto normalStateProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState, m_signal);
-		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
 	}
 
 	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);

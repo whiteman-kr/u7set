@@ -101,8 +101,6 @@ private:
 
 	int m_autoArchivingGroupsCount = 0;
 
-	UnitList m_unitInfo;
-
 	AppSignals m_appSignals;
 
 	AppDataSources m_appDataSources;				// all data sources

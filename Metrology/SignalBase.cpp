@@ -1069,12 +1069,11 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
-		m_unitList.clear();
-		m_outputSignalBase.empty();			// set all output signals vlue nullptr
-		m_tuningBase.Signals().clear();		// remove all tuning signals
+	m_outputSignalBase.empty();			// set all output signals vlue nullptr
+	m_tuningBase.Signals().clear();		// remove all tuning signals
 
-		m_signalHashMap.clear();
-		m_signalList.clear();
+	m_signalHashMap.clear();
+	m_signalList.clear();
 
 	m_signalMutex.unlock();
 }
@@ -1652,10 +1651,13 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			param.setInputElectricUnit(m_unitList.value(param.inputElectricUnitID()));
+
+			assert(false);
+/*			WhiteMan
+ * param.setInputElectricUnit(m_unitList.value(param.inputElectricUnitID()));
 			param.setInputPhysicalUnit(m_unitList.value(param.inputPhysicalUnitID()));
 			param.setOutputElectricUnit(m_unitList.value(param.outputElectricUnitID()));
-			param.setOutputPhysicalUnit(m_unitList.value(param.outputPhysicalUnitID()));
+			param.setOutputPhysicalUnit(m_unitList.value(param.outputPhysicalUnitID()));*/
 
 			// sensors
 			//

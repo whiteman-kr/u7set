@@ -65,7 +65,6 @@ void TcpAppDataClient::onDisconnection()
 		m_updateStatesTimer->stop();
 	}
 
-	m_unitList.clear();
 	m_signalHahes.clear();
 	m_signalParams.clear();
 	m_states.clear();
@@ -451,15 +450,6 @@ void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataS
 	{
 		assert(false);
 		return;
-	}
-
-	m_unitList.clear();
-
-	int unitCount = m_getUnitsReply.units_size();
-
-	for (int i = 0; i < unitCount; i++)
-	{
-		m_unitList.append(m_getUnitsReply.units(i).id(), QString::fromStdString(m_getUnitsReply.units(i).unit()));
 	}
 
 	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);

@@ -84,22 +84,14 @@ public:
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
 	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngeneeringUnits(); }
 	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngeneeringUnits(); }
-	Q_INVOKABLE int unitID() const { return m_signal.unitID(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
-//	Q_INVOKABLE double unbalanceLimit() const { return m_signal.unbalanceLimit(); }
-	Q_INVOKABLE double inputLowLimit() const { return m_signal.inputLowLimit(); }
-	Q_INVOKABLE double inputHighLimit() const { return m_signal.inputHighLimit(); }
-	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.inputUnitID());}
-	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.inputSensorType());}
-	Q_INVOKABLE double outputLowLimit() const { return m_signal.outputLowLimit(); }
-	Q_INVOKABLE double outputHighLimit() const { return m_signal.outputHighLimit(); }
-	Q_INVOKABLE int outputUnitID() const { return m_signal.outputUnitID(); }
+	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }
+	Q_INVOKABLE double inputHighLimit() const { return m_signal.electricHighLimit(); }
+	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.electricUnit());}
+	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.sensorType());}
 	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(m_signal.outputMode());}
-	Q_INVOKABLE int jsOutputSensorType() const { return static_cast<int>(m_signal.outputSensorType());}
 	Q_INVOKABLE bool acquire() const { return m_signal.acquire(); }
-	Q_INVOKABLE bool calculated() const { return m_signal.calculated(); }
-	Q_INVOKABLE int normalState() const { return m_signal.normalState(); }
 	Q_INVOKABLE int decimalPlaces() const { return m_signal.decimalPlaces(); }
 	Q_INVOKABLE double aperture() const { return m_signal.coarseAperture(); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_signal.inOutType(); }

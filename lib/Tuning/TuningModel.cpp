@@ -50,8 +50,8 @@ bool TuningModelRecordSorter::sortFunction(const TuningModelRecord& o1, const Tu
 		break;
 	case TuningModel::Columns::Units:
 	{
-		v1 = o1.param.unitId();
-		v2 = o2.param.unitId();
+		v1 = o1.param.unit();
+		v2 = o2.param.unit();
 	}
 		break;
 	case TuningModel::Columns::Type:

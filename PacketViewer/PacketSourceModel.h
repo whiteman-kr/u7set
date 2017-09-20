@@ -205,7 +205,6 @@ private:
 
 	std::shared_ptr<Hardware::DeviceRoot> m_deviceRoot;
 	SignalSet m_signalSet;
-	UnitList m_unitInfo;
 
 	QHash<quint32, std::shared_ptr<DataSource>> m_dataSources;
 };

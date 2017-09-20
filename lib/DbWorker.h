@@ -167,9 +167,9 @@ public slots:
 
 	// Units management
 	//
-	void slot_getUnits(UnitList* units);
+/*	void slot_getUnits(UnitList* units);
 	void slot_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
+	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);*/
 
     // Build management
     //

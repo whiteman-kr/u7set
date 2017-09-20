@@ -127,7 +127,6 @@ void AppDataServiceWorker::runTcpAppDataServer()
 															m_enabledAppDataSources,
 															m_appSignals,
 															m_signalStates,
-															m_unitInfo,
 															m_logger);
 	m_tcpAppDataServerThread->start();
 }
@@ -453,8 +452,6 @@ void AppDataServiceWorker::clearConfiguration()
 	stopTcpAppDataServer();
 	stopDataChannelThreads();
 	stopTcpArchiveClientThreads();
-
-	m_unitInfo.clear();
 
 	m_appSignals.clear();
 	m_enabledAppDataSources.clear();

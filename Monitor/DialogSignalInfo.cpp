@@ -177,8 +177,10 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 - %2").arg(m_signal.unitId()).arg(m_signal.unit());
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("UnitID") << str));
+/* WhiteMan		str = QString("%1 - %2").arg(m_signal.unitId()).arg(m_signal.unit());
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("UnitID") << str)); */
+
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
 	}
 
 	ui->treeProperties->addTopLevelItem(itemGroup1);

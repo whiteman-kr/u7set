@@ -883,16 +883,6 @@ namespace Builder
 			return false;
 		}
 
-		result = db->getUnits(Signal::unitList().get(), nullptr);
-
-		if (result == false)
-		{
-			// Load units from the project database error
-			//
-			m_log->errPDB2004();
-			return false;
-		}
-
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals")));
 
 		// Check some signals's properties and init Signal::lm property

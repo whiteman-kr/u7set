@@ -3,25 +3,11 @@
 #include "../lib/Signal.h"
 #include "../lib/DataSource.h"
 
-
-DataFormatList::DataFormatList()
-{
-	auto enumValues = E::enumValues<E::AnalogAppSignalFormat>();
-
-	for (auto v : enumValues)
-	{
-		append(v.first, v.second);
-	}
-}
-
-
 // --------------------------------------------------------------------------------------------------------
 //
 // Signal class implementation
 //
 // --------------------------------------------------------------------------------------------------------
-
-std::shared_ptr<UnitList> Signal::m_unitList = std::make_shared<UnitList>();
 
 Signal::Signal()
 {
@@ -208,23 +194,6 @@ bool Signal::isCompatibleFormat(const SignalAddress16& sa16) const
 void Signal::initCalculatedProperties()
 {
 	m_hash = calcHash(m_appSignalID);
-
-	if (isAnalog() == true)
-	{
-		if (m_unitList != nullptr)
-		{
-			m_unit = m_unitList->value(m_unitID, "???");
-		}
-		else
-		{
-			assert(false);
-			m_unit = "???";
-		}
-	}
-	else
-	{
-		m_unit.clear();
-	}
 }
 
 void Signal::resetAddresses()
@@ -344,61 +313,43 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	assert(false);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(E::InputUnit))
-{
-    const QStringRef& strValue = attr.value(fieldName);
-    if (strValue.isEmpty())
-    {
-        assert(false);
-        return;
-    }
-    for (int i = 0; i < unitInfo.count(); i++)
-    {
-        if (strValue == unitInfo[i])
-        {
-            (this->*setter)(static_cast<E::InputUnit>(i));
-            return;
-        }
-    }
-    assert(false);
-}
-
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType))
-{
-    const QStringRef& strValue = attr.value(fieldName);
-    if (strValue.isEmpty())
-    {
-        assert(false);
-        return;
-    }
-    for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
-    {
-        if (strValue == SensorTypeStr[i])
-        {
-            (this->*setter)(static_cast<E::SensorType>(i));
-            return;
-        }
-    }
-    assert(false);
-}
-
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ElectricUnit))
 {
 	const QStringRef& strValue = attr.value(fieldName);
+
 	if (strValue.isEmpty())
 	{
 		assert(false);
 		return;
 	}
-	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
+
+	(this->*setter)(E::stringToValue<E::ElectricUnit>(QString(strValue.constData())));
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SensorType))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+
+	if (strValue.isEmpty())
 	{
-		if (strValue == InOutTypeStr[i])
-		{
-			(this->*setter)(static_cast<E::SignalInOutType>(i));
-			return;
-		}
+		assert(false);
+		return;
 	}
-	assert(false);
+
+	(this->*setter)(E::stringToValue<E::SensorType>(QString(strValue.constData())));
+}
+
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::SignalInOutType))
+{
+	const QStringRef& strValue = attr.value(fieldName);
+
+	if (strValue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+
+	(this->*setter)(E::stringToValue<E::SignalInOutType>(QString(strValue.constData())));
 }
 
 void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::ByteOrder))
@@ -437,7 +388,7 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 	(this->*setter)(address);
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, DataFormatList& dataFormatInfo, void (Signal::*setter)(E::AnalogAppSignalFormat))
+void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(E::AnalogAppSignalFormat))
 {
 	const QStringRef& strValue = attr.value(fieldName);
 	if (strValue.isEmpty())
@@ -445,51 +396,11 @@ void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName,
 		assert(false);
 		return;
 	}
-	for (int i = 0; i < dataFormatInfo.count(); i++)
-	{
-		if (strValue == dataFormatInfo[i])
-		{
-			(this->*setter)(static_cast<E::AnalogAppSignalFormat>(dataFormatInfo.keyAt(i)));
-			return;
-		}
-	}
-	assert(false);
+
+	(this->*setter)(E::stringToValue<E::AnalogAppSignalFormat>(QString(strValue.constData())));
 }
 
-void Signal::serializeField(const QXmlStreamAttributes& attr, QString fieldName, UnitList& unitInfo, void (Signal::*setter)(int))
-{
-	const QStringRef& strValue = attr.value(fieldName);
-	for (int i = 0; i < unitInfo.count(); i++)
-	{
-		if (strValue == unitInfo[i])
-		{
-			(this->*setter)(unitInfo.keyAt(i));
-			return;
-		}
-	}
-	assert(false);
-}
-
-void Signal::serializeSensorField(const QXmlStreamAttributes& attr, QString fieldName, void (Signal::*setter)(int))
-{
-	const QStringRef& strValue = attr.value(fieldName);
-	if (strValue.isEmpty())
-	{
-		assert(false);
-		return;
-	}
-	for (int i = 0; i < SENSOR_TYPE_COUNT; i++)
-	{
-		if (strValue == SensorTypeStr[i])
-		{
-			(this->*setter)(i);
-			return;
-		}
-	}
-	assert(false);
-}
-
-void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& dataFormatInfo, UnitList &unitInfo)
+void Signal::serializeFields(const QXmlStreamAttributes& attr)
 {
 	serializeField(attr, "ID", &Signal::setID);
 	serializeField(attr, "SignalGroupID", &Signal::setSignalGroupID);
@@ -499,31 +410,24 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr, DataFormatList& d
 	serializeField(attr, "StrID", &Signal::setAppSignalID);
 	serializeField(attr, "ExtStrID", &Signal::setCustomAppSignalID);
 	serializeField(attr, "Name", &Signal::setCaption);
-	serializeField(attr, "DataFormat", dataFormatInfo, &Signal::setAnalogSignalFormat);
+	serializeField(attr, "DataFormat", &Signal::setAnalogSignalFormat);
 	serializeField(attr, "DataSize", &Signal::setDataSize);
 	serializeField(attr, "LowADC", &Signal::setLowADC);
 	serializeField(attr, "HighADC", &Signal::setHighADC);
 	serializeField(attr, "LowEngeneeringUnits", &Signal::setLowEngeneeringUnits);
 	serializeField(attr, "HighEngeneeringUnits", &Signal::setHighEngeneeringUnits);
-	serializeField(attr, "UnitID", unitInfo, &Signal::setUnitID);
-	//serializeField(attr, "Adjustment", &Signal::setAdjustment);
+	serializeField(attr, "Unit", &Signal::setUnit);
 	serializeField(attr, "LowValidRange", &Signal::setLowValidRange);
 	serializeField(attr, "HighValidRange", &Signal::setHighValidRange);
-//	serializeField(attr, "UnbalanceLimit", &Signal::setUnbalanceLimit);
-	serializeField(attr, "InputLowLimit", &Signal::setInputLowLimit);
-	serializeField(attr, "InputHighLimit", &Signal::setInputHighLimit);
-    serializeField(attr, "InputUnitID", unitInfo, &Signal::setInputUnitID);
-    serializeField(attr, "InputSensorID", &Signal::setInputSensorType);
-	serializeField(attr, "OutputLowLimit", &Signal::setOutputLowLimit);
-	serializeField(attr, "OutputHighLimit", &Signal::setOutputHighLimit);
-	serializeField(attr, "OutputUnitID", unitInfo, &Signal::setOutputUnitID);
+	serializeField(attr, "ElectricLowLimit", &Signal::setElectricLowLimit);
+	serializeField(attr, "ElectricHighLimit", &Signal::setElectricHighLimit);
+	serializeField(attr, "ElectricUnit", &Signal::setElectricUnit);
+	serializeField(attr, "SensorType", &Signal::setSensorType);
 	serializeField(attr, "OutputMode", &Signal::setOutputMode);
-    serializeField(attr, "OutputSensorID", &Signal::setOutputSensorType);
 	serializeField(attr, "Acquire", &Signal::setAcquire);
-	serializeField(attr, "Calculated", &Signal::setCalculated);
-	serializeField(attr, "NormalState", &Signal::setNormalState);
 	serializeField(attr, "DecimalPlaces", &Signal::setDecimalPlaces);
-	serializeField(attr, "Aperture", &Signal::setCoarseAperture);
+	serializeField(attr, "CoarseAperture", &Signal::setCoarseAperture);
+	serializeField(attr, "FineAperture", &Signal::setFineAperture);
 	serializeField(attr, "InOutType", &Signal::setInOutType);
 	serializeField(attr, "DeviceStrID", &Signal::setEquipmentID);
 	serializeField(attr, "FilteringTime", &Signal::setFilteringTime);
@@ -552,24 +456,18 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("HighADC", highADC());
 	xml.writeDoubleAttribute("LowEngeneeringUnits", lowEngeneeringUnits());
 	xml.writeDoubleAttribute("HighEngeneeringUnits", highEngeneeringUnits());
-	xml.writeIntAttribute("UnitID", unitID());
+	xml.writeStringAttribute("Unit", unit());
 	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
 	xml.writeDoubleAttribute("HighValidRange", highValidRange());
-//	xml.writeDoubleAttribute("UnbalanceLimit", unbalanceLimit());
-	xml.writeDoubleAttribute("InputLowLimit", inputLowLimit());
-	xml.writeDoubleAttribute("InputHighLimit", inputHighLimit());
-	xml.writeIntAttribute("InputUnitID", inputUnitID());
-	xml.writeIntAttribute("InputSensorID", inputSensorType());
-	xml.writeDoubleAttribute("OutputLowLimit", outputLowLimit());
-	xml.writeDoubleAttribute("OutputHighLimit", outputHighLimit());
-	xml.writeIntAttribute("OutputUnitID", outputUnitID());
+	xml.writeDoubleAttribute("ElectricLowLimit", electricLowLimit());
+	xml.writeDoubleAttribute("ElectricHighLimit", electricHighLimit());
+	xml.writeIntAttribute("ElectricUnit", electricUnit());
+	xml.writeIntAttribute("SensorType", sensorType());
 	xml.writeIntAttribute("OutputMode", outputModeInt());
-	xml.writeIntAttribute("OutputSensorID", outputSensorType());
 	xml.writeBoolAttribute("Acquire", acquire());
-	xml.writeBoolAttribute("Calculated", calculated());
-	xml.writeIntAttribute("NormalState", normalState());
 	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
-	xml.writeDoubleAttribute("Aperture", coarseAperture());
+	xml.writeDoubleAttribute("CoarseAperture", coarseAperture());
+	xml.writeDoubleAttribute("FineAperture", fineAperture());
 	xml.writeIntAttribute("InOutType", inOutTypeInt());
 	xml.writeDoubleAttribute("FilteringTime", filteringTime());
 	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
@@ -633,34 +531,25 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("HighADC", &m_highADC);
 	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
 	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
-	result &= xml.readIntAttribute("UnitID", &m_unitID);
+	result &= xml.readStringAttribute("Unit", &m_unit);
 	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
 	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
-//	result &= xml.readDoubleAttribute("UnbalanceLimit", &m_unbalanceLimit);
-	result &= xml.readDoubleAttribute("InputLowLimit", &m_inputLowLimit);
-	result &= xml.readDoubleAttribute("InputHighLimit", &m_inputHighLimit);
+	result &= xml.readDoubleAttribute("ElectricLowLimit", &m_electricLowLimit);
+	result &= xml.readDoubleAttribute("ElectricHighLimit", &m_electricHighLimit);
 
-	result &= xml.readIntAttribute("InputUnitID", &intValue);
-	m_inputUnitID = static_cast<E::InputUnit>(intValue);
+	result &= xml.readIntAttribute("ElectricUnit", &intValue);
+	m_electricUnit = static_cast<E::ElectricUnit>(intValue);
 
-	result &= xml.readIntAttribute("InputSensorID", &intValue);
-	m_inputSensorType = static_cast<E::SensorType>(intValue);
-
-	result &= xml.readDoubleAttribute("OutputLowLimit", &m_outputLowLimit);
-	result &= xml.readDoubleAttribute("OutputHighLimit", &m_outputHighLimit);
-	result &= xml.readIntAttribute("OutputUnitID", &m_outputUnitID);
+	result &= xml.readIntAttribute("SensorType", &intValue);
+	m_sensorType = static_cast<E::SensorType>(intValue);
 
 	result &= xml.readIntAttribute("OutputMode", &intValue);
 	m_outputMode = static_cast<E::OutputMode>(intValue);
 
-	result &= xml.readIntAttribute("OutputSensorID", &intValue);
-	m_outputSensorType = static_cast<E::SensorType>(intValue);
-
 	result &= xml.readBoolAttribute("Acquire", &m_acquire);
-	result &= xml.readBoolAttribute("Calculated", &m_calculated);
-	result &= xml.readIntAttribute("NormalState", &m_normalState);
 	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
-	result &= xml.readDoubleAttribute("Aperture", &m_coarseAperture);
+	result &= xml.readDoubleAttribute("CoarseAperture", &m_coarseAperture);
+	result &= xml.readDoubleAttribute("FineAperture", &m_fineAperture);
 
 	result &= xml.readIntAttribute("InOutType", &intValue);
 	m_inOutType = static_cast<E::SignalInOutType>(intValue);
@@ -741,7 +630,6 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 	// Analog signal properties
 
-	s->set_unitid(m_unitID);
 	s->set_lowadc(m_lowADC);
 	s->set_highadc(m_highADC);
 	s->set_lowengeneeringunits(m_lowEngeneeringUnits);
@@ -751,20 +639,13 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	s->set_filteringtime(m_filteringTime);
 	s->set_spreadtolerance(m_spreadTolerance);
 
-	// Analog input signal properties
+	// Analog input/output signal properties
 
-	s->set_inputlowlimit(m_inputLowLimit);
-	s->set_inputhighlimit(m_inputHighLimit);
-	s->set_inputunitid(m_inputUnitID);
-	s->set_inputsensortype(m_inputSensorType);
-
-	// Analog output signal properties
-
-	s->set_outputlowlimit(m_outputLowLimit);
-	s->set_outputhighlimit(m_outputHighLimit);
-	s->set_outputunitid(m_outputUnitID);
+	s->set_electriclowlimit(m_electricLowLimit);
+	s->set_electrichighlimit(m_electricHighLimit);
+	s->set_electricunit(m_electricUnit);
+	s->set_sensortype(m_sensorType);
 	s->set_outputmode(m_outputMode);
-	s->set_outputsensortype(m_outputSensorType);
 
 	// Tuning signal properties
 
@@ -776,8 +657,6 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	// Signal properties for MATS
 
 	s->set_acquire(m_acquire);
-	s->set_calculated(m_calculated);
-	s->set_normalstate(m_normalState);
 	s->set_decimalplaces(m_decimalPlaces);
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
@@ -863,7 +742,6 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	// Analog signal properties
 
-	m_unitID = s.unitid();
 	m_lowADC = s.lowadc();
 	m_highADC = s.highadc();
 	m_lowEngeneeringUnits = s.lowengeneeringunits();
@@ -873,20 +751,13 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	m_filteringTime = s.filteringtime();
 	m_spreadTolerance = s.spreadtolerance();
 
-	// Analog input signal properties
+	// Analog input/output signal properties
 
-	m_inputLowLimit = s.inputlowlimit();
-	m_inputHighLimit = s.inputhighlimit();
-	m_inputUnitID = static_cast<E::InputUnit>(s.inputunitid());
-	m_inputSensorType = static_cast<E::SensorType>(s.inputsensortype());
-
-	// Analog output signal properties
-
-	m_outputLowLimit = s.outputlowlimit();
-	m_outputHighLimit = s.outputhighlimit();
-	m_outputUnitID = s.outputunitid();
+	m_electricLowLimit = s.electriclowlimit();
+	m_electricHighLimit = s.electrichighlimit();
+	m_electricUnit = static_cast<E::ElectricUnit>(s.electricunit());
+	m_sensorType = static_cast<E::SensorType>(s.sensortype());
 	m_outputMode = static_cast<E::OutputMode>(s.outputmode());
-	m_outputSensorType = static_cast<E::SensorType>(s.outputsensortype());
 
 	// Tuning signal properties
 
@@ -898,8 +769,6 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	//	Signal properties for MATS
 
 	m_acquire = s.acquire();
-	m_calculated = s.calculated();
-	m_normalState = s.normalstate();
 	m_decimalPlaces = s.decimalplaces();
 	m_coarseAperture = s.coarseaperture();
 	m_fineAperture = s.fineaperture();
@@ -1172,14 +1041,13 @@ void SignalSet::resetAddresses()
 
 //
 
-void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, SignalSet& signalSet)
+void SerializeSignalsFromXml(const QString& filePath, SignalSet& signalSet)
 {
 	QXmlStreamReader applicationSignalsReader;
 	QFile file(filePath);
 
 	if (file.open(QIODevice::ReadOnly))
 	{
-		DataFormatList dataFormatInfo;
 		applicationSignalsReader.setDevice(&file);
 
 		while (!applicationSignalsReader.atEnd())
@@ -1191,14 +1059,11 @@ void SerializeSignalsFromXml(const QString& filePath, UnitList& unitInfo, Signal
 			case QXmlStreamReader::StartElement:
 			{
 				const QXmlStreamAttributes& attr = applicationSignalsReader.attributes();
-				if (applicationSignalsReader.name() == "Unit")
-				{
-					unitInfo.append(attr.value("ID").toInt(), attr.value("Name").toString());
-				}
+
 				if (applicationSignalsReader.name() == "Signal")
 				{
 					Signal* pSignal = new Signal;
-					pSignal->serializeFields(attr, dataFormatInfo, unitInfo);
+					pSignal->serializeFields(attr);
 					signalSet.append(pSignal->ID(), pSignal);
 				}
 				break;

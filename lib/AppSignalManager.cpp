@@ -91,6 +91,11 @@ void AppSignalManager::reset()
 
 void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
 {
+	assert(false);
+
+	/* WhiteMan:
+	 *	Check, may be, this code is not required now
+	 *
 	std::map<int, QString> unitsCopy;
 
 	{
@@ -125,7 +130,7 @@ void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
 				s.setUnit(foundUnitIt->second);
 			}
 		}
-	}
+	}*/
 
 	return;
 }

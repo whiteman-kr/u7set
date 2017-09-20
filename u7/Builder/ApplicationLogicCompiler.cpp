@@ -105,7 +105,6 @@ namespace Builder
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
-			&ApplicationLogicCompiler::writeUnitsFile,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
 		};
 
@@ -1015,44 +1014,6 @@ namespace Builder
 		m_resultWriter->addFile("Reports", "opto-modules.txt", "", "", list);
 
 		return true;
-	}
-
-	bool ApplicationLogicCompiler::writeUnitsFile()
-	{
-		UnitListShared unitList = Signal::unitList();
-
-		if (unitList == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		::Proto::UnitSet protoUnitSet;
-
-		// fill units
-		//
-		for(int i = 0; i < unitList->size(); i++)
-		{
-			int unitID = unitList->keyAt(i);
-			QString unitCaption = unitList->valueAt(i);
-
-			::Proto::Unit* protoUnit = protoUnitSet.add_unit();
-
-			protoUnit->set_id(unitID);
-			protoUnit->set_caption(unitCaption.toStdString());
-		}
-
-		int dataSize = protoUnitSet.ByteSize();
-
-		QByteArray data;
-
-		data.resize(dataSize);
-
-		protoUnitSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
-
-		BuildFile* unitSetFile = m_resultWriter->addFile("Common", QString("Units.proto"), "UNIT_SET", "", data);
-
-		return unitSetFile != nullptr;
 	}
 
 	bool ApplicationLogicCompiler::writeAppSignalSetFile()

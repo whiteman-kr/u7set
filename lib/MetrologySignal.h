@@ -150,6 +150,7 @@ namespace Metrology
 		virtual ~SignalParam() {}
 
 	private:
+		static const int NO_UNIT_ID = -1;		//WhiteMan
 
 		Hash					m_hash = 0;							// hash calcHash from AppSignalID
 
@@ -167,7 +168,7 @@ namespace Metrology
 
 		double					m_inputElectricLowLimit = 0;
 		double					m_inputElectricHighLimit = 0;
-		E::InputUnit			m_inputElectricUnitID = E::InputUnit::NoInputUnit;
+		E::ElectricUnit			m_inputElectricUnitID = E::ElectricUnit::NoInputUnit;
 		QString					m_inputElectricUnit;
 		E::SensorType			m_inputElectricSensorType = E::SensorType::NoSensorType;
 		QString					m_inputElectricSensor;
@@ -181,7 +182,7 @@ namespace Metrology
 
 		double					m_outputElectricLowLimit = 0;
 		double					m_outputElectricHighLimit = 0;
-		E::InputUnit			m_outputElectricUnitID  = E::InputUnit::NoInputUnit;
+		E::ElectricUnit			m_outputElectricUnitID  = E::ElectricUnit::NoInputUnit;
 		QString					m_outputElectricUnit;
 		E::SensorType			m_outputElectricSensorType = E::SensorType::NoSensorType;
 		QString					m_outputElectricSensor;
@@ -247,8 +248,8 @@ namespace Metrology
 		double					inputElectricHighLimit() const { return m_inputElectricHighLimit; }
 		void					setInputElectricHighLimit(double highLimit) { m_inputElectricHighLimit = highLimit; }
 
-		E::InputUnit			inputElectricUnitID() const { return m_inputElectricUnitID; }
-		void					setInputElectricUnitID(E::InputUnit unitID) { m_inputElectricUnitID = unitID; }
+		E::ElectricUnit			inputElectricUnitID() const { return m_inputElectricUnitID; }
+		void					setInputElectricUnitID(E::ElectricUnit unitID) { m_inputElectricUnitID = unitID; }
 
 		QString					inputElectricUnit() const { return m_inputElectricUnit; }
 		void					setInputElectricUnit(const QString& unit) { m_inputElectricUnit = unit; }
@@ -287,8 +288,8 @@ namespace Metrology
 		double					outputElectricHighLimit() const { return m_outputElectricHighLimit; }
 		void					setOutputElectricHighLimit(double highLimit) { m_outputElectricHighLimit = highLimit; }
 
-		E::InputUnit			outputElectricUnitID() const { return m_outputElectricUnitID; }
-		void					setOutputElectricUnitID(const E::InputUnit unitID) { m_outputElectricUnitID = unitID; }
+		E::ElectricUnit			outputElectricUnitID() const { return m_outputElectricUnitID; }
+		void					setOutputElectricUnitID(const E::ElectricUnit unitID) { m_outputElectricUnitID = unitID; }
 
 		QString					outputElectricUnit() const { return m_outputElectricUnit; }
 		void					setOutputElectricUnit(const QString& unit) { m_outputElectricUnit = unit; }
@@ -424,7 +425,7 @@ namespace Metrology
 			//
 			m_param.setInputElectricLowLimit(0);
 			m_param.setInputElectricHighLimit(5);
-			m_param.setInputElectricUnitID(E::InputUnit::V);
+			m_param.setInputElectricUnitID(E::ElectricUnit::V);
 		}
 
 		virtual ~Signal() {}

@@ -174,7 +174,6 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(message.analogsignalformat());
 	m_byteOrder = static_cast<E::ByteOrder>(message.byteorder());
 
-	m_unitId = message.unitid();
 	m_unit = QString::fromStdString(message.unit());
 
 	m_lowValidRange = message.lowvalidrange();
@@ -182,16 +181,11 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	m_lowEngeneeringUnits = message.lowengeneeringunits();
 	m_highEngeneeringUnits = message.highengeneeringunits();
 
-	m_inputLowLimit = message.inputlowlimit();
-	m_inputHighLimit = message.inputhighlimit();
-	m_inputUnitId = static_cast<E::InputUnit>(message.inputunitid());
-	m_inputSensorType = static_cast<E::SensorType>(message.inputsensortype());
-
-	m_outputLowLimit = message.outputlowlimit();
-	m_outputHighLimit = message.outputhighlimit();
-	m_outputUnitId = message.outputunitid();
+	m_electricLowLimit = message.electriclowlimit();
+	m_electricHighLimit = message.electrichighlimit();
+	m_electricUnit = static_cast<E::ElectricUnit>(message.electricunit());
+	m_sensorType = static_cast<E::SensorType>(message.sensortype());
 	m_outputMode = static_cast<E::OutputMode>(message.outputmode());
-	m_outputSensorType = static_cast<E::SensorType>(message.outputsensortype());
 
 	m_precision = message.decimalplaces();
 	m_coarseAperture = message.coarseaperture();
@@ -224,7 +218,6 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 	message->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
 	message->set_byteorder(m_byteOrder);
 
-	message->set_unitid(m_unitId);
 	message->set_unit(m_unit.toStdString());
 
 	message->set_lowvalidrange(m_lowValidRange);
@@ -232,16 +225,11 @@ void AppSignalParam::save(::Proto::AppSignal *message) const
 	message->set_lowengeneeringunits(m_lowEngeneeringUnits);
 	message->set_highengeneeringunits(m_highEngeneeringUnits);
 
-	message->set_inputlowlimit(m_inputLowLimit);
-	message->set_inputhighlimit(m_inputHighLimit);
-	message->set_inputunitid(m_inputUnitId);
-	message->set_inputsensortype(m_inputSensorType);
-
-	message->set_outputlowlimit(m_outputLowLimit);
-	message->set_outputhighlimit(m_outputHighLimit);
-	message->set_outputunitid(m_outputUnitId);
+	message->set_electriclowlimit(m_electricLowLimit);
+	message->set_electrichighlimit(m_electricHighLimit);
+	message->set_electricunit(m_electricUnit);
+	message->set_sensortype(m_sensorType);
 	message->set_outputmode(m_outputMode);
-	message->set_outputsensortype(m_outputSensorType);
 
 	message->set_decimalplaces(m_precision);
 	message->set_coarseaperture(m_coarseAperture);
@@ -378,16 +366,6 @@ void AppSignalParam::AppSignalParam::setByteOrder(E::ByteOrder value)
 	m_byteOrder = value;
 }
 
-int AppSignalParam::unitId() const
-{
-	return m_unitId;
-}
-
-void AppSignalParam::setUnitId(int value)
-{
-	m_unitId = value;
-}
-
 QString AppSignalParam::unit() const
 {
 	return m_unit;
@@ -430,22 +408,22 @@ void AppSignalParam::setHighEngineeringUnits(double value)
 
 double AppSignalParam::inputLowLimit() const
 {
-	return m_inputLowLimit;
+	return m_electricLowLimit;
 }
 
 double AppSignalParam::inputHighLimit() const
 {
-	return m_inputHighLimit;
+	return m_electricHighLimit;
 }
 
-E::InputUnit AppSignalParam::inputUnitId() const
+E::ElectricUnit AppSignalParam::inputUnitId() const
 {
-	return m_inputUnitId;
+	return m_electricUnit;
 }
 
 E::SensorType AppSignalParam::inputSensorType() const
 {
-	return m_inputSensorType;
+	return m_sensorType;
 }
 
 double AppSignalParam::outputLowLimit() const
