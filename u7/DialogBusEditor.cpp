@@ -697,7 +697,7 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	VFrame30::BusSignal bs(type);
 
 	bool ok = false;
-	QString defaultSignalId = QString("SID%1").arg(bus->busSignals().size());
+	QString defaultSignalId = QString("sid_%1").arg(bus->busSignals().size());
 
 	QString signalId = QInputDialog::getText(this, tr("Add Signal"),
 												  tr("Enter SignalID:"), QLineEdit::Normal,
