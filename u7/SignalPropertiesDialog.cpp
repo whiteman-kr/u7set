@@ -225,11 +225,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		if (s.isDiscrete())
-		{
-			signalProperties->propertyByCaption(normalStateCaption)->setVisible(false);
-		}
-
 		m_objList.push_back(signalProperties);
 	}
 

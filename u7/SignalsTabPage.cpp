@@ -32,28 +32,26 @@ SC_DEVICE_STR_ID = 2,
 SC_NAME = 3,
 SC_CHANNEL = 4,
 SC_TYPE = 5,
-SC_NORMAL_STATE = 6,
-SC_ACQUIRE = 7,
-SC_IN_OUT_TYPE = 8,
-SC_DATA_SIZE = 9,
-SC_ANALOG_DATA_FORMAT = 10,
-SC_LOW_ADC = 11,
-SC_HIGH_ADC = 12,
-SC_LOW_LIMIT = 13,
-SC_HIGH_LIMIT = 14,
-SC_UNIT = 15,
-SC_DROP_LIMIT = 16,
-SC_EXCESS_LIMIT = 17,
-SC_UNBALANCE_LIMIT = 18,
-SC_OUTPUT_MODE = 19,
-SC_DECIMAL_PLACES = 20,
-SC_APERTURE = 21,
-SC_FILTERING_TIME = 22,
-SC_SPREAD_TOLERANCE = 23,
-SC_BYTE_ORDER = 24,
-SC_ENABLE_TUNING = 25,
-SC_TUNING_DEFAULT_VALUE = 26,
-SC_LAST_CHANGE_USER = 27;
+SC_ACQUIRE = 6,
+SC_IN_OUT_TYPE = 7,
+SC_DATA_SIZE = 8,
+SC_ANALOG_SIGNAL_FORMAT = 9,
+SC_LOW_ADC = 10,
+SC_HIGH_ADC = 11,
+SC_LOW_LIMIT = 12,
+SC_HIGH_LIMIT = 13,
+SC_UNIT = 14,
+SC_DROP_LIMIT = 15,
+SC_EXCESS_LIMIT = 16,
+SC_OUTPUT_MODE = 17,
+SC_DECIMAL_PLACES = 18,
+SC_APERTURE = 19,
+SC_FILTERING_TIME = 20,
+SC_SPREAD_TOLERANCE = 21,
+SC_BYTE_ORDER = 22,
+SC_ENABLE_TUNING = 23,
+SC_TUNING_DEFAULT_VALUE = 24,
+SC_LAST_CHANGE_USER = 25;
 
 
 const char* Columns[] =
@@ -64,11 +62,10 @@ const char* Columns[] =
 	"Caption",
 	"Channel",
 	"A/D/B",
-	"Normal\nstate",
 	"Acquire",
 	"Input-output\ntype",
 	"Data\nsize",
-	"Analog\nData format",
+	"Analog\nSignal format",
 	"Low ADC",
 	"High ADC",
 	"Low\nEngeneering Units",
@@ -76,7 +73,6 @@ const char* Columns[] =
 	"Unit",
 	"Low\nValid Range",
 	"High\nValid Range",
-	"Unbalance limit",
 	"Output\nmode",
 	"Decimal\nplaces",
 	"Aperture",
@@ -154,6 +150,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 			return le;
 		}
 		case SC_NAME:
+		case SC_UNIT:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			QRegExp rx4Name("^.+$");
@@ -162,7 +159,6 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_LOW_ADC:
 		case SC_HIGH_ADC:
-		case SC_NORMAL_STATE:
 		case SC_DECIMAL_PLACES:
 		{
 			QLineEdit* le = new QLineEdit(parent);
@@ -183,12 +179,10 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		case SC_HIGH_LIMIT:
 		case SC_DROP_LIMIT:
 		case SC_EXCESS_LIMIT:
-		case SC_UNBALANCE_LIMIT:
 		case SC_APERTURE:
 		case SC_FILTERING_TIME:
 		case SC_SPREAD_TOLERANCE:
 		case SC_TUNING_DEFAULT_VALUE:
-		case SC_UNIT:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			le->setValidator(new QDoubleValidator(le));
@@ -201,7 +195,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		// ComboBox
 		//
-		case SC_ANALOG_DATA_FORMAT:
+		case SC_ANALOG_SIGNAL_FORMAT:
 		{
 			QComboBox* cb = new QComboBox(parent);
 			cb->addItems(E::enumKeyStrings<E::AnalogAppSignalFormat>());
@@ -288,8 +282,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_TUNING_DEFAULT_VALUE: if (le) le->setText(QString("%1").arg(s.tuningDefaultValue())); break;
 		// ComboBox
 		//
-		case SC_ANALOG_DATA_FORMAT: assert(false);/* WhiteMan if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt()));*/ break;
-		case SC_UNIT: if (le) le->setText(QString("%1").arg(s.unit())); break;
+		case SC_ANALOG_SIGNAL_FORMAT: assert(false);/* WhiteMan if (cb) cb->setCurrentIndex(m_dataFormatInfo.keyIndex(s.analogSignalFormatInt()));*/ break;
+		case SC_UNIT: if (le) le->setText(s.unit()); break;
 		case SC_OUTPUT_MODE: if (cb) cb->setCurrentIndex(s.outputMode()); break;
 		case SC_ACQUIRE: if (cb) cb->setCurrentIndex(s.acquire()); break;
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
@@ -327,7 +321,7 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				{
 					strId = '#' + strId;
 				}
-				s.setAppSignalID(strId);
+				s.setAppSignalID(strId.trimmed());
 			}
 			break;
 		}
@@ -341,32 +335,30 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 				{
 					strId = strId.mid(1);
 				}
-				s.setCustomAppSignalID(strId);
+				s.setCustomAppSignalID(strId.trimmed());
 			}
 			break;
 		}
-		case SC_NAME: if (le) s.setCaption(le->text()); break;
-		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text()); break;
+		case SC_NAME: if (le) s.setCaption(le->text().trimmed()); break;
+		case SC_DEVICE_STR_ID: if (le) s.setEquipmentID(le->text().trimmed()); break;
 
 		case SC_DATA_SIZE: if (le) s.setDataSize(le->text().toInt()); break;
 		case SC_LOW_ADC: if (le) s.setLowADC(le->text().toInt()); break;
 		case SC_HIGH_ADC: if (le) s.setHighADC(le->text().toInt()); break;
-		//case SC_NORMAL_STATE: if (le) s.setNormalState(le->text().toInt()); break;
 		case SC_DECIMAL_PLACES: if (le) s.setDecimalPlaces(le->text().toInt()); break;
 
 		case SC_LOW_LIMIT: if (le) s.setLowEngeneeringUnits(le->text().toDouble()); break;
 		case SC_HIGH_LIMIT: if (le) s.setHighEngeneeringUnits(le->text().toDouble()); break;
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
-//		case SC_UNBALANCE_LIMIT: if (le) s.setUnbalanceLimit(le->text().toDouble()); break;
 		case SC_APERTURE: if (le) s.setCoarseAperture(le->text().toDouble()); break;
 		case SC_FILTERING_TIME: if (le) s.setFilteringTime(le->text().toDouble()); break;
 		case SC_SPREAD_TOLERANCE: if (le) s.setSpreadTolerance(le->text().toDouble()); break;
 		case SC_TUNING_DEFAULT_VALUE: if (le) s.setTuningDefaultValue(le->text().toDouble()); break;
 		// ComboBox
 		//
-	case SC_ANALOG_DATA_FORMAT: assert(false); /* WhiteMan if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex())));*/ break;
-		case SC_UNIT: if (le) s.setUnit(le->text()); break;
+	case SC_ANALOG_SIGNAL_FORMAT: assert(false); /* WhiteMan if (cb) s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(m_dataFormatInfo.keyAt(cb->currentIndex())));*/ break;
+		case SC_UNIT: if (le) s.setUnit(le->text().trimmed()); break;
 		case SC_OUTPUT_MODE: if (cb) s.setOutputMode(static_cast<E::OutputMode>(cb->currentIndex())); break;
 		case SC_ACQUIRE: if (cb) s.setAcquire(cb->currentIndex() == 0 ? false : true); break;
 		case SC_ENABLE_TUNING: if (cb) s.setEnableTuning(cb->currentIndex() == 0 ? false : true); break;
@@ -437,11 +429,11 @@ int SignalsModel::columnCount(const QModelIndex &) const
 	return COLUMNS_COUNT;
 }
 
-QString SignalsModel::getSensorStr(int sensorID) const
+QString SignalsModel::getSensorStr(int sensorType) const
 {
-	if (sensorID >= 0 && sensorID < SENSOR_TYPE_COUNT)
+	if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 	{
-		return SensorTypeStr[sensorID];
+		return SensorTypeStr[sensorType];
 	}
 	else
 	{
@@ -703,7 +695,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 					case SC_TYPE: return QChar('A');
-					case SC_ANALOG_DATA_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(signal.analogSignalFormat());
+					case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(signal.analogSignalFormat());
 					case SC_DATA_SIZE: return signal.dataSize();
 					case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
 					case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
@@ -713,14 +705,12 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DROP_LIMIT: return signal.lowValidRange();
 					case SC_EXCESS_LIMIT: return signal.highValidRange();
-//					case SC_UNBALANCE_LIMIT: return signal.unbalanceLimit();
 
 					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
 
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 					case SC_ENABLE_TUNING: return signal.enableTuning() ? tr("True") : tr("False");
 
-//					case SC_NORMAL_STATE: return signal.normalState();
 					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 					case SC_APERTURE: return signal.coarseAperture();
 					case SC_FILTERING_TIME: return signal.filteringTime();
@@ -748,7 +738,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 					case SC_TYPE: return (signal.signalType() == E::SignalType::Discrete) ? QChar('D') : QChar('B');
-					case SC_ANALOG_DATA_FORMAT: return "";
+					case SC_ANALOG_SIGNAL_FORMAT: return "";
 
 					case SC_DATA_SIZE: return signal.dataSize();
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
@@ -766,11 +756,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DROP_LIMIT:
 					case SC_EXCESS_LIMIT:
-					case SC_UNBALANCE_LIMIT:
 
 					case SC_OUTPUT_MODE:
 
-					case SC_NORMAL_STATE:
 					case SC_DECIMAL_PLACES:
 					case SC_APERTURE:
 					case SC_FILTERING_TIME:
@@ -847,7 +835,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
-			case SC_ANALOG_DATA_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
+			case SC_ANALOG_SIGNAL_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
 			case SC_LOW_ADC: signal.setLowADC(value.toInt()); break;
 			case SC_HIGH_ADC: signal.setHighADC(value.toInt()); break;
@@ -856,11 +844,9 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 			case SC_UNIT: signal.setUnit(value.toString()); break;
 			case SC_DROP_LIMIT: signal.setLowValidRange(value.toDouble()); break;
 			case SC_EXCESS_LIMIT: signal.setHighValidRange(value.toDouble()); break;
-//			case SC_UNBALANCE_LIMIT: signal.setUnbalanceLimit(value.toDouble()); break;
 			case SC_OUTPUT_MODE: signal.setOutputMode(static_cast<E::OutputMode>(value.toInt())); break;
 			case SC_ACQUIRE: signal.setAcquire(value.toBool()); break;
 			case SC_ENABLE_TUNING: signal.setEnableTuning(value.toBool()); break;
-//			case SC_NORMAL_STATE: signal.setNormalState(value.toInt()); break;
 			case SC_DECIMAL_PLACES: signal.setDecimalPlaces(value.toInt()); break;
 			case SC_APERTURE: signal.setCoarseAperture(value.toDouble()); break;
 			case SC_FILTERING_TIME: signal.setFilteringTime(value.toDouble()); break;
@@ -1214,6 +1200,7 @@ bool SignalsModel::editSignals(QVector<int> ids)
 			if (dlg.isEditedSignal(ids[i]))
 			{
 				ObjectState state;
+				trimSignalTextFields(*signalVector[i]);
 				dbController()->setSignalWorkcopy(signalVector[i], &state, parentWindow());
 				states.append(state);
 			}
@@ -1230,9 +1217,20 @@ bool SignalsModel::editSignals(QVector<int> ids)
 	return false;
 }
 
+void SignalsModel::trimSignalTextFields(Signal& signal)
+{
+	signal.setAppSignalID(signal.appSignalID().trimmed());
+	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+	signal.setEquipmentID(signal.equipmentID().trimmed());
+	signal.setBusTypeID(signal.busTypeID().trimmed());
+	signal.setCaption(signal.caption().trimmed());
+	signal.setUnit(signal.unit().trimmed());
+}
+
 void SignalsModel::saveSignal(Signal& signal)
 {
 	ObjectState state;
+	trimSignalTextFields(signal);
 	dbController()->setSignalWorkcopy(&signal, &state, parentWindow());
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -2149,7 +2147,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	{
 		case ST_DISCRETE:
 		case ST_BUS:
-			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_SIGNAL_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, true);
 			}
@@ -2157,7 +2155,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 
 		case ST_ANALOG:
 		case ST_ANY:
-			for (int i = SC_ANALOG_DATA_FORMAT; i < SC_LAST_CHANGE_USER; i++)
+			for (int i = SC_ANALOG_SIGNAL_FORMAT; i < SC_LAST_CHANGE_USER; i++)
 			{
 				m_signalsView->setColumnHidden(i, false);
 			}

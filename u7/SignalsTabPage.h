@@ -107,6 +107,7 @@ public:
 	bool checkoutSignal(int index, QString& message);
 	bool undoSignal(int id);
 	bool editSignals(QVector<int> ids);
+	void trimSignalTextFields(Signal& signal);
 	void saveSignal(Signal& signal);
 	QList<int> cloneSignals(const QSet<int>& signalIDs);
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
