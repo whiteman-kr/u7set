@@ -168,7 +168,7 @@ namespace Metrology
 
 		double					m_inputElectricLowLimit = 0;
 		double					m_inputElectricHighLimit = 0;
-		E::ElectricUnit			m_inputElectricUnitID = E::ElectricUnit::NoInputUnit;
+		E::ElectricUnit			m_inputElectricUnitID = E::ElectricUnit::NoUnit;
 		QString					m_inputElectricUnit;
 		E::SensorType			m_inputElectricSensorType = E::SensorType::NoSensorType;
 		QString					m_inputElectricSensor;
@@ -182,7 +182,7 @@ namespace Metrology
 
 		double					m_outputElectricLowLimit = 0;
 		double					m_outputElectricHighLimit = 0;
-		E::ElectricUnit			m_outputElectricUnitID  = E::ElectricUnit::NoInputUnit;
+		E::ElectricUnit			m_outputElectricUnitID  = E::ElectricUnit::NoUnit;
 		QString					m_outputElectricUnit;
 		E::SensorType			m_outputElectricSensorType = E::SensorType::NoSensorType;
 		QString					m_outputElectricSensor;

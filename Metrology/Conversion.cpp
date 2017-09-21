@@ -6796,7 +6796,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					break;
 
-				case E::ElectricUnit::NoInputUnit:
+				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 
@@ -6854,7 +6854,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					break;
 
-				case E::ElectricUnit::NoInputUnit:
+				case E::ElectricUnit::NoUnit:
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 

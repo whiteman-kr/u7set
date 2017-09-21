@@ -170,7 +170,7 @@ public:
 	//
 	enum ElectricUnit
 	{
-		NoInputUnit = 0,
+		NoUnit = 0,
 		mA = 1,
 		mV = 2,
 		Ohm = 3,

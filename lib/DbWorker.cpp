@@ -4169,133 +4169,187 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 {
-	s.setID(q.value(0).toInt());
-	s.setSignalGroupID(q.value(1).toInt());
-	s.setSignalInstanceID(q.value(2).toInt());
-	s.setChangesetID(q.value(3).toInt());
-	s.setCheckedOut(q.value(4).toBool());
-	s.setUserID(q.value(5).toInt());
-	s.setChannel(static_cast<E::Channel>(q.value(6).toInt()));
-	s.setSignalType(static_cast<E::SignalType>(q.value(7).toInt()));
-	s.setCreated(q.value(8).toDateTime());
-	s.setDeleted(q.value(9).toBool());
-	s.setInstanceCreated(q.value(10).toDateTime());
-	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(11).toInt()));
-	s.setAppSignalID(q.value(12).toString());
-	s.setCustomAppSignalID(q.value(13).toString());
-	s.setCaption(q.value(14).toString());
+	// indexes of SignalData's fields
+	//
+	const int SD_APP_SIGNAL_ID = 0;
+	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
+	const int SD_CAPTION = 2;
+	const int SD_EQUIPMENT_ID = 3;
+	const int SD_BUS_TYPE_ID = 4;
+	const int SD_CHANNEL = 5;
 
-	int f = q.value(15).toInt();
+	const int SD_SIGNAL_TYPE = 6;
+	const int SD_IN_OUT_TYPE = 7;
+
+	const int SD_DATA_SIZE = 8;
+	const int SD_BYTE_ORDER = 9;
+
+	const int SD_ANALOG_SIGNAL_FORMAT = 10;
+	const int SD_UNIT = 11;
+
+	const int SD_LOW_ADC = 12;
+	const int SD_HIGH_ADC = 13;
+	const int SD_LOW_ENGENEERING_UNITS = 14;
+	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_VALID_RANGE = 16;
+	const int SD_HIGH_VALID_RANGE = 17;
+	const int SD_FILTERING_TIME = 18;
+	const int SD_SPREADTOLERANCE = 19;
+
+	const int SD_ELECTRIC_LOW_LIMIT = 20;
+	const int SD_ELECTRIC_HIGH_LIMIT = 21;
+	const int SD_ELECTRIC_UNIT = 22;
+	const int SD_SENSOR_TYPE = 23;
+	const int SD_OUTPUT_MODE = 24;
+
+	const int SD_ENABLE_TUNING = 25;
+	const int SD_TUNING_DEFAULT_VALUE = 26;
+	const int SD_TUNING_LOW_BOUND = 27;
+	const int SD_TUNING_HIGH_BOUND = 28;
+
+	const int SD_ACQUIRE = 29;
+	const int SD_DECIMAL_PLACES = 30;
+	const int SD_COARSE_APERTURE = 31;
+	const int SD_FINE_APERTURE = 32;
+	const int SD_ADAPTIVE_APERTURE = 33;
+
+	const int SD_SIGNAL_ID = 34;
+	const int SD_SIGNAL_GROUP_ID = 35;
+	const int SD_SIGNAL_INSTANCE_ID = 36;
+	const int SD_CHANGESET_ID = 37;
+	const int SD_CHECKEDOUT = 38;
+	const int SD_USER_ID = 39;
+	const int SD_CREATED = 40;
+	const int SD_DELETED = 41;
+	const int SD_INSTANCE_CREATED = 42;
+	const int SD_INSTANCE_ACTION = 43;
+
+	// read fields
+	//
+	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
+	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
+	s.setCaption(q.value(SD_CAPTION).toString());
+	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
+	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
+	s.setChannel(static_cast<E::Channel>(q.value(SD_CHANNEL).toInt()));
+
+	s.setSignalType(static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt()));
+	s.setInOutType(static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt()));
+
+	s.setDataSize(q.value(SD_DATA_SIZE).toInt());
+	s.setByteOrder(static_cast<E::ByteOrder>(q.value(SD_BYTE_ORDER).toInt()));
+
+	int f = q.value(SD_ANALOG_SIGNAL_FORMAT).toInt();
 
 	if (f == TO_INT(E::DataFormat::UnsignedInt))
 	{
 		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
 		//
-		s.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
+		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
 	}
-	else
-	{
-		s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
-	}
+	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
+	s.setUnit(q.value(SD_UNIT).toString());
 
-	s.setDataSize(q.value(16).toInt());
-	s.setLowADC(q.value(17).toInt());
-	s.setHighADC(q.value(18).toInt());
-	s.setLowEngeneeringUnits(q.value(19).toDouble());
-	s.setHighEngeneeringUnits(q.value(20).toDouble());
-	//s.setUnitID(q.value(21).toInt());
-	/*double tempAdjustment = */q.value(22).toDouble();
-	s.setLowValidRange(q.value(23).toDouble());
-	s.setHighValidRange(q.value(24).toDouble());
-//	s.setUnbalanceLimit(q.value(25).toDouble());
-	s.setElectricLowLimit(q.value(26).toDouble());
-	s.setElectricHighLimit(q.value(27).toDouble());
-	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(28).toInt()));
-    s.setSensorType(static_cast<E::SensorType>(q.value(29).toInt()));
-//	s.setOutputLowLimit(q.value(30).toDouble());
-//	s.setOutputHighLimit(q.value(31).toDouble());
-//	s.setOutputUnitID(q.value(32).toInt());
-//    s.setOutputSensorType(static_cast<E::SensorType>(q.value(33).toInt()));
-	s.setAcquire(q.value(34).toBool());
-//	s.setCalculated(q.value(35).toBool());
-//	s.setNormalState(q.value(36).toInt());
-	s.setDecimalPlaces(q.value(37).toInt());
-	s.setCoarseAperture(q.value(38).toDouble());
-	s.setFineAperture(q.value(38).toDouble());			// !!!!
-	s.setInOutType(static_cast<E::SignalInOutType>(q.value(39).toInt()));
-	s.setEquipmentID(q.value(40).toString());
-    s.setOutputMode(static_cast<E::OutputMode>(q.value(41).toInt()));               // since version 35 of database
-	s.setFilteringTime(q.value(42).toDouble());										//
-    s.setSpreadTolerance(q.value(43).toDouble());									//
-	s.setByteOrder(static_cast<E::ByteOrder>(q.value(44).toInt()));					//
-	s.setEnableTuning(q.value(45).toBool());										// since version 42 of database
-	s.setTuningDefaultValue(q.value(46).toFloat());									// since version 58 of database
-	s.setTuningLowBound(q.value(47).toFloat());										// since version 154 of database
-	s.setTuningHighBound(q.value(48).toFloat());
-	s.setBusTypeID(q.value(49).toString());
-	s.setAdaptiveAperture(q.value(50).toBool());
+	s.setLowADC(q.value(SD_LOW_ADC).toInt());
+	s.setHighADC(q.value(SD_HIGH_ADC).toInt());
+	s.setLowEngeneeringUnits(q.value(SD_LOW_ENGENEERING_UNITS).toDouble());
+	s.setHighEngeneeringUnits(q.value(SD_HIGH_ENGENEERING_UNITS).toDouble());
+	s.setLowValidRange(q.value(SD_LOW_VALID_RANGE).toDouble());
+	s.setHighValidRange(q.value(SD_HIGH_VALID_RANGE).toDouble());
+	s.setFilteringTime(q.value(SD_FILTERING_TIME).toDouble());
+	s.setSpreadTolerance(q.value(SD_SPREADTOLERANCE).toDouble());
+
+	s.setElectricLowLimit(q.value(SD_ELECTRIC_LOW_LIMIT).toDouble());
+	s.setElectricHighLimit(q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble());
+	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt()));
+	s.setSensorType(static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt()));
+	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
+
+	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
+	s.setTuningDefaultValue(q.value(SD_TUNING_DEFAULT_VALUE).toFloat());
+	s.setTuningLowBound(q.value(SD_TUNING_LOW_BOUND).toFloat());
+	s.setTuningHighBound(q.value(SD_TUNING_HIGH_BOUND).toFloat());
+
+	s.setAcquire(q.value(SD_ACQUIRE).toBool());
+	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
+	s.setCoarseAperture(q.value(SD_COARSE_APERTURE).toDouble());
+	s.setFineAperture(q.value(SD_FINE_APERTURE).toDouble());
+	s.setAdaptiveAperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+
+	s.setID(q.value(SD_SIGNAL_ID).toInt());
+	s.setSignalGroupID(q.value(SD_SIGNAL_GROUP_ID).toInt());
+	s.setSignalInstanceID(q.value(SD_SIGNAL_INSTANCE_ID).toInt());
+	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
+	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
+	s.setUserID(q.value(SD_USER_ID).toInt());
+	s.setCreated(q.value(SD_CREATED).toDateTime());
+	s.setDeleted(q.value(SD_DELETED).toBool());
+	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
+	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
 }
 
 
 QString DbWorker::getSignalDataStr(const Signal& s)
 {
 	QString str = QString(
-			"(%1,%2,%3,%4,%5,%6,%7,%8,'%9',%10,"
-			"'%11',%12,'%13','%14','%15',%16,%17,%18,%19,%20,"
-			"%21,'%22',%23,%24,%25,%26,%27,%28,%29,%30,"
-			"%31,%32,%33,%34,%35,%36,%37,%38,%39,%40,"
-			"'%41',%42,%43,%44,%45,%46,%47,%48,%49,'%50',%51)")
-	.arg(s.ID())
-	.arg(s.signalGroupID())
-	.arg(s.signalInstanceID())
-	.arg(s.changesetID())
-	.arg(toSqlBoolean(s.checkedOut()))
-	.arg(s.userID())
-	.arg(TO_INT(s.channel()))
-	.arg(TO_INT(s.signalType()))
-	.arg(s.created().toString(DATE_TIME_FORMAT_STR))
-	.arg(toSqlBoolean(s.deleted()))
-	.arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR))
-	.arg(s.instanceAction().toInt())
-	.arg(toSqlStr(s.appSignalID()))
-	.arg(toSqlStr(s.customAppSignalID()))
-	.arg(toSqlStr(s.caption()))
-	.arg(s.analogSignalFormatInt())
-	.arg(s.dataSize())
-	.arg(s.lowADC())
-	.arg(s.highADC())
-	.arg(s.lowEngeneeringUnits())
-	.arg(s.highEngeneeringUnits())
-	.arg(toSqlStr(s.unit()))
-	.arg(0.0)									// was Adjustment
-	.arg(s.lowValidRange())
-	.arg(s.highValidRange())
-	.arg(/*s.unbalanceLimit()*/0)
-	.arg(s.electricLowLimit())
-	.arg(s.electricHighLimit())
-	.arg(s.electricUnit())
-	.arg(s.sensorType())
-//	.arg(s.outputLowLimit())
-//	.arg(s.outputHighLimit())
-//	.arg(s.outputUnitID())
-//	.arg(s.outputSensorType())
-	.arg(toSqlBoolean(s.acquire()))
-//	.arg(toSqlBoolean(s.calculated()))
-//	.arg(s.normalState())
-	.arg(s.decimalPlaces())
-	.arg(s.coarseAperture())
-	.arg(TO_INT(s.inOutType()))
-	.arg(toSqlStr(s.equipmentID()))
-	.arg(s.outputMode())						// since version 35 of database
-	.arg(s.filteringTime())						//
-	.arg(s.spreadTolerance())					//
-	.arg(TO_INT(s.byteOrder()))					//
-	.arg(toSqlBoolean(s.enableTuning()))		// since version 42 of database
-	.arg(s.tuningDefaultValue())				// since version 58 of database
-	.arg(s.tuningLowBound())					// since version 154 of database
-	.arg(s.tuningHighBound())
-	.arg(s.busTypeID())
-	.arg(toSqlBoolean(s.adaptiveAperture()));
+			"('%1','%2','%3','%4','%5',%6,"
+			"%7,%8,%9,%10,%11,'%12',"
+			"%13,%14,%15,%16,%17,%18,%19,%20,"
+			"%21,%22,%23,%24,%25,"
+			"%26,%27,%28,%29,"
+			"%30,%31,%32,%33,%34,"
+			"%35,%36,%37,%38,%39,%40,'%41',%42,'%43',%44)").
+
+	arg(toSqlStr(s.appSignalID())).
+	arg(toSqlStr(s.customAppSignalID())).
+	arg(toSqlStr(s.caption())).
+	arg(toSqlStr(s.equipmentID())).
+	arg(s.busTypeID()).
+	arg(TO_INT(s.channel())).
+
+	arg(TO_INT(s.signalType())).
+	arg(TO_INT(s.inOutType())).
+	arg(s.dataSize()).
+	arg(TO_INT(s.byteOrder())).
+	arg(TO_INT(s.analogSignalFormat())).
+	arg(toSqlStr(s.unit())).
+
+	arg(s.lowADC()).
+	arg(s.highADC()).
+	arg(s.lowEngeneeringUnits()).
+	arg(s.highEngeneeringUnits()).
+	arg(s.lowValidRange()).
+	arg(s.highValidRange()).
+	arg(s.filteringTime()).
+	arg(s.spreadTolerance()).
+
+	arg(s.electricLowLimit()).
+	arg(s.electricHighLimit()).
+	arg(TO_INT(s.electricUnit())).
+	arg(TO_INT(s.sensorType())).
+	arg(TO_INT(s.outputMode())).
+
+	arg(toSqlBoolean(s.enableTuning())).
+	arg(s.tuningDefaultValue()).
+	arg(s.tuningLowBound()).
+	arg(s.tuningHighBound()).
+
+	arg(toSqlBoolean(s.acquire())).
+	arg(s.decimalPlaces()).
+	arg(s.coarseAperture()).
+	arg(s.fineAperture()).
+	arg(toSqlBoolean(s.adaptiveAperture())).
+
+	arg(s.ID()).
+	arg(s.signalGroupID()).
+	arg(s.signalInstanceID()).
+	arg(s.changesetID()).
+	arg(toSqlBoolean(s.checkedOut())).
+	arg(s.userID()).
+	arg(s.created().toString(DATE_TIME_FORMAT_STR)).
+	arg(toSqlBoolean(s.deleted())).
+	arg(s.instanceCreated().toString(DATE_TIME_FORMAT_STR)).
+	arg(s.instanceAction().toInt());
 
 	return str;
 }

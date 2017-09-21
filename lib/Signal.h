@@ -340,7 +340,7 @@ private:
 	//
 	double m_electricLowLimit = 0;										// low electric value for input range
 	double m_electricHighLimit = 0;										// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoInputUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
 	E::SensorType m_sensorType = E::SensorType::NoSensorType;			// electric sensor type for input range (was created for m_inputUnitID)
 	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;			// output electric range (or mode ref. OutputModeStr[])
 
