@@ -33,6 +33,10 @@ static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
 static const QString unitCaption("Unit");
 static const QString lowValidRangeCaption("LowValidRange");
 static const QString highValidRangeCaption("HighValidRange");
+static const QString electricLowLimitCaption("electricLowLimit");
+static const QString electricHighLimitCaption("electricHighLimit");
+static const QString electricUnitCaption("electricUnit");
+static const QString sensorTypeCaption("sensorType");
 static const QString outputModeCaption("OutputMode");
 static const QString acquireCaption("Acquire");
 static const QString decimalPlacesCaption("DecimalPlaces");
@@ -53,6 +57,8 @@ static const QString dataFormatCategory("3 Data Format");
 static const QString signalProcessingCategory("4 Signal processing");
 static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
 static const QString tuningCategory("6 Tuning");
+
+static const QString lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
 class SignalProperties : public PropertyObject

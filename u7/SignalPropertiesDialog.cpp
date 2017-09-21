@@ -492,23 +492,29 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 	Signal& signal = *m_signalVector[0];
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowADC", signal.lowADC());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highADC", signal.highADC());
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits", signal.lowEngeneeringUnits());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highEngeneeringUnits", signal.highEngeneeringUnits());
-	settings.setValue("SignalsTabPage/LastEditedSignal/unit", signal.unit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/lowValidRange", signal.lowValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/highValidRange", signal.highValidRange());
-	settings.setValue("SignalsTabPage/LastEditedSignal/electricLowLimit", signal.electricLowLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/electricHighLimit", signal.electricHighLimit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/electricUnit", signal.electricUnit());
-	settings.setValue("SignalsTabPage/LastEditedSignal/sensorType", signal.sensorType());
-	settings.setValue("SignalsTabPage/LastEditedSignal/outputMode", signal.outputMode());
-	settings.setValue("SignalsTabPage/LastEditedSignal/acquire", signal.acquire());
-	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
-	settings.setValue("SignalsTabPage/LastEditedSignal/coarseAperture", signal.coarseAperture());
-	settings.setValue("SignalsTabPage/LastEditedSignal/fineAperture", signal.fineAperture());
-	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
-	settings.setValue("SignalsTabPage/LastEditedSignal/spreadTolerance", signal.spreadTolerance());
-	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());
+
+	auto saver = [&settings](const QString& name, auto value)
+	{
+		settings.setValue(lastEditedSignalFieldValuePlace + name, value);
+	};
+
+	saver(lowADCCaption, signal.lowADC());
+	saver(highADCCaption, signal.highADC());
+	saver(lowEngeneeringUnitsCaption, signal.lowEngeneeringUnits());
+	saver(highEngeneeringUnitsCaption, signal.highEngeneeringUnits());
+	saver(unitCaption, signal.unit());
+	saver(lowValidRangeCaption, signal.lowValidRange());
+	saver(highValidRangeCaption, signal.highValidRange());
+	saver(electricLowLimitCaption, signal.electricLowLimit());
+	saver(electricHighLimitCaption, signal.electricHighLimit());
+	saver(electricUnitCaption, signal.electricUnit());
+	saver(sensorTypeCaption, signal.sensorType());
+	saver(outputModeCaption, signal.outputMode());
+	saver(acquireCaption, signal.acquire());
+	saver(decimalPlacesCaption, signal.decimalPlaces());
+	saver(coarseApertureCaption, signal.coarseAperture());
+	saver(fineApertureCaption, signal.fineAperture());
+	saver(filteringTimeCaption, signal.filteringTime());
+	saver(spreadToleranceCaption, signal.spreadTolerance());
+	saver(byteOrderCaption, signal.byteOrder());
 }

@@ -1069,28 +1069,33 @@ void SignalsModel::addSignal()
 			break;
 	}
 
-	signal.setLowADC(settings.value("SignalsTabPage/LastEditedSignal/lowADC").toInt());
-	signal.setHighADC(settings.value("SignalsTabPage/LastEditedSignal/highADC").toInt());
-	signal.setLowEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/lowEngeneeringUnits").toDouble());
-	signal.setHighEngeneeringUnits(settings.value("SignalsTabPage/LastEditedSignal/highEngeneeringUnits").toDouble());
-	signal.setUnit(settings.value("SignalsTabPage/LastEditedSignal/unit").toString());
-	signal.setLowValidRange(settings.value("SignalsTabPage/LastEditedSignal/lowValidRange").toDouble());
-	signal.setHighValidRange(settings.value("SignalsTabPage/LastEditedSignal/highValidRange").toDouble());
+	auto loader = [&settings](const QString& name)
+	{
+		return settings.value(lastEditedSignalFieldValuePlace + name);
+	};
 
-	signal.setElectricLowLimit(settings.value("SignalsTabPage/LastEditedSignal/electricLowLimit").toDouble());
-	signal.setElectricHighLimit(settings.value("SignalsTabPage/LastEditedSignal/electricHighLimit").toDouble());
-	signal.setElectricUnit(static_cast<E::ElectricUnit>(settings.value("SignalsTabPage/LastEditedSignal/electricUnit").toInt()));
-	signal.setSensorType(static_cast<E::SensorType>(settings.value("SignalsTabPage/LastEditedSignal/sensorType").toInt()));
-	signal.setOutputMode(static_cast<E::OutputMode>(settings.value("SignalsTabPage/LastEditedSignal/outputMode").toInt()));
+	signal.setLowADC(loader(lowADCCaption).toInt());
+	signal.setHighADC(loader(highADCCaption).toInt());
+	signal.setLowEngeneeringUnits(loader(lowEngeneeringUnitsCaption).toDouble());
+	signal.setHighEngeneeringUnits(loader(highEngeneeringUnitsCaption).toDouble());
+	signal.setUnit(loader(unitCaption).toString());
+	signal.setLowValidRange(loader(lowValidRangeCaption).toDouble());
+	signal.setHighValidRange(loader(highValidRangeCaption).toDouble());
 
-	signal.setAcquire(settings.value("SignalsTabPage/LastEditedSignal/acquire").toBool());
-	signal.setDecimalPlaces(settings.value("SignalsTabPage/LastEditedSignal/decimalPlaces").toInt());
-	signal.setCoarseAperture(settings.value("SignalsTabPage/LastEditedSignal/coarseAperture").toDouble());
-	signal.setFineAperture(settings.value("SignalsTabPage/LastEditedSignal/fineAperture").toDouble());
-	signal.setFilteringTime(settings.value("SignalsTabPage/LastEditedSignal/filteringTime").toDouble());
-	signal.setSpreadTolerance(settings.value("SignalsTabPage/LastEditedSignal/spreadTolerance").toDouble());
+	signal.setElectricLowLimit(loader(electricLowLimitCaption).toDouble());
+	signal.setElectricHighLimit(loader(electricHighLimitCaption).toDouble());
+	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(electricUnitCaption).toInt()));
+	signal.setSensorType(static_cast<E::SensorType>(loader(sensorTypeCaption).toInt()));
+	signal.setOutputMode(static_cast<E::OutputMode>(loader(outputModeCaption).toInt()));
+
+	signal.setAcquire(loader(acquireCaption).toBool());
+	signal.setDecimalPlaces(loader(decimalPlacesCaption).toInt());
+	signal.setCoarseAperture(loader(coarseApertureCaption).toDouble());
+	signal.setFineAperture(loader(fineApertureCaption).toDouble());
+	signal.setFilteringTime(loader(filteringTimeCaption).toDouble());
+	signal.setSpreadTolerance(loader(spreadToleranceCaption).toDouble());
 	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder(settings.value("SignalsTabPage/LastEditedSignal/byteOrder").toInt()));
+	signal.setByteOrder(E::ByteOrder(loader(byteOrderCaption).toInt()));
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
