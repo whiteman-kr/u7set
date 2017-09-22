@@ -43,6 +43,7 @@ namespace VFrame30
 		static const QString label;
 		static const QString caption;
 		static const QString maxLength;
+		static const QString multiLine;
 
 		// SchemaItemValue Colors
 		//

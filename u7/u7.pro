@@ -327,9 +327,7 @@ HEADERS  += \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
-    Forms/DialogUpdateFromPreset.h \
-    Forms/ChooseAfbDialog.h \
-    Forms/ChooseAfbDialog.h
+    Forms/DialogUpdateFromPreset.h
 
 FORMS    += \
     CreateProjectDialog.ui \

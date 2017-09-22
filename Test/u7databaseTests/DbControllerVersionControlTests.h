@@ -1,5 +1,6 @@
 #pragma once
 #include <QTest>
+#include <memory>
 #include "../../lib/DbController.h"
 
 class DbControllerVersionControlTests : public QObject
@@ -16,9 +17,9 @@ private slots:
 	void cleanupTestCase();
 
 private:
-	DbController *m_dbController;
-	QString m_databaseHost;
-	QString m_databaseName;
-	QString m_databaseUser;
-	QString m_adminPassword;
+	std::unique_ptr<DbController> m_db;
+	QString m_databaseHost = "127.0.0.1";
+	QString m_databaseName = "dbcontrollerversiontesting";
+	QString m_databaseUser = "u7";
+	QString m_adminPassword = "P2ssw0rd";
 };

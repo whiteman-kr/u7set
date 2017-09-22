@@ -36,6 +36,7 @@ namespace VFrame30
 	const QString PropertyNames::label("Label");
 	const QString PropertyNames::caption("Caption");
 	const QString PropertyNames::maxLength("MaxLength");
+	const QString PropertyNames::multiLine("MultiLine");
 
 	// SchemaItemValue Colors
 	//

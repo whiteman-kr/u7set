@@ -4414,12 +4414,21 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >*
       mutable_columns();
 
+  // optional bool multiLine = 5 [default = true];
+  inline bool has_multiline() const;
+  inline void clear_multiline();
+  static const int kMultiLineFieldNumber = 5;
+  inline bool multiline() const;
+  inline void set_multiline(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignal)
  private:
   inline void set_has_precision();
   inline void clear_has_precision();
   inline void set_has_analogformat();
   inline void clear_has_analogformat();
+  inline void set_has_multiline();
+  inline void clear_has_multiline();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4427,9 +4436,10 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 analogformat_;
   ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn > columns_;
+  bool multiline_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -16454,6 +16464,28 @@ SchemaItemSignal::columns() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn >*
 SchemaItemSignal::mutable_columns() {
   return &columns_;
+}
+
+// optional bool multiLine = 5 [default = true];
+inline bool SchemaItemSignal::has_multiline() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemSignal::set_has_multiline() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemSignal::clear_has_multiline() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemSignal::clear_multiline() {
+  multiline_ = true;
+  clear_has_multiline();
+}
+inline bool SchemaItemSignal::multiline() const {
+  return multiline_;
+}
+inline void SchemaItemSignal::set_multiline(bool value) {
+  set_has_multiline();
+  multiline_ = value;
 }
 
 // -------------------------------------------------------------------

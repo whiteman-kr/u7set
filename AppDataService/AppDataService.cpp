@@ -404,93 +404,9 @@ bool AppDataServiceWorker::readAppSignals(QByteArray& fileData)
 		m_appSignals.insert(s->appSignalID(), s);
 	}
 
+	m_appSignals.buildHash2Signal();
+
 	return true;
-
-
-/*	XmlReadHelper xml(fileData);
-
-	if (xml.findElement("Units") == false)
-	{
-		return false;
-	}
-
-	int unitCount = 0;
-
-	result &= xml.readIntAttribute("Count", &unitCount);
-
-	for(int count = 0; count < unitCount; count++)
-	{
-		if(xml.findElement("Unit") == false)
-		{
-			result = false;
-			break;
-		}
-
-		int unitID = 0;
-		QString unitCaption;
-
-		result &= xml.readIntAttribute("ID", &unitID);
-		result &= xml.readStringAttribute("Caption", &unitCaption);
-
-		m_unitInfo.append(unitID, unitCaption);
-	}
-
-	if (m_unitInfo.count() != unitCount)
-	{
-		qDebug() << "Units loading error";
-		assert(false);
-		return false;
-	}
-
-	if (xml.findElement("Signals") == false)
-	{
-		return false;
-	}
-
-	int signalCount = 0;
-
-	result &= xml.readIntAttribute("Count", &signalCount);
-
-	//quint64 time1 = QDateTime::currentMSecsSinceEpoch();
-
-	for(int count = 0; count < signalCount; count++)
-	{
-		if (xml.findElement("Signal") == false)
-		{
-			result = false;
-			break;
-		}
-
-		Signal* signal = new Signal();
-
-		bool res = signal->readFromXml(xml);	// time-expensive function !!!
-
-		if (res == true)
-		{
-			if (m_appSignals.contains(signal->appSignalID()) == false)
-			{
-				m_appSignals.insert(signal->appSignalID(), signal);
-			}
-			else
-			{
-				res = false;
-			}
-		}
-
-		if (res == false)
-		{
-			delete signal;
-		}
-
-		result &= res;
-	}
-
-	//quint64 time2 = QDateTime::currentMSecsSinceEpoch();
-	//qDebug() << "time " << (time2 - time1) << " per 1 " << (time2 - time1)/289;
-
-	m_appSignals.buildHash2Signal();*/
-
-	return result;
 }
 
 

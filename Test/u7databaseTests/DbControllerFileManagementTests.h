@@ -1,5 +1,6 @@
 #pragma once
 #include <QTest>
+#include <memory>
 #include "../../lib/DbController.h"
 
 class DbControllerFileTests : public QObject
@@ -8,6 +9,10 @@ class DbControllerFileTests : public QObject
 
 public:
 	DbControllerFileTests();
+
+protected:
+	QString logIn(QString username, QString password);		// returns session_key
+	bool logOut();
 
 private slots:
 	void initTestCase();
@@ -32,9 +37,9 @@ private slots:
 	void cleanupTestCase();
 
 private:
-	DbController *m_dbController;
-	QString m_databaseHost;
-	QString m_databaseName;
-	QString m_databaseUser;
-	QString m_adminPassword;
+	std::unique_ptr<DbController> m_db;
+	QString m_databaseHost = "127.0.0.1";
+	QString m_databaseName = "dbcontrollerfiletesting";
+	QString m_databaseUser = "u7";
+	QString m_adminPassword = "P2ssw0rd";
 };

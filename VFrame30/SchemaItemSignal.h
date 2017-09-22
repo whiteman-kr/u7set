@@ -66,6 +66,9 @@ namespace VFrame30
 		void setAppSignalIds(const QString& s);
 		QStringList* mutable_appSignalIds();
 
+		bool multiLine() const;
+		void setMultiLine(bool value);
+
 		bool multiChannel() const;
 
 		int precision() const;
@@ -90,6 +93,8 @@ namespace VFrame30
 		//
 	protected:
 		QStringList m_appSignalIds;
+
+		bool m_multiLine = true;		// Show multichannel signlas in multi/single line
 
 		int m_precision = 2;
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;

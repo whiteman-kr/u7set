@@ -571,6 +571,7 @@ message SchemaItemSignal
 	optional int32 precision = 2 [default = 2];
 	optional int32 analogFormat = 3 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 	repeated SchemaItemSignalColumn columns = 4;
+	optional bool multiLine = 5 [default = true];
 }
 
 //

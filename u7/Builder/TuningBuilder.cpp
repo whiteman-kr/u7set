@@ -46,7 +46,7 @@ namespace Builder
 		{
 			assert(db());
 			assert(log());
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, input parammeter is nullptr!").arg(__FUNCTION__));
 			return false;
 		}
 
@@ -58,14 +58,14 @@ namespace Builder
 			if (m->propertyExists("SubsystemID") == false)
 			{
 				assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property SubsystemID found in LM %1")).arg(m->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("No property SubsystemID found in LM %1")).arg(m->caption()));
 				return false;
 			}
 
 			if (m->propertyExists("LMNumber") == false)
 			{
 				assert(false);
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No property LMNumber found in LM %1")).arg(m->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("No property LMNumber found in LM %1")).arg(m->caption()));
 				return false;
 			}
 
@@ -73,7 +73,7 @@ namespace Builder
             if (lmDescription == nullptr)
             {
                 assert(lmDescription);
-                LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("No LMDescription for in LM %1")).arg(m->caption()));
+                LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("No LMDescription for in LM %1")).arg(m->caption()));
                 return false;
             }
 
@@ -89,7 +89,7 @@ namespace Builder
 
 			if (subsysID == -1)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(m->caption()));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("Undefined subsystem strID %1 assigned in LM %2")).arg(subsysStrID).arg(m->caption()));
 				return false;
 			}
 
@@ -161,12 +161,12 @@ namespace Builder
 
 			if (path.isEmpty())
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, subsystemId is empty."));
 				return false;
 			}
 			if (fileName.isEmpty())
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save module configuration output file, module type string is empty."));
 				return false;
 			}
 

@@ -28,6 +28,7 @@ namespace Builder
 													   AppLogicData* appLogicData,
 													   Tuning::TuningDataStorage* tuningDataStorage,
 													   ComparatorStorage* comparatorStorage,
+													   VFrame30::BusSet* busSet,
 													   BuildResultWriter* buildResultWriter,
 													   IssueLogger *log) :
 		m_subsystems(subsystems),
@@ -39,7 +40,8 @@ namespace Builder
 		m_tuningDataStorage(tuningDataStorage),
 		m_cmpStorage(comparatorStorage),
 		m_resultWriter(buildResultWriter),
-		m_connections(connections)
+		m_connections(connections),
+		m_busSet(busSet)
 	{
 		if (m_log == nullptr)
 		{
@@ -79,7 +81,8 @@ namespace Builder
 			m_tuningDataStorage == nullptr ||
 			m_cmpStorage == nullptr ||
 			m_resultWriter == nullptr ||
-			m_connections == nullptr)
+			m_connections == nullptr ||
+			m_busSet == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__));
 			return false;

@@ -173,44 +173,68 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			}
 		}
 
-		signalProperties->propertyByCaption("Type")->setReadOnly(true);
-		signalProperties->propertyByCaption("InOutType")->setReadOnly(true);
-		signalProperties->propertyByCaption("DataSize")->setReadOnly(true);
+		signalProperties->propertyByCaption(typeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(inOutTypeCaption)->setReadOnly(true);
+		signalProperties->propertyByCaption(dataSizeCaption)->setReadOnly(true);
 
-		if (!signalProperties->signal().isInternal())
+		auto& s = signalProperties->signal();
+		if (s.signalType() == E::SignalType::Bus)
 		{
-			signalProperties->propertyByCaption("EnableTuning")->setVisible(false);
-			signalProperties->propertyByCaption("TuningDefaultValue")->setVisible(false);
+			signalProperties->propertyByCaption(dataSizeCaption)->setVisible(false);
+			signalProperties->propertyByCaption(byteOrderCaption)->setVisible(false);
+
+			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
+		}
+		else
+		{
+			signalProperties->propertyByCaption(busTypeIDCaption)->setVisible(false);
 		}
 
-		if (signalProperties->signal().isAnalog())
+		if (s.isInternal() == false)
 		{
-			if (!signalProperties->signal().isInput())
+			signalProperties->propertyByCaption(enableTuningCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningDefaultValueCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningLowBoundCaption)->setVisible(false);
+			signalProperties->propertyByCaption(tuningHighBoundCaption)->setVisible(false);
+		}
+
+		if (s.isAnalog())
+		{
+			if (s.isInput() == false)
 			{
-				signalProperties->propertyByCaption("LowValidRange")->setVisible(false);
-				signalProperties->propertyByCaption("HighValidRange")->setVisible(false);
-				signalProperties->propertyByCaption("FilteringTime")->setVisible(false);
-				signalProperties->propertyByCaption("SpreadTolerance")->setVisible(false);
+				signalProperties->propertyByCaption(lowValidRangeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highValidRangeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(filteringTimeCaption)->setVisible(false);
+				signalProperties->propertyByCaption(spreadToleranceCaption)->setVisible(false);
 			}
 
-			if (signalProperties->signal().isInternal())
+			if (s.isInternal())
 			{
-				signalProperties->propertyByCaption("LowADC")->setVisible(false);
-				signalProperties->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
 			}
 
-			if (signalProperties->signal().isOutput())
+			if (s.isOutput())
 			{
-				signalProperties->propertyByCaption("LowADC")->setVisible(false);
-				signalProperties->propertyByCaption("HighADC")->setVisible(false);
+				signalProperties->propertyByCaption(lowADCCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highADCCaption)->setVisible(false);
 			}
 			else
 			{
-				signalProperties->propertyByCaption("LowDAC")->setVisible(false);
-				signalProperties->propertyByCaption("HighDAC")->setVisible(false);
-				signalProperties->propertyByCaption("OutputMode")->setVisible(false);
+				signalProperties->propertyByCaption(lowDACCaption)->setVisible(false);
+				signalProperties->propertyByCaption(highDACCaption)->setVisible(false);
+				signalProperties->propertyByCaption(outputModeCaption)->setVisible(false);
 			}
 		}
+
+		if (s.isDiscrete())
+		{
+			signalProperties->propertyByCaption(normalStateCaption)->setVisible(false);
+		}
+
 		m_objList.push_back(signalProperties);
 	}
 
@@ -499,8 +523,8 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	settings.setValue("SignalsTabPage/LastEditedSignal/calculated", signal.calculated());
 	settings.setValue("SignalsTabPage/LastEditedSignal/normalState", signal.normalState());
 	settings.setValue("SignalsTabPage/LastEditedSignal/decimalPlaces", signal.decimalPlaces());
-	settings.setValue("SignalsTabPage/LastEditedSignal/roughAperture", signal.coarseAperture());
-	settings.setValue("SignalsTabPage/LastEditedSignal/smoothAperture", signal.fineAperture());
+	settings.setValue("SignalsTabPage/LastEditedSignal/coarseAperture", signal.coarseAperture());
+	settings.setValue("SignalsTabPage/LastEditedSignal/fineAperture", signal.fineAperture());
 	settings.setValue("SignalsTabPage/LastEditedSignal/filteringTime", signal.filteringTime());
 	settings.setValue("SignalsTabPage/LastEditedSignal/spreadTolerance", signal.spreadTolerance());
 	settings.setValue("SignalsTabPage/LastEditedSignal/byteOrder", signal.byteOrder());

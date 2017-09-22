@@ -313,7 +313,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(buildFile->pathFileName()).arg(m_subDir));
 			return false;
@@ -333,7 +333,7 @@ namespace Builder
 
 		if (buildFile == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
@@ -352,7 +352,7 @@ namespace Builder
 
 		if (buildFile == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 					  QString(tr("Build file '%1' is not found")).
 					  arg(pathFileName).arg(m_subDir));
 			return false;
@@ -652,7 +652,7 @@ namespace Builder
 
 			if (m_log != nullptr)
 			{
-				LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
+				LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("%1: Invalid build params. Build aborted.")).arg(__FUNCTION__));
 			}
 
 			return false;
@@ -665,7 +665,7 @@ namespace Builder
 
 		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.release, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
 		{
-			LOG_ERROR_OBSOLETE(log, IssuePrexif::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
+			LOG_ERROR_OBSOLETE(log, IssuePrefix::NotDefined, QString(tr("%1: Build start error.")).arg(__FUNCTION__));
 			return false;
 		}
 
@@ -678,7 +678,7 @@ namespace Builder
 
 		if (m_buildInfo.release == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString(tr("RELEASE BUILD IS UNDER CONSTRUCTION!")));
 		}
 		else
 		{
@@ -958,7 +958,7 @@ namespace Builder
 
 			if (multichannelFile->subsysID() != subsysID)
 			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrexif::NotDefined,
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined,
 						  QString(tr("Different subsysID (%1 & %2) for subsysStrID = '%3'")).
 						  arg(multichannelFile->subsysID()).arg(subsysID).arg(subsysStrID));
 
