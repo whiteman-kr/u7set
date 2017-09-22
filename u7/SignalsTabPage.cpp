@@ -1113,6 +1113,8 @@ void SignalsModel::addSignal()
 
 	SignalPropertiesDialog dlg(dbController(), QVector<Signal*>() << &signal, false, false, m_parentWindow);
 
+	trimSignalTextFields(signal);
+
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QVector<Signal*> resultSignalVector;
@@ -1325,6 +1327,7 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 		{
 			const Signal&& groupSignal = m_signalSet.value(groupSignalIDs[i]);
 			groupSignals[i] = groupSignal;
+			trimSignalTextFields(groupSignals[i]);
 
 			groupSignals[i].setAppSignalID(idMaker(prefix, groupSignal.appSignalID()));
 			groupSignals[i].setCustomAppSignalID(idMaker(prefix, groupSignal.customAppSignalID()));
@@ -1694,6 +1697,11 @@ QStringList SignalsTabPage::createSignal(DbController* dbController, const QStri
 	if (dlg.exec() != QDialog::Accepted )
 	{
 		return QStringList();
+	}
+
+	for (Signal& signal : signalVector)
+	{
+		SignalsModel::trimSignalTextFields(signal);
 	}
 
 	if (dbController->addSignal(type, &signalVector, parent) == false)
