@@ -423,7 +423,7 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	var maxLMNumber: number = 62;               // Can be changed!
 	var configStartFrames: number = 2;
 	var configFrameCount: number = 4;          // number of frames in each configuration
-	//var ioModulesMaxCount: number = 14;
+	var ioModulesMaxCount: number = 14;
 
 	if (LMNumber < 1 || LMNumber > maxLMNumber) {
 		log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
@@ -534,10 +534,45 @@ function generate_bvb15_rev1(builder: Builder, module: DeviceObject, root: Devic
 	//Hash (UniqueID) will be counted later
 	ptr += 8;
 
-	var lanConfigFrame: number = configFrame + 1;
+	var chassis: DeviceObject = module.jsParent();
+
+	for (var i: number = 0; i < chassis.childrenCount(); i++) {
+
+		var ioModule: DeviceObject = chassis.jsChild(i);
+
+		if (ioModule.jsDeviceType() != DeviceObjectType.Module) {
+			continue;
+		}
+
+		if (ioModule.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+			continue;
+		}
+
+		var ioPlace: number = ioModule.jsPropertyInt("Place");
+		if (ioPlace < 1 || ioPlace > ioModulesMaxCount) {
+			log.errCFG3002("Place", ioPlace, 1, ioModulesMaxCount, ioModule.jsPropertyString("EquipmentID"));
+			return false;
+		}
+
+		if (ioModule.propertyValue("EquipmentID") == undefined) {
+			log.errCFG3000("EquipmentID", "I/O_module");
+			return false;
+		}
+
+		var ioEquipmentID: string = ioModule.jsPropertyString("EquipmentID");
+
+		var diagWordsIoCount: number = ioModule.jsPropertyInt("TxDiagDataSize");
+		if (diagWordsIoCount == null) {
+			log.errCFG3000("TxDiagDataSize", ioEquipmentID);
+			return false;
+		}
+
+		diagWordsCount += diagWordsIoCount;
+	}
 
 	// Create LANs configuration
 	//
+	var lanConfigFrame: number = configFrame + 1;
 
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 

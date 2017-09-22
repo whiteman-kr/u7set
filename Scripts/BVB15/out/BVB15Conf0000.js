@@ -241,7 +241,7 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
     var maxLMNumber = 62; // Can be changed!
     var configStartFrames = 2;
     var configFrameCount = 4; // number of frames in each configuration
-    //var ioModulesMaxCount: number = 14;
+    var ioModulesMaxCount = 14;
     if (LMNumber < 1 || LMNumber > maxLMNumber) {
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.jsPropertyString("EquipmentID"));
         return false;
@@ -326,9 +326,35 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
     //Hash (UniqueID) will be counted later
     ptr += 8;
-    var lanConfigFrame = configFrame + 1;
+    var chassis = module.jsParent();
+    for (var i = 0; i < chassis.childrenCount(); i++) {
+        var ioModule = chassis.jsChild(i);
+        if (ioModule.jsDeviceType() != DeviceObjectType.Module) {
+            continue;
+        }
+        if (ioModule.jsPropertyInt("ModuleFamily") == FamilyBVB15ID) {
+            continue;
+        }
+        var ioPlace = ioModule.jsPropertyInt("Place");
+        if (ioPlace < 1 || ioPlace > ioModulesMaxCount) {
+            log.errCFG3002("Place", ioPlace, 1, ioModulesMaxCount, ioModule.jsPropertyString("EquipmentID"));
+            return false;
+        }
+        if (ioModule.propertyValue("EquipmentID") == undefined) {
+            log.errCFG3000("EquipmentID", "I/O_module");
+            return false;
+        }
+        var ioEquipmentID = ioModule.jsPropertyString("EquipmentID");
+        var diagWordsIoCount = ioModule.jsPropertyInt("TxDiagDataSize");
+        if (diagWordsIoCount == null) {
+            log.errCFG3000("TxDiagDataSize", ioEquipmentID);
+            return false;
+        }
+        diagWordsCount += diagWordsIoCount;
+    }
     // Create LANs configuration
     //
+    var lanConfigFrame = configFrame + 1;
     confFirmware.writeLog("Writing LAN configuration.\r\n");
     var lanFrame = lanConfigFrame;
     var ip = [0, 0];
