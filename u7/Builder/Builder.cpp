@@ -898,7 +898,7 @@ namespace Builder
 
 		if (signalSet->expandBusSignals() == false)
 		{
-			LOG_WARNING_OBSOLETE(m_log, "", "SignalsSet->expandBusSignals() is not implemented!");
+			//LOG_WARNING_OBSOLETE(m_log, "", "SignalsSet->expandBusSignals() is not implemented!");
 		}
 
 		signalSet->buildID2IndexMap();
