@@ -25,6 +25,8 @@ MultiThreadSignalTest::MultiThreadSignalTest(int number,
 
 void MultiThreadSignalTest::run()
 {
+	return;
+
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", "sgnalThread_" + QString::number(m_threadNumber));
 
 	db.setHostName(m_databaseHost);

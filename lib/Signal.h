@@ -56,6 +56,7 @@ class Signal
 {
 	friend class DbWorker;
 	friend class SignalSet;
+	friend class SignalTests;
 
 public:
 	Signal();
@@ -157,7 +158,7 @@ public:
 	void setElectricHighLimit(double electricHighLimit) { m_electricHighLimit = electricHighLimit; }
 
 	E::ElectricUnit electricUnit() const { return m_electricUnit; }
-	int inputUnitInt() const { return TO_INT(m_electricUnit); }
+	int electricUnitInt() const { return TO_INT(m_electricUnit); }
 	void setElectricUnit(E::ElectricUnit electricUnit) { m_electricUnit = electricUnit; }
 
 	E::SensorType sensorType() const { return m_sensorType; }
