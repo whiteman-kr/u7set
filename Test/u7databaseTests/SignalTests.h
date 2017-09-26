@@ -2,7 +2,9 @@
 
 #include <QTest>
 #include <QtSql>
+
 #include "../../lib/Signal.h"
+#include "../../lib/DbWorker.h"
 #include "../../lib/WUtils.h"
 
 class SignalTests : public QObject
@@ -38,6 +40,7 @@ private:
 	bool readSignalFromQuery(const QSqlQuery& q, Signal& s, quint64 excludeMask);
 
 	void verifyQueryAndSignal(const QSqlQuery& q, Signal& s, quint64 excludeMask);
+	void verifyQueryAndQuery(const QSqlQuery& q1, const QSqlQuery& q2, quint64 excludeMask);
 
 private:
 	static QString SF_APP_SIGNAL_ID;
@@ -48,6 +51,8 @@ private:
 	static QString SF_CHANNEL;
 
 	static QString SF_SIGNAL_TYPE;
+	static QString SF_TYPE;
+
 	static QString SF_IN_OUT_TYPE;
 
 	static QString SF_DATA_SIZE;
@@ -97,6 +102,8 @@ private:
 
 	static QString SF_CHECKED_IN_INSTANCE_ID;
 	static QString SF_CHECKED_OUT_INSTANCE_ID;
+
+	static QString SF_ERR_CODE;
 
 	const quint64 EXM_CHANNEL = 0x0000000000000001ll;
 	const quint64 EXM_SIGNAL_ID = 0x0000000000000002ll;
