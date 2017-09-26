@@ -4025,6 +4025,26 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5092
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type ID '%1' of signal '%2' is undefined.
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///		%2 Application signal ID
+	///
+	/// Description:
+	///		Specified BusTypeID of signal is undefined. Check signals BusTypeID property.
+	///
+	void IssueLogger::errALC5092(QString busTypeID, QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5092,
+				  QString(tr("Bus type ID '%1' of signal '%2' is undefined.")).
+						arg(busTypeID).arg(appSignalID));
+	}
 
 	/// IssueCode: ALC5186
 	///

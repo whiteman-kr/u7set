@@ -278,7 +278,7 @@ namespace Builder
 		void errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom);			// Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
 		void errALC5090(QString appSignalID);						// Analog signal aperture should be greate then 0.
 		void errALC5091(QString appSignalID);						// Input/output application signal '%1' should be bound to equipment signal.
-
+		void errALC5092(QString busTypeID, QString appSignalID);	// Bus type ID '%1' of signal '%2' is undefined.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -288,8 +288,6 @@ namespace Builder
 		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
 		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
 		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
-
-
 
 		// EQP			Equipment issues						6000-6999
 		//

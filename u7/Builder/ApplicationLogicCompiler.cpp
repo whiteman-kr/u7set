@@ -96,6 +96,7 @@ namespace Builder
 		{
 			&ApplicationLogicCompiler::findLMs,
 			&ApplicationLogicCompiler::checkAppSignals,
+			&ApplicationLogicCompiler::expandBusSignals,
 			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
@@ -236,6 +237,10 @@ namespace Builder
 
 		appSignalIDs.reserve(count * 1.3);
 
+		const std::vector<VFrame30::Bus>& busses = m_busSet->busses();
+
+		m_busSignals.clear();
+
 		for(int i = 0; i < count; i++)
 		{
 			const Signal& s = (*m_signals)[i];
@@ -306,18 +311,17 @@ namespace Builder
 				m_log->wrnALC5070(s.appSignalID());
 			}
 
-			if (s.isDiscrete() == true)
+			switch(s.signalType())
 			{
+			case E::SignalType::Discrete:
 				if (s.dataSize() != 1)
 				{
 					m_log->errALC5014(s.appSignalID());		// Discrete signal '%1' must have DataSize equal to 1.
 					result = false;
 				}
-			}
-			else
-			{
-				assert(s.isAnalog() == true);
+				break;
 
+			case E::SignalType::Analog:
 				if (s.dataSize() != 32)
 				{
 					m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
@@ -329,6 +333,26 @@ namespace Builder
 					m_log->errALC5090(s.appSignalID());
 					result = false;
 				}
+				break;
+
+			case E::SignalType::Bus:
+				if (m_busSet->hasBus(s.busTypeID()) == false)
+				{
+					//  Bus type ID '%1' of signal '%2' is undefined.
+					//
+					m_log->errALC5092(s.busTypeID(), s.appSignalID());
+					result = false;
+				}
+				else
+				{
+					m_busSignals.insert(s.appSignalID(), i);
+				}
+				break;
+
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
 			// check tuningable signals properties
@@ -365,6 +389,18 @@ namespace Builder
 		{
 			LOG_SUCCESS(m_log, QString(tr("Ok")))
 		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::expandBusSignals()
+	{
+		if (m_busSignals.count() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
 
 		return result;
 	}

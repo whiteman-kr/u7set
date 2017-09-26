@@ -9,6 +9,8 @@
 
 #include "Subsystem.h"
 
+#include "../VFrame30/Bus.h"
+
 
 namespace Builder
 {
@@ -46,6 +48,7 @@ namespace Builder
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
 		bool checkAppSignals();
+		bool expandBusSignals();
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
@@ -85,6 +88,8 @@ namespace Builder
 		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 
 		QVector<Hardware::DeviceModule*> m_lm;
+
+		QHash<QString, int> m_busSignals;
 
 		friend class ModuleLogicCompiler;
 	};
