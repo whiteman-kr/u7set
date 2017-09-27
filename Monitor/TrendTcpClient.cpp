@@ -11,8 +11,6 @@ TrendTcpClient::TrendTcpClient(MonitorConfigController* configController) :
 
 	enableWatchdogTimer(false);
 
-	m_periodicTimerId = startTimer(theSettings.requestTimeInterval());
-
 	qRegisterMetaType<std::shared_ptr<TrendLib::OneHourData>>("share_ptr<TrendLib::OneHourData>>");
 
 	return;
@@ -53,6 +51,8 @@ void TrendTcpClient::onClientThreadStarted()
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
 			this, &TrendTcpClient::slot_configurationArrived,
 			Qt::QueuedConnection);
+
+	m_periodicTimerId = startTimer(theSettings.requestTimeInterval());	// Start it here, as this function is running in the right thread
 
 	return;
 }
@@ -381,7 +381,7 @@ void TrendTcpClient::slot_configurationArrived(ConfigSettings configuration)
 	HostAddressPort s1 = configuration.archiveService1.address();
 	HostAddressPort s2 = configuration.archiveService2.address();
 
-	if (serverAddressPort(0) == s1 ||
+	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)
 	{
 		setServers(s1, s2, true);

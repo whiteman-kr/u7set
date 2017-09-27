@@ -62,6 +62,13 @@ namespace TrendLib
 		layout->setRowStretch(0, 1);
 		layout->addWidget(m_trendSlider, 1, 0);
 
+		// Refresh Action
+		//
+		m_refreshAction = new QAction(tr("Refresh"), this);
+		m_refreshAction->setShortcut(QKeySequence::Refresh);
+		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
+		addAction(m_refreshAction);
+
 		//--
 		//
 		connect(ui->actionOpen, &QAction::triggered, this, &TrendMainWindow::actionOpenTriggered);
@@ -77,6 +84,7 @@ namespace TrendLib
 		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
 		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
 		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
+		connect(m_refreshButton, &QPushButton::clicked, m_refreshAction, &QAction::triggered);
 		connect(m_signalsButton, &QPushButton::clicked, this, &TrendMainWindow::signalsButton);
 
 		setMinimumSize(500, 300);
@@ -108,13 +116,6 @@ namespace TrendLib
 		m_trendSlider->setPageStep(t);
 
 		m_trendSlider->setLaneDuration(t * theSettings.m_laneCount);
-
-		// Refresh Action
-		//
-		m_refreshAction = new QAction(tr("Refresh"), this);
-		m_refreshAction->setShortcut(QKeySequence::Refresh);
-		connect(m_refreshAction, &QAction::triggered, this, &TrendMainWindow::actionRefreshTriggered);
-		addAction(m_refreshAction);
 
 		// Contect Menu
 		//
@@ -388,6 +389,11 @@ static int stdColorIndex = 0;
 		QWidget* empty = new QWidget();
 		empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		m_toolBar->addWidget(empty);
+
+		// Signals
+		//
+		m_refreshButton = new QPushButton("Refresh");
+		m_toolBar->addWidget(m_refreshButton);
 
 		// Signals
 		//
@@ -1115,7 +1121,10 @@ static int lastCopyCount = false;
 
 		m_timeCombo->blockSignals(true);		// Block changes, as tr("Custom") is deleting there
 
-		m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		if (m_timeCombo->findText(tr("Custom")) == -1)
+		{
+			m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+		}
 		m_timeCombo->setCurrentText(tr("Custom"));
 
 		m_timeCombo->blockSignals(false);
