@@ -1102,7 +1102,10 @@ static const int recomendedSize = 8192;
 
 //					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
 //					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
-//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex << ", Flags: " << state.flags << ", value: " << state.value;
+//					qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
+//							 << ", Flags: " << state.flags
+//							 << ", value: " << state.value
+//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
 //					pointIndex ++;
 
 					if (lines.isEmpty() == true)
@@ -1509,7 +1512,11 @@ static const int recomendedSize = 8192;
 		// Getting data whitout requesting if it is not present
 		//
 		std::list<std::shared_ptr<OneHourData>> signalData;
-		signalSet().getExistingTrendData(appSignalId, rullerTime.toDateTime(), rullerTime.toDateTime(), timeType, &signalData);
+
+		TimeStamp minus1hour(rullerTime.timeStamp - 1_hour);
+		TimeStamp plus1hour(rullerTime.timeStamp + 1_hour);
+
+		signalSet().getExistingTrendData(appSignalId, minus1hour.toDateTime(), plus1hour.toDateTime(), timeType, &signalData);
 
 		// Look for state at point ruller.timeStamp
 		//
