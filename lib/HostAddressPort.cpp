@@ -70,7 +70,7 @@ bool HostAddressPort::operator==(const HostAddressPort &other)
 
 bool HostAddressPort::operator!=(const HostAddressPort &other)
 {
-	return m_hostAddress != other.m_hostAddress && m_port != other.m_port;
+	return m_hostAddress != other.m_hostAddress || m_port != other.m_port;
 }
 
 

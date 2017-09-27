@@ -914,7 +914,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		QRectF textBoundRect;
 		drawText(painter, "0", textBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop, &textBoundRect);
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen(signal.color(), drawParam.cosmeticPenWidth(), Qt::SolidLine);
 		painter->setPen(linePen);
@@ -1058,7 +1058,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 			return;
 		}
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		QPen linePen(signal.color(), drawParam.cosmeticPenWidth());
 		painter->setPen(linePen);
@@ -1198,7 +1198,7 @@ static const int recomendedSize = 8192;
 		double dpiX = static_cast<double>(drawParam.dpiX());
 		double dpiY = static_cast<double>(drawParam.dpiY());
 
-		TimeType timeType = drawParam.timeType();
+		E::TimeType timeType = drawParam.timeType();
 
 		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
 		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
@@ -1505,7 +1505,7 @@ static const int recomendedSize = 8192;
 		return;
 	}
 
-	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, TimeType timeType) const
+	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, E::TimeType timeType) const
 	{
 		TimeStamp rullerTime = ruller.timeStamp();
 

@@ -68,7 +68,7 @@ public:
 	struct Result
 	{
 		std::vector<AppSignalParam> acceptedSignals;
-		TimeType timeType = TimeType::Local;
+		E::TimeType timeType = E::TimeType::Local;
 		TimeStamp requestStartTime;
 		TimeStamp requestEndTime;
 

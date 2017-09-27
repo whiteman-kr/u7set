@@ -63,9 +63,9 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 	// TimeType Combo
 	//
 	assert(ui->timeTypeCombo);
-	ui->timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(TimeType::Local));
-	ui->timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(TimeType::System));
-	ui->timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(TimeType::Plant));
+	ui->timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
+	ui->timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
+	ui->timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 
 	int currentTimeType = ui->timeTypeCombo->findData(QVariant::fromValue(init.timeType));
 	assert(currentTimeType != -1);
@@ -163,10 +163,6 @@ void DialogChooseArchiveSignals::filterSignals()
 
 void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 {
-//	QString signalId = std::get<0>(signal);
-//	QString type = std::get<1>(signal);
-//	QString caption = std::get<2>(signal);
-
 	if (archiveSignalsHasSignalId(signal.customSignalId()) == true)
 	{
 		// SignaID already presnt in ArchiveSignals
@@ -174,7 +170,7 @@ void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 		return;
 	}
 
-	if (ui->archiveSignals->topLevelItemCount() >= 12)
+	if (ui->archiveSignals->topLevelItemCount() >= ARCH_REQUEST_MAX_SIGNALS)
 	{
 		QMessageBox::critical(this, qAppName(), tr("The maximum number of signals reached."));
 		return;
@@ -476,7 +472,7 @@ FilteredArchiveSignalsModel::FilteredArchiveSignalsModel(const std::vector<AppSi
 
 void DialogChooseArchiveSignals::on_buttonBox_accepted()
 {
-	m_result.timeType = ui->timeTypeCombo->currentData().value<TimeType>();
+	m_result.timeType = ui->timeTypeCombo->currentData().value<E::TimeType>();
 
 	QDateTime startTime;
 	startTime.setDate(ui->startDateEdit->date());

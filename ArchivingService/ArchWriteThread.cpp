@@ -705,9 +705,9 @@ bool ArchWriteThreadWorker::writeTimeMark()
 
 	if (result == false)
 	{
-		assert(false);
 		DEBUG_LOG_ERR(m_logger, query.lastError().text());
 		m_db.close();
+		assert(false);
 		return false;
 	}
 

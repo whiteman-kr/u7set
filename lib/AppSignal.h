@@ -5,6 +5,7 @@
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/TimeStamp.h"
+#include "Types.cpp"
 #include "Types.h"
 
 
@@ -69,21 +70,27 @@ class AppSignalState
 	Q_PROPERTY(double Value READ value)
 
 public:
+	AppSignalState() = default;
+	AppSignalState(const AppSignalState&) = default;
+	AppSignalState(AppSignalState&&) = default;
+	AppSignalState(const Proto::AppSignalState& protoState);
+	~AppSignalState() = default;
+
+	AppSignalState& operator= (const AppSignalState& state) = default;
+	AppSignalState& operator= (const SimpleAppSignalState& smState);
+
 	static const quint32 VALID = 1;
 	static const quint32 INVALID = 0;
 
 	Q_INVOKABLE Hash hash() const;
 	const Times& time() const;
+	const TimeStamp& time(E::TimeType timeType) const;
 	Q_INVOKABLE double value() const;
 
 	Q_INVOKABLE bool isValid() const;
-	//bool isOverflow() const;
-	//bool isUnderflow() const;
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
-
-	const AppSignalState& operator = (const SimpleAppSignalState& smState);
 
 public:
 	Hash m_hash = 0;					// == calcHash(AppSignalID)

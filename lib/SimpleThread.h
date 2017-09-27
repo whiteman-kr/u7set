@@ -49,6 +49,9 @@ public:
 	bool wait(unsigned long time = ULONG_MAX);
 	bool quitAndWait(unsigned long time = ULONG_MAX);
 
+	bool isRunning() const;
+	bool isFinished() const;
+
 	virtual void beforeStart();
 	virtual void beforeQuit();
 };

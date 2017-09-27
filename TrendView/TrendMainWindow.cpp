@@ -52,7 +52,7 @@ namespace TrendLib
 		layout->addWidget(m_trendWidget, 0, 0);
 
 		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
-		m_trendWidget->setTimeType(static_cast<TimeType>(theSettings.m_timeType));
+		m_trendWidget->setTimeType(static_cast<E::TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
 		// Slider Widged
@@ -372,9 +372,9 @@ static int stdColorIndex = 0;
 		m_toolBar->addWidget(timeTypeLabel);
 
 		m_timeTypeCombo = new QComboBox(m_toolBar);
-		m_timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(TimeType::Local));
-		m_timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(TimeType::System));
-		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(TimeType::Plant));
+		m_timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
+		m_timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
+		m_timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 		m_toolBar->addWidget(m_timeTypeCombo);
 
 		// 	AutoScale
@@ -854,7 +854,7 @@ static int lastCopyCount = false;
 		qint64 startTimeValue = m_trendWidget->startTime().timeStamp;
 		qint64 finishTimeValue = m_trendWidget->startTime().timeStamp + m_trendWidget->duration();
 
-		TimeType timeType = m_trendWidget->timeType();
+		E::TimeType timeType = m_trendWidget->timeType();
 
 		for (TrendLib::TrendSignalParam& ts : analogs)
 		{
@@ -1092,7 +1092,7 @@ static int lastCopyCount = false;
 
 	void TrendMainWindow::timeTypeComboCurrentIndexChanged(int index)
 	{
-		TimeType timeType = m_timeTypeCombo->itemData(index).value<TimeType>();
+		E::TimeType timeType = m_timeTypeCombo->itemData(index).value<E::TimeType>();
 		m_trendWidget->setTimeType(timeType);
 		theSettings.m_timeType = static_cast<int>(timeType);
 

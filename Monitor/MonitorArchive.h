@@ -3,6 +3,8 @@
 
 #include "MonitorConfigController.h"
 #include "DialogChooseArchiveSignals.h"
+#include "ArchiveTcpClient.h"
+#include "ArchiveModelView.h"
 
 class MonitorArchiveWidget;
 
@@ -33,6 +35,10 @@ public:
 	bool setSignals(const std::vector<AppSignalParam>& appSignals);
 	bool addSignal(const AppSignalParam& appSignal);
 
+protected:
+	void requestData();
+	void cancelRequest();
+
 	// Events
 	//
 protected:
@@ -51,7 +57,10 @@ protected:
 	//
 protected slots:
 	void signalsButton();
-//	//void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+
+	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
+	void tcpClientError(QString errorMessage);
+	void tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount);
 
 	// Data
 	//
@@ -62,8 +71,8 @@ private:
 	std::vector<AppSignalParam> m_appSignals;
 	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
 
-//	ArchiveTcpClient* m_tcpClient = nullptr;
-//	std::unique_ptr<SimpleThread> m_tcpClientThread;
+	ArchiveTcpClient* m_tcpClient = nullptr;
+	SimpleThread* m_tcpClientThread = nullptr;
 
 	enum  StatusBarColumns
 	{
@@ -78,9 +87,12 @@ private:
 	QPushButton* m_printButton = nullptr;
 	QPushButton* m_signalsButton = nullptr;
 
+	ArchiveModel* m_model = new ArchiveModel(this);
+	ArchiveView* m_view = new ArchiveView(this);
+
 	QStatusBar* m_statusBar = nullptr;
 	QLabel* m_statusBarTextLabel = nullptr;
-	QLabel* m_statusBarQueueSizeLabel = nullptr;
+	QLabel* m_statusBarStatesReceivedLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;

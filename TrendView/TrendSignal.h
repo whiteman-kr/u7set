@@ -52,13 +52,13 @@ namespace TrendLib
 			return (flags & 0x000001);
 		}
 
-		TimeStamp getTime(const TimeType& timeType) const
+		TimeStamp getTime(const E::TimeType& timeType) const
 		{
 			switch (timeType)
 			{
-			case TimeType::Local:	return this->local;
-			case TimeType::System:	return this->system;
-			case TimeType::Plant:	return this->plant;
+			case E::TimeType::Local:	return this->local;
+			case E::TimeType::System:	return this->system;
+			case E::TimeType::Plant:	return this->plant;
 			default:
 				assert(false);
 				return this->local;
@@ -221,17 +221,17 @@ namespace TrendLib
 		int discretesSignalsCount() const;
 		int analogSignalsCount() const;
 
-		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
-		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
+		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData> >* outData) const;
 
-		void clear(TimeType timeType);
+		void clear(E::TimeType timeType);
 
 	public slots:
-		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-		void slot_requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType);
+		void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+		void slot_requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
 
 	signals:
-		void requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType) const;
+		void requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType) const;
 
 	private:
 		mutable QMutex m_paramMutex;

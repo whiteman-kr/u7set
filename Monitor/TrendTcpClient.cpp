@@ -349,7 +349,7 @@ void TrendTcpClient::processNext(const QByteArray& data)
 	return;
 }
 
-void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType)
+void TrendTcpClient::slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType)
 {
 	//qDebug() << "TrendTcpClient::slot_requestData, AppSignalID = " << appSignalId << ", Time = " << hourToRequest.toDateTime();
 
