@@ -238,13 +238,16 @@ namespace Builder
 
 		appSignalIDs.reserve(count * 1.3);
 
-		const std::vector<VFrame30::Bus>& busses = m_busSet->busses();
-
 		m_busSignals.clear();
 
 		for(int i = 0; i < count; i++)
 		{
 			Signal& s = (*m_signals)[i];
+
+			if (s.ID() > m_maxSignalID)
+			{
+				m_maxSignalID = s.ID();
+			}
 
 			// check AppSignalID
 			//
@@ -271,67 +274,6 @@ namespace Builder
 			}
 
 			customAppSignalIDs.insert(s.customAppSignalID(), i);
-
-			// check EquipmentID
-			//
-			s.setLm(nullptr);
-
-			if (s.equipmentID().isEmpty() == true)
-			{
-				// Application signal '%1' is not bound to any device object.
-				//
-				m_log->wrnALC5012(s.appSignalID());
-			}
-			else
-			{
-				std::shared_ptr<Hardware::DeviceObject> device = m_equipmentSet->deviceObjectSharedPointer(s.equipmentID());
-
-				if (device == nullptr)
-				{
-					// Application signal '%1' is bound to unknown device object '%2'.
-					//
-					m_log->errALC5013(s.appSignalID(), s.equipmentID());
-					result = false;
-				}
-
-				bool deviceOK = false;
-
-				switch(device->deviceType())
-				{
-				case Hardware::DeviceType::Module:
-					{
-						Hardware::DeviceModule* module = device->toModule();
-
-						if (module != nullptr && module->isLogicModule() == true)
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
-					}
-					break;
-
-				case Hardware::DeviceType::Signal:
-					{
-						Hardware::DeviceModule* module = DeviceHelper::getAssociatedLm(device);
-
-						if (module != nullptr && module->isLogicModule() == true)
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
-					}
-					break;
-				}
-
-				if (deviceOK == false)
-				{
-					// The signal '%1' can be bind only to Logic Module or Equipment Signal.
-					//
-					m_log->errALC5031(s.appSignalID());
-					result = false;
-					continue;
-				}
-			}
 
 			// check other signal properties
 			//
@@ -403,7 +345,7 @@ namespace Builder
 
 			// check tuningable signals properties
 			//
-			if (s.enableTuning() == fase)
+			if (s.enableTuning() == false)
 			{
 				continue;
 			}
@@ -449,6 +391,126 @@ namespace Builder
 		}
 
 		bool result = true;
+
+		for(QString busSignalID : m_busSignals)
+		{
+			Signal* s = m_signals->getSignal(busSignalID);
+
+			if (s == nullptr)
+			{
+				result = false;
+				LOG_INTERNAL_ERROR(m_log);
+				continue;
+			}
+
+			const VFrame30::Bus& bus = m_busSet->bus(s->busTypeID());
+
+			const std::vector<VFrame30::BusSignal>& busSignals = bus.busSignals();
+
+			for(const VFrame30::BusSignal& busSignal : busSignals)
+			{
+				result &= appendBusSignal(*s, bus, busSignal);
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal)
+	{
+		bool result = true;
+
+		Signal* newSignal = new Signal();
+
+		newSignal->setAppSignalID(QString(s.appSignalID() + BUS_SIGNAL_ID_SEPARATOR + busSignal.signalId()).toUpper());
+		newSignal->setCustomAppSignalID(QString(s.customAppSignalID() + BUS_SIGNAL_ID_SEPARATOR + busSignal.signalId()).toUpper());
+
+/*
+				// Signal identificators
+				//
+				QString m_appSignalID;
+				QString m_customAppSignalID;
+				QString m_caption;
+				QString m_equipmentID;
+				QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
+				E::Channel m_channel = E::Channel::A;
+
+				// Signal type
+				//
+				E::SignalType m_signalType = E::SignalType::Analog;
+				E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+
+				// Signal format
+				//
+				int m_dataSize = 32;											// signal data size in bits
+				E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+
+				// Analog signal properties
+				//
+				E::AnalogAppSignalFormat m_analogSignalFormat =					// only for m_signalType == E::SignalType::Analog
+										E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
+
+				QString m_unit;
+
+				int m_lowADC = 0;
+				int m_highADC = 0xFFFF;
+
+				double m_lowEngeneeringUnits = 0;								// low physical value for input range
+				double m_highEngeneeringUnits = 100;							// high physical value for input range
+
+				double m_lowValidRange = 0;
+				double m_highValidRange = 100;
+
+				double m_filteringTime = 0.005;
+				double m_spreadTolerance = 2;
+
+				// Analog input/output signals properties
+				//
+				double m_electricLowLimit = 0;										// low electric value for input range
+				double m_electricHighLimit = 0;										// high electric value for input range
+				E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+				E::SensorType m_sensorType = E::SensorType::NoSensorType;			// electric sensor type for input range (was created for m_inputUnitID)
+				E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;			// output electric range (or mode ref. OutputModeStr[])
+
+				// Tuning signal properties
+				//
+				bool m_enableTuning = false;
+				float m_tuningDefaultValue = 0;
+				float m_tuningLowBound = 0;
+				float m_tuningHighBound = 100;
+
+				// Signal properties for MATS
+				//
+				bool m_acquire = true;
+				int m_decimalPlaces = 2;
+				double m_coarseAperture = 1;
+				double m_fineAperture = 0.5;
+				bool m_adaptiveAperture = false;
+
+				// Signal fields from database
+				//
+				int m_ID = 0;
+				int m_signalGroupID = 0;
+				int m_signalInstanceID = 0;
+				int m_changesetID = 0;
+				bool m_checkedOut = false;
+				int m_userID = 0;
+				QDateTime m_created;
+				bool m_deleted = false;
+				QDateTime m_instanceCreated;
+				VcsItemAction m_instanceAction = VcsItemAction::Added;*/
+
+
+		if (result == true)
+		{
+			m_maxSignalID++;
+
+			m_signals->append(m_maxSignalID, newSignal);
+		}
+		else
+		{
+			delete newSignal;
+		}
 
 		return result;
 	}

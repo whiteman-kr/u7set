@@ -52,6 +52,8 @@ const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
+const char* const BUS_SIGNAL_ID_SEPARATOR = ".";
+
 class Signal
 {
 	friend class DbWorker;
