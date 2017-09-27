@@ -8,8 +8,10 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
 #include "../VFrame30/Afb.h"
+#include "../VFrame30/Bus.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
+#include "../u7/Builder/IssueLogger.h"
 
 
 class QXmlStreamAttributes;
@@ -52,13 +54,19 @@ const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
-const char* const BUS_SIGNAL_ID_SEPARATOR = ".";
-
 class Signal
 {
 	friend class DbWorker;
 	friend class SignalSet;
 	friend class SignalTests;
+
+public:
+	static QString BUS_SIGNAL_ID_SEPARATOR;
+
+	static QString BUS_SIGNAL_MACRO_BUSTYPEID;
+	static QString BUS_SIGNAL_MACRO_BUSID;
+	static QString BUS_SIGNAL_MACRO_BUSSIGNALID;
+	static QString BUS_SIGNAL_MACRO_BUSSIGNALCAPTION;
 
 public:
 	Signal();
@@ -405,10 +413,12 @@ private:
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
 
 
-class SignalSet : public SignalPtrOrderedHash
+class SignalSet : public SignalPtrOrderedHash, public QObject
 {
+	Q_OBJECT
+
 public:
-	SignalSet();
+	SignalSet(VFrame30::BusSet* busSet, Builder::IssueLogger* log);
 	virtual ~SignalSet();
 
 	virtual void clear() override;
@@ -422,7 +432,9 @@ public:
 	bool contains(const QString& appSignalID);
 	Signal* getSignal(const QString& appSignalID);
 
+	bool checkSignals();
 	bool expandBusSignals();
+	bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 	void initCalculatedSignalsProperties();
 
 	virtual void append(const int& signalID, Signal* signal) override;
@@ -435,8 +447,19 @@ public:
 	void resetAddresses();
 
 private:
+	bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
+	QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
+
+
+private:
+	VFrame30::BusSet* m_busSet = nullptr;
+	Builder::IssueLogger* m_log = nullptr;
+
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
+
+	int m_maxSignalID = -1;
+	QHash<int, QString> m_busSignals;
 };
 
 

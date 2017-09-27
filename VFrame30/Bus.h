@@ -6,6 +6,7 @@
 #include "../lib/Types.h"
 #include "../lib/Hash.h"
 
+
 class QDomElement;
 class QXmlStreamWriter;
 

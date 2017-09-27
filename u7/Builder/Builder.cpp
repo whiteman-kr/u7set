@@ -181,11 +181,23 @@ namespace Builder
 			LOG_SUCCESS(m_log, tr("Ok"));
 
 			//
+			// Loading BusTypes
+			//
+			VFrame30::BusSet busSet;
+
+			ok = loadBusses(&db, &busSet);
+
+			if (ok == false)
+			{
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
+			}
+
+			//
 			// SignalSet
 			//
-			SignalSet signalSet;
+			SignalSet signalSet(&busSet, m_log);
 
-			if (loadSignals(&db, &signalSet, equipmentSet) == false)
+			if (loadSignals(&db, &signalSet, &equipmentSet) == false)
 			{
 				break;
 			}
@@ -271,18 +283,6 @@ namespace Builder
 			}
 
 			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &fscDescriptions, m_log);
-
-			//
-			// Loading BusTypes
-			//
-			VFrame30::BusSet busSet;
-
-			ok = loadBusses(&db, &busSet);
-
-			if (ok == false)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Can't load BusTypes files"));
-			}
 
 			//
 			// Parse application logic
@@ -860,10 +860,11 @@ namespace Builder
     }
 
 
-    bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet& equipment)
+	bool BuildWorkerThread::loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment)
 	{
 		if (db == nullptr ||
-			signalSet == nullptr)
+			signalSet == nullptr ||
+			equipment == nullptr)
 		{
 			assert(false);
 			return false;
@@ -883,82 +884,25 @@ namespace Builder
 			return false;
 		}
 
-		// bind signals to LMs
-		//
-		int count = signalSet->count();
+		result = signalSet->checkSignals();
 
-		for(int i = 0; i < count; i++)
+		if (result == false)
 		{
-			Signal& s = (*signalSet)[i];
+			return false;
+		}
 
-			// check EquipmentID
-			//
-			s.setLm(nullptr);
+		result = signalSet->expandBusSignals();
 
-			if (s.equipmentID().isEmpty() == true)
-			{
-				// Application signal '%1' is not bound to any device object.
-				//
-				m_log->wrnALC5012(s.appSignalID());
-			}
-			else
-			{
-				std::shared_ptr<Hardware::DeviceObject> device = equipment.deviceObjectSharedPointer(s.equipmentID());
+		if (result == false)
+		{
+			return false;
+		}
 
-				if (device == nullptr)
-				{
-					// Application signal '%1' is bound to unknown device object '%2'.
-					//
-					m_log->errALC5013(s.appSignalID(), s.equipmentID());
-					result = false;
-				}
+		result = signalSet->bindSignalsToLMs(equipment);
 
-				bool deviceOK = false;
-
-				switch(device->deviceType())
-				{
-				case Hardware::DeviceType::Module:
-					{
-						std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
-
-						if (module != nullptr && module->isLogicModule() == true)
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
-					}
-					break;
-
-				case Hardware::DeviceType::Signal:
-					{
-						Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(device->getParentChassis());
-
-						if (chassis == nullptr)
-						{
-							assert(false);
-							continue;
-						}
-
-						std::shared_ptr<Hardware::DeviceModule> module = chassis->getLogicModuleSharedPointer();
-
-						if (module != nullptr && module->isLogicModule() == true)
-						{
-							s.setLm(module);
-							deviceOK = true;
-						}
-					}
-					break;
-				}
-
-				if (deviceOK == false)
-				{
-					// The signal '%1' can be bind only to Logic Module or Equipment Signal.
-					//
-					m_log->errALC5031(s.appSignalID());
-					result = false;
-					continue;
-				}
-			}
+		if (result == false)
+		{
+			return false;
 		}
 
 		LOG_SUCCESS(m_log, tr("Ok"));

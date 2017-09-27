@@ -47,11 +47,6 @@ namespace Builder
 		bool findLMs();
 		void findLM(Hardware::DeviceObject* startFromDevice);
 
-		bool checkAppSignals();
-
-		bool expandBusSignals();
-		bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
-
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
@@ -92,7 +87,7 @@ namespace Builder
 
 		QVector<Hardware::DeviceModule*> m_lm;
 
-		QHash<QString, int> m_busSignals;
+		QHash<int, QString> m_busSignals;
 		int m_maxSignalID = -1;
 
 		friend class ModuleLogicCompiler;
