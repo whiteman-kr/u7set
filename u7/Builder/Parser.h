@@ -5,6 +5,7 @@
 #include "../../VFrame30/Afb.h"
 #include "../../VFrame30/FblItemRect.h"
 #include "../../VFrame30/UfbSchema.h"
+#include "SignalSet.h"
 
 
 // Forware delcarations

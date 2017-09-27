@@ -194,7 +194,8 @@ SOURCES +=\
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
-    Forms/ChooseAfbDialog.cpp
+    Forms/ChooseAfbDialog.cpp \
+    Builder/SignalSet.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -327,7 +328,8 @@ HEADERS  += \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
-    Forms/DialogUpdateFromPreset.h
+    Forms/DialogUpdateFromPreset.h \
+    Builder/SignalSet.h
 
 FORMS    += \
     CreateProjectDialog.ui \

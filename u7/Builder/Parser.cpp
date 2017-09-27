@@ -2334,7 +2334,8 @@ namespace Builder
 				   AppLogicData* appLogicData,
 				   LmDescriptionSet* lmDescriptions,
 				   Hardware::EquipmentSet* equipmentSet,
-				   SignalSet* signalSet, VFrame30::BusSet* busSet,
+				   SignalSet* signalSet,
+				   VFrame30::BusSet* busSet,
 				   int changesetId,
 				   bool debug) :
 		m_db(db),

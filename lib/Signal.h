@@ -8,10 +8,8 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"
 #include "../VFrame30/Afb.h"
-#include "../VFrame30/Bus.h"
 #include "../lib/ProtobufHelper.h"
 #include "../lib/Hash.h"
-#include "../u7/Builder/IssueLogger.h"
 
 
 class QXmlStreamAttributes;
@@ -284,7 +282,7 @@ public:
 	void serializeTo(Proto::AppSignal* s) const;
 	void serializeFrom(const Proto::AppSignal &s);
 
-	//void serializeToProtoAppSignalParam(Proto::AppSignalParam* message) const;
+	void initCalculatedProperties();
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -306,7 +304,7 @@ private:
 
 	//
 
-	void initCalculatedProperties();
+
 
 private:
 	// Signal identificators
@@ -413,12 +411,10 @@ private:
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
 
 
-class SignalSet : public SignalPtrOrderedHash, public QObject
+class SignalSet : public SignalPtrOrderedHash
 {
-	Q_OBJECT
-
 public:
-	SignalSet(VFrame30::BusSet* busSet, Builder::IssueLogger* log);
+	SignalSet();
 	virtual ~SignalSet();
 
 	virtual void clear() override;
@@ -432,11 +428,6 @@ public:
 	bool contains(const QString& appSignalID);
 	Signal* getSignal(const QString& appSignalID);
 
-	bool checkSignals();
-	bool expandBusSignals();
-	bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
-	void initCalculatedSignalsProperties();
-
 	virtual void append(const int& signalID, Signal* signal) override;
 	virtual void remove(const int& signalID) override;
 	virtual void removeAt(const int index) override;
@@ -447,19 +438,8 @@ public:
 	void resetAddresses();
 
 private:
-	bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
-	QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
-
-
-private:
-	VFrame30::BusSet* m_busSet = nullptr;
-	Builder::IssueLogger* m_log = nullptr;
-
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
-
-	int m_maxSignalID = -1;
-	QHash<int, QString> m_busSignals;
 };
 
 

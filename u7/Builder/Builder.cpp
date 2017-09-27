@@ -193,7 +193,7 @@ namespace Builder
 			}
 
 			//
-			// SignalSet
+			// Builder::SignalSet
 			//
 			SignalSet signalSet(&busSet, m_log);
 

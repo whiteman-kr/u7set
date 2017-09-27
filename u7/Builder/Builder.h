@@ -12,7 +12,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "ComparatorStorage.h"
-
+#include "SignalSet.h"
 
 // Forware declarations
 //
