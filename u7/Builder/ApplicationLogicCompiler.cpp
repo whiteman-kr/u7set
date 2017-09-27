@@ -234,6 +234,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals")));
 
 		QHash<QString, int> appSignalIDs;
+		QHash<QString, int> customAppSignalIDs;
 
 		appSignalIDs.reserve(count * 1.3);
 
@@ -243,53 +244,83 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			const Signal& s = (*m_signals)[i];
+			Signal& s = (*m_signals)[i];
 
 			// check AppSignalID
 			//
 			if (appSignalIDs.contains(s.appSignalID()) == true)
 			{
-				m_log->errALC5016(s.appSignalID());		// Application signal identifier '%1' is not unique.
+				// Application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5016(s.appSignalID());
 				result = false;
+				continue;
 			}
-			else
+
+			appSignalIDs.insert(s.appSignalID(), i);
+
+			// check CustomAppSignalID
+			//
+			if (customAppSignalIDs.contains(s.customAppSignalID()) == true)
 			{
-				appSignalIDs.insert(s.appSignalID(), i);
+				// Custom application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5017(s.customAppSignalID());
+				result = false;
+				continue;
 			}
+
+			customAppSignalIDs.insert(s.customAppSignalID(), i);
 
 			// check EquipmentID
 			//
+			s.setLm(nullptr);
+
 			if (s.equipmentID().isEmpty() == true)
 			{
-				m_log->wrnALC5012(s.appSignalID());		// Application signal '%1' is not bound to any device object.
+				// Application signal '%1' is not bound to any device object.
+				//
+				m_log->wrnALC5012(s.appSignalID());
 			}
 			else
 			{
-				Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID());
+				std::shared_ptr<Hardware::DeviceObject> device = m_equipmentSet->deviceObjectSharedPointer(s.equipmentID());
 
 				if (device == nullptr)
 				{
-					m_log->errALC5013(s.appSignalID(), s.equipmentID());		// Application signal '%1' is bound to unknown device object '%2'.
+					// Application signal '%1' is bound to unknown device object '%2'.
+					//
+					m_log->errALC5013(s.appSignalID(), s.equipmentID());
 					result = false;
 				}
 
 				bool deviceOK = false;
 
-				if (device->isModule())
+				switch(device->deviceType())
 				{
-					Hardware::DeviceModule* module = device->toModule();
+				case Hardware::DeviceType::Module:
+					{
+						Hardware::DeviceModule* module = device->toModule();
 
-					if (module != nullptr && module->isLogicModule())
-					{
-						deviceOK = true;
+						if (module != nullptr && module->isLogicModule() == true)
+						{
+							s.setLm(module);
+							deviceOK = true;
+						}
 					}
-				}
-				else
-				{
-					if (device->isSignal())
+					break;
+
+				case Hardware::DeviceType::Signal:
 					{
-						deviceOK = true;
+						Hardware::DeviceModule* module = DeviceHelper::getAssociatedLm(device);
+
+						if (module != nullptr && module->isLogicModule() == true)
+						{
+							s.setLm(module);
+							deviceOK = true;
+						}
 					}
+					break;
 				}
 
 				if (deviceOK == false)
@@ -316,7 +347,9 @@ namespace Builder
 			case E::SignalType::Discrete:
 				if (s.dataSize() != 1)
 				{
-					m_log->errALC5014(s.appSignalID());		// Discrete signal '%1' must have DataSize equal to 1.
+					// Discrete signal '%1' must have DataSize equal to 1.
+					//
+					m_log->errALC5014(s.appSignalID());
 					result = false;
 				}
 				break;
@@ -324,15 +357,28 @@ namespace Builder
 			case E::SignalType::Analog:
 				if (s.dataSize() != 32)
 				{
-					m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
+					// Analog signal '%1' must have DataSize equal to 32.
+					//
+					m_log->errALC5015(s.appSignalID());
 					result = false;
 				}
 
 				if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
 				{
+					// Analog signal '%1' aperture should be greate then 0.
+					//
 					m_log->errALC5090(s.appSignalID());
 					result = false;
 				}
+
+				if (s.coarseAperture() < s.fineAperture())
+				{
+					// Coarse aperture of signal '%1' less then fine aperture.
+					//
+					m_log->wrnALC5093(s.appSignalID());
+					result = false;
+				}
+
 				break;
 
 			case E::SignalType::Bus:
@@ -357,29 +403,31 @@ namespace Builder
 
 			// check tuningable signals properties
 			//
-			if (s.enableTuning() == true)
+			if (s.enableTuning() == fase)
 			{
-				if (s.isAnalog() == true)
+				continue;
+			}
+
+			if (s.isAnalog() == true)
+			{
+				if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())
 				{
-					if (s.lowEngeneeringUnits() >= s.highEngeneeringUnits())
+					// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+					//
+					m_log->errALC5068(s.appSignalID());
+					result = false;
+				}
+				else
+				{
+					// limits OK
+					//
+					if (s.tuningDefaultValue() < s.lowEngeneeringUnits() ||
+						s.tuningDefaultValue() > s.highEngeneeringUnits())
 					{
-						// LowEngeneeringUnits property of tuningable signal '%1' must be greate than HighEngeneeringUnits.
+						// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
 						//
-						m_log->errALC5068(s.appSignalID());
+						m_log->errALC5069(s.appSignalID());
 						result = false;
-					}
-					else
-					{
-						// limits OK
-						//
-						if (s.tuningDefaultValue() < s.lowEngeneeringUnits() ||
-							s.tuningDefaultValue() > s.highEngeneeringUnits())
-						{
-							// TuningDefaultValue property of tuningable signal '%1' must be in range from LowEngeneeringUnits toHighEngeneeringUnits.
-							//
-							m_log->errALC5069(s.appSignalID());
-							result = false;
-						}
 					}
 				}
 			}

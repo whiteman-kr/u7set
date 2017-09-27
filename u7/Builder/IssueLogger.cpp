@@ -4046,6 +4046,25 @@ namespace Builder
 						arg(busTypeID).arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5093
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Coarse aperture of signal '%1' less then fine aperture.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Coarse aperture of specified signal less then fine aperture. Check signal's properties.
+	///
+	void IssueLogger::wrnALC5093(QString appSignalID)
+	{
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5092,
+				  QString(tr("Coarse aperture of signal '%1' less then fine aperture.")).arg(appSignalID));
+	}
+
 	/// IssueCode: ALC5186
 	///
 	/// IssueType: Error

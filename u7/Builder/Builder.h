@@ -96,8 +96,6 @@ namespace Builder
 		//
 		bool loadSignals(DbController *db, SignalSet* signalSet, Hardware::EquipmentSet &equipment);
 
-		bool checkAppSignals(SignalSet& signalSet, Hardware::EquipmentSet& equipment);
-
 		// Load BusTypes (VFrame30::BusSet)
 		//
 		bool loadBusses(DbController* db, VFrame30::BusSet* out);

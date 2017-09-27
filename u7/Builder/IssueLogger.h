@@ -279,6 +279,7 @@ namespace Builder
 		void errALC5090(QString appSignalID);						// Analog signal aperture should be greate then 0.
 		void errALC5091(QString appSignalID);						// Input/output application signal '%1' should be bound to equipment signal.
 		void errALC5092(QString busTypeID, QString appSignalID);	// Bus type ID '%1' of signal '%2' is undefined.
+		void wrnALC5093(QString appSignalID);						// Coarse aperture of signal '%1' less then fine aperture.
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
