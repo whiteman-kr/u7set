@@ -28,6 +28,7 @@ struct WriteCommand
 	}
 };
 
+struct TuningModelRecord;
 
 class TuningSignalManager : public Tcp::Client
 {
@@ -52,6 +53,8 @@ public:
 	bool signalExists(Hash hash) const; // WARNING!!! Lock the m_signalsMutex before calling this function!!!
 
 	TuningSignalState stateByHash(Hash hash) const; // WARNING!!! Lock the m_statesMutex before calling this function!!!
+
+	void updateStates(std::vector<TuningModelRecord>& items);
 
 	// Tuning sources
 

@@ -168,25 +168,7 @@ void TuningModelClient::updateStates()
 		m_blink = !m_blink;
 	}
 
-	if (m_items.size() == 0)
-	{
-		return;
-	}
-
-	QMutexLocker l(&m_tuningSignalManager->m_statesMutex);
-
-	int count = static_cast<int>(m_items.size());
-
-	for (int i = 0; i < count; i++)
-	{
-		TuningModelRecord& item = m_items[i];
-
-		TuningSignalState state = m_tuningSignalManager->stateByHash(item.param.hash());
-
-		item.state.copy(state);
-	}
-
-	l.unlock();
+	m_tuningSignalManager->updateStates(m_items);
 
 	return;
 }
@@ -1129,7 +1111,10 @@ void TuningPage::fillObjectsList()
 		}
 	}
 
+	m_tuningSignalManager->updateStates(filteredObjects);
+
 	m_model->setSignals(filteredObjects);
+
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
