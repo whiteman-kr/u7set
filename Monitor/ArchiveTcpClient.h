@@ -75,6 +75,7 @@ signals:
 
 	void requestError(QString errorMessage);
 	void statusUpdate(QString status, int statesReceived, int requestCount, int repliesCount);
+	void requestIsFinished();
 
 public slots:
 //	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType);
@@ -97,6 +98,7 @@ private:
 	volatile bool m_requestInProgress = false;
 	int m_currentRequestId = 0;
 	ArchiveRequest m_requestData;
+	bool m_needCancelRequest = false;
 
 	QTime m_startRequestTime;
 

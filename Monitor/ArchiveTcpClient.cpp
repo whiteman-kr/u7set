@@ -43,8 +43,8 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 
 	if (m_requestInProgress == true)
 	{
-		cancelRequest();
 		assert(m_requestInProgress == false);
+		return false;
 	}
 
 	m_requestData.startTime = qMin(startTime, endTime);
@@ -118,6 +118,9 @@ void ArchiveTcpClient::resetState()
 {
 	m_requestInProgress = false;
 	m_currentRequestId = 0;
+	m_needCancelRequest = false;
+
+	emit requestIsFinished();
 	return;
 }
 
@@ -308,6 +311,12 @@ void ArchiveTcpClient::requestNext()
 		return;
 	}
 
+	if (m_needCancelRequest == true)
+	{
+		requestCancel();
+		return;
+	}
+
 	assert(m_currentRequestId != 0);
 	assert(m_requestInProgress == true);
 
@@ -477,7 +486,15 @@ void ArchiveTcpClient::slot_startRequest()
 void ArchiveTcpClient::slot_cancelRequest()
 {
 	assert(m_requestInProgress == true);
-	requestCancel();
+
+	if (m_requestInProgress == false)
+	{
+		resetState();
+		return;
+	}
+
+	m_needCancelRequest = true;
+
 	return;
 }
 

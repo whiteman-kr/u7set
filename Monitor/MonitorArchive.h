@@ -51,12 +51,15 @@ protected:
 	// Slots
 	//
 protected slots:
-	void updateButton();
+	void timeTypeCurrentIndexChanged(int index);
+
+	void updateOrCancelButton();
 	void signalsButton();
 
 	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
 	void tcpClientError(QString errorMessage);
 	void tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount);
+	void tcpRequestFinished();
 
 	// Data
 	//
@@ -82,6 +85,10 @@ private:
 	QPushButton* m_printButton = nullptr;
 	QPushButton* m_updateButton = nullptr;
 	QPushButton* m_signalsButton = nullptr;
+
+	QDateTimeEdit* m_startDateTimeEdit = nullptr;
+	QDateTimeEdit* m_endDateTimeEdit = nullptr;
+	QComboBox* m_timeType = nullptr;
 
 	ArchiveModel* m_model = new ArchiveModel(this);
 	ArchiveView* m_view = new ArchiveView(this);

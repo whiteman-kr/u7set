@@ -77,6 +77,18 @@ static int no = 1;
 
 	setMinimumSize(QSize(750, 400));
 
+	// --
+	//
+	m_source.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
+
+	QDateTime currentTime = QDateTime::currentDateTime();
+
+	m_source.requestEndTime = TimeStamp(currentTime).timeStamp / 1_min * 1_min;		// reset seconds and ms
+	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
+
+	qDebug() << m_source.requestStartTime.toDateTime();
+	qDebug() << m_source.requestEndTime.toDateTime();
+
 	// ToolBar
 	//
 	m_toolBar = new QToolBar(tr("ToolBar"));
@@ -89,6 +101,44 @@ static int no = 1;
 
 	m_toolBar->addWidget(m_exportButton);
 	m_toolBar->addWidget(m_printButton);
+	m_toolBar->addSeparator();
+
+	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime());
+	m_startDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_startDateTimeEdit->setCalendarPopup(true);
+	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
+
+	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime());
+	m_endDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_endDateTimeEdit->setCalendarPopup(true);
+	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
+
+	m_toolBar->addWidget(new QLabel(tr(" Start Time: ")));
+	m_toolBar->addWidget(m_startDateTimeEdit);
+
+	m_toolBar->addWidget(new QLabel(tr("   End Time: ")));
+	m_toolBar->addWidget(m_endDateTimeEdit);
+
+
+	// TimeType combo
+	//
+	m_timeType = new QComboBox;
+
+	m_timeType->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
+	m_timeType->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
+	m_timeType->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
+
+	int currentTimeType = m_timeType->findData(QVariant::fromValue(m_source.timeType));
+	assert(currentTimeType != -1);
+
+	if (currentTimeType != -1)
+	{
+		m_timeType->setCurrentIndex(currentTimeType);
+	}
+
+	m_toolBar->addWidget(new QLabel(tr("   Time Type: ")));
+	m_toolBar->addWidget(m_timeType);
+
 	m_toolBar->addSeparator();
 
 	// Add stretecher
@@ -122,14 +172,9 @@ static int no = 1;
 
 	// --
 	//
-	m_source.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
+	connect(m_timeType, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MonitorArchiveWidget::timeTypeCurrentIndexChanged);
 
-	m_source.requestEndTime = TimeStamp(QDateTime::currentDateTime());
-	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
-
-	// --
-	//
-	connect(m_updateButton, &QPushButton::clicked, this, &MonitorArchiveWidget::updateButton);
+	connect(m_updateButton, &QPushButton::clicked, this, &MonitorArchiveWidget::updateOrCancelButton);
 	connect(m_signalsButton, &QPushButton::clicked, this, &MonitorArchiveWidget::signalsButton);
 
 	// Central widget - model/view
@@ -149,6 +194,7 @@ static int no = 1;
 	connect(m_tcpClient, &ArchiveTcpClient::dataReady, this, &MonitorArchiveWidget::dataReceived);
 	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
 	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
+	connect(m_tcpClient, &ArchiveTcpClient::requestIsFinished, this, &MonitorArchiveWidget::tcpRequestFinished);
 
 	// --
 	//
@@ -218,14 +264,23 @@ void MonitorArchiveWidget::requestData()
 
 	if (m_tcpClient->isRequestInProgress() == true)
 	{
-		cancelRequest();
 		assert(m_tcpClient->isRequestInProgress());
+		return;
 	}
+
+	m_source.requestStartTime = TimeStamp(m_startDateTimeEdit->dateTime());
+	m_source.requestEndTime = TimeStamp(m_endDateTimeEdit->dateTime());
+
+	m_source.timeType = m_timeType->currentData().value<E::TimeType>();
+	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
 
 	m_tcpClient->requestData(m_source.requestStartTime,
 							 m_source.requestEndTime,
 							 m_source.timeType,
 							 m_source.acceptedSignals);
+
+	m_signalsButton->setEnabled(false);
+	m_updateButton->setText(tr("Cancel"));
 
 	return;
 }
@@ -253,7 +308,7 @@ void MonitorArchiveWidget::cancelRequest()
 
 	m_tcpClient->cancelRequest();
 
-	assert(m_tcpClient->isRequestInProgress());
+	assert(m_tcpClient->isRequestInProgress() == false);
 
 	return;
 }
@@ -346,28 +401,41 @@ void MonitorArchiveWidget::restoreWindowState()
 	return;
 }
 
-void MonitorArchiveWidget::updateButton()
+void MonitorArchiveWidget::timeTypeCurrentIndexChanged(int /*index*/)
 {
-	if (m_source.acceptedSignals.empty() == true)
+	assert(m_timeType);
+
+	m_source.timeType = m_timeType->currentData().value<E::TimeType>();
+	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
+
+	return;
+}
+
+void MonitorArchiveWidget::updateOrCancelButton()
+{
+	if (m_updateButton->text() == "Update")
 	{
-		QMessageBox::warning(this, qAppName(), tr("To request data from archive add at least one signal."));
-		return;
+		if (m_source.acceptedSignals.empty() == true)
+		{
+			QMessageBox::warning(this, qAppName(), tr("To request data from archive add at least one signal."));
+			return;
+		}
+
+		m_model->clear();
+		m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+		requestData();
 	}
-
-	m_model->clear();
-	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
-
-	requestData();
+	else
+	{
+		cancelRequest();
+	}
 	return;
 
 }
 
 void MonitorArchiveWidget::signalsButton()
 {
-	//std::vector<AppSignalParam> appSignals = m_appSignals;
-
-	// --
-	//
 	DialogChooseArchiveSignals dialog(m_schemasDetais, m_source, this);
 
 	int result = dialog.exec();
@@ -379,10 +447,22 @@ void MonitorArchiveWidget::signalsButton()
 
 	m_source = dialog.accpetedResult();
 
-	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
-
 	// Request data from archive
 	//
+	TimeStamp tsStart = qMin(m_source.requestStartTime, m_source.requestEndTime);
+	TimeStamp tsEnd = qMax(m_source.requestStartTime, m_source.requestEndTime);
+
+	m_startDateTimeEdit->setDateTime(tsStart.toDateTime());
+	m_endDateTimeEdit->setDateTime(tsEnd.toDateTime());
+
+	int currentTimeType = m_timeType->findData(QVariant::fromValue(m_source.timeType));
+	assert(currentTimeType != -1);
+
+	if (currentTimeType != -1)
+	{
+		m_timeType->setCurrentIndex(currentTimeType);
+	}
+
 	m_model->clear();
 	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
@@ -432,4 +512,10 @@ void MonitorArchiveWidget::tcpStatus(QString status, int statesReceived, int req
 	}
 
 	return;
+}
+
+void MonitorArchiveWidget::tcpRequestFinished()
+{
+	m_signalsButton->setEnabled(true);
+	m_updateButton->setText(tr("Update"));
 }
