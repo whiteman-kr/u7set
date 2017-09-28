@@ -105,6 +105,16 @@ void TuningSignalState::copy(const TuningSignalState& source)
 		m_value = source.value();
 	}
 
+	if (userModified() == false)
+	{
+		if (m_editValue != m_value)
+		{
+			m_flags.m_needRedraw = true;
+
+			m_editValue = m_value;
+		}
+	}
+
 	m_flags.m_underflow = m_value < m_readLowLimit;
 	m_flags.m_overflow = m_value > m_readHighLimit;
 

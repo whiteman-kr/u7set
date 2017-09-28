@@ -46,10 +46,19 @@ int main(int argc, char *argv[])
 	db.setPassword(DatabaseUserPassword);
 	db.setDatabaseName("postgres");
 
-	assert (db.open() == true);
+
+    bool ok = db.open();
+    if (ok == false)
+    {
+        QSqlError error = db.lastError();
+
+        qDebug() << "Database open error: " << error.text();
+
+        return 1;
+    }
 
 	QSqlQuery query;
-	bool ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
+    ok = query.exec(QString("SELECT datname FROM pg_database WHERE datname = '%1'").arg(QString("u7_") + ProjectName));
 
 	assert (ok == true);
 
