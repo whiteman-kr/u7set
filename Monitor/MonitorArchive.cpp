@@ -120,13 +120,10 @@ static int no = 1;
 
 	// --
 	//
-	m_selectSignalsResult.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
+	m_source.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
 
-	m_selectSignalsResult.requestEndTime = TimeStamp(QDateTime::currentDateTime());
-	m_selectSignalsResult.requestStartTime = m_selectSignalsResult.requestEndTime.timeStamp - 1_hour;
-
-	m_selectSignalsResult.signalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
-	m_selectSignalsResult.schemaId.clear();
+	m_source.requestEndTime = TimeStamp(QDateTime::currentDateTime());
+	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
 
 	// --
 	//
@@ -152,6 +149,8 @@ static int no = 1;
 
 	// --
 	//
+	setAcceptDrops(true);
+
 	restoreWindowState();
 
 	startTimer(100);
@@ -193,15 +192,10 @@ void MonitorArchiveWidget::ensureVisible()
 
 bool MonitorArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 {
-	m_appSignals = appSignals;
+	m_source.acceptedSignals = appSignals;
 	return true;
 }
 
-bool MonitorArchiveWidget::addSignal(const AppSignalParam& appSignal)
-{
-	m_appSignals.push_back(appSignal);
-	return true;
-}
 
 void MonitorArchiveWidget::requestData()
 {
@@ -225,10 +219,10 @@ void MonitorArchiveWidget::requestData()
 		assert(m_tcpClient->isRequestInProgress());
 	}
 
-	m_tcpClient->requestData(m_selectSignalsResult.requestStartTime,
-							 m_selectSignalsResult.requestEndTime,
-							 m_selectSignalsResult.timeType,
-							 m_selectSignalsResult.acceptedSignals);
+	m_tcpClient->requestData(m_source.requestStartTime,
+							 m_source.requestEndTime,
+							 m_source.timeType,
+							 m_source.acceptedSignals);
 
 	return;
 }
@@ -268,6 +262,67 @@ void MonitorArchiveWidget::closeEvent(QCloseEvent*e)
 	return;
 }
 
+void MonitorArchiveWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void MonitorArchiveWidget::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		event->setDropAction(Qt::DropAction::IgnoreAction);
+		event->accept();
+		return;
+	}
+
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	// Parse data
+	//
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		AppSignalParam appSignalParam;
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
+										[&appSignalParam](const AppSignalParam& sp)
+										{
+											return sp.appSignalId() == appSignalParam.appSignalId();
+										});
+
+			if (foundId == m_source.acceptedSignals.end())
+			{
+				m_source.acceptedSignals.push_back(appSignalParam);
+			}
+		}
+	}
+
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	return;
+
+}
+
 void MonitorArchiveWidget::saveWindowState()
 {
 	theSettings.m_archiveWindowPos = pos();
@@ -290,11 +345,11 @@ void MonitorArchiveWidget::restoreWindowState()
 
 void MonitorArchiveWidget::signalsButton()
 {
-	std::vector<AppSignalParam> appSignals = m_appSignals;
+	//std::vector<AppSignalParam> appSignals = m_appSignals;
 
 	// --
 	//
-	DialogChooseArchiveSignals dialog(appSignals, m_schemasDetais, m_selectSignalsResult, this);
+	DialogChooseArchiveSignals dialog(m_schemasDetais, m_source, this);
 
 	int result = dialog.exec();
 
@@ -303,16 +358,14 @@ void MonitorArchiveWidget::signalsButton()
 		return;
 	}
 
-	m_selectSignalsResult = dialog.accpetedResult();
+	m_source = dialog.accpetedResult();
 
-	theSettings.m_archiveTimeType = static_cast<int>(m_selectSignalsResult.timeType);
-
-	m_appSignals = m_selectSignalsResult.acceptedSignals;
+	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
 
 	// Request data from archive
 	//
 	m_model->clear();
-	m_model->setParams(m_appSignals, m_selectSignalsResult.timeType);
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
 
 	requestData();
 

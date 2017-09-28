@@ -13,7 +13,7 @@ ArchiveModel::ArchiveModel(QObject* parent) :
 
 int ArchiveModel::rowCount(const QModelIndex& /*parent*/) const
 {
-	return m_cachedSize; // is m_archive.size();
+	return m_archive.size();
 }
 
 int ArchiveModel::columnCount(const QModelIndex& /*parent*/) const
@@ -57,7 +57,7 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row >= m_cachedSize)
+	if (row >= m_archive.size())
 	{
 		return QVariant();
 	}
@@ -242,6 +242,8 @@ void ArchiveModel::updateCachedState(int row) const
 
 void ArchiveModel::setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType)
 {
+	m_appSignals.clear();
+
 	for (const AppSignalParam& asp : appSignals)
 	{
 		Hash h = ::calcHash(asp.appSignalId());
@@ -269,7 +271,6 @@ void ArchiveModel::addData(std::shared_ptr<ArchiveChunk> chunk)
 	beginInsertRows(QModelIndex(), first, last);
 
 	m_archive.addChunk(chunk);
-	m_cachedSize = m_archive.size();
 
 	endInsertRows();
 	return;
@@ -280,8 +281,6 @@ void ArchiveModel::clear()
 	beginResetModel();
 
 	m_archive.clear();
-	m_cachedSize = m_archive.size();
-
 	m_cachedStateIndex = -1;
 
 	endResetModel();

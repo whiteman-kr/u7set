@@ -82,6 +82,10 @@ signals:
 
 	// Properties
 	//
+public:
+	MonitorConfigController* configController();
+	const MonitorConfigController* configController() const;
+
 protected:
 
 	// Data

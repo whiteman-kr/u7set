@@ -7,6 +7,15 @@
 #include "../lib/AppSignal.h"
 
 
+struct ArchiveSource
+{
+	std::vector<AppSignalParam> acceptedSignals;
+	E::TimeType timeType = E::TimeType::Local;
+	TimeStamp requestStartTime;
+	TimeStamp requestEndTime;
+};
+
+
 struct ArchiveChunk
 {
 	std::vector<AppSignalState> states;
@@ -30,6 +39,7 @@ public:
 
 private:
 	std::vector<std::shared_ptr<ArchiveChunk>> m_chunks;
+	int m_cachedSize = 0;
 };
 
 #endif // ARCHIVEDATA_H

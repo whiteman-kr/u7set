@@ -2,10 +2,14 @@
 #include "ui_DialogChooseArchiveSignals.h"
 #include "Settings.h"
 
+
+DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::m_lastSignalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
+QString DialogChooseArchiveSignals::m_lastSchemaId;
+
+
 DialogChooseArchiveSignals::DialogChooseArchiveSignals(
-		const std::vector<AppSignalParam>& appSignals,
 		const std::vector<VFrame30::SchemaDetails>& schemaDetails,
-		const DialogChooseArchiveSignals::Result& init,
+		const ArchiveSource& init,
 		QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseArchiveSignals),
@@ -22,7 +26,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 	ui->signalTypeCombo->addItem(tr("Analog Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::AnalogSignals));
 	ui->signalTypeCombo->addItem(tr("Discrete Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::DiscreteSignals));
 
-	int currentSignalTypeIndex = ui->signalTypeCombo->findData(QVariant::fromValue<ArchiveSignalType>(init.signalType));
+	int currentSignalTypeIndex = ui->signalTypeCombo->findData(QVariant::fromValue<ArchiveSignalType>(m_lastSignalType));
 	assert(currentSignalTypeIndex != -1);
 
 	if (currentSignalTypeIndex != -1)
@@ -41,7 +45,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, QVariant(schema.m_schemaId));
 	}
 
-	int schemaIndex = ui->schemaCombo->findData(QVariant(init.schemaId));
+	int schemaIndex = ui->schemaCombo->findData(QVariant(m_lastSchemaId));
 	if (schemaIndex != -1)
 	{
 		ui->schemaCombo->setCurrentIndex(schemaIndex);
@@ -114,7 +118,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// Fill added signals
 	//
-	for (const AppSignalParam& appSignal : appSignals)
+	for (const AppSignalParam& appSignal : init.acceptedSignals)
 	{
 		addSignal(appSignal);
 	}
@@ -127,7 +131,7 @@ DialogChooseArchiveSignals::~DialogChooseArchiveSignals()
 	delete ui;
 }
 
-DialogChooseArchiveSignals::Result DialogChooseArchiveSignals::accpetedResult() const
+ArchiveSource DialogChooseArchiveSignals::accpetedResult() const
 {
 	return m_result;
 }
@@ -191,12 +195,21 @@ void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 	itemData << signalType;
 	itemData << signal.caption();
 
+	QString toolTip = QString("%1\n%2\n%3")
+						.arg(signal.customSignalId())
+						.arg(signal.appSignalId())
+						.arg(signal.caption());
+
 	QTreeWidgetItem* item = new QTreeWidgetItem(ui->archiveSignals, itemData);
 	item->setData(0, Qt::UserRole, QVariant::fromValue(signal));
 
-	ui->archiveSignals->addTopLevelItem(item);
+	item->setToolTip(0, toolTip);
+	item->setToolTip(1, toolTip);
+	item->setToolTip(2, toolTip);
 
+	ui->archiveSignals->addTopLevelItem(item);
 	ui->archiveSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
+
 
 	disableControls();
 
@@ -485,8 +498,8 @@ void DialogChooseArchiveSignals::on_buttonBox_accepted()
 	m_result.requestStartTime = TimeStamp(startTime);
 	m_result.requestEndTime = TimeStamp(endTime);
 
-	m_result.signalType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
-	m_result.schemaId = ui->schemaCombo->currentData().toString();
+	m_lastSignalType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
+	m_lastSchemaId = ui->schemaCombo->currentData().toString();
 
 	m_result.acceptedSignals.reserve(ui->archiveSignals->topLevelItemCount());
 
@@ -587,6 +600,34 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 				assert(false);
 				return QVariant();
 			}
+		}
+		break;
+	case Qt::ToolTipRole:
+		{
+			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+			{
+				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				return QVariant();
+			}
+
+			int signalIndex = m_signalIndexes[row];
+
+			if (signalIndex < 0 ||
+				signalIndex >= static_cast<int>(m_signals.size()))
+			{
+				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				return QVariant();
+			}
+
+			const AppSignalParam& signalParam = m_signals[signalIndex];
+
+			QString toolTip = QString("%1\n%2\n%3")
+								.arg(signalParam.customSignalId())
+								.arg(signalParam.appSignalId())
+								.arg(signalParam.caption());
+
+			return toolTip;
+
 		}
 		break;
 	default:

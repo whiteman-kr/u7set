@@ -3,6 +3,7 @@
 ArchiveData::ArchiveData()
 {
 	m_chunks.reserve(128);
+	m_cachedSize = 0;
 }
 
 
@@ -16,25 +17,28 @@ void ArchiveData::addChunk(std::shared_ptr<ArchiveChunk> chunk)
 	}
 
 	m_chunks.push_back(chunk);
+	m_cachedSize += static_cast<int>(chunk->states.size());
 
 	return;
 }
 
 int ArchiveData::size() const
 {
-	int result = 0;
+	return m_cachedSize;
+//	int result = 0;
 
-	for (const std::shared_ptr<ArchiveChunk>& c : m_chunks)
-	{
-		result += static_cast<int>(c->states.size());
-	}
+//	for (const std::shared_ptr<ArchiveChunk>& c : m_chunks)
+//	{
+//		result += static_cast<int>(c->states.size());
+//	}
 
-	return result;
+//	return result;
 }
 
 void ArchiveData::clear()
 {
 	m_chunks.clear();
+	m_cachedSize = 0;
 }
 
 AppSignalState ArchiveData::state(int index) const

@@ -22,7 +22,6 @@ private:
 	static std::map<QString, MonitorArchiveWidget*> m_archiveList;
 };
 
-
 class MonitorArchiveWidget : public QMainWindow
 {
 public:
@@ -33,7 +32,6 @@ public:
 	void ensureVisible();
 
 	bool setSignals(const std::vector<AppSignalParam>& appSignals);
-	bool addSignal(const AppSignalParam& appSignal);
 
 protected:
 	void requestData();
@@ -43,11 +41,8 @@ protected:
 	//
 protected:
 	virtual void closeEvent(QCloseEvent *e) override;
-//	virtual void timerEvent(QTimerEvent* event) override;
-//	virtual void showEvent(QShowEvent*) override;
-
-//	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-//	virtual void dropEvent(QDropEvent* event) override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 protected:
 	void saveWindowState();
@@ -68,7 +63,6 @@ private:
 	ConfigConnection m_archiveService1;
 	ConfigConnection m_archiveService2;
 
-	std::vector<AppSignalParam> m_appSignals;
 	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
 
 	ArchiveTcpClient* m_tcpClient = nullptr;
@@ -97,7 +91,7 @@ private:
 	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
-	DialogChooseArchiveSignals::Result m_selectSignalsResult;
+	ArchiveSource m_source;
 };
 
 

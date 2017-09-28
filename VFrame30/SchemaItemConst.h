@@ -79,7 +79,7 @@ namespace VFrame30
 		ConstType m_type = ConstType::FloatType;
 		int m_intValue = 0;
 		double m_floatValue = 0.0;
-		int m_precision = 2;
+		int m_precision = 6;
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;

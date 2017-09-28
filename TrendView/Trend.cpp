@@ -549,8 +549,8 @@ namespace TrendLib
 		double minInchInterval = 1.0/4.0;	// 1/4 in -- minimum inches interval
 		double gridValue = 1.0;
 
-		double pow = 1e-30;
-		for (int mult = 0; mult <= 60; mult++, pow *= 10.0)
+		double pow = 1e-100;
+		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
 		{
 			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
 			{
@@ -572,11 +572,17 @@ namespace TrendLib
 		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
 		int gridCount = static_cast<int>(delta / gridValue) + 2;
 
-		if (gridCount < 0 || gridCount > 100)
+		if (gridCount < 0)
+		{
+			assert(false);
+			gridCount = 0;
+		}
+
+		if (gridCount > 100)
 		{
 			// Something wrong
 			//
-			assert(false);
+			gridCount = 100;
 			return;
 		}
 
@@ -686,8 +692,8 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		double minInchInterval = 3.0/8.0;	// minimum inches interval
 		double gridValue = 1.0;
 
-		double pow = 1e-30;
-		for (int mult = 0; mult <= 60; mult++, pow *= 10.0)
+		double pow = 1e-100;
+		for (int mult = 0; mult <= 200; mult++, pow *= 10.0)
 		{
 			for (size_t i = 0; i < possibleGridIntervals.size(); i++)
 			{
@@ -709,11 +715,17 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		double lowGriddedValue = floor(lowLimit / gridValue) * gridValue;
 		int gridCount = static_cast<int>(delta / gridValue) + 2;
 
-		if (gridCount < 0 || gridCount > 100)
+		if (gridCount < 0)
 		{
 			// Something wrong
 			//
 			assert(false);
+			return;
+		}
+
+		if (gridCount > 100)
+		{
+			gridCount = 100;
 			return;
 		}
 

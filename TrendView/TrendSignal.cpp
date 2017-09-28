@@ -281,7 +281,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setHighLimit(double value)
 	{
-		m_highLimit = value;
+		m_highLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::lowLimit() const
@@ -291,7 +291,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setLowLimit(double value)
 	{
-		m_lowLimit = value;
+		m_lowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::viewHighLimit() const
@@ -301,7 +301,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setViewHighLimit(double value)
 	{
-		m_viewHighLimit = value;
+		m_viewHighLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::viewLowLimit() const
@@ -311,7 +311,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setViewLowLimit(double value)
 	{
-		m_viewLowLimit = value;
+		m_viewLowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	QColor TrendSignalParam::color() const

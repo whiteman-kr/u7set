@@ -37,7 +37,6 @@ private:
 	std::map<Hash, AppSignalParam> m_appSignals;
 	E::TimeType m_timeType = E::TimeType::Local;
 	ArchiveData m_archive;
-	int m_cachedSize = 0;
 
 	mutable int m_cachedStateIndex = -1;
 	mutable AppSignalState m_cachedSignalState;
