@@ -627,7 +627,6 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 								.arg(signalParam.caption());
 
 			return toolTip;
-
 		}
 		break;
 	default:
