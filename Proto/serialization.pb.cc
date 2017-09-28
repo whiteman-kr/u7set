@@ -1714,12 +1714,16 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignals));
   BusSignal_descriptor_ = file->message_type(73);
-  static const int BusSignal_offsets_[14] = {
+  static const int BusSignal_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, signalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, units_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, analogformat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, precision_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, coarseaperture_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, fineaperture_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, adaptiveaperture_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, inbusoffset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, inbusdiscretebitno_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, inbusanalogsize_),
@@ -2414,24 +2418,27 @@ void protobuf_AddDesc_serialization_2eproto() {
     "2\013.Proto.Uuid\"A\n\nArchSignal\022\014\n\004hash\030\001 \002("
     "\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t"
     "\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003(\0132\021.P"
-    "roto.ArchSignal\"\326\002\n\tBusSignal\022\020\n\010signalI"
+    "roto.ArchSignal\"\303\003\n\tBusSignal\022\020\n\010signalI"
     "d\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r"
-    "\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\023\n\013i"
-    "nbusOffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030("
-    " \001(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAn"
-    "alogFormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder"
-    "\0304 \001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022bus"
-    "AnalogHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowL"
-    "imit\0307 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001"
-    "\"\226\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tb"
-    "usTypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Pro"
-    "to.BusSignal\022!\n\023autoSignalPlacement\030\n \001("
-    "\010:\004true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010*3\n\nSch"
-    "emaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004"
-    "Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020"
-    "\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog"
-    "\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Uns"
-    "ignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13596);
+    "\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tp"
+    "recision\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001("
+    "\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n\020adapt"
+    "iveAperture\030\016 \001(\010:\005false\022\023\n\013inbusOffset\030"
+    "  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001(\005\022\027\n\017inb"
+    "usAnalogSize\0302 \001(\005\022\031\n\021inbusAnalogFormat\030"
+    "3 \001(\005\022\034\n\024inbusAnalogByteOrder\0304 \001(\005\022\031\n\021b"
+    "usAnalogLowLimit\0305 \001(\001\022\032\n\022busAnalogHighL"
+    "imit\0306 \001(\001\022\033\n\023inbusAnalogLowLimit\0307 \001(\001\022"
+    "\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n"
+    "\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 "
+    "\001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto.BusSigna"
+    "l\022!\n\023autoSignalPlacement\030\n \001(\010:\004true\022\030\n\r"
+    "manualBusSize\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007"
+    "Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024C"
+    "onnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Output"
+    "\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discr"
+    "ete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022"
+    "\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 13705);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -33545,6 +33552,10 @@ const int BusSignal::kCaptionFieldNumber;
 const int BusSignal::kTypeFieldNumber;
 const int BusSignal::kUnitsFieldNumber;
 const int BusSignal::kAnalogFormatFieldNumber;
+const int BusSignal::kPrecisionFieldNumber;
+const int BusSignal::kCoarseApertureFieldNumber;
+const int BusSignal::kFineApertureFieldNumber;
+const int BusSignal::kAdaptiveApertureFieldNumber;
 const int BusSignal::kInbusOffsetFieldNumber;
 const int BusSignal::kInbusDiscreteBitNoFieldNumber;
 const int BusSignal::kInbusAnalogSizeFieldNumber;
@@ -33577,6 +33588,10 @@ void BusSignal::SharedCtor() {
   type_ = 0;
   units_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   analogformat_ = 0;
+  precision_ = 2;
+  coarseaperture_ = 1;
+  fineaperture_ = 0.5;
+  adaptiveaperture_ = false;
   inbusoffset_ = 0;
   inbusdiscretebitno_ = 0;
   inbusanalogsize_ = 0;
@@ -33647,15 +33662,21 @@ void BusSignal::Clear() {
       }
     }
     analogformat_ = 0;
+    precision_ = 2;
+    coarseaperture_ = 1;
+    fineaperture_ = 0.5;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    adaptiveaperture_ = false;
     inbusoffset_ = 0;
     inbusdiscretebitno_ = 0;
     inbusanalogsize_ = 0;
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     inbusanalogformat_ = 0;
     inbusanalogbyteorder_ = 0;
     busanaloglowlimit_ = 0;
     busanaloghighlimit_ = 0;
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     inbusanaloglowlimit_ = 0;
     inbusanaloghighlimit_ = 0;
   }
@@ -33744,6 +33765,70 @@ bool BusSignal::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &analogformat_)));
           set_has_analogformat();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(88)) goto parse_precision;
+        break;
+      }
+
+      // optional int32 precision = 11 [default = 2];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_precision:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &precision_)));
+          set_has_precision();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(97)) goto parse_coarseAperture;
+        break;
+      }
+
+      // optional double coarseAperture = 12 [default = 1];
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_coarseAperture:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &coarseaperture_)));
+          set_has_coarseaperture();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(105)) goto parse_fineAperture;
+        break;
+      }
+
+      // optional double fineAperture = 13 [default = 0.5];
+      case 13: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_fineAperture:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &fineaperture_)));
+          set_has_fineaperture();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(112)) goto parse_adaptiveAperture;
+        break;
+      }
+
+      // optional bool adaptiveAperture = 14 [default = false];
+      case 14: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_adaptiveAperture:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &adaptiveaperture_)));
+          set_has_adaptiveaperture();
         } else {
           goto handle_uninterpreted;
         }
@@ -33950,6 +34035,26 @@ void BusSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->analogformat(), output);
   }
 
+  // optional int32 precision = 11 [default = 2];
+  if (has_precision()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->precision(), output);
+  }
+
+  // optional double coarseAperture = 12 [default = 1];
+  if (has_coarseaperture()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(12, this->coarseaperture(), output);
+  }
+
+  // optional double fineAperture = 13 [default = 0.5];
+  if (has_fineaperture()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(13, this->fineaperture(), output);
+  }
+
+  // optional bool adaptiveAperture = 14 [default = false];
+  if (has_adaptiveaperture()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(14, this->adaptiveaperture(), output);
+  }
+
   // optional int32 inbusOffset = 32;
   if (has_inbusoffset()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(32, this->inbusoffset(), output);
@@ -34043,6 +34148,26 @@ void BusSignal::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->analogformat(), target);
   }
 
+  // optional int32 precision = 11 [default = 2];
+  if (has_precision()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->precision(), target);
+  }
+
+  // optional double coarseAperture = 12 [default = 1];
+  if (has_coarseaperture()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(12, this->coarseaperture(), target);
+  }
+
+  // optional double fineAperture = 13 [default = 0.5];
+  if (has_fineaperture()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(13, this->fineaperture(), target);
+  }
+
+  // optional bool adaptiveAperture = 14 [default = false];
+  if (has_adaptiveaperture()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(14, this->adaptiveaperture(), target);
+  }
+
   // optional int32 inbusOffset = 32;
   if (has_inbusoffset()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(32, this->inbusoffset(), target);
@@ -34134,6 +34259,30 @@ int BusSignal::ByteSize() const {
           this->analogformat());
     }
 
+    // optional int32 precision = 11 [default = 2];
+    if (has_precision()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->precision());
+    }
+
+    // optional double coarseAperture = 12 [default = 1];
+    if (has_coarseaperture()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double fineAperture = 13 [default = 0.5];
+    if (has_fineaperture()) {
+      total_size += 1 + 8;
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bool adaptiveAperture = 14 [default = false];
+    if (has_adaptiveaperture()) {
+      total_size += 1 + 1;
+    }
+
     // optional int32 inbusOffset = 32;
     if (has_inbusoffset()) {
       total_size += 2 +
@@ -34155,8 +34304,6 @@ int BusSignal::ByteSize() const {
           this->inbusanalogsize());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 inbusAnalogFormat = 51;
     if (has_inbusanalogformat()) {
       total_size += 2 +
@@ -34181,6 +34328,8 @@ int BusSignal::ByteSize() const {
       total_size += 2 + 8;
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional double inbusAnalogLowLimit = 55;
     if (has_inbusanaloglowlimit()) {
       total_size += 2 + 8;
@@ -34233,6 +34382,20 @@ void BusSignal::MergeFrom(const BusSignal& from) {
     if (from.has_analogformat()) {
       set_analogformat(from.analogformat());
     }
+    if (from.has_precision()) {
+      set_precision(from.precision());
+    }
+    if (from.has_coarseaperture()) {
+      set_coarseaperture(from.coarseaperture());
+    }
+    if (from.has_fineaperture()) {
+      set_fineaperture(from.fineaperture());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_adaptiveaperture()) {
+      set_adaptiveaperture(from.adaptiveaperture());
+    }
     if (from.has_inbusoffset()) {
       set_inbusoffset(from.inbusoffset());
     }
@@ -34242,8 +34405,6 @@ void BusSignal::MergeFrom(const BusSignal& from) {
     if (from.has_inbusanalogsize()) {
       set_inbusanalogsize(from.inbusanalogsize());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_inbusanalogformat()) {
       set_inbusanalogformat(from.inbusanalogformat());
     }
@@ -34256,6 +34417,8 @@ void BusSignal::MergeFrom(const BusSignal& from) {
     if (from.has_busanaloghighlimit()) {
       set_busanaloghighlimit(from.busanaloghighlimit());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_inbusanaloglowlimit()) {
       set_inbusanaloglowlimit(from.inbusanaloglowlimit());
     }
@@ -34290,6 +34453,10 @@ void BusSignal::Swap(BusSignal* other) {
     std::swap(type_, other->type_);
     std::swap(units_, other->units_);
     std::swap(analogformat_, other->analogformat_);
+    std::swap(precision_, other->precision_);
+    std::swap(coarseaperture_, other->coarseaperture_);
+    std::swap(fineaperture_, other->fineaperture_);
+    std::swap(adaptiveaperture_, other->adaptiveaperture_);
     std::swap(inbusoffset_, other->inbusoffset_);
     std::swap(inbusdiscretebitno_, other->inbusdiscretebitno_);
     std::swap(inbusanalogsize_, other->inbusanalogsize_);

@@ -10383,6 +10383,34 @@ class BusSignal : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 analogformat() const;
   inline void set_analogformat(::google::protobuf::int32 value);
 
+  // optional int32 precision = 11 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 11;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional double coarseAperture = 12 [default = 1];
+  inline bool has_coarseaperture() const;
+  inline void clear_coarseaperture();
+  static const int kCoarseApertureFieldNumber = 12;
+  inline double coarseaperture() const;
+  inline void set_coarseaperture(double value);
+
+  // optional double fineAperture = 13 [default = 0.5];
+  inline bool has_fineaperture() const;
+  inline void clear_fineaperture();
+  static const int kFineApertureFieldNumber = 13;
+  inline double fineaperture() const;
+  inline void set_fineaperture(double value);
+
+  // optional bool adaptiveAperture = 14 [default = false];
+  inline bool has_adaptiveaperture() const;
+  inline void clear_adaptiveaperture();
+  static const int kAdaptiveApertureFieldNumber = 14;
+  inline bool adaptiveaperture() const;
+  inline void set_adaptiveaperture(bool value);
+
   // optional int32 inbusOffset = 32;
   inline bool has_inbusoffset() const;
   inline void clear_inbusoffset();
@@ -10458,6 +10486,14 @@ class BusSignal : public ::google::protobuf::Message {
   inline void clear_has_units();
   inline void set_has_analogformat();
   inline void clear_has_analogformat();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_coarseaperture();
+  inline void clear_has_coarseaperture();
+  inline void set_has_fineaperture();
+  inline void clear_has_fineaperture();
+  inline void set_has_adaptiveaperture();
+  inline void clear_has_adaptiveaperture();
   inline void set_has_inbusoffset();
   inline void clear_has_inbusoffset();
   inline void set_has_inbusdiscretebitno();
@@ -10484,6 +10520,10 @@ class BusSignal : public ::google::protobuf::Message {
   ::std::string* units_;
   ::google::protobuf::int32 type_;
   ::google::protobuf::int32 analogformat_;
+  double coarseaperture_;
+  ::google::protobuf::int32 precision_;
+  bool adaptiveaperture_;
+  double fineaperture_;
   ::google::protobuf::int32 inbusoffset_;
   ::google::protobuf::int32 inbusdiscretebitno_;
   ::google::protobuf::int32 inbusanalogsize_;
@@ -10495,7 +10535,7 @@ class BusSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 inbusanalogbyteorder_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(14 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -25306,15 +25346,103 @@ inline void BusSignal::set_analogformat(::google::protobuf::int32 value) {
   analogformat_ = value;
 }
 
-// optional int32 inbusOffset = 32;
-inline bool BusSignal::has_inbusoffset() const {
+// optional int32 precision = 11 [default = 2];
+inline bool BusSignal::has_precision() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void BusSignal::set_has_inbusoffset() {
+inline void BusSignal::set_has_precision() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void BusSignal::clear_has_inbusoffset() {
+inline void BusSignal::clear_has_precision() {
   _has_bits_[0] &= ~0x00000020u;
+}
+inline void BusSignal::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 BusSignal::precision() const {
+  return precision_;
+}
+inline void BusSignal::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional double coarseAperture = 12 [default = 1];
+inline bool BusSignal::has_coarseaperture() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void BusSignal::set_has_coarseaperture() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void BusSignal::clear_has_coarseaperture() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void BusSignal::clear_coarseaperture() {
+  coarseaperture_ = 1;
+  clear_has_coarseaperture();
+}
+inline double BusSignal::coarseaperture() const {
+  return coarseaperture_;
+}
+inline void BusSignal::set_coarseaperture(double value) {
+  set_has_coarseaperture();
+  coarseaperture_ = value;
+}
+
+// optional double fineAperture = 13 [default = 0.5];
+inline bool BusSignal::has_fineaperture() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void BusSignal::set_has_fineaperture() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void BusSignal::clear_has_fineaperture() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void BusSignal::clear_fineaperture() {
+  fineaperture_ = 0.5;
+  clear_has_fineaperture();
+}
+inline double BusSignal::fineaperture() const {
+  return fineaperture_;
+}
+inline void BusSignal::set_fineaperture(double value) {
+  set_has_fineaperture();
+  fineaperture_ = value;
+}
+
+// optional bool adaptiveAperture = 14 [default = false];
+inline bool BusSignal::has_adaptiveaperture() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void BusSignal::set_has_adaptiveaperture() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void BusSignal::clear_has_adaptiveaperture() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void BusSignal::clear_adaptiveaperture() {
+  adaptiveaperture_ = false;
+  clear_has_adaptiveaperture();
+}
+inline bool BusSignal::adaptiveaperture() const {
+  return adaptiveaperture_;
+}
+inline void BusSignal::set_adaptiveaperture(bool value) {
+  set_has_adaptiveaperture();
+  adaptiveaperture_ = value;
+}
+
+// optional int32 inbusOffset = 32;
+inline bool BusSignal::has_inbusoffset() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void BusSignal::set_has_inbusoffset() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void BusSignal::clear_has_inbusoffset() {
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void BusSignal::clear_inbusoffset() {
   inbusoffset_ = 0;
@@ -25330,13 +25458,13 @@ inline void BusSignal::set_inbusoffset(::google::protobuf::int32 value) {
 
 // optional int32 inbusDiscreteBitNo = 40;
 inline bool BusSignal::has_inbusdiscretebitno() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void BusSignal::set_has_inbusdiscretebitno() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void BusSignal::clear_has_inbusdiscretebitno() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void BusSignal::clear_inbusdiscretebitno() {
   inbusdiscretebitno_ = 0;
@@ -25352,13 +25480,13 @@ inline void BusSignal::set_inbusdiscretebitno(::google::protobuf::int32 value) {
 
 // optional int32 inbusAnalogSize = 50;
 inline bool BusSignal::has_inbusanalogsize() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void BusSignal::set_has_inbusanalogsize() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void BusSignal::clear_has_inbusanalogsize() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void BusSignal::clear_inbusanalogsize() {
   inbusanalogsize_ = 0;
@@ -25374,13 +25502,13 @@ inline void BusSignal::set_inbusanalogsize(::google::protobuf::int32 value) {
 
 // optional int32 inbusAnalogFormat = 51;
 inline bool BusSignal::has_inbusanalogformat() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void BusSignal::set_has_inbusanalogformat() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void BusSignal::clear_has_inbusanalogformat() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void BusSignal::clear_inbusanalogformat() {
   inbusanalogformat_ = 0;
@@ -25396,13 +25524,13 @@ inline void BusSignal::set_inbusanalogformat(::google::protobuf::int32 value) {
 
 // optional int32 inbusAnalogByteOrder = 52;
 inline bool BusSignal::has_inbusanalogbyteorder() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void BusSignal::set_has_inbusanalogbyteorder() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void BusSignal::clear_has_inbusanalogbyteorder() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void BusSignal::clear_inbusanalogbyteorder() {
   inbusanalogbyteorder_ = 0;
@@ -25418,13 +25546,13 @@ inline void BusSignal::set_inbusanalogbyteorder(::google::protobuf::int32 value)
 
 // optional double busAnalogLowLimit = 53;
 inline bool BusSignal::has_busanaloglowlimit() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void BusSignal::set_has_busanaloglowlimit() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void BusSignal::clear_has_busanaloglowlimit() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void BusSignal::clear_busanaloglowlimit() {
   busanaloglowlimit_ = 0;
@@ -25440,13 +25568,13 @@ inline void BusSignal::set_busanaloglowlimit(double value) {
 
 // optional double busAnalogHighLimit = 54;
 inline bool BusSignal::has_busanaloghighlimit() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void BusSignal::set_has_busanaloghighlimit() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void BusSignal::clear_has_busanaloghighlimit() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void BusSignal::clear_busanaloghighlimit() {
   busanaloghighlimit_ = 0;
@@ -25462,13 +25590,13 @@ inline void BusSignal::set_busanaloghighlimit(double value) {
 
 // optional double inbusAnalogLowLimit = 55;
 inline bool BusSignal::has_inbusanaloglowlimit() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void BusSignal::set_has_inbusanaloglowlimit() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void BusSignal::clear_has_inbusanaloglowlimit() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void BusSignal::clear_inbusanaloglowlimit() {
   inbusanaloglowlimit_ = 0;
@@ -25484,13 +25612,13 @@ inline void BusSignal::set_inbusanaloglowlimit(double value) {
 
 // optional double inbusAnalogHighLimit = 56;
 inline bool BusSignal::has_inbusanaloghighlimit() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void BusSignal::set_has_inbusanaloghighlimit() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void BusSignal::clear_has_inbusanaloghighlimit() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void BusSignal::clear_inbusanaloghighlimit() {
   inbusanaloghighlimit_ = 0;
