@@ -1,4 +1,5 @@
 #include "ArchiveModelView.h"
+#include "Settings.h"
 
 //
 //
@@ -18,33 +19,31 @@ int ArchiveModel::rowCount(const QModelIndex& /*parent*/) const
 
 int ArchiveModel::columnCount(const QModelIndex& /*parent*/) const
 {
-	return static_cast<int>(Columns::ColumnCount);
+	return static_cast<int>(ArchiveColumns::ColumnCount);
 }
 
 QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
 {
-	if (orientation == Qt::Orientation::Vertical)
-	{
-		return QAbstractTableModel::headerData(section, orientation, role);
-	}
-
 	if (role != Qt::DisplayRole)
 	{
 		return QVariant();
 	}
 
-	switch (static_cast<Columns>(section))
+	switch (static_cast<ArchiveColumns>(section))
 	{
-	case Columns::CustomSignalId:
+	case ArchiveColumns::Row:
+		return tr("Row");
+
+	case ArchiveColumns::CustomSignalId:
 		return tr("SignalID");
 
-	case Columns::Caption:
+	case ArchiveColumns::Caption:
 		return tr("Caption");
 
-	case Columns::State:
+	case ArchiveColumns::State:
 		return tr("State");
 
-	case Columns::Time:
+	case ArchiveColumns::Time:
 		return tr("Time");
 	}
 
@@ -67,9 +66,12 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 		QVariant result;
 		updateCachedState(row);		// m_cachedSignalState -- state for row
 
-		switch (static_cast<Columns>(column))
+		switch (static_cast<ArchiveColumns>(column))
 		{
-		case Columns::CustomSignalId:
+		case ArchiveColumns::Row:
+			result = row;
+			break;
+		case ArchiveColumns::CustomSignalId:
 			{
 				auto sit = m_appSignals.find(m_cachedSignalState.hash());
 				if (sit == m_appSignals.end())
@@ -84,7 +86,7 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 				}
 			}
 			break;
-		case Columns::Caption:
+		case ArchiveColumns::Caption:
 			{
 				auto sit = m_appSignals.find(m_cachedSignalState.hash());
 				if (sit == m_appSignals.end())
@@ -99,7 +101,7 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 				}
 			}
 			break;
-		case Columns::State:
+		case ArchiveColumns::State:
 			{
 				auto sit = m_appSignals.find(m_cachedSignalState.hash());
 				if (sit == m_appSignals.end())
@@ -114,7 +116,7 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 				}
 			}
 			break;
-		case Columns::Time:
+		case ArchiveColumns::Time:
 			{
 				const TimeStamp& ts = m_cachedSignalState.time(m_timeType);
 				result = ts.toDateTime().toString("dd/MM/yyyy HH:mm:ss.zzz");
@@ -125,6 +127,11 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 		}
 
 		return result;
+	}
+
+	if (role == Qt::TextAlignmentRole && column ==  static_cast<int>(ArchiveColumns::Row))
+	{
+		return QVariant(Qt::AlignCenter);
 	}
 
 	if (role == Qt::ToolTipRole)
@@ -295,11 +302,95 @@ void ArchiveModel::clear()
 ArchiveView::ArchiveView(QWidget* parent) :
 	QTableView(parent)
 {
+	verticalHeader()->hide();
 	verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader()->setDefaultSectionSize(verticalHeader()->minimumSectionSize() + verticalHeader()->minimumSectionSize() / 10);
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+	// --
+	//
+	horizontalHeader()->restoreState(theSettings.m_archiveHorzHeader);
+
+	qRegisterMetaType<ArchiveColumns>("ArchiveColumns");
+
+	horizontalHeader()->setHighlightSections(false);
+	horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(horizontalHeader(), &QWidget::customContextMenuRequested, this, &ArchiveView::headerColumnContextMenuRequested);
+
+	return;
+}
+
+ArchiveView::~ArchiveView()
+{
+	theSettings.m_archiveHorzHeader = horizontalHeader()->saveState();
+}
+
+void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
+{
+	QMenu menu(this);
+
+	QList<QAction*> actions;
+
+	std::vector<std::pair<ArchiveColumns, QString>> actionsData;
+	actionsData.reserve(static_cast<int>(ArchiveColumns::ColumnCount));
+
+	actionsData.emplace_back(ArchiveColumns::Row, tr("Row"));
+	actionsData.emplace_back(ArchiveColumns::CustomSignalId, tr("SignalID"));
+	actionsData.emplace_back(ArchiveColumns::Caption, tr("Caption"));
+	actionsData.emplace_back(ArchiveColumns::State, tr("State"));
+	actionsData.emplace_back(ArchiveColumns::Time, tr("Time"));
+
+	for (std::pair<ArchiveColumns, QString> ad : actionsData)
+	{
+		QAction* action = new QAction(ad.second);
+		action->setData(QVariant::fromValue(ad.first));
+		action->setCheckable(true);
+		action->setChecked(!horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));
+
+		if (horizontalHeader()->count() - horizontalHeader()->hiddenSectionCount() == 1 &&
+			action->isChecked() == true)
+		{
+			action->setEnabled(false);			// Impossible to uncheck the last column
+		}
+
+		connect(action, &QAction::toggled, this, &ArchiveView::headerColumnToggled);
+
+		actions << action;
+	}
+
+	menu.exec(actions, mapToGlobal(pos), 0, this);
+	return;
+}
+
+void ArchiveView::headerColumnToggled(bool checked)
+{
+	QAction* action = dynamic_cast<QAction*>(sender());
+
+	if (action == nullptr)
+	{
+		assert(action);
+		return ;
+	}
+
+	int column = action->data().value<int>();
+
+	if (column >= static_cast<int>(ArchiveColumns::ColumnCount))
+	{
+		assert(column < static_cast<int>(ArchiveColumns::ColumnCount));
+		return;
+	}
+
+	if (checked == true)
+	{
+		showColumn(column);
+	}
+	else
+	{
+		hideColumn(column);
+	}
 
 	return;
 }

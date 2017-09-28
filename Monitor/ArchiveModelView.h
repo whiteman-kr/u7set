@@ -3,6 +3,19 @@
 #include <QTableView>
 #include "ArchiveData.h"
 
+enum class ArchiveColumns
+{
+	Row = 0,
+	CustomSignalId,
+	Caption,
+	State,
+	Time,
+
+	ColumnCount
+};
+
+Q_DECLARE_METATYPE(ArchiveColumns);
+
 //
 //
 //		ArchiveModel
@@ -41,16 +54,6 @@ private:
 	mutable int m_cachedStateIndex = -1;
 	mutable AppSignalState m_cachedSignalState;
 
-	enum class Columns
-	{
-		CustomSignalId = 0,
-		Caption,
-		State,
-		Time,
-
-		ColumnCount
-	};
-
 	QString nonValidString = "?";
 };
 
@@ -64,6 +67,18 @@ class ArchiveView : public QTableView
 {
 public:
 	explicit ArchiveView(QWidget* parent = nullptr);
+	virtual ~ArchiveView();
+
+protected:
+
+protected slots:
+	void headerColumnContextMenuRequested(const QPoint& pos);
+	void headerColumnToggled(bool checked);
+
+	// Data
+	//
+private:
+	QMenu m_columnMenu;
 };
 
 #endif // ARCHIVEMODELVIEW_H
