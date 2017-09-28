@@ -22,7 +22,6 @@ private:
 	QVector<Signal> m_signalParams;
 	QVector<AppSignalState> m_states;
 	QHash<Hash, int> m_hash2Index;
-	UnitList m_unitList;
 
 	QTimer* m_updateStatesTimer = nullptr;
 
@@ -107,5 +106,4 @@ public:
 	QList<AppDataSource*> dataSources() { return m_appDataSources.values(); }
 	const QVector<Signal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
-	QString unit(int id) { return m_unitList.contains(id) ? m_unitList.value(id) : tr("Unknown unit ID = %1").arg(id); }
 };

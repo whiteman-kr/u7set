@@ -89,69 +89,6 @@ void AppSignalManager::reset()
 	return;
 }
 
-void AppSignalManager::setUnits(const std::vector<AppSignalUnits>& units)
-{
-	std::map<int, QString> unitsCopy;
-
-	{
-		QMutexLocker l(&m_unitsMutex);
-
-		m_units.clear();
-
-		for (const AppSignalUnits& u : units)
-		{
-			m_units[u.id] = u.unit;
-		}
-
-		unitsCopy = m_units;
-	}
-
-	//  units in appsignals
-	//
-	{
-		QMutexLocker l(&m_paramsMutex);
-
-		for (auto& spair : m_signalParams)		// & is must be here, in other case pair will be a copy and AppSignalParam will be copy also
-		{
-			AppSignalParam& s = spair.second;
-			auto foundUnitIt = unitsCopy.find(s.unitId());
-
-			if (foundUnitIt == unitsCopy.end())
-			{
-				qDebug() << Q_FUNC_INFO << " Can't find unit, UnitID = " << s.unitId() << ", AppSiagnalID = " << s.appSignalId();
-			}
-			else
-			{
-				s.setUnit(foundUnitIt->second);
-			}
-		}
-	}
-
-	return;
-}
-
-std::map<int, QString> AppSignalManager::units() const
-{
-	QMutexLocker l(&m_unitsMutex);
-	return std::map<int, QString>(m_units);
-}
-
-QString AppSignalManager::units(int id) const
-{
-	QMutexLocker l(&m_unitsMutex);
-
-	auto it = m_units.find(id);
-
-	if (it == m_units.end())
-	{
-		return QString();
-	}
-	else
-	{
-		return it->second;
-	}
-}
-
 void AppSignalManager::addSignal(const AppSignalParam& signal)
 {
 	QMutexLocker l(&m_paramsMutex);

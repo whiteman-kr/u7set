@@ -131,9 +131,9 @@ public:
 
 	// Units management
 	//
-	bool getUnits(UnitList* units, QWidget* parentWidget);
+/*	bool getUnits(UnitList* units, QWidget* parentWidget);
 	bool addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget);
-	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);
+	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);*/
 
 	// Build management
 	//
@@ -209,7 +209,6 @@ signals:
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
-	void signal_getDataFormats(DataFormatList* dataFormats);
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
@@ -225,12 +224,6 @@ signals:
 
 	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);
-
-	// Units management
-	//
-	void signal_getUnits(UnitList* units);
-	void signal_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void signal_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
 
 	// Build management
 	//

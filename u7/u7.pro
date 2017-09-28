@@ -407,6 +407,10 @@ PRECOMPILED_HEADER = Stable.h
 #
 unix:QMAKE_CXXFLAGS += -std=c++11
 
+#c++14 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++14
+
 #Optimization flags
 #
 win32 {

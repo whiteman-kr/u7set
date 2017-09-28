@@ -6,8 +6,6 @@
 
 #include "Conversion.h"
 
-#include "../lib/Types.h"
-
 // -------------------------------------------------------------------------------------------------------------------
 
 Calculator::Calculator(QWidget* parent) :
@@ -201,7 +199,7 @@ void Calculator::initDialog()
 	for (int s = 0; s < SENSOR_TYPE_BY_UNIT_COUNT; s++)
 	{
 		UnitSensorTypePair pair = SensorTypeByUnit[s];
-		if (pair.unitID != E::InputUnit::Ohm)
+		if (pair.unitID != E::ElectricUnit::Ohm)
 		{
 			continue;
 		}
@@ -238,7 +236,7 @@ void Calculator::initDialog()
 	for (int s = 0; s < SENSOR_TYPE_BY_UNIT_COUNT; s++)
 	{
 		UnitSensorTypePair pair = SensorTypeByUnit[s];
-		if (pair.unitID != E::InputUnit::mV)
+		if (pair.unitID != E::ElectricUnit::mV)
 		{
 			continue;
 		}
@@ -319,7 +317,7 @@ void Calculator::conversionTr()
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::InputUnit::Ohm, sensorType);
+		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType);
 
 		m_pTrDegreeEdit->setFocus();
 		m_pTrDegreeEdit->setReadOnly(false);
@@ -329,7 +327,7 @@ void Calculator::conversionTr()
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::InputUnit::Ohm, sensorType);
+		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType);
 
 		m_pTrElectricEdit->setFocus();
 		m_pTrElectricEdit->setReadOnly(false);
@@ -361,7 +359,7 @@ void Calculator::conversionTc()
 
 	if (m_pTcDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::InputUnit::mV, sensorType);
+		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::mV, sensorType);
 
 		m_pTcDegreeEdit->setFocus();
 		m_pTcDegreeEdit->setReadOnly(false);
@@ -371,7 +369,7 @@ void Calculator::conversionTc()
 
 	if (m_pTcElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::InputUnit::mV, sensorType);
+		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::mV, sensorType);
 
 		m_pTcElectricEdit->setFocus();
 		m_pTcElectricEdit->setReadOnly(false);

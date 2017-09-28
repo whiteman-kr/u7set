@@ -18,18 +18,18 @@ class DbProgress;
 
 class DbWorker : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 
 private:
-    DbWorker();
-
-    void getSignalData(QSqlQuery& q, Signal &s);
-    QString getSignalDataStr(const Signal& s);
+	DbWorker();
 
 	void getObjectState(QSqlQuery& q, ObjectState& os);
 
 public:
     DbWorker(DbProgress* progress);
+
+	static void getSignalData(QSqlQuery& q, Signal &s);
+	static QString getSignalDataStr(const Signal& s);
 
 protected:
 	QString postgresConnectionName() const;
@@ -167,9 +167,9 @@ public slots:
 
 	// Units management
 	//
-	void slot_getUnits(UnitList* units);
+/*	void slot_getUnits(UnitList* units);
 	void slot_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);
+	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);*/
 
     // Build management
     //

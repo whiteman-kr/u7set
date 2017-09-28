@@ -19,11 +19,6 @@ namespace Builder
 	{
 		bool result = true;
 
-/*		result &= writeSettings();
-		result &= writeAppDataSourcesXml();
-		result &= writeAppSignalsXml();
-		result &= writeEquipmentXml();*/
-
 		return result;
 	}
 }

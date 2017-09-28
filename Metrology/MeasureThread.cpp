@@ -257,7 +257,7 @@ bool MeasureThread::setCalibratorUnit()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::InputUnit signalUnit, double electricHighLimit)
+bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit)
 {
 	if (calibratorIsValid(pCalibratorManager) == false)
 	{
@@ -270,20 +270,14 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 		return false;
 	}
 
-	if (theSignalBase.units().contains(signalUnit) == false)
-	{
-		assert(0);
-		return false;
-	}
-
 	int calibratorUnit = CALIBRATOR_UNIT_UNKNOWN;
 
 	switch(signalUnit)
 	{
-		case E::InputUnit::mA:	calibratorUnit = CALIBRATOR_UNIT_MA;	break;
-		case E::InputUnit::mV:	calibratorUnit = CALIBRATOR_UNIT_MV;	break;
-		case E::InputUnit::V:	calibratorUnit = CALIBRATOR_UNIT_V;		break;
-		case E::InputUnit::Ohm:
+		case E::ElectricUnit::mA:	calibratorUnit = CALIBRATOR_UNIT_MA;	break;
+		case E::ElectricUnit::mV:	calibratorUnit = CALIBRATOR_UNIT_MV;	break;
+		case E::ElectricUnit::V:	calibratorUnit = CALIBRATOR_UNIT_V;		break;
+		case E::ElectricUnit::Ohm:
 			{
 				// Minimal range for calibrators TRX-II and Calys75 this is 400 Ohm
 				//

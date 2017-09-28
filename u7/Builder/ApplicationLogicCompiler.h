@@ -60,7 +60,6 @@ namespace Builder
 		bool writeOptoVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort);
 		bool writeOptoModulesReport();
 
-		bool writeUnitsFile();
 		bool writeAppSignalSetFile();
 
 		const LmDescriptionSet& lmDescriptionSet() const;

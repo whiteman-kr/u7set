@@ -14,7 +14,6 @@ static const QString channelCaption("Channel");
 static const QString createdCaption("Created");
 static const QString deletedCaption("Deleted");
 static const QString instanceCreatedCaption("InstanceCreated");
-//static const QString instanceActionCaption("InstanceAction");
 static const QString typeCaption("Type");
 static const QString inOutTypeCaption("InOutType");
 static const QString cacheValidator("^[#]?[A-Za-z\\d_]*$");
@@ -23,7 +22,7 @@ static const QString customSignalIDCaption("CustomAppSignalID");
 static const QString busTypeIDCaption("BusTypeID");
 static const QString captionCaption("Caption");
 static const QString captionValidator("^.+$");
-static const QString analogDataFormatCaption("AnalogDataFormat");
+static const QString analogSignalFormatCaption("AnalogSignalFormat");
 static const QString dataSizeCaption("DataSize");
 static const QString lowADCCaption("LowADC");
 static const QString highADCCaption("HighADC");
@@ -34,10 +33,12 @@ static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
 static const QString unitCaption("Unit");
 static const QString lowValidRangeCaption("LowValidRange");
 static const QString highValidRangeCaption("HighValidRange");
-static const QString unbalanceLimitCaption("UnbalanceLimit");
+static const QString electricLowLimitCaption("electricLowLimit");
+static const QString electricHighLimitCaption("electricHighLimit");
+static const QString electricUnitCaption("electricUnit");
+static const QString sensorTypeCaption("sensorType");
 static const QString outputModeCaption("OutputMode");
 static const QString acquireCaption("Acquire");
-static const QString normalStateCaption("NormalState");
 static const QString decimalPlacesCaption("DecimalPlaces");
 static const QString coarseApertureCaption("CoarseAperture");
 static const QString fineApertureCaption("FineAperture");
@@ -56,6 +57,8 @@ static const QString dataFormatCategory("3 Data Format");
 static const QString signalProcessingCategory("4 Signal processing");
 static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
 static const QString tuningCategory("6 Tuning");
+
+static const QString lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
 class SignalProperties : public PropertyObject
@@ -84,22 +87,14 @@ public:
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
 	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngeneeringUnits(); }
 	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngeneeringUnits(); }
-	Q_INVOKABLE int unitID() const { return m_signal.unitID(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
-//	Q_INVOKABLE double unbalanceLimit() const { return m_signal.unbalanceLimit(); }
-	Q_INVOKABLE double inputLowLimit() const { return m_signal.inputLowLimit(); }
-	Q_INVOKABLE double inputHighLimit() const { return m_signal.inputHighLimit(); }
-	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.inputUnitID());}
-	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.inputSensorType());}
-	Q_INVOKABLE double outputLowLimit() const { return m_signal.outputLowLimit(); }
-	Q_INVOKABLE double outputHighLimit() const { return m_signal.outputHighLimit(); }
-	Q_INVOKABLE int outputUnitID() const { return m_signal.outputUnitID(); }
+	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }
+	Q_INVOKABLE double inputHighLimit() const { return m_signal.electricHighLimit(); }
+	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.electricUnit());}
+	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.sensorType());}
 	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(m_signal.outputMode());}
-	Q_INVOKABLE int jsOutputSensorType() const { return static_cast<int>(m_signal.outputSensorType());}
 	Q_INVOKABLE bool acquire() const { return m_signal.acquire(); }
-	Q_INVOKABLE bool calculated() const { return m_signal.calculated(); }
-	Q_INVOKABLE int normalState() const { return m_signal.normalState(); }
 	Q_INVOKABLE int decimalPlaces() const { return m_signal.decimalPlaces(); }
 	Q_INVOKABLE double aperture() const { return m_signal.coarseAperture(); }
 	Q_INVOKABLE E::SignalInOutType inOutType() const { return m_signal.inOutType(); }

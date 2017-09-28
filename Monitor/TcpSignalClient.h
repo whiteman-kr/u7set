@@ -15,8 +15,6 @@
 //				|
 //		ADS_GET_APP_SIGNAL_PARAM
 //				|
-//		ADS_GET_UNITS
-//				|
 //		ADS_GET_APP_SIGNAL_STATE <------+
 //				|						|			Repeat it
 //				+------------------------
@@ -57,9 +55,6 @@ protected:
 	void requestSignalParam(int startIndex);
 	void processSignalParam(const QByteArray& data);
 
-	void requestUnits();
-	void processUnits(const QByteArray& data);
-
 	void requestSignalState(int startIndex);
 	void processSignalState(const QByteArray& data);
 
@@ -90,9 +85,6 @@ private:
 	::Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	::Network::GetAppSignalStateReply m_getSignalStateReply;
 	int m_lastSignalStateStartIndex = 0;
-
-	::Network::GetUnitsRequest m_getUnitsRequest;
-	::Network::GetUnitsReply m_getUnitsReply;
 };
 
 #endif // TCPSIGNALCLIENT_H

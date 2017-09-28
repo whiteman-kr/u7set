@@ -340,18 +340,7 @@ bool ConfigSocket::readUnits(const QByteArray& fileData, int fileVersion)
 
 		result &= xml.readIntAttribute("ID", &unitID);
 		result &= xml.readStringAttribute("Caption", &unitCaption);
-
-		theSignalBase.units().append(unitID, unitCaption);
 	}
-
-	if (unitCount != theSignalBase.units().count())
-	{
-		qDebug() << "ConfigSocket::readUnits - Units loading error, loaded: " << theSignalBase.units().count() << " from " << unitCount;
-		assert(false);
-		return false;
-	}
-
-	qDebug() << "ConfigSocket::readUnits - Units were loaded: " << theSignalBase.units().count();
 
 	return result;
 }

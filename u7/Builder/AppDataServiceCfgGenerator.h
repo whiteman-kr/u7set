@@ -18,10 +18,9 @@ namespace Builder
 		bool getAssociatedLMs();
 
 		bool writeSettings();
-		bool writeAppSignalsXml();
-		bool writeAppSignalsProtofile();
-		bool writeEquipmentXml();
 		bool writeAppDataSourcesXml();
+		bool addLinkToAppSignalsFile();
+
 
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 

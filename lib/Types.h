@@ -168,15 +168,22 @@ public:
 
 	// InputUnit
 	//
-	enum InputUnit
+	enum ElectricUnit
 	{
-		NoInputUnit = 1,
-		mA = 15,
-		mV = 11,
-		Ohm = 20,
-		V = 12,
+		NoUnit = 0,
+		mA = 1,
+		mV = 2,
+		Ohm = 3,
+		V = 4,
+
+		// oder version
+		// NoInputUnit = 1,
+		// mA = 15,
+		// mV = 11,
+		// Ohm = 20,
+		// V = 12,
 	};
-	Q_ENUM(InputUnit)
+	Q_ENUM(ElectricUnit)
 
 	// SensorType
 	//
@@ -309,6 +316,36 @@ public:
 		return result;
 	}
 
+	// Convert QString to enum value (not index)
+	//
+	template <typename ENUM_TYPE>
+	static ENUM_TYPE stringToValue(const QString& str)
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return static_cast<ENUM_TYPE>(me.value(0));
+		}
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			if (QString::fromLocal8Bit(me.key(i)) == str)
+			{
+				return static_cast<ENUM_TYPE>(me.value(i));
+			}
+		}
+
+		assert(false);		// key is not found!
+
+		return static_cast<ENUM_TYPE>(me.value(0));
+	}
+
 	// Get list of enum values and assigned String
 	//
 	template <typename ENUM_TYPE>
@@ -334,6 +371,35 @@ public:
 		return result;
 	}
 
+
+	// Get list of enum keys converted to QString
+	//
+	template <typename ENUM_TYPE>
+	static QStringList enumKeyStrings()
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		QStringList result;
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		if (me.isValid() == false)
+		{
+			assert(me.isValid() == true);
+			return result;
+		}
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.append(QString::fromLocal8Bit(me.key(i)));
+		}
+
+		return result;
+	}
+
+
 	// Check if enum containes value
 	//
 	template <typename ENUM_TYPE>
@@ -351,6 +417,7 @@ public:
 				return true;
 			}
 		}
+
 		return false;
 	}
 };

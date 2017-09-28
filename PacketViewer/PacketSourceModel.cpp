@@ -252,9 +252,8 @@ void PacketSourceModel::loadProject(const QString& projectPath)
 	QDirIterator signalsIt(projectPath, QStringList() << "*appSignals.xml", QDir::Files, QDirIterator::Subdirectories);
 	if (signalsIt.hasNext())
 	{
-		m_unitInfo.clear();
 		m_signalSet.clear();
-		SerializeSignalsFromXml(signalsIt.next(), m_unitInfo, m_signalSet);
+		SerializeSignalsFromXml(signalsIt.next(), m_signalSet);
 	}
 	else
 	{

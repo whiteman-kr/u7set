@@ -20,7 +20,6 @@ void SignalProperties::initProperties()
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, createdCaption, false, Signal::created, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(bool, deletedCaption, false, Signal::deleted, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
-	//ADD_PROPERTY_GETTER_INDIRECT(E::InstanceAction, instanceActionCaption, false, Signal::instanceAction, m_signal);
 
 	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(signalTypeCategory);
@@ -79,11 +78,11 @@ void SignalProperties::initProperties()
 			}
 		}
 
-		auto analogDataFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogDataFormatCaption, QString(), true,
+		auto analogSignalFormatProperty = addProperty<E::AnalogAppSignalFormat>(analogSignalFormatCaption, QString(), true,
 																			  (std::function<E::AnalogAppSignalFormat(void)>)std::bind(&Signal::analogSignalFormat, &m_signal),
 																			  std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 
-		analogDataFormatProperty->setCategory(dataFormatCategory);
+		analogSignalFormatProperty->setCategory(dataFormatCategory);
 
 		auto lowADCProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, lowADCCaption, true, Signal::lowADC, Signal::setLowADC, m_signal);
 		lowADCProperty->setCategory(signalProcessingCategory);
@@ -116,12 +115,8 @@ void SignalProperties::initProperties()
 		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
 		outputModePropetry->setCategory(signalProcessingCategory);
 
-		auto unitProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(unitCaption, true, Signal::unitList(), Signal::unitID, Signal::setUnitID, m_signal);
-		unitProperty->setCategory(dataFormatCategory);
-
-/*		auto unbalanceLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, unbalanceLimitCaption, true, Signal::unbalanceLimit, Signal::setUnbalanceLimit, m_signal);
-		m_propertiesDependentOnPrecision.push_back(unbalanceLimitProperty);
-		unbalanceLimitProperty->setCategory(onlineMonitoringSystemCategory);*/
+		auto unit = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
+		unit->setCategory(signalProcessingCategory);
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
@@ -142,11 +137,6 @@ void SignalProperties::initProperties()
 		auto filteringTimePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, filteringTimeCaption, true, Signal::filteringTime, Signal::setFilteringTime, m_signal);
 		filteringTimePropetry->setPrecision(6);
 		filteringTimePropetry->setCategory(signalProcessingCategory);
-	}
-	else
-	{
-		auto normalStateProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, normalStateCaption, true, Signal::normalState, Signal::setNormalState, m_signal);
-		normalStateProperty->setCategory(onlineMonitoringSystemCategory);
 	}
 
 	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
