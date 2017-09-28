@@ -4,11 +4,13 @@
 namespace Builder
 {
 
-	SignalSet::SignalSet(VFrame30::BusSet* busSet, IssueLogger* log) :
+	SignalSet::SignalSet(VFrame30::BusSet* busSet, BuildResultWriter* resultWriter, IssueLogger* log) :
 		m_busSet(busSet),
+		m_resultWriter(resultWriter),
 		m_log(log)
 	{
 		assert(busSet != nullptr);
+		assert(resultWriter != nullptr);
 		assert(log != nullptr);
 	}
 

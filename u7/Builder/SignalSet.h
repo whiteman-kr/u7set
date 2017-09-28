@@ -3,7 +3,9 @@
 #include "../lib/Signal.h"
 #include "../VFrame30/Bus.h"
 
+#include "BuildResultWriter.h"
 #include "IssueLogger.h"
+#include "Busses.h"
 
 namespace Builder
 {
@@ -13,9 +15,10 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		SignalSet(VFrame30::BusSet* busSet, IssueLogger* log);
+		SignalSet(VFrame30::BusSet* busSet, BuildResultWriter* resultWriter, IssueLogger* log);
 		virtual ~SignalSet();
 
+		bool prepareBusses();
 		bool checkSignals();
 		bool expandBusSignals();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
@@ -27,10 +30,15 @@ namespace Builder
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;
+		BuildResultWriter* m_resultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
+
+		//
 
 		int m_maxSignalID = -1;
 		QHash<int, QString> m_busSignals;
+
+		Busses m_busses;
 	};
 
 }

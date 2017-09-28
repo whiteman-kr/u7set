@@ -471,6 +471,8 @@ const int	WORD_SIZE = 16,
 
 const int	ANALOG_SIZE_W = 2;
 
+const int	WORD_SIZE_IN_BYTES = 2;				// WORD size in bytes
+
 const int	SIZE_1BIT = 1;
 const int	SIZE_8BIT = 8;
 const int	SIZE_16BIT = 16;

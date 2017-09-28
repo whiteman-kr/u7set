@@ -891,12 +891,16 @@ namespace Builder
 			return false;
 		}
 
+		signalSet->buildID2IndexMap();
+
 		result = signalSet->expandBusSignals();
 
 		if (result == false)
 		{
 			return false;
 		}
+
+		signalSet->buildID2IndexMap();				// rebuild map after expand
 
 		result = signalSet->bindSignalsToLMs(equipment);
 
@@ -906,8 +910,6 @@ namespace Builder
 		}
 
 		LOG_SUCCESS(m_log, tr("Ok"));
-
-		signalSet->buildID2IndexMap();
 
 		signalSet->initCalculatedSignalsProperties();
 

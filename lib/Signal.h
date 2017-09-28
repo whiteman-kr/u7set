@@ -304,8 +304,6 @@ private:
 
 	//
 
-
-
 private:
 	// Signal identificators
 	//

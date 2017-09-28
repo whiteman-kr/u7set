@@ -4061,9 +4061,71 @@ namespace Builder
 	void IssueLogger::wrnALC5093(QString appSignalID)
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
-				  5092,
+				  5093,
 				  QString(tr("Coarse aperture of signal '%1' less then fine aperture.")).arg(appSignalID));
 	}
+
+	/// IssueCode: ALC5094
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 In bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Size of in bus analog signal is not multiple 16 bits. Check in bus signal properties.
+	///
+	void IssueLogger::errALC5094(QString inBusSignalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5094,
+				  QString(tr("Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').")).
+						arg(inBusSignalID).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5095
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		The bus size must be a multiple of 2 bytes (1 word). Check bus properties.
+	///
+	void IssueLogger::errALC5095(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5095,
+				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').")).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5096
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 In bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Offset of in bus analog signal is not multiple of 2 bytes (1 word). Check in bus signal properties.
+	///
+	void IssueLogger::errALC5096(QString inBusSignalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5096,
+				  QString(tr("Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+							arg(inBusSignalID).arg(busTypeID));
+	}
+
 
 	/// IssueCode: ALC5186
 	///
