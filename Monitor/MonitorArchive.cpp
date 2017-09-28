@@ -84,6 +84,7 @@ static int no = 1;
 
 	m_exportButton = new QPushButton(tr("Export..."));
 	m_printButton = new QPushButton(tr("Print..."));
+	m_updateButton = new QPushButton(tr("Update"));
 	m_signalsButton = new QPushButton(tr("Signals..."));
 
 	m_toolBar->addWidget(m_exportButton);
@@ -96,6 +97,7 @@ static int no = 1;
 	empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 	m_toolBar->addWidget(empty);
 
+	m_toolBar->addWidget(m_updateButton);
 	m_toolBar->addWidget(m_signalsButton);
 
 	addToolBar(m_toolBar);
@@ -127,6 +129,7 @@ static int no = 1;
 
 	// --
 	//
+	connect(m_updateButton, &QPushButton::clicked, this, &MonitorArchiveWidget::updateButton);
 	connect(m_signalsButton, &QPushButton::clicked, this, &MonitorArchiveWidget::signalsButton);
 
 	// Central widget - model/view
@@ -341,6 +344,22 @@ void MonitorArchiveWidget::restoreWindowState()
 	ensureVisible();
 
 	return;
+}
+
+void MonitorArchiveWidget::updateButton()
+{
+	if (m_source.acceptedSignals.empty() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("To request data from archive add at least one signal."));
+		return;
+	}
+
+	m_model->clear();
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	requestData();
+	return;
+
 }
 
 void MonitorArchiveWidget::signalsButton()

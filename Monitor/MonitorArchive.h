@@ -51,6 +51,7 @@ protected:
 	// Slots
 	//
 protected slots:
+	void updateButton();
 	void signalsButton();
 
 	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
@@ -79,6 +80,7 @@ private:
 	QToolBar* m_toolBar = nullptr;
 	QPushButton* m_exportButton = nullptr;
 	QPushButton* m_printButton = nullptr;
+	QPushButton* m_updateButton = nullptr;
 	QPushButton* m_signalsButton = nullptr;
 
 	ArchiveModel* m_model = new ArchiveModel(this);
