@@ -196,3 +196,15 @@ void TuningSignalState::invalidate()
 {
 	m_flags.m_valid = false;
 }
+
+bool TuningSignalState::floatsEqual(float x, float y)
+{
+	float epsilon = std::numeric_limits<float>::epsilon();
+
+	if (std::fabs(x - y) >= epsilon)
+	{
+		return false;
+	}
+
+	return true;
+}

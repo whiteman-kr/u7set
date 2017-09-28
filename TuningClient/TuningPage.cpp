@@ -195,9 +195,15 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false)
 		{
 			QColor color = QColor(Qt::red);
+			return QBrush(color);
+		}
+
+		if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.value()) == false)
+		{
+			QColor color = QColor(Qt::gray);
 			return QBrush(color);
 		}
 	}
@@ -288,7 +294,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush(color);
 		}
 
-		if (o.state.valid() == false || o.limitsUnbalance() == true)
+		if (o.state.valid() == false)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -497,23 +503,19 @@ void TuningModelClient::slot_setAll()
 
 	auto fAllToDefault = [this]() -> void
 	{
-			for (TuningModelRecord& o : m_items)
-	{
+		for (TuningModelRecord& o : m_items)
+		{
 			if (o.state.valid() == false)
-	{
-			continue;
-}
+			{
+				continue;
+			}
+			if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.editValue()) == false)
+			{
+				o.state.onEditValue(o.param.tuningDefaultValue());
+			}
+		}
 
-			//float scalePercent = std::fabs(o.param.lowEngineeringUnits() - o.param.highEngineeringUnits()) / 100.0;
-
-			double epsilon = std::numeric_limits<double>::epsilon();
-
-			if (std::fabs(o.param.tuningDefaultValue() - o.state.editValue()) > epsilon)
-	{
-			o.state.onEditValue(o.param.tuningDefaultValue());
-}
-}
-};
+	};
 
 	connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
 
