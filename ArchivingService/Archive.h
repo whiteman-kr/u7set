@@ -8,6 +8,7 @@
 #include "../lib/HostAddressPort.h"
 #include "../lib/TimeStamp.h"
 #include "../lib/CircularLogger.h"
+#include "../lib/Types.h"
 
 struct ArchSignal
 {
@@ -64,11 +65,11 @@ public:
 	void appendExistingTable(const QString& tableName);
 	bool tableIsExists(const QString& tableName);
 
-	static QString timeTypeStr(TimeType timeType);
+	static QString timeTypeStr(E::TimeType timeType);
 
 	static qint64 localTimeOffsetFromUtc();
 
-	static QString getCmpField(TimeType timeType);
+	static QString getCmpField(E::TimeType timeType);
 
 	void setSignalInitialized(Hash signalHash, bool initilaized);
 

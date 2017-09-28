@@ -5245,6 +5245,18 @@ class GetAppSignalStatesFromArchiveStartReply : public ::google::protobuf::Messa
   inline ::google::protobuf::int32 archerror() const;
   inline void set_archerror(::google::protobuf::int32 value);
 
+  // optional string errorString = 4;
+  inline bool has_errorstring() const;
+  inline void clear_errorstring();
+  static const int kErrorStringFieldNumber = 4;
+  inline const ::std::string& errorstring() const;
+  inline void set_errorstring(const ::std::string& value);
+  inline void set_errorstring(const char* value);
+  inline void set_errorstring(const char* value, size_t size);
+  inline ::std::string* mutable_errorstring();
+  inline ::std::string* release_errorstring();
+  inline void set_allocated_errorstring(::std::string* errorstring);
+
   // optional uint32 requestID = 3 [default = 0];
   inline bool has_requestid() const;
   inline void clear_requestid();
@@ -5258,6 +5270,8 @@ class GetAppSignalStatesFromArchiveStartReply : public ::google::protobuf::Messa
   inline void clear_has_error();
   inline void set_has_archerror();
   inline void clear_has_archerror();
+  inline void set_has_errorstring();
+  inline void clear_has_errorstring();
   inline void set_has_requestid();
   inline void clear_has_requestid();
 
@@ -5265,10 +5279,11 @@ class GetAppSignalStatesFromArchiveStartReply : public ::google::protobuf::Messa
 
   ::google::protobuf::int32 error_;
   ::google::protobuf::int32 archerror_;
+  ::std::string* errorstring_;
   ::google::protobuf::uint32 requestid_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -5436,6 +5451,18 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   inline ::google::protobuf::uint32 requestid() const;
   inline void set_requestid(::google::protobuf::uint32 value);
 
+  // optional string errorString = 10;
+  inline bool has_errorstring() const;
+  inline void clear_errorstring();
+  static const int kErrorStringFieldNumber = 10;
+  inline const ::std::string& errorstring() const;
+  inline void set_errorstring(const ::std::string& value);
+  inline void set_errorstring(const char* value);
+  inline void set_errorstring(const char* value, size_t size);
+  inline ::std::string* mutable_errorstring();
+  inline ::std::string* release_errorstring();
+  inline void set_allocated_errorstring(::std::string* errorstring);
+
   // optional bool dataReady = 4 [default = false];
   inline bool has_dataready() const;
   inline void clear_dataready();
@@ -5491,6 +5518,8 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   inline void clear_has_archerror();
   inline void set_has_requestid();
   inline void clear_has_requestid();
+  inline void set_has_errorstring();
+  inline void clear_has_errorstring();
   inline void set_has_dataready();
   inline void clear_has_dataready();
   inline void set_has_totalstatescount();
@@ -5506,6 +5535,7 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
 
   ::google::protobuf::int32 error_;
   ::google::protobuf::int32 archerror_;
+  ::std::string* errorstring_;
   ::google::protobuf::uint32 requestid_;
   ::google::protobuf::int32 totalstatescount_;
   ::google::protobuf::int32 sentstatescount_;
@@ -5515,7 +5545,7 @@ class GetAppSignalStatesFromArchiveNextReply : public ::google::protobuf::Messag
   ::google::protobuf::int32 statesinpartcount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -5676,20 +5706,35 @@ class GetAppSignalStatesFromArchiveCancelReply : public ::google::protobuf::Mess
   inline ::google::protobuf::int32 archerror() const;
   inline void set_archerror(::google::protobuf::int32 value);
 
+  // optional string errorString = 3;
+  inline bool has_errorstring() const;
+  inline void clear_errorstring();
+  static const int kErrorStringFieldNumber = 3;
+  inline const ::std::string& errorstring() const;
+  inline void set_errorstring(const ::std::string& value);
+  inline void set_errorstring(const char* value);
+  inline void set_errorstring(const char* value, size_t size);
+  inline ::std::string* mutable_errorstring();
+  inline ::std::string* release_errorstring();
+  inline void set_allocated_errorstring(::std::string* errorstring);
+
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveCancelReply)
  private:
   inline void set_has_error();
   inline void clear_has_error();
   inline void set_has_archerror();
   inline void clear_has_archerror();
+  inline void set_has_errorstring();
+  inline void clear_has_errorstring();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::int32 error_;
   ::google::protobuf::int32 archerror_;
+  ::std::string* errorstring_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10997,15 +11042,85 @@ inline void GetAppSignalStatesFromArchiveStartReply::set_archerror(::google::pro
   archerror_ = value;
 }
 
-// optional uint32 requestID = 3 [default = 0];
-inline bool GetAppSignalStatesFromArchiveStartReply::has_requestid() const {
+// optional string errorString = 4;
+inline bool GetAppSignalStatesFromArchiveStartReply::has_errorstring() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void GetAppSignalStatesFromArchiveStartReply::set_has_requestid() {
+inline void GetAppSignalStatesFromArchiveStartReply::set_has_errorstring() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void GetAppSignalStatesFromArchiveStartReply::clear_has_requestid() {
+inline void GetAppSignalStatesFromArchiveStartReply::clear_has_errorstring() {
   _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetAppSignalStatesFromArchiveStartReply::clear_errorstring() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    errorstring_->clear();
+  }
+  clear_has_errorstring();
+}
+inline const ::std::string& GetAppSignalStatesFromArchiveStartReply::errorstring() const {
+  return *errorstring_;
+}
+inline void GetAppSignalStatesFromArchiveStartReply::set_errorstring(const ::std::string& value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveStartReply::set_errorstring(const char* value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveStartReply::set_errorstring(const char* value, size_t size) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetAppSignalStatesFromArchiveStartReply::mutable_errorstring() {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  return errorstring_;
+}
+inline ::std::string* GetAppSignalStatesFromArchiveStartReply::release_errorstring() {
+  clear_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = errorstring_;
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetAppSignalStatesFromArchiveStartReply::set_allocated_errorstring(::std::string* errorstring) {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (errorstring) {
+    set_has_errorstring();
+    errorstring_ = errorstring;
+  } else {
+    clear_has_errorstring();
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional uint32 requestID = 3 [default = 0];
+inline bool GetAppSignalStatesFromArchiveStartReply::has_requestid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveStartReply::set_has_requestid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void GetAppSignalStatesFromArchiveStartReply::clear_has_requestid() {
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void GetAppSignalStatesFromArchiveStartReply::clear_requestid() {
   requestid_ = 0u;
@@ -11115,15 +11230,85 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_requestid(::google::prot
   requestid_ = value;
 }
 
-// optional bool dataReady = 4 [default = false];
-inline bool GetAppSignalStatesFromArchiveNextReply::has_dataready() const {
+// optional string errorString = 10;
+inline bool GetAppSignalStatesFromArchiveNextReply::has_errorstring() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void GetAppSignalStatesFromArchiveNextReply::set_has_dataready() {
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_errorstring() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void GetAppSignalStatesFromArchiveNextReply::clear_has_dataready() {
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_errorstring() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_errorstring() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    errorstring_->clear();
+  }
+  clear_has_errorstring();
+}
+inline const ::std::string& GetAppSignalStatesFromArchiveNextReply::errorstring() const {
+  return *errorstring_;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_errorstring(const ::std::string& value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_errorstring(const char* value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_errorstring(const char* value, size_t size) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetAppSignalStatesFromArchiveNextReply::mutable_errorstring() {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  return errorstring_;
+}
+inline ::std::string* GetAppSignalStatesFromArchiveNextReply::release_errorstring() {
+  clear_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = errorstring_;
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_allocated_errorstring(::std::string* errorstring) {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (errorstring) {
+    set_has_errorstring();
+    errorstring_ = errorstring;
+  } else {
+    clear_has_errorstring();
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool dataReady = 4 [default = false];
+inline bool GetAppSignalStatesFromArchiveNextReply::has_dataready() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::set_has_dataready() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void GetAppSignalStatesFromArchiveNextReply::clear_has_dataready() {
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_dataready() {
   dataready_ = false;
@@ -11139,13 +11324,13 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_dataready(bool value) {
 
 // optional int32 totalStatesCount = 5 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_totalstatescount() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_totalstatescount() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_totalstatescount() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_totalstatescount() {
   totalstatescount_ = 0;
@@ -11161,13 +11346,13 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_totalstatescount(::googl
 
 // optional int32 sentStatesCount = 6 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_sentstatescount() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_sentstatescount() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_sentstatescount() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_sentstatescount() {
   sentstatescount_ = 0;
@@ -11183,13 +11368,13 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_sentstatescount(::google
 
 // optional int32 statesInPartCount = 7 [default = 0];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_statesinpartcount() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_statesinpartcount() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_statesinpartcount() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_statesinpartcount() {
   statesinpartcount_ = 0;
@@ -11205,13 +11390,13 @@ inline void GetAppSignalStatesFromArchiveNextReply::set_statesinpartcount(::goog
 
 // optional bool isLastPart = 8 [default = false];
 inline bool GetAppSignalStatesFromArchiveNextReply::has_islastpart() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::set_has_islastpart() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_has_islastpart() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void GetAppSignalStatesFromArchiveNextReply::clear_islastpart() {
   islastpart_ = false;
@@ -11322,6 +11507,76 @@ inline ::google::protobuf::int32 GetAppSignalStatesFromArchiveCancelReply::arche
 inline void GetAppSignalStatesFromArchiveCancelReply::set_archerror(::google::protobuf::int32 value) {
   set_has_archerror();
   archerror_ = value;
+}
+
+// optional string errorString = 3;
+inline bool GetAppSignalStatesFromArchiveCancelReply::has_errorstring() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_has_errorstring() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::clear_has_errorstring() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::clear_errorstring() {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    errorstring_->clear();
+  }
+  clear_has_errorstring();
+}
+inline const ::std::string& GetAppSignalStatesFromArchiveCancelReply::errorstring() const {
+  return *errorstring_;
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_errorstring(const ::std::string& value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_errorstring(const char* value) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(value);
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_errorstring(const char* value, size_t size) {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  errorstring_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* GetAppSignalStatesFromArchiveCancelReply::mutable_errorstring() {
+  set_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    errorstring_ = new ::std::string;
+  }
+  return errorstring_;
+}
+inline ::std::string* GetAppSignalStatesFromArchiveCancelReply::release_errorstring() {
+  clear_has_errorstring();
+  if (errorstring_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = errorstring_;
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void GetAppSignalStatesFromArchiveCancelReply::set_allocated_errorstring(::std::string* errorstring) {
+  if (errorstring_ != &::google::protobuf::internal::kEmptyString) {
+    delete errorstring_;
+  }
+  if (errorstring) {
+    set_has_errorstring();
+    errorstring_ = errorstring;
+  } else {
+    clear_has_errorstring();
+    errorstring_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 

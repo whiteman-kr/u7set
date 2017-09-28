@@ -41,17 +41,6 @@ public:
 public:
 	void reset();
 
-	// Units
-	//
-	struct AppSignalUnits
-	{
-		int id;
-		QString unit;
-	};
-
-	void setUnits(const std::vector<AppSignalUnits>& units);
-	std::map<int, QString> units() const;
-	QString units(int id) const;
 
 	// Signal Params
 	//

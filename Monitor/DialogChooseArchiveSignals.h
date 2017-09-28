@@ -4,6 +4,8 @@
 #include <QDialog>
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/Schema.h"
+#include "ArchiveData.h"
+
 
 namespace Ui {
 	class DialogChooseArchiveSignals;
@@ -16,13 +18,12 @@ public:
 	struct Result;
 
 public:
-	DialogChooseArchiveSignals(const std::vector<AppSignalParam>& appSignals,
-							   const std::vector<VFrame30::SchemaDetails>& schemaDetails,
-							   const DialogChooseArchiveSignals::Result& init,
+	DialogChooseArchiveSignals(const std::vector<VFrame30::SchemaDetails>& schemaDetails,
+							   const ArchiveSource& init,
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();
 
-	DialogChooseArchiveSignals::Result accpetedResult() const;
+	ArchiveSource accpetedResult() const;
 
 protected:
 	void fillSignalList();
@@ -65,26 +66,18 @@ public:
 	};
 	Q_ENUM(ArchiveSignalType);
 
-	struct Result
-	{
-		std::vector<AppSignalParam> acceptedSignals;
-		TimeType timeType = TimeType::Local;
-		TimeStamp requestStartTime;
-		TimeStamp requestEndTime;
-
-		// Variable to restore last UI state
-		//
-		ArchiveSignalType signalType = ArchiveSignalType::AllSignals;	// Selected SignalType
-		QString schemaId;												// Selected Schema
-	};
-
 private:
 	Ui::DialogChooseArchiveSignals* ui;
 	QCompleter* m_filterCompleter = nullptr;
 
 	const std::vector<VFrame30::SchemaDetails>& m_schemasDetails;
 
-	Result m_result;
+	// Variable to restore last UI state
+	//
+	static ArchiveSignalType m_lastSignalType;
+	static QString m_lastSchemaId;
+
+	ArchiveSource m_result;
 };
 
 class FilteredArchiveSignalsModel : public QAbstractTableModel

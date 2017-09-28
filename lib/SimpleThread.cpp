@@ -122,6 +122,15 @@ bool SimpleThread::quitAndWait(unsigned long time)
 	return wait(time);
 }
 
+bool SimpleThread::isRunning() const
+{
+	return m_thread.isRunning();
+}
+
+bool SimpleThread::isFinished() const
+{
+	return m_thread.isFinished();
+}
 
 void SimpleThread::beforeStart()
 {

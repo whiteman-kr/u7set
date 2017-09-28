@@ -41,6 +41,18 @@ namespace VFrame30
 		E::AnalogAppSignalFormat analogFormat() const;
 		void setAnalogFormat(E::AnalogAppSignalFormat value);
 
+		int precision() const;
+		void setPrecision(int value);
+
+		double coarseAperture() const;
+		void setCoarseAperture(double aperture);
+
+		double fineAperture() const;
+		void setFineAperture(double aperture);
+
+		bool adaptiveAperture() const;
+		void setAdaptiveAperture(bool adaptive);
+
 		// Manual setting properties
 		//
 		int inbusOffset() const;
@@ -79,6 +91,10 @@ namespace VFrame30
 		// In use only if m_type == E::SignalType::Analog
 		//
 		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::Float32;
+		int m_precision = 2;
+		double m_coarseAperture = 1;
+		double m_fineAperture = 0.5;
+		bool m_adaptiveAperture = false;
 
 		// Manual signal settings
 		//

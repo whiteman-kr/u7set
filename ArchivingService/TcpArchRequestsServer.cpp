@@ -104,7 +104,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	ArchRequestParam param;
 
-	param.timeType = static_cast<TimeType>(request.timetype());
+	param.timeType = static_cast<E::TimeType>(request.timetype());
 
 	param.startTime = request.starttime();
 	param.endTime = request.endtime();

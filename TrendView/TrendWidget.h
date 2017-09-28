@@ -121,8 +121,8 @@ namespace TrendLib
 		int laneCount() const;
 		void setLaneCount(int value);
 
-		TimeType timeType() const;
-		void setTimeType(TimeType value);
+		E::TimeType timeType() const;
+		void setTimeType(E::TimeType value);
 
 		TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);

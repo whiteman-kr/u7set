@@ -1,5 +1,6 @@
 #include "MonitorArchive.h"
 #include "Settings.h"
+#include <QMessageBox>
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;
 
@@ -104,13 +105,13 @@ static int no = 1;
 	m_statusBar = new QStatusBar;
 
 	m_statusBarTextLabel = new QLabel(m_statusBar);
-	m_statusBarQueueSizeLabel = new QLabel(m_statusBar);
+	m_statusBarStatesReceivedLabel = new QLabel(m_statusBar);
 	m_statusBarNetworkRequestsLabel = new QLabel(m_statusBar);
 	m_statusBarServerLabel = new QLabel(m_statusBar);
 	m_statusBarConnectionStateLabel = new QLabel(m_statusBar);
 
 	m_statusBar->addWidget(m_statusBarTextLabel, 1);
-	m_statusBar->addWidget(m_statusBarQueueSizeLabel, 0);
+	m_statusBar->addWidget(m_statusBarStatesReceivedLabel, 0);
 	m_statusBar->addWidget(m_statusBarNetworkRequestsLabel, 0);
 	m_statusBar->addWidget(m_statusBarServerLabel, 0);
 	m_statusBar->addWidget(m_statusBarConnectionStateLabel, 0);
@@ -119,33 +120,37 @@ static int no = 1;
 
 	// --
 	//
-	m_selectSignalsResult.timeType = static_cast<TimeType>(theSettings.m_archiveTimeType);
+	m_source.timeType = static_cast<E::TimeType>(theSettings.m_archiveTimeType);
 
-	m_selectSignalsResult.requestEndTime = TimeStamp(QDateTime::currentDateTime());
-	m_selectSignalsResult.requestStartTime = m_selectSignalsResult.requestEndTime.timeStamp - 1_hour;
-
-	m_selectSignalsResult.signalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
-	m_selectSignalsResult.schemaId.clear();
+	m_source.requestEndTime = TimeStamp(QDateTime::currentDateTime());
+	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
 
 	// --
 	//
 	connect(m_signalsButton, &QPushButton::clicked, this, &MonitorArchiveWidget::signalsButton);
 
+	// Central widget - model/view
+	//
+	setContentsMargins(2, 2, 2, 2);
+
+	m_view->setModel(m_model);
+	setCentralWidget(m_view);
+
 	// Communication thread
 	//
-	//m_tcpClient = new TrendTcpClient(configController);
+	m_tcpClient = new ArchiveTcpClient(configController);
+	m_tcpClientThread = new SimpleThread(m_tcpClient);
 
-	//m_tcpClientThread = new SimpleThread(m_tcpClient);
-	//m_tcpClientThread->start();
+	m_tcpClientThread->start();
 
-	//connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, m_tcpClient, &TrendTcpClient::slot_requestData);
-	//connect(m_tcpClient, &TrendTcpClient::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_dataReceived);
-	//connect(m_tcpClient, &TrendTcpClient::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_requestError);
-
-	//connect(m_tcpClient, &TrendTcpClient::dataReady, this, &MonitorTrendsWidget::slot_dataReceived);
+	connect(m_tcpClient, &ArchiveTcpClient::dataReady, this, &MonitorArchiveWidget::dataReceived);
+	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
+	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
 
 	// --
 	//
+	setAcceptDrops(true);
+
 	restoreWindowState();
 
 	startTimer(100);
@@ -157,11 +162,8 @@ MonitorArchiveWidget::~MonitorArchiveWidget()
 {
 	MonitorArchive::unregisterWindow(this->windowTitle());
 
-//	assert(m_tcpClientThread);
-//	if (m_tcpClientThread != nullptr)
-//	{
-//		m_tcpClientThread->quitAndWait(10000);
-//	}
+	assert(m_tcpClientThread);
+	m_tcpClientThread->quitAndWait(10000);
 
 	return;
 }
@@ -190,14 +192,67 @@ void MonitorArchiveWidget::ensureVisible()
 
 bool MonitorArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 {
-	m_appSignals = appSignals;
+	m_source.acceptedSignals = appSignals;
 	return true;
 }
 
-bool MonitorArchiveWidget::addSignal(const AppSignalParam& appSignal)
+
+void MonitorArchiveWidget::requestData()
 {
-	m_appSignals.push_back(appSignal);
-	return true;
+	if (m_tcpClient == nullptr ||
+		m_tcpClientThread == nullptr)
+	{
+		assert(m_tcpClient);
+		assert(m_tcpClientThread);
+		return;
+	}
+
+	if (m_tcpClientThread->isRunning() == false)
+	{
+		assert(m_tcpClientThread->isRunning() == true);
+		return;
+	}
+
+	if (m_tcpClient->isRequestInProgress() == true)
+	{
+		cancelRequest();
+		assert(m_tcpClient->isRequestInProgress());
+	}
+
+	m_tcpClient->requestData(m_source.requestStartTime,
+							 m_source.requestEndTime,
+							 m_source.timeType,
+							 m_source.acceptedSignals);
+
+	return;
+}
+
+void MonitorArchiveWidget::cancelRequest()
+{
+	if (m_tcpClient == nullptr ||
+		m_tcpClientThread == nullptr)
+	{
+		assert(m_tcpClient);
+		assert(m_tcpClientThread);
+		return;
+	}
+
+	if (m_tcpClientThread->isRunning() == false)
+	{
+		assert(m_tcpClientThread->isRunning() == true);
+		return;
+	}
+
+	if (m_tcpClient->isRequestInProgress() == false)
+	{
+		return;
+	}
+
+	m_tcpClient->cancelRequest();
+
+	assert(m_tcpClient->isRequestInProgress());
+
+	return;
 }
 
 void MonitorArchiveWidget::closeEvent(QCloseEvent*e)
@@ -205,6 +260,67 @@ void MonitorArchiveWidget::closeEvent(QCloseEvent*e)
 	saveWindowState();
 	e->accept();
 	return;
+}
+
+void MonitorArchiveWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	return;
+}
+
+void MonitorArchiveWidget::dropEvent(QDropEvent* event)
+{
+	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
+	{
+		assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		event->setDropAction(Qt::DropAction::IgnoreAction);
+		event->accept();
+		return;
+	}
+
+	QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+	::Proto::AppSignalSet protoSetMessage;
+	bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+	if (ok == false)
+	{
+		event->acceptProposedAction();
+		return;
+	}
+
+	// Parse data
+	//
+	for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	{
+		const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+		AppSignalParam appSignalParam;
+		ok = appSignalParam.load(appSignalMessage);
+
+		if (ok == true)
+		{
+			auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
+										[&appSignalParam](const AppSignalParam& sp)
+										{
+											return sp.appSignalId() == appSignalParam.appSignalId();
+										});
+
+			if (foundId == m_source.acceptedSignals.end())
+			{
+				m_source.acceptedSignals.push_back(appSignalParam);
+			}
+		}
+	}
+
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	return;
+
 }
 
 void MonitorArchiveWidget::saveWindowState()
@@ -229,11 +345,11 @@ void MonitorArchiveWidget::restoreWindowState()
 
 void MonitorArchiveWidget::signalsButton()
 {
-	std::vector<AppSignalParam> appSignals = m_appSignals;
+	//std::vector<AppSignalParam> appSignals = m_appSignals;
 
 	// --
 	//
-	DialogChooseArchiveSignals dialog(appSignals, m_schemasDetais, m_selectSignalsResult, this);
+	DialogChooseArchiveSignals dialog(m_schemasDetais, m_source, this);
 
 	int result = dialog.exec();
 
@@ -242,11 +358,59 @@ void MonitorArchiveWidget::signalsButton()
 		return;
 	}
 
-	m_selectSignalsResult = dialog.accpetedResult();
+	m_source = dialog.accpetedResult();
 
-	theSettings.m_archiveTimeType = static_cast<int>(m_selectSignalsResult.timeType);
+	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
 
-	m_appSignals = m_selectSignalsResult.acceptedSignals;
+	// Request data from archive
+	//
+	m_model->clear();
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	requestData();
+
+	return;
+}
+
+void MonitorArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
+{
+	if (chunk == nullptr)
+	{
+		assert(chunk);
+		return;
+	}
+
+	m_model->addData(chunk);
+
+	return;
+}
+
+void MonitorArchiveWidget::tcpClientError(QString errorMessage)
+{
+	QMessageBox::critical(this, qAppName(), errorMessage);
+	return;
+}
+
+void MonitorArchiveWidget::tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount)
+{
+	assert(m_statusBar);
+
+	m_statusBarTextLabel->setText(status);
+	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(statesReceived));
+
+	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1/%2 ").arg(requestCount).arg(repliesCount));
+
+	HostAddressPort server = m_tcpClient->currentServerAddressPort();
+	m_statusBarServerLabel->setText(QString(" ArchiveServer: %1 ").arg(server.addressPortStr()));
+
+	if (m_tcpClient->isConnected() == true)
+	{
+		m_statusBarConnectionStateLabel->setText(" Connected ");
+	}
+	else
+	{
+		m_statusBarConnectionStateLabel->setText(" NoConnection ");
+	}
 
 	return;
 }

@@ -429,6 +429,7 @@ message GetAppSignalStatesFromArchiveStartReply
 {
     optional int32 error = 1 [default = 0];
     optional int32 archError = 2 [default = 100];
+	optional string errorString = 4;
     optional uint32 requestID = 3 [default = 0];
 }
 
@@ -444,6 +445,7 @@ message GetAppSignalStatesFromArchiveNextReply
     optional int32 error = 1 [default = 0];
     optional int32 archError = 2 [default = 100];
     optional uint32 requestID = 3 [default = 0];
+	optional string errorString = 10;
     optional bool dataReady = 4 [default = false];
     optional int32 totalStatesCount = 5 [default = 0];		// The actual number of transmitted states can be less than totalStatesCount
     optional int32 sentStatesCount = 6 [default = 0];
@@ -462,8 +464,8 @@ message GetAppSignalStatesFromArchiveCancelRequest
 message GetAppSignalStatesFromArchiveCancelReply
 {
     optional int32 error = 1 [default = 0];
-
     optional int32 archError = 2 [default = 100];
+	optional string errorString = 3;
 }
 
 

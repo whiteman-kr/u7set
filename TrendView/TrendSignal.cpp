@@ -281,7 +281,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setHighLimit(double value)
 	{
-		m_highLimit = value;
+		m_highLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::lowLimit() const
@@ -291,7 +291,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setLowLimit(double value)
 	{
-		m_lowLimit = value;
+		m_lowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::viewHighLimit() const
@@ -301,7 +301,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setViewHighLimit(double value)
 	{
-		m_viewHighLimit = value;
+		m_viewHighLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	double TrendSignalParam::viewLowLimit() const
@@ -311,7 +311,7 @@ namespace TrendLib
 
 	void TrendSignalParam::setViewLowLimit(double value)
 	{
-		m_viewLowLimit = value;
+		m_viewLowLimit = qBound(-1e+100, value, 1e+100);
 	}
 
 	QColor TrendSignalParam::color() const
@@ -641,7 +641,7 @@ namespace TrendLib
 		return count;
 	}
 
-	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
+	bool TrendSignalSet::getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		// Get already reqquested and received (o read form file) data
 		// Don't request any data if it is not present
@@ -661,9 +661,9 @@ namespace TrendLib
 		std::map<QString, TrendArchive>* m_archive = nullptr;
 		switch (timeType)
 		{
-		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
-		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
-		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
 			assert(false);
 			return false;
@@ -720,7 +720,7 @@ namespace TrendLib
 		return true;
 	}
 
-	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
+	bool TrendSignalSet::getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const
 	{
 		if (outData == nullptr ||
 			from > to)
@@ -738,9 +738,9 @@ namespace TrendLib
 			std::map<QString, TrendArchive>* m_archive = nullptr;
 			switch (timeType)
 			{
-			case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
-			case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
-			case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+			case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+			case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+			case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 			default:
 				assert(false);
 				return false;
@@ -828,19 +828,19 @@ namespace TrendLib
 		return true;
 	}
 
-	void TrendSignalSet::clear(TimeType timeType)
+	void TrendSignalSet::clear(E::TimeType timeType)
 	{
 		QMutexLocker locker(&m_archiveMutex);
 
 		switch (timeType)
 		{
-		case TimeType::Local:
+		case E::TimeType::Local:
 			m_archiveLocalTime.clear();
 			break;
-		case TimeType::System:
+		case E::TimeType::System:
 			m_archiveSystemTime.clear();
 			break;
-		case TimeType::Plant:
+		case E::TimeType::Plant:
 			m_archivePlantTime.clear();
 			break;
 		default:
@@ -851,7 +851,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
+	void TrendSignalSet::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
 	{
 		// Ignore data if there is no such signal in SignalParams
 		// Probably it was requested but later signal was excluded
@@ -877,9 +877,9 @@ namespace TrendLib
 		std::map<QString, TrendArchive>* m_archive = nullptr;
 		switch (timeType)
 		{
-		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
-		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
-		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
 			assert(false);
 			return;
@@ -911,7 +911,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::slot_requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType)
+	void TrendSignalSet::slot_requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType)
 	{
 		// Ignore data if there is no such signal in SignalParams
 		// Probably it was requested but later signal was excluded
@@ -937,9 +937,9 @@ namespace TrendLib
 		std::map<QString, TrendArchive>* m_archive = nullptr;
 		switch (timeType)
 		{
-		case TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
-		case TimeType::System:	m_archive = &m_archiveSystemTime;	break;
-		case TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
+		case E::TimeType::Local:	m_archive = &m_archiveLocalTime;	break;
+		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
+		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
 			assert(false);
 			return;

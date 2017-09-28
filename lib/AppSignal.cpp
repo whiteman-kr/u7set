@@ -48,6 +48,27 @@ bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 			smoothAperture == 1;
 }
 
+AppSignalState::AppSignalState(const Proto::AppSignalState& protoState)
+{
+	try
+	{
+		load(protoState);
+	}
+	catch(...)
+	{
+	}
+}
+
+AppSignalState& AppSignalState::operator= (const SimpleAppSignalState& smState)
+{
+	m_hash = smState.hash;
+	m_time = smState.time;
+	m_flags = smState.flags;
+	m_value = smState.value;
+
+	return *this;
+}
+
 Hash AppSignalState::hash() const
 {
 	return m_hash;
@@ -56,6 +77,23 @@ Hash AppSignalState::hash() const
 const Times& AppSignalState::time() const
 {
 	return m_time;
+}
+
+const TimeStamp& AppSignalState::time(E::TimeType timeType) const
+{
+	switch (timeType)
+	{
+	case E::TimeType::Plant:
+		return m_time.plant;
+	case E::TimeType::System:
+		return m_time.system;
+	case E::TimeType::Local:
+		return m_time.local;
+	}
+
+	assert(false);
+static const TimeStamp dummy;
+	return dummy;
 }
 
 double AppSignalState::value() const
@@ -67,16 +105,6 @@ bool AppSignalState::isValid() const
 {
 	return m_flags.valid;
 }
-
-//bool AppSignalState::isOverflow() const
-//{
-//	return flags.overflow;
-//}
-
-//bool AppSignalState::isUnderflow() const
-//{
-//	return flags.underflow;
-//}
 
 void AppSignalState::save(Proto::AppSignalState* protoState)
 {
@@ -110,16 +138,6 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 	m_time.plant.timeStamp = protoState.planttime();
 
 	return m_hash;
-}
-
-const AppSignalState& AppSignalState::operator = (const SimpleAppSignalState& smState)
-{
-	m_hash = smState.hash;
-	m_time = smState.time;
-	m_flags = smState.flags;
-	m_value = smState.value;
-
-	return *this;
 }
 
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)

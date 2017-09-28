@@ -108,7 +108,10 @@ SOURCES += main.cpp \
     DialogChooseTrendSignals.cpp \
     TrendTcpClient.cpp \
     MonitorArchive.cpp \
-    DialogChooseArchiveSignals.cpp
+    DialogChooseArchiveSignals.cpp \
+    ArchiveTcpClient.cpp \
+    ArchiveModelView.cpp \
+    ArchiveData.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -151,7 +154,10 @@ HEADERS  += \
     DialogChooseTrendSignals.h \
     TrendTcpClient.h \
     MonitorArchive.h \
-    DialogChooseArchiveSignals.h
+    DialogChooseArchiveSignals.h \
+    ArchiveTcpClient.h \
+    ArchiveModelView.h \
+    ArchiveData.h
 
 FORMS    += \
     DialogSettings.ui \

@@ -127,6 +127,10 @@ namespace VFrame30
 		static const QString connectionId;
 		static const QString signalSource;
 
+		static const QString coarseAperture;
+		static const QString fineAperture;
+		static const QString adaptiveAperture;
+
 		static const QString busTypeId;
 		static const QString busTypeFileName;
 		static const QString busAutoSignalPlacemanet;
@@ -154,6 +158,7 @@ namespace VFrame30
 		static const QString parametersCategory;
 		static const QString controlCategory;
 		static const QString scriptsCategory;
+		static const QString apertureCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

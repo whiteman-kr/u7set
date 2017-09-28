@@ -37,7 +37,7 @@ namespace TrendLib
 		}
 
 		m_viewMode = static_cast<TrendViewMode>(message.view_mode());
-		m_timeType = static_cast<TimeType>(message.time_type());
+		m_timeType = static_cast<E::TimeType>(message.time_type());
 		m_laneCount = message.lane_count();
 
 		m_startTimeStamp.timeStamp = message.start_time();
@@ -97,12 +97,12 @@ namespace TrendLib
 		m_viewMode = value;
 	}
 
-	TimeType TrendDrawParam::timeType() const
+	E::TimeType TrendDrawParam::timeType() const
 	{
 		return m_timeType;
 	}
 
-	void TrendDrawParam::setTimeType(TimeType value)
+	void TrendDrawParam::setTimeType(E::TimeType value)
 	{
 		m_timeType = value;
 	}

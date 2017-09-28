@@ -23,7 +23,7 @@ struct ArchRequestParam
 
 	// params from ARCHS_GET_APP_SIGNALS_STATES_START request
 	//
-	TimeType timeType = TimeType::System;
+	E::TimeType timeType = E::TimeType::System;
 
 	qint64 startTime = 0;
 	qint64 endTime = 0;
@@ -62,7 +62,7 @@ public:
 
 	int timeElapsed() const { return m_time.elapsed(); }
 
-	TimeType requestTimeType() const { return m_requestTimeType; }
+	E::TimeType requestTimeType() const { return m_requestTimeType; }
 
 	qint64 requestStartTime() const { return m_requestStartTime; }
 	qint64 requestEndTime() const { return m_requestEndTime; }
@@ -81,7 +81,7 @@ private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
 
-	TimeType timeType() const { return m_param.timeType; }
+	E::TimeType timeType() const { return m_param.timeType; }
 
 	qint64 startTime() const { return m_param.startTime; }
 	QString startTimeStr() const { return TimeStamp(m_param.startTime).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
@@ -104,7 +104,7 @@ private:
 
 	qint64 m_localTimeOffset = 0;
 
-	TimeType m_requestTimeType = TimeType::System;
+	E::TimeType m_requestTimeType = E::TimeType::System;
 
 	qint64 m_requestStartTime = 0;
 	qint64 m_requestEndTime = 0;

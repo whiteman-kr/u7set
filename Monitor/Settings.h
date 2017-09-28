@@ -92,7 +92,7 @@ public:
 	QPoint m_archiveWindowPos;
 	QByteArray m_archiveWindowGeometry;
 	QByteArray m_archiveWindowState;
-	int m_archiveTimeType = static_cast<int>(TimeType::Local);
+	int m_archiveTimeType = static_cast<int>(E::TimeType::Local);
 	QStringList m_archiveSignalsDialogFilterCompleter;
 
 private:
