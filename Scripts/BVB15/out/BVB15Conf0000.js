@@ -206,7 +206,8 @@ function generate_bvb15_rev1(builder, module, root, confCollection, log, signalS
         log.errCFG3000("EquipmentID", "BVB-15");
         return false;
     }
-    var checkProperties = ["SubsystemID", "LMNumber", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
+    var checkProperties = ["SubsystemID", "LMNumber", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
+        "Bit0_TemperatureSensor1", "Bit1_TemperatureSensor2", "Bit2_TemperatureSensor3", "Bit3_E14", "Bit4_E15", "Bit5_E16", "Bit6_SimulationInputMode"];
     for (var cp = 0; cp < checkProperties.length; cp++) {
         if (module.propertyValue(checkProperties[cp]) == undefined) {
             log.errCFG3000(checkProperties[cp], module.jsPropertyString("EquipmentID"));
@@ -827,6 +828,34 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         return false;
     }
     confFirmware.writeLog("    [" + frame + ":" + ptr + "]: ModulesMask = " + blocksMask + "\r\n");
+    ptr = 144;
+    // Checks
+    var Checks = 0;
+    if (module.jsPropertyBool("Bit0_TemperatureSensor1") == true) {
+        Checks |= (1 << 0);
+    }
+    if (module.jsPropertyBool("Bit1_TemperatureSensor2") == true) {
+        Checks |= (1 << 1);
+    }
+    if (module.jsPropertyBool("Bit2_TemperatureSensor3") == true) {
+        Checks |= (1 << 2);
+    }
+    if (module.jsPropertyBool("Bit3_E14") == true) {
+        Checks |= (1 << 3);
+    }
+    if (module.jsPropertyBool("Bit4_E15") == true) {
+        Checks |= (1 << 4);
+    }
+    if (module.jsPropertyBool("Bit5_E16") == true) {
+        Checks |= (1 << 5);
+    }
+    if (module.jsPropertyBool("Bit6_SimulationInputMode") == true) {
+        Checks |= (1 << 6);
+    }
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frame, ptr, "Checks", Checks) == false) {
+        return false;
+    }
+    confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Checks = " + Checks + "\r\n");
     ptr += 2;
     return true;
 }
