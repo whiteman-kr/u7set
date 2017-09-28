@@ -9,6 +9,7 @@ enum class ArchiveColumns
 	CustomSignalId,
 	Caption,
 	State,
+	Valid,						// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget, cannot do it in ArchiveView constructor, don't know why(((
 	Time,
 
 	ColumnCount

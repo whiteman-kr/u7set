@@ -119,7 +119,6 @@ static int no = 1;
 	m_toolBar->addWidget(new QLabel(tr("   End Time: ")));
 	m_toolBar->addWidget(m_endDateTimeEdit);
 
-
 	// TimeType combo
 	//
 	m_timeType = new QComboBox;
@@ -183,6 +182,13 @@ static int no = 1;
 
 	m_view->setModel(m_model);
 	setCentralWidget(m_view);
+
+	if (theSettings.m_archiveHorzHeader.isEmpty() == true)
+	{
+		// First time? Set what is should be hidden by deafult
+		//
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Valid));
+	}
 
 	// Communication thread
 	//

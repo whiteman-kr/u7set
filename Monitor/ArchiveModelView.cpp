@@ -22,7 +22,7 @@ int ArchiveModel::columnCount(const QModelIndex& /*parent*/) const
 	return static_cast<int>(ArchiveColumns::ColumnCount);
 }
 
-QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, int role /*= Qt::DisplayRole*/) const
 {
 	if (role != Qt::DisplayRole)
 	{
@@ -42,6 +42,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
 
 	case ArchiveColumns::State:
 		return tr("State");
+
+	case ArchiveColumns::Valid:
+		return tr("Valid");
 
 	case ArchiveColumns::Time:
 		return tr("Time");
@@ -116,6 +119,11 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 				}
 			}
 			break;
+		case ArchiveColumns::Valid:
+			{
+				result = m_cachedSignalState.isValid() ? "" : "no";
+			}
+			break;
 		case ArchiveColumns::Time:
 			{
 				const TimeStamp& ts = m_cachedSignalState.time(m_timeType);
@@ -129,7 +137,11 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 		return result;
 	}
 
-	if (role == Qt::TextAlignmentRole && column ==  static_cast<int>(ArchiveColumns::Row))
+	if (role == Qt::TextAlignmentRole &&
+		(column ==  static_cast<int>(ArchiveColumns::Row) ||
+		 column ==  static_cast<int>(ArchiveColumns::State) ||
+		column ==  static_cast<int>(ArchiveColumns::Valid))
+		)
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -311,14 +323,14 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 	// --
 	//
-	horizontalHeader()->restoreState(theSettings.m_archiveHorzHeader);
-
-	qRegisterMetaType<ArchiveColumns>("ArchiveColumns");
-
 	horizontalHeader()->setHighlightSections(false);
 	horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	connect(horizontalHeader(), &QWidget::customContextMenuRequested, this, &ArchiveView::headerColumnContextMenuRequested);
+
+	horizontalHeader()->restoreState(theSettings.m_archiveHorzHeader);
+
+	qRegisterMetaType<ArchiveColumns>("ArchiveColumns");
 
 	return;
 }
@@ -341,6 +353,7 @@ void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
 	actionsData.emplace_back(ArchiveColumns::CustomSignalId, tr("SignalID"));
 	actionsData.emplace_back(ArchiveColumns::Caption, tr("Caption"));
 	actionsData.emplace_back(ArchiveColumns::State, tr("State"));
+	actionsData.emplace_back(ArchiveColumns::Valid, tr("Valid"));
 	actionsData.emplace_back(ArchiveColumns::Time, tr("Time"));
 
 	for (std::pair<ArchiveColumns, QString> ad : actionsData)
