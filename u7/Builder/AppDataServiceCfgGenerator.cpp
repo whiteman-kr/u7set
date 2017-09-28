@@ -30,6 +30,7 @@ namespace Builder
 
 		result &= writeSettings();
 		result &= writeAppDataSourcesXml();
+		result &= writeAppSignalsXml();
 		result &= addLinkToAppSignalsFile();
 
 		return result;
@@ -299,14 +300,14 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "appSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile("Common", "AppSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{
 			return false;
 		}
 
-		m_cfgXml->addLinkToFile(buildFile);
+		//m_cfgXml->addLinkToFile(buildFile);
 
 		return true;
 	}
