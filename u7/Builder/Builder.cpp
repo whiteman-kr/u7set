@@ -195,7 +195,12 @@ namespace Builder
 			//
 			// Builder::SignalSet
 			//
-			SignalSet signalSet(&busSet, m_log);
+			SignalSet signalSet(&busSet, &buildWriter, m_log);
+
+			if (signalSet.prepareBusses() == false)
+			{
+				break;
+			}
 
 			if (loadSignals(&db, &signalSet, &equipmentSet) == false)
 			{

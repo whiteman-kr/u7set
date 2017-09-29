@@ -3563,7 +3563,7 @@ namespace Builder
 		{
 			TEST_PTR_RETURN_FALSE(appItem)
 
-			if (appItem->isSignal())
+			if (appItem->isSignal() == true)
 			{
 				result &= generateAppSignalCode(appItem);
 
@@ -3575,7 +3575,7 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isFb())
+			if (appItem->isFb() == true)
 			{
 				result &= generateFbCode(appItem);
 
@@ -3587,12 +3587,12 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isConst())
+			if (appItem->isConst() == true)
 			{
 				continue;
 			}
 
-			if (appItem->isTransmitter())
+			if (appItem->isTransmitter() == true)
 			{
 				// no special code generation for transmitter here
 				// code for transmitters is generate in copyOptoConnectionsTxData()
@@ -3600,7 +3600,7 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isReceiver())
+			if (appItem->isReceiver() == true)
 			{
 				// no special code generation for receiver here
 				// code for receivers is generate in:
@@ -3610,9 +3610,19 @@ namespace Builder
 				continue;
 			}
 
-			if (appItem->isTerminator())
+			if (appItem->isTerminator() == true)
 			{
 				// no needed special code generation for terminator
+				continue;
+			}
+
+			if (appItem->isBusComposer() == true)
+			{
+				continue;
+			}
+
+			if (appItem->isBusExtractor() == true)
+			{
 				continue;
 			}
 

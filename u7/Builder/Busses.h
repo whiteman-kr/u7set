@@ -3,6 +3,8 @@
 #include "../lib/Address16.h"
 #include "../VFrame30/Bus.h"
 #include "IssueLogger.h"
+#include "BuildResultWriter.h"
+
 
 namespace Builder
 {
@@ -17,7 +19,7 @@ namespace Builder
 		//
 		E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
 
-		int inbusAnalogSizeBits = 0;
+		int inbusSizeBits = 0;
 
 		E::DataFormat inbusAnalogFormat  = E::DataFormat::SignedInt;
 		E::ByteOrder inbusAnalogByteOrder = E::ByteOrder::BigEndian;
@@ -28,7 +30,7 @@ namespace Builder
 		double inbusAnalogLowLimit = 0.0;
 		double inbusAnalogHighLimit = 65535.0;
 
-		bool conversionRequired();
+		bool conversionRequired() const;
 	};
 
 	class Bus
@@ -70,12 +72,16 @@ namespace Builder
 	class Busses
 	{
 	public:
-		Busses();
+		Busses(VFrame30::BusSet* busSet, IssueLogger* log);
 		virtual ~Busses();
 
-		bool prepare(VFrame30::BusSet* busSet);
+		bool prepare();
+		bool writeReport(BuildResultWriter* resultWriter);
 
 	private:
+		VFrame30::BusSet* m_busSet = nullptr;
+		IssueLogger* m_log = nullptr;
+
 		QHash<QString, BusShared> m_busses;
 	};
 }

@@ -92,8 +92,13 @@ public:
 
 	bool isValid() const { return m_offset != BAD_ADDRESS && m_bit != BAD_ADDRESS; }
 
-	QString toString() const
+	QString toString(bool zeroPadded = false) const
 	{
+		if (zeroPadded == true)
+		{
+			return QString().sprintf("%05d:%02d", m_offset, m_bit);
+		}
+
 		return QString("%1:%2").arg(m_offset).arg(m_bit);
 	}
 

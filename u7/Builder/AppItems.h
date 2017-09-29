@@ -123,6 +123,8 @@ namespace Builder
 		bool isTransmitter() const { return m_appLogicItem.m_fblItem->isTransmitterElement(); }
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
 		bool isTerminator() const { return m_appLogicItem.m_fblItem->isTerminatorElement(); }
+		bool isBusComposer() const { return m_appLogicItem.m_fblItem->isBusComposerElement(); }
+		bool isBusExtractor() const { return m_appLogicItem.m_fblItem->isBusExtractorElement(); }
 
 		Type type() const;
 

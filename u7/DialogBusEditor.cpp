@@ -1084,6 +1084,7 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 			{
 				listBus->setAutoSignalPlacement(editBus->autoSignalPlacement());
 				listBus->setBusTypeId(editBus->busTypeId());
+				listBus->setManualBusSize(editBus->manualBusSize());
 
 				updateBusTreeItemText(item, *listBus);
 

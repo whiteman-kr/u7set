@@ -1,9 +1,10 @@
 #include "Busses.h"
+#include "../lib/WUtils.h"
 
 
 namespace Builder
 {
-	bool BusSignal::conversionRequired()
+	bool BusSignal::conversionRequired() const
 	{
 		switch(signalType)
 		{
@@ -12,14 +13,14 @@ namespace Builder
 			{
 			case E::AnalogAppSignalFormat::Float32:
 				return !(inbusAnalogFormat == E::DataFormat::Float &&
-					inbusAnalogSizeBits == SIZE_32BIT &&
+					inbusSizeBits == SIZE_32BIT &&
 					busAnalogLowLimit == inbusAnalogLowLimit &&
 					busAnalogHighLimit == inbusAnalogHighLimit &&
 					inbusAnalogByteOrder == E::ByteOrder::BigEndian);
 
 			case E::AnalogAppSignalFormat::SignedInt32:
 				return !(inbusAnalogFormat == E::DataFormat::SignedInt &&
-					inbusAnalogSizeBits == SIZE_32BIT &&
+					inbusSizeBits == SIZE_32BIT &&
 					busAnalogLowLimit == inbusAnalogLowLimit &&
 					busAnalogHighLimit == inbusAnalogHighLimit &&
 					inbusAnalogByteOrder == E::ByteOrder::BigEndian);
@@ -110,12 +111,37 @@ namespace Builder
 
 	void Bus::writeReport(QStringList& list)
 	{
-		list.append(QString("-------------------------------------------------------------------");
-		list.append(QString("BusTypeID:\t%1").arg(m_srcBus.busTypeId()));
+		QString separator("-------------------------------------------------------------------");
+
+		list.append(separator);
+		list.append(QString("BusTypeID:\t\t%1").arg(m_srcBus.busTypeId()));
 		list.append(QString("AutoSignalPlacement:\t%1").arg(m_srcBus.autoSignalPlacement() == true ? "True" : "False"));
-		list.append(QString("BusSizeW:\t%1").arg(m_sizeW));
-		list.append(QString("Signals:\t%1").arg(m_signals.count()));
-		list.append(QString("-------------------------------------------------------------------");
+		list.append(QString("BusSizeW:\t\t%1").arg(m_sizeW));
+		list.append(QString("Signals:\t\t%1").arg(m_signals.count()));
+		list.append(separator);
+
+		if (m_signals.count() == 0)
+		{
+			list.append("");
+			return;
+		}
+
+		list.append(QString(" OffsetW:Bit   Size\tType\tConvert\t SignalID"));
+		list.append(separator);
+
+		for(const BusSignal& s : m_signals)
+		{
+			list.append(QString("   %1    %2\t%3\t%4\t %5").
+							arg(s.inbusAddr.toString(true)).
+							arg(s.inbusSizeBits).
+							arg(s.signalType == E::SignalType::Analog ? "A" : "D").
+							arg(s.conversionRequired() == true ? "Yes" : "No").
+							arg(s.signalID));
+		}
+
+		list.append(separator);
+
+		list.append("");
 	}
 
 	bool Bus::buildInBusSignalsMap()
@@ -234,7 +260,7 @@ namespace Builder
 				busSignal.inbusAddr = inBusAddr;
 
 				busSignal.analogFormat = srcBusSignal.analogFormat();
-				busSignal.inbusAnalogSizeBits = srcBusSignal.inbusAnalogSize();
+				busSignal.inbusSizeBits = srcBusSignal.inbusAnalogSize();
 				busSignal.inbusAnalogFormat  = srcBusSignal.inbusAnalogFormat();
 				busSignal.inbusAnalogByteOrder = srcBusSignal.inbusAnalogByteOrder();
 				busSignal.busAnalogLowLimit = srcBusSignal.busAnalogLowLimit();
@@ -242,13 +268,14 @@ namespace Builder
 				busSignal.inbusAnalogLowLimit = srcBusSignal.inbusAnalogLowLimit();
 				busSignal.inbusAnalogHighLimit = srcBusSignal.inbusAnalogHighLimit();
 
-				inBusAddr.addBit(busSignal.inbusAnalogSizeBits);
+				inBusAddr.addBit(busSignal.inbusSizeBits);
 				break;
 
 			case E::SignalType::Discrete:
 
 				busSignal.signalType = E::SignalType::Discrete;
 				busSignal.inbusAddr = inBusAddr;
+				busSignal.inbusSizeBits = SIZE_1BIT;
 
 				inBusAddr.addBit(SIZE_1BIT);
 				break;
@@ -344,7 +371,7 @@ namespace Builder
 				busSignal.inbusAddr = inBusAddr;
 
 				busSignal.analogFormat = srcBusSignal.analogFormat();
-				busSignal.inbusAnalogSizeBits = srcBusSignal.inbusAnalogSize();
+				busSignal.inbusSizeBits = srcBusSignal.inbusAnalogSize();
 				busSignal.inbusAnalogFormat  = srcBusSignal.inbusAnalogFormat();
 				busSignal.inbusAnalogByteOrder = srcBusSignal.inbusAnalogByteOrder();
 				busSignal.busAnalogLowLimit = srcBusSignal.busAnalogLowLimit();
@@ -360,6 +387,8 @@ namespace Builder
 
 				inBusAddr.addBit(srcBusSignal.inbusOffset() * SIZE_8BIT + srcBusSignal.inbusDiscreteBitNo());
 				busSignal.inbusAddr = inBusAddr;
+
+				busSignal.inbusSizeBits = SIZE_1BIT;
 
 				break;
 
@@ -395,15 +424,73 @@ namespace Builder
 	}
 
 
-	Busses::Busses()
-	{
-
-	}
-
-	bool Busses::prepare(VFrame30::BusSet*)
+	Busses::Busses(VFrame30::BusSet* busSet, IssueLogger* log) :
+		m_busSet(busSet),
+		m_log(log)
 	{
 	}
 
+	Busses::~Busses()
+	{
+		m_busses.clear();
+	}
 
+
+	bool Busses::prepare()
+	{
+		TEST_PTR_RETURN_FALSE(m_busSet);
+
+		const std::vector<VFrame30::Bus>& busses = m_busSet->busses();
+
+		bool result = true;
+
+		for(const VFrame30::Bus& srcBus : busses)
+		{
+			if (m_busses.contains(srcBus.busTypeId()) == true)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			BusShared bus = std::make_shared<Bus>(srcBus, m_log);
+
+			if (bus->init() == true)
+			{
+				m_busses.insert(srcBus.busTypeId(), bus);
+			}
+			else
+			{
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
+	bool Busses::writeReport(BuildResultWriter* resultWriter)
+	{
+		TEST_PTR_RETURN_FALSE(resultWriter);
+
+		QStringList busTypeIDs = m_busses.keys();
+
+		busTypeIDs.sort();
+
+		QStringList report;
+
+		for(const QString& busTypeID : busTypeIDs)
+		{
+			BusShared bus = m_busses.value(busTypeID, nullptr);
+
+			TEST_PTR_CONTINUE(bus);
+
+			bus->writeReport(report);
+		}
+
+		resultWriter->addFile("Reports", "Busses.txt", "", "", report);
+
+		return true;
+	}
 
 }

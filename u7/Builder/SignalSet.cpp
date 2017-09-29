@@ -7,7 +7,8 @@ namespace Builder
 	SignalSet::SignalSet(VFrame30::BusSet* busSet, BuildResultWriter* resultWriter, IssueLogger* log) :
 		m_busSet(busSet),
 		m_resultWriter(resultWriter),
-		m_log(log)
+		m_log(log),
+		m_busses(busSet, log)
 	{
 		assert(busSet != nullptr);
 		assert(resultWriter != nullptr);
@@ -16,6 +17,18 @@ namespace Builder
 
 	SignalSet::~SignalSet()
 	{
+	}
+
+	bool SignalSet::prepareBusses()
+	{
+		bool result =  m_busses.prepare();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		return m_busses.writeReport(m_resultWriter);
 	}
 
 	bool SignalSet::checkSignals()
