@@ -9,7 +9,7 @@ enum class ArchiveColumns
 	CustomSignalId,
 	Caption,
 	State,
-	Valid,						// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget, cannot do it in ArchiveView constructor, don't know why(((
+	Valid,					// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget, cannot do it in ArchiveView constructor, don't know why(((
 	Time,
 
 	ColumnCount
@@ -33,6 +33,7 @@ public:
 
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	QVariant data(int row, int column, int role) const;
 
 private:
 	QString getValueString(const AppSignalState& state, const AppSignalParam& signalParam) const;

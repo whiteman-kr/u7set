@@ -59,6 +59,11 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 	int row = index.row();
 	int column = index.column();
 
+	return data(row, column, role);
+}
+
+QVariant ArchiveModel::data(int row, int column, int role) const
+{
 	if (row >= m_archive.size())
 	{
 		return QVariant();
@@ -72,7 +77,7 @@ QVariant ArchiveModel::data(const QModelIndex& index, int role) const
 		switch (static_cast<ArchiveColumns>(column))
 		{
 		case ArchiveColumns::Row:
-			result = row;
+			result = row + 1;
 			break;
 		case ArchiveColumns::CustomSignalId:
 			{

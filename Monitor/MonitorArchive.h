@@ -37,6 +37,8 @@ protected:
 	void requestData();
 	void cancelRequest();
 
+	bool saveArchiveWithDocWriter(QString fileName, QString format);
+
 	// Events
 	//
 protected:
@@ -53,8 +55,12 @@ protected:
 protected slots:
 	void timeTypeCurrentIndexChanged(int index);
 
+	void exportButton();
+	void printButton();
 	void updateOrCancelButton();
 	void signalsButton();
+
+	void slot_configurationArrived(ConfigSettings configuration);
 
 	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
 	void tcpClientError(QString errorMessage);
@@ -68,6 +74,8 @@ private:
 	ConfigConnection m_archiveService2;
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
+
+	ConfigSettings m_configuration;
 
 	ArchiveTcpClient* m_tcpClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
@@ -101,6 +109,8 @@ private:
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
+
+	const int m_maxReportStates = 10000;
 };
 
 
