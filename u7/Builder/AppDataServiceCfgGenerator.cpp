@@ -300,7 +300,7 @@ namespace Builder
 		xml.writeEndElement();	// </AppSignals>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile("Common", "AppSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, "AppSignals.xml", CFG_FILE_ID_APP_SIGNALS, "",  data);
 
 		if (buildFile == nullptr)
 		{
