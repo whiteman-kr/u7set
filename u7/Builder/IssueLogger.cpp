@@ -4122,7 +4122,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5096,
-				  QString(tr("Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+				  QString(tr("Offset of in bus analog signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
 							arg(inBusSignalID).arg(busTypeID));
 	}
 

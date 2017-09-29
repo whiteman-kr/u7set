@@ -232,8 +232,8 @@ namespace Builder
 
 		// signals ordering by alphabet
 		//
-		analogSignals.sort();
-		discreteSignals.sort();
+		analogSignals.sort(Qt::CaseInsensitive);
+		discreteSignals.sort(Qt::CaseInsensitive);
 
 		QStringList signalsOrder = analogSignals;
 
@@ -307,6 +307,14 @@ namespace Builder
 			switch(busSignal.type())
 			{
 			case E::SignalType::Analog:
+				if ((busSignal.inbusAnalogSize() % SIZE_16BIT) != 0)
+				{
+					// Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
+					//
+					m_log->errALC5094(busSignal.signalId(), m_srcBus.busTypeId());
+					return false;
+				}
+
 				if ((busSignal.inbusOffset() % WORD_SIZE_IN_BYTES) != 0)
 				{
 					// Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2')
