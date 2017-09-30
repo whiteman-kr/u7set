@@ -338,8 +338,15 @@ void MonitorArchiveWidget::cancelRequest()
 
 bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString format)
 {
-	assert(m_model);
-	assert(m_view);
+	if (m_model == nullptr ||
+		m_view == nullptr ||
+		fileName.isEmpty() == true)
+	{
+		assert(m_model);
+		assert(m_view);
+		assert(fileName.isEmpty() == false);
+		return false;
+	}
 
 	if (m_model->rowCount() > m_maxReportStates)
 	{
@@ -412,8 +419,10 @@ bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString fo
 
 	QTextCharFormat headerCharFormat = cursor.charFormat();
 	headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
+	headerCharFormat.setFontPointSize(12.0);
 
 	QTextCharFormat regularCharFormat = cursor.charFormat();
+	headerCharFormat.setFontPointSize(10.0);
 
 	cursor.setBlockFormat(headerCenterFormat);
 	cursor.setCharFormat(headerCharFormat);
@@ -492,6 +501,7 @@ bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString fo
 
 	// Fill table
 	//
+	QString cellText;
 	for (int row = 0; row < rowCount; row++)
 	{
 		progressDialog.setValue(row);
@@ -500,15 +510,16 @@ bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString fo
 			break;
 		}
 
+		QApplication::processEvents();
+
 		for (int column : shownColums)
 		{
-			QString cellText = m_model->data(row, column, Qt::DisplayRole).toString();
+			cellText = m_model->data(row, column, Qt::DisplayRole).toString();
 
 			cursor.insertText(cellText);
 			cursor.movePosition(QTextCursor::NextCell);
 		}
 	}
-	progressDialog.setValue(rowCount);
 	cursor.movePosition(QTextCursor::End);
 
 	cursor.insertText("\n\n");
@@ -550,6 +561,119 @@ bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString fo
 
 		writer.write(&doc);
 	}
+
+	progressDialog.setValue(rowCount);
+
+	// Restore cursor from wait
+	//
+	QApplication::restoreOverrideCursor();
+	QApplication::processEvents();
+
+	return true;
+}
+
+bool MonitorArchiveWidget::saveArchiveToCsv(QString fileName)
+{
+	if (m_model == nullptr ||
+		m_view == nullptr ||
+		fileName.isEmpty() == true)
+	{
+		assert(m_model);
+		assert(m_view);
+		assert(fileName.isEmpty() == false);
+		return false;
+	}
+
+	if (m_model->rowCount() > m_maxReportStatesForCsv )
+	{
+		QMessageBox::warning(this, qAppName(), tr("Too many archive records, only first %1 states will appear in the generated report.").arg(m_maxReportStatesForCsv ));
+	}
+
+	// --
+	//
+	QFile file(fileName);
+
+	bool ok = file.open(QIODevice::WriteOnly | QIODevice::Text);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1 for writing.").arg(fileName));
+		return false;
+	}
+
+	QTextStream out(&file);
+
+	// Set wait cursor
+	//
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	QApplication::processEvents();
+
+	// States
+	//
+	int rowCount = qBound(0, m_model->rowCount(), m_maxReportStatesForCsv);		// Limit row count to m_maxReportStates
+	int columnCount = m_model->columnCount();
+
+	std::vector<int> shownColums;
+	shownColums.reserve(columnCount);
+
+	int shownColumnCount = 0;
+	for (int column = 0; column < columnCount; column++)
+	{
+		if (m_view->isColumnHidden(column) == false)
+		{
+			shownColumnCount ++;
+			shownColums.push_back(column);
+		}
+	}
+
+	QProgressDialog progressDialog(tr("Generating report..."), tr("Cancel"), 0, rowCount, this);
+	progressDialog.setMinimumDuration(100);
+
+	// Fill header
+	//
+	for (int column : shownColums)
+	{
+		QString columnHeader = m_model->headerData(column, Qt::Horizontal, Qt::DisplayRole).toString();
+		out << columnHeader << ";";
+	}
+	out << endl;
+
+	// Fill table
+	//
+	QString cellText;
+	for (int row = 0; row < rowCount; row++)
+	{
+		progressDialog.setValue(row);
+		if (progressDialog.wasCanceled() == true)
+		{
+			break;
+		}
+
+		QApplication::processEvents();
+
+		if (row % 10000 == 0)
+		{
+			progressDialog.setLabelText(tr("Generating report... %1/%2").arg(row).arg(rowCount));
+		}
+
+		for (int column : shownColums)
+		{
+			cellText = m_model->data(row, column, Qt::DisplayRole).toString();
+
+			if (cellText.contains(';') == true)
+			{
+				// If cell contains semicolon it must be enclosed in quotes
+				//
+				cellText.prepend('"');
+				cellText.append('"');
+			}
+
+			out << cellText << ";";
+		}
+
+		out << endl;
+	}
+
+	progressDialog.setValue(rowCount);
 
 	// Restore cursor from wait
 	//
@@ -669,7 +793,7 @@ void MonitorArchiveWidget::exportButton()
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
 													"untitled.pdf",
-													tr("Portable Documnet Format (*.pdf);;Comma-Separated Values (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
 
 	if (fileName.isEmpty() == true)
 	{
@@ -681,6 +805,7 @@ void MonitorArchiveWidget::exportButton()
 
 	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0)
 	{
+		saveArchiveToCsv(fileName);
 		return;
 	}
 

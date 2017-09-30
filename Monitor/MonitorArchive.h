@@ -38,6 +38,7 @@ protected:
 	void cancelRequest();
 
 	bool saveArchiveWithDocWriter(QString fileName, QString format);
+	bool saveArchiveToCsv(QString fileName);
 
 	// Events
 	//
@@ -111,6 +112,7 @@ private:
 	ArchiveSource m_source;
 
 	const int m_maxReportStates = 10000;
+	const int m_maxReportStatesForCsv = 5000000;
 };
 
 
