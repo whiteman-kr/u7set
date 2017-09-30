@@ -7,6 +7,8 @@
 #include "ArchiveModelView.h"
 
 class MonitorArchiveWidget;
+class QPrinter;
+class QTextDocument;
 
 class MonitorArchive
 {
@@ -37,6 +39,7 @@ protected:
 	void requestData();
 	void cancelRequest();
 
+	bool exportToTextDocument(QTextDocument* doc, bool onlySelectedRows);
 	bool saveArchiveWithDocWriter(QString fileName, QString format);
 	bool saveArchiveToCsv(QString fileName);
 
@@ -60,6 +63,8 @@ protected slots:
 	void printButton();
 	void updateOrCancelButton();
 	void signalsButton();
+
+	void printRequested(QPrinter* printer);
 
 	void slot_configurationArrived(ConfigSettings configuration);
 
