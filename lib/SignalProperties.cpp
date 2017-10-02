@@ -112,11 +112,27 @@ void SignalProperties::initProperties()
 		m_propertiesDependentOnPrecision.push_back(highValidRangeProperty);
 		highValidRangeProperty->setCategory(signalProcessingCategory);
 
-		auto outputModePropetry = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::OutputMode, outputModeCaption, true, Signal::outputMode, Signal::setOutputMode, m_signal);
-		outputModePropetry->setCategory(signalProcessingCategory);
+		auto unitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
+		unitProperty->setCategory(signalProcessingCategory);
 
-		auto unit = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
-		unit->setCategory(signalProcessingCategory);
+		auto electricLowLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricLowLimitCaption, true, Signal::electricLowLimit, Signal::setElectricLowLimit, m_signal);
+		electricLowLimitProperty->setPrecision(3);
+		electricLowLimitProperty->setCategory(electricParametersCategory);
+
+		auto electricHighLimitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, electricHighLimitCaption, true, Signal::electricHighLimit, Signal::setElectricHighLimit, m_signal);
+		electricHighLimitProperty->setPrecision(3);
+		electricHighLimitProperty->setCategory(electricParametersCategory);
+
+		auto electricUnitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ElectricUnit, electricUnitCaption, true, Signal::electricUnit, Signal::setElectricUnit, m_signal);
+		electricUnitProperty->setCategory(electricParametersCategory);
+
+		std::shared_ptr<OrderedHash<int, QString>> sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
+		auto sensorTypeProperty = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(sensorTypeCaption, true, sensorTypeHash, Signal::sensorType, Signal::setSensorTypeInt, m_signal);
+		sensorTypeProperty->setCategory(electricParametersCategory);
+
+		std::shared_ptr<OrderedHash<int, QString>> outputModeHash = generateOrderedHashFromStringArray(OutputModeStr, OUTPUT_MODE_COUNT);
+		auto outputModePropetry = ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(outputModeCaption, true, outputModeHash, Signal::outputMode, Signal::setOutputModeInt, m_signal);
+		outputModePropetry->setCategory(electricParametersCategory);
 
 		auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 		decimalPlacesProperty->setCategory(onlineMonitoringSystemCategory);
@@ -144,4 +160,14 @@ void SignalProperties::initProperties()
 
 	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(dataFormatCategory);
+}
+
+std::shared_ptr<OrderedHash<int, QString> > SignalProperties::generateOrderedHashFromStringArray(const char* const* array, size_t size)
+{
+	auto result = std::make_shared<OrderedHash<int, QString>>();
+	for (size_t i = 0; i < size; i++)
+	{
+		result->append(i, array[i]);
+	}
+	return result;
 }
