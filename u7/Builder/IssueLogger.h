@@ -283,6 +283,9 @@ namespace Builder
 		void errALC5094(QString inBusSignalID, QString busTypeID);	// Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
 		void errALC5095(QString busTypeID);							// The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
 		void errALC5096(QString inBusSignalID, QString busTypeID);	// Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+		void errALC5097(QString signalID1, QString signalID2, QString busTypeID);	// Bus signals '%1' and '%2' are overlapped (bus type '%3').
+		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
+		void errALC5099(QString busTypeID);											// Bus size must be multiple of 2 bytes (bus type %1).
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

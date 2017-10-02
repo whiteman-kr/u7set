@@ -30,7 +30,11 @@ namespace Builder
 		double inbusAnalogLowLimit = 0.0;
 		double inbusAnalogHighLimit = 65535.0;
 
+		//
+
 		bool conversionRequired() const;
+		void init(const VFrame30::BusSignal& bs);
+		bool isOverlaped(const BusSignal& bs);
 	};
 
 	class Bus
@@ -48,7 +52,7 @@ namespace Builder
 		bool buildInBusSignalsMap();
 		bool placeSignals();
 		bool buildSignalsOrder();
-		bool checkSignalsOverlapping();
+		bool checkSignalsOffsets();
 
 		VFrame30::BusSignal& getBusSignal(const QString& signalID);
 

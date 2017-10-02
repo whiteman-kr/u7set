@@ -41,6 +41,53 @@ namespace Builder
 		return true;
 	}
 
+	void BusSignal::init(const VFrame30::BusSignal& bs)
+	{
+		signalID = bs.signalId();
+		signalType = bs.type();
+
+		inbusAddr.set(0, 0);
+		inbusAddr.addBit(bs.inbusOffset() * SIZE_8BIT + bs.inbusDiscreteBitNo());
+
+		analogFormat = bs.analogFormat();
+
+		switch(bs.type())
+		{
+		case E::SignalType::Analog:
+			inbusSizeBits = bs.inbusAnalogSize();
+			break;
+
+		case E::SignalType::Discrete:
+			inbusSizeBits = SIZE_1BIT;
+			break;
+
+		case E::SignalType::Bus:
+			assert(false);		// bus inside bus is not allowed
+			break;
+
+		default:
+			assert(false);		// unknown signal type
+		}
+		inbusAnalogFormat  = bs.inbusAnalogFormat();
+		inbusAnalogByteOrder = bs.inbusAnalogByteOrder();
+		busAnalogLowLimit = bs.busAnalogLowLimit();
+		busAnalogHighLimit = bs.busAnalogHighLimit();
+		inbusAnalogLowLimit = bs.inbusAnalogLowLimit();
+		inbusAnalogHighLimit = bs.inbusAnalogHighLimit();
+	}
+
+	bool BusSignal::isOverlaped(const BusSignal& bs)
+	{
+		int addr1 = inbusAddr.bitAddress();
+		int size1 = inbusSizeBits;
+
+		int addr2 = bs.inbusAddr.bitAddress();
+		int size2 = bs.inbusSizeBits;
+
+		return	(addr2 >= addr1 && addr2 < (addr1 + size1)) ||
+				(addr1 >= addr2 && addr1 < (addr2 + size2));
+	}
+
 
 	VFrame30::BusSignal Bus::m_invalidBusSignal;
 
@@ -104,7 +151,7 @@ namespace Builder
 			return false;
 		}
 
-		result = checkSignalsOverlapping();
+		result = checkSignalsOffsets();
 
 		return result;
 	}
@@ -249,34 +296,16 @@ namespace Builder
 
 			BusSignal busSignal;
 
-			busSignal.signalID = srcBusSignal.signalId();
+			busSignal.init(srcBusSignal);
+			busSignal.inbusAddr = inBusAddr;
 
 			switch(srcBusSignal.type())
 			{
 			case E::SignalType::Analog:
-				assert(inBusAddr.bit() == 0);
-
-				busSignal.signalType = E::SignalType::Analog;
-				busSignal.inbusAddr = inBusAddr;
-
-				busSignal.analogFormat = srcBusSignal.analogFormat();
-				busSignal.inbusSizeBits = srcBusSignal.inbusAnalogSize();
-				busSignal.inbusAnalogFormat  = srcBusSignal.inbusAnalogFormat();
-				busSignal.inbusAnalogByteOrder = srcBusSignal.inbusAnalogByteOrder();
-				busSignal.busAnalogLowLimit = srcBusSignal.busAnalogLowLimit();
-				busSignal.busAnalogHighLimit = srcBusSignal.busAnalogHighLimit();
-				busSignal.inbusAnalogLowLimit = srcBusSignal.inbusAnalogLowLimit();
-				busSignal.inbusAnalogHighLimit = srcBusSignal.inbusAnalogHighLimit();
-
 				inBusAddr.addBit(busSignal.inbusSizeBits);
 				break;
 
 			case E::SignalType::Discrete:
-
-				busSignal.signalType = E::SignalType::Discrete;
-				busSignal.inbusAddr = inBusAddr;
-				busSignal.inbusSizeBits = SIZE_1BIT;
-
 				inBusAddr.addBit(SIZE_1BIT);
 				break;
 
@@ -295,6 +324,16 @@ namespace Builder
 	bool Bus::buildSignalsOrder()
 	{
 		assert(m_srcBus.autoSignalPlacement() == false);
+
+		if ((m_srcBus.manualBusSize() % WORD_SIZE_IN_BYTES) != 0)
+		{
+			// Bus size must be multiple of 2 bytes (bus type %1).
+			//
+			m_log->errALC5099(m_srcBus.busTypeId());
+			return false;
+		}
+
+		m_sizeW = m_srcBus.manualBusSize() / WORD_SIZE_IN_BYTES;
 
 		QVector<QPair<QString, int>> inBusSignals;		// QPair<busSignalID, signalBitAddressInBus>
 
@@ -366,38 +405,18 @@ namespace Builder
 
 			BusSignal busSignal;
 
-			busSignal.signalID = srcBusSignal.signalId();
+			busSignal.init(srcBusSignal);
 
 			Address16 inBusAddr(0, 0);
 
 			switch(srcBusSignal.type())
 			{
 			case E::SignalType::Analog:
-				busSignal.signalType = E::SignalType::Analog;
-
 				inBusAddr.addBit(srcBusSignal.inbusOffset() * SIZE_8BIT);
-				busSignal.inbusAddr = inBusAddr;
-
-				busSignal.analogFormat = srcBusSignal.analogFormat();
-				busSignal.inbusSizeBits = srcBusSignal.inbusAnalogSize();
-				busSignal.inbusAnalogFormat  = srcBusSignal.inbusAnalogFormat();
-				busSignal.inbusAnalogByteOrder = srcBusSignal.inbusAnalogByteOrder();
-				busSignal.busAnalogLowLimit = srcBusSignal.busAnalogLowLimit();
-				busSignal.busAnalogHighLimit = srcBusSignal.busAnalogHighLimit();
-				busSignal.inbusAnalogLowLimit = srcBusSignal.inbusAnalogLowLimit();
-				busSignal.inbusAnalogHighLimit = srcBusSignal.inbusAnalogHighLimit();
-
 				break;
 
 			case E::SignalType::Discrete:
-
-				busSignal.signalType = E::SignalType::Discrete;
-
 				inBusAddr.addBit(srcBusSignal.inbusOffset() * SIZE_8BIT + srcBusSignal.inbusDiscreteBitNo());
-				busSignal.inbusAddr = inBusAddr;
-
-				busSignal.inbusSizeBits = SIZE_1BIT;
-
 				break;
 
 			default:
@@ -406,15 +425,56 @@ namespace Builder
 				return false;
 			}
 
+			busSignal.inbusAddr = inBusAddr;
+
 			m_signals.append(busSignal);
 		}
 
 		return true;
 	}
 
-	bool Bus::checkSignalsOverlapping()
+	bool Bus::checkSignalsOffsets()
 	{
-		return true;
+		bool result = true;
+
+		int count = m_signals.count();
+
+		int maxBitAddress = m_sizeW * SIZE_16BIT;
+
+		// check signals offsets
+		//
+		for(int i = 0; i < count; i++)
+		{
+			const BusSignal& s = m_signals[i];
+
+			int signalBitAddr = s.inbusAddr.bitAddress();
+
+			if (signalBitAddr < 0 || signalBitAddr >= maxBitAddress)
+			{
+				// Bus signal '%1' offset out of range (bus type '%2').
+				//
+				m_log->errALC5098(s.signalID, m_srcBus.busTypeId());
+				result = false;
+			}
+		}
+
+		// check signals overlapping
+		//
+		for(int i = 0; i < count - 1; i++)
+		{
+			for(int k = i + 1; k < count; k++)
+			{
+				if(m_signals[i].isOverlaped(m_signals[k]) == true)
+				{
+					// Bus signals '%1' and '%2' are overlapped (bus type '%3').
+					//
+					m_log->errALC5097(m_signals[i].signalID, m_signals[k].signalID, m_srcBus.busTypeId());
+					result = false;
+				}
+			}
+		}
+
+		return result;
 	}
 
 	VFrame30::BusSignal& Bus::getBusSignal(const QString& signalID)

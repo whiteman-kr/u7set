@@ -4126,6 +4126,67 @@ namespace Builder
 							arg(inBusSignalID).arg(busTypeID));
 	}
 
+	/// IssueCode: ALC5097
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus signals '%1' and '%2' are overlapped (bus type '%3').
+	///
+	/// Parameters:
+	///		%1 Bus signal ID
+	///		%2 Bus signal ID
+	///		%3 Bus type ID
+	///
+	/// Description:
+	///		Bus signals are overlaped. Check bus signal offsets.
+	///
+	void IssueLogger::errALC5097(QString signalID1, QString signalID2, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5097,
+				  QString(tr("Bus signals '%1' and '%2' are overlapped (bus type '%3').")).
+							arg(signalID1).arg(signalID2).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5098
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus signal '%1' offset out of range (bus type '%2').
+	///
+	/// Parameters:
+	///		%1 Bus signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Bus signal offset out of range. Check bus or signal properties.
+	///
+	void IssueLogger::errALC5098(QString signalID, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5098,
+				  QString(tr("Bus signal '%1' offset out of range (bus type '%2').")).
+							arg(signalID).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5098
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus size must be multiple of 2 bytes (bus type %1).
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		Bus size must be multiple of 2 bytes. Check bus properties.
+	///
+	void IssueLogger::errALC5099(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5099,
+				  QString(tr("Bus size must be multiple of 2 bytes (bus type %1).")).arg(busTypeID));
+	}
 
 	/// IssueCode: ALC5186
 	///
