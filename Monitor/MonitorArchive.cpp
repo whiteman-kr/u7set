@@ -10,6 +10,7 @@
 #include <QProgressDialog>
 #include <QPrintPreviewDialog>
 #include <QPrintDialog>
+#include "DialogSignalInfo.h"
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;
 
@@ -107,6 +108,7 @@ static int no = 1;
 	m_exportButton = new QPushButton(tr("Export..."));
 	m_printButton = new QPushButton(tr("Print..."));
 	m_updateButton = new QPushButton(tr("Update"));
+	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
 	m_signalsButton = new QPushButton(tr("Signals..."));
 
 	m_toolBar->addWidget(m_exportButton);
@@ -199,8 +201,14 @@ static int no = 1;
 	{
 		// First time? Set what is should be hidden by deafult
 		//
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::AppSignalId));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Valid));
 	}
+
+	connect(m_view, &ArchiveView::requestToShowSignalInfo, this, &MonitorArchiveWidget::showSignalInfo);
+	connect(m_view, &ArchiveView::requestToRemoveSignal, this, &MonitorArchiveWidget::removeSignal);
+	connect(m_view, &ArchiveView::requestToSetSignals, this, &MonitorArchiveWidget::signalsButton);
+
 
 	// Communication thread
 	//
@@ -405,6 +413,8 @@ bool MonitorArchiveWidget::exportToTextDocument(QTextDocument* doc, bool onlySel
 	if (onlySelectedRows == true)
 	{
 		selectedIndexes = m_view->selectionModel()->selectedRows();
+		qSort(selectedIndexes);
+
 		rowCount = selectedIndexes.size();
 	}
 
@@ -981,6 +991,32 @@ void MonitorArchiveWidget::signalsButton()
 	return;
 }
 
+void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
+{
+	DialogSignalInfo::showDialog(appSignalId, this->parentWidget());
+}
+
+void MonitorArchiveWidget::removeSignal(QString appSignalId)
+{
+	std::vector<AppSignalParam> result;
+	result.reserve(m_source.acceptedSignals.size());
+
+	for (const AppSignalParam& sp : m_source.acceptedSignals)
+	{
+		if (sp.appSignalId() != appSignalId)
+		{
+			result.push_back(sp);
+		}
+	}
+
+	m_source.acceptedSignals.swap(result);
+
+	m_model->clear();
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	return;
+}
+
 void MonitorArchiveWidget::printRequested(QPrinter* printer)
 {
 	if (printer == nullptr)
@@ -1053,5 +1089,9 @@ void MonitorArchiveWidget::tcpRequestFinished()
 	m_exportButton->setEnabled(true);
 	m_printButton->setEnabled(true);
 	m_signalsButton->setEnabled(true);
+
 	m_updateButton->setText(tr("Update"));
+	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
+
+	return;
 }

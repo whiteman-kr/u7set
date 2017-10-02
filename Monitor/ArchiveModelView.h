@@ -6,10 +6,11 @@
 enum class ArchiveColumns
 {
 	Row = 0,
+	AppSignalId,
 	CustomSignalId,
 	Caption,
 	State,
-	Valid,					// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget, cannot do it in ArchiveView constructor, don't know why(((
+	Valid,					// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget!!!, cannot do it in ArchiveView constructor, don't know why(((
 	Time,
 
 	ColumnCount
@@ -24,6 +25,7 @@ Q_DECLARE_METATYPE(ArchiveColumns);
 //
 class ArchiveModel : public QAbstractTableModel
 {
+	Q_OBJECT
 public:
 	explicit ArchiveModel(QObject* parent = nullptr);
 
@@ -46,6 +48,8 @@ public:
 	void addData(std::shared_ptr<ArchiveChunk> chunk);
 	void clear();
 
+	std::vector<AppSignalParam> appSignals();
+
 	// Data
 	//
 private:
@@ -67,20 +71,35 @@ private:
 //
 class ArchiveView : public QTableView
 {
+	Q_OBJECT
+
 public:
 	explicit ArchiveView(QWidget* parent = nullptr);
 	virtual ~ArchiveView();
 
 protected:
+	virtual void contextMenuEvent(QContextMenuEvent* event);
 
 protected slots:
 	void headerColumnContextMenuRequested(const QPoint& pos);
 	void headerColumnToggled(bool checked);
 
+	void copySelection();
+
+signals:
+	void removeAppSignal(QString appSignalId);
+
+	void requestToShowSignalInfo(QString appSignalId);
+	void requestToRemoveSignal(QString appSignalId);
+	void requestToCopySelection();
+	void requestToSetSignals();
+
 	// Data
 	//
 private:
 	QMenu m_columnMenu;
+
+	QAction* copyAction = nullptr;
 };
 
 #endif // ARCHIVEMODELVIEW_H

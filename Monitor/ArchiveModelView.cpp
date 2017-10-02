@@ -34,6 +34,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::Row:
 		return tr("Row");
 
+	case ArchiveColumns::AppSignalId:
+		return tr("AppSignalID");
+
 	case ArchiveColumns::CustomSignalId:
 		return tr("SignalID");
 
@@ -79,6 +82,23 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		case ArchiveColumns::Row:
 			result = row + 1;
 			break;
+
+		case ArchiveColumns::AppSignalId:
+			{
+				auto sit = m_appSignals.find(m_cachedSignalState.hash());
+				if (sit == m_appSignals.end())
+				{
+					// State from differtent signal!!! ArchiveService has returned something wrong?
+					//
+					assert(false);
+				}
+				else
+				{
+					result = sit->second.appSignalId();
+				}
+			}
+			break;
+
 		case ArchiveColumns::CustomSignalId:
 			{
 				auto sit = m_appSignals.find(m_cachedSignalState.hash());
@@ -311,6 +331,19 @@ void ArchiveModel::clear()
 	return;
 }
 
+std::vector<AppSignalParam> ArchiveModel::appSignals()
+{
+	std::vector<AppSignalParam> result;
+	result.reserve(m_appSignals.size());
+
+	for (const std::pair<Hash, AppSignalParam>& p : m_appSignals)
+	{
+		result.push_back(p.second);
+	}
+
+	return result;
+}
+
 //
 //
 //		ArchiveView
@@ -323,7 +356,7 @@ ArchiveView::ArchiveView(QWidget* parent) :
 	verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader()->setDefaultSectionSize(verticalHeader()->minimumSectionSize() + verticalHeader()->minimumSectionSize() / 10);
 
-	setSelectionBehavior(QAbstractItemView::SelectRows);
+	//setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	// --
@@ -337,12 +370,87 @@ ArchiveView::ArchiveView(QWidget* parent) :
 
 	qRegisterMetaType<ArchiveColumns>("ArchiveColumns");
 
+	// --
+	//
+	copyAction = new QAction(tr("Copy"));
+	copyAction->setShortcut(QKeySequence::Copy);
+	connect(copyAction, &QAction::triggered, this, &ArchiveView::copySelection);
+
+	addAction(copyAction);
+
 	return;
 }
 
 ArchiveView::~ArchiveView()
 {
 	theSettings.m_archiveHorzHeader = horizontalHeader()->saveState();
+}
+
+void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
+{
+	ArchiveModel* archiveModel = qobject_cast<ArchiveModel*>(model());
+	assert(archiveModel);
+
+	QMenu menu(this);
+
+	// Add action to show signal info dialog
+	//
+	std::vector<AppSignalParam> apppSignals = archiveModel->appSignals();
+
+	if (apppSignals.empty() == false)
+	{
+		for (const AppSignalParam& signal : apppSignals)
+		{
+			QAction* action = menu.addAction(signal.customSignalId() + " - " + signal.caption());
+
+			QString appSignalId = signal.appSignalId();
+			connect(action, &QAction::triggered, this, [this, appSignalId]()
+				{
+					qDebug() << "emit requestToShowSignalInfo " << appSignalId ;
+					emit requestToShowSignalInfo(appSignalId);
+				});
+		}
+
+		menu.addSeparator();
+	}
+
+	// Add actions to remove specific signal from archive model
+	//
+	if (apppSignals.empty() == false)
+	{
+		for (const AppSignalParam& signal : apppSignals)
+		{
+			QAction* action = menu.addAction(QLatin1String("Remove ") + signal.customSignalId());
+
+			QString appSignalId = signal.appSignalId();
+			connect(action, &QAction::triggered, this, [this, appSignalId]()
+				{
+					emit requestToRemoveSignal(appSignalId);
+				});
+		}
+
+		menu.addSeparator();
+	}
+
+	// Add action to copy selected rows to the cllipboard
+	//
+	QAction* a1 = menu.addAction(tr("Copy"));
+	a1->setEnabled(selectionModel()->hasSelection());
+	connect(a1, &QAction::triggered, this, &ArchiveView::requestToCopySelection);
+	connect(this, &ArchiveView::requestToCopySelection, this, &ArchiveView::copySelection);			// Can be coonected from QAction::triggered directly, but...
+
+	menu.addSeparator();
+
+	// Signals...
+	//
+	QAction* a4 = menu.addAction(tr("Signals..."));
+	connect(a4, &QAction::triggered, this, &ArchiveView::requestToSetSignals);
+
+	// Show menu
+	//
+	menu.exec(event->globalPos());
+
+	return;
 }
 
 void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
@@ -355,6 +463,7 @@ void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
 	actionsData.reserve(static_cast<int>(ArchiveColumns::ColumnCount));
 
 	actionsData.emplace_back(ArchiveColumns::Row, tr("Row"));
+	actionsData.emplace_back(ArchiveColumns::AppSignalId, tr("AppSignalID"));
 	actionsData.emplace_back(ArchiveColumns::CustomSignalId, tr("SignalID"));
 	actionsData.emplace_back(ArchiveColumns::Caption, tr("Caption"));
 	actionsData.emplace_back(ArchiveColumns::State, tr("State"));
@@ -409,6 +518,63 @@ void ArchiveView::headerColumnToggled(bool checked)
 	{
 		hideColumn(column);
 	}
+
+	return;
+}
+
+void ArchiveView::copySelection()
+{
+	ArchiveModel* archiveModel = qobject_cast<ArchiveModel*>(model());
+	assert(archiveModel);
+
+	QModelIndexList selectedIndexes = selectionModel()->selectedIndexes();
+	if (selectedIndexes.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (selectedIndexes.size() == 1)
+	{
+		QString str = archiveModel->data(selectedIndexes.front(), Qt::DisplayRole).toString();
+		qApp->clipboard()->setText(str);
+		return;
+	}
+
+	qSort(selectedIndexes);
+
+	QString str;
+	str.reserve(4096);
+	QTextStream out(&str);
+
+	QString cellText;
+	int lastRow = selectedIndexes.front().row();
+
+	for (const QModelIndex& index : selectedIndexes)
+	{
+		if (lastRow != index.row())
+		{
+			out << endl;
+		}
+
+		cellText = archiveModel->data(index, Qt::DisplayRole).toString();
+
+		if (cellText.contains(';') == true)
+		{
+			// If cell contains semicolon it must be enclosed in quotes
+			//
+			cellText.prepend('"');
+			cellText.append('"');
+		}
+
+		out << cellText << ";";
+
+		// --
+		//
+		lastRow = index.row();
+	}
+
+	out.flush();
+	qApp->clipboard()->setText(str);
 
 	return;
 }

@@ -64,6 +64,10 @@ protected slots:
 	void updateOrCancelButton();
 	void signalsButton();
 
+	void showSignalInfo(QString appSignalId);	// Slot to ArchiveView::requestToShowSignalInfo
+	void removeSignal(QString appSignalId);		// Slot to ArchiveView::requestToRemoveSignal
+
+
 	void printRequested(QPrinter* printer);
 
 	void slot_configurationArrived(ConfigSettings configuration);

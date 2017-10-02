@@ -284,6 +284,24 @@ DialogSignalInfo::~DialogSignalInfo()
 	delete ui;
 }
 
+bool DialogSignalInfo::showDialog(QString appSignalId, QWidget* parent)
+{
+	bool ok = false;
+	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
+	if (ok == true)
+	{
+		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
+		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
+
+	return ok;
+}
+
 void DialogSignalInfo::prepareContextMenu(const QPoint& pos)
 {
 	Q_UNUSED(pos);
