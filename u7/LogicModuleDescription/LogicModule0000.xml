@@ -3525,7 +3525,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#dec_bus_v1"          Caption="dec_bus"          Version="1.0002">
+		<AFB id="#dec_num_v1"          Caption="dec_num"          Version="1.0003">
 			<Properties>				
 				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
 				<Category>Logic</Category>
