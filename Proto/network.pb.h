@@ -5146,6 +5146,13 @@ class GetAppSignalStatesFromArchiveStartRequest : public ::google::protobuf::Mes
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
       mutable_signalhashes();
 
+  // optional bool removePeriodic = 6 [default = true];
+  inline bool has_removeperiodic() const;
+  inline void clear_removeperiodic();
+  static const int kRemovePeriodicFieldNumber = 6;
+  inline bool removeperiodic() const;
+  inline void set_removeperiodic(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.GetAppSignalStatesFromArchiveStartRequest)
  private:
   inline void set_has_clientequipmentid();
@@ -5156,17 +5163,20 @@ class GetAppSignalStatesFromArchiveStartRequest : public ::google::protobuf::Mes
   inline void clear_has_starttime();
   inline void set_has_endtime();
   inline void clear_has_endtime();
+  inline void set_has_removeperiodic();
+  inline void clear_has_removeperiodic();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* clientequipmentid_;
   ::google::protobuf::int64 starttime_;
   ::google::protobuf::int64 endtime_;
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhashes_;
   ::google::protobuf::int32 timetype_;
+  bool removeperiodic_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > signalhashes_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10992,6 +11002,28 @@ GetAppSignalStatesFromArchiveStartRequest::signalhashes() const {
 inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
 GetAppSignalStatesFromArchiveStartRequest::mutable_signalhashes() {
   return &signalhashes_;
+}
+
+// optional bool removePeriodic = 6 [default = true];
+inline bool GetAppSignalStatesFromArchiveStartRequest::has_removeperiodic() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void GetAppSignalStatesFromArchiveStartRequest::set_has_removeperiodic() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_has_removeperiodic() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void GetAppSignalStatesFromArchiveStartRequest::clear_removeperiodic() {
+  removeperiodic_ = true;
+  clear_has_removeperiodic();
+}
+inline bool GetAppSignalStatesFromArchiveStartRequest::removeperiodic() const {
+  return removeperiodic_;
+}
+inline void GetAppSignalStatesFromArchiveStartRequest::set_removeperiodic(bool value) {
+  set_has_removeperiodic();
+  removeperiodic_ = value;
 }
 
 // -------------------------------------------------------------------

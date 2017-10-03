@@ -960,12 +960,13 @@ void protobuf_AssignDesc_network_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SaveAppSignalsStatesToArchiveReply));
   GetAppSignalStatesFromArchiveStartRequest_descriptor_ = file->message_type(43);
-  static const int GetAppSignalStatesFromArchiveStartRequest_offsets_[5] = {
+  static const int GetAppSignalStatesFromArchiveStartRequest_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, clientequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, timetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, starttime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, endtime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, signalhashes_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(GetAppSignalStatesFromArchiveStartRequest, removeperiodic_),
   };
   GetAppSignalStatesFromArchiveStartRequest_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1427,28 +1428,28 @@ void protobuf_AddDesc_network_2eproto() {
     "gnalStates\030\002 \003(\0132\025.Proto.AppSignalState\""
     "N\n\"SaveAppSignalsStatesToArchiveReply\022\020\n"
     "\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\""
-    "\233\001\n)GetAppSignalStatesFromArchiveStartRe"
+    "\271\001\n)GetAppSignalStatesFromArchiveStartRe"
     "quest\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010time"
     "Type\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007e"
-    "ndTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\"~\n"
-    "\'GetAppSignalStatesFromArchiveStartReply"
-    "\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\0031"
-    "00\022\023\n\013errorString\030\004 \001(\t\022\024\n\trequestID\030\003 \001"
-    "(\r:\0010\"@\n(GetAppSignalStatesFromArchiveNe"
-    "xtRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetA"
-    "ppSignalStatesFromArchiveNextReply\022\020\n\005er"
-    "ror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\t"
-    "requestID\030\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022"
-    "\030\n\tdataReady\030\004 \001(\010:\005false\022\033\n\020totalStates"
-    "Count\030\005 \001(\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:"
-    "\0010\022\034\n\021statesInPartCount\030\007 \001(\005:\0010\022\031\n\nisLa"
-    "stPart\030\010 \001(\010:\005false\022.\n\017appSignalStates\030\t"
-    " \003(\0132\025.Proto.AppSignalState\"B\n*GetAppSig"
-    "nalStatesFromArchiveCancelRequest\022\024\n\treq"
-    "uestID\030\001 \001(\r:\0010\"i\n(GetAppSignalStatesFro"
-    "mArchiveCancelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n"
-    "\tarchError\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001"
-    "(\t", 6322);
+    "ndTime\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n"
+    "\016removePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSig"
+    "nalStatesFromArchiveStartReply\022\020\n\005error\030"
+    "\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013erro"
+    "rString\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(G"
+    "etAppSignalStatesFromArchiveNextRequest\022"
+    "\024\n\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalSt"
+    "atesFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:"
+    "\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030"
+    "\003 \001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataRea"
+    "dy\030\004 \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001("
+    "\005:\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021stat"
+    "esInPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001"
+    "(\010:\005false\022.\n\017appSignalStates\030\t \003(\0132\025.Pro"
+    "to.AppSignalState\"B\n*GetAppSignalStatesF"
+    "romArchiveCancelRequest\022\024\n\trequestID\030\001 \001"
+    "(\r:\0010\"i\n(GetAppSignalStatesFromArchiveCa"
+    "ncelReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+    "\030\002 \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t", 6352);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "network.proto", &protobuf_RegisterTypes);
   GetSignalListStartRequest::default_instance_ = new GetSignalListStartRequest();
@@ -15961,6 +15962,7 @@ const int GetAppSignalStatesFromArchiveStartRequest::kTimeTypeFieldNumber;
 const int GetAppSignalStatesFromArchiveStartRequest::kStartTimeFieldNumber;
 const int GetAppSignalStatesFromArchiveStartRequest::kEndTimeFieldNumber;
 const int GetAppSignalStatesFromArchiveStartRequest::kSignalHashesFieldNumber;
+const int GetAppSignalStatesFromArchiveStartRequest::kRemovePeriodicFieldNumber;
 #endif  // !_MSC_VER
 
 GetAppSignalStatesFromArchiveStartRequest::GetAppSignalStatesFromArchiveStartRequest()
@@ -15983,6 +15985,7 @@ void GetAppSignalStatesFromArchiveStartRequest::SharedCtor() {
   timetype_ = 1;
   starttime_ = GOOGLE_LONGLONG(0);
   endtime_ = GOOGLE_LONGLONG(0);
+  removeperiodic_ = true;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -16029,6 +16032,7 @@ void GetAppSignalStatesFromArchiveStartRequest::Clear() {
     timetype_ = 1;
     starttime_ = GOOGLE_LONGLONG(0);
     endtime_ = GOOGLE_LONGLONG(0);
+    removeperiodic_ = true;
   }
   signalhashes_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -16123,6 +16127,22 @@ bool GetAppSignalStatesFromArchiveStartRequest::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(40)) goto parse_signalHashes;
+        if (input->ExpectTag(48)) goto parse_removePeriodic;
+        break;
+      }
+
+      // optional bool removePeriodic = 6 [default = true];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_removePeriodic:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &removeperiodic_)));
+          set_has_removeperiodic();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -16175,6 +16195,11 @@ void GetAppSignalStatesFromArchiveStartRequest::SerializeWithCachedSizes(
       5, this->signalhashes(i), output);
   }
 
+  // optional bool removePeriodic = 6 [default = true];
+  if (has_removeperiodic()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->removeperiodic(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -16214,6 +16239,11 @@ void GetAppSignalStatesFromArchiveStartRequest::SerializeWithCachedSizes(
       WriteUInt64ToArray(5, this->signalhashes(i), target);
   }
 
+  // optional bool removePeriodic = 6 [default = true];
+  if (has_removeperiodic()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->removeperiodic(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -16247,6 +16277,11 @@ int GetAppSignalStatesFromArchiveStartRequest::ByteSize() const {
     // optional sfixed64 endTime = 4 [default = 0];
     if (has_endtime()) {
       total_size += 1 + 8;
+    }
+
+    // optional bool removePeriodic = 6 [default = true];
+    if (has_removeperiodic()) {
+      total_size += 1 + 1;
     }
 
   }
@@ -16299,6 +16334,9 @@ void GetAppSignalStatesFromArchiveStartRequest::MergeFrom(const GetAppSignalStat
     if (from.has_endtime()) {
       set_endtime(from.endtime());
     }
+    if (from.has_removeperiodic()) {
+      set_removeperiodic(from.removeperiodic());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -16327,6 +16365,7 @@ void GetAppSignalStatesFromArchiveStartRequest::Swap(GetAppSignalStatesFromArchi
     std::swap(starttime_, other->starttime_);
     std::swap(endtime_, other->endtime_);
     signalhashes_.Swap(&other->signalhashes_);
+    std::swap(removeperiodic_, other->removeperiodic_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

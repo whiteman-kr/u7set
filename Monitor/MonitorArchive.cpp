@@ -97,8 +97,7 @@ static int no = 1;
 	m_source.requestEndTime = TimeStamp(currentTime).timeStamp / 1_min * 1_min;		// reset seconds and ms
 	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
 
-	qDebug() << m_source.requestStartTime.toDateTime();
-	qDebug() << m_source.requestEndTime.toDateTime();
+	m_source.removePeriodicRecords = true;			// By defaut it's true, don't store it in theSettings as users often forget to set this option back
 
 	// ToolBar
 	//
@@ -307,6 +306,7 @@ void MonitorArchiveWidget::requestData()
 	m_tcpClient->requestData(m_source.requestStartTime,
 							 m_source.requestEndTime,
 							 m_source.timeType,
+							 m_source.removePeriodicRecords,
 							 m_source.acceptedSignals);
 
 	m_exportButton->setEnabled(false);

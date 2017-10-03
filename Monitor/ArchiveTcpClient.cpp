@@ -33,6 +33,7 @@ ArchiveTcpClient::~ArchiveTcpClient()
 bool ArchiveTcpClient::requestData(TimeStamp startTime,
 								   TimeStamp endTime,
 								   E::TimeType timeType,
+								   bool removePeriodicRecords,
 								   const std::vector<AppSignalParam>& appSignals)
 {
 	if (appSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
@@ -50,6 +51,7 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 	m_requestData.startTime = qMin(startTime, endTime);
 	m_requestData.endTime = qMax(startTime, endTime);
 	m_requestData.timeType = timeType;
+	m_requestData.removePrioodicRecords = removePeriodicRecords;
 
 	m_requestData.appSignals.clear();
 	for (const AppSignalParam& sp : appSignals)
@@ -243,6 +245,8 @@ void ArchiveTcpClient::requestStart()
 	m_startRequest.set_timetype(static_cast<int>(m_requestData.timeType));		// enum TymeType: 0 Plan, 1 SystemTime, 2 LocalTyme, 3 ArchiveId
 	m_startRequest.set_starttime(m_requestData.startTime.timeStamp);
 	m_startRequest.set_endtime(m_requestData.endTime.timeStamp);
+
+	m_startRequest.set_removeperiodic(m_requestData.removePrioodicRecords);
 
 	for (const std::pair<Hash, QString> sp : m_requestData.appSignals)
 	{
