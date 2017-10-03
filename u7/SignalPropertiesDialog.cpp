@@ -204,6 +204,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				signalProperties->propertyByCaption(highValidRangeCaption)->setVisible(false);
 				signalProperties->propertyByCaption(filteringTimeCaption)->setVisible(false);
 				signalProperties->propertyByCaption(spreadToleranceCaption)->setVisible(false);
+
+				signalProperties->propertyByCaption(electricLowLimitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(electricHighLimitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(electricUnitCaption)->setVisible(false);
+				signalProperties->propertyByCaption(sensorTypeCaption)->setVisible(false);
 			}
 
 			if (s.isInternal())
@@ -221,6 +226,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			{
 				signalProperties->propertyByCaption(lowDACCaption)->setVisible(false);
 				signalProperties->propertyByCaption(highDACCaption)->setVisible(false);
+
 				signalProperties->propertyByCaption(outputModeCaption)->setVisible(false);
 			}
 		}

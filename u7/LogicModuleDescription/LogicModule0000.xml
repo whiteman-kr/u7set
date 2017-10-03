@@ -1472,7 +1472,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0006">
+		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1510,7 +1510,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1579,7 +1579,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0006">
+		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1617,7 +1617,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1686,7 +1686,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0007">
+		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0008">
 			<Properties>								
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1724,7 +1724,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1793,7 +1793,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0006">
+		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1831,7 +1831,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1900,7 +1900,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0005">
+		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1937,7 +1937,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1959,7 +1959,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0005">
+		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0006">
 			<Properties>				
 				<Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1996,7 +1996,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2018,7 +2018,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0005">
+		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2055,7 +2055,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2077,7 +2077,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0005">
+		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0006">
 			<Properties>				
 				<Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2114,7 +2114,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2323,7 +2323,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#cod_bus_v1"          Caption="cod_bus"          Version="1.0004">
+		<AFB id="#cod_num_v1"          Caption="cod_num"          Version="1.0005">
 			<Properties>
 				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -3525,7 +3525,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#dec_bus_v1"          Caption="dec_bus"          Version="1.0002">
+		<AFB id="#dec_num_v1"          Caption="dec_num"          Version="1.0003">
 			<Properties>				
 				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
 				<Category>Logic</Category>

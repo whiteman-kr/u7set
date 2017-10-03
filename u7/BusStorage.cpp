@@ -60,24 +60,63 @@ bool BusStorage::load(QString* errorMessage)
 			continue;
 		}
 
-		VFrame30::Bus bus;
+		std::shared_ptr<VFrame30::Bus> bus = std::make_shared<VFrame30::Bus>();
+
 		QString loadBusErrorMessage;
 
-		ok = bus.Load(f->data());
+		ok = bus->Load(f->data());
 		if (ok == false)
 		{
 			*errorMessage = QString("Load bus %1 error ").arg(f->fileName()) + loadBusErrorMessage;
 			return false;
 		}
 
-		setFileInfo(bus.uuid(), *f);
+		setFileInfo(bus->uuid(), *f);
 
-		bus.setFileName(f->fileName());
+		bus->setFileName(f->fileName());
 
-		add(bus.uuid(), bus);
+		add(bus->uuid(), bus);
 	}
 
 	return true;
+}
+
+bool BusStorage::reload(const QUuid& uuid)
+{
+	std::shared_ptr<VFrame30::Bus> bus = get(uuid);
+	if (bus == nullptr)
+	{
+		assert(bus);
+		return false;
+	}
+
+	std::shared_ptr<DbFile> file = nullptr;
+
+	DbFileInfo fi = fileInfo(uuid);
+
+	bool ok = m_db->getLatestVersion(fi, &file, nullptr);
+
+	if (ok == false || file == nullptr)
+	{
+		assert(ok);
+		assert(file);
+
+		return false;
+	}
+
+	QByteArray data;
+	file->swapData(data);
+
+	ok = bus->Load(data);
+	if (ok == false)
+	{
+		assert(ok);
+
+		return false;
+	}
+
+	return true;
+
 }
 
 bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
@@ -90,7 +129,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	VFrame30::Bus* bus = getPtr(uuid);
+	std::shared_ptr<VFrame30::Bus> bus = get(uuid);
 	if (bus == nullptr)
 	{
 		assert(bus);
@@ -168,3 +207,5 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	return true;
 }
+
+

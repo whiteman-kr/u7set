@@ -472,7 +472,7 @@ void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
 
 	for (std::pair<ArchiveColumns, QString> ad : actionsData)
 	{
-		QAction* action = new QAction(ad.second);
+		QAction* action = new QAction(ad.second, nullptr);
 		action->setData(QVariant::fromValue(ad.first));
 		action->setCheckable(true);
 		action->setChecked(!horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));

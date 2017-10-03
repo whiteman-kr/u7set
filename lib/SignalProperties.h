@@ -33,10 +33,10 @@ static const QString highEngeneeringUnitsCaption("HighEngeneeringUnits");
 static const QString unitCaption("Unit");
 static const QString lowValidRangeCaption("LowValidRange");
 static const QString highValidRangeCaption("HighValidRange");
-static const QString electricLowLimitCaption("electricLowLimit");
-static const QString electricHighLimitCaption("electricHighLimit");
-static const QString electricUnitCaption("electricUnit");
-static const QString sensorTypeCaption("sensorType");
+static const QString electricLowLimitCaption("ElectricLowLimit");
+static const QString electricHighLimitCaption("ElectricHighLimit");
+static const QString electricUnitCaption("ElectricUnit");
+static const QString sensorTypeCaption("SensorType");
 static const QString outputModeCaption("OutputMode");
 static const QString acquireCaption("Acquire");
 static const QString decimalPlacesCaption("DecimalPlaces");
@@ -55,8 +55,9 @@ static const QString identificationCategory("1 Identification");
 static const QString signalTypeCategory("2 Signal type");
 static const QString dataFormatCategory("3 Data Format");
 static const QString signalProcessingCategory("4 Signal processing");
-static const QString onlineMonitoringSystemCategory("5 Online Monitoring System");
-static const QString tuningCategory("6 Tuning");
+static const QString electricParametersCategory("5 Electric parameters");
+static const QString onlineMonitoringSystemCategory("6 Online Monitoring System");
+static const QString tuningCategory("7 Tuning");
 
 static const QString lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
@@ -71,6 +72,7 @@ private:
 	std::vector<Property*> m_propertiesDependentOnPrecision;
 
 	void initProperties();
+	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);
 
 public:
 	explicit SignalProperties(Signal& signal);

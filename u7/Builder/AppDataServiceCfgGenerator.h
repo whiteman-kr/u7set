@@ -19,6 +19,7 @@ namespace Builder
 
 		bool writeSettings();
 		bool writeAppDataSourcesXml();
+		bool writeAppSignalsXml();
 		bool addLinkToAppSignalsFile();
 
 
