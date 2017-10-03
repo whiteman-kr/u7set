@@ -4169,7 +4169,7 @@ namespace Builder
 							arg(signalID).arg(busTypeID));
 	}
 
-	/// IssueCode: ALC5098
+	/// IssueCode: ALC5099
 	///
 	/// IssueType: Error
 	///
@@ -4187,6 +4187,97 @@ namespace Builder
 				  5099,
 				  QString(tr("Bus size must be multiple of 2 bytes (bus type %1).")).arg(busTypeID));
 	}
+
+	/// IssueCode: ALC5100
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type ID '%1' is undefined (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus type ID is undefined. Check UAL item properties.
+	///
+	void IssueLogger::errALC5100(QString busTypeID, QUuid item, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5100,
+				  QString(tr("Bus type ID '%1' is undefined (Logic schema '%2').")).arg(busTypeID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5101
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus composer can't be directly connected to transmitter (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Bus composer can't be directly connected to transmitter. Intermediate signal should be used.
+	///
+	void IssueLogger::errALC5101(QUuid item, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5101,
+				  QString(tr("Bus composer can't be directly connected to transmitter (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5102
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Output of bus composer can't be connected to input of another bus composer. Nested busses is not allowed.
+	///
+	void IssueLogger::errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, composer1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composer2Guid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5102,
+				  QString(tr("Output of bus composer can't be connected to input of another bus composer (Logic schema %1).")).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5103
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types of bus composer and signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Different bus types of bus composer and signal. Harmonize bus type of elements.
+	///
+	void IssueLogger::errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5103,
+				  QString(tr("Different bus types of bus composer and signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
+	//
 
 	/// IssueCode: ALC5186
 	///

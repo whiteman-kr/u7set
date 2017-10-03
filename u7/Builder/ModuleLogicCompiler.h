@@ -73,6 +73,12 @@ namespace Builder
 			int outputSignalIndex = -1;
 		};
 
+		struct BusComposerInfo
+		{
+			bool busFillingCodeAlreadyGenerated = false;
+			int busContentAddress = BAD_ADDRESS;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -199,19 +205,21 @@ namespace Builder
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
+
 		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
 
-		bool generateFbCode(const AppItem *appItem);
-
+		bool generateFbCode(const AppItem* appItem);
 		bool writeFbInputSignals(const AppFb *appFb);
 		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
 		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
-
 		bool startFb(const AppFb* appFb);
-
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
+
+		bool generateBusComposerCode(const AppItem* appItem);
+		bool generateBusComposerToSignalCode(const LogicBusComposer* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
+		bool generateBusFillingCode(const LogicBusComposer* composer, const Signal* destSignal, BusComposerInfo* composerInfo);
 
 		bool addToComparatorStorage(const AppFb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);

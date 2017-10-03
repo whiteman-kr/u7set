@@ -136,16 +136,22 @@ namespace Builder
 				break;
 
 			case E::SignalType::Bus:
-				if (m_busSet->hasBus(s.busTypeID()) == false)
 				{
-					//  Bus type ID '%1' of signal '%2' is undefined.
-					//
-					m_log->errALC5092(s.busTypeID(), s.appSignalID());
-					result = false;
-				}
-				else
-				{
-					m_busSignals.insert(i, s.appSignalID());
+					BusShared bus = getBus(s.busTypeID());
+
+					if (bus == nullptr)
+					{
+						//  Bus type ID '%1' of signal '%2' is undefined.
+						//
+						m_log->errALC5092(s.busTypeID(), s.appSignalID());
+						result = false;
+					}
+					else
+					{
+						m_busSignals.insert(i, s.appSignalID());
+
+						s.setDataSize(bus->sizeW() * SIZE_16BIT);
+					}
 				}
 				break;
 
@@ -185,11 +191,6 @@ namespace Builder
 					}
 				}
 			}
-		}
-
-		if (result == true)
-		{
-			LOG_SUCCESS(m_log, QString(tr("Ok")))
 		}
 
 		return result;

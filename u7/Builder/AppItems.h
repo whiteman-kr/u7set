@@ -10,8 +10,10 @@
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemBus.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
+
 
 #include "Parser.h"
 #include "ApplicationLogicCode.h"
@@ -21,12 +23,18 @@ namespace Builder
 	// typedefs Logic* for types defined outside ModuleLogicCompiler
 	//
 	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
+	typedef VFrame30::AfbPin LogicPin;
+
 	typedef VFrame30::SchemaItemSignal LogicSignal;
 	typedef VFrame30::SchemaItemAfb LogicFb;
-	typedef VFrame30::AfbPin LogicPin;
 	typedef VFrame30::SchemaItemConst LogicConst;
+
 	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
 	typedef VFrame30::SchemaItemReceiver LogicReceiver;
+
+	typedef VFrame30::SchemaItemBusComposer LogicBusComposer;
+	typedef VFrame30::SchemaItemBusExtractor LogicBusExtractor;
+
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
@@ -101,7 +109,9 @@ namespace Builder
 			Const,
 			Transmitter,
 			Receiver,
-			Terminator
+			Terminator,
+			BusComposer,
+			BusExtractor
 		};
 
 		AppItem();
@@ -138,6 +148,10 @@ namespace Builder
 		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
+
+		const LogicBusComposer* logicBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
+		const LogicBusExtractor* logicBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
+
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 
 		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }

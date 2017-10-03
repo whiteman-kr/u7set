@@ -24,6 +24,8 @@ namespace Builder
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 
+		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
+
 	private:
 		bool appendBusSignal(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);
 		QString buildBusSignalCaption(const Signal& s, const VFrame30::Bus& bus, const VFrame30::BusSignal& busSignal);

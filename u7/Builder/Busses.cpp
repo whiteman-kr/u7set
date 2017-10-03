@@ -561,4 +561,10 @@ namespace Builder
 		return true;
 	}
 
+	BusShared Busses::getBus(const QString& busTypeID) const
+	{
+		return m_busses.value(busTypeID, nullptr);
+	}
+
+
 }

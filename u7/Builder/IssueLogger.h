@@ -286,6 +286,10 @@ namespace Builder
 		void errALC5097(QString signalID1, QString signalID2, QString busTypeID);	// Bus signals '%1' and '%2' are overlapped (bus type '%3').
 		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
 		void errALC5099(QString busTypeID);											// Bus size must be multiple of 2 bytes (bus type %1).
+		void errALC5100(QString busTypeID, QUuid item, QString schemaID);			// Bus type ID '%1' is undefined (Logic schema '%2').
+		void errALC5101(QUuid item, QString schemaID);								// Bus composer can't be directly connected to transmitter (Logic schema %1).
+		void errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID);	// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
+		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

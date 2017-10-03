@@ -82,6 +82,8 @@ namespace Builder
 		bool prepare();
 		bool writeReport(BuildResultWriter* resultWriter);
 
+		BusShared getBus(const QString& busTypeID) const;
+
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;
 		IssueLogger* m_log = nullptr;

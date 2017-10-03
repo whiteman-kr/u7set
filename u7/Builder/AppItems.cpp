@@ -364,6 +364,16 @@ namespace Builder
 			return Type::Terminator;
 		}
 
+		if (isBusComposer() == true)
+		{
+			return Type::BusComposer;
+		}
+
+		if (isBusExtractor() == true)
+		{
+			return Type::BusExtractor;
+		}
+
 		assert(false);
 
 		return Type::Unknown;

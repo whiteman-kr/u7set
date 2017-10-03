@@ -2,8 +2,9 @@
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/Crc.h"
-#include "Connection.h"
 #include "../TuningIPEN/TuningIPENDataStorage.h"
+
+#include "Connection.h"
 #include "Parser.h"
 #include "Builder.h"
 
@@ -1352,7 +1353,6 @@ namespace Builder
 			}
 		}
 
-
 		return true;
 	}
 
@@ -1431,6 +1431,32 @@ namespace Builder
 				m_nonAcquiredBuses.append(s);
 			}
 		}
+
+		// append shadow bus signals (auto generated in m_appSignals)
+		//
+		for(AppSignal* appSignal : m_appSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
+
+			if (appSignal->isShadowSignal() == true &&
+				appSignal->isBus() == true)
+			{
+				Signal* s = appSignal->signal();
+
+				if (s == nullptr)
+				{
+					assert(false);
+					continue;
+				}
+
+				assert(s->isAcquired() == false);
+				assert(s->isInternal() == true);
+				assert(s->isBus() == true);
+
+				m_nonAcquiredBuses.append(s);
+			}
+		}
+
 
 		return true;
 	}
@@ -2814,11 +2840,11 @@ namespace Builder
 
 		for(const LogicPin& inPin : inPins)
 		{
-			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+			if (inPin.IsInput() == false)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("Input pin %1 has wrong direction")).arg(inPin.caption()));
-				ASSERT_RETURN_FALSE;
+				return false;
 			}
 
 			const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
@@ -2827,14 +2853,14 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("More than one pin is connected to the input")));
-				ASSERT_RETURN_FALSE;
+				return false;
 			}
 
 			if (associatedOutPins.size() < 1)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 						  QString(tr("Has no output pins is connected to the input")));
-				ASSERT_RETURN_FALSE;
+				return false;
 			}
 
 			QUuid connectedPinGuid = associatedOutPins[0];
@@ -2843,7 +2869,8 @@ namespace Builder
 
 			if (connectedPinParent == nullptr)
 			{
-				ASSERT_RETURN_FALSE
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 
 			QUuid connectedSignalUuid;
@@ -2863,7 +2890,7 @@ namespace Builder
 					// All transmitter inputs must be directly linked to a signals.
 					//
 					m_log->errALC5027(transmitter.guid());
-					ASSERT_RETURN_FALSE
+					return false;
 				}
 
 				QList<QUuid> ids = m_outPinSignal.values(connectedPinGuid);
@@ -2873,7 +2900,7 @@ namespace Builder
 					// Transmitter input can be linked to one signal only.
 					//
 					m_log->errALC5026(transmitter.guid(), ids);
-					ASSERT_RETURN_FALSE
+					return false;
 				}
 				else
 				{
@@ -2886,7 +2913,7 @@ namespace Builder
 			if (appSignal == nullptr)
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Signal is not found, GUID: %1")).arg(connectedSignalUuid.toString()));
-				ASSERT_RETURN_FALSE
+				return false;
 			}
 
 			QString connectedSignalID = appSignal->appSignalID();
@@ -3618,6 +3645,13 @@ namespace Builder
 
 			if (appItem->isBusComposer() == true)
 			{
+				result &= generateBusComposerCode(appItem);
+
+				if (result == false)
+				{
+					break;
+				}
+
 				continue;
 			}
 
@@ -3658,7 +3692,7 @@ namespace Builder
 
 		for(LogicPin inPin : appItem->inputs())
 		{
-			if (inPin.dirrection() != VFrame30::ConnectionDirrection::Input)
+			if (inPin.IsInput() == false)
 			{
 				ASSERT_RESULT_FALSE_BREAK
 			}
@@ -3696,15 +3730,22 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				if (connectedPinParent->isConst())
+				if (connectedPinParent->isConst() == true)
 				{
 					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->logicConst());
 					continue;
 				}
 
-				if (connectedPinParent->isReceiver())
+				if (connectedPinParent->isReceiver() == true)
 				{
 					result &= generateWriteReceiverToSignalCode(connectedPinParent->logicReceiver(), *appSignal, connectedPinGuid);
+					continue;
+				}
+
+				if (connectedPinParent->isBusComposer() == true)
+				{
+					// write busComposer to signal code implemented in generateBusComposerCode()
+					//
 					continue;
 				}
 
@@ -4750,6 +4791,7 @@ namespace Builder
 				switch(t)
 				{
 				case AppItem::Type::Fb:
+				case AppItem::Type::BusComposer:
 					connectedToFb = true;
 					break;
 
@@ -4937,6 +4979,211 @@ namespace Builder
 		}
 
 		appSignal->setResultSaved();
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateBusComposerCode(const AppItem* appItem)
+	{
+		TEST_PTR_RETURN_FALSE(appItem);
+
+		const LogicBusComposer* composer = appItem->logicBusComposer();
+
+		if (composer == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		BusComposerInfo composerInfo;
+
+		bool result = true;
+
+		int outputsCount = 0;
+
+		for(LogicPin outPin : appItem->outputs())
+		{
+			if (outputsCount >= 1)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (outPin.IsOutput() == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			outputsCount++;
+
+			for(QUuid connectedPinGuid : outPin.associatedIOs())
+			{
+				AppItem* connectedPinParent = m_pinParent.value(connectedPinGuid, nullptr);
+
+				if (connectedPinParent == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				// BusComposer output can be directly connected to:
+				//
+				// 1) signal of type E::SignalType::Bus
+				// 2) input of FB (via shadow bus signal)
+				// 3) terminator (no code will be generated)
+
+				// BusComposer output can't be directly connected to:
+				//
+				// 1) transmitter
+				// 2) input of another BusComposer
+
+				AppItem::Type t = connectedPinParent->type();
+
+				switch(t)
+				{
+				// allowed connections
+				//
+				case AppItem::Type::Signal:
+
+					// save BusComposer result to real signal
+					// connectedPinParent->guid() is an app signal guid
+					//
+					result = generateBusComposerToSignalCode(composer, connectedPinParent->guid(), &composerInfo);
+
+					break;
+
+				case AppItem::Type::Fb:
+
+					// save BusComposer result to shadow signal
+					// outPin->guid() is an shadow signal guid
+					//
+					result = generateBusComposerToSignalCode(composer, outPin.guid(), &composerInfo);
+
+					break;
+
+				case AppItem::Type::Terminator:
+					// nothing to do
+					break;
+
+				// disallowed connections
+				//
+				case AppItem::Type::Transmitter:
+					// Bus composer can't be directly connected to transmitter (Logic schema %1).
+					//
+					m_log->errALC5101(composer->guid(), appItem->schemaID());
+					result = false;
+					break;
+
+				case AppItem::Type::BusComposer:
+					// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
+					//
+					m_log->errALC5102(composer->guid(), connectedPinParent->guid(), appItem->schemaID());
+					result = false;
+					break;
+
+				// unknown AppItem::Type
+				//
+				default:
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+				}
+
+				if (result == false)
+				{
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateBusComposerToSignalCode(const LogicBusComposer* composer, QUuid signalUuid, BusComposerInfo* composerInfo)
+	{
+		if (composer == nullptr || composerInfo == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		AppSignal* destAppSignal = m_appSignals.value(signalUuid, nullptr);
+
+		if (destAppSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Signal* destSignal = m_signals->getSignal(destAppSignal->appSignalID());
+
+		if (destSignal == nullptr)
+		{
+			// Signal identifier '%1' is not found.
+			//
+			m_log->errALC5000(destAppSignal->appSignalID(), destAppSignal->guid());
+			return false;
+		}
+
+		QString busTypeID = composer->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			m_log->errALC5100(busTypeID, composer->guid(), destAppSignal->schemaID());
+			return false;
+		}
+
+		if (composer->busTypeId() != destSignal->busTypeID())
+		{
+			// Different bus types of bus composer and signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5103(destSignal->appSignalID(), destAppSignal->guid(), composer->guid(), destAppSignal->schemaID());
+			return false;
+		}
+
+		if (composerInfo->busFillingCodeAlreadyGenerated == true)
+		{
+			// simply copying contents of previous filled bus to the location of destSignal
+			//
+			Command cmd;
+
+			cmd.movMem(destSignal->ualAddr().offset(), composerInfo->busContentAddress, bus->sizeW());
+			cmd.setComment(QString("fill bus signal %1").arg(destSignal->appSignalID()));
+			m_code.append(cmd);
+
+			return true;
+		}
+
+		bool result = generateBusFillingCode(composer, destSignal, composerInfo);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateBusFillingCode(const LogicBusComposer* composer, const Signal* destSignal, BusComposerInfo* composerInfo)
+	{
+		if (composer == nullptr ||
+			destSignal == nullptr ||
+			composerInfo == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		assert(composerInfo->busFillingCodeAlreadyGenerated == false);
+
+		// code generation
+
+		composerInfo->busFillingCodeAlreadyGenerated = true;
 
 		return true;
 	}
