@@ -90,7 +90,7 @@ bool Convertor::convert(const QString& inputFilePath, const QString& parentFile,
 
 	FileQuery fq;
 	fq.path = parentFile + "/" + inputFileName;
-	fq.addQuery = "SELECT * FROM add_or_update_file(1, \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ", '{}');\n\n\n";
+	fq.addQuery = "SELECT * FROM api.add_or_update_file('$(SessionKey)', \'" + parentFile + "\', \'" + inputFileName + "\', \'Update: Adding file " + inputFileName + "\', " + str + ", '{}');\n\n\n";
 	fq.deleteQuery = "SELECT * FROM public.delete_file_on_update(1, '" + fq.path + "', 'Delete file " + inputFileName + "');\n\n\n";
 
 	queries.push_back(fq);
