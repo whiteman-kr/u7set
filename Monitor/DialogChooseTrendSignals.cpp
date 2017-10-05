@@ -75,10 +75,6 @@ void DialogChooseTrendSignals::fillSignalList()
 
 void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 {
-//	QString signalId = std::get<0>(signal);
-//	QString type = std::get<1>(signal);
-//	QString caption = std::get<2>(signal);
-
 	if (trendSignalsHasSignalId(signal.customSignalId()) == true)
 	{
 		// SignaID already presnt in TrenSignals
@@ -107,11 +103,19 @@ void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 	itemData << signalType;
 	itemData << signal.caption();
 
+	QString toolTip = QString("%1\n%2\n%3")
+						.arg(signal.customSignalId())
+						.arg(signal.appSignalId())
+						.arg(signal.caption());
+
 	QTreeWidgetItem* item = new QTreeWidgetItem(ui->trendSignals, itemData);
 	item->setData(0, Qt::UserRole, QVariant::fromValue(signal));
 
-	ui->trendSignals->addTopLevelItem(item);
+	item->setToolTip(0, toolTip);
+	item->setToolTip(1, toolTip);
+	item->setToolTip(2, toolTip);
 
+	ui->trendSignals->addTopLevelItem(item);
 	ui->trendSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
 
 	disableControls();
@@ -476,6 +480,33 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 			}
 		}
 		break;
+	case Qt::ToolTipRole:
+		{
+			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
+			{
+				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				return QVariant();
+			}
+
+			int signalIndex = m_signalIndexes[row];
+
+			if (signalIndex < 0 ||
+				signalIndex >= static_cast<int>(m_signals.size()))
+			{
+				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				return QVariant();
+			}
+
+			const AppSignalParam& signalParam = m_signals[signalIndex];
+
+			QString toolTip = QString("%1\n%2\n%3")
+								.arg(signalParam.customSignalId())
+								.arg(signalParam.appSignalId())
+								.arg(signalParam.caption());
+
+			return toolTip;
+
+		}
 	default:
 		return QVariant();
 	}

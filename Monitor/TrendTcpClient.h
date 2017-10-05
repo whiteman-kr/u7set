@@ -39,14 +39,14 @@ protected:
 	void processNext(const QByteArray& data);
 
 public slots:
-	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, TimeType timeType);
+	void slot_requestData(QString appSignalId, TimeStamp hourToRequest, E::TimeType timeType);
 
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 signals:
-	void dataReady(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
-	void requestError(QString appSignalId, TimeStamp requestedHour, TimeType timeType);
+	void dataReady(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+	void requestError(QString appSignalId, TimeStamp requestedHour, E::TimeType timeType);
 
 private:
 	int m_periodicTimerId = 0;
@@ -57,7 +57,7 @@ private:
 	{
 		QString appSignalId;
 		TimeStamp hourToRequest;
-		TimeType timeType;
+		E::TimeType timeType;
 
 		bool operator== (const RequestQueue& r) const
 		{

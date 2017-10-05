@@ -21,14 +21,10 @@ struct TuningModelRecord
 			return false;
 		}
 
-		//float scalePercent = std::fabs(param.lowEngineeringUnits() - param.highEngineeringUnits()) / 100.0;
-
-		double epsilon = std::numeric_limits<double>::epsilon();
-
 		if (state.valid() == true)
 		{
-			if ((std::fabs(param.lowEngineeringUnits() - state.readLowLimit()) > epsilon)  ||
-				std::fabs(param.highEngineeringUnits() - state.readHighLimit()) > epsilon)
+			if (TuningSignalState::floatsEqual(param.lowEngineeringUnits(), state.readLowLimit()) == false ||
+				TuningSignalState::floatsEqual(param.highEngineeringUnits(), state.readHighLimit()) == false)
 			{
 				return true;
 			}

@@ -3,6 +3,8 @@
 
 #include "MonitorConfigController.h"
 #include "DialogChooseArchiveSignals.h"
+#include "ArchiveTcpClient.h"
+#include "ArchiveModelView.h"
 
 class MonitorArchiveWidget;
 
@@ -20,7 +22,6 @@ private:
 	static std::map<QString, MonitorArchiveWidget*> m_archiveList;
 };
 
-
 class MonitorArchiveWidget : public QMainWindow
 {
 public:
@@ -31,17 +32,17 @@ public:
 	void ensureVisible();
 
 	bool setSignals(const std::vector<AppSignalParam>& appSignals);
-	bool addSignal(const AppSignalParam& appSignal);
+
+protected:
+	void requestData();
+	void cancelRequest();
 
 	// Events
 	//
 protected:
 	virtual void closeEvent(QCloseEvent *e) override;
-//	virtual void timerEvent(QTimerEvent* event) override;
-//	virtual void showEvent(QShowEvent*) override;
-
-//	virtual void dragEnterEvent(QDragEnterEvent* event) override;
-//	virtual void dropEvent(QDropEvent* event) override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
+	virtual void dropEvent(QDropEvent* event) override;
 
 protected:
 	void saveWindowState();
@@ -50,8 +51,15 @@ protected:
 	// Slots
 	//
 protected slots:
+	void timeTypeCurrentIndexChanged(int index);
+
+	void updateOrCancelButton();
 	void signalsButton();
-//	//void slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+
+	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
+	void tcpClientError(QString errorMessage);
+	void tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount);
+	void tcpRequestFinished();
 
 	// Data
 	//
@@ -59,11 +67,10 @@ private:
 	ConfigConnection m_archiveService1;
 	ConfigConnection m_archiveService2;
 
-	std::vector<AppSignalParam> m_appSignals;
 	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
 
-//	ArchiveTcpClient* m_tcpClient = nullptr;
-//	std::unique_ptr<SimpleThread> m_tcpClientThread;
+	ArchiveTcpClient* m_tcpClient = nullptr;
+	SimpleThread* m_tcpClientThread = nullptr;
 
 	enum  StatusBarColumns
 	{
@@ -76,16 +83,24 @@ private:
 	QToolBar* m_toolBar = nullptr;
 	QPushButton* m_exportButton = nullptr;
 	QPushButton* m_printButton = nullptr;
+	QPushButton* m_updateButton = nullptr;
 	QPushButton* m_signalsButton = nullptr;
+
+	QDateTimeEdit* m_startDateTimeEdit = nullptr;
+	QDateTimeEdit* m_endDateTimeEdit = nullptr;
+	QComboBox* m_timeType = nullptr;
+
+	ArchiveModel* m_model = new ArchiveModel(this);
+	ArchiveView* m_view = new ArchiveView(this);
 
 	QStatusBar* m_statusBar = nullptr;
 	QLabel* m_statusBarTextLabel = nullptr;
-	QLabel* m_statusBarQueueSizeLabel = nullptr;
+	QLabel* m_statusBarStatesReceivedLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarServerLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
-	DialogChooseArchiveSignals::Result m_selectSignalsResult;
+	ArchiveSource m_source;
 };
 
 

@@ -797,6 +797,16 @@ void MonitorMainWindow::tcpSignalClient_connectionReset()
 }
 
 
+MonitorConfigController* MonitorMainWindow::configController()
+{
+	return &m_configController;
+}
+
+const MonitorConfigController* MonitorMainWindow::configController() const
+{
+	return &m_configController;
+}
+
 SchemaListWidget::SchemaListWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
 	m_configController(configController),
 	m_centraWidget(centralWidget)
@@ -957,23 +967,39 @@ void MonitorToolBar::dragEnterEvent(QDragEnterEvent* event)
 	// Find Trend action
 	//
 	QWidget* trendActionWidget = nullptr;
-	QList<QAction*> allActions = actions();
+	QWidget* archiveActionWidget = nullptr;
 
+	QList<QAction*> allActions = actions();
 	for (QAction* a : allActions)
 	{
 		QVariant d = a->data();
+
 		if (d.isValid() &&
-			d.type() == QVariant::String &&
-			d.toString() == QLatin1String("IAmIndependentTrend"))
+			d.type() == QVariant::String)
 		{
-			trendActionWidget = widgetForAction(a);
-			trendActionWidget->setAcceptDrops(true);
-			break;
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendActionWidget = widgetForAction(a);
+				trendActionWidget->setAcceptDrops(true);
+			}
+
+			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+			{
+				archiveActionWidget = widgetForAction(a);
+				archiveActionWidget->setAcceptDrops(true);
+			}
 		}
 	}
 
 	if (trendActionWidget != nullptr &&
 		trendActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		event->acceptProposedAction();
+	}
+
+	if (archiveActionWidget != nullptr &&
+		archiveActionWidget->geometry().contains(event->pos()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
 		event->acceptProposedAction();
@@ -988,18 +1014,29 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 	//
 	QWidget* trendActionWidget = nullptr;
 	QAction* trendAction = nullptr;
+
+	QWidget* archiveActionWidget = nullptr;
+	QAction* archiveAction = nullptr;
+
 	QList<QAction*> allActions = actions();
 
 	for (QAction* a : allActions)
 	{
 		QVariant d = a->data();
 		if (d.isValid() &&
-			d.type() == QVariant::String &&
-			d.toString() == QLatin1String("IAmIndependentTrend"))
+			d.type() == QVariant::String)
 		{
-			trendAction = a;
-			trendActionWidget = widgetForAction(trendAction);
-			break;
+			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+			{
+				trendAction = a;
+				trendActionWidget = widgetForAction(trendAction);
+			}
+
+			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+			{
+				archiveAction = a;
+				archiveActionWidget = widgetForAction(archiveAction);
+			}
 		}
 	}
 
@@ -1053,6 +1090,58 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 			m->showTrends(appSignals);
 		}
 	}
+
+	if (archiveAction != nullptr &&
+		archiveActionWidget != nullptr &&
+		archiveActionWidget->geometry().contains(event->pos()) &&
+		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	{
+		// Lets assume parent isMonitorMainWindow
+		//
+		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
+		if (mainWindow == nullptr)
+		{
+			assert(mainWindow);
+			return;
+		}
+
+		// Load data from drag and drop
+		//
+		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+
+		::Proto::AppSignalSet protoSetMessage;
+		bool ok = protoSetMessage.ParseFromArray(data.constData(), data.size());
+
+		if (ok == false)
+		{
+			event->acceptProposedAction();
+			return;
+		}
+
+		std::vector<AppSignalParam> appSignals;
+		appSignals.reserve(protoSetMessage.appsignal_size());
+
+		// Parse data
+		//
+		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+		{
+			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+
+			AppSignalParam appSignalParam;
+			ok = appSignalParam.load(appSignalMessage);
+
+			if (ok == true)
+			{
+				appSignals.push_back(appSignalParam);
+			}
+		}
+
+		if (appSignals.empty() == false)
+		{
+			MonitorArchive::startNewWidget(mainWindow->configController(), appSignals, mainWindow);
+		}
+	}
+
 
 	return;
 }

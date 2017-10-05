@@ -3,15 +3,6 @@
 
 #include <QDateTime>
 
-enum class TimeType
-{
-	Plant,
-	System,
-	Local,
-	ArchiveId
-};
-
-Q_DECLARE_METATYPE(TimeType)
 
 // TimeStamp
 //

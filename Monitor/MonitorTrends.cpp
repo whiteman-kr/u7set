@@ -213,13 +213,18 @@ void MonitorTrendsWidget::signalsButton()
 	return;
 }
 
-void MonitorTrendsWidget::slot_dataReceived(QString appSignalId, TimeStamp requestedHour, TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data)
+void MonitorTrendsWidget::slot_dataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
 	assert(m_trendWidget);
 	assert(m_trendSlider);
 
+	TimeStamp plus1hour(requestedHour.timeStamp + 1_hour);
+	TimeStamp minus1hour(requestedHour.timeStamp - 1_hour);
+
 	if (timeType != m_trendWidget->timeType() ||
-		m_trendSlider->isTimeInRange(requestedHour) == false)
+		(m_trendSlider->isTimeInRange(requestedHour) == false &&
+		 m_trendSlider->isTimeInRange(plus1hour) == false &&
+		 m_trendSlider->isTimeInRange(minus1hour) == false))
 	{
 		return;
 	}

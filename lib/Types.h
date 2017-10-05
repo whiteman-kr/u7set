@@ -254,6 +254,17 @@ public:
 	};
 	Q_ENUM(ConfigCheckerState)
 
+	// TimeType
+	//
+	enum class TimeType
+	{
+		Plant,
+		System,
+		Local,
+		ArchiveId
+	};
+	Q_ENUM(TimeType)
+
 public:
 	// Convert enum value (not index) to QString
 	//

@@ -31,6 +31,12 @@ namespace VFrame30
 		case E::SignalType::Analog:
 			ADD_PROPERTY_GETTER_SETTER(E::AnalogAppSignalFormat, PropertyNames::analogFormat, true, BusSignal::analogFormat, BusSignal::setAnalogFormat);
 			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::units, true, BusSignal::units, BusSignal::setUnits);
+			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, BusSignal::precision, BusSignal::setPrecision);
+
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::apertureCategory, true, BusSignal::coarseAperture, BusSignal::setCoarseAperture);
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::apertureCategory, true, BusSignal::fineAperture, BusSignal::setFineAperture);
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::adaptiveAperture, PropertyNames::apertureCategory, true, BusSignal::adaptiveAperture, BusSignal::setAdaptiveAperture);
+
 			// Inbus settings (manual)
 			//
 			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::busInbusOffset, PropertyNames::busInbusSettingCategory, true, BusSignal::inbusOffset, BusSignal::setInbusOffset);
@@ -80,6 +86,10 @@ namespace VFrame30
 		message->set_type(static_cast<int>(m_type));
 		message->set_units(m_units.toStdString());
 		message->set_analogformat(static_cast<int>(m_analogFormat));
+		message->set_precision(m_precision);
+		message->set_coarseaperture(m_coarseAperture);
+		message->set_fineaperture(m_fineAperture);
+		message->set_adaptiveaperture(m_adaptiveAperture);
 
 		message->set_inbusoffset(m_inbusOffset);
 		message->set_inbusdiscretebitno(m_inbusDiscreteBitNo);
@@ -101,6 +111,10 @@ namespace VFrame30
 		m_type = static_cast<E::SignalType>(message.type());
 		m_units = QString::fromStdString(message.units());
 		m_analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
+		m_precision = message.precision();
+		m_coarseAperture = message.coarseaperture();
+		m_fineAperture = message.fineaperture();
+		m_adaptiveAperture = message.adaptiveaperture();
 
 		m_inbusOffset = message.inbusoffset();
 		m_inbusDiscreteBitNo = message.inbusdiscretebitno();
@@ -158,6 +172,46 @@ namespace VFrame30
 	void BusSignal::setAnalogFormat(E::AnalogAppSignalFormat value)
 	{
 		m_analogFormat = value;
+	}
+
+	int BusSignal::precision() const
+	{
+		return m_precision;
+	}
+
+	void BusSignal::setPrecision(int value)
+	{
+		m_precision = value;
+	}
+
+	double BusSignal::coarseAperture() const
+	{
+		return m_coarseAperture;
+	}
+
+	void BusSignal::setCoarseAperture(double aperture)
+	{
+		m_coarseAperture = aperture;
+	}
+
+	double BusSignal::fineAperture() const
+	{
+		return m_fineAperture;
+	}
+
+	void BusSignal::setFineAperture(double aperture)
+	{
+		m_fineAperture = aperture;
+	}
+
+	bool BusSignal::adaptiveAperture() const
+	{
+		return m_adaptiveAperture;
+	}
+
+	void BusSignal::setAdaptiveAperture(bool adaptive)
+	{
+		m_adaptiveAperture = adaptive;
 	}
 
 	int BusSignal::inbusOffset() const

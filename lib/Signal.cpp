@@ -460,7 +460,7 @@ void Signal::serializeFields(const QXmlStreamAttributes& attr)
 
 void Signal::writeToXml(XmlWriteHelper& xml)
 {
-	xml.writeStartElement("Signal");	// <Signal>
+/*	xml.writeStartElement("Signal");	// <Signal>
 
 	xml.writeIntAttribute("ID", ID());
 	xml.writeIntAttribute("GroupID", signalGroupID());
@@ -512,13 +512,74 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
 	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
 
+	xml.writeEndElement();				// </Signal>*/
+
+
+	xml.writeStartElement("Signal");	// <Signal>
+
+	xml.writeIntAttribute("ID", ID());
+	xml.writeIntAttribute("GroupID", signalGroupID());
+	xml.writeIntAttribute("InstanceID", signalInstanceID());
+	xml.writeIntAttribute("Channel", channelInt());
+	xml.writeIntAttribute("Type", signalTypeInt());
+	xml.writeStringAttribute("AppSignalID", appSignalID());
+	xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
+	xml.writeStringAttribute("Caption", caption());
+	xml.writeStringAttribute("EquipmentID", equipmentID());
+	xml.writeIntAttribute("DataFormat", analogSignalFormatInt());
+	xml.writeIntAttribute("DataSize", dataSize());
+	xml.writeIntAttribute("LowADC", lowADC());
+	xml.writeIntAttribute("HighADC", highADC());
+	xml.writeDoubleAttribute("LowEngeneeringUnits", lowEngeneeringUnits());
+	xml.writeDoubleAttribute("HighEngeneeringUnits", highEngeneeringUnits());
+	xml.writeIntAttribute("UnitID", 0);
+	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
+	xml.writeDoubleAttribute("HighValidRange", highValidRange());
+	xml.writeDoubleAttribute("UnbalanceLimit", 1);
+	xml.writeDoubleAttribute("InputLowLimit", electricLowLimit());
+	xml.writeDoubleAttribute("InputHighLimit", electricHighLimit());
+	xml.writeIntAttribute("InputUnitID", electricUnitInt());
+	xml.writeIntAttribute("InputSensorID", sensorTypeInt());
+	xml.writeDoubleAttribute("OutputLowLimit", electricLowLimit());
+	xml.writeDoubleAttribute("OutputHighLimit", electricHighLimit());
+	xml.writeIntAttribute("OutputUnitID", electricUnitInt());
+	xml.writeIntAttribute("OutputMode", outputModeInt());
+	xml.writeIntAttribute("OutputSensorID", sensorTypeInt());
+	xml.writeBoolAttribute("Acquire", acquire());
+	xml.writeBoolAttribute("Calculated", false);
+	xml.writeIntAttribute("NormalState", 0);
+	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
+	xml.writeDoubleAttribute("Aperture", coarseAperture());
+	xml.writeIntAttribute("InOutType", inOutTypeInt());
+	xml.writeDoubleAttribute("FilteringTime", filteringTime());
+	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
+	xml.writeIntAttribute("ByteOrder", byteOrderInt());
+
+	xml.writeBoolAttribute("EnableTuning", enableTuning());
+	xml.writeFloatAttribute("TuningDefaultValue", tuningDefaultValue());
+	xml.writeFloatAttribute("TuningLowBound", tuningLowBound());
+	xml.writeFloatAttribute("TuningHighBound", tuningHighBound());
+
+	xml.writeStringAttribute("BusTypeID", busTypeID());
+	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
+
+	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
+	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
+	xml.writeIntAttribute("ValueOffset", regValueAddr().offset());
+	xml.writeIntAttribute("ValueBit", regValueAddr().bit());
+	xml.writeIntAttribute("ValidityOffset", regValidityAddr().offset());
+	xml.writeIntAttribute("ValidityBit", regValidityAddr().bit());
+
+	xml.writeIntAttribute("TuningOffset", tuningAddr().offset());
+	xml.writeIntAttribute("TuningBit", tuningAddr().bit());
+
 	xml.writeEndElement();				// </Signal>
 }
 
 
 bool Signal::readFromXml(XmlReadHelper& xml)
 {
-	bool result = true;
+/*	bool result = true;
 
 	if (xml.name() != "Signal")
 	{
@@ -616,7 +677,127 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("TuningBit", &bit);
 
 	m_tuningAddr.setOffset(offset);
+	m_tuningAddr.setBit(bit);*/
+
+	bool result = true;
+
+	if (xml.name() != "Signal")
+	{
+		return false;
+	}
+
+	result &= xml.readIntAttribute("ID", &m_ID);
+	result &= xml.readIntAttribute("GroupID", &m_signalGroupID);
+	result &= xml.readIntAttribute("InstanceID", &m_signalInstanceID);
+
+	int intValue = 0;
+
+	result &= xml.readIntAttribute("Channel", &intValue);
+	m_channel = static_cast<E::Channel>(intValue);
+
+	int type = 0;
+
+	result &= xml.readIntAttribute("Type", &type);
+	m_signalType = static_cast<E::SignalType>(type);
+
+	result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
+	result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
+	result &= xml.readStringAttribute("Caption", &m_caption);
+	result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
+
+	result &= xml.readIntAttribute("DataFormat", &intValue);
+	m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(intValue);
+
+	result &= xml.readIntAttribute("DataSize", &m_dataSize);
+	result &= xml.readIntAttribute("LowADC", &m_lowADC);
+	result &= xml.readIntAttribute("HighADC", &m_highADC);
+	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &m_lowEngeneeringUnits);
+	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &m_highEngeneeringUnits);
+
+	result &= xml.readIntAttribute("UnitID", &intValue);
+
+	result &= xml.readDoubleAttribute("LowValidRange", &m_lowValidRange);
+	result &= xml.readDoubleAttribute("HighValidRange", &m_highValidRange);
+
+	double unbalanceLimit = 0;
+	result &= xml.readDoubleAttribute("UnbalanceLimit", &unbalanceLimit);
+
+	result &= xml.readDoubleAttribute("InputLowLimit", &m_electricLowLimit);
+	result &= xml.readDoubleAttribute("InputHighLimit", &m_electricHighLimit);
+
+	result &= xml.readIntAttribute("InputUnitID", &intValue);
+
+	result &= xml.readIntAttribute("InputSensorID", &intValue);
+	m_sensorType = static_cast<E::SensorType>(intValue);
+
+	result &= xml.readDoubleAttribute("OutputLowLimit", &m_electricLowLimit);
+	result &= xml.readDoubleAttribute("OutputHighLimit", &m_electricHighLimit);
+	result &= xml.readIntAttribute("OutputUnitID", &intValue);
+	m_electricUnit = static_cast<E::ElectricUnit>(intValue);
+
+	result &= xml.readIntAttribute("OutputMode", &intValue);
+	m_outputMode = static_cast<E::OutputMode>(intValue);
+
+	result &= xml.readIntAttribute("OutputSensorID", &intValue);
+	m_sensorType = static_cast<E::SensorType>(intValue);
+
+	result &= xml.readBoolAttribute("Acquire", &m_acquire);
+
+	bool boolValue = false;
+	result &= xml.readBoolAttribute("Calculated", &boolValue);
+	result &= xml.readIntAttribute("NormalState", &intValue);
+	result &= xml.readIntAttribute("DecimalPlaces", &m_decimalPlaces);
+	result &= xml.readDoubleAttribute("Aperture", &m_coarseAperture);
+	m_fineAperture = m_coarseAperture;
+
+	result &= xml.readIntAttribute("InOutType", &intValue);
+	m_inOutType = static_cast<E::SignalInOutType>(intValue);
+
+	result &= xml.readDoubleAttribute("FilteringTime", &m_filteringTime);
+	result &= xml.readDoubleAttribute("SpreadTolerance", &m_spreadTolerance);
+
+	result &= xml.readIntAttribute("ByteOrder", &intValue);
+	m_byteOrder = static_cast<E::ByteOrder>(intValue);
+
+	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+	result &= xml.readFloatAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+	result &= xml.readFloatAttribute("TuningLowBound", &m_tuningLowBound);
+	result &= xml.readFloatAttribute("TuningHighBound", &m_tuningHighBound);
+
+	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
+	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
+
+	int offset = 0;
+	int bit = 0;
+
+	result &= xml.readIntAttribute("RamAddrOffset", &offset);
+	result &= xml.readIntAttribute("RamAddrBit", &bit);
+
+	m_ualAddr.setOffset(offset);
+	m_ualAddr.setBit(bit);
+
+	offset = bit = 0;
+
+	result &= xml.readIntAttribute("ValueOffset", &offset);
+	result &= xml.readIntAttribute("ValueBit", &bit);
+
+	m_regValueAddr.setOffset(offset);
+	m_regValueAddr.setBit(bit);
+
+	result &= xml.readIntAttribute("ValidityOffset", &offset);
+	result &= xml.readIntAttribute("ValidityBit", &bit);
+
+	m_regValidityAddr.setOffset(offset);
+	m_regValidityAddr.setBit(bit);
+
+	result &= xml.readIntAttribute("TuningOffset", &offset);
+	result &= xml.readIntAttribute("TuningBit", &bit);
+
+	m_tuningAddr.setOffset(offset);
 	m_tuningAddr.setBit(bit);
+
+	return result;
+
 
 	return result;
 }

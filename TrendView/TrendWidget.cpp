@@ -1087,12 +1087,12 @@ namespace TrendLib
 		m_drawParam.setLaneCount(value);
 	}
 
-	TimeType TrendWidget::timeType() const
+	E::TimeType TrendWidget::timeType() const
 	{
 		return m_drawParam.timeType();
 	}
 
-	void TrendWidget::setTimeType(TimeType value)
+	void TrendWidget::setTimeType(E::TimeType value)
 	{
 		m_drawParam.setTimeType(value);
 	}

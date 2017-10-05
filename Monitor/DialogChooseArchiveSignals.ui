@@ -182,7 +182,11 @@
       <widget class="QComboBox" name="schemaCombo"/>
      </item>
      <item row="1" column="5">
-      <widget class="QTimeEdit" name="startTimeEdit"/>
+      <widget class="QTimeEdit" name="startTimeEdit">
+       <property name="displayFormat">
+        <string>HH:mm:ss</string>
+       </property>
+      </widget>
      </item>
      <item row="5" column="3" rowspan="7" colspan="3">
       <widget class="QTreeWidget" name="archiveSignals">
@@ -242,7 +246,11 @@
       </widget>
      </item>
      <item row="2" column="5">
-      <widget class="QTimeEdit" name="endTimeEdit"/>
+      <widget class="QTimeEdit" name="endTimeEdit">
+       <property name="displayFormat">
+        <string>HH:mm:ss</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

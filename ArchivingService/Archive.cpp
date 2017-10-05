@@ -180,20 +180,20 @@ bool Archive::tableIsExists(const QString& tableName)
 	return m_existingTables.contains(tableName);
 }
 
-QString Archive::timeTypeStr(TimeType timeType)
+QString Archive::timeTypeStr(E::TimeType timeType)
 {
 	switch(timeType)
 	{
-	case TimeType::Plant:
+	case E::TimeType::Plant:
 		return QString("Plant");
 
-	case TimeType::System:
+	case E::TimeType::System:
 		return QString("System");
 
-	case TimeType::Local:
+	case E::TimeType::Local:
 		return QString("Local");
 
-	case TimeType::ArchiveId:
+	case E::TimeType::ArchiveId:
 		return QString("ArchiveId");
 
 	default:
@@ -213,22 +213,22 @@ qint64 Archive::localTimeOffsetFromUtc()
 	return offset;
 }
 
-QString Archive::getCmpField(TimeType timeType)
+QString Archive::getCmpField(E::TimeType timeType)
 {
 	QString cmpField;
 
 	switch(timeType)
 	{
-	case TimeType::Plant:
+	case E::TimeType::Plant:
 		cmpField = FIELD_PLANT_TIME;
 		break;
 
-	case TimeType::System:
-	case TimeType::Local:						// local time search also use systemtime field in requests
+	case E::TimeType::System:
+	case E::TimeType::Local:						// local time search also use systemtime field in requests
 		cmpField = FIELD_SYSTEM_TIME;
 		break;
 
-	case TimeType::ArchiveId:
+	case E::TimeType::ArchiveId:
 		cmpField = FIELD_ARCH_ID;
 		break;
 

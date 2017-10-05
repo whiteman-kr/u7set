@@ -111,6 +111,8 @@ namespace TrendLib
 		{
 			TrendRuller r;
 			ok &= r.load(message.rullers(i));
+
+			m_rullers.push_back(r);
 		}
 
 		return ok;
