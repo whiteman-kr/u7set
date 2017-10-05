@@ -2182,7 +2182,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
-				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')").
+				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Logic schema '%4')").
 					arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 

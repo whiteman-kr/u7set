@@ -218,10 +218,12 @@ namespace Builder
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
 		bool generateBusComposerCode(const AppItem* composer);
-		bool generateBusComposerToSignalCode(const LogicBusComposer* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
-		bool fillAnalogBusSignals(const LogicBusComposer* composer, const Signal* destSignal);
+		bool generateBusComposerToSignalCode(const AppItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
+		bool fillAnalogBusSignals(const AppItem *composer, const Signal* destSignal);
 		bool fillDiscreteBusSignals(const LogicBusComposer* composer, const Signal* destSignal);
-		bool generateAnalogSignalToBusCode(const LogicBusComposer* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
+		bool generateAnalogSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
+		bool generateConstToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const AppItem* constAppItem);
+
 		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 
 		bool addToComparatorStorage(const AppFb *appFb);
