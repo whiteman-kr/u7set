@@ -90,12 +90,16 @@ namespace Builder
 
 
 	VFrame30::BusSignal Bus::m_invalidBusSignal;
+	BusSignal Bus::m_invalidSignal;
 
 	Bus::Bus(const VFrame30::Bus bus, IssueLogger* log) :
 		m_srcBus(bus),
 		m_log(log)
 	{
 		m_invalidBusSignal.setSignalId("InvalidInBusSignalID");
+
+		m_invalidSignal.signalID = "InvalidInBusSignalID";
+		m_invalidSignal.inbusAddr.reset();
 	}
 
 	bool Bus::init()
@@ -153,6 +157,13 @@ namespace Builder
 
 		result = checkSignalsOffsets();
 
+		if (result == false)
+		{
+			return false;
+		}
+
+		buildSignalIndexesArrays();
+
 		return result;
 	}
 
@@ -190,6 +201,18 @@ namespace Builder
 
 		list.append("");
 	}
+
+	const BusSignal& Bus::signalByIndex(int index) const
+	{
+		if (index < 0 || index >= m_signals.count())
+		{
+			assert(false);
+			return m_invalidSignal;
+		}
+
+		return m_signals[index];
+	}
+
 
 	bool Bus::buildInBusSignalsMap()
 	{
@@ -475,6 +498,33 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	void Bus::buildSignalIndexesArrays()
+	{
+		m_analogSignalIndexes.clear();
+		m_discreteSignalIndexes.clear();
+
+		int count = m_signals.count();
+
+		for(int i = 0; i < count; i++)
+		{
+			const BusSignal& s = m_signals[i];
+
+			switch(s.signalType)
+			{
+			case E::SignalType::Analog:
+				m_analogSignalIndexes.push_back(i);
+				break;
+
+			case E::SignalType::Discrete:
+				m_discreteSignalIndexes[s.inbusAddr.offset()].push_back(i);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
 	}
 
 	VFrame30::BusSignal& Bus::getBusSignal(const QString& signalID)

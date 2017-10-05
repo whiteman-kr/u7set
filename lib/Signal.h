@@ -129,6 +129,7 @@ public:
 	E::DataFormat dataFormat() const;
 
 	bool isCompatibleFormat(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder) const;
+	bool isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const;
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 
 	// Analog signal properties

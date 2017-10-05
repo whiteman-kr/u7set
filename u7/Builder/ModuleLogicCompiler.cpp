@@ -4983,14 +4983,11 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusComposerCode(const AppItem* appItem)
+	bool ModuleLogicCompiler::generateBusComposerCode(const AppItem* composer)
 	{
-		TEST_PTR_RETURN_FALSE(appItem);
-
-		const LogicBusComposer* composer = appItem->logicBusComposer();
-
 		if (composer == nullptr)
 		{
+			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
@@ -5082,7 +5079,7 @@ namespace Builder
 					result = false;
 					break;
 
-				// unknown AppItem::Type
+				// unknown or disallowed AppItem::Type
 				//
 				default:
 					assert(false);
@@ -5122,13 +5119,29 @@ namespace Builder
 			return false;
 		}
 
-		Signal* destSignal = m_signals->getSignal(destAppSignal->appSignalID());
+		Signal* busSignal = m_signals->getSignal(destAppSignal->appSignalID());
 
-		if (destSignal == nullptr)
+		if (busSignal == nullptr)
 		{
 			// Signal identifier '%1' is not found.
 			//
 			m_log->errALC5000(destAppSignal->appSignalID(), destAppSignal->guid());
+			return false;
+		}
+
+		if (busSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(busSignal->appSignalID(), destAppSignal->guid(), destAppSignal->schemaID());
+			return false;
+		}
+
+		if (busSignal->isBus() == false)
+		{
+			// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5104(composer->guid(), busSignal->appSignalID(), signalUuid, destAppSignal->schemaID());
 			return false;
 		}
 
@@ -5138,15 +5151,17 @@ namespace Builder
 
 		if (bus == nullptr)
 		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
 			m_log->errALC5100(busTypeID, composer->guid(), destAppSignal->schemaID());
 			return false;
 		}
 
-		if (composer->busTypeId() != destSignal->busTypeID())
+		if (composer->busTypeId() != busSignal->busTypeID())
 		{
 			// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 			//
-			m_log->errALC5103(destSignal->appSignalID(), destAppSignal->guid(), composer->guid(), destAppSignal->schemaID());
+			m_log->errALC5103(busSignal->appSignalID(), destAppSignal->guid(), composer->guid(), destAppSignal->schemaID());
 			return false;
 		}
 
@@ -5156,37 +5171,223 @@ namespace Builder
 			//
 			Command cmd;
 
-			cmd.movMem(destSignal->ualAddr().offset(), composerInfo->busContentAddress, bus->sizeW());
-			cmd.setComment(QString("fill bus signal %1").arg(destSignal->appSignalID()));
+			cmd.movMem(busSignal->ualAddr().offset(), composerInfo->busContentAddress, bus->sizeW());
+			cmd.setComment(QString("fill bus signal %1").arg(busSignal->appSignalID()));
 			m_code.append(cmd);
 
 			return true;
 		}
 
-		bool result = generateBusFillingCode(composer, destSignal, composerInfo);
+		// generate bus filling Code
 
-		return result;
+		bool result = fillAnalogBusSignals(composer, busSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+//		result = fillDiscreteBusSignals();
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		// setup composerInfo fields to indicate that bus filling code already generated and bus filled
+		//
+		composerInfo->busContentAddress = busSignal->ualAddr().offset();
+		composerInfo->busFillingCodeAlreadyGenerated = true;
+
+		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusFillingCode(const LogicBusComposer* composer, const Signal* destSignal, BusComposerInfo* composerInfo)
+	bool ModuleLogicCompiler::fillAnalogBusSignals(const LogicBusComposer* composer, const Signal* busSignal)
 	{
 		if (composer == nullptr ||
-			destSignal == nullptr ||
-			composerInfo == nullptr)
+			busSignal == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		assert(composerInfo->busFillingCodeAlreadyGenerated == false);
+		assert(busSignal->isBus() == true);
 
-		// code generation
+		BusShared bus = m_signals->getBus(composer->busTypeId());
 
-		composerInfo->busFillingCodeAlreadyGenerated = true;
+		if (bus == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<int>& analogSignalIndexes = bus->analogSignalIndexes();
+
+		for(int index : analogSignalIndexes)
+		{
+			const BusSignal& busInputSignal = bus->signalByIndex( index);
+
+			assert(busInputSignal.signalType == E::SignalType::Analog);
+
+			QUuid connectedOutPinUuid;
+			AppItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
+
+			switch(connectedItem->type())
+			{
+			// allowed connections
+			//
+			case AppItem::Type::Signal:
+				// composer is connected to signal schema item
+				//
+				generateAnalogSignalToBusCode(composer, busInputSignal, busSignal, connectedItem->guid() /* real app signal guid */);
+				break;
+
+			case AppItem::Type::Fb:
+				// composer is directly connected to FB via shadow signal
+				//
+				generateAnalogSignalToBusCode(composer, busInputSignal, busSignal, connectedOutPinUuid /* shadow app signal guid */);
+				break;
+
+			case AppItem::Type::Const:
+			case AppItem::Type::Receiver:
+				assert(false);				// must be implemented!
+				break;
+
+			// disallowed connections
+			//
+			case AppItem::Type::Transmitter:
+			case AppItem::Type::Terminator:
+			case AppItem::Type::BusComposer:
+			case AppItem::Type::BusExtractor:
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+		}
 
 		return true;
 	}
+
+	bool ModuleLogicCompiler::generateAnalogSignalToBusCode(const LogicBusComposer* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid)
+	{
+		if (composer == nullptr ||
+			busSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		AppSignal* connectedAppSignal = m_appSignals.value(connectedSignalGuid, nullptr);
+
+		if (connectedAppSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Signal* connectedSignal = connectedAppSignal->signal();
+
+		if (connectedSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		switch(connectedSignal->signalType())
+		{
+		case E::SignalType::Analog:
+			// all right
+			break;
+
+		case E::SignalType::Discrete:
+			//	Discrete signal '%1' is connected to analog input '%2.%3'.
+			//
+			m_log->errALC5007(connectedAppSignal->appSignalID(), "BusComposer", busInputSignal.signalID, composer->guid());
+			return false;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (connectedSignal->isCompatibleFormat(busInputSignal.signalType, busInputSignal.analogFormat, E::BigEndian) == false)
+		{
+			// Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')
+			//
+			m_log->errALC5008(connectedSignal->appSignalID(), "BusComposer", busInputSignal.signalID, composer->guid(), composer->);
+			return false;
+		}
+
+		return true;
+	}
+
+	AppItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
+	{
+		if (connectedOutPinUuid == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		*connectedOutPinUuid = QUuid();
+
+		AppItem* currentItem  = m_appItems.value(appItemUuid, nullptr);
+
+		if (currentItem == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		AppItem* connectedItem = nullptr;
+
+		const std::vector<LogicPin>& inputs = currentItem->inputs();
+
+		for(const LogicPin& input : inputs)
+		{
+			if (input.caption() != inPinCaption)
+			{
+				continue;
+			}
+
+			const std::vector<QUuid>& associatedOuts = input.associatedIOs();
+
+			if (associatedOuts.size() > 1)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			*connectedOutPinUuid = associatedOuts[0];
+
+			connectedItem = m_pinParent.value(*connectedOutPinUuid, nullptr);
+
+			if (connectedItem == nullptr)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return nullptr;
+			}
+
+			break;
+		}
+
+		assert(connectedItem != nullptr);
+
+		return connectedItem;
+	}
+
 
 	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
 	{
@@ -5587,7 +5788,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= initOutputModulesMemory();
+		//		result &= initOutputModulesMemory(); is now requred now!!
 		result &= conevrtOutputAnalogSignals();
 		result &= copyOutputDiscreteSignals();
 
@@ -5760,10 +5961,13 @@ namespace Builder
 		outDiscreteSignals.append(m_acquiredDiscreteOutputSignals);
 		outDiscreteSignals.append(m_nonAcquiredDiscreteOutputSignals);
 
-		if (outDiscreteSignals.isEmpty() == true)
-		{
-			return true;
-		}
+//		if (outDiscreteSignals.isEmpty() == true)
+//		{
+//			return true;
+//		}
+
+		int lmOutputsAddress = m_lmDescription->memory().m_appDataOffset;
+		bool lmOutputsIsWritten = false;
 
 		m_code.comment("Copy output discrete signals to output modules memory");
 		m_code.newLine();
@@ -5779,7 +5983,7 @@ namespace Builder
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
-		QVector<int>&& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
+		QVector<int>& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
 		qSort(sortedWriteAddress);
 
@@ -5805,6 +6009,21 @@ namespace Builder
 
 			cmd.mov(writeAddr, wordAccAddr);
 			cmd.clearComment();
+			m_code.append(cmd);
+			m_code.newLine();
+
+			if (writeAddr == lmOutputsAddress)
+			{
+				lmOutputsIsWritten = true;
+			}
+		}
+
+		if (lmOutputsIsWritten == false)
+		{
+			Command cmd;
+
+			cmd.movConst(lmOutputsAddress, 0);
+			cmd.setComment("write #0 to LM's outputs area");
 			m_code.append(cmd);
 			m_code.newLine();
 		}

@@ -217,9 +217,12 @@ namespace Builder
 		bool readFbOutputSignals(const AppFb *appFb);
 		bool generateReadFuncBlockToSignalCode(const AppFb& appFb, const LogicPin& outPin, const QUuid& signalGuid);
 
-		bool generateBusComposerCode(const AppItem* appItem);
+		bool generateBusComposerCode(const AppItem* composer);
 		bool generateBusComposerToSignalCode(const LogicBusComposer* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
-		bool generateBusFillingCode(const LogicBusComposer* composer, const Signal* destSignal, BusComposerInfo* composerInfo);
+		bool fillAnalogBusSignals(const LogicBusComposer* composer, const Signal* destSignal);
+		bool fillDiscreteBusSignals(const LogicBusComposer* composer, const Signal* destSignal);
+		bool generateAnalogSignalToBusCode(const LogicBusComposer* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
+		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 
 		bool addToComparatorStorage(const AppFb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);

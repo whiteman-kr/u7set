@@ -166,16 +166,16 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataForm
 
 	if (m_signalType == E::SignalType::Analog)
 	{
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::Float32 &&
-			(dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE))
+		switch(m_analogSignalFormat)
 		{
-			return true;
-		}
+		case E::AnalogAppSignalFormat::Float32:
+			return (dataFormat == E::DataFormat::Float && size == FLOAT32_SIZE);
 
-		if (m_analogSignalFormat == E::AnalogAppSignalFormat::SignedInt32 &&
-			(dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE))
-		{
-			return true;
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return (dataFormat == E::DataFormat::SignedInt && size == SIGNED_INT32_SIZE);
+
+		default:
+			assert(false);
 		}
 
 		return false;
@@ -192,6 +192,23 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataForm
 	}
 
 	assert(false);
+	return false;
+}
+
+bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const
+{
+	switch(analogFormat)
+	{
+	case E::AnalogAppSignalFormat::Float32:
+		return isCompatibleFormat(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder);
+
+	case E::AnalogAppSignalFormat::SignedInt32:
+		return isCompatibleFormat(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder);
+
+	default:
+		assert(false);
+	}
+
 	return false;
 }
 

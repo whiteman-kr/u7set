@@ -48,11 +48,16 @@ namespace Builder
 
 		int sizeW() const { return m_sizeW; }
 
+		const BusSignal& signalByIndex(int index) const;
+		const std::vector<int>& analogSignalIndexes() const { return m_analogSignalIndexes; }
+		const std::map<int, std::vector<int>>& discreteSignalIndexes() const { return m_discreteSignalIndexes; }
+
 	private:
 		bool buildInBusSignalsMap();
 		bool placeSignals();
 		bool buildSignalsOrder();
 		bool checkSignalsOffsets();
+		void buildSignalIndexesArrays();
 
 		VFrame30::BusSignal& getBusSignal(const QString& signalID);
 
@@ -68,7 +73,11 @@ namespace Builder
 
 		QVector<BusSignal> m_signals;
 
+		std::vector<int> m_analogSignalIndexes;
+		std::map<int, std::vector<int>> m_discreteSignalIndexes;		// discrete signals offset => discrete signal indexes
+
 		static VFrame30::BusSignal m_invalidBusSignal;
+		static BusSignal m_invalidSignal;
 	};
 
 	typedef std::shared_ptr<Bus> BusShared;

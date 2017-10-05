@@ -290,6 +290,9 @@ namespace Builder
 		void errALC5101(QUuid item, QString schemaID);								// Bus composer can't be directly connected to transmitter (Logic schema %1).
 		void errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID);	// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
+		void errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID);		// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+		void errALC5105(QString signalID, QUuid signalUuid, QString schemaID);		// Undefined UAL address of signal '%1' (Logic schema '%2').
+
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

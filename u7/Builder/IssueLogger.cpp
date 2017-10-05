@@ -4277,6 +4277,53 @@ namespace Builder
 						arg(signalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5104
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus composer is connected to non-bus signal.
+	///
+	void IssueLogger::errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5104,
+				  QString(tr("Bus composer is connected to non-bus signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5105
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Undefined UAL address of signal '%1' (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Bus composer is connected to non-bus signal.
+	///
+	void IssueLogger::errALC5105(QString signalID, QUuid signalUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5105,
+				  QString(tr("Undefined UAL address of signal '%1' (Logic schema '%2').")).
+						arg(signalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

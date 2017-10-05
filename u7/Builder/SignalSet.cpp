@@ -89,7 +89,7 @@ namespace Builder
 
 			// check other signal properties
 			//
-			if (s.byteOrder() != E::ByteOrder::BigEndian)
+			if (s.isAnalog() == true && s.byteOrder() != E::ByteOrder::BigEndian)
 			{
 				// Signal '%1' has Little Endian byte order.
 				//
