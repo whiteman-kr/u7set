@@ -1,6 +1,7 @@
 #include "Trend.h"
 #include <QPainter>
 #include <cfloat>
+#include <type_traits>
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
@@ -1519,7 +1520,7 @@ static const int recomendedSize = 8192;
 
 	TrendStateItem Trend::rullerSignalState(const TrendRuller& ruller, QString appSignalId, E::TimeType timeType) const
 	{
-		TimeStamp rullerTime = ruller.timeStamp();
+		const TimeStamp& rullerTime = ruller.timeStamp();
 
 		// Getting data whitout requesting if it is not present
 		//
@@ -1543,33 +1544,83 @@ static const int recomendedSize = 8192;
 			{
 				const std::vector<TrendStateItem>& states = record.states;
 
-				if (states.empty() == false &&
-					states.back().getTime(timeType) < rullerTime)
+				if (states.empty() == true)
+				{
+					continue;
+				}
+
+				if (states.back().getTime(timeType) < rullerTime)
 				{
 					lastState = states.back();
 					continue;	// to next record
 				}
 
-				for (const TrendStateItem& state : states)
+//				//for (const TrendStateItem& state : states)							// for by index is faster
+//				size_t stateCount = states.size();
+//				for (size_t stateIndex = 0; stateIndex < stateCount; ++stateIndex)
+//				{
+//					const TrendStateItem& state = states[stateIndex];
+
+//					TimeStamp ts = state.getTime(timeType);
+//					if (ts >= rullerTime)
+//					{
+//						// Got it, we need to return prev point.
+//						// if currnet state not valid, then we assume last state is not valid also
+//						//
+//						if (state.isValid() == false)
+//						{
+//							return state;
+//						}
+//						else
+//						{
+//							return lastState;
+//						}
+//					}
+
+//					//lastState = state;
+//					static_assert(std::is_pod<TrendStateItem>::value, "TrendStateItem must be a POD type.");
+//					memcpy(&lastState, &state, sizeof(lastState));
+//				}
+
+static const TrendStateItem fakeState;
+				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
+								 [&rullerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
+								 {
+										TimeStamp ts = state.getTime(timeType);
+										return ts < rullerTime;
+								 });
+
+				if (stateIt != states.end())
 				{
-					TimeStamp ts = state.getTime(timeType);
-					if (ts >= rullerTime)
+					if (rullerTime == (*stateIt).getTime(timeType))
 					{
-						// Got it, we need to return prev point.
-						// if currnet state not valid, then we assume last state is not valid also
+						// That is the exact value
 						//
-						if (state.isValid() == false)
+						return *stateIt;
+					}
+					else
+					{
+						if (stateIt == states.begin()) // and it is not equeal to the first (se the prev cond)
 						{
-							return state;
+							// Take the last value from the previous states vector
+							//
+							return lastState;
 						}
 						else
 						{
-							return lastState;
+							--stateIt;
+							return *stateIt;
 						}
 					}
-
-					lastState = state;
 				}
+				else
+				{
+					// value is beyond the last item
+					//
+					assert(false);	// we have checked it before
+				}
+
+				assert(false);
 			}
 		}
 

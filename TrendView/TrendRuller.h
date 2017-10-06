@@ -24,7 +24,7 @@ namespace TrendLib
 		// Properties
 		//
 	public:
-		TimeStamp timeStamp() const;
+		const TimeStamp& timeStamp() const;
 		void setTimeStamp(const TimeStamp& value);
 
 		bool isShowRuller() const;
