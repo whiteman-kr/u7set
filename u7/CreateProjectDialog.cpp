@@ -28,7 +28,7 @@ void CreateProjectDialog::on_okButton_clicked()
 	adminstratorPassword = ui->passwordEdit->text();
 	const QString& confirmedPassword = ui->confirmPasswordEdit->text();
 
-	bool result = PasswordService::checkPassword(adminstratorPassword, confirmedPassword, true, this);
+	bool result = PasswordService::checkPassword(adminstratorPassword, confirmedPassword, "Administrator", true, this);
 	if (result == false)
 	{
 		return;

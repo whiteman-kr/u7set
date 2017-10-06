@@ -115,9 +115,11 @@ namespace Afb
 		E::SignalType type() const;
 		Q_INVOKABLE int jsType() const;
 		void setType(E::SignalType type);
+		bool setType(const QString& type);
 
 		E::DataFormat dataFormat() const;
 		void setDataFormat(E::DataFormat dataFormat);
+		bool setDataFormat(const QString& dataFormat);
 
 		Q_INVOKABLE int operandIndex() const;
 		void setOperandIndex(int value);
@@ -127,9 +129,17 @@ namespace Afb
 
 		E::ByteOrder byteOrder() const;
 		void setByteOrder(E::ByteOrder value);
+		bool setByteOrder(const QString& value);
 
 		bool isAnalog() const;
 		bool isDiscrete() const;
+
+		E::BusDataFormat busDataFormat() const;
+		void setBusDataFormat(E::BusDataFormat value);
+		bool setBusDataFormat(const QString& value);
+
+		int maxBusSize() const;
+		void setMaxBusSize(int value);
 
 		// Data
 		//
@@ -143,6 +153,10 @@ private:
 		int m_operandIndex = 0;
 		int m_size = 0;
 		E::ByteOrder m_byteOrder =  E::ByteOrder::BigEndian;
+		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Discrete;
+		int m_maxBusSize = 16;
+
+		// WARNING!!!
 		// Operator= is present, don't forget to add new fields to it
 		//
 	};
@@ -264,25 +278,14 @@ private:
 		//
 	public:
 		bool loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg);
-//		bool loadFromXml(const QByteArray& data, QString &errorMsg);
 		bool loadFromXml(const QDomElement& xmlElement, QString* errorMessage);
 		bool deprecatedFormatLoad(const Proto::AfbElementXml& data, QString& errorMsg);
 
 		bool saveToXml(Proto::AfbElementXml* dst) const;
-//		bool saveToXml(QByteArray* dst) const;
 		bool saveToXml(QDomElement* xmlElement) const;
 
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
-
-//	protected:
-//		virtual bool SaveData(Proto::Envelope* message) const override;
-//		virtual bool LoadData(const Proto::Envelope& message) override;
-
-//	private:
-//		// Use this func only in serialization, as while object creation is not fully initialized  and must be read
-//		//
-//		static std::shared_ptr<AfbElement> CreateObject(const Proto::Envelope& message);
 
 		// Methods
 		//

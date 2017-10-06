@@ -64,6 +64,246 @@
 		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
 	</AFBImplementation>
 	<AFBL>
+			
+		<AFB id="#bus_or_v1"             Caption="bus_or"             Version="1.0000">
+			<Properties>				
+				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>1</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_1_oprd"  Caption="in_1"  Type="Bus" ByteOrder="BigEndian" OpIndex="3"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_2_oprd"  Caption="in_2"  Type="Bus" ByteOrder="BigEndian" OpIndex="4"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_3_oprd"  Caption="in_3"  Type="Bus" ByteOrder="BigEndian" OpIndex="5"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_4_oprd"  Caption="in_4"  Type="Bus" ByteOrder="BigEndian" OpIndex="6"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_5_oprd"  Caption="in_5"  Type="Bus" ByteOrder="BigEndian" OpIndex="7"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_6_oprd"  Caption="in_6"  Type="Bus" ByteOrder="BigEndian" OpIndex="8"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_7_oprd"  Caption="in_7"  Type="Bus" ByteOrder="BigEndian" OpIndex="9"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_8_oprd"  Caption="in_8"  Type="Bus" ByteOrder="BigEndian" OpIndex="10" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_9_oprd"  Caption="in_9"  Type="Bus" ByteOrder="BigEndian" OpIndex="11" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Bus" ByteOrder="BigEndian" OpIndex="12" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Bus" ByteOrder="BigEndian" OpIndex="13" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Bus" ByteOrder="BigEndian" OpIndex="15" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Bus" ByteOrder="BigEndian" OpIndex="16" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="18" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 16)
+	{
+		count = 16;
+	}
+
+	var opIndex = 3;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0000">
+			<Properties>				
+				<Description>Locking and simulation module</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>7</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>18</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_set" Caption="sim" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_reset" Caption="block" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+			</Params>
+			<CommonScript>
+				<Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#bus_and_v1"          Caption="bus_and"          Version="1.0000">
+			<Properties>
+				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>1</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_1_oprd"  Caption="in_1"  Type="Bus" ByteOrder="BigEndian" OpIndex="3"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_2_oprd"  Caption="in_2"  Type="Bus" ByteOrder="BigEndian" OpIndex="4"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_3_oprd"  Caption="in_3"  Type="Bus" ByteOrder="BigEndian" OpIndex="5"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_4_oprd"  Caption="in_4"  Type="Bus" ByteOrder="BigEndian" OpIndex="6"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_5_oprd"  Caption="in_5"  Type="Bus" ByteOrder="BigEndian" OpIndex="7"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_6_oprd"  Caption="in_6"  Type="Bus" ByteOrder="BigEndian" OpIndex="8"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_7_oprd"  Caption="in_7"  Type="Bus" ByteOrder="BigEndian" OpIndex="9"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_8_oprd"  Caption="in_8"  Type="Bus" ByteOrder="BigEndian" OpIndex="10" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_9_oprd"  Caption="in_9"  Type="Bus" ByteOrder="BigEndian" OpIndex="11" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Bus" ByteOrder="BigEndian" OpIndex="12" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Bus" ByteOrder="BigEndian" OpIndex="13" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Bus" ByteOrder="BigEndian" OpIndex="15" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Bus" ByteOrder="BigEndian" OpIndex="16" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="18" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 16)
+	{
+		count = 16;
+	}
+
+	var opIndex = 3;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>	
+	
 		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0005">
 			<Properties>
 				<Description>Adder Block with float data format</Description>

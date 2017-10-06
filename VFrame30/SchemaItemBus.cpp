@@ -145,7 +145,7 @@ namespace VFrame30
 	SchemaItemBusComposer::SchemaItemBusComposer(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addOutput(-1, "bus_out");
+		addOutput(-1, E::SignalType::Bus, "bus_out");
 	}
 
 	SchemaItemBusComposer::~SchemaItemBusComposer()
@@ -303,7 +303,7 @@ namespace VFrame30
 
 		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
 		{
-			addInput(-1, busSignal.signalId());
+			addInput(-1, E::SignalType::Discrete, busSignal.signalId());
 		}
 
 		adjustHeight();
@@ -327,7 +327,7 @@ namespace VFrame30
 	SchemaItemBusExtractor::SchemaItemBusExtractor(SchemaUnit unit) :
 		SchemaItemBus(unit)
 	{
-		addInput(-1, "bus_in");
+		addInput(-1, E::SignalType::Bus, "bus_in");
 	}
 
 	SchemaItemBusExtractor::~SchemaItemBusExtractor()
@@ -545,7 +545,7 @@ namespace VFrame30
 			if (it == props.end())
 			{
 				assert(false);
-				addOutput(-1, busSignal.signalId());
+				addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
 			}
 			else
 			{
@@ -556,7 +556,7 @@ namespace VFrame30
 				}
 				else
 				{
-					addOutput(-1, busSignal.signalId());
+					addOutput(-1, E::SignalType::Discrete, busSignal.signalId());
 				}
 			}
 		}

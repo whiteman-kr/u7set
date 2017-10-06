@@ -954,14 +954,14 @@ namespace VFrame30
 		return false;
 	}
 
-	void SchemaItemAfb::addInputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemaItemAfb::addInputSignal(QString caption, int type, int opIndex, int /*size*/)
 	{
-		addInput(opIndex, caption);
+		addInput(opIndex, static_cast<E::SignalType>(type), caption);
 	}
 
-	void SchemaItemAfb::addOutputSignal(QString caption, int /*type*/, int opIndex, int /*size*/)
+	void SchemaItemAfb::addOutputSignal(QString caption, int type, int opIndex, int /*size*/)
 	{
-		addOutput(opIndex, caption);
+		addOutput(opIndex, static_cast<E::SignalType>(type), caption);
 	}
 
 	void SchemaItemAfb::removeInputSignals()

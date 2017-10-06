@@ -256,7 +256,7 @@ namespace VFrame30
 
 			for (int i = 0; i < m_pinCount; i++)
 			{
-				addInput(i, QString("in_%1").arg(QString::number(i + 1)));
+				addInput(i, E::SignalType::Discrete, QString("in_%1").arg(QString::number(i + 1)));
 			}
 
 			double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
@@ -505,11 +505,11 @@ namespace VFrame30
 
 		removeAllOutputs();
 
-		addOutput(0, QLatin1String("out"));
+		addOutput(0, E::SignalType::Discrete, QLatin1String("out"));
 
 		if (m_showValidity == true)
 		{
-			addOutput(1, QLatin1String("validity"));
+			addOutput(1, E::SignalType::Discrete, QLatin1String("validity"));
 		}
 	}
 

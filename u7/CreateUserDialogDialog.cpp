@@ -67,7 +67,7 @@ void CreateUserDialogDialog::done(int r)
 
 		// Check password
 		//
-		bool ok = PasswordService::checkPassword(password, passwordConfirmation, true, this);
+		bool ok = PasswordService::checkPassword(password, passwordConfirmation, username, true, this);
 
 		if (ok == true)
 		{
