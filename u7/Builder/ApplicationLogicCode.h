@@ -385,6 +385,7 @@ namespace Builder
 		static IssueLogger* m_log;
 	};
 
+	typedef QVector<Command> Commands;
 
 	class ApplicationLogicCode : public QObject
 	{
@@ -404,6 +405,7 @@ namespace Builder
 		void setMemoryMap(LmMemoryMap* lmMemory, IssueLogger* log);
 
 		void append(const Command& cmd);
+		void append(const Commands& commands);
 		void append(const Comment& cmt);
 		void comment(QString commentStr);
 		void newLine();

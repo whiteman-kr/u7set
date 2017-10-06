@@ -2214,25 +2214,26 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog signal '%1' is connected to discrete input '%2.%3'.
+	/// Title: Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///		%2 AFB caption
 	///		%3 AFB input
+	///		%4 Logic schema ID
 	///
 	/// Description:
 	///		Discrete signal is connected to analog input of AFB.
 	///
-	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
+	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5010,
-				  tr("Analog signal '%1' is connected to discrete input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').").
+				  arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
-
 
 	/// IssueCode: ALC5011
 	///
@@ -3376,7 +3377,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, constantUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5060,

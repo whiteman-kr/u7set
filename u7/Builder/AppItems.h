@@ -27,13 +27,13 @@ namespace Builder
 
 	typedef VFrame30::SchemaItemSignal LogicSignal;
 	typedef VFrame30::SchemaItemAfb LogicFb;
-	typedef VFrame30::SchemaItemConst LogicConst;
+	typedef VFrame30::SchemaItemConst UalConst;
 
 	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
 	typedef VFrame30::SchemaItemReceiver LogicReceiver;
 
-	typedef VFrame30::SchemaItemBusComposer LogicBusComposer;
-	typedef VFrame30::SchemaItemBusExtractor LogicBusExtractor;
+	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
+	typedef VFrame30::SchemaItemBusExtractor UalBusExtractor;
 
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
@@ -145,12 +145,12 @@ namespace Builder
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.m_afbElement.params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
-		const LogicConst& logicConst() const { return *m_appLogicItem.m_fblItem->toSchemaItemConst(); }
+		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const LogicReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 
-		const LogicBusComposer* logicBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
-		const LogicBusExtractor* logicBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
+		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
+		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
 
 		const Afb::AfbElement& afb() const { return m_appLogicItem.m_afbElement; }
 

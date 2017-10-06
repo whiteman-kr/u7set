@@ -21,6 +21,9 @@ namespace Builder
 	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
 	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
+	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
+	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
+
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
@@ -3728,7 +3731,7 @@ namespace Builder
 
 				if (connectedPinParent->isConst() == true)
 				{
-					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->logicConst());
+					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->ualConst());
 					continue;
 				}
 
@@ -3806,8 +3809,10 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToSignalCode(AppSignal& appSignal, const UalConst* constItem)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log)
+
 		if (appSignal.enableTuning() == true)
 		{
 			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
@@ -3833,16 +3838,16 @@ namespace Builder
 		{
 		case E::SignalType::Discrete:
 
-			if (constItem.isIntegral() == false)
+			if (constItem->isIntegral() == false)
 			{
 				// Floating point constant is connected to discrete signal '%1'
 				//
-				m_log->errALC5028(appSignal.appSignalID(), constItem.guid(), appSignal.guid());
+				m_log->errALC5028(appSignal.appSignalID(), constItem->guid(), appSignal.guid());
 				return false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem->intValue();
 
 				if (constValue == 0 || constValue == 1)
 				{
@@ -3854,7 +3859,7 @@ namespace Builder
 				{
 					// Constant connected to discrete signal or FB input must have value 0 or 1.
 					//
-					m_log->errALC5086(constItem.guid(), appSignal.schemaID());
+					m_log->errALC5086(constItem->guid(), appSignal.schemaID());
 					return false;
 				}
 			}
@@ -3865,32 +3870,32 @@ namespace Builder
 			switch(appSignal.analogSignalFormat())
 			{
 			case E::AnalogAppSignalFormat::SignedInt32:
-				if (constItem.isIntegral() == true)
+				if (constItem->isIntegral() == true)
 				{
-					cmd.movConstInt32(ramAddrOffset, constItem.intValue());
+					cmd.movConstInt32(ramAddrOffset, constItem->intValue());
 					cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.intValue()));
+								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem->intValue()));
 				}
 				else
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							  QString(tr("Constant of type 'Float' (value %1) connected to signal %2 of type 'Signed Int'")).
-							  arg(constItem.floatValue()).arg(appSignal.appSignalID()));
+							  arg(constItem->floatValue()).arg(appSignal.appSignalID()));
 				}
 				break;
 
 			case E::AnalogAppSignalFormat::Float32:
-				if (constItem.isFloat() == true)
+				if (constItem->isFloat() == true)
 				{
-					cmd.movConstFloat(ramAddrOffset, constItem.floatValue());
+					cmd.movConstFloat(ramAddrOffset, constItem->floatValue());
 					cmd.setComment(QString(tr("%1 (reg %2) <= %3")).
-								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem.floatValue()));
+								   arg(appSignal.appSignalID()).arg(appSignal.regBufAddr().toString()).arg(constItem->floatValue()));
 				}
 				else
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							  QString(tr("Constant of type 'Signed Int' (value %1) connected to signal %2 of type 'Float'")).
-							  arg(constItem.intValue()).arg(appSignal.appSignalID()));
+							  arg(constItem->intValue()).arg(appSignal.appSignalID()));
 				}
 				break;
 
@@ -4289,7 +4294,7 @@ namespace Builder
 
 				if (connectedPinParent->isConst())
 				{
-					result &= generateWriteConstToFbCode(*appFb, inPin, connectedPinParent->logicConst());
+					result &= generateWriteConstToFbCode(*appFb, inPin, connectedPinParent->ualConst());
 					continue;
 				}
 
@@ -4356,8 +4361,10 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem)
+	bool ModuleLogicCompiler::generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const UalConst* constItem)
 	{
+		TEST_PTR_LOG_RETURN_FALSE(constItem, m_log);
+
 		quint16 fbType = appFb.opcode();
 		quint16 fbInstance = appFb.instance();
 		quint16 fbParamNo = inPin.afbOperandIndex();
@@ -4391,16 +4398,16 @@ namespace Builder
 		case E::SignalType::Discrete:
 			// input connected to discrete input
 			//
-			if (constItem.isIntegral() == false)
+			if (constItem->isIntegral() == false)
 			{
 				// Float constant is connected to discrete input (Logic schema '%1').
 				//
-				m_log->errALC5060(getSchemaID(constItem), constItem.guid());
+				m_log->errALC5060(getSchemaID(constItem->guid()), constItem->guid());
 				result = false;
 			}
 			else
 			{
-				int constValue = constItem.intValue();
+				int constValue = constItem->intValue();
 
 				if (constValue == 1 || constValue == 0)
 				{
@@ -4411,7 +4418,7 @@ namespace Builder
 				{
 					// Constant connected to discrete signal or FB input must have value 0 or 1.
 					//
-					m_log->errALC5086(constItem.guid(), appFb.schemaID());
+					m_log->errALC5086(constItem->guid(), appFb.schemaID());
 					return false;
 				}
 			}
@@ -4423,17 +4430,17 @@ namespace Builder
 			switch(fbInput.size())
 			{
 			case SIZE_16BIT:
-				if (constItem.isIntegral() == false)
+				if (constItem->isIntegral() == false)
 				{
 					// Float constant is connected to 16-bit input (Logic schema '%1').
 					//
-					m_log->errALC5061(getSchemaID(constItem), constItem.guid());
+					m_log->errALC5061(getSchemaID(constItem->guid()), constItem->guid());
 					result = false;
 				}
 				else
 				{
-					cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
-					cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constItem.intValue()));
+					cmd.writeFuncBlockConst(fbType, fbInstance, fbParamNo, constItem->intValue(), appFb.caption());
+					cmd.setComment(QString(tr("%1 <= %2")).arg(inPin.caption()).arg(constItem->intValue()));
 				}
 				break;
 
@@ -4441,32 +4448,32 @@ namespace Builder
 				switch(fbInput.dataFormat())
 				{
 				case E::DataFormat::SignedInt:
-					if (constItem.isIntegral() == false)
+					if (constItem->isIntegral() == false)
 					{
 						// Float constant is connected to SignedInt input (Logic schema '%1').
 						//
-						m_log->errALC5062(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5062(getSchemaID(constItem->guid()), constItem->guid());
 						result = false;
 					}
 					else
 					{
-						cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem.intValue(), appFb.caption());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem.intValue()));
+						cmd.writeFuncBlockConstInt32(fbType, fbInstance, fbParamNo, constItem->intValue(), appFb.caption());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem->intValue()));
 					}
 					break;
 
 				case E::DataFormat::Float:
-					if (constItem.isFloat() == false)
+					if (constItem->isFloat() == false)
 					{
 						// Integer constant is connected to Float input (Logic schema '%1').
 						//
-						m_log->errALC5063(getSchemaID(constItem), constItem.guid());
+						m_log->errALC5063(getSchemaID(constItem->guid()), constItem->guid());
 						result = false;
 					}
 					else
 					{
-						cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem.floatValue(), appFb.caption());
-						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem.floatValue()));
+						cmd.writeFuncBlockConstFloat(fbType, fbInstance, fbParamNo, constItem->floatValue(), appFb.caption());
+						cmd.setComment(QString(tr("%1 <= %2")).arg(fbInput.caption()).arg(constItem->floatValue()));
 					}
 					break;
 
@@ -4663,7 +4670,7 @@ namespace Builder
 			{
 				if (!appSignal.isDiscrete())
 				{
-					m_log->errALC5010(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid());
+					m_log->errALC5010(appSignal.appSignalID(), appFb.caption(), afbSignal.caption(), appSignal.guid(), appSignal.schemaID());
 					return false;
 				}
 			}
@@ -5143,15 +5150,15 @@ namespace Builder
 			return false;
 		}
 
-		const LogicBusComposer* logicComposer = composer->logicBusComposer();
+		const UalBusComposer* ualComposer = composer->ualBusComposer();
 
-		if (logicComposer == nullptr)
+		if (ualComposer == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		QString busTypeID = logicComposer->busTypeId();
+		QString busTypeID = ualComposer->busTypeId();
 
 		BusShared bus = m_signals->getBus(busTypeID);
 
@@ -5163,7 +5170,7 @@ namespace Builder
 			return false;
 		}
 
-		if (logicComposer->busTypeId() != busSignal->busTypeID())
+		if (ualComposer->busTypeId() != busSignal->busTypeID())
 		{
 			// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 			//
@@ -5193,7 +5200,7 @@ namespace Builder
 			return false;
 		}
 
-//		result = fillDiscreteBusSignals();
+		result = fillDiscreteBusSignals(composer, busSignal);
 
 		if (result == false)
 		{
@@ -5220,15 +5227,15 @@ namespace Builder
 
 		assert(busSignal->isBus() == true);
 
-		const LogicBusComposer* logicComposer = composer->logicBusComposer();
+		const UalBusComposer* ualComposer = composer->ualBusComposer();
 
-		if (logicComposer == nullptr)
+		if (ualComposer == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		BusShared bus = m_signals->getBus(logicComposer->busTypeId());
+		BusShared bus = m_signals->getBus(ualComposer->busTypeId());
 
 		if (bus == nullptr)
 		{
@@ -5239,9 +5246,21 @@ namespace Builder
 
 		const std::vector<int>& analogSignalIndexes = bus->analogSignalIndexes();
 
+		if (analogSignalIndexes.size() == 0)
+		{
+			return true;
+		}
+
 		for(int index : analogSignalIndexes)
 		{
-			const BusSignal& busInputSignal = bus->signalByIndex( index);
+			const BusSignal& busInputSignal = bus->signalByIndex(index);
+
+			if (busInputSignal.inbusAddr.isValid() == false)
+			{
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
 
 			assert(busInputSignal.signalType == E::SignalType::Analog);
 
@@ -5265,25 +5284,20 @@ namespace Builder
 				break;
 
 			case AppItem::Type::Const:
-				generateConstToBusCode(composer, busInputSignal, connectedItem);
+				generateAnalogConstToBusCode(busInputSignal, busSignal, connectedItem);
 				break;
 
 			case AppItem::Type::Receiver:
 				assert(false);				// must be implemented!
 				break;
 
-			// disallowed connections
+			// unknown AppItem::Type or disallowed connections
 			//
-			case AppItem::Type::Transmitter:
-			case AppItem::Type::Terminator:
-			case AppItem::Type::BusComposer:
-			case AppItem::Type::BusExtractor:
 			default:
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
 				return false;
 			}
-
 		}
 
 		return true;
@@ -5326,7 +5340,7 @@ namespace Builder
 		case E::SignalType::Discrete:
 			//	Discrete signal '%1' is connected to analog input '%2.%3'.
 			//
-			m_log->errALC5007(connectedAppSignal->appSignalID(), "BusComposer", busInputSignal.signalID, composer->guid());
+			m_log->errALC5007(connectedAppSignal->appSignalID(), BUS_COMPOSER_CAPTION, busInputSignal.signalID, composer->guid());
 			return false;
 
 		default:
@@ -5339,7 +5353,7 @@ namespace Builder
 		{
 			// Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Schema '%4')
 			//
-			m_log->errALC5008(connectedSignal->appSignalID(), "BusComposer", busInputSignal.signalID, composer->guid(), composer->schemaID());
+			m_log->errALC5008(connectedSignal->appSignalID(), BUS_COMPOSER_CAPTION, busInputSignal.signalID, composer->guid(), composer->schemaID());
 			return false;
 		}
 
@@ -5367,21 +5381,303 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateConstToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const AppItem* constAppItem)
+	bool ModuleLogicCompiler::generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem)
 	{
 		assert(constAppItem->isConst());
+		assert(busInputSignal.signalType == E::SignalType::Analog);
 
-		/*const LogicConst* ualConst = constAppItem->logicConst();
+		TEST_PTR_LOG_RETURN_FALSE(busSignal, m_log);
+
+		const UalConst* ualConst = constAppItem->ualConst();
 
 		if (ualConst == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
-		}*/
+		}
+
+		switch(busInputSignal.analogFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			if (ualConst->isIntegral() == true)
+			{
+				// Integer constant is connected to Float input (Logic schema '%1').
+				//
+				m_log->errALC5063(constAppItem->schemaID(), constAppItem->guid());
+				return false;
+			}
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			if (ualConst->isFloat() == true)
+			{
+				// Float constant is connected to SignedInt input (Logic schema '%1').
+				//
+				m_log->errALC5062(constAppItem->schemaID(), constAppItem->guid());
+				return false;
+			}
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (busInputSignal.conversionRequired() == true)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, "Bus signal conversion is not implemented");
+			return false;
+		}
+
+		Command cmd;
+
+		if (ualConst->isFloat() == true)
+		{
+			cmd.movConstFloat(busSignal->ualAddr().offset() + busInputSignal.inbusAddr.offset(), ualConst->floatValue());
+			cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(ualConst->floatValue()));
+			m_code.append(cmd);
+			return true;
+		}
+
+		if (ualConst->isIntegral() == true)
+		{
+			cmd.movConstInt32(busSignal->ualAddr().offset() + busInputSignal.inbusAddr.offset(), ualConst->intValue());
+			cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(ualConst->intValue()));
+			m_code.append(cmd);
+			return true;
+		}
+
+		// unknown type of constant!
+		//
+		assert(false);
+		LOG_INTERNAL_ERROR(m_log);
+
+		return false;
+	}
+
+	bool ModuleLogicCompiler::fillDiscreteBusSignals(const AppItem* composer, const Signal* busSignal)
+	{
+		if (composer == nullptr ||
+			busSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		assert(busSignal->isBus() == true);
+		assert(busSignal->ualAddr().isValid() == true);
+
+		const UalBusComposer* ualComposer = composer->ualBusComposer();
+
+		if (ualComposer == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		BusShared bus = m_signals->getBus(ualComposer->busTypeId());
+
+		if (bus == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::map<int, std::vector<int>>& discreteSignalIndexes = bus->discreteSignalIndexes();
+
+		if (discreteSignalIndexes.size() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		Commands fillingCode;
+
+		for(const std::pair<int, std::vector<int>>& pair: discreteSignalIndexes)
+		{
+			int discretesOffset = pair.first;
+			const std::vector<int>& discretesIndexes = pair.second;
+
+			Command cmd;
+
+			cmd.movConst(busSignal->ualAddr().offset() + discretesOffset, 0);
+
+			fillingCode.append(cmd);
+
+			for(int index : discretesIndexes)
+			{
+				const BusSignal& busInputSignal = bus->signalByIndex(index);
+
+				if (busInputSignal.inbusAddr.isValid() == false)
+				{
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				assert(busInputSignal.signalType == E::SignalType::Discrete);
+				assert(busInputSignal.inbusAddr.offset() == discretesOffset);
+
+				QUuid connectedOutPinUuid;
+				AppItem* connectedItem = getInputPinAssociatedOutputPinParent(composer->guid(), busInputSignal.signalID, &connectedOutPinUuid);
+
+				switch(connectedItem->type())
+				{
+				// allowed connections
+				//
+				case AppItem::Type::Signal:
+					// composer is connected to signal schema item
+					//
+					generateDiscreteSignalToBusCode(composer, busInputSignal, busSignal, connectedItem->guid() /* real app signal guid */, fillingCode);
+					break;
+
+				case AppItem::Type::Fb:
+					// composer is directly connected to FB via shadow signal
+					//
+					generateDiscreteSignalToBusCode(composer, busInputSignal, busSignal, connectedOutPinUuid /* shadow app signal guid */, fillingCode);
+					break;
+
+				case AppItem::Type::Const:
+					generateDiscreteConstToBusCode(busInputSignal, busSignal, connectedItem, fillingCode);
+					break;
+
+				case AppItem::Type::Receiver:
+					assert(false);				// must be implemented!
+					break;
+
+				// unknown AppItem::Type or disallowed connections
+				//
+				default:
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+		}
+
+		m_code.append(fillingCode);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusCode(const AppItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode)
+	{
+		if (composer == nullptr ||
+			busSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		AppSignal* connectedAppSignal = m_appSignals.value(connectedSignalGuid, nullptr);
+
+		if (connectedAppSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Signal* connectedSignal = connectedAppSignal->signal();
+
+		if (connectedSignal == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		switch(connectedSignal->signalType())
+		{
+		case E::SignalType::Analog:
+			// Analog signal '%1' is connected to discrete input '%2.%3'.
+			//
+			m_log->errALC5010(connectedAppSignal->appSignalID(), BUS_COMPOSER_CAPTION, busInputSignal.signalID, composer->guid(), composer->schemaID());
+			return false;
+
+		case E::SignalType::Discrete:
+			// all right
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (connectedSignal->ualAddr().isValid() == false)
+		{
+			// Undefined UAL address of signal '%1' (Logic schema '%2').
+			//
+			m_log->errALC5105(connectedSignal->appSignalID(), connectedAppSignal->guid(), connectedAppSignal->schemaID());
+			return false;
+		}
+
+		Command cmd;
+
+		cmd.movBit(busSignal->ualAddr().offset() + busInputSignal.inbusAddr.offset(),
+				   busInputSignal.inbusAddr.bit(),
+				   connectedSignal->ualAddr().offset(),
+				   connectedSignal->ualAddr().bit());
+
+		cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(connectedSignal->appSignalID()));
+
+		fillingCode.append(cmd);
 
 		return true;
 	}
+
+	bool ModuleLogicCompiler::generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode)
+	{
+		assert(constAppItem->isConst());
+		assert(busInputSignal.signalType == E::SignalType::Discrete);
+
+		TEST_PTR_LOG_RETURN_FALSE(busSignal, m_log);
+
+		const UalConst* ualConst = constAppItem->ualConst();
+
+		if (ualConst == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (ualConst->isFloat() == true)
+		{
+			// Float constant is connected to discrete input (Logic schema '%1').
+			//
+			m_log->errALC5060(constAppItem->schemaID(), constAppItem->guid());
+			return false;
+		}
+
+		assert(ualConst->isIntegral() == true);
+
+		if (ualConst->intValue() != 0 && ualConst->intValue() != 1)
+		{
+			// Constant connected to discrete signal or FB input must have value 0 or 1.
+			//
+			m_log->errALC5086(constAppItem->guid(), constAppItem->schemaID());
+			return false;
+		}
+
+		Command cmd;
+
+		cmd.movBitConst(busSignal->ualAddr().offset() + busInputSignal.inbusAddr.offset(),
+						busInputSignal.inbusAddr.bit(),
+						ualConst->intValue());
+		cmd.setComment(QString("%1.%2 <= %3").arg(busSignal->appSignalID()).arg(busInputSignal.signalID).arg(ualConst->intValue()));
+		fillingCode.append(cmd);
+
+		return true;
+	}
+
 
 	AppItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
 	{
@@ -7565,7 +7861,7 @@ namespace Builder
 			{
 				// Analog signal '%1' is connected to discrete input '%2.%3'.
 				//
-				m_log->errALC5010(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid);
+				m_log->errALC5010(srcSignal.appSignalID(), fb.caption(), afbSignal.caption(), srcSignalUuid, fb.schemaID());
 				return false;
 			}
 
@@ -7597,9 +7893,9 @@ namespace Builder
 		return m_appSignals.containsSignal(appSignalID);
 	}
 
-	QString ModuleLogicCompiler::getSchemaID(const LogicConst& constItem)
+	QString ModuleLogicCompiler::getSchemaID(QUuid itemUuid)
 	{
-		AppItem* appItem = m_appItems.value(constItem.guid(), nullptr);
+		AppItem* appItem = m_appItems.value(itemUuid, nullptr);
 
 		if (appItem != nullptr)
 		{

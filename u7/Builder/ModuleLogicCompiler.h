@@ -203,14 +203,14 @@ namespace Builder
 		bool generateAppLogicCode();
 
 		bool generateAppSignalCode(const AppItem* appItem);
-		bool generateWriteConstToSignalCode(AppSignal& appSignal, const LogicConst& constItem);
+		bool generateWriteConstToSignalCode(AppSignal& appSignal, const UalConst* constItem);
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
 
 		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
 
 		bool generateFbCode(const AppItem* appItem);
 		bool writeFbInputSignals(const AppFb *appFb);
-		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const LogicConst& constItem);
+		bool generateWriteConstToFbCode(const AppFb& appFb, const LogicPin& inPin, const UalConst* constItem);
 		bool genearateWriteReceiverToFbCode(const AppFb &appFb, const LogicPin& inPin, const LogicReceiver& receiver, const QUuid& receiverPinGuid);
 		bool generateWriteSignalToFbCode(const AppFb& appFb, const LogicPin& inPin, const AppSignal& appSignal);
 		bool startFb(const AppFb* appFb);
@@ -220,9 +220,11 @@ namespace Builder
 		bool generateBusComposerCode(const AppItem* composer);
 		bool generateBusComposerToSignalCode(const AppItem* composer, QUuid signalUuid, BusComposerInfo* composerInfo);
 		bool fillAnalogBusSignals(const AppItem *composer, const Signal* destSignal);
-		bool fillDiscreteBusSignals(const LogicBusComposer* composer, const Signal* destSignal);
 		bool generateAnalogSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
-		bool generateConstToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const AppItem* constAppItem);
+		bool generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem);
+		bool fillDiscreteBusSignals(const AppItem* composer, const Signal* busSignal);
+		bool generateDiscreteSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
+		bool generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode);
 
 		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 
@@ -274,7 +276,7 @@ namespace Builder
 		bool isUsedInUal(const Signal* s) const;
 		bool isUsedInUal(const QString& appSignalID) const;
 
-		QString getSchemaID(const LogicConst& constItem);
+		QString getSchemaID(QUuid itemUuid);
 
 		bool getLMIntProperty(const QString& name, int* value);
 		bool getLMStrProperty(const QString& name, QString *value);
@@ -394,6 +396,9 @@ namespace Builder
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;
 		static const char* PLATFORM_INTERFACE_CONTROLLER_SUFFIX;
+
+		static const char* BUS_COMPOSER_CAPTION;
+		static const char* BUS_EXTRACTOR_CAPTION;
 
 		QVector<AppItem*> m_scalAppItems;
 		QHash<QString, AppFb*> m_inOutSignalsToScalAppFbMap;

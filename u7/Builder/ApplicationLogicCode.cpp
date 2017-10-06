@@ -1708,6 +1708,19 @@ namespace Builder
 		m_codeItems.append(newCommand);
 	}
 
+	void ApplicationLogicCode::append(const Commands& commands)
+	{
+		for(const Command& cmd : commands)
+		{
+			Command* newCommand = new Command(cmd);
+
+			newCommand->setAddress(m_commandAddress);
+
+			m_commandAddress += newCommand->sizeW();
+
+			m_codeItems.append(newCommand);
+		}
+	}
 
 	void ApplicationLogicCode::append(const Comment& cmt)
 	{
