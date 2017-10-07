@@ -231,6 +231,20 @@ namespace VFrame30
 		return QString("Transmitter %1").arg(connectionId());
 	}
 
+	QString SchemaItemTransmitter::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Transmitter: "
+							  "\n\tConnectionID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit ConnectionID")
+						.arg(connectionId());
+
+		return str;
+	}
+
 	int SchemaItemTransmitter::pinCount() const
 	{
 		return m_pinCount;
@@ -481,6 +495,22 @@ namespace VFrame30
 	QString SchemaItemReceiver::buildName() const
 	{
 		return QString("Receiver %1").arg(connectionId());
+	}
+
+	QString SchemaItemReceiver::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Receiver: "
+							  "\n\tConnectionID: %1"
+							  "\n\tAppSignalID: %2"
+							  "\n"
+							  "\nHint: Press F2 to edit AppSignalID and ConnectionID")
+						.arg(connectionId())
+						.arg(appSignalId());
+
+		return str;
 	}
 
 	const QString& SchemaItemReceiver::appSignalId() const

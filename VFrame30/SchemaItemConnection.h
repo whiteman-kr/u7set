@@ -90,6 +90,7 @@ namespace VFrame30
 		//
 	public:
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//
@@ -143,6 +144,7 @@ namespace VFrame30
 	public:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//

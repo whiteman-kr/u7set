@@ -785,6 +785,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			str.append(tr("\n\t%1").arg(signalId));
 		}
 
+		str.append(tr("\n\nHint: Press F2 to edit AppSignalID(s)"));
+
 		return str;
 	}
 

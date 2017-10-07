@@ -202,6 +202,8 @@ namespace VFrame30
 							.arg(typeStr)
 							.arg(valueToString());
 
+		str.append(tr("\n\nHint: Press F2 to edit value"));
+
 		return str;
 	}
 
