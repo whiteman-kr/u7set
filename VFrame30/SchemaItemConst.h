@@ -49,6 +49,8 @@ namespace VFrame30
 
 		virtual QString buildName() const override;
 
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
+
 		// Properties
 		//
 	public:

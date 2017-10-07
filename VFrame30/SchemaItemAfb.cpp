@@ -549,6 +549,35 @@ namespace VFrame30
 		return true;
 	}
 
+	QString SchemaItemAfb::toolTipText(int dpiX, int dpiY) const
+	{
+		QImage image(QSize(3 * dpiX, 3 * dpiY), QImage::Format_RGB32);		// size 3x3 inches
+		image.fill(Qt::white);
+
+		image.setDotsPerMeterX(static_cast<int>(1000.0 / 25.4 * dpiX));
+		image.setDotsPerMeterY(static_cast<int>(1000.0 / 25.4 * dpiY));
+
+		QPainter painter;
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+		painter.begin(&image);
+		drawAfbHelp(&painter, QRect(0, 0, image.width(), image.height()));
+		painter.end();
+
+		QByteArray data;
+		QBuffer buffer(&data);
+		image.save(&buffer, "PNG", 100);
+
+		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
+					   .arg(QString(data.toBase64()))
+					   .arg(image.size().height())
+					   .arg(image.size().width());
+
+		return html;
+	}
+
+
 	QString SchemaItemAfb::buildName() const
 	{
 		return QString("%1 %2")

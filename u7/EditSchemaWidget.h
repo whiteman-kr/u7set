@@ -240,9 +240,7 @@ protected:
 
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
-
 	virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
-
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 	// Mouse Left Button Down
@@ -456,10 +454,6 @@ private:
 
 	SchemaPropertiesDialog* m_schemaPropertiesDialog = nullptr;
 	SchemaItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
-
-	// Temporary and state variables
-	//
-	std::shared_ptr<VFrame30::SchemaItem> m_toolTipItem;
 
 	//Qt::MouseButtons m_mousePressedButtons;
 

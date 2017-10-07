@@ -34,6 +34,7 @@ namespace VFrame30
 		// Methods
 		//
 	public:
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 		virtual QString buildName() const override;
 
 		bool setAfbParam(const QString& name, QVariant value, std::shared_ptr<VFrame30::Schema> schema, QString* errorMsg);

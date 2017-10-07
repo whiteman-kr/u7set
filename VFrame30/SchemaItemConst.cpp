@@ -180,6 +180,31 @@ namespace VFrame30
 		return QString("Const (%1)").arg(valueToString());
 	}
 
+	QString SchemaItemConst::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString typeStr;
+		switch (type())
+		{
+			case ConstType::IntegerType:
+				typeStr = "Integer";
+				break;
+			case ConstType::FloatType:
+				typeStr = "Float";
+				break;
+			default:
+				break;
+		}
+
+		QString str = QString("Constant:\n\tType: %1\n\tValue: %2")
+							.arg(typeStr)
+							.arg(valueToString());
+
+		return str;
+	}
+
 	SchemaItemConst::ConstType SchemaItemConst::type() const
 	{
 		return m_type;

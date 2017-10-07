@@ -2607,36 +2607,22 @@ void EditSchemaWidget::createActions()
 
 bool EditSchemaWidget::event(QEvent* e)
 {
-	if (e->type() == QEvent::ToolTip &&
-		m_toolTipItem != nullptr &&
-		m_toolTipItem->isSchemaItemAfb() == true)
+	// Show tool tip
+	//
+	if (e->type() == QEvent::ToolTip)
 	{
-		std::shared_ptr<VFrame30::SchemaItemAfb> afbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(m_toolTipItem);
+		QHelpEvent* he = static_cast<QHelpEvent*>(e);
 
-		QImage image(QSize(3 * this->physicalDpiX(), 3 * physicalDpiY()), QImage::Format_RGB32);		// size 3x3 inches
-		image.fill(Qt::white);
+		// Get item under cursor
+		//
+		QPointF docPoint = widgetPointToDocument(he->pos(), false);
+		std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
-		image.setDotsPerMeterX(1000.0 / 25.4 * this->physicalDpiX());
-		image.setDotsPerMeterY(1000.0 / 25.4 * this->physicalDpiY());
-
-		QPainter painter;
-		painter.setRenderHint(QPainter::Antialiasing, true);
-		painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-		painter.begin(&image);
-		afbItem->drawAfbHelp(&painter, QRect(0, 0, image.width(), image.height()));
-		painter.end();
-
-		QByteArray data;
-		QBuffer buffer(&data);
-		image.save(&buffer, "PNG", 100);
-
-		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
-					   .arg(QString(data.toBase64()))
-					   .arg(image.size().height())
-					   .arg(image.size().width());
-
-		setToolTip(html);
+		if (itemUnderPoint != nullptr)
+		{
+			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
+			setToolTip(toolTip);
+		}
 
 		return VFrame30::BaseSchemaWidget::event(e);
 	}
@@ -4709,7 +4695,6 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 {
 	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
-	m_toolTipItem.reset();
 
 	for (size_t i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
 	{
@@ -4746,7 +4731,6 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				editSchemaView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == SchemaItemAction::MoveItem)
 			{
 				setCursor(Qt::SizeAllCursor);
-				m_toolTipItem = itemUnderPoint;
 				return;
 			}
 		}
@@ -4782,10 +4766,6 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				{
 				case SchemaItemAction::MoveItem:
 					setCursor(Qt::SizeAllCursor);
-					if (editSchemaView()->selectedItems().size() == 1)
-					{
-						m_toolTipItem = si;
-					}
 					return;
 				case SchemaItemAction::MoveStartLinePoint:
 					setCursor(Qt::SizeAllCursor);
