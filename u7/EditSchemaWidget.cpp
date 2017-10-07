@@ -3763,8 +3763,15 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		bool startPointAddedToOther = false;	// Ќовый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 		bool endPointAddedToOther = false;		// Ќовый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderStartPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderEndPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = linksUnderStartPoint.size() == 1 ? linksUnderStartPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = linksUnderEndPoint.size() == 1 ? linksUnderEndPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
 
 		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderStartPoint =
 			activeLayer()->findPinUnderPoint(startPoint, schema()->gridSize(), schema()->pinGridStep());

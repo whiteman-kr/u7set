@@ -44,6 +44,7 @@ namespace VFrame30
 		std::shared_ptr<SchemaItemType> getItemUnderPointByType(QPointF point) const;		// This will work only inside VFrame30 :(
 
 		std::shared_ptr<SchemaItem> getItemUnderPoint(QPointF point, QString className = "") const;
+		std::list<std::shared_ptr<SchemaItem>> getItemListUnderPoint(QPointF point, QString className = "") const;
 		std::list<std::shared_ptr<SchemaItem>> getItemListInRectangle(const QRectF& rect) const;
 
 		std::shared_ptr<SchemaItem> findPinUnderPoint(QPointF point, double gridSize, int pinGridStep) const;
