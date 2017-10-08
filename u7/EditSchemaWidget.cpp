@@ -5633,46 +5633,49 @@ void EditSchemaWidget::f2Key()
 	}
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
-
 	if (selected.size() != 1)
 	{
 		return;
 	}
 
 	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
-	assert(item);
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
 
-	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-	VFrame30::SchemaItemTransmitter* itemTransmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
-	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
-	VFrame30::SchemaItemValue* itemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-
-	if (itemRect != nullptr)
+	if (item->isType<VFrame30::SchemaItemRect>() == true)
 	{
 		f2KeyForRect(item);
 		return;
 	}
 
-	if (itemSignal != nullptr)
+	if (item->isType<VFrame30::SchemaItemSignal>() == true)
 	{
 		f2KeyForSignal(item);
 		return;
 	}
 
-	if (itemReceiver != nullptr)
+	if (item->isType<VFrame30::SchemaItemConst>() == true)
+	{
+		f2KeyForConst(item);
+		return;
+	}
+
+	if (item->isType<VFrame30::SchemaItemReceiver>() == true)
 	{
 		f2KeyForReceiver(item);
 		return;
 	}
 
-	if (itemTransmitter != nullptr)
+	if (item->isType<VFrame30::SchemaItemTransmitter>() == true)
 	{
 		f2KeyForTransmitter(item);
 		return;
 	}
 
-	if (itemValue != nullptr)
+	if (item->isType<VFrame30::SchemaItemValue>() == true)
 	{
 		f2KeyForValue(item);
 		return;
@@ -5849,6 +5852,131 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 	{
 		assert(constItem);
 		return;
+	}
+
+	VFrame30::SchemaItemConst::ConstType type = constItem->type();
+	int intValue = constItem->intValue();
+	double floatValue = constItem->floatValue();
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Const Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* typeLabel = new QLabel("Const Type:");
+
+	QComboBox* typeCombo = new QComboBox();
+	typeCombo->addItem("IntegerType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::IntegerType));
+	typeCombo->addItem("FloatType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::FloatType));
+
+	int dataIndex = typeCombo->findData(QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(type));
+	assert(dataIndex != -1);
+	if (dataIndex != -1)
+	{
+		typeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// IntItems
+	//
+	QLabel* intValueLabel = new QLabel("IntegerValue:");
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
+	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
+	{
+		intValueLabel->setEnabled(false);
+		intValueEdit->setEnabled(false);
+	}
+
+	// FloatItems
+	//
+	QLabel* floatValueLabel = new QLabel("FloatValue:");
+	QLineEdit* floatValueEdit = new QLineEdit(QString::number(floatValue));
+	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
+	{
+		floatValueLabel->setEnabled(false);
+		floatValueEdit->setEnabled(false);
+	}
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(typeLabel);
+	layout->addWidget(typeCombo);
+
+	layout->addWidget(intValueLabel);
+	layout->addWidget(intValueEdit);
+
+	layout->addWidget(floatValueLabel);
+	layout->addWidget(floatValueEdit);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	connect(typeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit](int)
+			{
+				VFrame30::SchemaItemConst::ConstType type = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
+				if (type == VFrame30::SchemaItemConst::ConstType::IntegerType)
+				{
+					intValueLabel->setEnabled(true);
+					intValueEdit->setEnabled(true);
+					floatValueLabel->setEnabled(false);
+					floatValueEdit->setEnabled(false);
+				}
+
+				if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
+				{
+					intValueLabel->setEnabled(false);
+					intValueEdit->setEnabled(false);
+					floatValueLabel->setEnabled(true);
+					floatValueEdit->setEnabled(true);
+				}
+			});
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+		int newIntValue = intValueEdit->text().toInt();
+		double newFloatValue = floatValueEdit->text().toFloat();
+
+		if (newType != type)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant(newType), item);
+		}
+
+		if (newIntValue != intValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant(newIntValue), item);
+		}
+
+		if (newFloatValue != floatValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(newFloatValue), item);
+		}
+
+		editSchemaView()->update();
 	}
 
 	return;

@@ -88,15 +88,15 @@ namespace EditEngine
 	private:
 		static const int MaxCommandCount = 2048;
 
-		EditSchemaView* m_schemaView;
-		QScrollBar* m_hScrollBar;
-		QScrollBar* m_vScrollBar;
+		EditSchemaView* m_schemaView = nullptr;
+		QScrollBar* m_hScrollBar = nullptr;
+		QScrollBar* m_vScrollBar = nullptr;
 
 		std::vector<std::shared_ptr<EditCommand>> m_commands;
-		int m_current;
+		int m_current = 0;
 
-		bool m_readOnly;
-		bool m_modified;
+		bool m_readOnly = false;
+		bool m_modified = false;
 	};
 
 

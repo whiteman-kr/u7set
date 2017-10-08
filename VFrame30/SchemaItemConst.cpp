@@ -162,10 +162,10 @@ namespace VFrame30
 		switch (type())
 		{
 			case ConstType::IntegerType:
-				text = QString::number(intValue());
+				text = QString("int: %1").arg(QString::number(intValue()));
 				break;
 			case ConstType::FloatType:
-				text = QString::number(floatValue(), 'g', precision());
+				text = QString("float: %1").arg(QString::number(floatValue(), 'g', precision()));
 				break;
 			default:
 				assert(false);
