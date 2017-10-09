@@ -227,6 +227,7 @@ namespace Builder
 		bool generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode);
 
 		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
+		AppItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
 
 		bool addToComparatorStorage(const AppFb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);

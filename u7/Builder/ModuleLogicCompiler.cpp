@@ -3669,88 +3669,66 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateAppSignalCode(const AppItem* appItem)
 	{
-		if (!m_appSignals.contains(appItem->guid()))
+		assert(appItem->isSignal() == true);
+
+		AppSignal* appSignal = m_appSignals.value(appItem->guid(), nullptr);
+
+		if (appSignal == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal is not found, GUID: %1")).arg(appItem->guid().toString()));
 			return false;
 		}
 
-		AppSignal* appSignal = m_appSignals[appItem->guid()];
-
-		TEST_PTR_RETURN_FALSE(appSignal)
-
-		bool result = true;
-
 		if (appSignal->isResultSaved() == true)
 		{
 			return true;				// signal value is already set
 		}
 
-		int inPinsCount = 1;
+		const std::vector<LogicPin>& inputs = appItem->inputs();
 
-		for(LogicPin inPin : appItem->inputs())
+		if (inputs.size() != 1)
 		{
-			if (inPin.IsInput() == false)
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin& inPin = inputs[0];
+
+		QUuid connectedOutPinUuid;
+
+		AppItem* connectedPinParent = getAssociatedOutputPinParent(inPin, &connectedOutPinUuid);
+
+		if (connectedPinParent == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		switch(connectedPinParent->type())
+		{
+		case AppItem::Const:
+			result = generateWriteConstToSignalCode(*appSignal, connectedPinParent->ualConst());
+			break;
+
+		case AppItem::Receiver:
+			result = generateWriteReceiverToSignalCode(connectedPinParent->logicReceiver(), *appSignal, connectedOutPinUuid);
+			break;
+
+		case AppItem::BusComposer:
+			// "writeBusComposerToSignal" code implemented in generateBusComposerCode()
+			//
+			break;
+
+		case AppItem::Signal:
+		case AppItem::Fb:
 			{
-				ASSERT_RESULT_FALSE_BREAK
-			}
-
-			if (inPinsCount > 1)
-			{
-				ASSERT_RESULT_FALSE_BREAK
-			}
-
-			inPinsCount++;
-
-			int connectedPinsCount = 1;
-
-			for(QUuid connectedPinGuid : inPin.associatedIOs())
-			{
-				if (connectedPinsCount > 1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("More than one pin is connected to the input")));
-
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				connectedPinsCount++;
-
-				if (!m_pinParent.contains(connectedPinGuid))
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				AppItem* connectedPinParent = m_pinParent[connectedPinGuid];
-
-				if (connectedPinParent == nullptr)
-				{
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (connectedPinParent->isConst() == true)
-				{
-					result &= generateWriteConstToSignalCode(*appSignal, connectedPinParent->ualConst());
-					continue;
-				}
-
-				if (connectedPinParent->isReceiver() == true)
-				{
-					result &= generateWriteReceiverToSignalCode(connectedPinParent->logicReceiver(), *appSignal, connectedPinGuid);
-					continue;
-				}
-
-				if (connectedPinParent->isBusComposer() == true)
-				{
-					// write busComposer to signal code implemented in generateBusComposerCode()
-					//
-					continue;
-				}
-
 				QUuid srcSignalGuid;
 
-				if (connectedPinParent->isSignal())
+				if (connectedPinParent->isSignal() == true)
 				{
 					// input connected to real signal
 					//
@@ -3760,18 +3738,20 @@ namespace Builder
 				{
 					// connectedPinParent is FB
 					//
-					if (!m_outPinSignal.contains(connectedPinGuid))
-					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								  QString(tr("Output pin is not found, GUID: %1")).arg(connectedPinGuid.toString()));
-
-						ASSERT_RESULT_FALSE_BREAK
-					}
-
-					srcSignalGuid = m_outPinSignal[connectedPinGuid];
+					srcSignalGuid = m_outPinSignal.value(connectedOutPinUuid, QUuid());
 				}
 
-				if (!m_appSignals.contains(srcSignalGuid))
+				if (srcSignalGuid.isNull() == true)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							  QString(tr("Output pin is not found, GUID: %1")).arg(connectedOutPinUuid.toString()));
+
+					result = false;
+				}
+
+				AppSignal* srcAppSignal = m_appSignals.value(srcSignalGuid, nullptr);
+
+				if (srcAppSignal == nullptr)
 				{
 					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 							  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
@@ -3779,30 +3759,30 @@ namespace Builder
 					ASSERT_RESULT_FALSE_BREAK
 				}
 
-				AppSignal* srcAppSignal = m_appSignals[srcSignalGuid];
-
-				if (srcAppSignal == nullptr)
+				if (srcAppSignal->isComputed() == true)
 				{
-					ASSERT_RESULT_FALSE_BREAK
+					result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
 				}
-
-				if (!srcAppSignal->isComputed())
+				else
 				{
-					RESULT_FALSE_BREAK
+					// Value of signal '%1' is undefined.
+					//
+					m_log->errALC5002(srcAppSignal->schemaID(), srcAppSignal->appSignalID(), srcAppSignal->guid());
+					result = false;
 				}
-
-				result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
 			}
+			break;
 
-			if (result == false)
-			{
-				break;
-			}
+		default:
+			assert(false);
+			result = false;
 		}
 
-		if(!appSignal->isComputed())
+		if(appSignal->isComputed() == false)
 		{
-			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());			// Value of signal '%1' is undefined.
+			// Value of signal '%1' is undefined.
+			//
+			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
 			result = false;
 		}
 
@@ -5738,6 +5718,40 @@ namespace Builder
 		return connectedItem;
 	}
 
+	AppItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid) const
+	{
+		if (inputPin.IsInput() == false)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		const std::vector<QUuid>& associatedOuts = inputPin.associatedIOs();
+
+		if (associatedOuts.size() != 1)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		if (connectedOutPinUuid != nullptr)
+		{
+			*connectedOutPinUuid = associatedOuts[0];
+		}
+
+		AppItem* connectedOutPinParent = m_pinParent.value(associatedOuts[0], nullptr);
+
+		if (connectedOutPinParent == nullptr)
+		{
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		return connectedOutPinParent;
+	}
 
 	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)
 	{
