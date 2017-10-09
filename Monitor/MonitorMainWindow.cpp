@@ -32,6 +32,16 @@ MonitorMainWindow::MonitorMainWindow(QWidget *parent) :
 	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &MonitorMainWindow::tcpSignalClient_signalParamAndUnitsArrived);
 	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &MonitorMainWindow::tcpSignalClient_connectionReset);
 
+	// TcpSignalClient
+	//
+	m_tcpSignalRecents = new TcpSignalRecents(&m_configController, fakeAddress, fakeAddress);
+
+	m_tcpRecentsThread = new SimpleThread(m_tcpSignalRecents);
+	m_tcpRecentsThread->start();
+
+	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
+	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
+
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager);

@@ -111,7 +111,8 @@ SOURCES += main.cpp \
     DialogChooseArchiveSignals.cpp \
     ArchiveTcpClient.cpp \
     ArchiveModelView.cpp \
-    ArchiveData.cpp
+    ArchiveData.cpp \
+    TcpSignalRecents.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -157,7 +158,8 @@ HEADERS  += \
     DialogChooseArchiveSignals.h \
     ArchiveTcpClient.h \
     ArchiveModelView.h \
-    ArchiveData.h
+    ArchiveData.h \
+    TcpSignalRecents.h
 
 FORMS    += \
     DialogSettings.ui \

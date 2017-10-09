@@ -4,6 +4,7 @@
 #include "MonitorConfigController.h"
 #include "SchemaManager.h"
 #include "TcpSignalClient.h"
+#include "TcpSignalRecents.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -106,6 +107,9 @@ private:
 
 	TcpSignalClient* m_tcpSignalClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
+
+	TcpSignalRecents* m_tcpSignalRecents = nullptr;
+	SimpleThread* m_tcpRecentsThread = nullptr;
 
 	// File menu
 	//

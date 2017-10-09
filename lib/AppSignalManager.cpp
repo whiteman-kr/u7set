@@ -92,9 +92,7 @@ void AppSignalManager::reset()
 void AppSignalManager::addSignal(const AppSignalParam& signal)
 {
 	QMutexLocker l(&m_paramsMutex);
-
 	m_signalParams[signal.hash()] = signal;
-
 	return;
 }
 
@@ -187,7 +185,61 @@ void AppSignalManager::setState(Hash signalHash, const AppSignalState& state)
 
 	QMutexLocker l(&m_statesMutex);
 
-	m_signalStates[signalHash] = state;
+	AppSignalState& storedState = m_signalStates[signalHash];
+
+	if (state.time().system.timeStamp >= storedState.time().system.timeStamp)
+	{
+		storedState = state;
+	}
+	else
+	{
+		// if difference more then 1h, something wrong and we update state
+		//
+		qint64 diff = storedState.time().system.timeStamp - state.time().system.timeStamp;
+
+		if (diff > 1_hour)
+		{
+			storedState = state;
+		}
+	}
+
+	return;
+}
+
+void AppSignalManager::setState(const std::vector<AppSignalState>& states)
+{
+	QMutexLocker l(&m_statesMutex);
+
+	for (const AppSignalState& state : states)
+	{
+		AppSignalState& storedState = m_signalStates[state.hash()];
+
+		if (state.time().system.timeStamp >= storedState.time().system.timeStamp)
+		{
+			storedState = state;
+		}
+		else
+		{
+			// if difference more then 1h, something wrong and we update state
+			//
+			qint64 diff = storedState.time().system.timeStamp - state.time().system.timeStamp;
+
+			if (diff > 1_hour)
+			{
+				storedState = state;
+			}
+			else
+			{
+				// Skip setting state
+				//
+//				if (state.time().system.timeStamp != 0)
+//				{
+//					static int aaa = 0;
+//					qDebug() << aaa++ << " Skip setting state, diff is " << diff << " storedTime: " << storedState.time().system.toDate() << ", State: " << state.time().system.toDate();
+//				}
+			}
+		}
+	}
 
 	return;
 }
@@ -199,6 +251,8 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 		assert(signalHash != 0);
 		return AppSignalState();
 	}
+
+	emit addSignalToPriorityList(signalHash);
 
 	QMutexLocker l(&m_statesMutex);
 
@@ -235,6 +289,8 @@ void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std
 		assert(result);
 		return;
 	}
+
+	emit addSignalsToPriorityList(QVector<Hash>::fromStdVector(appSignalHashes));
 
 	QMutexLocker l(&m_statesMutex);
 
