@@ -120,6 +120,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 	ui->tabWidget->tabBar()->setExpanding(true);
 	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	QString str;
 
 	m_precision = signal.precision();

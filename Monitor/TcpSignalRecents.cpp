@@ -63,6 +63,46 @@ void RecentUsed::add(const QVector<Hash>& hashes)
 	return;
 }
 
+bool RecentUsed::remove(Hash hash)
+{
+	auto it = m_signalToTile.find(hash);
+	if (it == m_signalToTile.end())
+	{
+		return false;
+	}
+
+	qint64 itemTime = it->second;
+	bool removedFromTimeMap = false;
+
+	auto range = m_timeToSignal.equal_range(itemTime);
+	for (auto th = range.first; th != range.second; ++th)
+	{
+		if (th->second == hash)
+		{
+			m_timeToSignal.erase(th);
+			removedFromTimeMap = true;
+			break;
+		}
+	}
+	assert(removedFromTimeMap == true);
+
+	m_signalToTile.erase(it);
+
+	assert(m_signalToTile.size() == m_timeToSignal.size());
+	return true;
+}
+
+bool RecentUsed::remove(const std::vector<Hash>& hashes)
+{
+	bool ok = true;
+	for (Hash hash : hashes)
+	{
+		ok &= remove(hash);
+	}
+
+	return ok;
+}
+
 int RecentUsed::size() const
 {
 	return static_cast<int>(m_signalToTile.size());
@@ -170,14 +210,12 @@ void TcpSignalRecents::processReply(quint32 requestID, const char* replyData, qu
 
 void TcpSignalRecents::addSignal(Hash hash)
 {
-	QMutexLocker locker(&m_mutex);
 	m_recents.add(hash);
 	return;
 }
 
 void TcpSignalRecents::addSignals(QVector<Hash> hashes)
 {
-	QMutexLocker locker(&m_mutex);
 	m_recents.add(hashes);
 	return;
 }
@@ -190,21 +228,51 @@ void TcpSignalRecents::requestSignalState()
 
 	assert(isClearToSendRequest());
 
-	std::vector<Hash> hashes = m_recents.hashes();
-
-	if (hashes.size() > ADS_GET_APP_SIGNAL_STATE_MAX)
+	const std::map<Hash, qint64>& recentRecords = m_recents.rawHashes();
+	if (recentRecords.empty() == true)
 	{
-		assert(hashes.size() <= ADS_GET_APP_SIGNAL_STATE_MAX);
-		hashes.resize(ADS_GET_APP_SIGNAL_STATE_MAX);
+		QThread::yieldCurrentThread();
+	}
+
+	std::vector<Hash> hashesToRemove;
+	hashesToRemove.reserve(recentRecords.size());
+
+	if (recentRecords.size() > ADS_GET_APP_SIGNAL_STATE_MAX)
+	{
+		assert(recentRecords.size() <= ADS_GET_APP_SIGNAL_STATE_MAX);
 	}
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
-	m_getSignalStateRequest.mutable_signalhashes()->Reserve(static_cast<int>(hashes.size()));
+	m_getSignalStateRequest.mutable_signalhashes()->Reserve(static_cast<int>(recentRecords.size()));
 
-	for (Hash hash : hashes)
+	qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
+	int index = 0;
+	for (const std::pair<Hash, qint64>& p : recentRecords)
 	{
-		m_getSignalStateRequest.add_signalhashes(hash);
+		const Hash& hash = p.first;
+		const qint64& lastAccessTime = p.second;
+
+		if (now - lastAccessTime > 5_sec)
+		{
+			hashesToRemove.push_back(hash);
+			continue;
+		}
+		else
+		{
+			m_getSignalStateRequest.add_signalhashes(hash);
+		}
+
+		index ++;
+		if (index > ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// Make break at the and of the loop, as before threre is a condition to remove items
+			//
+			break;
+		}
 	}
+
+	m_recents.remove(hashesToRemove);
 
 	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
 	return;
@@ -244,6 +312,8 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 	}
 
 	theSignals.setState(states);
+
+	qDebug() << "Priority updates state count  "  << states.size();
 
 	requestSignalState();
 	return;

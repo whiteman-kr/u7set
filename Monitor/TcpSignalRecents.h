@@ -23,6 +23,9 @@ public:
 	void add(Hash h);
 	void add(const QVector<Hash>& hashes);
 
+	bool remove(Hash hash);
+	bool remove(const std::vector<Hash>& hashes);
+
 	int size() const;
 	const std::map<Hash, qint64>& rawHashes() const;	// Just faster access to map
 	std::vector<Hash> hashes() const;
@@ -65,8 +68,6 @@ protected slots:
 
 private:
 	MonitorConfigController* m_cfgController = nullptr;
-
-	QMutex m_mutex;			// Mutex for access to m_recents, really it's not required if addSignal used as a slot
 	RecentUsed m_recents = RecentUsed(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 private:
