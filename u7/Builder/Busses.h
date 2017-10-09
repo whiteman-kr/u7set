@@ -35,10 +35,15 @@ namespace Builder
 		bool conversionRequired() const;
 		void init(const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
+
+		bool isValid() const;
 	};
 
 	class Bus
 	{
+	public:
+		static QString INVALUD_BUS_SIGNAL_ID;
+
 	public:
 		Bus(const VFrame30::Bus bus, IssueLogger* log);
 
@@ -48,6 +53,7 @@ namespace Builder
 
 		int sizeW() const { return m_sizeW; }
 
+		const BusSignal& signalByID(const QString& signalID) const;
 		const BusSignal& signalByIndex(int index) const;
 		const std::vector<int>& analogSignalIndexes() const { return m_analogSignalIndexes; }
 		const std::map<int, std::vector<int>>& discreteSignalIndexes() const { return m_discreteSignalIndexes; }

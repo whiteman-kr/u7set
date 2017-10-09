@@ -197,13 +197,25 @@ bool Signal::isCompatibleFormat(E::SignalType signalType, E::DataFormat dataForm
 
 bool Signal::isCompatibleFormat(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat, E::ByteOrder byteOrder) const
 {
-	switch(analogFormat)
+	switch(signalType)
 	{
-	case E::AnalogAppSignalFormat::Float32:
-		return isCompatibleFormat(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder);
+	case E::SignalType::Analog:
 
-	case E::AnalogAppSignalFormat::SignedInt32:
-		return isCompatibleFormat(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder);
+		switch(analogFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			return isCompatibleFormat(signalType, E::DataFormat::Float, FLOAT32_SIZE, byteOrder);
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			return isCompatibleFormat(signalType, E::DataFormat::SignedInt, SIGNED_INT32_SIZE, byteOrder);
+
+		default:
+			assert(false);
+		}
+		break;
+
+	case E::SignalType::Discrete:
+		return isCompatibleFormat(signalType, E::DataFormat::UnsignedInt, DISCRETE_SIZE, byteOrder);
 
 	default:
 		assert(false);

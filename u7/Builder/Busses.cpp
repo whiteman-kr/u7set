@@ -88,7 +88,12 @@ namespace Builder
 				(addr1 >= addr2 && addr1 < (addr2 + size2));
 	}
 
+	bool BusSignal::isValid() const
+	{
+		return signalID.isEmpty() == false && signalID != Bus::INVALUD_BUS_SIGNAL_ID;
+	}
 
+	QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
 	VFrame30::BusSignal Bus::m_invalidBusSignal;
 	BusSignal Bus::m_invalidSignal;
 
@@ -96,9 +101,9 @@ namespace Builder
 		m_srcBus(bus),
 		m_log(log)
 	{
-		m_invalidBusSignal.setSignalId("InvalidInBusSignalID");
+		m_invalidBusSignal.setSignalId(INVALUD_BUS_SIGNAL_ID);
 
-		m_invalidSignal.signalID = "InvalidInBusSignalID";
+		m_invalidSignal.signalID = INVALUD_BUS_SIGNAL_ID;
 		m_invalidSignal.inbusAddr.reset();
 	}
 
@@ -200,6 +205,19 @@ namespace Builder
 		list.append(separator);
 
 		list.append("");
+	}
+
+	const BusSignal& Bus::signalByID(const QString& signalID) const
+	{
+		for(const BusSignal& busSignal : m_signals)
+		{
+			if (busSignal.signalID == signalID)
+			{
+				return busSignal;
+			}
+		}
+
+		return m_invalidSignal;
 	}
 
 	const BusSignal& Bus::signalByIndex(int index) const

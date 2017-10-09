@@ -380,6 +380,7 @@ namespace Builder
 		const Signal& constSignal() { return *m_signal; }
 
 		Signal* signal() { return m_signal; }
+		const Signal* signal() const { return m_signal; }
 
 		QString schemaID() const;
 

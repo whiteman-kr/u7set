@@ -205,8 +205,8 @@ namespace Builder
 		bool generateAppSignalCode(const AppItem* appItem);
 		bool generateWriteConstToSignalCode(AppSignal& appSignal, const UalConst* constItem);
 		bool generateWriteReceiverToSignalCode(const LogicReceiver& receiver, AppSignal& appSignal, const QUuid& pinGuid);
-
-		bool generateWriteSignalToSignalCode(AppSignal &appSignal, const AppSignal& srcSignal);
+		bool generateWriteBusExtractorToSignalCode(AppSignal& appSignal, const AppItem* appBusExtractor, QUuid extractorOutPinUuid);
+		bool generateWriteSignalToSignalCode(AppSignal& appSignal, QUuid srcSignalGuid);
 
 		bool generateFbCode(const AppItem* appItem);
 		bool writeFbInputSignals(const AppFb *appFb);
@@ -223,11 +223,12 @@ namespace Builder
 		bool generateAnalogSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid);
 		bool generateAnalogConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem);
 		bool fillDiscreteBusSignals(const AppItem* composer, const Signal* busSignal);
-		bool generateDiscreteSignalToBusCode(const AppItem *composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
+		bool generateDiscreteSignalToBusCode(const AppItem* composer, const BusSignal& busInputSignal, const Signal* busSignal, QUuid connectedSignalGuid, Commands& fillingCode);
 		bool generateDiscreteConstToBusCode(const BusSignal& busInputSignal, const Signal* busSignal, const AppItem* constAppItem, Commands& fillingCode);
 
 		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		AppItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
+		const AppSignal *getExtractorBusSignal(const AppItem* appBusExtractor);
 
 		bool addToComparatorStorage(const AppFb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);

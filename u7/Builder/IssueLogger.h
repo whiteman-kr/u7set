@@ -190,7 +190,7 @@ namespace Builder
 		void wrnALC5001(QString logicModuleID);									// Application logic for module '%1' is not found.
 		void errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid);					// Value of signal '%1' is undefined (Logic schema '%2').
 		void errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Analog output '%1.%2' is connected to discrete signal '%3'.
-		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+		void errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID);		// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
 		void errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Output '%1.%2' is connected to signal '%3' with uncompatible data size.
 		void errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid);		// Discrete output '%1.%2' is connected to analog signal '%3'.
 		void errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid);		// Discrete signal '%1' is connected to analog input '%2.%3'.
@@ -292,7 +292,6 @@ namespace Builder
 		void errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID);		// Different bus types of bus composer and signal '%1' (Logic schema '%2').
 		void errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID);		// Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
 		void errALC5105(QString signalID, QUuid signalUuid, QString schemaID);		// Undefined UAL address of signal '%1' (Logic schema '%2').
-
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

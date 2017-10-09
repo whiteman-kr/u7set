@@ -3687,6 +3687,25 @@ namespace Builder
 
 		const std::vector<LogicPin>& inputs = appItem->inputs();
 
+		if (inputs.size() == 0)
+		{
+			// signal has no input pins
+			// no code should be generated
+			//
+
+			// only check that signal is computed
+			//
+			if (appSignal->isComputed() == false)
+			{
+				// Value of signal '%1' is undefined.
+				//
+				m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
+				return false;
+			}
+
+			return true;
+		}
+
 		if (inputs.size() != 1)
 		{
 			assert(false);
@@ -3723,6 +3742,10 @@ namespace Builder
 			//
 			break;
 
+		case AppItem::BusExtractor:
+			result = generateWriteBusExtractorToSignalCode(*appSignal, connectedPinParent, connectedOutPinUuid);
+			break;
+
 		case AppItem::Signal:
 		case AppItem::Fb:
 			{
@@ -3739,37 +3762,17 @@ namespace Builder
 					// connectedPinParent is FB
 					//
 					srcSignalGuid = m_outPinSignal.value(connectedOutPinUuid, QUuid());
+
+					if (srcSignalGuid.isNull() == true)
+					{
+						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								  QString(tr("Output pin is not found, GUID: %1")).arg(connectedOutPinUuid.toString()));
+
+						result = false;
+					}
 				}
 
-				if (srcSignalGuid.isNull() == true)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Output pin is not found, GUID: %1")).arg(connectedOutPinUuid.toString()));
-
-					result = false;
-				}
-
-				AppSignal* srcAppSignal = m_appSignals.value(srcSignalGuid, nullptr);
-
-				if (srcAppSignal == nullptr)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
-
-					ASSERT_RESULT_FALSE_BREAK
-				}
-
-				if (srcAppSignal->isComputed() == true)
-				{
-					result &= generateWriteSignalToSignalCode(*appSignal, *srcAppSignal);
-				}
-				else
-				{
-					// Value of signal '%1' is undefined.
-					//
-					m_log->errALC5002(srcAppSignal->schemaID(), srcAppSignal->appSignalID(), srcAppSignal->guid());
-					result = false;
-				}
+				result = generateWriteSignalToSignalCode(*appSignal, srcSignalGuid);
 			}
 			break;
 
@@ -3778,12 +3781,12 @@ namespace Builder
 			result = false;
 		}
 
-		if(appSignal->isComputed() == false)
+		if (appSignal->isComputed() == false)
 		{
 			// Value of signal '%1' is undefined.
 			//
 			m_log->errALC5002(appSignal->schemaID(), appSignal->appSignalID(), appSignal->guid());
-			result = false;
+			return false;
 		}
 
 		return result;
@@ -4045,8 +4048,156 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, const AppSignal& srcSignal)
+	bool ModuleLogicCompiler::generateWriteBusExtractorToSignalCode(AppSignal& appSignal, const AppItem* appBusExtractor, QUuid extractorOutPinUuid)
 	{
+		const Signal* destSignal = appSignal.signal();
+
+		if (destSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (appBusExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const UalBusExtractor* extractor = appBusExtractor->ualBusExtractor();
+
+		if (extractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString busTypeID = extractor->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, appBusExtractor->guid(), appBusExtractor->schemaID());
+			return false;
+		}
+
+		const AppSignal* busSignal = getExtractorBusSignal(appBusExtractor);
+
+		if (busSignal == nullptr)
+		{
+			return false;
+		}
+
+		const Signal* srcSignal = busSignal->signal();
+
+		if (srcSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString outSignalCaption;
+
+		for(const LogicPin& outPin : appBusExtractor->outputs())
+		{
+			if (outPin.guid() == extractorOutPinUuid)
+			{
+				outSignalCaption = outPin.caption();
+				break;
+			}
+		}
+
+		if (outSignalCaption.isEmpty() == true)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		BusSignal busOut = bus->signalByID(outSignalCaption);
+
+		if (busOut.isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (destSignal->isCompatibleFormat(busOut.signalType, busOut.analogFormat, E::ByteOrder::BigEndian) == false)
+		{
+			// Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+			//
+			m_log->errALC5004(BUS_EXTRACTOR_CAPTION, outSignalCaption, destSignal->appSignalID(), appSignal.guid(), appSignal.schemaID());
+			return false;
+		}
+
+		if (destSignal->ualAddr().isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (srcSignal->ualAddr().isValid() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		Command cmd;
+
+		switch(destSignal->signalType())
+		{
+		case E::SignalType::Analog:
+			cmd.mov32(destSignal->ualAddr().offset(), srcSignal->ualAddr().offset() + busOut.inbusAddr.offset());
+			break;
+
+		case E::SignalType::Discrete:
+			cmd.movBit(destSignal->ualAddr().offset(), destSignal->ualAddr().bit(),
+					   srcSignal->ualAddr().offset() + busOut.inbusAddr.offset(), busOut.inbusAddr.bit());
+			break;
+
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		cmd.setComment(QString("%1 <= %2.%3").arg(destSignal->appSignalID()).arg(srcSignal->appSignalID()).arg(busOut.signalID));
+		m_code.append(cmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateWriteSignalToSignalCode(AppSignal& appSignal, QUuid srcSignalGuid)
+	{
+		AppSignal* srcAppSignal = m_appSignals.value(srcSignalGuid, nullptr);
+
+		if (srcAppSignal == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalGuid.toString()));
+			return false;
+		}
+
+		if (srcAppSignal->isComputed() == false)
+		{
+			// Value of signal '%1' is undefined.
+			//
+			m_log->errALC5002(srcAppSignal->schemaID(), srcAppSignal->appSignalID(), srcAppSignal->guid());
+			return false;
+		}
+
+		const Signal* srcSignalPtr = srcAppSignal->signal();
+
+		if (srcSignalPtr == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const Signal& srcSignal = *srcSignalPtr;
+
 		if (appSignal.enableTuning() == true)
 		{
 			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
@@ -4141,13 +4292,13 @@ namespace Builder
 
 		Command cmd;
 
-		int srcRamAddrOffset = srcSignal.ualAddr().offset();
-		int srcRamAddrBit = srcSignal.ualAddr().bit();
+		int srcUalAddrOffset = srcSignal.ualAddr().offset();
+		int srcUalAddrBit = srcSignal.ualAddr().bit();
 
-		int destRamAddrOffset = appSignal.ualAddr().offset();
-		int destRamAddrBit = appSignal.ualAddr().bit();
+		int destUalAddrOffset = appSignal.ualAddr().offset();
+		int destUalAddrBit = appSignal.ualAddr().bit();
 
-		if (srcRamAddrOffset == -1 || srcRamAddrBit == -1)
+		if (srcUalAddrOffset == -1 || srcUalAddrBit == -1)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal %1 RAM addreess is not calculated")).
@@ -4155,7 +4306,7 @@ namespace Builder
 			return false;
 		}
 
-		if (destRamAddrOffset == -1 || destRamAddrBit == -1)
+		if (destUalAddrOffset == -1 || destUalAddrBit == -1)
 		{
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 					  QString(tr("Signal %1 RAM addreess is not calculated")).
@@ -4171,7 +4322,7 @@ namespace Builder
 			{
 			case E::AnalogAppSignalFormat::Float32:
 			case E::AnalogAppSignalFormat::SignedInt32:
-				cmd.mov32(destRamAddrOffset, srcRamAddrOffset);
+				cmd.mov32(destUalAddrOffset, srcUalAddrOffset);
 				break;
 
 			default:
@@ -4185,7 +4336,7 @@ namespace Builder
 		{
 			// move value of discrete signal
 			//
-			cmd.movBit(destRamAddrOffset, destRamAddrBit, srcRamAddrOffset, srcRamAddrBit);
+			cmd.movBit(destUalAddrOffset, destUalAddrBit, srcUalAddrOffset, srcUalAddrBit);
 		}
 
 		cmd.setComment(QString(tr("%1 (reg %2) <= %3 (reg %4)")).
@@ -4897,7 +5048,7 @@ namespace Builder
 
 			if (appSignal->isCompatibleDataFormat(afbSignal) == false)
 			{
-				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid());
+				m_log->errALC5004(appFb.caption(), afbSignal.caption(), appSignal->appSignalID(), appSignal->guid(), appSignal->schemaID());
 				return false;
 			}
 		}
@@ -5751,6 +5902,69 @@ namespace Builder
 		}
 
 		return connectedOutPinParent;
+	}
+
+	const AppSignal* ModuleLogicCompiler::getExtractorBusSignal(const AppItem* appBusExtractor)
+	{
+		const UalBusExtractor* extractor = appBusExtractor->ualBusExtractor();
+
+		if (extractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// getting extractor's input pin
+		//
+		const std::vector<LogicPin>& inputs = appBusExtractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QUuid connectedOutPinUuid;
+
+		AppItem* extractorSourceItem = getAssociatedOutputPinParent(inputs[0], &connectedOutPinUuid);
+
+		QUuid srcSignalUuid;
+
+		switch(extractorSourceItem->type())
+		{
+		// allowed connections
+		//
+		case AppItem::Signal:
+			// extractor connected to signal
+			//
+			srcSignalUuid = extractorSourceItem->guid();
+			break;
+
+		case AppItem::Fb:
+		case AppItem::BusComposer:
+			// extractor directly connected to 	Fb, BusComposer
+			//
+			srcSignalUuid = connectedOutPinUuid;
+			break;
+
+		// disallowed or unknown connections
+		//
+		default:
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const AppSignal* srcSignal = m_appSignals.value(srcSignalUuid);
+
+		if (srcSignal == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+					  QString(tr("Signal is not found, GUID: %1")).arg(srcSignalUuid.toString()));
+			return false;
+		}
+
+		return srcSignal;
 	}
 
 	bool ModuleLogicCompiler::addToComparatorStorage(const AppFb* appFb)

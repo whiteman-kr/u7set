@@ -2082,13 +2082,14 @@ namespace Builder
 	/// Description:
 	///		Outpuf of AFB is connected to signal with uncompatible data format.
 	///
-	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
+	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
-				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format. (Logic schema '%4')").
+						arg(afbCaption).arg(output).arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5005
