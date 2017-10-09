@@ -1,6 +1,16 @@
 #include "MonitorArchive.h"
 #include "Settings.h"
 #include <QMessageBox>
+#include <QTextDocument>
+#include <QTextCursor>
+#include <QTextDocumentWriter>
+#include <QTextBlock>
+#include <QPrinter>
+#include <QPageSetupDialog>
+#include <QProgressDialog>
+#include <QPrintPreviewDialog>
+#include <QPrintDialog>
+#include "DialogSignalInfo.h"
 
 std::map<QString, MonitorArchiveWidget*> MonitorArchive::m_archiveList;
 
@@ -65,7 +75,8 @@ MonitorArchiveWidget::MonitorArchiveWidget(MonitorConfigController* configContro
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_archiveService1(configController->configuration().archiveService1),
 	m_archiveService2(configController->configuration().archiveService2),
-	m_schemasDetais(configController->schemasDetails())
+	m_schemasDetais(configController->schemasDetails()),
+	m_configuration(configController->configuration())
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -86,8 +97,7 @@ static int no = 1;
 	m_source.requestEndTime = TimeStamp(currentTime).timeStamp / 1_min * 1_min;		// reset seconds and ms
 	m_source.requestStartTime = m_source.requestEndTime.timeStamp - 1_hour;
 
-	qDebug() << m_source.requestStartTime.toDateTime();
-	qDebug() << m_source.requestEndTime.toDateTime();
+	m_source.removePeriodicRecords = true;			// By defaut it's true, don't store it in theSettings as users often forget to set this option back
 
 	// ToolBar
 	//
@@ -97,6 +107,7 @@ static int no = 1;
 	m_exportButton = new QPushButton(tr("Export..."));
 	m_printButton = new QPushButton(tr("Print..."));
 	m_updateButton = new QPushButton(tr("Update"));
+	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
 	m_signalsButton = new QPushButton(tr("Signals..."));
 
 	m_toolBar->addWidget(m_exportButton);
@@ -173,6 +184,8 @@ static int no = 1;
 	//
 	connect(m_timeType, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MonitorArchiveWidget::timeTypeCurrentIndexChanged);
 
+	connect(m_exportButton, &QPushButton::clicked, this, &MonitorArchiveWidget::exportButton);
+	connect(m_printButton, &QPushButton::clicked, this, &MonitorArchiveWidget::printButton);
 	connect(m_updateButton, &QPushButton::clicked, this, &MonitorArchiveWidget::updateOrCancelButton);
 	connect(m_signalsButton, &QPushButton::clicked, this, &MonitorArchiveWidget::signalsButton);
 
@@ -187,8 +200,14 @@ static int no = 1;
 	{
 		// First time? Set what is should be hidden by deafult
 		//
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::AppSignalId));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Valid));
 	}
+
+	connect(m_view, &ArchiveView::requestToShowSignalInfo, this, &MonitorArchiveWidget::showSignalInfo);
+	connect(m_view, &ArchiveView::requestToRemoveSignal, this, &MonitorArchiveWidget::removeSignal);
+	connect(m_view, &ArchiveView::requestToSetSignals, this, &MonitorArchiveWidget::signalsButton);
+
 
 	// Communication thread
 	//
@@ -201,6 +220,10 @@ static int no = 1;
 	connect(m_tcpClient, &ArchiveTcpClient::requestError, this, &MonitorArchiveWidget::tcpClientError);
 	connect(m_tcpClient, &ArchiveTcpClient::statusUpdate, this, &MonitorArchiveWidget::tcpStatus);
 	connect(m_tcpClient, &ArchiveTcpClient::requestIsFinished, this, &MonitorArchiveWidget::tcpRequestFinished);
+
+	// --
+	//
+	connect(configController, &MonitorConfigController::configurationArrived, this, &MonitorArchiveWidget::slot_configurationArrived);
 
 	// --
 	//
@@ -283,9 +306,13 @@ void MonitorArchiveWidget::requestData()
 	m_tcpClient->requestData(m_source.requestStartTime,
 							 m_source.requestEndTime,
 							 m_source.timeType,
+							 m_source.removePeriodicRecords,
 							 m_source.acceptedSignals);
 
+	m_exportButton->setEnabled(false);
+	m_printButton->setEnabled(false);
 	m_signalsButton->setEnabled(false);
+
 	m_updateButton->setText(tr("Cancel"));
 
 	return;
@@ -317,6 +344,406 @@ void MonitorArchiveWidget::cancelRequest()
 	assert(m_tcpClient->isRequestInProgress() == false);
 
 	return;
+}
+
+bool MonitorArchiveWidget::exportToTextDocument(QTextDocument* doc, bool onlySelectedRows)
+{
+	if (doc == nullptr)
+	{
+		assert(doc);
+		return false;
+	}
+
+	QTextCursor cursor(doc);
+
+	// Generate Header
+	//
+	QTextBlockFormat headerCenterFormat = cursor.blockFormat();
+	headerCenterFormat.setAlignment(Qt::AlignHCenter);
+
+	QTextBlockFormat regularFormat = cursor.blockFormat();
+	regularFormat.setAlignment(Qt::AlignLeft);
+
+	QTextCharFormat headerCharFormat = cursor.charFormat();
+	headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
+	headerCharFormat.setFontPointSize(12.0);
+
+	QTextCharFormat regularCharFormat = cursor.charFormat();
+	headerCharFormat.setFontPointSize(10.0);
+
+	cursor.setBlockFormat(headerCenterFormat);
+	cursor.setCharFormat(headerCharFormat);
+	cursor.insertText(tr("Archive - %1\n").arg(m_configuration.project));
+	cursor.insertText("\n");
+
+	cursor.setBlockFormat(regularFormat);
+	cursor.setCharFormat(regularCharFormat);
+	cursor.insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+	cursor.insertText(tr("Monitor: %1\n").arg(m_configuration.softwareEquipmentId));
+	cursor.insertText("\n");
+
+	QDateTime from = m_source.requestStartTime.toDateTime();
+	QDateTime to = m_source.requestEndTime.toDateTime();
+
+	if (from.date() == to.date())
+	{
+		cursor.insertText(tr("Requested interval: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("HH:mm:ss")));
+	}
+	else
+	{
+		cursor.insertText(tr("Requested interval:: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("dd/MM/yyyy  HH:mm:ss")));
+	}
+
+	cursor.insertText("Signal(s): ");
+	for (const AppSignalParam& s : m_source.acceptedSignals)
+	{
+		cursor.insertText(QString(" %1,").arg(s.customSignalId()));
+	}
+	cursor.deletePreviousChar();	// Delete last comma
+	cursor.insertText("\n");
+	cursor.insertText("\n");
+
+	// States
+	//
+	int rowCount = qBound(0, m_model->rowCount(), m_maxReportStates);		// Limit row count to m_maxReportStates
+
+	// reinit rowCount if printing only selected rows
+	//
+	QModelIndexList selectedIndexes;
+	if (onlySelectedRows == true)
+	{
+		selectedIndexes = m_view->selectionModel()->selectedRows();
+		qSort(selectedIndexes);
+
+		rowCount = selectedIndexes.size();
+	}
+
+	int columnCount = m_model->columnCount();
+
+	std::vector<int> shownColums;
+	shownColums.reserve(columnCount);
+
+	int shownColumnCount = 0;
+	for (int column = 0; column < columnCount; column++)
+	{
+		if (m_view->isColumnHidden(column) == false)
+		{
+			shownColumnCount ++;
+			shownColums.push_back(column);
+		}
+	}
+
+	QProgressDialog progressDialog(tr("Generating report..."), tr("Cancel"), 0, rowCount, this);
+	progressDialog.setMinimumDuration(100);
+
+	// Add table
+	//
+	QTextTableFormat tableFormat;
+
+	tableFormat.setHeaderRowCount(1);
+	tableFormat.setBorderStyle(QTextFrameFormat::BorderStyle_None);
+	tableFormat.setBorder(0);
+	tableFormat.setBorderBrush(Qt::NoBrush);
+	tableFormat.setWidth(QTextLength(QTextLength::PercentageLength, 100));
+
+	cursor.insertTable(rowCount + 1, shownColumnCount, tableFormat);	// VERY HEAVY OPERATION
+
+	// Fill table header
+	//
+	for (int column : shownColums)
+	{
+		QString columnHeader = m_model->headerData(column, Qt::Horizontal, Qt::DisplayRole).toString();
+
+		cursor.insertText(columnHeader);
+		cursor.movePosition(QTextCursor::NextCell);
+	}
+
+	// Fill table
+	//
+	if (onlySelectedRows == false)
+	{
+		QString cellText;
+		for (int row = 0; row < rowCount; row++)
+		{
+			progressDialog.setValue(row);
+			if (progressDialog.wasCanceled() == true)
+			{
+				break;
+			}
+
+			QApplication::processEvents();
+
+			for (int column : shownColums)
+			{
+				cellText = m_model->data(row, column, Qt::DisplayRole).toString();
+
+				cursor.insertText(cellText);
+				cursor.movePosition(QTextCursor::NextCell);
+			}
+		}
+	}
+	else
+	{
+		QString cellText;
+		for (const QModelIndex mi : selectedIndexes)
+		{
+			int row = mi.row();
+
+			progressDialog.setValue(row);
+			if (progressDialog.wasCanceled() == true)
+			{
+				break;
+			}
+
+			QApplication::processEvents();
+
+			for (int column : shownColums)
+			{
+				cellText = m_model->data(row, column, Qt::DisplayRole).toString();
+
+				cursor.insertText(cellText);
+				cursor.movePosition(QTextCursor::NextCell);
+			}
+		}
+	}
+
+	cursor.movePosition(QTextCursor::End);
+
+	cursor.insertText("\n\n");
+
+	if (m_model->rowCount() > m_maxReportStates)
+	{
+		cursor.insertText(tr("Warning: Only first %1 of %2 records present in generated report.\n").arg(rowCount).arg(m_model->rowCount()));
+	}
+
+	progressDialog.setValue(rowCount);
+
+	return !progressDialog.wasCanceled();
+}
+
+bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString format)
+{
+	if (m_model == nullptr ||
+		m_view == nullptr ||
+		fileName.isEmpty() == true)
+	{
+		assert(m_model);
+		assert(m_view);
+		assert(fileName.isEmpty() == false);
+		return false;
+	}
+
+	if (m_model->rowCount() > m_maxReportStates)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Too many archive records, only first %1 states will appear in the generated report.").arg(m_maxReportStates));
+	}
+
+	bool isPdf = format.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0;
+	bool isOdt = format.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0;
+
+	if (format.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 &&
+		format.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 &&
+		format.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 &&
+		format.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0 &&
+		format.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+		return false;
+	}
+
+	// Get page size, margins and orientation
+	//
+	std::unique_ptr<QPageSetupDialog> pageSetupDialog;
+
+	if (isPdf == true || isOdt == true)
+	{
+		pageSetupDialog = std::make_unique<QPageSetupDialog>(this);
+
+		int pageSetupResult = pageSetupDialog->exec();
+
+		if (pageSetupResult != QDialog::Accepted)
+		{
+			return false;
+		}
+	}
+
+	// Set wait cursor
+	//
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	QApplication::processEvents();
+
+	// --
+	//
+	QPrinter printer(QPrinter::PrinterResolution);
+	printer.setOutputFormat(QPrinter::PdfFormat);
+
+	if (pageSetupDialog != nullptr)
+	{
+		printer.setPageLayout(pageSetupDialog->printer()->pageLayout());
+	}
+
+	// Generate doc
+	//
+	QTextDocument doc;
+
+	if (pageSetupDialog != nullptr)
+	{
+		QSizeF pageSize = pageSetupDialog->printer()->pageRect().size();
+		doc.setPageSize(pageSize);
+	}
+
+	 exportToTextDocument(&doc, false);
+
+	// --
+	//
+	if (format.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
+	{
+		printer.setOutputFileName(fileName);
+		doc.print(&printer);
+	}
+	else
+	{
+		QByteArray docFormat;
+
+		if (format.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+			format.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0)
+		{
+			docFormat = "html";
+		}
+
+		if (format.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+		{
+			docFormat = "plaintext";
+		}
+
+		if (format.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0)
+		{
+			docFormat = "odf";
+		}
+
+		QTextDocumentWriter writer(fileName);
+		writer.setFormat(docFormat);
+
+		writer.write(&doc);
+	}
+
+	// Restore cursor from wait
+	//
+	QApplication::restoreOverrideCursor();
+	QApplication::processEvents();
+
+	return true;
+}
+
+bool MonitorArchiveWidget::saveArchiveToCsv(QString fileName)
+{
+	if (m_model == nullptr ||
+		m_view == nullptr ||
+		fileName.isEmpty() == true)
+	{
+		assert(m_model);
+		assert(m_view);
+		assert(fileName.isEmpty() == false);
+		return false;
+	}
+
+	if (m_model->rowCount() > m_maxReportStatesForCsv )
+	{
+		QMessageBox::warning(this, qAppName(), tr("Too many archive records, only first %1 states will appear in the generated report.").arg(m_maxReportStatesForCsv ));
+	}
+
+	// --
+	//
+	QFile file(fileName);
+
+	bool ok = file.open(QIODevice::WriteOnly | QIODevice::Text);
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot open file %1 for writing.").arg(fileName));
+		return false;
+	}
+
+	QTextStream out(&file);
+
+	// Set wait cursor
+	//
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	QApplication::processEvents();
+
+	// States
+	//
+	int rowCount = qBound(0, m_model->rowCount(), m_maxReportStatesForCsv);		// Limit row count to m_maxReportStates
+	int columnCount = m_model->columnCount();
+
+	std::vector<int> shownColums;
+	shownColums.reserve(columnCount);
+
+	int shownColumnCount = 0;
+	for (int column = 0; column < columnCount; column++)
+	{
+		if (m_view->isColumnHidden(column) == false)
+		{
+			shownColumnCount ++;
+			shownColums.push_back(column);
+		}
+	}
+
+	QProgressDialog progressDialog(tr("Generating report..."), tr("Cancel"), 0, rowCount, this);
+	progressDialog.setMinimumDuration(100);
+
+	// Fill header
+	//
+	for (int column : shownColums)
+	{
+		QString columnHeader = m_model->headerData(column, Qt::Horizontal, Qt::DisplayRole).toString();
+		out << columnHeader << ";";
+	}
+	out << endl;
+
+	// Fill table
+	//
+	QString cellText;
+	for (int row = 0; row < rowCount; row++)
+	{
+		progressDialog.setValue(row);
+		if (progressDialog.wasCanceled() == true)
+		{
+			break;
+		}
+
+		QApplication::processEvents();
+
+		if (row % 10000 == 0)
+		{
+			progressDialog.setLabelText(tr("Generating report... %1/%2").arg(row).arg(rowCount));
+		}
+
+		for (int column : shownColums)
+		{
+			cellText = m_model->data(row, column, Qt::DisplayRole).toString();
+
+			if (cellText.contains(';') == true)
+			{
+				// If cell contains semicolon it must be enclosed in quotes
+				//
+				cellText.prepend('"');
+				cellText.append('"');
+			}
+
+			out << cellText << ";";
+		}
+
+		out << endl;
+	}
+
+	progressDialog.setValue(rowCount);
+
+	// Restore cursor from wait
+	//
+	QApplication::restoreOverrideCursor();
+	QApplication::processEvents();
+
+	return true;
 }
 
 void MonitorArchiveWidget::closeEvent(QCloseEvent*e)
@@ -417,6 +844,93 @@ void MonitorArchiveWidget::timeTypeCurrentIndexChanged(int /*index*/)
 	return;
 }
 
+void MonitorArchiveWidget::exportButton()
+{
+	assert(m_model);
+	if (m_model->rowCount() == 0)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Nothing to export."));
+		return;
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save File"),
+													"untitled.pdf",
+													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFileInfo fileInfo(fileName);
+	QString extension = fileInfo.completeSuffix();
+
+	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0)
+	{
+		saveArchiveToCsv(fileName);
+		return;
+	}
+
+	if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0/* ||
+		extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
+	{
+		saveArchiveWithDocWriter(fileName, extension);
+		return;
+	}
+
+	QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+	return;
+}
+
+void MonitorArchiveWidget::printButton()
+{
+	if (m_model == nullptr ||
+		m_view == nullptr)
+	{
+		assert(m_model);
+		assert(m_view);
+		return;
+	}
+
+	QPrintDialog dialog(this);
+
+	if (m_view->selectionModel()->hasSelection() == true)
+	{
+		dialog.setOption(QAbstractPrintDialog::PrintSelection);
+		dialog.setOptions(dialog.options() & ~QAbstractPrintDialog::PrintPageRange);
+
+		//dialog.printer()->setPrintRange(QPrinter::PrintRange::Selection);				// Set Selection option by default
+	}
+
+	int result = dialog.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		printRequested(dialog.printer());
+	}
+
+//	QPrintPreviewDialog printDialog(this);
+
+//	printDialog.setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+//	printDialog.setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
+
+//	if (m_view->selectionModel()->hasSelection() == true)
+//	{
+//		qDebug() << "Print selection enabled";
+//		printDialog.printer()->setPrintRange(QPrinter::PrintRange::Selection);
+//	}
+
+	//connect(&printDialog, &QPrintPreviewDialog::paintRequested, this, &MonitorArchiveWidget::printRequested);
+
+//	printDialog.exec();
+
+	return;
+}
+
 void MonitorArchiveWidget::updateOrCancelButton()
 {
 	if (m_updateButton->text() == "Update")
@@ -477,6 +991,56 @@ void MonitorArchiveWidget::signalsButton()
 	return;
 }
 
+void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
+{
+	DialogSignalInfo::showDialog(appSignalId, this->parentWidget());
+}
+
+void MonitorArchiveWidget::removeSignal(QString appSignalId)
+{
+	std::vector<AppSignalParam> result;
+	result.reserve(m_source.acceptedSignals.size());
+
+	for (const AppSignalParam& sp : m_source.acceptedSignals)
+	{
+		if (sp.appSignalId() != appSignalId)
+		{
+			result.push_back(sp);
+		}
+	}
+
+	m_source.acceptedSignals.swap(result);
+
+	m_model->clear();
+	m_model->setParams(m_source.acceptedSignals, m_source.timeType);
+
+	return;
+}
+
+void MonitorArchiveWidget::printRequested(QPrinter* printer)
+{
+	if (printer == nullptr)
+	{
+		assert(printer);
+	}
+
+	QTextDocument doc;
+
+	QSizeF pageSize = printer->pageRect().size();
+	doc.setPageSize(pageSize);
+
+	exportToTextDocument(&doc, printer->printRange() == QPrinter::PrintRange::Selection);
+
+	doc.print(printer);
+
+	return;
+}
+
+void MonitorArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
+{
+	m_configuration = configuration;
+}
+
 void MonitorArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
 {
 	if (chunk == nullptr)
@@ -522,6 +1086,12 @@ void MonitorArchiveWidget::tcpStatus(QString status, int statesReceived, int req
 
 void MonitorArchiveWidget::tcpRequestFinished()
 {
+	m_exportButton->setEnabled(true);
+	m_printButton->setEnabled(true);
 	m_signalsButton->setEnabled(true);
+
 	m_updateButton->setText(tr("Update"));
+	m_updateButton->setShortcut(QKeySequence(QKeySequence::StandardKey::Refresh));
+
+	return;
 }

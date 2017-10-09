@@ -2607,36 +2607,22 @@ void EditSchemaWidget::createActions()
 
 bool EditSchemaWidget::event(QEvent* e)
 {
-	if (e->type() == QEvent::ToolTip &&
-		m_toolTipItem != nullptr &&
-		m_toolTipItem->isSchemaItemAfb() == true)
+	// Show tool tip
+	//
+	if (e->type() == QEvent::ToolTip)
 	{
-		std::shared_ptr<VFrame30::SchemaItemAfb> afbItem = std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(m_toolTipItem);
+		QHelpEvent* he = static_cast<QHelpEvent*>(e);
 
-		QImage image(QSize(3 * this->physicalDpiX(), 3 * physicalDpiY()), QImage::Format_RGB32);		// size 3x3 inches
-		image.fill(Qt::white);
+		// Get item under cursor
+		//
+		QPointF docPoint = widgetPointToDocument(he->pos(), false);
+		std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
-		image.setDotsPerMeterX(1000.0 / 25.4 * this->physicalDpiX());
-		image.setDotsPerMeterY(1000.0 / 25.4 * this->physicalDpiY());
-
-		QPainter painter;
-		painter.setRenderHint(QPainter::Antialiasing, true);
-		painter.setRenderHint(QPainter::TextAntialiasing, true);
-
-		painter.begin(&image);
-		afbItem->drawAfbHelp(&painter, QRect(0, 0, image.width(), image.height()));
-		painter.end();
-
-		QByteArray data;
-		QBuffer buffer(&data);
-		image.save(&buffer, "PNG", 100);
-
-		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
-					   .arg(QString(data.toBase64()))
-					   .arg(image.size().height())
-					   .arg(image.size().width());
-
-		setToolTip(html);
+		if (itemUnderPoint != nullptr)
+		{
+			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
+			setToolTip(toolTip);
+		}
 
 		return VFrame30::BaseSchemaWidget::event(e);
 	}
@@ -3777,8 +3763,15 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		bool startPointAddedToOther = false;	// Ќовый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 		bool endPointAddedToOther = false;		// Ќовый элемент был присоединен к существующему (конечные точки лежат на одной координте)
 
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = activeLayer()->getItemUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = activeLayer()->getItemUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderStartPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderEndPoint =
+				activeLayer()->getItemListUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
+
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = linksUnderStartPoint.size() == 1 ? linksUnderStartPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
+		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = linksUnderEndPoint.size() == 1 ? linksUnderEndPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
 
 		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderStartPoint =
 			activeLayer()->findPinUnderPoint(startPoint, schema()->gridSize(), schema()->pinGridStep());
@@ -4709,7 +4702,6 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 {
 	setCursor(QCursor(Qt::CursorShape::ArrowCursor));
-	m_toolTipItem.reset();
 
 	for (size_t i = 0; i < sizeof(m_mouseStateCursor) / sizeof(m_mouseStateCursor[0]); i++)
 	{
@@ -4746,7 +4738,6 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				editSchemaView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == SchemaItemAction::MoveItem)
 			{
 				setCursor(Qt::SizeAllCursor);
-				m_toolTipItem = itemUnderPoint;
 				return;
 			}
 		}
@@ -4782,10 +4773,6 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 				{
 				case SchemaItemAction::MoveItem:
 					setCursor(Qt::SizeAllCursor);
-					if (editSchemaView()->selectedItems().size() == 1)
-					{
-						m_toolTipItem = si;
-					}
 					return;
 				case SchemaItemAction::MoveStartLinePoint:
 					setCursor(Qt::SizeAllCursor);
@@ -5646,165 +5633,429 @@ void EditSchemaWidget::f2Key()
 	}
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
-
 	if (selected.size() != 1)
 	{
 		return;
 	}
 
 	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
-	assert(item);
-
-	VFrame30::SchemaItemSignal* itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-	VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-	VFrame30::SchemaItemTransmitter* itemTransmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
-	VFrame30::SchemaItemRect* itemRect = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
-	VFrame30::SchemaItemValue* itemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-
-	if (itemRect != nullptr)
+	if (item == nullptr)
 	{
-		QString text = itemRect->text();
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set text");
-		inputDialog.setLabelText(tr("Text:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(text);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			text != newValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
-			editSchemaView()->update();
-		}
-
+		assert(item);
 		return;
 	}
 
-	if (itemSignal != nullptr || itemReceiver != nullptr)
+	if (item->isType<VFrame30::SchemaItemRect>() == true)
 	{
-		QString appSignalId;
-
-		if (itemSignal != nullptr)
-		{
-			appSignalId = itemSignal->appSignalIds();
-		}
-
-		if (itemReceiver != nullptr)
-		{
-			appSignalId = itemReceiver->appSignalId();
-		}
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set AppSignalID");
-		inputDialog.setLabelText(tr("AppSignalID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(appSignalId);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			appSignalId != newValue)
-		{
-			// Set value
-			//
-			if (itemSignal != nullptr)
-			{
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
-			}
-
-			if (itemReceiver != nullptr)
-			{
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-			}
-
-			editSchemaView()->update();
-		}
-
+		f2KeyForRect(item);
 		return;
 	}
 
-	if (itemTransmitter != nullptr)
+	if (item->isType<VFrame30::SchemaItemSignal>() == true)
 	{
-		QString connectionId = itemTransmitter->connectionId();
-
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
-
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set ConnectionID");
-		inputDialog.setLabelText(tr("ConnectionID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-
-		inputDialog.setTextValue(connectionId);
-
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			connectionId != newValue)
-		{
-			// Set value
-			//
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
-
-			editSchemaView()->update();
-		}
-
+		f2KeyForSignal(item);
 		return;
 	}
 
-	if (itemValue != nullptr)
+	if (item->isType<VFrame30::SchemaItemConst>() == true)
 	{
-		QString text = itemValue->signalId();
+		f2KeyForConst(item);
+		return;
+	}
 
-		// Show input dialog
-		//
-		QInputDialog inputDialog(this);
+	if (item->isType<VFrame30::SchemaItemReceiver>() == true)
+	{
+		f2KeyForReceiver(item);
+		return;
+	}
 
-		inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-		inputDialog.setWindowTitle("Set AppSignalID");
-		inputDialog.setLabelText(tr("AppSignalID:"));
-		inputDialog.setTextEchoMode(QLineEdit::Normal);
-		inputDialog.resize(400, inputDialog.height());
-		inputDialog.setTextValue(text);
+	if (item->isType<VFrame30::SchemaItemTransmitter>() == true)
+	{
+		f2KeyForTransmitter(item);
+		return;
+	}
 
-		int inputDialogRecult = inputDialog.exec();
-		QString newValue = inputDialog.textValue();
-
-		if (inputDialogRecult == QDialog::Accepted &&
-			newValue.isNull() == false &&
-			text != newValue)
-		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-			editSchemaView()->update();
-		}
-
+	if (item->isType<VFrame30::SchemaItemValue>() == true)
+	{
+		f2KeyForValue(item);
 		return;
 	}
 
 	return;
 }
 
+void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemRect* rectItem = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
+	if (rectItem == nullptr)
+	{
+		assert(rectItem);
+		return;
+	}
+
+	QString text = rectItem->text();
+
+	// Show input dialog
+	//
+	bool ok;
+	QString newValue = QInputDialog::getMultiLineText(this, tr("Set text"),
+													  tr("Text:"), text, &ok);
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != text)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemReceiver* receiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+	if (receiver == nullptr)
+	{
+		assert(receiver);
+		return;
+	}
+
+	QString connectionId = receiver->connectionId();
+	QString appSignalId = receiver->appSignalId();
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Receiver Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
+	QLineEdit* connectionIdEdit = new QLineEdit(connectionId);
+
+	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
+	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(connectionIdLabel);
+	layout->addWidget(connectionIdEdit);
+
+	layout->addWidget(appSignalIdLabel);
+	layout->addWidget(appSignalIdEdit);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newConnectionId = connectionIdEdit->text().trimmed();
+		QString newAppSignalId = appSignalIdEdit->text().trimmed();
+
+		if (newConnectionId != connectionId)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+		}
+
+		if (newAppSignalId != appSignalId)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+		}
+
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemTransmitter* transmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
+	if (transmitter == nullptr)
+	{
+		assert(transmitter);
+		return;
+	}
+
+	QString connectionId = transmitter->connectionId();
+
+	// Show input dialog
+	//
+	QInputDialog inputDialog(this);
+
+	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+	inputDialog.setWindowTitle("Set ConnectionID");
+	inputDialog.setLabelText(tr("ConnectionID:"));
+	inputDialog.setTextEchoMode(QLineEdit::Normal);
+	inputDialog.resize(400, inputDialog.height());
+
+	inputDialog.setTextValue(connectionId);
+
+	int inputDialogRecult = inputDialog.exec();
+	QString newValue = inputDialog.textValue();
+
+	if (inputDialogRecult == QDialog::Accepted &&
+		newValue.isNull() == false &&
+		connectionId != newValue)
+	{
+		// Set value
+		//
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newValue), item);
+
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
+	if (constItem == nullptr)
+	{
+		assert(constItem);
+		return;
+	}
+
+	VFrame30::SchemaItemConst::ConstType type = constItem->type();
+	int intValue = constItem->intValue();
+	double floatValue = constItem->floatValue();
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("Set Const Params"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	// Type Items
+	//
+	QLabel* typeLabel = new QLabel("Const Type:");
+
+	QComboBox* typeCombo = new QComboBox();
+	typeCombo->addItem("IntegerType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::IntegerType));
+	typeCombo->addItem("FloatType", QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(VFrame30::SchemaItemConst::ConstType::FloatType));
+
+	int dataIndex = typeCombo->findData(QVariant::fromValue<VFrame30::SchemaItemConst::ConstType>(type));
+	assert(dataIndex != -1);
+	if (dataIndex != -1)
+	{
+		typeCombo->setCurrentIndex(dataIndex);
+	}
+
+	// IntItems
+	//
+	QLabel* intValueLabel = new QLabel("IntegerValue:");
+	QLineEdit* intValueEdit = new QLineEdit(QString::number(intValue));
+	intValueEdit->setValidator(new QIntValidator(std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), intValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::IntegerType)
+	{
+		intValueLabel->setEnabled(false);
+		intValueEdit->setEnabled(false);
+	}
+
+	// FloatItems
+	//
+	QLabel* floatValueLabel = new QLabel("FloatValue:");
+	QLineEdit* floatValueEdit = new QLineEdit(QString::number(floatValue));
+	floatValueEdit->setValidator(new QDoubleValidator(std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), 1000, floatValueEdit));
+
+	if (type != VFrame30::SchemaItemConst::ConstType::FloatType)
+	{
+		floatValueLabel->setEnabled(false);
+		floatValueEdit->setEnabled(false);
+	}
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+
+	layout->addWidget(typeLabel);
+	layout->addWidget(typeCombo);
+
+	layout->addWidget(intValueLabel);
+	layout->addWidget(intValueEdit);
+
+	layout->addWidget(floatValueLabel);
+	layout->addWidget(floatValueEdit);
+
+	layout->addWidget(buttonBox);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	connect(typeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			[typeCombo, intValueLabel, intValueEdit, floatValueLabel, floatValueEdit](int)
+			{
+				VFrame30::SchemaItemConst::ConstType type = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+
+				if (type == VFrame30::SchemaItemConst::ConstType::IntegerType)
+				{
+					intValueLabel->setEnabled(true);
+					intValueEdit->setEnabled(true);
+					floatValueLabel->setEnabled(false);
+					floatValueEdit->setEnabled(false);
+				}
+
+				if (type == VFrame30::SchemaItemConst::ConstType::FloatType)
+				{
+					intValueLabel->setEnabled(false);
+					intValueEdit->setEnabled(false);
+					floatValueLabel->setEnabled(true);
+					floatValueEdit->setEnabled(true);
+				}
+			});
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		VFrame30::SchemaItemConst::ConstType newType = typeCombo->currentData().value<VFrame30::SchemaItemConst::ConstType>();
+		int newIntValue = intValueEdit->text().toInt();
+		double newFloatValue = floatValueEdit->text().toFloat();
+
+		if (newType != type)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::type, QVariant(newType), item);
+		}
+
+		if (newIntValue != intValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueInteger, QVariant(newIntValue), item);
+		}
+
+		if (newFloatValue != floatValue)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::valueFloat, QVariant(newFloatValue), item);
+		}
+
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+	if (signalItem == nullptr)
+	{
+		assert(signalItem);
+		return;
+	}
+
+	QString appSignalId = signalItem->appSignalIds();
+
+	// Show input dialog
+	//
+	bool ok;
+	QString newValue = QInputDialog::getMultiLineText(this, tr("Set AppSignalID(s)"),
+													  tr("AppSignalID(s):"), appSignalId, &ok).trimmed();
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != appSignalId)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemValue* valueItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
+	if (valueItem == nullptr)
+	{
+		assert(valueItem);
+		return;
+	}
+
+	QString text = valueItem->signalId();
+
+	// Show input dialog
+	//
+	QInputDialog inputDialog(this);
+
+	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
+	inputDialog.setWindowTitle("Set AppSignalID");
+	inputDialog.setLabelText(tr("AppSignalID:"));
+	inputDialog.setTextEchoMode(QLineEdit::Normal);
+	inputDialog.resize(400, inputDialog.height());
+	inputDialog.setTextValue(text);
+
+	int inputDialogRecult = inputDialog.exec();
+	QString newValue = inputDialog.textValue();
+
+	if (inputDialogRecult == QDialog::Accepted &&
+		newValue.isNull() == false &&
+		text != newValue)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
 
 void EditSchemaWidget::deleteKey()
 {

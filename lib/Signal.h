@@ -173,10 +173,12 @@ public:
 	E::SensorType sensorType() const { return m_sensorType; }
 	int sensorTypeInt() const { return TO_INT(m_sensorType); }
 	void setSensorType(E::SensorType sensorType) { m_sensorType = sensorType; }
+	void setSensorTypeInt(int sensorType) { m_sensorType = IntToEnum<E::SensorType>(sensorType); }
 
 	E::OutputMode outputMode() const { return m_outputMode; }
 	int outputModeInt() const { return TO_INT(m_outputMode); }
 	void setOutputMode(E::OutputMode outputMode) { m_outputMode = outputMode; }
+	void setOutputModeInt(int outputMode) { m_outputMode = IntToEnum<E::OutputMode>(outputMode); }
 
 	// Tuning signal properties
 

@@ -773,6 +773,23 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				appSignalIds().contains(text, Qt::CaseInsensitive);
 	}
 
+	QString SchemaItemSignal::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = {"Signal(s): "};
+
+		for (QString signalId : m_appSignalIds)
+		{
+			str.append(tr("\n\t%1").arg(signalId));
+		}
+
+		str.append(tr("\n\nHint: Press F2 to edit AppSignalID(s)"));
+
+		return str;
+	}
+
 	QString SchemaItemSignal::appSignalIds() const
 	{
 		QString result;

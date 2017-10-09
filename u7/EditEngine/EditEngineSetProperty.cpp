@@ -134,6 +134,8 @@ namespace EditEngine
 					{
 						QMessageBox::critical(schemaView, QObject::tr("Error"), errorMsg);
 					}
+
+					continue;
 				}
 
 				if (r.item->isType<VFrame30::SchemaItemBusExtractor>() == true)

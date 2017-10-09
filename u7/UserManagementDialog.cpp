@@ -337,7 +337,7 @@ void UserManagementDialog::applyChanges(const QString& username)
 		newPassword.isEmpty() == false ||
 		passwordConfirmation.isEmpty() == false)
 	{
-		changePassword = PasswordService::checkPassword(newPassword, passwordConfirmation, true, this);
+		changePassword = PasswordService::checkPassword(newPassword, passwordConfirmation, username, true, this);
 
 		if (changePassword == false)
 		{
@@ -358,7 +358,7 @@ void UserManagementDialog::applyChanges(const QString& username)
 		newPassword.isEmpty() == false &&
 		passwordConfirmation.isEmpty() == false)
 	{
-		changePassword = PasswordService::checkPassword(newPassword, passwordConfirmation, true, this);
+		changePassword = PasswordService::checkPassword(newPassword, passwordConfirmation, username, true, this);
 
 		if (changePassword == false)
 		{

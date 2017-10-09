@@ -31,9 +31,12 @@ protected:
 	friend struct ConfigSettings;
 };
 
+
 struct ConfigSettings
 {
-	QString startSchemaId;					// Start Schema ID
+	QString softwareEquipmentId;
+	QString project;
+	QString startSchemaId;				// Start Schema ID
 	ConfigConnection appDataService1;
 	ConfigConnection appDataService2;
 	ConfigConnection archiveService1;
@@ -42,6 +45,7 @@ struct ConfigSettings
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };
+
 
 class MonitorConfigController : public QObject
 {
@@ -78,6 +82,7 @@ private slots:
 	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
+	bool xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
 

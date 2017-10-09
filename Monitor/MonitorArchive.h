@@ -7,6 +7,8 @@
 #include "ArchiveModelView.h"
 
 class MonitorArchiveWidget;
+class QPrinter;
+class QTextDocument;
 
 class MonitorArchive
 {
@@ -37,6 +39,10 @@ protected:
 	void requestData();
 	void cancelRequest();
 
+	bool exportToTextDocument(QTextDocument* doc, bool onlySelectedRows);
+	bool saveArchiveWithDocWriter(QString fileName, QString format);
+	bool saveArchiveToCsv(QString fileName);
+
 	// Events
 	//
 protected:
@@ -53,8 +59,18 @@ protected:
 protected slots:
 	void timeTypeCurrentIndexChanged(int index);
 
+	void exportButton();
+	void printButton();
 	void updateOrCancelButton();
 	void signalsButton();
+
+	void showSignalInfo(QString appSignalId);	// Slot to ArchiveView::requestToShowSignalInfo
+	void removeSignal(QString appSignalId);		// Slot to ArchiveView::requestToRemoveSignal
+
+
+	void printRequested(QPrinter* printer);
+
+	void slot_configurationArrived(ConfigSettings configuration);
 
 	void dataReceived(std::shared_ptr<ArchiveChunk> chunk);
 	void tcpClientError(QString errorMessage);
@@ -68,6 +84,8 @@ private:
 	ConfigConnection m_archiveService2;
 
 	std::vector<VFrame30::SchemaDetails> m_schemasDetais;
+
+	ConfigSettings m_configuration;
 
 	ArchiveTcpClient* m_tcpClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
@@ -101,6 +119,9 @@ private:
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
+
+	const int m_maxReportStates = 10000;
+	const int m_maxReportStatesForCsv = 5000000;
 };
 
 

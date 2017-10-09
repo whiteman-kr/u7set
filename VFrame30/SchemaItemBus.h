@@ -5,9 +5,6 @@
 
 namespace VFrame30
 {
-
-	static const double BusSideLineWidth = mm2in(0.4);
-
 	//
 	//
 	//		SchemaItemBus

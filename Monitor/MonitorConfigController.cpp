@@ -242,7 +242,7 @@ void MonitorConfigController::start()
 	return;
 }
 
-void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void MonitorConfigController::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 {
 	qDebug() << "MonitorConfigThread::slot_configurationReady";
 
@@ -287,6 +287,18 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 			// Get <Configuration>
 			//
 			QDomElement configElement = xml.documentElement();
+
+			// BuildInfo node
+			//
+			QDomNodeList buildInfoNodes = configElement.elementsByTagName("BuildInfo");
+			if (buildInfoNodes.size() != 1)
+			{
+				readSettings.errorMessage += tr("Parsing BuildInfo node error.\n");
+			}
+			else
+			{
+				result &= xmlReadBuildInfoNode(buildInfoNodes.item(0), &readSettings);
+			}
 
 			// Software node
 			//
@@ -362,14 +374,31 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 	// Emit signal to inform everybody about new configuration
 	//
-	emit configurationArrived(readSettings);
-
 	{
 		QMutexLocker locker(&m_confugurationMutex);
 		m_configuration = readSettings;
 	}
 
+	emit configurationArrived(readSettings);
+
 	return;
+}
+
+bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting)
+{
+	if (outSetting == nullptr ||
+		buildInfoNode.nodeName() != "BuildInfo")
+	{
+		assert(outSetting);
+		assert(buildInfoNode.nodeName() == "BuildInfo");
+		return false;
+	}
+
+	QDomElement element = buildInfoNode.toElement();
+
+	outSetting->project = element.attribute(QLatin1String("Project"));
+
+	return true;
 }
 
 bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
@@ -395,6 +424,8 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 		outSetting->errorMessage += "The received file has different EquipmentID then expected.\n";
 		return false;
 	}
+
+	outSetting->softwareEquipmentId = appEquipmentId;
 
 	// Read Type attribute
 	//

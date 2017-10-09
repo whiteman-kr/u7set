@@ -90,6 +90,18 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	enum class BusDataFormat
+	{
+		Discrete
+		//AnalogFloat32 ???
+		//AnalogSigneInt32 ???
+		//AnalogUnsignedInt32 ???
+		//AnalogSigneInt16 ???
+		//AnalogUnsignedInt16 ???
+		//Mixed ???
+	};
+	Q_ENUM(BusDataFormat)
+
 	// SignalFunction
 	//
 	enum class SignalFunction
@@ -319,9 +331,14 @@ public:
 	// Convert QString to enum value (not index)
 	//
 	template <typename ENUM_TYPE>
-	static ENUM_TYPE stringToValue(const QString& str)
+	static ENUM_TYPE stringToValue(const QString& str, bool* ok = nullptr)
 	{
 		assert(std::is_enum<ENUM_TYPE>::value);
+
+		if (ok != nullptr)
+		{
+			*ok = true;
+		}
 
 		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
 
@@ -341,7 +358,14 @@ public:
 			}
 		}
 
-		assert(false);		// key is not found!
+		if (ok == nullptr)
+		{
+			assert(false);		// key is not found!
+		}
+		else
+		{
+			*ok = false;
+		}
 
 		return static_cast<ENUM_TYPE>(me.value(0));
 	}

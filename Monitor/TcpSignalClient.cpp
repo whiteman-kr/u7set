@@ -343,7 +343,7 @@ void TcpSignalClient::requestSignalState(int startIndex)
 	}
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
-	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX );
+	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	for (int i = startIndex;
 		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX &&
@@ -378,21 +378,20 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		return;
 	}
 
-	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
+	int signalStateCount = m_getSignalStateReply.appsignalstates_size();
+
+	std::vector<AppSignalState> states;
+	states.reserve(signalStateCount);
+
+	for (int i = 0; i < signalStateCount; i++)
 	{
 		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
+		assert(protoState.hash() != 0);
 
-		if (protoState.hash() == 0)
-		{
-			assert(protoState.hash() != 0);
-			continue;
-		}
-
-		AppSignalState state;
-		state.load(protoState);
-
-		theSignals.setState(protoState.hash(), state);
+		states.emplace_back(protoState);
 	}
+
+	theSignals.setState(states);
 
 	requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
 
@@ -404,7 +403,7 @@ void TcpSignalClient::slot_configurationArrived(ConfigSettings configuration)
 	HostAddressPort s1 = configuration.appDataService1.address();
 	HostAddressPort s2 = configuration.appDataService2.address();
 
-	if (serverAddressPort(0) == s1 ||
+	if (serverAddressPort(0) != s1 ||
 		serverAddressPort(1) != s2)
 	{
 		setServers(s1, s2, true);

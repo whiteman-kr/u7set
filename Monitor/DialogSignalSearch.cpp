@@ -340,6 +340,7 @@ DialogSignalSearch::DialogSignalSearch(QWidget *parent) :
 	m_model(this)
 {
 	ui->setupUi(this);
+	setAttribute(Qt::WA_DeleteOnClose);
 
 	// Restore window pos
 	//

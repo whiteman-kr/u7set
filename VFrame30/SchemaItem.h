@@ -118,7 +118,7 @@ namespace VFrame30
 
 		// Draw Functions
 		//
-	public:
+
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
@@ -251,6 +251,8 @@ namespace VFrame30
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;
+
+		virtual QString toolTipText(int dpiX, int dpiY) const;
 
 		QString lastScriptError() const;
 

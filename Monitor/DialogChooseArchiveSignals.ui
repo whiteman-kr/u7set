@@ -252,6 +252,19 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="3" colspan="3">
+      <widget class="QCheckBox" name="removePeriodicCheckbox">
+       <property name="text">
+        <string>Remove Periodic Records</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
@@ -269,6 +282,7 @@
   <tabstop>endDateEdit</tabstop>
   <tabstop>endTimeEdit</tabstop>
   <tabstop>timeTypeCombo</tabstop>
+  <tabstop>removePeriodicCheckbox</tabstop>
   <tabstop>archiveSignals</tabstop>
  </tabstops>
  <resources/>

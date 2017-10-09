@@ -15,6 +15,7 @@ struct ArchiveRequest
 	TimeStamp startTime;
 	TimeStamp endTime;
 	E::TimeType timeType;
+	bool removePrioodicRecords;
 	std::map<Hash, QString> appSignals;
 };
 
@@ -35,6 +36,7 @@ public:
 	bool requestData(TimeStamp startTime,
 					 TimeStamp endTime,
 					 E::TimeType timeType,
+					 bool removePeriodicRecords,
 					 const std::vector<AppSignalParam>& appSignals);
 	bool cancelRequest();
 	bool isRequestInProgress() const;

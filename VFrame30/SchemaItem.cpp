@@ -718,6 +718,13 @@ namespace VFrame30
 		return QRectF();
 	}
 
+	QString SchemaItem::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY)
+		return QString();
+	}
+
 	QString SchemaItem::lastScriptError() const
 	{
 		return m_lastScriptError;

@@ -3845,6 +3845,13 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
       mutable_associatedios();
 
+  // optional int32 signalType = 7 [default = 0];
+  inline bool has_signaltype() const;
+  inline void clear_signaltype();
+  static const int kSignalTypeFieldNumber = 7;
+  inline ::google::protobuf::int32 signaltype() const;
+  inline void set_signaltype(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.FblConnectionPoint)
  private:
   inline void set_has_point();
@@ -3857,6 +3864,8 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   inline void clear_has_operandindex();
   inline void set_has_caption();
   inline void clear_has_caption();
+  inline void set_has_signaltype();
+  inline void clear_has_signaltype();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -3866,9 +3875,10 @@ class FblConnectionPoint : public ::google::protobuf::Message {
   ::google::protobuf::int32 operandindex_;
   ::std::string* caption_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > associatedios_;
+  ::google::protobuf::int32 signaltype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15897,6 +15907,28 @@ FblConnectionPoint::associatedios() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
 FblConnectionPoint::mutable_associatedios() {
   return &associatedios_;
+}
+
+// optional int32 signalType = 7 [default = 0];
+inline bool FblConnectionPoint::has_signaltype() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void FblConnectionPoint::set_has_signaltype() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void FblConnectionPoint::clear_has_signaltype() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void FblConnectionPoint::clear_signaltype() {
+  signaltype_ = 0;
+  clear_has_signaltype();
+}
+inline ::google::protobuf::int32 FblConnectionPoint::signaltype() const {
+  return signaltype_;
+}
+inline void FblConnectionPoint::set_signaltype(::google::protobuf::int32 value) {
+  set_has_signaltype();
+  signaltype_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -231,6 +231,20 @@ namespace VFrame30
 		return QString("Transmitter %1").arg(connectionId());
 	}
 
+	QString SchemaItemTransmitter::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Transmitter: "
+							  "\n\tConnectionID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit ConnectionID")
+						.arg(connectionId());
+
+		return str;
+	}
+
 	int SchemaItemTransmitter::pinCount() const
 	{
 		return m_pinCount;
@@ -256,7 +270,7 @@ namespace VFrame30
 
 			for (int i = 0; i < m_pinCount; i++)
 			{
-				addInput(i, QString("in_%1").arg(QString::number(i + 1)));
+				addInput(i, E::SignalType::Discrete, QString("in_%1").arg(QString::number(i + 1)));
 			}
 
 			double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
@@ -483,6 +497,22 @@ namespace VFrame30
 		return QString("Receiver %1").arg(connectionId());
 	}
 
+	QString SchemaItemReceiver::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Receiver: "
+							  "\n\tConnectionID: %1"
+							  "\n\tAppSignalID: %2"
+							  "\n"
+							  "\nHint: Press F2 to edit AppSignalID and ConnectionID")
+						.arg(connectionId())
+						.arg(appSignalId());
+
+		return str;
+	}
+
 	const QString& SchemaItemReceiver::appSignalId() const
 	{
 		return m_appSignalId;
@@ -505,11 +535,11 @@ namespace VFrame30
 
 		removeAllOutputs();
 
-		addOutput(0, QLatin1String("out"));
+		addOutput(0, E::SignalType::Discrete, QLatin1String("out"));
 
 		if (m_showValidity == true)
 		{
-			addOutput(1, QLatin1String("validity"));
+			addOutput(1, E::SignalType::Discrete, QLatin1String("validity"));
 		}
 	}
 

@@ -9,6 +9,6 @@ public:
 	PasswordService();
 
 public:
-	static bool checkPassword(const QString& password, const QString& passwordConfirmation, bool showMessageBox, QWidget* parent);
+	static bool checkPassword(QString password, QString passwordConfirmation, QString username, bool showMessageBox, QWidget* parent);
 };
 

@@ -264,12 +264,12 @@ namespace VFrame30
 
 		for (const SchemaItemSignal* in : ufbInputs)
 		{
-			this->addInput(-1, in->appSignalIds());
+			this->addInput(-1, E::SignalType::Discrete, in->appSignalIds());
 		}
 
 		for (const SchemaItemSignal* out: ufbOutputs)
 		{
-			this->addOutput(-1, out->appSignalIds());
+			this->addOutput(-1, E::SignalType::Discrete, out->appSignalIds());
 		}
 
 		// --

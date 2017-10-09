@@ -754,6 +754,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	m_configController(configController)
 {
 	ui->setupUi(this);
+	 setAttribute(Qt::WA_DeleteOnClose);
 
 	// Restore window pos
 	//

@@ -52,10 +52,11 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		// Text search
+		// Other
 		//
 	public:
 		virtual bool searchText(const QString& text) const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//
