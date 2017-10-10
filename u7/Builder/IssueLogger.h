@@ -10,6 +10,10 @@
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
+// Warning2 - the least important warning
+// Warning1 - just warning
+// Warning0 - the most important warning
+
 #define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
@@ -301,6 +305,7 @@ namespace Builder
 		void errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID);		// Serial Rx signal '%1' is not associated with LM '%2' .
 		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
 		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+		void wrnALC5194(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
 
 		// EQP			Equipment issues						6000-6999
 		//

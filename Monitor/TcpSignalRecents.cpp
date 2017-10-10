@@ -313,7 +313,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 
 	theSignals.setState(states);
 
-	qDebug() << "Priority updates state count  "  << states.size();
+	//qDebug() << "Priority updates state count  "  << states.size();
 
 	requestSignalState();
 	return;
