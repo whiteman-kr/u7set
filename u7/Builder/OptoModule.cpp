@@ -2163,7 +2163,7 @@ namespace Hardware
 						(port2->txBufAbsAddress() >= port1->txBufAbsAddress() &&
 						port2->txBufAbsAddress() < port1->txBufAbsAddress() + port1->txDataSizeW())	)
 				{
-					// ports areas are overlapped
+					// ports memory areas are overlapped
 					//
 					if (port1->manualSettings() == true && port2->manualSettings() == true)
 					{
