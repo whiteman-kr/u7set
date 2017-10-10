@@ -2121,6 +2121,8 @@ namespace Hardware
 		//
 		int portsCount = m_ports.count();
 
+		bool result = true;
+
 		for(int i = 0; i < portsCount - 1; i++)
 		{
 			OptoPortShared port1 = m_ports[i];
@@ -2129,7 +2131,8 @@ namespace Hardware
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				assert(false);
-				return false;
+				result = false;
+				continue;
 			}
 
 			if (port1->isUsedInConnection() == false)
@@ -2145,7 +2148,8 @@ namespace Hardware
 				{
 					LOG_INTERNAL_ERROR(m_log);
 					assert(false);
-					return false;
+					result = false;
+					continue;
 				}
 
 				if (port2->isUsedInConnection() == false)
@@ -2159,16 +2163,29 @@ namespace Hardware
 						(port2->txBufAbsAddress() >= port1->txBufAbsAddress() &&
 						port2->txBufAbsAddress() < port1->txBufAbsAddress() + port1->txDataSizeW())	)
 				{
-					// Tx data memory areas of ports '%1' and '%2' are overlapped.
+					// ports areas are overlapped
 					//
-					m_log->errALC5187(port1->equipmentID(), port2->equipmentID());
+					if (port1->manualSettings() == true && port2->manualSettings() == true)
+					{
+						// if both ports with manual settings - generate warning
+						//
+						m_log->wrnALC5194(port1->equipmentID(), port2->equipmentID());
+					}
+					else
+					{
+						// if single or both ports with Auto settings - generate error
+						//
+						// Tx data memory areas of ports '%1' and '%2' are overlapped.
+						//
+						m_log->errALC5187(port1->equipmentID(), port2->equipmentID());
 
-					return false;
+						result = false;
+					}
 				}
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool OptoModule::calculateRxBufAddresses()
