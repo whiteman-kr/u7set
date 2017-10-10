@@ -80,6 +80,9 @@ class SchemaItemValue;
 class SchemaItemBus;
 class SchemaItemBusComposer;
 class SchemaItemBusExtractor;
+class SchemaItemLoopback;
+class SchemaItemLoopbackSource;
+class SchemaItemLoopbackTarget;
 class SchemaItemControl;
 class SchemaItemPushButton;
 class SchemaItemLineEdit;
@@ -2910,6 +2913,33 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemBusExtractor* release_busextractor();
   inline void set_allocated_busextractor(::Proto::SchemaItemBusExtractor* busextractor);
 
+  // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
+  inline bool has_loopbackitem() const;
+  inline void clear_loopbackitem();
+  static const int kLoopbackItemFieldNumber = 155;
+  inline const ::Proto::SchemaItemLoopback& loopbackitem() const;
+  inline ::Proto::SchemaItemLoopback* mutable_loopbackitem();
+  inline ::Proto::SchemaItemLoopback* release_loopbackitem();
+  inline void set_allocated_loopbackitem(::Proto::SchemaItemLoopback* loopbackitem);
+
+  // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
+  inline bool has_loopbacksource() const;
+  inline void clear_loopbacksource();
+  static const int kLoopbackSourceFieldNumber = 156;
+  inline const ::Proto::SchemaItemLoopbackSource& loopbacksource() const;
+  inline ::Proto::SchemaItemLoopbackSource* mutable_loopbacksource();
+  inline ::Proto::SchemaItemLoopbackSource* release_loopbacksource();
+  inline void set_allocated_loopbacksource(::Proto::SchemaItemLoopbackSource* loopbacksource);
+
+  // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
+  inline bool has_loopbacktarget() const;
+  inline void clear_loopbacktarget();
+  static const int kLoopbackTargetFieldNumber = 157;
+  inline const ::Proto::SchemaItemLoopbackTarget& loopbacktarget() const;
+  inline ::Proto::SchemaItemLoopbackTarget* mutable_loopbacktarget();
+  inline ::Proto::SchemaItemLoopbackTarget* release_loopbacktarget();
+  inline void set_allocated_loopbacktarget(::Proto::SchemaItemLoopbackTarget* loopbacktarget);
+
   // optional .Proto.SchemaItemControl control = 200;
   inline bool has_control() const;
   inline void clear_control();
@@ -3007,6 +3037,12 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_buscomposer();
   inline void set_has_busextractor();
   inline void clear_has_busextractor();
+  inline void set_has_loopbackitem();
+  inline void clear_has_loopbackitem();
+  inline void set_has_loopbacksource();
+  inline void clear_has_loopbacksource();
+  inline void set_has_loopbacktarget();
+  inline void clear_has_loopbacktarget();
   inline void set_has_control();
   inline void clear_has_control();
   inline void set_has_pushbutton();
@@ -3050,12 +3086,15 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemBus* busitem_;
   ::Proto::SchemaItemBusComposer* buscomposer_;
   ::Proto::SchemaItemBusExtractor* busextractor_;
+  ::Proto::SchemaItemLoopback* loopbackitem_;
+  ::Proto::SchemaItemLoopbackSource* loopbacksource_;
+  ::Proto::SchemaItemLoopbackTarget* loopbacktarget_;
   ::Proto::SchemaItemControl* control_;
   ::Proto::SchemaItemPushButton* pushbutton_;
   ::Proto::SchemaItemLineEdit* lineedit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(37 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(40 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6188,6 +6227,237 @@ class SchemaItemBusExtractor : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemBusExtractor* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemLoopback : public ::google::protobuf::Message {
+ public:
+  SchemaItemLoopback();
+  virtual ~SchemaItemLoopback();
+
+  SchemaItemLoopback(const SchemaItemLoopback& from);
+
+  inline SchemaItemLoopback& operator=(const SchemaItemLoopback& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemLoopback& default_instance();
+
+  void Swap(SchemaItemLoopback* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemLoopback* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemLoopback& from);
+  void MergeFrom(const SchemaItemLoopback& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string loopbackId = 2;
+  inline bool has_loopbackid() const;
+  inline void clear_loopbackid();
+  static const int kLoopbackIdFieldNumber = 2;
+  inline const ::std::string& loopbackid() const;
+  inline void set_loopbackid(const ::std::string& value);
+  inline void set_loopbackid(const char* value);
+  inline void set_loopbackid(const char* value, size_t size);
+  inline ::std::string* mutable_loopbackid();
+  inline ::std::string* release_loopbackid();
+  inline void set_allocated_loopbackid(::std::string* loopbackid);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemLoopback)
+ private:
+  inline void set_has_loopbackid();
+  inline void clear_has_loopbackid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* loopbackid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemLoopback* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemLoopbackSource : public ::google::protobuf::Message {
+ public:
+  SchemaItemLoopbackSource();
+  virtual ~SchemaItemLoopbackSource();
+
+  SchemaItemLoopbackSource(const SchemaItemLoopbackSource& from);
+
+  inline SchemaItemLoopbackSource& operator=(const SchemaItemLoopbackSource& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemLoopbackSource& default_instance();
+
+  void Swap(SchemaItemLoopbackSource* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemLoopbackSource* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemLoopbackSource& from);
+  void MergeFrom(const SchemaItemLoopbackSource& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemLoopbackSource)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemLoopbackSource* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemLoopbackTarget : public ::google::protobuf::Message {
+ public:
+  SchemaItemLoopbackTarget();
+  virtual ~SchemaItemLoopbackTarget();
+
+  SchemaItemLoopbackTarget(const SchemaItemLoopbackTarget& from);
+
+  inline SchemaItemLoopbackTarget& operator=(const SchemaItemLoopbackTarget& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemLoopbackTarget& default_instance();
+
+  void Swap(SchemaItemLoopbackTarget* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemLoopbackTarget* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemLoopbackTarget& from);
+  void MergeFrom(const SchemaItemLoopbackTarget& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemLoopbackTarget)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemLoopbackTarget* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -15010,15 +15280,129 @@ inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtract
   }
 }
 
-// optional .Proto.SchemaItemControl control = 200;
-inline bool SchemaItem::has_control() const {
+// optional .Proto.SchemaItemLoopback LoopbackItem = 155;
+inline bool SchemaItem::has_loopbackitem() const {
   return (_has_bits_[1] & 0x00000004u) != 0;
 }
-inline void SchemaItem::set_has_control() {
+inline void SchemaItem::set_has_loopbackitem() {
   _has_bits_[1] |= 0x00000004u;
 }
-inline void SchemaItem::clear_has_control() {
+inline void SchemaItem::clear_has_loopbackitem() {
   _has_bits_[1] &= ~0x00000004u;
+}
+inline void SchemaItem::clear_loopbackitem() {
+  if (loopbackitem_ != NULL) loopbackitem_->::Proto::SchemaItemLoopback::Clear();
+  clear_has_loopbackitem();
+}
+inline const ::Proto::SchemaItemLoopback& SchemaItem::loopbackitem() const {
+  return loopbackitem_ != NULL ? *loopbackitem_ : *default_instance_->loopbackitem_;
+}
+inline ::Proto::SchemaItemLoopback* SchemaItem::mutable_loopbackitem() {
+  set_has_loopbackitem();
+  if (loopbackitem_ == NULL) loopbackitem_ = new ::Proto::SchemaItemLoopback;
+  return loopbackitem_;
+}
+inline ::Proto::SchemaItemLoopback* SchemaItem::release_loopbackitem() {
+  clear_has_loopbackitem();
+  ::Proto::SchemaItemLoopback* temp = loopbackitem_;
+  loopbackitem_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_loopbackitem(::Proto::SchemaItemLoopback* loopbackitem) {
+  delete loopbackitem_;
+  loopbackitem_ = loopbackitem;
+  if (loopbackitem) {
+    set_has_loopbackitem();
+  } else {
+    clear_has_loopbackitem();
+  }
+}
+
+// optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
+inline bool SchemaItem::has_loopbacksource() const {
+  return (_has_bits_[1] & 0x00000008u) != 0;
+}
+inline void SchemaItem::set_has_loopbacksource() {
+  _has_bits_[1] |= 0x00000008u;
+}
+inline void SchemaItem::clear_has_loopbacksource() {
+  _has_bits_[1] &= ~0x00000008u;
+}
+inline void SchemaItem::clear_loopbacksource() {
+  if (loopbacksource_ != NULL) loopbacksource_->::Proto::SchemaItemLoopbackSource::Clear();
+  clear_has_loopbacksource();
+}
+inline const ::Proto::SchemaItemLoopbackSource& SchemaItem::loopbacksource() const {
+  return loopbacksource_ != NULL ? *loopbacksource_ : *default_instance_->loopbacksource_;
+}
+inline ::Proto::SchemaItemLoopbackSource* SchemaItem::mutable_loopbacksource() {
+  set_has_loopbacksource();
+  if (loopbacksource_ == NULL) loopbacksource_ = new ::Proto::SchemaItemLoopbackSource;
+  return loopbacksource_;
+}
+inline ::Proto::SchemaItemLoopbackSource* SchemaItem::release_loopbacksource() {
+  clear_has_loopbacksource();
+  ::Proto::SchemaItemLoopbackSource* temp = loopbacksource_;
+  loopbacksource_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_loopbacksource(::Proto::SchemaItemLoopbackSource* loopbacksource) {
+  delete loopbacksource_;
+  loopbacksource_ = loopbacksource;
+  if (loopbacksource) {
+    set_has_loopbacksource();
+  } else {
+    clear_has_loopbacksource();
+  }
+}
+
+// optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
+inline bool SchemaItem::has_loopbacktarget() const {
+  return (_has_bits_[1] & 0x00000010u) != 0;
+}
+inline void SchemaItem::set_has_loopbacktarget() {
+  _has_bits_[1] |= 0x00000010u;
+}
+inline void SchemaItem::clear_has_loopbacktarget() {
+  _has_bits_[1] &= ~0x00000010u;
+}
+inline void SchemaItem::clear_loopbacktarget() {
+  if (loopbacktarget_ != NULL) loopbacktarget_->::Proto::SchemaItemLoopbackTarget::Clear();
+  clear_has_loopbacktarget();
+}
+inline const ::Proto::SchemaItemLoopbackTarget& SchemaItem::loopbacktarget() const {
+  return loopbacktarget_ != NULL ? *loopbacktarget_ : *default_instance_->loopbacktarget_;
+}
+inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::mutable_loopbacktarget() {
+  set_has_loopbacktarget();
+  if (loopbacktarget_ == NULL) loopbacktarget_ = new ::Proto::SchemaItemLoopbackTarget;
+  return loopbacktarget_;
+}
+inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::release_loopbacktarget() {
+  clear_has_loopbacktarget();
+  ::Proto::SchemaItemLoopbackTarget* temp = loopbacktarget_;
+  loopbacktarget_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_loopbacktarget(::Proto::SchemaItemLoopbackTarget* loopbacktarget) {
+  delete loopbacktarget_;
+  loopbacktarget_ = loopbacktarget;
+  if (loopbacktarget) {
+    set_has_loopbacktarget();
+  } else {
+    clear_has_loopbacktarget();
+  }
+}
+
+// optional .Proto.SchemaItemControl control = 200;
+inline bool SchemaItem::has_control() const {
+  return (_has_bits_[1] & 0x00000020u) != 0;
+}
+inline void SchemaItem::set_has_control() {
+  _has_bits_[1] |= 0x00000020u;
+}
+inline void SchemaItem::clear_has_control() {
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline void SchemaItem::clear_control() {
   if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
@@ -15050,13 +15434,13 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::has_pushbutton() const {
-  return (_has_bits_[1] & 0x00000008u) != 0;
+  return (_has_bits_[1] & 0x00000040u) != 0;
 }
 inline void SchemaItem::set_has_pushbutton() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000040u;
 }
 inline void SchemaItem::clear_has_pushbutton() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
@@ -15088,13 +15472,13 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::has_lineedit() const {
-  return (_has_bits_[1] & 0x00000010u) != 0;
+  return (_has_bits_[1] & 0x00000080u) != 0;
 }
 inline void SchemaItem::set_has_lineedit() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000080u;
 }
 inline void SchemaItem::clear_has_lineedit() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
@@ -18439,6 +18823,88 @@ inline ::google::protobuf::RepeatedPtrField< ::Proto::Property >*
 SchemaItemBusExtractor::mutable_properties() {
   return &properties_;
 }
+
+// -------------------------------------------------------------------
+
+// SchemaItemLoopback
+
+// optional string loopbackId = 2;
+inline bool SchemaItemLoopback::has_loopbackid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemLoopback::set_has_loopbackid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemLoopback::clear_has_loopbackid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemLoopback::clear_loopbackid() {
+  if (loopbackid_ != &::google::protobuf::internal::kEmptyString) {
+    loopbackid_->clear();
+  }
+  clear_has_loopbackid();
+}
+inline const ::std::string& SchemaItemLoopback::loopbackid() const {
+  return *loopbackid_;
+}
+inline void SchemaItemLoopback::set_loopbackid(const ::std::string& value) {
+  set_has_loopbackid();
+  if (loopbackid_ == &::google::protobuf::internal::kEmptyString) {
+    loopbackid_ = new ::std::string;
+  }
+  loopbackid_->assign(value);
+}
+inline void SchemaItemLoopback::set_loopbackid(const char* value) {
+  set_has_loopbackid();
+  if (loopbackid_ == &::google::protobuf::internal::kEmptyString) {
+    loopbackid_ = new ::std::string;
+  }
+  loopbackid_->assign(value);
+}
+inline void SchemaItemLoopback::set_loopbackid(const char* value, size_t size) {
+  set_has_loopbackid();
+  if (loopbackid_ == &::google::protobuf::internal::kEmptyString) {
+    loopbackid_ = new ::std::string;
+  }
+  loopbackid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemLoopback::mutable_loopbackid() {
+  set_has_loopbackid();
+  if (loopbackid_ == &::google::protobuf::internal::kEmptyString) {
+    loopbackid_ = new ::std::string;
+  }
+  return loopbackid_;
+}
+inline ::std::string* SchemaItemLoopback::release_loopbackid() {
+  clear_has_loopbackid();
+  if (loopbackid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = loopbackid_;
+    loopbackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemLoopback::set_allocated_loopbackid(::std::string* loopbackid) {
+  if (loopbackid_ != &::google::protobuf::internal::kEmptyString) {
+    delete loopbackid_;
+  }
+  if (loopbackid) {
+    set_has_loopbackid();
+    loopbackid_ = loopbackid;
+  } else {
+    clear_has_loopbackid();
+    loopbackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemLoopbackSource
+
+// -------------------------------------------------------------------
+
+// SchemaItemLoopbackTarget
 
 // -------------------------------------------------------------------
 

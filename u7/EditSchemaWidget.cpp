@@ -27,6 +27,7 @@
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/SchemaItemLineEdit.h"
+#include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/DrawParam.h"
 #include "../VFrame30/Bus.h"
@@ -2083,8 +2084,18 @@ void EditSchemaWidget::createActions()
 				addItem(text);
 			});
 
+	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
+
+	m_addLinkAction = new QAction(tr("Link"), this);
+	m_addLinkAction->setEnabled(true);
+	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
+	connect(m_addLinkAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemLink>(schema()->unit()));
+			});
 
 	m_addInputSignalAction = new QAction(tr("Input"), this);
 	m_addInputSignalAction->setEnabled(true);
@@ -2134,19 +2145,23 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemTerminator>(schema()->unit()));
 			});
 
+	// ----------------------------------------
+	m_addSeparatorAfb = new QAction(this);
+	m_addSeparatorAfb->setSeparator(true);
+
 	m_addAfbAction = new QAction(tr("App Functional Block"), this);
 	m_addAfbAction->setEnabled(true);
 	m_addAfbAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
 	connect(m_addAfbAction, &QAction::triggered, this, &EditSchemaWidget::addAfbElement);
 
-	m_addLinkAction = new QAction(tr("Link"), this);
-	m_addLinkAction->setEnabled(true);
-	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
-	connect(m_addLinkAction, &QAction::triggered,
-			[this](bool)
-			{
-				addItem(std::make_shared<VFrame30::SchemaItemLink>(schema()->unit()));
-			});
+	m_addUfbAction = new QAction(tr("User Functional Block"), this);
+	m_addUfbAction->setEnabled(true);
+	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
+	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+
+	// ----------------------------------------
+	m_addSeparatorConn = new QAction(this);
+	m_addSeparatorConn->setSeparator(true);
 
 	m_addTransmitter = new QAction(tr("Transmitter"), this);
 	m_addTransmitter->setEnabled(true);
@@ -2158,11 +2173,21 @@ void EditSchemaWidget::createActions()
 	m_addReceiver->setIcon(QIcon(":/Images/Images/SchemaReceiver.svg"));
 	connect(m_addReceiver, &QAction::triggered, this, &EditSchemaWidget::addReceiver);
 
-	m_addUfbAction = new QAction(tr("User Functional Block"), this);
-	m_addUfbAction->setEnabled(true);
-	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
-	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
+	// ----------------------------------------
+	m_addSeparatorLoop = new QAction(this);
+	m_addSeparatorLoop->setSeparator(true);
 
+	m_addLoopbackSource = new QAction(tr("Loopback Source"), this);
+	m_addLoopbackSource->setEnabled(true);
+	m_addLoopbackSource->setIcon(QIcon(":/Images/Images/SchemaLoopbackSource.svg"));
+	connect(m_addLoopbackSource, &QAction::triggered, this, &EditSchemaWidget::addLoopbackSource);
+
+	m_addLoopbackTarget = new QAction(tr("Loopback Target"), this);
+	m_addLoopbackTarget->setEnabled(true);
+	m_addLoopbackTarget->setIcon(QIcon(":/Images/Images/SchemaLoopbackTarget.svg"));
+	connect(m_addLoopbackTarget, &QAction::triggered, this, &EditSchemaWidget::addLoopbackTarget);
+
+	// ----------------------------------------
 	m_addSeparatorBus = new QAction(this);
 	m_addSeparatorBus->setSeparator(true);
 
@@ -2534,10 +2559,18 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addInOutSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
+
+			m_addMenu->addAction(m_addSeparatorAfb);
 			m_addMenu->addAction(m_addAfbAction);
+			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorConn);
 			m_addMenu->addAction(m_addTransmitter);
 			m_addMenu->addAction(m_addReceiver);
-			m_addMenu->addAction(m_addUfbAction);
+
+			m_addMenu->addAction(m_addSeparatorLoop);
+			m_addMenu->addAction(m_addLoopbackSource);
+			m_addMenu->addAction(m_addLoopbackTarget);
 
 			m_addMenu->addAction(m_addSeparatorBus);
 			m_addMenu->addAction(m_addBusComposer);
@@ -2623,6 +2656,11 @@ bool EditSchemaWidget::event(QEvent* e)
 			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
 			setToolTip(toolTip);
 		}
+		else
+		{
+			setToolTip("");
+		}
+
 
 		return VFrame30::BaseSchemaWidget::event(e);
 	}
@@ -6967,6 +7005,18 @@ void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemCon
 	//
 	addItem(schemaItem);
 	return;
+}
+
+void EditSchemaWidget::addLoopbackSource()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackSource>(schema()->unit());
+	addItem(schemaItem);
+}
+
+void EditSchemaWidget::addLoopbackTarget()
+{
+	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackTarget>(schema()->unit());
+	addItem(schemaItem);
 }
 
 void EditSchemaWidget::addAfbElement()
