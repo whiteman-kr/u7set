@@ -1061,9 +1061,7 @@ namespace Builder
 			}
 			else
 			{
-				assert(s.isAnalog() == true);
-
-				if (s.dataSize() != 32)
+				if (s.isAnalog() == true && s.dataSize() != 32)
 				{
 					// Analog signal '%1' must have DataSize equal to 32.
 					//

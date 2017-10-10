@@ -316,18 +316,19 @@ namespace Builder
 			}
 			else
 			{
-				assert(s.isAnalog() == true);
-
-				if (s.dataSize() != 32)
+				if (s.isAnalog() == true)
 				{
-					m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
-					result = false;
-				}
+					if (s.dataSize() != 32)
+					{
+						m_log->errALC5015(s.appSignalID());		// Analog signal '%1' must have DataSize equal to 32.
+						result = false;
+					}
 
-				if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
-				{
-					m_log->errALC5090(s.appSignalID());
-					result = false;
+					if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
+					{
+						m_log->errALC5090(s.appSignalID());
+						result = false;
+					}
 				}
 			}
 
