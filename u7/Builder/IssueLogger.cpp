@@ -4326,6 +4326,30 @@ namespace Builder
 						arg(signalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5106
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Pin with caption '%1' is not found in schema item (Logic schema '%2').
+	///
+	/// Parameters:
+	///		%1 Pin caption
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Pin with caption '%1' is not found in schema item. Contact with RPCT developers.
+	///
+	void IssueLogger::errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, schemaItemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5106,
+				  QString(tr("Pin with caption '%1' is not found in schema item (Logic schema '%2').")).
+						arg(pinCaption).arg(schemaID));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186

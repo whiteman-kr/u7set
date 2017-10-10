@@ -28,7 +28,7 @@ namespace Builder
 			return false;
 		}
 
-		if (isFb() == false)
+		if (isAfb() == false)
 		{
 			assert(false);
 			return true;

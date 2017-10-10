@@ -128,7 +128,7 @@ namespace Builder
 		QString strID() const;
 
 		bool isSignal() const { return m_appLogicItem.m_fblItem->isSignalElement(); }
-		bool isFb() const { return m_appLogicItem.m_fblItem->isAfbElement(); }
+		bool isAfb() const { return m_appLogicItem.m_fblItem->isAfbElement(); }
 		bool isConst() const { return m_appLogicItem.m_fblItem->isConstElement(); }
 		bool isTransmitter() const { return m_appLogicItem.m_fblItem->isTransmitterElement(); }
 		bool isReceiver() const { return m_appLogicItem.m_fblItem->isReceiverElement(); }
@@ -351,7 +351,7 @@ namespace Builder
 		void setResultSaved() { m_resultSaved = true; }
 		bool isResultSaved() const { return m_resultSaved; }
 
-		bool isShadowSignal() const { return m_isShadowSignal; }
+		bool isAutoSignal() const { return m_isAutoSignal; }
 
 		QString appSignalID() const { return m_signal->appSignalID(); }
 
@@ -388,10 +388,10 @@ namespace Builder
 		Signal* m_signal = nullptr;							// pointer to signal in m_signalSet
 
 		const AppItem* m_appItem = nullptr;					// application signals pointer (for real signals)
-															// application functional block pointer (for shadow signals)
+															// application functional block pointer (for auto signals)
 		QUuid m_guid;
 
-		bool m_isShadowSignal = false;
+		bool m_isAutoSignal = false;
 
 		bool m_computed = false;
 		bool m_resultSaved = false;
@@ -414,7 +414,7 @@ namespace Builder
 		void clear();
 
 	private:
-		QString getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin);
+		QString getAutoSignalID(const AppFb* appFb, const LogicPin& outputPin);
 		void incCounters(const AppSignal* appSignal);
 
 	private:

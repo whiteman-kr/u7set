@@ -106,6 +106,9 @@ namespace Builder
 
 		bool createAppFbsMap();
 		bool createAppSignalsMap();
+		bool appendSignalsUsedInUal();
+		bool appendAutoSignalsFromAfbOutputs();
+		bool appendAutoSignalsFromBusComposerOutputs();
 
 		bool buildTuningData();
 

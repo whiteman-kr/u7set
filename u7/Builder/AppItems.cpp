@@ -339,7 +339,7 @@ namespace Builder
 			return Type::Signal;
 		}
 
-		if (isFb() == true)
+		if (isAfb() == true)
 		{
 			return Type::Fb;
 		}
@@ -776,7 +776,7 @@ namespace Builder
 		m_signal(signal),
 		m_appItem(appItem)
 	{
-		m_isShadowSignal = false;
+		m_isAutoSignal = false;
 
 		// construct AppSignal based on real signal
 		//
@@ -802,11 +802,11 @@ namespace Builder
 		m_appItem(appItem),
 		m_guid(guid)
 	{
-		m_isShadowSignal = true;
+		m_isAutoSignal = true;
 
 		m_signal = new Signal;
 
-		// construct shadow AppSignal based on OutputPin
+		// construct auto AppSignal based on OutputPin
 		//
 		m_signal->setAppSignalID(strID);
 		m_signal->setSignalType(signalType);
@@ -824,7 +824,7 @@ namespace Builder
 
 	AppSignal::~AppSignal()
 	{
-		if (m_isShadowSignal == true)
+		if (m_isAutoSignal == true)
 		{
 			delete m_signal;
 		}
@@ -940,7 +940,7 @@ namespace Builder
 
 	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log)
 	{
-		// insert "shadow" signal bound to FB output pin
+		// insert "auto" signal bound to FB output pin
 		//
 		if (appFb == nullptr || log == nullptr)
 		{
@@ -951,7 +951,7 @@ namespace Builder
 
 		QUuid outPinGuid = outputPin.guid();
 
-		QString strID = getShadowSignalStrID(appFb, outputPin);
+		QString autoSignalID = getAutoSignalID(appFb, outputPin);
 
 		E::AnalogAppSignalFormat analogSignalFormat;
 		int dataSize = 1;
@@ -1000,23 +1000,23 @@ namespace Builder
 
 		AppSignal* appSignal = nullptr;
 
-		if (m_signalStrIdMap.contains(strID))
+		if (m_signalStrIdMap.contains(autoSignalID))
 		{
 			assert(false);							// duplicate StrID
 
-			appSignal = m_signalStrIdMap[strID];
+			appSignal = m_signalStrIdMap[autoSignalID];
 
 			//qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, s.type(), analogSignalFormat, dataSize, appFb, strID);
+			appSignal = new AppSignal(outPinGuid, s.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
 
-			// shadow signals always connected to output pin, therefore considered computed
+			// auto-signals always connected to output pin, therefore considered computed
 			//
 			appSignal->setComputed();
 
-			m_signalStrIdMap.insert(strID, appSignal);
+			m_signalStrIdMap.insert(autoSignalID, appSignal);
 
 			//qDebug() << "Create appSignal = " << strID;
 
@@ -1058,7 +1058,7 @@ namespace Builder
 		m_notRegisteredDiscreteSignalCount = 0;
 	}
 
-	QString AppSignalMap::getShadowSignalStrID(const AppFb* appFb, const LogicPin& outputPin)
+	QString AppSignalMap::getAutoSignalID(const AppFb* appFb, const LogicPin& outputPin)
 	{
 		if (appFb == nullptr)
 		{
