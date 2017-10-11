@@ -105,7 +105,7 @@ namespace Builder
 		{
 			Unknown,
 			Signal,
-			Fb,
+			Afb,
 			Const,
 			Transmitter,
 			Receiver,
@@ -168,6 +168,8 @@ namespace Builder
 	private:
 		QHash<QString, int> m_opNameToIndexMap;
 	};
+
+	typedef std::map<QUuid, AppItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
 
 	class AppFbParamValue
 	{
@@ -322,14 +324,14 @@ namespace Builder
 
 	class AppFbMap: public HashedVector<QUuid, AppFb*>
 	{
-	private:
-		int m_fbNumber = 1;
-
 	public:
 		virtual ~AppFbMap();
 
 		AppFb* insert(AppFb *appFb);
 		void clear();
+
+	private:
+		int m_fbNumber = 1;
 	};
 
 	class AppSignal
@@ -338,8 +340,9 @@ namespace Builder
 		// represent all signal in application logic schemas, and signals, which createad in compiling time
 		//
 	public:
-		AppSignal(Signal* signal, const AppItem* appItem);
+		AppSignal(Signal* signal, const AppItem* ualSignal);
 		AppSignal(const QUuid& guid, E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, int dataSize, const AppItem* appItem, const QString& appSignalID);
+		AppSignal(const QUuid& guid, const QString &signalID, const QString& busTypeID, int busSizeW);
 
 		~AppSignal();
 
@@ -402,11 +405,12 @@ namespace Builder
 	{
 		Q_OBJECT
 	public:
-		AppSignalMap(ModuleLogicCompiler& compiler);
+		AppSignalMap(ModuleLogicCompiler& compiler, IssueLogger* log);
 		~AppSignalMap();
 
-		bool insert(const AppItem* appItem);
-		bool insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log);
+		bool insertUalSignal(const AppItem* appItem);
+		bool insertAfbOutputAutoSignal(const AppFb* appFb, const LogicPin& outputPin);
+		bool insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, const QString& busTypeID, int busSizeW);
 
 		AppSignal* getSignal(const QString& appSignalID);
 		bool containsSignal(const QString& appSignalID) const;
@@ -414,21 +418,13 @@ namespace Builder
 		void clear();
 
 	private:
-		QString getAutoSignalID(const AppFb* appFb, const LogicPin& outputPin);
-		void incCounters(const AppSignal* appSignal);
+		QString getAutoSignalID(const AppItem* appItem, const LogicPin& outputPin);
 
 	private:
-		QHash<QString, AppSignal*> m_signalStrIdMap;
-
 		ModuleLogicCompiler& m_compiler;
+		IssueLogger* m_log = nullptr;
 
-		// counters for Internal signals only
-		//
-		int m_registeredAnalogSignalCount = 0;
-		int m_registeredDiscreteSignalCount = 0;
-
-		int m_notRegisteredAnalogSignalCount = 0;
-		int m_notRegisteredDiscreteSignalCount = 0;
+		QHash<QString, AppSignal*> m_signalStrIdMap;
 	};
 
 }

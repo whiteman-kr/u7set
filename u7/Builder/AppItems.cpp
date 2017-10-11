@@ -341,7 +341,7 @@ namespace Builder
 
 		if (isAfb() == true)
 		{
-			return Type::Fb;
+			return Type::Afb;
 		}
 
 		if (isConst() == true)
@@ -772,9 +772,9 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppSignal::AppSignal(Signal *signal, const AppItem *appItem) :
+	AppSignal::AppSignal(Signal *signal, const AppItem* ualSignal) :
 		m_signal(signal),
-		m_appItem(appItem)
+		m_appItem(ualSignal)
 	{
 		m_isAutoSignal = false;
 
@@ -788,7 +788,8 @@ namespace Builder
 
 		// believe that all input and tuning signals have already been computed
 		//
-		if (m_signal->isInput() || (m_signal->isInternal() && m_signal->enableTuning()))
+		if ( m_signal->isInput() == true ||
+			(m_signal->isInternal() == true && m_signal->enableTuning() == true))
 		{
 			setComputed();
 		}
@@ -818,6 +819,22 @@ namespace Builder
 			assert(false);
 		}
 
+		m_signal->setInOutType(E::SignalInOutType::Internal);
+		m_signal->setAcquire(false);								// non-registered signal !
+	}
+
+	AppSignal::AppSignal(const QUuid& guid, const QString& signalID, const QString& busTypeID, int busSizeW)
+	{
+		m_isAutoSignal = true;
+
+		m_signal = new Signal;
+
+		// construct auto AppSignal based on OutputPin
+		//
+		m_signal->setAppSignalID(signalID);
+		m_signal->setSignalType(E::SignalType::Bus);
+		m_signal->setBusTypeID(busTypeID);
+		m_signal->setDataSize(busSizeW * SIZE_16BIT);
 		m_signal->setInOutType(E::SignalInOutType::Internal);
 		m_signal->setAcquire(false);								// non-registered signal !
 	}
@@ -872,8 +889,9 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AppSignalMap::AppSignalMap(ModuleLogicCompiler& compiler) :
-		m_compiler(compiler)
+	AppSignalMap::AppSignalMap(ModuleLogicCompiler& compiler, IssueLogger* log) :
+		m_compiler(compiler),
+		m_log(log)
 	{
 	}
 
@@ -883,21 +901,21 @@ namespace Builder
 		clear();
 	}
 
-	bool AppSignalMap::insert(const AppItem* appItem)
+	bool AppSignalMap::insertUalSignal(const AppItem* ualSignal)
 	{
-		// insert signal from application logic schema
-		//
-		if (appItem == nullptr)
+		if (ualSignal == nullptr)
 		{
-			ASSERT_RETURN_FALSE
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
 		}
 
-		if (appItem->isSignal() == false)
+		if (ualSignal->isSignal() == false)
 		{
-			ASSERT_RETURN_FALSE
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
 		}
 
-		QString appSignalID = appItem->strID();
+		QString appSignalID = ualSignal->strID();
 
 		if (appSignalID[0] != '#')
 		{
@@ -908,44 +926,41 @@ namespace Builder
 
 		if (s == nullptr)
 		{
-			m_compiler.log()->errALC5000(appSignalID, appItem->guid());			// Signal identifier '%1' is not found.
+			// Signal identifier '%1' is not found.
+			//
+			m_compiler.log()->errALC5000(appSignalID, ualSignal->guid());
 			return false;
 		}
 
 		AppSignal* appSignal = nullptr;
 
-		if (m_signalStrIdMap.contains(appSignalID))
+		if (m_signalStrIdMap.contains(appSignalID) == true)
 		{
 			appSignal = m_signalStrIdMap[appSignalID];
-
-			//qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
-			appSignal = new AppSignal(s, appItem);
+			appSignal = new AppSignal(s, ualSignal);
 
 			m_signalStrIdMap.insert(appSignalID, appSignal);
-
-			//qDebug() << "Create appSignal = " << strID;
-
-			incCounters(appSignal);
 		}
 
 		assert(appSignal != nullptr);
 
-		HashedVector<QUuid, AppSignal*>::insert(appItem->guid(), appSignal);
+		HashedVector<QUuid, AppSignal*>::insert(ualSignal->guid(), appSignal);
 
 		return true;
 	}
 
-	bool AppSignalMap::insert(const AppFb* appFb, const LogicPin& outputPin, IssueLogger* log)
+	bool AppSignalMap::insertAfbOutputAutoSignal(const AppFb* appFb, const LogicPin& outputPin)
 	{
-		// insert "auto" signal bound to FB output pin
-		//
-		if (appFb == nullptr || log == nullptr)
+		if (appFb == nullptr )
 		{
-			ASSERT_RETURN_FALSE
+			LOG_NULLPTR_ERROR(m_log);
 		}
+
+		// insert "auto" signal bound to AFB output pin
+		//
 
 		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
@@ -975,7 +990,7 @@ namespace Builder
 				case E::DataFormat::UnsignedInt:
 					// Uncompatible data format of analog AFB Signal '%1.%2'
 					//
-					log->errALC5057(appFb->afb().caption(), s.caption(), appFb->guid());
+					m_log->errALC5057(appFb->afb().caption(), s.caption(), appFb->guid());
 					return false;
 
 				default:
@@ -990,7 +1005,7 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);
+			assert(false);		// insertBusAutoSignal should be called
 			dataSize = -1;		// real data size of bus should be assigned !!!
 			break;
 
@@ -1017,13 +1032,42 @@ namespace Builder
 			appSignal->setComputed();
 
 			m_signalStrIdMap.insert(autoSignalID, appSignal);
-
-			//qDebug() << "Create appSignal = " << strID;
-
-			incCounters(appSignal);
 		}
 
 		assert(appSignal != nullptr);
+
+		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
+
+		return true;
+	}
+
+	bool AppSignalMap::insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, const QString& busTypeID, int busSizeW)
+	{
+		if (appItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+		QUuid outPinGuid = outputPin.guid();
+
+		QString autoSignalID = getAutoSignalID(appItem, outputPin);
+
+		AppSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
+
+		if (appSignal == nullptr)
+		{
+			appSignal = new AppSignal(outPinGuid, autoSignalID, busTypeID, busSizeW);
+
+			// auto-signals always connected to output pin, therefore considered computed
+			//
+			appSignal->setComputed();
+
+			m_signalStrIdMap.insert(autoSignalID, appSignal);
+		}
+		else
+		{
+			assert(false);							// duplicate StrID??
+		}
 
 		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
 
@@ -1050,62 +1094,21 @@ namespace Builder
 		m_signalStrIdMap.clear();
 
 		HashedVector<QUuid, AppSignal*>::clear();
-
-		m_registeredAnalogSignalCount = 0;
-		m_registeredDiscreteSignalCount = 0;
-
-		m_notRegisteredAnalogSignalCount = 0;
-		m_notRegisteredDiscreteSignalCount = 0;
 	}
 
-	QString AppSignalMap::getAutoSignalID(const AppFb* appFb, const LogicPin& outputPin)
+	QString AppSignalMap::getAutoSignalID(const AppItem* appItem, const LogicPin& outputPin)
 	{
-		if (appFb == nullptr)
+		if (appItem == nullptr)
 		{
 			assert(false);
 			return "";
 		}
 
-		QString strID = QString("%1_%2").arg(appFb->label()).arg(outputPin.caption());
+		QString strID = QString("#%1_%2").arg(appItem->label()).arg(outputPin.caption());
 
-		strID = strID.toUpper();
-
-		strID = "#" + strID.remove(QRegularExpression("[^A-Z0-9_]"));
+		strID = strID.toUpper().remove(QRegularExpression("[^A-Z0-9_]"));
 
 		return strID;
 	}
 
-
-	void AppSignalMap::incCounters(const AppSignal* appSignal)
-	{
-		if (appSignal->isInternal())
-		{
-			if (appSignal->isAnalog())
-			{
-				// analog signal
-				//
-				if (appSignal->isAcquired())
-				{
-					m_registeredAnalogSignalCount++;
-				}
-				else
-				{
-					m_notRegisteredAnalogSignalCount++;
-				}
-			}
-			else
-			{
-				// discrete signal
-				//
-				if (appSignal->isAcquired())
-				{
-					m_registeredDiscreteSignalCount++;
-				}
-				else
-				{
-					m_notRegisteredDiscreteSignalCount++;
-				}
-			}
-		}
-	}
 }

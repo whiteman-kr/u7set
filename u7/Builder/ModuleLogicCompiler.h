@@ -106,9 +106,10 @@ namespace Builder
 
 		bool createAppFbsMap();
 		bool createAppSignalsMap();
-		bool appendSignalsUsedInUal();
-		bool appendAutoSignalsFromAfbOutputs();
-		bool appendAutoSignalsFromBusComposerOutputs();
+		bool appendSignalsFromAppItems();
+		bool appendUalSignals(AppItem* ualSignal);
+		bool appendAfbOutputsAutoSignals(AppItem* afb);
+		bool appendBusComposerOutputAutoSignal(AppItem* busComposer);
 
 		bool buildTuningData();
 
@@ -232,6 +233,7 @@ namespace Builder
 		AppItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		AppItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
 		const AppSignal *getExtractorBusSignal(const AppItem* appBusExtractor);
+		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
 
 		bool addToComparatorStorage(const AppFb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const AppFb* appFb);

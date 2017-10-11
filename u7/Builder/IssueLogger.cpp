@@ -4216,7 +4216,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus composer can't be directly connected to transmitter (Logic schema %1).
+	/// Title:	   Bus composer cannot be directly connected to transmitter (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4224,13 +4224,14 @@ namespace Builder
 	/// Description:
 	///		Bus composer can't be directly connected to transmitter. Intermediate signal should be used.
 	///
-	void IssueLogger::errALC5101(QUuid item, QString schemaID)
+	void IssueLogger::errALC5101(QUuid composerUuid, QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, item, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5101,
-				  QString(tr("Bus composer can't be directly connected to transmitter (Logic schema %1).")).arg(schemaID));
+				  QString(tr("Bus composer cannot be directly connected to transmitter (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5102
@@ -4248,7 +4249,7 @@ namespace Builder
 	void IssueLogger::errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, composer1Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, composer2Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, composer2Guid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5102,
@@ -4348,6 +4349,31 @@ namespace Builder
 				  QString(tr("Pin with caption '%1' is not found in schema item (Logic schema '%2').")).
 						arg(pinCaption).arg(schemaID));
 	}
+
+	/// IssueCode: ALC5107
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used. Check Afb and transmitter connection.
+	///
+	void IssueLogger::errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5107,
+				  QString(tr("Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.")));
+	}
+
+
+
+	void errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID);		// Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
 
 
 	//
