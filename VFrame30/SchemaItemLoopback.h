@@ -44,7 +44,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		QString m_loobackId;
+		QString m_loobackId = {"LOOPBACKID"};
 	};
 
 
@@ -81,6 +81,7 @@ namespace VFrame30
 		//
 	public:
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//
@@ -125,6 +126,7 @@ namespace VFrame30
 		//
 	public:
 		virtual QString buildName() const override;
+		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
 		// Properties
 		//

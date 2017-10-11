@@ -5686,6 +5686,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemLoopback>() == true)
+	{
+		f2KeyForLoopback(item);
+		return;
+	}
+
 	if (item->isType<VFrame30::SchemaItemValue>() == true)
 	{
 		f2KeyForValue(item);
@@ -6020,6 +6026,45 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 		newValue != appSignalId)
 	{
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
+		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemLoopback* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
+
+	if (loopbackItem == nullptr)
+	{
+		assert(loopbackItem);
+		return;
+	}
+
+	QString loopbackId = loopbackItem->loopbackId();
+
+	// Show input dialog
+	//
+	bool ok = false;
+	QString newValue = QInputDialog::getText(this,
+											 tr("Set LoopbackID"),
+											 tr("LoopbackID:"),
+											 QLineEdit::Normal,
+											 loopbackId,
+											 &ok).trimmed();
+
+	if (ok == true &&
+		newValue.isEmpty() == false &&
+		newValue != loopbackId)
+	{
+		m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
 		editSchemaView()->update();
 	}
 
@@ -6479,6 +6524,25 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
+	// Paste appSignalID to VFrame30::SchemaItemLoopback
+	//
+	{
+		bool allItemsAreLoopbacks = true;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
+			{
+				allItemsAreLoopbacks = false;
+				break;
+			}
+		}
+
+		if (allItemsAreLoopbacks == true)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(mimeData->text()), selected);
+		}
+	}
+
 	// Paste appSignalID to VFrame30::SchemaItemValue
 	//
 	{
@@ -6834,6 +6898,25 @@ void EditSchemaWidget::clipboardDataChanged()
 	if (allItemsAreReceivers == true &&
 		mimeData->hasText() == true &&
 		mimeData->text().startsWith('#') == true)
+	{
+		m_editPasteAction->setEnabled(true);
+		return;
+	}
+
+	// if Any SchemaItemLoopback is selected and Text is in the clipboard
+	//
+	bool allItemsAreLoopbacks = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
+		{
+			allItemsAreLoopbacks = false;
+			break;
+		}
+	}
+
+	if (allItemsAreLoopbacks == true &&
+		mimeData->hasText() == true)
 	{
 		m_editPasteAction->setEnabled(true);
 		return;

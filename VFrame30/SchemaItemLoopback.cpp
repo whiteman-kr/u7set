@@ -72,17 +72,6 @@ namespace VFrame30
 	void SchemaItemLoopback::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		FblItemRect::Draw(drawParam, schema, layer);
-
-		QPainter* painter = drawParam->painter();
-		QRectF r = itemRectPinIndent(painter->device());
-
-		r.setLeft(r.left() + m_font.drawSize() / 4.0);
-		r.setRight(r.right() - m_font.drawSize() / 4.0);
-
-		painter->setPen(textColor());
-
-		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
-
 		return;
 	}
 
@@ -172,71 +161,35 @@ namespace VFrame30
 	{
 		SchemaItemLoopback::Draw(drawParam, schema, layer);
 
-//		QPainter* painter = drawParam->painter();
+		QPainter* painter = drawParam->painter();
+		QRectF r = itemRectPinIndent(painter->device());
 
-//		QRectF r = itemRectPinIndent(painter->device());
-//		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-//		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
+		// Draw loopback logo
+		//
+		double pinVertGap =	CUtils::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
-//		// Draw bold left line
-//		//
-//		QPen pen(lineColor());
-//		//pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
-//		pen.setWidthF(LoopbackSideLineWidth);
-//		pen.setCapStyle(Qt::FlatCap);
-//		painter->setPen(pen);
+		QRectF logoRect = {r.right() - pinVertGap * 2.0, r.top(), pinVertGap * 2.0, r.height()};
+		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
+		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
 
-//		QLineF leftLine = {QPointF(r.right() - pen.widthF() / 2.0, r.top()),
-//						   QPointF(r.right() - pen.widthF() / 2.0 , r.bottom())};
+		QPen pen(lineColor());
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		painter->setPen(pen);
 
-//		painter->drawLine(leftLine);
+		painter->drawLine(logoRect.topLeft(), logoRect.bottomLeft());
 
-//		// Draw bold output pin
-//		//
-//		if (outputsCount() != 1)
-//		{
-//			assert(outputsCount() == 1);
-//			return;
-//		}
+		DrawHelper::drawText(painter, m_font, itemUnit(), QLatin1String("LB"), logoRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-//		const std::vector<AfbPin>& outputPins = outputs();
-//		const AfbPin& output = outputPins[0];
+		// Draw LoopbackID
+		//
+		QRectF textRect = {r.left(), r.top(), r.width() - logoRect.width(), r.height()};
 
-//		// Get pin position
-//		//
-//		SchemaPoint vip;
-//		GetConnectionPointPos(output.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
+		textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+		textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
 
-//		// Draw pin
-//		//
-//		int dpiX = drawParam->dpiX();
-//		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		painter->setPen(textColor());
 
-//		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
-//		QPointF pt2(drawParam->gridToDpi(vip.X - pinWidth, vip.Y));
-
-//		painter->setPen(pen);
-//		painter->drawLine(pt1, pt2);
-
-//		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
-
-//		if (connectionCount > 1)
-//		{
-//			painter->setBrush(pen.color());
-//			painter->setPen(pen);
-//			DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
-//			painter->setBrush(Qt::NoBrush);
-//		}
-//		else
-//		{
-//			// Draw red cross error mark
-//			//
-//			QPen redPen(QColor(0xE0B00000));
-//			redPen.setWidthF(pen.widthF());
-
-//			painter->setPen(redPen);
-//			DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
-//		}
+		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}
@@ -244,6 +197,20 @@ namespace VFrame30
 	QString SchemaItemLoopbackSource::buildName() const
 	{
 		return QString("LoopbackSource %1").arg(loopbackId());
+	}
+
+	QString SchemaItemLoopbackSource::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Loopback Source: "
+							  "\n\tLoopbackID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit LoopbackID")
+						.arg(loopbackId());
+
+		return str;
 	}
 
 	//
@@ -316,73 +283,35 @@ namespace VFrame30
 	{
 		SchemaItemLoopback::Draw(drawParam, schema, layer);
 
-//		QPainter* painter = drawParam->painter();
+		QPainter* painter = drawParam->painter();
+		QRectF r = itemRectPinIndent(painter->device());
 
-//		// Custom draw
-//		//
-//		QRectF r = itemRectPinIndent(painter->device());
-//		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-//		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
+		// Draw loopback logo
+		//
+		double pinVertGap =	CUtils::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
-//		// Draw bold left line
-//		//
-//		QPen pen(lineColor());
-//		//pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
-//		pen.setWidthF(LoopbackSideLineWidth);
-//		pen.setCapStyle(Qt::FlatCap);
-//		painter->setPen(pen);
+		QRectF logoRect = {r.left(), r.top(), pinVertGap * 2.0, r.height()};
+		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
+		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
 
-//		QLineF leftLine = {QPointF(r.left() + pen.widthF() / 2.0, r.top()),
-//						   QPointF(r.left() + pen.widthF() / 2.0 , r.bottom())};
+		QPen pen(lineColor());
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		painter->setPen(pen);
 
-//		painter->drawLine(leftLine);
+		painter->drawLine(logoRect.topRight(), logoRect.bottomRight());
 
-//		// Draw bold input pin
-//		//
-//		if (inputsCount() != 1)
-//		{
-//			assert(inputsCount() == 1);
-//			return;
-//		}
+		DrawHelper::drawText(painter, m_font, itemUnit(), QLatin1String("LB"), logoRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-//		const std::vector<AfbPin>& inputPins = inputs();
-//		const AfbPin& input = inputPins[0];
+		// Draw LoopbackID
+		//
+		QRectF textRect = {logoRect.right(), r.top(), r.width() - logoRect.width(), r.height()};
 
-//		// Get pin position
-//		//
-//		SchemaPoint vip;
-//		GetConnectionPointPos(input.guid(), &vip, drawParam->gridSize(), drawParam->pinGridStep());
+		textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+		textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
 
-//		// Draw pin
-//		//
-//		int dpiX = drawParam->dpiX();
-//		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		painter->setPen(textColor());
 
-//		QPointF pt1(drawParam->gridToDpi(vip.X, vip.Y));
-//		QPointF pt2(drawParam->gridToDpi(vip.X + pinWidth, vip.Y));
-
-//		painter->setPen(pen);
-//		painter->drawLine(pt1, pt2);
-
-//		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
-
-//		if (connectionCount > 1)
-//		{
-//			painter->setBrush(pen.color());
-//			painter->setPen(pen);
-//			DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
-//			painter->setBrush(Qt::NoBrush);
-//		}
-//		else
-//		{
-//			// Draw red cross error mark
-//			//
-//			QPen redPen(QColor(0xE0B00000));
-//			redPen.setWidthF(pen.widthF());
-
-//			painter->setPen(redPen);
-//			DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
-//		}
+		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}
@@ -390,5 +319,19 @@ namespace VFrame30
 	QString SchemaItemLoopbackTarget::buildName() const
 	{
 		return QString("LoopbackTarget %1").arg(loopbackId());
+	}
+
+	QString SchemaItemLoopbackTarget::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString str = QString("Loopback Target: "
+							  "\n\tLoopbackID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit LoopbackID")
+						.arg(loopbackId());
+
+		return str;
 	}
 }
