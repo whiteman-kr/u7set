@@ -3966,8 +3966,19 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 
 void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 {
-	AUTO_COMPLETE
+	getSignals(signalSet, excludeDeleted, false);
+}
 
+
+void DbWorker::slot_getTuningableSignals(SignalSet* signalSet)
+{
+	getSignals(signalSet, true, true);
+}
+
+
+void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly)
+{
+	AUTO_COMPLETE
 
 	// Check parameters
 	//
@@ -4040,15 +4051,22 @@ void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 			continue;
 		}
 
+		if (tuningableOnly == true && s->enableTuning() == false)
+		{
+			delete s;
+			continue;
+		}
+
 		signalSet->append(s->ID(), s);
 	}
 
-	signalSet->clearID2IndexMap();
+	signalSet->buildID2IndexMap();
 
 	m_progress->setValue(100);
 
 	return;
 }
+
 
 
 void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
