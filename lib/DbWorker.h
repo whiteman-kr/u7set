@@ -137,6 +137,8 @@ public slots:
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
 	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
+	void slot_getTuningableSignals(SignalSet* signalSet);
+	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly);
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
 
