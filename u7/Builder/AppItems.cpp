@@ -541,6 +541,33 @@ namespace Builder
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
+	bool AppFb::isBusProcessingAfb() const
+	{
+		switch(m_isBusProcessingAfb)
+		{
+		case -1:
+			{
+				// isBusProcessingAfbChecking() is not previously called
+				bool isBusProcessingAfb = isBusProcessingAfbChecking();
+
+				m_isBusProcessingAfb = (isBusProcessingAfb == false ? 0 : 1);
+
+				return isBusProcessingAfb;
+			}
+
+		case 0:
+			return false;
+
+		case 1:
+			return true;
+
+		default:
+			assert(false);			// disallowed value of m_isBusProcessingAfb
+		}
+
+		return false;
+	}
+
 	QString AppFb::instantiatorID()
 	{
 		if (m_instantiatorID.isEmpty() == false)
@@ -628,6 +655,24 @@ namespace Builder
 				  QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
 
 		return false;
+	}
+
+	bool AppFb::isBusProcessingAfbChecking() const
+	{
+		const std::vector<Afb::AfbSignal>& inputSignals = afb().inputSignals();
+
+		bool hasBusInputs = false;
+
+		for(const Afb::AfbSignal& afbInSignal : inputSignals)
+		{
+			if (afbInSignal.type() == E::SignalType::Bus)
+			{
+				hasBusInputs = true;
+				break;
+			}
+		}
+
+		return hasBusInputs;
 	}
 
 	bool AppFb::checkRequiredParameters(const QStringList& requiredParams)
@@ -726,6 +771,7 @@ namespace Builder
 
 		return false;
 	}
+
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -961,8 +1007,7 @@ namespace Builder
 
 		// insert "auto" signal bound to AFB output pin
 		//
-
-		const LogicAfbSignal s = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
+		const LogicAfbSignal afbSignal = m_compiler.getAfbSignal(appFb->afb().strID(), outputPin.afbOperandIndex());
 
 		QUuid outPinGuid = outputPin.guid();
 
@@ -971,11 +1016,11 @@ namespace Builder
 		E::AnalogAppSignalFormat analogSignalFormat;
 		int dataSize = 1;
 
-		switch(s.type())
+		switch(afbSignal.type())
 		{
 		case E::SignalType::Analog:
 			{
-				switch(s.dataFormat())		// Afb::AfbDataFormat
+				switch(afbSignal.dataFormat())		// Afb::AfbDataFormat
 				{
 				case E::DataFormat::Float:
 					analogSignalFormat = E::AnalogAppSignalFormat::Float32;
@@ -990,7 +1035,7 @@ namespace Builder
 				case E::DataFormat::UnsignedInt:
 					// Uncompatible data format of analog AFB Signal '%1.%2'
 					//
-					m_log->errALC5057(appFb->afb().caption(), s.caption(), appFb->guid());
+					m_log->errALC5057(appFb->afb().caption(), afbSignal.caption(), appFb->guid());
 					return false;
 
 				default:
@@ -1025,7 +1070,7 @@ namespace Builder
 		}
 		else
 		{
-			appSignal = new AppSignal(outPinGuid, s.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
+			appSignal = new AppSignal(outPinGuid, afbSignal.type(), analogSignalFormat, dataSize, appFb, autoSignalID);
 
 			// auto-signals always connected to output pin, therefore considered computed
 			//

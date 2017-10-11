@@ -298,6 +298,8 @@ namespace Builder
 		void errALC5105(QString signalID, QUuid signalUuid, QString schemaID);			// Undefined UAL address of signal '%1' (Logic schema '%2').
 		void errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID);	// Pin with caption '%1' is not found in schema item (Logic schema '%2').
 		void errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID);		// Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
+		void errALC5108(QUuid afbUuid, QString schemaID);								// Cannot identify AFB bus type (Logic schema %1).
+		void errALC5109(QUuid afbUuid, QString schemaID);								// Different bus types on AFB inputs (Logic schema %1).
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.
@@ -308,6 +310,7 @@ namespace Builder
 		void errALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Tx signal '%1' is defined in port '%2' raw data description isn't connect to transmitter (Connection '%3').
 		void errALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID);	// Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
 		void wrnALC5194(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+
 
 		// EQP			Equipment issues						6000-6999
 		//

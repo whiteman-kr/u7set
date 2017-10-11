@@ -4371,10 +4371,45 @@ namespace Builder
 				  QString(tr("Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.")));
 	}
 
+	/// IssueCode: ALC5108
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Cannot identify AFB bus type (Logic schema %1).
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Cannot identify AFB bus type based on its inputs.
+	///
+	void IssueLogger::errALC5108(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
 
+		LOG_ERROR(IssueType::AlCompiler,
+				  5108,
+				  QString(tr("Cannot identify AFB bus type (Logic schema %1).").arg(schemaID)));
+	}
 
-	void errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID);		// Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
+	/// IssueCode: ALC5109
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types on AFB inputs (Logic schema %1).
+	///
+	/// Parameters:
+	///
+	/// Description:
+	///		Busses of different types is connected to AFB's inputs.
+	///
+	void IssueLogger::errALC5109(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
 
+		LOG_ERROR(IssueType::AlCompiler,
+				  5109,
+				  QString(tr("Different bus types on AFB inputs (Logic schema %1).").arg(schemaID)));
+	}
 
 	//
 

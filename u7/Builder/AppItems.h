@@ -249,6 +249,8 @@ namespace Builder
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
 
+		bool isBusProcessingAfb() const;
+
 		QString instantiatorID();
 
 		void setInstance(quint16 instance) { m_instance = instance; }
@@ -256,6 +258,7 @@ namespace Builder
 
 		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
 		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
+		bool getAfbSignalByPin(const LogicPin pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
 
 		bool calculateFbParamValues(ModuleLogicCompiler *compiler);			// implemented in file FbParamCalculation.cpp
 
@@ -264,6 +267,8 @@ namespace Builder
 		int runTime() const { return m_runTime; }
 
 	private:
+		bool isBusProcessingAfbChecking() const;
+
 		// FB's parameters values and runtime calculations
 		// implemented in file FbParamCalculation.cpp
 		//
@@ -309,6 +314,10 @@ namespace Builder
 		quint16 m_instance = -1;
 		int m_number = -1;
 		QString m_instantiatorID;
+
+		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
+														// 0  - afb is not bus processing element
+														// 1  - afb is bus processing element
 
 		AppFbParamValuesArray m_paramValuesArray;
 
@@ -377,6 +386,8 @@ namespace Builder
 		bool isOutput() const { return m_signal->isOutput(); }
 		bool enableTuning() const { return m_signal->enableTuning(); }
 		int ID() const { return m_signal->ID(); }
+
+		QString busTypeID() const { return m_signal->busTypeID(); }
 
 		bool isCompatibleDataFormat(const LogicAfbSignal& afbSignal) const;
 
