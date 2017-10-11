@@ -503,6 +503,8 @@ private:
 
 	SchemaFindDialog* m_findDialog = nullptr;
 
+	static QString m_lastUsedLoopbackId;
+
 	// Actions
 	//
 private:

@@ -68,6 +68,9 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 	};
 
 
+QString EditSchemaWidget::m_lastUsedLoopbackId = "";
+
+
 void addSchemaItem(const QByteArray& itemData);
 
 
@@ -6066,6 +6069,8 @@ void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> it
 	{
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
 		editSchemaView()->update();
+
+		EditSchemaWidget::m_lastUsedLoopbackId = newValue;
 	}
 
 	return;
@@ -6540,6 +6545,7 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreLoopbacks == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(mimeData->text()), selected);
+			EditSchemaWidget::m_lastUsedLoopbackId = mimeData->text();
 		}
 	}
 
@@ -7066,12 +7072,25 @@ void EditSchemaWidget::addConnectionItem(std::shared_ptr<VFrame30::SchemaItemCon
 void EditSchemaWidget::addLoopbackSource()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackSource>(schema()->unit());
+
+	QString loopbackId = QString("LBID_%1").arg(db()->nextCounterValue());
+	EditSchemaWidget::m_lastUsedLoopbackId = loopbackId;
+
+	schemaItem->setLoopbackId(loopbackId);
+
 	addItem(schemaItem);
+	return;
 }
 
 void EditSchemaWidget::addLoopbackTarget()
 {
 	auto schemaItem = std::make_shared<VFrame30::SchemaItemLoopbackTarget>(schema()->unit());
+
+	if (EditSchemaWidget::m_lastUsedLoopbackId.isEmpty() == false)
+	{
+		schemaItem->setLoopbackId(EditSchemaWidget::m_lastUsedLoopbackId);
+	}
+
 	addItem(schemaItem);
 }
 
