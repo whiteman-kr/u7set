@@ -3283,8 +3283,6 @@ R"DELIM({
 			}
 
 			m_validitySignalId.replace(QLatin1String("$(PLACE)"), QString::number(place()).rightJustified(2, '0'), Qt::CaseInsensitive);
-
-			qDebug() << m_validitySignalId;
 		}
 
 		DeviceObject::expandEquipmentId();

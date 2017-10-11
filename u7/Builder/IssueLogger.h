@@ -169,8 +169,10 @@ namespace Builder
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
 
-		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);
-		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);
+		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
+		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
+
+		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
 
 		// Multichannel pasing errors
 		//

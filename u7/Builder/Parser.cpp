@@ -1233,7 +1233,7 @@ namespace Builder
 				if (foundDepIterator == itemsWithInputs.end())
 				{
 					assert(foundDepIterator != itemsWithInputs.end());
-					log->errINT1001("Output was not fount in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
+					log->errINT1001("Output was not found in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
 					continue;
 				}
 
@@ -1284,7 +1284,7 @@ namespace Builder
 
 				if (dependantIsAbove != currentIt)
 				{
-					// Save hostory, if this is the third switch item, then skip it
+					// Save history
 					//
 					auto histForCurrentItem = std::find_if(
 												  changeOrderHistory.begin(),
@@ -1304,6 +1304,14 @@ namespace Builder
 					}
 					else
 					{
+#define STRICT_LOOPBACK
+#ifdef STRICT_LOOPBACK
+						// if this is the second switch, then it's error, user LoopbackSource/Target to make it right
+						//
+						log->errALP4060(currentItem.m_schema->schemaId(), currentItem.m_fblItem->buildName(), currentItem.m_fblItem->guid());
+#endif
+						// if this is the third switch item, then skip it
+						//
 						int switchCounter = histForCurrentItem->getChangeCount(*dependantIsAbove);
 
 						if (switchCounter == 2)
@@ -1314,6 +1322,7 @@ namespace Builder
 						{
 							histForCurrentItem->incChangeCount(*dependantIsAbove);
 						}
+
 					}
 
 					// Dependant item is above currentItem, so let's move currentItem right before dependand one
@@ -1321,7 +1330,8 @@ namespace Builder
 					//
 					auto tempIter = currentIt;
 
-					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and part of the algorithm!
+					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and
+																					// the part of the the algorithm!
 
 					orderedItems.erase(tempIter);
 
@@ -1335,7 +1345,8 @@ namespace Builder
 				orderedItems.insert(std::next(currentIt), dep);
 				remainItems.erase(dep.m_fblItem->guid());
 
-				// process other dependtants, do not break!
+				// Process other dependtants, do not break!
+				//
 			}
 		}
 
