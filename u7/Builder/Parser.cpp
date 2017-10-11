@@ -738,7 +738,7 @@ namespace Builder
 	{
 		// Params:
 		//	groupId: is used for marking all UFB items as a single group, for AppLogic it can be null
-		//	label: is used to make new labels for UFB
+		//	label: is used to make new labels for UFBs
 		//
 
 		// Make a copy of ordered items
@@ -801,6 +801,14 @@ namespace Builder
 				oldToNewPins[pin.guid()] = newPinGuid;
 
 				pin.setGuid(newPinGuid);
+			}
+
+			// Set new loopbackIds
+			//
+			if (ali.m_fblItem->isType<VFrame30::SchemaItemLoopback>() == true)
+			{
+				auto loopbackItem = ali.m_fblItem->toType<VFrame30::SchemaItemLoopback>();
+				loopbackItem->setLoopbackId(label + "_" + loopbackItem->loopbackId());
 			}
 		}
 
