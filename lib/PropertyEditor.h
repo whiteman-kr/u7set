@@ -61,6 +61,8 @@ namespace ExtWidgets
 	public:
 		PropertyTextEditor(QWidget* parent);
 
+        virtual ~PropertyTextEditor();
+
 		virtual void setText(const QString& text) = 0;
 
 		virtual QString text() = 0;
@@ -393,7 +395,7 @@ namespace ExtWidgets
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
-		virtual PropertyTextEditor* createCodeEditor(bool script, QWidget* parent);
+        virtual PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent);
 
 	protected slots:
 		void updateProperties();
