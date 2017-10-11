@@ -2561,7 +2561,13 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addOutputSignalAction);
 			m_addMenu->addAction(m_addConstantAction);
 			m_addMenu->addAction(m_addTerminatorAction);
+
+			m_addMenu->addAction(m_addSeparatorAfb);
 			m_addMenu->addAction(m_addAfbAction);
+
+			m_addMenu->addAction(m_addSeparatorLoop);
+			m_addMenu->addAction(m_addLoopbackSource);
+			m_addMenu->addAction(m_addLoopbackTarget);
 
 			m_addMenu->addAction(m_addSeparatorBus);
 			m_addMenu->addAction(m_addBusComposer);

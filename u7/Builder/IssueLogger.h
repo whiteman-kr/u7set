@@ -173,6 +173,7 @@ namespace Builder
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
 
 		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
+		void errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids);	// Duplicate source of LoopbackID
 
 		// Multichannel pasing errors
 		//

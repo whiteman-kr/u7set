@@ -1795,6 +1795,30 @@ namespace Builder
 				  .arg(schemaItem));
 	}
 
+	/// IssueCode: ALP4061
+	///
+	/// IssueType: Error
+	///
+	/// Title: Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.
+	///
+	/// Parameters:
+	///		%1 LoopbackID
+	///		%2 Logic schema ID
+	///
+	/// Description:
+	///		Two or more LoopbackSource have the same LoopbackID.
+	///
+	void IssueLogger::errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuids, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4061,
+				  tr("Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.")
+				  .arg(loopbackId)
+				  .arg(schema));
+	}
+
 	/// IssueCode: ALP4130
 	///
 	/// IssueType: Error
