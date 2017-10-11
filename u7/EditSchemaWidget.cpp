@@ -84,7 +84,6 @@ const char* SchemaItemClipboardData::mimeType = "application/x-radiyschemaset";
 //
 EditSchemaView::EditSchemaView(QWidget* parent) :
 	VFrame30::SchemaView(parent),
-	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
 	m_editEndMovingEdge(0),
@@ -99,7 +98,6 @@ EditSchemaView::EditSchemaView(QWidget* parent) :
 
 EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
 	: VFrame30::SchemaView(schema, parent),
-	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_editStartMovingEdge(0),
 	m_editEndMovingEdge(0),
@@ -1625,41 +1623,17 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 QUuid EditSchemaView::activeLayerGuid() const
 {
-	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
-	{
-		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
-		return QUuid();
-	}
-
-	return schema()->Layers[m_activeLayer]->guid();
+	return schema()->activeLayerGuid();
 }
 
 std::shared_ptr<VFrame30::SchemaLayer> EditSchemaView::activeLayer()
 {
-	if (m_activeLayer >= static_cast<int>(schema()->Layers.size()))
-	{
-		assert(m_activeLayer < static_cast<int>(schema()->Layers.size()));
-		return std::make_shared<VFrame30::SchemaLayer>("Error", false);
-	}
-
-	return schema()->Layers[m_activeLayer];
+	return schema()->activeLayer();
 }
 
 void EditSchemaView::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
 {
-	for (int i = 0; i < static_cast<int>(schema()->Layers.size()); i++)
-	{
-		if (schema()->Layers[i] == layer)
-		{
-			m_activeLayer = i;
-			return;
-		}
-	}
-
-	// Layer was not found
-	//
-	assert(false);
-	return;
+	return schema()->setActiveLayer(layer);
 }
 
 MouseState EditSchemaView::mouseState() const
@@ -2660,7 +2634,6 @@ bool EditSchemaWidget::event(QEvent* e)
 		{
 			setToolTip("");
 		}
-
 
 		return VFrame30::BaseSchemaWidget::event(e);
 	}

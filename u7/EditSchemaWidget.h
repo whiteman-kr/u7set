@@ -163,7 +163,6 @@ public:
 	// Data
 	//
 private:
-	int m_activeLayer;
 	MouseState m_mouseState;
 
 protected:

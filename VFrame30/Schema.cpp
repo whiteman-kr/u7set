@@ -144,6 +144,11 @@ namespace VFrame30
 			}
 			
 			Layers.push_back(layer);
+
+			if (layer->compile() == true)
+			{
+				m_activeLayer = i;
+			}
 		}
 
 		if (schema.layers().size() != (int)Layers.size())
@@ -958,6 +963,54 @@ namespace VFrame30
 	void Schema::setUnit(SchemaUnit value)
 	{
 		m_unit = value;
+	}
+
+	int Schema::activeLayerIndex() const
+	{
+		return m_activeLayer;
+	}
+
+	QUuid Schema::activeLayerGuid() const
+	{
+		try
+		{
+			return Layers.at(m_activeLayer)->guid();
+		}
+		catch (...)
+		{
+			assert(false);
+			return QUuid();
+		}
+	}
+
+	std::shared_ptr<VFrame30::SchemaLayer> Schema::activeLayer() const
+	{
+		try
+		{
+			return Layers.at(m_activeLayer);
+		}
+		catch (...)
+		{
+			assert(false);
+			return std::shared_ptr<VFrame30::SchemaLayer>();
+		}
+	}
+
+	void Schema::setActiveLayer(std::shared_ptr<VFrame30::SchemaLayer> layer)
+	{
+		for (int i = 0; i < static_cast<int>(Layers.size()); i++)
+		{
+			if (Layers[i] == layer)
+			{
+				m_activeLayer = i;
+				return;
+			}
+		}
+
+		// Layer was not found
+		//
+		assert(false);
+		return;
 	}
 
 	double Schema::gridSize() const
