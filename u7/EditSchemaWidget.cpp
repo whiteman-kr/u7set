@@ -2623,6 +2623,10 @@ bool EditSchemaWidget::event(QEvent* e)
 			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
 			setToolTip(toolTip);
 		}
+		else
+		{
+			setToolTip("");
+		}
 
 		return VFrame30::BaseSchemaWidget::event(e);
 	}
