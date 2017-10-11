@@ -181,20 +181,19 @@ SOURCES +=\
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    DialogTuningFiltersEditor.cpp \
     ../lib/Tuning/TuningModel.cpp \
     LogicModule.cpp \
     Builder/ComparatorStorage.cpp \
     Builder/RawDataDescription.cpp \
     ../lib/Tuning/TuningSignalStorage.cpp \
     ../lib/AppSignal.cpp \
-    CodeEditor.cpp \
     ../lib/CsvFile.cpp \
     Builder/AppItems.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
-    Forms/ChooseAfbDialog.cpp
+    Forms/ChooseAfbDialog.cpp \
+    IdePropertyEditor.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -313,21 +312,20 @@ HEADERS  += \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningSignalState.h \
-    DialogTuningFiltersEditor.h \
     ../lib/Tuning/TuningModel.h \
     LogicModule.h \
     Builder/ComparatorStorage.h \
     Builder/RawDataDescription.h \
     ../lib/Tuning/TuningSignalStorage.h \
     ../lib/AppSignal.h \
-    CodeEditor.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
     Builder/AppItems.h \
     DialogBusEditor.h \
     DbObjectStorage.h \
     BusStorage.h \
-    Forms/DialogUpdateFromPreset.h
+    Forms/DialogUpdateFromPreset.h \
+    IdePropertyEditor.h
 
 FORMS    += \
     CreateProjectDialog.ui \

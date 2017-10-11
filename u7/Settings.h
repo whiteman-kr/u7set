@@ -129,6 +129,13 @@ public:
 	QPoint m_scriptHelpWindowPos;
 	QByteArray m_scriptHelpWindowGeometry;
 
+    // Tuning Filters editor Options
+    //
+    QList<int> m_tuningFiltersSignalsTableColumnWidth;
+    QList<int> m_tuningFiltersPresetsTreeColumnWidth;
+    int m_tuningFiltersPropertyEditorSplitterPos = -1;
+    QByteArray m_tuningFiltersPropertyEditorGeometry;
+
 	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;

@@ -242,9 +242,10 @@ public:
 
 	// Serialization
 
-	bool load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source);
-
+    bool load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source);
 	bool load(const QString& fileName, QString* errorCode, TuningFilter::FilterSource source);
+
+    bool save(QByteArray& data);
 	bool save(const QString& fileName, QString* errorMsg);
 
 	bool copyToClipboard(std::vector<std::shared_ptr<TuningFilter>> filters);

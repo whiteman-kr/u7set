@@ -6,15 +6,11 @@
 //
 
 TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
-									   std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth,
-									   QPoint pos,
-									   QByteArray geometry,
-									   QWidget* parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+                                       const QList<int> &signalsTableColumnWidth, const QList<int> &presetsTreeColumnWidth, int propertyEditorSplitterPos, const QByteArray& propertyEditorGeometry) :
 	m_filterStorage(filterStorage),
 	m_signals(objects),
-	m_signalsTableColumnWidth(signalsTableColumnWidth),
-	m_presetsTreeColumnWidth(presetsTreeColumnWidth)
+    m_propertyEditorSplitterPos(propertyEditorSplitterPos),
+    m_propertyEditorGeometry(propertyEditorGeometry)
 {
 
 	assert(filterStorage);
@@ -36,7 +32,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 
 	// Set column width
 
-	if (m_signalsTableColumnWidth.empty() == true)
+    if (signalsTableColumnWidth.isEmpty() == true)
 	{
 		m_signalsTable->resizeColumnsToContents();
 	}
@@ -45,14 +41,14 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 		int w = 0;
 		for (int c = 0; c < m_model->columnCount(); c++)
 		{
-			m_signalsTable->setColumnWidth(c, m_signalsTableColumnWidth[w++]);
+            m_signalsTable->setColumnWidth(c, signalsTableColumnWidth[w++]);
 
-			if (w >= m_signalsTableColumnWidth.size())
+            if (w >= signalsTableColumnWidth.size())
 			{
 				break;
 			}
 		}
-	}
+    }
 
 	// Add presets to tree
 	//
@@ -66,10 +62,10 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 			return;
 		}
 
-		if (f->isSourceUser() == false)
-		{
-			continue;
-		}
+        if (f->isSourceUser() == false)
+        {
+            continue;
+        }
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		setFilterItemText(item, f.get());
@@ -83,7 +79,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 
 	// Set column width
 
-	if (m_presetsTreeColumnWidth.empty() == true)
+    if (presetsTreeColumnWidth.empty() == true)
 	{
 		for (int i = 0; i < m_presetsTree->columnCount(); i++)
 		{
@@ -95,44 +91,44 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 		int w = 0;
 		for (int c = 0; c < m_presetsTree->columnCount(); c++)
 		{
-			m_presetsTree->setColumnWidth(c, m_presetsTreeColumnWidth[w++]);
+            m_presetsTree->setColumnWidth(c, presetsTreeColumnWidth[w++]);
 
-			if (w >= m_presetsTreeColumnWidth.size())
+            if (w >= presetsTreeColumnWidth.size())
 			{
 				break;
 			}
 		}
-	}
+    }
 
 	//
-
-	if (pos.x() != -1 && pos.y() != -1)
-	{
-		move(pos);
-		restoreGeometry(geometry);
-	}
-	else
-	{
-		resize(1024, 768);
-	}
-
 }
 
 TuningFilterEditor::~TuningFilterEditor()
 {
-	m_signalsTableColumnWidth.clear();
-	for (int i = 0; i < m_model->columnCount(); i++)
-	{
-		m_signalsTableColumnWidth.push_back(m_signalsTable->columnWidth(i));
-	}
+}
 
-	m_presetsTreeColumnWidth.clear();
-	for (int i = 0; i < m_presetsTree->columnCount(); i++)
-	{
-		m_presetsTreeColumnWidth.push_back(m_presetsTree->columnWidth(i));
-	}
+QList<int> TuningFilterEditor::saveSignalsTableColumnWidth()
+{
+    QList<int> result;
 
-	emit editorClosing(m_signalsTableColumnWidth, m_presetsTreeColumnWidth, pos(), saveGeometry());
+    for (int i = 0; i < m_model->columnCount(); i++)
+    {
+        result.push_back(m_signalsTable->columnWidth(i));
+    }
+
+    return result;
+}
+
+QList<int> TuningFilterEditor::savePresetsTreeColumnWidth()
+{
+    QList<int> result;
+
+    for (int i = 0; i < m_presetsTree->columnCount(); i++)
+    {
+        result.push_back(m_presetsTree->columnWidth(i));
+    }
+
+    return result;
 }
 
 void TuningFilterEditor::initUserInterface()
@@ -342,20 +338,11 @@ void TuningFilterEditor::initUserInterface()
 	m_presetsTreeContextMenu->addAction(m_setCurrentAction);
 	//
 
-	m_saveButton = new QPushButton(tr("Save"));
-	connect(m_saveButton, &QPushButton::clicked, this, &TuningFilterEditor::accept);
 
-	m_cancelButton = new QPushButton(tr("Cancel"));
-	connect(m_cancelButton, &QPushButton::clicked, this, &TuningFilterEditor::reject);
-
-	QHBoxLayout* okCancelButtonsLayout = new QHBoxLayout();
-	okCancelButtonsLayout->addStretch();
-	okCancelButtonsLayout->addWidget(m_saveButton);
-	okCancelButtonsLayout->addWidget(m_cancelButton);
 
 
 	mainLayout->addLayout(mainHorzLayout);
-	mainLayout->addLayout(okCancelButtonsLayout);
+
 
 	setLayout(mainLayout);
 }
@@ -574,10 +561,10 @@ void TuningFilterEditor::addChildTreeObjects(const std::shared_ptr<TuningFilter>
 			continue;
 		}
 
-		if (f->isSourceUser() == false)
-		{
-			continue;
-		}
+        if (f->isSourceUser() == false)
+        {
+            continue;
+        }
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		setFilterItemText(item, f.get());
@@ -755,6 +742,16 @@ void TuningFilterEditor::on_m_editPreset_clicked()
 
 	PropertyEditorDialog d(this);
 
+    if (m_propertyEditorSplitterPos > 50)
+    {
+        d.setSplitterPosition(m_propertyEditorSplitterPos);
+        d.restoreGeometry(m_propertyEditorGeometry);
+    }
+    else
+    {
+        d.setSplitterPosition(100);
+    }
+
 	d.setReadOnly(readOnly);
 
 	d.setObject(editFilter);
@@ -765,6 +762,9 @@ void TuningFilterEditor::on_m_editPreset_clicked()
 
 		m_modified = true;
 	}
+
+    m_propertyEditorSplitterPos = d.splitterPosition();
+    m_propertyEditorGeometry = d.saveGeometry();
 }
 
 void TuningFilterEditor::on_m_removePreset_clicked()
@@ -1276,8 +1276,9 @@ void TuningFilterEditor::on_m_setCurrent_clicked()
 		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
 
 		bool ok = false;
+        float newValue = 0;
 
-		double newValue = getCurrentSignalValue(ov.appSignalHash(), ok);
+        emit getCurrentSignalValue(ov.appSignalHash(), &newValue, &ok);
 
 		if (ok == true)
 		{
@@ -1322,14 +1323,6 @@ void TuningFilterEditor::on_m_signalsTable_doubleClicked(const QModelIndex& inde
 void TuningFilterEditor::slot_signalsUpdated()
 {
 	fillObjectsList();
-}
-
-float TuningFilterEditor::getCurrentSignalValue(Hash appSignalHash, bool& ok)
-{
-	Q_UNUSED(appSignalHash);
-	ok = false;
-
-	return 0;
 }
 
 void TuningFilterEditor::sortIndicatorChanged(int column, Qt::SortOrder order)

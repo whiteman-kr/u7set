@@ -47,6 +47,7 @@ Settings::Settings():
 	m_configuratorPort2(PORT_CONFIGURATION_SERVICE_REQUEST),
 	m_language("en")
 {
+    qRegisterMetaTypeStreamOperators<QList<int> >("QList<int>");
 }
 
 void Settings::StoreSystem()
@@ -172,20 +173,13 @@ void Settings::StoreUser()
 
 	// Preset editor
 
-	s.setValue("PresetEditor/pos", m_presetEditorPos);
-	s.setValue("PresetEditor/geometry", m_presetEditorGeometry);
+    s.setValue("TuningFiltersEditor/pos", m_presetEditorPos);
+    s.setValue("TuningFiltersEditor/geometry", m_presetEditorGeometry);
 
-	s.setValue("PresetEditor/signalsColumnCount", static_cast<uint>(m_presetEditorSignalsTableColumnWidth.size()));
-	for (int i = 0; i < m_presetEditorSignalsTableColumnWidth.size(); i++)
-	{
-		s.setValue(QString("PresetEditor/signalsColumnWidth/column%1").arg(i), m_presetEditorSignalsTableColumnWidth[i]);
-	}
-
-	s.setValue("PresetEditor/presetsColumnCount", static_cast<uint>(m_presetEditorPresetsTreeColumnWidth.size()));
-	for (int i = 0; i < m_presetEditorPresetsTreeColumnWidth.size(); i++)
-	{
-		s.setValue(QString("PresetEditor/presetsColumnWidth/column%1").arg(i), m_presetEditorPresetsTreeColumnWidth[i]);
-	}
+    s.setValue("TuningFiltersEditor/SignalsTableColumnWidth", QVariant::fromValue(m_presetEditorSignalsTableColumnWidth));
+    s.setValue("TuningFiltersEditor/PresetsTreeColumnWidth", QVariant::fromValue(m_presetEditorPresetsTreeColumnWidth));
+    s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_presetEditorPropertyEditorSplitterPos);
+    s.setValue("TuningFiltersEditor/PropertyEditorGeometry", m_presetEditorPropertyEditorGeometry);
 
 	//
 
@@ -232,20 +226,13 @@ void Settings::RestoreUser()
 
 	// Preset Editor
 
-	m_presetEditorPos = s.value("PresetEditor/pos", QPoint(-1, -1)).toPoint();
-	m_presetEditorGeometry = s.value("PresetEditor/geometry").toByteArray();
+    m_presetEditorPos = s.value("TuningFiltersEditor/pos", QPoint(-1, -1)).toPoint();
+    m_presetEditorGeometry = s.value("TuningFiltersEditor/geometry").toByteArray();
 
-	int count = s.value("PresetEditor/signalsColumnCount", 0).toInt();
-	for (int i = 0; i < count; i++)
-	{
-		m_presetEditorSignalsTableColumnWidth.push_back(s.value(QString("PresetEditor/signalsColumnWidth/column%1").arg(i)).toInt());
-	}
-
-	count = s.value("PresetEditor/presetsColumnCount", 0).toInt();
-	for (int i = 0; i < count; i++)
-	{
-		m_presetEditorPresetsTreeColumnWidth.push_back(s.value(QString("PresetEditor/presetsColumnWidth/column%1").arg(i)).toInt());
-	}
+    m_presetEditorSignalsTableColumnWidth = s.value("TuningFiltersEditor/SignalsTableColumnWidth").value<QList<int>>();
+    m_presetEditorPresetsTreeColumnWidth = s.value("TuningFiltersEditor/PresetsTreeColumnWidth").value<QList<int> >();
+    m_presetEditorPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
+    m_presetEditorPropertyEditorGeometry = s.value("TuningFiltersEditor/PropertyEditorGeometry").toByteArray();
 
 	//
 

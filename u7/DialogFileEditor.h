@@ -2,7 +2,7 @@
 #define DIALOGFILEEDITOR_H
 
 #include <QDialog>
-#include "CodeEditor.h"
+#include "IdePropertyEditor.h"
 #include "../lib/DbController.h"
 
 class DialogFileEditor : public QDialog
@@ -32,7 +32,7 @@ private:
 
 	bool m_readOnly = false;
 
-	CodeEditor* m_editor = nullptr;
+	IdeCodeEditor* m_editor = nullptr;
 	QPushButton* m_buttonOK = nullptr;
 	QPushButton* m_buttonCancel = nullptr;
 };

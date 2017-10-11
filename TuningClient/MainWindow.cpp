@@ -8,7 +8,7 @@
 #include "../lib/Tuning/TuningFilter.h"
 #include "DialogTuningSources.h"
 #include "DialogUsers.h"
-#include "TuningClientFilterEditor.h"
+#include "DialogFilterEditor.h"
 #include "version.h"
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -382,14 +382,6 @@ void MainWindow::slot_configurationArrived()
 	return;
 }
 
-void MainWindow::slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry)
-{
-	theSettings.m_presetEditorSignalsTableColumnWidth = signalsTableColumnWidth;
-	theSettings.m_presetEditorPresetsTreeColumnWidth = presetsTreeColumnWidth;
-	theSettings.m_presetEditorPos = pos;
-	theSettings.m_presetEditorGeometry = geometry;
-}
-
 void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 {
 	QString errorStr;
@@ -437,15 +429,11 @@ void MainWindow::runPresetEditor()
 
 	TuningSignalStorage objects = m_objectManager->signalsStorage();
 
-	TuningClientFilterEditor d(m_objectManager, &editFilters, &objects,
-							   theSettings.m_presetEditorSignalsTableColumnWidth,
-							   theSettings.m_presetEditorPresetsTreeColumnWidth,
-							   theSettings.m_presetEditorPos,
-							   theSettings.m_presetEditorGeometry,
+	DialogFilterEditor d(m_objectManager, &editFilters, &objects,
 							   this);
 
-	connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
-	connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
+    //connect(&d, &TuningFilterEditor::editorClosing, this, &MainWindow::slot_presetsEditorClosing);
+    //connect(&m_configController, &ConfigController::signalsArrived, &d, &TuningFilterEditor::slot_signalsUpdated);
 
 	if (d.exec() == QDialog::Accepted)
 	{
