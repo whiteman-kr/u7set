@@ -84,6 +84,11 @@ namespace ExtWidgets
 
 	}
 
+    PropertyTextEditor::~PropertyTextEditor()
+    {
+
+    }
+
 	bool PropertyTextEditor::modified()
 	{
 		return m_modified;
@@ -501,7 +506,7 @@ namespace ExtWidgets
 
 		// Create Editor
 
-		m_editor = m_propertyEditor->createCodeEditor(m_property->isScript() == true, this);
+        m_editor = m_propertyEditor->createCodeEditor(m_property.get(), this);
 
 		m_editor->setText(text);
 
@@ -2098,9 +2103,9 @@ namespace ExtWidgets
 		return;
 	}
 
-	PropertyTextEditor* PropertyEditor::createCodeEditor(bool script, QWidget* parent)
+    PropertyTextEditor* PropertyEditor::createCodeEditor(Property* property, QWidget* parent)
 	{
-		Q_UNUSED(script);
+        Q_UNUSED(property);
 		return new PropertyPlainTextEditor(parent);
 	}
 

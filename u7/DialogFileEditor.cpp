@@ -30,9 +30,9 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 		}
 	}
 
-	m_editor = new CodeEditor(codeType, this);
+	m_editor = new IdeCodeEditor(codeType, this);
 
-	connect(m_editor, &CodeEditor::escapePressed, this, &QDialog::reject);
+	connect(m_editor, &IdeCodeEditor::escapePressed, this, &QDialog::reject);
 
 	if (m_editor == nullptr)
 	{

@@ -7238,7 +7238,7 @@ namespace Builder
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
-		QVector<int>& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
+		QVector<int> sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
 		qSort(sortedWriteAddress);
 

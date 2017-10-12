@@ -7,32 +7,29 @@
 #include "TuningModel.h"
 
 
-class TuningFilterEditor : public QDialog
+class TuningFilterEditor : public QWidget
 {
 	Q_OBJECT
 
 public:
 
 	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
-								std::vector<int>& signalsTableColumnWidth, std::vector<int>& presetsTreeColumnWidth,
-								QPoint pos,
-								QByteArray geometry,
-								QWidget* parent);
+                                const QList<int>& signalsTableColumnWidth, const QList<int>& presetsTreeColumnWidth,
+                                int propertyEditorSplitterPos, const QByteArray& propertyEditorGeometry);
 
 	~TuningFilterEditor();
+
+    QList<int> saveSignalsTableColumnWidth();
+    QList<int> savePresetsTreeColumnWidth();
 
 
 signals:
 
-	void editorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
+    void getCurrentSignalValue(Hash appSignalHash, float* value, bool* ok);
 
 public slots:
 
 	void slot_signalsUpdated();
-
-protected:
-
-	virtual float getCurrentSignalValue(Hash appSignalHash, bool& ok);
 
 private slots:
 
@@ -165,11 +162,6 @@ private:
 
 	QMenu* m_presetsTreeContextMenu = nullptr;
 
-
-	//QDialogButtonBox* m_okCancelButtonBox = nullptr;
-	QPushButton* m_saveButton = nullptr;
-	QPushButton* m_cancelButton = nullptr;
-
 	// Dialog Data
 	//
 
@@ -187,8 +179,13 @@ private:
 
 	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 
-	std::vector <int> m_signalsTableColumnWidth;
-	std::vector <int> m_presetsTreeColumnWidth;
+public:
+
+    // Apperance
+    //
+
+    int m_propertyEditorSplitterPos = -1;
+    QByteArray m_propertyEditorGeometry;
 };
 
 #endif // DIALOGPRESETEDITOR_H

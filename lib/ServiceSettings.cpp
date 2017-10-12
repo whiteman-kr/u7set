@@ -372,6 +372,11 @@ bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, 
 
 			tc.sourcesIDs = sourcesIDs.split("\n", QString::SkipEmptyParts);
 
+			for (QString& id : tc.sourcesIDs)
+			{
+				id = id.trimmed();
+			}
+
 			this->clients.append(tc);
 		}
 	);
@@ -576,6 +581,8 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 			{
 				break;
 			}
+
+			sourceID = sourceID.trimmed();
 
 			tc.sourcesIDs.append(sourceID);
 		}

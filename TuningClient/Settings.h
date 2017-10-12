@@ -148,8 +148,10 @@ public:
 	QPoint m_presetEditorPos;
 	QByteArray m_presetEditorGeometry;
 
-	std::vector<int> m_presetEditorSignalsTableColumnWidth;
-	std::vector<int> m_presetEditorPresetsTreeColumnWidth;
+    QList<int> m_presetEditorSignalsTableColumnWidth;
+    QList<int> m_presetEditorPresetsTreeColumnWidth;
+    int m_presetEditorPropertyEditorSplitterPos = -1;
+    QByteArray m_presetEditorPropertyEditorGeometry;
 
 
 
