@@ -133,10 +133,8 @@ void Settings::writeUserScope() const
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
 	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 
-    s.setValue("TuningFiltersEditor/SignalsTableColumnWidth", QVariant::fromValue(m_tuningFiltersSignalsTableColumnWidth));
-    s.setValue("TuningFiltersEditor/PresetsTreeColumnWidth", QVariant::fromValue(m_tuningFiltersPresetsTreeColumnWidth));
+	s.setValue("TuningFiltersEditor/DialogChooseSignalGeometry", m_tuningFiltersDialogChooseSignalGeometry);
     s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
-    s.setValue("TuningFiltersEditor/PropertyEditorGeometry", m_tuningFiltersPropertyEditorGeometry);
 
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
@@ -206,10 +204,8 @@ void Settings::loadUserScope()
 	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
 	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 
-    m_tuningFiltersSignalsTableColumnWidth = s.value("TuningFiltersEditor/SignalsTableColumnWidth").value<QList<int>>();
-    m_tuningFiltersPresetsTreeColumnWidth = s.value("TuningFiltersEditor/PresetsTreeColumnWidth").value<QList<int>>();
+	m_tuningFiltersDialogChooseSignalGeometry = s.value("TuningFiltersEditor/DialogChooseSignalGeometry").toByteArray();
     m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
-    m_tuningFiltersPropertyEditorGeometry = s.value("TuningFiltersEditor/PropertyEditorGeometry").toByteArray();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
 	if (m_loginCompleter.isEmpty() == true)

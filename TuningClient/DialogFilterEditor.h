@@ -18,7 +18,7 @@ private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-    QPushButton* m_saveButton = nullptr;
+    QPushButton* m_okButton = nullptr;
     QPushButton* m_cancelButton = nullptr;
 
 private slots:

@@ -130,7 +130,7 @@ bool QsciLexerXML::defaultEolFill(int style) const
 // Returns the font of the text for a style.
 QFont QsciLexerXML::defaultFont(int style) const
 {
-    QFont f;
+	/*QFont f;
 
     switch (style)
     {
@@ -157,7 +157,10 @@ QFont QsciLexerXML::defaultFont(int style) const
         f = QsciLexerHTML::defaultFont(style);
     }
 
-    return f;
+
+	return f;*/
+
+	return QsciLexer::defaultFont(style);
 }
 
 
