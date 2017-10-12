@@ -24,6 +24,52 @@ namespace Builder
 	{
 	}
 
+	bool LogicAfb::isBusProcessingAfb() const
+	{
+		switch(m_isBusProcessingAfb)
+		{
+		case -1:
+			{
+				// isBusProcessingAfbChecking() is not previously called
+				bool isBusProcessingAfb = isBusProcessingAfbChecking();
+
+				m_isBusProcessingAfb = (isBusProcessingAfb == false ? 0 : 1);
+
+				return isBusProcessingAfb;
+			}
+
+		case 0:
+			return false;
+
+		case 1:
+			return true;
+
+		default:
+			assert(false);			// disallowed value of m_isBusProcessingAfb
+		}
+
+		return false;
+	}
+
+	bool LogicAfb::isBusProcessingAfbChecking() const
+	{
+		const std::vector<Afb::AfbSignal>& inputSignals = afb().inputSignals();
+
+		bool hasBusInputs = false;
+
+		for(const Afb::AfbSignal& afbInSignal : inputSignals)
+		{
+			if (afbInSignal.type() == E::SignalType::Bus)
+			{
+				hasBusInputs = true;
+				break;
+			}
+		}
+
+		return hasBusInputs;
+	}
+
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AfbMap class implementation
@@ -541,33 +587,6 @@ namespace Builder
 		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
 	}
 
-	bool AppFb::isBusProcessingAfb() const
-	{
-		switch(m_isBusProcessingAfb)
-		{
-		case -1:
-			{
-				// isBusProcessingAfbChecking() is not previously called
-				bool isBusProcessingAfb = isBusProcessingAfbChecking();
-
-				m_isBusProcessingAfb = (isBusProcessingAfb == false ? 0 : 1);
-
-				return isBusProcessingAfb;
-			}
-
-		case 0:
-			return false;
-
-		case 1:
-			return true;
-
-		default:
-			assert(false);			// disallowed value of m_isBusProcessingAfb
-		}
-
-		return false;
-	}
-
 	QString AppFb::instantiatorID()
 	{
 		if (m_instantiatorID.isEmpty() == false)
@@ -610,7 +629,7 @@ namespace Builder
 
 	bool AppFb::getAfbParamByIndex(int index, LogicAfbParam* afbParam) const
 	{
-		for(LogicAfbParam param : afb().params())
+		for(const LogicAfbParam& param : afb().params())
 		{
 			if (param.operandIndex() == index)
 			{
@@ -620,7 +639,7 @@ namespace Builder
 		}
 
 		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Not found parameter with opIndex = %1 int FB %2")).arg(index).arg(caption()));
+				  QString(tr("Not found parameter with opIndex = %1 in FB %2")).arg(index).arg(caption()));
 
 		return false;
 	}
@@ -633,7 +652,7 @@ namespace Builder
 			return false;
 		}
 
-		for(LogicAfbSignal input : afb().inputSignals())
+		for(const LogicAfbSignal& input : afb().inputSignals())
 		{
 			if (input.operandIndex() == index)
 			{
@@ -642,7 +661,7 @@ namespace Builder
 			}
 		}
 
-		for(LogicAfbSignal output : afb().outputSignals())
+		for(const LogicAfbSignal& output : afb().outputSignals())
 		{
 			if (output.operandIndex() == index)
 			{
@@ -652,28 +671,40 @@ namespace Builder
 		}
 
 		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-				  QString(tr("Not found signal with opIndex = %1 int FB %2")).arg(index).arg(caption()));
+				  QString(tr("Not found signal with opIndex = %1 in FB %2")).arg(index).arg(caption()));
 
 		return false;
 	}
 
-	bool AppFb::isBusProcessingAfbChecking() const
+	bool AppFb::getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const
 	{
-		const std::vector<Afb::AfbSignal>& inputSignals = afb().inputSignals();
-
-		bool hasBusInputs = false;
-
-		for(const Afb::AfbSignal& afbInSignal : inputSignals)
+		if (afbSignal == nullptr)
 		{
-			if (afbInSignal.type() == E::SignalType::Bus)
+			return false;
+		}
+
+		for(const LogicPin& inPin : inputs())
+		{
+			if (inPin.guid() == pinUuid)
 			{
-				hasBusInputs = true;
-				break;
+				return getAfbSignalByPin(inPin, afbSignal);
 			}
 		}
 
-		return hasBusInputs;
+		for(const LogicPin& outPin : outputs())
+		{
+			if (outPin.guid() == pinUuid)
+			{
+				return getAfbSignalByPin(outPin, afbSignal);
+			}
+		}
+
+		LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+				  QString(tr("Not found signal with pin Uuidx = %1 in FB %2")).arg(pinUuid.toString()).arg(caption()));
+
+		return false;
 	}
+
 
 	bool AppFb::checkRequiredParameters(const QStringList& requiredParams)
 	{
@@ -1058,15 +1089,11 @@ namespace Builder
 			assert(false);
 		}
 
-		AppSignal* appSignal = nullptr;
+		AppSignal* appSignal = m_signalStrIdMap.value(autoSignalID, nullptr);
 
-		if (m_signalStrIdMap.contains(autoSignalID))
+		if (appSignal != nullptr)
 		{
 			assert(false);							// duplicate StrID
-
-			appSignal = m_signalStrIdMap[autoSignalID];
-
-			//qDebug() << "Bind appSignal = " << strID;
 		}
 		else
 		{
@@ -1078,8 +1105,6 @@ namespace Builder
 
 			m_signalStrIdMap.insert(autoSignalID, appSignal);
 		}
-
-		assert(appSignal != nullptr);
 
 		HashedVector<QUuid, AppSignal*>::insert(outPinGuid, appSignal);
 
@@ -1151,7 +1176,7 @@ namespace Builder
 
 		QString strID = QString("#%1_%2").arg(appItem->label()).arg(outputPin.caption());
 
-		strID = strID.toUpper().remove(QRegularExpression("[^A-Z0-9_]"));
+		strID = strID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 
 		return strID;
 	}

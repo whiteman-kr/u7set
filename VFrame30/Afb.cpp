@@ -564,6 +564,11 @@ namespace Afb
 		return m_type == E::SignalType::Discrete;
 	}
 
+	bool AfbSignal::isBus() const
+	{
+		return m_type == E::SignalType::Bus;
+	}
+
 	E::BusDataFormat AfbSignal::busDataFormat() const
 	{
 		return m_busDataFormat;

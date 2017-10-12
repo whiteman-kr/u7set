@@ -4354,9 +4354,10 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
+	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').
 	///
 	/// Parameters:
+	///		%1 Logic schema ID
 	///
 	/// Description:
 	///		Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used. Check Afb and transmitter connection.
@@ -4368,7 +4369,8 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5107,
-				  QString(tr("Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.")));
+				  QString(tr("AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').")).
+								arg(schemaID));
 	}
 
 	/// IssueCode: ALC5108
@@ -4378,6 +4380,7 @@ namespace Builder
 	/// Title:	   Cannot identify AFB bus type (Logic schema %1).
 	///
 	/// Parameters:
+	///		%1 Logic schema ID
 	///
 	/// Description:
 	///		Cannot identify AFB bus type based on its inputs.
@@ -4388,7 +4391,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5108,
-				  QString(tr("Cannot identify AFB bus type (Logic schema %1).").arg(schemaID)));
+				  QString(tr("Cannot identify AFB bus type (Logic schema '%1'').").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5109
@@ -4398,6 +4401,7 @@ namespace Builder
 	/// Title:	   Different bus types on AFB inputs (Logic schema %1).
 	///
 	/// Parameters:
+	///		%1 Logic schema ID
 	///
 	/// Description:
 	///		Busses of different types is connected to AFB's inputs.
@@ -4408,7 +4412,122 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5109,
-				  QString(tr("Different bus types on AFB inputs (Logic schema %1).").arg(schemaID)));
+				  QString(tr("Different bus types on AFB inputs (Logic schema '%1'').").arg(schemaID)));
+	}
+
+	/// IssueCode: ALC5110
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Non-bus output is connected to bus input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Non-bus output cannot be connected to bus input.
+	///
+	void IssueLogger::errALC5110(QUuid item1, QUuid item2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, item2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5110,
+				  QString(tr("Non-bus output is connected to bus input (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5111
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Output of type 'Bus' is occured in non-bus processing AFB. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5111(QUuid afbUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5111,
+				  QString(tr("Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1'")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5112
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Different bus types of UAL elements (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Different bus types of UAL elements.
+	///
+	void IssueLogger::errALC5112(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5112,
+				  QString(tr("Different bus types of UAL elements (Logic schema %1).")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5113
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus output is connected to non-bus input (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Bus output cannot be connected to non-bus input.
+	///
+	void IssueLogger::errALC5113(QUuid item1, QUuid item2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, item2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5113,
+				  QString(tr("Bus output is connected to non-bus input (Logic schema '%1').")).
+						arg(schemaID));
+	}
+
+	/// IssueCode: ALC5114
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
+	///
+	/// Parameters:
+	///		%1 Logic item caption
+	///		%2 Logic input caption
+	///		%3 Logic schema ID
+	///
+	/// Description:
+	///		Connected bus size exceed max allowed bus size of specified input.
+	///
+	void IssueLogger::errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5114,
+				  QString(tr("Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').")).
+						arg(itemCaption).arg(inputCaption).arg(schemaID));
 	}
 
 	//

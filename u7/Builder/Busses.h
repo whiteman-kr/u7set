@@ -52,6 +52,9 @@ namespace Builder
 		void writeReport(QStringList& list);
 
 		int sizeW() const { return m_sizeW; }
+		int sizeB() const { return m_sizeW * WORD_SIZE_IN_BYTES; }
+
+		QString busTypeID() const { return m_srcBus.busTypeId(); }
 
 		const BusSignal& signalByID(const QString& signalID) const;
 		const BusSignal& signalByIndex(int index) const;

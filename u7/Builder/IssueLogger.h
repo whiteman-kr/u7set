@@ -300,6 +300,11 @@ namespace Builder
 		void errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID);		// Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used.
 		void errALC5108(QUuid afbUuid, QString schemaID);								// Cannot identify AFB bus type (Logic schema %1).
 		void errALC5109(QUuid afbUuid, QString schemaID);								// Different bus types on AFB inputs (Logic schema %1).
+		void errALC5110(QUuid item1, QUuid item2, QString schemaID);					// Non-bus output is connected to bus input.
+		void errALC5111(QUuid afbUuid, QString schemaID);								// Output of type 'Bus' is occured  in non-bus processing AFB (Logic schema '%1').
+		void errALC5112(QUuid uuid1, QUuid uuid2, QString schemaID);					// Different bus types on UAL elements (Logic schema %1).
+		void errALC5113(QUuid item1, QUuid item2, QString schemaID);					// Bus output is connected to non-bus input.
+		void errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID);	// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

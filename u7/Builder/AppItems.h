@@ -56,8 +56,17 @@ namespace Builder
 
 		QString strID() const { return m_afb->strID(); }
 
+		bool isBusProcessingAfb() const;
+
+	private:
+		bool LogicAfb::isBusProcessingAfbChecking() const;
+
 	private:
 		std::shared_ptr<Afb::AfbElement> m_afb;
+
+		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
+														// 0  - afb is not bus processing element
+														// 1  - afb is bus processing element
 	};
 
 	typedef QHash<int, int> FblInstanceMap;				// Key is OpCode
@@ -111,7 +120,9 @@ namespace Builder
 			Receiver,
 			Terminator,
 			BusComposer,
-			BusExtractor
+			BusExtractor,
+			LoopbackSource,
+			LoopbackTarget
 		};
 
 		AppItem();
@@ -249,8 +260,6 @@ namespace Builder
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
 
-		bool isBusProcessingAfb() const;
-
 		QString instantiatorID();
 
 		void setInstance(quint16 instance) { m_instance = instance; }
@@ -258,9 +267,10 @@ namespace Builder
 
 		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
 		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
-		bool getAfbSignalByPin(const LogicPin pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
+		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
+		bool getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const;
 
-		bool calculateFbParamValues(ModuleLogicCompiler *compiler);			// implemented in file FbParamCalculation.cpp
+		bool calculateFbParamValues(ModuleLogicCompiler* compiler);			// implemented in file FbParamCalculation.cpp
 
 		const AppFbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
 
@@ -314,10 +324,6 @@ namespace Builder
 		quint16 m_instance = -1;
 		int m_number = -1;
 		QString m_instantiatorID;
-
-		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
-														// 0  - afb is not bus processing element
-														// 1  - afb is bus processing element
 
 		AppFbParamValuesArray m_paramValuesArray;
 
