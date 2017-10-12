@@ -426,8 +426,8 @@ namespace Builder
 		~AppSignalMap();
 
 		bool insertUalSignal(const AppItem* appItem);
-		bool insertAfbOutputAutoSignal(const AppFb* appFb, const LogicPin& outputPin);
-		bool insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, const QString& busTypeID, int busSizeW);
+		bool insertNonBusAutoSignal(const AppFb* appFb, const LogicPin& outputPin);
+		bool insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, BusShared bus);
 
 		AppSignal* getSignal(const QString& appSignalID);
 		bool containsSignal(const QString& appSignalID) const;

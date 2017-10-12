@@ -92,13 +92,13 @@ public:
 
 	enum class BusDataFormat
 	{
-		Discrete
+		Discrete,
+		Mixed
 		//AnalogFloat32 ???
 		//AnalogSigneInt32 ???
 		//AnalogUnsignedInt32 ???
 		//AnalogSigneInt16 ???
 		//AnalogUnsignedInt16 ???
-		//Mixed ???
 	};
 	Q_ENUM(BusDataFormat)
 

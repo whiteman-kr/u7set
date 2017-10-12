@@ -261,6 +261,7 @@ namespace Builder
 					//
 					m_log->errALC5013(s.appSignalID(), s.equipmentID());
 					result = false;
+					continue;
 				}
 
 				bool deviceOK = false;

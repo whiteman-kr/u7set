@@ -106,15 +106,19 @@ namespace Builder
 
 		bool createAppFbsMap();
 		bool createAppSignalsMap();
+
+		bool appendUalSignals();
 		bool appendSignalsFromAppItems();
 
-		bool appendUalSignals(AppItem* ualSignal);
-
-		bool appendAfbOutputsAutoSignals(AppItem* afb);
-		bool appendAfbNonBusOutputsAutoSignals(AppItem* afb, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems);
-		bool appendAfbBusOutputsAutoSignals(AppItem* afb, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus);
+		bool appendAfbOutputsAutoSignals(AppItem* appItem);
+		bool appendAfbNonBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems);
+		bool appendAfbBusOutputsAutoSignals(AppItem* appItem, const LogicPin& outPin, const ConnectedAppItems& connectedAppItems, BusShared bus);
 
 		bool appendBusComposerOutputAutoSignal(AppItem* busComposer);
+
+		bool checkBusAndAfbInputCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem, QUuid destPinUuid);
+		bool checkBusAndSignalCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem);
+		bool checkBusAndBusExtractorCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem);
 
 		bool buildTuningData();
 

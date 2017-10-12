@@ -56,6 +56,8 @@ namespace Builder
 
 		QString busTypeID() const { return m_srcBus.busTypeId(); }
 
+		E::BusDataFormat busDataFormat() const { return m_busDataFormat; }
+
 		const BusSignal& signalByID(const QString& signalID) const;
 		const BusSignal& signalByIndex(int index) const;
 		const std::vector<int>& analogSignalIndexes() const { return m_analogSignalIndexes; }
@@ -78,6 +80,7 @@ namespace Builder
 
 		QHash<QString, int>	m_inBusSignalsMap;	// in bus signalID => signal index in m_srcBus.signals
 
+		E::BusDataFormat m_busDataFormat = E::BusDataFormat::Mixed;
 		int m_sizeW = 0;
 
 		QVector<BusSignal> m_signals;

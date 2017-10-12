@@ -3898,13 +3898,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').
+	/// Title: Constant connected to discrete input must have value 0 or 1 (Logic schema '%1').
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
 	///
 	/// Description:
-	///		Constant connected to discrete signal or FB input must have value 0 or 1. Check constant value.
+	///		Constant connected to discrete input must have value 0 or 1. Check constant value.
 	///
 
 	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
@@ -3913,7 +3913,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5086,
-				  QString(tr("Constant connected to discrete signal or FB input must have value 0 or 1 (Logic schema '%1').")).
+				  QString(tr("Constant connected to discrete input must have value 0 or 1 (Logic schema '%1').")).
 						arg(schemaID));
 
 	}
@@ -4528,6 +4528,29 @@ namespace Builder
 				  5114,
 				  QString(tr("Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').")).
 						arg(itemCaption).arg(inputCaption).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5115
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Uncompatible bus data format of UAL elements (Logic schema '%1').
+	///
+	/// Parameters:
+	///		%1 Logic schema ID
+	///
+	/// Description:
+	///		Uncompatible bus data format of UAL elements.
+	///
+	void IssueLogger::errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, uuid2);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5115,
+				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema '%1').")).
+						arg(schemaID));
 	}
 
 	//

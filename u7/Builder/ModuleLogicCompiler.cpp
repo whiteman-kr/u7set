@@ -627,7 +627,45 @@ namespace Builder
 
 		bool result = true;
 
+		result = appendUalSignals();
+
+		if (result == false)
+		{
+			return false;
+		}
+
 		result = appendSignalsFromAppItems();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::appendUalSignals()
+	{
+		bool result = true;
+
+		for(AppItem* item : m_appItems)
+		{
+			if (item == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (item->isSignal() == false)
+			{
+				continue;
+			}
+
+			if (m_chassisSignals.contains(item->strID()) == false)
+			{
+				// The signal '%1' is not associated with LM '%2'.
+				//
+				m_log->errALC5030(item->strID(), m_lm->equipmentIdTemplate(), item->guid());
+				return false;
+			}
+
+			result &= m_appSignals.insertUalSignal(item);
+		}
 
 		return result;
 	}
@@ -636,7 +674,7 @@ namespace Builder
 	{
 		// m_appSignals map contains signals:
 		//
-		// 1) real signals used in UAL (input/output schema items) (ref by signal item Uuid)
+		// 1) real signals from schema input/output elements
 		// 2) auto signals from AFB outputs (ref by out pin Uuid)
 		// 3) auto bus signals from BusComposer outputs (ref by out pin Uuid)
 		// 4) expanded busses auto signals linked to BusExtractor outputs (ref by out pin Uuid)
@@ -657,8 +695,7 @@ namespace Builder
 			// items that generate signals
 			//
 			case AppItem::Type::Signal:
-				result &= appendUalSignals(item);					// 1)
-				break;
+				break;												// 1) already added in appendUalSignals()
 
 			case AppItem::Type::Afb:
 				result &= appendAfbOutputsAutoSignals(item);		// 2)
@@ -689,33 +726,6 @@ namespace Builder
 				result = false;
 			}
 		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::appendUalSignals(AppItem* ualSignal)
-	{
-		if (ualSignal == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		if (ualSignal->isSignal() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (m_chassisSignals.contains(ualSignal->strID()) == false)
-		{
-			// The signal '%1' is not associated with LM '%2'.
-			//
-			m_log->errALC5030(ualSignal->strID(), m_lm->equipmentIdTemplate(), ualSignal->guid());
-			return false;
-		}
-
-		bool result = m_appSignals.insertUalSignal(ualSignal);
 
 		return result;
 	}
@@ -767,8 +777,8 @@ namespace Builder
 			}
 		}
 
-		// find AFB outputs, which NOT connected to signals
-		// create and add to m_appSignals map 'auto' signals
+		// find AFB bus outputs, which NOT connected to signals
+		// create and add to m_appSignals map bus 'auto' signals
 		//
 		for(const LogicPin& outPin : appItem->outputs())
 		{
@@ -909,7 +919,7 @@ namespace Builder
 				return false;
 			}
 
-			result = m_appSignals.insertAfbOutputAutoSignal(appFb, outPin);
+			result = m_appSignals.insertNonBusAutoSignal(appFb, outPin);
 
 			if (result == false)
 			{
@@ -951,49 +961,18 @@ namespace Builder
 
 			AppItem::Type connectedItemType = connectedAppItem->type();
 
+			bool res = true;
+
 			switch(connectedItemType)
 			{
 			// allowed AFB's output connections
 			//
 			case AppItem::Type::Afb:
 				{
-					// input of connected appItem must have
-					// 1) 'bus' type
-					// 2) maxBusSize > BusTypeID.sizeW
-					//
-					AppFb* appFb = m_appFbs.value(connectedAppItem->guid(), nullptr);
+					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
 
-					if (appFb == nullptr)
+					if (res == false)
 					{
-						assert(false);
-						LOG_INTERNAL_ERROR(m_log);
-						result = false;
-						break;
-					}
-
-					LogicAfbSignal afbSignal;
-
-					if (appFb->getAfbSignalByPinUuid(connectedPinUuid, &afbSignal) == false)
-					{
-						result = false;
-						break;
-					}
-
-					if (afbSignal.isBus() == false)
-					{
-						// Bus output is connected to non-bus input (Logic schema '%1').
-						//
-						m_log->errALC5113(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
-						result = false;
-						break;
-					}
-
-					if (afbSignal.maxBusSize() < bus->sizeB())
-					{
-						// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
-						//
-						m_log->errALC5114(connectedAppItem->caption(), afbSignal.caption(),
-										  connectedAppItem->guid(), connectedAppItem->schemaID());
 						result = false;
 						break;
 					}
@@ -1004,21 +983,10 @@ namespace Builder
 
 			case AppItem::Type::BusExtractor:
 				{
-					const UalBusExtractor* busExtractor = connectedAppItem->ualBusExtractor();
+					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
 
-					if (busExtractor == nullptr)
+					if (res == false)
 					{
-						assert(false);
-						LOG_INTERNAL_ERROR(m_log);
-						result = false;
-						break;
-					}
-
-					if (busExtractor->busTypeId() != bus->busTypeID())
-					{
-						// Different bus types of UAL elements (Logic schema %1).
-						//
-						m_log->errALC5112(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 						result = false;
 						break;
 					}
@@ -1036,8 +1004,18 @@ namespace Builder
 				break;
 
 			case AppItem::Type::Signal:
-				connectedToSignal = true;
-				m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
+				{
+					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
+
+					if (res == false)
+					{
+						result = false;
+						break;
+					}
+
+					connectedToSignal = true;
+					m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
+				}
 				break;
 
 			// disallowed connections or connection to unknown item type
@@ -1078,7 +1056,7 @@ namespace Builder
 				return false;
 			}
 
-			result = m_appSignals.insertAfbOutputAutoSignal(appFb, outPin);
+			result = m_appSignals.insertBusAutoSignal(appFb, outPin, bus);
 
 			if (result == false)
 			{
@@ -1093,31 +1071,51 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::appendBusComposerOutputAutoSignal(AppItem* busComposer)
+	bool ModuleLogicCompiler::appendBusComposerOutputAutoSignal(AppItem* appItem)
 	{
-		if (busComposer == nullptr)
+		if (appItem == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
 
-		if (busComposer->isBusComposer() == false)
+		if (appItem->isBusComposer() == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		if (busComposer->outputs().size() != 1)
+		if (appItem->outputs().size() != 1)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		const LogicPin& output = busComposer->outputs()[0];
+		const UalBusComposer* ualBusComposer = appItem->ualBusComposer();
+
+		if (ualBusComposer == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString busTypeID = ualBusComposer->busTypeId();
+
+		BusShared bus = m_signals->getBus(busTypeID);
+
+		if (bus == nullptr)
+		{
+			// Bus type ID '%1' is undefined (Logic schema '%2').
+			//
+			m_log->errALC5100(busTypeID, appItem->guid(), appItem->schemaID());
+			return false;
+		}
+
+		const LogicPin& outPin = appItem->outputs()[0];
 
 		ConnectedAppItems connectedAppItems;
 
-		bool result = getConnectedAppItems(output, &connectedAppItems);
+		bool result = getConnectedAppItems(outPin, &connectedAppItems);
 
 		if (result == false)
 		{
@@ -1129,6 +1127,7 @@ namespace Builder
 
 		for(const std::pair<QUuid, AppItem*>& pair : connectedAppItems)
 		{
+			QUuid connectedPinUuid = pair.first;
 			AppItem* connectedAppItem = pair.second;
 
 			if (connectedAppItem == nullptr)
@@ -1138,21 +1137,56 @@ namespace Builder
 				continue;
 			}
 
+			bool res = true;
+
 			switch(connectedAppItem->type())
 			{
 			// allowed BusComposer connections
 			//
 			case AppItem::Type::Afb:
+				{
+					res = checkBusAndAfbInputCompatibility(appItem, bus, connectedAppItem, connectedPinUuid);
+
+					if (res == false)
+					{
+						result = false;
+						break;
+					}
+
+					needToCreateAutoSignal = true;
+				}
+				break;
+
 			case AppItem::Type::BusExtractor:
-				needToCreateAutoSignal = true;
+				{
+					res = checkBusAndBusExtractorCompatibility(appItem, bus, connectedAppItem);
+
+					if (res == false)
+					{
+						result = false;
+						break;
+					}
+
+					needToCreateAutoSignal = true;
+				}
 				break;
 
 			case AppItem::Type::Terminator:		// not need to create signal
 				break;
 
 			case AppItem::Type::Signal:
-				connectedToSignal = true;
-				m_outPinSignal.insertMulti(output.guid(), connectedAppItem->signal().guid());
+				{
+					res = checkBusAndSignalCompatibility(appItem, bus, connectedAppItem);
+
+					if (res == false)
+					{
+						result = false;
+						break;
+					}
+
+					connectedToSignal = true;
+					m_outPinSignal.insertMulti(outPin.guid(), connectedAppItem->signal().guid());
+				}
 				break;
 
 			// disallowed connections or connection to unknown item type
@@ -1160,14 +1194,14 @@ namespace Builder
 			case AppItem::Type::BusComposer:
 				// Output of bus composer can't be connected to input of another bus composer (Logic schema %1).
 				//
-				m_log->errALC5102(busComposer->guid(), connectedAppItem->guid(), busComposer->schemaID());
+				m_log->errALC5102(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 				result = false;
 				break;
 
 			case AppItem::Type::Transmitter:
 				// Bus composer cannot be directly connected to transmitter (Logic schema %1).
 				//
-				m_log->errALC5101(busComposer->guid(), connectedAppItem->guid(), busComposer->schemaID());
+				m_log->errALC5101(appItem->guid(), connectedAppItem->guid(), appItem->schemaID());
 				result = false;
 				break;
 
@@ -1183,29 +1217,9 @@ namespace Builder
 
 		if (needToCreateAutoSignal == true && connectedToSignal == false)
 		{
-			const UalBusComposer* ualBusComposer = busComposer->ualBusComposer();
-
-			if (ualBusComposer == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			QString busTypeID = ualBusComposer->busTypeId();
-
-			BusShared bus = m_signals->getBus(busTypeID);
-
-			if (bus == nullptr)
-			{
-				// Bus type ID '%1' is undefined (Logic schema '%2').
-				//
-				m_log->errALC5100(busTypeID, busComposer->guid(), busComposer->schemaID());
-				return false;
-			}
-
 			// create auto signal with Uuid of this output pin
 			//
-			result = m_appSignals.insertBusAutoSignal(busComposer, output, busTypeID, bus->sizeW());
+			result = m_appSignals.insertBusAutoSignal(appItem, outPin, bus);
 
 			if (result == false)
 			{
@@ -1214,10 +1228,134 @@ namespace Builder
 
 			// output pin connected to auto signal with same guid
 			//
-			m_outPinSignal.insert(output.guid(), output.guid());
+			m_outPinSignal.insert(outPin.guid(), outPin.guid());
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::checkBusAndAfbInputCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem, QUuid destPinUuid)
+	{
+		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		// input of appItem connected to Bus must have
+		// 1) 'bus' type
+		// 2) maxBusSize > BusTypeID.sizeW
+		// 3) same E::BusDataFormat
+		//
+		AppFb* destAppFb = m_appFbs.value(destAppItem->guid(), nullptr);
+
+		if (destAppFb == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		LogicAfbSignal destAfbSignal;
+
+		if (destAppFb->getAfbSignalByPinUuid(destPinUuid, &destAfbSignal) == false)
+		{
+			return false;
+		}
+
+		if (destAfbSignal.isBus() == false)
+		{
+			// Bus output is connected to non-bus input (Logic schema '%1').
+			//
+			m_log->errALC5113(srcAppItem->guid(), destAppItem->guid(), srcAppItem->schemaID());
+			return false;
+		}
+
+		if (destAfbSignal.maxBusSize() < bus->sizeB())
+		{
+			// Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
+			//
+			m_log->errALC5114(destAppItem->caption(), destAppItem->caption(),
+							  destAppItem->guid(), destAppItem->schemaID());
+			return false;
+		}
+
+		if (destAfbSignal.busDataFormat() != bus->busDataFormat())
+		{
+			// Uncompatible bus data format of UAL elements (Logic schema '%1').
+			//
+			m_log->errALC5115(srcAppItem->guid(), destAppItem->guid(), srcAppItem->schemaID());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::checkBusAndSignalCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem)
+	{
+		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		// check that connected signal has 'bus' type and apropriate 'busTypeID'
+		//
+		AppSignal* appSignal = m_appSignals.value(destAppItem->guid(), nullptr);
+
+		if (appSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// check that connected signal has 'bus' type
+		//
+		if (appSignal->isBus() == false)
+		{
+			// Bus output is connected to non-bus input.
+			//
+			m_log->errALC5113(srcAppItem->guid(), destAppItem->guid(), srcAppItem->schemaID());
+			return false;
+		}
+
+		// check that connected signal has apropriate 'busTypeID'
+		//
+		if (appSignal->busTypeID() != bus->busTypeID())
+		{
+			// Different bus types on UAL elements (Logic schema %1).
+			//
+			m_log->errALC5112(srcAppItem->guid(), destAppItem->guid(), srcAppItem->schemaID());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::checkBusAndBusExtractorCompatibility(AppItem* srcAppItem, BusShared bus, AppItem* destAppItem)
+	{
+		if (srcAppItem == nullptr || bus == nullptr || destAppItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		const UalBusExtractor* busExtractor = destAppItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (busExtractor->busTypeId() != bus->busTypeID())
+		{
+			// Different bus types of UAL elements (Logic schema %1).
+			//
+			m_log->errALC5112(srcAppItem->guid(), destAppItem->guid(), srcAppItem->schemaID());
+			return false;
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::buildTuningData()
@@ -5677,12 +5815,12 @@ namespace Builder
 					break;
 
 				case AppItem::Type::Afb:
+				case AppItem::Type::BusExtractor:
 
 					// save BusComposer result to auto signal
 					// outPin->guid() is an auto signal guid
 					//
 					result = generateBusComposerToSignalCode(composer, outPin.guid(), &composerInfo);
-
 					break;
 
 				case AppItem::Type::Terminator:
@@ -5747,7 +5885,7 @@ namespace Builder
 			return false;
 		}
 
-		Signal* busSignal = m_signals->getSignal(destAppSignal->appSignalID());
+		Signal* busSignal = destAppSignal->signal();
 
 		if (busSignal == nullptr)
 		{
@@ -6528,7 +6666,7 @@ namespace Builder
 
 		if (isBusProcessingAfb == false)
 		{
-			return true;
+			return true;			// result of getBusProcessingParams()!
 		}
 
 		// this is bus processing AFB, will try identify BusTypeID
@@ -6598,6 +6736,8 @@ namespace Builder
 			if (checkBusTypeID != btypeID)
 			{
 				// Different bus types on AFB inputs (Logic schema %1).
+				//
+				m_log->errALC5109(appFb->guid(), appFb->schemaID());
 				return false;
 			}
 		}
@@ -6633,11 +6773,11 @@ namespace Builder
 
 		if (connectedPinParent->isSignal() == true)
 		{
-			appSignal = m_appSignals.value(connectedPinParent->guid());
+			appSignal = m_appSignals.value(connectedPinParent->guid(), nullptr);
 		}
 		else
 		{
-			appSignal = m_appSignals.value(associatedOutUuid);
+			appSignal = m_appSignals.value(associatedOutUuid, nullptr);
 		}
 
 		return appSignal;

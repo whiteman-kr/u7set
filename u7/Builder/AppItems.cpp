@@ -1026,10 +1026,12 @@ namespace Builder
 
 		HashedVector<QUuid, AppSignal*>::insert(ualSignal->guid(), appSignal);
 
+		// qDebug() << "Insert signal" << ualSignal->guid().toString() << appSignalID;
+
 		return true;
 	}
 
-	bool AppSignalMap::insertAfbOutputAutoSignal(const AppFb* appFb, const LogicPin& outputPin)
+	bool AppSignalMap::insertNonBusAutoSignal(const AppFb* appFb, const LogicPin& outputPin)
 	{
 		if (appFb == nullptr )
 		{
@@ -1081,9 +1083,8 @@ namespace Builder
 			break;
 
 		case E::SignalType::Bus:
-			assert(false);		// insertBusAutoSignal should be called
-			dataSize = -1;		// real data size of bus should be assigned !!!
-			break;
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
 
 		default:
 			assert(false);
@@ -1111,13 +1112,14 @@ namespace Builder
 		return true;
 	}
 
-	bool AppSignalMap::insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, const QString& busTypeID, int busSizeW)
+	bool AppSignalMap::insertBusAutoSignal(const AppItem* appItem, const LogicPin& outputPin, BusShared bus)
 	{
-		if (appItem == nullptr)
+		if (appItem == nullptr || bus == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
+
 		QUuid outPinGuid = outputPin.guid();
 
 		QString autoSignalID = getAutoSignalID(appItem, outputPin);
@@ -1126,7 +1128,7 @@ namespace Builder
 
 		if (appSignal == nullptr)
 		{
-			appSignal = new AppSignal(outPinGuid, autoSignalID, busTypeID, busSizeW);
+			appSignal = new AppSignal(outPinGuid, autoSignalID, bus->busTypeID(), bus->sizeW());
 
 			// auto-signals always connected to output pin, therefore considered computed
 			//
@@ -1174,7 +1176,7 @@ namespace Builder
 			return "";
 		}
 
-		QString strID = QString("#%1_%2").arg(appItem->label()).arg(outputPin.caption());
+		QString strID = QString("#AUTO_%1_%2").arg(appItem->label()).arg(outputPin.caption());
 
 		strID = strID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 

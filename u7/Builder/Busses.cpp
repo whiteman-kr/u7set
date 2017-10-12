@@ -240,6 +240,9 @@ namespace Builder
 
 		const std::vector<VFrame30::BusSignal>& busSignals = m_srcBus.busSignals();
 
+		bool hasAnalogSignals = false;
+		bool hasDiscreteSignals = false;
+
 		for(int i = 0; i < busSignals.size(); i++)
 		{
 			const VFrame30::BusSignal& busSignal = busSignals[i];
@@ -252,6 +255,27 @@ namespace Builder
 			}
 
 			m_inBusSignalsMap.insert(busSignal.signalId(), i);
+
+			switch(busSignal.type())
+			{
+			case E::SignalType::Analog:
+				hasAnalogSignals = true;
+				break;
+
+			case E::SignalType::Discrete:
+				hasDiscreteSignals = true;
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		m_busDataFormat = E::BusDataFormat::Mixed;
+
+		if (hasDiscreteSignals == true && hasAnalogSignals == false)
+		{
+			m_busDataFormat = E::BusDataFormat::Discrete;
 		}
 
 		return true;
