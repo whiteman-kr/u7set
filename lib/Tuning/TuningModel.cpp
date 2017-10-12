@@ -192,7 +192,7 @@ TuningModel::~TuningModel()
 	}
 }
 
-void TuningModel::setSignals(std::vector<TuningModelRecord>& signalsList)
+void TuningModel::setItems(std::vector<TuningModelRecord>& signalsList)
 {
 	if (rowCount() > 0)
 	{
@@ -261,6 +261,16 @@ int TuningModel::columnIndex(int index) const
 	return m_columnsIndexes[index];
 }
 
+TuningModelRecord* TuningModel::item(int index)
+{
+	if (index < 0 || index >= m_items.size())
+	{
+		assert(false);
+		return nullptr;
+	}
+	return &m_items[index];
+
+}
 
 AppSignalParam* TuningModel::param(int index)
 {
@@ -269,7 +279,7 @@ AppSignalParam* TuningModel::param(int index)
 		assert(false);
 		return nullptr;
 	}
-	return& m_items[index].param;
+	return &m_items[index].param;
 }
 
 TuningSignalState* TuningModel::state(int index)

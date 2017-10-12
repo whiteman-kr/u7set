@@ -37,7 +37,7 @@ namespace TrendLib
 		return true;
 	}
 
-	TimeStamp TrendRuller::timeStamp() const
+	const TimeStamp& TrendRuller::timeStamp() const
 	{
 		return m_timeStamp;
 	}

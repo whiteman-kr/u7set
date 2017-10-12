@@ -414,15 +414,17 @@ message SaveAppSignalsStatesToArchiveReply
 message GetAppSignalStatesFromArchiveStartRequest
 {
     optional string clientEquipmentID = 1;
-    optional int32 timeType = 2 [default = 1];		// enum TimeType values:
-                                                        // 0 - plant time
-							// 1 - system time
-							// 2 - local time
-							// 3 - archive id
+	optional int32 timeType = 2 [default = 1];		// enum TimeType values:
+	                                                // 0 - plant time
+													// 1 - system time
+													// 2 - local time
+													// 3 - archive id
     optional sfixed64 startTime = 3 [default = 0];
     optional sfixed64 endTime = 4 [default = 0];
 
-    repeated uint64 signalHashes = 5;			// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
+    repeated uint64 signalHashes = 5;				// max hashes count should be less or equal to 32 (ARCH_REQUEST_MAX_SIGNALS at SocketIO.h)
+
+    optional bool removePeriodic = 6 [default = true];
 }
 
 message GetAppSignalStatesFromArchiveStartReply

@@ -1115,7 +1115,7 @@ void TuningPage::fillObjectsList()
 
 	m_tuningSignalManager->updateStates(filteredObjects);
 
-	m_model->setSignals(filteredObjects);
+	m_model->setItems(filteredObjects);
 
 	m_objectList->sortByColumn(m_sortColumn, m_sortOrder);
 }

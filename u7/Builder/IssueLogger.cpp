@@ -4201,6 +4201,26 @@ namespace Builder
 						arg(appSignalID).arg(portID).arg(connectionID));
 	}
 
+	/// IssueCode: ALC5187
+	///
+	/// IssueType: Warning
+	///
+	/// Title: // Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+	///
+	/// Parameters:
+	///		%1 Opto port 1 ID
+	///		%2 Opto port 2 ID
+	///
+	/// Description:
+	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
+	///
+	void IssueLogger::wrnALC5194(const QString& port1ID, const QString &port2ID)
+	{
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5194,
+				  QString(tr("Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.")).
+						arg(port1ID).arg(port2ID));
+	}
 
 
 	// EQP			Equipment issues						6000-6999

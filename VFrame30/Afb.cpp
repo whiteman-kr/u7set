@@ -250,6 +250,8 @@ namespace Afb
 		m_operandIndex = that.m_operandIndex;
 		m_size = that.m_size;
 		m_byteOrder = that.m_byteOrder;
+		m_busDataFormat = that.m_busDataFormat;
+		m_maxBusSize = that.m_maxBusSize;
 
 		return *this;
 	}
@@ -294,20 +296,12 @@ namespace Afb
 			*errorMessage = QString("Can't find attribute Type. Pin %1").arg(m_caption);
 			return false;
 		}
-
-		QString typeAttribute = xmlElement.attribute(QLatin1String("Type"));
-
-		if (typeAttribute.compare(QLatin1String("Analog"), Qt::CaseInsensitive) == 0)
-		{
-			m_type = E::SignalType::Analog;
-		}
 		else
 		{
-			if (typeAttribute.compare(QLatin1String("Discrete"), Qt::CaseInsensitive) == 0)
-			{
-				m_type = E::SignalType::Discrete;
-			}
-			else
+			QString typeAttribute = xmlElement.attribute(QLatin1String("Type"));
+
+			bool ok = setType(typeAttribute);
+			if (ok == false)
 			{
 				*errorMessage = QString("Unknown SignalType %1. Pin %2").arg(typeAttribute).arg(m_caption);
 				return false;
@@ -318,40 +312,21 @@ namespace Afb
 		//
 		if (xmlElement.hasAttribute(QLatin1String("DataFormat")) == false)
 		{
-			if (type() == E::SignalType::Analog)
+			if (type() == E::SignalType::Analog)		// Ignore for discretes
 			{
 				*errorMessage = QString("Can't find attribute DataFormat. Pin %1").arg(m_caption);
 				return false;
 			}
-
-			assert(type() == E::SignalType::Discrete);
 		}
 		else
 		{
 			QString dataFormatAttribute = xmlElement.attribute(QLatin1String("DataFormat"));
 
-			if (dataFormatAttribute.compare(QLatin1String("UnsignedInt"), Qt::CaseInsensitive) == 0)
+			bool ok = setDataFormat(dataFormatAttribute);
+			if (ok == false)
 			{
-				m_dataFormat = E::DataFormat::UnsignedInt;
-			}
-			else
-			{
-				if (dataFormatAttribute.compare(QLatin1String("SignedInt"), Qt::CaseInsensitive) == 0)
-				{
-					m_dataFormat = E::DataFormat::SignedInt;
-				}
-				else
-				{
-					if (dataFormatAttribute.compare(QLatin1String("Float"), Qt::CaseInsensitive) == 0)
-					{
-						m_dataFormat = E::DataFormat::Float;
-					}
-					else
-					{
-						*errorMessage = QString("Unknown DataFormat %1. Pin %2").arg(dataFormatAttribute).arg(m_caption);
-						return false;
-					}
-				}
+				*errorMessage = QString("Unknown DataFormat %1. Pin %2").arg(dataFormatAttribute).arg(m_caption);
+				return false;
 			}
 		}
 
@@ -381,22 +356,49 @@ namespace Afb
 		{
 			QString byteOrderAttribute = xmlElement.attribute(QLatin1String("ByteOrder"));
 
-			if (byteOrderAttribute.compare(QLatin1String("LittleEndian"), Qt::CaseInsensitive) == 0)
+			bool ok = setByteOrder(byteOrderAttribute);
+			if (ok == false)
 			{
-				m_byteOrder = E::ByteOrder::LittleEndian;
+				*errorMessage = QString("Unknown ByteOrder %1. Pin %2").arg(byteOrderAttribute).arg(m_caption);
+				return false;
 			}
-			else
+		}
+
+		// BusDataFormat
+		//
+		if (xmlElement.hasAttribute(QLatin1String("BusDataFormat")) == false)
+		{
+			if (type() == E::SignalType::Bus)
 			{
-				if (byteOrderAttribute.compare(QLatin1String("BigEndian"), Qt::CaseInsensitive) == 0)
-				{
-					m_byteOrder = E::ByteOrder::BigEndian;
-				}
-				else
-				{
-					*errorMessage = QString("Unknown ByteOrder %1. Pin %2").arg(byteOrderAttribute).arg(m_caption);
-					return false;
-				}
+				*errorMessage = QString("Not set BusDataFormat for pin %2").arg(m_caption);
+				return false;
 			}
+		}
+		else
+		{
+			QString attribute = xmlElement.attribute(QLatin1String("BusDataFormat"));
+
+			bool ok = setBusDataFormat(attribute);
+			if (ok == false)
+			{
+				*errorMessage = QString("Unknown BusDataFormat %1. Pin %2").arg(attribute).arg(m_caption);
+				return false;
+			}
+		}
+
+		// MaxBusSize
+		//
+		if (xmlElement.hasAttribute(QLatin1String("MaxBusSize")) == false)
+		{
+			if (type() == E::SignalType::Bus)
+			{
+				*errorMessage = QString("Not set MaxBusSize for pin %2").arg(m_caption);
+				return false;
+			}
+		}
+		else
+		{
+			m_maxBusSize = xmlElement.attribute(QLatin1String("MaxBusSize")).toInt();
 		}
 
 		return true;
@@ -439,6 +441,14 @@ namespace Afb
 		// ByteOrder
 		//
 		element->setAttribute(QLatin1String("ByteOrder"), E::valueToString(m_byteOrder));
+
+		// BusDataFormat
+		//
+		element->setAttribute(QLatin1String("BusDataFormat"), E::valueToString(m_busDataFormat));
+
+		// MaxBusSize
+		//
+		element->setAttribute(QLatin1String("MaxBusSize"), m_maxBusSize);
 
 		return true;
 	}
@@ -483,6 +493,13 @@ namespace Afb
 		m_type = type;
 	}
 
+	bool AfbSignal::setType(const QString& type)
+	{
+		bool ok = false;
+		m_type = E::stringToValue<E::SignalType>(type, &ok);
+		return ok;
+	}
+
 	E::DataFormat AfbSignal::dataFormat() const
 	{
 		return m_dataFormat;
@@ -491,6 +508,13 @@ namespace Afb
 	void AfbSignal::setDataFormat(E::DataFormat dataFormat)
 	{
 		m_dataFormat = dataFormat;
+	}
+
+	bool AfbSignal::setDataFormat(const QString& dataFormat)
+	{
+		bool ok = false;
+		m_dataFormat = E::stringToValue<E::DataFormat>(dataFormat, &ok);
+		return ok;
 	}
 
 	int AfbSignal::operandIndex() const
@@ -523,6 +547,13 @@ namespace Afb
 		m_byteOrder = value;
 	}
 
+	bool AfbSignal::setByteOrder(const QString& value)
+	{
+		bool ok = false;
+		m_byteOrder = E::stringToValue<E::ByteOrder>(value, &ok);
+		return ok;
+	}
+
 	bool AfbSignal::isAnalog() const
 	{
 		return m_type == E::SignalType::Analog;
@@ -531,6 +562,33 @@ namespace Afb
 	bool AfbSignal::isDiscrete() const
 	{
 		return m_type == E::SignalType::Discrete;
+	}
+
+	E::BusDataFormat AfbSignal::busDataFormat() const
+	{
+		return m_busDataFormat;
+	}
+
+	void AfbSignal::setBusDataFormat(E::BusDataFormat value)
+	{
+		m_busDataFormat = value;
+	}
+
+	bool AfbSignal::setBusDataFormat(const QString& value)
+	{
+		bool ok = false;
+		m_busDataFormat = E::stringToValue<E::BusDataFormat>(value, &ok);
+		return ok;
+	}
+
+	int AfbSignal::maxBusSize() const
+	{
+		return m_maxBusSize;
+	}
+
+	void AfbSignal::setMaxBusSize(int value)
+	{
+		m_maxBusSize = value;
 	}
 
 	//

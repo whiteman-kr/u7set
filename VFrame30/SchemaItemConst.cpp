@@ -162,10 +162,10 @@ namespace VFrame30
 		switch (type())
 		{
 			case ConstType::IntegerType:
-				text = QString::number(intValue());
+				text = QString("int: %1").arg(QString::number(intValue()));
 				break;
 			case ConstType::FloatType:
-				text = QString::number(floatValue(), 'g', precision());
+				text = QString("float: %1").arg(QString::number(floatValue(), 'g', precision()));
 				break;
 			default:
 				assert(false);
@@ -178,6 +178,33 @@ namespace VFrame30
 	QString SchemaItemConst::buildName() const
 	{
 		return QString("Const (%1)").arg(valueToString());
+	}
+
+	QString SchemaItemConst::toolTipText(int dpiX, int dpiY) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+
+		QString typeStr;
+		switch (type())
+		{
+			case ConstType::IntegerType:
+				typeStr = "Integer";
+				break;
+			case ConstType::FloatType:
+				typeStr = "Float";
+				break;
+			default:
+				break;
+		}
+
+		QString str = QString("Constant:\n\tType: %1\n\tValue: %2")
+							.arg(typeStr)
+							.arg(valueToString());
+
+		str.append(tr("\n\nHint: Press F2 to edit value"));
+
+		return str;
 	}
 
 	SchemaItemConst::ConstType SchemaItemConst::type() const

@@ -79,6 +79,11 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 		ui->timeTypeCombo->setCurrentIndex(currentTimeType);
 	}
 
+	// Remove periodic records checkbox
+	//
+	assert(ui->removePeriodicCheckbox);
+	ui->removePeriodicCheckbox->setChecked(init.removePeriodicRecords);
+
 	// Set filter completer
 	//
 	m_filterCompleter = new QCompleter(theSettings.m_archiveSignalsDialogFilterCompleter, this);
@@ -497,6 +502,8 @@ void DialogChooseArchiveSignals::on_buttonBox_accepted()
 
 	m_result.requestStartTime = TimeStamp(startTime);
 	m_result.requestEndTime = TimeStamp(endTime);
+
+	m_result.removePeriodicRecords = ui->removePeriodicCheckbox->isChecked();
 
 	m_lastSignalType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
 	m_lastSchemaId = ui->schemaCombo->currentData().toString();

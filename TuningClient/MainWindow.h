@@ -48,8 +48,6 @@ private:
 
 private slots:
 	void slot_configurationArrived();
-	void slot_presetsEditorClosing(std::vector <int>& signalsTableColumnWidth, std::vector <int>& presetsTreeColumnWidth, QPoint pos, QByteArray geometry);
-
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_schemasDetailsUpdated(QByteArray data);
 	void slot_schemasGlobalScriptArrived(QByteArray data);

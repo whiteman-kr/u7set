@@ -64,6 +64,246 @@
 		<AFBComponent Caption="TCONV"		OpCode="28"	ImpVersion="0"		VersionOpIndex="11"/>
 	</AFBImplementation>
 	<AFBL>
+			
+		<AFB id="#bus_or_v1"             Caption="bus_or"             Version="1.0000">
+			<Properties>				
+				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>1</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_1_oprd"  Caption="in_1"  Type="Bus" ByteOrder="BigEndian" OpIndex="3"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_2_oprd"  Caption="in_2"  Type="Bus" ByteOrder="BigEndian" OpIndex="4"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_3_oprd"  Caption="in_3"  Type="Bus" ByteOrder="BigEndian" OpIndex="5"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_4_oprd"  Caption="in_4"  Type="Bus" ByteOrder="BigEndian" OpIndex="6"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_5_oprd"  Caption="in_5"  Type="Bus" ByteOrder="BigEndian" OpIndex="7"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_6_oprd"  Caption="in_6"  Type="Bus" ByteOrder="BigEndian" OpIndex="8"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_7_oprd"  Caption="in_7"  Type="Bus" ByteOrder="BigEndian" OpIndex="9"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_8_oprd"  Caption="in_8"  Type="Bus" ByteOrder="BigEndian" OpIndex="10" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_9_oprd"  Caption="in_9"  Type="Bus" ByteOrder="BigEndian" OpIndex="11" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Bus" ByteOrder="BigEndian" OpIndex="12" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Bus" ByteOrder="BigEndian" OpIndex="13" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Bus" ByteOrder="BigEndian" OpIndex="15" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Bus" ByteOrder="BigEndian" OpIndex="16" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="18" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Script>
+						<Changed></Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 16)
+	{
+		count = 16;
+	}
+
+	var opIndex = 3;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0000">
+			<Properties>				
+				<Description>Locking and simulation module</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>7</OpCode>
+				<HasRam>false</HasRam>				
+				<InternalUse>false</InternalUse>
+				<MinWidth>18</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_data" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_set" Caption="sim" Type="Bus" ByteOrder="BigEndian" OpIndex="1" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_reset" Caption="block" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="4" Size="16" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+			</Params>
+			<CommonScript>
+				<Library></Library>
+				<AfterCreation></AfterCreation>
+			</CommonScript>
+		</AFB>
+
+		<AFB id="#bus_and_v1"          Caption="bus_and"          Version="1.0000">
+			<Properties>
+				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
+				<Category>Bus Logic</Category>
+				<OpCode>1</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>14</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_1_oprd"  Caption="in_1"  Type="Bus" ByteOrder="BigEndian" OpIndex="3"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_2_oprd"  Caption="in_2"  Type="Bus" ByteOrder="BigEndian" OpIndex="4"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_3_oprd"  Caption="in_3"  Type="Bus" ByteOrder="BigEndian" OpIndex="5"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_4_oprd"  Caption="in_4"  Type="Bus" ByteOrder="BigEndian" OpIndex="6"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_5_oprd"  Caption="in_5"  Type="Bus" ByteOrder="BigEndian" OpIndex="7"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_6_oprd"  Caption="in_6"  Type="Bus" ByteOrder="BigEndian" OpIndex="8"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_7_oprd"  Caption="in_7"  Type="Bus" ByteOrder="BigEndian" OpIndex="9"  Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_8_oprd"  Caption="in_8"  Type="Bus" ByteOrder="BigEndian" OpIndex="10" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_9_oprd"  Caption="in_9"  Type="Bus" ByteOrder="BigEndian" OpIndex="11" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_10_oprd" Caption="in_10" Type="Bus" ByteOrder="BigEndian" OpIndex="12" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_11_oprd" Caption="in_11" Type="Bus" ByteOrder="BigEndian" OpIndex="13" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_12_oprd" Caption="in_12" Type="Bus" ByteOrder="BigEndian" OpIndex="14" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_13_oprd" Caption="in_13" Type="Bus" ByteOrder="BigEndian" OpIndex="15" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_14_oprd" Caption="in_14" Type="Bus" ByteOrder="BigEndian" OpIndex="16" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_15_oprd" Caption="in_15" Type="Bus" ByteOrder="BigEndian" OpIndex="17" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+				<Pin OpName="i_16_oprd" Caption="in_16" Type="Bus" ByteOrder="BigEndian" OpIndex="18" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="20" Size="1" BusDataFormat="Discrete" MaxBusSize="16"/>
+			</Outputs>
+			<Params>
+				<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>2</Value>
+					<Default>2</Default>
+					<LowLimit>2</LowLimit>
+					<HighLimit>16</HighLimit>
+					<Script>
+						<Changed>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="i_bus_width" Caption="BusWidth" Visible="false" OpIndex="1" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>
+				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="2" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+					<Value>1</Value>
+					<Script>
+						<Changed/>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(videoItemFblElement, afbElement)
+{
+	videoItemFblElement.removeInputSignals();
+
+	var count = videoItemFblElement.getParamIntValue("OperandCount");
+	if (count == -1)
+	{
+		return false;
+	}
+	if (count &lt; 2)
+	{
+		count = 2;
+	}
+	if (count &gt; 16)
+	{
+		count = 16;
+	}
+
+	var opIndex = 3;
+	for (var i = 0; i &lt; count; i++)
+	{
+		var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+		if (afbInputSignal != null)
+		{
+			var caption = afbInputSignal.jsCaption();
+			var type = afbInputSignal.jsType();
+			var operandIndex = afbInputSignal.operandIndex();
+			var size = afbInputSignal.size();
+			videoItemFblElement.addInputSignal(caption, type, operandIndex, size);
+		}
+		opIndex++;
+	}
+
+	videoItemFblElement.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+}
+				</AfterCreation>
+			</CommonScript>
+		</AFB>	
+	
 		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0005">
 			<Properties>
 				<Description>Adder Block with float data format</Description>
@@ -1472,7 +1712,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0006">
+		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1510,7 +1750,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1579,7 +1819,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0006">
+		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1617,7 +1857,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1686,7 +1926,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0007">
+		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0008">
 			<Properties>								
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1724,7 +1964,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1793,7 +2033,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0006">
+		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1831,7 +2071,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-3.40282e+38</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>3.40282e+38</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1900,7 +2140,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0005">
+		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1937,7 +2177,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -1959,7 +2199,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0005">
+		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0006">
 			<Properties>				
 				<Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -1996,7 +2236,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2018,7 +2258,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0005">
+		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0006">
 			<Properties>
 				<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2055,7 +2295,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2077,7 +2317,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0005">
+		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0006">
 			<Properties>				
 				<Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2114,7 +2354,7 @@ function(videoItemFblElement, afbElement)
 				<Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 					<Value>0</Value>
 					<Default>0</Default>
-					<LowLimit>-2147483648</LowLimit>
+					<LowLimit>0</LowLimit>
 					<HighLimit>2147483647</HighLimit>
 					<Script>
 						<Changed></Changed>
@@ -2323,7 +2563,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#cod_bus_v1"          Caption="cod_bus"          Version="1.0004">
+		<AFB id="#cod_num_v1"          Caption="cod_num"          Version="1.0005">
 			<Properties>
 				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -3525,7 +3765,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#dec_bus_v1"          Caption="dec_bus"          Version="1.0002">
+		<AFB id="#dec_num_v1"          Caption="dec_num"          Version="1.0003">
 			<Properties>				
 				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
 				<Category>Logic</Category>

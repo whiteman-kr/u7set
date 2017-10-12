@@ -129,6 +129,11 @@ public:
 	QPoint m_scriptHelpWindowPos;
 	QByteArray m_scriptHelpWindowGeometry;
 
+    // Tuning Filters editor Options
+    //
+	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+    int m_tuningFiltersPropertyEditorSplitterPos = -1;
+
 	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;

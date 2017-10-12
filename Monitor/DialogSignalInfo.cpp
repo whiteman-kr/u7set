@@ -120,6 +120,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 	ui->tabWidget->tabBar()->setExpanding(true);
 	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
 
+	setAttribute(Qt::WA_DeleteOnClose);
+
 	QString str;
 
 	m_precision = signal.precision();
@@ -282,6 +284,24 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 DialogSignalInfo::~DialogSignalInfo()
 {
 	delete ui;
+}
+
+bool DialogSignalInfo::showDialog(QString appSignalId, QWidget* parent)
+{
+	bool ok = false;
+	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
+	if (ok == true)
+	{
+		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
+		dsi->show();
+	}
+	else
+	{
+		QMessageBox::critical(parent, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+	}
+
+	return ok;
 }
 
 void DialogSignalInfo::prepareContextMenu(const QPoint& pos)

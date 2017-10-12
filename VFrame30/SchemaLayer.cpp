@@ -222,6 +222,30 @@ namespace VFrame30
 		return std::shared_ptr<SchemaItem>();
 	}
 
+	std::list<std::shared_ptr<SchemaItem>> SchemaLayer::getItemListUnderPoint(QPointF point, QString className /*= ""*/) const
+	{
+		double x = point.x();
+		double y = point.y();
+
+		std::list<std::shared_ptr<SchemaItem>> out;
+
+		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
+		{
+			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+
+			if (item->IsIntersectPoint(x, y) == true)
+			{
+				if ((className.isEmpty() == true) ||
+					(className == item->metaObject()->className()))
+				{
+					out.push_back(item);
+				}
+			}
+		}
+
+		return out;
+	}
+
 	std::list<std::shared_ptr<SchemaItem>> SchemaLayer::getItemListInRectangle(const QRectF& rect) const
 	{
 		std::list<std::shared_ptr<SchemaItem>> out;

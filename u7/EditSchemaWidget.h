@@ -240,9 +240,7 @@ protected:
 
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
-
 	virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
-
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
 
 	// Mouse Left Button Down
@@ -335,7 +333,15 @@ protected slots:
 	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
 
 	void escapeKey();
+
 	void f2Key();
+	void f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
+
 	void deleteKey();
 
 	void undo();
@@ -456,10 +462,6 @@ private:
 
 	SchemaPropertiesDialog* m_schemaPropertiesDialog = nullptr;
 	SchemaItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
-
-	// Temporary and state variables
-	//
-	std::shared_ptr<VFrame30::SchemaItem> m_toolTipItem;
 
 	//Qt::MouseButtons m_mousePressedButtons;
 

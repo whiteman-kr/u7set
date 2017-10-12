@@ -5330,7 +5330,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result &= initOutputModulesMemory();
+//		result &= initOutputModulesMemory();
 		result &= conevrtOutputAnalogSignals();
 		result &= copyOutputDiscreteSignals();
 
@@ -5503,10 +5503,13 @@ namespace Builder
 		outDiscreteSignals.append(m_acquiredDiscreteOutputSignals);
 		outDiscreteSignals.append(m_nonAcquiredDiscreteOutputSignals);
 
-		if (outDiscreteSignals.isEmpty() == true)
-		{
-			return true;
-		}
+//		if (outDiscreteSignals.isEmpty() == true)
+//		{
+//			return true;
+//		}
+
+		int lmOutputsAddress = m_lmDescription->memory().m_appDataOffset;
+		bool lmOutputsIsWritten = false;
 
 		m_code.comment("Copy output discrete signals to output modules memory");
 		m_code.newLine();
@@ -5522,7 +5525,7 @@ namespace Builder
 
 		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
 
-		QVector<int>&& sortedWriteAddress = QVector<int>::fromList(writeAddreses);
+		QVector<int> sortedWriteAddress = QVector<int>::fromList(writeAddreses);
 
 		qSort(sortedWriteAddress);
 
@@ -5548,6 +5551,21 @@ namespace Builder
 
 			cmd.mov(writeAddr, wordAccAddr);
 			cmd.clearComment();
+			m_code.append(cmd);
+			m_code.newLine();
+
+			if (writeAddr == lmOutputsAddress)
+			{
+				lmOutputsIsWritten = true;
+			}
+		}
+
+		if (lmOutputsIsWritten == false)
+		{
+			Command cmd;
+
+			cmd.movConst(lmOutputsAddress, 0);
+			cmd.setComment("write #0 to LM's outputs area");
 			m_code.append(cmd);
 			m_code.newLine();
 		}

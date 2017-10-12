@@ -153,10 +153,9 @@ TuningFilter::TuningFilter()
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	//auto propFilterID = ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
-	//propFilterID->setCategory("Debug");
-	//auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, TuningFilter::filterType);
-	//propFilterType->setCategory("Debug");
+	ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
+
+	ADD_PROPERTY_GETTER_SETTER(FilterType, "FilterType", true, TuningFilter::filterType, TuningFilter::setFilterType);
 
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
@@ -167,11 +166,11 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	//auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-	//propBackColor->setCategory("Color");
+	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
+	propBackColor->setCategory("Color");
 
-	//auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-	//propTextColor->setCategory("Color");
+	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
+	propTextColor->setCategory("Color");
 
 }
 
@@ -428,8 +427,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 
 	writer.writeStartElement("Values");
 
-	std::vector <TuningFilterValue> values = signalValues();
-	for (const TuningFilterValue& v : values)
+	std::vector <TuningFilterValue> valuesList = getValues();
+	for (const TuningFilterValue& v : valuesList)
 	{
 		v.save(writer);
 	}
@@ -565,7 +564,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 }
 
 
-std::vector <TuningFilterValue> TuningFilter::signalValues() const
+std::vector <TuningFilterValue> TuningFilter::getValues() const
 {
 	std::vector <TuningFilterValue> result;
 
@@ -1095,7 +1094,7 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, Tuni
 
 }
 
-bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source)
+bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode, TuningFilter::FilterSource source)
 {
 	if (errorCode == nullptr)
 	{
@@ -1103,7 +1102,7 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, Tunin
 		return false;
 	}
 
-	QXmlStreamReader reader(data);
+    QXmlStreamReader reader(data);
 
 	if (reader.readNextStartElement() == false)
 	{
@@ -1157,28 +1156,44 @@ bool TuningFilterStorage::load(const QByteArray& data, QString* errorCode, Tunin
 		return !reader.hasError();
 	}
 
-	return !reader.hasError();
+    return !reader.hasError();
+}
+
+bool TuningFilterStorage::save(QByteArray& data)
+{
+    QXmlStreamWriter writer(&data);
+
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+
+    writer.writeStartElement("ObjectFilterStorage");
+
+    m_root->save(writer);
+
+    writer.writeEndElement();
+
+    writer.writeEndElement();	// ObjectFilterStorage
+
+    writer.writeEndDocument();
+
+    return true;
+
 }
 
 bool TuningFilterStorage::save(const QString& fileName, QString* errorMsg)
 {
 	// save data to XML
 	//
-	QByteArray data;
-	QXmlStreamWriter writer(&data);
 
-	writer.setAutoFormatting(true);
-	writer.writeStartDocument();
+    QByteArray data;
 
-	writer.writeStartElement("ObjectFilterStorage");
+    bool ok = save(data);
 
-	m_root->save(writer);
-
-	writer.writeEndElement();
-
-	writer.writeEndElement();	// ObjectFilterStorage
-
-	writer.writeEndDocument();
+    if (ok == false)
+    {
+        *errorMsg = QObject::tr("TuningFilterStorage::save: failed to save presets QByteArray.");
+        return false;
+    }
 
 	QFile f(fileName);
 

@@ -184,6 +184,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0166.sql", "Upgrade to version 166, Implementing safe file functions"},
 	{":/DatabaseUpgrade/Upgrade0167.sql", "Upgrade to version 167, Fixing error: Deleted but not checked-in file remains in the result of get_latest_file_tree_version"},
 	{":/DatabaseUpgrade/Upgrade0168.sql", "Upgrade to version 168, Changes in signalInstance table, deletion unit table"},
+	{":/DatabaseUpgrade/Upgrade0169.sql", "Upgrade to version 169, AFBL library (cmp, dec_num and cod_num) was updated"},
+	{":/DatabaseUpgrade/Upgrade0170.sql", "Upgrade to version 170, AFBL library was updated"},
 };
 
 
@@ -3964,8 +3966,19 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 
 void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 {
-	AUTO_COMPLETE
+	getSignals(signalSet, excludeDeleted, false);
+}
 
+
+void DbWorker::slot_getTuningableSignals(SignalSet* signalSet)
+{
+	getSignals(signalSet, true, true);
+}
+
+
+void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly)
+{
+	AUTO_COMPLETE
 
 	// Check parameters
 	//
@@ -4038,15 +4051,22 @@ void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 			continue;
 		}
 
+		if (tuningableOnly == true && s->enableTuning() == false)
+		{
+			delete s;
+			continue;
+		}
+
 		signalSet->append(s->ID(), s);
 	}
 
-	signalSet->clearID2IndexMap();
+	signalSet->buildID2IndexMap();
 
 	m_progress->setValue(100);
 
 	return;
 }
+
 
 
 void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)

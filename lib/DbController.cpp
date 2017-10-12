@@ -76,6 +76,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
+	connect(this, &DbController::signal_getTuningableSignals, m_worker, &DbWorker::slot_getTuningableSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
@@ -1521,6 +1522,29 @@ bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget
 	return ok;
 }
 
+bool DbController::getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget)
+{
+	if (signalSet == nullptr)
+	{
+		assert(signalSet != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getTuningableSignals(signalSet);
+
+	ok = waitForComplete(parentWidget, tr("Reading tuningable signals"));
+
+	return ok;
+}
 
 bool DbController::getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget)
 {

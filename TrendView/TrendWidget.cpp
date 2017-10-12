@@ -187,10 +187,12 @@ namespace TrendLib
 		}
 
 		QByteArray ba = file.readAll();
+		qDebug() << ba.size();
 
 		// Uncompress data
 		//
 		QByteArray uncommpressedData = qUncompress(ba);
+		qDebug() << uncommpressedData.size();
 
 		// Deserialize
 		//
