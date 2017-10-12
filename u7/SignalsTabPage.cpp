@@ -29,29 +29,30 @@
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,
 SC_DEVICE_STR_ID = 2,
-SC_NAME = 3,
-SC_CHANNEL = 4,
-SC_TYPE = 5,
-SC_ACQUIRE = 6,
-SC_IN_OUT_TYPE = 7,
-SC_DATA_SIZE = 8,
-SC_ANALOG_SIGNAL_FORMAT = 9,
-SC_LOW_ADC = 10,
-SC_HIGH_ADC = 11,
-SC_LOW_LIMIT = 12,
-SC_HIGH_LIMIT = 13,
-SC_UNIT = 14,
-SC_DROP_LIMIT = 15,
-SC_EXCESS_LIMIT = 16,
-SC_OUTPUT_MODE = 17,
-SC_DECIMAL_PLACES = 18,
-SC_APERTURE = 19,
-SC_FILTERING_TIME = 20,
-SC_SPREAD_TOLERANCE = 21,
-SC_BYTE_ORDER = 22,
-SC_ENABLE_TUNING = 23,
-SC_TUNING_DEFAULT_VALUE = 24,
-SC_LAST_CHANGE_USER = 25;
+SC_BUS_TYPE_ID = 3,
+SC_NAME = 4,
+SC_CHANNEL = 5,
+SC_TYPE = 6,
+SC_ACQUIRE = 7,
+SC_IN_OUT_TYPE = 8,
+SC_DATA_SIZE = 9,
+SC_ANALOG_SIGNAL_FORMAT = 10,
+SC_LOW_ADC = 11,
+SC_HIGH_ADC = 12,
+SC_LOW_LIMIT = 13,
+SC_HIGH_LIMIT = 14,
+SC_UNIT = 15,
+SC_DROP_LIMIT = 16,
+SC_EXCESS_LIMIT = 17,
+SC_OUTPUT_MODE = 18,
+SC_DECIMAL_PLACES = 19,
+SC_APERTURE = 20,
+SC_FILTERING_TIME = 21,
+SC_SPREAD_TOLERANCE = 22,
+SC_BYTE_ORDER = 23,
+SC_ENABLE_TUNING = 24,
+SC_TUNING_DEFAULT_VALUE = 25,
+SC_LAST_CHANGE_USER = 26;
 
 
 const char* Columns[] =
@@ -59,6 +60,7 @@ const char* Columns[] =
 	"AppSignalID",
 	"CustomAppSignalID",
 	"EquipmentID",
+	"BusTypeID",
 	"Caption",
 	"Channel",
 	"A/D/B",
@@ -143,6 +145,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		//
 		case SC_STR_ID:
 		case SC_EXT_STR_ID:
+		case SC_BUS_TYPE_ID:
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			QRegExp rx4ID("^[#]?[A-Za-z\\d_]*$");
@@ -264,6 +267,7 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		//
 		case SC_STR_ID: if (le) le->setText(s.appSignalID()); break;
 		case SC_EXT_STR_ID: if (le) le->setText(s.customAppSignalID()); break;
+		case SC_BUS_TYPE_ID: if (le) le->setText(s.busTypeID()); break;
 		case SC_NAME: if (le) le->setText(s.caption()); break;
 		case SC_DEVICE_STR_ID: if (le) le->setText(s.equipmentID()); break;
 
@@ -336,6 +340,19 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 					strId = strId.mid(1);
 				}
 				s.setCustomAppSignalID(strId.trimmed());
+			}
+			break;
+		}
+		case SC_BUS_TYPE_ID:
+		{
+			if (le)
+			{
+				QString busId = le->text();
+				if (!busId.isEmpty() && busId[0] == '#')
+				{
+					busId = busId.mid(1);
+				}
+				s.setBusTypeID(busId.trimmed());
 			}
 			break;
 		}
@@ -692,6 +709,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 					case SC_STR_ID: return signal.appSignalID();
 					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_BUS_TYPE_ID: return signal.busTypeID();
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 					case SC_TYPE: return QChar('A');
@@ -735,6 +753,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_LAST_CHANGE_USER: return signal.checkedOut() ? getUserStr(signal.userID()) : "";
 					case SC_STR_ID: return signal.appSignalID();
 					case SC_EXT_STR_ID: return signal.customAppSignalID();
+					case SC_BUS_TYPE_ID: return signal.busTypeID();
 					case SC_NAME: return signal.caption();
 					case SC_CHANNEL: return E::valueToString<E::Channel>(signal.channelInt());
 					case SC_TYPE: return (signal.signalType() == E::SignalType::Discrete) ? QChar('D') : QChar('B');
@@ -834,6 +853,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 		{
 			case SC_STR_ID: signal.setAppSignalID(value.toString()); break;
 			case SC_EXT_STR_ID: signal.setCustomAppSignalID(value.toString()); break;
+			case SC_BUS_TYPE_ID: signal.setBusTypeID(value.toString()); break;
 			case SC_NAME: signal.setCaption(value.toString()); break;
 			case SC_ANALOG_SIGNAL_FORMAT: signal.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(value.toInt())); break;
 			case SC_DATA_SIZE: signal.setDataSize(value.toInt()); break;
@@ -1458,6 +1478,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
+	m_signalsView->setColumnWidth(SC_BUS_TYPE_ID, 400);
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
 
