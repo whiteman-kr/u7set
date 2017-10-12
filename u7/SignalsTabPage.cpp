@@ -1254,17 +1254,6 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 	QList<int> resultSignalIDs;
 	m_signalSet.buildID2IndexMap();
 
-	auto idMaker = [](QString prefix, QString id) {
-		if (id[0] == '#')
-		{
-			return '#' + prefix + id.mid(1);
-		}
-		else
-		{
-			return prefix + id;
-		}
-	};
-
 	QSet<int> clonedSignalIDs;
 	QList<int> signalIDsList = signalIDs.toList();
 	qSort(signalIDsList);
@@ -1294,15 +1283,15 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 			clonedSignalIDs.insert(groupSignalID);
 		}
 
-		QString prefix = "CLONE_";
-		int prefixNumerator = 1;
+		QString suffix = "_CLONE";
+		int suffixNumerator = 1;
 		bool hasConflict;
 		do
 		{
 			hasConflict = false;
 			for (int groupSignalID : groupSignalIDs)
 			{
-				if (m_signalSet.contains(idMaker(prefix, m_signalSet.value(groupSignalID).appSignalID())))
+				if (m_signalSet.contains(m_signalSet.value(groupSignalID).appSignalID() + suffix))
 				{
 					hasConflict = true;
 					break;
@@ -1310,13 +1299,13 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 			}
 			if (hasConflict)
 			{
-				prefixNumerator++;
-				prefix = QString("CLONE%1_").arg(prefixNumerator);
+				suffixNumerator++;
+				suffix = QString("_CLONE%1").arg(suffixNumerator);
 			}
 		}
-		while (hasConflict && prefixNumerator < 1000);
+		while (hasConflict && suffixNumerator < 1000);
 
-		if (prefixNumerator >= 1000)
+		if (suffixNumerator >= 1000)
 		{
 			assert(false);
 			return QList<int>();
@@ -1329,8 +1318,8 @@ QList<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 			groupSignals[i] = groupSignal;
 			trimSignalTextFields(groupSignals[i]);
 
-			groupSignals[i].setAppSignalID(idMaker(prefix, groupSignal.appSignalID()));
-			groupSignals[i].setCustomAppSignalID(idMaker(prefix, groupSignal.customAppSignalID()));
+			groupSignals[i].setAppSignalID(groupSignal.appSignalID() + suffix);
+			groupSignals[i].setCustomAppSignalID(groupSignal.customAppSignalID() + suffix);
 		}
 
 		dbController()->addSignal(type, &groupSignals, m_parentWindow);
