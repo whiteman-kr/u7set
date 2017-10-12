@@ -9,8 +9,9 @@
 // IdePropertyEditor
 //
 
-IdePropertyEditor::IdePropertyEditor(QWidget* parent) :
-    PropertyEditor(parent)
+IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController /*= nullptr*/) :
+	PropertyEditor(parent),
+	m_dbController(dbController)
 {
     // Set script help data
     //
@@ -48,7 +49,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createCodeEditor(Property *pr
         // This is Filters Editor for TuningClient
         //
 
-        IdeTuningFiltersEditor* editor = new IdeTuningFiltersEditor(parent);
+		IdeTuningFiltersEditor* editor = new IdeTuningFiltersEditor(m_dbController, parent);
         return editor;
     }
 
@@ -374,18 +375,44 @@ void IdeCodeEditor::replaceAll(QString findText, QString replaceText)
 // IdeTuningFiltersEditor
 //
 
-IdeTuningFiltersEditor::IdeTuningFiltersEditor(QWidget* parent):
-  PropertyTextEditor(parent)
+IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidget* parent):
+  PropertyTextEditor(parent),
+  m_dbController(dbController)
 {
+	SignalSet tuningSignalSet;
 
+	// Load tuning signals
+	//
+
+	bool ok = m_dbController->getTuningableSignals(&tuningSignalSet, parent);
+
+	if (ok == true)
+	{
+		int count = tuningSignalSet.count();
+
+		Proto::AppSignal pas;
+		AppSignalParam asp;
+
+		for (int i = 0; i < count; i++)
+		{
+			tuningSignalSet[i].serializeTo(&pas);
+
+			ok = asp.load(pas);
+
+			if (ok == false)
+			{
+				assert(false);
+				return;
+			}
+
+			m_signalStorage.addSignal(asp);
+		}
+	}
 }
 
 IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 {
-    theSettings.m_tuningFiltersSignalsTableColumnWidth = m_tuningFilterEditor->saveSignalsTableColumnWidth();
-    theSettings.m_tuningFiltersPresetsTreeColumnWidth = m_tuningFilterEditor->savePresetsTreeColumnWidth();
-    theSettings.m_tuningFiltersPropertyEditorSplitterPos = m_tuningFilterEditor->m_propertyEditorSplitterPos;
-    theSettings.m_tuningFiltersPropertyEditorGeometry = m_tuningFilterEditor->m_propertyEditorGeometry;
+	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 }
 
 void IdeTuningFiltersEditor::setText(const QString& text)
@@ -396,9 +423,12 @@ void IdeTuningFiltersEditor::setText(const QString& text)
         return;
     }
 
-    QString errorCode;
 
-    bool ok = m_filterStorage.load(text.toUtf8(), &errorCode, TuningFilter::FilterSource::User);
+	// Load presets
+
+	QString errorCode;
+
+	bool ok = m_filterStorage.load(text.toUtf8(), &errorCode, TuningFilter::FilterSource::User);
     if (ok == false)
     {
         QLabel* errorLabel = new QLabel(errorCode);
@@ -408,11 +438,11 @@ void IdeTuningFiltersEditor::setText(const QString& text)
         return;
     }
 
-    m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage,
-                                                  theSettings.m_tuningFiltersSignalsTableColumnWidth,
-                                                  theSettings.m_tuningFiltersPresetsTreeColumnWidth,
-                                                  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
-                                                  theSettings.m_tuningFiltersPropertyEditorGeometry);
+
+
+	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false,
+												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
+												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(0, 0, 0, 0);

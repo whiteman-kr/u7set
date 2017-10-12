@@ -5,81 +5,18 @@
 #include "TuningFilter.h"
 #include "TuningSignalState.h"
 #include "TuningModel.h"
+#include "../lib/PropertyEditor.h"
 
 
-class TuningFilterEditor : public QWidget
+
+class DialogChooseTuningSignals : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
-                                const QList<int>& signalsTableColumnWidth, const QList<int>& presetsTreeColumnWidth,
-                                int propertyEditorSplitterPos, const QByteArray& propertyEditorGeometry);
+	DialogChooseTuningSignals(const TuningSignalStorage* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
 
-	~TuningFilterEditor();
-
-    QList<int> saveSignalsTableColumnWidth();
-    QList<int> savePresetsTreeColumnWidth();
-
-
-signals:
-
-    void getCurrentSignalValue(Hash appSignalHash, float* value, bool* ok);
-
-public slots:
-
-	void slot_signalsUpdated();
-
-private slots:
-
-	void on_m_addPreset_clicked();
-
-	void on_m_editPreset_clicked();
-
-	void on_m_removePreset_clicked();
-
-	void on_m_copyPreset_clicked();
-
-	void on_m_pastePreset_clicked();
-
-	void on_m_moveUp_clicked();
-
-	void on_m_moveDown_clicked();
-
-	void on_m_add_clicked();
-
-	void on_m_remove_clicked();
-
-	void on_m_presetsTree_doubleClicked(const QModelIndex& index);
-
-	void on_m_signalTypeCombo_currentIndexChanged(int index);
-
-	void on_m_presetsTree_itemSelectionChanged();
-
-	void on_m_setValue_clicked();
-
-	void on_m_setCurrent_clicked();
-
-	void on_m_applyFilter_clicked();
-
-	void on_m_signalsTable_doubleClicked(const QModelIndex& index);
-
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
-
-	void on_m_filterTypeCombo_currentIndexChanged(int index);
-
-	void on_m_filterText_returnPressed();
-
-	void on_m_presetsTree_contextMenu(const QPoint& pos);
-
-private:
-
-	enum class TreeItemType
-	{
-		Filter,
-		Signal
-	};
 
 	enum class FilterType
 	{
@@ -97,49 +34,46 @@ private:
 		Discrete
 	};
 
-	void initUserInterface();
-
-	bool isFilter(QTreeWidgetItem* item);
-	bool isSignal(QTreeWidgetItem* item);
-
-	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
-
-	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
-	void setSignalItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
-
-	void fillObjectsList();
-
-	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
-
-	void getSelectedCount(int& selectedPresets, int& selectedSignals);
-
 
 private:
 
-	// User interface
-	//
+	void fillBaseSignalsList();
 
-	QTableView* m_signalsTable = nullptr;
-	QComboBox* m_signalTypeCombo = nullptr;
-	QComboBox* m_filterTypeCombo = nullptr;
-	QLineEdit* m_filterText = nullptr;
-	QPushButton* m_applyFilter = nullptr;
+	void fillFilterValuesList();
 
-	//
+	void accept() override;
 
-	QPushButton* m_add = nullptr;
-	QPushButton* m_remove = nullptr;
+	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
 
-	QTreeWidget* m_presetsTree = nullptr;
+private:
 
-	//
+	const TuningSignalStorage* m_signalStorage = nullptr;
 
-	QPushButton* m_addPreset = nullptr;
-	QPushButton* m_editPreset = nullptr;
-	QPushButton* m_removePreset = nullptr;
+	std::shared_ptr<TuningFilter> m_filter;
 
-	QPushButton* m_copyPreset = nullptr;
-	QPushButton* m_pastePreset = nullptr;
+	std::vector<TuningFilterValue> m_filterValues;
+
+	// Left side
+
+	TuningModel* m_baseModel = nullptr;
+	QTableView* m_baseSignalsTable = nullptr;
+
+	QComboBox* m_baseSignalTypeCombo = nullptr;
+	QComboBox* m_baseFilterTypeCombo = nullptr;
+	QLineEdit* m_baseFilterText = nullptr;
+	QPushButton* m_baseApplyFilter = nullptr;
+
+	int m_sortColumn = 0;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+
+	// Middle
+
+	QPushButton* m_addValue = nullptr;
+	QPushButton* m_removeValue = nullptr;
+
+	// Right side
+
+	QTreeWidget* m_filterValuesTree = nullptr;
 
 	QPushButton* m_moveUp = nullptr;
 	QPushButton* m_moveDown = nullptr;
@@ -147,45 +81,145 @@ private:
 	QPushButton* m_setValue = nullptr;
 	QPushButton* m_setCurrent = nullptr;
 
-	QAction* m_addPresetAction = nullptr;
-	QAction* m_editPresetAction = nullptr;
-	QAction* m_removePresetAction = nullptr;
-
-	QAction* m_copyPresetAction = nullptr;
-	QAction* m_pastePresetAction = nullptr;
-
 	QAction* m_moveUpAction = nullptr;
 	QAction* m_moveDownAction = nullptr;
 
 	QAction* m_setValueAction = nullptr;
 	QAction* m_setCurrentAction = nullptr;
 
+	//
+
+	QPushButton* m_buttonOk = nullptr;
+	QPushButton* m_buttonCancel = nullptr;
+
+private slots:
+
+	void baseSortIndicatorChanged(int column, Qt::SortOrder order);
+
+	void on_m_baseApplyFilter_clicked();
+
+	void on_m_baseFilterTypeCombo_currentIndexChanged(int index);
+
+	void on_m_baseFilterText_returnPressed();
+
+	void on_m_baseSignalTypeCombo_currentIndexChanged(int index);
+
+	void on_m_baseSignalsTable_doubleClicked(const QModelIndex& index);
+
+	void on_m_filterValuesTree_doubleClicked(const QModelIndex& index);
+
+	void on_m_moveUp_clicked();
+
+	void on_m_moveDown_clicked();
+
+	void on_m_add_clicked();
+
+	void on_m_remove_clicked();
+
+	void on_m_setValue_clicked();
+
+	void on_m_setCurrent_clicked();
+};
+
+class TuningFilterEditor : public QWidget
+{
+	Q_OBJECT
+
+public:
+
+	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
+								bool readOnly,
+								bool setCurrentEnabled,
+								int propertyEditorSplitterPos,
+								const QByteArray& dialogChooseSignalGeometry);
+
+	~TuningFilterEditor();
+
+	 void saveUserInterfaceSettings(int* propertyEditorSplitterPos, QByteArray* dialogChooseSignalGeometry);
+
+
+signals:
+
+	//void getCurrentSignalValue(Hash appSignalHash, float* value, bool* ok);
+
+private slots:
+
+	void on_m_addPreset_clicked();
+
+	void on_m_removePreset_clicked();
+
+	void on_m_copyPreset_clicked();
+
+	void on_m_pastePreset_clicked();
+
+	void on_m_presetsTree_itemSelectionChanged();
+
+	void on_m_presetsTree_contextMenu(const QPoint& pos);
+
+	void presetPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	void on_m_presetsSignals_clicked();
+private:
+
+	void initUserInterface();
+
+	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
+
+	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
+
+	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
+
+
+private:
+
+	// User interface
+	//
+
+	QComboBox* m_filterTypeCombo = nullptr;
+	QLineEdit* m_filterText = nullptr;
+	QPushButton* m_applyFilter = nullptr;
+
+	//
+
+	QTreeWidget* m_presetsTree = nullptr;
+	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+
+	//
+
+	QPushButton* m_addPreset = nullptr;
+	QPushButton* m_removePreset = nullptr;
+
+	QPushButton* m_copyPreset = nullptr;
+	QPushButton* m_pastePreset = nullptr;
+
+	QPushButton* m_presetSignals = nullptr;
+
+	QAction* m_addPresetAction = nullptr;
+	QAction* m_removePresetAction = nullptr;
+
+	QAction* m_copyPresetAction = nullptr;
+	QAction* m_pastePresetAction = nullptr;
+
 	QMenu* m_presetsTreeContextMenu = nullptr;
 
 	// Dialog Data
 	//
 
-	TuningModel* m_model = nullptr;
-
 	bool m_modified = false;
-
-	bool m_showAutomatic = false;
 
 	TuningFilterStorage* m_filterStorage = nullptr;
 
-	const TuningSignalStorage* m_signals = nullptr;
+	const TuningSignalStorage* m_signalStorage = nullptr;
 
-	int m_sortColumn = 0;
-
-	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
-
-public:
+private:
 
     // Apperance
     //
+	QByteArray m_dialogChooseSignalGeometry;
 
     int m_propertyEditorSplitterPos = -1;
-    QByteArray m_propertyEditorGeometry;
+	bool m_readOnly = false;
+	bool m_setCurrentEnabled = false;
 };
 
 #endif // DIALOGPRESETEDITOR_H

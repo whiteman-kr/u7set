@@ -6,7 +6,7 @@
 #include "../QScintilla/Qt4Qt5/Qsci/qscilexerxml.h"
 
 #include "../lib/PropertyEditor.h"
-
+#include "../lib/DbController.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
 
 //
@@ -16,12 +16,16 @@
 class IdePropertyEditor : public ExtWidgets::PropertyEditor
 {
 public:
-    IdePropertyEditor(QWidget* parent);
+	IdePropertyEditor(QWidget* parent, DbController* dbController = nullptr);
     virtual ~IdePropertyEditor();
 
     virtual void saveSettings();
 
     virtual ExtWidgets::PropertyTextEditor* createCodeEditor(Property *property, QWidget* parent) override;
+
+private:
+
+	DbController* m_dbController = nullptr;
 };
 
 
@@ -108,7 +112,7 @@ class IdeTuningFiltersEditor : public ExtWidgets::PropertyTextEditor
 {
 public:
 
-    explicit IdeTuningFiltersEditor(QWidget* parent);
+	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
     virtual ~IdeTuningFiltersEditor();
 
     void setText(const QString& text) override;
@@ -122,6 +126,8 @@ private:
 
     TuningSignalStorage m_signalStorage;
     TuningFilterStorage m_filterStorage;
+
+	DbController* m_dbController = nullptr;
 
 };
 

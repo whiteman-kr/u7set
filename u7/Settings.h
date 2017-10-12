@@ -131,10 +131,8 @@ public:
 
     // Tuning Filters editor Options
     //
-    QList<int> m_tuningFiltersSignalsTableColumnWidth;
-    QList<int> m_tuningFiltersPresetsTreeColumnWidth;
+	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
     int m_tuningFiltersPropertyEditorSplitterPos = -1;
-    QByteArray m_tuningFiltersPropertyEditorGeometry;
 
 	// Connection editor
 	//

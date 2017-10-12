@@ -145,8 +145,8 @@ public:
 	// Values
 	//
 
-	std::vector <TuningFilterValue> signalValues() const;
-	void setValues(const std::vector <TuningFilterValue>& values);
+	std::vector <TuningFilterValue> getValues() const;
+	void setValues(const std::vector <TuningFilterValue>& getValues);
 
 	int valuesCount() const;
 	bool valueExists(Hash hash) const;

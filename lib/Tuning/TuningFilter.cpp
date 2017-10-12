@@ -153,11 +153,9 @@ TuningFilter::TuningFilter()
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	//auto propFilterID = ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
-	//propFilterID->setCategory("Debug");
+	ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
 
-    auto propFilterType = ADD_PROPERTY_GETTER(FilterType, "FilterType", true, TuningFilter::filterType);
-    propFilterType->setCategory("Debug");
+	ADD_PROPERTY_GETTER_SETTER(FilterType, "FilterType", true, TuningFilter::filterType, TuningFilter::setFilterType);
 
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
@@ -168,11 +166,11 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-    //auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-    //propBackColor->setCategory("Color");
+	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
+	propBackColor->setCategory("Color");
 
-    //auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-    //propTextColor->setCategory("Color");
+	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
+	propTextColor->setCategory("Color");
 
 }
 
@@ -429,8 +427,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 
 	writer.writeStartElement("Values");
 
-	std::vector <TuningFilterValue> values = signalValues();
-	for (const TuningFilterValue& v : values)
+	std::vector <TuningFilterValue> valuesList = getValues();
+	for (const TuningFilterValue& v : valuesList)
 	{
 		v.save(writer);
 	}
@@ -566,7 +564,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 }
 
 
-std::vector <TuningFilterValue> TuningFilter::signalValues() const
+std::vector <TuningFilterValue> TuningFilter::getValues() const
 {
 	std::vector <TuningFilterValue> result;
 

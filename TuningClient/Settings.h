@@ -148,12 +148,9 @@ public:
 	QPoint m_presetEditorPos;
 	QByteArray m_presetEditorGeometry;
 
-    QList<int> m_presetEditorSignalsTableColumnWidth;
-    QList<int> m_presetEditorPresetsTreeColumnWidth;
-    int m_presetEditorPropertyEditorSplitterPos = -1;
-    QByteArray m_presetEditorPropertyEditorGeometry;
 
-
+	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+	int m_tuningFiltersPropertyEditorSplitterPos = -1;
 
 private:
 
