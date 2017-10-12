@@ -1582,7 +1582,7 @@ static const int recomendedSize = 8192;
 //					memcpy(&lastState, &state, sizeof(lastState));
 //				}
 
-static const TrendStateItem fakeState;
+static const TrendStateItem fakeState = TrendStateItem();
 				auto stateIt = std::lower_bound(states.begin(), states.end(), fakeState,
 								 [&rullerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
 								 {

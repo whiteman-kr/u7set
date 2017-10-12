@@ -1,3 +1,4 @@
+#include <memory>
 #include "MonitorArchive.h"
 #include "Settings.h"
 #include <QMessageBox>
