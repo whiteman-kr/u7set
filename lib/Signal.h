@@ -386,8 +386,8 @@ private:
 	//
 	Hash m_hash = 0;						// == calcHash(m_appSignalID)
 
-	Address16 m_ioBufAddr;					// signal address in i/o modules buffers
-											// only for signals of input/output modules (input and output signals)
+	Address16 m_ioBufAddr;					// signal address in i/o modules buffers for signals of input/output modules (input and output signals)
+											// or
 
 	Address16 m_tuningAddr;					// signal address in tuning buffer
 											// only for tuningable signals

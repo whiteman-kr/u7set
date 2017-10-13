@@ -195,7 +195,8 @@ SOURCES +=\
     Forms/ChooseAfbDialog.cpp \
     Builder/SignalSet.cpp \
     Builder/Busses.cpp \
-    IdePropertyEditor.cpp
+    IdePropertyEditor.cpp \
+    Builder/Ual.cpp
 
 HEADERS  += \
     CentralWidget.h \
@@ -329,7 +330,8 @@ HEADERS  += \
     Forms/DialogUpdateFromPreset.h \
     Builder/SignalSet.h \
     Builder/Busses.h \
-    IdePropertyEditor.h
+    IdePropertyEditor.h \
+    Builder/Ual.h
 
 FORMS    += \
     CreateProjectDialog.ui \

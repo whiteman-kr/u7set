@@ -625,16 +625,16 @@ namespace Builder
 		m_appSignals.clear();
 		m_outPinSignal.clear();
 
-		bool result = true;
+		bool result = false;
 
-		result = appendUalSignals();
-
-		if (result == false)
+		do
 		{
-			return false;
-		}
+			if (appendUalSignals() == false) break;
+			if (appendSignalsFromAppItems() == false) break;
 
-		result = appendSignalsFromAppItems();
+			result = true;
+		}
+		while(false);
 
 		return result;
 	}
