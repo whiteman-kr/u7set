@@ -201,6 +201,11 @@ unix:QMAKE_LFLAGS += '-Wl,-rpath,\'\$$ORIGIN/./\''
 unix:QMAKE_CXXFLAGS += -std=c++11
 
 
+#c++14 support for GCC
+#
+unix:QMAKE_CXXFLAGS += -std=c++14
+
+
 # VFrame30 library
 # $unix:!macx|win32: LIBS += -L$$OUT_PWD/../VFrame30/ -lVFrame30
 #

@@ -113,14 +113,12 @@ TuningSignalState TuningSignalManager::stateByHash(Hash hash) const
 	auto it = m_statesMap.find(hash);
 	if (it == m_statesMap.end())
 	{
-		assert(false);
 		return TuningSignalState();
 	}
 
 	int index = it->second;
 	if (index < 0 || index >= m_states.size())
 	{
-		assert(false);
 		return TuningSignalState();
 	}
 
