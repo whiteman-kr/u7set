@@ -426,6 +426,7 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 	if (tuningSourceEquipmentId.isEmpty() == false)
 	{
 		tuningSourceEquipmentId.replace('\n', ';');
+		tuningSourceEquipmentId.remove('\r');
 		tuningSourceEquipmentIdMasks = tuningSourceEquipmentId.split(';');
 	}
 
@@ -434,23 +435,24 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 
 	::Proto::AppSignalSet tuningSet;
 
-	int signalsCount = m_signalSet->count();
-
-	for (int i = 0; i < signalsCount; i++)
+	if (tuningSourceEquipmentIdMasks.empty() == false)
 	{
-		const Signal& s = (*m_signalSet)[i];
+		int signalsCount = m_signalSet->count();
 
-		if (s.enableTuning() == false)
+		for (int i = 0; i < signalsCount; i++)
 		{
-			continue;
-		}
+			const Signal& s = (*m_signalSet)[i];
 
-		// Check EquipmentIdMasks
-		//
+			if (s.enableTuning() == false)
+			{
+				continue;
+			}
 
-		if (tuningSourceEquipmentIdMasks.empty() == false)
-		{
+			// Check EquipmentIdMasks
+			//
+
 			bool result = false;
+
 			for (QString m : tuningSourceEquipmentIdMasks)
 			{
 				m = m.trimmed();
@@ -468,15 +470,19 @@ bool TuningClientCfgGenerator::writeTuningSignals()
 					break;
 				}
 			}
+
 			if (result == false)
 			{
 				continue;
 			}
+
+			::Proto::AppSignal* aspMessage = tuningSet.add_appsignal();
+			s.serializeTo(aspMessage);
 		}
-
-
-		::Proto::AppSignal* aspMessage = tuningSet.add_appsignal();
-		s.serializeTo(aspMessage);
+	}
+	else
+	{
+		m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
 	}
 
 	// Write number of signals
