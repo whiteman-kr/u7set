@@ -94,7 +94,7 @@ public:
 
 	TuningFilter& operator= (const TuningFilter& That);
 
-	bool load(QXmlStreamReader& reader, Source source);
+	bool load(QXmlStreamReader& reader);
 	bool save(QXmlStreamWriter& writer) const;
 
 	bool match(const AppSignalParam& object, bool checkValues) const;
@@ -117,8 +117,8 @@ public:
 	bool isSourceSchema() const;
 	bool isSourceUser() const;
 
-	Source sourceType() const;
-	void setSourceType(Source value);
+	Source source() const;
+	void setSource(Source value);
 
 	InterfaceType interfaceType() const;
 	void setInterfaceType(InterfaceType value);
@@ -180,7 +180,7 @@ public:
 	bool removeChild(const QString& ID);
 
 	void removeAllChildren();
-	void removeChildren(Source sourceType);
+	void removeChildren(Source source);
 
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
@@ -245,8 +245,8 @@ public:
 
 	// Serialization
 
-	bool load(const QByteArray& data, QString* errorCode, TuningFilter::Source source = TuningFilter::Source::User);
-	bool load(const QString& fileName, QString* errorCode, TuningFilter::Source source);
+	bool load(const QByteArray& data, QString* errorCode);
+	bool load(const QString& fileName, QString* errorCode);
 
     bool save(QByteArray& data);
 	bool save(const QString& fileName, QString* errorMsg);

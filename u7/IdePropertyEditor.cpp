@@ -440,7 +440,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false,
+	m_tuningFilterEditor = new TuningFilterEditor(&m_filterStorage, &m_signalStorage, false, false, TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
 												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
 

@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode, TuningFilter::Source::User) == false)
+	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -400,7 +400,7 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 
 	m_filterStorage.removeFilters(TuningFilter::Source::Project);
 
-	if (m_filterStorage.load(data, &errorStr, TuningFilter::Source::Project) == false)
+	if (m_filterStorage.load(data, &errorStr) == false)
 	{
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		theLogFile->writeError(completeErrorMessage);

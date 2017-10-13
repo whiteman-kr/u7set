@@ -227,7 +227,7 @@ TuningFilter::~TuningFilter()
 
 }
 
-bool TuningFilter::load(QXmlStreamReader& reader, Source source)
+bool TuningFilter::load(QXmlStreamReader& reader)
 {
 	if (isRoot() == false)
 	{
@@ -298,6 +298,41 @@ bool TuningFilter::load(QXmlStreamReader& reader, Source source)
 				}
 			}
 		}
+
+		if (reader.attributes().hasAttribute("Source"))
+		{
+			QString v = reader.attributes().value("Source").toString();
+			if (v == "Project")
+			{
+				setSource(Source::Project);
+			}
+			else
+			{
+				if (v == "Schema")
+				{
+					setSource(Source::Schema);
+				}
+				else
+				{
+					if (v == "Equipment")
+					{
+						setSource(Source::Equipment);
+					}
+					else
+					{
+						if (v == "User")
+						{
+							setSource(Source::User);
+						}
+						else
+						{
+							reader.raiseError(tr("Unknown Source value: %1").arg(v));
+							return false;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	int recurseLevel = 0;		//recurseLevel 1 = "Values", recurseLevel 2 = "Value"
@@ -356,12 +391,10 @@ bool TuningFilter::load(QXmlStreamReader& reader, Source source)
 
 				std::shared_ptr<TuningFilter> of = std::make_shared<TuningFilter>(filterType);
 
-				if (of->load(reader, source) == false)
+				if (of->load(reader) == false)
 				{
 					return false;
 				}
-
-				of->setSourceType(source);
 
 				addChild(of);
 
@@ -426,6 +459,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer) const
 	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
 
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>(static_cast<int>(signalType())));
+	writer.writeAttribute("Source", E::valueToString<Source>(static_cast<int>(source())));
 
 	writer.writeStartElement("Values");
 
@@ -486,13 +520,13 @@ bool TuningFilter::isSourceUser() const
 	return m_source == Source::User;
 }
 
-TuningFilter::Source TuningFilter::sourceType() const
+TuningFilter::Source TuningFilter::source() const
 {
 	return m_source;
 }
 
 
-void TuningFilter::setSourceType(Source value)
+void TuningFilter::setSource(Source value)
 {
 	m_source = value;
 }
@@ -834,7 +868,7 @@ void TuningFilter::removeChildren(Source sourceType)
 	{
 		std::shared_ptr<TuningFilter>& filter =* it;
 
-		if (filter->sourceType() != sourceType)
+		if (filter->source() != sourceType)
 		{
 			m_childFilters.push_back(filter);
 		}
@@ -1060,7 +1094,7 @@ TuningFilterStorage::TuningFilterStorage(const TuningFilterStorage& That)
 	*this = That;
 }
 
-bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, TuningFilter::Source source)
+bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -1083,11 +1117,11 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode, Tuni
 
 	QByteArray data = f.readAll();
 
-	return load(data, errorCode, source);
+	return load(data, errorCode);
 
 }
 
-bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode, TuningFilter::Source source /* = TuningFilter::Source::Project*/)
+bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
@@ -1133,7 +1167,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode, Tunin
 
 		if (tagName == "Root")
 		{
-			if (m_root->load(reader, source) == false)
+			if (m_root->load(reader) == false)
 			{
 				*errorCode = reader.errorString();
 				return false;
@@ -1255,7 +1289,7 @@ std::shared_ptr<TuningFilter> TuningFilterStorage::pasteFromClipboard()
 
 	QString errorMsg;
 
-	bool ok = clipboardStorage.load(data, &errorMsg, TuningFilter::Source::User);
+	bool ok = clipboardStorage.load(data, &errorMsg);
 	if (ok == false)
 	{
 		return nullptr;
@@ -1322,7 +1356,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 		std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
 		ofSchema->setID("%AUTOFILTER%_SCHEMA");
 		ofSchema->setCaption(QObject::tr("Schemas"));
-		ofSchema->setSourceType(TuningFilter::Source::Schema);
+		ofSchema->setSource(TuningFilter::Source::Schema);
 
 		for (const VFrame30::SchemaDetails& schemasDetails : m_schemasDetails)
 		{
@@ -1354,7 +1388,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 
 			//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
 			ofTs->setCaption(schemasDetails.m_caption);
-			ofTs->setSourceType(TuningFilter::Source::Schema);
+			ofTs->setSource(TuningFilter::Source::Schema);
 
 			ofSchema->addChild(ofTs);
 		}
@@ -1371,7 +1405,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 		std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
 		ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
 		ofEquipment->setCaption(QObject::tr("Equipment"));
-		ofEquipment->setSourceType(TuningFilter::Source::Equipment);
+		ofEquipment->setSource(TuningFilter::Source::Equipment);
 
 		for (const QString& ts : tuningSourcesEquipmentIds)
 		{
@@ -1379,7 +1413,7 @@ void TuningFilterStorage::createAutomaticFilters(const TuningSignalStorage* obje
 			ofTs->setEquipmentIDMask(ts);
 			ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
 			ofTs->setCaption(ts);
-			ofTs->setSourceType(TuningFilter::Source::Equipment);
+			ofTs->setSource(TuningFilter::Source::Equipment);
 
 			ofEquipment->addChild(ofTs);
 		}

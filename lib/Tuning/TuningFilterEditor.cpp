@@ -682,13 +682,14 @@ void TuningFilterEditor::on_m_presetsTree_doubleClicked(const QModelIndex& index
 
 TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 									   bool readOnly,
-									   bool setCurrentEnabled,
+									   bool setCurrentEnabled, TuningFilter::Source source,
 									   int propertyEditorSplitterPos,
 									   const QByteArray& dialogChooseSignalGeometry):
 	m_filterStorage(filterStorage),
 	m_signalStorage(objects),
 	m_readOnly(readOnly),
 	m_setCurrentEnabled(setCurrentEnabled),
+	m_source(source),
 	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry)
 {
@@ -711,7 +712,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, const
 			return;
 		}
 
-        if (f->isSourceUser() == false)
+		if (f->source() != m_source)
         {
             continue;
         }
@@ -925,10 +926,10 @@ void TuningFilterEditor::addChildTreeObjects(const std::shared_ptr<TuningFilter>
 			continue;
 		}
 
-        if (f->isSourceUser() == false)
-        {
-            continue;
-        }
+		if (f->source() != m_source)
+		{
+			continue;
+		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		setFilterItemText(item, f.get());
@@ -968,6 +969,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	QUuid uid = QUuid::createUuid();
 	newFilter->setID(uid.toString());
 	newFilter->setCaption(tr("New Filter"));
+	newFilter->setSource(m_source);
 
 	QTreeWidgetItem* newPresetItem = new QTreeWidgetItem();
 	setFilterItemText(newPresetItem, newFilter.get());
