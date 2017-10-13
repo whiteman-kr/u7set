@@ -963,7 +963,7 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 
 void TuningFilterEditor::on_m_addPreset_clicked()
 {
-	std::shared_ptr<TuningFilter> newFilter = std::make_shared<TuningFilter>(TuningFilter::FilterType::Tree);
+	std::shared_ptr<TuningFilter> newFilter = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
 
 	QUuid uid = QUuid::createUuid();
 	newFilter->setID(uid.toString());

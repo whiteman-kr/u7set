@@ -2,6 +2,7 @@
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/AppSignal.h"
+#include "../lib/Tuning/TuningFilter.h"
 
 namespace Builder
 {
@@ -46,10 +47,12 @@ bool TuningClientCfgGenerator::generateConfiguration()
 
 	bool result = true;
 
+	std::vector<Hash> tuningSignalHashArray;
+
 	result &= writeSettings();
-	result &= writeObjectFilters();
+	result &= writeTuningSignals(&tuningSignalHashArray);
+	result &= writeObjectFilters(tuningSignalHashArray);
 	result &= writeSchemasDetails();
-	result &= writeTuningSignals();
 	result &= writeSchemas();
 	result &= writeGlobalScript();
 
@@ -295,7 +298,113 @@ bool TuningClientCfgGenerator::writeSettings()
 	return true;
 }
 
-bool TuningClientCfgGenerator::writeObjectFilters()
+bool TuningClientCfgGenerator::writeTuningSignals(std::vector<Hash>* tuningSignalHashArray)
+{
+	if (tuningSignalHashArray == nullptr)
+	{
+		assert(tuningSignalHashArray);
+		return false;
+	}
+
+	tuningSignalHashArray->clear();
+
+	// Parse tuningSourceEquipmentId
+	//
+	bool ok = false;
+	QString tuningSourceEquipmentId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	QStringList tuningSourceEquipmentIdMasks;
+	if (tuningSourceEquipmentId.isEmpty() == false)
+	{
+		tuningSourceEquipmentId.replace('\n', ';');
+		tuningSourceEquipmentId.remove('\r');
+		tuningSourceEquipmentIdMasks = tuningSourceEquipmentId.split(';');
+	}
+
+	// Write signals
+	//
+
+	::Proto::AppSignalSet tuningSet;
+
+	if (tuningSourceEquipmentIdMasks.empty() == false)
+	{
+		int signalsCount = m_signalSet->count();
+
+		for (int i = 0; i < signalsCount; i++)
+		{
+			const Signal& s = (*m_signalSet)[i];
+
+			if (s.enableTuning() == false)
+			{
+				continue;
+			}
+
+			// Check EquipmentIdMasks
+			//
+
+			bool result = false;
+
+			for (QString m : tuningSourceEquipmentIdMasks)
+			{
+				m = m.trimmed();
+
+				if (m.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QRegExp rx(m);
+				rx.setPatternSyntax(QRegExp::Wildcard);
+				if (rx.exactMatch(s.equipmentID()))
+				{
+					result = true;
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				continue;
+			}
+
+			tuningSignalHashArray->push_back(::calcHash(s.appSignalID()));
+
+			::Proto::AppSignal* aspMessage = tuningSet.add_appsignal();
+			s.serializeTo(aspMessage);
+		}
+	}
+	else
+	{
+		m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
+	}
+
+	// Write number of signals
+
+	QByteArray data;
+	data.resize(tuningSet.ByteSize());
+
+	tuningSet.SerializeToArray(data.data(), tuningSet.ByteSize());
+
+	// Write file
+
+	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
+
+	if (buildFile == nullptr)
+	{
+		m_log->errCMN0012("TuningSignals.dat");
+		return false;
+	}
+
+	m_cfgXml->addLinkToFile(buildFile);
+
+	return true;
+}
+
+bool TuningClientCfgGenerator::writeObjectFilters(const std::vector<Hash>& tuningSignalHashArray)
 {
 	bool ok = true;
 
@@ -313,6 +422,39 @@ bool TuningClientCfgGenerator::writeObjectFilters()
 		m_log->errCFG3022(m_software->equipmentId(), "Filters");
 		return false;
 	}
+
+	//
+	// Check all filters for non-existing signals
+	//
+
+	TuningFilterStorage tuningFilterStorage;
+
+	QString errorCode;
+
+	ok = tuningFilterStorage.load(filters.toUtf8(), &errorCode);
+	if (ok == false)
+	{
+		m_log->errEQP6107("Filters", m_software->equipmentId());
+		return false;
+	}
+
+	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
+
+	tuningFilterStorage.checkFilterSignals(tuningSignalHashArray, notFoundSignalsAndFilters);
+
+	if (notFoundSignalsAndFilters.empty() == false)
+	{
+		for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
+		{
+			m_log->errEQP6108(p.first, p.second, m_software->equipmentId());
+		}
+
+		return false;
+	}
+
+	//
+	// Save filters to file
+	//
 
 	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "", filters);
 
@@ -403,102 +545,6 @@ bool TuningClientCfgGenerator::writeSchemasDetails()
 	if (buildFile == nullptr)
 	{
 		m_log->errCMN0012("SchemasDetails.pbuf");
-		return false;
-	}
-
-	m_cfgXml->addLinkToFile(buildFile);
-
-	return true;
-}
-
-bool TuningClientCfgGenerator::writeTuningSignals()
-{
-	// Parse tuningSourceEquipmentId
-	//
-	bool ok = false;
-	QString tuningSourceEquipmentId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID", &ok).trimmed();
-	if (ok == false)
-	{
-		return false;
-	}
-
-	QStringList tuningSourceEquipmentIdMasks;
-	if (tuningSourceEquipmentId.isEmpty() == false)
-	{
-		tuningSourceEquipmentId.replace('\n', ';');
-		tuningSourceEquipmentId.remove('\r');
-		tuningSourceEquipmentIdMasks = tuningSourceEquipmentId.split(';');
-	}
-
-	// Write signals
-	//
-
-	::Proto::AppSignalSet tuningSet;
-
-	if (tuningSourceEquipmentIdMasks.empty() == false)
-	{
-		int signalsCount = m_signalSet->count();
-
-		for (int i = 0; i < signalsCount; i++)
-		{
-			const Signal& s = (*m_signalSet)[i];
-
-			if (s.enableTuning() == false)
-			{
-				continue;
-			}
-
-			// Check EquipmentIdMasks
-			//
-
-			bool result = false;
-
-			for (QString m : tuningSourceEquipmentIdMasks)
-			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegExp rx(m);
-				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(s.equipmentID()))
-				{
-					result = true;
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			::Proto::AppSignal* aspMessage = tuningSet.add_appsignal();
-			s.serializeTo(aspMessage);
-		}
-	}
-	else
-	{
-		m_log->wrnCFG3016(m_software->equipmentIdTemplate(), "TuningSourceEquipmentID");
-	}
-
-	// Write number of signals
-
-	QByteArray data;
-	data.resize(tuningSet.ByteSize());
-
-	tuningSet.SerializeToArray(data.data(), tuningSet.ByteSize());
-
-	// Write file
-
-	BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CFG_FILE_ID_TUNING_SIGNALS, "", data);
-
-	if (buildFile == nullptr)
-	{
-		m_log->errCMN0012("TuningSignals.dat");
 		return false;
 	}
 

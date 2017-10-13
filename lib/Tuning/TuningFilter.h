@@ -42,7 +42,7 @@ class DialogCheckFilterSignals : public QDialog
 
 public:
 
-	DialogCheckFilterSignals(QStringList& errorLog, QWidget* parent);
+	DialogCheckFilterSignals(std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parent);
 
 private slots:
 
@@ -60,22 +60,23 @@ class TuningFilter : public PropertyObject
 public:
 	//Enums
 	//
-	enum class FilterType
+	enum class InterfaceType
 	{
 		Root,
 		Tree,
 		Tab,
 		Button
 	};
-	Q_ENUM(FilterType)
+	Q_ENUM(InterfaceType)
 
-	enum class FilterSource
+	enum class Source
 	{
 		Project,
-		Automatic,
+		Schema,
+		Equipment,
 		User
 	};
-	Q_ENUM(FilterSource)
+	Q_ENUM(Source)
 
 	enum class SignalType
 	{
@@ -88,19 +89,19 @@ public:
 public:
 	TuningFilter();
 	TuningFilter(const TuningFilter& That);
-	TuningFilter(FilterType filterType);
+	TuningFilter(InterfaceType interfaceType);
 	~TuningFilter();
 
 	TuningFilter& operator= (const TuningFilter& That);
 
-	bool load(QXmlStreamReader& reader, FilterSource source);
+	bool load(QXmlStreamReader& reader, Source source);
 	bool save(QXmlStreamWriter& writer) const;
 
 	bool match(const AppSignalParam& object, bool checkValues) const;
 
-	void checkSignals(const TuningSignalStorage* objects, QStringList& errorLog, int& notFoundCounter);
+	void checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
-	void removeNotExistingSignals(const TuningSignalStorage* objects, int& removedCounter);
+	void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
 
 public:
 	// Properties
@@ -112,14 +113,15 @@ public:
 	void setCaption(const QString& value);
 
 	bool isSourceProject() const;
-	bool isSourceAutomatic() const;
+	bool isSourceEquipment() const;
+	bool isSourceSchema() const;
 	bool isSourceUser() const;
 
-	FilterSource sourceType() const;
-	void setSourceType(FilterSource value);
+	Source sourceType() const;
+	void setSourceType(Source value);
 
-	FilterType filterType() const;
-	void setFilterType(FilterType value);
+	InterfaceType interfaceType() const;
+	void setInterfaceType(InterfaceType value);
 
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
@@ -178,7 +180,7 @@ public:
 	bool removeChild(const QString& ID);
 
 	void removeAllChildren();
-	void removeChildren(FilterSource sourceType);
+	void removeChildren(Source sourceType);
 
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
@@ -194,9 +196,10 @@ private:
 	QString m_ID;
 	QString m_caption;
 
-	FilterSource m_source = FilterSource::User;
+	Source m_source = Source::User;
 
-	FilterType m_filterType = FilterType::Tree;
+	InterfaceType m_interfaceType = InterfaceType::Tree;
+
 	SignalType m_signalType = SignalType::All;
 
 	QColor m_backColor = Qt::GlobalColor::lightGray;
@@ -242,8 +245,8 @@ public:
 
 	// Serialization
 
-    bool load(const QByteArray& data, QString* errorCode, TuningFilter::FilterSource source);
-	bool load(const QString& fileName, QString* errorCode, TuningFilter::FilterSource source);
+	bool load(const QByteArray& data, QString* errorCode, TuningFilter::Source source = TuningFilter::Source::User);
+	bool load(const QString& fileName, QString* errorCode, TuningFilter::Source source);
 
     bool save(QByteArray& data);
 	bool save(const QString& fileName, QString* errorMsg);
@@ -261,9 +264,10 @@ public:
 
 	void createAutomaticFilters(const TuningSignalStorage* objects, bool bySchemas, bool byEquipment, const QStringList& tuningSourcesEquipmentIds);
 
-	void removeFilters(TuningFilter::FilterSource sourceType);
+	void removeFilters(TuningFilter::Source sourceType);
 
-	void checkSignals(const TuningSignalStorage* objects, bool& removedNotFound, QWidget* parentWidget);
+	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
+	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
 
 protected:
 
