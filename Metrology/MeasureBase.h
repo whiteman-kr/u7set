@@ -203,9 +203,9 @@ public:
 
 	void			virtual clear();
 
-	void			set1(const MeasureMultiParam& measureParam);
-	void			set2(const MeasureMultiParam& measureParam);
-	void			set3(const MeasureMultiParam& measureParam);
+	void			set_aim(const MeasureMultiParam& measureParam);
+	void			set_aim_aom(const MeasureMultiParam& measureParam);
+	void			set_tun_aom(const MeasureMultiParam& measureParam);
 
 	void			calcError();
 	void			calcAdditionalParam(int limitType);

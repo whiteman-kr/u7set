@@ -94,9 +94,9 @@ LinearityMeasurement::LinearityMeasurement(const MeasureMultiParam &measureParam
 
 	switch (outputSignalType)
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			set1(measureParam);	break;
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		set2(measureParam);	break;
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	set3(measureParam);	break;
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			set_aim(measureParam);		break;
+		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		set_aim_aom(measureParam);	break;
+		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	set_tun_aom(measureParam);	break;
 		default:								assert(0);
 	}
 }
@@ -158,7 +158,7 @@ void LinearityMeasurement::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set1(const MeasureMultiParam &measureParam)
+void LinearityMeasurement::set_aim(const MeasureMultiParam &measureParam)
 {
 	Metrology::SignalParam param = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (param.isValid() == false)
@@ -277,7 +277,7 @@ void LinearityMeasurement::set1(const MeasureMultiParam &measureParam)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set2(const MeasureMultiParam &measureParam)
+void LinearityMeasurement::set_aim_aom(const MeasureMultiParam &measureParam)
 {
 	if (measureParam.isValid() == false)
 	{
@@ -363,6 +363,9 @@ void LinearityMeasurement::set2(const MeasureMultiParam &measureParam)
 
 		if (outParam.isOutput() == true)
 		{
+			//measureParam.calibratorManager()->value();
+			//while(measureParam.calibratorManager()->isReadyForManage() != true);
+
 			OutElVal = pCalibrator->measureValue();
 		}
 
@@ -423,7 +426,7 @@ void LinearityMeasurement::set2(const MeasureMultiParam &measureParam)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::set3(const MeasureMultiParam &measureParam)
+void LinearityMeasurement::set_tun_aom(const MeasureMultiParam &measureParam)
 {
 	if (measureParam.isValid() == false)
 	{
@@ -508,6 +511,9 @@ void LinearityMeasurement::set3(const MeasureMultiParam &measureParam)
 
 		if (outParam.isOutput() == true)
 		{
+			//measureParam.calibratorManager()->value();
+			//while(measureParam.calibratorManager()->isReadyForManage() != true);
+
 			OutElVal = pCalibrator->measureValue();
 		}
 

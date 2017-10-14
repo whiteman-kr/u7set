@@ -289,9 +289,7 @@ namespace Metrology
 
 		m_inputPhysicalLowLimit = signal.lowEngeneeringUnits();
 		m_inputPhysicalHighLimit = signal.highEngeneeringUnits();
-
-		// WhiteMan m_inputPhysicalUnitID = signal.unitID();
-
+		m_inputPhysicalUnit = signal.unit();
 		m_inputPhysicalPrecision = signal.decimalPlaces();
 
 		switch(signal.outputMode())
@@ -303,14 +301,9 @@ namespace Metrology
 			default:								assert(0);
 		}
 
-		/* WhiteMan
-		 * m_outputElectricSensorType = signal.outputSensorType();
-		m_outputElectricPrecision = 3;
 
-		m_outputPhysicalLowLimit = signal.outputLowLimit();
-		m_outputPhysicalHighLimit = signal.outputHighLimit();
-		m_outputPhysicalUnitID = signal.outputUnitID();*/
-		m_outputPhysicalPrecision = signal.decimalPlaces();
+		m_outputElectricSensorType = E::SensorType::NoSensorType;
+		m_outputElectricPrecision = 3;
 
 		m_enableTuning = signal.enableTuning();
 		m_tuningDefaultValue = signal.tuningDefaultValue();
@@ -365,7 +358,7 @@ namespace Metrology
 
 		result &= xml.readDoubleAttribute("InputPhysicalLowLimit", &m_inputPhysicalLowLimit);
 		result &= xml.readDoubleAttribute("InputPhysicalHighLimit", &m_inputPhysicalHighLimit);
-		result &= xml.readIntAttribute("InputPhysicalUnitID", &m_inputPhysicalUnitID);
+		result &= xml.readStringAttribute("InputPhysicalUnit", &m_inputPhysicalUnit);
 		result &= xml.readIntAttribute("InputPhysicalPrecision", &m_inputPhysicalPrecision);
 
 		result &= xml.readDoubleAttribute("OutputElectricLowLimit", &m_outputElectricLowLimit);
@@ -375,11 +368,6 @@ namespace Metrology
 		result &= xml.readIntAttribute("OutputElectricSensorType", &type);
 		m_outputElectricSensorType = static_cast<E::SensorType>(type);
 		result &= xml.readIntAttribute("OutputElectricPrecision", &m_outputElectricPrecision);
-
-		result &= xml.readDoubleAttribute("OutputPhysicalLowLimit", &m_outputPhysicalLowLimit);
-		result &= xml.readDoubleAttribute("OutputPhysicalHighLimit", &m_outputPhysicalHighLimit);
-		result &= xml.readIntAttribute("OutputPhysicalUnitID", &m_outputPhysicalUnitID);
-		result &= xml.readIntAttribute("OutputPhysicalPrecision", &m_outputPhysicalPrecision);
 
 		result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
 		result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
@@ -413,7 +401,7 @@ namespace Metrology
 
 			xml.writeDoubleAttribute("InputPhysicalLowLimit", inputPhysicalLowLimit());
 			xml.writeDoubleAttribute("InputPhysicalHighLimit", inputPhysicalHighLimit());
-			xml.writeIntAttribute("InputPhysicalUnitID", inputPhysicalUnitID());
+			xml.writeStringAttribute("InputPhysicalUnit", inputPhysicalUnit());
 			xml.writeIntAttribute("InputPhysicalPrecision", inputPhysicalPrecision());
 
 			xml.writeDoubleAttribute("OutputElectricLowLimit", outputElectricLowLimit());
@@ -421,11 +409,6 @@ namespace Metrology
 			xml.writeIntAttribute("OutputElectricUnitID", outputElectricUnitID());
 			xml.writeIntAttribute("OutputElectricSensorType", outputElectricSensorType());
 			xml.writeIntAttribute("OutputElectricPrecision", outputElectricPrecision());
-
-			xml.writeDoubleAttribute("OutputPhysicalLowLimit", outputPhysicalLowLimit());
-			xml.writeDoubleAttribute("OutputPhysicalHighLimit", outputPhysicalHighLimit());
-			xml.writeIntAttribute("OutputPhysicalUnitID", outputPhysicalUnitID());
-			xml.writeIntAttribute("OutputPhysicalPrecision", outputPhysicalPrecision());
 
 			xml.writeBoolAttribute("EnableTuning", enableTuning());
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
@@ -500,24 +483,6 @@ namespace Metrology
 		if (m_outputElectricUnit.isEmpty() == false)
 		{
 			range.append(" " + m_outputElectricUnit);
-		}
-
-		return range;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString SignalParam::outputPhysicalRangeStr() const
-	{
-		QString range, formatStr;
-
-		formatStr.sprintf("%%.%df", m_outputPhysicalPrecision);
-
-		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_outputPhysicalLowLimit, m_outputPhysicalHighLimit);
-
-		if (m_outputPhysicalUnit.isEmpty() == false)
-		{
-			range.append(" " + m_outputPhysicalUnit);
 		}
 
 		return range;

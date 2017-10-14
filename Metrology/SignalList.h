@@ -30,7 +30,6 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Input Ph.range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Input El.range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Input El.sensor"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Output Ph.range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Output El.range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Output El.sensor"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
@@ -51,11 +50,10 @@ const int					SIGNAL_LIST_COLUMN_RACK				= 0,
 							SIGNAL_LIST_COLUMN_IN_PH_RANGE		= 9,
 							SIGNAL_LIST_COLUMN_IN_EL_RANGE		= 10,
 							SIGNAL_LIST_COLUMN_IN_EL_SENSOR		= 11,
-							SIGNAL_LIST_COLUMN_OUT_PH_RANGE		= 12,
-							SIGNAL_LIST_COLUMN_OUT_EL_RANGE		= 13,
-							SIGNAL_LIST_COLUMN_OUT_EL_SENSOR	= 14,
-							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 15,
-							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 16;
+							SIGNAL_LIST_COLUMN_OUT_EL_RANGE		= 12,
+							SIGNAL_LIST_COLUMN_OUT_EL_SENSOR	= 13,
+							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 14,
+							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 15;
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
@@ -71,7 +69,6 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 							150,	// SIGNAL_LIST_COLUMN_IN_PH_RANGE
 							150,	// SIGNAL_LIST_COLUMN_IN_EL_RANGE
 							100,	// SIGNAL_LIST_COLUMN_IN_EL_SENSOR
-							150,	// SIGNAL_LIST_COLUMN_OUT_PH_RANGE
 							150,	// SIGNAL_LIST_COLUMN_OUT_EL_RANGE
 							100,	// SIGNAL_LIST_COLUMN_OUT_EL_SENSOR
 							 50,	// SIGNAL_LIST_COLUMN_TUN_SIGNAL

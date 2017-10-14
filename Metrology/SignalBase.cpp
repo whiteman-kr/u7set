@@ -641,34 +641,55 @@ QString MeasureMultiParam::electricRangeStr() const
 
 	m_mutex.lock();
 
-		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		switch(m_outputSignalType)
 		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
-			{
-				result = param.inputElectricRangeStr();
-			}
-		}
-		else
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
-			{
-				result = inParam.inputElectricRangeStr() + MultiTextDivider;
-			}
+			case OUTPUT_SIGNAL_TYPE_UNUSED:
+				{
+					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (param.isValid() == true)
+					{
+						result = param.inputElectricRangeStr();
+					}
+				}
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.inputElectricRangeStr() != outParam.inputElectricRangeStr())
+				break;
+
+			case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 				{
-					result += outParam.inputElectricRangeStr();
+					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (inParam.isValid() == true)
+					{
+						result = inParam.inputElectricRangeStr() + MultiTextDivider;
+					}
+
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						if (inParam.inputElectricRangeStr() != outParam.outputElectricRangeStr())
+						{
+							result += outParam.outputElectricRangeStr();
+						}
+						else
+						{
+							result = outParam.outputElectricRangeStr();
+						}
+					}
 				}
-				else
+
+				break;
+
+			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 				{
-					result = outParam.inputElectricRangeStr();
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						result = outParam.outputElectricRangeStr();
+					}
 				}
-			}
+
+				break;
+
+			default: assert(0);
 		}
 
 	m_mutex.unlock();
@@ -684,34 +705,55 @@ QString MeasureMultiParam::electricSensorStr() const
 
 	m_mutex.lock();
 
-		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		switch(m_outputSignalType)
 		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
-			{
-				result = param.inputElectricSensor();
-			}
-		}
-		else
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
-			{
-				result = inParam.inputElectricSensor() + MultiTextDivider;
-			}
+			case OUTPUT_SIGNAL_TYPE_UNUSED:
+				{
+					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (param.isValid() == true)
+					{
+						result = param.inputElectricSensor();
+					}
+				}
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.inputElectricSensor() != outParam.inputElectricSensor())
+				break;
+
+			case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 				{
-					result += outParam.inputElectricSensor();
+					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (inParam.isValid() == true)
+					{
+						result = inParam.inputElectricSensor() + MultiTextDivider;
+					}
+
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						if (inParam.inputElectricSensor() != outParam.outputElectricSensor())
+						{
+							result += outParam.outputElectricSensor();
+						}
+						else
+						{
+							result = outParam.outputElectricSensor();
+						}
+					}
 				}
-				else
+
+				break;
+
+			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 				{
-					result = outParam.inputElectricSensor();
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						result = outParam.outputElectricSensor();
+					}
 				}
-			}
+
+				break;
+
+			default: assert(0);
 		}
 
 	m_mutex.unlock();
@@ -1651,13 +1693,14 @@ void SignalBase::initSignals()
 
 			// units
 			//
-
-			assert(false);
-/*			WhiteMan
- * param.setInputElectricUnit(m_unitList.value(param.inputElectricUnitID()));
-			param.setInputPhysicalUnit(m_unitList.value(param.inputPhysicalUnitID()));
-			param.setOutputElectricUnit(m_unitList.value(param.outputElectricUnitID()));
-			param.setOutputPhysicalUnit(m_unitList.value(param.outputPhysicalUnitID()));*/
+			if (param.inputElectricUnitID() >= 0 && param.inputElectricUnitID() < ELECTRIC_UNIT_COUNT)
+			{
+				param.setInputElectricUnit(ElectricUnitStr[param.inputElectricUnitID()]);
+			}
+			if (param.outputElectricUnitID() >= 0 && param.outputElectricUnitID() < ELECTRIC_UNIT_COUNT)
+			{
+				param.setOutputElectricUnit(ElectricUnitStr[param.outputElectricUnitID()]);
+			}
 
 			// sensors
 			//

@@ -29,7 +29,6 @@ const char* const				SignalPropertyGroup[] =
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Position"),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Input physical range: "),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Input electric range: "),
-								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Output physical range: "),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Output electric range: "),
 };
 
@@ -39,8 +38,7 @@ const int						SIGNAL_PROPERTY_GROUP_ID					= 0,
 								SIGNAL_PROPERTY_GROUP_POSITION				= 1,
 								SIGNAL_PROPERTY_GROUP_IN_PH_RANGE			= 2,
 								SIGNAL_PROPERTY_GROUP_IN_EL_RANGE			= 3,
-								SIGNAL_PROPERTY_GROUP_OUT_PH_RANGE			= 4,
-								SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE			= 5;
+								SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE			= 4;
 
 // ----------------------------------------------------------------------------------------------
 
