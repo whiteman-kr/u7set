@@ -366,16 +366,16 @@ namespace Metrology
 			// temporary solution
 			// because u7 can not set electric range
 			//
-			if (param.electricLowLimit() == 0 && param.electricHighLimit() == 0)
-			{
-				m_param.setElectricLowLimit(0);
-				m_param.setElectricHighLimit(5);
-			}
+			//			if (param.electricLowLimit() == 0 && param.electricHighLimit() == 0)
+			//			{
+			//				m_param.setElectricLowLimit(0);
+			//				m_param.setElectricHighLimit(5);
+			//			}
 
-			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
-			{
-				m_param.setElectricUnitID(E::ElectricUnit::V);
-			}
+			//			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			//			{
+			//				m_param.setElectricUnitID(E::ElectricUnit::V);
+			//			}
 			//
 			//
 		}
