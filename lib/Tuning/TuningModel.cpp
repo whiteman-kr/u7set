@@ -125,8 +125,8 @@ bool TuningModelRecordSorter::sortFunction(const TuningModelRecord& o1, const Tu
 		break;
 	case TuningModel::Columns::Underflow:
 	{
-		v1 = o1.state.underflow();
-		v2 = o2.state.underflow();
+		v1 = o1.state.outOfRange();
+		v2 = o2.state.outOfRange();
 	}
 		break;
 	case TuningModel::Columns::Overflow:
@@ -487,13 +487,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 					if (item.state.userModified() == true)
 					{
-						QString editValueString = item.state.editValue() == 0 ? tr("0") : tr("1");
+						QString editValueString = item.state.newValue() == 0 ? tr("0") : tr("1");
 						return tr("%1 => %2").arg(valueString).arg(editValueString);
 					}
 
-					if (item.state.writing() == true)
+					if (item.state.writeInProgress() == true)
 					{
-						QString editValueString = item.state.editValue() == 0 ? tr("0") : tr("1");
+						QString editValueString = item.state.newValue() == 0 ? tr("0") : tr("1");
 						return tr("Writing %1").arg(editValueString);
 					}
 
@@ -505,17 +505,17 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 					if (item.state.userModified() == true)
 					{
-						QString editValueString = QString::number(item.state.editValue(), 'f', item.param.precision());
+						QString editValueString = QString::number(item.state.newValue(), 'f', item.param.precision());
 						return QString("%1 => %2").arg(valueString).arg(editValueString);
 					}
 
-					if (item.state.writing() == true)
+					if (item.state.writeInProgress() == true)
 					{
-						QString editValueString = QString::number(item.state.editValue(), 'f', item.param.precision());
+						QString editValueString = QString::number(item.state.newValue(), 'f', item.param.precision());
 						return tr("Writing %1").arg(editValueString);
 					}
 
-					if (item.state.underflow() == true)
+					if (item.state.outOfRange() == true)
 					{
 						return tr("UNDRFLW");
 					}
@@ -542,7 +542,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				{
 					QString str = tr("Base %1, read %2")
 							.arg(QString::number(item.param.lowEngineeringUnits(), 'f', item.param.precision()))
-							.arg(QString::number(item.state.readLowLimit(), 'f', item.param.precision()));
+							.arg(QString::number(item.state.lowBound(), 'f', item.param.precision()));
 					return str;
 				}
 				else
@@ -564,7 +564,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				{
 					QString str = tr("Base %1, read %2")
 							.arg(QString::number(item.param.highEngineeringUnits(), 'f', item.param.precision()))
-							.arg(QString::number(item.state.readHighLimit(), 'f', item.param.precision()));
+							.arg(QString::number(item.state.highBound(), 'f', item.param.precision()));
 					return str;
 				}
 				else
@@ -597,7 +597,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (displayIndex == static_cast<int>(Columns::Underflow))
 		{
-			return (item.state.underflow() == true) ? tr("UNDRFLW") : tr("");
+			return (item.state.outOfRange() == true) ? tr("UNDRFLW") : tr("");
 		}
 
 		if (displayIndex == static_cast<int>(Columns::Overflow))

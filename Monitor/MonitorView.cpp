@@ -55,20 +55,6 @@ void MonitorView::paintEvent(QPaintEvent* /*pe*/)
 	//
 	Ajust(&p, 0, 0, zoom());
 
-	// Draw Schema
-	//
-	//QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
-	// Items are being moved drawing
-	//
-	//drawMovingItems(&drawParam);
-
-	// --
-	//
-	//drawRectSizing(&drawParam);
-	//drawMovingLinePoint(&drawParam);
-	//drawMovingEdgesOrVertexConnectionLine(&drawParam);
-
 	p.restore();
 
 	// --

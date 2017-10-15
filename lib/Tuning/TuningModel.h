@@ -23,8 +23,8 @@ struct TuningModelRecord
 
 		if (state.valid() == true)
 		{
-			if (TuningSignalState::floatsEqual(param.lowEngineeringUnits(), state.readLowLimit()) == false ||
-				TuningSignalState::floatsEqual(param.highEngineeringUnits(), state.readHighLimit()) == false)
+			if (TuningSignalState::floatsEqual(param.lowEngineeringUnits(), state.lowBound()) == false ||
+				TuningSignalState::floatsEqual(param.highEngineeringUnits(), state.highBound()) == false)
 			{
 				return true;
 			}

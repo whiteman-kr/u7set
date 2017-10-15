@@ -1,20 +1,55 @@
 #ifndef TUNINGSIGNAL_H
 #define TUNINGSIGNAL_H
 
-#include "../lib/Hash.h"
-#include "../lib/Tuning/TuningSignalStorage.h"
+#include "../Hash.h"
+#include "../../Proto/network.pb.h"
+
+struct TuningValue;
+extern bool operator < (const TuningValue& l, const TuningValue& r);
+extern bool operator > (const TuningValue& l, const TuningValue& r);
+extern bool operator == (const TuningValue& l, const TuningValue& r);
+extern bool operator != (const TuningValue& l, const TuningValue& r);
+
+enum class TuningValueType
+{
+	Discrete,
+	SignedInteger,
+	Float,
+	Double
+};
+
+struct TuningValue
+{
+	Q_GADGET
+public:
+	TuningValueType type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
+	qint32 intValue = 0;
+	float floatValue = 0.0;
+	double doubleValue = 0.0;
+
+	// Methods
+	//
+	TuningValue() = default;
+	TuningValue(const Network::TuningValue& message);
+
+	bool save(Network::TuningValue* message) const;
+	bool load(const Network::TuningValue& message);
+
+	friend bool operator < (const TuningValue& l, const TuningValue& r);
+	friend bool operator > (const TuningValue& l, const TuningValue& r);
+	friend bool operator == (const TuningValue& l, const TuningValue& r);
+	friend bool operator != (const TuningValue& l, const TuningValue& r);
+};
 
 union TuningSignalStateFlags
 {
 	struct
 	{
-		quint32	m_valid : 1;
-		quint32	m_overflow : 1;
-		quint32	m_underflow : 1;
-		quint32	m_writing : 1;
+		quint32	valid : 1;
+		quint32	outOfRange : 1;
+		quint32	writeInProgress : 1;
 
-		quint32	m_needRedraw : 1;	// This flag is used by TuningClient's model
-		quint32 m_userModified : 1;	// This flag is used by TuningClient's model
+		quint32 userModified : 1;	// This flag is used by TuningClient's model
 	};
 
 	quint32 all = 0;
@@ -24,55 +59,54 @@ class TuningSignalState
 {
 	Q_GADGET
 
+	Q_PROPERTY(Hash Hash READ hash)
+	Q_PROPERTY(TuningValue Value READ value)
+	Q_PROPERTY(TuningValue LowBound READ lowBound)
+	Q_PROPERTY(TuningValue HighBound READ highBound)
+	Q_PROPERTY(bool Valid READ valid)
+	Q_PROPERTY(bool OutOfRange READ outOfRange)
+
 public:
-	// State methods
-	//
-	Q_INVOKABLE float value() const;
+	TuningSignalState() = default;
 
-	Q_INVOKABLE float readLowLimit() const;
-	Q_INVOKABLE float readHighLimit() const;
+	Q_INVOKABLE Hash hash() const;
 
-	Q_INVOKABLE bool underflow() const;
-	Q_INVOKABLE bool overflow() const;
+	Q_INVOKABLE TuningValue value() const;
+
+	TuningValue newValue() const;
+	void setNewValue(const TuningValue& value);
+
+	Q_INVOKABLE TuningValue lowBound() const;
+	Q_INVOKABLE TuningValue highBound() const;
 
 	Q_INVOKABLE bool valid() const;
-	Q_INVOKABLE bool writing() const;
+	Q_INVOKABLE bool outOfRange() const;
+	Q_INVOKABLE bool writeInProgress() const;
 
-	float editValue() const;
-
-	// Functions used by model
-	//
-	void onEditValue(float value);
-
-	bool needRedraw();
+	Q_INVOKABLE int writeErrorCode() const;
 
 	bool userModified() const;
 	void clearUserModified();
 
-	void copy(const TuningSignalState& source);
-
-	// Functions used by signal manager
-	//
-	void onReceiveValue(float readLowLimit, float readHighLimit, bool valid, float value, bool* writingFailed);
-	void onSendValue(float value);
+	void setState(const ::Network::TuningSignalState& message);
 
 	void invalidate();
 
 public:
-	static bool floatsEqual(float x, float y);
+	Hash m_hash = UNDEFINED_HASH;
 
-public:
 	TuningSignalStateFlags m_flags;
 
-	float m_value = 0;
-	float m_editValue = 0;
+	TuningValue m_value;
+	TuningValue m_newValue;
 
-	float m_readLowLimit = 0;
-	float m_readHighLimit = 0;
+	TuningValue m_lowBound;
+	TuningValue m_highBound;
 
-	int m_writingCounter = 0;
+	int m_writeErrorCode = 0;
+	Hash m_writeClient = 0;
 };
 
-Q_DECLARE_METATYPE(TuningSignalState)
+Q_DECLARE_METATYPE(TuningSignalState);
 
 #endif // TUNINGSIGNAL_H

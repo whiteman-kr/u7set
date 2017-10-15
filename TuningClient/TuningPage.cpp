@@ -128,7 +128,7 @@ void TuningModelClient::setValue(const std::vector<int>& selectedRows)
 	for (int i : selectedRows)
 	{
 		TuningModelRecord& o = m_items[i];
-		o.state.onEditValue(newValue);
+		o.state.setNewValue(newValue);
 	}
 }
 
@@ -145,13 +145,13 @@ void TuningModelClient::invertValue(const std::vector<int>& selectedRows)
 
 		if (o.param.isAnalog() == false)
 		{
-			if (o.state.editValue() == 0)
+			if (o.state.newValue() == 0)
 			{
-				o.state.onEditValue(1);
+				o.state.setNewValue(1);
 			}
 			else
 			{
-				o.state.onEditValue(0);
+				o.state.setNewValue(0);
 			}
 		}
 	}
@@ -234,7 +234,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 	{
 		const TuningModelRecord& o = m_items[row];
 
-		if (o.state.underflow() == true)
+		if (o.state.outOfRange() == true)
 		{
 			QColor color = QColor(Qt::red);
 			return QBrush(color);
@@ -316,7 +316,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 	{
 		const TuningModelRecord& o = m_items[row];
 
-		if (o.state.underflow() == true)
+		if (o.state.outOfRange() == true)
 		{
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
@@ -397,7 +397,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && o.param.isAnalog() == false && o.state.valid() == true)
 	{
-		return (o.state.editValue() == 0 ? Qt::Unchecked : Qt::Checked);
+		return (o.state.newValue() == 0 ? Qt::Unchecked : Qt::Checked);
 	}
 
 	return TuningModel::data(index, role);
@@ -431,7 +431,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 			return false;
 		}
 
-		o.state.onEditValue(v);
+		o.state.setNewValue(v);
 		return true;
 	}
 
@@ -441,12 +441,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 		if ((Qt::CheckState)value.toInt() == Qt::Checked)
 		{
-			o.state.onEditValue(1.0);
+			o.state.setNewValue(1.0);
 			return true;
 		}
 		else
 		{
-			o.state.onEditValue(0.0);
+			o.state.setNewValue(0.0);
 			return true;
 		}
 	}
@@ -471,7 +471,7 @@ void TuningModelClient::slot_setAll()
 
 			if (o.param.isAnalog() == false)
 	{
-			o.state.onEditValue(1);
+			o.state.setNewValue(1);
 }
 }
 };
@@ -491,7 +491,7 @@ void TuningModelClient::slot_setAll()
 
 			if (o.param.isAnalog() == false)
 	{
-			o.state.onEditValue(0);
+			o.state.setNewValue(0);
 }
 }
 };
@@ -509,9 +509,9 @@ void TuningModelClient::slot_setAll()
 			{
 				continue;
 			}
-			if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.editValue()) == false)
+			if (TuningSignalState::floatsEqual(o.param.tuningDefaultValue(), o.state.newValue()) == false)
 			{
-				o.state.onEditValue(o.param.tuningDefaultValue());
+				o.state.setNewValue(o.param.tuningDefaultValue());
 			}
 		}
 
@@ -534,7 +534,7 @@ void TuningModelClient::slot_undo()
 {
 	for (TuningModelRecord& o : m_items)
 	{
-		o.state.onEditValue(o.state.value());
+		o.state.setNewValue(o.state.value());
 	}
 }
 
@@ -586,11 +586,11 @@ void TuningModelClient::slot_Write()
 
 		if (o.param.isAnalog() == true)
 		{
-			strValue = QString::number(o.state.editValue(), 'f', o.param.precision());
+			strValue = QString::number(o.state.newValue(), 'f', o.param.precision());
 		}
 		else
 		{
-			strValue = o.state.editValue() == 0 ? tr("0") : tr("1");
+			strValue = o.state.newValue() == 0 ? tr("0") : tr("1");
 		}
 
 		str += tr("%1 (%2) = %3\r\n").arg(o.param.appSignalId()).arg(o.param.caption()).arg(strValue);
@@ -617,7 +617,7 @@ void TuningModelClient::slot_Write()
 
 		o.state.clearUserModified();
 
-		writeData.push_back(std::pair<Hash, float>(o.param.hash(), o.state.editValue()));
+		writeData.push_back(std::pair<Hash, float>(o.param.hash(), o.state.newValue()));
 	}
 
 	m_tuningSignalManager->writeTuningSignals(writeData);

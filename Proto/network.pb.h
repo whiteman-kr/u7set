@@ -67,6 +67,7 @@ class GetTuningSourcesStates;
 class TuningSourceState;
 class GetTuningSourcesStatesReply;
 class TuningSignalsRead;
+class TuningValue;
 class TuningSignalState;
 class TuningSignalsReadReply;
 class TuningSignalWrite;
@@ -4070,6 +4071,118 @@ class TuningSignalsRead : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class TuningValue : public ::google::protobuf::Message {
+ public:
+  TuningValue();
+  virtual ~TuningValue();
+
+  TuningValue(const TuningValue& from);
+
+  inline TuningValue& operator=(const TuningValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const TuningValue& default_instance();
+
+  void Swap(TuningValue* other);
+
+  // implements Message ----------------------------------------------
+
+  TuningValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const TuningValue& from);
+  void MergeFrom(const TuningValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 type = 1;
+  inline bool has_type() const;
+  inline void clear_type();
+  static const int kTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 type() const;
+  inline void set_type(::google::protobuf::int32 value);
+
+  // optional int32 intValue = 2 [default = 0];
+  inline bool has_intvalue() const;
+  inline void clear_intvalue();
+  static const int kIntValueFieldNumber = 2;
+  inline ::google::protobuf::int32 intvalue() const;
+  inline void set_intvalue(::google::protobuf::int32 value);
+
+  // optional float floatValue = 3 [default = 0];
+  inline bool has_floatvalue() const;
+  inline void clear_floatvalue();
+  static const int kFloatValueFieldNumber = 3;
+  inline float floatvalue() const;
+  inline void set_floatvalue(float value);
+
+  // optional float doubleValue = 4 [default = 0];
+  inline bool has_doublevalue() const;
+  inline void clear_doublevalue();
+  static const int kDoubleValueFieldNumber = 4;
+  inline float doublevalue() const;
+  inline void set_doublevalue(float value);
+
+  // @@protoc_insertion_point(class_scope:Network.TuningValue)
+ private:
+  inline void set_has_type();
+  inline void clear_has_type();
+  inline void set_has_intvalue();
+  inline void clear_has_intvalue();
+  inline void set_has_floatvalue();
+  inline void clear_has_floatvalue();
+  inline void set_has_doublevalue();
+  inline void clear_has_doublevalue();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 intvalue_;
+  float floatvalue_;
+  float doublevalue_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static TuningValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class TuningSignalState : public ::google::protobuf::Message {
  public:
   TuningSignalState();
@@ -4124,7 +4237,7 @@ class TuningSignalState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 signalHash = 1 [default = 0];
+  // optional fixed64 signalHash = 1 [default = 0];
   inline bool has_signalhash() const;
   inline void clear_signalhash();
   static const int kSignalHashFieldNumber = 1;
@@ -4145,26 +4258,53 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline bool valid() const;
   inline void set_valid(bool value);
 
-  // optional float value = 4 [default = 0];
+  // optional .Network.TuningValue value = 4;
   inline bool has_value() const;
   inline void clear_value();
   static const int kValueFieldNumber = 4;
-  inline float value() const;
-  inline void set_value(float value);
+  inline const ::Network::TuningValue& value() const;
+  inline ::Network::TuningValue* mutable_value();
+  inline ::Network::TuningValue* release_value();
+  inline void set_allocated_value(::Network::TuningValue* value);
 
-  // optional float readLowBound = 5 [default = 0];
+  // optional .Network.TuningValue readLowBound = 5;
   inline bool has_readlowbound() const;
   inline void clear_readlowbound();
   static const int kReadLowBoundFieldNumber = 5;
-  inline float readlowbound() const;
-  inline void set_readlowbound(float value);
+  inline const ::Network::TuningValue& readlowbound() const;
+  inline ::Network::TuningValue* mutable_readlowbound();
+  inline ::Network::TuningValue* release_readlowbound();
+  inline void set_allocated_readlowbound(::Network::TuningValue* readlowbound);
 
-  // optional float readHighBound = 6 [default = 0];
+  // optional .Network.TuningValue readHighBound = 6;
   inline bool has_readhighbound() const;
   inline void clear_readhighbound();
   static const int kReadHighBoundFieldNumber = 6;
-  inline float readhighbound() const;
-  inline void set_readhighbound(float value);
+  inline const ::Network::TuningValue& readhighbound() const;
+  inline ::Network::TuningValue* mutable_readhighbound();
+  inline ::Network::TuningValue* release_readhighbound();
+  inline void set_allocated_readhighbound(::Network::TuningValue* readhighbound);
+
+  // optional bool writeInProgress = 7 [default = false];
+  inline bool has_writeinprogress() const;
+  inline void clear_writeinprogress();
+  static const int kWriteInProgressFieldNumber = 7;
+  inline bool writeinprogress() const;
+  inline void set_writeinprogress(bool value);
+
+  // optional int32 writeErrorCode = 8 [default = 0];
+  inline bool has_writeerrorcode() const;
+  inline void clear_writeerrorcode();
+  static const int kWriteErrorCodeFieldNumber = 8;
+  inline ::google::protobuf::int32 writeerrorcode() const;
+  inline void set_writeerrorcode(::google::protobuf::int32 value);
+
+  // optional fixed64 writeClient = 9 [default = 0];
+  inline bool has_writeclient() const;
+  inline void clear_writeclient();
+  static const int kWriteClientFieldNumber = 9;
+  inline ::google::protobuf::uint64 writeclient() const;
+  inline void set_writeclient(::google::protobuf::uint64 value);
 
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
@@ -4180,18 +4320,27 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline void clear_has_readlowbound();
   inline void set_has_readhighbound();
   inline void clear_has_readhighbound();
+  inline void set_has_writeinprogress();
+  inline void clear_has_writeinprogress();
+  inline void set_has_writeerrorcode();
+  inline void clear_has_writeerrorcode();
+  inline void set_has_writeclient();
+  inline void clear_has_writeclient();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 signalhash_;
+  ::Network::TuningValue* value_;
   ::google::protobuf::int32 error_;
   bool valid_;
-  float value_;
-  float readlowbound_;
-  float readhighbound_;
+  bool writeinprogress_;
+  ::Network::TuningValue* readlowbound_;
+  ::Network::TuningValue* readhighbound_;
+  ::google::protobuf::uint64 writeclient_;
+  ::google::protobuf::int32 writeerrorcode_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -10139,9 +10288,101 @@ TuningSignalsRead::mutable_signalhash() {
 
 // -------------------------------------------------------------------
 
+// TuningValue
+
+// optional int32 type = 1;
+inline bool TuningValue::has_type() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void TuningValue::set_has_type() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void TuningValue::clear_has_type() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void TuningValue::clear_type() {
+  type_ = 0;
+  clear_has_type();
+}
+inline ::google::protobuf::int32 TuningValue::type() const {
+  return type_;
+}
+inline void TuningValue::set_type(::google::protobuf::int32 value) {
+  set_has_type();
+  type_ = value;
+}
+
+// optional int32 intValue = 2 [default = 0];
+inline bool TuningValue::has_intvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void TuningValue::set_has_intvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void TuningValue::clear_has_intvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void TuningValue::clear_intvalue() {
+  intvalue_ = 0;
+  clear_has_intvalue();
+}
+inline ::google::protobuf::int32 TuningValue::intvalue() const {
+  return intvalue_;
+}
+inline void TuningValue::set_intvalue(::google::protobuf::int32 value) {
+  set_has_intvalue();
+  intvalue_ = value;
+}
+
+// optional float floatValue = 3 [default = 0];
+inline bool TuningValue::has_floatvalue() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void TuningValue::set_has_floatvalue() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void TuningValue::clear_has_floatvalue() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void TuningValue::clear_floatvalue() {
+  floatvalue_ = 0;
+  clear_has_floatvalue();
+}
+inline float TuningValue::floatvalue() const {
+  return floatvalue_;
+}
+inline void TuningValue::set_floatvalue(float value) {
+  set_has_floatvalue();
+  floatvalue_ = value;
+}
+
+// optional float doubleValue = 4 [default = 0];
+inline bool TuningValue::has_doublevalue() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void TuningValue::set_has_doublevalue() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void TuningValue::clear_has_doublevalue() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void TuningValue::clear_doublevalue() {
+  doublevalue_ = 0;
+  clear_has_doublevalue();
+}
+inline float TuningValue::doublevalue() const {
+  return doublevalue_;
+}
+inline void TuningValue::set_doublevalue(float value) {
+  set_has_doublevalue();
+  doublevalue_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // TuningSignalState
 
-// optional uint64 signalHash = 1 [default = 0];
+// optional fixed64 signalHash = 1 [default = 0];
 inline bool TuningSignalState::has_signalhash() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -10207,7 +10448,7 @@ inline void TuningSignalState::set_valid(bool value) {
   valid_ = value;
 }
 
-// optional float value = 4 [default = 0];
+// optional .Network.TuningValue value = 4;
 inline bool TuningSignalState::has_value() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -10218,18 +10459,34 @@ inline void TuningSignalState::clear_has_value() {
   _has_bits_[0] &= ~0x00000008u;
 }
 inline void TuningSignalState::clear_value() {
-  value_ = 0;
+  if (value_ != NULL) value_->::Network::TuningValue::Clear();
   clear_has_value();
 }
-inline float TuningSignalState::value() const {
+inline const ::Network::TuningValue& TuningSignalState::value() const {
+  return value_ != NULL ? *value_ : *default_instance_->value_;
+}
+inline ::Network::TuningValue* TuningSignalState::mutable_value() {
+  set_has_value();
+  if (value_ == NULL) value_ = new ::Network::TuningValue;
   return value_;
 }
-inline void TuningSignalState::set_value(float value) {
-  set_has_value();
+inline ::Network::TuningValue* TuningSignalState::release_value() {
+  clear_has_value();
+  ::Network::TuningValue* temp = value_;
+  value_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_value(::Network::TuningValue* value) {
+  delete value_;
   value_ = value;
+  if (value) {
+    set_has_value();
+  } else {
+    clear_has_value();
+  }
 }
 
-// optional float readLowBound = 5 [default = 0];
+// optional .Network.TuningValue readLowBound = 5;
 inline bool TuningSignalState::has_readlowbound() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -10240,18 +10497,34 @@ inline void TuningSignalState::clear_has_readlowbound() {
   _has_bits_[0] &= ~0x00000010u;
 }
 inline void TuningSignalState::clear_readlowbound() {
-  readlowbound_ = 0;
+  if (readlowbound_ != NULL) readlowbound_->::Network::TuningValue::Clear();
   clear_has_readlowbound();
 }
-inline float TuningSignalState::readlowbound() const {
+inline const ::Network::TuningValue& TuningSignalState::readlowbound() const {
+  return readlowbound_ != NULL ? *readlowbound_ : *default_instance_->readlowbound_;
+}
+inline ::Network::TuningValue* TuningSignalState::mutable_readlowbound() {
+  set_has_readlowbound();
+  if (readlowbound_ == NULL) readlowbound_ = new ::Network::TuningValue;
   return readlowbound_;
 }
-inline void TuningSignalState::set_readlowbound(float value) {
-  set_has_readlowbound();
-  readlowbound_ = value;
+inline ::Network::TuningValue* TuningSignalState::release_readlowbound() {
+  clear_has_readlowbound();
+  ::Network::TuningValue* temp = readlowbound_;
+  readlowbound_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_readlowbound(::Network::TuningValue* readlowbound) {
+  delete readlowbound_;
+  readlowbound_ = readlowbound;
+  if (readlowbound) {
+    set_has_readlowbound();
+  } else {
+    clear_has_readlowbound();
+  }
 }
 
-// optional float readHighBound = 6 [default = 0];
+// optional .Network.TuningValue readHighBound = 6;
 inline bool TuningSignalState::has_readhighbound() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -10262,15 +10535,97 @@ inline void TuningSignalState::clear_has_readhighbound() {
   _has_bits_[0] &= ~0x00000020u;
 }
 inline void TuningSignalState::clear_readhighbound() {
-  readhighbound_ = 0;
+  if (readhighbound_ != NULL) readhighbound_->::Network::TuningValue::Clear();
   clear_has_readhighbound();
 }
-inline float TuningSignalState::readhighbound() const {
+inline const ::Network::TuningValue& TuningSignalState::readhighbound() const {
+  return readhighbound_ != NULL ? *readhighbound_ : *default_instance_->readhighbound_;
+}
+inline ::Network::TuningValue* TuningSignalState::mutable_readhighbound() {
+  set_has_readhighbound();
+  if (readhighbound_ == NULL) readhighbound_ = new ::Network::TuningValue;
   return readhighbound_;
 }
-inline void TuningSignalState::set_readhighbound(float value) {
-  set_has_readhighbound();
-  readhighbound_ = value;
+inline ::Network::TuningValue* TuningSignalState::release_readhighbound() {
+  clear_has_readhighbound();
+  ::Network::TuningValue* temp = readhighbound_;
+  readhighbound_ = NULL;
+  return temp;
+}
+inline void TuningSignalState::set_allocated_readhighbound(::Network::TuningValue* readhighbound) {
+  delete readhighbound_;
+  readhighbound_ = readhighbound;
+  if (readhighbound) {
+    set_has_readhighbound();
+  } else {
+    clear_has_readhighbound();
+  }
+}
+
+// optional bool writeInProgress = 7 [default = false];
+inline bool TuningSignalState::has_writeinprogress() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void TuningSignalState::set_has_writeinprogress() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void TuningSignalState::clear_has_writeinprogress() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void TuningSignalState::clear_writeinprogress() {
+  writeinprogress_ = false;
+  clear_has_writeinprogress();
+}
+inline bool TuningSignalState::writeinprogress() const {
+  return writeinprogress_;
+}
+inline void TuningSignalState::set_writeinprogress(bool value) {
+  set_has_writeinprogress();
+  writeinprogress_ = value;
+}
+
+// optional int32 writeErrorCode = 8 [default = 0];
+inline bool TuningSignalState::has_writeerrorcode() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TuningSignalState::set_has_writeerrorcode() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TuningSignalState::clear_has_writeerrorcode() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void TuningSignalState::clear_writeerrorcode() {
+  writeerrorcode_ = 0;
+  clear_has_writeerrorcode();
+}
+inline ::google::protobuf::int32 TuningSignalState::writeerrorcode() const {
+  return writeerrorcode_;
+}
+inline void TuningSignalState::set_writeerrorcode(::google::protobuf::int32 value) {
+  set_has_writeerrorcode();
+  writeerrorcode_ = value;
+}
+
+// optional fixed64 writeClient = 9 [default = 0];
+inline bool TuningSignalState::has_writeclient() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void TuningSignalState::set_has_writeclient() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void TuningSignalState::clear_has_writeclient() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void TuningSignalState::clear_writeclient() {
+  writeclient_ = GOOGLE_ULONGLONG(0);
+  clear_has_writeclient();
+}
+inline ::google::protobuf::uint64 TuningSignalState::writeclient() const {
+  return writeclient_;
+}
+inline void TuningSignalState::set_writeclient(::google::protobuf::uint64 value) {
+  set_has_writeclient();
+  writeclient_ = value;
 }
 
 // -------------------------------------------------------------------

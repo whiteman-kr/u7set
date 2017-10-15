@@ -112,7 +112,9 @@ SOURCES += main.cpp \
     ArchiveTcpClient.cpp \
     ArchiveModelView.cpp \
     ArchiveData.cpp \
-    TcpSignalRecents.cpp
+    TcpSignalRecents.cpp \
+    ../lib/Tuning/TuningSignalManager.cpp \
+    ../lib/Tuning/TuningTcpClient.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -159,7 +161,9 @@ HEADERS  += \
     ArchiveTcpClient.h \
     ArchiveModelView.h \
     ArchiveData.h \
-    TcpSignalRecents.h
+    TcpSignalRecents.h \
+    ../lib/Tuning/TuningSignalManager.h \
+    ../lib/Tuning/TuningTcpClient.h
 
 FORMS    += \
     DialogSettings.ui \

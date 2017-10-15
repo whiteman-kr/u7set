@@ -21,7 +21,6 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 	}
 
 	m_signals.clear();
-
 	m_signalsMap.clear();
 
 	::Proto::AppSignalSet set;
@@ -59,6 +58,8 @@ bool TuningSignalStorage::loadSignals(const QByteArray& data, QString* errorCode
 		m_signalsMap[asp->hash()] = static_cast<int>(m_signals.size()) - 1;
 	}
 
+	assert(m_signalsMap.size() == m_signals.size());
+
 	return true;
 }
 
@@ -75,6 +76,8 @@ bool TuningSignalStorage::addSignal(const AppSignalParam& param)
 	m_signals.push_back(asp);
 
 	m_signalsMap[asp->hash()] = static_cast<int>(m_signals.size()) - 1;
+
+	assert(m_signalsMap.size() == m_signals.size());
 
 	return true;
 }
@@ -113,5 +116,4 @@ AppSignalParam* TuningSignalStorage::signalPtrByHash(Hash hash) const
 	}
 
 	return signalPtrByIndex(it->second);
-
 }
