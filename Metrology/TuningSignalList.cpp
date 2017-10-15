@@ -474,7 +474,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
-		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.inputPhysicalRangeStr();		break;
+		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.physicalRangeStr();			break;
 		default:									assert(0);
 	}
 
@@ -507,13 +507,13 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	{
 		case E::SignalType::Analog:
 
-			formatStr.sprintf("%%.%df", param.inputPhysicalPrecision());
+			formatStr.sprintf("%%.%df", param.physicalPrecision());
 
 			stateStr.sprintf(formatStr.toAscii(), pSignal->state().value());
 
-			if (param.inputPhysicalUnit().isEmpty() == false)
+			if (param.physicalUnit().isEmpty() == false)
 			{
-				stateStr.append(" " + param.inputPhysicalUnit());
+				stateStr.append(" " + param.physicalUnit());
 			}
 
 			break;

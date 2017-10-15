@@ -64,6 +64,7 @@ private:
 	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
+	double					m_percent = 0;
 
 public:
 
@@ -91,6 +92,9 @@ public:
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
+
+	double					percent() const { return m_percent; }
+	void					setPercent(double percent) { m_percent= percent; }
 
 	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };

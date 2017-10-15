@@ -473,7 +473,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					pointGroup->addSubProperty(item);
 
 
-				QtProperty *outputrangeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
+				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
 
 					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), LinearityParamName[LO_PARAM_LIST_TYPE]);
 					QStringList listTypeList;
@@ -484,24 +484,32 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item->setAttribute(QLatin1String("enumNames"), listTypeList);
 					item->setValue(m_options.linearity().viewType());
 					appendProperty(item, page, LO_PARAM_LIST_TYPE);
-					outputrangeGroup->addSubProperty(item);
+					showcolumnGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_INPUT_RANGE]);
-					item->setValue(m_options.linearity().showInputRangeColumn());
-					appendProperty(item, page, LO_PARAM_SHOW_INPUT_RANGE);
-					outputrangeGroup->addSubProperty(item);
+					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_PHYSICAL_VALUE]);
+					item->setValue(m_options.linearity().showPhyscalValueColumn());
+					appendProperty(item, page, LO_PARAM_SHOW_PHYSICAL_VALUE);
+					showcolumnGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_OUTPUT_RANGE]);
-					item->setValue(m_options.linearity().showOutputRangeColumn());
-					appendProperty(item, page, LO_PARAM_SHOW_OUTPUT_RANGE);
-					outputrangeGroup->addSubProperty(item);
+				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
+
+					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_WARN_IF_MEASURED]);
+					item->setValue(m_options.linearity().warningIfMeasured());
+					appendProperty(item, page, LO_PARAM_WARN_IF_MEASURED);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_MEASURE_ENTIRE_MODULE]);
+					item->setValue(m_options.linearity().measureEntireModule());
+					appendProperty(item, page, LO_PARAM_MEASURE_ENTIRE_MODULE);
+					measuremoduleGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
 				editor->addProperty(measureGroup);
 				editor->addProperty(pointGroup);
-				editor->addProperty(outputrangeGroup);
+				editor->addProperty(showcolumnGroup);
+				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -1037,11 +1045,10 @@ void OptionsDialog::applyProperty()
 					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);						break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_SHOW_INPUT_RANGE:			m_options.linearity().setShowInputRangeColumn(value.toBool());
+					case LO_PARAM_SHOW_PHYSICAL_VALUE:		m_options.linearity().setShowPhyscalValueColumn(value.toBool());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-
-					case LO_PARAM_SHOW_OUTPUT_RANGE:		m_options.linearity().setShowOutputRangeColumn(value.toBool());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
+					case LO_PARAM_WARN_IF_MEASURED:			m_options.linearity().setWarningIfMeasured(value.toBool());		break;
+					case LO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.linearity().setMeasureEntireModule(value.toBool());	break;
 					default:								assert(0);
 				}
 			}

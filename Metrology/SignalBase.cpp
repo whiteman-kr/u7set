@@ -603,7 +603,7 @@ QString MeasureMultiParam::physicalRangeStr() const
 			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (param.isValid() == true)
 			{
-				result = param.inputPhysicalRangeStr();
+				result = param.physicalRangeStr();
 			}
 		}
 		else
@@ -611,19 +611,19 @@ QString MeasureMultiParam::physicalRangeStr() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.inputPhysicalRangeStr() + MultiTextDivider;
+				result = inParam.physicalRangeStr() + MultiTextDivider;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 			if (outParam.isValid() == true)
 			{
-				if (inParam.inputPhysicalRangeStr() != outParam.inputPhysicalRangeStr())
+				if (inParam.physicalRangeStr() != outParam.physicalRangeStr())
 				{
-					result += outParam.inputPhysicalRangeStr();
+					result += outParam.physicalRangeStr();
 				}
 				else
 				{
-					result = outParam.inputPhysicalRangeStr();
+					result = outParam.physicalRangeStr();
 				}
 			}
 		}
@@ -648,7 +648,7 @@ QString MeasureMultiParam::electricRangeStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
 					{
-						result = param.inputElectricRangeStr();
+						result = param.electricRangeStr();
 					}
 				}
 
@@ -659,19 +659,19 @@ QString MeasureMultiParam::electricRangeStr() const
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
 					{
-						result = inParam.inputElectricRangeStr() + MultiTextDivider;
+						result = inParam.electricRangeStr() + MultiTextDivider;
 					}
 
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.inputElectricRangeStr() != outParam.outputElectricRangeStr())
+						if (inParam.electricRangeStr() != outParam.electricRangeStr())
 						{
-							result += outParam.outputElectricRangeStr();
+							result += outParam.electricRangeStr();
 						}
 						else
 						{
-							result = outParam.outputElectricRangeStr();
+							result = outParam.electricRangeStr();
 						}
 					}
 				}
@@ -680,10 +680,10 @@ QString MeasureMultiParam::electricRangeStr() const
 
 			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 				{
-					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-					if (outParam.isValid() == true)
+					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (param.isValid() == true)
 					{
-						result = outParam.outputElectricRangeStr();
+						result = param.electricRangeStr();
 					}
 				}
 
@@ -712,7 +712,7 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
 					{
-						result = param.inputElectricSensor();
+						result = param.electricSensor();
 					}
 				}
 
@@ -723,19 +723,19 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
 					{
-						result = inParam.inputElectricSensor() + MultiTextDivider;
+						result = inParam.electricSensor() + MultiTextDivider;
 					}
 
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.inputElectricSensor() != outParam.outputElectricSensor())
+						if (inParam.electricSensor() != outParam.electricSensor())
 						{
-							result += outParam.outputElectricSensor();
+							result += outParam.electricSensor();
 						}
 						else
 						{
-							result = outParam.outputElectricSensor();
+							result = outParam.electricSensor();
 						}
 					}
 				}
@@ -744,10 +744,10 @@ QString MeasureMultiParam::electricSensorStr() const
 
 			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 				{
-					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-					if (outParam.isValid() == true)
+					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (param.isValid() == true)
 					{
-						result = outParam.outputElectricSensor();
+						result = param.electricSensor();
 					}
 				}
 
@@ -1693,27 +1693,17 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			if (param.inputElectricUnitID() >= 0 && param.inputElectricUnitID() < ELECTRIC_UNIT_COUNT)
+			if (param.electricUnitID() >= 0 && param.electricUnitID() < ELECTRIC_UNIT_COUNT)
 			{
-				param.setInputElectricUnit(ElectricUnitStr[param.inputElectricUnitID()]);
-			}
-			if (param.outputElectricUnitID() >= 0 && param.outputElectricUnitID() < ELECTRIC_UNIT_COUNT)
-			{
-				param.setOutputElectricUnit(ElectricUnitStr[param.outputElectricUnitID()]);
+				param.setElectricUnit(ElectricUnitStr[param.electricUnitID()]);
 			}
 
 			// sensors
 			//
-			int sensorType = param.inputElectricSensorType();
+			int sensorType = param.electricSensorType();
 			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
 			{
-				param.setInputElectricSensor(SensorTypeStr[ sensorType ]);
-			}
-
-			sensorType = param.outputElectricSensorType();
-			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
-			{
-				param.setOutputElectricSensor(SensorTypeStr[ sensorType ]);
+				param.setElectricSensor(SensorTypeStr[ sensorType ]);
 			}
 
 			// places for tuning signals

@@ -179,7 +179,6 @@ public:
 	MeasureThread&			measureThread() { return m_measureThread; }
 
 	bool					signalSourceIsValid(bool showMsg);
-	bool					signalIsMeasured(QString& signalID);
 
 protected:
 
@@ -276,6 +275,8 @@ private slots:
 	void					measureThreadStoped();
 	void					setMeasureThreadInfo(QString msg);
 	void					setMeasureThreadInfo(int timeout);
+	void					measureThreadMsgBox(int type, QString text, int *result = nullptr);
+	void					setNextMeasureSignal(bool& measureNextSignal);
 	void					measureComplite(Measurement* pMeasurement);
 
 	// Slots for enable measuring

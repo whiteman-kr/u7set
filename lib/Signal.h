@@ -18,7 +18,7 @@ class XmlReadHelper;
 
 const char* const ElectricUnitStr[] =
 {
-	"NoUnit",
+	"",
 	"mA",
 	"mV",
 	"Ohm",

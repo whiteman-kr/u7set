@@ -27,44 +27,32 @@ const char* const				SignalPropertyGroup[] =
 {
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Signal ID"),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Position"),
-								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Input physical range: "),
-								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Input electric range: "),
-								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Output electric range: "),
+								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Physical range: "),
+								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Electric range: "),
 };
 
-const int						SIGNAL_PROPERTY_GROUP_COUNT					= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
+const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
 
-const int						SIGNAL_PROPERTY_GROUP_ID					= 0,
-								SIGNAL_PROPERTY_GROUP_POSITION				= 1,
-								SIGNAL_PROPERTY_GROUP_IN_PH_RANGE			= 2,
-								SIGNAL_PROPERTY_GROUP_IN_EL_RANGE			= 3,
-								SIGNAL_PROPERTY_GROUP_OUT_EL_RANGE			= 4;
+const int						SIGNAL_PROPERTY_GROUP_ID				= 0,
+								SIGNAL_PROPERTY_GROUP_POSITION			= 1,
+								SIGNAL_PROPERTY_GROUP_PH_RANGE			= 2,
+								SIGNAL_PROPERTY_GROUP_EL_RANGE			= 3;
 
 // ----------------------------------------------------------------------------------------------
 
-const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID				= 0,
-								SIGNAL_PROPERTY_ITEM_CAPTION				= 1,
-								SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_LOW		= 2,
-								SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_HIGH		= 3,
-								SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_UNIT		= 4,
-								SIGNAL_PROPERTY_ITEM_IN_PH_RANGE_PRECISION	= 5,
-								SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_LOW		= 6,
-								SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_HIGH		= 7,
-								SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_UNIT		= 8,
-								SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_SENSOR		= 9,
-								SIGNAL_PROPERTY_ITEM_IN_EL_RANGE_PRECISION	= 10,
-								SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_LOW		= 11,
-								SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_HIGH		= 12,
-								SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_UNIT		= 13,
-								SIGNAL_PROPERTY_ITEM_OUT_PH_RANGE_PRECISION = 14,
-								SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_LOW		= 15,
-								SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_HIGH		= 16,
-								SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_UNIT		= 17,
-								SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_SENSOR	= 18,
-								SIGNAL_PROPERTY_ITEM_OUT_EL_RANGE_PRECISION = 19;
+const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
+								SIGNAL_PROPERTY_ITEM_CAPTION			= 1,
+								SIGNAL_PROPERTY_ITEM_PH_RANGE_LOW		= 2,
+								SIGNAL_PROPERTY_ITEM_PH_RANGE_HIGH		= 3,
+								SIGNAL_PROPERTY_ITEM_PH_RANGE_UNIT		= 4,
+								SIGNAL_PROPERTY_ITEM_PH_RANGE_PRECISION	= 5,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW		= 6,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH		= 7,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT		= 8,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 9,
+								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 10;
 
-const int						SIGNAL_PROPERTY_ITEM_COUNT					= 20;
-
+const int						SIGNAL_PROPERTY_ITEM_COUNT				= 11;
 
 // ----------------------------------------------------------------------------------------------
 

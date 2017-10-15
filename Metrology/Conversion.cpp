@@ -6761,7 +6761,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					switch(param.inputElectricSensorType())
 					{
-						case E::SensorType::NoSensorType:		retVal = (val - param.inputPhysicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.inputElectricLowLimit();	break;
+						case E::SensorType::NoSensorType:		retVal = (val - param.physicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.inputElectricLowLimit();	break;
 
 						case E::SensorType::Ohm_Pt50_W1391:		retVal = findConversionVal(val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, true);		break;
 						case E::SensorType::Ohm_Pt100_W1391:	retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	break;
@@ -6785,7 +6785,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					switch(param.inputElectricSensorType())
 					{
-						case E::SensorType::NoSensorType:		retVal = (val - param.inputPhysicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.inputElectricLowLimit();	break;
+						case E::SensorType::NoSensorType:		retVal = (val - param.physicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.inputElectricLowLimit();	break;
 
 						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, true);					break;
 						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, true);					break;
@@ -6800,7 +6800,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 
-					retVal = (val - param.inputPhysicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit()) + param.inputElectricLowLimit();
+					retVal = (val - param.physicalLowLimit())*(param.inputElectricHighLimit() - param.inputElectricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.inputElectricLowLimit();
 
 					break;
 
@@ -6819,7 +6819,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 					switch(param.inputElectricSensorType())
 					{
 
-						case E::SensorType::NoSensorType:		retVal = (val - param.inputElectricLowLimit())*(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.inputPhysicalLowLimit();	break;
+						case E::SensorType::NoSensorType:		retVal = (val - param.inputElectricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.physicalLowLimit();	break;
 
 						case E::SensorType::Ohm_Pt50_W1391:		retVal = findConversionVal(val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
 						case E::SensorType::Ohm_Pt100_W1391:	retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
@@ -6843,7 +6843,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					switch(param.inputElectricSensorType())
 					{
-						case E::SensorType::NoSensorType:		retVal = (val - param.inputElectricLowLimit())*(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.inputPhysicalLowLimit();	break;
+						case E::SensorType::NoSensorType:		retVal = (val - param.inputElectricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.physicalLowLimit();	break;
 
 						case E::SensorType::mV_K_TXA: 			retVal = findConversionVal(val, &K_TXA[0][0], K_TXA_COUNT, false);					break;
 						case E::SensorType::mV_L_TXK:			retVal = findConversionVal(val, &L_TXK[0][0], L_TXK_COUNT, false);					break;
@@ -6858,7 +6858,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 				case E::ElectricUnit::mA:
 				case E::ElectricUnit::V:
 
-					retVal = (val - param.inputElectricLowLimit())*(param.inputPhysicalHighLimit() - param.inputPhysicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.inputPhysicalLowLimit();
+					retVal = (val - param.inputElectricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.inputElectricHighLimit() - param.inputElectricLowLimit()) + param.physicalLowLimit();
 
 					break;
 
