@@ -319,6 +319,8 @@ namespace Builder
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.
 
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
+		void errEQP6107(QString property, QString softwareEquipmentId);							//Error parsing property %1 specified in software %2.
+		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 
 
 	public:

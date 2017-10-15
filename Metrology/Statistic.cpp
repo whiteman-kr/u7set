@@ -117,11 +117,10 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_ADC:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_IN_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_IN_EL_RANGE:		result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_OUTPUT_TYPE:		result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_OUT_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_OUT_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MEASURE_COUNT:	result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_STATE:			result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_OUTPUT_TYPE:		result = Qt::AlignCenter;	break;
 			default:								assert(0);
 		}
 
@@ -209,11 +208,10 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 		case STATISTIC_COLUMN_ADC:				result = param.adcRangeStr(m_showADCInHex);			break;
 		case STATISTIC_COLUMN_IN_PH_RANGE:		result = param.inputPhysicalRangeStr();				break;
 		case STATISTIC_COLUMN_IN_EL_RANGE:		result = param.inputElectricRangeStr();				break;
-		case STATISTIC_COLUMN_OUTPUT_TYPE:		result.clear();										break;
-		case STATISTIC_COLUMN_OUT_PH_RANGE:		result = param.outputPhysicalRangeStr();			break;
 		case STATISTIC_COLUMN_OUT_EL_RANGE:		result = param.outputElectricRangeStr();			break;
 		case STATISTIC_COLUMN_MEASURE_COUNT:	result = pSignal->statistic().measureCountStr();	break;
 		case STATISTIC_COLUMN_STATE:			result = pSignal->statistic().stateStr();			break;
+		case STATISTIC_COLUMN_OUTPUT_TYPE:		result.clear();										break;
 		default:								assert(0);
 	}
 
@@ -605,9 +603,8 @@ void StatisticDialog::updateVisibleColunm()
 	hideColumn(STATISTIC_COLUMN_ADC, true);
 	hideColumn(STATISTIC_COLUMN_IN_PH_RANGE, true);
 	hideColumn(STATISTIC_COLUMN_IN_EL_RANGE, true);
-	hideColumn(STATISTIC_COLUMN_OUTPUT_TYPE, true);
-	hideColumn(STATISTIC_COLUMN_OUT_PH_RANGE, true);
 	hideColumn(STATISTIC_COLUMN_OUT_EL_RANGE, true);
+	hideColumn(STATISTIC_COLUMN_OUTPUT_TYPE, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

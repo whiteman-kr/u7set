@@ -130,6 +130,7 @@ public:
 	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, const TuningSignalStorage* objects,
 								bool readOnly,
 								bool setCurrentEnabled,
+								TuningFilter::Source source,
 								int propertyEditorSplitterPos,
 								const QByteArray& dialogChooseSignalGeometry);
 
@@ -220,6 +221,7 @@ private:
     int m_propertyEditorSplitterPos = -1;
 	bool m_readOnly = false;
 	bool m_setCurrentEnabled = false;
+	TuningFilter::Source m_source = TuningFilter::Source::User;
 };
 
 #endif // DIALOGPRESETEDITOR_H

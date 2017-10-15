@@ -4633,6 +4633,55 @@ namespace Builder
 				  .arg(tuningClientEquipmentId)
 				  );
 	}
+
+	/// IssueCode: EQP6107
+	///
+	/// IssueType: Error
+	///
+	/// Title: Error parsing property %1 specified in software %2.
+	///
+	/// Parameters:
+	///		%1 Property
+	///		%2 Software Equipment ID
+	///
+	/// Description:
+	///		Error parsing property in software configuration
+	///
+	void IssueLogger::errEQP6107(QString property, QString softwareEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6107,
+				  tr("Error parsing property %1 specified in software %2.")
+				  .arg(property)
+				  .arg(softwareEquipmentId)
+				  );
+	}
+
+
+	/// IssueCode: EQP6108
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
+	///
+	/// Parameters:
+	///		%1 Schema ID
+	///		%2 TuningClient Equipment ID
+	///
+	/// Description:
+	///		Signal that is specified in Filter of the Tuning Client does not exist.
+	///
+	void IssueLogger::errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6108,
+				  tr("Signal %1 specified in filter %2 in Tuning Client %3 does not exist.")
+				  .arg(appSignalId)
+				  .arg(filter)
+				  .arg(tuningClientEquipmentId)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

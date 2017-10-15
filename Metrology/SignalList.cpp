@@ -117,7 +117,6 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_IN_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_IN_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:		result = Qt::AlignCenter;	break;
-			case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:		result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = Qt::AlignCenter;	break;
@@ -182,7 +181,6 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_IN_PH_RANGE:		result = param.inputPhysicalRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_IN_EL_RANGE:		result = param.inputElectricRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_IN_EL_SENSOR:		result = param.inputElectricSensor();		break;
-		case SIGNAL_LIST_COLUMN_OUT_PH_RANGE:		result = param.outputPhysicalRangeStr();	break;
 		case SIGNAL_LIST_COLUMN_OUT_EL_RANGE:		result = param.outputElectricRangeStr();	break;
 		case SIGNAL_LIST_COLUMN_OUT_EL_SENSOR:		result = param.outputElectricSensor();		break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();			break;
@@ -533,7 +531,6 @@ void SignalListDialog::updateVisibleColunm()
 			{
 				case E::SignalInOutType::Input:
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
-					hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
 					break;
@@ -541,7 +538,6 @@ void SignalListDialog::updateVisibleColunm()
 				case E::SignalInOutType::Internal:
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
-					hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
 					break;
@@ -550,7 +546,6 @@ void SignalListDialog::updateVisibleColunm()
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
 					hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
-					hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
 					break;
 
@@ -566,7 +561,6 @@ void SignalListDialog::updateVisibleColunm()
 			hideColumn(SIGNAL_LIST_COLUMN_IN_PH_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
-			hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
 
@@ -578,7 +572,6 @@ void SignalListDialog::updateVisibleColunm()
 			hideColumn(SIGNAL_LIST_COLUMN_IN_PH_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_IN_EL_SENSOR, true);
-			hideColumn(SIGNAL_LIST_COLUMN_OUT_PH_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_OUT_EL_SENSOR, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_SIGNAL, true);

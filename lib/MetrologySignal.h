@@ -150,7 +150,6 @@ namespace Metrology
 		virtual ~SignalParam() {}
 
 	private:
-		static const int NO_UNIT_ID = -1;		//WhiteMan
 
 		Hash					m_hash = 0;							// hash calcHash from AppSignalID
 
@@ -176,7 +175,6 @@ namespace Metrology
 
 		double					m_inputPhysicalLowLimit = 0;
 		double					m_inputPhysicalHighLimit = 0;
-		int						m_inputPhysicalUnitID = NO_UNIT_ID;
 		QString					m_inputPhysicalUnit;
 		int						m_inputPhysicalPrecision = 2;
 
@@ -187,12 +185,6 @@ namespace Metrology
 		E::SensorType			m_outputElectricSensorType = E::SensorType::NoSensorType;
 		QString					m_outputElectricSensor;
 		int						m_outputElectricPrecision = 3;
-
-		double					m_outputPhysicalLowLimit = 0;
-		double					m_outputPhysicalHighLimit = 0;
-		int						m_outputPhysicalUnitID = NO_UNIT_ID;
-		QString					m_outputPhysicalUnit;
-		int						m_outputPhysicalPrecision = 2;
 
 		bool					m_enableTuning = false;
 		double					m_tuningDefaultValue = 0;
@@ -271,9 +263,6 @@ namespace Metrology
 		double					inputPhysicalHighLimit() const { return m_inputPhysicalHighLimit; }
 		void					setInputPhysicalHighLimit(double highLimit) { m_inputPhysicalHighLimit = highLimit; }
 
-		int						inputPhysicalUnitID() const { return m_inputPhysicalUnitID; }
-		void					setInputPhysicalUnitID(int unitID) { m_inputPhysicalUnitID = unitID; }
-
 		QString					inputPhysicalUnit() const { return m_inputPhysicalUnit; }
 		void					setInputPhysicalUnit(const QString& unit) { m_inputPhysicalUnit = unit; }
 
@@ -304,23 +293,6 @@ namespace Metrology
 		void					setOutputElectricPrecision(int precision) { m_outputElectricPrecision = precision; }
 
 		QString					outputElectricRangeStr() const;
-
-		double					outputPhysicalLowLimit() const { return m_outputPhysicalLowLimit; }
-		void					setOutputPhysicalLowLimit(double lowLimit) { m_outputPhysicalLowLimit = lowLimit; }
-
-		double					outputPhysicalHighLimit() const { return m_outputPhysicalHighLimit; }
-		void					setOutputPhysicalHighLimit(double highLimit) { m_outputPhysicalHighLimit = highLimit; }
-
-		int						outputPhysicalUnitID() const { return m_outputPhysicalUnitID; }
-		void					setOutputPhysicalUnitID(int unitID) { m_outputPhysicalUnitID = unitID; }
-
-		QString					outputPhysicalUnit() const { return m_outputPhysicalUnit; }
-		void					setOutputPhysicalUnit(const QString& unit) { m_outputPhysicalUnit = unit; }
-
-		int						outputPhysicalPrecision() const { return m_outputPhysicalPrecision; }
-		void					setOutputPhysicalPrecision(int precision) { m_outputPhysicalPrecision = precision; }
-
-		QString					outputPhysicalRangeStr() const;
 
 		bool					enableTuning() const { return m_enableTuning; }
 		QString					enableTuningStr() const;

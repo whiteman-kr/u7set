@@ -31,12 +31,10 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "ADC range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Input Ph.range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Input El.range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Output type"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Output Ph.range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Output El.range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
-
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Output type"),
 };
 
 const int					STATISTIC_COLUMN_COUNT			= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
@@ -52,11 +50,10 @@ const int					STATISTIC_COLUMN_RACK			= 0,
 							STATISTIC_COLUMN_ADC			= 8,
 							STATISTIC_COLUMN_IN_PH_RANGE	= 9,
 							STATISTIC_COLUMN_IN_EL_RANGE	= 10,
-							STATISTIC_COLUMN_OUTPUT_TYPE	= 11,
-							STATISTIC_COLUMN_OUT_PH_RANGE	= 12,
-							STATISTIC_COLUMN_OUT_EL_RANGE	= 13,
-							STATISTIC_COLUMN_MEASURE_COUNT	= 14,
-							STATISTIC_COLUMN_STATE			= 15;
+							STATISTIC_COLUMN_OUT_EL_RANGE	= 11,
+							STATISTIC_COLUMN_MEASURE_COUNT	= 12,
+							STATISTIC_COLUMN_STATE			= 13,
+							STATISTIC_COLUMN_OUTPUT_TYPE	= 14;
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
@@ -71,11 +68,10 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							100,	// STATISTIC_COLUMN_ADC
 							150,	// STATISTIC_COLUMN_IN_PH_RANGE
 							150,	// STATISTIC_COLUMN_IN_EL_RANGE
-							100,	// STATISTIC_COLUMN_OUTPUT_TYPE
-							150,	// STATISTIC_COLUMN_OUT_PH_RANGE
 							150,	// STATISTIC_COLUMN_OUT_EL_RANGE
 							100,	// STATISTIC_COLUMN_MEASURE_COUNT
 							100,	// STATISTIC_COLUMN_MEASURE_STATE
+							100,	// STATISTIC_COLUMN_OUTPUT_TYPE
 };
 
 // ==============================================================================================
