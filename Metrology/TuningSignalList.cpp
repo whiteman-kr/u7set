@@ -689,6 +689,12 @@ void TuningSignalListDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
 
+	m_pChangeStateAction = m_pSignalMenu->addAction(tr("&Change state ..."));
+	m_pChangeStateAction->setIcon(QIcon(":/icons/ChangeState.png"));
+	//m_pChangeStateAction->setShortcut(Qt::CTRL + Qt::Key_Enter);
+
+	m_pSignalMenu->addSeparator();
+
 	m_pExportAction = m_pSignalMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
 	m_pExportAction->setShortcut(Qt::CTRL + Qt::Key_E);
@@ -734,6 +740,7 @@ void TuningSignalListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
+	connect(m_pChangeStateAction, &QAction::triggered, this, &TuningSignalListDialog::changeSignalState);
 	connect(m_pExportAction, &QAction::triggered, this, &TuningSignalListDialog::exportSignal);
 
 	connect(m_pFindAction, &QAction::triggered, this, &TuningSignalListDialog::find);
@@ -1001,6 +1008,37 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void TuningSignalListDialog::changeSignalState()
+{
+	int index = m_pSignalView->currentIndex().row();
+	if (index < 0 || index >= m_signalTable.signalCount())
+	{
+		return;
+	}
+
+	Metrology::Signal* pSignal = m_signalTable.signal(index);
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	Metrology::SignalParam& param = pSignal->param();
+	if (param.isValid() == false)
+	{
+		return;
+	}
+
+	if (param.isBus() == true || param.isInternal() == false)
+	{
+		return;
+	}
+
+	TuningSignalStateDialog* dialog = new TuningSignalStateDialog(param);
+	dialog->exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void TuningSignalListDialog::exportSignal()
 {
 	ExportData* dialog = new ExportData(m_pSignalView, tr("Signals"));
@@ -1130,4 +1168,162 @@ void TuningSignalListDialog::onColumnAction(QAction* action)
 	}
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalListDialog::onListDoubleClicked(const QModelIndex&)
+{
+	changeSignalState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+TuningSignalStateDialog::TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent) :
+	QDialog(parent),
+	m_param(param)
+{
+	createInterface();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TuningSignalStateDialog::~TuningSignalStateDialog()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalStateDialog::createInterface()
+{
+	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
+	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowTitle(tr("Signal state"));
+
+	if (m_param.isValid() == false)
+	{
+		QMessageBox::critical(this, windowTitle(), tr("It is not possible to change signal state!"));
+		return;
+	}
+
+	// main Layout
+	//
+	QVBoxLayout *mainLayout = new QVBoxLayout;
+
+	switch(m_param.signalType())
+	{
+		case E::SignalType::Analog:
+			{
+				QLabel* stateLabel = new QLabel(tr("Please, input new state of analog signal:"));
+				stateLabel->setAlignment(Qt::AlignHCenter);
+
+				QRegExp rx("^[-]{0,1}[0-9]*[.]{1}[0-9]*$");
+				QValidator *validator = new QRegExpValidator(rx, this);
+
+				m_stateEdit = new QLineEdit(QString::number(theSignalBase.signalState(m_param.hash()).value() ));
+				m_stateEdit->setAlignment(Qt::AlignHCenter);
+				m_stateEdit->setValidator(validator);
+
+				QLabel* rangeLabel = new QLabel(m_param.physicalRangeStr());
+				rangeLabel->setAlignment(Qt::AlignHCenter);
+
+				// buttons
+				//
+				QHBoxLayout *buttonLayout = new QHBoxLayout ;
+
+				QPushButton* okButton = new QPushButton(tr("Ok"));
+				QPushButton* cancelButton = new QPushButton(tr("Cancel"));
+
+				connect(okButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onOk);
+				connect(cancelButton, &QPushButton::clicked, this, &TuningSignalStateDialog::reject);
+
+				buttonLayout->addWidget(okButton);
+				buttonLayout->addWidget(cancelButton);
+
+				// main Layout
+				//
+				mainLayout->addWidget(stateLabel);
+				mainLayout->addWidget(m_stateEdit);
+				mainLayout->addWidget(rangeLabel);
+				mainLayout->addStretch();
+				mainLayout->addLayout(buttonLayout);
+			}
+			break;
+
+		case E::SignalType::Discrete:
+			{
+				QLabel* stateLabel = new QLabel(tr("Please, select new state of discrete signal:"));
+
+				// buttons
+				//
+				QHBoxLayout *buttonLayout = new QHBoxLayout ;
+
+				QPushButton* yesButton = new QPushButton(tr("Yes"));
+				QPushButton* noButton = new QPushButton(tr("No"));
+
+				connect(yesButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onYes);
+				connect(noButton, &QPushButton::clicked, this, &TuningSignalStateDialog::onNo);
+
+				buttonLayout->addWidget(yesButton);
+				buttonLayout->addWidget(noButton);
+
+				// main Layout
+				//
+				mainLayout->addWidget(stateLabel);
+				mainLayout->addLayout(buttonLayout);
+			}
+			break;
+
+		default:
+			assert(0);
+	}
+
+	setLayout(mainLayout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalStateDialog::onOk()
+{
+	double state = m_stateEdit->text().toDouble();
+
+	if (state < m_param.physicalLowLimit() || state > m_param.physicalHighLimit())
+	{
+		QString str, formatStr;
+
+		formatStr.sprintf("%%.%df", m_param.physicalPrecision());
+
+		str.sprintf("Failed input value: " + formatStr.toAscii(), state);
+		str += tr(" %1").arg(m_param.physicalUnit());
+		str += tr("\nRange of signal: %1").arg(m_param.physicalRangeStr());
+
+		QMessageBox::critical(this, windowTitle(), str);
+		return;
+	}
+
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), state);
+
+	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalStateDialog::onYes()
+{
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), 1);
+
+	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TuningSignalStateDialog::onNo()
+{
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), 0);
+
+	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
